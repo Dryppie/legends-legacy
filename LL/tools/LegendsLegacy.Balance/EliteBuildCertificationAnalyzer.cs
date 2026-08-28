@@ -18,7 +18,27 @@ public sealed record EliteCertificationRestartSnapshot(
     bool PlateauPassed,
     int UniqueCandidatesEvaluated,
     int LocalRefinementPasses,
-    int LocalCandidatesEvaluated);
+    int LocalCandidatesEvaluated,
+    int OneSwapCandidatesEvaluated = 0,
+    int TwoSwapCandidatesEvaluated = 0,
+    int RefinementSeedsEvaluated = 1,
+    string? RawBestBuildId = null,
+    string? BestBuildId = null,
+    IReadOnlyList<string>? RawBestEssenceIds = null,
+    IReadOnlyList<string>? BestEssenceIds = null,
+    int DistanceFromStrongestRestart = 0,
+    int ValleyBeamDepthReached = 0,
+    int ValleyBeamCandidatesEvaluated = 0,
+    bool ValleyBeamBudgetExhausted = false,
+    double ValleyBeamBestImprovement = 0,
+    int ValleyBeamCandidatesGenerated = 0,
+    int ValleyBeamCandidatesRejectedByPrefilter = 0,
+    int CoordinatedMutationCandidatesEvaluated = 0,
+    int ExplorerContinuationCandidatesEvaluated = 0,
+    double BaselineBestScore = 0,
+    string? BaselineBestBuildId = null,
+    IReadOnlyList<string>? BaselineBestEssenceIds = null,
+    int StratifiedPortfolioCandidatesEvaluated = 0);
 
 public sealed record EliteCertificationCandidateSnapshot(
     string BuildId,
@@ -26,6 +46,32 @@ public sealed record EliteCertificationCandidateSnapshot(
     double AggregateScore,
     IReadOnlyDictionary<string, double> ComponentScores,
     IReadOnlyList<string> EssenceIds);
+
+public sealed record EliteBridgePathNodeSnapshot(
+    string BuildId,
+    IReadOnlyList<string> Genome,
+    double Score);
+
+public sealed record EliteRestartBridgeAuditSnapshot(
+    string ProfileId,
+    int SlotCount,
+    int SourceRestart,
+    string SourceBuildId,
+    IReadOnlyList<string> SourceGenome,
+    double SourceScore,
+    int TargetRestart,
+    string TargetBuildId,
+    IReadOnlyList<string> TargetGenome,
+    double TargetScore,
+    int SubstitutionDistance,
+    int LegalBridgeNodesEvaluated,
+    IReadOnlyList<EliteBridgePathNodeSnapshot> BestMaximinPath,
+    double PathMinimumScore,
+    double LargestSingleStepRegression,
+    double TotalTemporaryRegressionBelowSource,
+    double StepRegressionTolerance,
+    bool NonRegressingBridgeExists,
+    bool ToleranceBoundedBridgeExists);
 
 public sealed record EliteLocalChallengeSnapshot(
     int FinalistCount,
@@ -119,7 +165,9 @@ public sealed record EliteBuildCertificationSnapshot(
     EliteCertificationVerdict Verdict,
     IReadOnlyList<string> Warnings,
     IReadOnlyList<EliteCertificationProfileSnapshot> Profiles,
-    IReadOnlyList<EliteCertificationFloorSnapshot> Floors);
+    IReadOnlyList<EliteCertificationFloorSnapshot> Floors,
+    int TotalBridgeNodesEvaluated = 0,
+    IReadOnlyList<EliteRestartBridgeAuditSnapshot>? BridgeAudits = null);
 
 public sealed class EliteBuildCertificationAnalyzer(
     IAbilityCatalogProvider catalogProvider,
@@ -129,7 +177,7 @@ public sealed class EliteBuildCertificationAnalyzer(
     EssenceBuildOptimizer optimizer,
     IEncounterBuildEvaluator encounterEvaluator)
 {
-    public const int AlgorithmVersion = 3;
+    public const int AlgorithmVersion = 14;
 
     public EliteBuildCertificationSnapshot Certify(
         EssenceMetaAnalysisSnapshot essenceMeta,
@@ -177,30 +225,35 @@ public sealed class EliteBuildCertificationAnalyzer(
                 options))
             .ToArray();
         var profiles = profileStates.Select(state => state.Snapshot).ToArray();
-        var calibrationByFloor = calibration.Floors.ToDictionary(floor => floor.Floor);
-        var representativeById = representativeBuilds.Profiles.ToDictionary(profile => profile.Id, StringComparer.Ordinal);
-        var floors = worldTower.Floors.OrderBy(floor => floor.Floor)
-            .Select(floor => CertifyFloor(
-                floor,
-                calibrationByFloor.GetValueOrDefault(floor.Floor)
-                ?? throw new InvalidOperationException($"Elite certification could not find calibration for Floor {floor.Floor}."),
-                representativeById.GetValueOrDefault(floor.RepresentativeProfileId)
-                ?? throw new InvalidOperationException($"Elite certification could not find profile '{floor.RepresentativeProfileId}'."),
-                profileStates.Single(state => state.SlotCount == representativeById[floor.RepresentativeProfileId].SlotCount),
+        var floors = options.SearchOnly
+            ? []
+            : CertifyFloors(
+                representativeBuilds,
+                worldTower,
+                calibration,
+                profileStates,
                 fixtures,
                 curatedCandidates,
                 runSeed,
-                worldTower.Options.MaxTicks,
                 policy,
-                options))
-            .ToArray();
+                options);
+        var verdictInputs = profiles.Select(profile => profile.Verdict)
+            .Concat(floors.Select(floor => floor.Verdict));
+        if (options.SearchOnly)
+            verdictInputs = verdictInputs.Append(EliteCertificationVerdict.PartyOptimizationRequired);
         var verdict = ResolveOverallVerdict(
-            profiles.Select(profile => profile.Verdict).Concat(floors.Select(floor => floor.Verdict)),
+            verdictInputs,
             options.Profile);
         var warnings = profiles.SelectMany(profile => profile.Warnings)
             .Concat(floors.SelectMany(floor => floor.Warnings))
+            .Concat(options.SearchOnly
+                ? ["Search-only mode skipped elite encounter holdouts and party optimization; this run cannot certify."]
+                : [])
             .Distinct(StringComparer.Ordinal)
             .ToArray();
+        var bridgeAudits = options.BridgeAuditEnabled
+            ? RunBridgeAudits(profiles, definitionsById, runSeed, policy)
+            : [];
 
         return new EliteBuildCertificationSnapshot(
             AlgorithmVersion,
@@ -215,7 +268,217 @@ public sealed class EliteBuildCertificationAnalyzer(
             verdict,
             warnings,
             profiles,
-            floors);
+            floors,
+            bridgeAudits.Sum(audit => audit.LegalBridgeNodesEvaluated),
+            bridgeAudits);
+    }
+
+    private EliteRestartBridgeAuditSnapshot[] RunBridgeAudits(
+        IReadOnlyList<EliteCertificationProfileSnapshot> profiles,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        int runSeed,
+        EliteCertificationPolicy policy) =>
+        profiles.OrderBy(profile => profile.SlotCount)
+            .Where(profile => profile.Restarts
+                .Select(restart => Signature(restart.BestEssenceIds ?? []))
+                .Distinct(StringComparer.Ordinal)
+                .Count() > 1)
+            .Select(profile => RunBridgeAudit(profile, definitionsById, runSeed, policy))
+            .ToArray();
+
+    private EliteRestartBridgeAuditSnapshot RunBridgeAudit(
+        EliteCertificationProfileSnapshot profile,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        int runSeed,
+        EliteCertificationPolicy policy)
+    {
+        var target = profile.Restarts
+            .OrderByDescending(restart => restart.BestScore)
+            .ThenBy(restart => restart.Restart)
+            .ThenBy(restart => restart.BestBuildId, StringComparer.Ordinal)
+            .First();
+        var targetSignature = Signature(target.BestEssenceIds ?? []);
+        var source = profile.Restarts
+            .Where(restart => Signature(restart.BestEssenceIds ?? []) != targetSignature)
+            .OrderBy(restart => restart.BestScore)
+            .ThenByDescending(restart => GenomeDistance(restart.BestEssenceIds ?? [], target.BestEssenceIds ?? []))
+            .ThenBy(restart => restart.Restart)
+            .ThenBy(restart => restart.BestBuildId, StringComparer.Ordinal)
+            .First();
+        var sourceGenome = (source.BestEssenceIds ?? []).OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+        var targetGenome = (target.BestEssenceIds ?? []).OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+        var distance = GenomeDistance(sourceGenome, targetGenome);
+        var genomes = EnumerateMinimumBridgeGenomes(sourceGenome, targetGenome, definitionsById)
+            .OrderBy(value => value.Level)
+            .ThenBy(value => Signature(value.Genome), StringComparer.Ordinal)
+            .ToArray();
+        var builds = genomes.Select(value => buildGenerator.MaterializeBuild(
+                CreateCanonicalId(profile.SlotCount, Signature(value.Genome)),
+                $"E{profile.SlotCount}_ELITE_BRIDGE_AUDIT",
+                profile.SlotCount,
+                runSeed,
+                value.Genome))
+            .ToArray();
+        var benchmarks = benchmarkRunner.Run(builds, runSeed).Builds
+            .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+        var nodes = genomes.Select((value, index) => new BridgeNode(
+                value.Level,
+                Signature(value.Genome),
+                builds[index],
+                benchmarks[builds[index].Id].AggregateScore))
+            .ToArray();
+        var nodesByLevel = nodes.GroupBy(node => node.Level)
+            .ToDictionary(group => group.Key, group => group.OrderBy(node => node.Signature, StringComparer.Ordinal).ToArray());
+        var sourceNode = nodes.Single(node => node.Level == 0 && node.Signature == Signature(sourceGenome));
+        var states = new Dictionary<string, BridgePathState>(StringComparer.Ordinal)
+        {
+            [sourceNode.Signature] = new BridgePathState([sourceNode], sourceNode.Score, 0, 0)
+        };
+        var nonRegressingReachable = new HashSet<string>(StringComparer.Ordinal) { sourceNode.Signature };
+        var toleranceReachable = new HashSet<string>(StringComparer.Ordinal) { sourceNode.Signature };
+        for (var level = 1; level <= distance; level++)
+        {
+            foreach (var node in nodesByLevel.GetValueOrDefault(level, []))
+            {
+                var predecessors = nodesByLevel.GetValueOrDefault(level - 1, [])
+                    .Where(previous => GenomeDistance(previous.Build.Essences.Select(value => value.EssenceId).ToArray(), node.Build.Essences.Select(value => value.EssenceId).ToArray()) == 1)
+                    .OrderBy(previous => previous.Signature, StringComparer.Ordinal)
+                    .ToArray();
+                var path = predecessors.Where(previous => states.ContainsKey(previous.Signature))
+                    .Select(previous => ExtendBridgePath(states[previous.Signature], node, sourceNode.Score))
+                    .OrderByDescending(state => state.MinimumScore)
+                    .ThenBy(state => state.LargestSingleStepRegression)
+                    .ThenBy(state => state.TotalTemporaryRegressionBelowSource)
+                    .ThenBy(state => BridgePathKey(state.Nodes), StringComparer.Ordinal)
+                    .FirstOrDefault();
+                if (path is not null)
+                    states[node.Signature] = path;
+                if (predecessors.Any(previous => nonRegressingReachable.Contains(previous.Signature)
+                                                 && node.Score >= previous.Score))
+                {
+                    nonRegressingReachable.Add(node.Signature);
+                }
+                if (predecessors.Any(previous => toleranceReachable.Contains(previous.Signature)
+                                                 && previous.Score - node.Score <= policy.RestartBestScoreSpreadTolerance))
+                {
+                    toleranceReachable.Add(node.Signature);
+                }
+            }
+        }
+        var targetNode = nodes.Single(node => node.Level == distance && node.Signature == Signature(targetGenome));
+        var bestPath = states[targetNode.Signature];
+        return new EliteRestartBridgeAuditSnapshot(
+            profile.ProfileId,
+            profile.SlotCount,
+            source.Restart,
+            source.BestBuildId ?? sourceNode.Build.Id,
+            sourceGenome,
+            source.BestScore,
+            target.Restart,
+            target.BestBuildId ?? targetNode.Build.Id,
+            targetGenome,
+            target.BestScore,
+            distance,
+            nodes.Length,
+            bestPath.Nodes.Select(node => new EliteBridgePathNodeSnapshot(
+                    node.Build.Id,
+                    node.Build.Essences.Select(value => value.EssenceId).ToArray(),
+                    node.Score))
+                .ToArray(),
+            Round(bestPath.MinimumScore),
+            Round(bestPath.LargestSingleStepRegression),
+            Round(bestPath.TotalTemporaryRegressionBelowSource),
+            policy.RestartBestScoreSpreadTolerance,
+            nonRegressingReachable.Contains(targetNode.Signature),
+            toleranceReachable.Contains(targetNode.Signature));
+    }
+
+    private static IEnumerable<BridgeGenome> EnumerateMinimumBridgeGenomes(
+        IReadOnlyList<string> source,
+        IReadOnlyList<string> target,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        var common = source.Intersect(target, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var sourceOnly = source.Except(target, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var targetOnly = target.Except(source, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        for (var level = 0; level <= sourceOnly.Length; level++)
+        {
+            foreach (var retainedSource in Combinations(sourceOnly, sourceOnly.Length - level))
+            foreach (var introducedTarget in Combinations(targetOnly, level))
+            {
+                var genome = common.Concat(retainedSource).Concat(introducedTarget)
+                    .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+                if (genome.Select(id => definitionsById[id].SourceMonsterId)
+                    .Distinct(StringComparer.OrdinalIgnoreCase).Count() == genome.Length)
+                {
+                    yield return new BridgeGenome(level, genome);
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<IReadOnlyList<string>> Combinations(IReadOnlyList<string> values, int count)
+    {
+        if (count == 0)
+        {
+            yield return [];
+            yield break;
+        }
+        for (var index = 0; index <= values.Count - count; index++)
+        {
+            foreach (var tail in Combinations(values.Skip(index + 1).ToArray(), count - 1))
+                yield return new[] { values[index] }.Concat(tail).ToArray();
+        }
+    }
+
+    private static BridgePathState ExtendBridgePath(BridgePathState path, BridgeNode node, double sourceScore)
+    {
+        var previous = path.Nodes[^1];
+        return new BridgePathState(
+            path.Nodes.Append(node).ToArray(),
+            Math.Min(path.MinimumScore, node.Score),
+            Math.Max(path.LargestSingleStepRegression, Math.Max(0, previous.Score - node.Score)),
+            path.TotalTemporaryRegressionBelowSource + Math.Max(0, sourceScore - node.Score));
+    }
+
+    private static string BridgePathKey(IEnumerable<BridgeNode> nodes) =>
+        string.Join("->", nodes.Select(node => node.Signature));
+
+    private EliteCertificationFloorSnapshot[] CertifyFloors(
+        RepresentativeBuildLibrarySnapshot representativeBuilds,
+        WorldTowerAnalysisSnapshot worldTower,
+        EncounterCalibrationSnapshot calibration,
+        IReadOnlyList<ProfileState> profileStates,
+        TopPlayerFixtureDocument fixtures,
+        IReadOnlyList<EssenceBuildSnapshot> curatedCandidates,
+        int runSeed,
+        EliteCertificationPolicy policy,
+        EliteCertificationOptions options)
+    {
+        var calibrationByFloor = calibration.Floors.ToDictionary(floor => floor.Floor);
+        var representativeById = representativeBuilds.Profiles.ToDictionary(profile => profile.Id, StringComparer.Ordinal);
+        return worldTower.Floors.OrderBy(floor => floor.Floor)
+            .Select(floor => CertifyFloor(
+                floor,
+                calibrationByFloor.GetValueOrDefault(floor.Floor)
+                ?? throw new InvalidOperationException($"Elite certification could not find calibration for Floor {floor.Floor}."),
+                representativeById.GetValueOrDefault(floor.RepresentativeProfileId)
+                ?? throw new InvalidOperationException($"Elite certification could not find profile '{floor.RepresentativeProfileId}'."),
+                profileStates.Single(state => state.SlotCount == representativeById[floor.RepresentativeProfileId].SlotCount),
+                fixtures,
+                curatedCandidates,
+                runSeed,
+                worldTower.Options.MaxTicks,
+                policy,
+                options))
+            .ToArray();
     }
 
     private IReadOnlyList<RestartResult> RunIndependentSearches(
@@ -237,7 +500,10 @@ public sealed class EliteBuildCertificationAnalyzer(
             Math.Min(options.FinalistsPerSlotProfile, options.PopulationSize),
             options.MaximumGenerations,
             plateauRequirement,
-            policy.PlateauImprovementTolerance);
+            policy.PlateauImprovementTolerance,
+            options.CrossoverRate,
+            options.CoordinatedMutationRate,
+            options.ExplorerArchiveSize);
         return Enumerable.Range(1, options.RestartCount).Select(restart =>
         {
             var searchSeed = StableRandom.Seed(
@@ -254,9 +520,106 @@ public sealed class EliteBuildCertificationAnalyzer(
                         $"E{slotCount}_ELITE_R{restart:00}_INITIAL"))
                 .ToArray();
             var initialBenchmarks = benchmarkRunner.Run(initial, runSeed);
-            var result = optimizer.Optimize(initial, initialBenchmarks, runSeed, optimizerOptions, searchSeed);
-            return new RestartResult(restart, searchSeed, result);
+            var baselineResult = optimizer.Optimize(initial, initialBenchmarks, runSeed, optimizerOptions, searchSeed);
+            var baselineSignatures = baselineResult.EvaluatedCandidates.Select(candidate => Signature(candidate.Build))
+                .ToHashSet(StringComparer.Ordinal);
+            var portfolio = GenerateStratifiedPortfolio(
+                sourceFamilies,
+                baselineSignatures,
+                restart,
+                searchSeed,
+                runSeed,
+                options.StratifiedPortfolioCandidatesPerProfile);
+            var result = baselineResult with
+            {
+                EvaluatedCandidates = baselineResult.EvaluatedCandidates.Concat(portfolio).ToArray()
+            };
+            return new RestartResult(
+                restart,
+                searchSeed,
+                result,
+                baselineSignatures,
+                options.StratifiedPortfolioCandidatesPerProfile);
         }).ToArray();
+    }
+
+    private IReadOnlyList<EssenceOptimizerEvaluatedCandidate> GenerateStratifiedPortfolio(
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlySet<string> baselineSignatures,
+        int restart,
+        int searchSeed,
+        int runSeed,
+        int candidatesPerProfile)
+    {
+        if (candidatesPerProfile == 0)
+            return [];
+        var orderedFamilies = sourceFamilies
+            .OrderBy(family => family[0].SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var strides = Enumerable.Range(1, orderedFamilies.Length - 1)
+            .Where(value => GreatestCommonDivisor(value, orderedFamilies.Length) == 1)
+            .ToArray();
+        var builds = new List<EssenceBuildSnapshot>(candidatesPerProfile * EssenceBuildGenerator.InitialSlotCounts.Count);
+        foreach (var slotCount in EssenceBuildGenerator.InitialSlotCounts)
+        {
+            var signatures = baselineSignatures.ToHashSet(StringComparer.Ordinal);
+            var attempt = 0;
+            while (builds.Count(build => build.SlotCount == slotCount) < candidatesPerProfile
+                   && attempt++ < candidatesPerProfile * 100)
+            {
+                var ordinal = attempt - 1;
+                var seed = StableRandom.Seed(
+                    "balance-elite-stratified-portfolio-v1",
+                    searchSeed.ToString(CultureInfo.InvariantCulture),
+                    restart.ToString(CultureInfo.InvariantCulture),
+                    slotCount.ToString(CultureInfo.InvariantCulture),
+                    ordinal.ToString(CultureInfo.InvariantCulture));
+                var unsignedSeed = unchecked((uint)seed);
+                var start = (int)(unsignedSeed % (uint)orderedFamilies.Length);
+                var stride = strides[(int)((unsignedSeed / (uint)orderedFamilies.Length) % (uint)strides.Length)];
+                var genes = Enumerable.Range(0, slotCount).Select(geneIndex =>
+                    {
+                        var family = orderedFamilies[(start + geneIndex * stride) % orderedFamilies.Length]
+                            .OrderBy(definition => definition.Id, StringComparer.OrdinalIgnoreCase)
+                            .ToArray();
+                        var variantSeed = StableRandom.Seed(
+                            "balance-elite-stratified-variant-v1",
+                            seed.ToString(CultureInfo.InvariantCulture),
+                            geneIndex.ToString(CultureInfo.InvariantCulture));
+                        return family[(int)(unchecked((uint)variantSeed) % (uint)family.Length)].Id;
+                    })
+                    .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+                var signature = Signature(genes);
+                if (!signatures.Add(signature))
+                    continue;
+                builds.Add(buildGenerator.MaterializeBuild(
+                    $"E{slotCount}_ELITE_R{restart:00}_PORTFOLIO_{builds.Count(build => build.SlotCount == slotCount) + 1:0000}",
+                    $"E{slotCount}_ELITE_R{restart:00}_STRATIFIED_PORTFOLIO",
+                    slotCount,
+                    seed,
+                    genes));
+            }
+            if (builds.Count(build => build.SlotCount == slotCount) != candidatesPerProfile)
+            {
+                throw new InvalidOperationException(
+                    $"Could not generate {candidatesPerProfile} unique stratified E{slotCount} portfolio candidates for restart {restart}.");
+            }
+        }
+        var benchmarks = benchmarkRunner.Run(builds, runSeed).Builds
+            .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+        return builds.Select(build => new EssenceOptimizerEvaluatedCandidate(
+                build,
+                benchmarks[build.Id],
+                int.MaxValue))
+            .ToArray();
+    }
+
+    private static int GreatestCommonDivisor(int first, int second)
+    {
+        while (second != 0)
+            (first, second) = (second, first % second);
+        return Math.Abs(first);
     }
 
     private IReadOnlyList<CertificationCandidate> CanonicalizeAndEvaluate(
@@ -300,18 +663,92 @@ public sealed class EliteBuildCertificationAnalyzer(
                 .Select(candidate => Signature(candidate.Build))
                 .Distinct(StringComparer.Ordinal)
                 .ToArray();
-            var rawBest = signatures.Select(signature => bySignature[signature])
+            var restartCandidates = signatures.Select(signature => bySignature[signature]).ToArray();
+            var baselineCandidates = restartCandidates
+                .Where(candidate => restart.BaselineSignatures.Contains(Signature(candidate.Build)))
+                .ToArray();
+            var rawBest = restartCandidates
                 .OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
                 .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
                 .First();
-            var refinement = RefineRestartWinner(
-                rawBest,
+            var baselineRefinementSeeds = SelectRestartRefinementSeeds(
+                baselineCandidates,
+                Math.Min(options.RestartRefinementSeedCount, baselineCandidates.Length),
+                options.DiversityPenalty);
+            var baselineRefinements = baselineRefinementSeeds.Select(seed => RefineRestartWinner(
+                    seed,
+                    bySignature,
+                    sourceFamilies,
+                    definitionsById,
+                    essenceMeta,
+                    runSeed,
+                    policy,
+                    options))
+                .ToArray();
+            var portfolioCandidates = restartCandidates
+                .Where(candidate => !restart.BaselineSignatures.Contains(Signature(candidate.Build)))
+                .ToArray();
+            var portfolioRefinementSeeds = portfolioCandidates.Length == 0
+                ? []
+                : SelectRestartRefinementSeeds(
+                    portfolioCandidates,
+                    Math.Min(options.RestartRefinementSeedCount, portfolioCandidates.Length),
+                    options.DiversityPenalty);
+            var portfolioRefinements = portfolioRefinementSeeds.Select(seed => RefineRestartWinner(
+                    seed,
+                    bySignature,
+                    sourceFamilies,
+                    definitionsById,
+                    essenceMeta,
+                    runSeed,
+                    policy,
+                    options))
+                .ToArray();
+            var refinements = baselineRefinements.Concat(portfolioRefinements).ToArray();
+            var baselineBest = baselineRefinements
+                .OrderByDescending(value => value.Best.Benchmark.AggregateScore)
+                .ThenBy(value => value.Best.Build.Id, StringComparer.Ordinal)
+                .First()
+                .Best;
+            var refinement = refinements
+                .OrderByDescending(value => value.Best.Benchmark.AggregateScore)
+                .ThenBy(value => value.Best.Build.Id, StringComparer.Ordinal)
+                .First();
+            var oneSwapCandidatesEvaluated = refinements.Sum(value => value.OneSwapCandidatesEvaluated);
+            var twoSwapCandidatesEvaluated = refinements.Sum(value => value.TwoSwapCandidatesEvaluated);
+            var acceptedPasses = refinement.AcceptedPasses;
+            var valley = RunValleyBeam(
+                refinement.Best,
                 bySignature,
                 sourceFamilies,
                 definitionsById,
+                essenceMeta,
                 runSeed,
-                policy,
                 options);
+            var refinedBest = valley.Best.Benchmark.AggregateScore > refinement.Best.Benchmark.AggregateScore
+                ? valley.Best
+                : refinement.Best;
+            if (valley.Best.Benchmark.AggregateScore - refinement.Best.Benchmark.AggregateScore
+                > policy.PlateauImprovementTolerance)
+            {
+                var polished = RefineRestartWinner(
+                    valley.Best,
+                    bySignature,
+                    sourceFamilies,
+                    definitionsById,
+                    essenceMeta,
+                    runSeed,
+                    policy,
+                    options);
+                if (polished.Best.Benchmark.AggregateScore > refinedBest.Benchmark.AggregateScore)
+                    refinedBest = polished.Best;
+                acceptedPasses += polished.AcceptedPasses;
+                oneSwapCandidatesEvaluated += polished.OneSwapCandidatesEvaluated;
+                twoSwapCandidatesEvaluated += polished.TwoSwapCandidatesEvaluated;
+            }
+            var newCandidatesEvaluated = oneSwapCandidatesEvaluated
+                                         + twoSwapCandidatesEvaluated
+                                         + valley.NewCandidatesEvaluated;
             var generationsSinceImprovement = GenerationsSinceMaterialImprovement(
                 profile.Generations,
                 policy.PlateauImprovementTolerance);
@@ -319,14 +756,44 @@ public sealed class EliteBuildCertificationAnalyzer(
                 restart.Restart,
                 restart.SearchSeed,
                 rawBest.Benchmark.AggregateScore,
-                refinement.Best.Benchmark.AggregateScore,
+                refinedBest.Benchmark.AggregateScore,
                 profile.Generations[^1].Generation,
                 generationsSinceImprovement,
                 generationsSinceImprovement >= plateauRequirement,
-                signatures.Length + refinement.NewCandidatesEvaluated,
-                refinement.AcceptedPasses,
-                refinement.NewCandidatesEvaluated);
+                signatures.Length + newCandidatesEvaluated,
+                acceptedPasses,
+                oneSwapCandidatesEvaluated + twoSwapCandidatesEvaluated,
+                oneSwapCandidatesEvaluated,
+                twoSwapCandidatesEvaluated,
+                baselineRefinementSeeds.Count + portfolioRefinementSeeds.Count,
+                rawBest.Build.Id,
+                refinedBest.Build.Id,
+                rawBest.Build.Essences.Select(value => value.EssenceId).ToArray(),
+                refinedBest.Build.Essences.Select(value => value.EssenceId).ToArray(),
+                0,
+                valley.DepthReached,
+                valley.CandidatesEvaluated,
+                valley.BudgetExhausted,
+                valley.BestImprovement,
+                valley.CandidatesGenerated,
+                valley.CandidatesRejectedByPrefilter,
+                profile.Generations.Sum(generation => generation.CoordinatedMutationBirths),
+                profile.Generations.Sum(generation => generation.ExplorerContinuationBirths),
+                baselineBest.Benchmark.AggregateScore,
+                baselineBest.Build.Id,
+                baselineBest.Build.Essences.Select(value => value.EssenceId).ToArray(),
+                restart.PortfolioCandidatesEvaluated);
         }).ToArray();
+        var strongestRestart = restartEvidence
+            .OrderByDescending(value => value.BestScore)
+            .ThenBy(value => value.Restart)
+            .First();
+        var strongestGenome = strongestRestart.BestEssenceIds ?? [];
+        restartEvidence = restartEvidence.Select(value => value with
+            {
+                DistanceFromStrongestRestart = GenomeDistance(value.BestEssenceIds ?? [], strongestGenome)
+            })
+            .ToArray();
         var bestScoreSpread = Round(restartEvidence.Max(value => value.BestScore) - restartEvidence.Min(value => value.BestScore));
         var agreementPassed = bestScoreSpread <= policy.RestartBestScoreSpreadTolerance;
         var plateauPassed = restartEvidence.All(value => value.PlateauPassed);
@@ -464,47 +931,201 @@ public sealed class EliteBuildCertificationAnalyzer(
         IDictionary<string, CertificationCandidate> candidatesBySignature,
         IReadOnlyList<EssenceDefinition[]> sourceFamilies,
         IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        EssenceMetaAnalysisSnapshot essenceMeta,
         int runSeed,
         EliteCertificationPolicy policy,
         EliteCertificationOptions options)
     {
         var current = initial;
         var acceptedPasses = 0;
-        var newCandidatesEvaluated = 0;
+        var oneSwapCandidatesEvaluated = 0;
+        var twoSwapCandidatesEvaluated = 0;
         for (var pass = 1; pass <= options.RestartLocalRefinementPassLimit; pass++)
         {
-            var genomes = EnumerateOneSwapGenomes(current.Build, sourceFamilies, definitionsById)
+            var oneSwapGenomes = EnumerateOneSwapGenomes(current.Build, sourceFamilies, definitionsById)
                 .DistinctBy(Signature)
                 .ToArray();
-            var missing = genomes.Where(genome => !candidatesBySignature.ContainsKey(Signature(genome)))
-                .Select(genome => buildGenerator.MaterializeBuild(
-                    CreateCanonicalId(current.Build.SlotCount, Signature(genome)),
-                    $"E{current.Build.SlotCount}_ELITE_RESTART_LOCAL",
-                    current.Build.SlotCount,
-                    runSeed,
-                    genome))
-                .ToArray();
-            if (missing.Length > 0)
-            {
-                var benchmarks = benchmarkRunner.Run(missing, runSeed).Builds
-                    .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
-                foreach (var build in missing)
-                    candidatesBySignature[Signature(build)] = new CertificationCandidate(build, benchmarks[build.Id]);
-                newCandidatesEvaluated += missing.Length;
-            }
-            var bestNeighbor = genomes.Select(genome => candidatesBySignature[Signature(genome)])
+            oneSwapCandidatesEvaluated += EvaluateMissingCandidates(
+                oneSwapGenomes,
+                current.Build.SlotCount,
+                "RESTART_ONE_SWAP",
+                candidatesBySignature,
+                runSeed);
+            var bestNeighbor = oneSwapGenomes.Select(genome => candidatesBySignature[Signature(genome)])
                 .OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
                 .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
                 .First();
             if (bestNeighbor.Benchmark.AggregateScore - current.Benchmark.AggregateScore
+                > policy.PlateauImprovementTolerance)
+            {
+                current = bestNeighbor;
+                acceptedPasses++;
+                continue;
+            }
+
+            if (options.RestartTwoSwapChallengerLimitPerPass == 0)
+                break;
+            var twoSwapGenomes = EnumerateTwoSwapGenomes(
+                    current.Build,
+                    sourceFamilies,
+                    definitionsById,
+                    essenceMeta)
+                .Take(options.RestartTwoSwapChallengerLimitPerPass)
+                .DistinctBy(Signature)
+                .ToArray();
+            if (twoSwapGenomes.Length == 0)
+                break;
+            twoSwapCandidatesEvaluated += EvaluateMissingCandidates(
+                twoSwapGenomes,
+                current.Build.SlotCount,
+                "RESTART_TWO_SWAP",
+                candidatesBySignature,
+                runSeed);
+            var bestTwoSwapNeighbor = twoSwapGenomes.Select(genome => candidatesBySignature[Signature(genome)])
+                .OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
+                .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+                .First();
+            if (bestTwoSwapNeighbor.Benchmark.AggregateScore - current.Benchmark.AggregateScore
                 <= policy.PlateauImprovementTolerance)
             {
                 break;
             }
-            current = bestNeighbor;
+            current = bestTwoSwapNeighbor;
             acceptedPasses++;
         }
-        return new RestartRefinementResult(current, acceptedPasses, newCandidatesEvaluated);
+        return new RestartRefinementResult(
+            current,
+            acceptedPasses,
+            oneSwapCandidatesEvaluated + twoSwapCandidatesEvaluated,
+            oneSwapCandidatesEvaluated,
+            twoSwapCandidatesEvaluated);
+    }
+
+    private ValleyBeamResult RunValleyBeam(
+        CertificationCandidate initial,
+        IDictionary<string, CertificationCandidate> candidatesBySignature,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        EssenceMetaAnalysisSnapshot essenceMeta,
+        int runSeed,
+        EliteCertificationOptions options)
+    {
+        if (options.RestartValleyCandidateBudget == 0)
+            return new ValleyBeamResult(initial, 0, 0, 0, false, 0, 0, 0);
+
+        var best = initial;
+        IReadOnlyList<CertificationCandidate> beam = [initial];
+        var visited = new HashSet<string>(StringComparer.Ordinal) { Signature(initial.Build) };
+        var essenceScores = essenceMeta.Essences.ToDictionary(
+            value => value.EssenceId,
+            value => (value.PerformanceDelta ?? 0) + value.P99Usage * 10 + (value.AdminAdjustedScoreDelta ?? 0),
+            StringComparer.OrdinalIgnoreCase);
+        var pairScores = essenceMeta.PairSynergies.ToDictionary(
+            value => Signature([value.FirstEssenceId, value.SecondEssenceId]),
+            value => value.SynergyDelta,
+            StringComparer.Ordinal);
+        var candidatesEvaluated = 0;
+        var newCandidatesEvaluated = 0;
+        var candidatesGenerated = 0;
+        var candidatesRejectedByPrefilter = 0;
+        var depthReached = 0;
+        var budgetExhausted = false;
+
+        for (var depth = 1; depth <= options.RestartValleyBeamDepth; depth++)
+        {
+            var layerGenomes = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+            foreach (var parent in beam.OrderByDescending(value => value.Benchmark.AggregateScore)
+                         .ThenBy(value => value.Build.Id, StringComparer.Ordinal))
+            {
+                foreach (var genome in EnumerateOneSwapGenomes(parent.Build, sourceFamilies, definitionsById))
+                {
+                    var signature = Signature(genome);
+                    if (!visited.Add(signature))
+                        continue;
+                    layerGenomes.Add(signature, genome);
+                    candidatesGenerated++;
+                }
+            }
+            if (layerGenomes.Count == 0)
+                break;
+
+            var rankedGenomes = layerGenomes.Values
+                .Select(genome => new
+                {
+                    Genome = genome,
+                    Signature = Signature(genome),
+                    Score = ValleyPrefilterScore(genome, essenceScores, pairScores)
+                })
+                .OrderByDescending(value => value.Score)
+                .ThenBy(value => value.Signature, StringComparer.Ordinal)
+                .ToArray();
+            var prefilterLimit = options.RestartValleyPrefilterLimitPerDepth == 0
+                ? rankedGenomes.Length
+                : Math.Min(options.RestartValleyPrefilterLimitPerDepth, rankedGenomes.Length);
+            candidatesRejectedByPrefilter += rankedGenomes.Length - prefilterLimit;
+            var remainingBudget = options.RestartValleyCandidateBudget - candidatesEvaluated;
+            var selectedCount = Math.Min(prefilterLimit, remainingBudget);
+            if (selectedCount < prefilterLimit)
+                budgetExhausted = true;
+            if (selectedCount == 0)
+                break;
+            var selected = rankedGenomes.Take(selectedCount).ToArray();
+            var genomes = selected.Select(value => value.Genome).ToArray();
+            candidatesEvaluated += genomes.Length;
+            newCandidatesEvaluated += EvaluateMissingCandidates(
+                genomes,
+                initial.Build.SlotCount,
+                $"RESTART_VALLEY_D{depth}",
+                candidatesBySignature,
+                runSeed);
+            var layer = selected.Select(value => candidatesBySignature[value.Signature]).ToArray();
+            var layerBest = layer.OrderByDescending(value => value.Benchmark.AggregateScore)
+                .ThenBy(value => value.Build.Id, StringComparer.Ordinal)
+                .First();
+            if (layerBest.Benchmark.AggregateScore > best.Benchmark.AggregateScore)
+                best = layerBest;
+            beam = SelectRestartRefinementSeeds(
+                layer,
+                Math.Min(options.RestartValleyBeamWidth, layer.Length),
+                options.DiversityPenalty);
+            depthReached = depth;
+            if (budgetExhausted)
+                break;
+        }
+
+        return new ValleyBeamResult(
+            best,
+            depthReached,
+            candidatesEvaluated,
+            newCandidatesEvaluated,
+            budgetExhausted,
+            Round(best.Benchmark.AggregateScore - initial.Benchmark.AggregateScore),
+            candidatesGenerated,
+            candidatesRejectedByPrefilter);
+    }
+
+    private int EvaluateMissingCandidates(
+        IReadOnlyList<IReadOnlyList<string>> genomes,
+        int slotCount,
+        string sourceSuffix,
+        IDictionary<string, CertificationCandidate> candidatesBySignature,
+        int runSeed)
+    {
+        var missing = genomes.Where(genome => !candidatesBySignature.ContainsKey(Signature(genome)))
+            .Select(genome => buildGenerator.MaterializeBuild(
+                CreateCanonicalId(slotCount, Signature(genome)),
+                $"E{slotCount}_ELITE_{sourceSuffix}",
+                slotCount,
+                runSeed,
+                genome))
+            .ToArray();
+        if (missing.Length == 0)
+            return 0;
+        var benchmarks = benchmarkRunner.Run(missing, runSeed).Builds
+            .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+        foreach (var build in missing)
+            candidatesBySignature[Signature(build)] = new CertificationCandidate(build, benchmarks[build.Id]);
+        return missing.Length;
     }
 
     private EliteLocalChallengeSnapshot RunLocalChallenge(
@@ -1049,6 +1670,27 @@ public sealed class EliteBuildCertificationAnalyzer(
         return selected;
     }
 
+    private static IReadOnlyList<CertificationCandidate> SelectRestartRefinementSeeds(
+        IReadOnlyList<CertificationCandidate> candidates,
+        int count,
+        double diversityPenalty)
+    {
+        const int aggregatePoolSize = 50;
+        const int scenarioPoolSize = 20;
+        var seedPool = candidates.OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
+            .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+            .Take(aggregatePoolSize)
+            .Concat(candidates[0].Benchmark.Components.SelectMany(component => candidates
+                .OrderByDescending(candidate => candidate.Benchmark.Components
+                    .Single(value => value.ScenarioId == component.ScenarioId).Score)
+                .ThenByDescending(candidate => candidate.Benchmark.AggregateScore)
+                .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+                .Take(scenarioPoolSize)))
+            .DistinctBy(candidate => Signature(candidate.Build))
+            .ToArray();
+        return SelectFinalists(FindParetoFrontier(seedPool), candidates, count, diversityPenalty);
+    }
+
     private static void AddUnique(ICollection<CertificationCandidate> selected, CertificationCandidate candidate, int count)
     {
         if (selected.Count < count && selected.All(existing => Signature(existing.Build) != Signature(candidate.Build)))
@@ -1247,14 +1889,58 @@ public sealed class EliteBuildCertificationAnalyzer(
     private static string Signature(IEnumerable<string> essenceIds) =>
         string.Join('|', essenceIds.OrderBy(id => id, StringComparer.OrdinalIgnoreCase));
 
+    private static double ValleyPrefilterScore(
+        IReadOnlyList<string> genome,
+        IReadOnlyDictionary<string, double> essenceScores,
+        IReadOnlyDictionary<string, double> pairScores)
+    {
+        var score = genome.Sum(id => essenceScores.GetValueOrDefault(id));
+        for (var first = 0; first < genome.Count; first++)
+        {
+            for (var second = first + 1; second < genome.Count; second++)
+                score += pairScores.GetValueOrDefault(Signature([genome[first], genome[second]]));
+        }
+        return score;
+    }
+
+    private static int GenomeDistance(IReadOnlyList<string> first, IReadOnlyList<string> second) =>
+        first.Except(second, StringComparer.OrdinalIgnoreCase).Count();
+
     private static double Round(double value) => Math.Round(value, 2, MidpointRounding.AwayFromZero);
     private static double RoundRate(double value) => Math.Round(value, 4, MidpointRounding.AwayFromZero);
 
-    private sealed record RestartResult(int Restart, int SearchSeed, EssenceOptimizationResult Result);
+    private sealed record RestartResult(
+        int Restart,
+        int SearchSeed,
+        EssenceOptimizationResult Result,
+        IReadOnlySet<string> BaselineSignatures,
+        int PortfolioCandidatesEvaluated);
     private sealed record RestartRefinementResult(
         CertificationCandidate Best,
         int AcceptedPasses,
-        int NewCandidatesEvaluated);
+        int NewCandidatesEvaluated,
+        int OneSwapCandidatesEvaluated,
+        int TwoSwapCandidatesEvaluated);
+    private sealed record ValleyBeamResult(
+        CertificationCandidate Best,
+        int DepthReached,
+        int CandidatesEvaluated,
+        int NewCandidatesEvaluated,
+        bool BudgetExhausted,
+        double BestImprovement,
+        int CandidatesGenerated,
+        int CandidatesRejectedByPrefilter);
+    private sealed record BridgeGenome(int Level, IReadOnlyList<string> Genome);
+    private sealed record BridgeNode(
+        int Level,
+        string Signature,
+        EssenceBuildSnapshot Build,
+        double Score);
+    private sealed record BridgePathState(
+        IReadOnlyList<BridgeNode> Nodes,
+        double MinimumScore,
+        double LargestSingleStepRegression,
+        double TotalTemporaryRegressionBelowSource);
     private sealed record CertificationCandidate(EssenceBuildSnapshot Build, PveBenchmarkBuildSnapshot Benchmark);
     private sealed record ChallengeLink(string ParentSignature, string ChallengerSignature, int Depth);
     private sealed record PartySearchResult(

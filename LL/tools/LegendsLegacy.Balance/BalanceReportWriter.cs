@@ -393,16 +393,32 @@ public sealed class BalanceReportWriter
         var eliteProfileRows = string.Join(
             Environment.NewLine,
             report.EliteBuildCertification.Profiles.Select(profile =>
-                $"| `{profile.ProfileId}` " +
-                $"| {profile.LegalSearchSpaceSize:N0} " +
-                $"| {profile.UniqueCandidatesEvaluated:N0} " +
-                $"| {profile.Restarts.Min(restart => restart.GenerationsExecuted)}-{profile.Restarts.Max(restart => restart.GenerationsExecuted)} " +
-                $"| {FormatScore(profile.P95TargetScore)} " +
-                $"| {FormatScore(profile.P99TargetScore)} " +
-                $"| {FormatScore(profile.BestScoreSpreadAcrossRestarts)} " +
-                $"| {profile.Restarts.Sum(restart => restart.LocalRefinementPasses)}/{profile.LocalChallenge.RefinementRounds} " +
-                $"| {FormatSignedScore(profile.LocalChallenge.BestAggregateImprovement)} " +
-                $"| {profile.Verdict} |"));
+            {
+                var valleyCandidates = profile.Restarts.Sum(restart => restart.ValleyBeamCandidatesEvaluated);
+                var valleyGenerated = profile.Restarts.Sum(restart => restart.ValleyBeamCandidatesGenerated);
+                var valleyRejected = profile.Restarts.Sum(restart => restart.ValleyBeamCandidatesRejectedByPrefilter);
+                var valleyDepth = profile.Restarts.Max(restart => restart.ValleyBeamDepthReached);
+                var valleyExhausted = profile.Restarts.Any(restart => restart.ValleyBeamBudgetExhausted) ? "*" : string.Empty;
+                return $"| `{profile.ProfileId}` " +
+                       $"| {profile.LegalSearchSpaceSize:N0} " +
+                       $"| {profile.UniqueCandidatesEvaluated:N0} " +
+                       $"| {profile.Restarts.Min(restart => restart.GenerationsExecuted)}-{profile.Restarts.Max(restart => restart.GenerationsExecuted)} " +
+                       $"| {FormatScore(profile.P95TargetScore)} " +
+                       $"| {FormatScore(profile.P99TargetScore)} " +
+                       $"| {FormatScore(profile.BestScoreSpreadAcrossRestarts)} " +
+                       $"| {profile.Restarts.Max(restart => restart.DistanceFromStrongestRestart)} " +
+                       $"| {valleyGenerated:N0}/{valleyCandidates:N0}/{valleyDepth}{valleyExhausted} " +
+                       $"| {valleyRejected:N0} " +
+                       $"| {FormatSignedScore(profile.Restarts.Max(restart => restart.ValleyBeamBestImprovement))} " +
+                       $"| {profile.Restarts.Sum(restart => restart.LocalRefinementPasses)}/{profile.Restarts.Sum(restart => restart.RefinementSeedsEvaluated)}/{profile.LocalChallenge.RefinementRounds} " +
+                       $"| {profile.Restarts.Sum(restart => restart.TwoSwapCandidatesEvaluated):N0} " +
+                       $"| {profile.Restarts.Sum(restart => restart.CoordinatedMutationCandidatesEvaluated):N0} " +
+                       $"| {profile.Restarts.Sum(restart => restart.ExplorerContinuationCandidatesEvaluated):N0} " +
+                       $"| {FormatScore(profile.Restarts.Max(restart => restart.BaselineBestScore))}/{FormatScore(profile.BestScore)} " +
+                       $"| {profile.Restarts.Sum(restart => restart.StratifiedPortfolioCandidatesEvaluated):N0} " +
+                       $"| {FormatSignedScore(profile.LocalChallenge.BestAggregateImprovement)} " +
+                       $"| {profile.Verdict} |";
+            }));
         var eliteFloorRows = string.Join(
             Environment.NewLine,
             report.EliteBuildCertification.Floors.Select(floor =>
@@ -413,9 +429,39 @@ public sealed class BalanceReportWriter
                 $"| {FormatPercent(floor.SpecializedParty.ClearRate)} " +
                 $"| {floor.PartyGenomesEvaluated:N0}/{floor.PartyGenomeSearchSpaceSize:N0} " +
                 $"| {floor.Verdict} |"));
+        var eliteFloorEvidence = report.EliteBuildCertification.Options.SearchOnly
+            ? "_Search-only mode skipped encounter holdouts and party optimization. This evidence cannot certify._"
+            : $"""
+               | Floor | Generic P75 | Certified P95 (95% CI) | Certified P99 (95% CI) | Specialized Party | Party Genomes | Verdict |
+               | ---: | ---: | --- | --- | ---: | ---: | --- |
+               {eliteFloorRows}
+               """;
         var eliteWarningText = report.EliteBuildCertification.Warnings.Count == 0
             ? "- None."
             : string.Join(Environment.NewLine, report.EliteBuildCertification.Warnings.Select(warning => $"- {EscapeCell(warning)}"));
+        var bridgeAudits = report.EliteBuildCertification.BridgeAudits ?? [];
+        var eliteBridgeEvidence = !report.EliteBuildCertification.Options.BridgeAuditEnabled
+            ? "_Bridge audit disabled._"
+            : bridgeAudits.Count == 0
+                ? "_Bridge audit enabled; all restart winners used identical genomes._"
+                : string.Join(
+                    Environment.NewLine + Environment.NewLine,
+                    bridgeAudits.Select(audit =>
+                    {
+                        var pathRows = string.Join(
+                            Environment.NewLine,
+                            audit.BestMaximinPath.Select((node, index) =>
+                                $"| {index} | `{node.BuildId}` | {FormatScore(node.Score)} | {EscapeCell(string.Join(", ", node.Genome))} |"));
+                        return $"""
+                               #### `{audit.ProfileId}` restart {audit.SourceRestart} → restart {audit.TargetRestart}
+
+                               Distance: {audit.SubstitutionDistance}; legal nodes evaluated: {audit.LegalBridgeNodesEvaluated:N0}; path minimum: {FormatScore(audit.PathMinimumScore)}; largest step regression: {FormatScore(audit.LargestSingleStepRegression)}; total regression below source: {FormatScore(audit.TotalTemporaryRegressionBelowSource)}; non-regressing: {audit.NonRegressingBridgeExists}; within {FormatScore(audit.StepRegressionTolerance)} per step: {audit.ToleranceBoundedBridgeExists}.
+
+                               | Step | Build | Score | Genome |
+                               | ---: | --- | ---: | --- |
+                               {pathRows}
+                               """;
+                    }));
         var scalingValidationRows = string.Join(
             Environment.NewLine,
             report.ScalingValidation.Floors.Select(floor =>
@@ -626,13 +672,21 @@ public sealed class BalanceReportWriter
 
             **Content fingerprint:** `{{report.EliteBuildCertification.ContentFingerprint}}`
 
-            | Profile | Legal Space | Unique Evaluations | Actual Generations | P95 Score | P99 Score | Restart Spread | Restart/Finalist Refinements | Best Local Improvement | Verdict |
-            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+            | Profile | Legal Space | Unique Evaluations | Actual Generations | P95 Score | P99 Score | Restart Spread | Max Restart Distance | Valley Generated/Evaluated/Depth | Prefilter Rejected | Best Valley Gain | Restart Passes/Seeds/Finalist Rounds | Restart Two-Swap Evaluations | Basin-Jump Births | Explorer Continuations | Baseline/Final Ceiling | Portfolio Evaluations | Best Local Improvement | Verdict |
+            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
             {{eliteProfileRows}}
 
-            | Floor | Generic P75 | Certified P95 (95% CI) | Certified P99 (95% CI) | Specialized Party | Party Genomes | Verdict |
-            | ---: | ---: | --- | --- | ---: | ---: | --- |
-            {{eliteFloorRows}}
+            _A `*` after valley depth means at least one restart exhausted its configured valley candidate budget._
+
+            {{eliteFloorEvidence}}
+
+            ### Restart Bridge Audit
+
+            **Audit-only authoritative evaluations:** {{report.EliteBuildCertification.TotalBridgeNodesEvaluated:N0}}
+
+            {{eliteBridgeEvidence}}
+
+            Bridge genomes are evaluated through the production PvE benchmark boundary but remain outside certification candidate populations, restart evidence, percentile cohorts, local challenges, verdicts, and unique-candidate totals.
 
             Certification keeps P75 progression separate from generated P95/P99 and encounter-specialized stress populations. Developer-profile runs preserve complete diagnostics but cannot emit `CertifiedElite`. Production content was not modified.
 

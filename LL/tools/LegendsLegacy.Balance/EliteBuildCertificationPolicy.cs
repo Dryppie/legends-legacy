@@ -160,7 +160,19 @@ public sealed record EliteCertificationOptions(
     string? TopPlayerBuildsPath = null,
     int MaximumGenerations = 24,
     int RestartLocalRefinementPassLimit = 6,
-    int FinalistRefinementRoundLimit = 3)
+    int FinalistRefinementRoundLimit = 3,
+    int RestartTwoSwapChallengerLimitPerPass = 250,
+    int RestartRefinementSeedCount = 4,
+    bool SearchOnly = false,
+    double CrossoverRate = 0,
+    int RestartValleyBeamWidth = 0,
+    int RestartValleyBeamDepth = 0,
+    int RestartValleyCandidateBudget = 0,
+    int RestartValleyPrefilterLimitPerDepth = 0,
+    bool BridgeAuditEnabled = false,
+    double CoordinatedMutationRate = 0,
+    int ExplorerArchiveSize = 0,
+    int StratifiedPortfolioCandidatesPerProfile = 0)
 {
     public static EliteCertificationOptions ForProfile(EliteCertificationProfile profile) =>
         profile == EliteCertificationProfile.Release
@@ -178,7 +190,9 @@ public sealed record EliteCertificationOptions(
                 PartyGenomeBudgetPerFloor: 25_000,
                 MaximumGenerations: 100,
                 RestartLocalRefinementPassLimit: 12,
-                FinalistRefinementRoundLimit: 5)
+                FinalistRefinementRoundLimit: 5,
+                RestartTwoSwapChallengerLimitPerPass: 1_000,
+                RestartRefinementSeedCount: 8)
             : new EliteCertificationOptions();
 
     public EliteCertificationOptions Validate()
@@ -195,6 +209,10 @@ public sealed record EliteCertificationOptions(
             throw new ArgumentOutOfRangeException(nameof(RestartLocalRefinementPassLimit));
         if (FinalistRefinementRoundLimit is < 0 or > 20)
             throw new ArgumentOutOfRangeException(nameof(FinalistRefinementRoundLimit));
+        if (RestartTwoSwapChallengerLimitPerPass is < 0 or > 1_000_000)
+            throw new ArgumentOutOfRangeException(nameof(RestartTwoSwapChallengerLimitPerPass));
+        if (RestartRefinementSeedCount is < 1 or > 50)
+            throw new ArgumentOutOfRangeException(nameof(RestartRefinementSeedCount));
         if (EliteCount < 1 || EliteCount >= PopulationSize)
             throw new ArgumentOutOfRangeException(nameof(EliteCount), "Elite count must be positive and below population size.");
         if (FinalistsPerSlotProfile is < 1 or > 50)
@@ -211,6 +229,59 @@ public sealed record EliteCertificationOptions(
             throw new ArgumentOutOfRangeException(nameof(PartyGenomeBudgetPerFloor));
         if (MutationRate is < 0.01 or > 1 || RandomInjectionRate is < 0 or > 0.5)
             throw new ArgumentOutOfRangeException(nameof(MutationRate), "Elite mutation and injection rates are invalid.");
+        if (!double.IsFinite(CrossoverRate) || CrossoverRate is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(CrossoverRate));
+        if (!double.IsFinite(CoordinatedMutationRate) || CoordinatedMutationRate is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(CoordinatedMutationRate));
+        if (CrossoverRate > 0 && CoordinatedMutationRate > 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(CoordinatedMutationRate),
+                "Elite crossover and coordinated mutation are separate experiments and cannot be enabled together.");
+        }
+        if (ExplorerArchiveSize is < 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(ExplorerArchiveSize));
+        if (ExplorerArchiveSize > 0 && CoordinatedMutationRate == 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(ExplorerArchiveSize),
+                "An elite explorer archive requires a positive coordinated mutation rate.");
+        }
+        if (StratifiedPortfolioCandidatesPerProfile is < 0 or > 5_000)
+            throw new ArgumentOutOfRangeException(nameof(StratifiedPortfolioCandidatesPerProfile));
+        if (StratifiedPortfolioCandidatesPerProfile > 0
+            && (CrossoverRate > 0 || CoordinatedMutationRate > 0))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(StratifiedPortfolioCandidatesPerProfile),
+                "The stratified portfolio requires crossover and coordinated mutation to remain disabled so the baseline stream stays comparable.");
+        }
+        var valleySearchDisabled = RestartValleyBeamWidth == 0
+                                   && RestartValleyBeamDepth == 0
+                                   && RestartValleyCandidateBudget == 0;
+        var valleySearchConfigured = RestartValleyBeamWidth is >= 1 and <= 100
+                                     && RestartValleyBeamDepth is >= 1 and <= 6
+                                     && RestartValleyCandidateBudget is >= 1 and <= 1_000_000;
+        if (!valleySearchDisabled && !valleySearchConfigured)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(RestartValleyBeamWidth),
+                "Elite valley search requires width 1-100, depth 1-6, and candidate budget 1-1,000,000; use zero for all three to disable it.");
+        }
+        if (RestartValleyPrefilterLimitPerDepth is < 0 or > 10_000)
+            throw new ArgumentOutOfRangeException(nameof(RestartValleyPrefilterLimitPerDepth));
+        if (valleySearchDisabled && RestartValleyPrefilterLimitPerDepth != 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(RestartValleyPrefilterLimitPerDepth),
+                "Elite valley prefiltering requires valley search to be enabled.");
+        }
+        if (StratifiedPortfolioCandidatesPerProfile > 0 && !valleySearchDisabled)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(StratifiedPortfolioCandidatesPerProfile),
+                "The stratified portfolio and valley search are separate experiments and cannot be enabled together.");
+        }
         if (DiversityPenalty is < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(DiversityPenalty));
         return this;

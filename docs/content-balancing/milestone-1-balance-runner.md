@@ -41,15 +41,27 @@ Supported options:
 --encounter-candidate-simulations <number>  Trials per encounter-specific candidate (default: 3).
 --encounter-retained <number>      Specialized builds retained per floor (default: 5).
 --certification-profile <value>    developer (default) or release.
+--elite-search-only                Skip holdouts and party search; never certifies.
 --elite-restarts <number>          Independent elite-search restarts.
 --elite-population <number>        Candidates per restart and slot profile.
 --elite-generations <number>       Search generations per restart.
 --elite-max-generations <number>   Hard ceiling for adaptive certification generations.
 --elite-elites <number>            Elites retained per certification generation.
+--elite-crossover <number>         Experimental elite-parent crossover rate, 0.00-1.00 (default: 0).
+--elite-basin-jump <number>        Restart-local coordinated 3/4-gene mutation rate, 0.00-1.00 (default: 0).
+--elite-explorer-archive <number>  Persistent restart-local explorer candidates, 0-100 (default: 0).
+--elite-stratified-portfolio <number>  Separately seeded legal candidates per restart/profile, 0-5000 (default: 0).
+--elite-valley-beam-width <number> Opt-in restart valley-search beam width; 0 disables.
+--elite-valley-beam-depth <number> Opt-in restart valley-search depth; 0 disables.
+--elite-valley-budget <number>     Candidate budget per restart/profile; 0 disables.
+--elite-valley-prefilter <number> Fully benchmark at most this many valley candidates per depth; 0 disables.
+--elite-bridge-audit              Audit shortest legal bridges between differing restart winners; disabled by default.
 --elite-finalists <number>         Pareto-diverse finalists per slot profile.
 --elite-local-swap-depth <1|2>     Local-neighborhood challenge depth.
 --elite-two-swap-limit <number>    Two-swap challengers per finalist; 0 means complete.
---elite-restart-refinement <number>  One-swap refinement passes per restart winner.
+--elite-restart-refinement <number>  Local refinement passes per restart beam seed.
+--elite-restart-seeds <number>     Pareto-diverse refinement seeds per restart.
+--elite-restart-two-swap-limit <number> Two-swap escape candidates per stalled restart pass; 0 disables.
 --elite-finalist-refinement <number> Neighborhood absorption rounds before final challenge.
 --elite-holdout-seeds <number>     Independent elite holdout seeds.
 --elite-simulations <number>       Elite holdout trials per seed.
@@ -68,6 +80,24 @@ Supported options:
 
 The default content root is discovered from the repository layout. The default report root is `balance-output/` at the repository root.
 
+Valley search is diagnostic and disabled in both approved profiles. Width, depth, and total candidate budget must be enabled together. `--elite-valley-prefilter` may then limit authoritative PvE benchmarks per depth using Essence usage, performance, and pair-synergy metadata. That surrogate never becomes a certification score: generated, rejected, and fully benchmarked counts are serialized, and only full benchmark results can affect a verdict. The measured width-16/depth-3 experiments on seed `8471` failed convergence and runtime, so none of those experimental settings are frozen defaults.
+
+The bridge audit is also diagnostic and disabled in both approved profiles. `--elite-bridge-audit` selects the strongest and lowest-scoring distinct restart winners per slot profile, enumerates every legal genome on their minimum-substitution bridge, benchmarks all nodes through the production PvE boundary, and reports the deterministic best maximin path plus regression reachability. Audit builds and counts are serialized separately and cannot affect certification candidates, restart evidence, percentiles, finalists, challenges, verdicts, or `TotalUniqueCandidatesEvaluated`.
+
+Coordinated mutation is experimental and disabled in both approved profiles. `--elite-basin-jump` replaces the requested share of ordinary genetic births with deterministic legal three/four-gene jumps from that restart's own elites; it does not add births, use bridge nodes, or exchange genomes between restarts. Crossover and basin jumps cannot be enabled together. Successful jump counts are serialized per generation and restart.
+
+`--elite-explorer-archive` retains a bounded set of recent explorer descendants as alternate parents in the same restart. Approximately half of later explorer births continue archived genomes through ordinary mutation and half create new coordinated seeds. Archived candidates receive no automatic elite status or score adjustment. The archive requires basin jumps, remains disabled by default, and reports continuation counts separately.
+
+`--elite-stratified-portfolio` runs only after the unchanged baseline optimizer and refines baseline and portfolio beams separately. It reports direct portfolio evaluations plus the fully refined baseline and final ceilings for each restart/profile. It is mutually exclusive with crossover, basin jumps/archive, and valley search, and remains disabled by default.
+
+The seed-`8471` algorithm-v11 run used search-only `96`/`24`-`40`/`12` settings with crossover and valley search disabled. It took `1,247.34` seconds, retained `59,006` certification candidates, and separately benchmarked `146` bridge nodes. The complete 70-node E5 bridge had a best maximin score of `83.69` from the `85.27` source, a `1.30` largest step regression, and no non-regressing or `0.50`-bounded route to `86.21`. This confirms a genuine shortest-path valley but does not approve a search budget or exclude longer detours.
+
+The algorithm-v12 `20%` basin-jump trial used seed `8471` with the same search-only `96`/`24`-`40`/`12` settings and every other experimental option disabled. It replaced `3,366` ordinary births, ran for `1,407.29` seconds, and evaluated `62,296` certification candidates. E4 reached `78.61` with `0.46` spread, E6 retained `87.46` with `0.37` spread, but E5 worsened to `1.09` spread while retaining the `86.21` ceiling in only one restart. The option remains forensic-only; seed `1337` was not run and no default was changed.
+
+The algorithm-v13 archive follow-up used the same rate with 12 persistent candidates. It produced `1,664` seed jumps and `1,513` continuation births, ran for `1,386.22` seconds, and evaluated `59,793` certification candidates. Its E5 spread of `0.15` was invalid because the observed ceiling fell from `86.21` to `85.27`; E6 widened to `0.99`, and the overall verdict remained `SearchUnstable`. Seed `1337` was not run. The archive remains forensic-only and no default changed.
+
+The algorithm-v14 isolated-portfolio follow-up used `256` deterministic candidates per restart/profile and separate baseline/portfolio refinement beams. It directly benchmarked `2,304` portfolio candidates, evaluated `80,560` local candidates, retained `109,724` unique certification candidates, and ran for approximately `517.35` seconds. E4 and E6 passed at `0.29` and `0.34` spread while retaining their known ceilings. E5 retained `86.21` but failed at `1.09` spread (`86.21`, `85.12`, `85.27`). Seed `1337` was not run. The option remains forensic-only; no default, budget, or tolerance changed.
+
 ## Complete Automated Flow
 
 One invocation executes every completed stage as a single orchestration:
@@ -85,7 +115,7 @@ One invocation executes every completed stage as a single orchestration:
 11. Essence usage, pairing, synergy, and complementary simulator analysis;
 12. bounded encounter calibration recommendations;
 13. encounter-specific optimization and cheese/hard-counter detection;
-14. elite-build certification, local challenges, party search, and P95/P99 holdouts;
+14. elite-build certification with adaptive restarts, local challenges, optional search diagnostics, party search, and P95/P99 holdouts;
 15. Region 1 holdout scaling validation and sensitivity probes.
 
 There are no manual handoffs or separate milestone commands within this flow. Reports are written only after the complete run succeeds. Encounter recommendations are generated automatically, but applying them to production content remains an intentional developer-approval step.
@@ -153,6 +183,7 @@ Automated coverage verifies:
 - Essence percentile usage, common partners, additive pair deltas, and warning thresholds are deterministic;
 - encounter calibration reuses parties and combat seeds, stays within its approved bounds, and never modifies production content;
 - encounter-specific optimization is deterministic, preserves generic progression data, and classifies narrow cheese evidence separately from hard counters;
+- elite certification preserves restart independence, records raw/refined genomes and distances, reports coordinated-mutation seeds, explorer continuations, optional valley generation, prefilter, evaluation, depth, exhaustion, and improvement evidence, and keeps shortest-path bridge evaluations in a separate audit-only section;
 - holdout confidence, seed stability, monotonicity, sensitivity, and percentile-order checks can reject unsafe scaling;
 - JSON and Markdown reports are written to both `latest` and immutable `history` locations;
 - invalid command-line arguments fail explicitly.

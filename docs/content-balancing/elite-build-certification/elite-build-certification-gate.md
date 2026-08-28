@@ -2,7 +2,7 @@
 
 The concrete v1 thresholds, execution profiles, player-fixture rules, and approval checklist are defined in the companion [Elite Build Certification Policy v1](elite-build-certification-policy-v1.md).
 
-**Implementation status:** Implemented in balance schema 15. The one-click runner now executes adaptive deterministic multi-restart search, per-restart hill-climbing, bounded Pareto-finalist refinement, direct party-genome search, P95/P99 holdouts, curated-fixture validation, explicit verdicts, and standalone report persistence. The checked-in curated fixture is intentionally empty, so the current repository cannot produce `CertifiedElite` until reviewed player evidence is supplied and a release-profile run passes.
+**Implementation status:** Implemented in balance schema 15. The one-click runner now executes adaptive deterministic multi-restart search, per-restart hill-climbing, opt-in crossover, coordinated-mutation, persistent-explorer, valley, metadata-prefilter, shortest-path bridge, and isolated-portfolio diagnostics, bounded Pareto-finalist refinement, direct party-genome search, P95/P99 holdouts, curated-fixture validation, explicit verdicts, and standalone report persistence. Certification analyzer algorithm v14 retains the v11 finding of a genuine minimum-substitution E5 fitness valley and rejects the v12 direct-jump, v13 persistent-archive, and v14 arithmetic-portfolio trials on seed `8471`. Certification evidence is not approved: E5 remains outside the frozen restart-spread tolerance, no experimental search setting is promoted, and the checked-in curated fixture is intentionally empty. The complete investigation history is recorded in the [Elite Build Search Investigation Log](elite-build-search-investigation-log.md).
 
 This gate establishes whether generated Essence combinations are strong enough to represent highly optimized and top-player builds. It must be completed before Region 1 scaling is remediated and before Milestone 14 extends the system to additional progression bands.
 
@@ -153,8 +153,12 @@ Each E4/E5/E6 elite profile and encounter-specialized party should report:
 - unique candidates evaluated;
 - independent restart count and seeds;
 - best score and component scores per restart;
+- raw/refined build IDs and Essence genomes, plus distance from the strongest restart genome;
 - best-score spread across restarts;
 - generations since the last material improvement;
+- optional valley-search depth, candidates, budget exhaustion, and best improvement;
+- optional valley-prefilter generated and rejected candidate counts;
+- optional bridge endpoint, legal-node, maximin-path, and regression evidence kept outside certification populations;
 - one-swap and two-swap challengers evaluated;
 - best local-neighbor improvement;
 - cross-strategy agreement;
@@ -193,11 +197,11 @@ Exact thresholds must be configuration-owned and approved before implementation.
 | Diversity                    | Retain multiple materially distinct elite archetypes unless the report explicitly flags a mandatory-Essence meta.        |
 | Legality                     | Every build and party must pass production source-family, slot, content-resolution, and progression rules.               |
 
-These values are draft engineering tolerances, not hidden game-design decisions. The intended P95/P99 clear-rate band for each content type must be chosen explicitly by design.
+These values are frozen v1 runtime tolerances, not hidden game-design decisions. They remain subject to explicit game-design approval together with the intended P95/P99 clear-rate bands.
 
 ## Content-balance use
 
-For each encounter, the final balance report should compare:
+For each encounter, the final balance report compares:
 
 ```text
 Generic P75 clear rate and confidence interval
@@ -214,7 +218,7 @@ No encounter scaling should be accepted merely because generic P75 is on target 
 
 ## Automated-flow requirement
 
-The certification gate must become part of the same repository-level action:
+The certification gate is part of the same repository-level action:
 
 ```powershell
 .\build\run-balance.ps1
@@ -222,28 +226,43 @@ The certification gate must become part of the same repository-level action:
 
 It must not require manual transfer of optimizer outputs between commands. A practical implementation can expose a quick default and a more expensive release-certification profile, but both must execute the same stages and produce compatible artifacts.
 
-Suggested future controls include:
+Implemented controls include:
 
 ```text
 --elite-restarts <number>
 --elite-population <number>
 --elite-generations <number>
+--elite-max-generations <number>
+--elite-crossover <number>
+--elite-basin-jump <number>
+--elite-explorer-archive <number>
+--elite-stratified-portfolio <number>
+--elite-valley-beam-width <number>
+--elite-valley-beam-depth <number>
+--elite-valley-budget <number>
+--elite-valley-prefilter <number>
+--elite-bridge-audit
 --elite-local-swap-depth <1|2>
+--elite-restart-refinement <number>
+--elite-restart-seeds <number>
+--elite-restart-two-swap-limit <number>
+--elite-finalist-refinement <number>
 --elite-holdout-seeds <number>
 --elite-simulations <number>
 --top-player-builds <path>
 --certification-profile <developer|release>
+--elite-search-only
 ```
 
-## Proposed report contract
+## Implemented report contract
 
-The implementation should add a standalone artifact under both `latest` and immutable history:
+The runner writes a standalone artifact under both `latest` and immutable history:
 
 ```text
 elite-build-certification.json
 ```
 
-`summary.json` should contain the complete certification snapshot, while `summary.md` should show:
+`summary.json` contains the complete certification snapshot, while `summary.md` shows:
 
 - certification verdict per E4/E5/E6 elite profile;
 - leading generic and scenario-specialized builds;
@@ -252,7 +271,7 @@ elite-build-certification.json
 - comparison with curated top-player builds;
 - blocking warnings that prevent scaling approval.
 
-Balance schema version 15 implements this contract and writes the resolved policy, execution profile, content fingerprint, evidence, verdicts, and warnings into the standalone artifact and combined summary.
+Balance schema version 15, optimizer algorithm version 6, and certification analyzer algorithm version 14 implement this contract and write the resolved policy, execution profile, content fingerprint, evidence, verdicts, warnings, coordinated-mutation, explorer-continuation, isolated-portfolio counts and baseline ceilings, and optional isolated bridge-audit section into the standalone artifact and combined summary.
 
 ## Relationship to the current Region 1 gate
 
@@ -260,16 +279,16 @@ The existing [Region 1 Scaling Validation Gate](../region-1-scaling-validation.m
 
 The required order is therefore:
 
-1. implement and pass elite-build certification;
+1. pass elite-build certification with the implemented gate;
 2. freeze certified generic and encounter-specialized elite cohorts for the content version;
 3. remediate Region 1 calibration using P75 as the normal target;
 4. stress every recommendation against certified P95/P99 and top-player parties;
 5. rerun Region 1 scaling validation;
 6. begin Milestone 14 only after both gates pass or exceptions are explicitly approved.
 
-## Completion criteria
+## Implementation completion and current evidence boundary
 
-This gate is complete when:
+The gate implementation is complete because:
 
 - elite candidates are searched with multiple independent strategies and restarts;
 - finalists pass deterministic local-neighborhood challenges;
@@ -281,3 +300,13 @@ This gate is complete when:
 - the entire process runs from the one-button balance command;
 - automated tests cover legality, determinism, convergence, local challenge, player comparison, report persistence, and failure verdicts;
 - no certification result mutates production content automatically.
+
+The evidence gate itself has not passed. The completed algorithm-v11 bridge run used seed `8471`, search-only mode, population `96`, generations `24`-`40`, and `12` elites, with valley search and crossover disabled. It took `1,247.34` seconds, retained `59,006` certification candidates, and separately evaluated `146` bridge nodes. The E5 bridge exhaustively evaluated 70 legal minimum-substitution nodes. Its best maximin path was `85.27 -> 83.97 -> 83.69 -> 83.87 -> 86.21`, with a `1.30` largest step loss and `4.28` total deficit below the source; neither a non-regressing nor frozen-`0.50`-bounded bridge exists. This establishes a genuine shortest-path fitness valley while leaving the `0.94` spread and `SearchUnstable` verdict unchanged. Longer off-endpoint detours were not evaluated.
+
+Algorithm v12 then tested a `20%` restart-local coordinated-mutation rate under the same `96`/`24`-`40`/`12` search-only configuration, with all other experimental search options disabled. It replaced `3,366` ordinary mutation births with legal three/four-gene jumps and completed in `1,407.29` seconds with `62,296` certification candidates. E4 improved to the known `78.61` ceiling at `0.46` spread, but E5 worsened to `1.09` spread (`86.21`, `85.50`, `85.12`) and E6 widened to `0.37`. The result remained `SearchUnstable`, exceeded the runtime criterion, and was not repeated on seed `1337`.
+
+Algorithm v13 then tested that follow-up with the same `20%` rate and a 12-candidate persistent restart-local explorer archive. The run produced `1,664` new jump seeds plus `1,513` continuation births, took `1,386.22` seconds, and evaluated `59,793` certification candidates. E4 converged at `0.17` but retained only `78.32`. E5 converged at `0.15` only because every restart fell into the lower basin (`85.27`, `85.12`, `85.27`) and lost `86.21`. E6 widened to `0.99` while retaining `87.46` in one restart. The overall result remained `SearchUnstable`; seed `1337` was not run and the archive is not approved.
+
+Algorithm v14 then isolated `256` deterministic stratified candidates per restart/profile behind the unchanged baseline optimizer and refinement beam. The corrected seed-`8471` run benchmarked `2,304` direct portfolio candidates, evaluated `80,560` local candidates across the separate baseline and portfolio beams, retained `109,724` unique certification candidates, and completed in approximately `517.35` seconds. It preserved all known ceilings. E4 passed at `0.29` (`78.61`, `78.61`, `78.32`) and E6 passed at `0.34` (`87.46`, `87.46`, `87.12`), but E5 still failed at `1.09` (`86.21`, `85.12`, `85.27`). Its only portfolio gain was `84.91` to `85.12` in restart 2. The run remained `SearchUnstable`; seed `1337` was not run, the option stays disabled, and no budget is promoted.
+
+The bridge audit establishes a real minimum-substitution E5 valley, while the v12-v14 failures show that unstructured global exploration does not reliably cover the stronger basin. Any next bounded investigation should preserve the complete baseline path and use an isolated structured quality-diversity island or explicit mechanic/source-family niches. Increasing random jumps, archive size, or the arithmetic portfolio alone is not justified. Curated player evidence and a release-profile run remain separate mandatory blockers.

@@ -105,7 +105,13 @@ public static class BalanceCli
             }
             Console.WriteLine(
                 $"Elite certification: {report.EliteBuildCertification.Verdict} " +
-                $"({report.EliteBuildCertification.Options.Profile}, {report.EliteBuildCertification.TotalUniqueCandidatesEvaluated} candidates)");
+                $"({report.EliteBuildCertification.Options.Profile}" +
+                $"{(report.EliteBuildCertification.Options.SearchOnly ? ", search-only" : string.Empty)}, " +
+                $"basin-jump {report.EliteBuildCertification.Options.CoordinatedMutationRate:P0}, " +
+                $"explorer archive {report.EliteBuildCertification.Options.ExplorerArchiveSize}, " +
+                $"stratified portfolio {report.EliteBuildCertification.Options.StratifiedPortfolioCandidatesPerProfile}/profile/restart, " +
+                $"{report.EliteBuildCertification.TotalUniqueCandidatesEvaluated} candidates, " +
+                $"{report.EliteBuildCertification.TotalBridgeNodesEvaluated} bridge-audit evaluations)");
             foreach (var profile in report.EliteBuildCertification.Profiles)
             {
                 Console.WriteLine(

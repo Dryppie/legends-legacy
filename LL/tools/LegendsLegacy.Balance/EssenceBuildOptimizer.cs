@@ -12,7 +12,10 @@ public sealed record EssenceOptimizerOptions(
     int RetainedCandidates = 10,
     int MaximumGenerations = 0,
     int RequiredPlateauGenerations = 0,
-    double PlateauImprovementTolerance = 0.25)
+    double PlateauImprovementTolerance = 0.25,
+    double CrossoverRate = 0,
+    double CoordinatedMutationRate = 0,
+    int ExplorerArchiveSize = 0)
 {
     public EssenceOptimizerOptions Validate()
     {
@@ -30,6 +33,22 @@ public sealed record EssenceOptimizerOptions(
             throw new ArgumentOutOfRangeException(nameof(RequiredPlateauGenerations));
         if (!double.IsFinite(PlateauImprovementTolerance) || PlateauImprovementTolerance < 0)
             throw new ArgumentOutOfRangeException(nameof(PlateauImprovementTolerance));
+        if (!double.IsFinite(CrossoverRate) || CrossoverRate is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(CrossoverRate));
+        if (!double.IsFinite(CoordinatedMutationRate) || CoordinatedMutationRate is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(CoordinatedMutationRate));
+        if (CrossoverRate > 0 && CoordinatedMutationRate > 0)
+            throw new ArgumentOutOfRangeException(
+                nameof(CoordinatedMutationRate),
+                "Crossover and coordinated mutation are separate experiments and cannot be enabled together.");
+        if (ExplorerArchiveSize is < 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(ExplorerArchiveSize));
+        if (ExplorerArchiveSize > 0 && CoordinatedMutationRate == 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(ExplorerArchiveSize),
+                "An explorer archive requires a positive coordinated mutation rate.");
+        }
         if (EliteCount < 1 || EliteCount >= PopulationSize)
             throw new ArgumentOutOfRangeException(nameof(EliteCount), "Elite count must be at least 1 and below population size.");
         if (MutationRate is < 0.01 or > 1)
@@ -55,7 +74,9 @@ public sealed record EssenceOptimizerGenerationSnapshot(
     double BestScore,
     double MedianScore,
     double WorstScore,
-    double MeanPairwiseSimilarity);
+    double MeanPairwiseSimilarity,
+    int CoordinatedMutationBirths = 0,
+    int ExplorerContinuationBirths = 0);
 
 public sealed record EssenceOptimizerCandidateSnapshot(
     string BuildId,
@@ -93,7 +114,7 @@ public sealed class EssenceBuildOptimizer(
     EssenceBuildGenerator buildGenerator,
     PveBenchmarkRunner benchmarkRunner)
 {
-    public const int AlgorithmVersion = 2;
+    public const int AlgorithmVersion = 6;
 
     public EssenceOptimizationResult Optimize(
         IReadOnlyList<EssenceBuildSnapshot> initialBuilds,
@@ -180,6 +201,7 @@ public sealed class EssenceBuildOptimizer(
         {
             SummarizeGeneration(0, population)
         };
+        IReadOnlyList<Candidate> explorerArchive = [];
         var maximumGenerations = options.MaximumGenerations == 0
             ? options.Generations
             : options.MaximumGenerations;
@@ -197,7 +219,7 @@ public sealed class EssenceBuildOptimizer(
             var mutationCount = options.PopulationSize - options.EliteCount - randomInjectionCount;
             var generationSeed = DeriveSeed(searchSeed, slotCount, generation);
             random = new Random(generationSeed);
-            var mutatedBuilds = CreateMutatedBuilds(
+            var mutationBatch = CreateMutatedBuilds(
                 mutationCount,
                 slotCount,
                 generation,
@@ -208,7 +230,11 @@ public sealed class EssenceBuildOptimizer(
                 seenSignatures,
                 random,
                 generationSeed,
-                options.MutationRate);
+                options.MutationRate,
+                options.CrossoverRate,
+                options.CoordinatedMutationRate,
+                explorerArchive,
+                options.ExplorerArchiveSize);
             var injectedBuilds = CreateFreshBuilds(
                 randomInjectionCount,
                 slotCount,
@@ -218,11 +244,22 @@ public sealed class EssenceBuildOptimizer(
                 seenSignatures,
                 random,
                 generationSeed);
-            var evaluatedAdditions = Evaluate([.. mutatedBuilds, .. injectedBuilds], runSeed, generation);
+            var evaluatedAdditions = Evaluate([.. mutationBatch.Builds, .. injectedBuilds], runSeed, generation);
             next.AddRange(evaluatedAdditions);
             evaluatedCandidates.AddRange(evaluatedAdditions);
             population = next;
-            generations.Add(SummarizeGeneration(generation, population));
+            if (options.ExplorerArchiveSize > 0)
+            {
+                explorerArchive = UpdateExplorerArchive(
+                    explorerArchive,
+                    evaluatedAdditions.Where(candidate => mutationBatch.ExplorerBuildIds.Contains(candidate.Build.Id)),
+                    options.ExplorerArchiveSize);
+            }
+            generations.Add(SummarizeGeneration(
+                generation,
+                population,
+                mutationBatch.CoordinatedMutationBirths,
+                mutationBatch.ExplorerContinuationBirths));
             if (ShouldStopAdaptiveSearch(generations, options))
             {
                 break;
@@ -273,7 +310,7 @@ public sealed class EssenceBuildOptimizer(
         return builds.Select(build => new Candidate(build, results[build.Id], generation)).ToArray();
     }
 
-    private IReadOnlyList<EssenceBuildSnapshot> CreateMutatedBuilds(
+    private MutationBatch CreateMutatedBuilds(
         int count,
         int slotCount,
         int generation,
@@ -284,33 +321,91 @@ public sealed class EssenceBuildOptimizer(
         ISet<string> signatures,
         Random random,
         int generationSeed,
-        double mutationRate)
+        double mutationRate,
+        double crossoverRate,
+        double coordinatedMutationRate,
+        IReadOnlyList<Candidate> explorerArchive,
+        int explorerArchiveSize)
     {
         var builds = new List<EssenceBuildSnapshot>(count);
+        var coordinatedMutationBirths = 0;
+        var explorerContinuationBirths = 0;
+        var explorerBuildIds = new HashSet<string>(StringComparer.Ordinal);
         var attempts = 0;
         while (builds.Count < count && attempts++ < Math.Max(100, count * 200))
         {
-            var parent = elites[random.Next(elites.Count)];
-            var essenceIds = Mutate(
-                parent.Build.Essences.Select(essence => essence.EssenceId).ToArray(),
-                sourceFamilies,
-                definitionsById,
-                random,
-                mutationRate);
+            var parentIndex = random.Next(elites.Count);
+            var parent = elites[parentIndex];
+            var parentGenome = parent.Build.Essences.Select(essence => essence.EssenceId).ToArray();
+            var explorerBirth = coordinatedMutationRate > 0 && random.NextDouble() < coordinatedMutationRate;
+            var continuation = explorerBirth
+                               && explorerArchiveSize > 0
+                               && explorerArchive.Count > 0
+                               && random.NextDouble() < 0.5;
+            if (continuation)
+            {
+                var explorerParent = explorerArchive[random.Next(explorerArchive.Count)];
+                parentGenome = explorerParent.Build.Essences.Select(essence => essence.EssenceId).ToArray();
+            }
+            var crossed = false;
+            if (!explorerBirth && crossoverRate > 0 && elites.Count > 1 && random.NextDouble() < crossoverRate)
+            {
+                var secondParentIndex = random.Next(elites.Count - 1);
+                if (secondParentIndex >= parentIndex)
+                    secondParentIndex++;
+                parentGenome = Crossover(
+                    parentGenome,
+                    elites[secondParentIndex].Build.Essences.Select(essence => essence.EssenceId).ToArray(),
+                    definitionsById,
+                    random);
+                crossed = true;
+            }
+            var essenceIds = explorerBirth && !continuation
+                ? CoordinatedMutate(parentGenome, sourceFamilies, definitionsById, random)
+                : Mutate(
+                    parentGenome,
+                    sourceFamilies,
+                    definitionsById,
+                    random,
+                    mutationRate,
+                    requireChange: !crossed);
             var signature = Signature(essenceIds);
             if (!signatures.Add(signature))
                 continue;
-            builds.Add(buildGenerator.MaterializeBuild(
-                $"E{slotCount}_OPT_G{generation:000}_{builds.Count + 1:000}",
+            var build = buildGenerator.MaterializeBuild(
+                $"E{slotCount}_OPT_G{generation:000}_{(continuation ? "X" : explorerBirth ? "J" : "M")}{builds.Count + 1:000}",
                 profileId,
                 slotCount,
                 generationSeed,
-                essenceIds));
+                essenceIds);
+            builds.Add(build);
+            if (explorerBirth)
+                explorerBuildIds.Add(build.Id);
+            if (explorerBirth && !continuation)
+                coordinatedMutationBirths++;
+            if (continuation)
+                explorerContinuationBirths++;
         }
         if (builds.Count != count)
             throw new InvalidOperationException($"Could not create {count} unique mutated E{slotCount} candidates.");
-        return builds;
+        return new MutationBatch(
+            builds,
+            coordinatedMutationBirths,
+            explorerContinuationBirths,
+            explorerBuildIds);
     }
+
+    private static IReadOnlyList<Candidate> UpdateExplorerArchive(
+        IReadOnlyList<Candidate> current,
+        IEnumerable<Candidate> additions,
+        int archiveSize) =>
+        additions.Concat(current)
+            .DistinctBy(candidate => Signature(candidate.Build))
+            .OrderByDescending(candidate => candidate.DiscoveredGeneration)
+            .ThenByDescending(candidate => candidate.Benchmark.AggregateScore)
+            .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+            .Take(archiveSize)
+            .ToArray();
 
     private IReadOnlyList<EssenceBuildSnapshot> CreateFreshBuilds(
         int count,
@@ -347,7 +442,8 @@ public sealed class EssenceBuildOptimizer(
         IReadOnlyList<EssenceDefinition[]> sourceFamilies,
         IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
         Random random,
-        double mutationRate)
+        double mutationRate,
+        bool requireChange = true)
     {
         var genes = parent.ToArray();
         var changed = false;
@@ -357,14 +453,86 @@ public sealed class EssenceBuildOptimizer(
                 continue;
             changed |= ReplaceGene(genes, index, sourceFamilies, definitionsById, random);
         }
-        if (!changed)
+        if (!changed && requireChange)
         {
             var start = random.Next(genes.Length);
             for (var offset = 0; offset < genes.Length && !changed; offset++)
                 changed = ReplaceGene(genes, (start + offset) % genes.Length, sourceFamilies, definitionsById, random);
         }
-        if (!changed)
+        if (!changed && requireChange)
             throw new InvalidOperationException("No legal Essence mutation was available.");
+        return genes.OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    private static IReadOnlyList<string> CoordinatedMutate(
+        IReadOnlyList<string> parent,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        Random random)
+    {
+        var minimumReplacements = Math.Min(3, parent.Count);
+        var maximumReplacements = Math.Min(4, parent.Count);
+        var replacementCount = minimumReplacements == maximumReplacements
+            ? minimumReplacements
+            : random.Next(minimumReplacements, maximumReplacements + 1);
+        var indexes = Enumerable.Range(0, parent.Count).ToArray();
+        for (var index = 0; index < replacementCount; index++)
+        {
+            var selected = random.Next(index, indexes.Length);
+            (indexes[index], indexes[selected]) = (indexes[selected], indexes[index]);
+        }
+        var replacedIndexes = indexes.Take(replacementCount).ToHashSet();
+        var retained = parent.Where((_, index) => !replacedIndexes.Contains(index)).ToArray();
+        var retainedSources = retained.Select(id => definitionsById[id].SourceMonsterId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var parentIds = parent.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var eligibleFamilies = sourceFamilies
+            .Where(family => !retainedSources.Contains(family[0].SourceMonsterId))
+            .Select(family => family.Where(definition => !parentIds.Contains(definition.Id))
+                .OrderBy(definition => definition.Id, StringComparer.OrdinalIgnoreCase)
+                .ToArray())
+            .Where(family => family.Length > 0)
+            .ToArray();
+        if (eligibleFamilies.Length < replacementCount)
+            throw new InvalidOperationException("No legal coordinated Essence mutation was available.");
+        for (var index = 0; index < replacementCount; index++)
+        {
+            var selected = random.Next(index, eligibleFamilies.Length);
+            (eligibleFamilies[index], eligibleFamilies[selected]) = (eligibleFamilies[selected], eligibleFamilies[index]);
+        }
+        var replacements = eligibleFamilies.Take(replacementCount)
+            .Select(family => family[random.Next(family.Length)].Id);
+        return retained.Concat(replacements)
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private static string[] Crossover(
+        IReadOnlyList<string> firstParent,
+        IReadOnlyList<string> secondParent,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        Random random)
+    {
+        var candidates = firstParent.Concat(secondParent)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        for (var index = candidates.Length - 1; index > 0; index--)
+        {
+            var selected = random.Next(index + 1);
+            (candidates[index], candidates[selected]) = (candidates[selected], candidates[index]);
+        }
+        var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var genes = new List<string>(firstParent.Count);
+        foreach (var essenceId in candidates)
+        {
+            if (!sources.Add(definitionsById[essenceId].SourceMonsterId))
+                continue;
+            genes.Add(essenceId);
+            if (genes.Count == firstParent.Count)
+                break;
+        }
+        if (genes.Count != firstParent.Count)
+            throw new InvalidOperationException("Elite crossover could not construct a legal source-distinct genome.");
         return genes.OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
@@ -438,7 +606,9 @@ public sealed class EssenceBuildOptimizer(
 
     private static EssenceOptimizerGenerationSnapshot SummarizeGeneration(
         int generation,
-        IReadOnlyList<Candidate> population)
+        IReadOnlyList<Candidate> population,
+        int coordinatedMutationBirths = 0,
+        int explorerContinuationBirths = 0)
     {
         var scores = population.Select(candidate => candidate.Benchmark.AggregateScore)
             .OrderBy(score => score)
@@ -450,7 +620,9 @@ public sealed class EssenceBuildOptimizer(
             scores[^1],
             Round(Percentile(scores, 0.5)),
             scores[0],
-            Round(MeanPairwiseSimilarity(population)));
+            Round(MeanPairwiseSimilarity(population)),
+            coordinatedMutationBirths,
+            explorerContinuationBirths);
     }
 
     private static double MeanPairwiseSimilarity(IReadOnlyList<Candidate> population)
@@ -542,4 +714,9 @@ public sealed class EssenceBuildOptimizer(
         IReadOnlyList<EssenceOptimizerEvaluatedCandidate> EvaluatedCandidates);
 
     private sealed record DiverseSelection(Candidate Candidate, double AdjustedFitness);
+    private sealed record MutationBatch(
+        IReadOnlyList<EssenceBuildSnapshot> Builds,
+        int CoordinatedMutationBirths,
+        int ExplorerContinuationBirths,
+        IReadOnlySet<string> ExplorerBuildIds);
 }

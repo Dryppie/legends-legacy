@@ -10,7 +10,7 @@ namespace EssenceSystem.Tests;
 public sealed class BalanceRunnerTests
 {
     [Fact]
-    public void Production_smoke_simulation_is_repeatable_for_the_same_seed()
+    public void Production_smoke_and_bridge_audit_are_deterministic_and_audit_isolated()
     {
         var timeProvider = new FixedTimeProvider(new DateTimeOffset(2026, 8, 27, 12, 0, 0, TimeSpan.Zero));
         var runner = ProductionBalanceComposition.Create(FindApiContentRoot(), timeProvider);
@@ -23,8 +23,9 @@ public sealed class BalanceRunnerTests
             WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
-            EliteCertificationOptions: CreateTestEliteCertificationOptions(),
+            EliteCertificationOptions: CreateTestEliteCertificationOptions(searchOnly: true),
             ScalingValidationOptions: CreateTestScalingValidationOptions()));
+        var bridgeOptions = CreateTestEliteCertificationOptions(searchOnly: true) with { BridgeAuditEnabled = true };
         var replay = runner.Run(new BalanceRunRequest(
             8471,
             "test-commit",
@@ -33,7 +34,17 @@ public sealed class BalanceRunnerTests
             WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
-            EliteCertificationOptions: CreateTestEliteCertificationOptions(),
+            EliteCertificationOptions: bridgeOptions,
+            ScalingValidationOptions: CreateTestScalingValidationOptions()));
+        var bridgeReplay = runner.Run(new BalanceRunRequest(
+            8471,
+            "test-commit",
+            EssenceBuildsPerProfile: 3,
+            OptimizerOptions: CreateTestOptimizerOptions(),
+            WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
+            EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
+            EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: bridgeOptions,
             ScalingValidationOptions: CreateTestScalingValidationOptions()));
 
         Assert.Equal(first.Metadata.Seed, replay.Metadata.Seed);
@@ -51,7 +62,51 @@ public sealed class BalanceRunnerTests
         Assert.Equivalent(first.WorldTowerAnalysis, replay.WorldTowerAnalysis, strict: true);
         Assert.Equivalent(first.EncounterCalibration, replay.EncounterCalibration, strict: true);
         Assert.Equivalent(first.EncounterSpecificOptimization, replay.EncounterSpecificOptimization, strict: true);
-        Assert.Equivalent(first.EliteBuildCertification, replay.EliteBuildCertification, strict: true);
+        var certificationWithoutAudit = replay.EliteBuildCertification with
+        {
+            Options = replay.EliteBuildCertification.Options with { BridgeAuditEnabled = false },
+            TotalBridgeNodesEvaluated = 0,
+            BridgeAudits = []
+        };
+        Assert.Equivalent(first.EliteBuildCertification, certificationWithoutAudit, strict: true);
+        Assert.Equivalent(replay.EliteBuildCertification, bridgeReplay.EliteBuildCertification, strict: true);
+        Assert.True(replay.EliteBuildCertification.Options.BridgeAuditEnabled);
+        Assert.NotEqual(EliteCertificationVerdict.CertifiedElite, replay.EliteBuildCertification.Verdict);
+        Assert.All(replay.EliteBuildCertification.Profiles, profile =>
+            Assert.False(profile.CuratedComparison.RequirementSatisfied));
+        Assert.Equal(
+            replay.EliteBuildCertification.BridgeAudits!.Sum(audit => audit.LegalBridgeNodesEvaluated),
+            replay.EliteBuildCertification.TotalBridgeNodesEvaluated);
+        Assert.All(replay.EliteBuildCertification.BridgeAudits!, audit =>
+        {
+            Assert.Equal(audit.SubstitutionDistance + 1, audit.BestMaximinPath.Count);
+            Assert.Equal(audit.SourceBuildId, audit.BestMaximinPath[0].BuildId);
+            Assert.Equal(audit.TargetBuildId, audit.BestMaximinPath[^1].BuildId);
+            Assert.Equal(audit.PathMinimumScore, audit.BestMaximinPath.Min(node => node.Score));
+            Assert.True(audit.LegalBridgeNodesEvaluated >= audit.BestMaximinPath.Count);
+        });
+        Assert.True(first.EliteBuildCertification.Options.SearchOnly);
+        Assert.Empty(first.EliteBuildCertification.Floors);
+        Assert.Equal(0, first.EliteBuildCertification.TotalPartyGenomesEvaluated);
+        Assert.NotEqual(EliteCertificationVerdict.CertifiedElite, first.EliteBuildCertification.Verdict);
+        Assert.Contains(first.EliteBuildCertification.Warnings, warning =>
+            warning.Contains("Search-only mode", StringComparison.Ordinal));
+        Assert.All(first.EliteBuildCertification.Profiles.SelectMany(profile => profile.Restarts), restart =>
+        {
+            Assert.Equal(1, restart.ValleyBeamDepthReached);
+            Assert.Equal(1, restart.ValleyBeamCandidatesEvaluated);
+            Assert.False(restart.ValleyBeamBudgetExhausted);
+            Assert.True(restart.ValleyBeamCandidatesGenerated > restart.ValleyBeamCandidatesEvaluated);
+            Assert.True(restart.ValleyBeamCandidatesRejectedByPrefilter > 0);
+            Assert.True(restart.CoordinatedMutationCandidatesEvaluated > 0);
+            Assert.NotNull(restart.RawBestBuildId);
+            Assert.NotNull(restart.BestBuildId);
+            Assert.NotEmpty(restart.RawBestEssenceIds!);
+            Assert.NotEmpty(restart.BestEssenceIds!);
+        });
+        Assert.True(first.EliteBuildCertification.Profiles
+            .SelectMany(profile => profile.Restarts)
+            .Sum(restart => restart.ExplorerContinuationCandidatesEvaluated) > 0);
         Assert.Equivalent(first.ScalingValidation, replay.ScalingValidation, strict: true);
         Assert.NotEqual(first.Metadata.RunId, replay.Metadata.RunId);
         Assert.True(first.Content.AbilityCount > 0);
@@ -178,6 +233,9 @@ public sealed class BalanceRunnerTests
             profile => AssertOptimizerProfile(profile, "E4_OPTIMIZER", 4),
             profile => AssertOptimizerProfile(profile, "E5_OPTIMIZER", 5),
             profile => AssertOptimizerProfile(profile, "E6_OPTIMIZER", 6));
+        Assert.Equal(6, report.Optimizer.AlgorithmVersion);
+        Assert.All(report.Optimizer.Profiles, profile =>
+            Assert.True(profile.Generations.Sum(generation => generation.CoordinatedMutationBirths) > 0));
         Assert.Equal(9, report.RepresentativeBuilds.Profiles.Count);
         Assert.Collection(
             report.RepresentativeBuilds.Profiles,
@@ -269,7 +327,7 @@ public sealed class BalanceRunnerTests
                 floor.GenericClearRate);
         });
         Assert.False(report.EliteBuildCertification.ProductionContentModified);
-        Assert.Equal(3, report.EliteBuildCertification.AlgorithmVersion);
+        Assert.Equal(14, report.EliteBuildCertification.AlgorithmVersion);
         Assert.NotEqual(EliteCertificationVerdict.CertifiedElite, report.EliteBuildCertification.Verdict);
         Assert.Equal(3, report.EliteBuildCertification.Profiles.Count);
         Assert.Equal(Enumerable.Range(1, 10), report.EliteBuildCertification.Floors.Select(floor => floor.Floor));
@@ -281,7 +339,26 @@ public sealed class BalanceRunnerTests
             {
                 Assert.InRange(restart.GenerationsExecuted, 1, 1);
                 Assert.True(restart.RawBestScore <= restart.BestScore);
-                Assert.InRange(restart.LocalRefinementPasses, 0, 1);
+                Assert.InRange(restart.LocalRefinementPasses, 0, 2);
+                Assert.Equal(2, restart.RefinementSeedsEvaluated);
+                Assert.Equal(
+                    restart.LocalCandidatesEvaluated,
+                    restart.OneSwapCandidatesEvaluated + restart.TwoSwapCandidatesEvaluated);
+                Assert.InRange(restart.TwoSwapCandidatesEvaluated, 0, 1);
+                Assert.NotNull(restart.RawBestBuildId);
+                Assert.NotNull(restart.BestBuildId);
+                Assert.Equal(profile.SlotCount, restart.RawBestEssenceIds!.Count);
+                Assert.Equal(profile.SlotCount, restart.BestEssenceIds!.Count);
+                Assert.InRange(restart.DistanceFromStrongestRestart, 0, profile.SlotCount);
+                Assert.Equal(0, restart.ValleyBeamDepthReached);
+                Assert.Equal(0, restart.ValleyBeamCandidatesEvaluated);
+                Assert.False(restart.ValleyBeamBudgetExhausted);
+                Assert.Equal(0, restart.ValleyBeamCandidatesGenerated);
+                Assert.Equal(0, restart.ValleyBeamCandidatesRejectedByPrefilter);
+                Assert.Equal(1, restart.StratifiedPortfolioCandidatesEvaluated);
+                Assert.NotNull(restart.BaselineBestBuildId);
+                Assert.Equal(profile.SlotCount, restart.BaselineBestEssenceIds!.Count);
+                Assert.True(restart.BestScore >= restart.BaselineBestScore);
             });
             Assert.True(profile.P95TargetScore <= profile.P99TargetScore);
             Assert.True(profile.P99TargetScore <= profile.BestScore);
@@ -1025,15 +1102,24 @@ public sealed class BalanceRunnerTests
     {
         var options = BalanceCommandOptions.Parse([
             "--certification-profile", "release",
+            "--elite-search-only",
             "--elite-restarts", "6",
             "--elite-population", "100",
             "--elite-generations", "20",
             "--elite-max-generations", "40",
             "--elite-elites", "10",
+            "--elite-crossover", "0.4",
+            "--elite-valley-beam-width", "16",
+            "--elite-valley-beam-depth", "3",
+            "--elite-valley-budget", "5000",
+            "--elite-valley-prefilter", "256",
+            "--elite-bridge-audit",
             "--elite-finalists", "8",
             "--elite-local-swap-depth", "2",
             "--elite-two-swap-limit", "0",
             "--elite-restart-refinement", "9",
+            "--elite-restart-seeds", "7",
+            "--elite-restart-two-swap-limit", "750",
             "--elite-finalist-refinement", "4",
             "--elite-holdout-seeds", "10",
             "--elite-simulations", "160",
@@ -1042,16 +1128,28 @@ public sealed class BalanceRunnerTests
         ]);
 
         Assert.Equal(EliteCertificationProfile.Release, options.EliteCertificationOptions.Profile);
+        Assert.True(options.EliteCertificationOptions.SearchOnly);
         Assert.Equal(6, options.EliteCertificationOptions.RestartCount);
         Assert.Equal(100, options.EliteCertificationOptions.PopulationSize);
         Assert.Equal(20, options.EliteCertificationOptions.Generations);
         Assert.Equal(40, options.EliteCertificationOptions.MaximumGenerations);
         Assert.Equal(10, options.EliteCertificationOptions.EliteCount);
+        Assert.Equal(0.4, options.EliteCertificationOptions.CrossoverRate);
+        Assert.Equal(0, options.EliteCertificationOptions.CoordinatedMutationRate);
+        Assert.Equal(0, options.EliteCertificationOptions.ExplorerArchiveSize);
+        Assert.Equal(16, options.EliteCertificationOptions.RestartValleyBeamWidth);
+        Assert.Equal(3, options.EliteCertificationOptions.RestartValleyBeamDepth);
+        Assert.Equal(5_000, options.EliteCertificationOptions.RestartValleyCandidateBudget);
+        Assert.Equal(256, options.EliteCertificationOptions.RestartValleyPrefilterLimitPerDepth);
+        Assert.True(options.EliteCertificationOptions.BridgeAuditEnabled);
+        Assert.Contains("--elite-bridge-audit", BalanceCommandOptions.Usage, StringComparison.Ordinal);
         Assert.Equal(8, options.EliteCertificationOptions.FinalistsPerSlotProfile);
         Assert.Equal(10, options.EliteCertificationOptions.HoldoutSeeds);
         Assert.Equal(160, options.EliteCertificationOptions.SimulationsPerSeed);
         Assert.Equal(5_000, options.EliteCertificationOptions.PartyGenomeBudgetPerFloor);
         Assert.Equal(9, options.EliteCertificationOptions.RestartLocalRefinementPassLimit);
+        Assert.Equal(7, options.EliteCertificationOptions.RestartRefinementSeedCount);
+        Assert.Equal(750, options.EliteCertificationOptions.RestartTwoSwapChallengerLimitPerPass);
         Assert.Equal(4, options.EliteCertificationOptions.FinalistRefinementRoundLimit);
         Assert.Equal("fixtures.json", options.EliteCertificationOptions.TopPlayerBuildsPath);
     }
@@ -1066,12 +1164,114 @@ public sealed class BalanceRunnerTests
     }
 
     [Fact]
+    public void Command_options_keep_experimental_elite_search_features_disabled_by_default()
+    {
+        var options = BalanceCommandOptions.Parse([]).EliteCertificationOptions;
+
+        Assert.False(options.SearchOnly);
+        Assert.Equal(0, options.CrossoverRate);
+        Assert.Equal(0, options.CoordinatedMutationRate);
+        Assert.Equal(0, options.ExplorerArchiveSize);
+        Assert.Equal(0, options.StratifiedPortfolioCandidatesPerProfile);
+        Assert.Equal(0, options.RestartValleyBeamWidth);
+        Assert.Equal(0, options.RestartValleyBeamDepth);
+        Assert.Equal(0, options.RestartValleyCandidateBudget);
+        Assert.Equal(0, options.RestartValleyPrefilterLimitPerDepth);
+        Assert.False(options.BridgeAuditEnabled);
+        Assert.Equal(64, options.PopulationSize);
+        Assert.Equal(12, options.Generations);
+        Assert.Equal(24, options.MaximumGenerations);
+        Assert.Equal(8, options.EliteCount);
+    }
+
+    [Fact]
     public void Command_options_raise_implicit_elite_generation_ceiling_with_the_minimum()
     {
         var options = BalanceCommandOptions.Parse(["--elite-generations", "30"]);
 
         Assert.Equal(30, options.EliteCertificationOptions.Generations);
         Assert.Equal(30, options.EliteCertificationOptions.MaximumGenerations);
+    }
+
+    [Fact]
+    public void Command_options_configure_opt_in_elite_basin_jumps()
+    {
+        var options = BalanceCommandOptions.Parse([
+            "--elite-basin-jump", "0.2",
+            "--elite-explorer-archive", "12"
+        ]);
+
+        Assert.Equal(0.2, options.EliteCertificationOptions.CoordinatedMutationRate);
+        Assert.Equal(12, options.EliteCertificationOptions.ExplorerArchiveSize);
+        Assert.Contains("--elite-basin-jump", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+        Assert.Contains("--elite-explorer-archive", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_configure_opt_in_stratified_portfolio()
+    {
+        var options = BalanceCommandOptions.Parse(["--elite-stratified-portfolio", "256"]);
+
+        Assert.Equal(256, options.EliteCertificationOptions.StratifiedPortfolioCandidatesPerProfile);
+        Assert.Contains("--elite-stratified-portfolio", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_combining_stratified_portfolio_with_search_stream_experiments()
+    {
+        var basinException = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-stratified-portfolio", "256",
+            "--elite-basin-jump", "0.2"
+        ]));
+        var valleyException = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-stratified-portfolio", "256",
+            "--elite-valley-beam-width", "16",
+            "--elite-valley-beam-depth", "3",
+            "--elite-valley-budget", "5000"
+        ]));
+
+        Assert.Contains("baseline stream stays comparable", basinException.Message, StringComparison.Ordinal);
+        Assert.Contains("separate experiments", valleyException.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_combining_crossover_and_basin_jumps()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-crossover", "0.35",
+            "--elite-basin-jump", "0.2"
+        ]));
+
+        Assert.Contains("separate experiments", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_explorer_archive_without_basin_jumps()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--elite-explorer-archive", "12"]));
+
+        Assert.Contains("requires a positive coordinated mutation rate", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_partial_elite_valley_search_configuration()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-valley-beam-width", "16",
+            "--elite-valley-beam-depth", "3"
+        ]));
+
+        Assert.Contains("valley search requires", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Command_options_reject_elite_valley_prefilter_without_valley_search()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--elite-valley-prefilter", "256"]));
+
+        Assert.Contains("prefiltering requires valley search", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -2071,26 +2271,38 @@ public sealed class BalanceRunnerTests
             MutationRate: 0.25,
             RandomInjectionRate: 0.17,
             DiversityPenalty: 8,
-            RetainedCandidates: 3);
+            RetainedCandidates: 3,
+            CoordinatedMutationRate: 1);
 
     private static EncounterSpecificOptimizationOptions CreateTestEncounterOptimizerOptions() =>
         new(CandidateSimulations: 1, RetainedBuilds: 2);
 
-    private static EliteCertificationOptions CreateTestEliteCertificationOptions() =>
+    private static EliteCertificationOptions CreateTestEliteCertificationOptions(bool searchOnly = false) =>
         new(
             RestartCount: 2,
             PopulationSize: 4,
-            Generations: 1,
-            EliteCount: 1,
+            Generations: searchOnly ? 2 : 1,
+            EliteCount: 2,
             FinalistsPerSlotProfile: 1,
             LocalSwapDepth: 1,
             TwoSwapChallengerLimitPerFinalist: 0,
             HoldoutSeeds: 2,
             SimulationsPerSeed: 1,
             PartyGenomeBudgetPerFloor: 1,
-            MaximumGenerations: 1,
+            MaximumGenerations: searchOnly ? 2 : 1,
             RestartLocalRefinementPassLimit: 1,
-            FinalistRefinementRoundLimit: 0);
+            FinalistRefinementRoundLimit: 0,
+            RestartTwoSwapChallengerLimitPerPass: 1,
+            RestartRefinementSeedCount: 1,
+            SearchOnly: searchOnly,
+            CrossoverRate: 0,
+            RestartValleyBeamWidth: searchOnly ? 1 : 0,
+            RestartValleyBeamDepth: searchOnly ? 1 : 0,
+            RestartValleyCandidateBudget: searchOnly ? 1 : 0,
+            RestartValleyPrefilterLimitPerDepth: searchOnly ? 1 : 0,
+            CoordinatedMutationRate: searchOnly ? 1 : 0,
+            ExplorerArchiveSize: searchOnly ? 2 : 0,
+            StratifiedPortfolioCandidatesPerProfile: searchOnly ? 0 : 1);
 
     private static ScalingValidationOptions CreateTestScalingValidationOptions() =>
         new(HoldoutSeeds: 2, SimulationsPerSeed: 1, ProbeSimulationsPerSeed: 1);

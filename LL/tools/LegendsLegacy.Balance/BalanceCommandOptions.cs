@@ -44,15 +44,27 @@ public sealed record BalanceCommandOptions(
           --encounter-candidate-simulations <number>  Trials per specialized candidate (default: 3).
           --encounter-retained <number>      Specialized builds retained per floor (default: 5).
           --certification-profile <value>    developer (default) or release.
+          --elite-search-only                Skip holdouts and party search; never certifies.
           --elite-restarts <number>          Independent certification restarts.
           --elite-population <number>        Candidates per restart and E4/E5/E6 profile.
           --elite-generations <number>       Search generations per certification restart.
           --elite-max-generations <number>   Hard ceiling for adaptive certification generations.
           --elite-elites <number>            Elites retained per certification generation.
+          --elite-crossover <number>         Experimental elite-parent crossover rate, 0.00-1.00 (default: 0).
+          --elite-basin-jump <number>        Restart-local coordinated 3/4-gene mutation rate, 0.00-1.00 (default: 0).
+          --elite-explorer-archive <number>  Persistent restart-local explorer candidates, 0-100 (default: 0).
+          --elite-stratified-portfolio <number>  Isolated deterministic candidates per restart/profile, 0-5000 (default: 0).
+          --elite-valley-beam-width <number> Opt-in restart valley-search beam width; 0 disables.
+          --elite-valley-beam-depth <number> Opt-in restart valley-search depth; 0 disables.
+          --elite-valley-budget <number>     Candidate budget per restart/profile; 0 disables.
+          --elite-valley-prefilter <number> Fully benchmark at most this many valley candidates per depth; 0 disables.
+          --elite-bridge-audit              Audit minimum-substitution bridges between differing restart winners.
           --elite-finalists <number>         Pareto-diverse finalists per slot profile.
           --elite-local-swap-depth <1|2>     Local-neighborhood challenge depth.
           --elite-two-swap-limit <number>    Two-swap challengers per finalist; 0 means complete.
-          --elite-restart-refinement <number>  One-swap refinement passes per restart winner.
+          --elite-restart-refinement <number>  Local refinement passes per restart beam seed.
+          --elite-restart-seeds <number>     Pareto-diverse refinement seeds per restart.
+          --elite-restart-two-swap-limit <number>  Two-swap escape candidates per stalled restart pass; 0 disables.
           --elite-finalist-refinement <number> Neighborhood absorption rounds before final challenge.
           --elite-holdout-seeds <number>     Independent elite holdout seeds.
           --elite-simulations <number>       Elite holdout simulations per seed.
@@ -89,15 +101,27 @@ public sealed record BalanceCommandOptions(
         var certificationProfile = ReadCertificationProfile(args);
         var eliteDefaults = EliteCertificationOptions.ForProfile(certificationProfile);
         var eliteRestarts = eliteDefaults.RestartCount;
+        var eliteSearchOnly = false;
         var elitePopulation = eliteDefaults.PopulationSize;
         var eliteGenerations = eliteDefaults.Generations;
         var eliteMaximumGenerations = eliteDefaults.MaximumGenerations;
         var eliteMaximumGenerationsSpecified = false;
         var eliteElites = eliteDefaults.EliteCount;
+        var eliteCrossover = eliteDefaults.CrossoverRate;
+        var eliteBasinJump = eliteDefaults.CoordinatedMutationRate;
+        var eliteExplorerArchive = eliteDefaults.ExplorerArchiveSize;
+        var eliteStratifiedPortfolio = eliteDefaults.StratifiedPortfolioCandidatesPerProfile;
+        var eliteValleyBeamWidth = eliteDefaults.RestartValleyBeamWidth;
+        var eliteValleyBeamDepth = eliteDefaults.RestartValleyBeamDepth;
+        var eliteValleyBudget = eliteDefaults.RestartValleyCandidateBudget;
+        var eliteValleyPrefilter = eliteDefaults.RestartValleyPrefilterLimitPerDepth;
+        var eliteBridgeAudit = eliteDefaults.BridgeAuditEnabled;
         var eliteFinalists = eliteDefaults.FinalistsPerSlotProfile;
         var eliteLocalSwapDepth = eliteDefaults.LocalSwapDepth;
         var eliteTwoSwapLimit = eliteDefaults.TwoSwapChallengerLimitPerFinalist;
         var eliteRestartRefinement = eliteDefaults.RestartLocalRefinementPassLimit;
+        var eliteRestartSeeds = eliteDefaults.RestartRefinementSeedCount;
+        var eliteRestartTwoSwapLimit = eliteDefaults.RestartTwoSwapChallengerLimitPerPass;
         var eliteFinalistRefinement = eliteDefaults.FinalistRefinementRoundLimit;
         var eliteHoldoutSeeds = eliteDefaults.HoldoutSeeds;
         var eliteSimulations = eliteDefaults.SimulationsPerSeed;
@@ -173,6 +197,9 @@ public sealed record BalanceCommandOptions(
                 case "--certification-profile":
                     _ = ParseCertificationProfile(ReadValue(args, ref index, argument));
                     break;
+                case "--elite-search-only":
+                    eliteSearchOnly = true;
+                    break;
                 case "--elite-restarts":
                     eliteRestarts = ReadInt(args, ref index, argument, 2, 32);
                     break;
@@ -189,6 +216,33 @@ public sealed record BalanceCommandOptions(
                 case "--elite-elites":
                     eliteElites = ReadInt(args, ref index, argument, 1, 499);
                     break;
+                case "--elite-crossover":
+                    eliteCrossover = ReadDouble(args, ref index, argument, 0, 1);
+                    break;
+                case "--elite-basin-jump":
+                    eliteBasinJump = ReadDouble(args, ref index, argument, 0, 1);
+                    break;
+                case "--elite-explorer-archive":
+                    eliteExplorerArchive = ReadInt(args, ref index, argument, 0, 100);
+                    break;
+                case "--elite-stratified-portfolio":
+                    eliteStratifiedPortfolio = ReadInt(args, ref index, argument, 0, 5_000);
+                    break;
+                case "--elite-valley-beam-width":
+                    eliteValleyBeamWidth = ReadInt(args, ref index, argument, 0, 100);
+                    break;
+                case "--elite-valley-beam-depth":
+                    eliteValleyBeamDepth = ReadInt(args, ref index, argument, 0, 6);
+                    break;
+                case "--elite-valley-budget":
+                    eliteValleyBudget = ReadInt(args, ref index, argument, 0, 1_000_000);
+                    break;
+                case "--elite-valley-prefilter":
+                    eliteValleyPrefilter = ReadInt(args, ref index, argument, 0, 10_000);
+                    break;
+                case "--elite-bridge-audit":
+                    eliteBridgeAudit = true;
+                    break;
                 case "--elite-finalists":
                     eliteFinalists = ReadInt(args, ref index, argument, 1, 50);
                     break;
@@ -200,6 +254,12 @@ public sealed record BalanceCommandOptions(
                     break;
                 case "--elite-restart-refinement":
                     eliteRestartRefinement = ReadInt(args, ref index, argument, 1, 50);
+                    break;
+                case "--elite-restart-seeds":
+                    eliteRestartSeeds = ReadInt(args, ref index, argument, 1, 50);
+                    break;
+                case "--elite-restart-two-swap-limit":
+                    eliteRestartTwoSwapLimit = ReadInt(args, ref index, argument, 0, 1_000_000);
                     break;
                 case "--elite-finalist-refinement":
                     eliteFinalistRefinement = ReadInt(args, ref index, argument, 0, 20);
@@ -311,7 +371,19 @@ public sealed record BalanceCommandOptions(
             topPlayerBuildsPath,
             eliteMaximumGenerations,
             eliteRestartRefinement,
-            eliteFinalistRefinement);
+            eliteFinalistRefinement,
+            eliteRestartTwoSwapLimit,
+            eliteRestartSeeds,
+            eliteSearchOnly,
+            eliteCrossover,
+            eliteValleyBeamWidth,
+            eliteValleyBeamDepth,
+            eliteValleyBudget,
+            eliteValleyPrefilter,
+            eliteBridgeAudit,
+            eliteBasinJump,
+            eliteExplorerArchive,
+            eliteStratifiedPortfolio);
         try
         {
             eliteCertification.Validate();
