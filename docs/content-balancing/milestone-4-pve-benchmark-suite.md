@@ -47,17 +47,17 @@ The aggregate Benchmark Performance Score is the equal-weight arithmetic mean of
 
 ## Ranking Boundary
 
-Milestone 4 may order the sampled builds by measured aggregate performance, but it does not alter candidate generation. This preserves the random baseline required for percentile analysis.
+Milestone 4 orders sampled builds by measured aggregate performance, but it does not alter candidate generation. This preserves the random baseline required for Combat Rating analysis and later optimizer seeding.
 
 The existing Admin Essence Simulator remains a complementary signal:
 
 - it measures Essence and team performance in its 1v1/3v3 comparison model;
 - the PvE suite measures complete builds against synthetic encounter demands;
-- Milestone 6 may use both signals to seed and evolve candidates while retaining random injection and diversity pressure.
+- Milestone 6 currently optimizes complete builds from the PvE signal while retaining random injection and diversity pressure; Admin Essence Simulator evidence remains complementary input for the later meta-analysis milestone.
 
 ## Report Contract
 
-Every balance run includes benchmark results in `summary.json`, summarizes profile ranges and leading sampled builds in `summary.md`, and writes full results to `benchmarks.json` under both `latest` and the immutable history directory. The balance schema version is 4.
+Every balance run includes benchmark results in `summary.json`, summarizes profile ranges and leading sampled builds in `summary.md`, and writes full results to `benchmarks.json` under both `latest` and the immutable history directory. This contract was introduced with balance schema version 4; the current combined pipeline uses schema version 14.
 
 Each build result records its profile, aggregate score, scenario component scores, deterministic seeds, and raw combat measurements.
 
@@ -75,7 +75,7 @@ Milestone 5 consumes each build's displayed/raw CR and aggregate benchmark score
 
 ## Verification Boundary
 
-Automated coverage must verify:
+Automated coverage verifies:
 
 - all five scenarios execute for every generated build;
 - repeated runs with identical inputs produce identical benchmark results;

@@ -23,7 +23,7 @@ Each package contains the seven canonical combat equipment slots. Offensive and 
 - production attribute projection;
 - the current Combat Rating calculation and display conversion.
 
-Gear Packages contain no Essences. This keeps equipment power separate from Essence profile and representative-build power, which will be introduced in later milestones.
+Gear Packages contain no Essences. This keeps equipment power separate from Essence profile and representative-build power; Milestone 8 combines those independent inputs when measuring power anchors.
 
 ## Report Contract
 
@@ -50,4 +50,4 @@ Automated coverage verifies:
 - a higher raw Combat Rating for the Epic end package than the Rare start package;
 - JSON and Markdown report integration, including immutable historical package output.
 
-This milestone does not define the final World Tower power curve. Milestone 3 adds legal 4-slot and 6-slot Essence builds to represent the intended player progression states at these anchors, plus a 5-slot intermediate sampling profile.
+This milestone does not define the World Tower power curve by itself. Milestone 3 supplies legal 4-slot and 6-slot Essence builds for these anchors plus a 5-slot intermediate sample; Milestones 8 and 9 now measure and interpolate the complete Region 1 band.

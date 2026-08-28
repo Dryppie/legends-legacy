@@ -71,9 +71,9 @@ This classification is a diagnostic signal, not an automatic approval gate. A we
 
 ## Report Contract
 
-Every balance run will include CR-health results in `summary.json`, summarize the classification and principal metrics in `summary.md`, and write the complete analysis to `combat-rating.json` under both `latest` and the immutable history directory.
+Every balance run includes CR-health results in `summary.json`, summarizes the classification and principal metrics in `summary.md`, and writes the complete analysis to `combat-rating.json` under both `latest` and the immutable history directory. This contract was introduced with balance schema version 5; the current combined pipeline uses schema version 14.
 
-The report will include:
+The report includes:
 
 - overall health and model statistics;
 - occupied CR-band distributions;
@@ -81,9 +81,38 @@ The report will include:
 - high- and low-performing CR outliers;
 - explicit explanatory warnings when sample size or CR diversity limits interpretation.
 
+## Initial Measured Result
+
+With production content current when this milestone was implemented, seed `8471`, and the default ten builds per E4/E5/E6 profile, the result was:
+
+| Metric | Value |
+| --- | ---: |
+| Classification | **Poor** |
+| Observations | 30 |
+| Distinct displayed CR values | 3 |
+| Spearman correlation | 0.3962 |
+| R² | 0.1298 |
+| Mean absolute error | 4.17 score points |
+| Root mean square error | 5.16 score points |
+| Mean P10–P90 band spread | 11.72 score points |
+
+The occupied bands measured:
+
+| Display CR band | Median | P10 | P90 | Spread |
+| --- | ---: | ---: | ---: | ---: |
+| 180–189 | 59.68 | 56.40 | 66.58 | 10.18 |
+| 190–199 | 65.35 | 59.67 | 67.40 | 7.73 |
+| 210–219 | 66.64 | 56.51 | 73.76 | 17.25 |
+
+`E6_RANDOM_008` was identified as a low-performing CR outlier: observed performance 52.72 versus 66.37 predicted at displayed CR 213, a residual of −13.65 points (−20.57%).
+
+This is a measured diagnostic rather than an acceptance constant. The poor classification is credible given that CR currently does not price Essence ability performance, and only three distinct CR values make the global correlation provisional.
+
+Milestone 6 uses the aggregate benchmark score as optimizer fitness while leaving this random-population CR-health result intact as the unbiased baseline.
+
 ## Verification Boundary
 
-Automated coverage must verify:
+Automated coverage verifies:
 
 - deterministic statistics for identical benchmark input;
 - tied-rank correlation behavior;

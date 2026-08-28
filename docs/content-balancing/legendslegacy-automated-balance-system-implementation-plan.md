@@ -445,6 +445,11 @@ BalanceRunner
 ├── ExploitAnalyzer
 │   └── encounter-specific optimization
 │
+├── ScalingValidationAnalyzer
+│   ├── holdout-seed confidence analysis
+│   ├── monotonicity and sensitivity probes
+│   └── percentile-order validation
+│
 └── BalanceReportGenerator
     ├── Markdown
     ├── JSON
@@ -483,22 +488,21 @@ Avoid copying production balance logic into the balance tool.
 
 ---
 
-## 4.1 Suggested Commands
+## 4.1 Command Boundary
 
-Support commands such as:
+The repository-level one-action entry point runs every currently completed milestone:
 
-```bash
-balance --full
-balance --essences
-balance --builds
-balance --benchmarks
-balance --combat-rating
-balance --content
-balance --content WorldTower
-balance --encounter WorldTowerFloor11
+```powershell
+.\build\run-balance.ps1
 ```
 
-A single full command should eventually execute the entire pipeline.
+It delegates to:
+
+```powershell
+dotnet run --project LL/tools/LegendsLegacy.Balance -- --full
+```
+
+Milestones 1–13 and the Region 1 scaling-validation gate always execute in this single flow; no completed stage requires a second command or manual data transfer. Seed, optimizer search size, representative count, progression curve, World Tower simulation count, calibration iteration count, encounter-candidate trial count, specialized-team size, holdout validation sample sizes, Essence meta simulator sample size, content root, and output root are configurable options. Later encounter/content filters should narrow the same pipeline rather than create competing runners.
 
 ---
 
@@ -512,17 +516,24 @@ Use a directory such as:
     history/
 ```
 
-Each run should include:
+The current schema-version-14 run includes:
 
 ```text
 summary.md
 summary.json
-essences.json
-representative-builds.json
-power-anchors.json
+gear-packages.json
+essence-builds.json
+benchmarks.json
 combat-rating.json
-content.json
-warnings.json
+optimizer.json
+representative-builds.json
+essence-meta-analysis.json
+power-anchors.json
+progression-bands.json
+world-tower-analysis.json
+encounter-calibration.json
+encounter-specific-optimization.json
+scaling-validation.json
 ```
 
 Each balance run should have a unique ID and metadata.
@@ -1047,12 +1058,12 @@ public sealed record PowerAnchorDefinition
 Example:
 
 ```text
-R1_Start:
-T1 / Common / Fine
+WorldTower.Region1.Start:
+T1 / Rare / Exceptional
 4 Essences / P75
 
-R1_End:
-T1 / Rare / Exceptional
+WorldTower.Region1.End:
+T1 / Epic / Exceptional
 6 Essences / P75
 ```
 
@@ -1538,14 +1549,14 @@ For Floors 1-10:
 ```text
 Start:
 T1
-Common
-Fine
+Rare
+Exceptional
 4 Essences
 P75 Essence profile
 
 End:
 T1
-Rare
+Epic
 Exceptional
 6 Essences
 P75 Essence profile
@@ -1581,6 +1592,8 @@ Initial recommendation:
 HealthMultiplier
 DamageMultiplier
 ```
+
+Milestone 12 implements these as explicit authored and suggested values. Its first safe search uses one bounded difficulty factor applied equally to health and offense, which avoids an underdetermined two-dimensional search while keeping both resulting content values visible for review. Defense, resistance, regeneration, stagger, and authored mechanics are not search variables.
 
 Possible later abstraction:
 
@@ -1633,6 +1646,8 @@ Use binary search or another bounded search strategy.
 Do not automatically apply the result to production data.
 
 Return it as a recommendation requiring developer approval.
+
+The implemented Milestone 12 search uses the range `0.25–2.00`, ten iterations, and the World Tower analysis clear-rate target and trial count. It reuses the same parties and combat seeds for every candidate, records the complete trace, and distinguishes convergence, best effort, and exhausted bounds. The seed-`8471` default run converged on nine of ten floors; Floor 5 remained a clearly labeled best-effort result at an 80% clear-rate cliff. These search results are provisional until the separate [Region 1 Scaling Validation Gate](region-1-scaling-validation.md) accepts them on holdout seeds; the current gate accepts only Floor 8.
 
 ---
 
@@ -1690,6 +1705,8 @@ Median optimized kill time:
 This should produce a critical investigation warning.
 
 It should not redefine the normal recommended CR.
+
+Milestone 13 implements this separation directly. Each floor evaluates the complete matching-slot population already produced by the generic optimizer against the calibrated real Guardian, retains a diverse specialized team, and compares its production-runtime clear rate with the calibrated generic P75 baseline. A hard-counter signal requires at least 80% specialized clear rate and a 25-point advantage. A cheese signal additionally requires at least 90% clear rate, a generic-PvE penalty of at least five score points, and an Essence present in at least 80% of retained builds. Results remain diagnostic and cannot alter representative profiles, anchors, progression bands, recommended CR, or authored content. Encounter-specific findings also do not override the downstream holdout verdict. See [Milestone 13 Encounter-Specific Optimization](milestone-13-encounter-specific-optimization.md) and [Region 1 Scaling Validation Gate](region-1-scaling-validation.md).
 
 ---
 
@@ -2115,7 +2132,7 @@ Aggregate benchmark score
 
 ## Milestone 5 — Combat Rating Validation
 
-**Status: In progress.** The statistical and reporting contract is documented in [Milestone 5 Combat Rating Validation](milestone-5-combat-rating-validation.md).
+**Status: Complete.** See [Milestone 5 Combat Rating Validation](milestone-5-combat-rating-validation.md) for the implemented statistics, CR bands, outlier rules, measured CR-health result, and report contract.
 
 Implement:
 
@@ -2132,6 +2149,8 @@ This should already provide useful insight before sophisticated optimization exi
 ---
 
 ## Milestone 6 — Essence Optimizer
+
+**Status: Complete.** See [Milestone 6 Essence Optimizer](milestone-6-essence-optimizer.md) for the implemented deterministic search, legality rules, configurable defaults, diversity selection, measured improvements, and report contract.
 
 Implement:
 
@@ -2150,6 +2169,8 @@ Optimize Essence selection only.
 
 ## Milestone 7 — Essence Profiles + Representative Builds
 
+**Status: Complete.** See [Milestone 7 Representative Essence Builds](milestone-7-representative-essence-builds.md) for the implemented population boundary, percentile semantics, deterministic diversity selection, measured profiles, configuration, and report contract.
+
 Implement:
 
 ```text
@@ -2165,6 +2186,8 @@ Do not persist the full optimizer search population as long-term benchmark profi
 ---
 
 ## Milestone 8 — Power Anchors
+
+**Status: Complete.** See [Milestone 8 Power Anchors](milestone-8-power-anchors.md) for the implemented Region 1 definitions, benchmark-power statistic, variance and CR measurements, measured endpoints, and report contract.
 
 Implement anchor measurement.
 
@@ -2204,6 +2227,8 @@ Performance variance
 
 ## Milestone 9 — Progression Bands
 
+**Status: Complete.** See [Milestone 9 Progression Bands](milestone-9-progression-bands.md) for the implemented Region 1 band, supported interpolation curves, rounding rules, measured Floor 1–10 targets, and report contract.
+
 Implement:
 
 ```text
@@ -2219,6 +2244,8 @@ Assign target power to each floor without creating explicit builds for each floo
 ---
 
 ## Milestone 10 — World Tower Content Analysis
+
+**Status: Complete.** See [Milestone 10 World Tower Content Analysis](milestone-10-world-tower-content-analysis.md) for the production-content boundary, deterministic party selection, clear-rate and CR derivation rules, measured Region 1 result, warnings, and report contract.
 
 Integrate real World Tower encounters.
 
@@ -2239,6 +2266,8 @@ This is the first major end-to-end proof of the system.
 
 ## Milestone 11 — Essence Meta Analysis
 
+**Status: Complete.** See [Milestone 11 Essence Meta Analysis](milestone-11-essence-meta-analysis.md) for the optimizer-population boundary, percentile semantics, complementary Admin Simulator evidence, pair-synergy model, warning thresholds, and report contract.
+
 Implement:
 
 ```text
@@ -2255,6 +2284,8 @@ Use the existing admin simulator as complementary evidence, not a replacement fo
 
 ## Milestone 12 — Encounter Calibration
 
+**Status: Complete.** See [Milestone 12 Encounter Calibration](milestone-12-encounter-calibration.md) for the controlled health/offense boundary, common-seed binary search, exhausted-bound behavior, measured Region 1 recommendations, safety guarantees, and report contract.
+
 Implement:
 
 ```text
@@ -2270,6 +2301,8 @@ Do not automatically write suggested values back into production content.
 
 ## Milestone 13 — Encounter-Specific Optimization
 
+**Status: Complete.** See [Milestone 13 Encounter-Specific Optimization](milestone-13-encounter-specific-optimization.md) for candidate sourcing, production-runtime evaluation, explicit cheese/hard-counter thresholds, the generic-progression safety boundary, and measured Region 1 findings.
+
 Implement:
 
 ```text
@@ -2277,6 +2310,22 @@ Optimize specifically against a boss
 Compare generic vs encounter-specific builds
 Detect cheese/hard counters
 ```
+
+---
+
+## Region 1 Scaling Validation Gate
+
+**Status: Complete.** See [Region 1 Scaling Validation Gate](region-1-scaling-validation.md) for holdout-seed sampling, 95% confidence acceptance, cross-seed stability limits, scaling sensitivity, generic percentile ordering, measured verdicts, and the pre-expansion approval boundary.
+
+The gate runs after Milestone 13 and does not create another manual command. The seed-`8471` default run validated only Floor 8, marked Floors 2–5 unstable, and required mechanic/build-profile review on Floors 1, 6, 7, 9, and 10. Region 1 therefore must not yet be copied as the scaling template for additional bands.
+
+---
+
+## Elite Build Certification Gate
+
+**Status: Designed, not implemented.** See [Elite Build Certification Gate](elite-build-certification-gate.md) for the measured legal search space, multi-restart convergence requirements, local-neighborhood challenges, P95/P99 separation, joint party optimization, curated top-player fixtures, proposed verdicts, and one-button integration contract.
+
+The current default optimizer evaluates 80 unique builds per slot profile against legal spaces ranging from 1.57 million E4 combinations to 296.23 million E6 combinations. Its P90 profiles are percentiles of that generated sample, not proof of top-player strength. Elite certification must be implemented before Region 1 scaling remediation is accepted or Milestone 14 begins.
 
 ---
 
@@ -2415,7 +2464,7 @@ The balance system constructs:
 START ANCHOR
 
 Gear Package:
-T1_Rare_Exceptional
+T1_Rare_Exceptional_Balanced
 
 Essence Profile:
 E4_P75
@@ -2427,35 +2476,35 @@ and:
 END ANCHOR
 
 Gear Package:
-T1_Epic_Exceptional
+T1_Epic_Exceptional_Balanced
 
 Essence Profile:
 E6_P75
 ```
 
-The benchmark runner measures:
+The seed-`8471` reference run measures:
 
 ```text
-Start Power = 1,000
-End Power   = 2,200
+Start Power = 66.83
+End Power   = 73.35
 ```
 
-The progression model creates:
+The default SmoothStep progression model creates:
 
 ```text
-Floor 1  = 1,000
-Floor 2  = 1,110
-Floor 3  = 1,225
-Floor 4  = 1,350
-Floor 5  = 1,480
-Floor 6  = 1,620
-Floor 7  = 1,770
-Floor 8  = 1,930
-Floor 9  = 2,100
-Floor 10 = 2,200
+Floor 1  = 66.83
+Floor 2  = 67.05
+Floor 3  = 67.65
+Floor 4  = 68.52
+Floor 5  = 69.55
+Floor 6  = 70.63
+Floor 7  = 71.66
+Floor 8  = 72.53
+Floor 9  = 73.13
+Floor 10 = 73.35
 ```
 
-Again, these values are illustrative.
+These values are measured outputs rather than acceptance constants and may change with production content, optimizer settings, representative count, or progression curve.
 
 For each floor, the system then simulates suitable representative characters around that target power.
 
@@ -2680,46 +2729,45 @@ Whether CR still predicts actual character strength
 
 without requiring manually maintained bespoke builds for every floor.
 
-That is the central architectural objective.
+That central Region 1 architectural objective is implemented through Milestone 13, and its scaling now has an automated holdout gate. The reports expose rather than hide that Combat Rating is a poor predictor of measured build performance, authored Floors 1–10 are substantially overtuned for the specified reference progression, encounter-aware build selection creates nine hard-counter signals, and only Floor 8 currently passes the complete scaling-validation policy. Calibration and specialization findings require developer review and are never written automatically.
 
 ---
 
-# 47. Immediate Codex Task
+# 47. Current Implementation Status and Next Task
 
-Begin with **Milestone 0**.
+The P0 cleanup, Milestones 1–13, and the Region 1 scaling-validation gate are complete. A developer can run the entire implemented pipeline from the repository root with one action:
 
-First audit and clean the existing balance/testing infrastructure while preserving the Admin Dashboard Essence Simulator.
-
-Then implement the smallest vertical slice required to prove:
-
-```text
-Gear Package
-+
-Essence Profile
-+
-Representative Builds
-+
-PvE Benchmark Power
-+
-Progression Band
-+
-World Tower Encounter Simulation
-+
-Recommended CR
+```powershell
+.\build\run-balance.ps1
 ```
 
-Do not prematurely implement:
+That invocation automatically performs:
 
 ```text
-Full equipment optimization
-Distributed simulation
-Live telemetry
-Complex dashboards
-Automatic production-data mutation
-Every World Tower region
-Every PvE system
+Production content loading
+Gear and legal Essence build construction
+PvE benchmarking and CR analysis
+Essence optimization and representative selection
+Essence meta analysis
+Power anchors and progression targets
+World Tower simulation
+Bounded encounter calibration
+Encounter-specific optimization and exploit detection
+Multi-seed scaling validation and sensitivity probes
+Schema-14 JSON and Markdown reporting
 ```
 
-Establish the Region 1 Floor 1-Floor 10 pipeline first.
+No completed milestone requires a separate command or manual data transfer. The only manual boundary is approval and application of suggested balance changes.
 
-Once that pipeline is coherent, deterministic, and produces useful results, extend it incrementally.
+Milestone 14 remains the next planned expansion, but it is now explicitly gated. Before beginning it, certify the elite build ceiling and then remediate or approve the Region 1 validation failures:
+
+```text
+Implement and pass the Elite Build Certification Gate
+Recalibrate unstable Floors 2–5 against the certified build population and holdout distribution
+Review encounter/build-profile interactions on Floors 1, 6, 7, 9, and 10
+Stress recommendations against certified P95/P99 and curated top-player parties
+Rerun the unchanged scaling-validation policy
+Begin additional progression bands only after both gates pass or exceptions are explicitly approved
+```
+
+Full equipment optimization, distributed simulation, live telemetry, automatic production-data mutation, and expansion beyond the proven Region 1 band remain outside the current implementation boundary.

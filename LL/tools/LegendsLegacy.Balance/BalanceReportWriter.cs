@@ -25,28 +25,78 @@ public sealed class BalanceReportWriter
         var gearPackagesJson = JsonSerializer.Serialize(report.GearPackages, JsonOptions);
         var essenceBuildsJson = JsonSerializer.Serialize(report.EssenceBuilds, JsonOptions);
         var benchmarksJson = JsonSerializer.Serialize(report.Benchmarks, JsonOptions);
+        var combatRatingJson = JsonSerializer.Serialize(report.CombatRatingHealth, JsonOptions);
+        var optimizerJson = JsonSerializer.Serialize(report.Optimizer, JsonOptions);
+        var representativeBuildsJson = JsonSerializer.Serialize(report.RepresentativeBuilds, JsonOptions);
+        var essenceMetaAnalysisJson = JsonSerializer.Serialize(report.EssenceMetaAnalysis, JsonOptions);
+        var powerAnchorsJson = JsonSerializer.Serialize(report.PowerAnchors, JsonOptions);
+        var progressionBandsJson = JsonSerializer.Serialize(report.ProgressionBands, JsonOptions);
+        var worldTowerAnalysisJson = JsonSerializer.Serialize(report.WorldTowerAnalysis, JsonOptions);
+        var encounterCalibrationJson = JsonSerializer.Serialize(report.EncounterCalibration, JsonOptions);
+        var encounterSpecificOptimizationJson = JsonSerializer.Serialize(report.EncounterSpecificOptimization, JsonOptions);
+        var scalingValidationJson = JsonSerializer.Serialize(report.ScalingValidation, JsonOptions);
         var markdown = RenderMarkdown(report);
         var latestJsonPath = Path.Combine(latestDirectory, "summary.json");
         var latestMarkdownPath = Path.Combine(latestDirectory, "summary.md");
         var latestGearPackagesJsonPath = Path.Combine(latestDirectory, "gear-packages.json");
         var latestEssenceBuildsJsonPath = Path.Combine(latestDirectory, "essence-builds.json");
         var latestBenchmarksJsonPath = Path.Combine(latestDirectory, "benchmarks.json");
+        var latestCombatRatingJsonPath = Path.Combine(latestDirectory, "combat-rating.json");
+        var latestOptimizerJsonPath = Path.Combine(latestDirectory, "optimizer.json");
+        var latestRepresentativeBuildsJsonPath = Path.Combine(latestDirectory, "representative-builds.json");
+        var latestEssenceMetaAnalysisJsonPath = Path.Combine(latestDirectory, "essence-meta-analysis.json");
+        var latestPowerAnchorsJsonPath = Path.Combine(latestDirectory, "power-anchors.json");
+        var latestProgressionBandsJsonPath = Path.Combine(latestDirectory, "progression-bands.json");
+        var latestWorldTowerAnalysisJsonPath = Path.Combine(latestDirectory, "world-tower-analysis.json");
+        var latestEncounterCalibrationJsonPath = Path.Combine(latestDirectory, "encounter-calibration.json");
+        var latestEncounterSpecificOptimizationJsonPath = Path.Combine(latestDirectory, "encounter-specific-optimization.json");
+        var latestScalingValidationJsonPath = Path.Combine(latestDirectory, "scaling-validation.json");
         var historyJsonPath = Path.Combine(historyDirectory, "summary.json");
         var historyMarkdownPath = Path.Combine(historyDirectory, "summary.md");
         var historyGearPackagesJsonPath = Path.Combine(historyDirectory, "gear-packages.json");
         var historyEssenceBuildsJsonPath = Path.Combine(historyDirectory, "essence-builds.json");
         var historyBenchmarksJsonPath = Path.Combine(historyDirectory, "benchmarks.json");
+        var historyCombatRatingJsonPath = Path.Combine(historyDirectory, "combat-rating.json");
+        var historyOptimizerJsonPath = Path.Combine(historyDirectory, "optimizer.json");
+        var historyRepresentativeBuildsJsonPath = Path.Combine(historyDirectory, "representative-builds.json");
+        var historyEssenceMetaAnalysisJsonPath = Path.Combine(historyDirectory, "essence-meta-analysis.json");
+        var historyPowerAnchorsJsonPath = Path.Combine(historyDirectory, "power-anchors.json");
+        var historyProgressionBandsJsonPath = Path.Combine(historyDirectory, "progression-bands.json");
+        var historyWorldTowerAnalysisJsonPath = Path.Combine(historyDirectory, "world-tower-analysis.json");
+        var historyEncounterCalibrationJsonPath = Path.Combine(historyDirectory, "encounter-calibration.json");
+        var historyEncounterSpecificOptimizationJsonPath = Path.Combine(historyDirectory, "encounter-specific-optimization.json");
+        var historyScalingValidationJsonPath = Path.Combine(historyDirectory, "scaling-validation.json");
 
         WriteUtf8(historyJsonPath, json);
         WriteUtf8(historyMarkdownPath, markdown);
         WriteUtf8(historyGearPackagesJsonPath, gearPackagesJson);
         WriteUtf8(historyEssenceBuildsJsonPath, essenceBuildsJson);
         WriteUtf8(historyBenchmarksJsonPath, benchmarksJson);
+        WriteUtf8(historyCombatRatingJsonPath, combatRatingJson);
+        WriteUtf8(historyOptimizerJsonPath, optimizerJson);
+        WriteUtf8(historyRepresentativeBuildsJsonPath, representativeBuildsJson);
+        WriteUtf8(historyEssenceMetaAnalysisJsonPath, essenceMetaAnalysisJson);
+        WriteUtf8(historyPowerAnchorsJsonPath, powerAnchorsJson);
+        WriteUtf8(historyProgressionBandsJsonPath, progressionBandsJson);
+        WriteUtf8(historyWorldTowerAnalysisJsonPath, worldTowerAnalysisJson);
+        WriteUtf8(historyEncounterCalibrationJsonPath, encounterCalibrationJson);
+        WriteUtf8(historyEncounterSpecificOptimizationJsonPath, encounterSpecificOptimizationJson);
+        WriteUtf8(historyScalingValidationJsonPath, scalingValidationJson);
         WriteUtf8(latestJsonPath, json);
         WriteUtf8(latestMarkdownPath, markdown);
         WriteUtf8(latestGearPackagesJsonPath, gearPackagesJson);
         WriteUtf8(latestEssenceBuildsJsonPath, essenceBuildsJson);
         WriteUtf8(latestBenchmarksJsonPath, benchmarksJson);
+        WriteUtf8(latestCombatRatingJsonPath, combatRatingJson);
+        WriteUtf8(latestOptimizerJsonPath, optimizerJson);
+        WriteUtf8(latestRepresentativeBuildsJsonPath, representativeBuildsJson);
+        WriteUtf8(latestEssenceMetaAnalysisJsonPath, essenceMetaAnalysisJson);
+        WriteUtf8(latestPowerAnchorsJsonPath, powerAnchorsJson);
+        WriteUtf8(latestProgressionBandsJsonPath, progressionBandsJson);
+        WriteUtf8(latestWorldTowerAnalysisJsonPath, worldTowerAnalysisJson);
+        WriteUtf8(latestEncounterCalibrationJsonPath, encounterCalibrationJson);
+        WriteUtf8(latestEncounterSpecificOptimizationJsonPath, encounterSpecificOptimizationJson);
+        WriteUtf8(latestScalingValidationJsonPath, scalingValidationJson);
 
         return new BalanceReportPaths(
             latestJsonPath,
@@ -54,11 +104,31 @@ public sealed class BalanceReportWriter
             latestGearPackagesJsonPath,
             latestEssenceBuildsJsonPath,
             latestBenchmarksJsonPath,
+            latestCombatRatingJsonPath,
+            latestOptimizerJsonPath,
+            latestRepresentativeBuildsJsonPath,
+            latestEssenceMetaAnalysisJsonPath,
+            latestPowerAnchorsJsonPath,
+            latestProgressionBandsJsonPath,
+            latestWorldTowerAnalysisJsonPath,
+            latestEncounterCalibrationJsonPath,
+            latestEncounterSpecificOptimizationJsonPath,
+            latestScalingValidationJsonPath,
             historyJsonPath,
             historyMarkdownPath,
             historyGearPackagesJsonPath,
             historyEssenceBuildsJsonPath,
-            historyBenchmarksJsonPath);
+            historyBenchmarksJsonPath,
+            historyCombatRatingJsonPath,
+            historyOptimizerJsonPath,
+            historyRepresentativeBuildsJsonPath,
+            historyEssenceMetaAnalysisJsonPath,
+            historyPowerAnchorsJsonPath,
+            historyProgressionBandsJsonPath,
+            historyWorldTowerAnalysisJsonPath,
+            historyEncounterCalibrationJsonPath,
+            historyEncounterSpecificOptimizationJsonPath,
+            historyScalingValidationJsonPath);
     }
 
     public static string RenderMarkdown(BalanceRunReport report)
@@ -123,6 +193,223 @@ public sealed class BalanceReportWriter
         var benchmarkComponentDividers = string.Join(
             " | ",
             report.Benchmarks.Scenarios.Select(_ => "---:"));
+        var crHealth = report.CombatRatingHealth;
+        var crBandRows = string.Join(
+            Environment.NewLine,
+            crHealth.Bands.Select(band =>
+                $"| {band.MinimumDisplayCr}-{band.MaximumDisplayCr} " +
+                $"| {band.BuildCount} " +
+                $"| {FormatScore(band.MedianPerformance)} " +
+                $"| {FormatScore(band.P10Performance)} " +
+                $"| {FormatScore(band.P90Performance)} " +
+                $"| {FormatScore(band.PerformanceSpread)} |"));
+        var crOutlierRows = crHealth.Outliers.Count == 0
+            ? "| None | — | — | — | — | — |"
+            : string.Join(
+                Environment.NewLine,
+                crHealth.Outliers.Select(outlier =>
+                    $"| {outlier.Direction} " +
+                    $"| `{outlier.BuildId}` " +
+                    $"| {outlier.DisplayCr} " +
+                    $"| {FormatScore(outlier.ObservedPerformance)} " +
+                    $"| {FormatScore(outlier.PredictedPerformance)} " +
+                    $"| {FormatSignedScore(outlier.Residual)} |"));
+        var crWarnings = crHealth.Warnings.Count == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, crHealth.Warnings.Select(warning => $"- {warning}"));
+        var optimizerRows = string.Join(
+            Environment.NewLine,
+            report.Optimizer.Profiles.Select(profile =>
+            {
+                var finalGeneration = profile.Generations[^1];
+                return $"| `{profile.ProfileId}` " +
+                       $"| {profile.SlotCount} " +
+                       $"| {finalGeneration.PopulationSize} " +
+                       $"| {profile.Generations.Count - 1} " +
+                       $"| {FormatScore(profile.InitialBestScore)} " +
+                       $"| {FormatScore(profile.FinalBestScore)} " +
+                       $"| {FormatSignedScore(profile.BestScoreImprovement)} " +
+                       $"| {FormatMetric(finalGeneration.MeanPairwiseSimilarity, "F4")} |";
+            }));
+        var optimizerLeaderRows = string.Join(
+            Environment.NewLine,
+            report.Optimizer.Profiles.Select(profile =>
+            {
+                var candidate = profile.RetainedCandidates[0];
+                return $"| `{profile.ProfileId}` " +
+                       $"| `{candidate.BuildId}` " +
+                       $"| {FormatScore(candidate.AggregateScore)} " +
+                       $"| {candidate.DiscoveredGeneration} " +
+                       $"| {EscapeCell(string.Join(", ", candidate.EssenceIds))} |";
+            }));
+        var representativeProfileRows = string.Join(
+            Environment.NewLine,
+            report.RepresentativeBuilds.Profiles.Select(profile =>
+                $"| `{profile.Id}` " +
+                $"| {profile.EvaluatedPopulationSize} " +
+                $"| {profile.Builds.Count} " +
+                $"| {FormatScore(profile.TargetScore)} " +
+                $"| {FormatScore(profile.MinimumSelectedScore)}-{FormatScore(profile.MaximumSelectedScore)} " +
+                $"| {FormatScore(profile.MeanSelectedScore)} " +
+                $"| {FormatMetric(profile.MeanPairwiseSimilarity, "F4")} |"));
+        var representativeLeadingRows = string.Join(
+            Environment.NewLine,
+            report.RepresentativeBuilds.Profiles.Select(profile =>
+            {
+                var build = profile.Builds[0];
+                return $"| `{profile.Id}` " +
+                       $"| `{build.Id}` " +
+                       $"| `{build.SourceBuildId}` " +
+                       $"| {FormatScore(build.AggregateScore)} " +
+                       $"| {FormatScore(build.PopulationPercentile)} " +
+                       $"| {EscapeCell(string.Join(", ", build.Essences.Select(essence => essence.EssenceId)))} |";
+            }));
+        var meta = report.EssenceMetaAnalysis;
+        var essenceUsageRows = string.Join(
+            Environment.NewLine,
+            meta.Essences
+                .OrderByDescending(essence => essence.P95Usage)
+                .ThenByDescending(essence => essence.OverallUsage)
+                .ThenBy(essence => essence.EssenceId, StringComparer.OrdinalIgnoreCase)
+                .Take(20)
+                .Select(essence =>
+                    $"| `{essence.EssenceId}` " +
+                    $"| {essence.Appearances} " +
+                    $"| {FormatPercent(essence.OverallUsage)} " +
+                    $"| {FormatPercent(essence.P50Usage)} " +
+                    $"| {FormatPercent(essence.P75Usage)} " +
+                    $"| {FormatPercent(essence.P90Usage)} " +
+                    $"| {FormatPercent(essence.P95Usage)} " +
+                    $"| {FormatPercent(essence.P99Usage)} " +
+                    $"| {FormatNullableScore(essence.PerformanceDelta)} " +
+                    $"| {EscapeCell(essence.AdminClassification ?? "Unavailable")} |"));
+        var synergyRows = meta.PairSynergies.Count == 0
+            ? "| None | — | — | — | — | — |"
+            : string.Join(
+                Environment.NewLine,
+                meta.PairSynergies.Take(20).Select(pair =>
+                    $"| `{pair.FirstEssenceId}` + `{pair.SecondEssenceId}` " +
+                    $"| {pair.Appearances} " +
+                    $"| {FormatScore(pair.ObservedMeanPerformance)} " +
+                    $"| {FormatScore(pair.ExpectedMeanPerformance)} " +
+                    $"| {FormatSignedScore(pair.SynergyDelta)} " +
+                    $"| {pair.Classification} |"));
+        var metaWarnings = meta.Warnings.Count == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, meta.Warnings.Select(warning => $"- **{warning.Kind}:** {EscapeCell(warning.Message)}"));
+        var powerAnchorRows = string.Join(
+            Environment.NewLine,
+            report.PowerAnchors.Anchors.Select(anchor =>
+                $"| `{anchor.Definition.Id}` " +
+                $"| {anchor.Definition.Floor} " +
+                $"| `{anchor.Definition.GearPackageId}` " +
+                $"| `{anchor.Definition.EssenceProfileId}` " +
+                $"| {anchor.Performance.RepresentativeBuildCount} " +
+                $"| {FormatScore(anchor.Performance.MeanBenchmarkPower)} " +
+                $"| {FormatScore(anchor.Performance.MinimumBenchmarkPower)}-{FormatScore(anchor.Performance.MaximumBenchmarkPower)} " +
+                $"| {FormatMetric(anchor.Performance.PopulationStandardDeviation, "F4")} " +
+                $"| {anchor.CombatRating.MinimumDisplayCr}-{anchor.CombatRating.MaximumDisplayCr} |"));
+        var progressionBandRows = string.Join(
+            Environment.NewLine,
+            report.ProgressionBands.Bands.SelectMany(band => band.Floors.Select(floor =>
+                $"| `{band.Definition.Id}` " +
+                $"| {floor.Floor} " +
+                $"| {FormatMetric(floor.NormalizedPosition, "F4")} " +
+                $"| {FormatMetric(floor.CurveWeight, "F6")} " +
+                $"| {FormatScore(floor.TargetBenchmarkPower)} " +
+                $"| {(floor.AnchorId is null ? "—" : $"`{floor.AnchorId}`")} |")));
+        var towerRows = string.Join(
+            Environment.NewLine,
+            report.WorldTowerAnalysis.Floors.Select(floor =>
+                $"| {floor.Floor} " +
+                $"| {EscapeCell(floor.GuardianName)} " +
+                $"| {floor.RequiredSlots} " +
+                $"| {FormatScore(floor.TargetBenchmarkPower)} " +
+                $"| `{floor.RepresentativeProfileId}` " +
+                $"| {FormatPercent(floor.DesiredClearRate)} " +
+                $"| {FormatPercent(floor.ObservedClearRate)} " +
+                $"| {floor.RecommendedDisplayCr.ToString("F0", CultureInfo.InvariantCulture)} " +
+                $"| {(floor.ObservedClearingDisplayCr.HasValue ? floor.ObservedClearingDisplayCr.Value.ToString("F0", CultureInfo.InvariantCulture) : "—")} " +
+                $"| {floor.AuthoredRecommendedCr} " +
+                $"| {floor.Classification} |"));
+        var towerWarnings = report.WorldTowerAnalysis.Floors
+            .SelectMany(floor => floor.Warnings.Select(warning => $"- Floor {floor.Floor}: {warning}"))
+            .ToArray();
+        var towerWarningText = towerWarnings.Length == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, towerWarnings);
+        var calibrationRows = string.Join(
+            Environment.NewLine,
+            report.EncounterCalibration.Floors.Select(floor =>
+                $"| {floor.Floor} " +
+                $"| {FormatPercent(floor.BaselineClearRate)} " +
+                $"| {FormatMetric(floor.RecommendedDifficultyMultiplier, "F3")} " +
+                $"| {FormatMetric(floor.AuthoredHealthMultiplier, "F3")} → {FormatMetric(floor.SuggestedHealthMultiplier, "F3")} " +
+                $"| {FormatMetric(floor.AuthoredDamageMultiplier, "F3")} → {FormatMetric(floor.SuggestedDamageMultiplier, "F3")} " +
+                $"| {FormatPercent(floor.SuggestedClearRate)} " +
+                $"| {floor.Status} " +
+                $"| {floor.Evaluations.Count} |"));
+        var calibrationRecommendations = string.Join(
+            Environment.NewLine,
+            report.EncounterCalibration.Floors.Select(floor =>
+                $"- Floor {floor.Floor}: {EscapeCell(floor.Recommendation)}"));
+        var encounterOptimizerRows = string.Join(
+            Environment.NewLine,
+            report.EncounterSpecificOptimization.Floors.Select(floor =>
+                $"| {floor.Floor} " +
+                $"| `{floor.GenericProfileId}` " +
+                $"| {floor.CandidateCount} " +
+                $"| {FormatPercent(floor.GenericClearRate)} " +
+                $"| {FormatPercent(floor.SpecializedClearRate)} " +
+                $"| {FormatSignedPercent(floor.ClearRateAdvantage)} " +
+                $"| {FormatSignedScore(floor.GenericPveScoreDelta)} " +
+                $"| {FormatPercent(floor.SpecializedMeanPairwiseSimilarity)} " +
+                $"| {floor.Finding} |"));
+        var encounterOptimizerLeaderRows = string.Join(
+            Environment.NewLine,
+            report.EncounterSpecificOptimization.Floors.Select(floor =>
+            {
+                var leader = floor.RetainedBuilds[0];
+                return $"| {floor.Floor} " +
+                       $"| `{leader.BuildId}` " +
+                       $"| {FormatScore(leader.EncounterScore)} " +
+                       $"| {FormatPercent(leader.CandidateClearRate)} " +
+                       $"| {FormatScore(leader.GenericPveScore)} " +
+                       $"| {EscapeCell(string.Join(", ", leader.EssenceIds))} |";
+            }));
+        var encounterOptimizerWarnings = report.EncounterSpecificOptimization.Floors
+            .SelectMany(floor => floor.Warnings)
+            .ToArray();
+        var encounterOptimizerWarningText = encounterOptimizerWarnings.Length == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, encounterOptimizerWarnings.Select(warning => $"- {EscapeCell(warning)}"));
+        var scalingValidationRows = string.Join(
+            Environment.NewLine,
+            report.ScalingValidation.Floors.Select(floor =>
+                $"| {floor.Floor} " +
+                $"| {floor.HoldoutEvaluation.TrialCount} " +
+                $"| {FormatPercent(floor.TargetMinimumClearRate)}–{FormatPercent(floor.TargetMaximumClearRate)} " +
+                $"| {FormatPercent(floor.HoldoutEvaluation.ClearRate)} " +
+                $"| {FormatPercent(floor.ConfidenceLowerBound)}–{FormatPercent(floor.ConfidenceUpperBound)} " +
+                $"| {FormatPercent(floor.SeedClearRateStandardDeviation)} " +
+                $"| {FormatPercent(floor.SeedClearRateRange)} " +
+                $"| {floor.Verdict} |"));
+        var scalingProbeRows = string.Join(
+            Environment.NewLine,
+            report.ScalingValidation.Floors.Select(floor =>
+                $"| {floor.Floor} " +
+                $"| {FormatPercent(floor.EasierProbeClearRate)} / {FormatPercent(floor.P75ClearRate)} / {FormatPercent(floor.HarderProbeClearRate)} " +
+                $"| {(floor.DifficultyMonotonic ? "Yes" : "No")} " +
+                $"| {FormatPercent(floor.P50ClearRate)} / {FormatPercent(floor.P75ClearRate)} / {FormatPercent(floor.P90ClearRate)} " +
+                $"| {(floor.PercentileOrderingValid ? "Yes" : "No")} " +
+                $"| {FormatSignedPercent(floor.HealthOnlyClearRateDelta)} " +
+                $"| {FormatSignedPercent(floor.DamageOnlyClearRateDelta)} |"));
+        var scalingValidationWarnings = report.ScalingValidation.Floors
+            .SelectMany(floor => floor.Warnings)
+            .ToArray();
+        var scalingValidationWarningText = scalingValidationWarnings.Length == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, scalingValidationWarnings.Select(warning => $"- {EscapeCell(warning)}"));
         var gitCommit = string.IsNullOrWhiteSpace(metadata.GitCommitHash)
             ? "Unavailable"
             : metadata.GitCommitHash;
@@ -168,6 +455,152 @@ public sealed class BalanceReportWriter
 
             Scores use production-engine combat telemetry. Rankings describe this run's random sample and do not yet represent optimizer-selected builds.
 
+            ## Combat Rating Health
+
+            **Classification: {{crHealth.Classification}}**
+
+            | Observations | Distinct CRs | Spearman | R² | MAE | RMSE | Mean Band Spread |
+            | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+            | {{crHealth.ObservationCount}} | {{crHealth.DistinctDisplayCrCount}} | {{FormatMetric(crHealth.Model.SpearmanCorrelation, "F4")}} | {{FormatMetric(crHealth.Model.RSquared, "F4")}} | {{FormatScore(crHealth.Model.MeanAbsoluteError)}} | {{FormatScore(crHealth.Model.RootMeanSquareError)}} | {{FormatScore(crHealth.Model.MeanWithinBandSpread)}} |
+
+            | Display CR Band | Builds | Median | P10 | P90 | P10-P90 Spread |
+            | --- | ---: | ---: | ---: | ---: | ---: |
+            {{crBandRows}}
+
+            ### CR Outliers
+
+            | Direction | Build | CR | Observed | Predicted | Residual |
+            | --- | --- | ---: | ---: | ---: | ---: |
+            {{crOutlierRows}}
+
+            ### Interpretation Warnings
+
+            {{crWarnings}}
+
+            ## Essence Optimizer
+
+            | Profile | Slots | Population | Generations | Initial Best | Final Best | Improvement | Final Mean Similarity |
+            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+            {{optimizerRows}}
+
+            | Profile | Leading Retained Build | Score | Discovered Generation | Essences |
+            | --- | --- | ---: | ---: | --- |
+            {{optimizerLeaderRows}}
+
+            Optimizer results use elitism, legal mutation, random injection, and diversity-aware selection. The transient search population is not persisted.
+
+            ## Representative Essence Builds
+
+            | Profile | Evaluated Population | Retained | Target Score | Selected Score Range | Mean Selected Score | Mean Similarity |
+            | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+            {{representativeProfileRows}}
+
+            | Profile | Closest Representative | Source Candidate | Score | Population Percentile | Essences |
+            | --- | --- | --- | ---: | ---: | --- |
+            {{representativeLeadingRows}}
+
+            P50/P75/P90 describe this run's complete unique evaluated optimizer population, not live-player percentiles. Only the compact representative library is persisted.
+
+            ## Essence Meta Analysis
+
+            **Optimizer builds:** {{meta.EvaluatedBuildCount}}
+
+            **Complementary simulator:** {{meta.SimulatorEvidence.BattlesRun}} battles, Tier {{meta.SimulatorEvidence.EquipmentTier}} {{meta.SimulatorEvidence.EquipmentRarity}} {{meta.SimulatorEvidence.EquipmentProfile}}
+
+            | Essence | Appearances | Overall | P50+ | P75+ | P90+ | P95+ | P99+ | PvE Delta | Simulator Classification |
+            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+            {{essenceUsageRows}}
+
+            The table shows the twenty highest P95-usage Essences. Complete usage and common-partner data remain in `essence-meta-analysis.json`.
+
+            ### Pair Synergy
+
+            | Pair | Builds | Observed | Additive Expected | Delta | Classification |
+            | --- | ---: | ---: | ---: | ---: | --- |
+            {{synergyRows}}
+
+            Pair deltas are correlation-based investigation signals. The table shows the twenty largest absolute eligible deltas.
+
+            ### Essence Meta Warnings
+
+            {{metaWarnings}}
+
+            ## Power Anchors
+
+            | Anchor | Floor | Gear Package | Essence Profile | Builds | Mean Power | Power Range | Standard Deviation | Display CR Range |
+            | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: |
+            {{powerAnchorRows}}
+
+            Anchor power is measured from the representative P75 builds' aggregate PvE benchmark scores. Combat Rating remains a diagnostic rather than the source of target power.
+
+            ## Progression Bands
+
+            **Curve: {{report.ProgressionBands.Options.Curve}}**
+
+            | Band | Floor | Position | Curve Weight | Target Benchmark Power | Anchor |
+            | --- | ---: | ---: | ---: | ---: | --- |
+            {{progressionBandRows}}
+
+            Intermediate floors are interpolated targets and do not create additional character builds. The World Tower analysis below consumes these targets.
+
+            ## World Tower Content Analysis
+
+            | Floor | Guardian | Party | Target Power | P75 Profile | Desired Clear | Observed Clear | Derived CR | Clearing CR | Authored CR | Result |
+            | ---: | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+            {{towerRows}}
+
+            Each deterministic trial assembles a varied party from the selected P75 profile and runs the authored encounter through production combat preparation, Guardian scaling, abilities, and engine rules. Derived CR interpolates the measured endpoint-anchor CRs with the same progression weight as target power. Clearing CR is the median mean-player CR among successful trials when the sample contains a clear.
+
+            ### World Tower Warnings
+
+            {{towerWarningText}}
+
+            ## Encounter Calibration
+
+            | Floor | Baseline Clear | Difficulty Factor | Health Multiplier | Damage Multiplier | Suggested Clear | Search Status | Evaluations |
+            | ---: | ---: | ---: | --- | --- | ---: | --- | ---: |
+            {{calibrationRows}}
+
+            The bounded search applies the same temporary difficulty factor to authored Guardian health and offense while preserving mechanics, defense, parties, and combat seeds. These are recommendations only; production content was not modified.
+
+            ### Suggested Balance Changes
+
+            {{calibrationRecommendations}}
+
+            ## Encounter-Specific Optimization
+
+            | Floor | Generic Profile | Candidates | Generic Clear | Specialized Clear | Advantage | Generic PvE Delta | Specialized Similarity | Finding |
+            | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+            {{encounterOptimizerRows}}
+
+            | Floor | Leading Specialized Build | Encounter Score | Candidate Clear | Generic PvE Score | Essences |
+            | ---: | --- | ---: | ---: | ---: | --- |
+            {{encounterOptimizerLeaderRows}}
+
+            Every unique legal build already evaluated in the matching generic optimizer population is tested against the calibrated Guardian. The retained specialized team is diversity-aware and is re-simulated through the production World Tower runtime. These diagnostics do not replace representative builds, progression targets, or recommended Combat Rating.
+
+            ### Encounter-Specific Warnings
+
+            {{encounterOptimizerWarningText}}
+
+            ## Region 1 Scaling Validation
+
+            **Verdicts:** {{report.ScalingValidation.ValidatedFloorCount}} validated, {{report.ScalingValidation.UnstableFloorCount}} unstable, {{report.ScalingValidation.MechanicReviewFloorCount}} require mechanic review.
+
+            | Floor | Holdout Trials | Target Window | Clear Rate | 95% Confidence Interval | Seed σ | Seed Range | Verdict |
+            | ---: | ---: | --- | ---: | --- | ---: | ---: | --- |
+            {{scalingValidationRows}}
+
+            | Floor | Easier / Calibrated / Harder | Monotonic | P50 / P75 / P90 | Ordered | Health +{{FormatPercent(report.ScalingValidation.Options.ScalingProbeDelta)}} Delta | Damage +{{FormatPercent(report.ScalingValidation.Options.ScalingProbeDelta)}} Delta |
+            | ---: | --- | --- | --- | --- | ---: | ---: |
+            {{scalingProbeRows}}
+
+            Holdout seeds are derived independently from the calibration seed. A floor is validated only when its 95% clear-rate interval is contained by the target window, seed variance is bounded, nearby shared scaling is monotonic, generic percentile ordering holds, and calibration did not stop at best effort or an exhausted bound. Health-only and damage-only probes expose which authored dimension drives local difficulty. Production content was not modified.
+
+            ### Scaling Validation Warnings
+
+            {{scalingValidationWarningText}}
+
             ## Region 1 Gear Packages
 
             | Progression anchor | Package | Tier | Rarity | Quality | Archetype | Items | CR | Raw CR |
@@ -205,6 +638,21 @@ public sealed class BalanceReportWriter
     private static string FormatScore(double score) =>
         score.ToString("F2", CultureInfo.InvariantCulture);
 
+    private static string FormatSignedScore(double score) =>
+        score.ToString("+0.00;-0.00;0.00", CultureInfo.InvariantCulture);
+
+    private static string FormatNullableScore(double? score) =>
+        score.HasValue ? FormatSignedScore(score.Value) : "—";
+
+    private static string FormatMetric(double value, string format) =>
+        value.ToString(format, CultureInfo.InvariantCulture);
+
+    private static string FormatPercent(double value) =>
+        value.ToString("P0", CultureInfo.InvariantCulture);
+
+    private static string FormatSignedPercent(double value) =>
+        value.ToString("+0%;-0%;0%", CultureInfo.InvariantCulture);
+
     private static void WriteUtf8(string path, string contents) =>
         File.WriteAllText(path, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
@@ -225,8 +673,28 @@ public sealed record BalanceReportPaths(
     string LatestGearPackagesJsonPath,
     string LatestEssenceBuildsJsonPath,
     string LatestBenchmarksJsonPath,
+    string LatestCombatRatingJsonPath,
+    string LatestOptimizerJsonPath,
+    string LatestRepresentativeBuildsJsonPath,
+    string LatestEssenceMetaAnalysisJsonPath,
+    string LatestPowerAnchorsJsonPath,
+    string LatestProgressionBandsJsonPath,
+    string LatestWorldTowerAnalysisJsonPath,
+    string LatestEncounterCalibrationJsonPath,
+    string LatestEncounterSpecificOptimizationJsonPath,
+    string LatestScalingValidationJsonPath,
     string HistoryJsonPath,
     string HistoryMarkdownPath,
     string HistoryGearPackagesJsonPath,
     string HistoryEssenceBuildsJsonPath,
-    string HistoryBenchmarksJsonPath);
+    string HistoryBenchmarksJsonPath,
+    string HistoryCombatRatingJsonPath,
+    string HistoryOptimizerJsonPath,
+    string HistoryRepresentativeBuildsJsonPath,
+    string HistoryEssenceMetaAnalysisJsonPath,
+    string HistoryPowerAnchorsJsonPath,
+    string HistoryProgressionBandsJsonPath,
+    string HistoryWorldTowerAnalysisJsonPath,
+    string HistoryEncounterCalibrationJsonPath,
+    string HistoryEncounterSpecificOptimizationJsonPath,
+    string HistoryScalingValidationJsonPath);

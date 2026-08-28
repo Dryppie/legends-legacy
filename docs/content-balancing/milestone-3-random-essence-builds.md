@@ -48,9 +48,9 @@ Each snapshot records:
 
 With the current production content and seed `8471`, a three-build-per-profile smoke run produced displayed CR ranges of 187–187 for `E4_RANDOM`, 196–196 for `E5_RANDOM`, and 213–213 for `E6_RANDOM`. These are measured results, not acceptance constants.
 
-The current Combat Rating algorithm does not score Essence ability performance, so a zero-width CR spread inside a profile is expected. Milestone 4 evaluates these builds with the PvE benchmark suite; optimization remains explicitly deferred to Milestone 6.
+The current Combat Rating algorithm does not score Essence ability performance, so a zero-width CR spread inside a profile is expected. Milestone 4 evaluates these builds with the PvE benchmark suite, and Milestone 6 uses that measured performance as optimizer fitness.
 
-Random builds remain part of the benchmark population even after scoring is available. They establish the unbiased performance distribution against which later optimized and representative builds can be interpreted.
+Random builds remain part of the benchmark population after scoring and optimization. They establish the unbiased baseline used by Combat Rating analysis and seed the broader evaluated population from which representative builds are selected.
 
 ## Verification Boundary
 
