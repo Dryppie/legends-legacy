@@ -273,7 +273,8 @@ public sealed class WorldTowerContentAnalyzer(
             Round(trials.Count(trial => trial.Outcome == BattleOutcome.Victory.ToString()) / (double)trials.Length, 4),
             Round(trials.Average(trial => trial.DurationTicks), 2),
             Round(trials.Average(trial => trial.FriendlyDeaths), 2),
-            Round(trials.Average(trial => trial.RemainingHealthRatio), 4));
+            Round(trials.Average(trial => trial.RemainingHealthRatio), 4),
+            Round(Median(trials.Select(trial => (double)trial.DurationTicks).OrderBy(value => value).ToArray()), 2));
     }
 
     public EncounterCalibrationEvaluation EvaluateBuilds(EncounterBuildEvaluationRequest request)
@@ -314,7 +315,8 @@ public sealed class WorldTowerContentAnalyzer(
             Round(trials.Count(trial => trial.Outcome == BattleOutcome.Victory.ToString()) / (double)trials.Length, 4),
             Round(trials.Average(trial => trial.DurationTicks), 2),
             Round(trials.Average(trial => trial.FriendlyDeaths), 2),
-            Round(trials.Average(trial => trial.RemainingHealthRatio), 4));
+            Round(trials.Average(trial => trial.RemainingHealthRatio), 4),
+            Round(Median(trials.Select(trial => (double)trial.DurationTicks).OrderBy(value => value).ToArray()), 2));
     }
 
     private PreparedRepresentativeBuild PrepareBuild(RepresentativeEssenceBuildSnapshot representative)

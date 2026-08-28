@@ -516,7 +516,7 @@ Use a directory such as:
     history/
 ```
 
-The current schema-version-14 run includes:
+The current schema-version-15 run includes:
 
 ```text
 summary.md
@@ -533,6 +533,7 @@ progression-bands.json
 world-tower-analysis.json
 encounter-calibration.json
 encounter-specific-optimization.json
+elite-build-certification.json
 scaling-validation.json
 ```
 
@@ -2323,9 +2324,9 @@ The gate runs after Milestone 13 and does not create another manual command. The
 
 ## Elite Build Certification Gate
 
-**Status: Designed, not implemented.** See [Elite Build Certification Gate](elite-build-certification-gate.md) for the measured legal search space, multi-restart convergence requirements, local-neighborhood challenges, P95/P99 separation, joint party optimization, curated top-player fixtures, proposed verdicts, and one-button integration contract.
+**Status: Implemented in schema 15; certification evidence is not yet approved.** See [Elite Build Certification Gate](elite-build-certification/elite-build-certification-gate.md) for the measured legal search space, multi-restart convergence requirements, local-neighborhood challenges, P95/P99 separation, joint party optimization, curated top-player fixtures, verdicts, and one-button integration contract. The thresholds and execution budgets are recorded in [Elite Build Certification Policy v1](elite-build-certification/elite-build-certification-policy-v1.md). The default developer profile is diagnostic and cannot certify; the checked-in player fixture is empty, so a release-profile run with reviewed evidence is still required before Region 1 remediation is accepted.
 
-The current default optimizer evaluates 80 unique builds per slot profile against legal spaces ranging from 1.57 million E4 combinations to 296.23 million E6 combinations. Its P90 profiles are percentiles of that generated sample, not proof of top-player strength. Elite certification must be implemented before Region 1 scaling remediation is accepted or Milestone 14 begins.
+The ordinary optimizer still evaluates 80 unique builds per slot profile by default against legal spaces ranging from 1.57 million E4 combinations to 296.23 million E6 combinations. Its P90 profiles remain ordinary generated-population percentiles. The separate certification stage now expands the search, canonicalizes and deduplicates candidates, derives P95/P99 cohorts, challenges local neighborhoods, optimizes parties, and produces evidence-based verdicts without replacing P75 progression targets.
 
 ---
 
@@ -2735,7 +2736,7 @@ That central Region 1 architectural objective is implemented through Milestone 1
 
 # 47. Current Implementation Status and Next Task
 
-The P0 cleanup, Milestones 1–13, and the Region 1 scaling-validation gate are complete. A developer can run the entire implemented pipeline from the repository root with one action:
+The P0 cleanup, Milestones 1–13, the Elite Build Certification Gate, and the Region 1 scaling-validation gate are implemented. A developer can run the entire pipeline from the repository root with one action:
 
 ```powershell
 .\build\run-balance.ps1
@@ -2753,8 +2754,9 @@ Power anchors and progression targets
 World Tower simulation
 Bounded encounter calibration
 Encounter-specific optimization and exploit detection
+Elite P95/P99 search, local challenges, party optimization, and holdouts
 Multi-seed scaling validation and sensitivity probes
-Schema-14 JSON and Markdown reporting
+Schema-15 JSON and Markdown reporting
 ```
 
 No completed milestone requires a separate command or manual data transfer. The only manual boundary is approval and application of suggested balance changes.
@@ -2762,7 +2764,7 @@ No completed milestone requires a separate command or manual data transfer. The 
 Milestone 14 remains the next planned expansion, but it is now explicitly gated. Before beginning it, certify the elite build ceiling and then remediate or approve the Region 1 validation failures:
 
 ```text
-Implement and pass the Elite Build Certification Gate
+Supply reviewed top-player fixtures and pass the Elite Build Certification Gate in release mode
 Recalibrate unstable Floors 2–5 against the certified build population and holdout distribution
 Review encounter/build-profile interactions on Floors 1, 6, 7, 9, and 10
 Stress recommendations against certified P95/P99 and curated top-player parties

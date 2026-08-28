@@ -57,7 +57,7 @@ The existing Admin Essence Simulator remains a complementary signal:
 
 ## Report Contract
 
-Every balance run includes benchmark results in `summary.json`, summarizes profile ranges and leading sampled builds in `summary.md`, and writes full results to `benchmarks.json` under both `latest` and the immutable history directory. This contract was introduced with balance schema version 4; the current combined pipeline uses schema version 14.
+Every balance run includes benchmark results in `summary.json`, summarizes profile ranges and leading sampled builds in `summary.md`, and writes full results to `benchmarks.json` under both `latest` and the immutable history directory. This contract was introduced with balance schema version 4; the current combined pipeline uses schema version 15.
 
 Each build result records its profile, aggregate score, scenario component scores, deterministic seeds, and raw combat measurements.
 

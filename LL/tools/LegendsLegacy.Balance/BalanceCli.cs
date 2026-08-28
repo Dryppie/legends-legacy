@@ -18,6 +18,14 @@ public static class BalanceCli
             var outputRoot = options.OutputRoot is null
                 ? Path.Combine(repositoryRoot, "balance-output")
                 : Path.GetFullPath(options.OutputRoot);
+            var policyPath = options.ElitePolicyPath is null
+                ? Path.Combine(repositoryRoot, "LL", "tools", "LegendsLegacy.Balance", "Configuration", "elite-certification-policy.v1.json")
+                : Path.GetFullPath(options.ElitePolicyPath);
+            var fixturePath = options.EliteCertificationOptions.TopPlayerBuildsPath is null
+                ? Path.Combine(repositoryRoot, "LL", "tools", "LegendsLegacy.Balance", "Fixtures", "top-player-builds.json")
+                : Path.GetFullPath(options.EliteCertificationOptions.TopPlayerBuildsPath);
+            var elitePolicy = EliteCertificationPolicy.Load(policyPath);
+            var eliteOptions = options.EliteCertificationOptions with { TopPlayerBuildsPath = fixturePath };
             var runner = ProductionBalanceComposition.Create(contentRoot);
             var report = runner.Run(new BalanceRunRequest(
                 options.Seed,
@@ -30,6 +38,8 @@ public static class BalanceCli
                 options.EssenceMetaAnalysisOptions,
                 options.EncounterCalibrationOptions,
                 options.EncounterSpecificOptimizationOptions,
+                elitePolicy,
+                eliteOptions,
                 options.ScalingValidationOptions));
             var paths = new BalanceReportWriter().Write(report, outputRoot);
 
@@ -93,6 +103,15 @@ public static class BalanceCli
                     FormattableString.Invariant(
                         $"Encounter optimizer F{floor.Floor}: {floor.GenericClearRate:P0} -> {floor.SpecializedClearRate:P0} ({floor.ClearRateAdvantage:+0%;-0%;0%}), {floor.Finding}"));
             }
+            Console.WriteLine(
+                $"Elite certification: {report.EliteBuildCertification.Verdict} " +
+                $"({report.EliteBuildCertification.Options.Profile}, {report.EliteBuildCertification.TotalUniqueCandidatesEvaluated} candidates)");
+            foreach (var profile in report.EliteBuildCertification.Profiles)
+            {
+                Console.WriteLine(
+                    FormattableString.Invariant(
+                        $"Elite {profile.ProfileId}: P95 {profile.P95TargetScore:F2}, P99 {profile.P99TargetScore:F2}, {profile.Verdict}"));
+            }
             foreach (var floor in report.ScalingValidation.Floors)
             {
                 Console.WriteLine(
@@ -113,6 +132,7 @@ public static class BalanceCli
             Console.WriteLine($"World Tower analysis: {paths.LatestWorldTowerAnalysisJsonPath}");
             Console.WriteLine($"Encounter calibration: {paths.LatestEncounterCalibrationJsonPath}");
             Console.WriteLine($"Encounter-specific optimization: {paths.LatestEncounterSpecificOptimizationJsonPath}");
+            Console.WriteLine($"Elite build certification: {paths.LatestEliteBuildCertificationJsonPath}");
             Console.WriteLine($"Scaling validation: {paths.LatestScalingValidationJsonPath}");
             return 0;
         }

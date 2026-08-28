@@ -17,4 +17,13 @@
     <ProjectReference Include="..\..\src\Infrastructure\Service\Services.LL\Services.LL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="EssenceSystem.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Configuration\elite-certification-policy.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures\top-player-builds.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

@@ -68,7 +68,7 @@ Milestone 10 remains the authored-content diagnosis stage. It does not search Gu
 
 ## Report Contract
 
-Balance schema version 10 introduced `worldTowerAnalysis` in `summary.json` and `world-tower-analysis.json` under both `latest` and immutable history; the current combined pipeline uses schema version 14. `summary.md` includes the complete Floor 1–10 table and all warnings. Trial-level JSON retains the exact seeds and party build IDs needed to reproduce an observation. Schema 12 also retains each floor's authored health and offense multipliers so the separate calibration report can show exact before-and-after recommendations.
+Balance schema version 10 introduced `worldTowerAnalysis` in `summary.json` and `world-tower-analysis.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. `summary.md` includes the complete Floor 1–10 table and all warnings. Trial-level JSON retains the exact seeds and party build IDs needed to reproduce an observation. Schema 12 also retains each floor's authored health and offense multipliers so the separate calibration report can show exact before-and-after recommendations.
 
 ## Initial Measured Result
 

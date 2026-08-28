@@ -9,7 +9,10 @@ public sealed record EssenceOptimizerOptions(
     double MutationRate = 0.25,
     double RandomInjectionRate = 0.10,
     double DiversityPenalty = 8,
-    int RetainedCandidates = 10)
+    int RetainedCandidates = 10,
+    int MaximumGenerations = 0,
+    int RequiredPlateauGenerations = 0,
+    double PlateauImprovementTolerance = 0.25)
 {
     public EssenceOptimizerOptions Validate()
     {
@@ -17,6 +20,16 @@ public sealed record EssenceOptimizerOptions(
             throw new ArgumentOutOfRangeException(nameof(PopulationSize), "Population size must be between 4 and 500.");
         if (Generations is < 1 or > 100)
             throw new ArgumentOutOfRangeException(nameof(Generations), "Generation count must be between 1 and 100.");
+        if (MaximumGenerations != 0 && (MaximumGenerations < Generations || MaximumGenerations > 100))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(MaximumGenerations),
+                "Maximum generations must be zero or between the minimum generation count and 100.");
+        }
+        if (RequiredPlateauGenerations is < 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(RequiredPlateauGenerations));
+        if (!double.IsFinite(PlateauImprovementTolerance) || PlateauImprovementTolerance < 0)
+            throw new ArgumentOutOfRangeException(nameof(PlateauImprovementTolerance));
         if (EliteCount < 1 || EliteCount >= PopulationSize)
             throw new ArgumentOutOfRangeException(nameof(EliteCount), "Elite count must be at least 1 and below population size.");
         if (MutationRate is < 0.01 or > 1)
@@ -80,17 +93,19 @@ public sealed class EssenceBuildOptimizer(
     EssenceBuildGenerator buildGenerator,
     PveBenchmarkRunner benchmarkRunner)
 {
-    public const int AlgorithmVersion = 1;
+    public const int AlgorithmVersion = 2;
 
     public EssenceOptimizationResult Optimize(
         IReadOnlyList<EssenceBuildSnapshot> initialBuilds,
         PveBenchmarkSuiteSnapshot initialBenchmarks,
         int runSeed,
-        EssenceOptimizerOptions? requestedOptions = null)
+        EssenceOptimizerOptions? requestedOptions = null,
+        int? requestedSearchSeed = null)
     {
         ArgumentNullException.ThrowIfNull(initialBuilds);
         ArgumentNullException.ThrowIfNull(initialBenchmarks);
         var options = (requestedOptions ?? new EssenceOptimizerOptions()).Validate();
+        var searchSeed = requestedSearchSeed ?? runSeed;
         var benchmarksByBuildId = initialBenchmarks.Builds.ToDictionary(
             benchmark => benchmark.BuildId,
             StringComparer.Ordinal);
@@ -104,13 +119,14 @@ public sealed class EssenceBuildOptimizer(
                 sourceFamilies,
                 definitionsById,
                 runSeed,
+                searchSeed,
                 options))
             .ToArray();
 
         return new EssenceOptimizationResult(
             new EssenceOptimizerSnapshot(
                 AlgorithmVersion,
-                runSeed,
+                searchSeed,
                 options,
                 profiles.Select(profile => profile.Snapshot).ToArray()),
             profiles.SelectMany(profile => profile.EvaluatedCandidates).ToArray());
@@ -123,13 +139,14 @@ public sealed class EssenceBuildOptimizer(
         IReadOnlyList<EssenceDefinition[]> sourceFamilies,
         IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
         int runSeed,
+        int searchSeed,
         EssenceOptimizerOptions options)
     {
         if (initialBuilds.Count == 0)
             throw new InvalidOperationException($"Optimizer profile E{slotCount} has no initial builds.");
 
         var profileId = $"E{slotCount}_OPTIMIZER";
-        var profileSeed = DeriveSeed(runSeed, slotCount, 0);
+        var profileSeed = DeriveSeed(searchSeed, slotCount, 0);
         var random = new Random(profileSeed);
         var evaluatedCandidates = initialBuilds.Select(build =>
         {
@@ -163,7 +180,10 @@ public sealed class EssenceBuildOptimizer(
         {
             SummarizeGeneration(0, population)
         };
-        for (var generation = 1; generation <= options.Generations; generation++)
+        var maximumGenerations = options.MaximumGenerations == 0
+            ? options.Generations
+            : options.MaximumGenerations;
+        for (var generation = 1; generation <= maximumGenerations; generation++)
         {
             var selectedElites = SelectDiverse(population, options.EliteCount, options.DiversityPenalty)
                 .Select(selection => selection.Candidate)
@@ -175,7 +195,7 @@ public sealed class EssenceBuildOptimizer(
                     options.PopulationSize * options.RandomInjectionRate,
                     MidpointRounding.AwayFromZero));
             var mutationCount = options.PopulationSize - options.EliteCount - randomInjectionCount;
-            var generationSeed = DeriveSeed(runSeed, slotCount, generation);
+            var generationSeed = DeriveSeed(searchSeed, slotCount, generation);
             random = new Random(generationSeed);
             var mutatedBuilds = CreateMutatedBuilds(
                 mutationCount,
@@ -203,6 +223,10 @@ public sealed class EssenceBuildOptimizer(
             evaluatedCandidates.AddRange(evaluatedAdditions);
             population = next;
             generations.Add(SummarizeGeneration(generation, population));
+            if (ShouldStopAdaptiveSearch(generations, options))
+            {
+                break;
+            }
         }
 
         var retained = SelectDiverse(
@@ -470,6 +494,30 @@ public sealed class EssenceBuildOptimizer(
         return lower == upper
             ? sortedValues[lower]
             : sortedValues[lower] + (sortedValues[upper] - sortedValues[lower]) * (position - lower);
+    }
+
+    internal static bool ShouldStopAdaptiveSearch(
+        IReadOnlyList<EssenceOptimizerGenerationSnapshot> generations,
+        EssenceOptimizerOptions options) =>
+        generations[^1].Generation >= options.Generations
+        && (options.RequiredPlateauGenerations == 0
+            || GenerationsSinceMaterialImprovement(generations, options.PlateauImprovementTolerance)
+            >= options.RequiredPlateauGenerations);
+
+    internal static int GenerationsSinceMaterialImprovement(
+        IReadOnlyList<EssenceOptimizerGenerationSnapshot> generations,
+        double tolerance)
+    {
+        var lastImprovement = 0;
+        var best = generations[0].BestScore;
+        foreach (var generation in generations.Skip(1))
+        {
+            if (generation.BestScore - best <= tolerance)
+                continue;
+            best = generation.BestScore;
+            lastImprovement = generation.Generation;
+        }
+        return generations[^1].Generation - lastImprovement;
     }
 
     private static int DeriveSeed(int runSeed, int profileSalt, int generation)

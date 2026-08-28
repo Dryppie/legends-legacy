@@ -41,7 +41,8 @@ public sealed record EncounterCalibrationEvaluation(
     double ObservedClearRate,
     double AverageDurationTicks,
     double AverageFriendlyDeaths,
-    double AverageRemainingHealthRatio);
+    double AverageRemainingHealthRatio,
+    double MedianDurationTicks = 0);
 
 public interface IEncounterCalibrationEvaluator
 {

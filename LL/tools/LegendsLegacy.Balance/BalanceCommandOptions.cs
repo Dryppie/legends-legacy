@@ -12,7 +12,9 @@ public sealed record BalanceCommandOptions(
     EssenceMetaAnalysisOptions EssenceMetaAnalysisOptions,
     EncounterCalibrationOptions EncounterCalibrationOptions,
     EncounterSpecificOptimizationOptions EncounterSpecificOptimizationOptions,
+    EliteCertificationOptions EliteCertificationOptions,
     ScalingValidationOptions ScalingValidationOptions,
+    string? ElitePolicyPath,
     string? ContentRoot,
     string? OutputRoot,
     bool ShowHelp)
@@ -41,6 +43,22 @@ public sealed record BalanceCommandOptions(
           --calibration-iterations <number>  Bounded encounter-search iterations (default: 10).
           --encounter-candidate-simulations <number>  Trials per specialized candidate (default: 3).
           --encounter-retained <number>      Specialized builds retained per floor (default: 5).
+          --certification-profile <value>    developer (default) or release.
+          --elite-restarts <number>          Independent certification restarts.
+          --elite-population <number>        Candidates per restart and E4/E5/E6 profile.
+          --elite-generations <number>       Search generations per certification restart.
+          --elite-max-generations <number>   Hard ceiling for adaptive certification generations.
+          --elite-elites <number>            Elites retained per certification generation.
+          --elite-finalists <number>         Pareto-diverse finalists per slot profile.
+          --elite-local-swap-depth <1|2>     Local-neighborhood challenge depth.
+          --elite-two-swap-limit <number>    Two-swap challengers per finalist; 0 means complete.
+          --elite-restart-refinement <number>  One-swap refinement passes per restart winner.
+          --elite-finalist-refinement <number> Neighborhood absorption rounds before final challenge.
+          --elite-holdout-seeds <number>     Independent elite holdout seeds.
+          --elite-simulations <number>       Elite holdout simulations per seed.
+          --elite-party-genomes <number>     Party genomes evaluated per floor.
+          --elite-policy <path>              Certification policy JSON override.
+          --top-player-builds <path>         Curated top-player fixture JSON override.
           --validation-seeds <number>        Deterministic holdout seeds per floor (default: 8).
           --validation-simulations <number>  Calibrated trials per holdout seed (default: 50).
           --validation-probe-simulations <number>  Trials per sensitivity probe and seed (default: 25).
@@ -68,6 +86,24 @@ public sealed record BalanceCommandOptions(
         var calibrationIterations = 10;
         var encounterCandidateSimulations = 3;
         var encounterRetained = 5;
+        var certificationProfile = ReadCertificationProfile(args);
+        var eliteDefaults = EliteCertificationOptions.ForProfile(certificationProfile);
+        var eliteRestarts = eliteDefaults.RestartCount;
+        var elitePopulation = eliteDefaults.PopulationSize;
+        var eliteGenerations = eliteDefaults.Generations;
+        var eliteMaximumGenerations = eliteDefaults.MaximumGenerations;
+        var eliteMaximumGenerationsSpecified = false;
+        var eliteElites = eliteDefaults.EliteCount;
+        var eliteFinalists = eliteDefaults.FinalistsPerSlotProfile;
+        var eliteLocalSwapDepth = eliteDefaults.LocalSwapDepth;
+        var eliteTwoSwapLimit = eliteDefaults.TwoSwapChallengerLimitPerFinalist;
+        var eliteRestartRefinement = eliteDefaults.RestartLocalRefinementPassLimit;
+        var eliteFinalistRefinement = eliteDefaults.FinalistRefinementRoundLimit;
+        var eliteHoldoutSeeds = eliteDefaults.HoldoutSeeds;
+        var eliteSimulations = eliteDefaults.SimulationsPerSeed;
+        var elitePartyGenomes = eliteDefaults.PartyGenomeBudgetPerFloor;
+        string? elitePolicyPath = null;
+        string? topPlayerBuildsPath = null;
         var validationSeeds = 8;
         var validationSimulations = 50;
         var validationProbeSimulations = 25;
@@ -134,6 +170,55 @@ public sealed record BalanceCommandOptions(
                 case "--encounter-retained":
                     encounterRetained = ReadInt(args, ref index, argument, 1, 50);
                     break;
+                case "--certification-profile":
+                    _ = ParseCertificationProfile(ReadValue(args, ref index, argument));
+                    break;
+                case "--elite-restarts":
+                    eliteRestarts = ReadInt(args, ref index, argument, 2, 32);
+                    break;
+                case "--elite-population":
+                    elitePopulation = ReadInt(args, ref index, argument, 4, 500);
+                    break;
+                case "--elite-generations":
+                    eliteGenerations = ReadInt(args, ref index, argument, 1, 100);
+                    break;
+                case "--elite-max-generations":
+                    eliteMaximumGenerations = ReadInt(args, ref index, argument, 1, 100);
+                    eliteMaximumGenerationsSpecified = true;
+                    break;
+                case "--elite-elites":
+                    eliteElites = ReadInt(args, ref index, argument, 1, 499);
+                    break;
+                case "--elite-finalists":
+                    eliteFinalists = ReadInt(args, ref index, argument, 1, 50);
+                    break;
+                case "--elite-local-swap-depth":
+                    eliteLocalSwapDepth = ReadInt(args, ref index, argument, 1, 2);
+                    break;
+                case "--elite-two-swap-limit":
+                    eliteTwoSwapLimit = ReadInt(args, ref index, argument, 0, 1_000_000);
+                    break;
+                case "--elite-restart-refinement":
+                    eliteRestartRefinement = ReadInt(args, ref index, argument, 1, 50);
+                    break;
+                case "--elite-finalist-refinement":
+                    eliteFinalistRefinement = ReadInt(args, ref index, argument, 0, 20);
+                    break;
+                case "--elite-holdout-seeds":
+                    eliteHoldoutSeeds = ReadInt(args, ref index, argument, 2, 50);
+                    break;
+                case "--elite-simulations":
+                    eliteSimulations = ReadInt(args, ref index, argument, 1, 1_000);
+                    break;
+                case "--elite-party-genomes":
+                    elitePartyGenomes = ReadInt(args, ref index, argument, 1, 100_000);
+                    break;
+                case "--elite-policy":
+                    elitePolicyPath = ReadValue(args, ref index, argument);
+                    break;
+                case "--top-player-builds":
+                    topPlayerBuildsPath = ReadValue(args, ref index, argument);
+                    break;
                 case "--validation-seeds":
                     validationSeeds = ReadInt(args, ref index, argument, 2, 50);
                     break;
@@ -175,6 +260,8 @@ public sealed record BalanceCommandOptions(
             optimizerRandom,
             optimizerDiversity,
             optimizerRetained);
+        if (!eliteMaximumGenerationsSpecified)
+            eliteMaximumGenerations = Math.Max(eliteMaximumGenerations, eliteGenerations);
         try
         {
             optimizer.Validate();
@@ -206,6 +293,33 @@ public sealed record BalanceCommandOptions(
                 $"Encounter retained build count must not exceed the optimizer's minimum evaluated population " +
                 $"of {minimumEvaluatedCandidates} candidates per slot profile.");
         }
+        var eliteCertification = new EliteCertificationOptions(
+            certificationProfile,
+            eliteRestarts,
+            elitePopulation,
+            eliteGenerations,
+            eliteElites,
+            eliteFinalists,
+            eliteLocalSwapDepth,
+            eliteTwoSwapLimit,
+            eliteHoldoutSeeds,
+            eliteSimulations,
+            elitePartyGenomes,
+            eliteDefaults.MutationRate,
+            eliteDefaults.RandomInjectionRate,
+            eliteDefaults.DiversityPenalty,
+            topPlayerBuildsPath,
+            eliteMaximumGenerations,
+            eliteRestartRefinement,
+            eliteFinalistRefinement);
+        try
+        {
+            eliteCertification.Validate();
+        }
+        catch (ArgumentOutOfRangeException exception)
+        {
+            throw new BalanceCommandException(exception.Message);
+        }
 
         return new BalanceCommandOptions(
             seed,
@@ -219,10 +333,12 @@ public sealed record BalanceCommandOptions(
             new EncounterSpecificOptimizationOptions(
                 CandidateSimulations: encounterCandidateSimulations,
                 RetainedBuilds: encounterRetained),
+            eliteCertification,
             new ScalingValidationOptions(
                 HoldoutSeeds: validationSeeds,
                 SimulationsPerSeed: validationSimulations,
                 ProbeSimulationsPerSeed: validationProbeSimulations),
+            elitePolicyPath,
             contentRoot,
             outputRoot,
             showHelp);
@@ -282,6 +398,28 @@ public sealed record BalanceCommandOptions(
             "smooth-step" => ProgressionCurveKind.SmoothStep,
             _ => throw new BalanceCommandException(
                 $"Invalid progression curve '{value}'. Expected linear, ease-in, ease-out, or smooth-step.")
+        };
+
+    private static EliteCertificationProfile ReadCertificationProfile(IReadOnlyList<string> args)
+    {
+        for (var index = 0; index < args.Count; index++)
+        {
+            if (!args[index].Equals("--certification-profile", StringComparison.Ordinal))
+                continue;
+            if (++index >= args.Count || string.IsNullOrWhiteSpace(args[index]))
+                throw new BalanceCommandException("Argument '--certification-profile' requires a value.");
+            return ParseCertificationProfile(args[index]);
+        }
+        return EliteCertificationProfile.Developer;
+    }
+
+    private static EliteCertificationProfile ParseCertificationProfile(string value) =>
+        value.ToLowerInvariant() switch
+        {
+            "developer" => EliteCertificationProfile.Developer,
+            "release" => EliteCertificationProfile.Release,
+            _ => throw new BalanceCommandException(
+                $"Invalid certification profile '{value}'. Expected developer or release.")
         };
 }
 

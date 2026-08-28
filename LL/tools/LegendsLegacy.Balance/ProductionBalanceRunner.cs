@@ -22,10 +22,11 @@ public sealed class ProductionBalanceRunner(
     WorldTowerContentAnalyzer worldTower,
     EncounterCalibrator encounterCalibrator,
     EncounterSpecificOptimizer encounterSpecificOptimizer,
+    EliteBuildCertificationAnalyzer eliteBuildCertificationAnalyzer,
     ScalingValidationAnalyzer scalingValidationAnalyzer,
     TimeProvider timeProvider)
 {
-    public const int BalanceSchemaVersion = 14;
+    public const int BalanceSchemaVersion = 15;
     public const string SmokeScenarioId = "production-essence-smoke-1v1";
 
     public BalanceRunReport Run(BalanceRunRequest request)
@@ -115,6 +116,14 @@ public sealed class ProductionBalanceRunner(
             encounterCalibration,
             simulation.RandomSeed,
             request.EncounterSpecificOptimizationOptions);
+        var eliteBuildCertification = eliteBuildCertificationAnalyzer.Certify(
+            essenceMetaAnalysis,
+            representativeBuildLibrary,
+            worldTowerAnalysis,
+            encounterCalibration,
+            simulation.RandomSeed,
+            request.EliteCertificationPolicy,
+            request.EliteCertificationOptions);
         var scalingValidation = scalingValidationAnalyzer.Validate(
             worldTowerAnalysis,
             representativeBuildLibrary,
@@ -163,6 +172,7 @@ public sealed class ProductionBalanceRunner(
             worldTowerAnalysis,
             encounterCalibration,
             encounterSpecificOptimization,
+            eliteBuildCertification,
             scalingValidation);
     }
 
@@ -181,6 +191,8 @@ public sealed record BalanceRunRequest(
     EssenceMetaAnalysisOptions? EssenceMetaAnalysisOptions = null,
     EncounterCalibrationOptions? EncounterCalibrationOptions = null,
     EncounterSpecificOptimizationOptions? EncounterSpecificOptimizationOptions = null,
+    EliteCertificationPolicy? EliteCertificationPolicy = null,
+    EliteCertificationOptions? EliteCertificationOptions = null,
     ScalingValidationOptions? ScalingValidationOptions = null);
 
 public sealed record BalanceRunReport(
@@ -199,6 +211,7 @@ public sealed record BalanceRunReport(
     WorldTowerAnalysisSnapshot WorldTowerAnalysis,
     EncounterCalibrationSnapshot EncounterCalibration,
     EncounterSpecificOptimizationSnapshot EncounterSpecificOptimization,
+    EliteBuildCertificationSnapshot EliteBuildCertification,
     ScalingValidationSnapshot ScalingValidation);
 
 public sealed record BalanceRunMetadata(

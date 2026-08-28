@@ -1,5 +1,9 @@
 # Elite Build Certification Gate
 
+The concrete v1 thresholds, execution profiles, player-fixture rules, and approval checklist are defined in the companion [Elite Build Certification Policy v1](elite-build-certification-policy-v1.md).
+
+**Implementation status:** Implemented in balance schema 15. The one-click runner now executes adaptive deterministic multi-restart search, per-restart hill-climbing, bounded Pareto-finalist refinement, direct party-genome search, P95/P99 holdouts, curated-fixture validation, explicit verdicts, and standalone report persistence. The checked-in curated fixture is intentionally empty, so the current repository cannot produce `CertifiedElite` until reviewed player evidence is supplied and a release-profile run passes.
+
 This gate establishes whether generated Essence combinations are strong enough to represent highly optimized and top-player builds. It must be completed before Region 1 scaling is remediated and before Milestone 14 extends the system to additional progression bands.
 
 The purpose is not to make P99 builds the normal progression target. Generic P75 builds remain the default Region 1 reference. Certified P95/P99 and encounter-specialized parties provide a separate elite stress boundary that prevents content from being accidentally trivialized by advanced players.
@@ -39,6 +43,8 @@ Content should be evaluated against distinct populations with different purposes
 | Curated or observed player builds | Evidence that automated search reflects builds real advanced players construct.          |
 
 Elite profiles must not silently replace P75 progression profiles. Every report must show the populations independently and apply an explicit target policy to each one.
+
+World Tower holdouts use deterministic score-centered cohorts around the P95 and P99 targets. The artifact retains both cohort membership lists so reviewers can verify that the labels did not collapse into the same upper-tail population.
 
 ## Required certification search
 
@@ -246,11 +252,11 @@ elite-build-certification.json
 - comparison with curated top-player builds;
 - blocking warnings that prevent scaling approval.
 
-The schema version should be incremented when this contract is implemented. Creating this design document does not itself change the current schema-14 runtime.
+Balance schema version 15 implements this contract and writes the resolved policy, execution profile, content fingerprint, evidence, verdicts, and warnings into the standalone artifact and combined summary.
 
 ## Relationship to the current Region 1 gate
 
-The existing [Region 1 Scaling Validation Gate](region-1-scaling-validation.md) correctly tests whether calibration generalizes for the current P75 representative library. It does not prove that the library contains elite-quality builds.
+The existing [Region 1 Scaling Validation Gate](../region-1-scaling-validation.md) correctly tests whether calibration generalizes for the current P75 representative library. It does not prove that the library contains elite-quality builds.
 
 The required order is therefore:
 

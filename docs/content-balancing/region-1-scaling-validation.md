@@ -84,7 +84,7 @@ All ten floors passed the local shared-factor monotonicity check. Floor 8 is the
 
 ## Milestone 14 gate
 
-Region 1 is not yet approved as the calibration template for additional progression bands. Before recalibration, the designed [Elite Build Certification Gate](elite-build-certification-gate.md) should establish trustworthy P95/P99 and top-player stress cohorts. Unstable Floors 2–5 should then be recalibrated against the certified population and holdout distribution, while mechanic-review Floors 1, 6, 7, 9, and 10 should be inspected for encounter-specific interactions or unsuitable generic profile mapping. This gate should then be rerun unchanged. Expansion is safe only after both gates pass or a developer explicitly documents an exception.
+Region 1 is not yet approved as the calibration template for additional progression bands. The implemented [Elite Build Certification Gate](elite-build-certification/elite-build-certification-gate.md) must first establish trustworthy P95/P99 and top-player stress cohorts through a passing release-profile run. Unstable Floors 2–5 should then be recalibrated against the certified population and holdout distribution, while mechanic-review Floors 1, 6, 7, 9, and 10 should be inspected for encounter-specific interactions or unsuitable generic profile mapping. This gate should then be rerun unchanged. Expansion is safe only after both gates pass or a developer explicitly documents an exception.
 
 ## Verification
 

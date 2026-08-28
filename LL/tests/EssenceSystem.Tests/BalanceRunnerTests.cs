@@ -23,6 +23,7 @@ public sealed class BalanceRunnerTests
             WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: CreateTestEliteCertificationOptions(),
             ScalingValidationOptions: CreateTestScalingValidationOptions()));
         var replay = runner.Run(new BalanceRunRequest(
             8471,
@@ -32,6 +33,7 @@ public sealed class BalanceRunnerTests
             WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: CreateTestEliteCertificationOptions(),
             ScalingValidationOptions: CreateTestScalingValidationOptions()));
 
         Assert.Equal(first.Metadata.Seed, replay.Metadata.Seed);
@@ -49,6 +51,7 @@ public sealed class BalanceRunnerTests
         Assert.Equivalent(first.WorldTowerAnalysis, replay.WorldTowerAnalysis, strict: true);
         Assert.Equivalent(first.EncounterCalibration, replay.EncounterCalibration, strict: true);
         Assert.Equivalent(first.EncounterSpecificOptimization, replay.EncounterSpecificOptimization, strict: true);
+        Assert.Equivalent(first.EliteBuildCertification, replay.EliteBuildCertification, strict: true);
         Assert.Equivalent(first.ScalingValidation, replay.ScalingValidation, strict: true);
         Assert.NotEqual(first.Metadata.RunId, replay.Metadata.RunId);
         Assert.True(first.Content.AbilityCount > 0);
@@ -68,6 +71,7 @@ public sealed class BalanceRunnerTests
             WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: CreateTestEliteCertificationOptions(),
             ScalingValidationOptions: CreateTestScalingValidationOptions()));
 
         Assert.Collection(
@@ -99,9 +103,10 @@ public sealed class BalanceRunnerTests
             OptimizerOptions: CreateTestOptimizerOptions(),
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: CreateTestEliteCertificationOptions(),
             ScalingValidationOptions: CreateTestScalingValidationOptions()));
 
-        Assert.Equal(14, report.Metadata.BalanceSchemaVersion);
+        Assert.Equal(15, report.Metadata.BalanceSchemaVersion);
         Assert.Equal(ProductionBalanceRunner.SmokeScenarioId, report.Simulation.ScenarioId);
         Assert.Equal(15, report.EssenceBuilds.Count);
         Assert.Collection(
@@ -262,6 +267,38 @@ public sealed class BalanceRunnerTests
             Assert.Equal(
                 report.EncounterCalibration.Floors.Single(calibration => calibration.Floor == floor.Floor).SuggestedClearRate,
                 floor.GenericClearRate);
+        });
+        Assert.False(report.EliteBuildCertification.ProductionContentModified);
+        Assert.Equal(3, report.EliteBuildCertification.AlgorithmVersion);
+        Assert.NotEqual(EliteCertificationVerdict.CertifiedElite, report.EliteBuildCertification.Verdict);
+        Assert.Equal(3, report.EliteBuildCertification.Profiles.Count);
+        Assert.Equal(Enumerable.Range(1, 10), report.EliteBuildCertification.Floors.Select(floor => floor.Floor));
+        Assert.All(report.EliteBuildCertification.Profiles, profile =>
+        {
+            Assert.True(profile.LegalSearchSpaceSize > profile.UniqueCandidatesEvaluated);
+            Assert.Equal(2, profile.Restarts.Count);
+            Assert.All(profile.Restarts, restart =>
+            {
+                Assert.InRange(restart.GenerationsExecuted, 1, 1);
+                Assert.True(restart.RawBestScore <= restart.BestScore);
+                Assert.InRange(restart.LocalRefinementPasses, 0, 1);
+            });
+            Assert.True(profile.P95TargetScore <= profile.P99TargetScore);
+            Assert.True(profile.P99TargetScore <= profile.BestScore);
+            Assert.True(profile.LocalChallenge.CompleteForConfiguredDepth);
+            Assert.NotEmpty(profile.Finalists);
+        });
+        Assert.All(report.EliteBuildCertification.Floors, floor =>
+        {
+            Assert.Equal(1, floor.PartyGenomesEvaluated);
+            Assert.Equal(1, floor.PartyGenomeSearchSpaceSize);
+            Assert.True(floor.PartyOptimizationComplete);
+            Assert.NotEmpty(floor.P95CohortBuildIds);
+            Assert.NotEmpty(floor.P99CohortBuildIds);
+            Assert.False(floor.P95CohortBuildIds.SequenceEqual(floor.P99CohortBuildIds));
+            Assert.InRange(floor.CertifiedP95.ClearRate, 0, 1);
+            Assert.InRange(floor.CertifiedP99.ClearRate, 0, 1);
+            Assert.InRange(floor.SpecializedParty.ConfidenceLowerBound, 0, floor.SpecializedParty.ConfidenceUpperBound);
         });
         Assert.Equal(Enumerable.Range(1, 10), report.ScalingValidation.Floors.Select(floor => floor.Floor));
         Assert.False(report.ScalingValidation.ProductionContentModified);
@@ -712,6 +749,7 @@ public sealed class BalanceRunnerTests
             Assert.True(File.Exists(paths.LatestWorldTowerAnalysisJsonPath));
             Assert.True(File.Exists(paths.LatestEncounterCalibrationJsonPath));
             Assert.True(File.Exists(paths.LatestEncounterSpecificOptimizationJsonPath));
+            Assert.True(File.Exists(paths.LatestEliteBuildCertificationJsonPath));
             Assert.True(File.Exists(paths.LatestScalingValidationJsonPath));
             Assert.True(File.Exists(paths.HistoryJsonPath));
             Assert.True(File.Exists(paths.HistoryMarkdownPath));
@@ -727,6 +765,7 @@ public sealed class BalanceRunnerTests
             Assert.True(File.Exists(paths.HistoryWorldTowerAnalysisJsonPath));
             Assert.True(File.Exists(paths.HistoryEncounterCalibrationJsonPath));
             Assert.True(File.Exists(paths.HistoryEncounterSpecificOptimizationJsonPath));
+            Assert.True(File.Exists(paths.HistoryEliteBuildCertificationJsonPath));
             Assert.True(File.Exists(paths.HistoryScalingValidationJsonPath));
             Assert.Equal(
                 File.ReadAllText(paths.LatestJsonPath),
@@ -771,6 +810,9 @@ public sealed class BalanceRunnerTests
                 File.ReadAllText(paths.LatestEncounterSpecificOptimizationJsonPath),
                 File.ReadAllText(paths.HistoryEncounterSpecificOptimizationJsonPath));
             Assert.Equal(
+                File.ReadAllText(paths.LatestEliteBuildCertificationJsonPath),
+                File.ReadAllText(paths.HistoryEliteBuildCertificationJsonPath));
+            Assert.Equal(
                 File.ReadAllText(paths.LatestScalingValidationJsonPath),
                 File.ReadAllText(paths.HistoryScalingValidationJsonPath));
 
@@ -788,6 +830,7 @@ public sealed class BalanceRunnerTests
             Assert.Contains("World Tower Content Analysis", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Encounter Calibration", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Encounter-Specific Optimization", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Elite Build Certification", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Region 1 Scaling Validation", File.ReadAllText(paths.LatestMarkdownPath));
             using var gearJson = JsonDocument.Parse(File.ReadAllText(paths.LatestGearPackagesJsonPath));
             Assert.Single(gearJson.RootElement.EnumerateArray());
@@ -819,6 +862,11 @@ public sealed class BalanceRunnerTests
             using var encounterSpecificOptimizationJson = JsonDocument.Parse(
                 File.ReadAllText(paths.LatestEncounterSpecificOptimizationJsonPath));
             Assert.Single(encounterSpecificOptimizationJson.RootElement.GetProperty("floors").EnumerateArray());
+            using var eliteBuildCertificationJson = JsonDocument.Parse(
+                File.ReadAllText(paths.LatestEliteBuildCertificationJsonPath));
+            Assert.Equal(
+                "DeveloperProfileOnly",
+                eliteBuildCertificationJson.RootElement.GetProperty("verdict").GetString());
             using var scalingValidationJson = JsonDocument.Parse(
                 File.ReadAllText(paths.LatestScalingValidationJsonPath));
             Assert.Single(scalingValidationJson.RootElement.GetProperty("floors").EnumerateArray());
@@ -972,13 +1020,209 @@ public sealed class BalanceRunnerTests
         Assert.Contains("--meta-simulator-battles", exception.Message);
     }
 
+    [Fact]
+    public void Command_options_configure_release_elite_certification_profile()
+    {
+        var options = BalanceCommandOptions.Parse([
+            "--certification-profile", "release",
+            "--elite-restarts", "6",
+            "--elite-population", "100",
+            "--elite-generations", "20",
+            "--elite-max-generations", "40",
+            "--elite-elites", "10",
+            "--elite-finalists", "8",
+            "--elite-local-swap-depth", "2",
+            "--elite-two-swap-limit", "0",
+            "--elite-restart-refinement", "9",
+            "--elite-finalist-refinement", "4",
+            "--elite-holdout-seeds", "10",
+            "--elite-simulations", "160",
+            "--elite-party-genomes", "5000",
+            "--top-player-builds", "fixtures.json"
+        ]);
+
+        Assert.Equal(EliteCertificationProfile.Release, options.EliteCertificationOptions.Profile);
+        Assert.Equal(6, options.EliteCertificationOptions.RestartCount);
+        Assert.Equal(100, options.EliteCertificationOptions.PopulationSize);
+        Assert.Equal(20, options.EliteCertificationOptions.Generations);
+        Assert.Equal(40, options.EliteCertificationOptions.MaximumGenerations);
+        Assert.Equal(10, options.EliteCertificationOptions.EliteCount);
+        Assert.Equal(8, options.EliteCertificationOptions.FinalistsPerSlotProfile);
+        Assert.Equal(10, options.EliteCertificationOptions.HoldoutSeeds);
+        Assert.Equal(160, options.EliteCertificationOptions.SimulationsPerSeed);
+        Assert.Equal(5_000, options.EliteCertificationOptions.PartyGenomeBudgetPerFloor);
+        Assert.Equal(9, options.EliteCertificationOptions.RestartLocalRefinementPassLimit);
+        Assert.Equal(4, options.EliteCertificationOptions.FinalistRefinementRoundLimit);
+        Assert.Equal("fixtures.json", options.EliteCertificationOptions.TopPlayerBuildsPath);
+    }
+
+    [Fact]
+    public void Command_options_reject_unknown_elite_certification_profile()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--certification-profile", "production"]));
+
+        Assert.Contains("developer or release", exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_raise_implicit_elite_generation_ceiling_with_the_minimum()
+    {
+        var options = BalanceCommandOptions.Parse(["--elite-generations", "30"]);
+
+        Assert.Equal(30, options.EliteCertificationOptions.Generations);
+        Assert.Equal(30, options.EliteCertificationOptions.MaximumGenerations);
+    }
+
+    [Fact]
+    public void Command_options_reject_elite_generation_ceiling_below_the_minimum()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-generations", "20",
+            "--elite-max-generations", "10"
+        ]));
+
+        Assert.Contains("maximum generations", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Optimizer_adaptive_stop_requires_the_minimum_and_material_plateau()
+    {
+        var options = new EssenceOptimizerOptions(
+            Generations: 3,
+            MaximumGenerations: 6,
+            RequiredPlateauGenerations: 2,
+            PlateauImprovementTolerance: 0.25);
+        var generations = new List<EssenceOptimizerGenerationSnapshot>
+        {
+            OptimizerGeneration(0, 10),
+            OptimizerGeneration(1, 10.1),
+            OptimizerGeneration(2, 10.2),
+            OptimizerGeneration(3, 10.6),
+            OptimizerGeneration(4, 10.65)
+        };
+
+        Assert.False(EssenceBuildOptimizer.ShouldStopAdaptiveSearch(generations, options));
+
+        generations.Add(OptimizerGeneration(5, 10.7));
+
+        Assert.Equal(2, EssenceBuildOptimizer.GenerationsSinceMaterialImprovement(generations, 0.25));
+        Assert.True(EssenceBuildOptimizer.ShouldStopAdaptiveSearch(generations, options));
+    }
+
+    [Fact]
+    public void Elite_percentile_cohorts_are_centered_on_distinct_target_scores()
+    {
+        double[] scores = [70, 73.3, 73.5, 75.0, 75.1, 80];
+
+        var p95 = EliteCertificationSearchRules.SelectPercentileCohortIndexes(scores, 73.4, 2);
+        var p99 = EliteCertificationSearchRules.SelectPercentileCohortIndexes(scores, 75.05, 2);
+
+        Assert.Equal([2, 1], p95);
+        Assert.Equal([4, 3], p99);
+        Assert.Empty(p95.Intersect(p99));
+    }
+
+    [Fact]
+    public void Elite_scenario_challenge_rejects_tradeoffs_but_accepts_stable_improvements()
+    {
+        var parent = new Dictionary<string, double>
+        {
+            ["damage"] = 90,
+            ["survival"] = 80,
+            ["attrition"] = 80
+        };
+        var tradeoff = new Dictionary<string, double>
+        {
+            ["damage"] = 95,
+            ["survival"] = 60,
+            ["attrition"] = 80
+        };
+        var stableImprovement = new Dictionary<string, double>
+        {
+            ["damage"] = 92,
+            ["survival"] = 79.5,
+            ["attrition"] = 80
+        };
+
+        Assert.False(EliteCertificationSearchRules.IsScenarioImprovement(parent, tradeoff, "damage", 1));
+        Assert.True(EliteCertificationSearchRules.IsScenarioImprovement(parent, stableImprovement, "damage", 1));
+    }
+
+    [Theory]
+    [InlineData(6, 5, 252)]
+    [InlineData(12, 5, 4368)]
+    public void Elite_party_search_counts_unique_unordered_genomes_with_repetition(
+        int candidateCount,
+        int requiredSlots,
+        long expected)
+    {
+        Assert.Equal(expected, EliteCertificationSearchRules.CountPartyGenomes(candidateCount, requiredSlots));
+    }
+
+    [Fact]
+    public void Elite_certification_policy_round_trips_from_the_versioned_configuration()
+    {
+        var policyPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Configuration",
+            "elite-certification-policy.v1.json");
+
+        var policy = EliteCertificationPolicy.Load(policyPath);
+
+        Assert.Equal(EliteCertificationPolicy.V1, policy);
+        Assert.Equal(64, policy.CreateFingerprint().Length);
+    }
+
+    [Fact]
+    public void Top_player_fixtures_reject_stale_content_fingerprints()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"elite-fixtures-{Guid.NewGuid():N}.json");
+        try
+        {
+            File.WriteAllText(path, """
+                {
+                  "schemaVersion": 1,
+                  "contentFingerprint": "stale",
+                  "builds": [
+                    {
+                      "id": "fixture-one",
+                      "sourceCategory": "TrustedTester",
+                      "reviewDate": "2026-08-28",
+                      "slotCount": 4,
+                      "essenceIds": ["a", "b", "c", "d"],
+                      "gearPackageId": "gear",
+                      "characterLevel": 30,
+                      "progressionState": "region-one",
+                      "intendedRole": "generic",
+                      "encounterFloor": null,
+                      "observedResult": null,
+                      "reviewerNote": "reviewed"
+                    }
+                  ],
+                  "parties": []
+                }
+                """);
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                TopPlayerFixtureDocument.Load(path, "current"));
+
+            Assert.Contains("does not match current content", exception.Message);
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
     private static BalanceRunReport CreateReport() =>
         new(
             new BalanceRunMetadata(
                 "20260827T120000000Z-12345678",
                 new DateTimeOffset(2026, 8, 27, 12, 0, 0, TimeSpan.Zero),
                 1337,
-                14,
+                15,
                 2,
                 "1.0.0.0",
                 "abcdef123456"),
@@ -1007,7 +1251,88 @@ public sealed class BalanceRunnerTests
             CreateWorldTowerAnalysis(),
             CreateEncounterCalibration(),
             CreateEncounterSpecificOptimization(),
+            CreateEliteBuildCertification(),
             CreateScalingValidation());
+
+    private static EliteBuildCertificationSnapshot CreateEliteBuildCertification()
+    {
+        var holdout = new EliteHoldoutSnapshot(2, 10, 20, 18, 0.9, 0.7, 0.97, 0.27, 100, 100, 0, 0.5);
+        var candidate = new EliteCertificationCandidateSnapshot(
+            "E4_CERT_test",
+            99,
+            80,
+            new Dictionary<string, double> { ["pve.short-single-target"] = 80 },
+            ["essence.test_one"]);
+        return new EliteBuildCertificationSnapshot(
+            1,
+            1337,
+            "content-fingerprint",
+            "policy-fingerprint",
+            EliteCertificationPolicy.V1,
+            new EliteCertificationOptions(
+                RestartCount: 2,
+                PopulationSize: 4,
+                Generations: 1,
+                EliteCount: 1,
+                FinalistsPerSlotProfile: 1,
+                LocalSwapDepth: 1,
+                HoldoutSeeds: 2,
+                SimulationsPerSeed: 10,
+                PartyGenomeBudgetPerFloor: 1),
+            false,
+            10,
+            1,
+            EliteCertificationVerdict.DeveloperProfileOnly,
+            ["Developer profile cannot certify."],
+            [
+                new EliteCertificationProfileSnapshot(
+                    "E4_ELITE",
+                    4,
+                    1_572_574,
+                    10,
+                    75,
+                    80,
+                    80,
+                    0.25,
+                    true,
+                    true,
+                    true,
+                    true,
+                    candidate,
+                    candidate,
+                    [candidate],
+                    [new EliteCertificationRestartSnapshot(1, 123, 79, 80, 4, 4, true, 10, 1, 20)],
+                    new EliteLocalChallengeSnapshot(1, 1, 10, 0, true, 0, 0, null, null),
+                    new CuratedBuildComparisonSnapshot(3, 79, 80, -1, true, false),
+                    EliteCertificationVerdict.DeveloperProfileOnly,
+                    ["Developer profile cannot certify."])
+            ],
+            [
+                new EliteCertificationFloorSnapshot(
+                    1,
+                    "The First Gate",
+                    "E4_P75",
+                    4,
+                    1,
+                    1,
+                    true,
+                    holdout,
+                    holdout,
+                    holdout,
+                    holdout,
+                    null,
+                    true,
+                    true,
+                    false,
+                    false,
+                    false,
+                    EliteCertificationVerdict.DeveloperProfileOnly,
+                    ["E4_CERT_p95"],
+                    ["E4_CERT_p99"],
+                    ["E4_CERT_test"],
+                    ["Developer profile cannot certify."])
+            ]);
+    }
 
     private static EssenceMetaAnalysisSnapshot CreateEssenceMetaAnalysis() =>
         new(
@@ -1751,8 +2076,27 @@ public sealed class BalanceRunnerTests
     private static EncounterSpecificOptimizationOptions CreateTestEncounterOptimizerOptions() =>
         new(CandidateSimulations: 1, RetainedBuilds: 2);
 
+    private static EliteCertificationOptions CreateTestEliteCertificationOptions() =>
+        new(
+            RestartCount: 2,
+            PopulationSize: 4,
+            Generations: 1,
+            EliteCount: 1,
+            FinalistsPerSlotProfile: 1,
+            LocalSwapDepth: 1,
+            TwoSwapChallengerLimitPerFinalist: 0,
+            HoldoutSeeds: 2,
+            SimulationsPerSeed: 1,
+            PartyGenomeBudgetPerFloor: 1,
+            MaximumGenerations: 1,
+            RestartLocalRefinementPassLimit: 1,
+            FinalistRefinementRoundLimit: 0);
+
     private static ScalingValidationOptions CreateTestScalingValidationOptions() =>
         new(HoldoutSeeds: 2, SimulationsPerSeed: 1, ProbeSimulationsPerSeed: 1);
+
+    private static EssenceOptimizerGenerationSnapshot OptimizerGeneration(int generation, double bestScore) =>
+        new(generation, 4, 4, bestScore, bestScore, bestScore, 0);
 
     private static void AssertGearPackage(
         GearPackageSnapshot package,

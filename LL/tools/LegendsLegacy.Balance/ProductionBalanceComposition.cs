@@ -83,6 +83,14 @@ public static class ProductionBalanceComposition
             gearPackages);
         var encounterCalibrator = new EncounterCalibrator(worldTowerAnalyzer);
         var encounterSpecificOptimizer = new EncounterSpecificOptimizer(worldTowerAnalyzer);
+        var essenceOptimizer = new EssenceBuildOptimizer(essenceBuildGenerator, benchmarkRunner);
+        var eliteBuildCertificationAnalyzer = new EliteBuildCertificationAnalyzer(
+            catalog,
+            essences,
+            essenceBuildGenerator,
+            benchmarkRunner,
+            essenceOptimizer,
+            worldTowerAnalyzer);
         var scalingValidationAnalyzer = new ScalingValidationAnalyzer(worldTowerAnalyzer);
 
         return new ProductionBalanceRunner(
@@ -94,7 +102,7 @@ public static class ProductionBalanceComposition
             essenceBuildGenerator,
             benchmarkRunner,
             new CombatRatingAnalyzer(),
-            new EssenceBuildOptimizer(essenceBuildGenerator, benchmarkRunner),
+            essenceOptimizer,
             new RepresentativeBuildLibrary(),
             new EssenceMetaAnalyzer(essences),
             new PowerAnchorAnalyzer(),
@@ -102,6 +110,7 @@ public static class ProductionBalanceComposition
             worldTowerAnalyzer,
             encounterCalibrator,
             encounterSpecificOptimizer,
+            eliteBuildCertificationAnalyzer,
             scalingValidationAnalyzer,
             timeProvider ?? TimeProvider.System);
     }

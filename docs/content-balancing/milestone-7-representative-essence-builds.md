@@ -56,7 +56,7 @@ This is intentionally separate from optimizer population size and Milestone 6's 
 
 ## Report Contract
 
-Balance schema version 7 introduced `representativeBuilds` in `summary.json` and `representative-builds.json` under both `latest` and immutable history; the current combined pipeline uses schema version 14. `summary.md` reports every profile's target score, selected score range, mean score, mean pairwise similarity, and representative count, followed by a compact list of its closest representative.
+Balance schema version 7 introduced `representativeBuilds` in `summary.json` and `representative-builds.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. `summary.md` reports every profile's target score, selected score range, mean score, mean pairwise similarity, and representative count, followed by a compact list of its closest representative.
 
 The output contains exactly nine profiles in stable slot-count and percentile order. Milestone 8 uses `E4_P75` with the Region 1 Floor 1 Gear Package and `E6_P75` with the Floor 10 Gear Package to measure the first power anchors.
 

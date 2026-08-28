@@ -37,7 +37,7 @@ Positions, weights, and target powers are rounded to four, six, and two decimal 
 
 ## Report Contract
 
-Balance schema version 9 introduced `progressionBands` in `summary.json` and `progression-bands.json` under both `latest` and immutable history; the current combined pipeline uses schema version 14. Each floor retains its normalized position, curve weight, target benchmark power, and optional endpoint anchor ID. The Markdown report renders the complete ten-floor curve.
+Balance schema version 9 introduced `progressionBands` in `summary.json` and `progression-bands.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. Each floor retains its normalized position, curve weight, target benchmark power, and optional endpoint anchor ID. The Markdown report renders the complete ten-floor curve.
 
 Milestone 9 describes progression intent only. Milestone 10 consumes these targets to select P75 representatives, simulate the authored World Tower encounters, derive CR, and report difficulty warnings. Milestone 12 now consumes that diagnosis and performs bounded health/offense calibration without modifying production content.
 

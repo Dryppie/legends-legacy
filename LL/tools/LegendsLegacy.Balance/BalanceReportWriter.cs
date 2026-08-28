@@ -34,6 +34,7 @@ public sealed class BalanceReportWriter
         var worldTowerAnalysisJson = JsonSerializer.Serialize(report.WorldTowerAnalysis, JsonOptions);
         var encounterCalibrationJson = JsonSerializer.Serialize(report.EncounterCalibration, JsonOptions);
         var encounterSpecificOptimizationJson = JsonSerializer.Serialize(report.EncounterSpecificOptimization, JsonOptions);
+        var eliteBuildCertificationJson = JsonSerializer.Serialize(report.EliteBuildCertification, JsonOptions);
         var scalingValidationJson = JsonSerializer.Serialize(report.ScalingValidation, JsonOptions);
         var markdown = RenderMarkdown(report);
         var latestJsonPath = Path.Combine(latestDirectory, "summary.json");
@@ -50,6 +51,7 @@ public sealed class BalanceReportWriter
         var latestWorldTowerAnalysisJsonPath = Path.Combine(latestDirectory, "world-tower-analysis.json");
         var latestEncounterCalibrationJsonPath = Path.Combine(latestDirectory, "encounter-calibration.json");
         var latestEncounterSpecificOptimizationJsonPath = Path.Combine(latestDirectory, "encounter-specific-optimization.json");
+        var latestEliteBuildCertificationJsonPath = Path.Combine(latestDirectory, "elite-build-certification.json");
         var latestScalingValidationJsonPath = Path.Combine(latestDirectory, "scaling-validation.json");
         var historyJsonPath = Path.Combine(historyDirectory, "summary.json");
         var historyMarkdownPath = Path.Combine(historyDirectory, "summary.md");
@@ -65,6 +67,7 @@ public sealed class BalanceReportWriter
         var historyWorldTowerAnalysisJsonPath = Path.Combine(historyDirectory, "world-tower-analysis.json");
         var historyEncounterCalibrationJsonPath = Path.Combine(historyDirectory, "encounter-calibration.json");
         var historyEncounterSpecificOptimizationJsonPath = Path.Combine(historyDirectory, "encounter-specific-optimization.json");
+        var historyEliteBuildCertificationJsonPath = Path.Combine(historyDirectory, "elite-build-certification.json");
         var historyScalingValidationJsonPath = Path.Combine(historyDirectory, "scaling-validation.json");
 
         WriteUtf8(historyJsonPath, json);
@@ -81,6 +84,7 @@ public sealed class BalanceReportWriter
         WriteUtf8(historyWorldTowerAnalysisJsonPath, worldTowerAnalysisJson);
         WriteUtf8(historyEncounterCalibrationJsonPath, encounterCalibrationJson);
         WriteUtf8(historyEncounterSpecificOptimizationJsonPath, encounterSpecificOptimizationJson);
+        WriteUtf8(historyEliteBuildCertificationJsonPath, eliteBuildCertificationJson);
         WriteUtf8(historyScalingValidationJsonPath, scalingValidationJson);
         WriteUtf8(latestJsonPath, json);
         WriteUtf8(latestMarkdownPath, markdown);
@@ -96,6 +100,7 @@ public sealed class BalanceReportWriter
         WriteUtf8(latestWorldTowerAnalysisJsonPath, worldTowerAnalysisJson);
         WriteUtf8(latestEncounterCalibrationJsonPath, encounterCalibrationJson);
         WriteUtf8(latestEncounterSpecificOptimizationJsonPath, encounterSpecificOptimizationJson);
+        WriteUtf8(latestEliteBuildCertificationJsonPath, eliteBuildCertificationJson);
         WriteUtf8(latestScalingValidationJsonPath, scalingValidationJson);
 
         return new BalanceReportPaths(
@@ -113,6 +118,7 @@ public sealed class BalanceReportWriter
             latestWorldTowerAnalysisJsonPath,
             latestEncounterCalibrationJsonPath,
             latestEncounterSpecificOptimizationJsonPath,
+            latestEliteBuildCertificationJsonPath,
             latestScalingValidationJsonPath,
             historyJsonPath,
             historyMarkdownPath,
@@ -128,6 +134,7 @@ public sealed class BalanceReportWriter
             historyWorldTowerAnalysisJsonPath,
             historyEncounterCalibrationJsonPath,
             historyEncounterSpecificOptimizationJsonPath,
+            historyEliteBuildCertificationJsonPath,
             historyScalingValidationJsonPath);
     }
 
@@ -383,6 +390,32 @@ public sealed class BalanceReportWriter
         var encounterOptimizerWarningText = encounterOptimizerWarnings.Length == 0
             ? "- None."
             : string.Join(Environment.NewLine, encounterOptimizerWarnings.Select(warning => $"- {EscapeCell(warning)}"));
+        var eliteProfileRows = string.Join(
+            Environment.NewLine,
+            report.EliteBuildCertification.Profiles.Select(profile =>
+                $"| `{profile.ProfileId}` " +
+                $"| {profile.LegalSearchSpaceSize:N0} " +
+                $"| {profile.UniqueCandidatesEvaluated:N0} " +
+                $"| {profile.Restarts.Min(restart => restart.GenerationsExecuted)}-{profile.Restarts.Max(restart => restart.GenerationsExecuted)} " +
+                $"| {FormatScore(profile.P95TargetScore)} " +
+                $"| {FormatScore(profile.P99TargetScore)} " +
+                $"| {FormatScore(profile.BestScoreSpreadAcrossRestarts)} " +
+                $"| {profile.Restarts.Sum(restart => restart.LocalRefinementPasses)}/{profile.LocalChallenge.RefinementRounds} " +
+                $"| {FormatSignedScore(profile.LocalChallenge.BestAggregateImprovement)} " +
+                $"| {profile.Verdict} |"));
+        var eliteFloorRows = string.Join(
+            Environment.NewLine,
+            report.EliteBuildCertification.Floors.Select(floor =>
+                $"| {floor.Floor} " +
+                $"| {FormatPercent(floor.GenericP75.ClearRate)} " +
+                $"| {FormatPercent(floor.CertifiedP95.ClearRate)} ({FormatPercent(floor.CertifiedP95.ConfidenceLowerBound)}-{FormatPercent(floor.CertifiedP95.ConfidenceUpperBound)}) " +
+                $"| {FormatPercent(floor.CertifiedP99.ClearRate)} ({FormatPercent(floor.CertifiedP99.ConfidenceLowerBound)}-{FormatPercent(floor.CertifiedP99.ConfidenceUpperBound)}) " +
+                $"| {FormatPercent(floor.SpecializedParty.ClearRate)} " +
+                $"| {floor.PartyGenomesEvaluated:N0}/{floor.PartyGenomeSearchSpaceSize:N0} " +
+                $"| {floor.Verdict} |"));
+        var eliteWarningText = report.EliteBuildCertification.Warnings.Count == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, report.EliteBuildCertification.Warnings.Select(warning => $"- {EscapeCell(warning)}"));
         var scalingValidationRows = string.Join(
             Environment.NewLine,
             report.ScalingValidation.Floors.Select(floor =>
@@ -583,6 +616,30 @@ public sealed class BalanceReportWriter
 
             {{encounterOptimizerWarningText}}
 
+            ## Elite Build Certification
+
+            **Overall verdict:** `{{report.EliteBuildCertification.Verdict}}`
+
+            **Execution profile:** `{{report.EliteBuildCertification.Options.Profile}}`
+
+            **Policy:** `{{report.EliteBuildCertification.Policy.PolicyId}}` (fingerprint `{{report.EliteBuildCertification.PolicyFingerprint}}`)
+
+            **Content fingerprint:** `{{report.EliteBuildCertification.ContentFingerprint}}`
+
+            | Profile | Legal Space | Unique Evaluations | Actual Generations | P95 Score | P99 Score | Restart Spread | Restart/Finalist Refinements | Best Local Improvement | Verdict |
+            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+            {{eliteProfileRows}}
+
+            | Floor | Generic P75 | Certified P95 (95% CI) | Certified P99 (95% CI) | Specialized Party | Party Genomes | Verdict |
+            | ---: | ---: | --- | --- | ---: | ---: | --- |
+            {{eliteFloorRows}}
+
+            Certification keeps P75 progression separate from generated P95/P99 and encounter-specialized stress populations. Developer-profile runs preserve complete diagnostics but cannot emit `CertifiedElite`. Production content was not modified.
+
+            ### Elite Certification Warnings
+
+            {{eliteWarningText}}
+
             ## Region 1 Scaling Validation
 
             **Verdicts:** {{report.ScalingValidation.ValidatedFloorCount}} validated, {{report.ScalingValidation.UnstableFloorCount}} unstable, {{report.ScalingValidation.MechanicReviewFloorCount}} require mechanic review.
@@ -682,6 +739,7 @@ public sealed record BalanceReportPaths(
     string LatestWorldTowerAnalysisJsonPath,
     string LatestEncounterCalibrationJsonPath,
     string LatestEncounterSpecificOptimizationJsonPath,
+    string LatestEliteBuildCertificationJsonPath,
     string LatestScalingValidationJsonPath,
     string HistoryJsonPath,
     string HistoryMarkdownPath,
@@ -697,4 +755,5 @@ public sealed record BalanceReportPaths(
     string HistoryWorldTowerAnalysisJsonPath,
     string HistoryEncounterCalibrationJsonPath,
     string HistoryEncounterSpecificOptimizationJsonPath,
+    string HistoryEliteBuildCertificationJsonPath,
     string HistoryScalingValidationJsonPath);

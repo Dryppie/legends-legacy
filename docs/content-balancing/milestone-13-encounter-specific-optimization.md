@@ -49,7 +49,7 @@ The version-1 thresholds are intentionally conservative and explicit:
 
 ## Report contract
 
-Balance schema version 13 introduced `encounterSpecificOptimization` in `summary.json` and `encounter-specific-optimization.json` under both `latest` and immutable history; the current combined pipeline uses schema version 14. Each floor records:
+Balance schema version 13 introduced `encounterSpecificOptimization` in `summary.json` and `encounter-specific-optimization.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. Each floor records:
 
 - the candidate population and slot count;
 - the calibration factors actually tested;
@@ -86,4 +86,4 @@ The generic clear rates in this table are the ten-trial calibration observations
 
 ## Verification
 
-Automated coverage verifies deterministic end-to-end execution, encounter-specific artifact persistence in the current schema-14 report, CLI option validation, and a focused synthetic case where a dominant low-generic-PvE strategy is classified as `CheeseRisk`. The canonical seed-8471 invocation verifies all 10 production Guardians through the same one-button flow.
+Automated coverage verifies deterministic end-to-end execution, encounter-specific artifact persistence in the current schema-15 report, CLI option validation, and a focused synthetic case where a dominant low-generic-PvE strategy is classified as `CheeseRisk`. The canonical seed-8471 invocation verifies all 10 production Guardians through the same one-button flow.

@@ -51,7 +51,7 @@ Thresholds and sampling limits are serialized with the report. The one-button CL
 
 ## Report Contract
 
-Balance schema version 11 introduced `essenceMetaAnalysis` in `summary.json` and `essence-meta-analysis.json` under both `latest` and immutable history; the current combined pipeline uses schema version 14. The Markdown report summarizes warnings, percentile usage, simulator evidence, and the strongest measured pair deltas.
+Balance schema version 11 introduced `essenceMetaAnalysis` in `summary.json` and `essence-meta-analysis.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. The Markdown report summarizes warnings, percentile usage, simulator evidence, and the strongest measured pair deltas.
 
 ## Initial Measured Result
 

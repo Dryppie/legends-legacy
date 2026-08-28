@@ -40,6 +40,22 @@ Supported options:
 --calibration-iterations <number>  Bounded encounter-search iterations (default: 10).
 --encounter-candidate-simulations <number>  Trials per encounter-specific candidate (default: 3).
 --encounter-retained <number>      Specialized builds retained per floor (default: 5).
+--certification-profile <value>    developer (default) or release.
+--elite-restarts <number>          Independent elite-search restarts.
+--elite-population <number>        Candidates per restart and slot profile.
+--elite-generations <number>       Search generations per restart.
+--elite-max-generations <number>   Hard ceiling for adaptive certification generations.
+--elite-elites <number>            Elites retained per certification generation.
+--elite-finalists <number>         Pareto-diverse finalists per slot profile.
+--elite-local-swap-depth <1|2>     Local-neighborhood challenge depth.
+--elite-two-swap-limit <number>    Two-swap challengers per finalist; 0 means complete.
+--elite-restart-refinement <number>  One-swap refinement passes per restart winner.
+--elite-finalist-refinement <number> Neighborhood absorption rounds before final challenge.
+--elite-holdout-seeds <number>     Independent elite holdout seeds.
+--elite-simulations <number>       Elite holdout trials per seed.
+--elite-party-genomes <number>     Party genomes evaluated per floor.
+--elite-policy <path>              Certification policy JSON override.
+--top-player-builds <path>         Curated player fixture JSON override.
 --validation-seeds <number>        Holdout seeds per floor (default: 8).
 --validation-simulations <number>  Calibrated trials per holdout seed (default: 50).
 --validation-probe-simulations <number>  Trials per sensitivity probe and seed (default: 25).
@@ -69,7 +85,8 @@ One invocation executes every completed stage as a single orchestration:
 11. Essence usage, pairing, synergy, and complementary simulator analysis;
 12. bounded encounter calibration recommendations;
 13. encounter-specific optimization and cheese/hard-counter detection;
-14. Region 1 holdout scaling validation and sensitivity probes.
+14. elite-build certification, local challenges, party search, and P95/P99 holdouts;
+15. Region 1 holdout scaling validation and sensitivity probes.
 
 There are no manual handoffs or separate milestone commands within this flow. Reports are written only after the complete run succeeds. Encounter recommendations are generated automatically, but applying them to production content remains an intentional developer-approval step.
 
@@ -92,6 +109,7 @@ balance-output/
 │   ├── world-tower-analysis.json
 │   ├── encounter-calibration.json
 │   ├── encounter-specific-optimization.json
+│   ├── elite-build-certification.json
 │   ├── scaling-validation.json
 │   ├── summary.json
 │   └── summary.md
@@ -109,12 +127,13 @@ balance-output/
         ├── world-tower-analysis.json
         ├── encounter-calibration.json
         ├── encounter-specific-optimization.json
+        ├── elite-build-certification.json
         ├── scaling-validation.json
         ├── summary.json
         └── summary.md
 ```
 
-History directories are immutable. A report records its run ID, UTC timestamp, seed, balance schema version, simulator algorithm version, combat-engine assembly version, Git commit when available, production catalog counts, and combat result. Milestone 2 extended the output with `gear-packages.json`; Milestone 3 added `essence-builds.json`; Milestone 4 added `benchmarks.json`; Milestone 5 added `combat-rating.json` and CR-health summaries; Milestone 6 added deterministic Essence optimization and `optimizer.json`; Milestone 7 added the P50/P75/P90 library and `representative-builds.json`; Milestones 8 and 9 added `power-anchors.json` and `progression-bands.json`; Milestone 10 added `world-tower-analysis.json`; Milestone 11 added `essence-meta-analysis.json`; Milestone 12 added `encounter-calibration.json`; Milestone 13 added `encounter-specific-optimization.json`; the pre-Milestone-14 gate added `scaling-validation.json`.
+History directories are immutable. A report records its run ID, UTC timestamp, seed, balance schema version, simulator algorithm version, combat-engine assembly version, Git commit when available, production catalog counts, and combat result. Milestone 2 extended the output with `gear-packages.json`; Milestone 3 added `essence-builds.json`; Milestone 4 added `benchmarks.json`; Milestone 5 added `combat-rating.json` and CR-health summaries; Milestone 6 added deterministic Essence optimization and `optimizer.json`; Milestone 7 added the P50/P75/P90 library and `representative-builds.json`; Milestones 8 and 9 added `power-anchors.json` and `progression-bands.json`; Milestone 10 added `world-tower-analysis.json`; Milestone 11 added `essence-meta-analysis.json`; Milestone 12 added `encounter-calibration.json`; Milestone 13 added `encounter-specific-optimization.json`; the elite gate added `elite-build-certification.json`; the pre-Milestone-14 scaling gate added `scaling-validation.json`.
 
 Generated reports are ignored by Git.
 
@@ -129,7 +148,7 @@ The `production-essence-smoke-1v1` scenario remains a foundation check rather th
 Automated coverage verifies:
 
 - identical production content and seed produce identical combat results;
-- one `BalanceRunRequest` produces every schema-14 stage from gear packages through scaling validation;
+- one `BalanceRunRequest` produces every schema-15 stage from gear packages through elite certification and scaling validation;
 - World Tower Floors 1–10 use deterministic varied parties and authored encounter content;
 - Essence percentile usage, common partners, additive pair deltas, and warning thresholds are deterministic;
 - encounter calibration reuses parties and combat seeds, stays within its approved bounds, and never modifies production content;
