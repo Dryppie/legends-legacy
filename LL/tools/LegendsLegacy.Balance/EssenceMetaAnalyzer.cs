@@ -13,7 +13,8 @@ public enum EssenceMetaWarningKind
 {
     MandatoryEssence,
     UnderusedEssence,
-    SuspiciousSynergy
+    SuspiciousSynergy,
+    SimulatorNoDiscrimination
 }
 
 public sealed record EssenceMetaAnalysisOptions(
@@ -23,7 +24,8 @@ public sealed record EssenceMetaAnalysisOptions(
     double MandatoryP95UsageThreshold = 0.80,
     double UnderusedOverallUsageThreshold = 0.02,
     int CommonPartnersPerEssence = 5,
-    int MaximumSynergyWarnings = 20)
+    int MaximumSynergyWarnings = 20,
+    int SimulatorRoundsPerMatchup = 0)
 {
     public EssenceMetaAnalysisOptions Validate()
     {
@@ -41,6 +43,10 @@ public sealed record EssenceMetaAnalysisOptions(
             throw new ArgumentOutOfRangeException(nameof(CommonPartnersPerEssence), "Common partner count must be between 1 and 50.");
         if (MaximumSynergyWarnings is < 1 or > 1_000)
             throw new ArgumentOutOfRangeException(nameof(MaximumSynergyWarnings), "Maximum synergy warnings must be between 1 and 1,000.");
+        if (SimulatorRoundsPerMatchup is < 0 or > 1_000)
+            throw new ArgumentOutOfRangeException(nameof(SimulatorRoundsPerMatchup), "Simulator rounds per matchup must be between 0 and 1,000.");
+        if (SimulatorRoundsPerMatchup % 2 != 0)
+            throw new ArgumentOutOfRangeException(nameof(SimulatorRoundsPerMatchup), "Simulator rounds per matchup must be even so every matchup receives equal side assignments.");
         return this;
     }
 }
@@ -52,7 +58,10 @@ public sealed record EssenceMetaSimulatorEvidenceSnapshot(
     int EquipmentTier,
     string EquipmentRarity,
     string EquipmentProfile,
-    int EssenceResultCount);
+    int EssenceResultCount,
+    int DistinctEssenceScoreCount = 0,
+    double EssenceScoreRange = 0,
+    bool DiscriminationPassed = false);
 
 public sealed record EssenceCommonPartnerSnapshot(
     string EssenceId,
@@ -112,7 +121,7 @@ public sealed record EssenceMetaAnalysisSnapshot(
 
 public sealed class EssenceMetaAnalyzer(IEssenceDefinitionRepository essenceDefinitions)
 {
-    public const int AlgorithmVersion = 1;
+    public const int AlgorithmVersion = 2;
     private static readonly int[] PercentileThresholds = [50, 75, 90, 95, 99];
 
     public EssenceMetaAnalysisSnapshot Analyze(
@@ -141,6 +150,18 @@ public sealed class EssenceMetaAnalyzer(IEssenceDefinitionRepository essenceDefi
         var adminById = simulatorEvidence.EssenceResults.ToDictionary(
             result => result.EssenceId,
             StringComparer.OrdinalIgnoreCase);
+        var distinctSimulatorScores = simulatorEvidence.EssenceResults
+            .Select(result => RoundRate(result.Score))
+            .Distinct()
+            .Count();
+        var simulatorScoreRange = simulatorEvidence.EssenceResults.Count == 0
+            ? 0
+            : simulatorEvidence.EssenceResults.Max(result => result.Score)
+              - simulatorEvidence.EssenceResults.Min(result => result.Score);
+        var simulatorHasClassificationCoverage = simulatorEvidence.EssenceResults.Count >= 2
+                                                 && simulatorEvidence.EssenceResults.All(result => result.Battles >= 1_000);
+        var simulatorDiscriminationPassed = !simulatorHasClassificationCoverage
+                                            || simulatorScoreRange >= 0.02;
         var usage = definitions.ToDictionary(
             definition => definition.Id,
             definition => CreateUsageMeasurement(definition.Id, observations, cohortSizes),
@@ -177,7 +198,9 @@ public sealed class EssenceMetaAnalyzer(IEssenceDefinitionRepository essenceDefi
                 admin?.Battles ?? 0,
                 admin is null ? null : RoundScore(admin.Score),
                 admin is null ? null : RoundScore(admin.AdjustedScoreDelta),
-                admin?.Classification,
+                admin is not null && admin.Battles >= 1_000 && !simulatorDiscriminationPassed
+                    ? "NoDiscrimination"
+                    : admin?.Classification,
                 partners.OrderByDescending(value => value.Pair.Appearances)
                     .ThenByDescending(value => value.Pair.ObservedMeanPerformance)
                     .ThenBy(value => value.PartnerId, StringComparer.OrdinalIgnoreCase)
@@ -190,21 +213,25 @@ public sealed class EssenceMetaAnalyzer(IEssenceDefinitionRepository essenceDefi
                         value.Pair.ObservedMeanPerformance))
                     .ToArray());
         }).ToArray();
-        var warnings = CreateWarnings(essenceSnapshots, pairSynergies, options);
+        var simulatorSnapshot = new EssenceMetaSimulatorEvidenceSnapshot(
+            simulatorEvidence.Mode,
+            simulatorEvidence.BattlesRun,
+            simulatorEvidence.CandidateTeamCount,
+            simulatorEvidence.EquipmentTier,
+            simulatorEvidence.EquipmentRarity,
+            simulatorEvidence.EquipmentProfile,
+            simulatorEvidence.EssenceResults.Count,
+            distinctSimulatorScores,
+            RoundRate(simulatorScoreRange),
+            simulatorDiscriminationPassed);
+        var warnings = CreateWarnings(essenceSnapshots, pairSynergies, simulatorSnapshot, options);
 
         return new EssenceMetaAnalysisSnapshot(
             AlgorithmVersion,
             options,
             observations.Count,
             cohortSizes,
-            new EssenceMetaSimulatorEvidenceSnapshot(
-                simulatorEvidence.Mode,
-                simulatorEvidence.BattlesRun,
-                simulatorEvidence.CandidateTeamCount,
-                simulatorEvidence.EquipmentTier,
-                simulatorEvidence.EquipmentRarity,
-                simulatorEvidence.EquipmentProfile,
-                simulatorEvidence.EssenceResults.Count),
+            simulatorSnapshot,
             essenceSnapshots,
             pairSynergies,
             warnings);
@@ -333,6 +360,7 @@ public sealed class EssenceMetaAnalyzer(IEssenceDefinitionRepository essenceDefi
     private static IReadOnlyList<EssenceMetaWarningSnapshot> CreateWarnings(
         IReadOnlyList<EssenceUsageSnapshot> essences,
         IReadOnlyList<EssencePairSynergySnapshot> pairs,
+        EssenceMetaSimulatorEvidenceSnapshot simulator,
         EssenceMetaAnalysisOptions options)
     {
         var warnings = new List<EssenceMetaWarningSnapshot>();
@@ -371,6 +399,16 @@ public sealed class EssenceMetaAnalyzer(IEssenceDefinitionRepository essenceDefi
                 options.SynergyDeltaThreshold,
                 FormattableString.Invariant(
                     $"{pair.FirstDisplayName} + {pair.SecondDisplayName} has a {pair.SynergyDelta:+0.00;-0.00;0.00}-point synergy delta across {pair.Appearances} builds."))));
+        if (!simulator.DiscriminationPassed)
+        {
+            warnings.Add(new EssenceMetaWarningSnapshot(
+                EssenceMetaWarningKind.SimulatorNoDiscrimination,
+                [],
+                simulator.EssenceScoreRange,
+                0.02,
+                FormattableString.Invariant(
+                    $"The {simulator.Mode} simulator produced only {simulator.DistinctEssenceScoreCount} distinct Essence score(s) across {simulator.EssenceResultCount} Essences after {simulator.BattlesRun:N0} battles; its {simulator.EssenceScoreRange:0.0000} score range cannot support balance classifications or pair-interaction conclusions.")));
+        }
         return warnings;
     }
 

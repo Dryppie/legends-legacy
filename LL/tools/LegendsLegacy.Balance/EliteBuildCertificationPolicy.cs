@@ -172,7 +172,14 @@ public sealed record EliteCertificationOptions(
     bool BridgeAuditEnabled = false,
     double CoordinatedMutationRate = 0,
     int ExplorerArchiveSize = 0,
-    int StratifiedPortfolioCandidatesPerProfile = 0)
+    int StratifiedPortfolioCandidatesPerProfile = 0,
+    int QualityDiversityIslandCandidateBudgetPerProfile = 0,
+    bool DescriptorSeparabilityAuditEnabled = false,
+    int MechanicArchetypeIslandCandidateBudgetPerProfile = 0,
+    bool BenchmarkConfidenceAuditEnabled = false,
+    int BenchmarkConfidenceAuditCohortSize = 512,
+    int BenchmarkConfidenceAuditSeedCount = 16,
+    double BenchmarkConfidenceTargetScoreMargin = 0.25)
 {
     public static EliteCertificationOptions ForProfile(EliteCertificationProfile profile) =>
         profile == EliteCertificationProfile.Release
@@ -249,6 +256,19 @@ public sealed record EliteCertificationOptions(
         }
         if (StratifiedPortfolioCandidatesPerProfile is < 0 or > 5_000)
             throw new ArgumentOutOfRangeException(nameof(StratifiedPortfolioCandidatesPerProfile));
+        if (QualityDiversityIslandCandidateBudgetPerProfile is < 0 or > 5_000)
+            throw new ArgumentOutOfRangeException(nameof(QualityDiversityIslandCandidateBudgetPerProfile));
+        if (MechanicArchetypeIslandCandidateBudgetPerProfile is < 0 or > 5_000)
+            throw new ArgumentOutOfRangeException(nameof(MechanicArchetypeIslandCandidateBudgetPerProfile));
+        if (BenchmarkConfidenceAuditCohortSize is < 3 or > 5_000)
+            throw new ArgumentOutOfRangeException(nameof(BenchmarkConfidenceAuditCohortSize), "Benchmark confidence cohort size must be between 3 and 5,000.");
+        if (BenchmarkConfidenceAuditSeedCount is < 2 or > 1_000)
+            throw new ArgumentOutOfRangeException(nameof(BenchmarkConfidenceAuditSeedCount), "Benchmark confidence seed count must be between 2 and 1,000.");
+        if (!double.IsFinite(BenchmarkConfidenceTargetScoreMargin)
+            || BenchmarkConfidenceTargetScoreMargin is < 0.01 or > 5)
+        {
+            throw new ArgumentOutOfRangeException(nameof(BenchmarkConfidenceTargetScoreMargin), "Benchmark confidence target score margin must be between 0.01 and 5.");
+        }
         if (StratifiedPortfolioCandidatesPerProfile > 0
             && (CrossoverRate > 0 || CoordinatedMutationRate > 0))
         {
@@ -281,6 +301,27 @@ public sealed record EliteCertificationOptions(
             throw new ArgumentOutOfRangeException(
                 nameof(StratifiedPortfolioCandidatesPerProfile),
                 "The stratified portfolio and valley search are separate experiments and cannot be enabled together.");
+        }
+        if (QualityDiversityIslandCandidateBudgetPerProfile > 0
+            && (CrossoverRate > 0
+                || CoordinatedMutationRate > 0
+                || StratifiedPortfolioCandidatesPerProfile > 0
+                || !valleySearchDisabled))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(QualityDiversityIslandCandidateBudgetPerProfile),
+                "The quality-diversity island is an isolated experiment and cannot be combined with crossover, coordinated mutation/archive, stratified portfolio, or valley search.");
+        }
+        if (MechanicArchetypeIslandCandidateBudgetPerProfile > 0
+            && (CrossoverRate > 0
+                || CoordinatedMutationRate > 0
+                || StratifiedPortfolioCandidatesPerProfile > 0
+                || QualityDiversityIslandCandidateBudgetPerProfile > 0
+                || !valleySearchDisabled))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(MechanicArchetypeIslandCandidateBudgetPerProfile),
+                "The mechanic-archetype island is an isolated experiment and cannot be combined with crossover, coordinated mutation/archive, stratified portfolio, scenario quality island, or valley search.");
         }
         if (DiversityPenalty is < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(DiversityPenalty));

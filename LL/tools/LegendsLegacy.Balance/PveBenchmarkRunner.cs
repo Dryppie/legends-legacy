@@ -104,7 +104,23 @@ public sealed class PveBenchmarkRunner(
 
     public PveBenchmarkSuiteSnapshot Run(
         IReadOnlyList<EssenceBuildSnapshot> builds,
-        int runSeed)
+        int runSeed) => Run(builds, runSeed, useCommonScenarioSeeds: false);
+
+    public IReadOnlyList<PveBenchmarkSuiteSnapshot> RunCommonSeedReplicates(
+        IReadOnlyList<EssenceBuildSnapshot> builds,
+        IReadOnlyList<int> replicateSeeds)
+    {
+        ArgumentNullException.ThrowIfNull(replicateSeeds);
+        if (replicateSeeds.Count == 0)
+            throw new ArgumentException("At least one common benchmark seed is required.", nameof(replicateSeeds));
+
+        return replicateSeeds.Select(seed => Run(builds, seed, useCommonScenarioSeeds: true)).ToArray();
+    }
+
+    private PveBenchmarkSuiteSnapshot Run(
+        IReadOnlyList<EssenceBuildSnapshot> builds,
+        int runSeed,
+        bool useCommonScenarioSeeds)
     {
         ArgumentNullException.ThrowIfNull(builds);
         var catalog = catalogProvider.GetCatalog();
@@ -120,7 +136,8 @@ public sealed class PveBenchmarkRunner(
                 definitionsById,
                 compiledAbilities,
                 compiledStatuses,
-                compiledSummons))
+                compiledSummons,
+                useCommonScenarioSeeds))
             .ToArray();
         var ranked = unranked
             .GroupBy(build => build.ProfileId, StringComparer.Ordinal)
@@ -143,7 +160,8 @@ public sealed class PveBenchmarkRunner(
         IReadOnlyDictionary<string, Domain.Models.Essences.Definitions.EssenceDefinition> definitionsById,
         IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
         IReadOnlyDictionary<string, CompiledStatus> compiledStatuses,
-        IReadOnlyDictionary<string, CompiledSummon> compiledSummons)
+        IReadOnlyDictionary<string, CompiledSummon> compiledSummons,
+        bool useCommonScenarioSeeds)
     {
         var gearDefinition = GearPackageFactory.RegionOneDefinitions.Single(definition =>
             definition.Id.Equals(build.Character.GearPackageId, StringComparison.Ordinal));
@@ -166,7 +184,8 @@ public sealed class PveBenchmarkRunner(
                 tags,
                 compiledAbilities,
                 compiledStatuses,
-                compiledSummons))
+                compiledSummons,
+                useCommonScenarioSeeds))
             .ToArray();
 
         return new PveBenchmarkBuildSnapshot(
@@ -187,9 +206,12 @@ public sealed class PveBenchmarkRunner(
         IReadOnlyList<string> tags,
         IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
         IReadOnlyDictionary<string, CompiledStatus> compiledStatuses,
-        IReadOnlyDictionary<string, CompiledSummon> compiledSummons)
+        IReadOnlyDictionary<string, CompiledSummon> compiledSummons,
+        bool useCommonScenarioSeeds)
     {
-        var combatSeed = DeriveSeed(runSeed, build.Id, scenario.Id);
+        var combatSeed = useCommonScenarioSeeds
+            ? DeriveCommonScenarioSeed(runSeed, scenario.Id)
+            : DeriveSeed(runSeed, build.Id, scenario.Id);
         var friendly = new RuntimeCombatant(
             $"benchmark:{build.Id}",
             build.Id,
@@ -342,11 +364,17 @@ public sealed class PveBenchmarkRunner(
         denominator <= 0 ? 0 : Math.Clamp(numerator / denominator, 0, 1);
 
     private static int DeriveSeed(int runSeed, string buildId, string scenarioId)
+        => DeriveSeed($"{runSeed}|{buildId}|{scenarioId}");
+
+    private static int DeriveCommonScenarioSeed(int runSeed, string scenarioId)
+        => DeriveSeed($"common|{runSeed}|{scenarioId}");
+
+    private static int DeriveSeed(string value)
     {
         const uint offset = 2_166_136_261;
         const uint prime = 16_777_619;
         var hash = offset;
-        foreach (var character in $"{runSeed}|{buildId}|{scenarioId}")
+        foreach (var character in value)
         {
             hash ^= character;
             hash *= prime;

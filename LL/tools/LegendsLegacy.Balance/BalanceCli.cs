@@ -73,7 +73,11 @@ public static class BalanceCli
             Console.WriteLine(
                 $"Essence meta: {report.EssenceMetaAnalysis.Essences.Count} Essences, " +
                 $"{report.EssenceMetaAnalysis.PairSynergies.Count} eligible pairs, " +
-                $"{report.EssenceMetaAnalysis.Warnings.Count} warnings");
+                $"{report.EssenceMetaAnalysis.Warnings.Count} warnings, " +
+                $"simulator {report.EssenceMetaAnalysis.SimulatorEvidence.Mode} " +
+                $"{report.EssenceMetaAnalysis.SimulatorEvidence.BattlesRun:N0} battles/" +
+                $"{report.EssenceMetaAnalysis.SimulatorEvidence.DistinctEssenceScoreCount} distinct scores " +
+                $"(discrimination {report.EssenceMetaAnalysis.SimulatorEvidence.DiscriminationPassed})");
             foreach (var anchor in report.PowerAnchors.Anchors)
             {
                 Console.WriteLine(
@@ -110,8 +114,20 @@ public static class BalanceCli
                 $"basin-jump {report.EliteBuildCertification.Options.CoordinatedMutationRate:P0}, " +
                 $"explorer archive {report.EliteBuildCertification.Options.ExplorerArchiveSize}, " +
                 $"stratified portfolio {report.EliteBuildCertification.Options.StratifiedPortfolioCandidatesPerProfile}/profile/restart, " +
+                $"quality island {report.EliteBuildCertification.Options.QualityDiversityIslandCandidateBudgetPerProfile}/profile/restart, " +
+                $"mechanic island {report.EliteBuildCertification.Options.MechanicArchetypeIslandCandidateBudgetPerProfile}/profile/restart, " +
                 $"{report.EliteBuildCertification.TotalUniqueCandidatesEvaluated} candidates, " +
-                $"{report.EliteBuildCertification.TotalBridgeNodesEvaluated} bridge-audit evaluations)");
+                $"{report.EliteBuildCertification.TotalBridgeNodesEvaluated} bridge-audit evaluations, " +
+                $"{report.EliteBuildCertification.TotalDescriptorAuditCandidatesEvaluated} descriptor-audit evaluations, " +
+                $"{report.EliteBuildCertification.TotalBenchmarkConfidenceCombatExecutions} confidence-audit combats)");
+            if (report.EliteBuildCertification.BenchmarkConfidenceAudit is { } confidence)
+            {
+                Console.WriteLine(
+                    $"Elite E5 confidence: {confidence.CohortSize} builds x {confidence.SeedCount} seeds x " +
+                    $"{confidence.ScenarioCount} scenarios; baseline/mean rho {confidence.BaselineToMeanSpearmanCorrelation:F4}, " +
+                    $"top-{confidence.TopK} overlap {confidence.MinimumBaselineTopKOverlap:P0}-{confidence.MeanBaselineTopKOverlap:P0}, " +
+                    $"sample adequate {confidence.ConfiguredSampleAdequate}");
+            }
             foreach (var profile in report.EliteBuildCertification.Profiles)
             {
                 Console.WriteLine(

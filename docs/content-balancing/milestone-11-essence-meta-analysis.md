@@ -47,7 +47,7 @@ The default diagnostic thresholds are:
 
 Synergy warnings are capped at the twenty largest absolute deltas to keep the report actionable. All eligible pair measurements remain available in JSON even when they do not receive a warning.
 
-Thresholds and sampling limits are serialized with the report. The one-button CLI exposes `--meta-simulator-battles <number>` for the complementary simulator sample size; its default is 2,000 battles.
+Thresholds and sampling limits are serialized with the report. The one-button CLI exposes `--meta-simulator-battles <number>` for the legacy random sample and `--meta-simulator-rounds-per-matchup <number>` for a balanced all-Essence singleton round robin. In round-robin mode the requested value is repeated for every unordered matchup, not treated as a global battle count.
 
 ## Report Contract
 
@@ -67,6 +67,12 @@ No Essence crossed the 80% P95 mandatory threshold. Four crossed the 2% underuse
 Fourteen pairs crossed the five-point absolute synergy threshold. The largest positive signal was Dire Wolf + Kobold Skirmisher at `+7.11` points across eight builds. The largest negative signal was Bark Golem + Bog Mite at `-7.19` points across three builds. The small counts, especially three-observation pairs, make these investigation leads rather than tuning conclusions.
 
 The complementary simulator ran 2,000 deterministic Tier 1 Rare Balanced 1v1 battles. Its per-Essence samples remain below the production simulator's 1,000-battle classification floor, so classifications are `InsufficientData`; raw score and adjusted-delta evidence are still retained. Increase `--meta-simulator-battles` when a stronger PvP-side classification is required.
+
+## Balanced coverage and discrimination result
+
+The algorithm-v20 seed-`8471` pilot used 16 rounds for every one of the 3,160 unordered singleton matchups among 80 production Essences. It ran 50,560 battles and gave every Essence exactly 1,264 appearances, so coverage is no longer the limiting factor. Nevertheless, every Essence score was exactly `0.5000`; side alternation canceled the duel outcome and left no observable Essence separation. The meta analyzer now records distinct-score count and score range, requires a range of at least `0.02` once every Essence has classification coverage, emits `SimulatorNoDiscrimination` on failure, and exposes `NoDiscrimination` rather than `Healthy` for affected rows.
+
+This result supersedes the earlier suggestion to solve the problem by increasing only `--meta-simulator-battles`. No singleton or pair balance conclusion may be drawn from the current duel endpoint even at high battle counts. The next measurement must use a neutral discriminatory endpoint, such as common-seed fixed-hostile PvE trials or an explicitly side-bias-controlled damage/survival score, before a factorial pair audit is sized.
 
 ## Verification Boundary
 

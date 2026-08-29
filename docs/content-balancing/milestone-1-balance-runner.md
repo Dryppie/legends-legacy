@@ -51,11 +51,18 @@ Supported options:
 --elite-basin-jump <number>        Restart-local coordinated 3/4-gene mutation rate, 0.00-1.00 (default: 0).
 --elite-explorer-archive <number>  Persistent restart-local explorer candidates, 0-100 (default: 0).
 --elite-stratified-portfolio <number>  Separately seeded legal candidates per restart/profile, 0-5000 (default: 0).
+--elite-quality-island <number> Restart-local quality-diversity island budget per profile, 0-5000 (default: 0).
+--elite-mechanic-island <number> Restart-local mechanic-archetype island budget per profile, 0-5000 (default: 0).
 --elite-valley-beam-width <number> Opt-in restart valley-search beam width; 0 disables.
 --elite-valley-beam-depth <number> Opt-in restart valley-search depth; 0 disables.
 --elite-valley-budget <number>     Candidate budget per restart/profile; 0 disables.
 --elite-valley-prefilter <number> Fully benchmark at most this many valley candidates per depth; 0 disables.
 --elite-bridge-audit              Audit shortest legal bridges between differing restart winners; disabled by default.
+--elite-descriptor-audit          Audit E5 descriptor separability and coarse-niche collisions; disabled by default.
+--elite-benchmark-confidence-audit  Repeat a stratified E5 cohort on common PvE seeds; disabled by default.
+--elite-confidence-cohort <number>  Confidence-audit E5 cohort size (default: 512).
+--elite-confidence-seeds <number>   Confidence-audit common seed count (default: 16).
+--elite-confidence-margin <number>  Target approximate 95% score half-width (default: 0.25).
 --elite-finalists <number>         Pareto-diverse finalists per slot profile.
 --elite-local-swap-depth <1|2>     Local-neighborhood challenge depth.
 --elite-two-swap-limit <number>    Two-swap challengers per finalist; 0 means complete.
@@ -72,6 +79,7 @@ Supported options:
 --validation-simulations <number>  Calibrated trials per holdout seed (default: 50).
 --validation-probe-simulations <number>  Trials per sensitivity probe and seed (default: 25).
 --meta-simulator-battles <number>  Complementary 1v1 Essence battles (default: 2000).
+--meta-simulator-rounds-per-matchup <number> Balanced all-Essence round robin; 0 disables (default: 0).
 --content-root <path>   API.LL directory containing the production Data folder.
 --output <path>         Override the report root.
 --full                  Run the currently implemented pipeline.
@@ -90,6 +98,8 @@ Coordinated mutation is experimental and disabled in both approved profiles. `--
 
 `--elite-stratified-portfolio` runs only after the unchanged baseline optimizer and refines baseline and portfolio beams separately. It reports direct portfolio evaluations plus the fully refined baseline and final ceilings for each restart/profile. It is mutually exclusive with crossover, basin jumps/archive, and valley search, and remains disabled by default.
 
+`--elite-quality-island` runs after the complete baseline optimizer and refinement. It pre-fills a strongest/weakest-PvE-scenario niche map from the same restart's baseline, then authoritatively benchmarks a 32-candidate seed batch and one-swap descendants of niche champions until the fixed budget is exhausted. Initial/descendant counts, niche occupancy/replacements, island ceiling, and baseline/final ceilings are serialized. It is mutually exclusive with all other search experiments and remains disabled by default.
+
 The seed-`8471` algorithm-v11 run used search-only `96`/`24`-`40`/`12` settings with crossover and valley search disabled. It took `1,247.34` seconds, retained `59,006` certification candidates, and separately benchmarked `146` bridge nodes. The complete 70-node E5 bridge had a best maximin score of `83.69` from the `85.27` source, a `1.30` largest step regression, and no non-regressing or `0.50`-bounded route to `86.21`. This confirms a genuine shortest-path valley but does not approve a search budget or exclude longer detours.
 
 The algorithm-v12 `20%` basin-jump trial used seed `8471` with the same search-only `96`/`24`-`40`/`12` settings and every other experimental option disabled. It replaced `3,366` ordinary births, ran for `1,407.29` seconds, and evaluated `62,296` certification candidates. E4 reached `78.61` with `0.46` spread, E6 retained `87.46` with `0.37` spread, but E5 worsened to `1.09` spread while retaining the `86.21` ceiling in only one restart. The option remains forensic-only; seed `1337` was not run and no default was changed.
@@ -97,6 +107,8 @@ The algorithm-v12 `20%` basin-jump trial used seed `8471` with the same search-o
 The algorithm-v13 archive follow-up used the same rate with 12 persistent candidates. It produced `1,664` seed jumps and `1,513` continuation births, ran for `1,386.22` seconds, and evaluated `59,793` certification candidates. Its E5 spread of `0.15` was invalid because the observed ceiling fell from `86.21` to `85.27`; E6 widened to `0.99`, and the overall verdict remained `SearchUnstable`. Seed `1337` was not run. The archive remains forensic-only and no default changed.
 
 The algorithm-v14 isolated-portfolio follow-up used `256` deterministic candidates per restart/profile and separate baseline/portfolio refinement beams. It directly benchmarked `2,304` portfolio candidates, evaluated `80,560` local candidates, retained `109,724` unique certification candidates, and ran for approximately `517.35` seconds. E4 and E6 passed at `0.29` and `0.34` spread while retaining their known ceilings. E5 retained `86.21` but failed at `1.09` spread (`86.21`, `85.12`, `85.27`). Seed `1337` was not run. The option remains forensic-only; no default, budget, or tolerance changed.
+
+The corrected algorithm-v15 quality-island follow-up used `256` candidates per restart/profile, retained `62,865` unique certification candidates, and ran for approximately `256` seconds. The 7–11 occupied scenario-pair niches produced 1–13 champion replacements per restart, but no island exceeded its baseline. E4 failed at `0.63`, E5 failed at `1.30` (`86.21`, `84.91`, `85.27`), and E6 retained its baseline `0.34` spread. Seed `1337` was not run. The option remains forensic-only; no default, budget, or tolerance changed.
 
 ## Complete Automated Flow
 
@@ -183,7 +195,7 @@ Automated coverage verifies:
 - Essence percentile usage, common partners, additive pair deltas, and warning thresholds are deterministic;
 - encounter calibration reuses parties and combat seeds, stays within its approved bounds, and never modifies production content;
 - encounter-specific optimization is deterministic, preserves generic progression data, and classifies narrow cheese evidence separately from hard counters;
-- elite certification preserves restart independence, records raw/refined genomes and distances, reports coordinated-mutation seeds, explorer continuations, optional valley generation, prefilter, evaluation, depth, exhaustion, and improvement evidence, and keeps shortest-path bridge evaluations in a separate audit-only section;
+- elite certification preserves restart independence, records raw/refined genomes and distances, reports coordinated-mutation seeds, explorer continuations, portfolio evidence, quality-island evaluations/niches/ceilings, optional valley generation, prefilter, evaluation, depth, exhaustion, and improvement evidence, and keeps shortest-path bridge evaluations in a separate audit-only section;
 - holdout confidence, seed stability, monotonicity, sensitivity, and percentile-order checks can reject unsafe scaling;
 - JSON and Markdown reports are written to both `latest` and immutable `history` locations;
 - invalid command-line arguments fail explicitly.

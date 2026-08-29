@@ -10,6 +10,254 @@ namespace EssenceSystem.Tests;
 public sealed class BalanceRunnerTests
 {
     [Fact]
+    public void Benchmark_confidence_audit_is_common_seeded_and_isolated_from_certification()
+    {
+        var runner = ProductionBalanceComposition.Create(FindApiContentRoot());
+        var baselineOptions = CreateTestEliteCertificationOptions(searchOnly: true);
+        var auditOptions = baselineOptions with
+        {
+            BenchmarkConfidenceAuditEnabled = true,
+            BenchmarkConfidenceAuditCohortSize = 12,
+            BenchmarkConfidenceAuditSeedCount = 2,
+            BenchmarkConfidenceTargetScoreMargin = 5
+        };
+        BalanceRunReport Run(EliteCertificationOptions options) => runner.Run(new BalanceRunRequest(
+            8471,
+            "test-commit",
+            EssenceBuildsPerProfile: 3,
+            OptimizerOptions: CreateTestOptimizerOptions(),
+            WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
+            EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
+            EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: options,
+            ScalingValidationOptions: CreateTestScalingValidationOptions()));
+
+        var baseline = Run(baselineOptions);
+        var audited = Run(auditOptions);
+        var certificationWithoutAudit = audited.EliteBuildCertification with
+        {
+            Options = audited.EliteBuildCertification.Options with
+            {
+                BenchmarkConfidenceAuditEnabled = false,
+                BenchmarkConfidenceAuditCohortSize = baselineOptions.BenchmarkConfidenceAuditCohortSize,
+                BenchmarkConfidenceAuditSeedCount = baselineOptions.BenchmarkConfidenceAuditSeedCount,
+                BenchmarkConfidenceTargetScoreMargin = baselineOptions.BenchmarkConfidenceTargetScoreMargin
+            },
+            TotalBenchmarkConfidenceCombatExecutions = 0,
+            BenchmarkConfidenceAudit = null
+        };
+
+        Assert.Equivalent(baseline.EliteBuildCertification, certificationWithoutAudit, strict: true);
+        var audit = Assert.IsType<EliteBenchmarkConfidenceAuditSnapshot>(
+            audited.EliteBuildCertification.BenchmarkConfidenceAudit);
+        Assert.True(audit.CommonRandomNumbers);
+        Assert.False(audit.CertificationEvidenceAffected);
+        Assert.Equal(2, audit.SeedCount);
+        Assert.Equal(5, audit.ScenarioCount);
+        Assert.Equal(audit.CohortSize * audit.SeedCount * audit.ScenarioCount, audit.TotalCombatExecutions);
+        Assert.Equal(audit.TotalCombatExecutions, audited.EliteBuildCertification.TotalBenchmarkConfidenceCombatExecutions);
+        Assert.Equal(2, audit.AnchorComparisons.Count);
+        Assert.All(audit.Builds, build =>
+        {
+            Assert.True(double.IsFinite(build.ScoreStandardDeviation));
+            Assert.True(build.RecommendedSeedCountForTargetMargin >= 2);
+        });
+        Assert.InRange(audit.BaselineToMeanSpearmanCorrelation, -1, 1);
+        Assert.InRange(audit.MinimumBaselineTopKOverlap, 0, 1);
+    }
+
+    [Fact]
+    public void Descriptor_separability_audit_is_deterministic_authoritative_and_isolated_from_certification()
+    {
+        var runner = ProductionBalanceComposition.Create(FindApiContentRoot());
+        var baselineOptions = CreateTestEliteCertificationOptions(searchOnly: true);
+        var auditOptions = baselineOptions with { DescriptorSeparabilityAuditEnabled = true };
+        BalanceRunReport Run(EliteCertificationOptions options) => runner.Run(new BalanceRunRequest(
+            8471,
+            "test-commit",
+            EssenceBuildsPerProfile: 3,
+            OptimizerOptions: CreateTestOptimizerOptions(),
+            WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
+            EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
+            EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: options,
+            ScalingValidationOptions: CreateTestScalingValidationOptions()));
+
+        var baseline = Run(baselineOptions);
+        var audited = Run(auditOptions);
+        var replay = Run(auditOptions);
+
+        Assert.Equivalent(audited.EliteBuildCertification, replay.EliteBuildCertification, strict: true);
+        var certificationWithoutAudit = audited.EliteBuildCertification with
+        {
+            Options = audited.EliteBuildCertification.Options with { DescriptorSeparabilityAuditEnabled = false },
+            TotalDescriptorAuditCandidatesEvaluated = 0,
+            DescriptorSeparabilityAudit = null
+        };
+        Assert.Equivalent(baseline.EliteBuildCertification, certificationWithoutAudit, strict: true);
+        var audit = Assert.IsType<EliteDescriptorSeparabilityAuditSnapshot>(
+            audited.EliteBuildCertification.DescriptorSeparabilityAudit);
+        Assert.True(audit.AuthoritativeProductionBenchmark);
+        Assert.False(audit.CertificationEvidenceAffected);
+        Assert.True(audit.UniqueCandidatesEvaluated > 0);
+        Assert.Equal(audit.UniqueCandidatesEvaluated, audited.EliteBuildCertification.TotalDescriptorAuditCandidatesEvaluated);
+        Assert.True(audit.HighBasinCandidates > 0);
+        Assert.True(audit.LowBasinCandidates > audit.HighBasinCandidates);
+        Assert.Equal(3, audit.Anchors.Count);
+        Assert.Equal(5, audit.DescriptorFamilies.Count);
+        Assert.Contains(audit.DescriptorFamilies, descriptor => descriptor.DescriptorId == "scenario-shape");
+        var coarseMechanic = Assert.Single(
+            audit.DescriptorFamilies,
+            descriptor => descriptor.DescriptorId == "mechanic-archetype");
+        Assert.Equal(256, coarseMechanic.TheoreticalNicheCeiling);
+        Assert.True(coarseMechanic.HardNicheCeilingPassed);
+        Assert.True(coarseMechanic.DistinctNeighborhoodSignatures <= coarseMechanic.TheoreticalNicheCeiling);
+        Assert.True(coarseMechanic.SeparabilityPassed);
+        Assert.True(coarseMechanic.MapCandidatePassed);
+        Assert.Contains("mechanic-archetype", audit.MapCandidateDescriptorIds);
+        var collision = Assert.IsType<EliteDescriptorCollisionAuditSnapshot>(audit.CollisionAudit);
+        Assert.Equal("mechanic-archetype", collision.ParentDescriptorId);
+        Assert.Equal("mechanic-intensity-residual", collision.ResidualDescriptorId);
+        Assert.Equal(4, collision.FeatureCount);
+        Assert.Equal(81, collision.TheoreticalResidualNicheCeiling);
+        Assert.True(collision.HardNicheCeilingPassed);
+        Assert.True(collision.ParentNicheCandidates >= 0);
+        Assert.True(collision.CandidateCount >= 0);
+        Assert.Equal(
+            collision.CandidateCount,
+            collision.HighBasinCandidates + collision.LowBasinCandidates);
+        Assert.Equal(
+            collision.ParentNicheCandidates,
+            collision.CandidateCount + collision.AmbiguousQualityCandidatesExcluded);
+        Assert.True(collision.HighScoreFloor > collision.LowScoreCeiling);
+        Assert.InRange(collision.DistinctResidualSignatures, 0, 81);
+        Assert.InRange(collision.ExactSignaturePurity, 0, 1);
+        Assert.InRange(collision.SingletonCandidateRate, 0, 1);
+        Assert.InRange(collision.LeaveOneOutHighAccuracy, 0, 1);
+        Assert.InRange(collision.LeaveOneOutLowAccuracy, 0, 1);
+        Assert.InRange(collision.LeaveOneOutBalancedAccuracy, 0, 1);
+        Assert.All(audit.DescriptorFamilies, descriptor =>
+        {
+            Assert.InRange(descriptor.ExactSignaturePurity, 0, 1);
+            Assert.InRange(descriptor.SingletonCandidateRate, 0, 1);
+            Assert.InRange(descriptor.NearestAnchorBalancedAccuracy, 0, 1);
+        });
+    }
+
+    [Fact]
+    public void Quality_diversity_island_is_deterministic_and_preserves_the_refined_baseline_ceiling()
+    {
+        var runner = ProductionBalanceComposition.Create(FindApiContentRoot());
+        var islandOptions = CreateTestEliteCertificationOptions(searchOnly: true) with
+        {
+            RestartValleyBeamWidth = 0,
+            RestartValleyBeamDepth = 0,
+            RestartValleyCandidateBudget = 0,
+            RestartValleyPrefilterLimitPerDepth = 0,
+            CoordinatedMutationRate = 0,
+            ExplorerArchiveSize = 0,
+            QualityDiversityIslandCandidateBudgetPerProfile = 33
+        };
+        BalanceRunReport Run() => runner.Run(new BalanceRunRequest(
+            8471,
+            "test-commit",
+            EssenceBuildsPerProfile: 3,
+            OptimizerOptions: CreateTestOptimizerOptions(),
+            WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
+            EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
+            EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: islandOptions,
+            ScalingValidationOptions: CreateTestScalingValidationOptions()));
+
+        var first = Run();
+        var replay = Run();
+
+        Assert.Equivalent(first.EliteBuildCertification, replay.EliteBuildCertification, strict: true);
+        Assert.All(first.EliteBuildCertification.Profiles, profile =>
+        {
+            Assert.All(profile.Restarts, restart =>
+            {
+                Assert.Equal(33, restart.QualityDiversityIslandCandidatesEvaluated);
+                Assert.Equal(32, restart.QualityDiversityIslandInitialCandidatesEvaluated);
+                Assert.Equal(1, restart.QualityDiversityIslandDescendantsEvaluated);
+                Assert.True(restart.QualityDiversityIslandNichesOccupied > 0);
+                Assert.True(restart.QualityDiversityIslandNichesOccupied <= 25);
+                Assert.InRange(restart.QualityDiversityIslandNicheReplacements, 0, 33);
+                Assert.NotNull(restart.QualityDiversityIslandBestBuildId);
+                Assert.Equal(profile.SlotCount, restart.QualityDiversityIslandBestEssenceIds!.Count);
+                Assert.True(restart.BestScore >= restart.BaselineBestScore);
+            });
+        });
+    }
+
+    [Fact]
+    public void Mechanic_archetype_island_is_deterministic_restart_local_and_preserves_the_refined_baseline_ceiling()
+    {
+        var runner = ProductionBalanceComposition.Create(FindApiContentRoot());
+        var islandOptions = CreateTestEliteCertificationOptions(searchOnly: true) with
+        {
+            RestartValleyBeamWidth = 0,
+            RestartValleyBeamDepth = 0,
+            RestartValleyCandidateBudget = 0,
+            RestartValleyPrefilterLimitPerDepth = 0,
+            CoordinatedMutationRate = 0,
+            ExplorerArchiveSize = 0,
+            QualityDiversityIslandCandidateBudgetPerProfile = 0,
+            MechanicArchetypeIslandCandidateBudgetPerProfile = 33
+        };
+        BalanceRunReport Run() => runner.Run(new BalanceRunRequest(
+            8471,
+            "test-commit",
+            EssenceBuildsPerProfile: 3,
+            OptimizerOptions: CreateTestOptimizerOptions(),
+            WorldTowerAnalysisOptions: new WorldTowerAnalysisOptions(1),
+            EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
+            EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
+            EliteCertificationOptions: islandOptions,
+            ScalingValidationOptions: CreateTestScalingValidationOptions()));
+
+        var first = Run();
+        var replay = Run();
+
+        Assert.Equivalent(first.EliteBuildCertification, replay.EliteBuildCertification, strict: true);
+        Assert.All(first.EliteBuildCertification.Profiles, profile =>
+        {
+            Assert.All(profile.Restarts, restart =>
+            {
+                Assert.Equal(33, restart.MechanicArchetypeIslandCandidatesEvaluated);
+                Assert.Equal(32, restart.MechanicArchetypeIslandInitialCandidatesEvaluated);
+                Assert.Equal(1, restart.MechanicArchetypeIslandDescendantsEvaluated);
+                Assert.InRange(restart.MechanicArchetypeIslandNichesOccupied, 1, 256);
+                Assert.InRange(restart.MechanicArchetypeIslandNicheReplacements, 0, 33);
+                Assert.NotNull(restart.MechanicArchetypeIslandBestBuildId);
+                Assert.Equal(profile.SlotCount, restart.MechanicArchetypeIslandBestEssenceIds!.Count);
+                Assert.True(restart.BestScore >= restart.BaselineBestScore);
+                Assert.Equal(0, restart.QualityDiversityIslandCandidatesEvaluated);
+                Assert.InRange(restart.MechanicArchetypeHighNicheIslandCandidatesEvaluated, 0, 33);
+                if (profile.SlotCount == 5)
+                {
+                    if (restart.MechanicArchetypeHighNichePresentInBaseline)
+                        Assert.True(restart.MechanicArchetypeHighNicheBaselineBestScore > 0);
+                    if (restart.MechanicArchetypeHighNicheIslandCandidatesEvaluated > 0)
+                    {
+                        Assert.True(restart.MechanicArchetypeHighNicheIslandBestScore > 0);
+                        Assert.True(
+                            restart.MechanicArchetypeHighNicheIslandBestScore
+                            <= restart.MechanicArchetypeIslandBestScore);
+                    }
+                }
+                else
+                {
+                    Assert.False(restart.MechanicArchetypeHighNichePresentInBaseline);
+                    Assert.Equal(0, restart.MechanicArchetypeHighNicheBaselineBestScore);
+                    Assert.Equal(0, restart.MechanicArchetypeHighNicheIslandCandidatesEvaluated);
+                    Assert.Equal(0, restart.MechanicArchetypeHighNicheIslandBestScore);
+                }
+            });
+        });
+    }
+
+    [Fact]
     public void Production_smoke_and_bridge_audit_are_deterministic_and_audit_isolated()
     {
         var timeProvider = new FixedTimeProvider(new DateTimeOffset(2026, 8, 27, 12, 0, 0, TimeSpan.Zero));
@@ -327,7 +575,7 @@ public sealed class BalanceRunnerTests
                 floor.GenericClearRate);
         });
         Assert.False(report.EliteBuildCertification.ProductionContentModified);
-        Assert.Equal(14, report.EliteBuildCertification.AlgorithmVersion);
+        Assert.Equal(20, report.EliteBuildCertification.AlgorithmVersion);
         Assert.NotEqual(EliteCertificationVerdict.CertifiedElite, report.EliteBuildCertification.Verdict);
         Assert.Equal(3, report.EliteBuildCertification.Profiles.Count);
         Assert.Equal(Enumerable.Range(1, 10), report.EliteBuildCertification.Floors.Select(floor => floor.Floor));
@@ -482,6 +730,49 @@ public sealed class BalanceRunnerTests
         Assert.Equal(EssencePairSynergyClassification.Strong, pair.Classification);
         Assert.Contains(result.Warnings, warning => warning.Kind == EssenceMetaWarningKind.MandatoryEssence);
         Assert.Contains(result.Warnings, warning => warning.Kind == EssenceMetaWarningKind.SuspiciousSynergy);
+    }
+
+    [Fact]
+    public void Essence_meta_analysis_rejects_high_coverage_simulator_evidence_with_no_discrimination()
+    {
+        var definitions = new[]
+        {
+            CreateMetaEssence("essence.a"),
+            CreateMetaEssence("essence.b")
+        };
+        var candidates = new[]
+        {
+            CreateMetaCandidate("build-1", 10, "essence.a"),
+            CreateMetaCandidate("build-2", 20, "essence.b")
+        };
+        AbilityBalanceEssenceResult Evidence(string id) => new(
+            id,
+            id,
+            1,
+            1_264,
+            632,
+            632,
+            0,
+            0.5,
+            0,
+            0,
+            0.47,
+            0.53,
+            100,
+            500,
+            500,
+            "Healthy");
+
+        var result = new EssenceMetaAnalyzer(new FakeEssenceDefinitionRepository(definitions)).Analyze(
+            candidates,
+            CreateMetaSimulatorEvidence(Evidence("essence.a"), Evidence("essence.b")),
+            new EssenceMetaAnalysisOptions(MinimumPairAppearances: 2));
+
+        Assert.False(result.SimulatorEvidence.DiscriminationPassed);
+        Assert.Equal(1, result.SimulatorEvidence.DistinctEssenceScoreCount);
+        Assert.Equal(0, result.SimulatorEvidence.EssenceScoreRange);
+        Assert.All(result.Essences, essence => Assert.Equal("NoDiscrimination", essence.AdminClassification));
+        Assert.Contains(result.Warnings, warning => warning.Kind == EssenceMetaWarningKind.SimulatorNoDiscrimination);
     }
 
     [Fact]
@@ -1089,6 +1380,24 @@ public sealed class BalanceRunnerTests
     }
 
     [Fact]
+    public void Command_options_configure_balanced_meta_round_robin()
+    {
+        var options = BalanceCommandOptions.Parse(["--meta-simulator-rounds-per-matchup", "16"]);
+
+        Assert.Equal(16, options.EssenceMetaAnalysisOptions.SimulatorRoundsPerMatchup);
+        Assert.Contains("--meta-simulator-rounds-per-matchup", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_unpaired_meta_round_robin_rounds()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--meta-simulator-rounds-per-matchup", "15"]));
+
+        Assert.Contains("must be even", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Command_options_reject_invalid_meta_simulator_battle_count()
     {
         var exception = Assert.Throws<BalanceCommandException>(() =>
@@ -1114,6 +1423,11 @@ public sealed class BalanceRunnerTests
             "--elite-valley-budget", "5000",
             "--elite-valley-prefilter", "256",
             "--elite-bridge-audit",
+            "--elite-descriptor-audit",
+            "--elite-benchmark-confidence-audit",
+            "--elite-confidence-cohort", "384",
+            "--elite-confidence-seeds", "446",
+            "--elite-confidence-margin", "0.4",
             "--elite-finalists", "8",
             "--elite-local-swap-depth", "2",
             "--elite-two-swap-limit", "0",
@@ -1143,6 +1457,13 @@ public sealed class BalanceRunnerTests
         Assert.Equal(256, options.EliteCertificationOptions.RestartValleyPrefilterLimitPerDepth);
         Assert.True(options.EliteCertificationOptions.BridgeAuditEnabled);
         Assert.Contains("--elite-bridge-audit", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+        Assert.True(options.EliteCertificationOptions.DescriptorSeparabilityAuditEnabled);
+        Assert.Contains("--elite-descriptor-audit", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+        Assert.True(options.EliteCertificationOptions.BenchmarkConfidenceAuditEnabled);
+        Assert.Equal(384, options.EliteCertificationOptions.BenchmarkConfidenceAuditCohortSize);
+        Assert.Equal(446, options.EliteCertificationOptions.BenchmarkConfidenceAuditSeedCount);
+        Assert.Equal(0.4, options.EliteCertificationOptions.BenchmarkConfidenceTargetScoreMargin);
+        Assert.Contains("--elite-benchmark-confidence-audit", BalanceCommandOptions.Usage, StringComparison.Ordinal);
         Assert.Equal(8, options.EliteCertificationOptions.FinalistsPerSlotProfile);
         Assert.Equal(10, options.EliteCertificationOptions.HoldoutSeeds);
         Assert.Equal(160, options.EliteCertificationOptions.SimulationsPerSeed);
@@ -1173,11 +1494,18 @@ public sealed class BalanceRunnerTests
         Assert.Equal(0, options.CoordinatedMutationRate);
         Assert.Equal(0, options.ExplorerArchiveSize);
         Assert.Equal(0, options.StratifiedPortfolioCandidatesPerProfile);
+        Assert.Equal(0, options.QualityDiversityIslandCandidateBudgetPerProfile);
+        Assert.Equal(0, options.MechanicArchetypeIslandCandidateBudgetPerProfile);
         Assert.Equal(0, options.RestartValleyBeamWidth);
         Assert.Equal(0, options.RestartValleyBeamDepth);
         Assert.Equal(0, options.RestartValleyCandidateBudget);
         Assert.Equal(0, options.RestartValleyPrefilterLimitPerDepth);
         Assert.False(options.BridgeAuditEnabled);
+        Assert.False(options.DescriptorSeparabilityAuditEnabled);
+        Assert.False(options.BenchmarkConfidenceAuditEnabled);
+        Assert.Equal(512, options.BenchmarkConfidenceAuditCohortSize);
+        Assert.Equal(16, options.BenchmarkConfidenceAuditSeedCount);
+        Assert.Equal(0.25, options.BenchmarkConfidenceTargetScoreMargin);
         Assert.Equal(64, options.PopulationSize);
         Assert.Equal(12, options.Generations);
         Assert.Equal(24, options.MaximumGenerations);
@@ -1214,6 +1542,58 @@ public sealed class BalanceRunnerTests
 
         Assert.Equal(256, options.EliteCertificationOptions.StratifiedPortfolioCandidatesPerProfile);
         Assert.Contains("--elite-stratified-portfolio", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_configure_opt_in_quality_diversity_island()
+    {
+        var options = BalanceCommandOptions.Parse(["--elite-quality-island", "256"]);
+
+        Assert.Equal(256, options.EliteCertificationOptions.QualityDiversityIslandCandidateBudgetPerProfile);
+        Assert.Contains("--elite-quality-island", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_configure_opt_in_mechanic_archetype_island()
+    {
+        var options = BalanceCommandOptions.Parse(["--elite-mechanic-island", "256"]);
+
+        Assert.Equal(256, options.EliteCertificationOptions.MechanicArchetypeIslandCandidateBudgetPerProfile);
+        Assert.Contains("--elite-mechanic-island", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_combining_mechanic_archetype_island_with_other_experiments()
+    {
+        var scenarioException = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-mechanic-island", "256",
+            "--elite-quality-island", "256"
+        ]));
+        var portfolioException = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-mechanic-island", "256",
+            "--elite-stratified-portfolio", "256"
+        ]));
+
+        Assert.Contains("isolated experiment", scenarioException.Message, StringComparison.Ordinal);
+        Assert.Contains("isolated experiment", portfolioException.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_combining_quality_diversity_island_with_other_experiments()
+    {
+        var portfolioException = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-quality-island", "256",
+            "--elite-stratified-portfolio", "256"
+        ]));
+        var valleyException = Assert.Throws<BalanceCommandException>(() => BalanceCommandOptions.Parse([
+            "--elite-quality-island", "256",
+            "--elite-valley-beam-width", "16",
+            "--elite-valley-beam-depth", "3",
+            "--elite-valley-budget", "5000"
+        ]));
+
+        Assert.Contains("isolated experiment", portfolioException.Message, StringComparison.Ordinal);
+        Assert.Contains("isolated experiment", valleyException.Message, StringComparison.Ordinal);
     }
 
     [Fact]

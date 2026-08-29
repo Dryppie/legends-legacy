@@ -24,6 +24,8 @@ import {
 export class DialogFocusDirective implements AfterViewInit, OnDestroy {
   @Input() dialogRole: 'dialog' | 'alertdialog' = 'dialog';
   @Input() dialogEscapeDisabled = false;
+  @Input() dialogInitialFocus: 'first-tabbable' | 'container' =
+    'first-tabbable';
   @Output() dialogEscape = new EventEmitter<void>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -37,6 +39,12 @@ export class DialogFocusDirective implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.focusTrap = this.focusTrapFactory.create(this.element.nativeElement);
+
+    if (this.dialogInitialFocus === 'container') {
+      this.element.nativeElement.focus({ preventScroll: true });
+      return;
+    }
+
     void this.focusTrap.focusInitialElementWhenReady().then((focused) => {
       if (!focused) this.element.nativeElement.focus();
     });

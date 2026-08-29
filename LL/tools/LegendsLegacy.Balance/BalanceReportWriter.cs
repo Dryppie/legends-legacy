@@ -416,6 +416,13 @@ public sealed class BalanceReportWriter
                        $"| {profile.Restarts.Sum(restart => restart.ExplorerContinuationCandidatesEvaluated):N0} " +
                        $"| {FormatScore(profile.Restarts.Max(restart => restart.BaselineBestScore))}/{FormatScore(profile.BestScore)} " +
                        $"| {profile.Restarts.Sum(restart => restart.StratifiedPortfolioCandidatesEvaluated):N0} " +
+                       $"| {profile.Restarts.Sum(restart => restart.QualityDiversityIslandInitialCandidatesEvaluated):N0}/{profile.Restarts.Sum(restart => restart.QualityDiversityIslandDescendantsEvaluated):N0} " +
+                       $"| {profile.Restarts.Max(restart => restart.QualityDiversityIslandNichesOccupied):N0}/{profile.Restarts.Sum(restart => restart.QualityDiversityIslandNicheReplacements):N0} " +
+                       $"| {FormatScore(profile.Restarts.Max(restart => restart.QualityDiversityIslandBestScore))} " +
+                       $"| {profile.Restarts.Sum(restart => restart.MechanicArchetypeIslandInitialCandidatesEvaluated):N0}/{profile.Restarts.Sum(restart => restart.MechanicArchetypeIslandDescendantsEvaluated):N0} " +
+                       $"| {profile.Restarts.Max(restart => restart.MechanicArchetypeIslandNichesOccupied):N0}/{profile.Restarts.Sum(restart => restart.MechanicArchetypeIslandNicheReplacements):N0} " +
+                       $"| {FormatScore(profile.Restarts.Max(restart => restart.MechanicArchetypeIslandBestScore))} " +
+                       $"| {profile.Restarts.Count(restart => restart.MechanicArchetypeHighNichePresentInBaseline)}/{profile.Restarts.Sum(restart => restart.MechanicArchetypeHighNicheIslandCandidatesEvaluated)} / {FormatScore(profile.Restarts.Max(restart => restart.MechanicArchetypeHighNicheBaselineBestScore))}/{FormatScore(profile.Restarts.Max(restart => restart.MechanicArchetypeHighNicheIslandBestScore))} " +
                        $"| {FormatSignedScore(profile.LocalChallenge.BestAggregateImprovement)} " +
                        $"| {profile.Verdict} |";
             }));
@@ -462,6 +469,18 @@ public sealed class BalanceReportWriter
                                {pathRows}
                                """;
                     }));
+        var descriptorAudit = report.EliteBuildCertification.DescriptorSeparabilityAudit;
+        var eliteDescriptorEvidence = !report.EliteBuildCertification.Options.DescriptorSeparabilityAuditEnabled
+            ? "_Descriptor-separability audit disabled._"
+            : descriptorAudit is null
+                ? "_Descriptor-separability audit was requested but produced no result._"
+                : CreateDescriptorAuditMarkdown(descriptorAudit);
+        var benchmarkConfidenceAudit = report.EliteBuildCertification.BenchmarkConfidenceAudit;
+        var eliteBenchmarkConfidenceEvidence = !report.EliteBuildCertification.Options.BenchmarkConfidenceAuditEnabled
+            ? "_Benchmark-confidence audit disabled._"
+            : benchmarkConfidenceAudit is null
+                ? "_Benchmark-confidence audit was requested but produced no result._"
+                : CreateBenchmarkConfidenceAuditMarkdown(benchmarkConfidenceAudit);
         var scalingValidationRows = string.Join(
             Environment.NewLine,
             report.ScalingValidation.Floors.Select(floor =>
@@ -584,7 +603,7 @@ public sealed class BalanceReportWriter
 
             **Optimizer builds:** {{meta.EvaluatedBuildCount}}
 
-            **Complementary simulator:** {{meta.SimulatorEvidence.BattlesRun}} battles, Tier {{meta.SimulatorEvidence.EquipmentTier}} {{meta.SimulatorEvidence.EquipmentRarity}} {{meta.SimulatorEvidence.EquipmentProfile}}
+            **Complementary simulator:** {{meta.SimulatorEvidence.BattlesRun}} battles in `{{meta.SimulatorEvidence.Mode}}` mode across {{meta.SimulatorEvidence.CandidateTeamCount}} candidate teams, Tier {{meta.SimulatorEvidence.EquipmentTier}} {{meta.SimulatorEvidence.EquipmentRarity}} {{meta.SimulatorEvidence.EquipmentProfile}}. Distinct Essence scores: {{meta.SimulatorEvidence.DistinctEssenceScoreCount}}; score range: {{meta.SimulatorEvidence.EssenceScoreRange:F4}}; discrimination passed: {{meta.SimulatorEvidence.DiscriminationPassed}}.
 
             | Essence | Appearances | Overall | P50+ | P75+ | P90+ | P95+ | P99+ | PvE Delta | Simulator Classification |
             | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -672,8 +691,8 @@ public sealed class BalanceReportWriter
 
             **Content fingerprint:** `{{report.EliteBuildCertification.ContentFingerprint}}`
 
-            | Profile | Legal Space | Unique Evaluations | Actual Generations | P95 Score | P99 Score | Restart Spread | Max Restart Distance | Valley Generated/Evaluated/Depth | Prefilter Rejected | Best Valley Gain | Restart Passes/Seeds/Finalist Rounds | Restart Two-Swap Evaluations | Basin-Jump Births | Explorer Continuations | Baseline/Final Ceiling | Portfolio Evaluations | Best Local Improvement | Verdict |
-            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+            | Profile | Legal Space | Unique Evaluations | Actual Generations | P95 Score | P99 Score | Restart Spread | Max Restart Distance | Valley Generated/Evaluated/Depth | Prefilter Rejected | Best Valley Gain | Restart Passes/Seeds/Finalist Rounds | Restart Two-Swap Evaluations | Basin-Jump Births | Explorer Continuations | Baseline/Final Ceiling | Portfolio Evaluations | Scenario Island Initial/Descendants | Scenario Island Niches/Replacements | Scenario Island Best | Mechanic Island Initial/Descendants | Mechanic Island Niches/Replacements | Mechanic Island Best | E5 High Niche Baselines/Island Candidates / Best Baseline/Island | Best Local Improvement | Verdict |
+            | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | --- |
             {{eliteProfileRows}}
 
             _A `*` after valley depth means at least one restart exhausted its configured valley candidate budget._
@@ -687,6 +706,22 @@ public sealed class BalanceReportWriter
             {{eliteBridgeEvidence}}
 
             Bridge genomes are evaluated through the production PvE benchmark boundary but remain outside certification candidate populations, restart evidence, percentile cohorts, local challenges, verdicts, and unique-candidate totals.
+
+            ### E5 Descriptor-Separability Audit
+
+            **Audit-only authoritative evaluations:** {{report.EliteBuildCertification.TotalDescriptorAuditCandidatesEvaluated:N0}}
+
+            {{eliteDescriptorEvidence}}
+
+            Descriptor-audit anchors and one-substitution neighborhoods are evaluated through the production PvE benchmark boundary but cannot seed a restart, enter certification cohorts, alter ceilings, or affect verdicts.
+
+            ### E5 PvE Benchmark Confidence Audit
+
+            **Audit-only combat executions:** {{report.EliteBuildCertification.TotalBenchmarkConfidenceCombatExecutions:N0}}
+
+            {{eliteBenchmarkConfidenceEvidence}}
+
+            The confidence audit repeats a deterministic score-stratified cohort with common scenario seeds. It measures ranking and score uncertainty but cannot seed a restart, enter certification cohorts, alter ceilings, or affect verdicts.
 
             Certification keeps P75 progression separate from generated P95/P99 and encounter-specialized stress populations. Developer-profile runs preserve complete diagnostics but cannot emit `CertifiedElite`. Production content was not modified.
 
@@ -742,6 +777,114 @@ public sealed class BalanceReportWriter
         {
             throw new InvalidOperationException("Balance run ID is not safe for use as a history directory name.");
         }
+    }
+
+    private static string CreateBenchmarkConfidenceAuditMarkdown(EliteBenchmarkConfidenceAuditSnapshot audit)
+    {
+        var comparisonRows = string.Join(
+            Environment.NewLine,
+            audit.AnchorComparisons.Select(comparison =>
+                $"| `{comparison.HigherAnchorId}` vs `{comparison.LowerAnchorId}` " +
+                $"| {FormatScore(comparison.MeanPairedScoreDifference)} " +
+                $"| {FormatScore(comparison.Approximate95ConfidenceLowerBound)}–{FormatScore(comparison.Approximate95ConfidenceUpperBound)} " +
+                $"| {FormatPercent(comparison.HigherScoreFraction)} " +
+                $"| {comparison.OrderingConfident} |"));
+        var warningText = audit.Warnings.Count == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, audit.Warnings.Select(warning => $"- {EscapeCell(warning)}"));
+        return $"""
+               Cohort: {audit.CohortSize:N0}/{audit.AvailableCandidateCount:N0} available E5 candidates; {audit.SeedCount} common seeds × {audit.ScenarioCount} scenarios = {audit.TotalCombatExecutions:N0} combat executions. Target approximate 95% score half-width: {FormatScore(audit.TargetScoreMargin)}.
+
+               | Baseline↔Mean Spearman | Minimum Replicate↔Mean Spearman | Mean Replicate↔Mean Spearman | Minimum Baseline Top-{audit.TopK} Overlap | Mean Baseline Top-{audit.TopK} Overlap | Median/Maximum 95% Half-Width | Maximum Recommended Seeds | Stable | Sample Adequate |
+               | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+               | {audit.BaselineToMeanSpearmanCorrelation:F4} | {audit.MinimumReplicateToMeanSpearmanCorrelation:F4} | {audit.MeanReplicateToMeanSpearmanCorrelation:F4} | {FormatPercent(audit.MinimumBaselineTopKOverlap)} | {FormatPercent(audit.MeanBaselineTopKOverlap)} | {FormatScore(audit.MedianApproximate95ConfidenceHalfWidth)} / {FormatScore(audit.MaximumApproximate95ConfidenceHalfWidth)} | {audit.MaximumRecommendedSeedCountForTargetMargin:N0} | {audit.RankingStabilityPassed} | {audit.ConfiguredSampleAdequate} |
+
+               | Paired Anchor Comparison | Mean Difference | Approximate 95% CI | Higher Wins | Ordering Confident |
+               | --- | ---: | ---: | ---: | --- |
+               {comparisonRows}
+
+               #### Confidence Warnings
+
+               {warningText}
+               """;
+    }
+
+    private static string CreateDescriptorAuditMarkdown(EliteDescriptorSeparabilityAuditSnapshot audit)
+    {
+        var anchorRows = string.Join(
+            Environment.NewLine,
+            audit.Anchors.Select(anchor =>
+                $"| {anchor.Basin} | `{anchor.AnchorId}` | {FormatScore(anchor.AggregateScore)} | {EscapeCell(string.Join(", ", anchor.Genome))} |"));
+        var basinRows = string.Join(
+            Environment.NewLine,
+            audit.Basins.Select(basin =>
+                $"| {basin.Basin} | {basin.CandidateCount:N0} | {FormatScore(basin.MinimumScore)} / {FormatScore(basin.MedianScore)} / {FormatScore(basin.MaximumScore)} | " +
+                $"{EscapeCell(string.Join(", ", basin.MeanScenarioScores.Select(pair => $"{pair.Key}={FormatScore(pair.Value)}")))} |"));
+        var descriptorRows = string.Join(
+            Environment.NewLine,
+            audit.DescriptorFamilies.Select(descriptor =>
+                $"| `{descriptor.DescriptorId}` | {descriptor.FeatureCount:N0} | {descriptor.DistinctNeighborhoodSignatures:N0} | " +
+                $"{FormatPercent(descriptor.ExactSignaturePurity)} | {FormatPercent(descriptor.SingletonCandidateRate)} | " +
+                $"{FormatPercent(descriptor.NearestAnchorHighAccuracy)} / {FormatPercent(descriptor.NearestAnchorLowAccuracy)} / {FormatPercent(descriptor.NearestAnchorBalancedAccuracy)} | " +
+                $"{descriptor.NearestAnchorAmbiguousCandidates:N0} | {descriptor.HighAnchorCollidesWithLowAnchor} | " +
+                $"{descriptor.HighAnchorRetainedNicheOccupancy:N0} / {FormatNullableScore(descriptor.HighAnchorRetainedNicheBestScore)} | " +
+                $"{(descriptor.TheoreticalNicheCeiling is null ? "—" : descriptor.TheoreticalNicheCeiling.Value.ToString("N0"))} / {descriptor.HardNicheCeilingPassed} | " +
+                $"{descriptor.SeparabilityPassed} / {descriptor.MapCandidatePassed} | " +
+                $"{EscapeCell(string.Join("; ", descriptor.StrongestFeatureContrasts.Take(5).Select(contrast => $"{contrast.Feature} ({contrast.HighBasinMean:0.##}/{contrast.LowBasinMean:0.##})")))} |"));
+        var warningText = audit.Warnings.Count == 0
+            ? "- None."
+            : string.Join(Environment.NewLine, audit.Warnings.Select(warning => $"- {EscapeCell(warning)}"));
+        var collisionText = audit.CollisionAudit is null
+            ? "_Collision audit not available._"
+            : CreateDescriptorCollisionAuditMarkdown(audit.CollisionAudit);
+        return $"""
+               Neighborhood: {audit.NeighborhoodDefinition}
+
+               Evaluated {audit.UniqueCandidatesEvaluated:N0} unique genomes: {audit.HighBasinCandidates:N0} high-labeled, {audit.LowBasinCandidates:N0} low-labeled, {audit.AmbiguousNeighborhoodCandidatesExcluded:N0} ambiguous excluded. Retained baseline comparison set: {audit.RetainedBaselineCandidates:N0} candidates. Authoritative benchmark: {audit.AuthoritativeProductionBenchmark}; certification affected: {audit.CertificationEvidenceAffected}.
+
+               | Basin | Anchor | Score | Genome |
+               | --- | --- | ---: | --- |
+               {anchorRows}
+
+               | Basin | Candidates | Score min / median / max | Mean scenario scores |
+               | --- | ---: | --- | --- |
+               {basinRows}
+
+               A descriptor passes separability only when anchors do not collide, nearest-anchor balanced accuracy and exact-signature purity are both at least 80%, and no more than 50% of candidates occupy singleton signatures. A map candidate must also declare and stay within a hard theoretical niche ceiling. Map candidates: {(audit.MapCandidateDescriptorIds.Count == 0 ? "none" : string.Join(", ", audit.MapCandidateDescriptorIds.Select(id => $"`{id}`")))}.
+
+               | Descriptor | Features | Signatures | Purity | Singleton rate | High / Low / Balanced accuracy | Ambiguous | Anchor collision | Retained high niche count / best | Hard ceiling / within | Separability / map | Strongest contrasts (high/low mean) |
+               | --- | ---: | ---: | ---: | ---: | --- | ---: | --- | --- | --- | --- | --- |
+               {descriptorRows}
+
+               #### Coarse-Niche Collision Audit
+
+               {collisionText}
+
+               #### Descriptor Audit Warnings
+
+               {warningText}
+               """;
+    }
+
+    private static string CreateDescriptorCollisionAuditMarkdown(EliteDescriptorCollisionAuditSnapshot collision)
+    {
+        var contrasts = string.Join(
+            "; ",
+            collision.StrongestFeatureContrasts.Select(contrast =>
+                $"{contrast.Feature} ({contrast.HighBasinMean:0.##}/{contrast.LowBasinMean:0.##})"));
+        return $"""
+               Parent descriptor: `{collision.ParentDescriptorId}`; residual descriptor: `{collision.ResidualDescriptorId}`; parent high-niche signature: `{EscapeCell(collision.ParentHighNicheSignature)}`.
+
+               Candidate universe: {collision.CandidateUniverse}
+
+               The residual uses {collision.FeatureCount} capped `0/1/2+` authored-mechanic intensity axes and has a hard ceiling of {collision.TheoreticalResidualNicheCeiling:N0} niches. It is evaluated only among candidates already occupying the parent high niche. High labels require score >= {FormatScore(collision.HighScoreFloor)}; low labels require score <= {FormatScore(collision.LowScoreCeiling)}; {collision.AmbiguousQualityCandidatesExcluded:N0} candidates in the gap are excluded. Scores define the audit outcome only and are not descriptor features. Leave-one-out classification predicts from the other candidates sharing the exact residual signature; ties and candidates without a peer are ambiguous.
+
+               | Parent niche / labeled candidates (high/low) | Residual signatures | Purity | Singleton rate | Leave-one-out high / low / balanced | Ambiguous | High-anchor collision | Retained high residual niche count / best | Hard ceiling / within | Separability / map |
+               | --- | ---: | ---: | ---: | --- | ---: | --- | --- | --- | --- |
+               | {collision.ParentNicheCandidates:N0} / {collision.CandidateCount:N0} ({collision.HighBasinCandidates:N0}/{collision.LowBasinCandidates:N0}) | {collision.DistinctResidualSignatures:N0} | {FormatPercent(collision.ExactSignaturePurity)} | {FormatPercent(collision.SingletonCandidateRate)} | {FormatPercent(collision.LeaveOneOutHighAccuracy)} / {FormatPercent(collision.LeaveOneOutLowAccuracy)} / {FormatPercent(collision.LeaveOneOutBalancedAccuracy)} | {collision.LeaveOneOutAmbiguousCandidates:N0} | {collision.HighAnchorResidualCollidesWithLowCandidate} | {collision.HighAnchorRetainedResidualNicheOccupancy:N0} / {FormatNullableScore(collision.HighAnchorRetainedResidualNicheBestScore)} | {collision.TheoreticalResidualNicheCeiling:N0} / {collision.HardNicheCeilingPassed} | {collision.SeparabilityPassed} / {collision.MapCandidatePassed} |
+
+               Strongest residual contrasts (high/low mean): {EscapeCell(contrasts)}.
+               """;
     }
 
     private static string EscapeCell(string value) => value.Replace("|", "\\|", StringComparison.Ordinal);

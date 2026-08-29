@@ -38,7 +38,27 @@ public sealed record EliteCertificationRestartSnapshot(
     double BaselineBestScore = 0,
     string? BaselineBestBuildId = null,
     IReadOnlyList<string>? BaselineBestEssenceIds = null,
-    int StratifiedPortfolioCandidatesEvaluated = 0);
+    int StratifiedPortfolioCandidatesEvaluated = 0,
+    int QualityDiversityIslandCandidatesEvaluated = 0,
+    int QualityDiversityIslandInitialCandidatesEvaluated = 0,
+    int QualityDiversityIslandDescendantsEvaluated = 0,
+    int QualityDiversityIslandNichesOccupied = 0,
+    int QualityDiversityIslandNicheReplacements = 0,
+    double QualityDiversityIslandBestScore = 0,
+    string? QualityDiversityIslandBestBuildId = null,
+    IReadOnlyList<string>? QualityDiversityIslandBestEssenceIds = null,
+    int MechanicArchetypeIslandCandidatesEvaluated = 0,
+    int MechanicArchetypeIslandInitialCandidatesEvaluated = 0,
+    int MechanicArchetypeIslandDescendantsEvaluated = 0,
+    int MechanicArchetypeIslandNichesOccupied = 0,
+    int MechanicArchetypeIslandNicheReplacements = 0,
+    double MechanicArchetypeIslandBestScore = 0,
+    string? MechanicArchetypeIslandBestBuildId = null,
+    IReadOnlyList<string>? MechanicArchetypeIslandBestEssenceIds = null,
+    bool MechanicArchetypeHighNichePresentInBaseline = false,
+    double MechanicArchetypeHighNicheBaselineBestScore = 0,
+    int MechanicArchetypeHighNicheIslandCandidatesEvaluated = 0,
+    double MechanicArchetypeHighNicheIslandBestScore = 0);
 
 public sealed record EliteCertificationCandidateSnapshot(
     string BuildId,
@@ -72,6 +92,144 @@ public sealed record EliteRestartBridgeAuditSnapshot(
     double StepRegressionTolerance,
     bool NonRegressingBridgeExists,
     bool ToleranceBoundedBridgeExists);
+
+public sealed record EliteDescriptorAnchorSnapshot(
+    string Basin,
+    string AnchorId,
+    string BuildId,
+    IReadOnlyList<string> Genome,
+    double AggregateScore,
+    IReadOnlyDictionary<string, double> ScenarioScores);
+
+public sealed record EliteDescriptorBasinSnapshot(
+    string Basin,
+    int CandidateCount,
+    double MinimumScore,
+    double MedianScore,
+    double MaximumScore,
+    IReadOnlyDictionary<string, double> MeanScenarioScores);
+
+public sealed record EliteDescriptorFeatureContrastSnapshot(
+    string Feature,
+    double HighBasinMean,
+    double LowBasinMean,
+    double NormalizedDifference);
+
+public sealed record EliteDescriptorFamilySnapshot(
+    string DescriptorId,
+    string DisplayName,
+    int FeatureCount,
+    int DistinctNeighborhoodSignatures,
+    double ExactSignaturePurity,
+    double SingletonCandidateRate,
+    double NearestAnchorHighAccuracy,
+    double NearestAnchorLowAccuracy,
+    double NearestAnchorBalancedAccuracy,
+    int NearestAnchorAmbiguousCandidates,
+    bool HighAnchorCollidesWithLowAnchor,
+    int HighAnchorRetainedNicheOccupancy,
+    double? HighAnchorRetainedNicheBestScore,
+    int? TheoreticalNicheCeiling,
+    bool HardNicheCeilingPassed,
+    bool SeparabilityPassed,
+    bool MapCandidatePassed,
+    IReadOnlyList<EliteDescriptorFeatureContrastSnapshot> StrongestFeatureContrasts);
+
+public sealed record EliteDescriptorCollisionAuditSnapshot(
+    string ParentDescriptorId,
+    string ParentHighNicheSignature,
+    string ResidualDescriptorId,
+    string DisplayName,
+    string CandidateUniverse,
+    int FeatureCount,
+    int ParentNicheCandidates,
+    int CandidateCount,
+    int HighBasinCandidates,
+    int LowBasinCandidates,
+    int AmbiguousQualityCandidatesExcluded,
+    double HighScoreFloor,
+    double LowScoreCeiling,
+    int DistinctResidualSignatures,
+    double ExactSignaturePurity,
+    double SingletonCandidateRate,
+    double LeaveOneOutHighAccuracy,
+    double LeaveOneOutLowAccuracy,
+    double LeaveOneOutBalancedAccuracy,
+    int LeaveOneOutAmbiguousCandidates,
+    bool HighAnchorResidualCollidesWithLowCandidate,
+    int HighAnchorRetainedResidualNicheOccupancy,
+    double? HighAnchorRetainedResidualNicheBestScore,
+    int TheoreticalResidualNicheCeiling,
+    bool HardNicheCeilingPassed,
+    bool SeparabilityPassed,
+    bool MapCandidatePassed,
+    IReadOnlyList<EliteDescriptorFeatureContrastSnapshot> StrongestFeatureContrasts);
+
+public sealed record EliteDescriptorSeparabilityAuditSnapshot(
+    string ProfileId,
+    int SlotCount,
+    string NeighborhoodDefinition,
+    bool AuthoritativeProductionBenchmark,
+    bool CertificationEvidenceAffected,
+    int UniqueCandidatesEvaluated,
+    int HighBasinCandidates,
+    int LowBasinCandidates,
+    int AmbiguousNeighborhoodCandidatesExcluded,
+    int RetainedBaselineCandidates,
+    IReadOnlyList<EliteDescriptorAnchorSnapshot> Anchors,
+    IReadOnlyList<EliteDescriptorBasinSnapshot> Basins,
+    IReadOnlyList<EliteDescriptorFamilySnapshot> DescriptorFamilies,
+    IReadOnlyList<string> MapCandidateDescriptorIds,
+    IReadOnlyList<string> Warnings,
+    EliteDescriptorCollisionAuditSnapshot? CollisionAudit = null);
+
+public sealed record EliteBenchmarkConfidenceBuildSnapshot(
+    string BuildId,
+    double BaselineScore,
+    int BaselineRank,
+    double MeanScore,
+    double ScoreStandardDeviation,
+    double Approximate95ConfidenceHalfWidth,
+    int RecommendedSeedCountForTargetMargin,
+    double MeanReplicateRank,
+    IReadOnlyList<string> EssenceIds);
+
+public sealed record EliteBenchmarkConfidenceComparisonSnapshot(
+    string HigherAnchorId,
+    string LowerAnchorId,
+    double MeanPairedScoreDifference,
+    double DifferenceStandardDeviation,
+    double Approximate95ConfidenceLowerBound,
+    double Approximate95ConfidenceUpperBound,
+    double HigherScoreFraction,
+    bool OrderingConfident);
+
+public sealed record EliteBenchmarkConfidenceAuditSnapshot(
+    string ProfileId,
+    string CandidateUniverse,
+    int AvailableCandidateCount,
+    int CohortSize,
+    int SeedCount,
+    int ScenarioCount,
+    int TotalCombatExecutions,
+    bool CommonRandomNumbers,
+    double TargetScoreMargin,
+    int TopK,
+    double BaselineToMeanSpearmanCorrelation,
+    double MinimumReplicateToMeanSpearmanCorrelation,
+    double MeanReplicateToMeanSpearmanCorrelation,
+    double MinimumBaselineTopKOverlap,
+    double MeanBaselineTopKOverlap,
+    double MedianApproximate95ConfidenceHalfWidth,
+    double MaximumApproximate95ConfidenceHalfWidth,
+    int MaximumRecommendedSeedCountForTargetMargin,
+    bool RankingStabilityPassed,
+    bool KnownAnchorOrderingPassed,
+    bool ConfiguredSampleAdequate,
+    bool CertificationEvidenceAffected,
+    IReadOnlyList<EliteBenchmarkConfidenceBuildSnapshot> Builds,
+    IReadOnlyList<EliteBenchmarkConfidenceComparisonSnapshot> AnchorComparisons,
+    IReadOnlyList<string> Warnings);
 
 public sealed record EliteLocalChallengeSnapshot(
     int FinalistCount,
@@ -167,7 +325,11 @@ public sealed record EliteBuildCertificationSnapshot(
     IReadOnlyList<EliteCertificationProfileSnapshot> Profiles,
     IReadOnlyList<EliteCertificationFloorSnapshot> Floors,
     int TotalBridgeNodesEvaluated = 0,
-    IReadOnlyList<EliteRestartBridgeAuditSnapshot>? BridgeAudits = null);
+    IReadOnlyList<EliteRestartBridgeAuditSnapshot>? BridgeAudits = null,
+    int TotalDescriptorAuditCandidatesEvaluated = 0,
+    EliteDescriptorSeparabilityAuditSnapshot? DescriptorSeparabilityAudit = null,
+    int TotalBenchmarkConfidenceCombatExecutions = 0,
+    EliteBenchmarkConfidenceAuditSnapshot? BenchmarkConfidenceAudit = null);
 
 public sealed class EliteBuildCertificationAnalyzer(
     IAbilityCatalogProvider catalogProvider,
@@ -177,7 +339,49 @@ public sealed class EliteBuildCertificationAnalyzer(
     EssenceBuildOptimizer optimizer,
     IEncounterBuildEvaluator encounterEvaluator)
 {
-    public const int AlgorithmVersion = 14;
+    public const int AlgorithmVersion = 20;
+
+    private static readonly DescriptorAuditAnchor[] DescriptorAuditAnchors =
+    [
+        new(
+            "high",
+            "known-e5-high-86.21",
+            [
+                "essence.bark_golem",
+                "essence.giant_bat",
+                "essence.plague_ghoul",
+                "essence.poisonous_rat",
+                "essence.spider_queen_royal_venom"
+            ]),
+        new(
+            "low",
+            "known-e5-low-85.27",
+            [
+                "essence.bark_golem",
+                "essence.elder_treant_thornstorm",
+                "essence.illusion_fox",
+                "essence.venomous_spiderling",
+                "essence.wind_harpy"
+            ]),
+        new(
+            "low",
+            "known-e5-low-84.91",
+            [
+                "essence.bark_golem",
+                "essence.elder_treant_thornstorm",
+                "essence.giant_worm",
+                "essence.plague_ghoul",
+                "essence.venomous_spiderling"
+            ])
+    ];
+
+    private static readonly string[] MechanicResidualFeatureNames =
+    [
+        "intensity:outgoing-result",
+        "intensity:health-recovery",
+        "intensity:status-lifecycle",
+        "intensity:condition-dependency"
+    ];
 
     public EliteBuildCertificationSnapshot Certify(
         EssenceMetaAnalysisSnapshot essenceMeta,
@@ -254,6 +458,21 @@ public sealed class EliteBuildCertificationAnalyzer(
         var bridgeAudits = options.BridgeAuditEnabled
             ? RunBridgeAudits(profiles, definitionsById, runSeed, policy)
             : [];
+        var descriptorAudit = options.DescriptorSeparabilityAuditEnabled
+            ? RunDescriptorSeparabilityAudit(
+                canonicalCandidates,
+                profileStates.Single(state => state.SlotCount == 5).Candidates,
+                restartResults,
+                sourceFamilies,
+                definitionsById,
+                runSeed)
+            : null;
+        var benchmarkConfidenceAudit = options.BenchmarkConfidenceAuditEnabled
+            ? RunBenchmarkConfidenceAudit(
+                profileStates.Single(state => state.SlotCount == 5),
+                runSeed,
+                options)
+            : null;
 
         return new EliteBuildCertificationSnapshot(
             AlgorithmVersion,
@@ -270,7 +489,1058 @@ public sealed class EliteBuildCertificationAnalyzer(
             profiles,
             floors,
             bridgeAudits.Sum(audit => audit.LegalBridgeNodesEvaluated),
-            bridgeAudits);
+            bridgeAudits,
+            descriptorAudit?.UniqueCandidatesEvaluated ?? 0,
+            descriptorAudit,
+            benchmarkConfidenceAudit?.TotalCombatExecutions ?? 0,
+            benchmarkConfidenceAudit);
+    }
+
+    private EliteBenchmarkConfidenceAuditSnapshot RunBenchmarkConfidenceAudit(
+        ProfileState profile,
+        int runSeed,
+        EliteCertificationOptions options)
+    {
+        var candidatesBySignature = profile.Candidates
+            .DistinctBy(candidate => Signature(candidate.Build))
+            .ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
+        var missingAnchorBuilds = DescriptorAuditAnchors
+            .Where(anchor => !candidatesBySignature.ContainsKey(Signature(anchor.Genome)))
+            .Select(anchor => buildGenerator.MaterializeBuild(
+                CreateCanonicalId(profile.SlotCount, Signature(anchor.Genome)),
+                profile.Candidates[0].Build.ProfileId,
+                profile.SlotCount,
+                runSeed,
+                anchor.Genome))
+            .ToArray();
+        if (missingAnchorBuilds.Length > 0)
+        {
+            var missingBenchmarks = benchmarkRunner.Run(missingAnchorBuilds, runSeed).Builds
+                .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+            foreach (var build in missingAnchorBuilds)
+                candidatesBySignature[Signature(build)] = new CertificationCandidate(build, missingBenchmarks[build.Id]);
+        }
+
+        var mandatorySignatures = DescriptorAuditAnchors.Select(anchor => Signature(anchor.Genome))
+            .Concat(profile.Finalists.Select(candidate => Signature(candidate.Build)))
+            .ToHashSet(StringComparer.Ordinal);
+        var ordered = candidatesBySignature.Values
+            .OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
+            .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+            .ToArray();
+        var targetSize = Math.Min(
+            ordered.Length,
+            Math.Max(options.BenchmarkConfidenceAuditCohortSize, mandatorySignatures.Count));
+        var selected = ordered.Where(candidate => mandatorySignatures.Contains(Signature(candidate.Build)))
+            .ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
+        var remainingSlots = targetSize - selected.Count;
+        if (remainingSlots > 0)
+        {
+            for (var index = 0; index < remainingSlots; index++)
+            {
+                var position = remainingSlots == 1
+                    ? ordered.Length / 2
+                    : (int)Math.Round(index * (ordered.Length - 1d) / (remainingSlots - 1));
+                selected.TryAdd(Signature(ordered[position].Build), ordered[position]);
+            }
+            foreach (var candidate in ordered)
+            {
+                if (selected.Count >= targetSize)
+                    break;
+                selected.TryAdd(Signature(candidate.Build), candidate);
+            }
+        }
+
+        var cohort = selected.Values.OrderBy(candidate => candidate.Build.Id, StringComparer.Ordinal).ToArray();
+        var replicateSeeds = Enumerable.Range(1, options.BenchmarkConfidenceAuditSeedCount)
+            .Select(index => StableRandom.Seed(
+                "balance-elite-benchmark-confidence-v1",
+                runSeed.ToString(CultureInfo.InvariantCulture),
+                index.ToString(CultureInfo.InvariantCulture)))
+            .ToArray();
+        var suites = benchmarkRunner.RunCommonSeedReplicates(
+            cohort.Select(candidate => candidate.Build).ToArray(),
+            replicateSeeds);
+        var baselineScores = cohort.ToDictionary(
+            candidate => candidate.Build.Id,
+            candidate => candidate.Benchmark.AggregateScore,
+            StringComparer.Ordinal);
+        var replicateScores = suites.Select(suite => suite.Builds.ToDictionary(
+                build => build.BuildId,
+                build => build.AggregateScore,
+                StringComparer.Ordinal))
+            .ToArray();
+        var meanScores = cohort.ToDictionary(
+            candidate => candidate.Build.Id,
+            candidate => replicateScores.Average(scores => scores[candidate.Build.Id]),
+            StringComparer.Ordinal);
+        var baselineRanks = RankDescending(baselineScores);
+        var meanRanks = RankDescending(meanScores);
+        var replicateRanks = replicateScores.Select(RankDescending).ToArray();
+        var topK = Math.Min(20, cohort.Length);
+        var baselineTop = baselineRanks.Where(pair => pair.Value <= topK).Select(pair => pair.Key)
+            .ToHashSet(StringComparer.Ordinal);
+        var topOverlaps = replicateRanks.Select(ranks =>
+                ranks.Count(pair => pair.Value <= topK && baselineTop.Contains(pair.Key)) / (double)topK)
+            .ToArray();
+        var replicateCorrelations = replicateRanks.Select(ranks => Spearman(ranks, meanRanks)).ToArray();
+        var buildRows = cohort.Select(candidate =>
+            {
+                var scores = replicateScores.Select(values => values[candidate.Build.Id]).ToArray();
+                var standardDeviation = SampleStandardDeviation(scores);
+                var halfWidth = 1.959963984540054 * standardDeviation / Math.Sqrt(scores.Length);
+                var recommendedSeeds = Math.Max(2, (int)Math.Ceiling(Math.Pow(
+                    1.959963984540054 * standardDeviation / options.BenchmarkConfidenceTargetScoreMargin,
+                    2)));
+                return new EliteBenchmarkConfidenceBuildSnapshot(
+                    candidate.Build.Id,
+                    Round(baselineScores[candidate.Build.Id]),
+                    baselineRanks[candidate.Build.Id],
+                    Round(meanScores[candidate.Build.Id]),
+                    Round(standardDeviation),
+                    Round(halfWidth),
+                    recommendedSeeds,
+                    Round(replicateRanks.Average(ranks => ranks[candidate.Build.Id])),
+                    candidate.Build.Essences.Select(essence => essence.EssenceId).ToArray());
+            })
+            .OrderBy(row => row.BaselineRank)
+            .ToArray();
+        var anchorBuildIds = DescriptorAuditAnchors.ToDictionary(
+            anchor => anchor.AnchorId,
+            anchor => candidatesBySignature[Signature(anchor.Genome)].Build.Id,
+            StringComparer.Ordinal);
+        var highAnchor = DescriptorAuditAnchors.Single(anchor => anchor.Basin == "high");
+        var comparisons = DescriptorAuditAnchors.Where(anchor => anchor.Basin == "low")
+            .Select(lowAnchor => CreateConfidenceComparison(
+                highAnchor.AnchorId,
+                anchorBuildIds[highAnchor.AnchorId],
+                lowAnchor.AnchorId,
+                anchorBuildIds[lowAnchor.AnchorId],
+                replicateScores))
+            .ToArray();
+        var baselineToMean = Spearman(baselineRanks, meanRanks);
+        var rankingPassed = baselineToMean >= 0.95
+                            && replicateCorrelations.Min() >= 0.90
+                            && topOverlaps.Min() >= 0.70
+                            && topOverlaps.Average() >= 0.80;
+        var orderingPassed = comparisons.All(comparison => comparison.OrderingConfident);
+        var configuredSampleAdequate = buildRows.All(row =>
+                                                 row.Approximate95ConfidenceHalfWidth
+                                                 <= options.BenchmarkConfidenceTargetScoreMargin)
+                                             && rankingPassed
+                                             && orderingPassed;
+        var warnings = new List<string>();
+        if (!rankingPassed)
+            warnings.Add("The predeclared rank-stability thresholds were not met; single-seed PvE ordering is not stable enough for a global ranking claim.");
+        if (!orderingPassed)
+            warnings.Add("At least one known high-versus-low anchor difference includes zero at the approximate 95% confidence level.");
+        if (buildRows.Any(row => row.Approximate95ConfidenceHalfWidth > options.BenchmarkConfidenceTargetScoreMargin))
+            warnings.Add("The configured seed count does not achieve the target score margin for every audited build.");
+
+        return new EliteBenchmarkConfidenceAuditSnapshot(
+            "E5_ELITE",
+            "Deterministic score-stratified E5 cohort with all known descriptor anchors and certification finalists forced into the sample.",
+            ordered.Length,
+            cohort.Length,
+            replicateSeeds.Length,
+            suites[0].Scenarios.Count,
+            cohort.Length * replicateSeeds.Length * suites[0].Scenarios.Count,
+            true,
+            options.BenchmarkConfidenceTargetScoreMargin,
+            topK,
+            RoundRate(baselineToMean),
+            RoundRate(replicateCorrelations.Min()),
+            RoundRate(replicateCorrelations.Average()),
+            RoundRate(topOverlaps.Min()),
+            RoundRate(topOverlaps.Average()),
+            Round(buildRows.Select(row => row.Approximate95ConfidenceHalfWidth).Order().ElementAt(buildRows.Length / 2)),
+            Round(buildRows.Max(row => row.Approximate95ConfidenceHalfWidth)),
+            buildRows.Max(row => row.RecommendedSeedCountForTargetMargin),
+            rankingPassed,
+            orderingPassed,
+            configuredSampleAdequate,
+            false,
+            buildRows,
+            comparisons,
+            warnings);
+    }
+
+    private static EliteBenchmarkConfidenceComparisonSnapshot CreateConfidenceComparison(
+        string higherAnchorId,
+        string higherBuildId,
+        string lowerAnchorId,
+        string lowerBuildId,
+        IReadOnlyList<IReadOnlyDictionary<string, double>> replicateScores)
+    {
+        var differences = replicateScores.Select(scores => scores[higherBuildId] - scores[lowerBuildId]).ToArray();
+        var mean = differences.Average();
+        var standardDeviation = SampleStandardDeviation(differences);
+        var halfWidth = 1.959963984540054 * standardDeviation / Math.Sqrt(differences.Length);
+        return new EliteBenchmarkConfidenceComparisonSnapshot(
+            higherAnchorId,
+            lowerAnchorId,
+            Round(mean),
+            Round(standardDeviation),
+            Round(mean - halfWidth),
+            Round(mean + halfWidth),
+            RoundRate(differences.Count(value => value > 0) / (double)differences.Length),
+            mean - halfWidth > 0);
+    }
+
+    private static IReadOnlyDictionary<string, int> RankDescending(IReadOnlyDictionary<string, double> scores) =>
+        scores.OrderByDescending(pair => pair.Value)
+            .ThenBy(pair => pair.Key, StringComparer.Ordinal)
+            .Select((pair, index) => (pair.Key, Rank: index + 1))
+            .ToDictionary(pair => pair.Key, pair => pair.Rank, StringComparer.Ordinal);
+
+    private static double Spearman(
+        IReadOnlyDictionary<string, int> first,
+        IReadOnlyDictionary<string, int> second)
+    {
+        var count = first.Count;
+        if (count < 2)
+            return 1;
+        var squaredDifference = first.Sum(pair =>
+        {
+            var difference = pair.Value - second[pair.Key];
+            return difference * difference;
+        });
+        return 1 - 6d * squaredDifference / (count * (count * count - 1d));
+    }
+
+    private static double SampleStandardDeviation(IReadOnlyList<double> values)
+    {
+        if (values.Count < 2)
+            return 0;
+        var mean = values.Average();
+        return Math.Sqrt(values.Sum(value => Math.Pow(value - mean, 2)) / (values.Count - 1));
+    }
+
+    private EliteDescriptorSeparabilityAuditSnapshot RunDescriptorSeparabilityAudit(
+        IReadOnlyList<CertificationCandidate> canonicalCandidates,
+        IReadOnlyList<CertificationCandidate> certificationCandidates,
+        IReadOnlyList<RestartResult> restartResults,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        int runSeed)
+    {
+        const int slotCount = 5;
+        foreach (var essenceId in DescriptorAuditAnchors.SelectMany(anchor => anchor.Genome))
+        {
+            if (!definitionsById.ContainsKey(essenceId))
+                throw new InvalidOperationException($"Descriptor audit anchor Essence '{essenceId}' is absent from production content.");
+        }
+
+        var originsBySignature = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        var genomesBySignature = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (var anchor in DescriptorAuditAnchors)
+        foreach (var genome in EnumerateCompleteOneSwapNeighborhood(anchor.Genome, sourceFamilies, definitionsById))
+        {
+            var signature = Signature(genome);
+            genomesBySignature[signature] = genome;
+            if (!originsBySignature.TryGetValue(signature, out var origins))
+            {
+                origins = new HashSet<string>(StringComparer.Ordinal);
+                originsBySignature[signature] = origins;
+            }
+            origins.Add(anchor.Basin);
+        }
+
+        var orderedGenomes = genomesBySignature.OrderBy(pair => pair.Key, StringComparer.Ordinal).ToArray();
+        var builds = orderedGenomes.Select(pair => buildGenerator.MaterializeBuild(
+                CreateCanonicalId(slotCount, pair.Key),
+                "E5_ELITE_DESCRIPTOR_AUDIT",
+                slotCount,
+                runSeed,
+                pair.Value))
+            .ToArray();
+        var benchmarks = benchmarkRunner.Run(builds, runSeed).Builds
+            .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+        var auditedBySignature = builds.ToDictionary(
+            Signature,
+            build => new CertificationCandidate(build, benchmarks[build.Id]),
+            StringComparer.Ordinal);
+        var ambiguousSignatures = originsBySignature
+            .Where(pair => pair.Value.Count > 1)
+            .Select(pair => pair.Key)
+            .ToHashSet(StringComparer.Ordinal);
+        var labeledCandidates = originsBySignature
+            .Where(pair => pair.Value.Count == 1)
+            .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+            .Select(pair => new DescriptorAuditCandidate(auditedBySignature[pair.Key], pair.Value.Single()))
+            .ToArray();
+
+        var retainedSignatures = restartResults.SelectMany(restart => restart.Result.Snapshot.Profiles
+                .Where(profile => profile.SlotCount == slotCount)
+                .SelectMany(profile => profile.RetainedCandidates)
+                .Select(candidate => Signature(candidate.EssenceIds)))
+            .ToHashSet(StringComparer.Ordinal);
+        var retainedCandidates = canonicalCandidates
+            .Where(candidate => candidate.Build.SlotCount == slotCount
+                                && retainedSignatures.Contains(Signature(candidate.Build)))
+            .DistinctBy(candidate => Signature(candidate.Build))
+            .OrderBy(candidate => Signature(candidate.Build), StringComparer.Ordinal)
+            .ToArray();
+        var anchorCandidates = DescriptorAuditAnchors.Select(anchor => new DescriptorAuditAnchorCandidate(
+                anchor,
+                auditedBySignature[Signature(anchor.Genome)]))
+            .ToArray();
+        var descriptorDefinitions = CreateDescriptorDefinitions(definitionsById);
+        var descriptorFamilies = descriptorDefinitions.Select(descriptor => AnalyzeDescriptorFamily(
+                descriptor,
+                labeledCandidates,
+                anchorCandidates,
+                retainedCandidates))
+            .ToArray();
+        var collisionAudit = AnalyzeMechanicArchetypeCollision(
+            certificationCandidates,
+            anchorCandidates,
+            retainedCandidates,
+            definitionsById);
+        var warnings = new List<string>();
+        if (definitionsById.Values.All(definition => definition.Tags.Count == 0))
+        {
+            warnings.Add(
+                "Production Essence-level tags are empty; mechanic and effect-role descriptors were derived from resolved authored ability specs instead.");
+        }
+        if (descriptorFamilies.All(descriptor => !descriptor.SeparabilityPassed))
+        {
+            warnings.Add(
+                "No tested descriptor passed the predeclared accuracy, purity, and fragmentation criteria; do not spend a larger quality-diversity budget.");
+        }
+        var mapCandidateDescriptorIds = descriptorFamilies
+            .Where(descriptor => descriptor.MapCandidatePassed)
+            .Select(descriptor => descriptor.DescriptorId)
+            .ToArray();
+        if (mapCandidateDescriptorIds.Length == 0)
+        {
+            warnings.Add(
+                "No tested descriptor passed both separability and a declared hard niche ceiling; do not start a descriptor-driven island search.");
+        }
+        if (!collisionAudit.MapCandidatePassed)
+        {
+            warnings.Add(
+                "The bounded mechanic-intensity residual did not separate the colliding coarse E5 niche; do not start another mechanic-island search.");
+        }
+
+        return new EliteDescriptorSeparabilityAuditSnapshot(
+            "E5_ELITE",
+            slotCount,
+            "Each known anchor plus every unique legal genome at substitution distance one; candidates shared by high and low neighborhoods are excluded from labeled metrics.",
+            true,
+            false,
+            builds.Length,
+            labeledCandidates.Count(candidate => candidate.Basin == "high"),
+            labeledCandidates.Count(candidate => candidate.Basin == "low"),
+            ambiguousSignatures.Count,
+            retainedCandidates.Length,
+            anchorCandidates.Select(value => new EliteDescriptorAnchorSnapshot(
+                    value.Anchor.Basin,
+                    value.Anchor.AnchorId,
+                    value.Candidate.Build.Id,
+                    value.Anchor.Genome,
+                    value.Candidate.Benchmark.AggregateScore,
+                    value.Candidate.Benchmark.Components.ToDictionary(
+                        component => component.ScenarioId,
+                        component => component.Score,
+                        StringComparer.Ordinal)))
+                .ToArray(),
+            [
+                SummarizeDescriptorBasin("high", labeledCandidates),
+                SummarizeDescriptorBasin("low", labeledCandidates)
+            ],
+            descriptorFamilies,
+            mapCandidateDescriptorIds,
+            warnings,
+            collisionAudit);
+    }
+
+    private static IEnumerable<IReadOnlyList<string>> EnumerateCompleteOneSwapNeighborhood(
+        IReadOnlyList<string> anchor,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        var yielded = new HashSet<string>(StringComparer.Ordinal);
+        var orderedAnchor = anchor.OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+        yielded.Add(Signature(orderedAnchor));
+        yield return orderedAnchor;
+        for (var replacementIndex = 0; replacementIndex < orderedAnchor.Length; replacementIndex++)
+        {
+            var retained = orderedAnchor.Where((_, index) => index != replacementIndex).ToArray();
+            var occupiedSources = retained.Select(id => definitionsById[id].SourceMonsterId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var family in sourceFamilies
+                         .Where(family => !occupiedSources.Contains(family[0].SourceMonsterId))
+                         .OrderBy(family => family[0].SourceMonsterId, StringComparer.OrdinalIgnoreCase))
+            foreach (var definition in family.OrderBy(value => value.Id, StringComparer.OrdinalIgnoreCase))
+            {
+                var genome = retained.Append(definition.Id)
+                    .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+                if (yielded.Add(Signature(genome)))
+                    yield return genome;
+            }
+        }
+    }
+
+    private static DescriptorDefinition[] CreateDescriptorDefinitions(
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById) =>
+    [
+        new(
+            "source-family",
+            "Authored source-family set",
+            candidate => ExtractSourceFamilyFeatures(candidate, definitionsById),
+            0,
+            null),
+        new(
+            "mechanic",
+            "Authored trigger/condition/resource mechanics",
+            candidate => ExtractMechanicFeatures(candidate, definitionsById),
+            0,
+            null),
+        new(
+            "mechanic-archetype",
+            "Generic eight-axis authored mechanic archetype",
+            candidate => ExtractMechanicArchetypeFeatures(candidate, definitionsById),
+            0,
+            256),
+        new(
+            "effect-role",
+            "Authored ability/effect role",
+            candidate => ExtractEffectRoleFeatures(candidate, definitionsById),
+            0,
+            null),
+        new(
+            "scenario-shape",
+            "Authoritative centered PvE scenario vector",
+            ExtractScenarioShapeFeatures,
+            2.5,
+            null)
+    ];
+
+    private static IReadOnlyDictionary<string, double> ExtractSourceFamilyFeatures(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById) =>
+        candidate.Build.Essences
+            .Select(essence => definitionsById[essence.EssenceId].SourceMonsterId)
+            .GroupBy(source => source, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => (double)group.Count(), StringComparer.OrdinalIgnoreCase);
+
+    private static IReadOnlyDictionary<string, double> ExtractMechanicFeatures(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        var features = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in ResolveCandidateAbilities(candidate, definitionsById))
+        {
+            AddFeature(features, $"ability-kind:{ability.Kind}");
+            AddFeature(features, ability.CooldownTicks == 0 ? "cooldown:passive" : "cooldown:active");
+            if (ability.IsHardCrowdControl)
+                AddFeature(features, "mechanic:hard-crowd-control");
+            foreach (var cost in ability.Costs)
+                AddFeature(features, $"cost:{cost.Resource}");
+            foreach (var trigger in ability.Triggers)
+            {
+                AddFeature(features, $"trigger:{trigger.Event}");
+                foreach (var condition in trigger.Conditions)
+                    AddFeature(features, $"condition:{condition.Type}");
+            }
+            foreach (var effect in ability.Effects)
+            foreach (var condition in effect.Conditions)
+                AddFeature(features, $"condition:{condition.Type}");
+        }
+        return features;
+    }
+
+    private static IReadOnlyDictionary<string, double> ExtractEffectRoleFeatures(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        var features = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in ResolveCandidateAbilities(candidate, definitionsById))
+        {
+            foreach (var tag in ability.Tags.Concat(ability.DeliveryTags).Concat(ability.EffectTags)
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
+                AddFeature(features, $"tag:{tag}");
+            foreach (var effect in ability.Effects)
+            {
+                AddFeature(features, $"operation:{effect.Operation}");
+                AddFeature(features, $"target:{effect.Target}");
+                if (effect.AttackType != Domain.Models.Damages.AttackType.None)
+                    AddFeature(features, $"attack:{effect.AttackType}");
+                if (effect.DamageType != Domain.Models.Damages.DamageType.None)
+                    AddFeature(features, $"damage:{effect.DamageType}");
+                foreach (var tag in effect.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
+                    AddFeature(features, $"tag:{tag}");
+            }
+        }
+        return features;
+    }
+
+    private static IReadOnlyDictionary<string, double> ExtractMechanicArchetypeFeatures(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById) =>
+        ExtractMechanicArchetypeFeatures(
+            candidate.Build.Essences.Select(essence => essence.EssenceId),
+            definitionsById);
+
+    private static IReadOnlyDictionary<string, double> ExtractMechanicArchetypeFeatures(
+        IEnumerable<string> essenceIds,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        var features = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in essenceIds.SelectMany(essenceId =>
+                 {
+                     var definition = definitionsById[essenceId];
+                     return new[] { definition.ActiveAbility, definition.PassiveAbility };
+                 }))
+        {
+            foreach (var trigger in ability.Triggers)
+            {
+                switch (trigger.Event)
+                {
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnAbilityUsed:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnBasicAttack:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnMeleeAttack:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnRangedAttack:
+                        SetFeature(features, "axis:attack-action");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHit:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnKill:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnEnemyDeath:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnDamageDealt:
+                        SetFeature(features, "axis:outgoing-result");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnDamaged:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnAttacked:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnMeleeAttacked:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnRangedAttacked:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnDodge:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnBarrierApplied:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnBarrierAbsorbed:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnBarrierBroken:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnBarrierContributionBroken:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnBarrierExpired:
+                        SetFeature(features, "axis:incoming-reaction");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHealthChanged:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHeal:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHealed:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnLifestealHeal:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnEnemyHealed:
+                        SetFeature(features, "axis:health-recovery");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusApplied:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusExpired:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusRemoved:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusCleansed:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusDispelled:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusChanged:
+                        SetFeature(features, "axis:status-lifecycle");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnCombatStart:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnInterval:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnDeath:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnSummonChanged:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnSummonGroupResolved:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStaggerBroken:
+                        SetFeature(features, "axis:timeline-summon-terminal");
+                        break;
+                }
+                foreach (var condition in trigger.Conditions)
+                    AddMechanicConditionArchetype(features, condition.Type);
+            }
+            foreach (var effect in ability.Effects)
+            foreach (var condition in effect.Conditions)
+                AddMechanicConditionArchetype(features, condition.Type);
+        }
+        return features;
+    }
+
+    private static void AddMechanicConditionArchetype(
+        IDictionary<string, double> features,
+        Domain.Models.Combat.Abilities.AbilityConditionType condition)
+    {
+        switch (condition)
+        {
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HealthBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HealthAbovePercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HealthAtOrBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.AnyEnemyHealthBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NoEnemyHealthBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NonSummonedEnemyHealthSpreadAtMostPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NonSummonedEnemyHealthSpreadAbovePercent:
+                SetFeature(features, "axis:health-recovery");
+                break;
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HasStatus:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.StatusStacksAtLeast:
+                SetFeature(features, "axis:status-lifecycle");
+                break;
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HasCondition:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.ConditionStacksAtLeast:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.AnyEnemyHasCondition:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NoEnemyHasCondition:
+                SetFeature(features, "axis:condition-dependency");
+                break;
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventDamageTypeIs:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventAttackTypeIs:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventWasCritical:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventWasDirectHit:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventIdIs:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventSourceIsSelf:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventSourceIsEnemy:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventMagnitudeAtLeast:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventMagnitudeAtMost:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventSourceIsAlly:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventIdIsNot:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventTargetIsAlly:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.EventInstigatorIsSelf:
+                SetFeature(features, "axis:event-filter");
+                break;
+        }
+    }
+
+    private static IReadOnlyDictionary<string, double> ExtractMechanicResidualFeatures(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById) =>
+        ExtractMechanicResidualFeatures(
+            candidate.Build.Essences.Select(essence => essence.EssenceId),
+            definitionsById);
+
+    private static IReadOnlyDictionary<string, double> ExtractMechanicResidualFeatures(
+        IEnumerable<string> essenceIds,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        var features = MechanicResidualFeatureNames.ToDictionary(
+            feature => feature,
+            _ => 0d,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in essenceIds.SelectMany(essenceId =>
+                 {
+                     var definition = definitionsById[essenceId];
+                     return new[] { definition.ActiveAbility, definition.PassiveAbility };
+                 }))
+        {
+            foreach (var trigger in ability.Triggers)
+            {
+                switch (trigger.Event)
+                {
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHit:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnKill:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnEnemyDeath:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnDamageDealt:
+                        AddFeature(features, "intensity:outgoing-result");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHealthChanged:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHeal:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnHealed:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnLifestealHeal:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnEnemyHealed:
+                        AddFeature(features, "intensity:health-recovery");
+                        break;
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusApplied:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusExpired:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusRemoved:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusCleansed:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusDispelled:
+                    case Domain.Models.Combat.Abilities.AbilityTriggerEvent.OnStatusChanged:
+                        AddFeature(features, "intensity:status-lifecycle");
+                        break;
+                }
+                foreach (var condition in trigger.Conditions)
+                    AddMechanicResidualCondition(features, condition.Type);
+            }
+            foreach (var effect in ability.Effects)
+            foreach (var condition in effect.Conditions)
+                AddMechanicResidualCondition(features, condition.Type);
+        }
+        return features.ToDictionary(
+            pair => pair.Key,
+            pair => Math.Min(2, pair.Value),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void AddMechanicResidualCondition(
+        IDictionary<string, double> features,
+        Domain.Models.Combat.Abilities.AbilityConditionType condition)
+    {
+        switch (condition)
+        {
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HealthBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HealthAbovePercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HealthAtOrBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.AnyEnemyHealthBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NoEnemyHealthBelowPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NonSummonedEnemyHealthSpreadAtMostPercent:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NonSummonedEnemyHealthSpreadAbovePercent:
+                AddFeature(features, "intensity:health-recovery");
+                break;
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HasStatus:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.StatusStacksAtLeast:
+                AddFeature(features, "intensity:status-lifecycle");
+                break;
+            case Domain.Models.Combat.Abilities.AbilityConditionType.HasCondition:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.ConditionStacksAtLeast:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.AnyEnemyHasCondition:
+            case Domain.Models.Combat.Abilities.AbilityConditionType.NoEnemyHasCondition:
+                AddFeature(features, "intensity:condition-dependency");
+                break;
+        }
+    }
+
+    private static IReadOnlyDictionary<string, double> ExtractScenarioShapeFeatures(CertificationCandidate candidate) =>
+        candidate.Benchmark.Components.ToDictionary(
+            component => component.ScenarioId,
+            component => component.Score - candidate.Benchmark.AggregateScore,
+            StringComparer.Ordinal);
+
+    private static IEnumerable<Domain.Models.Combat.Abilities.AbilitySpec> ResolveCandidateAbilities(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById) =>
+        candidate.Build.Essences.SelectMany(essence =>
+        {
+            var definition = definitionsById[essence.EssenceId];
+            return new[] { definition.ActiveAbility, definition.PassiveAbility };
+        });
+
+    private static void AddFeature(IDictionary<string, double> features, string feature) =>
+        features[feature] = (features.TryGetValue(feature, out var current) ? current : 0) + 1;
+
+    private static void SetFeature(IDictionary<string, double> features, string feature) =>
+        features[feature] = 1;
+
+    private static EliteDescriptorCollisionAuditSnapshot AnalyzeMechanicArchetypeCollision(
+        IReadOnlyList<CertificationCandidate> canonicalCandidates,
+        IReadOnlyList<DescriptorAuditAnchorCandidate> anchors,
+        IReadOnlyList<CertificationCandidate> retainedCandidates,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById)
+    {
+        const int theoreticalNicheCeiling = 81;
+        var highAnchor = anchors.Single(anchor => anchor.Anchor.Basin == "high");
+        var parentHighNicheSignature = CreateDescriptorSignature(
+            ExtractMechanicArchetypeFeatures(highAnchor.Candidate, definitionsById),
+            0);
+        var highScoreFloor = highAnchor.Candidate.Benchmark.AggregateScore - 0.50;
+        var lowScoreCeiling = anchors.Where(anchor => anchor.Anchor.Basin == "low")
+            .Max(anchor => anchor.Candidate.Benchmark.AggregateScore);
+        var parentNicheCandidates = canonicalCandidates
+            .Where(candidate => candidate.Build.SlotCount == 5
+                                && CreateDescriptorSignature(
+                                    ExtractMechanicArchetypeFeatures(candidate, definitionsById),
+                                    0) == parentHighNicheSignature)
+            .DistinctBy(candidate => Signature(candidate.Build))
+            .OrderBy(candidate => Signature(candidate.Build), StringComparer.Ordinal)
+            .ToArray();
+        var rows = parentNicheCandidates.Select(candidate => new
+            {
+                Basin = candidate.Benchmark.AggregateScore >= highScoreFloor
+                    ? "high"
+                    : candidate.Benchmark.AggregateScore <= lowScoreCeiling
+                        ? "low"
+                        : null,
+                Candidate = candidate,
+                Features = ExtractMechanicResidualFeatures(candidate, definitionsById)
+            })
+            .Where(row => row.Basin is not null)
+            .Select(row => new
+            {
+                Basin = row.Basin!,
+                row.Candidate,
+                row.Features,
+                Signature = CreateDescriptorSignature(row.Features, 0)
+            })
+            .ToArray();
+        var groups = rows.GroupBy(row => row.Signature, StringComparer.Ordinal).ToArray();
+        var exactPurity = groups.Sum(group => group
+                              .GroupBy(row => row.Basin, StringComparer.Ordinal)
+                              .Max(labels => labels.Count()))
+                          / (double)Math.Max(1, rows.Length);
+        var singletonRate = groups.Where(group => group.Count() == 1).Sum(group => group.Count())
+                            / (double)Math.Max(1, rows.Length);
+        var highCorrect = 0;
+        var lowCorrect = 0;
+        var ambiguous = 0;
+        foreach (var row in rows)
+        {
+            var group = groups.Single(candidateGroup => candidateGroup.Key == row.Signature);
+            var highPeers = group.Count(candidate => candidate.Basin == "high") - (row.Basin == "high" ? 1 : 0);
+            var lowPeers = group.Count(candidate => candidate.Basin == "low") - (row.Basin == "low" ? 1 : 0);
+            if (highPeers == lowPeers)
+            {
+                ambiguous++;
+                continue;
+            }
+            var prediction = highPeers > lowPeers ? "high" : "low";
+            if (prediction == row.Basin)
+            {
+                if (row.Basin == "high")
+                    highCorrect++;
+                else
+                    lowCorrect++;
+            }
+        }
+
+        var highCount = rows.Count(row => row.Basin == "high");
+        var lowCount = rows.Count(row => row.Basin == "low");
+        var highAccuracy = highCorrect / (double)Math.Max(1, highCount);
+        var lowAccuracy = lowCorrect / (double)Math.Max(1, lowCount);
+        var balancedAccuracy = (highAccuracy + lowAccuracy) / 2;
+        var highAnchorResidualFeatures = ExtractMechanicResidualFeatures(highAnchor.Candidate, definitionsById);
+        var highAnchorResidualSignature = CreateDescriptorSignature(highAnchorResidualFeatures, 0);
+        var highAnchorCollision = rows.Any(row =>
+            row.Basin == "low" && row.Signature == highAnchorResidualSignature);
+        var retainedResidualNiche = retainedCandidates
+            .Where(candidate => CreateDescriptorSignature(
+                                    ExtractMechanicArchetypeFeatures(candidate, definitionsById),
+                                    0) == parentHighNicheSignature
+                                && CreateDescriptorSignature(
+                                    ExtractMechanicResidualFeatures(candidate, definitionsById),
+                                    0) == highAnchorResidualSignature)
+            .ToArray();
+        var contrasts = MechanicResidualFeatureNames.Select(feature =>
+            {
+                var highValues = rows.Where(row => row.Basin == "high")
+                    .Select(row => row.Features.GetValueOrDefault(feature))
+                    .ToArray();
+                var lowValues = rows.Where(row => row.Basin == "low")
+                    .Select(row => row.Features.GetValueOrDefault(feature))
+                    .ToArray();
+                var allValues = highValues.Concat(lowValues)
+                    .Append(highAnchorResidualFeatures.GetValueOrDefault(feature))
+                    .ToArray();
+                var highMean = highValues.Length == 0 ? 0 : highValues.Average();
+                var lowMean = lowValues.Length == 0 ? 0 : lowValues.Average();
+                var range = allValues.Max() - allValues.Min();
+                return new EliteDescriptorFeatureContrastSnapshot(
+                    feature,
+                    Round(highMean),
+                    Round(lowMean),
+                    RoundRate(range <= 0 ? 0 : Math.Abs(highMean - lowMean) / range));
+            })
+            .OrderByDescending(contrast => contrast.NormalizedDifference)
+            .ThenBy(contrast => contrast.Feature, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var hardNicheCeilingPassed = groups.Length <= theoreticalNicheCeiling;
+        var separabilityPassed = highCount > 0
+                                 && lowCount > 0
+                                 && !highAnchorCollision
+                                 && balancedAccuracy >= 0.80
+                                 && exactPurity >= 0.80
+                                 && singletonRate <= 0.50;
+
+        return new EliteDescriptorCollisionAuditSnapshot(
+            "mechanic-archetype",
+            parentHighNicheSignature,
+            "mechanic-intensity-residual",
+            "Four-axis capped authored-mechanic intensity residual",
+            "Every unique independently generated E5 certification candidate after restart and finalist refinement that occupies the known high mechanic-archetype niche; audit-neighborhood candidates are excluded.",
+            MechanicResidualFeatureNames.Length,
+            parentNicheCandidates.Length,
+            rows.Length,
+            highCount,
+            lowCount,
+            parentNicheCandidates.Length - rows.Length,
+            Round(highScoreFloor),
+            Round(lowScoreCeiling),
+            groups.Length,
+            RoundRate(exactPurity),
+            RoundRate(singletonRate),
+            RoundRate(highAccuracy),
+            RoundRate(lowAccuracy),
+            RoundRate(balancedAccuracy),
+            ambiguous,
+            highAnchorCollision,
+            retainedResidualNiche.Length,
+            retainedResidualNiche.Length == 0
+                ? null
+                : retainedResidualNiche.Max(candidate => candidate.Benchmark.AggregateScore),
+            theoreticalNicheCeiling,
+            hardNicheCeilingPassed,
+            separabilityPassed,
+            separabilityPassed && hardNicheCeilingPassed,
+            contrasts);
+    }
+
+    private static EliteDescriptorFamilySnapshot AnalyzeDescriptorFamily(
+        DescriptorDefinition descriptor,
+        IReadOnlyList<DescriptorAuditCandidate> candidates,
+        IReadOnlyList<DescriptorAuditAnchorCandidate> anchors,
+        IReadOnlyList<CertificationCandidate> retainedCandidates)
+    {
+        var featureRows = candidates.Select(candidate => new DescriptorFeatureRow(
+                candidate.Basin,
+                descriptor.Extract(candidate.Candidate)))
+            .ToArray();
+        var anchorRows = anchors.Select(anchor => new DescriptorAnchorFeatureRow(
+                anchor.Anchor.Basin,
+                descriptor.Extract(anchor.Candidate)))
+            .ToArray();
+        var allFeatures = featureRows.SelectMany(row => row.Features.Keys)
+            .Concat(anchorRows.SelectMany(row => row.Features.Keys))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(feature => feature, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var ranges = allFeatures.ToDictionary(
+            feature => feature,
+            feature =>
+            {
+                var values = featureRows.Select(row => row.Features.GetValueOrDefault(feature))
+                    .Concat(anchorRows.Select(row => row.Features.GetValueOrDefault(feature)))
+                    .DefaultIfEmpty(0)
+                    .ToArray();
+                return (Minimum: values.Min(), Maximum: values.Max());
+            },
+            StringComparer.OrdinalIgnoreCase);
+        var signatures = featureRows.Select(row => new
+            {
+                row.Basin,
+                Signature = CreateDescriptorSignature(row.Features, descriptor.SignatureBinWidth)
+            })
+            .ToArray();
+        var signatureGroups = signatures.GroupBy(value => value.Signature, StringComparer.Ordinal).ToArray();
+        var exactPurity = signatureGroups.Sum(group => group.GroupBy(value => value.Basin, StringComparer.Ordinal)
+            .Max(labels => labels.Count())) / (double)Math.Max(1, signatures.Length);
+        var singletonRate = signatureGroups.Where(group => group.Count() == 1).Sum(group => group.Count())
+                            / (double)Math.Max(1, signatures.Length);
+        var highAnchors = anchorRows.Where(anchor => anchor.Basin == "high").ToArray();
+        var lowAnchors = anchorRows.Where(anchor => anchor.Basin == "low").ToArray();
+        var highCorrect = 0;
+        var lowCorrect = 0;
+        var ambiguous = 0;
+        foreach (var row in featureRows)
+        {
+            var highDistance = highAnchors.Min(anchor => DescriptorDistance(row.Features, anchor.Features, allFeatures, ranges));
+            var lowDistance = lowAnchors.Min(anchor => DescriptorDistance(row.Features, anchor.Features, allFeatures, ranges));
+            if (Math.Abs(highDistance - lowDistance) <= 0.000000001)
+            {
+                ambiguous++;
+                continue;
+            }
+            var predicted = highDistance < lowDistance ? "high" : "low";
+            if (predicted == row.Basin)
+            {
+                if (row.Basin == "high")
+                    highCorrect++;
+                else
+                    lowCorrect++;
+            }
+        }
+        var highCount = featureRows.Count(row => row.Basin == "high");
+        var lowCount = featureRows.Count(row => row.Basin == "low");
+        var highAccuracy = highCorrect / (double)Math.Max(1, highCount);
+        var lowAccuracy = lowCorrect / (double)Math.Max(1, lowCount);
+        var balancedAccuracy = (highAccuracy + lowAccuracy) / 2;
+        var highAnchorSignature = CreateDescriptorSignature(highAnchors[0].Features, descriptor.SignatureBinWidth);
+        var anchorCollision = lowAnchors.Any(anchor =>
+            CreateDescriptorSignature(anchor.Features, descriptor.SignatureBinWidth) == highAnchorSignature);
+        var retainedNiche = retainedCandidates.Select(candidate => new
+            {
+                Candidate = candidate,
+                Signature = CreateDescriptorSignature(descriptor.Extract(candidate), descriptor.SignatureBinWidth)
+            })
+            .Where(value => value.Signature == highAnchorSignature)
+            .ToArray();
+        var contrasts = allFeatures.Select(feature =>
+            {
+                var highMean = featureRows.Where(row => row.Basin == "high")
+                    .Average(row => row.Features.GetValueOrDefault(feature));
+                var lowMean = featureRows.Where(row => row.Basin == "low")
+                    .Average(row => row.Features.GetValueOrDefault(feature));
+                var range = ranges[feature].Maximum - ranges[feature].Minimum;
+                return new EliteDescriptorFeatureContrastSnapshot(
+                    feature,
+                    Round(highMean),
+                    Round(lowMean),
+                    RoundRate(range <= 0 ? 0 : Math.Abs(highMean - lowMean) / range));
+            })
+            .OrderByDescending(contrast => contrast.NormalizedDifference)
+            .ThenBy(contrast => contrast.Feature, StringComparer.OrdinalIgnoreCase)
+            .Take(12)
+            .ToArray();
+        var separabilityPassed = !anchorCollision
+                                 && balancedAccuracy >= 0.80
+                                 && exactPurity >= 0.80
+                                 && singletonRate <= 0.50;
+        var hardNicheCeilingPassed = descriptor.TheoreticalNicheCeiling is null
+                                     || signatureGroups.Length <= descriptor.TheoreticalNicheCeiling.Value;
+        var mapCandidatePassed = separabilityPassed
+                                 && descriptor.TheoreticalNicheCeiling is not null
+                                 && hardNicheCeilingPassed;
+
+        return new EliteDescriptorFamilySnapshot(
+            descriptor.Id,
+            descriptor.DisplayName,
+            allFeatures.Length,
+            signatureGroups.Length,
+            RoundRate(exactPurity),
+            RoundRate(singletonRate),
+            RoundRate(highAccuracy),
+            RoundRate(lowAccuracy),
+            RoundRate(balancedAccuracy),
+            ambiguous,
+            anchorCollision,
+            retainedNiche.Length,
+            retainedNiche.Length == 0
+                ? null
+                : retainedNiche.Max(value => value.Candidate.Benchmark.AggregateScore),
+            descriptor.TheoreticalNicheCeiling,
+            hardNicheCeilingPassed,
+            separabilityPassed,
+            mapCandidatePassed,
+            contrasts);
+    }
+
+    private static string CreateDescriptorSignature(
+        IReadOnlyDictionary<string, double> features,
+        double binWidth) =>
+        string.Join(
+            "|",
+            features.OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(pair => binWidth > 0
+                    ? $"{pair.Key}={Math.Round(pair.Value / binWidth, MidpointRounding.AwayFromZero):0}"
+                    : $"{pair.Key}={pair.Value:0.####}"));
+
+    private static double DescriptorDistance(
+        IReadOnlyDictionary<string, double> first,
+        IReadOnlyDictionary<string, double> second,
+        IReadOnlyList<string> features,
+        IReadOnlyDictionary<string, (double Minimum, double Maximum)> ranges)
+    {
+        if (features.Count == 0)
+            return 0;
+        return features.Sum(feature =>
+        {
+            var range = ranges[feature].Maximum - ranges[feature].Minimum;
+            return range <= 0
+                ? 0
+                : Math.Abs(first.GetValueOrDefault(feature) - second.GetValueOrDefault(feature)) / range;
+        }) / features.Count;
+    }
+
+    private static EliteDescriptorBasinSnapshot SummarizeDescriptorBasin(
+        string basin,
+        IReadOnlyList<DescriptorAuditCandidate> candidates)
+    {
+        var selected = candidates.Where(candidate => candidate.Basin == basin)
+            .Select(candidate => candidate.Candidate)
+            .OrderBy(candidate => candidate.Benchmark.AggregateScore)
+            .ToArray();
+        var scores = selected.Select(candidate => candidate.Benchmark.AggregateScore).ToArray();
+        var middle = scores.Length / 2;
+        var median = scores.Length % 2 == 0
+            ? (scores[middle - 1] + scores[middle]) / 2
+            : scores[middle];
+        var scenarios = selected.SelectMany(candidate => candidate.Benchmark.Components)
+            .GroupBy(component => component.ScenarioId, StringComparer.Ordinal)
+            .OrderBy(group => group.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => Round(group.Average(component => component.Score)), StringComparer.Ordinal);
+        return new EliteDescriptorBasinSnapshot(
+            basin,
+            selected.Length,
+            scores.Min(),
+            Round(median),
+            scores.Max(),
+            scenarios);
     }
 
     private EliteRestartBridgeAuditSnapshot[] RunBridgeAudits(
@@ -622,6 +1892,248 @@ public sealed class EliteBuildCertificationAnalyzer(
         return Math.Abs(first);
     }
 
+    private QualityDiversityIslandResult RunQualityDiversityIsland(
+        int slotCount,
+        int restart,
+        int searchSeed,
+        IReadOnlyList<CertificationCandidate> baselineSeeds,
+        IDictionary<string, CertificationCandidate> sharedCandidatesBySignature,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        int runSeed,
+        int candidateBudget) =>
+        RunBehaviorIsland(
+            slotCount,
+            restart,
+            searchSeed,
+            baselineSeeds,
+            sharedCandidatesBySignature,
+            sourceFamilies,
+            definitionsById,
+            runSeed,
+            candidateBudget,
+            "balance-elite-quality-diversity-island-v1",
+            "QUALITY_ISLAND",
+            QualityDiversityNiche,
+            null);
+
+    private QualityDiversityIslandResult RunMechanicArchetypeIsland(
+        int slotCount,
+        int restart,
+        int searchSeed,
+        IReadOnlyList<CertificationCandidate> baselineSeeds,
+        IDictionary<string, CertificationCandidate> sharedCandidatesBySignature,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        int runSeed,
+        int candidateBudget) =>
+        RunBehaviorIsland(
+            slotCount,
+            restart,
+            searchSeed,
+            baselineSeeds,
+            sharedCandidatesBySignature,
+            sourceFamilies,
+            definitionsById,
+            runSeed,
+            candidateBudget,
+            "balance-elite-mechanic-archetype-island-v1",
+            "MECHANIC_ARCHETYPE_ISLAND",
+            candidate => MechanicArchetypeNiche(candidate, definitionsById),
+            slotCount == 5
+                ? CreateDescriptorSignature(
+                    ExtractMechanicArchetypeFeatures(
+                        DescriptorAuditAnchors.Single(anchor => anchor.Basin == "high").Genome,
+                        definitionsById),
+                    0)
+                : null);
+
+    private QualityDiversityIslandResult RunBehaviorIsland(
+        int slotCount,
+        int restart,
+        int searchSeed,
+        IReadOnlyList<CertificationCandidate> baselineSeeds,
+        IDictionary<string, CertificationCandidate> sharedCandidatesBySignature,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        int runSeed,
+        int candidateBudget,
+        string seedNamespace,
+        string profileSuffix,
+        Func<CertificationCandidate, string> nicheSelector,
+        string? telemetryTargetNiche)
+    {
+        if (candidateBudget == 0)
+            return new QualityDiversityIslandResult(null, 0, 0, 0, 0, 0);
+
+        const int batchSize = 32;
+        var islandSeed = StableRandom.Seed(
+            seedNamespace,
+            searchSeed.ToString(CultureInfo.InvariantCulture),
+            restart.ToString(CultureInfo.InvariantCulture),
+            slotCount.ToString(CultureInfo.InvariantCulture));
+        var random = new Random(islandSeed);
+        var archive = new Dictionary<string, CertificationCandidate>(StringComparer.Ordinal);
+        foreach (var seed in baselineSeeds.OrderBy(candidate => Signature(candidate.Build), StringComparer.Ordinal))
+            UpdateQualityDiversityArchive(archive, seed, nicheSelector);
+        var baselineTargetCandidates = telemetryTargetNiche is null
+            ? []
+            : baselineSeeds.Where(candidate => nicheSelector(candidate) == telemetryTargetNiche).ToArray();
+
+        var seen = baselineSeeds.Select(candidate => Signature(candidate.Build)).ToHashSet(StringComparer.Ordinal);
+        var islandCandidates = new List<CertificationCandidate>(candidateBudget);
+        var initialCandidates = Math.Min(batchSize, candidateBudget);
+        var nicheReplacements = 0;
+        while (islandCandidates.Count < candidateBudget)
+        {
+            var requested = Math.Min(batchSize, candidateBudget - islandCandidates.Count);
+            var genomes = new List<IReadOnlyList<string>>(requested);
+            var attempts = 0;
+            var parents = archive.OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                .Select(pair => pair.Value)
+                .ToArray();
+            while (genomes.Count < requested && attempts++ < requested * 500)
+            {
+                var genome = islandCandidates.Count == 0
+                    ? CreateQualityDiversityInitialGenome(slotCount, sourceFamilies, random)
+                    : CreateQualityDiversityDescendant(
+                        parents[random.Next(parents.Length)],
+                        sourceFamilies,
+                        definitionsById,
+                        random);
+                if (seen.Add(Signature(genome)))
+                    genomes.Add(genome);
+            }
+            if (genomes.Count != requested)
+            {
+                throw new InvalidOperationException(
+                    $"Could not create {requested} unique {profileSuffix} E{slotCount} candidates for restart {restart}.");
+            }
+
+            var builds = genomes.Select((genome, index) => buildGenerator.MaterializeBuild(
+                    CreateCanonicalId(slotCount, Signature(genome)),
+                    $"E{slotCount}_ELITE_R{restart:00}_{profileSuffix}",
+                    slotCount,
+                    islandSeed,
+                    genome))
+                .ToArray();
+            var benchmarks = benchmarkRunner.Run(builds, runSeed).Builds
+                .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+            foreach (var build in builds)
+            {
+                var candidate = new CertificationCandidate(build, benchmarks[build.Id]);
+                islandCandidates.Add(candidate);
+                var signature = Signature(build);
+                if (!sharedCandidatesBySignature.ContainsKey(signature))
+                    sharedCandidatesBySignature[signature] = candidate;
+                var niche = nicheSelector(candidate);
+                if (archive.TryGetValue(niche, out var incumbent))
+                {
+                    if (!IsBetterQualityDiversityCandidate(candidate, incumbent))
+                        continue;
+                    nicheReplacements++;
+                }
+                archive[niche] = candidate;
+            }
+        }
+
+        var best = islandCandidates.OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
+            .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+            .First();
+        var islandTargetCandidates = telemetryTargetNiche is null
+            ? []
+            : islandCandidates.Where(candidate => nicheSelector(candidate) == telemetryTargetNiche).ToArray();
+        return new QualityDiversityIslandResult(
+            best,
+            islandCandidates.Count,
+            initialCandidates,
+            islandCandidates.Count - initialCandidates,
+            archive.Count,
+            nicheReplacements,
+            baselineTargetCandidates.Length > 0,
+            baselineTargetCandidates.Length == 0
+                ? 0
+                : baselineTargetCandidates.Max(candidate => candidate.Benchmark.AggregateScore),
+            islandTargetCandidates.Length,
+            islandTargetCandidates.Length == 0
+                ? 0
+                : islandTargetCandidates.Max(candidate => candidate.Benchmark.AggregateScore));
+    }
+
+    private static IReadOnlyList<string> CreateQualityDiversityInitialGenome(
+        int slotCount,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        Random random)
+    {
+        var indexes = Enumerable.Range(0, sourceFamilies.Count).ToArray();
+        for (var index = 0; index < slotCount; index++)
+        {
+            var selected = random.Next(index, indexes.Length);
+            (indexes[index], indexes[selected]) = (indexes[selected], indexes[index]);
+        }
+        return indexes.Take(slotCount)
+            .Select(index => sourceFamilies[index][random.Next(sourceFamilies[index].Length)].Id)
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private static IReadOnlyList<string> CreateQualityDiversityDescendant(
+        CertificationCandidate parent,
+        IReadOnlyList<EssenceDefinition[]> sourceFamilies,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById,
+        Random random)
+    {
+        var genes = parent.Build.Essences.Select(essence => essence.EssenceId).ToList();
+        var replacementIndex = random.Next(genes.Count);
+        var occupiedSources = genes.Select(id => definitionsById[id].SourceMonsterId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        occupiedSources.Remove(definitionsById[genes[replacementIndex]].SourceMonsterId);
+        var availableFamilies = sourceFamilies
+            .Where(family => !occupiedSources.Contains(family[0].SourceMonsterId))
+            .ToArray();
+        var family = availableFamilies[random.Next(availableFamilies.Length)];
+        genes[replacementIndex] = family[random.Next(family.Length)].Id;
+        return genes.OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    private static void UpdateQualityDiversityArchive(
+        IDictionary<string, CertificationCandidate> archive,
+        CertificationCandidate candidate,
+        Func<CertificationCandidate, string> nicheSelector)
+    {
+        var niche = nicheSelector(candidate);
+        if (!archive.TryGetValue(niche, out var incumbent)
+            || IsBetterQualityDiversityCandidate(candidate, incumbent))
+        {
+            archive[niche] = candidate;
+        }
+    }
+
+    private static bool IsBetterQualityDiversityCandidate(
+        CertificationCandidate candidate,
+        CertificationCandidate incumbent) =>
+        candidate.Benchmark.AggregateScore > incumbent.Benchmark.AggregateScore
+        || (candidate.Benchmark.AggregateScore.Equals(incumbent.Benchmark.AggregateScore)
+            && string.CompareOrdinal(candidate.Build.Id, incumbent.Build.Id) < 0);
+
+    private static string QualityDiversityNiche(CertificationCandidate candidate)
+    {
+        var strongestScenario = candidate.Benchmark.Components
+            .OrderByDescending(component => component.Score)
+            .ThenBy(component => component.ScenarioId, StringComparer.Ordinal)
+            .First().ScenarioId;
+        var weakestScenario = candidate.Benchmark.Components
+            .OrderBy(component => component.Score)
+            .ThenBy(component => component.ScenarioId, StringComparer.Ordinal)
+            .First().ScenarioId;
+        return $"{strongestScenario}>{weakestScenario}";
+    }
+
+    private static string MechanicArchetypeNiche(
+        CertificationCandidate candidate,
+        IReadOnlyDictionary<string, EssenceDefinition> definitionsById) =>
+        CreateDescriptorSignature(ExtractMechanicArchetypeFeatures(candidate, definitionsById), 0);
+
     private IReadOnlyList<CertificationCandidate> CanonicalizeAndEvaluate(
         IReadOnlyList<RestartResult> restarts,
         int runSeed)
@@ -746,9 +2258,63 @@ public sealed class EliteBuildCertificationAnalyzer(
                 oneSwapCandidatesEvaluated += polished.OneSwapCandidatesEvaluated;
                 twoSwapCandidatesEvaluated += polished.TwoSwapCandidatesEvaluated;
             }
+            var islandSeeds = baselineCandidates
+                .Concat(baselineRefinementSeeds)
+                .Concat(baselineRefinements.Select(value => value.Best))
+                .DistinctBy(candidate => Signature(candidate.Build))
+                .ToArray();
+            var qualityIsland = RunQualityDiversityIsland(
+                slotCount,
+                restart.Restart,
+                restart.SearchSeed,
+                islandSeeds,
+                bySignature,
+                sourceFamilies,
+                definitionsById,
+                runSeed,
+                options.QualityDiversityIslandCandidateBudgetPerProfile);
+            var mechanicIsland = RunMechanicArchetypeIsland(
+                slotCount,
+                restart.Restart,
+                restart.SearchSeed,
+                islandSeeds,
+                bySignature,
+                sourceFamilies,
+                definitionsById,
+                runSeed,
+                options.MechanicArchetypeIslandCandidateBudgetPerProfile);
+            var islandBest = qualityIsland.Best;
+            if (mechanicIsland.Best is not null
+                && (islandBest is null
+                    || mechanicIsland.Best.Benchmark.AggregateScore > islandBest.Benchmark.AggregateScore))
+            {
+                islandBest = mechanicIsland.Best;
+            }
+            var islandPolished = false;
+            if (islandBest is not null
+                && islandBest.Benchmark.AggregateScore > refinedBest.Benchmark.AggregateScore)
+            {
+                var polished = RefineRestartWinner(
+                    islandBest,
+                    bySignature,
+                    sourceFamilies,
+                    definitionsById,
+                    essenceMeta,
+                    runSeed,
+                    policy,
+                    options);
+                if (polished.Best.Benchmark.AggregateScore > refinedBest.Benchmark.AggregateScore)
+                    refinedBest = polished.Best;
+                acceptedPasses += polished.AcceptedPasses;
+                oneSwapCandidatesEvaluated += polished.OneSwapCandidatesEvaluated;
+                twoSwapCandidatesEvaluated += polished.TwoSwapCandidatesEvaluated;
+                islandPolished = true;
+            }
             var newCandidatesEvaluated = oneSwapCandidatesEvaluated
                                          + twoSwapCandidatesEvaluated
-                                         + valley.NewCandidatesEvaluated;
+                                         + valley.NewCandidatesEvaluated
+                                         + qualityIsland.CandidatesEvaluated
+                                         + mechanicIsland.CandidatesEvaluated;
             var generationsSinceImprovement = GenerationsSinceMaterialImprovement(
                 profile.Generations,
                 policy.PlateauImprovementTolerance);
@@ -765,7 +2331,7 @@ public sealed class EliteBuildCertificationAnalyzer(
                 oneSwapCandidatesEvaluated + twoSwapCandidatesEvaluated,
                 oneSwapCandidatesEvaluated,
                 twoSwapCandidatesEvaluated,
-                baselineRefinementSeeds.Count + portfolioRefinementSeeds.Count,
+                baselineRefinementSeeds.Count + portfolioRefinementSeeds.Count + (islandPolished ? 1 : 0),
                 rawBest.Build.Id,
                 refinedBest.Build.Id,
                 rawBest.Build.Essences.Select(value => value.EssenceId).ToArray(),
@@ -782,7 +2348,27 @@ public sealed class EliteBuildCertificationAnalyzer(
                 baselineBest.Benchmark.AggregateScore,
                 baselineBest.Build.Id,
                 baselineBest.Build.Essences.Select(value => value.EssenceId).ToArray(),
-                restart.PortfolioCandidatesEvaluated);
+                restart.PortfolioCandidatesEvaluated,
+                qualityIsland.CandidatesEvaluated,
+                qualityIsland.InitialCandidatesEvaluated,
+                qualityIsland.DescendantsEvaluated,
+                qualityIsland.NichesOccupied,
+                qualityIsland.NicheReplacements,
+                qualityIsland.Best?.Benchmark.AggregateScore ?? 0,
+                qualityIsland.Best?.Build.Id,
+                qualityIsland.Best?.Build.Essences.Select(value => value.EssenceId).ToArray(),
+                mechanicIsland.CandidatesEvaluated,
+                mechanicIsland.InitialCandidatesEvaluated,
+                mechanicIsland.DescendantsEvaluated,
+                mechanicIsland.NichesOccupied,
+                mechanicIsland.NicheReplacements,
+                mechanicIsland.Best?.Benchmark.AggregateScore ?? 0,
+                mechanicIsland.Best?.Build.Id,
+                mechanicIsland.Best?.Build.Essences.Select(value => value.EssenceId).ToArray(),
+                mechanicIsland.TelemetryTargetNichePresentInBaseline,
+                mechanicIsland.TelemetryTargetNicheBaselineBestScore,
+                mechanicIsland.TelemetryTargetNicheIslandCandidatesEvaluated,
+                mechanicIsland.TelemetryTargetNicheIslandBestScore);
         }).ToArray();
         var strongestRestart = restartEvidence
             .OrderByDescending(value => value.BestScore)
@@ -1921,6 +3507,28 @@ public sealed class EliteBuildCertificationAnalyzer(
         int NewCandidatesEvaluated,
         int OneSwapCandidatesEvaluated,
         int TwoSwapCandidatesEvaluated);
+    private sealed record DescriptorAuditAnchor(
+        string Basin,
+        string AnchorId,
+        IReadOnlyList<string> Genome);
+    private sealed record DescriptorAuditAnchorCandidate(
+        DescriptorAuditAnchor Anchor,
+        CertificationCandidate Candidate);
+    private sealed record DescriptorAuditCandidate(
+        CertificationCandidate Candidate,
+        string Basin);
+    private sealed record DescriptorDefinition(
+        string Id,
+        string DisplayName,
+        Func<CertificationCandidate, IReadOnlyDictionary<string, double>> Extract,
+        double SignatureBinWidth,
+        int? TheoreticalNicheCeiling);
+    private sealed record DescriptorFeatureRow(
+        string Basin,
+        IReadOnlyDictionary<string, double> Features);
+    private sealed record DescriptorAnchorFeatureRow(
+        string Basin,
+        IReadOnlyDictionary<string, double> Features);
     private sealed record ValleyBeamResult(
         CertificationCandidate Best,
         int DepthReached,
@@ -1930,6 +3538,17 @@ public sealed class EliteBuildCertificationAnalyzer(
         double BestImprovement,
         int CandidatesGenerated,
         int CandidatesRejectedByPrefilter);
+    private sealed record QualityDiversityIslandResult(
+        CertificationCandidate? Best,
+        int CandidatesEvaluated,
+        int InitialCandidatesEvaluated,
+        int DescendantsEvaluated,
+        int NichesOccupied,
+        int NicheReplacements,
+        bool TelemetryTargetNichePresentInBaseline = false,
+        double TelemetryTargetNicheBaselineBestScore = 0,
+        int TelemetryTargetNicheIslandCandidatesEvaluated = 0,
+        double TelemetryTargetNicheIslandBestScore = 0);
     private sealed record BridgeGenome(int Level, IReadOnlyList<string> Genome);
     private sealed record BridgeNode(
         int Level,

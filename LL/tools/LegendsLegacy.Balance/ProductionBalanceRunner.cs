@@ -75,8 +75,15 @@ public sealed class ProductionBalanceRunner(
             optimization.Snapshot.Options.DiversityPenalty,
             request.RepresentativeBuildOptions);
         var metaOptions = (request.EssenceMetaAnalysisOptions ?? new EssenceMetaAnalysisOptions()).Validate();
+        var balancedSingletonTeams = metaOptions.SimulatorRoundsPerMatchup > 0
+            ? essences.Select(essence => new AbilityBalanceTeamLoadout(
+                    [new AbilityBalanceParticipantLoadout([essence.Id])]))
+                .ToArray()
+            : null;
         var metaSimulatorEvidence = metaSimulator.Run(new AbilityBalanceSimulationRequest(
-            BattleCount: metaOptions.SimulatorBattleCount,
+            BattleCount: metaOptions.SimulatorRoundsPerMatchup > 0
+                ? metaOptions.SimulatorRoundsPerMatchup
+                : metaOptions.SimulatorBattleCount,
             TeamSize: 1,
             EssencesPerParticipant: 1,
             RandomSeed: StableRandom.Seed(
@@ -84,7 +91,7 @@ public sealed class ProductionBalanceRunner(
                 simulation.RandomSeed.ToString(CultureInfo.InvariantCulture)),
             TopResults: essences.Length,
             CandidatePoolSize: essences.Length,
-            CandidateTeams: null,
+            CandidateTeams: balancedSingletonTeams,
             EquipmentTier: 1,
             EquipmentRarity: "Rare",
             EquipmentProfile: "Balanced"));

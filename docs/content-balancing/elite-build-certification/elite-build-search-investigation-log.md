@@ -4,7 +4,7 @@
 
 **Evidence date:** 2026-08-28
 
-**Current certification analyzer:** Algorithm v14
+**Current certification analyzer:** Algorithm v20
 
 This document consolidates the experiments used to investigate elite-build search convergence, especially the persistent E5 failure on seed `8471`. It is an evidence log, not a replacement for the normative [certification policy](elite-build-certification-policy-v1.md) or [certification gate](elite-build-certification-gate.md).
 
@@ -79,6 +79,11 @@ The genomes share only `essence.bark_golem`; their minimum substitution distance
 | 12 | 20% direct three/four-gene basin jumps | 62,296 | 1,407.29 s | 0.46 | 1.09 | 0.37 | E5 worsened; runtime failed |
 | 13 | 20% jumps plus 12-candidate explorer archive | 59,793 | 1,386.22 s | 0.17 | 0.15 | 0.99 | False E5 convergence caused by ceiling loss |
 | 14 | 256 isolated stratified candidates/restart/profile | 109,724 | Approximately 517.35 s | 0.29 | 1.09 | 0.34 | Ceilings preserved; E5 still failed |
+| 15 | 256-candidate scenario-niche quality island/restart/profile | 62,865 | Approximately 256 s | 0.63 | 1.30 | 0.34 | No island beat its refined baseline; E4/E5 failed |
+| 16 | Audit-only E5 descriptor separability | 60,903 plus 1,112 audit candidates | Approximately 304 s | 0.63 | 1.30 | 0.34 | Mechanic family separated neighborhoods; source/effect signatures fragmented and scenario shape failed |
+| 17 | Audit-only coarse mechanic-map validation | 60,903 plus 1,112 audit candidates | Approximately 289 s | 0.63 | 1.30 | 0.34 | Eight-axis mechanic archetype passed with 55 observed niches |
+| 18 | 256-candidate mechanic-archetype island/restart/profile | 63,023 | Approximately 303 s | 0.63 | 1.30 | 0.34 | Island reached the high coarse niche but no island beat its refined baseline |
+| 19 | Audit-only coarse-niche collision study | 60,903 plus 1,112 audit candidates | Approximately 272 s | 0.63 | 1.30 | 0.34 | Four-axis residual collided with weak candidates and had 0% high accuracy |
 
 Runtime was not recorded in the retained summaries for the baseline, expanded-refinement, or crossover runs. Those values must not be reconstructed or guessed.
 
@@ -192,6 +197,106 @@ Corrected results:
 
 Conclusion: ceiling preservation works, and simple arithmetic stratification can improve coverage, as E4 demonstrates. It is still not structured enough to cover the stronger E5 basin reliably. Increasing the same portfolio size is not justified by this single failed configuration.
 
+### 9. Isolated scenario-niche quality-diversity island
+
+Algorithm v15 implemented the bounded follow-up behind `--elite-quality-island`. Each restart completes the unchanged optimizer and full baseline refinement first. A separate deterministic island then seeds a behavioral map from that restart's own authoritative baseline population, evaluates 32 fresh legal candidates, and spends the remaining budget on one-substitution descendants of current niche champions. Niches are the candidate's strongest/weakest production PvE benchmark scenario pair, with at most 25 stable gameplay niches. Another restart's candidates, bridge nodes, and experimental descendants are never eligible parents. The final restart result must dominate its serialized baseline.
+
+The first execution combined scenario pairs with complete ability-role sets. That produced 96–124 niches per island, spread 224 descendants too thinly, and left every island well below baseline. The artifact is retained but superseded. The corrected run used the same seed, baseline, and `256`-candidate budget while limiting the map to scenario pairs and pre-filling it from the complete restart-local baseline population.
+
+The corrected seed-`8471` run benchmarked `2,304` island candidates, retained `62,865` unique certification candidates, and completed in approximately `256` seconds. Islands occupied 7–11 niches and recorded 1–13 champion replacements per restart, so the archive mechanism was materially exercised. No island beat any fully refined baseline:
+
+| Profile | Baseline/final restart scores | Best island scores | Spread | Interpretation |
+| --- | --- | --- | ---: | --- |
+| E4 | 77.98, 78.61, 78.32 | 75.82, 77.36, 77.80 | 0.63 | Ceiling preserved, but the island did not reproduce the v14 portfolio gain |
+| E5 | 86.21, 84.91, 85.27 | 82.64, 84.04, 84.55 | 1.30 | Strong basin remained isolated; no restart improved |
+| E6 | 87.46, 87.46, 87.12 | 87.08, 86.15, 86.07 | 0.34 | Baseline already passed; no island gain |
+
+The run met the developer runtime criterion but remained `SearchUnstable`. Seed `1337` was not run. The option remains disabled and the budget is not promoted. The result rejects strongest/weakest scenario pairs as sufficient behavioral niches at this budget; occupancy and replacement activity alone do not demonstrate useful basin coverage.
+
+### 10. Audit-only E5 descriptor separability
+
+Algorithm v16 implemented the recommended study behind `--elite-descriptor-audit`. The audit materializes each known E5 anchor and every unique legal one-substitution neighbor, then evaluates those builds through the production PvE benchmark. It separately compares the 17 unique optimizer-retained E5 candidates from the three baseline restarts. Audit builds cannot enter a restart population, seed refinement, alter a ceiling, enter percentile/finalist cohorts, or affect a verdict or `TotalUniqueCandidatesEvaluated`.
+
+The seed-`8471` run retained the unchanged E4/E5/E6 restart results and separately evaluated `1,112` E5 genomes: `372` in the strong-anchor neighborhood and `740` in the union of the two weak-anchor neighborhoods. The three anchors reproduced `86.21`, `85.27`, and `84.91`. There were no high/low neighborhood overlaps at distance one.
+
+The audit predeclared a descriptor-family pass as: no high/low anchor collision, at least `80%` exact-signature purity, at least `80%` balanced nearest-anchor accuracy, and at most `50%` of candidates in singleton signatures.
+
+| Descriptor family | Features | Signatures | Purity | Singleton rate | High / low / balanced accuracy | Retained exact high niche | Result |
+| --- | ---: | ---: | ---: | ---: | --- | ---: | --- |
+| Source family | 77 | 1,079 | 100.00% | 94.06% | 100.00% / 100.00% / 100.00% | 0 | Failed fragmentation criterion |
+| Authored mechanics | 41 | 472 | 99.28% | 26.17% | 97.31% / 96.22% / 96.76% | 0 | Passed family-level criteria |
+| Authored effect role | 88 | 1,112 | 100.00% | 100.00% | 99.73% / 99.73% / 99.73% | 0 | Failed fragmentation criterion |
+| Centered scenario shape | 5 | 802 | 94.24% | 55.31% | 0.54% / 94.32% / 47.43% | 0 | Failed accuracy and fragmentation criteria |
+
+Production Essence-level tag arrays are empty. The mechanic and effect-role descriptors therefore use resolved authored active/passive ability specifications. The strongest mechanic contrasts were `OnDamageDealt` (strong/weak mean `0.03`/`0.80`), `HasCondition` (`0.12`/`0.91`), `OnStatusExpired` (`0.83`/`0.04`), `EventDamageTypeIs` (`0.05`/`0.83`), and `OnMeleeAttack` (`0.83`/`0.43`). These are authored behavior signals rather than non-authoritative fitness estimates.
+
+Conclusion: the study rejects source identity, the full effect-role vector, and centered scenario shape as direct niche keys. Authored mechanics contain real basin-separating information, but the complete 41-feature count signature still creates 472 niches and none of the 17 retained baseline candidates exactly matches the strong anchor's full signature. This is evidence for a bounded, coarsened mechanic descriptor study; it is not evidence for increasing the v15 island budget or using the full mechanic signature directly.
+
+### 11. Audit-only coarse mechanic-map validation
+
+Algorithm v17 added one prospective descriptor to the unchanged v16 audit. The descriptor is independent of all anchor Essence identities and reduces resolved authored behavior to eight binary axes: attack action, outgoing result, incoming reaction, health/recovery, status lifecycle, condition dependency, event filtering, and timeline/summon/terminal behavior. Its theoretical niche count is therefore hard-bounded at `2^8 = 256` for every legal candidate. It contains no benchmark score, source-family identity, or hand-coded high-basin genome feature.
+
+The seed-`8471` diagnostic repeated the same `1,112` authoritative E5 audit evaluations and retained the unchanged `60,903` certification candidates. The coarse map produced:
+
+- `55` observed neighborhood signatures under the hard `256` ceiling;
+- `97.57%` exact-signature purity;
+- `0.63%` singleton-candidate rate;
+- `81.45%` high-neighborhood accuracy;
+- `95.41%` low-neighborhood accuracy;
+- `88.43%` balanced nearest-anchor accuracy;
+- `71` distance ties treated as ambiguous rather than correct;
+- no high/low anchor collision.
+
+The strongest coarse contrasts were status-lifecycle behavior (`0.81` high vs `0.07` low), outgoing-result behavior (`0.09` vs `0.81`), condition dependency (`0.12` vs `0.82`), and health/recovery behavior (`0.84` vs `0.23`). The descriptor passed all predeclared v16 separation criteria and its explicit hard niche ceiling, making `mechanic-archetype` the only map-ready descriptor in the artifact.
+
+The 17 optimizer-retained candidates still contain no exact match for the strong anchor's coarse signature. That does not invalidate the map: it demonstrates that ordinary retained populations omit a behavior niche associated with the stronger neighborhood. The audit remains topology evidence only and did not inject that signature, anchor, or any audit candidate into search.
+
+Conclusion: a small restart-local mechanic-archetype island is now justified. It must pre-fill only from each restart's own complete baseline, use the generic eight-axis descriptor exactly as audited, benchmark every descendant authoritatively, preserve the fully refined baseline ceiling, and remain disabled by default. The first seed-`8471` trial should use the existing `256` candidate cap so the candidate budget does not exceed the descriptor's theoretical niche ceiling; seed `1337` remains gated behind a seed-`8471` pass.
+
+### 12. Isolated mechanic-archetype island
+
+Algorithm v18 implemented the bounded follow-up behind `--elite-mechanic-island`. It reuses the audited eight-axis descriptor without changing it, pre-fills only from the complete authoritative baseline of the same restart, evaluates 32 deterministic fresh legal candidates, and spends the remaining 224 evaluations on one-substitution descendants of restart-local niche champions. Audit candidates, audit anchors, and another restart's candidates never enter the archive or become parents. The known high E5 signature is consulted only after evaluation for collision telemetry; it does not affect generation, selection, scoring, replacement, refinement, or the final result.
+
+The seed-`8471` run benchmarked `2,304` island candidates, retained `63,023` unique certification candidates, and completed in approximately `303` seconds. Islands occupied 133–153 of the descriptor's 256 possible niches and recorded 28–44 champion replacements. No island beat any fully refined baseline:
+
+| Profile | Baseline/final restart scores | Best island scores | Occupied niches | Spread | Interpretation |
+| --- | --- | --- | --- | ---: | --- |
+| E4 | 77.98, 78.61, 78.32 | 76.55, 76.55, 77.19 | 153, 145, 149 | 0.63 | Ceiling preserved; no restart improved |
+| E5 | 86.21, 84.91, 85.27 | 82.98, 82.09, 85.12 | 147, 148, 141 | 1.30 | Strong basin remained isolated; no restart improved |
+| E6 | 87.46, 87.46, 87.12 | 86.15, 84.76, 86.19 | 136, 133, 142 | 0.34 | Baseline already passed; no restart improved |
+
+The failure was not caused by missing the coarse high-archetype niche. That niche was already represented in every E5 restart's complete baseline, with best scores `86.21`, `74.34`, and `74.71`. The islands independently generated 3, 2, and 2 additional candidates in the same niche, whose best scores were only `79.52`, `76.35`, and `73.06`. The same eight-bit signature therefore contains both the known `86.21` basin and much weaker candidates. Its v17 neighborhood-level separability was real, but it is too lossy to act as a fitness-basin key for search.
+
+The run remained `SearchUnstable`; seed `1337` was not run. The option remains disabled and the budget is not promoted. A deterministic replay produced identical baseline, island, and final search evidence. Increasing this island budget would mostly spend more evaluations inside descriptor collisions and is not justified by the result.
+
+### 13. Audit-only coarse-niche collision study
+
+Algorithm v19 extended `--elite-descriptor-audit` without adding search candidates or changing certification evidence. The prospectively frozen `mechanic-intensity-residual` uses four authored-mechanic intensity axes—outgoing result, health/recovery, status lifecycle, and condition dependency—each capped to `0`, `1`, or `2+`. The residual therefore has a hard maximum of `3^4 = 81` signatures. Essence identities, source families, benchmark scores, and anchor-genome membership are not descriptor features.
+
+The collision audit selects every unique independently generated E5 candidate after restart and finalist refinement that occupies the known high mechanic-archetype niche. Audit-neighborhood candidates are excluded from this population. Authoritative scores define outcomes only: high means within the frozen `0.50` tolerance of the `86.21` anchor (`>= 85.71`), low means at or below the known `85.27` weak ceiling, and candidates in the gap are excluded. Exact-signature leave-one-out classification uses only other candidates sharing the residual signature; absent peers and label ties are ambiguous.
+
+The first v19 execution applied the residual only to the old anchor-neighborhood population. All 150 candidates in its target coarse niche were high-neighborhood labeled and none were low-neighborhood labeled, so that artifact could not test the v18 collision and is superseded. The second execution used pre-refinement canonical search candidates: it found 35 low candidates but omitted the refined `86.21` winner, so it is also superseded. The corrected execution consumes the finalized `ProfileState.Candidates` collection while remaining read-only and audit-isolated.
+
+Corrected seed-`8471` evidence:
+
+| Metric | Result |
+| --- | ---: |
+| Finalized E5 candidates in parent coarse niche | 343 |
+| High / low / gap-excluded candidates | 1 / 342 / 0 |
+| Residual signatures | 3 of at most 81 |
+| Exact-signature purity | 99.71% |
+| Singleton-candidate rate | 0.29% |
+| Leave-one-out high accuracy | 0.00% |
+| Leave-one-out low accuracy | 99.71% |
+| Leave-one-out balanced accuracy | 49.85% |
+| Ambiguous candidates | 1 |
+| High-anchor residual collides with low candidate | Yes |
+| Retained exact high residual niche | 0 |
+
+The high purity is a class-imbalance artifact: predicting the overwhelming low class produces nearly the same number. The sole high candidate shares its residual signature with low candidates. Health/recovery intensity is exactly `2.00` for both classes; status-lifecycle intensity is `1.00` high versus `1.04` low; outgoing-result and condition-dependency intensity are both zero. The descriptor passes its hard ceiling but fails anchor collision, high accuracy, balanced accuracy, separability, and map readiness.
+
+Conclusion: authored mechanic presence and capped intensity do not explain the isolated `86.21` result inside the coarse niche. The residual is rejected, seed `1337` was not run, and no descriptor or search budget is promoted. Further descriptor-island work is not justified without evidence that quantitative effect payloads or higher-order Essence interactions can rank the high candidate prospectively.
+
 ## What the tests establish about E5
 
 The evidence supports two simultaneous conclusions:
@@ -222,38 +327,39 @@ The following should not be promoted without materially new evidence:
 - a 20% direct three/four-gene mutation rate;
 - a 12-candidate persistent explorer archive at that rate;
 - a 256-candidate arithmetic stratified portfolio;
+- a 256-candidate strongest/weakest-scenario quality-diversity island;
+- a 256-candidate eight-axis mechanic-archetype island;
+- a four-axis capped mechanic-intensity residual inside the high coarse niche;
 - relaxing the `0.50` spread tolerance;
 - accepting low-spread results that lose a known ceiling;
 - increasing a failed budget solely because one seed or one profile improved.
 
 All experimental CLI options remain disabled in the approved developer and release defaults.
 
+## Algorithm v20 benchmark-confidence and simulator-coverage audit
+
+Algorithm v20 added an audit-only common-random-number benchmark study behind `--elite-benchmark-confidence-audit`. It forces the known E5 anchors and certification finalists into a deterministic score-stratified cohort, repeats all five production PvE scenarios on common seeds, and reports score uncertainty, rank correlations, top-k overlap, and paired anchor differences. Audit executions, rows, and warnings are serialized separately and cannot affect search candidates, percentiles, ceilings, challenges, verdicts, or `TotalUniqueCandidatesEvaluated`.
+
+The seed-`8471` pilot used the unchanged `96`/`24`-`40`/`12` search, 512 of 21,761 finalized E5 candidates, 16 common seeds, and five scenarios: 40,960 audit-only combat executions. The single-seed baseline-to-mean Spearman correlation was `0.9127`, below the predeclared `0.95` boundary. Replicate-to-mean Spearman ranged from `0.9267` upward, but baseline top-20 overlap fell to `30%` and averaged only `40.63%`. The median approximate 95% score half-width was `0.65`, the maximum was `1.32`, and the most variable build would require 446 seeds to reach the requested `0.25` half-width under the observed variance. Both known high-versus-low comparisons reversed under the common-seed mean, so the known ordering gate also failed. Sixteen seeds are therefore insufficient for the requested score precision and the original one-seed ranking is not a reliable global ordering.
+
+The same pilot replaced the random singleton sampler with the balanced 80-Essence round robin at 16 rounds per matchup: 3,160 unordered matchups and 50,560 battles, exactly 1,264 appearances per Essence. Coverage passed the simulator's 1,000-battle classification floor, but every Essence scored exactly `0.5000`. Algorithm v2 of the meta analyzer now detects this zero-range result, emits `SimulatorNoDiscrimination`, and reports `NoDiscrimination` instead of 80 misleading `Healthy` classifications. A large sample cannot compensate for an outcome that contains no Essence signal.
+
+The planned pair-interaction study is deliberately blocked. Pair coefficients or tuning conclusions must not be derived from a singleton simulator with zero discrimination or from the sparse 240-build optimizer population. The next bounded engineering step is to establish a discriminatory neutral baseline—preferably fixed-hostile common-seed PvE singleton trials, or a side-bias-controlled duel score with a predeclared damage/survival endpoint—then rerun the singleton gate before sizing any factorial pair audit from its measured residual variance.
+
 ## Recommended next bounded investigation
 
-If another experiment is authorized, the best-supported next step is an isolated quality-diversity island rather than another undirected diversity knob.
+Do not increase either island budget and do not run seed `1337`. First replace or repair the zero-discrimination singleton measurement and rerun its coverage/discrimination gate. Then size a balanced pair-interaction audit from measured neutral-baseline variance, using held-out restarts and keeping every model outside search and certification evidence. Another search experiment is justified only if an identity-independent payload model or restart-local interaction model ranks the strong candidate reliably without importing another restart's winner.
 
-Suggested boundaries:
+## Verification history
 
-1. Run the complete baseline optimizer and baseline refinement first and serialize their final evidence.
-2. Create a separate restart-local island with a fixed candidate/evaluation budget and independent deterministic RNG.
-3. Define stable niches from gameplay-relevant descriptors, such as source-family composition, effect roles, scenario-score strengths, or mechanic coverage.
-4. Retain the best authoritative candidate per niche even when it is below the aggregate elite, allowing weaker stepping stones to persist without displacing baseline elites.
-5. Do not import another restart's winner, bridge nodes, or experimental descendants.
-6. Benchmark every admitted candidate through the production boundary.
-7. Merge only the final experimental evidence after the baseline result is complete; final restart evidence must dominate its baseline.
-8. Report direct island candidates, descendant/local evaluations, niche occupancy, ceiling deltas, spread, runtime, and deterministic replay evidence separately.
-9. Gate seed `1337` behind a complete seed-`8471` pass.
-10. Require both seeds to retain known ceilings, satisfy spread `<= 0.50`, pass cross-strategy and local challenges, and meet the developer runtime criterion before considering any default or budget change.
-
-This recommendation is intentionally a design direction, not an approved implementation or search budget.
-
-## Verification completed with algorithm v14
-
-- Focused `BalanceRunnerTests`: `53/53` passed.
-- Required full backend suite through `build/run-tests.ps1`: `1,655/1,655` passed.
+- Focused descriptor-audit test: `1/1` passed after the finalized-population correction.
+- Complete `BalanceRunnerTests`: `60/60` passed, including audit determinism/isolation, collision-population accounting, hard-ceiling checks, island behavior, CLI parsing, disabled defaults, and invalid experiment combinations.
+- Required full backend suite through `build/run-tests.ps1`: `1,662/1,662` passed against the final algorithm-v19 implementation; the Release build completed with zero warnings and zero errors.
 - Bridge-audit isolation has an explicit deterministic test proving that enabling the audit changes only the audit option/section/count and does not change certification evidence or verdicts.
 - Portfolio tests cover CLI parsing, disabled defaults, invalid experiment combinations, baseline build/genome serialization, direct portfolio accounting, and final-score dominance over the fully refined baseline.
 - No database migration, production configuration, deployment, or production-content mutation is involved.
+
+Algorithm v20 added focused coverage for common-seed confidence-audit isolation and accounting, balanced round-robin CLI parsing, even side assignment, and high-coverage zero-discrimination rejection. The repository-required Release verification through `build/run-tests.ps1` passed `1,666/1,666`; the final balance-runner Release build completed with zero warnings and zero errors. Two unrelated pre-existing xUnit analyzer warnings remain visible only when the complete test project is built.
 
 ## Artifact inventory
 
@@ -272,11 +378,50 @@ These paths are local diagnostic evidence and are not deployment inputs:
 | Explorer archive | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-explorer12-jump20-seed8471\latest\elite-build-certification.json` |
 | Superseded preliminary portfolio | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-stratified256-seed8471\latest\elite-build-certification.json` |
 | Corrected isolated portfolio | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-stratified256-isolated-seed8471\latest\elite-build-certification.json` |
+| Superseded fragmented quality island | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-quality-island256-seed8471\latest\elite-build-certification.json` |
+| Corrected scenario-niche quality island | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-quality-island256-v2-seed8471\latest\elite-build-certification.json` |
+| E5 descriptor-separability audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-descriptor-audit-seed8471\latest\elite-build-certification.json` |
+| Coarse mechanic-map audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-coarse-mechanic-audit-seed8471\latest\elite-build-certification.json` |
+| Superseded mechanic island without collision telemetry | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-mechanic-island256-seed8471\latest\elite-build-certification.json` |
+| Mechanic-archetype island with collision telemetry | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-mechanic-island256-v2-seed8471\latest\elite-build-certification.json` |
+| Superseded v19 anchor-neighborhood collision audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-seed8471\latest\elite-build-certification.json` |
+| Superseded v19 pre-refinement collision audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-v2-seed8471\latest\elite-build-certification.json` |
+| Corrected v19 finalized-population collision audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-v3-seed8471\latest\elite-build-certification.json` |
+
+The corrected v19 immutable collision-audit artifact is:
+
+```text
+C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-v3-seed8471\history\20260828T212956625Z-af30e8a0\elite-build-certification.json
+```
+
+The v18 immutable mechanic-island artifact is:
+
+```text
+C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-mechanic-island256-v2-seed8471\history\20260828T204946703Z-15d02230\elite-build-certification.json
+```
+
+The v17 immutable coarse-mechanic artifact is:
+
+```text
+C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-coarse-mechanic-audit-seed8471\history\20260828T201340949Z-0b7c01a2\elite-build-certification.json
+```
+
+The v16 immutable descriptor-audit artifact is:
+
+```text
+C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-descriptor-audit-seed8471\history\20260828T191748257Z-6c3dfabe\elite-build-certification.json
+```
 
 The corrected v14 immutable artifact is:
 
 ```text
 C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-stratified256-isolated-seed8471\history\20260828T151913988Z-62ac6b8c\elite-build-certification.json
+```
+
+The corrected v15 immutable artifact is:
+
+```text
+C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-quality-island256-v2-seed8471\history\20260828T170828680Z-4c53199f\elite-build-certification.json
 ```
 
 The v11 immutable bridge-audit artifact is:

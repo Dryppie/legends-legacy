@@ -54,6 +54,13 @@ public sealed record BalanceCommandOptions(
           --elite-basin-jump <number>        Restart-local coordinated 3/4-gene mutation rate, 0.00-1.00 (default: 0).
           --elite-explorer-archive <number>  Persistent restart-local explorer candidates, 0-100 (default: 0).
           --elite-stratified-portfolio <number>  Isolated deterministic candidates per restart/profile, 0-5000 (default: 0).
+          --elite-quality-island <number> Restart-local quality-diversity island budget per profile, 0-5000 (default: 0).
+          --elite-mechanic-island <number> Restart-local mechanic-archetype island budget per profile, 0-5000 (default: 0).
+          --elite-descriptor-audit          Audit known E5 basin descriptor separability; never affects search or certification.
+          --elite-benchmark-confidence-audit  Repeat a stratified E5 cohort on common PvE seeds; diagnostic only.
+          --elite-confidence-cohort <number>  E5 builds in the confidence audit (default: 512).
+          --elite-confidence-seeds <number>   Common PvE seed replicates (default: 16).
+          --elite-confidence-margin <number>  Target 95% score half-width (default: 0.25).
           --elite-valley-beam-width <number> Opt-in restart valley-search beam width; 0 disables.
           --elite-valley-beam-depth <number> Opt-in restart valley-search depth; 0 disables.
           --elite-valley-budget <number>     Candidate budget per restart/profile; 0 disables.
@@ -75,6 +82,7 @@ public sealed record BalanceCommandOptions(
           --validation-simulations <number>  Calibrated trials per holdout seed (default: 50).
           --validation-probe-simulations <number>  Trials per sensitivity probe and seed (default: 25).
           --meta-simulator-battles <number>  Complementary 1v1 Essence battles (default: 2000).
+          --meta-simulator-rounds-per-matchup <number>  Balanced all-Essence round robin; 0 disables (default: 0).
           --content-root <path>   API.LL directory containing the production Data folder.
           --output <path>         Report root (default: <repository>/balance-output).
           --full                  Run the currently implemented balance pipeline.
@@ -111,6 +119,13 @@ public sealed record BalanceCommandOptions(
         var eliteBasinJump = eliteDefaults.CoordinatedMutationRate;
         var eliteExplorerArchive = eliteDefaults.ExplorerArchiveSize;
         var eliteStratifiedPortfolio = eliteDefaults.StratifiedPortfolioCandidatesPerProfile;
+        var eliteQualityIsland = eliteDefaults.QualityDiversityIslandCandidateBudgetPerProfile;
+        var eliteDescriptorAudit = eliteDefaults.DescriptorSeparabilityAuditEnabled;
+        var eliteMechanicIsland = eliteDefaults.MechanicArchetypeIslandCandidateBudgetPerProfile;
+        var eliteBenchmarkConfidenceAudit = eliteDefaults.BenchmarkConfidenceAuditEnabled;
+        var eliteConfidenceCohort = eliteDefaults.BenchmarkConfidenceAuditCohortSize;
+        var eliteConfidenceSeeds = eliteDefaults.BenchmarkConfidenceAuditSeedCount;
+        var eliteConfidenceMargin = eliteDefaults.BenchmarkConfidenceTargetScoreMargin;
         var eliteValleyBeamWidth = eliteDefaults.RestartValleyBeamWidth;
         var eliteValleyBeamDepth = eliteDefaults.RestartValleyBeamDepth;
         var eliteValleyBudget = eliteDefaults.RestartValleyCandidateBudget;
@@ -132,6 +147,7 @@ public sealed record BalanceCommandOptions(
         var validationSimulations = 50;
         var validationProbeSimulations = 25;
         var metaSimulatorBattles = 2_000;
+        var metaSimulatorRoundsPerMatchup = 0;
         string? contentRoot = null;
         string? outputRoot = null;
         var showHelp = false;
@@ -228,6 +244,27 @@ public sealed record BalanceCommandOptions(
                 case "--elite-stratified-portfolio":
                     eliteStratifiedPortfolio = ReadInt(args, ref index, argument, 0, 5_000);
                     break;
+                case "--elite-quality-island":
+                    eliteQualityIsland = ReadInt(args, ref index, argument, 0, 5_000);
+                    break;
+                case "--elite-descriptor-audit":
+                    eliteDescriptorAudit = true;
+                    break;
+                case "--elite-benchmark-confidence-audit":
+                    eliteBenchmarkConfidenceAudit = true;
+                    break;
+                case "--elite-confidence-cohort":
+                    eliteConfidenceCohort = ReadInt(args, ref index, argument, 3, 5_000);
+                    break;
+                case "--elite-confidence-seeds":
+                    eliteConfidenceSeeds = ReadInt(args, ref index, argument, 2, 1_000);
+                    break;
+                case "--elite-confidence-margin":
+                    eliteConfidenceMargin = ReadDouble(args, ref index, argument, 0.01, 5);
+                    break;
+                case "--elite-mechanic-island":
+                    eliteMechanicIsland = ReadInt(args, ref index, argument, 0, 5_000);
+                    break;
                 case "--elite-valley-beam-width":
                     eliteValleyBeamWidth = ReadInt(args, ref index, argument, 0, 100);
                     break;
@@ -290,6 +327,11 @@ public sealed record BalanceCommandOptions(
                     break;
                 case "--meta-simulator-battles":
                     metaSimulatorBattles = ReadInt(args, ref index, argument, 1, 1_000_000);
+                    break;
+                case "--meta-simulator-rounds-per-matchup":
+                    metaSimulatorRoundsPerMatchup = ReadInt(args, ref index, argument, 0, 1_000);
+                    if (metaSimulatorRoundsPerMatchup % 2 != 0)
+                        throw new BalanceCommandException($"Argument '{argument}' must be even so every matchup receives equal side assignments.");
                     break;
                 case "--build-count":
                     var buildCountValue = ReadValue(args, ref index, argument);
@@ -383,7 +425,14 @@ public sealed record BalanceCommandOptions(
             eliteBridgeAudit,
             eliteBasinJump,
             eliteExplorerArchive,
-            eliteStratifiedPortfolio);
+            eliteStratifiedPortfolio,
+            eliteQualityIsland,
+            eliteDescriptorAudit,
+            eliteMechanicIsland,
+            eliteBenchmarkConfidenceAudit,
+            eliteConfidenceCohort,
+            eliteConfidenceSeeds,
+            eliteConfidenceMargin);
         try
         {
             eliteCertification.Validate();
@@ -400,7 +449,9 @@ public sealed record BalanceCommandOptions(
             representativeBuilds,
             new ProgressionBandOptions(progressionCurve),
             new WorldTowerAnalysisOptions(towerSimulations),
-            new EssenceMetaAnalysisOptions(metaSimulatorBattles),
+            new EssenceMetaAnalysisOptions(
+                SimulatorBattleCount: metaSimulatorBattles,
+                SimulatorRoundsPerMatchup: metaSimulatorRoundsPerMatchup),
             new EncounterCalibrationOptions(SearchIterations: calibrationIterations),
             new EncounterSpecificOptimizationOptions(
                 CandidateSimulations: encounterCandidateSimulations,

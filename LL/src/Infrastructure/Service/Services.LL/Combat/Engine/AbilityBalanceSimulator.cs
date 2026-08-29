@@ -119,14 +119,15 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
 
         void QueueBattle(
             AbilityBalanceTeamLoadout friendly,
-            AbilityBalanceTeamLoadout hostile)
+            AbilityBalanceTeamLoadout hostile,
+            int? pairedRandomSeed = null)
         {
             var index = battleIndex++;
             battleBatch.Add(new BalanceBattleWorkItem(
                 friendly,
                 hostile,
                 index,
-                normalized.RandomSeed + battleIndex));
+                pairedRandomSeed ?? normalized.RandomSeed + battleIndex));
             if (battleBatch.Count >= batchSize)
                 FlushBattleBatch();
         }
@@ -143,9 +144,12 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
                         var left = savedCandidates[leftIndex];
                         var right = savedCandidates[rightIndex];
                         var swapSides = run % 2 == 1;
+                        var pairedRandomSeed = unchecked(
+                            normalized.RandomSeed + battleIndex - (swapSides ? 1 : 0));
                         QueueBattle(
                             swapSides ? right : left,
-                            swapSides ? left : right);
+                            swapSides ? left : right,
+                            pairedRandomSeed);
                     }
                 }
             }

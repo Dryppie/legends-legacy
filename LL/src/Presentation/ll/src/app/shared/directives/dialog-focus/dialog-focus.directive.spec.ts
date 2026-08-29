@@ -12,6 +12,7 @@ import { DialogFocusDirective } from './dialog-focus.directive';
     <section
       *ngIf="open"
       appDialogFocus
+      [dialogInitialFocus]="initialFocus"
       aria-label="Example dialog"
       (dialogEscape)="open = false"
     >
@@ -21,6 +22,7 @@ import { DialogFocusDirective } from './dialog-focus.directive';
 })
 class DialogFocusHostComponent {
   open = false;
+  initialFocus: 'first-tabbable' | 'container' = 'first-tabbable';
 }
 
 describe('DialogFocusDirective', () => {
@@ -54,5 +56,17 @@ describe('DialogFocusDirective', () => {
 
     expect(fixture.nativeElement.querySelector('[appDialogFocus]')).toBeNull();
     expect(document.activeElement).toBe(trigger);
+  });
+
+  it('can focus the dialog container without focusing its first action', async () => {
+    fixture.componentInstance.initialFocus = 'container';
+    fixture.componentInstance.open = true;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const dialog: HTMLElement =
+      fixture.nativeElement.querySelector('[appDialogFocus]');
+
+    expect(document.activeElement).toBe(dialog);
   });
 });

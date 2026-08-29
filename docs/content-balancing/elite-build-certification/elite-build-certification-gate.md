@@ -2,7 +2,7 @@
 
 The concrete v1 thresholds, execution profiles, player-fixture rules, and approval checklist are defined in the companion [Elite Build Certification Policy v1](elite-build-certification-policy-v1.md).
 
-**Implementation status:** Implemented in balance schema 15. The one-click runner now executes adaptive deterministic multi-restart search, per-restart hill-climbing, opt-in crossover, coordinated-mutation, persistent-explorer, valley, metadata-prefilter, shortest-path bridge, and isolated-portfolio diagnostics, bounded Pareto-finalist refinement, direct party-genome search, P95/P99 holdouts, curated-fixture validation, explicit verdicts, and standalone report persistence. Certification analyzer algorithm v14 retains the v11 finding of a genuine minimum-substitution E5 fitness valley and rejects the v12 direct-jump, v13 persistent-archive, and v14 arithmetic-portfolio trials on seed `8471`. Certification evidence is not approved: E5 remains outside the frozen restart-spread tolerance, no experimental search setting is promoted, and the checked-in curated fixture is intentionally empty. The complete investigation history is recorded in the [Elite Build Search Investigation Log](elite-build-search-investigation-log.md).
+**Implementation status:** Implemented in balance schema 15. The one-click runner now executes adaptive deterministic multi-restart search and isolated diagnostics, including the algorithm-v20 common-seed PvE confidence audit. The seed-`8471` v20 pilot rejects the one-seed E5 ordering as a global ranking, while the balanced singleton simulator reaches its coverage floor but fails the new discrimination gate. Certification evidence is not approved: E5 remains outside the frozen restart-spread tolerance, no experimental search setting is promoted, and the checked-in curated fixture is intentionally empty. The complete investigation history is recorded in the [Elite Build Search Investigation Log](elite-build-search-investigation-log.md).
 
 This gate establishes whether generated Essence combinations are strong enough to represent highly optimized and top-player builds. It must be completed before Region 1 scaling is remediated and before Milestone 14 extends the system to additional progression bands.
 
@@ -237,6 +237,13 @@ Implemented controls include:
 --elite-basin-jump <number>
 --elite-explorer-archive <number>
 --elite-stratified-portfolio <number>
+--elite-quality-island <number>
+--elite-mechanic-island <number>
+--elite-descriptor-audit
+--elite-benchmark-confidence-audit
+--elite-confidence-cohort <number>
+--elite-confidence-seeds <number>
+--elite-confidence-margin <number>
 --elite-valley-beam-width <number>
 --elite-valley-beam-depth <number>
 --elite-valley-budget <number>
@@ -271,7 +278,7 @@ elite-build-certification.json
 - comparison with curated top-player builds;
 - blocking warnings that prevent scaling approval.
 
-Balance schema version 15, optimizer algorithm version 6, and certification analyzer algorithm version 14 implement this contract and write the resolved policy, execution profile, content fingerprint, evidence, verdicts, warnings, coordinated-mutation, explorer-continuation, isolated-portfolio counts and baseline ceilings, and optional isolated bridge-audit section into the standalone artifact and combined summary.
+Balance schema version 15, optimizer algorithm version 6, and certification analyzer algorithm version 20 implement this contract and write the resolved policy, execution profile, content fingerprint, evidence, verdicts, warnings, search diagnostics, and optional isolated bridge, E5 descriptor/collision, and common-seed benchmark-confidence audit sections into the standalone artifact and combined summary.
 
 ## Relationship to the current Region 1 gate
 
@@ -309,4 +316,12 @@ Algorithm v13 then tested that follow-up with the same `20%` rate and a 12-candi
 
 Algorithm v14 then isolated `256` deterministic stratified candidates per restart/profile behind the unchanged baseline optimizer and refinement beam. The corrected seed-`8471` run benchmarked `2,304` direct portfolio candidates, evaluated `80,560` local candidates across the separate baseline and portfolio beams, retained `109,724` unique certification candidates, and completed in approximately `517.35` seconds. It preserved all known ceilings. E4 passed at `0.29` (`78.61`, `78.61`, `78.32`) and E6 passed at `0.34` (`87.46`, `87.46`, `87.12`), but E5 still failed at `1.09` (`86.21`, `85.12`, `85.27`). Its only portfolio gain was `84.91` to `85.12` in restart 2. The run remained `SearchUnstable`; seed `1337` was not run, the option stays disabled, and no budget is promoted.
 
-The bridge audit establishes a real minimum-substitution E5 valley, while the v12-v14 failures show that unstructured global exploration does not reliably cover the stronger basin. Any next bounded investigation should preserve the complete baseline path and use an isolated structured quality-diversity island or explicit mechanic/source-family niches. Increasing random jumps, archive size, or the arithmetic portfolio alone is not justified. Curated player evidence and a release-profile run remain separate mandatory blockers.
+Algorithm v15 then tested `256` quality-diversity island candidates per restart/profile after the complete unchanged baseline. The corrected run pre-filled at most 25 strongest/weakest-scenario niches from each restart's own authoritative baseline, evaluated 32 fresh candidates and 224 niche-champion descendants, retained `62,865` unique certification candidates, and completed in approximately `256` seconds. Islands occupied 7–11 niches and made 1–13 champion replacements, but none beat a refined baseline. E4 failed at `0.63` (`77.98`, `78.61`, `78.32`), E5 failed at `1.30` (`86.21`, `84.91`, `85.27`), and E6 retained its passing `0.34` baseline spread. The result remained `SearchUnstable`; seed `1337` was not run, the option stays disabled, and no budget is promoted.
+
+Algorithm v18 then tested `256` restart-local mechanic-archetype island candidates per restart/profile after the complete unchanged baseline. The run benchmarked `2,304` island candidates, retained `63,023` unique certification candidates, and completed in approximately `303` seconds. Islands occupied 133–153 niches and made 28–44 champion replacements, but none beat a refined baseline. E4 failed at `0.63`, E5 failed at `1.30` (`86.21`, `84.91`, `85.27`), and E6 retained its passing `0.34` spread. The high E5 coarse niche was already present in every complete baseline and every island reached it, but same-niche candidates scored from `86.21` down into the 70s. The failure is therefore descriptor collision, not insufficient coarse-niche coverage. Seed `1337` was not run, the option stays disabled, and no budget is promoted.
+
+The bridge audit establishes a real minimum-substitution E5 valley, while the v12-v15 and v18 failures show that diversity and retention alone do not reliably cover the stronger basin. A larger random, portfolio, scenario-island, or mechanic-island budget is not justified. If investigation continues, the next bounded work is an audit-only collision study for a hard-bounded authored-mechanic residual descriptor inside the coarse E5 niche; it must pass prospective separability and fragmentation criteria before another search run is authorized. Curated player evidence and a release-profile run remain separate mandatory blockers.
+
+Algorithm v19 then tested a four-axis capped authored-mechanic intensity residual across the finalized E5 collision population. Of 343 candidates in the coarse high niche, one met the `85.71` high floor and 342 were at or below the `85.27` low ceiling. Three residual signatures produced `99.71%` purity but `0%` high accuracy and only `49.85%` balanced leave-one-out accuracy; the high anchor residual collided with low candidates. The descriptor passed its hard 81-niche ceiling but failed separability and map readiness. Seed `1337` was not run and no setting is promoted.
+
+Further descriptor-island work is not justified by current evidence. If investigation continues, the next bounded work should be an audit-only held-out rankability study comparing quantitative authored effect payloads, additive Essence effects, and measured pair interactions. The restart containing a candidate under evaluation must be excluded from model training, and no model may enter search or certification evidence until it prospectively ranks the strong candidate. Curated player evidence and a release-profile run remain separate mandatory blockers.
