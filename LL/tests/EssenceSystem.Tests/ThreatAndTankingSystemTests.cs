@@ -394,6 +394,35 @@ public sealed class ThreatAndTankingSystemTests
     }
 
     [Fact]
+    public void Negative_threat_is_reported_in_entity_and_ability_stats()
+    {
+        var definition = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "threat.negative-passive",
+            Name = "Negative Threat Passive",
+            Kind = AbilitySpecKind.Passive,
+            ThreatValue = -50
+        });
+        var friendly = Combatant("friendly", CombatTeam.Friendly, [definition], canBasicAttack: false);
+        var hostile = Combatant("hostile", CombatTeam.Hostile, [], canBasicAttack: false);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 1,
+                BasicAttackIntervalTicks: 1_000,
+                ThreatHalfLifeSeconds: 0));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(50f, friendly.Threat);
+        var stats = Assert.Single(result.EntityStats, item => item.EntityId == friendly.Id);
+        Assert.Equal(-50, stats.ThreatGenerated);
+        Assert.Equal(
+            -50,
+            Assert.Single(stats.Abilities, ability => ability.Name == definition.Name).TotalThreat);
+    }
+
+    [Fact]
     public void Basic_attack_threat_is_reported_in_entity_and_ability_stats()
     {
         var friendly = Combatant("friendly", CombatTeam.Friendly, []);

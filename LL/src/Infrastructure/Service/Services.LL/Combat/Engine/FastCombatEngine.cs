@@ -4276,15 +4276,10 @@ public sealed class FastCombatEngine
         string statsSource)
     {
         combatant.AdjustThreat(amount, _currentTick, _threatDecayPerTick);
-        if (amount <= 0)
-            return;
-
-        var generated = Math.Max(
-            0,
-            (int)Math.Round(
-                amount * combatant.ThreatMultiplier,
-                MidpointRounding.AwayFromZero));
-        if (generated <= 0)
+        var generated = (int)Math.Round(
+            amount * combatant.ThreatMultiplier,
+            MidpointRounding.AwayFromZero);
+        if (generated == 0)
             return;
 
         if (!_threatGeneration.TryGetValue(combatant, out var telemetry))
@@ -5978,10 +5973,16 @@ public sealed class FastCombatEngine
 
     private static BattleOutcome DetermineOutcome(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        if (!HasLivingTeam(combatants, CombatTeam.Friendly))
+        var hasLivingFriendly = HasLivingTeam(combatants, CombatTeam.Friendly);
+        var hasLivingHostile = HasLivingTeam(combatants, CombatTeam.Hostile);
+
+        if (!hasLivingFriendly && !hasLivingHostile)
+            return BattleOutcome.Draw;
+
+        if (!hasLivingFriendly)
             return BattleOutcome.Defeat;
 
-        if (!HasLivingTeam(combatants, CombatTeam.Hostile))
+        if (!hasLivingHostile)
             return BattleOutcome.Victory;
 
         return BattleOutcome.Draw;
