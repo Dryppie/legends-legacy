@@ -1,0 +1,28 @@
+namespace Domain.Models.Combat;
+
+public sealed record CompactCombatTelemetry(
+    int PeakActiveFriendlyCombatants = 0,
+    int PeakActiveHostileCombatants = 0,
+    int PeakActiveFriendlySummons = 0,
+    int PeakActiveHostileSummons = 0,
+    int PeakActiveHostileTick = 0,
+    int? FirstAdditionalHostileTick = null,
+    int? FirstAdditionalHostileClearTick = null,
+    int AdditionalHostileWindowCount = 0,
+    int ClearedAdditionalHostileWindowCount = 0,
+    int HostileSummonActiveTicks = 0,
+    int HostileSummonWaveCount = 0,
+    int HostileSummonWaveIntervalCount = 0,
+    int HostileSummonWaveIntervalTotalTicks = 0,
+    int? MinimumHostileSummonWaveIntervalTicks = null,
+    int? MaximumHostileSummonWaveIntervalTicks = null,
+    int TotalFriendlyCombatants = 0,
+    int TotalHostileCombatants = 0,
+    int TotalFriendlySummons = 0,
+    int TotalHostileSummons = 0,
+    int FinalActiveFriendlyCombatants = 0,
+    int FinalActiveHostileCombatants = 0,
+    int FinalActiveFriendlySummons = 0,
+    int FinalActiveHostileSummons = 0,
+    int InitialFriendlyHealthDeficitSampleTicks = 0,
+    double AverageInitialFriendlyHealthDeficitRatio = 0);

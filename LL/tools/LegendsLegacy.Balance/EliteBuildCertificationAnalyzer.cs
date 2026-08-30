@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Interfaces.Services.LL.Essences;
@@ -192,7 +193,56 @@ public sealed record EliteBenchmarkConfidenceBuildSnapshot(
     double Approximate95ConfidenceHalfWidth,
     int RecommendedSeedCountForTargetMargin,
     double MeanReplicateRank,
-    IReadOnlyList<string> EssenceIds);
+    IReadOnlyList<string> EssenceIds,
+    int RobustRank = 0,
+    int RankChange = 0,
+    IReadOnlyDictionary<string, double>? ScenarioMeans = null,
+    IReadOnlyDictionary<string, double>? ScenarioStandardDeviations = null,
+    IReadOnlyList<double>? PerSeedAggregateScores = null);
+
+public sealed record EliteBenchmarkScenarioVarianceSnapshot(
+    string ScenarioId,
+    double MeanScore,
+    double MeanWithinBuildStandardDeviation,
+    double MedianWithinBuildStandardDeviation,
+    double MaximumWithinBuildStandardDeviation);
+
+public sealed record EliteBenchmarkReferenceProfileSnapshot(
+    string ProfileId,
+    int SlotCount,
+    int AvailableCandidateCount,
+    int CohortSize,
+    string LegacyKnownBestBuildId,
+    double LegacyKnownBestScore,
+    int LegacyKnownBestRobustRank,
+    string RobustKnownBestBuildId,
+    double RobustKnownBestScore,
+    double LegacyToRobustSpearmanCorrelation,
+    IReadOnlyList<EliteBenchmarkScenarioVarianceSnapshot> ScenarioVariances,
+    IReadOnlyList<EliteBenchmarkConfidenceBuildSnapshot> Builds);
+
+public sealed record EliteBenchmarkPanelSizeSnapshot(
+    int SeedCount,
+    int TotalCombatExecutions,
+    long CumulativeElapsedMilliseconds,
+    double SpearmanCorrelationToReference,
+    double Top10OverlapWithReference,
+    double Top20OverlapWithReference,
+    double Top50OverlapWithReference,
+    double EliteTop50PairwiseOrderingAgreement,
+    double FinalistPairwiseOrderingAgreement,
+    int ClearlySeparatedElitePairReversals,
+    int ClearlySeparatedElitePairCount,
+    double ClearlySeparatedElitePairReversalRate,
+    double? MedianApproximate95ConfidenceHalfWidth,
+    double? MaximumApproximate95ConfidenceHalfWidth,
+    double EstimatedFullSearchRuntimeSeconds,
+    bool StatisticalGatesPassed,
+    bool FifteenMinuteSearchRuntimePassed,
+    int PromotionDepthForReferenceTop10 = 0,
+    int PromotionDepthForReferenceTop20 = 0,
+    int PromotionDepthForReferenceTop50 = 0,
+    double ReferenceTop50RecallAtTop100 = 0);
 
 public sealed record EliteBenchmarkConfidenceComparisonSnapshot(
     string HigherAnchorId,
@@ -229,7 +279,13 @@ public sealed record EliteBenchmarkConfidenceAuditSnapshot(
     bool CertificationEvidenceAffected,
     IReadOnlyList<EliteBenchmarkConfidenceBuildSnapshot> Builds,
     IReadOnlyList<EliteBenchmarkConfidenceComparisonSnapshot> AnchorComparisons,
-    IReadOnlyList<string> Warnings);
+    IReadOnlyList<string> Warnings,
+    int ReferenceSeedCount = 0,
+    int SelectedPracticalSeedCount = 0,
+    bool PracticalPanelPassed = false,
+    IReadOnlyList<EliteBenchmarkPanelSizeSnapshot>? PanelSizes = null,
+    IReadOnlyList<EliteBenchmarkReferenceProfileSnapshot>? ReferenceProfiles = null,
+    IReadOnlyList<int>? CombatSeedPanel = null);
 
 public sealed record EliteLocalChallengeSnapshot(
     int FinalistCount,
@@ -286,6 +342,10 @@ public sealed record EliteHoldoutSnapshot(
     double AverageFriendlyDeaths,
     double AverageRemainingHealthRatio);
 
+public sealed record EliteCalibrationBuildSnapshot(
+    string BuildId,
+    IReadOnlyList<string> EssenceIds);
+
 public sealed record EliteCertificationFloorSnapshot(
     int Floor,
     string EncounterName,
@@ -308,7 +368,10 @@ public sealed record EliteCertificationFloorSnapshot(
     IReadOnlyList<string> P95CohortBuildIds,
     IReadOnlyList<string> P99CohortBuildIds,
     IReadOnlyList<string> SpecializedPartyBuildIds,
-    IReadOnlyList<string> Warnings);
+    IReadOnlyList<string> Warnings)
+{
+    public IReadOnlyList<EliteCalibrationBuildSnapshot> P95CohortBuilds { get; init; } = [];
+}
 
 public sealed record EliteBuildCertificationSnapshot(
     int AlgorithmVersion,
@@ -339,7 +402,7 @@ public sealed class EliteBuildCertificationAnalyzer(
     EssenceBuildOptimizer optimizer,
     IEncounterBuildEvaluator encounterEvaluator)
 {
-    public const int AlgorithmVersion = 20;
+    public const int AlgorithmVersion = 21;
 
     private static readonly DescriptorAuditAnchor[] DescriptorAuditAnchors =
     [
@@ -469,7 +532,7 @@ public sealed class EliteBuildCertificationAnalyzer(
             : null;
         var benchmarkConfidenceAudit = options.BenchmarkConfidenceAuditEnabled
             ? RunBenchmarkConfidenceAudit(
-                profileStates.Single(state => state.SlotCount == 5),
+                profileStates,
                 runSeed,
                 options)
             : null;
@@ -497,117 +560,109 @@ public sealed class EliteBuildCertificationAnalyzer(
     }
 
     private EliteBenchmarkConfidenceAuditSnapshot RunBenchmarkConfidenceAudit(
-        ProfileState profile,
+        IReadOnlyList<ProfileState> profiles,
         int runSeed,
         EliteCertificationOptions options)
     {
-        var candidatesBySignature = profile.Candidates
-            .DistinctBy(candidate => Signature(candidate.Build))
-            .ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
-        var missingAnchorBuilds = DescriptorAuditAnchors
-            .Where(anchor => !candidatesBySignature.ContainsKey(Signature(anchor.Genome)))
-            .Select(anchor => buildGenerator.MaterializeBuild(
-                CreateCanonicalId(profile.SlotCount, Signature(anchor.Genome)),
-                profile.Candidates[0].Build.ProfileId,
-                profile.SlotCount,
+        var primaryProfile = profiles.Single(profile => profile.SlotCount == 5);
+        var cohorts = profiles.ToDictionary(
+            profile => profile.SlotCount,
+            profile => PrepareConfidenceCohort(
+                profile,
                 runSeed,
-                anchor.Genome))
-            .ToArray();
-        if (missingAnchorBuilds.Length > 0)
-        {
-            var missingBenchmarks = benchmarkRunner.Run(missingAnchorBuilds, runSeed).Builds
-                .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
-            foreach (var build in missingAnchorBuilds)
-                candidatesBySignature[Signature(build)] = new CertificationCandidate(build, missingBenchmarks[build.Id]);
-        }
-
-        var mandatorySignatures = DescriptorAuditAnchors.Select(anchor => Signature(anchor.Genome))
-            .Concat(profile.Finalists.Select(candidate => Signature(candidate.Build)))
-            .ToHashSet(StringComparer.Ordinal);
-        var ordered = candidatesBySignature.Values
-            .OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
+                profile.SlotCount == 5 ? options.BenchmarkConfidenceAuditCohortSize : 50,
+                profile.SlotCount == 5),
+            EqualityComparer<int>.Default);
+        var allCandidates = cohorts.Values.SelectMany(values => values)
+            .OrderBy(candidate => candidate.Build.SlotCount)
             .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
             .ToArray();
-        var targetSize = Math.Min(
-            ordered.Length,
-            Math.Max(options.BenchmarkConfidenceAuditCohortSize, mandatorySignatures.Count));
-        var selected = ordered.Where(candidate => mandatorySignatures.Contains(Signature(candidate.Build)))
-            .ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
-        var remainingSlots = targetSize - selected.Count;
-        if (remainingSlots > 0)
-        {
-            for (var index = 0; index < remainingSlots; index++)
-            {
-                var position = remainingSlots == 1
-                    ? ordered.Length / 2
-                    : (int)Math.Round(index * (ordered.Length - 1d) / (remainingSlots - 1));
-                selected.TryAdd(Signature(ordered[position].Build), ordered[position]);
-            }
-            foreach (var candidate in ordered)
-            {
-                if (selected.Count >= targetSize)
-                    break;
-                selected.TryAdd(Signature(candidate.Build), candidate);
-            }
-        }
-
-        var cohort = selected.Values.OrderBy(candidate => candidate.Build.Id, StringComparer.Ordinal).ToArray();
         var replicateSeeds = Enumerable.Range(1, options.BenchmarkConfidenceAuditSeedCount)
             .Select(index => StableRandom.Seed(
                 "balance-elite-benchmark-confidence-v1",
                 runSeed.ToString(CultureInfo.InvariantCulture),
                 index.ToString(CultureInfo.InvariantCulture)))
             .ToArray();
-        var suites = benchmarkRunner.RunCommonSeedReplicates(
-            cohort.Select(candidate => candidate.Build).ToArray(),
-            replicateSeeds);
-        var baselineScores = cohort.ToDictionary(
-            candidate => candidate.Build.Id,
-            candidate => candidate.Benchmark.AggregateScore,
-            StringComparer.Ordinal);
+        var suites = new List<PveBenchmarkSuiteSnapshot>(replicateSeeds.Length);
+        var cumulativeElapsedMilliseconds = new Dictionary<int, long>();
+        var stopwatch = Stopwatch.StartNew();
+        foreach (var replicateSeed in replicateSeeds)
+        {
+            suites.Add(benchmarkRunner.RunCommonSeedReplicates(
+                allCandidates.Select(candidate => candidate.Build).ToArray(),
+                [replicateSeed]).Single());
+            cumulativeElapsedMilliseconds[suites.Count] = stopwatch.ElapsedMilliseconds;
+        }
+        stopwatch.Stop();
+
         var replicateScores = suites.Select(suite => suite.Builds.ToDictionary(
                 build => build.BuildId,
                 build => build.AggregateScore,
                 StringComparer.Ordinal))
             .ToArray();
-        var meanScores = cohort.ToDictionary(
+        var replicateComponents = suites.Select(suite => suite.Builds.ToDictionary(
+                build => build.BuildId,
+                build => (IReadOnlyDictionary<string, double>)build.Components.ToDictionary(
+                    component => component.ScenarioId,
+                    component => component.Score,
+                    StringComparer.Ordinal),
+                StringComparer.Ordinal))
+            .ToArray();
+        var scenarioCount = suites[0].Scenarios.Count;
+        var referenceProfiles = profiles.OrderBy(profile => profile.SlotCount)
+            .Select(profile => CreateReferenceProfileSnapshot(
+                profile,
+                cohorts[profile.SlotCount],
+                replicateScores,
+                replicateComponents,
+                suites[0].Scenarios,
+                options.BenchmarkConfidenceTargetScoreMargin))
+            .ToArray();
+        var primaryReference = referenceProfiles.Single(profile => profile.SlotCount == 5);
+        var primaryCohort = cohorts[5];
+        var primaryIds = primaryCohort.Select(candidate => candidate.Build.Id).ToHashSet(StringComparer.Ordinal);
+        var primaryReplicateScores = replicateScores.Select(scores =>
+                (IReadOnlyDictionary<string, double>)scores
+                    .Where(pair => primaryIds.Contains(pair.Key))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal))
+            .ToArray();
+        var baselineScores = primaryCohort.ToDictionary(
             candidate => candidate.Build.Id,
-            candidate => replicateScores.Average(scores => scores[candidate.Build.Id]),
+            candidate => candidate.Benchmark.AggregateScore,
+            StringComparer.Ordinal);
+        var referenceScores = primaryCohort.ToDictionary(
+            candidate => candidate.Build.Id,
+            candidate => primaryReplicateScores.Average(scores => scores[candidate.Build.Id]),
             StringComparer.Ordinal);
         var baselineRanks = RankDescending(baselineScores);
-        var meanRanks = RankDescending(meanScores);
-        var replicateRanks = replicateScores.Select(RankDescending).ToArray();
-        var topK = Math.Min(20, cohort.Length);
+        var referenceRanks = RankDescending(referenceScores);
+        var replicateRanks = primaryReplicateScores.Select(RankDescending).ToArray();
+        var topK = Math.Min(20, primaryCohort.Count);
         var baselineTop = baselineRanks.Where(pair => pair.Value <= topK).Select(pair => pair.Key)
             .ToHashSet(StringComparer.Ordinal);
         var topOverlaps = replicateRanks.Select(ranks =>
                 ranks.Count(pair => pair.Value <= topK && baselineTop.Contains(pair.Key)) / (double)topK)
             .ToArray();
-        var replicateCorrelations = replicateRanks.Select(ranks => Spearman(ranks, meanRanks)).ToArray();
-        var buildRows = cohort.Select(candidate =>
-            {
-                var scores = replicateScores.Select(values => values[candidate.Build.Id]).ToArray();
-                var standardDeviation = SampleStandardDeviation(scores);
-                var halfWidth = 1.959963984540054 * standardDeviation / Math.Sqrt(scores.Length);
-                var recommendedSeeds = Math.Max(2, (int)Math.Ceiling(Math.Pow(
-                    1.959963984540054 * standardDeviation / options.BenchmarkConfidenceTargetScoreMargin,
-                    2)));
-                return new EliteBenchmarkConfidenceBuildSnapshot(
-                    candidate.Build.Id,
-                    Round(baselineScores[candidate.Build.Id]),
-                    baselineRanks[candidate.Build.Id],
-                    Round(meanScores[candidate.Build.Id]),
-                    Round(standardDeviation),
-                    Round(halfWidth),
-                    recommendedSeeds,
-                    Round(replicateRanks.Average(ranks => ranks[candidate.Build.Id])),
-                    candidate.Build.Essences.Select(essence => essence.EssenceId).ToArray());
-            })
-            .OrderBy(row => row.BaselineRank)
-            .ToArray();
+        var replicateCorrelations = replicateRanks.Select(ranks => Spearman(ranks, referenceRanks)).ToArray();
+        var panelSizes = CreatePanelSizeSnapshots(
+            primaryProfile,
+            primaryCohort,
+            primaryReplicateScores,
+            referenceScores,
+            cumulativeElapsedMilliseconds,
+            allCandidates.Length,
+            profiles.Sum(profile => profile.Candidates.Count),
+            scenarioCount);
+        var selectedPanelIndex = Enumerable.Range(0, Math.Max(0, panelSizes.Count - 1))
+            .FirstOrDefault(index => panelSizes[index].StatisticalGatesPassed
+                                     && panelSizes[index + 1].StatisticalGatesPassed,
+                -1);
+        var selectedPanel = selectedPanelIndex >= 0 ? panelSizes[selectedPanelIndex] : null;
+
+        var anchorCandidates = primaryCohort.ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
         var anchorBuildIds = DescriptorAuditAnchors.ToDictionary(
             anchor => anchor.AnchorId,
-            anchor => candidatesBySignature[Signature(anchor.Genome)].Build.Id,
+            anchor => anchorCandidates[Signature(anchor.Genome)].Build.Id,
             StringComparer.Ordinal);
         var highAnchor = DescriptorAuditAnchors.Single(anchor => anchor.Basin == "high");
         var comparisons = DescriptorAuditAnchors.Where(anchor => anchor.Basin == "low")
@@ -616,35 +671,39 @@ public sealed class EliteBuildCertificationAnalyzer(
                 anchorBuildIds[highAnchor.AnchorId],
                 lowAnchor.AnchorId,
                 anchorBuildIds[lowAnchor.AnchorId],
-                replicateScores))
+                primaryReplicateScores))
             .ToArray();
-        var baselineToMean = Spearman(baselineRanks, meanRanks);
+        var baselineToMean = Spearman(baselineRanks, referenceRanks);
         var rankingPassed = baselineToMean >= 0.95
                             && replicateCorrelations.Min() >= 0.90
                             && topOverlaps.Min() >= 0.70
                             && topOverlaps.Average() >= 0.80;
         var orderingPassed = comparisons.All(comparison => comparison.OrderingConfident);
-        var configuredSampleAdequate = buildRows.All(row =>
+        var configuredSampleAdequate = primaryReference.Builds.All(row =>
                                                  row.Approximate95ConfidenceHalfWidth
                                                  <= options.BenchmarkConfidenceTargetScoreMargin)
                                              && rankingPassed
                                              && orderingPassed;
         var warnings = new List<string>();
         if (!rankingPassed)
-            warnings.Add("The predeclared rank-stability thresholds were not met; single-seed PvE ordering is not stable enough for a global ranking claim.");
+            warnings.Add("The legacy single-seed PvE objective failed the predeclared rank-stability thresholds against the common-seed reference panel.");
         if (!orderingPassed)
-            warnings.Add("At least one known high-versus-low anchor difference includes zero at the approximate 95% confidence level.");
-        if (buildRows.Any(row => row.Approximate95ConfidenceHalfWidth > options.BenchmarkConfidenceTargetScoreMargin))
-            warnings.Add("The configured seed count does not achieve the target score margin for every audited build.");
+            warnings.Add("The legacy E5 high anchor was not confidently superior to every legacy low anchor under the common-seed reference panel.");
+        if (primaryReference.Builds.Any(row => row.Approximate95ConfidenceHalfWidth > options.BenchmarkConfidenceTargetScoreMargin))
+            warnings.Add("The reference seed count does not achieve the requested score margin for every audited E5 build.");
+        if (selectedPanel is null)
+            warnings.Add("No submaximal seed panel and its next larger panel both passed the predeclared elite-ranking gates; do not promote a robust search objective.");
+        else if (!selectedPanel.FifteenMinuteSearchRuntimePassed)
+            warnings.Add($"The smallest statistically stable panel ({selectedPanel.SeedCount} seeds) projects beyond the 15-minute complete-search target; progressive evaluation or caching is required before promotion.");
 
         return new EliteBenchmarkConfidenceAuditSnapshot(
             "E5_ELITE",
-            "Deterministic score-stratified E5 cohort with all known descriptor anchors and certification finalists forced into the sample.",
-            ordered.Length,
-            cohort.Length,
+            "Primary deterministic score-stratified E5 cohort plus the top 50 legacy candidates from E4 and E6; known E5 anchors, restart winners, and certification finalists are forced into their profile cohorts.",
+            primaryProfile.Candidates.Count,
+            primaryCohort.Count,
             replicateSeeds.Length,
-            suites[0].Scenarios.Count,
-            cohort.Length * replicateSeeds.Length * suites[0].Scenarios.Count,
+            scenarioCount,
+            allCandidates.Length * replicateSeeds.Length * scenarioCount,
             true,
             options.BenchmarkConfidenceTargetScoreMargin,
             topK,
@@ -653,16 +712,323 @@ public sealed class EliteBuildCertificationAnalyzer(
             RoundRate(replicateCorrelations.Average()),
             RoundRate(topOverlaps.Min()),
             RoundRate(topOverlaps.Average()),
-            Round(buildRows.Select(row => row.Approximate95ConfidenceHalfWidth).Order().ElementAt(buildRows.Length / 2)),
-            Round(buildRows.Max(row => row.Approximate95ConfidenceHalfWidth)),
-            buildRows.Max(row => row.RecommendedSeedCountForTargetMargin),
+            Round(primaryReference.Builds.Select(row => row.Approximate95ConfidenceHalfWidth).Order().ElementAt(primaryReference.Builds.Count / 2)),
+            Round(primaryReference.Builds.Max(row => row.Approximate95ConfidenceHalfWidth)),
+            primaryReference.Builds.Max(row => row.RecommendedSeedCountForTargetMargin),
             rankingPassed,
             orderingPassed,
             configuredSampleAdequate,
             false,
-            buildRows,
+            primaryReference.Builds,
             comparisons,
-            warnings);
+            warnings,
+            replicateSeeds.Length,
+            selectedPanel?.SeedCount ?? 0,
+            selectedPanel is not null && selectedPanel.FifteenMinuteSearchRuntimePassed,
+            panelSizes,
+            referenceProfiles,
+            replicateSeeds);
+    }
+
+    private IReadOnlyList<CertificationCandidate> PrepareConfidenceCohort(
+        ProfileState profile,
+        int runSeed,
+        int requestedSize,
+        bool includeKnownE5Anchors)
+    {
+        var candidatesBySignature = profile.Candidates
+            .DistinctBy(candidate => Signature(candidate.Build))
+            .ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
+        if (includeKnownE5Anchors)
+        {
+            var missingAnchorBuilds = DescriptorAuditAnchors
+                .Where(anchor => !candidatesBySignature.ContainsKey(Signature(anchor.Genome)))
+                .Select(anchor => buildGenerator.MaterializeBuild(
+                    CreateCanonicalId(profile.SlotCount, Signature(anchor.Genome)),
+                    profile.Candidates[0].Build.ProfileId,
+                    profile.SlotCount,
+                    runSeed,
+                    anchor.Genome))
+                .ToArray();
+            if (missingAnchorBuilds.Length > 0)
+            {
+                var missingBenchmarks = benchmarkRunner.Run(missingAnchorBuilds, runSeed).Builds
+                    .ToDictionary(build => build.BuildId, StringComparer.Ordinal);
+                foreach (var build in missingAnchorBuilds)
+                    candidatesBySignature[Signature(build)] = new CertificationCandidate(build, missingBenchmarks[build.Id]);
+            }
+        }
+
+        var mandatorySignatures = profile.Finalists.Select(candidate => Signature(candidate.Build))
+            .Concat(profile.Snapshot.Restarts.SelectMany(restart => new[]
+            {
+                restart.BestEssenceIds,
+                restart.RawBestEssenceIds,
+                restart.BaselineBestEssenceIds
+            }).Where(genome => genome is not null).Select(genome => Signature(genome!)))
+            .Concat(includeKnownE5Anchors
+                ? DescriptorAuditAnchors.Select(anchor => Signature(anchor.Genome))
+                : [])
+            .ToHashSet(StringComparer.Ordinal);
+        var ordered = candidatesBySignature.Values
+            .OrderByDescending(candidate => candidate.Benchmark.AggregateScore)
+            .ThenBy(candidate => candidate.Build.Id, StringComparer.Ordinal)
+            .ToArray();
+        var targetSize = Math.Min(ordered.Length, Math.Max(requestedSize, mandatorySignatures.Count));
+        var selected = ordered.Where(candidate => mandatorySignatures.Contains(Signature(candidate.Build)))
+            .ToDictionary(candidate => Signature(candidate.Build), StringComparer.Ordinal);
+        var remainingSlots = targetSize - selected.Count;
+        if (includeKnownE5Anchors && remainingSlots > 0)
+        {
+            for (var index = 0; index < remainingSlots; index++)
+            {
+                var position = remainingSlots == 1
+                    ? ordered.Length / 2
+                    : (int)Math.Round(index * (ordered.Length - 1d) / (remainingSlots - 1));
+                selected.TryAdd(Signature(ordered[position].Build), ordered[position]);
+            }
+        }
+        foreach (var candidate in ordered)
+        {
+            if (selected.Count >= targetSize)
+                break;
+            selected.TryAdd(Signature(candidate.Build), candidate);
+        }
+        return selected.Values.OrderBy(candidate => candidate.Build.Id, StringComparer.Ordinal).ToArray();
+    }
+
+    private static EliteBenchmarkReferenceProfileSnapshot CreateReferenceProfileSnapshot(
+        ProfileState profile,
+        IReadOnlyList<CertificationCandidate> cohort,
+        IReadOnlyList<IReadOnlyDictionary<string, double>> replicateScores,
+        IReadOnlyList<IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>>> replicateComponents,
+        IReadOnlyList<PveBenchmarkScenarioSnapshot> scenarios,
+        double targetMargin)
+    {
+        var baselineScores = cohort.ToDictionary(
+            candidate => candidate.Build.Id,
+            candidate => candidate.Benchmark.AggregateScore,
+            StringComparer.Ordinal);
+        var robustScores = cohort.ToDictionary(
+            candidate => candidate.Build.Id,
+            candidate => replicateScores.Average(scores => scores[candidate.Build.Id]),
+            StringComparer.Ordinal);
+        var baselineRanks = RankDescending(baselineScores);
+        var robustRanks = RankDescending(robustScores);
+        var replicateRanks = replicateScores.Select(scores => RankDescending(
+                cohort.ToDictionary(candidate => candidate.Build.Id, candidate => scores[candidate.Build.Id], StringComparer.Ordinal)))
+            .ToArray();
+        var buildRows = cohort.Select(candidate =>
+            {
+                var buildId = candidate.Build.Id;
+                var scores = replicateScores.Select(values => values[buildId]).ToArray();
+                var standardDeviation = SampleStandardDeviation(scores);
+                var halfWidth = 1.959963984540054 * standardDeviation / Math.Sqrt(scores.Length);
+                var recommendedSeeds = Math.Max(2, (int)Math.Ceiling(Math.Pow(
+                    1.959963984540054 * standardDeviation / targetMargin,
+                    2)));
+                var scenarioMeans = scenarios.ToDictionary(
+                    scenario => scenario.Id,
+                    scenario => Round(replicateComponents.Average(values => values[buildId][scenario.Id])),
+                    StringComparer.Ordinal);
+                var scenarioStandardDeviations = scenarios.ToDictionary(
+                    scenario => scenario.Id,
+                    scenario => Round(SampleStandardDeviation(replicateComponents
+                        .Select(values => values[buildId][scenario.Id]).ToArray())),
+                    StringComparer.Ordinal);
+                return new EliteBenchmarkConfidenceBuildSnapshot(
+                    buildId,
+                    Round(baselineScores[buildId]),
+                    baselineRanks[buildId],
+                    Round(robustScores[buildId]),
+                    Round(standardDeviation),
+                    Round(halfWidth),
+                    recommendedSeeds,
+                    Round(replicateRanks.Average(ranks => ranks[buildId])),
+                    candidate.Build.Essences.Select(essence => essence.EssenceId).ToArray(),
+                    robustRanks[buildId],
+                    baselineRanks[buildId] - robustRanks[buildId],
+                    scenarioMeans,
+                    scenarioStandardDeviations,
+                    scores.Select(Round).ToArray());
+            })
+            .OrderBy(row => row.RobustRank)
+            .ToArray();
+        var scenarioVariances = scenarios.Select(scenario =>
+            {
+                var allScores = cohort.SelectMany(candidate => replicateComponents.Select(values =>
+                    values[candidate.Build.Id][scenario.Id])).ToArray();
+                var withinBuild = cohort.Select(candidate => SampleStandardDeviation(replicateComponents
+                        .Select(values => values[candidate.Build.Id][scenario.Id]).ToArray()))
+                    .Order()
+                    .ToArray();
+                return new EliteBenchmarkScenarioVarianceSnapshot(
+                    scenario.Id,
+                    Round(allScores.Average()),
+                    Round(withinBuild.Average()),
+                    Round(withinBuild[withinBuild.Length / 2]),
+                    Round(withinBuild.Max()));
+            })
+            .ToArray();
+        var legacyBest = buildRows.Single(row => row.BaselineRank == 1);
+        var robustBest = buildRows.Single(row => row.RobustRank == 1);
+        return new EliteBenchmarkReferenceProfileSnapshot(
+            profile.Snapshot.ProfileId,
+            profile.SlotCount,
+            profile.Candidates.Count,
+            cohort.Count,
+            legacyBest.BuildId,
+            legacyBest.BaselineScore,
+            legacyBest.RobustRank,
+            robustBest.BuildId,
+            robustBest.MeanScore,
+            RoundRate(Spearman(baselineRanks, robustRanks)),
+            scenarioVariances,
+            buildRows);
+    }
+
+    private static IReadOnlyList<EliteBenchmarkPanelSizeSnapshot> CreatePanelSizeSnapshots(
+        ProfileState profile,
+        IReadOnlyList<CertificationCandidate> cohort,
+        IReadOnlyList<IReadOnlyDictionary<string, double>> replicateScores,
+        IReadOnlyDictionary<string, double> referenceScores,
+        IReadOnlyDictionary<int, long> cumulativeElapsedMilliseconds,
+        int totalAuditCandidateCount,
+        int totalSearchCandidateCount,
+        int scenarioCount)
+    {
+        var configuredCounts = new[] { 1, 2, 4, 8, 12, 16, 24, 32 }
+            .Where(count => count <= replicateScores.Count)
+            .Append(replicateScores.Count)
+            .Distinct()
+            .Order()
+            .ToArray();
+        var referenceRanks = RankDescending(referenceScores);
+        var eliteIds = referenceRanks.Where(pair => pair.Value <= Math.Min(50, cohort.Count))
+            .Select(pair => pair.Key)
+            .ToArray();
+        var finalistIds = profile.Finalists.Select(candidate => candidate.Build.Id)
+            .Where(referenceRanks.ContainsKey)
+            .ToArray();
+        return configuredCounts.Select(seedCount =>
+            {
+                var panelScores = cohort.ToDictionary(
+                    candidate => candidate.Build.Id,
+                    candidate => replicateScores.Take(seedCount).Average(scores => scores[candidate.Build.Id]),
+                    StringComparer.Ordinal);
+                var panelRanks = RankDescending(panelScores);
+                var clearlySeparatedPairs = 0;
+                var clearlySeparatedReversals = 0;
+                for (var first = 0; first < eliteIds.Length; first++)
+                for (var second = first + 1; second < eliteIds.Length; second++)
+                {
+                    var firstId = eliteIds[first];
+                    var secondId = eliteIds[second];
+                    if (Math.Abs(referenceScores[firstId] - referenceScores[secondId]) < 1)
+                        continue;
+                    clearlySeparatedPairs++;
+                    if (Math.Sign(panelScores[firstId] - panelScores[secondId])
+                        != Math.Sign(referenceScores[firstId] - referenceScores[secondId]))
+                    {
+                        clearlySeparatedReversals++;
+                    }
+                }
+                var halfWidths = seedCount < 2
+                    ? []
+                    : cohort.Select(candidate =>
+                        {
+                            var scores = replicateScores.Take(seedCount)
+                                .Select(values => values[candidate.Build.Id])
+                                .ToArray();
+                            return 1.959963984540054 * SampleStandardDeviation(scores) / Math.Sqrt(scores.Length);
+                        })
+                        .Order()
+                        .ToArray();
+                var spearman = Spearman(panelRanks, referenceRanks);
+                var top10 = TopKOverlap(panelRanks, referenceRanks, 10);
+                var top20 = TopKOverlap(panelRanks, referenceRanks, 20);
+                var top50 = TopKOverlap(panelRanks, referenceRanks, 50);
+                var eliteAgreement = PairwiseOrderingAgreement(panelRanks, referenceRanks, eliteIds);
+                var finalistAgreement = PairwiseOrderingAgreement(panelRanks, referenceRanks, finalistIds);
+                var reversalRate = clearlySeparatedPairs == 0
+                    ? 0
+                    : clearlySeparatedReversals / (double)clearlySeparatedPairs;
+                var statisticalGatesPassed = spearman >= 0.98
+                                             && top10 >= 0.80
+                                             && top20 >= 0.85
+                                             && top50 >= 0.90
+                                             && eliteAgreement >= 0.95
+                                             && finalistAgreement >= 0.95
+                                             && reversalRate <= 0.02;
+                var elapsed = cumulativeElapsedMilliseconds[seedCount];
+                var estimatedSearchSeconds = elapsed / 1000d
+                                             * totalSearchCandidateCount
+                                             / Math.Max(1, totalAuditCandidateCount);
+                int PromotionDepth(int referenceTopK) => referenceRanks
+                    .Where(pair => pair.Value <= Math.Min(referenceTopK, cohort.Count))
+                    .Max(pair => panelRanks[pair.Key]);
+                var referenceTop50 = referenceRanks
+                    .Where(pair => pair.Value <= Math.Min(50, cohort.Count))
+                    .Select(pair => pair.Key)
+                    .ToArray();
+                return new EliteBenchmarkPanelSizeSnapshot(
+                    seedCount,
+                    totalAuditCandidateCount * seedCount * scenarioCount,
+                    elapsed,
+                    RoundRate(spearman),
+                    RoundRate(top10),
+                    RoundRate(top20),
+                    RoundRate(top50),
+                    RoundRate(eliteAgreement),
+                    RoundRate(finalistAgreement),
+                    clearlySeparatedReversals,
+                    clearlySeparatedPairs,
+                    RoundRate(reversalRate),
+                    halfWidths.Length == 0 ? null : Round(halfWidths[halfWidths.Length / 2]),
+                    halfWidths.Length == 0 ? null : Round(halfWidths[^1]),
+                    Round(estimatedSearchSeconds),
+                    statisticalGatesPassed,
+                    estimatedSearchSeconds <= 15 * 60,
+                    PromotionDepth(10),
+                    PromotionDepth(20),
+                    PromotionDepth(50),
+                    RoundRate(referenceTop50.Count(id => panelRanks[id] <= Math.Min(100, cohort.Count))
+                              / (double)referenceTop50.Length));
+            })
+            .ToArray();
+    }
+
+    private static double TopKOverlap(
+        IReadOnlyDictionary<string, int> first,
+        IReadOnlyDictionary<string, int> second,
+        int requestedK)
+    {
+        var k = Math.Min(requestedK, first.Count);
+        var firstTop = first.Where(pair => pair.Value <= k).Select(pair => pair.Key)
+            .ToHashSet(StringComparer.Ordinal);
+        return second.Count(pair => pair.Value <= k && firstTop.Contains(pair.Key)) / (double)k;
+    }
+
+    private static double PairwiseOrderingAgreement(
+        IReadOnlyDictionary<string, int> first,
+        IReadOnlyDictionary<string, int> second,
+        IReadOnlyList<string> ids)
+    {
+        if (ids.Count < 2)
+            return 1;
+        var agreements = 0;
+        var comparisons = 0;
+        for (var left = 0; left < ids.Count; left++)
+        for (var right = left + 1; right < ids.Count; right++)
+        {
+            comparisons++;
+            if (Math.Sign(first[ids[left]] - first[ids[right]])
+                == Math.Sign(second[ids[left]] - second[ids[right]]))
+            {
+                agreements++;
+            }
+        }
+        return comparisons == 0 ? 1 : agreements / (double)comparisons;
     }
 
     private static EliteBenchmarkConfidenceComparisonSnapshot CreateConfidenceComparison(
@@ -2916,7 +3282,13 @@ public sealed class EliteBuildCertificationAnalyzer(
             p95Builds.Select(build => build.Id).ToArray(),
             p99Builds.Select(build => build.Id).ToArray(),
             party.Builds.Select(build => build.Id).ToArray(),
-            warnings);
+            warnings)
+        {
+            P95CohortBuilds = p95Builds.Select(build =>
+                new EliteCalibrationBuildSnapshot(
+                    build.Id,
+                    build.Essences.Select(essence => essence.EssenceId).ToArray())).ToArray()
+        };
     }
 
     private PartySearchResult OptimizeParty(

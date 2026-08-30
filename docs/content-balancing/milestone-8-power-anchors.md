@@ -25,7 +25,7 @@ The variance is the population variance of the retained anchor sample. CR remain
 
 ## Report Contract
 
-Balance schema version 8 introduced `powerAnchors` in `summary.json` and `power-anchors.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. `summary.md` reports the anchor composition, measured benchmark power and spread, and CR range.
+Balance schema version 8 introduced `powerAnchors` in `summary.json` and `power-anchors.json` under both `latest` and immutable history; the current combined pipeline uses schema version 46. `summary.md` reports the anchor composition, measured benchmark power and spread, and CR range.
 
 Milestone 9 consumes the measured mean benchmark power of these anchors as its exact Floor 1 and Floor 10 endpoints.
 

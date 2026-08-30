@@ -49,7 +49,7 @@ The version-1 thresholds are intentionally conservative and explicit:
 
 ## Report contract
 
-Balance schema version 13 introduced `encounterSpecificOptimization` in `summary.json` and `encounter-specific-optimization.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. Each floor records:
+Balance schema version 13 introduced `encounterSpecificOptimization` in `summary.json` and `encounter-specific-optimization.json` under both `latest` and immutable history; the current combined pipeline uses schema version 46. Each floor records:
 
 - the candidate population and slot count;
 - the calibration factors actually tested;

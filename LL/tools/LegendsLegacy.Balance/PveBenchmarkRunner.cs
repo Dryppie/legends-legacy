@@ -25,7 +25,17 @@ public sealed record PveBenchmarkMetricsSnapshot(
     int PreventedDamage,
     int EnemiesDefeated,
     bool Survived,
-    double RemainingHealthRatio);
+    double RemainingHealthRatio)
+{
+    public double AverageFriendlyHealthDeficitRatio { get; init; }
+    public int StatusEffectsCleansed { get; init; }
+    public int StatusEffectsDispelled { get; init; }
+    public int StunApplications { get; init; }
+    public int FreezeApplications { get; init; }
+    public int SilenceApplications { get; init; }
+    public int SlowApplications { get; init; }
+    public int StaggerContributed { get; init; }
+}
 
 public sealed record PveBenchmarkComponentSnapshot(
     string ScenarioId,
@@ -50,7 +60,7 @@ public sealed class PveBenchmarkRunner(
     IEssenceDefinitionRepository essenceDefinitions,
     GearPackageFactory gearPackages)
 {
-    public const int ScoringVersion = 1;
+    public const int ScoringVersion = 2;
 
     private static readonly IReadOnlyList<ScenarioDefinition> Definitions =
         Array.AsReadOnly<ScenarioDefinition>(
@@ -257,7 +267,19 @@ public sealed class PveBenchmarkRunner(
             preventedDamage,
             hostiles.Count(hostile => !hostile.IsAlive),
             friendly.IsAlive,
-            Math.Round(Math.Clamp(friendly.Health / maxHealth, 0, 1), 4));
+            Math.Round(Math.Clamp(friendly.Health / maxHealth, 0, 1), 4))
+        {
+            AverageFriendlyHealthDeficitRatio = Math.Round(
+                result.CompactTelemetry.AverageInitialFriendlyHealthDeficitRatio,
+                4),
+            StatusEffectsCleansed = friendlyStats.Sum(stats => stats.StatusEffectsCleansed),
+            StatusEffectsDispelled = friendlyStats.Sum(stats => stats.StatusEffectsDispelled),
+            StunApplications = friendlyStats.Sum(stats => stats.StunApplications),
+            FreezeApplications = friendlyStats.Sum(stats => stats.FreezeApplications),
+            SilenceApplications = friendlyStats.Sum(stats => stats.SilenceApplications),
+            SlowApplications = friendlyStats.Sum(stats => stats.SlowApplications),
+            StaggerContributed = friendlyStats.Sum(stats => stats.StaggerContributed)
+        };
         var score = Score(scenario, metrics, totalEnemyHealth);
 
         return new PveBenchmarkComponentSnapshot(scenario.Id, combatSeed, score, metrics);
@@ -300,7 +322,7 @@ public sealed class PveBenchmarkRunner(
             .ToArray();
     }
 
-    private static IReadOnlyList<CompiledAbility> SelectAbilities(
+    internal static IReadOnlyList<CompiledAbility> SelectAbilities(
         EssenceBuildSnapshot build,
         IReadOnlyDictionary<string, Domain.Models.Essences.Definitions.EssenceDefinition> definitionsById,
         IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)

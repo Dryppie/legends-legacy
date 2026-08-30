@@ -21,10 +21,18 @@ public static class BalanceCli
             var policyPath = options.ElitePolicyPath is null
                 ? Path.Combine(repositoryRoot, "LL", "tools", "LegendsLegacy.Balance", "Configuration", "elite-certification-policy.v1.json")
                 : Path.GetFullPath(options.ElitePolicyPath);
+            var floorProgressionPolicyPath = Path.Combine(
+                repositoryRoot,
+                "LL",
+                "tools",
+                "LegendsLegacy.Balance",
+                "Configuration",
+                "floor-progression-policy.v1.json");
             var fixturePath = options.EliteCertificationOptions.TopPlayerBuildsPath is null
                 ? Path.Combine(repositoryRoot, "LL", "tools", "LegendsLegacy.Balance", "Fixtures", "top-player-builds.json")
                 : Path.GetFullPath(options.EliteCertificationOptions.TopPlayerBuildsPath);
             var elitePolicy = EliteCertificationPolicy.Load(policyPath);
+            var floorProgressionPolicy = FloorProgressionPolicySuite.Load(floorProgressionPolicyPath);
             var eliteOptions = options.EliteCertificationOptions with { TopPlayerBuildsPath = fixturePath };
             var runner = ProductionBalanceComposition.Create(contentRoot);
             var report = runner.Run(new BalanceRunRequest(
@@ -40,7 +48,19 @@ public static class BalanceCli
                 options.EncounterSpecificOptimizationOptions,
                 elitePolicy,
                 eliteOptions,
-                options.ScalingValidationOptions));
+                options.ScalingValidationOptions,
+                new BuildCapabilityOptions(
+                    options.CapabilityProbeSeedCount,
+                    Path.Combine(outputRoot, "cache", "build-capability-probes.v1.json")),
+                new PartyFamilyBuilderOptions(options.PartyFamilySamplesPerFamily),
+                new PartyFamilyEvaluationOptions(
+                    Enabled: true,
+                    Profile: options.EliteCertificationOptions.Profile,
+                    SimulationsPerParty: options.PartyFamilySimulationsPerParty),
+                EncounterScaleProbeOptions: options.EncounterScaleProbeOptions,
+                RegionOneReliabilityStudyOptions: options.RegionOneReliabilityStudyOptions,
+                FloorProgressionPolicy: floorProgressionPolicy,
+                AutomaticFloorProgressionCalibrationOptions: options.AutomaticFloorProgressionCalibrationOptions));
             var paths = new BalanceReportWriter().Write(report, outputRoot);
 
             Console.WriteLine($"Balance run {report.Metadata.RunId} completed.");
@@ -58,6 +78,38 @@ public static class BalanceCli
             Console.WriteLine(
                 $"PvE benchmarks: {report.Benchmarks.Builds.Count} builds x " +
                 $"{report.Benchmarks.Scenarios.Count} scenarios");
+            Console.WriteLine(
+                $"Build capabilities v{report.BuildCapabilities.AlgorithmVersion}: " +
+                $"{report.BuildCapabilities.Profiles.Count} profiles x 6 dimensions, " +
+                $"{report.BuildCapabilities.ProbeSeedCount} support/wave seed(s)");
+            Console.WriteLine(
+                $"Party families v{report.PartyFamilies.AlgorithmVersion}: " +
+                $"{report.PartyFamilies.Floors.Count} floors x " +
+                $"{report.PartyFamilies.Options.PartiesPerFamily} requested samples/family");
+            Console.WriteLine(
+                $"Party-family encounter evaluation v{report.PartyFamilyEvaluation.AlgorithmVersion}: " +
+                $"{report.PartyFamilyEvaluation.Floors.Count} floors, " +
+                $"{report.PartyFamilyEvaluation.Options.SimulationsPerParty} common-seed trial(s)/roster, " +
+                $"{report.PartyFamilyEvaluation.Floors.Count(floor => floor.ProgressionOrdering.Verdict == PartyFamilyEvaluationVerdict.Pass)}/" +
+                $"{report.PartyFamilyEvaluation.Floors.Count} progression-ordered, " +
+                $"{report.PartyFamilyEvaluation.CertificationVerdict}");
+            Console.WriteLine(
+                $"Encounter scale probes v{report.EncounterScaleProbes.AlgorithmVersion}: " +
+                $"{(report.EncounterScaleProbes.Options.Enabled ? $"{report.EncounterScaleProbes.Floors.Count} floors, {report.EncounterScaleProbes.TotalCombatTrials:N0} added trials, {report.EncounterScaleProbes.TotalSimulatedTicks:N0} simulated ticks" : "disabled")}; " +
+                "balance-only/non-release");
+            if (report.EncounterScaleProbes.Options.Enabled)
+            {
+                Console.WriteLine(
+                    $"Scale-probe performance: {report.EncounterScaleProbes.TotalMeasuredWallTimeMilliseconds:N2} ms, " +
+                    $"{report.EncounterScaleProbes.TotalAllocatedBytes / (1024d * 1024d):N2} MiB allocated, " +
+                    $"{report.EncounterScaleProbes.SimulatedTicksPerSecond:N0} ticks/s, " +
+                    $"{report.EncounterScaleProbes.ProcessPeakWorkingSetBytes / (1024d * 1024d):N2} MiB process peak, " +
+                    $"budget {report.EncounterScaleProbes.PerformanceBudgetAssessment}");
+            }
+            Console.WriteLine(
+                $"Region 1 reliability study v{report.RegionOneReliabilityStudy.AlgorithmVersion}: " +
+                $"{(report.RegionOneReliabilityStudy.Options.Enabled ? $"{report.RegionOneReliabilityStudy.TotalCombatTrials:N0} trials, {report.RegionOneReliabilityStudy.Faults.Count(fault => fault.Verdict == RegionOneReliabilityVerdict.Pass)}/{report.RegionOneReliabilityStudy.Faults.Count} passed" : "disabled")}; " +
+                $"{report.RegionOneReliabilityStudy.Verdict}");
             Console.WriteLine(
                 FormattableString.Invariant(
                     $"CR health: {report.CombatRatingHealth.Classification} (Spearman {report.CombatRatingHealth.Model.SpearmanCorrelation:F4}, R² {report.CombatRatingHealth.Model.RSquared:F4})"));
@@ -91,9 +143,15 @@ public static class BalanceCli
                 $"{progressionBand.Curve}");
             foreach (var floor in report.WorldTowerAnalysis.Floors)
             {
+                var primaryFailureObservation = floor.PrimaryObservedFailureModeCounts
+                    .Where(entry => entry.Key != WorldTowerObservedFailureMode.None)
+                    .OrderByDescending(entry => entry.Value)
+                    .ThenBy(entry => entry.Key)
+                    .Select(entry => entry.Key.ToString())
+                    .FirstOrDefault() ?? "None";
                 Console.WriteLine(
                     FormattableString.Invariant(
-                        $"Tower F{floor.Floor}: {floor.ObservedClearRate:P0} clear, {floor.Classification}, recommended CR {floor.RecommendedDisplayCr:F0}"));
+                        $"Tower F{floor.Floor}: {floor.ObservedClearRate:P0} clear, duration P10/P50/P90 {floor.P10DurationTicks:F0}/{floor.MedianDurationTicks:F0}/{floor.P90DurationTicks:F0}, primary observation {primaryFailureObservation}, {floor.Classification}, recommended CR {floor.RecommendedDisplayCr:F0}"));
             }
             foreach (var floor in report.EncounterCalibration.Floors)
             {
@@ -126,7 +184,8 @@ public static class BalanceCli
                     $"Elite E5 confidence: {confidence.CohortSize} builds x {confidence.SeedCount} seeds x " +
                     $"{confidence.ScenarioCount} scenarios; baseline/mean rho {confidence.BaselineToMeanSpearmanCorrelation:F4}, " +
                     $"top-{confidence.TopK} overlap {confidence.MinimumBaselineTopKOverlap:P0}-{confidence.MeanBaselineTopKOverlap:P0}, " +
-                    $"sample adequate {confidence.ConfiguredSampleAdequate}");
+                    $"stable panel {(confidence.SelectedPracticalSeedCount == 0 ? "none" : confidence.SelectedPracticalSeedCount)}, " +
+                    $"practical {confidence.PracticalPanelPassed}");
             }
             foreach (var profile in report.EliteBuildCertification.Profiles)
             {
@@ -145,6 +204,11 @@ public static class BalanceCli
             Console.WriteLine($"Gear packages: {paths.LatestGearPackagesJsonPath}");
             Console.WriteLine($"Essence builds: {paths.LatestEssenceBuildsJsonPath}");
             Console.WriteLine($"PvE benchmarks: {paths.LatestBenchmarksJsonPath}");
+            Console.WriteLine($"Build capabilities: {paths.LatestBuildCapabilitiesJsonPath}");
+            Console.WriteLine($"Party families: {paths.LatestPartyFamiliesJsonPath}");
+            Console.WriteLine($"Party-family evaluation: {paths.LatestPartyFamilyEvaluationJsonPath}");
+            Console.WriteLine($"Encounter scale probes: {paths.LatestEncounterScaleProbesJsonPath}");
+            Console.WriteLine($"Region 1 reliability study: {paths.LatestRegionOneReliabilityStudyJsonPath}");
             Console.WriteLine($"Combat Rating: {paths.LatestCombatRatingJsonPath}");
             Console.WriteLine($"Optimizer: {paths.LatestOptimizerJsonPath}");
             Console.WriteLine($"Representative builds: {paths.LatestRepresentativeBuildsJsonPath}");
@@ -156,6 +220,8 @@ public static class BalanceCli
             Console.WriteLine($"Encounter-specific optimization: {paths.LatestEncounterSpecificOptimizationJsonPath}");
             Console.WriteLine($"Elite build certification: {paths.LatestEliteBuildCertificationJsonPath}");
             Console.WriteLine($"Scaling validation: {paths.LatestScalingValidationJsonPath}");
+            Console.WriteLine($"Floor-to-progression policy evaluation: {paths.LatestFloorProgressionPolicyEvaluationJsonPath}");
+            Console.WriteLine($"Automatic floor-to-progression calibration: {paths.LatestAutomaticFloorProgressionCalibrationJsonPath}");
             return 0;
         }
         catch (BalanceCommandException exception)

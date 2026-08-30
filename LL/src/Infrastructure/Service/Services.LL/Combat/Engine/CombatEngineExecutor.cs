@@ -114,11 +114,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var checkpoints = new List<CombatCheckpoint>();
         var execution = await ExecuteCoreAsync(
             runtime,
-            ruleset with { CaptureEventLog = false },
+            ruleset,
             cancellationToken,
             checkpoint => checkpoints.Add(checkpoint),
             checkpointIntervalTicks,
-            captureEventLog: false);
+            captureEventLog: ruleset.CaptureEventLog);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
@@ -304,7 +304,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 CoverBudgetMaxHealthFraction: _threatAndTankingOptions.CoverBudgetMaxHealthFraction,
                 Downed: options.Downed,
                 WaveRecovery: options.WaveRecovery,
-                HostileFury: options.HostileFury));
+                HostileFury: options.HostileFury,
+                CaptureCompactTelemetry: options.CaptureCompactTelemetry));
         var result = engine.Run(
             friendly,
             hostile,

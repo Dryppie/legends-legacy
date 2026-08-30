@@ -2,7 +2,7 @@
 
 The concrete v1 thresholds, execution profiles, player-fixture rules, and approval checklist are defined in the companion [Elite Build Certification Policy v1](elite-build-certification-policy-v1.md).
 
-**Implementation status:** Implemented in balance schema 15. The one-click runner now executes adaptive deterministic multi-restart search and isolated diagnostics, including the algorithm-v20 common-seed PvE confidence audit. The seed-`8471` v20 pilot rejects the one-seed E5 ordering as a global ranking, while the balanced singleton simulator reaches its coverage floor but fails the new discrimination gate. Certification evidence is not approved: E5 remains outside the frozen restart-spread tolerance, no experimental search setting is promoted, and the checked-in curated fixture is intentionally empty. The complete investigation history is recorded in the [Elite Build Search Investigation Log](elite-build-search-investigation-log.md).
+**Implementation status:** Implemented in balance schema 15. Certification analyzer algorithm v21 retains the legacy single-seed objective and adds a disabled-by-default nested common-seed audit with E4/E5/E6 reference cohorts, exact seed panels, elite ranking gates, scenario variance, promotion telemetry, and runtime projection. The seed-`8471` 32-seed experiment found no statistically stable submaximal panel compatible with the 15-minute complete-search target, so no robust search objective or larger-population search is promoted. Certification evidence remains unapproved and the checked-in curated fixture is intentionally empty. The complete investigation history is recorded in the [Elite Build Search Investigation Log](elite-build-search-investigation-log.md).
 
 This gate establishes whether generated Essence combinations are strong enough to represent highly optimized and top-player builds. It must be completed before Region 1 scaling is remediated and before Milestone 14 extends the system to additional progression bands.
 
@@ -278,7 +278,7 @@ elite-build-certification.json
 - comparison with curated top-player builds;
 - blocking warnings that prevent scaling approval.
 
-Balance schema version 15, optimizer algorithm version 6, and certification analyzer algorithm version 20 implement this contract and write the resolved policy, execution profile, content fingerprint, evidence, verdicts, warnings, search diagnostics, and optional isolated bridge, E5 descriptor/collision, and common-seed benchmark-confidence audit sections into the standalone artifact and combined summary.
+Balance schema version 15, optimizer algorithm version 6, and certification analyzer algorithm version 21 implement this contract and write the resolved policy, execution profile, content fingerprint, evidence, verdicts, warnings, search diagnostics, and optional isolated bridge, E5 descriptor/collision, and nested common-seed benchmark-confidence audit sections into the standalone artifact and combined summary.
 
 ## Relationship to the current Region 1 gate
 

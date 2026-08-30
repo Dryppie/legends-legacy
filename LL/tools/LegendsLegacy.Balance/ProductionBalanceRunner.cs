@@ -13,6 +13,12 @@ public sealed class ProductionBalanceRunner(
     GearPackageFactory gearPackages,
     EssenceBuildGenerator essenceBuilds,
     PveBenchmarkRunner benchmarks,
+    BuildCapabilityProfiler capabilityProfiler,
+    PartyFamilyBuilder partyFamilyBuilder,
+    PartyFamilyEncounterEvaluator partyFamilyEncounterEvaluator,
+    EncounterScaleProbeAnalyzer encounterScaleProbeAnalyzer,
+    RegionOneReliabilityStudyAnalyzer regionOneReliabilityStudyAnalyzer,
+    RegionOneMatchedGenomeProgressionAnalyzer matchedGenomeProgressionAnalyzer,
     CombatRatingAnalyzer combatRatingAnalyzer,
     EssenceBuildOptimizer optimizer,
     RepresentativeBuildLibrary representativeBuilds,
@@ -24,13 +30,16 @@ public sealed class ProductionBalanceRunner(
     EncounterSpecificOptimizer encounterSpecificOptimizer,
     EliteBuildCertificationAnalyzer eliteBuildCertificationAnalyzer,
     ScalingValidationAnalyzer scalingValidationAnalyzer,
+    FloorProgressionPolicyEvaluator floorProgressionPolicyEvaluator,
+    AutomaticFloorProgressionCalibrator automaticFloorProgressionCalibrator,
     TimeProvider timeProvider)
 {
-    public const int BalanceSchemaVersion = 15;
+    public const int BalanceSchemaVersion = 48;
     public const string SmokeScenarioId = "production-essence-smoke-1v1";
 
     public BalanceRunReport Run(BalanceRunRequest request)
     {
+        var floorProgressionPolicy = request.FloorProgressionPolicy?.Validate();
         var catalog = catalogProvider.GetCatalog();
         var essences = essenceDefinitions.GetAll()
             .Where(essence =>
@@ -74,6 +83,16 @@ public sealed class ProductionBalanceRunner(
             simulation.RandomSeed,
             optimization.Snapshot.Options.DiversityPenalty,
             request.RepresentativeBuildOptions);
+        var capabilityInputs = CreateCapabilityInputs(
+            generatedEssenceBuilds,
+            benchmarkSuite,
+            optimization.EvaluatedCandidates,
+            representativeBuildLibrary);
+        var buildCapabilities = capabilityProfiler.Profile(
+            capabilityInputs.Builds,
+            capabilityInputs.Benchmarks,
+            simulation.RandomSeed,
+            request.BuildCapabilityOptions);
         var metaOptions = (request.EssenceMetaAnalysisOptions ?? new EssenceMetaAnalysisOptions()).Validate();
         var balancedSingletonTeams = metaOptions.SimulatorRoundsPerMatchup > 0
             ? essences.Select(essence => new AbilityBalanceTeamLoadout(
@@ -137,6 +156,101 @@ public sealed class ProductionBalanceRunner(
             encounterCalibration,
             simulation.RandomSeed,
             request.ScalingValidationOptions);
+        var partyFamilies = partyFamilyBuilder.Build(
+            representativeBuildLibrary,
+            buildCapabilities,
+            worldTowerAnalysis,
+            eliteBuildCertification,
+            simulation.RandomSeed,
+            request.PartyFamilyBuilderOptions);
+        var partyFamilyEvaluation = partyFamilyEncounterEvaluator.Evaluate(
+            partyFamilies,
+            representativeBuildLibrary,
+            worldTowerAnalysis,
+            eliteBuildCertification,
+            simulation.RandomSeed,
+            request.PartyFamilyEvaluationOptions,
+            request.PartyFamilyCertificationPolicy);
+        var floorProgressionPolicyEvaluation = floorProgressionPolicy is null
+            ? new FloorProgressionPolicyEvaluationSnapshot(
+                FloorProgressionPolicyEvaluator.AlgorithmVersion,
+                "disabled",
+                0,
+                string.Empty,
+                ProductionContentModified: false,
+                FloorProgressionVerdict.Disabled,
+                [],
+                ["Floor-to-progression policy evaluation was not configured for this run."])
+            : floorProgressionPolicyEvaluator.Evaluate(
+                floorProgressionPolicy,
+                representativeBuildLibrary,
+                worldTowerAnalysis,
+                partyFamilyEvaluation,
+                eliteBuildCertification);
+        var automaticFloorProgressionCalibration = floorProgressionPolicy is null
+            ? new AutomaticFloorProgressionCalibrationSnapshot(
+                AutomaticFloorProgressionCalibrator.AlgorithmVersion,
+                simulation.RandomSeed,
+                (request.AutomaticFloorProgressionCalibrationOptions
+                    ?? new AutomaticFloorProgressionCalibrationOptions()).Validate(),
+                "disabled",
+                string.Empty,
+                CommonCandidateSeeds: true,
+                IndependentHoldoutSeeds: true,
+                ProductionContentModified: false,
+                AutomaticFloorProgressionCalibrationVerdict.Disabled,
+                0,
+                0,
+                [],
+                ["Automatic floor-to-progression calibration requires an authored policy suite."])
+            : automaticFloorProgressionCalibrator.Calibrate(
+                floorProgressionPolicy,
+                floorProgressionPolicyEvaluation,
+                representativeBuildLibrary,
+                worldTowerAnalysis,
+                partyFamilies,
+                eliteBuildCertification,
+                simulation.RandomSeed,
+                request.AutomaticFloorProgressionCalibrationOptions);
+        var encounterScaleProbes = encounterScaleProbeAnalyzer.Analyze(
+            worldTowerAnalysis,
+            representativeBuildLibrary,
+            buildCapabilities,
+            partyFamilies,
+            partyFamilyEvaluation,
+            simulation.RandomSeed,
+            request.EncounterScaleProbeOptions);
+        var reliabilityOptions = request.RegionOneReliabilityStudyOptions ?? new RegionOneReliabilityStudyOptions();
+        var matchedGenomeProgression = matchedGenomeProgressionAnalyzer.Analyze(
+            generatedEssenceBuilds,
+            simulation.RandomSeed,
+            reliabilityOptions.Enabled && reliabilityOptions.ProgressionFidelityEnabled);
+        var populationProtocol = new RegionOneReliabilityPopulationProtocolSnapshot(
+            BalanceSchemaVersion,
+            request.EssenceBuildsPerProfile,
+            benchmarkSuite.ScoringVersion,
+            optimization.Snapshot.AlgorithmVersion,
+            optimization.Snapshot.Options,
+            representativeBuildLibrary.AlgorithmVersion,
+            representativeBuildLibrary.Options,
+            buildCapabilities.AlgorithmVersion,
+            buildCapabilities.NormalizationVersion,
+            buildCapabilities.ContentFingerprint,
+            buildCapabilities.ProbeSeedCount,
+            partyFamilies.AlgorithmVersion,
+            partyFamilies.Options,
+            worldTowerAnalysis.AlgorithmVersion,
+            worldTowerAnalysis.Options);
+        var regionOneReliabilityStudy = regionOneReliabilityStudyAnalyzer.Analyze(
+            worldTowerAnalysis,
+            representativeBuildLibrary,
+            partyFamilies,
+            simulation.RandomSeed,
+            request.RegionOneReliabilityStudyOptions,
+            buildCapabilities,
+            catalog.Abilities,
+            matchedGenomeProgression,
+            populationProtocol);
         var createdAtUtc = timeProvider.GetUtcNow();
         var runId = CreateRunId(createdAtUtc);
         var engineVersion = typeof(FastCombatEngine).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -170,6 +284,11 @@ public sealed class ProductionBalanceRunner(
             regionOneGearPackages,
             generatedEssenceBuilds,
             benchmarkSuite,
+            buildCapabilities,
+            partyFamilies,
+            partyFamilyEvaluation,
+            encounterScaleProbes,
+            regionOneReliabilityStudy,
             combatRatingHealth,
             optimization.Snapshot,
             representativeBuildLibrary,
@@ -180,11 +299,53 @@ public sealed class ProductionBalanceRunner(
             encounterCalibration,
             encounterSpecificOptimization,
             eliteBuildCertification,
-            scalingValidation);
+            scalingValidation,
+            floorProgressionPolicyEvaluation,
+            automaticFloorProgressionCalibration);
     }
 
     private static string CreateRunId(DateTimeOffset createdAtUtc) =>
         $"{createdAtUtc.ToUniversalTime().ToString("yyyyMMddTHHmmssfff'Z'", CultureInfo.InvariantCulture)}-{Guid.NewGuid():N}"[..28];
+
+    private static CapabilityInputs CreateCapabilityInputs(
+        IReadOnlyList<EssenceBuildSnapshot> generatedBuilds,
+        PveBenchmarkSuiteSnapshot generatedBenchmarks,
+        IReadOnlyList<EssenceOptimizerEvaluatedCandidate> evaluatedCandidates,
+        RepresentativeBuildLibrarySnapshot representativeBuilds)
+    {
+        var requiredIds = generatedBuilds.Select(build => build.Id)
+            .Concat(representativeBuilds.Profiles
+            .SelectMany(profile => profile.Builds)
+                .Select(build => build.SourceBuildId))
+            .ToHashSet(StringComparer.Ordinal);
+        var buildsById = evaluatedCandidates.Select(candidate => candidate.Build)
+            .Concat(generatedBuilds)
+            .GroupBy(build => build.Id, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var benchmarksById = evaluatedCandidates.Select(candidate => candidate.Benchmark)
+            .Concat(generatedBenchmarks.Builds)
+            .GroupBy(benchmark => benchmark.BuildId, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var missingBuilds = requiredIds.Where(id => !buildsById.ContainsKey(id)).Order().ToArray();
+        var missingBenchmarks = requiredIds.Where(id => !benchmarksById.ContainsKey(id)).Order().ToArray();
+        if (missingBuilds.Length > 0 || missingBenchmarks.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Capability cohort is incomplete. Missing builds: {string.Join(", ", missingBuilds)}; " +
+                $"missing benchmarks: {string.Join(", ", missingBenchmarks)}.");
+        }
+        var orderedIds = requiredIds.OrderBy(id => id, StringComparer.Ordinal).ToArray();
+        return new CapabilityInputs(
+            orderedIds.Select(id => buildsById[id]).ToArray(),
+            new PveBenchmarkSuiteSnapshot(
+                generatedBenchmarks.ScoringVersion,
+                generatedBenchmarks.Scenarios,
+                orderedIds.Select(id => benchmarksById[id]).ToArray()));
+    }
+
+    private sealed record CapabilityInputs(
+        IReadOnlyList<EssenceBuildSnapshot> Builds,
+        PveBenchmarkSuiteSnapshot Benchmarks);
 }
 
 public sealed record BalanceRunRequest(
@@ -200,7 +361,15 @@ public sealed record BalanceRunRequest(
     EncounterSpecificOptimizationOptions? EncounterSpecificOptimizationOptions = null,
     EliteCertificationPolicy? EliteCertificationPolicy = null,
     EliteCertificationOptions? EliteCertificationOptions = null,
-    ScalingValidationOptions? ScalingValidationOptions = null);
+    ScalingValidationOptions? ScalingValidationOptions = null,
+    BuildCapabilityOptions? BuildCapabilityOptions = null,
+    PartyFamilyBuilderOptions? PartyFamilyBuilderOptions = null,
+    PartyFamilyEvaluationOptions? PartyFamilyEvaluationOptions = null,
+    PartyFamilyCertificationPolicy? PartyFamilyCertificationPolicy = null,
+    EncounterScaleProbeOptions? EncounterScaleProbeOptions = null,
+    RegionOneReliabilityStudyOptions? RegionOneReliabilityStudyOptions = null,
+    FloorProgressionPolicySuite? FloorProgressionPolicy = null,
+    AutomaticFloorProgressionCalibrationOptions? AutomaticFloorProgressionCalibrationOptions = null);
 
 public sealed record BalanceRunReport(
     BalanceRunMetadata Metadata,
@@ -209,6 +378,11 @@ public sealed record BalanceRunReport(
     IReadOnlyList<GearPackageSnapshot> GearPackages,
     IReadOnlyList<EssenceBuildSnapshot> EssenceBuilds,
     PveBenchmarkSuiteSnapshot Benchmarks,
+    BuildCapabilitySuiteSnapshot BuildCapabilities,
+    PartyFamilySuiteSnapshot PartyFamilies,
+    PartyFamilyEvaluationSuiteSnapshot PartyFamilyEvaluation,
+    EncounterScaleProbeSuiteSnapshot EncounterScaleProbes,
+    RegionOneReliabilityStudySnapshot RegionOneReliabilityStudy,
     CombatRatingHealthSnapshot CombatRatingHealth,
     EssenceOptimizerSnapshot Optimizer,
     RepresentativeBuildLibrarySnapshot RepresentativeBuilds,
@@ -219,7 +393,9 @@ public sealed record BalanceRunReport(
     EncounterCalibrationSnapshot EncounterCalibration,
     EncounterSpecificOptimizationSnapshot EncounterSpecificOptimization,
     EliteBuildCertificationSnapshot EliteBuildCertification,
-    ScalingValidationSnapshot ScalingValidation);
+    ScalingValidationSnapshot ScalingValidation,
+    FloorProgressionPolicyEvaluationSnapshot FloorProgressionPolicyEvaluation,
+    AutomaticFloorProgressionCalibrationSnapshot AutomaticFloorProgressionCalibration);
 
 public sealed record BalanceRunMetadata(
     string RunId,

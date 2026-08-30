@@ -4,7 +4,7 @@
 
 **Evidence date:** 2026-08-28
 
-**Current certification analyzer:** Algorithm v20
+**Current certification analyzer:** Algorithm v21
 
 This document consolidates the experiments used to investigate elite-build search convergence, especially the persistent E5 failure on seed `8471`. It is an evidence log, not a replacement for the normative [certification policy](elite-build-certification-policy-v1.md) or [certification gate](elite-build-certification-gate.md).
 
@@ -348,7 +348,9 @@ The planned pair-interaction study is deliberately blocked. Pair coefficients or
 
 ## Recommended next bounded investigation
 
-Do not increase either island budget and do not run seed `1337`. First replace or repair the zero-discrimination singleton measurement and rerun its coverage/discrimination gate. Then size a balanced pair-interaction audit from measured neutral-baseline variance, using held-out restarts and keeping every model outside search and certification evidence. Another search experiment is justified only if an identity-independent payload model or restart-local interaction model ranks the strong candidate reliably without importing another restart's winner.
+Algorithm v21 changes the immediate priority from search or singleton modeling to whole-build fitness. Its seed-`8471` nested-panel audit used 512 E5 candidates, 50 strong E4 candidates, and 50 strong E6 candidates across 32 common seeds and five scenarios. The final immutable rerun completed 97,920 authoritative scenario executions in 48.8 seconds. No submaximal panel passed two consecutive predeclared elite-ranking checkpoints. Four seeds projected within 15 minutes but retained only 82% of the reference top 50 and 81.6% of elite pair orderings; 24 seeds still missed the 95% elite-ordering gate and projected to 60.8 minutes. The legacy E4/E5/E6 known-best builds fell to robust-reference ranks 39/48/35 within their audited cohorts. The former E5 `85.27` build became the current best observed E5 reference at `83.26`, while the former `86.21` build averaged `78.39` and lost to it on every seed.
+
+Do not run population 192/256 or another search algorithm yet. Do not promote 32 seeds as a search objective: it is the comparison reference and projects to 80.9 minutes. The next bounded work is a prospective progressive-evaluation audit using cached candidate×scenario×seed results. A reasonable hypothesis from this cohort is one common seed for the broad stage, promotion of roughly the top 20%, expansion to eight seeds, and a 32-seed finalist panel; this is not frozen because promotion recall must be validated on independent candidate cohorts and roots. Scenario-specific allocation should prioritize the high-variance three-target and short-single-target scenarios. The complete workflow must remain under 15 minutes before any robust objective is promoted.
 
 ## Verification history
 
@@ -360,6 +362,8 @@ Do not increase either island budget and do not run seed `1337`. First replace o
 - No database migration, production configuration, deployment, or production-content mutation is involved.
 
 Algorithm v20 added focused coverage for common-seed confidence-audit isolation and accounting, balanced round-robin CLI parsing, even side assignment, and high-coverage zero-discrimination rejection. The repository-required Release verification through `build/run-tests.ps1` passed `1,666/1,666`; the final balance-runner Release build completed with zero warnings and zero errors. Two unrelated pre-existing xUnit analyzer warnings remain visible only when the complete test project is built.
+
+Algorithm v21 adds nested panel metrics, exact seed-panel persistence, E4/E5/E6 robust-reference rows, per-seed and per-scenario distributions, promotion-depth telemetry, and runtime projection. The final repository-required backend run passed all 1,666 tests with zero failures after the implementation was frozen.
 
 ## Artifact inventory
 
@@ -387,6 +391,7 @@ These paths are local diagnostic evidence and are not deployment inputs:
 | Superseded v19 anchor-neighborhood collision audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-seed8471\latest\elite-build-certification.json` |
 | Superseded v19 pre-refinement collision audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-v2-seed8471\latest\elite-build-certification.json` |
 | Corrected v19 finalized-population collision audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-elite-residual-mechanic-audit-v3-seed8471\latest\elite-build-certification.json` |
+| v21 nested PvE objective audit | `C:\Users\HrHoe\AppData\Local\Temp\legends-legacy-pve-objective-v21-seed8471\history\20260829T073904217Z-68bcae2d\elite-build-certification.json` |
 
 The corrected v19 immutable collision-audit artifact is:
 

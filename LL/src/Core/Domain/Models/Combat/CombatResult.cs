@@ -14,6 +14,7 @@ public class CombatResult
     public List<SimpleCombatEntity> EnemyTeam { get; set; } = [];
     public List<CombatLogItem> EventLog { get; set; } = [];
     public List<EntityStats> EntityStats { get; set; } = [];
+    public CompactCombatTelemetry CompactTelemetry { get; set; } = new();
     public BattleOutcome Outcome
     {
         get => ContentOutcome;

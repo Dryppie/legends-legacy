@@ -29,7 +29,8 @@ public sealed record FastCombatEngineOptions(
     float CoverBudgetMaxHealthFraction = 0.5f,
     CombatDownedOptions? Downed = null,
     CombatWaveRecoveryOptions? WaveRecovery = null,
-    CombatHostileFuryOptions? HostileFury = null);
+    CombatHostileFuryOptions? HostileFury = null,
+    bool CaptureCompactTelemetry = true);
 
 public sealed class FastCombatEngine
 {
@@ -52,6 +53,7 @@ public sealed class FastCombatEngine
     private readonly bool _startActiveAbilitiesOnCooldown;
     private readonly float _markThreatBonus;
     private readonly bool _captureEventLog;
+    private readonly bool _captureCompactTelemetry;
     private readonly int _overtimeStartsAtTick;
     private readonly int _overtimePowerIncreaseIntervalTicks;
     private readonly float _overtimePowerIncreasePercent;
@@ -76,7 +78,7 @@ public sealed class FastCombatEngine
     private readonly List<CombatLogItem> _log = [];
     private readonly Dictionary<string, int> _balanceDamageDone = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _balanceDamageTaken = new(StringComparer.OrdinalIgnoreCase);
-    private readonly CombatStatsAccumulator _balanceStats = new();
+    private readonly CombatStatsAccumulator _balanceStats;
     private readonly Dictionary<string, RuntimeSummonGroup> _summonGroups = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<RuntimeEffect> _effectTickBuffer = [];
     private readonly List<RuntimeStatus> _statusTickBuffer = [];
@@ -99,6 +101,31 @@ public sealed class FastCombatEngine
     private readonly Dictionary<RuntimeCombatant, int> _revivalCounts = [];
     private readonly Dictionary<RuntimeCombatant, int> _reviveAtTicks = [];
     private readonly Dictionary<RuntimeCombatant, int> _downedTicks = [];
+    private readonly Dictionary<RuntimeCombatant, int> _actionDeniedTicks = [];
+    private readonly Dictionary<RuntimeCombatant, int> _staggeredTicks = [];
+    private readonly Dictionary<RuntimeCombatant, int> _stunnedOrFrozenTicks = [];
+    private readonly Dictionary<RuntimeCombatant, int> _silencedTicks = [];
+    private readonly Dictionary<RuntimeCombatant, int> _slowedTicks = [];
+    private int _peakActiveFriendlyCombatants;
+    private int _peakActiveHostileCombatants;
+    private int _peakActiveFriendlySummons;
+    private int _peakActiveHostileSummons;
+    private int _peakActiveHostileTick;
+    private int? _firstAdditionalHostileTick;
+    private int? _firstAdditionalHostileClearTick;
+    private bool _hostileSummonWindowActive;
+    private int _additionalHostileWindowCount;
+    private int _clearedAdditionalHostileWindowCount;
+    private int _hostileSummonActiveTicks;
+    private int _lastHostileSummonUptimeTick = -1;
+    private int _hostileSummonWaveCount;
+    private int _hostileSummonWaveIntervalCount;
+    private int _hostileSummonWaveIntervalTotalTicks;
+    private int? _lastHostileSummonWaveTick;
+    private int? _minimumHostileSummonWaveIntervalTicks;
+    private int? _maximumHostileSummonWaveIntervalTicks;
+    private int _initialFriendlyHealthDeficitSampleTicks;
+    private double _initialFriendlyHealthDeficitRatioTotal;
 
     private enum DamageDelivery
     {
@@ -137,6 +164,8 @@ public sealed class FastCombatEngine
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
         _markThreatBonus = Math.Max(0, resolved.MarkThreatBonus);
         _captureEventLog = resolved.CaptureEventLog;
+        _captureCompactTelemetry = resolved.CaptureCompactTelemetry;
+        _balanceStats = new CombatStatsAccumulator(_captureCompactTelemetry);
         _overtimeStartsAtTick = resolved.OvertimeStartsAtTick ?? int.MaxValue;
         _overtimePowerIncreaseIntervalTicks = Math.Max(0, resolved.OvertimePowerIncreaseIntervalTicks);
         _overtimePowerIncreasePercent = Math.Max(0, resolved.OvertimePowerIncreasePercent);
@@ -182,9 +211,11 @@ public sealed class FastCombatEngine
         var checkpointSequence = 0;
         var checkpointLogIndex = 0;
         var checkpointStats = checkpointObserver is not null && checkpointIntervalTicks > 0
-            ? new CombatStatsAccumulator()
+            ? new CombatStatsAccumulator(_captureCompactTelemetry)
             : null;
         _checkpointStats = checkpointStats;
+        if (_captureCompactTelemetry)
+            TrackCompactTelemetry(combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
         if (checkpointObserver is not null && checkpointIntervalTicks > 0)
         {
@@ -215,6 +246,8 @@ public sealed class FastCombatEngine
                 var combatant = combatants[combatantIndex];
                 if (!combatant.IsAlive)
                     continue;
+                if (_captureCompactTelemetry)
+                    TrackControlExposure(combatant);
                 if (IsActionBlocked(combatant) || !HasLivingOpponent(combatant, combatants))
                     continue;
 
@@ -236,6 +269,11 @@ public sealed class FastCombatEngine
                 combatants[combatantIndex].Tick();
 
             TickSummons(combatants);
+            if (_captureCompactTelemetry)
+            {
+                TrackCompactTelemetry(combatants);
+                TrackInitialFriendlyHealthDeficit(friendly);
+            }
             _currentTick++;
 
             var spawnedReinforcementWave = false;
@@ -248,6 +286,8 @@ public sealed class FastCombatEngine
                     ref nextReinforcementWave,
                     publishCombatStart: true,
                     hostileWaveFactory);
+                if (_captureCompactTelemetry && spawnedReinforcementWave)
+                    TrackCompactTelemetry(combatants);
                 if (spawnedReinforcementWave
                     && checkpointObserver is not null
                     && checkpointIntervalTicks > 0)
@@ -303,7 +343,10 @@ public sealed class FastCombatEngine
             EventLog = [.. _log],
             Duration = _currentTick,
             Outcome = DetermineOutcome(combatants),
-            EntityStats = [.. entityStats]
+            EntityStats = [.. entityStats],
+            CompactTelemetry = _captureCompactTelemetry
+                ? CreateCompactTelemetry(combatants)
+                : new CompactCombatTelemetry()
         };
     }
 
@@ -483,7 +526,10 @@ public sealed class FastCombatEngine
                 AddThreatGenerationTelemetry(
                     AddHealthRegenerationTelemetry(
                         checkpointStats?.Snapshot()
-                        ?? new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+                        ?? new CombatStatsAggregator().Aggregate(
+                            _log,
+                            teamsByEntityId,
+                            _captureCompactTelemetry),
                         combatants)),
                 combatants),
             combatants), combatants);
@@ -509,9 +555,14 @@ public sealed class FastCombatEngine
                 continue;
             result[index] = result[index] with
             {
-                Deaths = _deathCounts.GetValueOrDefault(combatant),
-                Revivals = _revivalCounts.GetValueOrDefault(combatant),
-                DownedTicks = _downedTicks.GetValueOrDefault(combatant)
+                Deaths = Math.Max(result[index].Deaths, _deathCounts.GetValueOrDefault(combatant)),
+                Revivals = Math.Max(result[index].Revivals, _revivalCounts.GetValueOrDefault(combatant)),
+                DownedTicks = _downedTicks.GetValueOrDefault(combatant),
+                ActionDeniedTicks = _actionDeniedTicks.GetValueOrDefault(combatant),
+                StaggeredTicks = _staggeredTicks.GetValueOrDefault(combatant),
+                StunnedOrFrozenTicks = _stunnedOrFrozenTicks.GetValueOrDefault(combatant),
+                SilencedTicks = _silencedTicks.GetValueOrDefault(combatant),
+                SlowedTicks = _slowedTicks.GetValueOrDefault(combatant)
             };
         }
         return result;
@@ -625,20 +676,174 @@ public sealed class FastCombatEngine
 
     private static bool IsActionBlocked(RuntimeCombatant combatant)
     {
-        for (var index = 0; index < combatant.Statuses.Count; index++)
-        {
-            var status = combatant.Statuses[index];
-            if (status.Stacks > 0 && status.Definition.Tags.Contains("Control.Stun"))
-                return true;
-        }
-
         return combatant.Stagger?.IsStaggered == true
-               || combatant.HasCondition(StandardConditionType.Stun)
-               || combatant.HasCondition(StandardConditionType.Freeze);
+               || IsStunnedOrFrozen(combatant);
     }
 
     private static bool IsActiveAbilityBlocked(RuntimeCombatant combatant) =>
-        combatant.HasCondition(StandardConditionType.Silence);
+        combatant.HasCondition(StandardConditionType.Silence)
+        || HasStatusTag(combatant, "Control.Silence");
+
+    private static bool IsStunnedOrFrozen(RuntimeCombatant combatant) =>
+        combatant.HasCondition(StandardConditionType.Stun)
+        || combatant.HasCondition(StandardConditionType.Freeze)
+        || HasStatusTag(combatant, "Control.Stun")
+        || HasStatusTag(combatant, "Control.Freeze");
+
+    private static bool HasStatusTag(RuntimeCombatant combatant, string tag)
+    {
+        for (var index = 0; index < combatant.Statuses.Count; index++)
+        {
+            var status = combatant.Statuses[index];
+            if (status.Stacks > 0 && status.Definition.Tags.Contains(tag))
+                return true;
+        }
+        return false;
+    }
+
+    private void TrackControlExposure(RuntimeCombatant combatant)
+    {
+        var staggered = combatant.Stagger?.IsStaggered == true;
+        var stunnedOrFrozen = IsStunnedOrFrozen(combatant);
+        if (staggered || stunnedOrFrozen)
+            _actionDeniedTicks[combatant] = _actionDeniedTicks.GetValueOrDefault(combatant) + 1;
+        if (staggered)
+            _staggeredTicks[combatant] = _staggeredTicks.GetValueOrDefault(combatant) + 1;
+        if (stunnedOrFrozen)
+            _stunnedOrFrozenTicks[combatant] = _stunnedOrFrozenTicks.GetValueOrDefault(combatant) + 1;
+        if (IsActiveAbilityBlocked(combatant))
+            _silencedTicks[combatant] = _silencedTicks.GetValueOrDefault(combatant) + 1;
+        if (combatant.HasCondition(StandardConditionType.Slow) || HasStatusTag(combatant, "Control.Slow"))
+            _slowedTicks[combatant] = _slowedTicks.GetValueOrDefault(combatant) + 1;
+    }
+
+    private void TrackCompactTelemetry(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var activeFriendly = 0;
+        var activeHostile = 0;
+        var activeFriendlySummons = 0;
+        var activeHostileSummons = 0;
+        for (var index = 0; index < combatants.Count; index++)
+        {
+            var combatant = combatants[index];
+            if (!combatant.IsAlive)
+                continue;
+            if (combatant.Team == CombatTeam.Friendly)
+            {
+                activeFriendly++;
+                if (combatant.IsSummoned)
+                    activeFriendlySummons++;
+            }
+            else if (combatant.Team == CombatTeam.Hostile)
+            {
+                activeHostile++;
+                if (combatant.IsSummoned)
+                    activeHostileSummons++;
+            }
+        }
+
+        _peakActiveFriendlyCombatants = Math.Max(_peakActiveFriendlyCombatants, activeFriendly);
+        _peakActiveFriendlySummons = Math.Max(_peakActiveFriendlySummons, activeFriendlySummons);
+        _peakActiveHostileSummons = Math.Max(_peakActiveHostileSummons, activeHostileSummons);
+        if (activeHostile > _peakActiveHostileCombatants)
+        {
+            _peakActiveHostileCombatants = activeHostile;
+            _peakActiveHostileTick = _currentTick;
+        }
+        if (activeHostile > 1)
+            _firstAdditionalHostileTick ??= _currentTick;
+        if (activeHostileSummons > 0)
+        {
+            if (!_hostileSummonWindowActive)
+            {
+                _hostileSummonWindowActive = true;
+                _additionalHostileWindowCount++;
+            }
+            if (_hostileSummonWaveCount == 0)
+                RecordHostileSummonWave();
+            if (_lastHostileSummonUptimeTick != _currentTick)
+            {
+                _hostileSummonActiveTicks++;
+                _lastHostileSummonUptimeTick = _currentTick;
+            }
+        }
+        else if (_hostileSummonWindowActive)
+        {
+            _hostileSummonWindowActive = false;
+            _clearedAdditionalHostileWindowCount++;
+            _firstAdditionalHostileClearTick ??= _currentTick;
+        }
+    }
+
+    private void TrackInitialFriendlyHealthDeficit(IReadOnlyList<RuntimeCombatant> friendly)
+    {
+        if (friendly.Count == 0)
+            return;
+
+        double deficitRatioTotal = 0;
+        for (var index = 0; index < friendly.Count; index++)
+        {
+            var combatant = friendly[index];
+            var maximumHealth = Math.Max(1, combatant.GetAttribute(AttributeType.MaxHealth));
+            var healthRatio = combatant.IsAlive
+                ? Math.Clamp(combatant.Health / maximumHealth, 0, 1)
+                : 0;
+            deficitRatioTotal += 1 - healthRatio;
+        }
+
+        _initialFriendlyHealthDeficitRatioTotal += deficitRatioTotal / friendly.Count;
+        _initialFriendlyHealthDeficitSampleTicks++;
+    }
+
+    private void RecordHostileSummonWave()
+    {
+        if (_lastHostileSummonWaveTick == _currentTick)
+            return;
+        if (_lastHostileSummonWaveTick.HasValue)
+        {
+            var interval = _currentTick - _lastHostileSummonWaveTick.Value;
+            _hostileSummonWaveIntervalCount++;
+            _hostileSummonWaveIntervalTotalTicks = checked(
+                _hostileSummonWaveIntervalTotalTicks + interval);
+            _minimumHostileSummonWaveIntervalTicks = !_minimumHostileSummonWaveIntervalTicks.HasValue
+                ? interval
+                : Math.Min(_minimumHostileSummonWaveIntervalTicks.Value, interval);
+            _maximumHostileSummonWaveIntervalTicks = !_maximumHostileSummonWaveIntervalTicks.HasValue
+                ? interval
+                : Math.Max(_maximumHostileSummonWaveIntervalTicks.Value, interval);
+        }
+        _lastHostileSummonWaveTick = _currentTick;
+        _hostileSummonWaveCount++;
+    }
+
+    private CompactCombatTelemetry CreateCompactTelemetry(IReadOnlyList<RuntimeCombatant> combatants) => new(
+        _peakActiveFriendlyCombatants,
+        _peakActiveHostileCombatants,
+        _peakActiveFriendlySummons,
+        _peakActiveHostileSummons,
+        _peakActiveHostileTick,
+        _firstAdditionalHostileTick,
+        _firstAdditionalHostileClearTick,
+        _additionalHostileWindowCount,
+        _clearedAdditionalHostileWindowCount,
+        _hostileSummonActiveTicks,
+        _hostileSummonWaveCount,
+        _hostileSummonWaveIntervalCount,
+        _hostileSummonWaveIntervalTotalTicks,
+        _minimumHostileSummonWaveIntervalTicks,
+        _maximumHostileSummonWaveIntervalTicks,
+        combatants.Count(combatant => combatant.Team == CombatTeam.Friendly),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Hostile),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Friendly && combatant.IsSummoned),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Hostile && combatant.IsSummoned),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Friendly && combatant.IsAlive),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Hostile && combatant.IsAlive),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Friendly && combatant.IsAlive && combatant.IsSummoned),
+        combatants.Count(combatant => combatant.Team == CombatTeam.Hostile && combatant.IsAlive && combatant.IsSummoned),
+        _initialFriendlyHealthDeficitSampleTicks,
+        _initialFriendlyHealthDeficitSampleTicks == 0
+            ? 0
+            : _initialFriendlyHealthDeficitRatioTotal / _initialFriendlyHealthDeficitSampleTicks);
 
     private static bool HasLivingOpponent(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
@@ -1564,13 +1769,13 @@ public sealed class FastCombatEngine
                     effect.StaggerPower);
                 break;
             case AbilityEffectOperation.Cleanse:
-                CleanseStatuses(source, target, combatants);
-                CleanseConditions(source, target, effect.Condition, combatants);
-                Log(source, target, effect.Id, EventType.StatusEffectCleansed, 0, $"{target.Name} was cleansed.", statsSource, countStatsActivation);
+                var cleansed = CleanseStatuses(source, target, combatants)
+                               + CleanseConditions(source, target, effect.Condition, combatants);
+                Log(source, target, effect.Id, EventType.StatusEffectCleansed, cleansed, $"{target.Name} was cleansed.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.Dispel:
-                DispelConditions(source, target, effect.Condition, effect.BaseValue, combatants);
-                Log(source, target, effect.Id, EventType.StatusEffectDispelled, 0, $"{target.Name} was dispelled.", statsSource, countStatsActivation);
+                var dispelled = DispelConditions(source, target, effect.Condition, effect.BaseValue, combatants);
+                Log(source, target, effect.Id, EventType.StatusEffectDispelled, dispelled, $"{target.Name} was dispelled.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.ModifyAttribute:
                 target.AdjustAttribute(effect.Attribute!.Value, value);
@@ -2989,6 +3194,8 @@ public sealed class FastCombatEngine
             groupInstanceId);
         RegisterListeners(summon);
         mutableCombatants.Add(summon);
+        if (_captureCompactTelemetry && summon.Team == CombatTeam.Hostile)
+            RecordHostileSummonWave();
         _basicAttackProgress[summon] = GetBasicAttackChargeThreshold();
         _healthRegenerationProgress[summon] = 0;
 
@@ -3430,21 +3637,24 @@ public sealed class FastCombatEngine
             countStatsActivation);
     }
 
-    private void CleanseStatuses(
+    private int CleanseStatuses(
         RuntimeCombatant source,
         RuntimeCombatant target,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
+        var before = target.Statuses.Count;
         foreach (var status in target.Statuses.ToList())
             RemoveStatusInstance(source, target, status, ConditionRemovalReason.Cleansed, combatants);
+        return before - target.Statuses.Count;
     }
 
-    private void CleanseConditions(
+    private int CleanseConditions(
         RuntimeCombatant source,
         RuntimeCombatant target,
         StandardConditionType? selectedType,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
+        var before = target.Conditions.Count;
         var types = selectedType is { } selected
             ? [selected]
             : target.Conditions
@@ -3466,15 +3676,17 @@ public sealed class FastCombatEngine
                 ConditionRemovalReason.Cleansed,
                 combatants);
         }
+        return before - target.Conditions.Count;
     }
 
-    private void DispelConditions(
+    private int DispelConditions(
         RuntimeCombatant source,
         RuntimeCombatant target,
         StandardConditionType? selectedType,
         int maximumRemovals,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
+        var before = target.Conditions.Count;
         if (maximumRemovals > 0)
         {
             foreach (var condition in target.Conditions
@@ -3495,7 +3707,7 @@ public sealed class FastCombatEngine
                     combatants);
             }
 
-            return;
+            return before - target.Conditions.Count;
         }
 
         var types = selectedType is { } selected
@@ -3522,6 +3734,7 @@ public sealed class FastCombatEngine
                 ConditionRemovalReason.Dispelled,
                 combatants);
         }
+        return before - target.Conditions.Count;
     }
 
     private void RemoveConditionInstances(
@@ -4150,7 +4363,14 @@ public sealed class FastCombatEngine
             var index = result.FindIndex(stats =>
                 stats.EntityId.Equals(combatant.Id, StringComparison.OrdinalIgnoreCase));
             if (index < 0)
-                continue;
+            {
+                result.Add(new EntityStats(
+                    combatant.Id,
+                    combatant.Name,
+                    [],
+                    Team: combatant.Team.ToString()));
+                index = result.Count - 1;
+            }
 
             result[index] = result[index] with
             {
@@ -5653,7 +5873,8 @@ public sealed class FastCombatEngine
                 damageType,
                 damageRedirectedTo,
                 damageRedirectedAway,
-                countsAsTargetedAttack);
+                countsAsTargetedAttack,
+                _currentTick);
         }
 
         if (!_captureEventLog)

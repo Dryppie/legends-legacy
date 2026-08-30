@@ -12,6 +12,7 @@ using Domain.Models.Entities.Creatures.Templates.Enums;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.WorldTower;
+using Services.LL.Combat.Engine;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -27,6 +28,61 @@ public enum WorldTowerDifficultyClassification
     TooHard,
     OnTarget,
     TooEasy
+}
+
+public enum WorldTowerTerminalFailure
+{
+    None,
+    PartyDefeated,
+    Timeout,
+    Other
+}
+
+public enum WorldTowerObservedFailureMode
+{
+    None,
+    PrimaryTargetCollapse,
+    PartyAttrition,
+    BossSustainDominance,
+    AddPressure,
+    PriorityObjectiveUnmet,
+    ControlWindowUnmet,
+    CleanseDemandUnmet,
+    Other
+}
+
+public sealed record WorldTowerRegenerationPointSnapshot(
+    int Tick,
+    int GuardianHealth,
+    int GuardianMaxHealth,
+    int CumulativeGuardianRegeneration,
+    int ActiveHostileCombatants,
+    int ActiveHostileSummons);
+
+public sealed record WorldTowerFailureEvidenceSnapshot(
+    string Metric,
+    double ObservedValue,
+    double? Threshold,
+    string Unit,
+    string? EntityId = null);
+
+public sealed record WorldTowerFailureDiagnosticSnapshot(
+    WorldTowerTerminalFailure TerminalFailure,
+    WorldTowerObservedFailureMode PrimaryObservedFailureMode,
+    double Confidence,
+    IReadOnlyList<WorldTowerObservedFailureMode> ContributingConditions,
+    string RuleVersion,
+    string? AuthoritativeMechanicCause,
+    IReadOnlyList<WorldTowerFailureEvidenceSnapshot> Evidence)
+{
+    public static WorldTowerFailureDiagnosticSnapshot Success { get; } = new(
+        WorldTowerTerminalFailure.None,
+        WorldTowerObservedFailureMode.None,
+        1,
+        [],
+        WorldTowerContentAnalyzer.FailureRuleVersion,
+        null,
+        []);
 }
 
 public sealed record WorldTowerAnalysisOptions(
@@ -58,7 +114,58 @@ public sealed record WorldTowerTrialSnapshot(
     double RemainingHealthRatio,
     double MeanPlayerDisplayCr,
     int TeamDisplayCr,
-    IReadOnlyList<string> BuildIds);
+    IReadOnlyList<string> BuildIds)
+{
+    public IReadOnlyList<int> PartyNumbers { get; init; } = [];
+    public double GuardianHealthRemainingRatio { get; init; }
+    public double HostileDamagePerSecond { get; init; }
+    public int GuardianPassiveRegeneration { get; init; }
+    public int GuardianAbilityHealing { get; init; }
+    public int GuardianTotalSelfSustain { get; init; }
+    public double GuardianDamageTakenPerSecond { get; init; }
+    public double PrimaryTargetDamageTaken { get; init; }
+    public double NonPrimaryFriendlyDamageTakenPerSecond { get; init; }
+    public double FriendlyDamageTakenConcentration { get; init; }
+    public double PartySustainPerSecond { get; init; }
+    public int GuardianInjectedDistributedDamage { get; init; }
+    public double GuardianInjectedDistributedDamagePerSecond { get; init; }
+    public int GuardianInjectedDistributedDamageHitCount { get; init; }
+    public int GuardianInjectedDistributedDamageWaveCount { get; init; }
+    public int GuardianInjectedDistributedDamagePeakTargetsPerWave { get; init; }
+    public int? FirstFriendlyDeathTick { get; init; }
+    public int PeakActiveHostileCombatants { get; init; }
+    public int PeakActiveHostileSummons { get; init; }
+    public int FinalActiveHostileCombatants { get; init; }
+    public int FinalActiveHostileSummons { get; init; }
+    public int? FirstAdditionalHostileTick { get; init; }
+    public int? FirstAdditionalHostileClearTick { get; init; }
+    public int? FirstAdditionalHostileClearDurationTicks =>
+        FirstAdditionalHostileTick.HasValue && FirstAdditionalHostileClearTick.HasValue
+            ? Math.Max(0, FirstAdditionalHostileClearTick.Value - FirstAdditionalHostileTick.Value)
+            : null;
+    public int TotalHostileSummons { get; init; }
+    public int AdditionalHostileWindowCount { get; init; }
+    public int ClearedAdditionalHostileWindowCount { get; init; }
+    public int HostileSummonActiveTicks { get; init; }
+    public double HostileSummonUptimeRatio => DurationTicks <= 0
+        ? 0
+        : Math.Clamp(HostileSummonActiveTicks / (double)DurationTicks, 0, 1);
+    public int HostileSummonWaveCount { get; init; }
+    public int HostileSummonWaveIntervalCount { get; init; }
+    public int HostileSummonWaveIntervalTotalTicks { get; init; }
+    public double? AverageHostileSummonWaveIntervalTicks => HostileSummonWaveIntervalCount == 0
+        ? null
+        : HostileSummonWaveIntervalTotalTicks / (double)HostileSummonWaveIntervalCount;
+    public int? MinimumHostileSummonWaveIntervalTicks { get; init; }
+    public int? MaximumHostileSummonWaveIntervalTicks { get; init; }
+    public int CleansedEffects { get; init; }
+    public int DispelledEffects { get; init; }
+    public int HostileActionDeniedTicks { get; init; }
+    public int FriendlyActionDeniedTicks { get; init; }
+    public IReadOnlyList<WorldTowerRegenerationPointSnapshot> GuardianRegenerationTimeline { get; init; } = [];
+    public WorldTowerFailureDiagnosticSnapshot FailureDiagnostic { get; init; } =
+        WorldTowerFailureDiagnosticSnapshot.Success;
+}
 
 public sealed record WorldTowerFloorAnalysisSnapshot(
     int Floor,
@@ -83,7 +190,18 @@ public sealed record WorldTowerFloorAnalysisSnapshot(
     double AverageRemainingHealthRatio,
     WorldTowerDifficultyClassification Classification,
     IReadOnlyList<string> Warnings,
-    IReadOnlyList<WorldTowerTrialSnapshot> Trials);
+    IReadOnlyList<WorldTowerTrialSnapshot> Trials)
+{
+    public double P10DurationTicks { get; init; }
+    public double P90DurationTicks { get; init; }
+    public double AverageHostileDamagePerSecond { get; init; }
+    public double AveragePrimaryTargetDamageTaken { get; init; }
+    public double AveragePartySustainPerSecond { get; init; }
+    public IReadOnlyDictionary<WorldTowerTerminalFailure, int> TerminalFailureCounts { get; init; } =
+        new Dictionary<WorldTowerTerminalFailure, int>();
+    public IReadOnlyDictionary<WorldTowerObservedFailureMode, int> PrimaryObservedFailureModeCounts { get; init; } =
+        new Dictionary<WorldTowerObservedFailureMode, int>();
+}
 
 public sealed record WorldTowerAnalysisSnapshot(
     int AlgorithmVersion,
@@ -101,10 +219,13 @@ public sealed class WorldTowerContentAnalyzer(
     IReadOnlyDictionary<Guid, Creature> creatures,
     ICombatSetupService combatSetup,
     ICombatEngineExecutor combatEngine,
-    GearPackageFactory gearPackages) : IEncounterCalibrationEvaluator, IEncounterBuildEvaluator
+    GearPackageFactory gearPackages) : IEncounterCalibrationEvaluator, IEncounterBuildEvaluator, IPartyFamilyCombatEvaluator,
+    IEncounterScaleProbeCombatEvaluator
 {
-    public const int AlgorithmVersion = 1;
+    public const int AlgorithmVersion = 8;
+    public const string FailureRuleVersion = "world-tower-failure-observation-v3";
     public const string RegionOneBandId = "WorldTower.Region1";
+    private readonly WorldTowerEncounterExecutor _encounterExecutor = new(combatSetup, combatEngine);
 
     public WorldTowerAnalysisSnapshot Analyze(
         ProgressionBandSuiteSnapshot progressionBands,
@@ -204,6 +325,7 @@ public sealed class WorldTowerContentAnalyzer(
             victories.Length,
             recommendedCr,
             classification);
+        var orderedDurations = trials.Select(trial => (double)trial.DurationTicks).Order().ToArray();
 
         return new WorldTowerFloorAnalysisSnapshot(
             definition.FloorNumber,
@@ -228,7 +350,17 @@ public sealed class WorldTowerContentAnalyzer(
             Round(trials.Average(trial => trial.RemainingHealthRatio), 4),
             classification,
             warnings,
-            trials);
+            trials)
+        {
+            P10DurationTicks = Round(Percentile(orderedDurations, 0.10), 2),
+            P90DurationTicks = Round(Percentile(orderedDurations, 0.90), 2),
+            AverageHostileDamagePerSecond = Round(trials.Average(trial => trial.HostileDamagePerSecond), 2),
+            AveragePrimaryTargetDamageTaken = Round(trials.Average(trial => trial.PrimaryTargetDamageTaken), 2),
+            AveragePartySustainPerSecond = Round(trials.Average(trial => trial.PartySustainPerSecond), 2),
+            TerminalFailureCounts = CreateCountMap(trials.Select(trial => trial.FailureDiagnostic.TerminalFailure)),
+            PrimaryObservedFailureModeCounts = CreateCountMap(
+                trials.Select(trial => trial.FailureDiagnostic.PrimaryObservedFailureMode))
+        };
     }
 
     public EncounterCalibrationEvaluation Evaluate(EncounterCalibrationEvaluationRequest request)
@@ -239,6 +371,14 @@ public sealed class WorldTowerContentAnalyzer(
             throw new ArgumentOutOfRangeException(nameof(request.HealthAdjustmentFactor));
         if (!double.IsFinite(request.DamageAdjustmentFactor) || request.DamageAdjustmentFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(request.DamageAdjustmentFactor));
+        if (!double.IsFinite(request.DefenseAdjustmentFactor) || request.DefenseAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.DefenseAdjustmentFactor));
+        if (!double.IsFinite(request.ResistanceAdjustmentFactor) || request.ResistanceAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.ResistanceAdjustmentFactor));
+        if (!double.IsFinite(request.RegenerationAdjustmentFactor) || request.RegenerationAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.RegenerationAdjustmentFactor));
+        if (!double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.AbilityHealingAdjustmentFactor));
         if (request.Simulations is < 1 or > 1_000)
             throw new ArgumentOutOfRangeException(nameof(request.Simulations));
         if (request.MaxTicks is < 1 or > 100_000)
@@ -257,7 +397,10 @@ public sealed class WorldTowerContentAnalyzer(
         var calibratedDefinition = WithCalibration(
             definition,
             request.HealthAdjustmentFactor,
-            request.DamageAdjustmentFactor);
+            request.DamageAdjustmentFactor,
+            request.DefenseAdjustmentFactor,
+            request.ResistanceAdjustmentFactor,
+            request.RegenerationAdjustmentFactor);
         var preparedBuilds = profile.Builds.Select(PrepareBuild).ToArray();
         var trials = Enumerable.Range(1, request.Simulations)
             .Select(trial => RunTrial(
@@ -266,15 +409,10 @@ public sealed class WorldTowerContentAnalyzer(
                 guardianSource,
                 request.RunSeed,
                 trial,
-                request.MaxTicks))
+                request.MaxTicks,
+                request.AbilityHealingAdjustmentFactor))
             .ToArray();
-        return new EncounterCalibrationEvaluation(
-            trials.Length,
-            Round(trials.Count(trial => trial.Outcome == BattleOutcome.Victory.ToString()) / (double)trials.Length, 4),
-            Round(trials.Average(trial => trial.DurationTicks), 2),
-            Round(trials.Average(trial => trial.FriendlyDeaths), 2),
-            Round(trials.Average(trial => trial.RemainingHealthRatio), 4),
-            Round(Median(trials.Select(trial => (double)trial.DurationTicks).OrderBy(value => value).ToArray()), 2));
+        return CreateCalibrationEvaluation(trials);
     }
 
     public EncounterCalibrationEvaluation EvaluateBuilds(EncounterBuildEvaluationRequest request)
@@ -287,6 +425,8 @@ public sealed class WorldTowerContentAnalyzer(
             throw new ArgumentOutOfRangeException(nameof(request.HealthAdjustmentFactor));
         if (!double.IsFinite(request.DamageAdjustmentFactor) || request.DamageAdjustmentFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(request.DamageAdjustmentFactor));
+        if (!double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.AbilityHealingAdjustmentFactor));
         if (request.Simulations is < 1 or > 1_000)
             throw new ArgumentOutOfRangeException(nameof(request.Simulations));
         if (request.MaxTicks is < 1 or > 100_000)
@@ -308,38 +448,136 @@ public sealed class WorldTowerContentAnalyzer(
                 guardianSource,
                 request.RunSeed,
                 trial,
-                request.MaxTicks))
+                request.MaxTicks,
+                request.AbilityHealingAdjustmentFactor))
             .ToArray();
+        return CreateCalibrationEvaluation(trials);
+    }
+
+    public IReadOnlyList<WorldTowerTrialSnapshot> EvaluateParty(PartyFamilyCombatEvaluationRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Builds);
+        if (request.Simulations is < 1 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(request.Simulations));
+        if (request.MaxTicks is < 1 or > 100_000)
+            throw new ArgumentOutOfRangeException(nameof(request.MaxTicks));
+        if (!double.IsFinite(request.HealthAdjustmentFactor) || request.HealthAdjustmentFactor <= 0
+            || !double.IsFinite(request.DamageAdjustmentFactor) || request.DamageAdjustmentFactor <= 0
+            || !double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request), "Party-family calibration factors must be positive and finite.");
+        var definition = towerDefinitions.GetFloors().SingleOrDefault(floor => floor.FloorNumber == request.Floor)
+                         ?? throw new InvalidOperationException($"World Tower floor {request.Floor} was not found.");
+        if (request.Builds.Count != definition.RequiredSlots)
+        {
+            throw new InvalidOperationException(
+                $"World Tower floor {request.Floor} requires {definition.RequiredSlots} exact party builds, but received {request.Builds.Count}.");
+        }
+        if (!creatures.TryGetValue(definition.GuardianCreatureId, out var guardianSource))
+            throw new InvalidOperationException($"World Tower guardian '{definition.GuardianCreatureId}' was not found in creatures.json.");
+        var calibratedDefinition = WithCalibration(
+            definition,
+            request.HealthAdjustmentFactor,
+            request.DamageAdjustmentFactor);
+        var preparedBuilds = request.Builds.Select(PrepareBuild).ToArray();
+        return Enumerable.Range(1, request.Simulations)
+            .Select(trial => RunTrial(
+                calibratedDefinition,
+                preparedBuilds,
+                guardianSource,
+                request.RunSeed,
+                trial,
+                request.MaxTicks,
+                request.AbilityHealingAdjustmentFactor))
+            .ToArray();
+    }
+
+    private static EncounterCalibrationEvaluation CreateCalibrationEvaluation(
+        IReadOnlyList<WorldTowerTrialSnapshot> trials)
+    {
+        var orderedDurations = trials.Select(trial => (double)trial.DurationTicks).Order().ToArray();
+        var orderedDeaths = trials.Select(trial => (double)trial.FriendlyDeaths).Order().ToArray();
+        var orderedHealth = trials.Select(trial => trial.RemainingHealthRatio).Order().ToArray();
         return new EncounterCalibrationEvaluation(
-            trials.Length,
-            Round(trials.Count(trial => trial.Outcome == BattleOutcome.Victory.ToString()) / (double)trials.Length, 4),
+            trials.Count,
+            Round(trials.Count(trial => trial.Outcome == BattleOutcome.Victory.ToString()) / (double)trials.Count, 4),
             Round(trials.Average(trial => trial.DurationTicks), 2),
             Round(trials.Average(trial => trial.FriendlyDeaths), 2),
             Round(trials.Average(trial => trial.RemainingHealthRatio), 4),
-            Round(Median(trials.Select(trial => (double)trial.DurationTicks).OrderBy(value => value).ToArray()), 2));
+            Round(Median(orderedDurations), 2))
+        {
+            MedianFriendlyDeaths = Round(Median(orderedDeaths), 2),
+            MedianRemainingHealthRatio = Round(Median(orderedHealth), 4),
+            PrimaryObservedFailureModeCounts = trials
+                .Select(trial => trial.FailureDiagnostic.PrimaryObservedFailureMode)
+                .Where(mode => mode != WorldTowerObservedFailureMode.None)
+                .GroupBy(mode => mode)
+                .ToDictionary(group => group.Key, group => group.Count())
+        };
     }
 
-    private PreparedRepresentativeBuild PrepareBuild(RepresentativeEssenceBuildSnapshot representative)
+    public IReadOnlyList<WorldTowerTrialSnapshot> EvaluateScaleProbe(EncounterScaleProbeCombatRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Builds);
+        request.AppliedOverride.Validate();
+        if (request.PlayerCount is not (5 or 10 or 15))
+            throw new ArgumentOutOfRangeException(nameof(request.PlayerCount));
+        if (request.Builds.Count != request.PlayerCount)
+            throw new InvalidOperationException(
+                $"Scale probe requires {request.PlayerCount} exact builds, but received {request.Builds.Count}.");
+        if (request.Simulations is < 1 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(request.Simulations));
+        if (request.MaxTicks is < 1 or > 100_000)
+            throw new ArgumentOutOfRangeException(nameof(request.MaxTicks));
+        if (request.AppliedOverride.Floor != request.Floor
+            || request.AppliedOverride.PlayerCount != request.PlayerCount)
+        {
+            throw new InvalidOperationException("Scale-probe override does not match the requested floor and player count.");
+        }
+
+        var authored = towerDefinitions.GetFloors().SingleOrDefault(floor => floor.FloorNumber == request.Floor)
+                       ?? throw new InvalidOperationException($"World Tower floor {request.Floor} was not found.");
+        if (!creatures.TryGetValue(authored.GuardianCreatureId, out var guardianSource))
+            throw new InvalidOperationException($"World Tower guardian '{authored.GuardianCreatureId}' was not found in creatures.json.");
+        var probeDefinition = WithScaleProbe(authored, request.PlayerCount, request.AppliedOverride);
+        var preparedBuilds = request.Builds.Select(PrepareBuild).ToArray();
+        return Enumerable.Range(1, request.Simulations)
+            .Select(trial => RunTrial(
+                probeDefinition,
+                preparedBuilds,
+                guardianSource,
+                request.RunSeed,
+                trial,
+                request.MaxTicks,
+                request.AppliedOverride.GuardianAbilityHealingMultiplier,
+                request.AppliedOverride.GuardianAdditionalSummonCopies,
+                request.AppliedOverride.GuardianAdditionalSummonPotencyMultiplier,
+                request.AppliedOverride.GuardianDistributedDamageMultiplier))
+            .ToArray();
+    }
+
+    private WorldTowerPreparedBuild PrepareBuild(RepresentativeEssenceBuildSnapshot representative)
     {
         var gearDefinition = GearPackageFactory.RegionOneDefinitions.Single(definition =>
             definition.Id.Equals(representative.Character.GearPackageId, StringComparison.Ordinal));
         var canonical = gearPackages.CreateCanonicalBuild(
             gearDefinition,
             representative.Essences.Select(essence => essence.EssenceId).ToArray());
-        return new PreparedRepresentativeBuild(
+        return new WorldTowerPreparedBuild(
             representative.Id,
             representative.Character.CombatRating.DisplayOverall,
             canonical);
     }
 
-    private PreparedRepresentativeBuild PrepareBuild(EssenceBuildSnapshot build)
+    private WorldTowerPreparedBuild PrepareBuild(EssenceBuildSnapshot build)
     {
         var gearDefinition = GearPackageFactory.RegionOneDefinitions.Single(definition =>
             definition.Id.Equals(build.Character.GearPackageId, StringComparison.Ordinal));
         var canonical = gearPackages.CreateCanonicalBuild(
             gearDefinition,
             build.Essences.Select(essence => essence.EssenceId).ToArray());
-        return new PreparedRepresentativeBuild(
+        return new WorldTowerPreparedBuild(
             build.Id,
             build.Character.CombatRating.DisplayOverall,
             canonical);
@@ -347,11 +585,15 @@ public sealed class WorldTowerContentAnalyzer(
 
     private WorldTowerTrialSnapshot RunTrial(
         TowerFloorDefinition definition,
-        IReadOnlyList<PreparedRepresentativeBuild> builds,
+        IReadOnlyList<WorldTowerPreparedBuild> builds,
         Creature guardianSource,
         int runSeed,
         int trial,
-        int maxTicks)
+        int maxTicks,
+        double guardianAbilityHealingMultiplier = 1,
+        int guardianAdditionalSummonCopies = 0,
+        double guardianAdditionalSummonPotencyMultiplier = 1,
+        double guardianDistributedDamageMultiplier = 1)
     {
         var selectionSeed = StableRandom.Seed(
             "balance-world-tower-party-v1",
@@ -359,76 +601,24 @@ public sealed class WorldTowerContentAnalyzer(
             definition.FloorNumber.ToString(CultureInfo.InvariantCulture),
             trial.ToString(CultureInfo.InvariantCulture));
         var random = new Random(selectionSeed);
-        var selected = new List<PreparedRepresentativeBuild>(definition.RequiredSlots);
+        var selected = new List<WorldTowerPreparedBuild>(definition.RequiredSlots);
         while (selected.Count < definition.RequiredSlots)
         {
             var cycle = builds.OrderBy(_ => random.Next()).ToArray();
             selected.AddRange(cycle.Take(definition.RequiredSlots - selected.Count));
         }
 
-        var mappedBuilds = new Dictionary<Guid, PreparedRepresentativeBuild>();
-        var friendlyRequests = selected.Select((build, index) =>
-        {
-            var slotId = $"tower:f{definition.FloorNumber}:t{trial}:player:{index + 1}";
-            var snapshotId = StableRandom.Guid("balance-world-tower-snapshot-v1", slotId);
-            mappedBuilds.Add(snapshotId, build);
-            var snapshot = new CharacterSnapshot
-            {
-                Id = snapshotId,
-                CharacterId = build.Build.Character.Id,
-                Name = build.Build.Character.Name,
-                Level = build.Build.Character.Level
-            };
-            return new SnapshotCombatantRequest(
-                snapshot,
-                new CombatParticipantSlot(slotId, snapshot.CharacterId, CombatSide.Friendly));
-        }).ToArray();
-        var combatSeed = StableRandom.Seed(
-            "balance-world-tower-combat-v1",
-            runSeed.ToString(CultureInfo.InvariantCulture),
-            definition.FloorNumber.ToString(CultureInfo.InvariantCulture),
-            trial.ToString(CultureInfo.InvariantCulture));
-        var runtimeFactory = new WorldTowerCombatRuntimeFactory(
-            new CombatPreparationPipeline(
-                new CalibrationSnapshotCombatantBuilder(mappedBuilds, combatSetup),
-                combatSetup));
-        var runtime = runtimeFactory.CreateAsync(
-                new WorldTowerCombatRuntimeRequest(
-                    StableRandom.Guid("balance-world-tower-encounter-v1", combatSeed.ToString(CultureInfo.InvariantCulture)),
-                    Guid.Empty,
-                    definition,
-                    friendlyRequests,
-                    CloneCreature(guardianSource),
-                    0,
-                    0,
-                    0,
-                    DateTimeOffset.UnixEpoch,
-                    combatSeed),
-                CancellationToken.None)
-            .GetAwaiter().GetResult();
-        var result = combatEngine.ExecuteSimulationAsync(
-                runtime,
-                new CombatRuleset(
-                    combatSeed,
-                    maxTicks,
-                    StartActiveAbilitiesOnCooldown: true,
-                    CaptureEventLog: false),
-                CancellationToken.None)
-            .GetAwaiter().GetResult();
-        var maxHealth = result.PlayerTeam.Sum(member => Math.Max(1, member.MaxHealth));
-        var currentHealth = result.PlayerTeam.Sum(member => Math.Max(0, member.Health));
-        var meanPlayerCr = selected.Average(build => build.DisplayCr);
-
-        return new WorldTowerTrialSnapshot(
+        return _encounterExecutor.Execute(
+            definition,
+            selected,
+            guardianSource,
+            runSeed,
             trial,
-            combatSeed,
-            result.Outcome.ToString(),
-            result.Duration,
-            result.PlayerTeam.Count(member => member.Health <= 0),
-            Round(currentHealth / (double)maxHealth, 4),
-            Round(meanPlayerCr, 2),
-            selected.Sum(build => build.DisplayCr),
-            selected.Select(build => build.Id).ToArray());
+            maxTicks,
+            guardianAbilityHealingMultiplier,
+            guardianAdditionalSummonCopies,
+            guardianAdditionalSummonPotencyMultiplier,
+            guardianDistributedDamageMultiplier);
     }
 
     private static RepresentativeEssenceProfileSnapshot SelectProfile(
@@ -438,6 +628,169 @@ public sealed class WorldTowerContentAnalyzer(
             .ThenBy(profile => profile.SlotCount)
             .ThenBy(profile => profile.Id, StringComparer.Ordinal)
             .First();
+
+    internal static WorldTowerFailureDiagnosticSnapshot AnalyzeFailure(
+        CombatResult result,
+        int maxTicks,
+        IReadOnlyList<EntityStats> friendlyStats,
+        IReadOnlyList<EntityStats> hostileStats,
+        string guardianEntityId)
+    {
+        if (result.Outcome == BattleOutcome.Victory)
+            return WorldTowerFailureDiagnosticSnapshot.Success;
+
+        var terminalFailure = result.Outcome switch
+        {
+            BattleOutcome.Defeat => WorldTowerTerminalFailure.PartyDefeated,
+            BattleOutcome.Draw => WorldTowerTerminalFailure.Timeout,
+            _ when result.Duration >= maxTicks => WorldTowerTerminalFailure.Timeout,
+            _ => WorldTowerTerminalFailure.Other
+        };
+        var evidence = new List<WorldTowerFailureEvidenceSnapshot>
+        {
+            new("duration_ticks", result.Duration, maxTicks, "ticks")
+        };
+        var contributing = new List<WorldTowerObservedFailureMode>();
+        var finalDeaths = friendlyStats.Count(stats => stats.Health <= 0 || stats.Deaths > stats.Revivals);
+        evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+            "friendly_final_deaths",
+            finalDeaths,
+            friendlyStats.Count,
+            "combatants"));
+
+        var primaryTarget = friendlyStats
+            .OrderByDescending(stats => stats.AttentionSharePercent)
+            .ThenByDescending(stats => stats.TargetedAttacks)
+            .FirstOrDefault();
+        var focusThreshold = Math.Max(30, 150d / Math.Max(1, friendlyStats.Count));
+        var focusedMemberCollapsed = primaryTarget is not null
+                                     && (primaryTarget.Health <= 0 || primaryTarget.Deaths > primaryTarget.Revivals)
+                                     && primaryTarget.AttentionSharePercent >= focusThreshold;
+        if (primaryTarget is not null)
+        {
+            evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+                "highest_attention_share",
+                primaryTarget.AttentionSharePercent,
+                focusThreshold,
+                "percent",
+                primaryTarget.EntityId));
+        }
+
+        var guardianStats = hostileStats.FirstOrDefault(stats =>
+            stats.EntityId.Equals(guardianEntityId, StringComparison.OrdinalIgnoreCase));
+        var guardianTargetDamage = friendlyStats.Sum(stats => stats.TargetInteractions
+            .Where(target => target.TargetId.Equals(guardianEntityId, StringComparison.OrdinalIgnoreCase))
+            .Sum(target => (long)target.DamageDone));
+        var friendlyDamage = guardianTargetDamage > 0
+            ? guardianTargetDamage
+            : friendlyStats.Sum(stats => (long)stats.DamageDone);
+        var guardianSelfSustainRatio = guardianStats is null
+            ? 0
+            : (guardianStats.HealthRegenerated + guardianStats.HealingDone)
+              / (double)Math.Max(1, friendlyDamage);
+        if (guardianStats is not null)
+        {
+            evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+                "guardian_self_sustain_to_friendly_damage",
+                Round(guardianSelfSustainRatio, 4),
+                0.20,
+                "ratio",
+                guardianStats.EntityId));
+        }
+
+        var firstFriendlyDeathTick = friendlyStats
+            .Where(stats => stats.FirstDeathTick.HasValue)
+            .Select(stats => stats.FirstDeathTick)
+            .Min();
+        if (firstFriendlyDeathTick.HasValue)
+        {
+            evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+                "first_friendly_death_tick",
+                firstFriendlyDeathTick.Value,
+                null,
+                "ticks"));
+        }
+        var peakAdditionalHostiles = Math.Max(0, result.CompactTelemetry.PeakActiveHostileCombatants - 1);
+        var finalAdditionalHostiles = Math.Max(0, result.CompactTelemetry.FinalActiveHostileCombatants - 1);
+        evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+            "peak_additional_hostiles",
+            peakAdditionalHostiles,
+            null,
+            "combatants"));
+        evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+            "final_additional_hostiles",
+            finalAdditionalHostiles,
+            0,
+            "combatants"));
+        evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+            "friendly_cleanse_count",
+            friendlyStats.Sum(stats => stats.StatusEffectsCleansed),
+            null,
+            "effects"));
+        evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+            "friendly_dispel_count",
+            friendlyStats.Sum(stats => stats.StatusEffectsDispelled),
+            null,
+            "effects"));
+        evidence.Add(new WorldTowerFailureEvidenceSnapshot(
+            "friendly_action_denied_ticks",
+            friendlyStats.Sum(stats => stats.ActionDeniedTicks),
+            null,
+            "ticks"));
+
+        WorldTowerObservedFailureMode primaryMode;
+        double confidence;
+        if (terminalFailure == WorldTowerTerminalFailure.PartyDefeated && focusedMemberCollapsed)
+        {
+            primaryMode = WorldTowerObservedFailureMode.PrimaryTargetCollapse;
+            confidence = 0.80;
+            if (finalDeaths > 1)
+                contributing.Add(WorldTowerObservedFailureMode.PartyAttrition);
+        }
+        else if (terminalFailure == WorldTowerTerminalFailure.PartyDefeated)
+        {
+            primaryMode = WorldTowerObservedFailureMode.PartyAttrition;
+            confidence = 0.75;
+            if (focusedMemberCollapsed)
+                contributing.Add(WorldTowerObservedFailureMode.PrimaryTargetCollapse);
+        }
+        else if (terminalFailure == WorldTowerTerminalFailure.Timeout && finalAdditionalHostiles > 0)
+        {
+            primaryMode = WorldTowerObservedFailureMode.AddPressure;
+            confidence = 0.70;
+        }
+        else if (terminalFailure == WorldTowerTerminalFailure.Timeout && guardianSelfSustainRatio >= 0.20)
+        {
+            primaryMode = WorldTowerObservedFailureMode.BossSustainDominance;
+            confidence = 0.65;
+        }
+        else
+        {
+            primaryMode = WorldTowerObservedFailureMode.Other;
+            confidence = 0.50;
+        }
+
+        if (primaryMode != WorldTowerObservedFailureMode.BossSustainDominance
+            && guardianSelfSustainRatio >= 0.20)
+        {
+            contributing.Add(WorldTowerObservedFailureMode.BossSustainDominance);
+        }
+        if (primaryMode != WorldTowerObservedFailureMode.AddPressure
+            && peakAdditionalHostiles > 0
+            && finalAdditionalHostiles > 0)
+        {
+            contributing.Add(WorldTowerObservedFailureMode.AddPressure);
+        }
+
+        return new WorldTowerFailureDiagnosticSnapshot(
+            terminalFailure,
+            primaryMode,
+            confidence,
+            contributing.Distinct().ToArray(),
+            FailureRuleVersion,
+            null,
+            evidence);
+    }
 
     private static double ResolveAnchorCr(PowerAnchorSuiteSnapshot anchors, string anchorId) =>
         anchors.Anchors.SingleOrDefault(anchor =>
@@ -474,32 +827,13 @@ public sealed class WorldTowerContentAnalyzer(
         return warnings;
     }
 
-    private static Creature CloneCreature(Creature source) => new()
-    {
-        Id = source.Id,
-        Name = source.Name,
-        ImagePath = source.ImagePath,
-        Archetype = source.Archetype,
-        DamageProfile = source.DamageProfile,
-        DefenseProfile = source.DefenseProfile,
-        RewardTableId = source.RewardTableId,
-        BaseLevel = source.BaseLevel,
-        Level = source.Level,
-        Tier = source.Tier,
-        StatOverrides = source.StatOverrides.Select(value => new StatOverride
-        {
-            Id = value.Id,
-            AttributeType = value.AttributeType,
-            Multiplier = value.Multiplier,
-            Additive = value.Additive
-        }).ToArray(),
-        BaseAttributes = EntityBaseAttributeHelper.CreateEntityAttributes(source.Id)
-    };
-
     private static TowerFloorDefinition WithCalibration(
         TowerFloorDefinition source,
         double healthAdjustment,
-        double damageAdjustment) => new()
+        double damageAdjustment,
+        double defenseAdjustment = 1,
+        double resistanceAdjustment = 1,
+        double regenerationAdjustment = 1) => new()
     {
         FloorNumber = source.FloorNumber,
         Name = source.Name,
@@ -514,10 +848,39 @@ public sealed class WorldTowerContentAnalyzer(
         {
             Health = checked((float)(source.GuardianScaling.Health * healthAdjustment)),
             Offense = checked((float)(source.GuardianScaling.Offense * damageAdjustment)),
-            Defense = source.GuardianScaling.Defense,
-            Resistance = source.GuardianScaling.Resistance,
+            Defense = checked((float)(source.GuardianScaling.Defense * defenseAdjustment)),
+            Resistance = checked((float)(source.GuardianScaling.Resistance * resistanceAdjustment)),
             Penetration = source.GuardianScaling.Penetration,
-            Regeneration = source.GuardianScaling.Regeneration
+            Regeneration = checked((float)(source.GuardianScaling.Regeneration * regenerationAdjustment))
+        },
+        Stagger = source.Stagger,
+        EchoEnabledAfterClear = source.EchoEnabledAfterClear,
+        TowerTokens = source.TowerTokens,
+        Unlocks = source.Unlocks
+    };
+
+    private static TowerFloorDefinition WithScaleProbe(
+        TowerFloorDefinition source,
+        int playerCount,
+        EncounterScaleProbeOverride appliedOverride) => new()
+    {
+        FloorNumber = source.FloorNumber,
+        Name = source.Name,
+        Type = source.Type,
+        GuardianCreatureId = source.GuardianCreatureId,
+        GuardianName = source.GuardianName,
+        GuardianAbilityProfileId = source.GuardianAbilityProfileId,
+        RequiredSlots = playerCount,
+        RecommendedPowerRating = source.RecommendedPowerRating,
+        ProgressionPosition = source.ProgressionPosition,
+        GuardianScaling = new TowerGuardianScalingDefinition
+        {
+            Health = checked((float)(source.GuardianScaling.Health * appliedOverride.HealthMultiplier)),
+            Offense = checked((float)(source.GuardianScaling.Offense * appliedOverride.OffenseMultiplier)),
+            Defense = checked((float)(source.GuardianScaling.Defense * appliedOverride.DefenseMultiplier)),
+            Resistance = checked((float)(source.GuardianScaling.Resistance * appliedOverride.ResistanceMultiplier)),
+            Penetration = source.GuardianScaling.Penetration,
+            Regeneration = checked((float)(source.GuardianScaling.Regeneration * appliedOverride.RegenerationMultiplier))
         },
         Stagger = source.Stagger,
         EchoEnabledAfterClear = source.EchoEnabledAfterClear,
@@ -535,37 +898,28 @@ public sealed class WorldTowerContentAnalyzer(
             : (values[middle - 1] + values[middle]) / 2d;
     }
 
-    private static double Round(double value, int digits) =>
+    private static double Percentile(IReadOnlyList<double> orderedValues, double percentile)
+    {
+        if (orderedValues.Count == 0)
+            throw new InvalidOperationException("Percentile requires at least one value.");
+        var position = percentile * (orderedValues.Count - 1);
+        var lower = (int)Math.Floor(position);
+        var upper = (int)Math.Ceiling(position);
+        if (lower == upper)
+            return orderedValues[lower];
+        return orderedValues[lower] + (orderedValues[upper] - orderedValues[lower]) * (position - lower);
+    }
+
+    private static IReadOnlyDictionary<T, int> CreateCountMap<T>(IEnumerable<T> values)
+        where T : struct, Enum =>
+        values.GroupBy(value => value)
+            .OrderBy(group => group.Key)
+            .ToDictionary(group => group.Key, group => group.Count());
+
+    internal static double RoundMetric(double value, int digits) =>
         Math.Round(value, digits, MidpointRounding.AwayFromZero);
 
-    private sealed record PreparedRepresentativeBuild(
-        string Id,
-        int DisplayCr,
-        Services.LL.PowerRatings.CanonicalEquipmentBuild Build);
-
-    private sealed class CalibrationSnapshotCombatantBuilder(
-        IReadOnlyDictionary<Guid, PreparedRepresentativeBuild> builds,
-        ICombatSetupService combatSetup) : ISnapshotCombatantBuilder
-    {
-        public Task<IReadOnlyList<CombatRuntimeParticipant>> BuildAsync(
-            IReadOnlyList<SnapshotCombatantRequest> requests,
-            CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            IReadOnlyList<CombatRuntimeParticipant> participants = requests.Select(request =>
-            {
-                if (!builds.TryGetValue(request.Snapshot.Id, out var build))
-                    throw new InvalidOperationException($"Calibration snapshot '{request.Snapshot.Id}' was not mapped.");
-                var combatant = combatSetup.CreatePlayerCombatEntities([build.Build.Character]).Single();
-                combatant.EquippedEssences = [.. build.Build.EquippedEssences];
-                combatant.HasEquippedEssenceSnapshot = true;
-                combatant.Id = request.Slot.SlotId;
-                combatant.OriginalId = request.Slot.SourceEntityId;
-                return new CombatRuntimeParticipant(request.Slot, build.Build.Character, combatant);
-            }).ToArray();
-            return Task.FromResult(participants);
-        }
-    }
+    private static double Round(double value, int digits) => RoundMetric(value, digits);
 }
 
 public static class WorldTowerCreatureCatalog

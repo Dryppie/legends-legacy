@@ -5,6 +5,12 @@ namespace LegendsLegacy.Balance;
 public sealed record BalanceCommandOptions(
     int Seed,
     int EssenceBuildsPerProfile,
+    int CapabilityProbeSeedCount,
+    int PartyFamilySamplesPerFamily,
+    int PartyFamilySimulationsPerParty,
+    EncounterScaleProbeOptions EncounterScaleProbeOptions,
+    RegionOneReliabilityStudyOptions RegionOneReliabilityStudyOptions,
+    AutomaticFloorProgressionCalibrationOptions AutomaticFloorProgressionCalibrationOptions,
     EssenceOptimizerOptions OptimizerOptions,
     RepresentativeBuildOptions RepresentativeBuildOptions,
     ProgressionBandOptions ProgressionBandOptions,
@@ -30,6 +36,25 @@ public sealed record BalanceCommandOptions(
         Options:
           --seed <number>         Deterministic simulation seed (default: 1337).
           --build-count <number>  Random builds per 4/5/6-slot profile (default: 10).
+          --capability-seeds <number> Common support/wave probe seeds per build, 1-32 (default: 1).
+          --party-family-samples <number> Deterministic roster samples per family, 1-50 (default: 3).
+          --party-family-simulations <number> Common-seed encounter trials per retained roster, 1-100 (developer default: 1; release: 25).
+          --scale-probes          Run isolated balance-only 5/10/15-player encounter probes (default: disabled).
+          --scale-probe-parties <number> Balanced rosters per probed size, 1-20 (default: 1).
+          --scale-probe-simulations <number> Production-combat trials per scale-probe roster, 1-100 (default: 1).
+          --scale-probe-max-ms-per-trial <number> Optional diagnostic wall-time ceiling per trial.
+          --scale-probe-max-allocated-mb-per-trial <number> Optional allocation ceiling per trial in MiB.
+          --scale-probe-min-ticks-per-second <number> Optional simulated-tick throughput floor.
+          --scale-probe-max-peak-memory-mb <number> Optional process peak-working-set ceiling in MiB.
+          --reliability-study                Run the optional Region 1 neutral-reference fault-injection study.
+          --reliability-rosters <number>     Exact valid rosters per tested family, 1-15 (default: 3).
+          --reliability-simulations <number> Common-seed trials per reliability roster, 5-100 (default: 10).
+          --reliability-fault-multiplier <number> One-knob injected multiplier, >1-2 (default: 1.40).
+          --floor-progression-calibration         Run the Floor 1/7 constrained continuous-knob pilot (default: disabled).
+          --floor-progression-simulations <number> Common-seed trials per search candidate, 1-1000 (default: 10).
+          --floor-progression-holdout-simulations <number> Independent holdout trials per candidate, 1-1000 (default: 25).
+          --floor-progression-sensitivity-points <number> Ordered sensitivity points, 2-20 (default: 5).
+          --floor-progression-refinement-iterations <number> Boundary refinements, 0-20 (default: 4).
           --optimizer-population <number>  Candidates per profile (default: 20).
           --optimizer-generations <number> Generations to evolve (default: 4).
           --optimizer-elites <number>      Elites retained per generation (default: 5).
@@ -41,6 +66,8 @@ public sealed record BalanceCommandOptions(
           --progression-curve <value>      linear, ease-in, ease-out, or smooth-step (default).
           --tower-simulations <number>     Seeded party simulations per Floor 1-10 (default: 10).
           --calibration-iterations <number>  Bounded encounter-search iterations (default: 10).
+          --assisted-calibration            Run evidence-gated single-parameter sensitivity probes and holdout checks (default: disabled).
+          --assisted-calibration-simulations <number> Trials per sensitivity/holdout evaluation; 0 inherits Tower simulations (default: 0).
           --encounter-candidate-simulations <number>  Trials per specialized candidate (default: 3).
           --encounter-retained <number>      Specialized builds retained per floor (default: 5).
           --certification-profile <value>    developer (default) or release.
@@ -93,6 +120,28 @@ public sealed record BalanceCommandOptions(
     {
         var seed = DefaultSeed;
         var essenceBuildsPerProfile = 10;
+        var certificationProfile = ReadCertificationProfile(args);
+        var capabilityProbeSeedCount = 1;
+        var partyFamilySamplesPerFamily = PartyFamilyCertificationPolicy.V1.MinimumReleasePartiesPerRegularFamily;
+        var partyFamilySimulationsPerParty = certificationProfile == EliteCertificationProfile.Release
+            ? PartyFamilyCertificationPolicy.V1.MinimumReleaseSimulationsPerParty
+            : 1;
+        var scaleProbesEnabled = false;
+        var scaleProbeParties = 1;
+        var scaleProbeSimulations = 1;
+        double? scaleProbeMaximumMillisecondsPerTrial = null;
+        double? scaleProbeMaximumAllocatedMebibytesPerTrial = null;
+        double? scaleProbeMinimumTicksPerSecond = null;
+        double? scaleProbeMaximumPeakMemoryMebibytes = null;
+        var reliabilityStudyEnabled = false;
+        var reliabilityRosters = 3;
+        var reliabilitySimulations = 10;
+        var reliabilityFaultMultiplier = 1.40;
+        var floorProgressionCalibrationEnabled = false;
+        var floorProgressionSimulations = 10;
+        var floorProgressionHoldoutSimulations = 25;
+        var floorProgressionSensitivityPoints = 5;
+        var floorProgressionRefinementIterations = 4;
         var optimizerPopulation = 20;
         var optimizerGenerations = 4;
         var optimizerElites = 5;
@@ -104,9 +153,10 @@ public sealed record BalanceCommandOptions(
         var progressionCurve = ProgressionCurveKind.SmoothStep;
         var towerSimulations = 10;
         var calibrationIterations = 10;
+        var assistedCalibrationEnabled = false;
+        var assistedCalibrationSimulations = 0;
         var encounterCandidateSimulations = 3;
         var encounterRetained = 5;
-        var certificationProfile = ReadCertificationProfile(args);
         var eliteDefaults = EliteCertificationOptions.ForProfile(certificationProfile);
         var eliteRestarts = eliteDefaults.RestartCount;
         var eliteSearchOnly = false;
@@ -203,6 +253,12 @@ public sealed record BalanceCommandOptions(
                     break;
                 case "--calibration-iterations":
                     calibrationIterations = ReadInt(args, ref index, argument, 1, 20);
+                    break;
+                case "--assisted-calibration":
+                    assistedCalibrationEnabled = true;
+                    break;
+                case "--assisted-calibration-simulations":
+                    assistedCalibrationSimulations = ReadInt(args, ref index, argument, 0, 1_000);
                     break;
                 case "--encounter-candidate-simulations":
                     encounterCandidateSimulations = ReadInt(args, ref index, argument, 1, 100);
@@ -346,6 +402,63 @@ public sealed record BalanceCommandOptions(
                             $"Invalid build count '{buildCountValue}'. Expected a number from 1 to 1,000.");
                     }
                     break;
+                case "--capability-seeds":
+                    capabilityProbeSeedCount = ReadInt(args, ref index, argument, 1, 32);
+                    break;
+                case "--party-family-samples":
+                    partyFamilySamplesPerFamily = ReadInt(args, ref index, argument, 1, 50);
+                    break;
+                case "--party-family-simulations":
+                    partyFamilySimulationsPerParty = ReadInt(args, ref index, argument, 1, 100);
+                    break;
+                case "--scale-probes":
+                    scaleProbesEnabled = true;
+                    break;
+                case "--scale-probe-parties":
+                    scaleProbeParties = ReadInt(args, ref index, argument, 1, 20);
+                    break;
+                case "--scale-probe-simulations":
+                    scaleProbeSimulations = ReadInt(args, ref index, argument, 1, 100);
+                    break;
+                case "--scale-probe-max-ms-per-trial":
+                    scaleProbeMaximumMillisecondsPerTrial = ReadDouble(args, ref index, argument, 0.01, 600_000);
+                    break;
+                case "--scale-probe-max-allocated-mb-per-trial":
+                    scaleProbeMaximumAllocatedMebibytesPerTrial = ReadDouble(args, ref index, argument, 0.01, 2_048);
+                    break;
+                case "--scale-probe-min-ticks-per-second":
+                    scaleProbeMinimumTicksPerSecond = ReadDouble(args, ref index, argument, 0.01, 1_000_000_000);
+                    break;
+                case "--scale-probe-max-peak-memory-mb":
+                    scaleProbeMaximumPeakMemoryMebibytes = ReadDouble(args, ref index, argument, 1, 32_768);
+                    break;
+                case "--reliability-study":
+                    reliabilityStudyEnabled = true;
+                    break;
+                case "--reliability-rosters":
+                    reliabilityRosters = ReadInt(args, ref index, argument, 1, 15);
+                    break;
+                case "--reliability-simulations":
+                    reliabilitySimulations = ReadInt(args, ref index, argument, 5, 100);
+                    break;
+                case "--reliability-fault-multiplier":
+                    reliabilityFaultMultiplier = ReadDouble(args, ref index, argument, 1.0001, 2);
+                    break;
+                case "--floor-progression-calibration":
+                    floorProgressionCalibrationEnabled = true;
+                    break;
+                case "--floor-progression-simulations":
+                    floorProgressionSimulations = ReadInt(args, ref index, argument, 1, 1_000);
+                    break;
+                case "--floor-progression-holdout-simulations":
+                    floorProgressionHoldoutSimulations = ReadInt(args, ref index, argument, 1, 1_000);
+                    break;
+                case "--floor-progression-sensitivity-points":
+                    floorProgressionSensitivityPoints = ReadInt(args, ref index, argument, 2, 20);
+                    break;
+                case "--floor-progression-refinement-iterations":
+                    floorProgressionRefinementIterations = ReadInt(args, ref index, argument, 0, 20);
+                    break;
                 case "--output":
                     outputRoot = ReadValue(args, ref index, argument);
                     break;
@@ -445,6 +558,37 @@ public sealed record BalanceCommandOptions(
         return new BalanceCommandOptions(
             seed,
             essenceBuildsPerProfile,
+            capabilityProbeSeedCount,
+            partyFamilySamplesPerFamily,
+            partyFamilySimulationsPerParty,
+            new EncounterScaleProbeOptions
+            {
+                Enabled = scaleProbesEnabled,
+                PartiesPerSize = scaleProbeParties,
+                SimulationsPerParty = scaleProbeSimulations,
+                PerformanceBudget = new EncounterScaleProbePerformanceBudget(
+                    scaleProbeMaximumMillisecondsPerTrial,
+                    scaleProbeMaximumAllocatedMebibytesPerTrial.HasValue
+                        ? checked((long)Math.Round(scaleProbeMaximumAllocatedMebibytesPerTrial.Value * 1024 * 1024, MidpointRounding.AwayFromZero))
+                        : null,
+                    scaleProbeMinimumTicksPerSecond,
+                    scaleProbeMaximumPeakMemoryMebibytes.HasValue
+                        ? checked((long)Math.Round(scaleProbeMaximumPeakMemoryMebibytes.Value * 1024 * 1024, MidpointRounding.AwayFromZero))
+                        : null)
+            },
+            new RegionOneReliabilityStudyOptions
+            {
+                Enabled = reliabilityStudyEnabled,
+                RostersPerFamily = reliabilityRosters,
+                SimulationsPerRoster = reliabilitySimulations,
+                FaultMultiplier = reliabilityFaultMultiplier
+            },
+            new AutomaticFloorProgressionCalibrationOptions(
+                floorProgressionCalibrationEnabled,
+                floorProgressionSimulations,
+                floorProgressionHoldoutSimulations,
+                floorProgressionSensitivityPoints,
+                floorProgressionRefinementIterations),
             optimizer,
             representativeBuilds,
             new ProgressionBandOptions(progressionCurve),
@@ -452,7 +596,11 @@ public sealed record BalanceCommandOptions(
             new EssenceMetaAnalysisOptions(
                 SimulatorBattleCount: metaSimulatorBattles,
                 SimulatorRoundsPerMatchup: metaSimulatorRoundsPerMatchup),
-            new EncounterCalibrationOptions(SearchIterations: calibrationIterations),
+            new EncounterCalibrationOptions(SearchIterations: calibrationIterations)
+            {
+                AssistedCalibrationEnabled = assistedCalibrationEnabled,
+                AssistedProbeSimulations = assistedCalibrationSimulations
+            },
             new EncounterSpecificOptimizationOptions(
                 CandidateSimulations: encounterCandidateSimulations,
                 RetainedBuilds: encounterRetained),

@@ -53,6 +53,7 @@ public static class ProductionBalanceComposition
             gearPackages,
             new EssenceSlotUnlockService());
         var benchmarkRunner = new PveBenchmarkRunner(catalog, essences, gearPackages);
+        var capabilityProfiler = new BuildCapabilityProfiler(catalog, essences, gearPackages);
         var creatureLoot = new JsonCreatureEssenceLootTableRepository(
             configuration,
             contentRoot,
@@ -81,6 +82,13 @@ public static class ProductionBalanceComposition
             combatSetup,
             new CombatEngineExecutor(catalog, essences, craftingDefinitions),
             gearPackages);
+        var partyFamilyBuilder = new PartyFamilyBuilder();
+        var partyFamilyEncounterEvaluator = new PartyFamilyEncounterEvaluator(worldTowerAnalyzer);
+        var encounterScaleProbeAnalyzer = new EncounterScaleProbeAnalyzer(partyFamilyBuilder, worldTowerAnalyzer);
+        var regionOneReliabilityStudyAnalyzer = new RegionOneReliabilityStudyAnalyzer(worldTowerAnalyzer);
+        var matchedGenomeProgressionAnalyzer = new RegionOneMatchedGenomeProgressionAnalyzer(
+            essenceBuildGenerator,
+            benchmarkRunner);
         var encounterCalibrator = new EncounterCalibrator(worldTowerAnalyzer);
         var encounterSpecificOptimizer = new EncounterSpecificOptimizer(worldTowerAnalyzer);
         var essenceOptimizer = new EssenceBuildOptimizer(essenceBuildGenerator, benchmarkRunner);
@@ -92,6 +100,11 @@ public static class ProductionBalanceComposition
             essenceOptimizer,
             worldTowerAnalyzer);
         var scalingValidationAnalyzer = new ScalingValidationAnalyzer(worldTowerAnalyzer);
+        var automaticFloorProgressionCalibrator = new AutomaticFloorProgressionCalibrator(
+            worldTowerAnalyzer,
+            worldTowerAnalyzer,
+            worldTowerAnalyzer,
+            new EliteFloorCalibrationBuildResolver(essenceBuildGenerator));
 
         return new ProductionBalanceRunner(
             catalog,
@@ -101,6 +114,12 @@ public static class ProductionBalanceComposition
             gearPackages,
             essenceBuildGenerator,
             benchmarkRunner,
+            capabilityProfiler,
+            partyFamilyBuilder,
+            partyFamilyEncounterEvaluator,
+            encounterScaleProbeAnalyzer,
+            regionOneReliabilityStudyAnalyzer,
+            matchedGenomeProgressionAnalyzer,
             new CombatRatingAnalyzer(),
             essenceOptimizer,
             new RepresentativeBuildLibrary(),
@@ -112,6 +131,8 @@ public static class ProductionBalanceComposition
             encounterSpecificOptimizer,
             eliteBuildCertificationAnalyzer,
             scalingValidationAnalyzer,
+            new FloorProgressionPolicyEvaluator(),
+            automaticFloorProgressionCalibrator,
             timeProvider ?? TimeProvider.System);
     }
 

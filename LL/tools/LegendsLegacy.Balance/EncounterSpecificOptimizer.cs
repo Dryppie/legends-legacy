@@ -51,7 +51,8 @@ public sealed record EncounterBuildEvaluationRequest(
     int Simulations,
     int MaxTicks,
     double HealthAdjustmentFactor,
-    double DamageAdjustmentFactor);
+    double DamageAdjustmentFactor,
+    double AbilityHealingAdjustmentFactor = 1);
 
 public interface IEncounterBuildEvaluator
 {

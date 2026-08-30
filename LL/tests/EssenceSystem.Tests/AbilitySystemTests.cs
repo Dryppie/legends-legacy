@@ -7697,6 +7697,7 @@ public sealed class AbilitySystemTests
         Assert.InRange(friendly.Health, 0, friendly.MaxHealth);
         Assert.InRange(hostile.Health, 0, hostile.MaxHealth);
         Assert.NotEmpty(execution.Checkpoints);
+        Assert.NotEmpty(execution.Result.EventLog);
     }
 
     [Theory]

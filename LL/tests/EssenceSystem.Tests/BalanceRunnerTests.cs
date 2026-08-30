@@ -54,8 +54,19 @@ public sealed class BalanceRunnerTests
         Assert.False(audit.CertificationEvidenceAffected);
         Assert.Equal(2, audit.SeedCount);
         Assert.Equal(5, audit.ScenarioCount);
-        Assert.Equal(audit.CohortSize * audit.SeedCount * audit.ScenarioCount, audit.TotalCombatExecutions);
+        var referenceProfiles = Assert.IsAssignableFrom<IReadOnlyList<EliteBenchmarkReferenceProfileSnapshot>>(
+            audit.ReferenceProfiles);
+        var panelSizes = Assert.IsAssignableFrom<IReadOnlyList<EliteBenchmarkPanelSizeSnapshot>>(audit.PanelSizes);
+        Assert.Equal(
+            referenceProfiles.Sum(profile => profile.CohortSize) * audit.SeedCount * audit.ScenarioCount,
+            audit.TotalCombatExecutions);
         Assert.Equal(audit.TotalCombatExecutions, audited.EliteBuildCertification.TotalBenchmarkConfidenceCombatExecutions);
+        Assert.Equal(3, referenceProfiles.Count);
+        Assert.Equal([1, 2], panelSizes.Select(panel => panel.SeedCount));
+        var seedPanel = Assert.IsAssignableFrom<IReadOnlyList<int>>(audit.CombatSeedPanel);
+        Assert.Equal(2, seedPanel.Count);
+        Assert.Equal(2, seedPanel.Distinct().Count());
+        Assert.Contains("panelSizes", JsonSerializer.Serialize(audit), StringComparison.OrdinalIgnoreCase);
         Assert.Equal(2, audit.AnchorComparisons.Count);
         Assert.All(audit.Builds, build =>
         {
@@ -301,6 +312,9 @@ public sealed class BalanceRunnerTests
         Assert.Equivalent(first.GearPackages, replay.GearPackages, strict: true);
         Assert.Equivalent(first.EssenceBuilds, replay.EssenceBuilds, strict: true);
         Assert.Equivalent(first.Benchmarks, replay.Benchmarks, strict: true);
+        Assert.Equivalent(first.BuildCapabilities, replay.BuildCapabilities, strict: true);
+        Assert.Equivalent(first.PartyFamilies, replay.PartyFamilies, strict: true);
+        Assert.Equivalent(first.PartyFamilyEvaluation, replay.PartyFamilyEvaluation, strict: true);
         Assert.Equivalent(first.CombatRatingHealth, replay.CombatRatingHealth, strict: true);
         Assert.Equivalent(first.Optimizer, replay.Optimizer, strict: true);
         Assert.Equivalent(first.RepresentativeBuilds, replay.RepresentativeBuilds, strict: true);
@@ -407,9 +421,30 @@ public sealed class BalanceRunnerTests
             EncounterCalibrationOptions: new EncounterCalibrationOptions(SearchIterations: 1),
             EncounterSpecificOptimizationOptions: CreateTestEncounterOptimizerOptions(),
             EliteCertificationOptions: CreateTestEliteCertificationOptions(),
-            ScalingValidationOptions: CreateTestScalingValidationOptions()));
+            ScalingValidationOptions: CreateTestScalingValidationOptions(),
+            BuildCapabilityOptions: new BuildCapabilityOptions(ProbeSeedCount: 3),
+            PartyFamilyBuilderOptions: new PartyFamilyBuilderOptions(1),
+            PartyFamilyEvaluationOptions: new PartyFamilyEvaluationOptions(Enabled: true, SimulationsPerParty: 1),
+            EncounterScaleProbeOptions: new EncounterScaleProbeOptions
+            {
+                Enabled = true,
+                Overrides =
+                [
+                    new EncounterScaleProbeOverride(
+                        1,
+                        10,
+                        HealthMultiplier: 1.1,
+                        OffenseMultiplier: 0.9,
+                        DefenseMultiplier: 1.05,
+                        ResistanceMultiplier: 0.95,
+                        RegenerationMultiplier: 1.2,
+                        GuardianAbilityHealingMultiplier: 1.3)
+                ],
+                PerformanceBudget = new EncounterScaleProbePerformanceBudget(
+                    MaximumAllocatedBytesPerTrial: 1)
+            }));
 
-        Assert.Equal(15, report.Metadata.BalanceSchemaVersion);
+        Assert.Equal(ProductionBalanceRunner.BalanceSchemaVersion, report.Metadata.BalanceSchemaVersion);
         Assert.Equal(ProductionBalanceRunner.SmokeScenarioId, report.Simulation.ScenarioId);
         Assert.Equal(15, report.EssenceBuilds.Count);
         Assert.Collection(
@@ -454,6 +489,7 @@ public sealed class BalanceRunnerTests
             {
                 Assert.InRange(component.Score, 0, 100);
                 Assert.InRange(component.Metrics.RemainingHealthRatio, 0, 1);
+                Assert.InRange(component.Metrics.AverageFriendlyHealthDeficitRatio, 0, 1);
             });
         });
         Assert.All(report.Benchmarks.Builds.GroupBy(build => build.ProfileId), profile =>
@@ -465,6 +501,221 @@ public sealed class BalanceRunnerTests
         Assert.Contains(
             report.Benchmarks.Builds.GroupBy(build => build.ProfileId),
             profile => profile.Select(build => build.AggregateScore).Distinct().Count() > 1);
+        Assert.Equal(BuildCapabilityProfiler.AlgorithmVersion, report.BuildCapabilities.AlgorithmVersion);
+        Assert.Equal(BuildCapabilityProfiler.WaveResponseScenarioId, report.BuildCapabilities.WaveResponseScenarioId);
+        Assert.Equal(3, report.BuildCapabilities.ProbeSeedCount);
+        Assert.False(report.BuildCapabilities.PersistentCacheEnabled);
+        Assert.True(report.BuildCapabilities.Profiles.Count >= report.EssenceBuilds.Count);
+        Assert.All(report.EssenceBuilds, build =>
+            Assert.Contains(report.BuildCapabilities.Profiles, profile => profile.BuildId == build.Id));
+        Assert.All(report.BuildCapabilities.Profiles, profile =>
+        {
+            Assert.Equal(64, profile.CacheKey.Length);
+            Assert.Equal(6, profile.Dimensions.Count);
+            Assert.Equal(Enum.GetValues<BuildCapabilityDimension>(), profile.Dimensions.Select(value => value.Dimension));
+            Assert.All(profile.Dimensions, dimension =>
+            {
+                Assert.True(dimension.RawValue >= 0);
+                Assert.InRange(dimension.NormalizedScore, 0, 100);
+                Assert.False(string.IsNullOrWhiteSpace(dimension.Unit));
+            });
+            Assert.True(profile.Mechanics.ObservationTicks > 0);
+            Assert.True(profile.Mechanics.CleansesPer15Seconds >= 0);
+            Assert.True(profile.Mechanics.DispelsPer15Seconds >= 0);
+            foreach (var dimension in profile.Dimensions.Where(dimension =>
+                         dimension.Dimension is BuildCapabilityDimension.MultiTarget
+                             or BuildCapabilityDimension.PartySustain))
+            {
+                Assert.NotNull(dimension.SeedStandardDeviation);
+                Assert.NotNull(dimension.SeedMinimum);
+                Assert.NotNull(dimension.SeedMaximum);
+                Assert.True(dimension.SeedMinimum <= dimension.SeedMaximum);
+            }
+            Assert.Contains(
+                profile.Dimensions.Single(dimension => dimension.Dimension == BuildCapabilityDimension.MultiTarget)
+                    .SupportingMetrics,
+                metric => metric.Key == "wave_damage_per_second");
+            Assert.Contains(
+                profile.Dimensions.Single(dimension => dimension.Dimension == BuildCapabilityDimension.AttritionResilience)
+                    .SupportingMetrics,
+                metric => metric.Key == "average_health_deficit_ratio" && metric.Value is >= 0 and <= 1);
+        });
+        Assert.Contains(report.BuildCapabilities.Profiles, profile =>
+            profile.Dimensions.Single(dimension =>
+                dimension.Dimension == BuildCapabilityDimension.PartySustain).RawValue > 0);
+        Assert.Contains(report.BuildCapabilities.Profiles, profile =>
+            profile.Mechanics.StatusEffectsCleansed > 0
+            || profile.Mechanics.StatusEffectsDispelled > 0
+            || profile.Mechanics.StunApplications > 0
+            || profile.Mechanics.FreezeApplications > 0
+            || profile.Mechanics.SilenceApplications > 0
+            || profile.Mechanics.SlowApplications > 0
+            || profile.Mechanics.StaggerContributed > 0);
+        Assert.Equal(report.WorldTowerAnalysis.Floors.Count, report.PartyFamilies.Floors.Count);
+        Assert.Equal(1, report.PartyFamilies.Options.PartiesPerFamily);
+        Assert.All(report.PartyFamilies.Floors, floor =>
+        {
+            Assert.Equal(Enum.GetValues<PartyFamilyKind>(), floor.ResponseProfile.Responses.Select(response => response.Family));
+            Assert.Equal(
+                report.WorldTowerAnalysis.Floors.Single(worldTowerFloor => worldTowerFloor.Floor == floor.Floor).RequiredSlots,
+                floor.RequiredSlots);
+            Assert.All(floor.Families, family => Assert.True(family.Parties.Count <= family.RequestedPartyCount));
+            Assert.All(floor.Families.SelectMany(family => family.Parties), party =>
+            {
+                Assert.Equal(floor.RequiredSlots, party.Members.Count);
+                Assert.Equal(64, party.Signature.Length);
+            });
+            Assert.All(floor.Families, family => Assert.Equal(
+                family.Parties.Count,
+                family.Parties.Select(party => party.Signature).Distinct(StringComparer.Ordinal).Count()));
+            Assert.Equal(Enum.GetValues<PartyProgressionCohortKind>(), floor.ProgressionCohorts.Select(value => value.Cohort));
+            Assert.Equal(
+                floor.Families.Single(family => family.Family == PartyFamilyKind.IntendedBalanced).Parties,
+                floor.ProgressionCohorts.Single(cohort => cohort.Cohort == PartyProgressionCohortKind.IntendedP75).Parties);
+            Assert.All(floor.ProgressionCohorts, cohort =>
+                Assert.All(cohort.Parties, party => Assert.Equal(floor.RequiredSlots, party.Members.Count)));
+        });
+        Assert.Equal(
+            PartyFamilyDisposition.Advantaged,
+            report.PartyFamilies.Floors.Single(floor => floor.Floor == 3).ResponseProfile.Responses
+                .Single(response => response.Family == PartyFamilyKind.MultiTargetSpecialist).Disposition);
+        Assert.Equal(
+            PartyFamilyDisposition.Advantaged,
+            report.PartyFamilies.Floors.Single(floor => floor.Floor == 7).ResponseProfile.Responses
+                .Single(response => response.Family == PartyFamilyKind.SingleTargetSpecialist).Disposition);
+        Assert.Equal(
+            PartyFamilyDisposition.Advantaged,
+            report.PartyFamilies.Floors.Single(floor => floor.Floor == 8).ResponseProfile.Responses
+                .Single(response => response.Family == PartyFamilyKind.MechanicSpecialist).Disposition);
+        Assert.True(report.PartyFamilyEvaluation.Options.Enabled);
+        Assert.Equal(EliteCertificationProfile.Developer, report.PartyFamilyEvaluation.Options.Profile);
+        Assert.Equal(
+            PartyFamilyCertificationVerdict.DeveloperProfileOnly,
+            report.PartyFamilyEvaluation.CertificationVerdict);
+        Assert.Equal(report.PartyFamilies.Floors.Count, report.PartyFamilyEvaluation.Floors.Count);
+        Assert.False(report.PartyFamilyEvaluation.ProductionContentModified);
+        Assert.All(report.PartyFamilyEvaluation.Floors, floor =>
+        {
+            Assert.Equal(
+                report.PartyFamilies.Floors.Single(partyFloor => partyFloor.Floor == floor.Floor).RequiredSlots,
+                floor.RequiredSlots);
+            Assert.Equal(PartyFamilyCertificationVerdict.DeveloperProfileOnly, floor.CertificationVerdict);
+            Assert.NotEmpty(floor.CertificationBlockers);
+            Assert.Equal(3, floor.ProgressionCohorts.Count);
+            Assert.Equal(
+                "reused-intended-balanced-evaluation",
+                floor.ProgressionCohorts.Single(cohort => cohort.Cohort == PartyProgressionCohortKind.IntendedP75).EvidenceSource);
+            Assert.All(
+                floor.ProgressionCohorts.Where(cohort => cohort.Cohort != PartyProgressionCohortKind.IntendedP75),
+                cohort => Assert.Equal("capability-profile-constrained-progression-sampler", cohort.EvidenceSource));
+            Assert.Contains(
+                floor.ProgressionOrdering.Verdict,
+                new[]
+                {
+                    PartyFamilyEvaluationVerdict.Pass,
+                    PartyFamilyEvaluationVerdict.Review,
+                    PartyFamilyEvaluationVerdict.Fail
+                });
+            Assert.Contains(floor.Families, family =>
+                family.Family == PartyFamilyKind.IntendedBalanced
+                && family.EvidenceSource == "production-world-tower-combat"
+                && family.TrialCount > 0);
+            Assert.All(floor.Families.Where(family => family.TrialCount > 0), family =>
+            {
+                Assert.InRange(family.ObservedClearRate, 0, 1);
+                Assert.True(family.ConfidenceLowerBound <= family.ConfidenceUpperBound);
+            });
+        });
+        Assert.True(report.EncounterScaleProbes.Options.Enabled);
+        Assert.False(report.EncounterScaleProbes.ProductionContentModified);
+        Assert.False(report.EncounterScaleProbes.ReleaseEligible);
+        Assert.True(report.EncounterScaleProbes.TotalCombatTrials > 0);
+        Assert.True(report.EncounterScaleProbes.TotalSimulatedTicks > 0);
+        Assert.True(report.EncounterScaleProbes.TotalMeasuredWallTimeMilliseconds > 0);
+        Assert.True(report.EncounterScaleProbes.TotalAllocatedBytes > 0);
+        Assert.True(report.EncounterScaleProbes.ProcessPeakWorkingSetBytes > 0);
+        Assert.True(report.EncounterScaleProbes.ManagedHeapHighWaterEstimateBytes > 0);
+        Assert.True(report.EncounterScaleProbes.SimulatedTicksPerSecond > 0);
+        Assert.False(string.IsNullOrWhiteSpace(report.EncounterScaleProbes.PerformanceEnvironment.FrameworkDescription));
+        Assert.False(string.IsNullOrWhiteSpace(report.EncounterScaleProbes.PerformanceEnvironment.OperatingSystemDescription));
+        Assert.True(report.EncounterScaleProbes.PerformanceEnvironment.LogicalProcessorCount > 0);
+        Assert.True(report.EncounterScaleProbes.PerformanceEnvironment.StopwatchFrequency > 0);
+        Assert.Equal(
+            EncounterScaleProbePerformanceAssessment.OutsideBudget,
+            report.EncounterScaleProbes.PerformanceBudgetAssessment);
+        Assert.Equal(report.WorldTowerAnalysis.Floors.Count, report.EncounterScaleProbes.Floors.Count);
+        Assert.All(report.EncounterScaleProbes.Floors, floor =>
+        {
+            Assert.Equal([5, 10, 15], floor.Variants.Select(variant => variant.PlayerCount));
+            Assert.Equal(
+                report.WorldTowerAnalysis.Floors.Single(value => value.Floor == floor.Floor).RequiredSlots,
+                floor.AuthoredPlayerCount);
+            var authored = Assert.Single(floor.Variants, variant => variant.IsAuthoredPlayerCount);
+            Assert.Equal(EncounterScaleProbeAssessment.AuthoredBaseline, authored.Assessment);
+            Assert.Equal("reused-authored-party-family", authored.EvidenceSource);
+            Assert.Equal(EncounterScaleProbePerformanceAssessment.NotMeasured, authored.Performance.BudgetAssessment);
+            Assert.All(floor.Variants, variant =>
+            {
+                Assert.Equal(1, variant.PartyCount);
+                Assert.Equal(1, variant.TrialCount);
+                Assert.True(variant.ConfidenceLowerBound <= variant.ConfidenceUpperBound);
+                Assert.Equal(
+                    Math.Round(Math.Pow(variant.PlayerCount / (double)floor.AuthoredPlayerCount, 0.85), 4),
+                    variant.HealthFormulaRatio);
+                Assert.Equal(
+                    Math.Round(
+                        (1 + 0.05 * (variant.PlayerCount - 1))
+                        / (1 + 0.05 * (floor.AuthoredPlayerCount - 1)),
+                        4),
+                    variant.OffenseFormulaRatio);
+                Assert.Equal(
+                    Math.Round(Math.Pow(variant.PlayerCount / (double)floor.AuthoredPlayerCount, 0.25), 4),
+                    variant.DurabilityFormulaRatio);
+            });
+            Assert.All(floor.Variants.Where(variant => !variant.IsAuthoredPlayerCount), variant =>
+            {
+                Assert.True(variant.Performance.Measured);
+                Assert.True(variant.Performance.WallTimeMilliseconds > 0);
+                Assert.True(variant.Performance.AllocatedBytes > 0);
+                Assert.True(variant.Performance.SimulatedTicksPerSecond > 0);
+                Assert.Equal(EncounterScaleProbePerformanceAssessment.OutsideBudget, variant.Performance.BudgetAssessment);
+                Assert.NotEmpty(variant.Performance.BudgetViolations);
+            });
+        });
+        Assert.Equal(
+            new EncounterScaleProbeOverride(
+                1,
+                10,
+                HealthMultiplier: 1.1,
+                OffenseMultiplier: 0.9,
+                DefenseMultiplier: 1.05,
+                ResistanceMultiplier: 0.95,
+                RegenerationMultiplier: 1.2,
+                GuardianAbilityHealingMultiplier: 1.3),
+            report.EncounterScaleProbes.Floors.Single(floor => floor.Floor == 1).Variants
+                .Single(variant => variant.PlayerCount == 10).AppliedOverride);
+        Assert.False(report.RegionOneReliabilityStudy.Options.Enabled);
+        Assert.Equal(RegionOneReliabilityVerdict.Disabled, report.RegionOneReliabilityStudy.Verdict);
+        Assert.Equal(0, report.RegionOneReliabilityStudy.TotalCombatTrials);
+        Assert.True(report.RegionOneReliabilityStudy.CleanseDemandPrecondition.EvidenceAvailable);
+        Assert.Equal(
+            report.BuildCapabilities.Profiles.Count,
+            report.RegionOneReliabilityStudy.CleanseDemandPrecondition.ProfiledBuildCount);
+        Assert.True(report.RegionOneReliabilityStudy.CleanseDemandPrecondition.FloorRequiresCleanse);
+        Assert.False(report.RegionOneReliabilityStudy.CleanseDemandPrecondition.PrerequisitesSatisfied);
+        Assert.False(report.RegionOneReliabilityStudy.CleanseDemandPrecondition.InjectionImplemented);
+        var populationProtocol = Assert.IsType<RegionOneReliabilityPopulationProtocolSnapshot>(
+            report.RegionOneReliabilityStudy.PopulationProtocol);
+        Assert.Equal(ProductionBalanceRunner.BalanceSchemaVersion, populationProtocol.BalanceSchemaVersion);
+        Assert.Equal(5, populationProtocol.EssenceBuildsPerProfile);
+        Assert.Equal(report.Benchmarks.ScoringVersion, populationProtocol.PveBenchmarkScoringVersion);
+        Assert.Equal(report.Optimizer.AlgorithmVersion, populationProtocol.OptimizerAlgorithmVersion);
+        Assert.Equal(report.Optimizer.Options, populationProtocol.OptimizerOptions);
+        Assert.Equal(report.RepresentativeBuilds.Options, populationProtocol.RepresentativeBuildOptions);
+        Assert.Equal(report.BuildCapabilities.ContentFingerprint, populationProtocol.CapabilityContentFingerprint);
+        Assert.Equal(report.BuildCapabilities.ProbeSeedCount, populationProtocol.CapabilityProbeSeedCount);
+        Assert.Equal(report.PartyFamilies.Options, populationProtocol.PartyFamilyBuilderOptions);
+        Assert.Equal(report.WorldTowerAnalysis.Options, populationProtocol.WorldTowerAnalysisOptions);
         Assert.Equal(report.EssenceBuilds.Count, report.CombatRatingHealth.ObservationCount);
         Assert.Equal(report.EssenceBuilds.Count, report.CombatRatingHealth.Predictions.Count);
         Assert.Equal(3, report.CombatRatingHealth.DistinctDisplayCrCount);
@@ -536,12 +787,58 @@ public sealed class BalanceRunnerTests
         Assert.All(report.WorldTowerAnalysis.Floors, floor =>
         {
             Assert.Equal(10, floor.Trials.Count);
-            Assert.All(floor.Trials, trial => Assert.Equal(floor.RequiredSlots, trial.BuildIds.Count));
+            Assert.Equal(floor.Trials.Count, floor.TerminalFailureCounts.Values.Sum());
+            Assert.Equal(floor.Trials.Count, floor.PrimaryObservedFailureModeCounts.Values.Sum());
+            Assert.True(floor.P10DurationTicks <= floor.MedianDurationTicks);
+            Assert.True(floor.MedianDurationTicks <= floor.P90DurationTicks);
+            Assert.All(floor.Trials, trial =>
+            {
+                Assert.Equal(floor.RequiredSlots, trial.BuildIds.Count);
+                Assert.Equal(
+                    Enumerable.Range(0, floor.RequiredSlots).Select(index => index / 5 + 1),
+                    trial.PartyNumbers);
+                Assert.Equal(WorldTowerContentAnalyzer.FailureRuleVersion, trial.FailureDiagnostic.RuleVersion);
+                Assert.InRange(trial.FailureDiagnostic.Confidence, 0, 1);
+                Assert.InRange(trial.GuardianHealthRemainingRatio, 0, 1);
+                Assert.True(trial.HostileDamagePerSecond >= 0);
+                Assert.True(trial.GuardianPassiveRegeneration >= 0);
+                Assert.True(trial.GuardianAbilityHealing >= 0);
+                Assert.Equal(
+                    trial.GuardianPassiveRegeneration + trial.GuardianAbilityHealing,
+                    trial.GuardianTotalSelfSustain);
+                Assert.True(trial.GuardianDamageTakenPerSecond >= 0);
+                Assert.True(trial.PrimaryTargetDamageTaken >= 0);
+                Assert.True(trial.PartySustainPerSecond >= 0);
+                Assert.True(trial.PeakActiveHostileCombatants >= 1);
+                Assert.True(trial.PeakActiveHostileSummons >= 0);
+                Assert.True(trial.CleansedEffects >= 0);
+                Assert.True(trial.DispelledEffects >= 0);
+                Assert.True(trial.FriendlyActionDeniedTicks >= 0);
+                Assert.True(trial.HostileActionDeniedTicks >= 0);
+                Assert.NotEmpty(trial.GuardianRegenerationTimeline);
+                Assert.Equal(0, trial.GuardianRegenerationTimeline[0].Tick);
+                Assert.Equal(
+                    trial.GuardianRegenerationTimeline.OrderBy(point => point.Tick).Select(point => point.Tick),
+                    trial.GuardianRegenerationTimeline.Select(point => point.Tick));
+                if (trial.Outcome == "Victory")
+                {
+                    Assert.Equal(WorldTowerTerminalFailure.None, trial.FailureDiagnostic.TerminalFailure);
+                    Assert.Equal(WorldTowerObservedFailureMode.None, trial.FailureDiagnostic.PrimaryObservedFailureMode);
+                }
+                else
+                {
+                    Assert.NotEqual(WorldTowerTerminalFailure.None, trial.FailureDiagnostic.TerminalFailure);
+                    Assert.NotEmpty(trial.FailureDiagnostic.Evidence);
+                }
+            });
             Assert.InRange(floor.ObservedClearRate, 0, 1);
             Assert.InRange(floor.AverageRemainingHealthRatio, 0, 1);
             Assert.True(floor.RecommendedDisplayCr > 0);
             Assert.False(string.IsNullOrWhiteSpace(floor.GuardianAbilityProfileId));
         });
+        Assert.Contains(
+            report.WorldTowerAnalysis.Floors.SelectMany(floor => floor.Trials),
+            trial => trial.GuardianDamageTakenPerSecond > 0);
         Assert.Equal(80, report.EssenceMetaAnalysis.Essences.Count);
         Assert.Equal(30, report.EssenceMetaAnalysis.EvaluatedBuildCount);
         Assert.Equal(2_000, report.EssenceMetaAnalysis.SimulatorEvidence.BattlesRun);
@@ -575,7 +872,7 @@ public sealed class BalanceRunnerTests
                 floor.GenericClearRate);
         });
         Assert.False(report.EliteBuildCertification.ProductionContentModified);
-        Assert.Equal(20, report.EliteBuildCertification.AlgorithmVersion);
+        Assert.Equal(21, report.EliteBuildCertification.AlgorithmVersion);
         Assert.NotEqual(EliteCertificationVerdict.CertifiedElite, report.EliteBuildCertification.Verdict);
         Assert.Equal(3, report.EliteBuildCertification.Profiles.Count);
         Assert.Equal(Enumerable.Range(1, 10), report.EliteBuildCertification.Floors.Select(floor => floor.Floor));
@@ -823,6 +1120,141 @@ public sealed class BalanceRunnerTests
         Assert.Equal(0.5, floor.RecommendedDifficultyMultiplier);
         Assert.False(floor.RequiresContentChange);
         Assert.Contains("review mechanics", floor.Recommendation);
+    }
+
+    [Fact]
+    public void Assisted_encounter_calibration_proposes_only_offense_for_dominant_party_attrition()
+    {
+        var source = CreateWorldTowerAnalysis();
+        var hardFloor = source.Floors.Single() with
+        {
+            ObservedClearRate = 0.2,
+            Classification = WorldTowerDifficultyClassification.TooHard,
+            PrimaryObservedFailureModeCounts = new Dictionary<WorldTowerObservedFailureMode, int>
+            {
+                [WorldTowerObservedFailureMode.PartyAttrition] = 8,
+                [WorldTowerObservedFailureMode.PrimaryTargetCollapse] = 2
+            }
+        };
+        var evaluator = new FakeScalingValidationEvaluator(request =>
+        {
+            if (request.HealthAdjustmentFactor == 1 && request.DamageAdjustmentFactor < 1)
+                return request.DamageAdjustmentFactor <= 0.7 ? 0.65 : 0.6;
+            if (request.HealthAdjustmentFactor == 1 && request.DamageAdjustmentFactor == 1)
+                return 0.2;
+            return 0.65;
+        });
+
+        var result = new EncounterCalibrator(evaluator).Calibrate(
+            source with { Floors = [hardFloor] },
+            CreateRepresentativeBuilds(),
+            8471,
+            new EncounterCalibrationOptions(0.5, 2, 2)
+            {
+                AssistedCalibrationEnabled = true,
+                AssistedProbeSimulations = 10
+            });
+
+        var floor = Assert.Single(result.Floors);
+        Assert.Equal(EncounterAssistedCalibrationVerdict.Proposal, floor.AssistedVerdict);
+        Assert.Equal(EncounterCalibrationEvidenceDisposition.Supported, floor.AssistedEvidenceDisposition);
+        Assert.Equal(WorldTowerObservedFailureMode.PartyAttrition, floor.DominantObservedFailureMode);
+        Assert.Equal(0.8, floor.DominantObservedFailureShare);
+        var proposal = Assert.Single(floor.ParameterProposals);
+        Assert.Equal(EncounterCalibrationParameterGroup.Offense, proposal.ParameterGroup);
+        Assert.True(proposal.HumanApprovalRequired);
+        Assert.True(floor.IdentityConstraintsSatisfied);
+        Assert.All(
+            evaluator.Requests.Where(request => request.HealthAdjustmentFactor == 1 && request.DamageAdjustmentFactor != 1),
+            request =>
+            {
+                Assert.Equal(1, request.DefenseAdjustmentFactor);
+                Assert.Equal(1, request.ResistanceAdjustmentFactor);
+                Assert.Equal(1, request.RegenerationAdjustmentFactor);
+            });
+        var sensitivitySeeds = floor.SensitivityProbes
+            .Where(probe => probe.Phase == "Sensitivity")
+            .Select(probe => probe.RunSeed)
+            .Distinct()
+            .ToArray();
+        Assert.Equal([8471], sensitivitySeeds);
+        Assert.Single(floor.SensitivityProbes, probe => probe.Phase == "HoldoutBaseline");
+        Assert.Single(floor.SensitivityProbes, probe => probe.Phase == "HoldoutCandidate");
+        Assert.DoesNotContain(8471, floor.SensitivityProbes
+            .Where(probe => probe.Phase.StartsWith("Holdout", StringComparison.Ordinal))
+            .Select(probe => probe.RunSeed));
+        Assert.False(result.ProductionContentModified);
+    }
+
+    [Fact]
+    public void Assisted_encounter_calibration_uses_regeneration_for_dominant_boss_sustain()
+    {
+        var source = CreateWorldTowerAnalysis();
+        var hardFloor = source.Floors.Single() with
+        {
+            ObservedClearRate = 0.2,
+            Classification = WorldTowerDifficultyClassification.TooHard,
+            PrimaryObservedFailureModeCounts = new Dictionary<WorldTowerObservedFailureMode, int>
+            {
+                [WorldTowerObservedFailureMode.BossSustainDominance] = 10
+            }
+        };
+        var evaluator = new FakeScalingValidationEvaluator(request =>
+        {
+            if (request.RegenerationAdjustmentFactor < 1)
+                return request.RegenerationAdjustmentFactor <= 0.7 ? 0.65 : 0.6;
+            if (request.HealthAdjustmentFactor == 1 && request.DamageAdjustmentFactor == 1)
+                return 0.2;
+            return 0.65;
+        });
+
+        var result = new EncounterCalibrator(evaluator).Calibrate(
+            source with { Floors = [hardFloor] },
+            CreateRepresentativeBuilds(),
+            8471,
+            new EncounterCalibrationOptions(0.5, 2, 2) { AssistedCalibrationEnabled = true });
+
+        var floor = Assert.Single(result.Floors);
+        var proposal = Assert.Single(floor.ParameterProposals);
+        Assert.Equal(EncounterCalibrationParameterGroup.Regeneration, proposal.ParameterGroup);
+        Assert.All(
+            evaluator.Requests.Where(request => request.RegenerationAdjustmentFactor != 1),
+            request =>
+            {
+                Assert.Equal(1, request.HealthAdjustmentFactor);
+                Assert.Equal(1, request.DamageAdjustmentFactor);
+                Assert.Equal(1, request.DefenseAdjustmentFactor);
+                Assert.Equal(1, request.ResistanceAdjustmentFactor);
+            });
+    }
+
+    [Fact]
+    public void Assisted_encounter_calibration_returns_review_for_ambiguous_mechanic_evidence()
+    {
+        var source = CreateWorldTowerAnalysis();
+        var hardFloor = source.Floors.Single() with
+        {
+            ObservedClearRate = 0.2,
+            Classification = WorldTowerDifficultyClassification.TooHard,
+            PrimaryObservedFailureModeCounts = new Dictionary<WorldTowerObservedFailureMode, int>
+            {
+                [WorldTowerObservedFailureMode.AddPressure] = 10
+            }
+        };
+        var evaluator = new FakeScalingValidationEvaluator(_ => 0.2);
+
+        var result = new EncounterCalibrator(evaluator).Calibrate(
+            source with { Floors = [hardFloor] },
+            CreateRepresentativeBuilds(),
+            8471,
+            new EncounterCalibrationOptions(0.5, 2, 2) { AssistedCalibrationEnabled = true });
+
+        var floor = Assert.Single(result.Floors);
+        Assert.Equal(EncounterAssistedCalibrationVerdict.Review, floor.AssistedVerdict);
+        Assert.Equal(EncounterCalibrationEvidenceDisposition.Ambiguous, floor.AssistedEvidenceDisposition);
+        Assert.Empty(floor.SensitivityProbes);
+        Assert.Empty(floor.ParameterProposals);
+        Assert.Contains("mechanic review", floor.AssistedRecommendation, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -1108,6 +1540,11 @@ public sealed class BalanceRunnerTests
             Assert.True(File.Exists(paths.LatestGearPackagesJsonPath));
             Assert.True(File.Exists(paths.LatestEssenceBuildsJsonPath));
             Assert.True(File.Exists(paths.LatestBenchmarksJsonPath));
+            Assert.True(File.Exists(paths.LatestBuildCapabilitiesJsonPath));
+            Assert.True(File.Exists(paths.LatestPartyFamiliesJsonPath));
+            Assert.True(File.Exists(paths.LatestPartyFamilyEvaluationJsonPath));
+            Assert.True(File.Exists(paths.LatestEncounterScaleProbesJsonPath));
+            Assert.True(File.Exists(paths.LatestRegionOneReliabilityStudyJsonPath));
             Assert.True(File.Exists(paths.LatestCombatRatingJsonPath));
             Assert.True(File.Exists(paths.LatestOptimizerJsonPath));
             Assert.True(File.Exists(paths.LatestRepresentativeBuildsJsonPath));
@@ -1124,6 +1561,11 @@ public sealed class BalanceRunnerTests
             Assert.True(File.Exists(paths.HistoryGearPackagesJsonPath));
             Assert.True(File.Exists(paths.HistoryEssenceBuildsJsonPath));
             Assert.True(File.Exists(paths.HistoryBenchmarksJsonPath));
+            Assert.True(File.Exists(paths.HistoryBuildCapabilitiesJsonPath));
+            Assert.True(File.Exists(paths.HistoryPartyFamiliesJsonPath));
+            Assert.True(File.Exists(paths.HistoryPartyFamilyEvaluationJsonPath));
+            Assert.True(File.Exists(paths.HistoryEncounterScaleProbesJsonPath));
+            Assert.True(File.Exists(paths.HistoryRegionOneReliabilityStudyJsonPath));
             Assert.True(File.Exists(paths.HistoryCombatRatingJsonPath));
             Assert.True(File.Exists(paths.HistoryOptimizerJsonPath));
             Assert.True(File.Exists(paths.HistoryRepresentativeBuildsJsonPath));
@@ -1135,6 +1577,8 @@ public sealed class BalanceRunnerTests
             Assert.True(File.Exists(paths.HistoryEncounterSpecificOptimizationJsonPath));
             Assert.True(File.Exists(paths.HistoryEliteBuildCertificationJsonPath));
             Assert.True(File.Exists(paths.HistoryScalingValidationJsonPath));
+            Assert.True(File.Exists(paths.HistoryFloorProgressionPolicyEvaluationJsonPath));
+            Assert.True(File.Exists(paths.HistoryAutomaticFloorProgressionCalibrationJsonPath));
             Assert.Equal(
                 File.ReadAllText(paths.LatestJsonPath),
                 File.ReadAllText(paths.HistoryJsonPath));
@@ -1150,6 +1594,21 @@ public sealed class BalanceRunnerTests
             Assert.Equal(
                 File.ReadAllText(paths.LatestBenchmarksJsonPath),
                 File.ReadAllText(paths.HistoryBenchmarksJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestBuildCapabilitiesJsonPath),
+                File.ReadAllText(paths.HistoryBuildCapabilitiesJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestPartyFamiliesJsonPath),
+                File.ReadAllText(paths.HistoryPartyFamiliesJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestPartyFamilyEvaluationJsonPath),
+                File.ReadAllText(paths.HistoryPartyFamilyEvaluationJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestEncounterScaleProbesJsonPath),
+                File.ReadAllText(paths.HistoryEncounterScaleProbesJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestRegionOneReliabilityStudyJsonPath),
+                File.ReadAllText(paths.HistoryRegionOneReliabilityStudyJsonPath));
             Assert.Equal(
                 File.ReadAllText(paths.LatestCombatRatingJsonPath),
                 File.ReadAllText(paths.HistoryCombatRatingJsonPath));
@@ -1183,12 +1642,51 @@ public sealed class BalanceRunnerTests
             Assert.Equal(
                 File.ReadAllText(paths.LatestScalingValidationJsonPath),
                 File.ReadAllText(paths.HistoryScalingValidationJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestFloorProgressionPolicyEvaluationJsonPath),
+                File.ReadAllText(paths.HistoryFloorProgressionPolicyEvaluationJsonPath));
+            Assert.Equal(
+                File.ReadAllText(paths.LatestAutomaticFloorProgressionCalibrationJsonPath),
+                File.ReadAllText(paths.HistoryAutomaticFloorProgressionCalibrationJsonPath));
 
             using var json = JsonDocument.Parse(File.ReadAllText(paths.LatestJsonPath));
             Assert.Equal(1337, json.RootElement.GetProperty("metadata").GetProperty("seed").GetInt32());
             Assert.Contains("Deterministic Smoke Simulation", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Region 1 Gear Packages", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("PvE Benchmark Performance", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains(
+                $"Build Capability Profiles v{BuildCapabilityProfiler.AlgorithmVersion}",
+                File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Attrition Avg Health Deficit", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains(
+                $"Deterministic Party Families v{PartyFamilyBuilder.AlgorithmVersion}",
+                File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains(
+                $"Authoritative Party-Family Encounter Evaluation v{PartyFamilyEncounterEvaluator.AlgorithmVersion}",
+                File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Authored-Size Certification Gate", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Authored-Content Progression Ordering", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains(
+                $"Optional Encounter Scale Probes v{EncounterScaleProbeAnalyzer.AlgorithmVersion}",
+                File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Scale-Probe Performance Evidence", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains(
+                $"Optional Region 1 Reliability Fault Injection v{RegionOneReliabilityStudyAnalyzer.AlgorithmVersion}",
+                File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Diagnostic Verdict", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Family Contract Verdict", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Add-Clear Lifecycle Evidence", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Repeated Add-Pressure Evidence", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Graded Brood-Payload Response", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Graded Regeneration Response", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Guardian damage taken/s", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Net damage after sustain/s", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Graded Distributed-Attrition Response", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Cleanse-Demand Preconditions", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Progression-Cohort Fidelity Matrix", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Neutral-Reference Search Evidence", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Matched-Genome Progression-Power Probe", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Upstream Population Protocol", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Combat Rating Health", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Essence Optimizer", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Representative Essence Builds", File.ReadAllText(paths.LatestMarkdownPath));
@@ -1196,16 +1694,51 @@ public sealed class BalanceRunnerTests
             Assert.Contains("Power Anchors", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Progression Bands", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("World Tower Content Analysis", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Avg Peak Hostiles", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Terminal Results", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Primary Observations", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Encounter Calibration", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Encounter-Specific Optimization", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Elite Build Certification", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Region 1 Scaling Validation", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Floor-to-Progression Policy Evaluation", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Automatic Floor-to-Progression Calibration", File.ReadAllText(paths.LatestMarkdownPath));
             using var gearJson = JsonDocument.Parse(File.ReadAllText(paths.LatestGearPackagesJsonPath));
             Assert.Single(gearJson.RootElement.EnumerateArray());
             using var essenceJson = JsonDocument.Parse(File.ReadAllText(paths.LatestEssenceBuildsJsonPath));
             Assert.Single(essenceJson.RootElement.EnumerateArray());
             using var benchmarkJson = JsonDocument.Parse(File.ReadAllText(paths.LatestBenchmarksJsonPath));
             Assert.Single(benchmarkJson.RootElement.GetProperty("builds").EnumerateArray());
+            using var capabilityJson = JsonDocument.Parse(File.ReadAllText(paths.LatestBuildCapabilitiesJsonPath));
+            Assert.Single(capabilityJson.RootElement.GetProperty("profiles").EnumerateArray());
+            using var partyFamiliesJson = JsonDocument.Parse(File.ReadAllText(paths.LatestPartyFamiliesJsonPath));
+            Assert.Single(partyFamiliesJson.RootElement.GetProperty("floors").EnumerateArray());
+            using var partyFamilyEvaluationJson = JsonDocument.Parse(
+                File.ReadAllText(paths.LatestPartyFamilyEvaluationJsonPath));
+            Assert.False(partyFamilyEvaluationJson.RootElement.GetProperty("options").GetProperty("enabled").GetBoolean());
+            Assert.Equal(
+                "Disabled",
+                partyFamilyEvaluationJson.RootElement.GetProperty("certificationVerdict").GetString());
+            Assert.Equal(
+                PartyFamilyCertificationPolicy.V1.PolicyId,
+                partyFamilyEvaluationJson.RootElement.GetProperty("certificationPolicy").GetProperty("policyId").GetString());
+            using var encounterScaleProbesJson = JsonDocument.Parse(
+                File.ReadAllText(paths.LatestEncounterScaleProbesJsonPath));
+            Assert.False(encounterScaleProbesJson.RootElement.GetProperty("options").GetProperty("enabled").GetBoolean());
+            Assert.False(encounterScaleProbesJson.RootElement.GetProperty("releaseEligible").GetBoolean());
+            Assert.Equal(
+                "NotMeasured",
+                encounterScaleProbesJson.RootElement.GetProperty("performanceBudgetAssessment").GetString());
+            using var reliabilityJson = JsonDocument.Parse(
+                File.ReadAllText(paths.LatestRegionOneReliabilityStudyJsonPath));
+            Assert.False(reliabilityJson.RootElement.GetProperty("options").GetProperty("enabled").GetBoolean());
+            Assert.Equal("Disabled", reliabilityJson.RootElement.GetProperty("verdict").GetString());
+            Assert.Equal(
+                "Disabled",
+                reliabilityJson.RootElement.GetProperty("progressionFidelity").GetProperty("verdict").GetString());
+            Assert.Equal(
+                ProductionBalanceRunner.BalanceSchemaVersion,
+                reliabilityJson.RootElement.GetProperty("populationProtocol").GetProperty("balanceSchemaVersion").GetInt32());
             using var combatRatingJson = JsonDocument.Parse(File.ReadAllText(paths.LatestCombatRatingJsonPath));
             Assert.Equal("Concerning", combatRatingJson.RootElement.GetProperty("classification").GetString());
             using var optimizerJson = JsonDocument.Parse(File.ReadAllText(paths.LatestOptimizerJsonPath));
@@ -1223,7 +1756,14 @@ public sealed class BalanceRunnerTests
             Assert.Single(progressionBandsJson.RootElement.GetProperty("bands").EnumerateArray());
             using var worldTowerJson = JsonDocument.Parse(
                 File.ReadAllText(paths.LatestWorldTowerAnalysisJsonPath));
-            Assert.Single(worldTowerJson.RootElement.GetProperty("floors").EnumerateArray());
+            var worldTowerFloor = Assert.Single(worldTowerJson.RootElement.GetProperty("floors").EnumerateArray());
+            Assert.Equal(100, worldTowerFloor.GetProperty("p10DurationTicks").GetDouble());
+            Assert.Equal(100, worldTowerFloor.GetProperty("p90DurationTicks").GetDouble());
+            var worldTowerTrial = Assert.Single(worldTowerFloor.GetProperty("trials").EnumerateArray());
+            Assert.Equal(
+                "None",
+                worldTowerTrial.GetProperty("failureDiagnostic").GetProperty("terminalFailure").GetString());
+            Assert.Equal(1, Assert.Single(worldTowerTrial.GetProperty("partyNumbers").EnumerateArray()).GetInt32());
             using var encounterCalibrationJson = JsonDocument.Parse(
                 File.ReadAllText(paths.LatestEncounterCalibrationJsonPath));
             Assert.Single(encounterCalibrationJson.RootElement.GetProperty("floors").EnumerateArray());
@@ -1255,6 +1795,178 @@ public sealed class BalanceRunnerTests
             BalanceCommandOptions.Parse(["--not-a-command"]));
 
         Assert.Contains("Unknown", exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_configure_capability_probe_seed_count()
+    {
+        var options = BalanceCommandOptions.Parse(["--capability-seeds", "3"]);
+
+        Assert.Equal(3, options.CapabilityProbeSeedCount);
+        Assert.Contains("--capability-seeds", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_invalid_capability_probe_seed_count()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--capability-seeds", "0"]));
+
+        Assert.Contains("--capability-seeds", exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_configure_party_family_sample_count()
+    {
+        var options = BalanceCommandOptions.Parse(["--party-family-samples", "4"]);
+
+        Assert.Equal(4, options.PartyFamilySamplesPerFamily);
+        Assert.Contains("--party-family-samples", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_invalid_party_family_sample_count()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--party-family-samples", "0"]));
+
+        Assert.Contains("--party-family-samples", exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_configure_party_family_simulation_count()
+    {
+        var options = BalanceCommandOptions.Parse(["--party-family-simulations", "5"]);
+
+        Assert.Equal(5, options.PartyFamilySimulationsPerParty);
+        Assert.Contains("--party-family-simulations", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_reject_invalid_party_family_simulation_count()
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse(["--party-family-simulations", "0"]));
+
+        Assert.Contains("--party-family-simulations", exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_enable_and_bound_encounter_scale_probes()
+    {
+        var options = BalanceCommandOptions.Parse([
+            "--scale-probes",
+            "--scale-probe-parties", "2",
+            "--scale-probe-simulations", "4",
+            "--scale-probe-max-ms-per-trial", "250.5",
+            "--scale-probe-max-allocated-mb-per-trial", "12.5",
+            "--scale-probe-min-ticks-per-second", "1000",
+            "--scale-probe-max-peak-memory-mb", "2048"
+        ]);
+
+        Assert.True(options.EncounterScaleProbeOptions.Enabled);
+        Assert.Equal(2, options.EncounterScaleProbeOptions.PartiesPerSize);
+        Assert.Equal(4, options.EncounterScaleProbeOptions.SimulationsPerParty);
+        Assert.Equal(250.5, options.EncounterScaleProbeOptions.PerformanceBudget.MaximumMillisecondsPerTrial);
+        Assert.Equal(13_107_200, options.EncounterScaleProbeOptions.PerformanceBudget.MaximumAllocatedBytesPerTrial);
+        Assert.Equal(1000, options.EncounterScaleProbeOptions.PerformanceBudget.MinimumSimulatedTicksPerSecond);
+        Assert.Equal(2_147_483_648, options.EncounterScaleProbeOptions.PerformanceBudget.MaximumProcessPeakWorkingSetBytes);
+        Assert.Contains("--scale-probes", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("--scale-probe-parties", "0")]
+    [InlineData("--scale-probe-simulations", "101")]
+    [InlineData("--scale-probe-max-ms-per-trial", "0")]
+    [InlineData("--scale-probe-max-allocated-mb-per-trial", "0")]
+    [InlineData("--scale-probe-min-ticks-per-second", "0")]
+    [InlineData("--scale-probe-max-peak-memory-mb", "0")]
+    public void Command_options_reject_invalid_encounter_scale_probe_budgets(string argument, string value)
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse([argument, value]));
+
+        Assert.Contains(argument, exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_enable_and_bound_region_one_reliability_study()
+    {
+        var options = BalanceCommandOptions.Parse([
+            "--reliability-study",
+            "--reliability-rosters", "5",
+            "--reliability-simulations", "15",
+            "--reliability-fault-multiplier", "1.5"
+        ]);
+
+        Assert.True(options.RegionOneReliabilityStudyOptions.Enabled);
+        Assert.Equal(5, options.RegionOneReliabilityStudyOptions.RostersPerFamily);
+        Assert.Equal(15, options.RegionOneReliabilityStudyOptions.SimulationsPerRoster);
+        Assert.Equal(1.5, options.RegionOneReliabilityStudyOptions.FaultMultiplier);
+        Assert.Contains("--reliability-study", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("--reliability-rosters", "0")]
+    [InlineData("--reliability-simulations", "4")]
+    [InlineData("--reliability-fault-multiplier", "1")]
+    public void Command_options_reject_invalid_region_one_reliability_budgets(string argument, string value)
+    {
+        var exception = Assert.Throws<BalanceCommandException>(() =>
+            BalanceCommandOptions.Parse([argument, value]));
+
+        Assert.Contains(argument, exception.Message);
+    }
+
+    [Fact]
+    public void Encounter_scale_probe_options_require_unique_supported_sizes_and_unique_overrides()
+    {
+        Assert.Throws<ArgumentException>(() => new EncounterScaleProbeOptions
+        {
+            PlayerCounts = [5, 5]
+        }.Validate());
+        Assert.Throws<ArgumentException>(() => new EncounterScaleProbeOptions
+        {
+            Overrides =
+            [
+                new EncounterScaleProbeOverride(1, 10),
+                new EncounterScaleProbeOverride(1, 10, HealthMultiplier: 1.1)
+            ]
+        }.Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new EncounterScaleProbeOverride(1, 10, HealthMultiplier: 4.1).Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new EncounterScaleProbeOverride(1, 10, GuardianAbilityHealingMultiplier: 4.1).Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new EncounterScaleProbeOverride(1, 10, GuardianDistributedDamageMultiplier: 4.1).Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new EncounterScaleProbeOverride(1, 10, GuardianDistributedDamageMultiplier: 0.9).Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new EncounterScaleProbeOverride(1, 10, GuardianAdditionalSummonCopies: 4).Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new EncounterScaleProbeOverride(
+                1,
+                10,
+                GuardianAdditionalSummonCopies: 1,
+                GuardianAdditionalSummonPotencyMultiplier: 0.24).Validate());
+        Assert.Throws<ArgumentOutOfRangeException>(() => new EncounterScaleProbeOptions
+        {
+            PerformanceBudget = new EncounterScaleProbePerformanceBudget(
+                MaximumAllocatedBytesPerTrial: 0)
+        }.Validate());
+    }
+
+    [Fact]
+    public void Release_profile_uses_the_reviewed_party_family_simulation_budget_by_default()
+    {
+        var options = BalanceCommandOptions.Parse(["--certification-profile", "release"]);
+
+        Assert.Equal(
+            PartyFamilyCertificationPolicy.V1.MinimumReleasePartiesPerRegularFamily,
+            options.PartyFamilySamplesPerFamily);
+        Assert.Equal(
+            PartyFamilyCertificationPolicy.V1.MinimumReleaseSimulationsPerParty,
+            options.PartyFamilySimulationsPerParty);
     }
 
     [Fact]
@@ -1325,6 +2037,42 @@ public sealed class BalanceRunnerTests
             BalanceCommandOptions.Parse(["--calibration-iterations", "0"]));
 
         Assert.Contains("--calibration-iterations", exception.Message);
+    }
+
+    [Fact]
+    public void Command_options_enable_assisted_encounter_calibration_explicitly()
+    {
+        var defaults = BalanceCommandOptions.Parse([]);
+        var options = BalanceCommandOptions.Parse([
+            "--assisted-calibration",
+            "--assisted-calibration-simulations", "25"
+        ]);
+
+        Assert.False(defaults.EncounterCalibrationOptions.AssistedCalibrationEnabled);
+        Assert.True(options.EncounterCalibrationOptions.AssistedCalibrationEnabled);
+        Assert.Equal(25, options.EncounterCalibrationOptions.AssistedProbeSimulations);
+        Assert.Contains("--assisted-calibration", BalanceCommandOptions.Usage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Command_options_enable_automatic_floor_progression_calibration_explicitly()
+    {
+        var defaults = BalanceCommandOptions.Parse([]);
+        var options = BalanceCommandOptions.Parse([
+            "--floor-progression-calibration",
+            "--floor-progression-simulations", "12",
+            "--floor-progression-holdout-simulations", "30",
+            "--floor-progression-sensitivity-points", "6",
+            "--floor-progression-refinement-iterations", "5"
+        ]);
+
+        Assert.False(defaults.AutomaticFloorProgressionCalibrationOptions.Enabled);
+        Assert.True(options.AutomaticFloorProgressionCalibrationOptions.Enabled);
+        Assert.Equal(12, options.AutomaticFloorProgressionCalibrationOptions.SimulationsPerCandidate);
+        Assert.Equal(30, options.AutomaticFloorProgressionCalibrationOptions.HoldoutSimulations);
+        Assert.Equal(6, options.AutomaticFloorProgressionCalibrationOptions.SensitivityPoints);
+        Assert.Equal(5, options.AutomaticFloorProgressionCalibrationOptions.RefinementIterations);
+        Assert.Contains("--floor-progression-calibration", BalanceCommandOptions.Usage, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1802,7 +2550,7 @@ public sealed class BalanceRunnerTests
                 "20260827T120000000Z-12345678",
                 new DateTimeOffset(2026, 8, 27, 12, 0, 0, TimeSpan.Zero),
                 1337,
-                15,
+                26,
                 2,
                 "1.0.0.0",
                 "abcdef123456"),
@@ -1822,6 +2570,11 @@ public sealed class BalanceRunnerTests
             [CreateGearPackage()],
             [CreateEssenceBuild()],
             CreateBenchmarks(),
+            CreateBuildCapabilities(),
+            CreatePartyFamilies(),
+            CreatePartyFamilyEvaluation(),
+            CreateEncounterScaleProbes(),
+            CreateRegionOneReliabilityStudy(),
             CreateCombatRatingHealth(),
             CreateOptimizer(),
             CreateRepresentativeBuilds(),
@@ -1832,7 +2585,118 @@ public sealed class BalanceRunnerTests
             CreateEncounterCalibration(),
             CreateEncounterSpecificOptimization(),
             CreateEliteBuildCertification(),
-            CreateScalingValidation());
+            CreateScalingValidation(),
+            CreateFloorProgressionPolicyEvaluation(),
+            CreateAutomaticFloorProgressionCalibration());
+
+    private static BuildCapabilitySuiteSnapshot CreateBuildCapabilities() => new(
+        BuildCapabilityProfiler.AlgorithmVersion,
+        BuildCapabilityProfiler.NormalizationVersion,
+        new string('a', 64),
+        BuildCapabilityProfiler.PartySupportScenarioId,
+        BuildCapabilityProfiler.WaveResponseScenarioId,
+        1,
+        false,
+        [
+            new BuildCapabilityProfileSnapshot(
+                "E4_RANDOM_001",
+                "E4_RANDOM",
+                100,
+                new string('b', 64),
+                Enum.GetValues<BuildCapabilityDimension>()
+                    .Select(dimension => new BuildCapabilityMeasurementSnapshot(
+                        dimension,
+                        10,
+                        dimension is BuildCapabilityDimension.FocusSurvivability or BuildCapabilityDimension.AttritionResilience
+                            ? "survival_seconds"
+                            : "damage_per_second",
+                        50,
+                        dimension == BuildCapabilityDimension.AttritionResilience
+                            ? new Dictionary<string, double>
+                            {
+                                ["sample"] = 10,
+                                ["average_health_deficit_ratio"] = 0.25
+                            }
+                            : new Dictionary<string, double> { ["sample"] = 10 }))
+                    .ToArray(),
+                new BuildMechanicCapabilitySnapshot(100, 1, 1, 1, 0, 0, 0, 10, 1.5, 1.5))
+        ]);
+
+    private static PartyFamilySuiteSnapshot CreatePartyFamilies() => new(
+        PartyFamilyBuilder.AlgorithmVersion,
+        1337,
+        new PartyFamilyBuilderOptions(1),
+        [
+            new PartyFamilyFloorSnapshot(
+                1,
+                "The First Gate",
+                1,
+                "E4_P50",
+                PartyFamilyResponseCatalog.Create(1, "The First Gate"),
+                [],
+                [],
+                [])
+        ]);
+
+    private static PartyFamilyEvaluationSuiteSnapshot CreatePartyFamilyEvaluation() => new(
+        PartyFamilyEncounterEvaluator.AlgorithmVersion,
+        1337,
+        new PartyFamilyEvaluationOptions(),
+        PartyFamilyCertificationPolicy.V1,
+        false,
+        [],
+        ["Party-family encounter evaluation is disabled for this run."],
+        PartyFamilyCertificationVerdict.Disabled,
+        ["Party-family encounter evaluation is disabled."]);
+
+    private static EncounterScaleProbeSuiteSnapshot CreateEncounterScaleProbes() => new(
+        EncounterScaleProbeAnalyzer.AlgorithmVersion,
+        1337,
+        new EncounterScaleProbeOptions(),
+        false,
+        false,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        EncounterScaleProbePerformanceAssessment.NotMeasured,
+        EncounterScaleProbePerformanceEnvironmentSnapshot.Capture(),
+        [],
+        ["Encounter scale probes are disabled for this run."]);
+
+    private static RegionOneReliabilityStudySnapshot CreateRegionOneReliabilityStudy() => new(
+        RegionOneReliabilityStudyAnalyzer.AlgorithmVersion,
+        1337,
+        new RegionOneReliabilityStudyOptions(),
+        false,
+        false,
+        0,
+        RegionOneReliabilityVerdict.Disabled,
+        [],
+        [],
+        [],
+        ["Region 1 reliability fault injection is disabled for this run."])
+    {
+        PopulationProtocol = new RegionOneReliabilityPopulationProtocolSnapshot(
+            ProductionBalanceRunner.BalanceSchemaVersion,
+            1,
+            PveBenchmarkRunner.ScoringVersion,
+            EssenceBuildOptimizer.AlgorithmVersion,
+            new EssenceOptimizerOptions(),
+            RepresentativeBuildLibrary.AlgorithmVersion,
+            new RepresentativeBuildOptions(),
+            BuildCapabilityProfiler.AlgorithmVersion,
+            BuildCapabilityProfiler.NormalizationVersion,
+            "test-content-fingerprint",
+            1,
+            PartyFamilyBuilder.AlgorithmVersion,
+            new PartyFamilyBuilderOptions(),
+            WorldTowerContentAnalyzer.AlgorithmVersion,
+            new WorldTowerAnalysisOptions())
+    };
 
     private static EliteBuildCertificationSnapshot CreateEliteBuildCertification()
     {
@@ -1844,7 +2708,7 @@ public sealed class BalanceRunnerTests
             new Dictionary<string, double> { ["pve.short-single-target"] = 80 },
             ["essence.test_one"]);
         return new EliteBuildCertificationSnapshot(
-            1,
+            PveBenchmarkRunner.ScoringVersion,
             1337,
             "content-fingerprint",
             "policy-fingerprint",
@@ -1980,7 +2844,30 @@ public sealed class BalanceRunnerTests
                     0.5,
                     WorldTowerDifficultyClassification.TooEasy,
                     ["Observed clear rate is above the configured target window."],
-                    [new WorldTowerTrialSnapshot(1, 1234, "Victory", 100, 0, 0.5, 164, 820, ["E4_P75_001"])])
+                    [new WorldTowerTrialSnapshot(1, 1234, "Victory", 100, 0, 0.5, 164, 820, ["E4_P75_001"])
+                    {
+                        PartyNumbers = [1],
+                        GuardianHealthRemainingRatio = 0,
+                        HostileDamagePerSecond = 12,
+                        PrimaryTargetDamageTaken = 120,
+                        PartySustainPerSecond = 4,
+                        FailureDiagnostic = WorldTowerFailureDiagnosticSnapshot.Success
+                    }])
+                {
+                    P10DurationTicks = 100,
+                    P90DurationTicks = 100,
+                    AverageHostileDamagePerSecond = 12,
+                    AveragePrimaryTargetDamageTaken = 120,
+                    AveragePartySustainPerSecond = 4,
+                    TerminalFailureCounts = new Dictionary<WorldTowerTerminalFailure, int>
+                    {
+                        [WorldTowerTerminalFailure.None] = 1
+                    },
+                    PrimaryObservedFailureModeCounts = new Dictionary<WorldTowerObservedFailureMode, int>
+                    {
+                        [WorldTowerObservedFailureMode.None] = 1
+                    }
+                }
             ]);
 
     private static EncounterCalibrationSnapshot CreateEncounterCalibration() =>
@@ -2106,6 +2993,33 @@ public sealed class BalanceRunnerTests
                     ScalingValidationVerdict.Validated,
                     [])
             ]);
+
+    private static FloorProgressionPolicyEvaluationSnapshot CreateFloorProgressionPolicyEvaluation() =>
+        new(
+            FloorProgressionPolicyEvaluator.AlgorithmVersion,
+            "test-floor-progression-policy",
+            1,
+            new string('f', 64),
+            false,
+            FloorProgressionVerdict.Review,
+            [],
+            ["Pilot policy evidence is incomplete in the report fixture."]);
+
+    private static AutomaticFloorProgressionCalibrationSnapshot CreateAutomaticFloorProgressionCalibration() =>
+        new(
+            AutomaticFloorProgressionCalibrator.AlgorithmVersion,
+            1337,
+            new AutomaticFloorProgressionCalibrationOptions(),
+            "test-floor-progression-policy",
+            new string('f', 64),
+            true,
+            true,
+            false,
+            AutomaticFloorProgressionCalibrationVerdict.Disabled,
+            0,
+            0,
+            [],
+            ["Automatic calibration is disabled in the report fixture."]);
 
     private static EssenceOptimizerSnapshot CreateOptimizer() =>
         new(
@@ -2395,7 +3309,7 @@ public sealed class BalanceRunnerTests
             true,
             0.9);
         return new PveBenchmarkSuiteSnapshot(
-            1,
+            PveBenchmarkRunner.ScoringVersion,
             scenarios,
             [
                 new PveBenchmarkBuildSnapshot(

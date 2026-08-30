@@ -194,6 +194,8 @@ Algorithm v19 completed that audit-only follow-up. The corrected seed-`8471` run
 
 Algorithm v20 measured whether the benchmark and singleton simulator can support that follow-up. On seed `8471`, 512 E5 builds across 16 common seeds and five scenarios produced a `0.9127` baseline-to-mean rank correlation, only `30%` minimum baseline top-20 overlap, and `0.65` median approximate 95% score half-width against a `0.25` target. The configured sample is inadequate. Separately, a balanced 50,560-battle singleton round robin gave every one of 80 Essences exactly 1,264 battles but only one distinct score (`0.5000`). The meta analyzer now rejects such high-coverage zero-range evidence as `NoDiscrimination`. Pair modeling remains blocked until a neutral baseline passes both coverage and discrimination.
 
+Algorithm v21 expanded the whole-build audit to nested 1/2/4/8/12/16/24/32-seed panels and E4/E5/E6 references. Acceptance gates were declared before the run: whole-cohort correlation `>=0.98`; top-10/20/50 overlap `>=80%/85%/90%`; elite and finalist pair ordering `>=95%`; and separated-pair reversal rate `<=2%`. A submaximal panel and its next larger panel must both pass. No submaximal panel did. Four seeds projected to 10.0 minutes but failed top-50 and pair-order gates; 24 seeds failed elite pair ordering and projected to 60.8 minutes. The 32-seed reference projected to 80.9 minutes. No objective or search configuration is promoted. Progressive evaluation and deterministic result caching require their own prospective promotion-recall experiment.
+
 ## 5. Search and neighborhood requirements
 
 Release certification requires at least two complementary deterministic strategies:

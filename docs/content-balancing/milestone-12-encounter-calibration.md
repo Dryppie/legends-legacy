@@ -52,7 +52,7 @@ No part of calibration writes to `tower-floors.json`, a database, or an external
 
 ## Report contract
 
-Balance schema version 12 introduced `encounterCalibration` in `summary.json` and `encounter-calibration.json` under both `latest` and immutable history; the current combined pipeline uses schema version 15. Each floor records:
+Balance schema version 12 introduced `encounterCalibration` in `summary.json` and `encounter-calibration.json` under both `latest` and immutable history; the current combined pipeline uses schema version 46. Each floor records:
 
 - baseline and desired clear rates;
 - authored health and damage multipliers;

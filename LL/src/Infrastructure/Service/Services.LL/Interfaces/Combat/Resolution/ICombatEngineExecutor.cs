@@ -102,7 +102,8 @@ public sealed record CombatRuleset(
     bool CaptureEventLog = true,
     CombatDownedOptions? Downed = null,
     CombatWaveRecoveryOptions? WaveRecovery = null,
-    CombatHostileFuryOptions? HostileFury = null);
+    CombatHostileFuryOptions? HostileFury = null,
+    bool CaptureCompactTelemetry = true);
 
 public sealed record CombatDownedOptions(
     int BaseDelayTicks,

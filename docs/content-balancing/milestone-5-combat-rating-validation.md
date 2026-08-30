@@ -71,7 +71,7 @@ This classification is a diagnostic signal, not an automatic approval gate. A we
 
 ## Report Contract
 
-Every balance run includes CR-health results in `summary.json`, summarizes the classification and principal metrics in `summary.md`, and writes the complete analysis to `combat-rating.json` under both `latest` and the immutable history directory. This contract was introduced with balance schema version 5; the current combined pipeline uses schema version 15.
+Every balance run includes CR-health results in `summary.json`, summarizes the classification and principal metrics in `summary.md`, and writes the complete analysis to `combat-rating.json` under both `latest` and the immutable history directory. This contract was introduced with balance schema version 5; the current combined pipeline uses schema version 46.
 
 The report includes:
 

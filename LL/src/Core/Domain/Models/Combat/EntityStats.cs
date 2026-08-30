@@ -42,6 +42,29 @@ public sealed record EntityStats(
     int Revivals = 0,
     int DownedTicks = 0)
 {
+    public List<EntityTargetInteractionStats> TargetInteractions { get; init; } = [];
+    public int? FirstDeathTick { get; init; }
+    public int? LastDeathTick { get; init; }
+    public int? FirstHealthRegenerationTick { get; init; }
+    public int? LastHealthRegenerationTick { get; init; }
+    public int StatusEffectsApplied { get; init; }
+    public int StatusEffectsCleansed { get; init; }
+    public int StatusEffectsDispelled { get; init; }
+    public int StunApplications { get; init; }
+    public int FreezeApplications { get; init; }
+    public int SilenceApplications { get; init; }
+    public int SlowApplications { get; init; }
+    public int ActionDeniedTicks { get; init; }
+    public int StaggeredTicks { get; init; }
+    public int StunnedOrFrozenTicks { get; init; }
+    public int SilencedTicks { get; init; }
+    public int SlowedTicks { get; init; }
+    public int SummonsCreated { get; init; }
+    public int SummonsExpired { get; init; }
+    public bool IsSummonedEntity { get; init; }
+    public int? SummonedAtTick { get; init; }
+    public int? SummonEndedAtTick { get; init; }
+
     public int AccountedIncomingDamage =>
         AvoidedDamage
         + TypedMitigationPrevented
@@ -59,3 +82,10 @@ public sealed record EntityStats(
         IncomingRawDamage + DamageAmplified == AccountedIncomingDamage
         && TypedMitigationTelemetryReconciles;
 }
+
+public sealed record EntityTargetInteractionStats(
+    string TargetId,
+    string TargetName,
+    int DamageDone,
+    int HealingDone,
+    int BarrierGenerated);

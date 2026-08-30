@@ -11,9 +11,15 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
 
     public IReadOnlyList<EntityStats> Aggregate(
         IEnumerable<CombatLogItem> log,
-        IReadOnlyDictionary<string, string> teamsByEntityId)
+        IReadOnlyDictionary<string, string> teamsByEntityId) =>
+        Aggregate(log, teamsByEntityId, captureCompactTelemetry: true);
+
+    public IReadOnlyList<EntityStats> Aggregate(
+        IEnumerable<CombatLogItem> log,
+        IReadOnlyDictionary<string, string> teamsByEntityId,
+        bool captureCompactTelemetry)
     {
-        var accumulator = new CombatStatsAccumulator();
+        var accumulator = new CombatStatsAccumulator(captureCompactTelemetry);
         accumulator.AddRange(log, teamsByEntityId);
         return accumulator.Snapshot();
     }
@@ -22,6 +28,10 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
 public sealed class CombatStatsAccumulator
 {
     private readonly Dictionary<string, WorkEntity> _entityMap = new(StringComparer.OrdinalIgnoreCase);
+    private readonly bool _captureCompactTelemetry;
+
+    public CombatStatsAccumulator(bool captureCompactTelemetry = true) =>
+        _captureCompactTelemetry = captureCompactTelemetry;
 
     public void AddRange(
         IEnumerable<CombatLogItem> log,
@@ -53,7 +63,8 @@ public sealed class CombatStatsAccumulator
                 item.DamageType,
                 item.DamageRedirectedTo,
                 item.DamageRedirectedAway,
-                item.CountsAsTargetedAttack);
+                item.CountsAsTargetedAttack,
+                item.Timestamp);
         }
     }
 
@@ -81,7 +92,8 @@ public sealed class CombatStatsAccumulator
         DamageType damageType = DamageType.None,
         int damageRedirectedTo = 0,
         int damageRedirectedAway = 0,
-        bool countsAsTargetedAttack = false)
+        bool countsAsTargetedAttack = false,
+        int timestamp = 0)
     {
         // ----- entity context ------------------------------------------------
         var entity = GetOrAddEntity(actorId);
@@ -107,18 +119,45 @@ public sealed class CombatStatsAccumulator
                     entity.SelfDamageDone += magnitude;
                 else if (relationship == DamageTargetRelationship.Ally)
                     entity.AlliedDamageDone += magnitude;
+                if (_captureCompactTelemetry && !string.IsNullOrWhiteSpace(targetId))
+                    entity.GetOrAddTarget(targetId, targetName).DamageDone += magnitude;
                 break;
             case EventType.Heal:
             case EventType.HealOverTime:
             case EventType.HealCrit:
                 entity.HealingDone += magnitude;
+                if (_captureCompactTelemetry && !string.IsNullOrWhiteSpace(targetId))
+                    entity.GetOrAddTarget(targetId, targetName).HealingDone += magnitude;
                 break;
             // add more global categories here
             case EventType.HealthRegeneration:
                 entity.HealthRegenerated += magnitude;
+                if (_captureCompactTelemetry)
+                {
+                    entity.FirstHealthRegenerationTick ??= timestamp;
+                    entity.LastHealthRegenerationTick = timestamp;
+                }
                 break;
             case EventType.RestoreBarrier:
                 entity.BarrierGenerated += magnitude;
+                if (_captureCompactTelemetry && !string.IsNullOrWhiteSpace(targetId))
+                    entity.GetOrAddTarget(targetId, targetName).BarrierGenerated += magnitude;
+                break;
+            case EventType.StatusEffect when _captureCompactTelemetry:
+                entity.StatusEffectsApplied++;
+                entity.CountTypedConditionApplication(source);
+                break;
+            case EventType.StatusEffectCleansed when _captureCompactTelemetry && magnitude > 0:
+                entity.StatusEffectsCleansed += magnitude;
+                break;
+            case EventType.StatusEffectDispelled when _captureCompactTelemetry && magnitude > 0:
+                entity.StatusEffectsDispelled += magnitude;
+                break;
+            case EventType.Summon when _captureCompactTelemetry:
+                entity.SummonsCreated += Math.Max(1, magnitude);
+                break;
+            case EventType.SummonExpired when _captureCompactTelemetry:
+                entity.SummonsExpired++;
                 break;
             case EventType.StaggerApplied:
                 entity.StaggerContributed += magnitude;
@@ -240,6 +279,29 @@ public sealed class CombatStatsAccumulator
             }
             else if (eventType == EventType.Heal || eventType == EventType.HealOverTime || eventType == EventType.HealCrit)
                 target.HealingReceived += magnitude;
+            else if (eventType == EventType.Death)
+            {
+                target.Deaths++;
+                if (_captureCompactTelemetry)
+                {
+                    target.FirstDeathTick ??= timestamp;
+                    target.LastDeathTick = timestamp;
+                    if (target.IsSummonedEntity)
+                        target.SummonEndedAtTick = timestamp;
+                }
+            }
+            else if (eventType == EventType.Revive)
+                target.Revivals++;
+            else if (_captureCompactTelemetry && eventType == EventType.Summon)
+            {
+                target.IsSummonedEntity = true;
+                target.SummonedAtTick ??= timestamp;
+            }
+            else if (_captureCompactTelemetry && eventType == EventType.SummonExpired)
+            {
+                target.IsSummonedEntity = true;
+                target.SummonEndedAtTick = timestamp;
+            }
         }
     }
 
@@ -299,8 +361,16 @@ public sealed class WorkEntity
     public int DamageAmplified, FinalHealthDamage;
     public int DamageRedirectedTo, DamageRedirectedAway, TargetedAttacks;
     public int StaggerContributed, StaggerBreaks;
+    public int Deaths, Revivals;
+    public int StatusEffectsApplied, StatusEffectsCleansed, StatusEffectsDispelled;
+    public int StunApplications, FreezeApplications, SilenceApplications, SlowApplications;
+    public int SummonsCreated, SummonsExpired;
+    public int? FirstDeathTick, LastDeathTick, FirstHealthRegenerationTick, LastHealthRegenerationTick;
+    public bool IsSummonedEntity;
+    public int? SummonedAtTick, SummonEndedAtTick;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, WorkTargetInteraction> _targets = new(StringComparer.OrdinalIgnoreCase);
     private string? _firstEntityName;
 
     public WorkEntity(string id) => Id = id;
@@ -310,6 +380,26 @@ public sealed class WorkEntity
         if (!_abilities.TryGetValue(abilityName, out var ability))
             _abilities[abilityName] = ability = new WorkAbility(abilityName);
         return ability;
+    }
+
+    public WorkTargetInteraction GetOrAddTarget(string targetId, string? targetName)
+    {
+        if (!_targets.TryGetValue(targetId, out var target))
+            _targets[targetId] = target = new WorkTargetInteraction(targetId);
+        target.SetName(targetName);
+        return target;
+    }
+
+    public void CountTypedConditionApplication(string source)
+    {
+        if (source.Equals("condition.stun", StringComparison.OrdinalIgnoreCase))
+            StunApplications++;
+        else if (source.Equals("condition.freeze", StringComparison.OrdinalIgnoreCase))
+            FreezeApplications++;
+        else if (source.Equals("condition.silence", StringComparison.OrdinalIgnoreCase))
+            SilenceApplications++;
+        else if (source.Equals("condition.slow", StringComparison.OrdinalIgnoreCase))
+            SlowApplications++;
     }
 
     public void SetTeam(string team)
@@ -357,7 +447,54 @@ public sealed class WorkEntity
         DamageRedirectedAway: DamageRedirectedAway,
         TargetedAttacks: TargetedAttacks,
         StaggerContributed: StaggerContributed,
-        StaggerBreaks: StaggerBreaks);
+        StaggerBreaks: StaggerBreaks,
+        Deaths: Deaths,
+        Revivals: Revivals)
+        {
+            TargetInteractions = _targets.Values
+                .OrderBy(target => target.TargetId, StringComparer.OrdinalIgnoreCase)
+                .Select(target => target.ToImmutable())
+                .ToList(),
+            FirstDeathTick = FirstDeathTick,
+            LastDeathTick = LastDeathTick,
+            FirstHealthRegenerationTick = FirstHealthRegenerationTick,
+            LastHealthRegenerationTick = LastHealthRegenerationTick,
+            StatusEffectsApplied = StatusEffectsApplied,
+            StatusEffectsCleansed = StatusEffectsCleansed,
+            StatusEffectsDispelled = StatusEffectsDispelled,
+            StunApplications = StunApplications,
+            FreezeApplications = FreezeApplications,
+            SilenceApplications = SilenceApplications,
+            SlowApplications = SlowApplications,
+            SummonsCreated = SummonsCreated,
+            SummonsExpired = SummonsExpired,
+            IsSummonedEntity = IsSummonedEntity,
+            SummonedAtTick = SummonedAtTick,
+            SummonEndedAtTick = SummonEndedAtTick
+        };
+}
+
+public sealed class WorkTargetInteraction(string targetId)
+{
+    private string? _targetName;
+
+    public string TargetId { get; } = targetId;
+    public int DamageDone { get; set; }
+    public int HealingDone { get; set; }
+    public int BarrierGenerated { get; set; }
+
+    public void SetName(string? targetName)
+    {
+        if (!string.IsNullOrWhiteSpace(targetName) && string.IsNullOrWhiteSpace(_targetName))
+            _targetName = targetName;
+    }
+
+    public EntityTargetInteractionStats ToImmutable() => new(
+        TargetId,
+        _targetName ?? TargetId,
+        DamageDone,
+        HealingDone,
+        BarrierGenerated);
 }
 
 public sealed class WorkAbility
