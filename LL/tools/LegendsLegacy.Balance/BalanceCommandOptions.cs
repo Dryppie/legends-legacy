@@ -50,7 +50,7 @@ public sealed record BalanceCommandOptions(
           --reliability-rosters <number>     Exact valid rosters per tested family, 1-15 (default: 3).
           --reliability-simulations <number> Common-seed trials per reliability roster, 5-100 (default: 10).
           --reliability-fault-multiplier <number> One-knob injected multiplier, >1-2 (default: 1.40).
-          --floor-progression-calibration         Run the Floor 1/7 constrained continuous-knob pilot (default: disabled).
+          --floor-progression-calibration         Run constrained floor search and atomic Region coordination (default: disabled).
           --floor-progression-simulations <number> Common-seed trials per search candidate, 1-1000 (default: 10).
           --floor-progression-holdout-simulations <number> Independent holdout trials per candidate, 1-1000 (default: 25).
           --floor-progression-sensitivity-points <number> Ordered sensitivity points, 2-20 (default: 5).

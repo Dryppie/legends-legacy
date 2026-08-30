@@ -742,6 +742,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
         effect.BaseValue = ScaleValue(effect.BaseValue, 1 + modifier.Value);
         effect.ScalingCoefficient *= (float)(1 + modifier.Value);
+        effect.SummonPowerMultiplier *= 1 + modifier.Value;
+        effect.SummonHealthMultiplier *= 1 + modifier.Value;
     }
 
     private static void ApplyAddEffectModifier(

@@ -1,8 +1,8 @@
 # Automatic Floor-to-Progression Calibration Plan
 
-Status: **Slices 1–2 implemented; add/distributed adapters and Region coordination not implemented**  
+Status: **Slices 1–4 implemented for policy-enabled Floors 1–5 and 7; full Region 1 policy coverage and optional apply workflow remain**
 Target service: `LL/tools/LegendsLegacy.Balance`  
-Current foundation: **balance schema 48**  
+Current foundation: **balance schema 54**
 Initial scope: **World Tower Region 1 Floors 1–10**
 
 ## 1. Goal
@@ -32,52 +32,24 @@ Every calibrated floor therefore needs an authored policy that identifies:
 
 Generated P50/P75/P90 cohorts remain generated-population percentiles. They must never be labeled as live-player percentiles.
 
-## 3. Proposed floor policy
+## 3. Implemented floor policy
 
-The policy should be author-editable, versioned, validated before combat runs, and included in report provenance.
+The current author-editable policy is
+`LL/tools/LegendsLegacy.Balance/Configuration/floor-progression-policy.v5.json`.
+The CLI loads v5; v1–v4 remain packaged as historical policy revisions and are not selected by default. The validated canonical JSON and its SHA-256 fingerprint are included in report provenance.
 
-Conceptual example:
+Every enabled floor currently uses a 55–70% primary clear-rate target, 60–90 second median-duration target, at most one median friendly death, and at least 10% median remaining Health. The generated P50 clear-rate ceiling is 35%, the P90 floor is 70%, and the certified-P95 floor is 80%. These are authored policy thresholds, not live-player percentile claims.
 
-```yaml
-floor: 4
-policyVersion: 1
+| Floor | Frozen primary | Intended identity | Required family response | Approved knobs | Explicit review boundary |
+| ---: | --- | --- | --- | --- | --- |
+| 1 | E4 P75, level 30, four Essences, Rare gear | Party attrition | IntendedBalanced should succeed | Health, offense, exact `Slam the Gates` distributed damage | Distributed tuning uses the named reviewed exception and makes no relative-family claim |
+| 2 | E4 P75, level 30, four Essences, Rare gear | Weak-target collapse, party attrition, Bleed-fed boss sustain | IntendedBalanced should succeed | Health, offense | Boss-sustain dominance returns `Review`; no Velka-specific recovery adapter exists |
+| 3 | E4 P75, level 30, four Essences, Rare gear | Add pressure | MultiTargetSpecialist advantaged | Health, offense, authored Broodling health/power | Summon tuning requires `AddPressureMultiTargetResetV1`; count and cadence are immutable |
+| 4 | E4 P75, level 30, four Essences, Rare gear | Primary-target collapse, party attrition | IntendedBalanced should succeed | Health, offense | Reflection strength/window and Physical/Magical identity are immutable |
+| 5 | E4 P75, level 30, four Essences, Rare gear | Collapse, attrition, add pressure, unmet priority objective | MultiTargetSpecialist advantaged | Offense only | Health would retune inherited pillar Health and barrier magnitude; objective-dominated and duration-only cases return `Review` |
+| 7 | E6 P75, level 50, six Essences, Epic gear | Boss-sustain dominance | SingleTargetSpecialist advantaged | Health, exact Guardian ability healing | Primary-target-collapse dominance is prohibited |
 
-primaryCohort:
-  characterLevel: 12
-  essenceSlots: 5
-  gearPackage: region1-mid
-  profile: P75
-
-guardrailCohorts:
-  undergeared: E4-P75
-  ordinary: E5-P50
-  strong: E5-P90
-  elite: certified-elite
-
-targets:
-  clearRate: [0.55, 0.70]
-  medianDurationSeconds: [60, 90]
-  maximumMedianDeaths: 1
-  minimumMedianRemainingHealth: 0.10
-
-identity:
-  intendedFailureModes: [AddPressure]
-  intendedAdvantagedFamilies: [MultiTargetSpecialist]
-  prohibitedDominantFailureModes: [PrimaryTargetCollapse]
-
-allowedKnobs:
-  guardianHealthMultiplier: [0.80, 1.20]
-  guardianOffenseMultiplier: [0.85, 1.15]
-  addHealthMultiplier: [0.75, 1.25]
-
-forbiddenChanges:
-  - requiredSlots
-  - summonIdentity
-  - abilityIdentity
-  - productionPartyRules
-```
-
-The final representation may be JSON or strongly typed configuration. The important contract is that every target and allowed mutation is explicit and reviewable.
+The evaluator requires the run-resolved primary profile, level, Essence slots, and gear package to match the authored row. Population drift therefore produces a policy mismatch and `Review`; it never silently remaps a floor to another cohort.
 
 ## 4. Calibration flow
 
@@ -225,14 +197,14 @@ Immutable history output must retain enough information to reproduce the approva
 
 The pilot should include deliberately mis-tuned fixtures proving that the calibrator selects the injected parameter group rather than merely finding a clear-rate multiplier.
 
-### Slice 3 — Add and distributed-pressure adapters
+### Slice 3 — Add and distributed-pressure adapters — implemented in schema 49
 
 - Add typed add-health/power and ability-specific distributed-damage adapters.
 - Require the confirmed AddPressure response contract.
 - Require an approved DistributedAttrition physical family contract or an explicit policy exception.
 - Keep discrete add count/cadence out of scope until continuous adapters are proven.
 
-### Slice 4 — Region 1 coordinator
+### Slice 4 — Region 1 coordinator — implemented in schema 50
 
 - Calibrate all policy-enabled Region 1 floors.
 - Check neighboring-floor and Region-wide progression ordering.
@@ -306,6 +278,20 @@ The Region 1 automatic floor calibrator is ready for production review when:
 
 ## 16. Recommended next action
 
-Run and review the opt-in Floor 1 and Floor 7 automatic-calibration pilot across protocol-compatible developer populations. Refine author-owned windows only when repeated evidence justifies it, then implement Slice 3's typed add-health/power and ability-specific distributed-damage adapters.
+Run and review the opt-in atomic Region coordinator across protocol-compatible developer populations, then author Floors 6 and 8–10 one at a time with reviewed cohort, identity, specialist, and knob contracts. Do not enable a floor merely to obtain ten-floor coverage. Consider Slice 5 only after the complete policy-enabled Region proposal is stable and manually reviewed.
+
+### Implementation history
 
 Schema 48 retains the schema-47 policy contract and adds an opt-in detached one-parameter search for the Floor 1 and Floor 7 pilots. It supports Guardian health, offense, and ability-healing adapters; uses common candidate seeds; checks candidate-specific P75/P50/P90, certified-P95, party-family, progression, and identity constraints; refines toward the authored value; rechecks on an independently derived holdout seed; and emits a fingerprinted, unapplied proposed patch. It never modifies production content.
+
+Schema 49 adds continuous authored-effect adapters for Morrowmaw's summon health/power payload and Garran's exact `Slam the Gates` damage coefficient. Both use detached temporary ability-spec clones and preserve ability ID, effect ID, targets, summon count, and cadence. Add-pressure tuning is policy-valid only with the confirmed `AddPressureMultiTargetResetV1` specialist contract and candidate MultiTarget reset evidence. Distributed tuning requires direct attributed damage reaching at least two targets plus either an approved family contract or a named, reasoned policy exception. The Floor 1 pilot records the latter exception explicitly and makes no unsupported relative-family claim. Discrete add count and cadence remain outside automatic calibration.
+
+Schema 50 adds automatic calibrator algorithm version 3 and the Region 1 coordinator. After per-floor search and holdout, every policy-enabled final factor is re-evaluated with one independently derived Region seed through primary, P50/P90, certified-P95, family, identity, and mechanic gates. The coordinator checks all authored Region 1 floors for nondecreasing recommended CR and target benchmark power, checks policy-enabled primary level/slot progression, and rejects later-floor clear-rate or duration inversions beyond author-owned tolerances. It emits one fingerprinted atomic Region patch only when every floor, holdout, and ordering constraint passes. Individual floor patches remain evidence; production content is unchanged.
+
+Schema 51 introduces floor-progression policy v2 and enables Floor 3 alongside the existing Floor 1 and Floor 7 pilots. Floor 3 is bound to the run's frozen E4 P75/P50/P90 progression cohorts, declares AddPressure as its intended failure identity, prohibits PrimaryTargetCollapse as dominant, and requires the authored advantaged MultiTargetSpecialist response. Its summon-health/power knob is valid only under the confirmed `AddPressureMultiTargetResetV1` contract; the existing health and offense bounds remain available for physically diagnosed duration or collapse pressure.
+
+Schema 52 introduces floor-progression policy v3 and enables Floor 2. Velka uses the frozen E4 cohorts and the default IntendedBalanced response. Her authored weak-target dive, all-party Bleed pressure, and Bleed-fed recovery make PrimaryTargetCollapse, PartyAttrition, and BossSustainDominance valid encounter outcomes; AddPressure is prohibited because the encounter has no summons. Only health and offense are approved. A BossSustain-dominated run therefore returns `Review` until a separately typed and validated Velka recovery adapter exists.
+
+Schema 53 introduces floor-progression policy v4 and enables Floor 4. Vaelor uses the frozen E4 cohorts and default IntendedBalanced response. His highest/lowest-health lance, all-party shards, and reflected direct damage admit PrimaryTargetCollapse and PartyAttrition while prohibiting BossSustainDominance and AddPressure. Health and offense are the only approved controls; reflection strength/window and Physical/Magical damage identity are explicit immutable boundaries. A reflection-specific imbalance must therefore exhaust or return `Review`, not reinterpret offense as a reflection adapter.
+
+Schema 54 introduces floor-progression policy v5 and enables Floor 5. Kharad uses the frozen E4 cohorts and the authored advantaged MultiTargetSpecialist response. Collapse, attrition, add pressure, and unmet priority objectives are valid identity outcomes; boss sustain is prohibited. Only offense is tunable. Guardian health is explicitly forbidden because both pillars inherit 10% of Kharad's MaxHealth and his Seal barrier also scales from MaxHealth, so a generic health change would silently retune the objective. Pillar identity, count, cadence, Resonance, and barrier behavior are immutable. Add/objective-dominated or duration-only violations therefore return `Review`. Floors 6 and 8–10 remain outside automatic search pending the same review standard.

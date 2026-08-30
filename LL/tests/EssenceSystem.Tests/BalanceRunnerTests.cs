@@ -1703,6 +1703,7 @@ public sealed class BalanceRunnerTests
             Assert.Contains("Region 1 Scaling Validation", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Floor-to-Progression Policy Evaluation", File.ReadAllText(paths.LatestMarkdownPath));
             Assert.Contains("Automatic Floor-to-Progression Calibration", File.ReadAllText(paths.LatestMarkdownPath));
+            Assert.Contains("Region 1 Coordination", File.ReadAllText(paths.LatestMarkdownPath));
             using var gearJson = JsonDocument.Parse(File.ReadAllText(paths.LatestGearPackagesJsonPath));
             Assert.Single(gearJson.RootElement.EnumerateArray());
             using var essenceJson = JsonDocument.Parse(File.ReadAllText(paths.LatestEssenceBuildsJsonPath));
@@ -1778,6 +1779,14 @@ public sealed class BalanceRunnerTests
             using var scalingValidationJson = JsonDocument.Parse(
                 File.ReadAllText(paths.LatestScalingValidationJsonPath));
             Assert.Single(scalingValidationJson.RootElement.GetProperty("floors").EnumerateArray());
+            using var automaticFloorProgressionJson = JsonDocument.Parse(
+                File.ReadAllText(paths.LatestAutomaticFloorProgressionCalibrationJsonPath));
+            Assert.Equal(
+                "Disabled",
+                automaticFloorProgressionJson.RootElement
+                    .GetProperty("regionCoordination")
+                    .GetProperty("verdict")
+                    .GetString());
             Assert.Throws<InvalidOperationException>(() =>
                 new BalanceReportWriter().Write(report, outputRoot));
         }

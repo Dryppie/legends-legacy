@@ -1,7 +1,7 @@
 # Current Balancing Functionality
 
 Last reconciled with the implementation: **2026-08-30**  
-Current combined report schema: **48**
+Current combined report schema: **54**
 
 This document describes the balancing functionality that currently exists in the LegendsLegacy repository. It is an implementation reference, not a future design proposal. Historical measured examples are identified as such and must not be treated as permanent balance targets.
 
@@ -28,8 +28,8 @@ The pipeline currently supports:
 - multi-restart P95/P99 elite search, local challenges, party search, holdouts, curated-player comparison, and experimental audit modes;
 - independent Region 1 scaling holdout validation;
 - authored encounter-specific party-family response profiles and progression-cohort evaluation;
-- versioned Floor 1 and Floor 7 progression policies with simulation-free hard-constraint evaluation;
-- opt-in constrained Floor 1 and Floor 7 health/offense/ability-healing search with independent holdouts and unapplied proposed patches;
+- versioned Floor 1–5 and Floor 7 progression policies with simulation-free hard-constraint evaluation;
+- opt-in constrained policy-floor health/offense/ability-healing/add-payload/distributed-damage search with independent floor and Region holdouts plus one unapplied atomic Region proposal;
 - opt-in 5/10/15-player balance-only scale probes with performance measurements;
 - opt-in neutral-reference Region 1 health/offense/regeneration/add-pressure/distributed-attrition fault injection, an always-emitted CleanseDemand prerequisite audit, and a diagnostic E4/E5/E6 progression-fidelity matrix;
 - a simulation-free population-replication policy evaluator for comparing completed reliability snapshots; and
@@ -664,7 +664,20 @@ CLI developer runs use one trial per roster and therefore report `DeveloperProfi
 
 ### 4.22 Floor-to-progression policy evaluation
 
-Floor progression policy evaluator algorithm version 1 loads the versioned author-owned policy before combat begins and fingerprints its canonical JSON for report provenance. Schema 47 pilots Floor 1's general health/offense pressure policy and Floor 7's health/ability-healing policy.
+Floor progression policy evaluator algorithm version 1 loads the versioned author-owned policy before combat begins and fingerprints its canonical JSON for report provenance. Schema 47 pilots Floor 1's general health/offense pressure policy and Floor 7's health/ability-healing policy. Schema 51 adds Floor 3's reviewed AddPressure policy: frozen E4 cohorts, an advantaged MultiTargetSpecialist response, PrimaryTargetCollapse prohibition, ordinary health/offense bounds, and the exact authored summon-health/power adapter gated by `AddPressureMultiTargetResetV1`. Schema 52 adds Floor 2's reviewed weak-target, party-attrition, and boss-recovery identity with only health/offense mutation authority. BossSustain evidence remains valid identity evidence but intentionally returns `Review` because the Eydis-specific healing adapter cannot tune Velka. Schema 53 adds Floor 4's reviewed collapse/attrition identity with immutable reflection and damage-type identity. Schema 54 switches the CLI to policy v5 and adds Floor 5's MultiTarget/objective identity with offense as its only approved knob. Guardian health is forbidden because Kharad's pillars and barrier inherit MaxHealth; pillar count/cadence, Resonance, and barrier behavior remain immutable.
+
+The selected policy is `Configuration/floor-progression-policy.v5.json`; v1–v4 remain packaged as historical revisions. Current coverage is:
+
+| Floor | Primary cohort | Approved knobs | Mechanic/family gate |
+| ---: | --- | --- | --- |
+| 1 | E4 P75 | Health, offense, exact distributed damage | Reviewed distributed-attrition exception; no relative-family promise |
+| 2 | E4 P75 | Health, offense | IntendedBalanced; Velka sustain has no approved adapter |
+| 3 | E4 P75 | Health, offense, authored summon health/power | Advantaged MultiTarget plus `AddPressureMultiTargetResetV1` |
+| 4 | E4 P75 | Health, offense | IntendedBalanced; reflection and damage-type identity immutable |
+| 5 | E4 P75 | Offense | Advantaged MultiTarget; pillar/objective, Resonance, barrier, and Guardian health immutable |
+| 7 | E6 P75 | Health, exact ability healing | Advantaged SingleTarget |
+
+Floors 6 and 8–10 have no checked-in automatic-calibration policy. Their absence is an intentional review gate, not an implied default policy.
 
 The evaluator reuses evidence already produced by the same run. It resolves the authored P75 primary profile from the representative library and World Tower trials, the matching P50/P90 guardrails from party-family progression evidence, the certified P95 guardrail from elite holdouts, and required family responses from party-family evaluation. It does not change cohort selection or run additional combat.
 
@@ -672,13 +685,15 @@ Each floor reports cohort-resolution status; primary clear-rate, duration, media
 
 ### 4.23 Automatic Floor-to-Progression calibration pilot
 
-Automatic floor progression calibrator algorithm version 1 is disabled by default and enabled with `--floor-progression-calibration`. It operates only on policy-enabled pilot floors and changes one typed continuous parameter group at a time on detached runtime definitions: Guardian health, Guardian offense, or Guardian ability healing.
+Automatic floor progression calibrator algorithm version 3 is disabled by default and enabled with `--floor-progression-calibration`. It operates only on policy-enabled pilot floors and changes one typed continuous parameter group at a time on detached runtime definitions: Guardian health, Guardian offense, Guardian ability healing, authored summon health/power, or an authored ability-specific distributed-damage coefficient.
 
-Physical failure evidence selects offense for primary-collapse or party-attrition pressure and ability healing for boss-sustain pressure. Health is available for a duration-only violation when the primary clear-rate target already passes. If the physically supported knob is not policy-approved, the floor returns `Review` without searching a substitute parameter.
+Physical failure evidence selects offense for primary-collapse pressure, the ability-specific distributed adapter for party attrition when authorized (otherwise offense), the summon-payload adapter for add pressure, and ability healing for boss-sustain pressure. Health is available for a duration-only violation when the primary clear-rate target already passes. If the physically supported knob is not policy-approved, the floor returns `Review` without searching a substitute parameter.
 
 The sensitivity grid uses common seeds, stops at the nearest candidate satisfying every hard constraint, and performs bounded midpoint refinement toward factor `1.0`. Every candidate independently evaluates the authored P75 primary cohort, P50/P90 progression guardrails, certified-P95 builds, required exact party families, progression ordering, outcome targets, and dominant-failure identity. Candidate and family rosters remain frozen throughout the comparison.
 
-The selected factor and a neutral baseline are then evaluated on an independently derived holdout seed. A patch is proposed only when the holdout candidate also satisfies every hard constraint. The artifact records every evaluated factor and rejection reason, normalized change distance, policy/content fingerprints, combat counts, and a machine-readable one-field patch. Patches require human approval, have `applied: false`, and are never written to production content by the balance command.
+The selected factor and a neutral baseline are then evaluated on an independently derived holdout seed. A patch is proposed only when the holdout candidate also satisfies every hard constraint. The artifact records every evaluated factor and rejection reason, normalized change distance, policy/content fingerprints, combat counts, and machine-readable field changes (the summon adapter changes its paired health and power fields together as one parameter group). Patches require human approval, have `applied: false`, and are never written to production content by the balance command.
+
+Schema 50 adds Region coordinator algorithm version 1. It re-evaluates every policy-enabled final factor with a second independent Region holdout seed and repeats the primary, progression, certified-P95, family, identity, and mechanic gates. It also checks the complete authored Region 1 sequence for nondecreasing recommended CR and target benchmark power, then checks adjacent enabled policies for nondecreasing primary character level/Essence slots and bounded clear-rate/duration inversions. Any unavailable or failed floor, holdout, or ordering constraint returns `Review` and withholds the Region patch. When all gates pass, the report contains one fingerprinted, atomic, human-approval-required patch with `applied: false`; individual floor patches are supporting evidence only.
 
 ### 4.24 Balance-only 5/10/15-player scale probes
 
@@ -826,7 +841,7 @@ Run help with:
 | `--calibration-iterations` | 10 | Shared-factor binary-search iterations |
 | `--assisted-calibration` | Off | Evidence-gated single-parameter calibration |
 | `--assisted-calibration-simulations` | 0 | Assisted trials/evaluation; zero inherits Tower trials |
-| `--floor-progression-calibration` | Off | Run the Floor 1/7 constrained continuous-knob pilot |
+| `--floor-progression-calibration` | Off | Run policy-enabled constrained continuous-knob calibration |
 | `--floor-progression-simulations` | 10 | Common-seed trials per search candidate |
 | `--floor-progression-holdout-simulations` | 25 | Independent holdout trials per candidate |
 | `--floor-progression-sensitivity-points` | 5 | Ordered points between authored value and approved bound |
@@ -1044,7 +1059,9 @@ Current blockers and qualifications are:
 - release party-family certification depends on certified elite evidence;
 - scale probes remain diagnostic and cannot create or certify gameplay variants; and
 - schema-46 evidence confirms all five supported physical diagnostics and the AddPressure family contract, shows that Regeneration and DistributedAttrition family proxies remain insufficient, confirms the earlier P75 power inversion was a generated-population-composition confound, and prevents cross-population claims from silently mixing upstream cohort protocols; fixed three-stage progression adoption remains unsupported, and the uncensored attrition burden metric has stable internal direction but only weak holdout outcome prediction;
-- assisted calibration currently supports only conservative offense/regeneration mappings and does not yet enforce complete author-owned identity constraints.
+- legacy assisted calibration remains narrower than the automatic floor-policy workflow and does not enforce the complete author-owned floor contract; use automatic floor calibration for policy, family, elite, and Region gates.
+
+Automatic floor calibration schema 49 supports five typed, detached continuous adapters: Guardian health, Guardian offense, ability healing, authored summon health/power, and the exact authored distributed-damage effect. The summon adapter scales Morrowmaw's authored Broodling health and power without changing wave count or cadence and is blocked unless policy and candidate evidence satisfy the confirmed MultiTarget reset contract. The distributed adapter scales only Garran's authored all-enemy `Slam the Gates` coefficient, requires direct attributed multi-target reach, and requires either an approved family contract or an explicit reviewed policy exception. The checked-in Floor 1 pilot carries such an exception because no relative DistributedAttrition family premise is currently certified; it does not manufacture one. All generated patches remain unapplied and require human approval.
 
 These are evidence blockers, not missing safety behavior: the system reports non-certification rather than silently approving incomplete evidence.
 
@@ -1053,6 +1070,7 @@ These are evidence blockers, not missing safety behavior: the system reports non
 ### 10.1 Scope limitations
 
 - Only World Tower Region 1 Floors 1–10 have a complete progression-band and authored-response implementation.
+- Automatic floor-policy coverage currently includes Floors 1–5 and 7; Floors 6 and 8–10 remain intentionally unauthored.
 - Additional progression bands are not implemented.
 - There is no Admin Dashboard encounter-balancing workspace yet.
 - No production write/apply workflow is implemented.
@@ -1063,7 +1081,7 @@ These are evidence blockers, not missing safety behavior: the system reports non
 - The default generic benchmark objective uses build-specific RNG streams.
 - Generic build fitness is an equal-weight average of five scenarios.
 - Party capability is not predicted by summing member profiles; real encounter simulation remains required.
-- Party-family response profiles and constraint thresholds are currently code-owned rather than loaded from an author-editable balance policy.
+- Party-family response profiles remain code-owned. Floor progression cohorts, thresholds, identities, allowed knobs, and immutable boundaries are loaded from the author-editable versioned JSON policy.
 - Some observed failure modes do not have authoritative encounter causes.
 - The current terminal-failure enum distinguishes party defeat, timeout, and other; explicit enrage/objective failure requires encounter support.
 - Encounter-specific optimization searches the already evaluated generic candidate population rather than a larger boss-specific genome space.
@@ -1178,4 +1196,4 @@ This runs the frozen workstation diagnostic workload. Establish a separate basel
 - [Encounter scale-probe performance baseline](encounter-scale-probe-performance-baseline-v1.md)
 - [Region 1 balance-framework reliability audit](region-one-balance-framework-reliability-audit.md)
 - [Region 1 affected-family contract decision](region-one-family-contract-decision.md)
-- [Automatic floor-to-progression calibration plan](automatic-floor-progression-calibration-plan.md) — Slices 1–2 implemented
+- [Automatic floor-to-progression calibration plan](automatic-floor-progression-calibration-plan.md) — Slices 1–4 implemented for policy-enabled floors

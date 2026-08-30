@@ -24,6 +24,10 @@
   <ItemGroup>
     <None Update="Configuration\elite-certification-policy.v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Configuration\floor-progression-policy.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Configuration\floor-progression-policy.v2.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Configuration\floor-progression-policy.v3.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Configuration\floor-progression-policy.v4.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Configuration\floor-progression-policy.v5.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Fixtures\top-player-builds.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

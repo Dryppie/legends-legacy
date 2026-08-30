@@ -38,14 +38,58 @@ public enum FloorProgressionConstraintKind
     ProgressionOrdering,
     FailureMode,
     PartyFamily,
-    EliteGuardrail
+    EliteGuardrail,
+    MechanicContract,
+    RegionOrdering,
+    AtomicProposal
 }
 
 public enum FloorCalibrationKnob
 {
     GuardianHealthMultiplier,
     GuardianOffenseMultiplier,
-    GuardianAbilityHealingMultiplier
+    GuardianAbilityHealingMultiplier,
+    GuardianSummonHealthPowerMultiplier,
+    GuardianDistributedDamageMultiplier
+}
+
+public enum FloorCalibrationPhysicalContract
+{
+    AddPressureV1,
+    DistributedAttritionV1
+}
+
+public sealed record FloorCalibrationPolicyException(
+    string ExceptionId,
+    string Rationale)
+{
+    public FloorCalibrationPolicyException Validate()
+    {
+        if (string.IsNullOrWhiteSpace(ExceptionId))
+            throw new InvalidOperationException("A floor calibration policy exception ID is required.");
+        if (string.IsNullOrWhiteSpace(Rationale))
+            throw new InvalidOperationException($"Floor calibration policy exception '{ExceptionId}' requires a rationale.");
+        return this;
+    }
+}
+
+public sealed record FloorCalibrationApplicabilityPolicy(
+    FloorCalibrationPhysicalContract PhysicalContract,
+    string? ApprovedFamilyContractId = null,
+    FloorCalibrationPolicyException? FamilyContractException = null)
+{
+    public FloorCalibrationApplicabilityPolicy Validate()
+    {
+        var approved = !string.IsNullOrWhiteSpace(ApprovedFamilyContractId);
+        var excepted = FamilyContractException is not null;
+        if (approved == excepted)
+        {
+            throw new InvalidOperationException(
+                $"Calibration contract '{PhysicalContract}' requires exactly one approved family contract or explicit policy exception.");
+        }
+        FamilyContractException?.Validate();
+        return this;
+    }
 }
 
 public sealed record FloorProgressionRange(double Minimum, double Maximum)
@@ -168,7 +212,8 @@ public sealed record FloorProgressionIdentityPolicy(
 
 public sealed record FloorCalibrationKnobPolicy(
     FloorCalibrationKnob Knob,
-    FloorProgressionRange AdjustmentFactorBounds)
+    FloorProgressionRange AdjustmentFactorBounds,
+    FloorCalibrationApplicabilityPolicy? Applicability = null)
 {
     public FloorCalibrationKnobPolicy Validate()
     {
@@ -218,7 +263,10 @@ public sealed record FloorProgressionPolicy(
         if (AllowedKnobs.Select(knob => knob.Knob).Distinct().Count() != AllowedKnobs.Count)
             throw new InvalidOperationException($"Floor {Floor} progression policy calibration knobs must be unique.");
         foreach (var knob in AllowedKnobs)
+        {
             knob.Validate();
+            ValidateApplicability(knob);
+        }
         var forbidden = ForbiddenChanges.ToHashSet(StringComparer.OrdinalIgnoreCase);
         if (!RequiredForbiddenChanges.IsSubsetOf(forbidden))
         {
@@ -229,12 +277,57 @@ public sealed record FloorProgressionPolicy(
             throw new InvalidOperationException($"Floor {Floor} progression policy forbidden changes must be unique.");
         return this;
     }
+
+    private void ValidateApplicability(FloorCalibrationKnobPolicy knob)
+    {
+        if (knob.Knob is not (FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier
+            or FloorCalibrationKnob.GuardianDistributedDamageMultiplier))
+        {
+            if (knob.Applicability is not null)
+                throw new InvalidOperationException($"Floor {Floor} knob '{knob.Knob}' does not use a mechanic applicability contract.");
+            return;
+        }
+        if (knob.Applicability is null)
+            throw new InvalidOperationException($"Floor {Floor} knob '{knob.Knob}' requires a mechanic applicability contract.");
+        knob.Applicability.Validate();
+
+        if (knob.Knob == FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier)
+        {
+            if (knob.Applicability.PhysicalContract != FloorCalibrationPhysicalContract.AddPressureV1
+                || !string.Equals(
+                    knob.Applicability.ApprovedFamilyContractId,
+                    "AddPressureMultiTargetResetV1",
+                    StringComparison.Ordinal)
+                || knob.Applicability.FamilyContractException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Floor {Floor} add-health/power tuning requires the confirmed AddPressureMultiTargetResetV1 contract.");
+            }
+            if (!Identity.IntendedFailureModes.Contains(WorldTowerObservedFailureMode.AddPressure)
+                || !Identity.RequiredFamilyResponses.Any(response =>
+                    response.Family == PartyFamilyKind.MultiTargetSpecialist
+                    && response.ExpectedDisposition == PartyFamilyDisposition.Advantaged))
+            {
+                throw new InvalidOperationException(
+                    $"Floor {Floor} add-health/power tuning requires AddPressure identity and an advantaged MultiTargetSpecialist response.");
+            }
+            return;
+        }
+
+        if (knob.Applicability.PhysicalContract != FloorCalibrationPhysicalContract.DistributedAttritionV1
+            || !Identity.IntendedFailureModes.Contains(WorldTowerObservedFailureMode.PartyAttrition))
+        {
+            throw new InvalidOperationException(
+                $"Floor {Floor} distributed-damage tuning requires the DistributedAttritionV1 physical contract and PartyAttrition identity.");
+        }
+    }
 }
 
 public sealed record FloorProgressionPolicySuite(
     string PolicyId,
     int PolicyVersion,
-    IReadOnlyList<FloorProgressionPolicy> Floors)
+    IReadOnlyList<FloorProgressionPolicy> Floors,
+    FloorProgressionRegionCoordinationPolicy? RegionCoordination = null)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -258,6 +351,7 @@ public sealed record FloorProgressionPolicySuite(
             throw new InvalidOperationException("Floor progression policy suite contains duplicate floors.");
         foreach (var floor in Floors)
             floor.Validate();
+        (RegionCoordination ?? FloorProgressionRegionCoordinationPolicy.V1).Validate();
         return this;
     }
 
@@ -275,6 +369,33 @@ public sealed record FloorProgressionPolicySuite(
         return (JsonSerializer.Deserialize<FloorProgressionPolicySuite>(File.ReadAllText(fullPath), JsonOptions)
                 ?? throw new InvalidOperationException("Floor progression policy JSON was empty."))
             .Validate();
+    }
+}
+
+public sealed record FloorProgressionRegionCoordinationPolicy(
+    double MaximumLaterFloorClearRateAdvantage = 0.10,
+    double MaximumLaterFloorMedianDurationDecreaseSeconds = 15,
+    bool RequireMonotonicRecommendedCr = true,
+    bool RequireMonotonicTargetBenchmarkPower = true,
+    bool RequireMonotonicPrimaryCohortProgression = true)
+{
+    public static FloorProgressionRegionCoordinationPolicy V1 { get; } = new();
+
+    public FloorProgressionRegionCoordinationPolicy Validate()
+    {
+        if (!double.IsFinite(MaximumLaterFloorClearRateAdvantage)
+            || MaximumLaterFloorClearRateAdvantage is < 0 or > 0.50)
+        {
+            throw new InvalidOperationException(
+                "Region coordination maximum later-floor clear-rate advantage must be between 0 and 0.50.");
+        }
+        if (!double.IsFinite(MaximumLaterFloorMedianDurationDecreaseSeconds)
+            || MaximumLaterFloorMedianDurationDecreaseSeconds is < 0 or > 300)
+        {
+            throw new InvalidOperationException(
+                "Region coordination maximum later-floor median-duration decrease must be between 0 and 300 seconds.");
+        }
+        return this;
     }
 }
 

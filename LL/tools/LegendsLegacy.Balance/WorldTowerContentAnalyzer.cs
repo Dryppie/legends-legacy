@@ -132,6 +132,11 @@ public sealed record WorldTowerTrialSnapshot(
     public int GuardianInjectedDistributedDamageHitCount { get; init; }
     public int GuardianInjectedDistributedDamageWaveCount { get; init; }
     public int GuardianInjectedDistributedDamagePeakTargetsPerWave { get; init; }
+    public int GuardianCalibratedDistributedDamage { get; init; }
+    public double GuardianCalibratedDistributedDamagePerSecond { get; init; }
+    public int GuardianCalibratedDistributedDamageHitCount { get; init; }
+    public int GuardianCalibratedDistributedDamageWaveCount { get; init; }
+    public int GuardianCalibratedDistributedDamagePeakTargetsPerWave { get; init; }
     public int? FirstFriendlyDeathTick { get; init; }
     public int PeakActiveHostileCombatants { get; init; }
     public int PeakActiveHostileSummons { get; init; }
@@ -379,6 +384,10 @@ public sealed class WorldTowerContentAnalyzer(
             throw new ArgumentOutOfRangeException(nameof(request.RegenerationAdjustmentFactor));
         if (!double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(request.AbilityHealingAdjustmentFactor));
+        if (!double.IsFinite(request.SummonHealthPowerAdjustmentFactor) || request.SummonHealthPowerAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.SummonHealthPowerAdjustmentFactor));
+        if (!double.IsFinite(request.DistributedDamageAdjustmentFactor) || request.DistributedDamageAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.DistributedDamageAdjustmentFactor));
         if (request.Simulations is < 1 or > 1_000)
             throw new ArgumentOutOfRangeException(nameof(request.Simulations));
         if (request.MaxTicks is < 1 or > 100_000)
@@ -410,7 +419,9 @@ public sealed class WorldTowerContentAnalyzer(
                 request.RunSeed,
                 trial,
                 request.MaxTicks,
-                request.AbilityHealingAdjustmentFactor))
+                request.AbilityHealingAdjustmentFactor,
+                authoredSummonHealthPowerMultiplier: request.SummonHealthPowerAdjustmentFactor,
+                authoredDistributedDamageMultiplier: request.DistributedDamageAdjustmentFactor))
             .ToArray();
         return CreateCalibrationEvaluation(trials);
     }
@@ -427,6 +438,10 @@ public sealed class WorldTowerContentAnalyzer(
             throw new ArgumentOutOfRangeException(nameof(request.DamageAdjustmentFactor));
         if (!double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(request.AbilityHealingAdjustmentFactor));
+        if (!double.IsFinite(request.SummonHealthPowerAdjustmentFactor) || request.SummonHealthPowerAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.SummonHealthPowerAdjustmentFactor));
+        if (!double.IsFinite(request.DistributedDamageAdjustmentFactor) || request.DistributedDamageAdjustmentFactor <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.DistributedDamageAdjustmentFactor));
         if (request.Simulations is < 1 or > 1_000)
             throw new ArgumentOutOfRangeException(nameof(request.Simulations));
         if (request.MaxTicks is < 1 or > 100_000)
@@ -449,7 +464,9 @@ public sealed class WorldTowerContentAnalyzer(
                 request.RunSeed,
                 trial,
                 request.MaxTicks,
-                request.AbilityHealingAdjustmentFactor))
+                request.AbilityHealingAdjustmentFactor,
+                authoredSummonHealthPowerMultiplier: request.SummonHealthPowerAdjustmentFactor,
+                authoredDistributedDamageMultiplier: request.DistributedDamageAdjustmentFactor))
             .ToArray();
         return CreateCalibrationEvaluation(trials);
     }
@@ -464,7 +481,9 @@ public sealed class WorldTowerContentAnalyzer(
             throw new ArgumentOutOfRangeException(nameof(request.MaxTicks));
         if (!double.IsFinite(request.HealthAdjustmentFactor) || request.HealthAdjustmentFactor <= 0
             || !double.IsFinite(request.DamageAdjustmentFactor) || request.DamageAdjustmentFactor <= 0
-            || !double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0)
+            || !double.IsFinite(request.AbilityHealingAdjustmentFactor) || request.AbilityHealingAdjustmentFactor <= 0
+            || !double.IsFinite(request.SummonHealthPowerAdjustmentFactor) || request.SummonHealthPowerAdjustmentFactor <= 0
+            || !double.IsFinite(request.DistributedDamageAdjustmentFactor) || request.DistributedDamageAdjustmentFactor <= 0)
             throw new ArgumentOutOfRangeException(nameof(request), "Party-family calibration factors must be positive and finite.");
         var definition = towerDefinitions.GetFloors().SingleOrDefault(floor => floor.FloorNumber == request.Floor)
                          ?? throw new InvalidOperationException($"World Tower floor {request.Floor} was not found.");
@@ -488,7 +507,9 @@ public sealed class WorldTowerContentAnalyzer(
                 request.RunSeed,
                 trial,
                 request.MaxTicks,
-                request.AbilityHealingAdjustmentFactor))
+                request.AbilityHealingAdjustmentFactor,
+                authoredSummonHealthPowerMultiplier: request.SummonHealthPowerAdjustmentFactor,
+                authoredDistributedDamageMultiplier: request.DistributedDamageAdjustmentFactor))
             .ToArray();
     }
 
@@ -508,6 +529,10 @@ public sealed class WorldTowerContentAnalyzer(
         {
             MedianFriendlyDeaths = Round(Median(orderedDeaths), 2),
             MedianRemainingHealthRatio = Round(Median(orderedHealth), 4),
+            AverageCalibratedDistributedDamagePerSecond = Round(
+                trials.Average(trial => trial.GuardianCalibratedDistributedDamagePerSecond), 2),
+            AverageCalibratedDistributedDamagePeakTargetsPerWave = Round(
+                trials.Average(trial => trial.GuardianCalibratedDistributedDamagePeakTargetsPerWave), 2),
             PrimaryObservedFailureModeCounts = trials
                 .Select(trial => trial.FailureDiagnostic.PrimaryObservedFailureMode)
                 .Where(mode => mode != WorldTowerObservedFailureMode.None)
@@ -593,7 +618,9 @@ public sealed class WorldTowerContentAnalyzer(
         double guardianAbilityHealingMultiplier = 1,
         int guardianAdditionalSummonCopies = 0,
         double guardianAdditionalSummonPotencyMultiplier = 1,
-        double guardianDistributedDamageMultiplier = 1)
+        double guardianDistributedDamageMultiplier = 1,
+        double authoredSummonHealthPowerMultiplier = 1,
+        double authoredDistributedDamageMultiplier = 1)
     {
         var selectionSeed = StableRandom.Seed(
             "balance-world-tower-party-v1",
@@ -618,7 +645,9 @@ public sealed class WorldTowerContentAnalyzer(
             guardianAbilityHealingMultiplier,
             guardianAdditionalSummonCopies,
             guardianAdditionalSummonPotencyMultiplier,
-            guardianDistributedDamageMultiplier);
+            guardianDistributedDamageMultiplier,
+            authoredSummonHealthPowerMultiplier,
+            authoredDistributedDamageMultiplier);
     }
 
     private static RepresentativeEssenceProfileSnapshot SelectProfile(

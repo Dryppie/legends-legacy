@@ -86,7 +86,9 @@ public sealed record EncounterCalibrationEvaluationRequest(
     double DefenseAdjustmentFactor = 1,
     double ResistanceAdjustmentFactor = 1,
     double RegenerationAdjustmentFactor = 1,
-    double AbilityHealingAdjustmentFactor = 1);
+    double AbilityHealingAdjustmentFactor = 1,
+    double SummonHealthPowerAdjustmentFactor = 1,
+    double DistributedDamageAdjustmentFactor = 1);
 
 public sealed record EncounterCalibrationEvaluation(
     int TrialCount,
@@ -98,6 +100,8 @@ public sealed record EncounterCalibrationEvaluation(
 {
     public double MedianFriendlyDeaths { get; init; }
     public double MedianRemainingHealthRatio { get; init; }
+    public double AverageCalibratedDistributedDamagePerSecond { get; init; }
+    public double AverageCalibratedDistributedDamagePeakTargetsPerWave { get; init; }
     public IReadOnlyDictionary<WorldTowerObservedFailureMode, int> PrimaryObservedFailureModeCounts { get; init; } =
         new Dictionary<WorldTowerObservedFailureMode, int>();
 }

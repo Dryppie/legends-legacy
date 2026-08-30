@@ -1,6 +1,6 @@
 {
-  "policyId": "WorldTowerRegionOneFloorProgressionPilotV1",
-  "policyVersion": 1,
+  "policyId": "WorldTowerRegionOneFloorProgressionPilotV2",
+  "policyVersion": 2,
   "regionCoordination": {
     "maximumLaterFloorClearRateAdvantage": 0.10,
     "maximumLaterFloorMedianDurationDecreaseSeconds": 15,
@@ -57,6 +57,61 @@
               "exceptionId": "RegionOneFloor1DistributedAttritionPilotV1",
               "rationale": "The exact authored all-party effect and confirmed direct physical-reach contract are sufficient for this review-only pilot; no relative family promise is asserted."
             }
+          }
+        }
+      ],
+      "forbiddenChanges": [
+        "requiredSlots",
+        "summonIdentity",
+        "abilityIdentity",
+        "productionPartyRules"
+      ]
+    },
+    {
+      "floor": 3,
+      "policyVersion": 1,
+      "primaryCohort": {
+        "profileId": "E4_P75",
+        "characterLevel": 30,
+        "essenceSlots": 4,
+        "gearPackageId": "T1_Rare_Exceptional_Balanced"
+      },
+      "guardrails": {
+        "undergearedProfileId": "E4_P50",
+        "undergearedMaximumClearRate": 0.35,
+        "strongProfileId": "E4_P90",
+        "strongMinimumClearRate": 0.70,
+        "eliteCohortId": "certified-p95",
+        "eliteMinimumClearRate": 0.80
+      },
+      "targets": {
+        "clearRate": { "minimum": 0.55, "maximum": 0.70 },
+        "medianDurationSeconds": { "minimum": 60, "maximum": 90 },
+        "maximumMedianFriendlyDeaths": 1,
+        "minimumMedianRemainingHealth": 0.10
+      },
+      "identity": {
+        "intendedFailureModes": ["AddPressure"],
+        "prohibitedDominantFailureModes": ["PrimaryTargetCollapse"],
+        "requiredFamilyResponses": [
+          { "family": "MultiTargetSpecialist", "expectedDisposition": "Advantaged" }
+        ]
+      },
+      "allowedKnobs": [
+        {
+          "knob": "GuardianHealthMultiplier",
+          "adjustmentFactorBounds": { "minimum": 0.80, "maximum": 1.20 }
+        },
+        {
+          "knob": "GuardianOffenseMultiplier",
+          "adjustmentFactorBounds": { "minimum": 0.85, "maximum": 1.15 }
+        },
+        {
+          "knob": "GuardianSummonHealthPowerMultiplier",
+          "adjustmentFactorBounds": { "minimum": 0.75, "maximum": 1.25 },
+          "applicability": {
+            "physicalContract": "AddPressureV1",
+            "approvedFamilyContractId": "AddPressureMultiTargetResetV1"
           }
         }
       ],

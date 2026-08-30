@@ -1050,6 +1050,22 @@ public sealed class BalanceReportWriter
             : string.Join(
                 Environment.NewLine,
                 report.AutomaticFloorProgressionCalibration.Warnings.Select(warning => $"- {EscapeCell(warning)}"));
+        var regionCoordination = report.AutomaticFloorProgressionCalibration.RegionCoordination;
+        var regionCoordinationRows = regionCoordination.Constraints.Count == 0
+            ? "| — | — | — | — | Disabled |"
+            : string.Join(
+                Environment.NewLine,
+                regionCoordination.Constraints.Select(constraint =>
+                    $"| {EscapeCell(constraint.ConstraintId)} " +
+                    $"| {constraint.Kind} " +
+                    $"| {EscapeCell(constraint.Requirement)} " +
+                    $"| {(constraint.ObservedValue.HasValue ? constraint.ObservedValue.Value.ToString("F4", CultureInfo.InvariantCulture) : "—")} " +
+                    $"| {(constraint.Satisfied.HasValue ? constraint.Satisfied.Value ? "Pass" : "Fail" : "Unavailable")} |"));
+        var atomicRegionPatch = regionCoordination.ProposedPatch is null
+            ? "Withheld or not required."
+            : $"`{regionCoordination.ProposedPatch.ExpectedRegionFingerprint}` covering Floors " +
+              string.Join(", ", regionCoordination.ProposedPatch.FloorPatches.Select(patch => patch.Floor)) +
+              "; atomic, human approval required, applied=false.";
         var gitCommit = string.IsNullOrWhiteSpace(metadata.GitCommitHash)
             ? "Unavailable"
             : metadata.GitCommitHash;
@@ -1452,6 +1468,20 @@ public sealed class BalanceReportWriter
             {{automaticFloorCalibrationRows}}
 
             Candidate comparisons reuse common seeds. Holdout baseline and candidate evaluations use an independently derived seed. Search changes exactly one policy-approved parameter group on detached encounter definitions, requires every primary, progression, family, identity, and elite hard constraint to pass, and selects the closest valid factor to the authored value. Proposed patches are machine-readable review artifacts and are never applied by this command.
+
+            ### Region 1 Coordination v{{regionCoordination.AlgorithmVersion}}
+
+            **Region verdict:** `{{regionCoordination.Verdict}}`
+
+            **Independent Region holdouts / combat trials:** {{regionCoordination.HoldoutEvaluationCount}} / {{regionCoordination.TotalCombatTrials}}
+
+            **Atomic Region patch:** {{atomicRegionPatch}}
+
+            | Constraint | Kind | Requirement | Observed | Result |
+            | --- | --- | --- | ---: | --- |
+            {{regionCoordinationRows}}
+
+            The coordinator re-evaluates every policy-enabled final factor with one independently derived Region seed, including primary, P50/P90, certified-P95, party-family, identity, and mechanic gates. It checks full-Region recommended-CR and target-power monotonicity plus adjacent enabled-policy cohort, clear-rate, and duration ordering. Individual floor patches are evidence only; an actionable proposal exists only as the single atomic Region patch.
 
             ### Automatic Calibration Warnings
 

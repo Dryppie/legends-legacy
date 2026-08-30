@@ -5,7 +5,7 @@ namespace EssenceSystem.Tests;
 public sealed class FloorProgressionPolicyEvaluatorTests
 {
     [Fact]
-    public void Pilot_policy_loads_with_a_stable_fingerprint()
+    public void Current_policy_loads_with_reviewed_floor_authority_and_a_stable_fingerprint()
     {
         var repositoryRoot = FindRepositoryRoot();
         var path = Path.Combine(
@@ -14,13 +14,66 @@ public sealed class FloorProgressionPolicyEvaluatorTests
             "tools",
             "LegendsLegacy.Balance",
             "Configuration",
-            "floor-progression-policy.v1.json");
+            "floor-progression-policy.v5.json");
 
         var first = FloorProgressionPolicySuite.Load(path);
         var second = FloorProgressionPolicySuite.Load(path);
 
-        Assert.Equal("WorldTowerRegionOneFloorProgressionPilotV1", first.PolicyId);
-        Assert.Equal([1, 7], first.Floors.Select(floor => floor.Floor));
+        Assert.Equal("WorldTowerRegionOneFloorProgressionPilotV5", first.PolicyId);
+        Assert.Equal(5, first.PolicyVersion);
+        Assert.Equal([1, 2, 3, 4, 5, 7], first.Floors.Select(floor => floor.Floor));
+        var floorTwo = first.Floors.Single(floor => floor.Floor == 2);
+        Assert.Equal("E4_P75", floorTwo.PrimaryCohort.ProfileId);
+        Assert.Contains(WorldTowerObservedFailureMode.PrimaryTargetCollapse, floorTwo.Identity.IntendedFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.PartyAttrition, floorTwo.Identity.IntendedFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.BossSustainDominance, floorTwo.Identity.IntendedFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.AddPressure, floorTwo.Identity.ProhibitedDominantFailureModes);
+        Assert.Contains(floorTwo.Identity.RequiredFamilyResponses, response =>
+            response.Family == PartyFamilyKind.IntendedBalanced
+            && response.ExpectedDisposition == PartyFamilyDisposition.ShouldSucceed);
+        Assert.Equal(
+            [FloorCalibrationKnob.GuardianHealthMultiplier, FloorCalibrationKnob.GuardianOffenseMultiplier],
+            floorTwo.AllowedKnobs.Select(knob => knob.Knob));
+        Assert.DoesNotContain(floorTwo.AllowedKnobs, knob =>
+            knob.Knob == FloorCalibrationKnob.GuardianAbilityHealingMultiplier);
+        var floorThree = first.Floors.Single(floor => floor.Floor == 3);
+        Assert.Contains(WorldTowerObservedFailureMode.AddPressure, floorThree.Identity.IntendedFailureModes);
+        Assert.Contains(floorThree.Identity.RequiredFamilyResponses, response =>
+            response.Family == PartyFamilyKind.MultiTargetSpecialist
+            && response.ExpectedDisposition == PartyFamilyDisposition.Advantaged);
+        var summonKnob = floorThree.AllowedKnobs.Single(knob =>
+            knob.Knob == FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier);
+        Assert.Equal(FloorCalibrationPhysicalContract.AddPressureV1, summonKnob.Applicability?.PhysicalContract);
+        Assert.Equal("AddPressureMultiTargetResetV1", summonKnob.Applicability?.ApprovedFamilyContractId);
+        var floorFour = first.Floors.Single(floor => floor.Floor == 4);
+        Assert.Equal("E4_P75", floorFour.PrimaryCohort.ProfileId);
+        Assert.Contains(WorldTowerObservedFailureMode.PrimaryTargetCollapse, floorFour.Identity.IntendedFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.PartyAttrition, floorFour.Identity.IntendedFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.BossSustainDominance, floorFour.Identity.ProhibitedDominantFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.AddPressure, floorFour.Identity.ProhibitedDominantFailureModes);
+        Assert.Contains("reflectionIdentity", floorFour.ForbiddenChanges);
+        Assert.Contains("damageTypeIdentity", floorFour.ForbiddenChanges);
+        Assert.Equal(
+            [FloorCalibrationKnob.GuardianHealthMultiplier, FloorCalibrationKnob.GuardianOffenseMultiplier],
+            floorFour.AllowedKnobs.Select(knob => knob.Knob));
+        var floorFive = first.Floors.Single(floor => floor.Floor == 5);
+        Assert.Equal("E4_P75", floorFive.PrimaryCohort.ProfileId);
+        Assert.Contains(WorldTowerObservedFailureMode.AddPressure, floorFive.Identity.IntendedFailureModes);
+        Assert.Contains(WorldTowerObservedFailureMode.PriorityObjectiveUnmet, floorFive.Identity.IntendedFailureModes);
+        Assert.Contains(floorFive.Identity.RequiredFamilyResponses, response =>
+            response.Family == PartyFamilyKind.MultiTargetSpecialist
+            && response.ExpectedDisposition == PartyFamilyDisposition.Advantaged);
+        Assert.Equal(
+            [FloorCalibrationKnob.GuardianOffenseMultiplier],
+            floorFive.AllowedKnobs.Select(knob => knob.Knob));
+        Assert.DoesNotContain(floorFive.AllowedKnobs, knob =>
+            knob.Knob is FloorCalibrationKnob.GuardianHealthMultiplier
+                or FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier);
+        Assert.Contains("guardianHealthMultiplier", floorFive.ForbiddenChanges);
+        Assert.Contains("pillarHealthIdentity", floorFive.ForbiddenChanges);
+        Assert.Contains("resonanceIdentity", floorFive.ForbiddenChanges);
+        Assert.NotNull(first.RegionCoordination);
+        Assert.Equal(0.10, first.RegionCoordination.MaximumLaterFloorClearRateAdvantage);
         Assert.Equal(first.CreateFingerprint(), second.CreateFingerprint());
         Assert.Equal(64, first.CreateFingerprint().Length);
     }
@@ -34,6 +87,65 @@ public sealed class FloorProgressionPolicyEvaluatorTests
 
         Assert.Contains("abilityIdentity", exception.Message);
         Assert.Contains("productionPartyRules", exception.Message);
+    }
+
+    [Fact]
+    public void Add_health_power_knob_requires_the_confirmed_specialist_contract()
+    {
+        var policy = CreatePolicy() with
+        {
+            Identity = new FloorProgressionIdentityPolicy(
+                [WorldTowerObservedFailureMode.AddPressure],
+                [WorldTowerObservedFailureMode.PrimaryTargetCollapse],
+                [new FloorProgressionFamilyPolicy(
+                    PartyFamilyKind.MultiTargetSpecialist,
+                    PartyFamilyDisposition.Advantaged)]),
+            AllowedKnobs =
+            [
+                new FloorCalibrationKnobPolicy(
+                    FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier,
+                    new FloorProgressionRange(0.75, 1.25))
+            ]
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() => policy.Validate());
+
+        Assert.Contains("applicability contract", exception.Message);
+    }
+
+    [Fact]
+    public void Distributed_damage_knob_requires_family_authority_or_an_explicit_exception()
+    {
+        var policy = CreatePolicy() with
+        {
+            AllowedKnobs =
+            [
+                new FloorCalibrationKnobPolicy(
+                    FloorCalibrationKnob.GuardianDistributedDamageMultiplier,
+                    new FloorProgressionRange(0.75, 1.25),
+                    new FloorCalibrationApplicabilityPolicy(
+                        FloorCalibrationPhysicalContract.DistributedAttritionV1))
+            ]
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() => policy.Validate());
+
+        Assert.Contains("approved family contract or explicit policy exception", exception.Message);
+    }
+
+    [Fact]
+    public void Policy_rejects_invalid_region_ordering_tolerance()
+    {
+        var suite = new FloorProgressionPolicySuite(
+            "test-policy",
+            1,
+            [CreatePolicy()],
+            new FloorProgressionRegionCoordinationPolicy(
+                MaximumLaterFloorClearRateAdvantage: 0.60));
+
+        var exception = Assert.Throws<InvalidOperationException>(() => suite.Validate());
+
+        Assert.Contains("clear-rate advantage", exception.Message);
     }
 
     [Fact]

@@ -34,7 +34,7 @@ public sealed class ProductionBalanceRunner(
     AutomaticFloorProgressionCalibrator automaticFloorProgressionCalibrator,
     TimeProvider timeProvider)
 {
-    public const int BalanceSchemaVersion = 48;
+    public const int BalanceSchemaVersion = 54;
     public const string SmokeScenarioId = "production-essence-smoke-1v1";
 
     public BalanceRunReport Run(BalanceRunRequest request)

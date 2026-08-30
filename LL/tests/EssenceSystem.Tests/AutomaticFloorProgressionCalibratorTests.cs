@@ -8,6 +8,8 @@ public sealed class AutomaticFloorProgressionCalibratorTests
     [InlineData(FloorCalibrationKnob.GuardianHealthMultiplier, WorldTowerObservedFailureMode.None, 0.65, 1_000)]
     [InlineData(FloorCalibrationKnob.GuardianOffenseMultiplier, WorldTowerObservedFailureMode.PartyAttrition, 0.20, 700)]
     [InlineData(FloorCalibrationKnob.GuardianAbilityHealingMultiplier, WorldTowerObservedFailureMode.BossSustainDominance, 0.20, 700)]
+    [InlineData(FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier, WorldTowerObservedFailureMode.AddPressure, 0.20, 700)]
+    [InlineData(FloorCalibrationKnob.GuardianDistributedDamageMultiplier, WorldTowerObservedFailureMode.PartyAttrition, 0.20, 700)]
     public void Search_recovers_the_injected_parameter_group_and_emits_an_unapplied_patch(
         FloorCalibrationKnob expectedKnob,
         WorldTowerObservedFailureMode baselineFailureMode,
@@ -26,7 +28,9 @@ public sealed class AutomaticFloorProgressionCalibratorTests
             CreateBaselinePolicyEvaluation(policy),
             CreateRepresentatives(),
             CreateWorldTower(baselineFailureMode, baselineClearRate, baselineDurationTicks),
-            new PartyFamilySuiteSnapshot(1, 7, new PartyFamilyBuilderOptions(1), []),
+            expectedKnob == FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier
+                ? CreateAddPressurePartyFamilies()
+                : new PartyFamilySuiteSnapshot(1, 7, new PartyFamilyBuilderOptions(1), []),
             CreateEliteCertification(),
             7,
             new AutomaticFloorProgressionCalibrationOptions(true, 2, 2, 2, 1));
@@ -37,15 +41,58 @@ public sealed class AutomaticFloorProgressionCalibratorTests
         Assert.NotNull(floor.ProposedPatch);
         Assert.False(floor.ProposedPatch.Applied);
         Assert.True(floor.ProposedPatch.HumanApprovalRequired);
-        Assert.Single(floor.ProposedPatch.Changes);
+        Assert.Equal(
+            expectedKnob == FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier ? 2 : 1,
+            floor.ProposedPatch.Changes.Count);
         Assert.False(result.ProductionContentModified);
+        Assert.Equal(AutomaticFloorProgressionCalibrationVerdict.Proposed, result.RegionCoordination.Verdict);
+        Assert.NotNull(result.RegionCoordination.ProposedPatch);
+        Assert.True(result.RegionCoordination.ProposedPatch.Atomic);
+        Assert.Single(result.RegionCoordination.HoldoutFloors);
         Assert.Contains(floor.Candidates, candidate => candidate.Phase == AutomaticFloorProgressionCalibrationPhase.HoldoutCandidate);
         Assert.NotEqual(
             floor.Candidates.First(candidate => candidate.Phase == AutomaticFloorProgressionCalibrationPhase.Sensitivity).Seed,
             floor.Candidates.First(candidate => candidate.Phase == AutomaticFloorProgressionCalibrationPhase.HoldoutCandidate).Seed);
+        Assert.NotEqual(
+            floor.Candidates.First(candidate => candidate.Phase == AutomaticFloorProgressionCalibrationPhase.HoldoutCandidate).Seed,
+            result.RegionCoordination.HoldoutSeed);
         Assert.All(
             evaluator.Requests.Where(request => request.Factor < 0.9999),
             request => Assert.Equal(expectedKnob, request.ChangedKnob));
+    }
+
+    [Fact]
+    public void Search_rejects_add_adapter_when_the_confirmed_family_premise_is_unavailable()
+    {
+        var evaluator = new RecoveringEvaluator(
+            FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier,
+            WorldTowerObservedFailureMode.AddPressure);
+        var policy = CreatePolicy(FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier);
+        var calibrator = new AutomaticFloorProgressionCalibrator(
+            evaluator,
+            evaluator,
+            evaluator,
+            new FakeEliteBuildResolver());
+
+        var result = calibrator.Calibrate(
+            new FloorProgressionPolicySuite("test-policy", 1, [policy]),
+            CreateBaselinePolicyEvaluation(policy),
+            CreateRepresentatives(),
+            CreateWorldTower(WorldTowerObservedFailureMode.AddPressure, 0.20, 700),
+            new PartyFamilySuiteSnapshot(1, 7, new PartyFamilyBuilderOptions(1), []),
+            CreateEliteCertification(),
+            7,
+            new AutomaticFloorProgressionCalibrationOptions(true, 2, 2, 2, 1));
+
+        var floor = Assert.Single(result.Floors);
+        Assert.Equal(AutomaticFloorProgressionCalibrationVerdict.Review, floor.Verdict);
+        Assert.NotEmpty(floor.Candidates);
+        Assert.Null(floor.ProposedPatch);
+        Assert.Equal(AutomaticFloorProgressionCalibrationVerdict.Review, result.RegionCoordination.Verdict);
+        Assert.Null(result.RegionCoordination.ProposedPatch);
+        Assert.Contains(
+            floor.Candidates.SelectMany(candidate => candidate.RejectionReasons),
+            reason => reason.Contains("add-pressure-response-contract", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -88,11 +135,32 @@ public sealed class AutomaticFloorProgressionCalibratorTests
             1,
             0.10),
         new FloorProgressionIdentityPolicy(
-            [WorldTowerObservedFailureMode.PartyAttrition, WorldTowerObservedFailureMode.BossSustainDominance],
+            [WorldTowerObservedFailureMode.PartyAttrition, WorldTowerObservedFailureMode.BossSustainDominance, WorldTowerObservedFailureMode.AddPressure],
             [WorldTowerObservedFailureMode.PrimaryTargetCollapse],
-            []),
-        [new FloorCalibrationKnobPolicy(knob, new FloorProgressionRange(0.80, 1.20))],
+            knob == FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier
+                ? [new FloorProgressionFamilyPolicy(PartyFamilyKind.MultiTargetSpecialist, PartyFamilyDisposition.Advantaged)]
+                : []),
+        [CreateKnobPolicy(knob)],
         ["requiredSlots", "abilityIdentity", "productionPartyRules"]);
+
+    private static FloorCalibrationKnobPolicy CreateKnobPolicy(FloorCalibrationKnob knob) => knob switch
+    {
+        FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier => new FloorCalibrationKnobPolicy(
+            knob,
+            new FloorProgressionRange(0.80, 1.20),
+            new FloorCalibrationApplicabilityPolicy(
+                FloorCalibrationPhysicalContract.AddPressureV1,
+                "AddPressureMultiTargetResetV1")),
+        FloorCalibrationKnob.GuardianDistributedDamageMultiplier => new FloorCalibrationKnobPolicy(
+            knob,
+            new FloorProgressionRange(0.80, 1.20),
+            new FloorCalibrationApplicabilityPolicy(
+                FloorCalibrationPhysicalContract.DistributedAttritionV1,
+                FamilyContractException: new FloorCalibrationPolicyException(
+                    "test-exception",
+                    "The unit fixture explicitly accepts the missing relative family premise."))),
+        _ => new FloorCalibrationKnobPolicy(knob, new FloorProgressionRange(0.80, 1.20))
+    };
 
     private static FloorProgressionPolicyEvaluationSnapshot CreateBaselinePolicyEvaluation(
         FloorProgressionPolicy policy) =>
@@ -145,16 +213,76 @@ public sealed class AutomaticFloorProgressionCalibratorTests
                     percentile,
                     percentile,
                     0,
-                    [new RepresentativeEssenceBuildSnapshot(
-                        $"E4_P{percentile}_001",
-                        $"source-{percentile}",
-                        0,
-                        percentile,
-                        percentile,
-                        0,
-                        [],
-                        character,
-                        new Dictionary<string, double>())])).ToArray());
+                    [
+                        new RepresentativeEssenceBuildSnapshot(
+                            $"E4_P{percentile}_001",
+                            $"source-{percentile}",
+                            0,
+                            percentile,
+                            percentile,
+                            0,
+                            [],
+                            character,
+                            new Dictionary<string, double>()),
+                        new RepresentativeEssenceBuildSnapshot(
+                            $"E4_P{percentile}_002",
+                            $"source-{percentile}-2",
+                            0,
+                            percentile,
+                            percentile,
+                            0,
+                            [],
+                            character,
+                            new Dictionary<string, double>())
+                    ])).ToArray());
+    }
+
+    private static PartyFamilySuiteSnapshot CreateAddPressurePartyFamilies()
+    {
+        static PartyFamilyPartySnapshot Party(string buildId) => new(
+            buildId,
+            7,
+            Enumerable.Range(0, 5)
+                .Select(_ => new PartyFamilyMemberSnapshot(buildId, buildId, "E4_P75", null))
+                .ToArray(),
+            new Dictionary<BuildCapabilityDimension, double>(),
+            null,
+            0,
+            []);
+
+        var responses = new EncounterPartyFamilyResponseProfileSnapshot(
+            "test-v1",
+            1,
+            "Test Encounter",
+            [new PartyFamilyResponseSnapshot(
+                PartyFamilyKind.MultiTargetSpecialist,
+                PartyFamilyDisposition.Advantaged,
+                new PartyFamilyEnvelopeSnapshot(0, 1),
+                null,
+                "Confirmed add-window reset specialist.")]);
+        var floor = new PartyFamilyFloorSnapshot(
+            1,
+            "Test Encounter",
+            5,
+            "E4_P75",
+            responses,
+            [
+                new PartyFamilySnapshot(
+                    PartyFamilyKind.IntendedBalanced,
+                    PartyFamilyDisposition.ShouldSucceed,
+                    1,
+                    [Party("E4_P75_001")],
+                    "test"),
+                new PartyFamilySnapshot(
+                    PartyFamilyKind.MultiTargetSpecialist,
+                    PartyFamilyDisposition.Advantaged,
+                    1,
+                    [Party("E4_P75_002")],
+                    "test")
+            ],
+            [],
+            []);
+        return new PartyFamilySuiteSnapshot(1, 7, new PartyFamilyBuilderOptions(1), [floor]);
     }
 
     private static WorldTowerAnalysisSnapshot CreateWorldTower(
@@ -267,7 +395,9 @@ public sealed class AutomaticFloorProgressionCalibratorTests
             var observation = Observe(
                 request.HealthAdjustmentFactor,
                 request.DamageAdjustmentFactor,
-                request.AbilityHealingAdjustmentFactor);
+                request.AbilityHealingAdjustmentFactor,
+                request.SummonHealthPowerAdjustmentFactor,
+                request.DistributedDamageAdjustmentFactor);
             Requests.Add(observation);
             var role = request.RepresentativeProfileId.EndsWith("_P50", StringComparison.Ordinal)
                 ? FloorProgressionCohortRole.Undergeared
@@ -282,20 +412,60 @@ public sealed class AutomaticFloorProgressionCalibratorTests
             var observation = Observe(
                 request.HealthAdjustmentFactor,
                 request.DamageAdjustmentFactor,
-                request.AbilityHealingAdjustmentFactor);
+                request.AbilityHealingAdjustmentFactor,
+                request.SummonHealthPowerAdjustmentFactor,
+                request.DistributedDamageAdjustmentFactor);
             Requests.Add(observation);
             return CreateEvaluation(FloorProgressionCohortRole.Elite, observation.Factor);
         }
 
-        public IReadOnlyList<WorldTowerTrialSnapshot> EvaluateParty(PartyFamilyCombatEvaluationRequest request) => [];
+        public IReadOnlyList<WorldTowerTrialSnapshot> EvaluateParty(PartyFamilyCombatEvaluationRequest request)
+        {
+            var observation = Observe(
+                request.HealthAdjustmentFactor,
+                request.DamageAdjustmentFactor,
+                request.AbilityHealingAdjustmentFactor,
+                request.SummonHealthPowerAdjustmentFactor,
+                request.DistributedDamageAdjustmentFactor);
+            Requests.Add(observation);
+            if (injectedKnob != FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier)
+                return [];
+            var multiTarget = request.Builds[0].Id.EndsWith("_002", StringComparison.Ordinal);
+            return
+            [
+                new WorldTowerTrialSnapshot(
+                    1,
+                    request.RunSeed,
+                    "Victory",
+                    700,
+                    0,
+                    0.5,
+                    100,
+                    500,
+                    request.Builds.Select(build => build.Id).ToArray())
+                {
+                    TotalHostileSummons = 10,
+                    PeakActiveHostileSummons = 5,
+                    AdditionalHostileWindowCount = 10,
+                    ClearedAdditionalHostileWindowCount = multiTarget ? 8 : 5
+                }
+            ];
+        }
 
-        private RequestObservation Observe(double health, double offense, double healing)
+        private RequestObservation Observe(
+            double health,
+            double offense,
+            double healing,
+            double summonHealthPower,
+            double distributedDamage)
         {
             var changed = new[]
                 {
                     (Knob: FloorCalibrationKnob.GuardianHealthMultiplier, Factor: health),
                     (Knob: FloorCalibrationKnob.GuardianOffenseMultiplier, Factor: offense),
-                    (Knob: FloorCalibrationKnob.GuardianAbilityHealingMultiplier, Factor: healing)
+                    (Knob: FloorCalibrationKnob.GuardianAbilityHealingMultiplier, Factor: healing),
+                    (Knob: FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier, Factor: summonHealthPower),
+                    (Knob: FloorCalibrationKnob.GuardianDistributedDamageMultiplier, Factor: distributedDamage)
                 }
                 .FirstOrDefault(value => Math.Abs(value.Factor - 1) >= 0.0001);
             return changed == default
@@ -319,6 +489,12 @@ public sealed class AutomaticFloorProgressionCalibratorTests
             {
                 MedianFriendlyDeaths = 0,
                 MedianRemainingHealthRatio = 0.5,
+                AverageCalibratedDistributedDamagePerSecond = injectedKnob == FloorCalibrationKnob.GuardianDistributedDamageMultiplier
+                    ? 10
+                    : 0,
+                AverageCalibratedDistributedDamagePeakTargetsPerWave = injectedKnob == FloorCalibrationKnob.GuardianDistributedDamageMultiplier
+                    ? 5
+                    : 0,
                 PrimaryObservedFailureModeCounts = role == FloorProgressionCohortRole.Primary
                                                    && failureMode != WorldTowerObservedFailureMode.None
                     ? new Dictionary<WorldTowerObservedFailureMode, int> { [failureMode] = 1 }

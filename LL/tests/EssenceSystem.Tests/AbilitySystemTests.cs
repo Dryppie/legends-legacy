@@ -6989,6 +6989,55 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public async Task Combat_engine_executor_multiplier_scales_authored_summon_health_payload()
+    {
+        const string abilityId = "ability.creature.morrowmaw.hatch_the_brood";
+        const string effectId = "effect.creature.morrowmaw.hatch_the_brood.summon";
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var friendlyCharacter = CreateSourceCharacter("Morrowmaw Adapter Friendly");
+        var hostileCharacter = CreateSourceCharacter("Morrowmaw Adapter Hostile");
+        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter);
+        friendlyCombatant.NativeAbilityIds.Add(abilityId);
+        friendlyCombatant.TemporaryAbilityModifiers.Add(new EssenceAbilityModifierDefinition
+        {
+            Target = effectId,
+            Operation = "AddMultiplier",
+            Value = -0.5
+        });
+        var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        IncreaseMaxHealth(friendlyCombatant, 2_000);
+        IncreaseMaxHealth(hostileCombatant, 2_000);
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Idle,
+            1,
+            DateTimeOffset.UtcNow,
+            [
+                new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
+                new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
+            ],
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)))
+        {
+            ContentType = CombatContentType.Idle
+        };
+        var runtime = new CombatEncounterRuntime(
+            plan,
+            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
+            [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
+        var executor = new CombatEngineExecutor(provider);
+
+        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+
+        var summons = result.EventLog.Where(log =>
+            log.Source == effectId && log.EventType == EventType.Summon).ToArray();
+        Assert.NotEmpty(summons);
+        Assert.All(summons, summon => Assert.Equal(100, summon.CombatEntity?.MaxHealth));
+    }
+
+    [Fact]
     public async Task Combat_engine_executor_illusion_fox_passive_retaliates_when_holder_is_attacked()
     {
         var provider = new JsonAbilityCatalogProvider(

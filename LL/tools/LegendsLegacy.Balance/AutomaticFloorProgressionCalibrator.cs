@@ -20,7 +20,8 @@ public enum AutomaticFloorProgressionCalibrationPhase
     Sensitivity,
     Refinement,
     HoldoutBaseline,
-    HoldoutCandidate
+    HoldoutCandidate,
+    RegionHoldout
 }
 
 public sealed record AutomaticFloorProgressionCalibrationOptions(
@@ -108,7 +109,11 @@ public sealed record AutomaticFloorProgressionCalibrationSnapshot(
     int TotalCandidateEvaluations,
     int TotalCombatTrials,
     IReadOnlyList<AutomaticFloorProgressionFloorCalibrationSnapshot> Floors,
-    IReadOnlyList<string> Warnings);
+    IReadOnlyList<string> Warnings)
+{
+    public AutomaticFloorProgressionRegionCoordinationSnapshot RegionCoordination { get; init; } =
+        AutomaticFloorProgressionRegionCoordinationSnapshot.Disabled;
+}
 
 public interface IEliteFloorCalibrationBuildResolver
 {
@@ -160,7 +165,8 @@ public sealed class AutomaticFloorProgressionCalibrator(
     IPartyFamilyCombatEvaluator partyEvaluator,
     IEliteFloorCalibrationBuildResolver eliteBuildResolver)
 {
-    public const int AlgorithmVersion = 1;
+    public const int AlgorithmVersion = 3;
+    private readonly AutomaticFloorProgressionRegionCoordinator _regionCoordinator = new();
 
     public AutomaticFloorProgressionCalibrationSnapshot Calibrate(
         FloorProgressionPolicySuite policySuite,
@@ -220,12 +226,50 @@ public sealed class AutomaticFloorProgressionCalibrator(
                 runSeed,
                 options))
             .ToArray();
-        var verdict = floors.All(floor => floor.Verdict == AutomaticFloorProgressionCalibrationVerdict.NoChangeRequired)
-            ? AutomaticFloorProgressionCalibrationVerdict.NoChangeRequired
-            : floors.All(floor => floor.Verdict is AutomaticFloorProgressionCalibrationVerdict.NoChangeRequired
-                    or AutomaticFloorProgressionCalibrationVerdict.Proposed)
-                ? AutomaticFloorProgressionCalibrationVerdict.Proposed
-                : AutomaticFloorProgressionCalibrationVerdict.Review;
+        var regionHoldoutSeed = StableRandom.Seed(
+            "balance-floor-progression-region-holdout-v1",
+            runSeed.ToString(CultureInfo.InvariantCulture),
+            policySuite.CreateFingerprint());
+        var regionHoldouts = new List<AutomaticFloorProgressionRegionHoldoutFloorSnapshot>();
+        foreach (var policy in policySuite.Floors.OrderBy(policy => policy.Floor))
+        {
+            var calibration = floors.Single(floor => floor.Floor == policy.Floor);
+            if (calibration.Verdict is not (AutomaticFloorProgressionCalibrationVerdict.Proposed
+                or AutomaticFloorProgressionCalibrationVerdict.NoChangeRequired))
+            {
+                continue;
+            }
+            var knob = calibration.SelectedKnob ?? policy.AllowedKnobs[0].Knob;
+            var factor = calibration.SelectedAdjustmentFactor ?? 1;
+            var knobPolicy = policy.AllowedKnobs.Single(value => value.Knob == knob);
+            var evaluation = EvaluateCandidate(
+                1,
+                AutomaticFloorProgressionCalibrationPhase.RegionHoldout,
+                policy,
+                worldFloors[policy.Floor],
+                knob,
+                factor,
+                regionHoldoutSeed,
+                options.HoldoutSimulations,
+                worldTower.Options.MaxTicks,
+                representativeBuilds,
+                representativeLookup,
+                partyFloors.GetValueOrDefault(policy.Floor),
+                eliteCertification,
+                eliteFloors.GetValueOrDefault(policy.Floor),
+                knobPolicy.AdjustmentFactorBounds);
+            regionHoldouts.Add(new AutomaticFloorProgressionRegionHoldoutFloorSnapshot(
+                policy.Floor,
+                knob,
+                factor,
+                evaluation));
+        }
+        var regionCoordination = _regionCoordinator.Coordinate(
+            policySuite,
+            worldTower,
+            floors,
+            regionHoldouts,
+            regionHoldoutSeed);
         return new AutomaticFloorProgressionCalibrationSnapshot(
             AlgorithmVersion,
             runSeed,
@@ -235,11 +279,18 @@ public sealed class AutomaticFloorProgressionCalibrator(
             CommonCandidateSeeds: true,
             IndependentHoldoutSeeds: true,
             ProductionContentModified: false,
-            verdict,
-            floors.Sum(floor => floor.CandidateEvaluationCount + floor.HoldoutEvaluationCount),
-            floors.SelectMany(floor => floor.Candidates).Sum(candidate => candidate.TotalCombatTrials),
+            regionCoordination.Verdict,
+            floors.Sum(floor => floor.CandidateEvaluationCount + floor.HoldoutEvaluationCount)
+            + regionCoordination.HoldoutEvaluationCount,
+            floors.SelectMany(floor => floor.Candidates).Sum(candidate => candidate.TotalCombatTrials)
+            + regionCoordination.TotalCombatTrials,
             floors,
-            floors.SelectMany(floor => floor.Warnings.Select(warning => $"Floor {floor.Floor}: {warning}")).ToArray());
+            floors.SelectMany(floor => floor.Warnings.Select(warning => $"Floor {floor.Floor}: {warning}"))
+                .Concat(regionCoordination.Warnings.Select(warning => $"Region: {warning}"))
+                .ToArray())
+        {
+            RegionCoordination = regionCoordination
+        };
     }
 
     private AutomaticFloorProgressionFloorCalibrationSnapshot CalibrateFloor(
@@ -527,7 +578,7 @@ public sealed class AutomaticFloorProgressionCalibrator(
             primary.Result.EvidenceSource,
             dominant.HasValue ? $"Candidate dominant failure mode: {dominant}." : "No candidate failures contradicted identity.");
 
-        var familyTrialCount = EvaluateFamilyConstraints(
+        var familyEvaluation = EvaluateFamilyConstraints(
             constraints,
             policy,
             partyFloor,
@@ -537,6 +588,13 @@ public sealed class AutomaticFloorProgressionCalibrator(
             seed,
             Math.Min(simulations, 100),
             maxTicks);
+        EvaluateMechanicContract(
+            constraints,
+            policy,
+            knob,
+            factor,
+            primary.Evaluation,
+            familyEvaluation);
         var normalizedDistance = Math.Abs(factor - 1) / Math.Max(0.0001, bounds.Maximum - bounds.Minimum);
         var targetDistance = CalculateTargetDistance(policy, primary.Result);
         var rejected = constraints.Where(constraint => constraint.Satisfied != true)
@@ -551,7 +609,7 @@ public sealed class AutomaticFloorProgressionCalibrator(
             Round(normalizedDistance),
             Round(targetDistance),
             rejected.Length == 0,
-            cohorts.Sum(cohort => cohort.TrialCount) + familyTrialCount,
+            cohorts.Sum(cohort => cohort.TrialCount) + familyEvaluation.TrialCount,
             cohorts,
             constraints,
             rejected);
@@ -581,7 +639,9 @@ public sealed class AutomaticFloorProgressionCalibrator(
             maxTicks,
             factors.Health,
             factors.Offense,
-            AbilityHealingAdjustmentFactor: factors.AbilityHealing));
+            AbilityHealingAdjustmentFactor: factors.AbilityHealing,
+            SummonHealthPowerAdjustmentFactor: factors.SummonHealthPower,
+            DistributedDamageAdjustmentFactor: factors.DistributedDamage));
         return new ProfileEvaluation(
             new AutomaticFloorProgressionCohortResultSnapshot(
                 role,
@@ -621,7 +681,9 @@ public sealed class AutomaticFloorProgressionCalibrator(
             maxTicks,
             factors.Health,
             factors.Offense,
-            factors.AbilityHealing));
+            factors.AbilityHealing,
+            factors.SummonHealthPower,
+            factors.DistributedDamage));
         return new ProfileEvaluation(
             new AutomaticFloorProgressionCohortResultSnapshot(
                 FloorProgressionCohortRole.Elite,
@@ -637,7 +699,7 @@ public sealed class AutomaticFloorProgressionCalibrator(
             true);
     }
 
-    private int EvaluateFamilyConstraints(
+    private FamilyConstraintEvaluation EvaluateFamilyConstraints(
         ICollection<FloorProgressionConstraintSnapshot> constraints,
         FloorProgressionPolicy policy,
         PartyFamilyFloorSnapshot? floor,
@@ -649,12 +711,13 @@ public sealed class AutomaticFloorProgressionCalibrator(
         int maxTicks)
     {
         if (policy.Identity.RequiredFamilyResponses.Count == 0)
-            return 0;
+            return FamilyConstraintEvaluation.Empty;
         var requestedKinds = policy.Identity.RequiredFamilyResponses.Select(response => response.Family)
             .Append(PartyFamilyKind.IntendedBalanced)
             .Distinct()
             .ToArray();
         var rates = new Dictionary<PartyFamilyKind, double>();
+        var familyTrials = new Dictionary<PartyFamilyKind, IReadOnlyList<WorldTowerTrialSnapshot>>();
         var totalFamilyTrials = 0;
         foreach (var kind in requestedKinds)
         {
@@ -686,11 +749,14 @@ public sealed class AutomaticFloorProgressionCalibrator(
                     maxTicks,
                     factors.Health,
                     factors.Offense,
-                    factors.AbilityHealing)));
+                    factors.AbilityHealing,
+                    factors.SummonHealthPower,
+                    factors.DistributedDamage)));
             }
             if (trials.Count > 0)
             {
                 rates[kind] = trials.Count(trial => trial.Outcome.Equals("Victory", StringComparison.Ordinal)) / (double)trials.Count;
+                familyTrials[kind] = trials;
                 totalFamilyTrials += trials.Count;
             }
         }
@@ -726,7 +792,91 @@ public sealed class AutomaticFloorProgressionCalibrator(
                 "candidate-party-family-calibration",
                 available ? $"Candidate family clear rate: {rate:P2}." : "Required candidate family evidence is unavailable.");
         }
-        return totalFamilyTrials;
+        return new FamilyConstraintEvaluation(totalFamilyTrials, familyTrials);
+    }
+
+    private static void EvaluateMechanicContract(
+        ICollection<FloorProgressionConstraintSnapshot> constraints,
+        FloorProgressionPolicy policy,
+        FloorCalibrationKnob knob,
+        double factor,
+        EncounterCalibrationEvaluation? primary,
+        FamilyConstraintEvaluation families)
+    {
+        var knobPolicy = policy.AllowedKnobs.Single(value => value.Knob == knob);
+        if (knobPolicy.Applicability is null)
+            return;
+        if (Math.Abs(factor - 1) < 0.0001)
+            return;
+
+        if (knob == FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier)
+        {
+            var multiAvailable = families.Trials.TryGetValue(PartyFamilyKind.MultiTargetSpecialist, out var multi);
+            var balancedAvailable = families.Trials.TryGetValue(PartyFamilyKind.IntendedBalanced, out var balanced);
+            var multiReset = multiAvailable ? CalculateAddWindowResetRate(multi!) : 0;
+            var balancedReset = balancedAvailable ? CalculateAddWindowResetRate(balanced!) : 0;
+            var strongestReset = multiAvailable
+                                 && families.Trials
+                                     .Where(pair => pair.Value.Sum(trial => trial.AdditionalHostileWindowCount) > 0)
+                                     .All(pair => multiReset >= CalculateAddWindowResetRate(pair.Value));
+            var physicalReach = multiAvailable
+                                && multi!.Any(trial => trial.TotalHostileSummons > 0
+                                                       && trial.PeakActiveHostileSummons > 0
+                                                       && trial.AdditionalHostileWindowCount > 0);
+            var satisfied = physicalReach
+                            && balancedAvailable
+                            && strongestReset
+                            && multiReset >= balancedReset + 0.10;
+            AddMetricConstraint(
+                constraints,
+                FloorProgressionConstraintKind.MechanicContract,
+                "add-pressure-response-contract",
+                "Authored adds observed; MultiTargetSpecialist has strongest reset rate and >= 10-point advantage over IntendedBalanced",
+                multiAvailable ? multiReset : null,
+                multiAvailable && balancedAvailable ? satisfied : null,
+                "candidate-add-pressure-contract-v1",
+                multiAvailable && balancedAvailable
+                    ? $"MultiTarget reset {multiReset:P2}; IntendedBalanced reset {balancedReset:P2}."
+                    : "The confirmed AddPressure family premise is unavailable.");
+            return;
+        }
+
+        if (knob == FloorCalibrationKnob.GuardianDistributedDamageMultiplier)
+        {
+            var directReach = primary is not null
+                              && primary.AverageCalibratedDistributedDamagePerSecond > 0
+                              && primary.AverageCalibratedDistributedDamagePeakTargetsPerWave >= 2;
+            AddMetricConstraint(
+                constraints,
+                FloorProgressionConstraintKind.MechanicContract,
+                "distributed-attrition-physical-contract",
+                "Positive exact-effect damage reaches at least two targets in one wave",
+                primary?.AverageCalibratedDistributedDamagePeakTargetsPerWave,
+                primary is null ? null : directReach,
+                "candidate-distributed-attrition-contract-v1",
+                directReach
+                    ? $"Exact effect dealt {primary!.AverageCalibratedDistributedDamagePerSecond:F2} DPS with {primary.AverageCalibratedDistributedDamagePeakTargetsPerWave:F2} peak targets per wave."
+                    : "Direct exact-effect distributed-damage reach was not observed.");
+
+            var applicability = knobPolicy.Applicability;
+            AddMetricConstraint(
+                constraints,
+                FloorProgressionConstraintKind.MechanicContract,
+                "distributed-attrition-family-authority",
+                "Approved family contract or explicit reviewed policy exception",
+                null,
+                true,
+                "floor-progression-policy",
+                applicability!.FamilyContractException is not null
+                    ? $"Explicit exception {applicability.FamilyContractException.ExceptionId}: {applicability.FamilyContractException.Rationale}"
+                    : $"Approved family contract: {applicability.ApprovedFamilyContractId}.");
+        }
+    }
+
+    private static double CalculateAddWindowResetRate(IReadOnlyList<WorldTowerTrialSnapshot> trials)
+    {
+        var windows = trials.Sum(trial => trial.AdditionalHostileWindowCount);
+        return windows == 0 ? 0 : trials.Sum(trial => trial.ClearedAdditionalHostileWindowCount) / (double)windows;
     }
 
     private static FloorCalibrationKnob? SelectKnob(
@@ -741,6 +891,11 @@ public sealed class AutomaticFloorProgressionCalibrator(
             .FirstOrDefault();
         var physical = dominant switch
         {
+            WorldTowerObservedFailureMode.AddPressure =>
+                FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier,
+            WorldTowerObservedFailureMode.PartyAttrition when policy.AllowedKnobs.Any(knob =>
+                knob.Knob == FloorCalibrationKnob.GuardianDistributedDamageMultiplier) =>
+                FloorCalibrationKnob.GuardianDistributedDamageMultiplier,
             WorldTowerObservedFailureMode.PrimaryTargetCollapse or WorldTowerObservedFailureMode.PartyAttrition =>
                 FloorCalibrationKnob.GuardianOffenseMultiplier,
             WorldTowerObservedFailureMode.BossSustainDominance =>
@@ -773,7 +928,9 @@ public sealed class AutomaticFloorProgressionCalibrator(
         if (duration > policy.Targets.MedianDurationSeconds.Maximum)
             return -1;
         if (duration < policy.Targets.MedianDurationSeconds.Minimum)
-            return knob == FloorCalibrationKnob.GuardianOffenseMultiplier ? 0 : 1;
+            return knob is FloorCalibrationKnob.GuardianOffenseMultiplier
+                or FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier
+                or FloorCalibrationKnob.GuardianDistributedDamageMultiplier ? 0 : 1;
         return 0;
     }
 
@@ -792,9 +949,11 @@ public sealed class AutomaticFloorProgressionCalibrator(
 
     private static AdjustmentFactors ResolveFactors(FloorCalibrationKnob knob, double factor) => knob switch
     {
-        FloorCalibrationKnob.GuardianHealthMultiplier => new AdjustmentFactors(factor, 1, 1),
-        FloorCalibrationKnob.GuardianOffenseMultiplier => new AdjustmentFactors(1, factor, 1),
-        FloorCalibrationKnob.GuardianAbilityHealingMultiplier => new AdjustmentFactors(1, 1, factor),
+        FloorCalibrationKnob.GuardianHealthMultiplier => new AdjustmentFactors(factor, 1, 1, 1, 1),
+        FloorCalibrationKnob.GuardianOffenseMultiplier => new AdjustmentFactors(1, factor, 1, 1, 1),
+        FloorCalibrationKnob.GuardianAbilityHealingMultiplier => new AdjustmentFactors(1, 1, factor, 1, 1),
+        FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier => new AdjustmentFactors(1, 1, 1, factor, 1),
+        FloorCalibrationKnob.GuardianDistributedDamageMultiplier => new AdjustmentFactors(1, 1, 1, 1, factor),
         _ => throw new ArgumentOutOfRangeException(nameof(knob), knob, null)
     };
 
@@ -804,26 +963,41 @@ public sealed class AutomaticFloorProgressionCalibrator(
         double factor,
         string upstreamContentFingerprint)
     {
-        var change = knob switch
+        var changes = knob switch
         {
-            FloorCalibrationKnob.GuardianHealthMultiplier => new AutomaticFloorProgressionPatchChangeSnapshot(
+            FloorCalibrationKnob.GuardianHealthMultiplier => new[] { new AutomaticFloorProgressionPatchChangeSnapshot(
                 "guardianScaling.health",
                 "replace",
                 floor.AuthoredHealthMultiplier,
                 Round(floor.AuthoredHealthMultiplier * factor, 3),
-                factor),
-            FloorCalibrationKnob.GuardianOffenseMultiplier => new AutomaticFloorProgressionPatchChangeSnapshot(
+                factor) },
+            FloorCalibrationKnob.GuardianOffenseMultiplier => [new AutomaticFloorProgressionPatchChangeSnapshot(
                 "guardianScaling.offense",
                 "replace",
                 floor.AuthoredDamageMultiplier,
                 Round(floor.AuthoredDamageMultiplier * factor, 3),
-                factor),
-            FloorCalibrationKnob.GuardianAbilityHealingMultiplier => new AutomaticFloorProgressionPatchChangeSnapshot(
+                factor)],
+            FloorCalibrationKnob.GuardianAbilityHealingMultiplier => [new AutomaticFloorProgressionPatchChangeSnapshot(
                 "guardianAbilityProfile.healingEffects",
                 "multiply",
                 1,
                 factor,
-                factor),
+                factor)],
+            FloorCalibrationKnob.GuardianSummonHealthPowerMultiplier =>
+            [
+                new AutomaticFloorProgressionPatchChangeSnapshot(
+                    "guardianAbilityProfile.effects[effect.creature.morrowmaw.hatch_the_brood.summon].summonHealthMultiplier",
+                    "multiply", 1, factor, factor),
+                new AutomaticFloorProgressionPatchChangeSnapshot(
+                    "guardianAbilityProfile.effects[effect.creature.morrowmaw.hatch_the_brood.summon].summonPowerMultiplier",
+                    "multiply", 1, factor, factor)
+            ],
+            FloorCalibrationKnob.GuardianDistributedDamageMultiplier =>
+            [
+                new AutomaticFloorProgressionPatchChangeSnapshot(
+                    "guardianAbilityProfile.effects[effect.creature.garran.slam_the_gates.damage].scalingCoefficient",
+                    "replace", 1.5, Round(1.5 * factor, 3), factor)
+            ],
             _ => throw new ArgumentOutOfRangeException(nameof(knob), knob, null)
         };
         var fingerprintSource = JsonSerializer.Serialize(new
@@ -840,7 +1014,7 @@ public sealed class AutomaticFloorProgressionCalibrator(
         return new AutomaticFloorProgressionProposedPatchSnapshot(
             floor.Floor,
             fingerprint,
-            [change],
+            changes,
             HumanApprovalRequired: true,
             Applied: false);
     }
@@ -889,7 +1063,21 @@ public sealed class AutomaticFloorProgressionCalibrator(
 
     private sealed record RepresentativeLookup(string ProfileId, RepresentativeEssenceBuildSnapshot Build);
 
-    private sealed record AdjustmentFactors(double Health, double Offense, double AbilityHealing);
+    private sealed record AdjustmentFactors(
+        double Health,
+        double Offense,
+        double AbilityHealing,
+        double SummonHealthPower,
+        double DistributedDamage);
+
+    private sealed record FamilyConstraintEvaluation(
+        int TrialCount,
+        IReadOnlyDictionary<PartyFamilyKind, IReadOnlyList<WorldTowerTrialSnapshot>> Trials)
+    {
+        public static FamilyConstraintEvaluation Empty { get; } = new(
+            0,
+            new Dictionary<PartyFamilyKind, IReadOnlyList<WorldTowerTrialSnapshot>>());
+    }
 
     private sealed record ProfileEvaluation(
         AutomaticFloorProgressionCohortResultSnapshot Result,

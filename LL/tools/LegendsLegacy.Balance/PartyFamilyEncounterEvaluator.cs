@@ -93,7 +93,9 @@ public sealed record PartyFamilyCombatEvaluationRequest(
     int MaxTicks,
     double HealthAdjustmentFactor = 1,
     double DamageAdjustmentFactor = 1,
-    double AbilityHealingAdjustmentFactor = 1);
+    double AbilityHealingAdjustmentFactor = 1,
+    double SummonHealthPowerAdjustmentFactor = 1,
+    double DistributedDamageAdjustmentFactor = 1);
 
 public interface IPartyFamilyCombatEvaluator
 {

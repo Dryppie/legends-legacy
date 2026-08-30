@@ -38,6 +38,8 @@ internal sealed class WorldTowerEncounterExecutor(
     internal const int TelemetryCheckpointIntervalTicks = 10 * FastCombatEngine.TicksPerSecond;
     private const string InjectedDistributedDamageEffectId =
         "effect.creature.garran.slam_the_gates.damage.balance_distributed_attrition";
+    private const string AuthoredDistributedDamageEffectId =
+        "effect.creature.garran.slam_the_gates.damage";
 
     public WorldTowerTrialSnapshot Execute(
         TowerFloorDefinition definition,
@@ -49,7 +51,9 @@ internal sealed class WorldTowerEncounterExecutor(
         double guardianAbilityHealingMultiplier = 1,
         int guardianAdditionalSummonCopies = 0,
         double guardianAdditionalSummonPotencyMultiplier = 1,
-        double guardianDistributedDamageMultiplier = 1)
+        double guardianDistributedDamageMultiplier = 1,
+        double authoredSummonHealthPowerMultiplier = 1,
+        double authoredDistributedDamageMultiplier = 1)
     {
         if (roster.Count != definition.RequiredSlots)
         {
@@ -108,6 +112,8 @@ internal sealed class WorldTowerEncounterExecutor(
             guardianAdditionalSummonCopies,
             guardianAdditionalSummonPotencyMultiplier);
         ApplyGuardianDistributedDamageMultiplier(runtime, guardianDistributedDamageMultiplier);
+        ApplyAuthoredSummonHealthPowerMultiplier(runtime, authoredSummonHealthPowerMultiplier);
+        ApplyAuthoredDistributedDamageMultiplier(runtime, authoredDistributedDamageMultiplier);
         var execution = combatEngine.ExecuteRaidPlaybackAsync(
                 runtime,
                 TelemetryCheckpointIntervalTicks,
@@ -115,7 +121,8 @@ internal sealed class WorldTowerEncounterExecutor(
                     combatSeed,
                     maxTicks,
                     StartActiveAbilitiesOnCooldown: true,
-                    CaptureEventLog: guardianDistributedDamageMultiplier > 1),
+                    CaptureEventLog: guardianDistributedDamageMultiplier > 1
+                                     || Math.Abs(authoredDistributedDamageMultiplier - 1) >= 0.0001),
                 CancellationToken.None)
             .GetAwaiter().GetResult();
         var result = execution.Result;
@@ -184,6 +191,15 @@ internal sealed class WorldTowerEncounterExecutor(
         var injectedDistributedDamageWaves = injectedDistributedDamageEvents
             .GroupBy(item => item.Timestamp)
             .ToArray();
+        var calibratedDistributedDamageEvents = result.EventLog
+            .Where(item => item.Source.StartsWith(AuthoredDistributedDamageEffectId, StringComparison.OrdinalIgnoreCase)
+                && !item.Source.StartsWith(InjectedDistributedDamageEffectId, StringComparison.OrdinalIgnoreCase)
+                && item.EventType is EventType.Damage or EventType.DamageCrit)
+            .ToArray();
+        var calibratedDistributedDamage = calibratedDistributedDamageEvents.Sum(item => item.Magnitude);
+        var calibratedDistributedDamageWaves = calibratedDistributedDamageEvents
+            .GroupBy(item => item.Timestamp)
+            .ToArray();
 
         return new WorldTowerTrialSnapshot(
             trial,
@@ -228,6 +244,18 @@ internal sealed class WorldTowerEncounterExecutor(
             GuardianInjectedDistributedDamagePeakTargetsPerWave = injectedDistributedDamageWaves.Length == 0
                 ? 0
                 : injectedDistributedDamageWaves.Max(wave => wave
+                    .Select(item => item.TargetId)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Count()),
+            GuardianCalibratedDistributedDamage = calibratedDistributedDamage,
+            GuardianCalibratedDistributedDamagePerSecond = WorldTowerContentAnalyzer.RoundMetric(
+                calibratedDistributedDamage / durationSeconds,
+                2),
+            GuardianCalibratedDistributedDamageHitCount = calibratedDistributedDamageEvents.Length,
+            GuardianCalibratedDistributedDamageWaveCount = calibratedDistributedDamageWaves.Length,
+            GuardianCalibratedDistributedDamagePeakTargetsPerWave = calibratedDistributedDamageWaves.Length == 0
+                ? 0
+                : calibratedDistributedDamageWaves.Max(wave => wave
                     .Select(item => item.TargetId)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .Count()),
@@ -355,6 +383,48 @@ internal sealed class WorldTowerEncounterExecutor(
                 DamageType = DamageType.Magical,
                 ProcCoefficient = 1m
             }
+        });
+    }
+
+    private static void ApplyAuthoredSummonHealthPowerMultiplier(
+        CombatEncounterRuntime runtime,
+        double multiplier)
+    {
+        const string abilityId = "ability.creature.morrowmaw.hatch_the_brood";
+        const string summonEffectId = "effect.creature.morrowmaw.hatch_the_brood.summon";
+        ApplyAuthoredEffectMultiplier(runtime, multiplier, abilityId, summonEffectId, "add-health/power");
+    }
+
+    private static void ApplyAuthoredDistributedDamageMultiplier(
+        CombatEncounterRuntime runtime,
+        double multiplier) =>
+        ApplyAuthoredEffectMultiplier(
+            runtime,
+            multiplier,
+            "ability.creature.garran.slam_the_gates",
+            AuthoredDistributedDamageEffectId,
+            "distributed-attrition");
+
+    private static void ApplyAuthoredEffectMultiplier(
+        CombatEncounterRuntime runtime,
+        double multiplier,
+        string abilityId,
+        string effectId,
+        string adapter)
+    {
+        if (!double.IsFinite(multiplier) || multiplier is < 0.25 or > 4)
+            throw new ArgumentOutOfRangeException(nameof(multiplier));
+        if (Math.Abs(multiplier - 1) < double.Epsilon)
+            return;
+
+        var guardian = runtime.HostileParticipants.Single().Combatant;
+        if (!guardian.NativeAbilityIds.Contains(abilityId, StringComparer.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"The {adapter} adapter requires Guardian ability '{abilityId}'.");
+        guardian.TemporaryAbilityModifiers.Add(new EssenceAbilityModifierDefinition
+        {
+            Target = effectId,
+            Operation = "AddMultiplier",
+            Value = multiplier - 1
         });
     }
 

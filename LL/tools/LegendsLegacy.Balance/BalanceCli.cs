@@ -27,7 +27,7 @@ public static class BalanceCli
                 "tools",
                 "LegendsLegacy.Balance",
                 "Configuration",
-                "floor-progression-policy.v1.json");
+                "floor-progression-policy.v5.json");
             var fixturePath = options.EliteCertificationOptions.TopPlayerBuildsPath is null
                 ? Path.Combine(repositoryRoot, "LL", "tools", "LegendsLegacy.Balance", "Fixtures", "top-player-builds.json")
                 : Path.GetFullPath(options.EliteCertificationOptions.TopPlayerBuildsPath);
