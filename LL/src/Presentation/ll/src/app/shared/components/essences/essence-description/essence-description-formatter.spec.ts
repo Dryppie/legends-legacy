@@ -1,4 +1,20 @@
 import { EssenceDescriptionFormatter } from './essence-description-formatter';
+import { COMBAT_KEYWORDS } from './combat-keyword-glossary';
+
+describe('Combat keyword descriptions', () => {
+  it('identifies the damage type dealt by each periodic damage condition', () => {
+    for (const damageType of ['Poison', 'Burn', 'Bleed']) {
+      const keyword = COMBAT_KEYWORDS.find(
+        (definition) => definition.name === damageType,
+      );
+
+      expect(keyword?.description).toContain(`${damageType} Damage`);
+      expect(keyword?.descriptionWithValue).toContain(
+        `${damageType} Damage`,
+      );
+    }
+  });
+});
 
 describe('EssenceDescriptionFormatter target explanations', () => {
   const formatter = new EssenceDescriptionFormatter();

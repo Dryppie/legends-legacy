@@ -11,6 +11,10 @@ import { RaidPageComponent } from './raid/raid-page.component';
 import { raidFeatureGuard } from '../../../core/guards/raid-feature.guard';
 import { RegionBossComponent } from './region-boss/region-boss.component';
 import { worldMapRegionRedirect } from '../../../core/guards/world-map-region.guard';
+import {
+  focusedBetaRegionGuard,
+  focusedBetaUnavailableGuard,
+} from '../../../core/guards/focused-beta-journey.guard';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -25,17 +29,19 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'raid/:raidId',
         component: RaidPageComponent,
-        canActivate: [raidFeatureGuard],
+        canActivate: [focusedBetaUnavailableGuard, raidFeatureGuard],
         data: { guidePageId: GUIDE_PAGE_IDS.raids },
       },
       {
         path: 'tower',
         component: TowerOverviewComponent,
+        canActivate: [focusedBetaUnavailableGuard],
         data: { guideDisabled: true },
       },
       {
         path: 'tower/expeditions/:rallyId',
         component: TowerRallyComponent,
+        canActivate: [focusedBetaUnavailableGuard],
         data: { guideDisabled: true },
       },
       {
@@ -46,16 +52,19 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'tower/hall-of-fame',
         component: TowerHallOfFameComponent,
+        canActivate: [focusedBetaUnavailableGuard],
         data: { guideDisabled: true },
       },
       {
         path: 'tower/personal-expeditions',
         component: TowerPersonalExpeditionsComponent,
+        canActivate: [focusedBetaUnavailableGuard],
         data: { guideDisabled: true },
       },
       {
         path: 'region-boss',
         component: RegionBossComponent,
+        canActivate: [focusedBetaUnavailableGuard],
         data: { guideDisabled: true },
       },
       {
@@ -66,6 +75,7 @@ export const WORLD_ROUTES: Routes = [
       {
         path: ':id',
         component: RegionComponent,
+        canActivate: [focusedBetaRegionGuard],
         data: { guidePageId: GUIDE_PAGE_IDS.world },
       },
     ],

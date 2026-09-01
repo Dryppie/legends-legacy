@@ -4,6 +4,7 @@
   window["env"] = window["env"] || {};
   // Environment variables
   window.env.environment = "dev";
+  window.env.focusedBetaJourney = "true";
   window.env.apiBaseUrl = "http://localhost:7050";
   window.env.chatApiRoot = "http://localhost:5179/chat";
   window.env.isLocal = "true";

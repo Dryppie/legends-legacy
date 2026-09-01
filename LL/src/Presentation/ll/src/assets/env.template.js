@@ -4,6 +4,7 @@
   window.env = window.env || {};
   // Environment variables
   window.env.environment = "${environment}";
+  window.env.focusedBetaJourney = "${focusedBetaJourney}";
   window.env.apiBaseUrl = "${apiBaseUrl}";
   window.env.chatApiRoot = "${chatApiRoot}";
   window.env.isLocal = "${isLocal}";

@@ -69,7 +69,7 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
     name: 'Guard',
     aliases: ['Guarded'],
     description:
-      'Each charge reduces the damage received of one direct hit by 25%.',
+      'Each charge reduces one direct hit that is not a Basic Attack by 25%.',
     valueMeaning: 'charges',
   },
   {
@@ -88,27 +88,27 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
     name: 'Poison',
     aliases: ['Poisoned'],
     description:
-      'Poison deals damage based on your Power every 2 seconds for 12 seconds.',
+      'Poison deals Poison Damage based on your Power every 2 seconds for 12 seconds.',
     descriptionWithValue:
-      'Poison({value}) deals {value}% of your Power every 2 seconds for 12 seconds.',
+      'Poison({value}) deals {value}% of your Power as Poison Damage every 2 seconds for 12 seconds.',
     valueMeaning: 'potency',
   },
   {
     name: 'Burn',
     aliases: ['Burning'],
     description:
-      'Burn deals damage based on your Power every second for 4 seconds.',
+      'Burn deals Burn Damage based on your Power every second for 4 seconds.',
     descriptionWithValue:
-      'Burn({value}) deals {value}% of your Power every second for 4 seconds.',
+      'Burn({value}) deals {value}% of your Power as Burn Damage every second for 4 seconds.',
     valueMeaning: 'potency',
   },
   {
     name: 'Bleed',
     aliases: ['Bleeding'],
     description:
-      'Bleed deals damage based on your Power every 2 seconds for 8 seconds.',
+      'Bleed deals Bleed Damage based on your Power every 2 seconds for 8 seconds.',
     descriptionWithValue:
-      'Bleed({value}) deals {value}% of your Power every 2 seconds for 8 seconds.',
+      'Bleed({value}) deals {value}% of your Power as Bleed Damage every 2 seconds for 8 seconds.',
     valueMeaning: 'potency',
   },
   {

@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import {
   CharacterProfession,
@@ -66,6 +67,9 @@ describe('CharacterOverviewComponent', () => {
           return undefined;
         },
       } as unknown as ProfessionsService,
+      {
+        journal: signal({ quests: [] }).asReadonly(),
+      } as unknown as QuestStateService,
       {
         snapshot: { queryParamMap: convertToParamMap({}) },
         queryParamMap: of(convertToParamMap({})),
@@ -154,6 +158,9 @@ function createComponent(
     {
       getProfession: () => undefined,
     } as unknown as ProfessionsService,
+    {
+      journal: signal({ quests: [] }).asReadonly(),
+    } as unknown as QuestStateService,
     {
       snapshot: { queryParamMap: convertToParamMap({}) },
       queryParamMap: of(convertToParamMap({})),

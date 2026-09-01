@@ -1,3 +1,48 @@
+<button
+  *ngIf="quest() as activeQuest"
+  type="button"
+  class="relative flex min-w-0 basis-full items-center gap-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-left sm:hidden"
+  [class.quest-header-awaiting-welcome]="welcomeOpen()"
+  [attr.aria-label]="'Open pinned quest: ' + activeQuest.title"
+  (click)="navigate()"
+>
+  <span class="shrink-0 text-primary" aria-hidden="true">!</span>
+  <span class="min-w-0 flex-1">
+    <span class="flex min-w-0 items-center gap-2">
+      <strong class="truncate text-xs font-semibold text-primary">
+        {{ activeQuest.title }}
+      </strong>
+      <span class="shrink-0 text-xs text-[var(--ll-color-text-muted)]">
+        {{ requiresChoice() ? "Choose" : "Current objective" }}
+      </span>
+    </span>
+    <span
+      class="mt-0.5 block truncate text-xs text-[var(--ll-color-text-subtle)]"
+    >
+      {{
+        requiresChoice()
+          ? activeQuest.choice?.selectionSummary
+          : objective()?.description || "Open the Quest Journal"
+      }}
+    </span>
+    <span
+      *ngIf="!requiresChoice() && objective() as currentObjective"
+      class="mt-1 block h-1 overflow-hidden rounded-full bg-black/50"
+      role="progressbar"
+      [attr.aria-label]="currentObjective.description"
+      [attr.aria-valuenow]="currentObjective.currentAmount"
+      aria-valuemin="0"
+      [attr.aria-valuemax]="currentObjective.requiredAmount"
+    >
+      <span
+        class="block h-full rounded-full bg-primary"
+        [style.width.%]="progressPercent()"
+      ></span>
+    </span>
+  </span>
+  <span class="shrink-0 text-primary" aria-hidden="true">›</span>
+</button>
+
 <section
   *ngIf="quest() as activeQuest"
   #questHeader
@@ -232,7 +277,7 @@
 
 <div
   *ngIf="error() as questError"
-  class="ll-state ll-state-danger hidden basis-full px-3 py-1.5 text-xs sm:block"
+  class="ll-state ll-state-danger basis-full px-3 py-1.5 text-xs"
   role="alert"
 >
   {{ questError }}

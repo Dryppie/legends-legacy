@@ -639,6 +639,8 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<QuestService>();
+        services.Configure<QuestSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
+        services.AddScoped<IQuestSystemChatPublisher, QuestSystemChatPublisher>();
         services.AddScoped<IQuestService>(sp => sp.GetRequiredService<QuestService>());
         services.AddScoped<IQuestProgressionService>(sp => sp.GetRequiredService<QuestService>());
         services.AddScoped<EventQuestService>();

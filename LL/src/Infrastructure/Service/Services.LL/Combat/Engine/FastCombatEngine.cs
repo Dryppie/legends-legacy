@@ -670,7 +670,8 @@ public sealed class FastCombatEngine
             null,
             combatants,
             "Basic Attack",
-            armorPenetrationBonus: basicAttackModifiers.ArmorPenetration);
+            armorPenetrationBonus: basicAttackModifiers.ArmorPenetration,
+            canConsumeGuard: false);
         ApplyLifeSteal(actor, healthDamage, 0, combatants, "Basic Attack", "Basic Attack");
     }
 
@@ -1974,7 +1975,8 @@ public sealed class FastCombatEngine
         DamageDelivery delivery = DamageDelivery.Direct,
         float armorPenetrationBonus = 0,
         bool skipSourceDamageModifier = false,
-        RuntimeCombatant? redirectedFrom = null)
+        RuntimeCombatant? redirectedFrom = null,
+        bool canConsumeGuard = true)
     {
         if (!target.IsAlive || damage <= 0)
             return 0;
@@ -2057,6 +2059,7 @@ public sealed class FastCombatEngine
         var damageReductionPrevented = Math.Max(0, blockedDamage - reducedDamage);
         var guardedDamage = reducedDamage;
         if (delivery == DamageDelivery.Direct
+            && canConsumeGuard
             && reducedDamage > 0
             && TryConsumeConditionCharge(target, StandardConditionType.Guard, source, combatants))
         {

@@ -7,6 +7,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  signal,
   untracked,
 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
@@ -35,6 +36,11 @@ import { QuestPresenterService } from '../../../core/services/api/quest/quest-pr
 import { ProgressBarComponent } from '../../../shared/components/progress-bar/progress-bar.component';
 import { getEstimatedTemperingQueueDuration } from '../../../shared/utils/tempering/tempering-duration.utils';
 import { RegionService } from '../../../core/services/client-side/region/region.service';
+import {
+  filterSidebarForPlayerJourney,
+  getPlayerJourneyDestinationRoute,
+} from '../../../core/services/client-side/player-journey/player-journey';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -53,7 +59,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
-  sections: SidebarSection[] = [];
+  private readonly sections = signal<SidebarSection[]>([]);
+  readonly visibleSections = computed(() =>
+    filterSidebarForPlayerJourney(
+      this.sections(),
+      this.questState.journal(),
+      this.characterState.currentCharacter()?.level ?? 1,
+      environment.features.focusedBetaJourney,
+    ),
+  );
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
@@ -128,7 +142,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       .getSidebar()
       .pipe(takeUntil(this.destroy$))
       .subscribe((sections) => {
-        this.sections = sections;
+        this.sections.set(sections);
       });
 
     this.router.events
@@ -216,9 +230,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   isQuestDestination(item: Tab): boolean {
-    const destinationRoute =
-      this.questState.pinnedOnboardingObjective()?.presentation
-        .destinationRoute;
+    if (!this.questState.pinnedOnboardingObjective()) return false;
+
+    const destinationRoute = getPlayerJourneyDestinationRoute(
+      this.questState.journal(),
+    );
     if (!destinationRoute) return false;
     const destinationPath = this.routePath(destinationRoute);
     const itemRoute = `/${item.route.join('/')}`;

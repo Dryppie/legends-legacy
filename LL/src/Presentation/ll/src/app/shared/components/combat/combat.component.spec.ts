@@ -10,7 +10,6 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
-import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { RegionService } from '../../../core/services/client-side/region/region.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
@@ -24,7 +23,6 @@ describe('CombatComponent', () => {
   let currentAction: ReturnType<typeof signal<Record<string, unknown> | null>>;
   let bootstrapLoaded: ReturnType<typeof signal<boolean>>;
   let router: { url: string; navigate: jasmine.Spy };
-  let tour: { start: jasmine.Spy; stop: jasmine.Spy };
   let refreshCurrentAction: jasmine.Spy;
   let combatResult: ReturnType<typeof signal<any>>;
   let combatOutcome: ReturnType<typeof signal<BattleOutcome | null>>;
@@ -44,11 +42,6 @@ describe('CombatComponent', () => {
       url: '/game/combat',
       navigate: jasmine.createSpy('navigate').and.resolveTo(true),
     };
-    tour = {
-      start: jasmine.createSpy('start'),
-      stop: jasmine.createSpy('stop'),
-    };
-
     const characterActions = {
       currentAction,
       loadingCombat: signal(false),
@@ -97,10 +90,6 @@ describe('CombatComponent', () => {
             getRegionNameByAreaId: (areaId: string) =>
               areaId === 'region_02_area_02' ? 'Meran' : null,
           },
-        },
-        {
-          provide: FirstPartyTourService,
-          useValue: tour,
         },
         { provide: Router, useValue: router },
       ],
@@ -188,17 +177,6 @@ describe('CombatComponent', () => {
 
     fixture.componentInstance.returnToWorld();
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world']);
-  });
-
-  it('does not start delayed tutorial guidance after the summary is destroyed', async () => {
-    fixture.componentInstance.battleType = BattleType.Training;
-    fixture.detectChanges();
-
-    fixture.destroy();
-    await new Promise((resolve) => setTimeout(resolve, 15));
-
-    expect(tour.start).not.toHaveBeenCalled();
-    expect(tour.stop).toHaveBeenCalledOnceWith(false);
   });
 
   it('shows the Escape shortcut on Arena and Dungeon summary buttons', () => {

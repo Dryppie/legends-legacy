@@ -16,6 +16,57 @@
   width: 100%;
 }
 
+.overview-journey {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-color: color-mix(
+    in srgb,
+    var(--ll-color-primary) 45%,
+    var(--ll-color-border)
+  );
+  background: linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--ll-color-primary) 10%, transparent),
+      transparent 55%
+    ),
+    var(--ll-color-surface);
+}
+
+.overview-journey-main,
+.overview-journey-unlock {
+  min-width: 0;
+  padding: var(--ll-space-4);
+}
+
+.overview-journey-objective {
+  display: grid;
+  gap: var(--ll-space-1);
+  margin-top: var(--ll-space-4);
+  padding-left: var(--ll-space-3);
+  border-left: 2px solid var(--ll-color-primary);
+}
+
+.overview-journey-objective strong,
+.overview-journey-unlock strong {
+  color: var(--ll-color-text);
+  font-size: var(--ll-text-sm);
+}
+
+.overview-journey-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ll-space-2);
+  margin-top: var(--ll-space-4);
+}
+
+.overview-journey-unlock {
+  display: grid;
+  align-content: center;
+  gap: var(--ll-space-2);
+  border-top: 1px solid var(--ll-color-border);
+  background: color-mix(in srgb, var(--ll-color-surface-soft) 80%, transparent);
+}
+
 .overview-profile-primary,
 .overview-profile-progress,
 .overview-layout,
@@ -168,6 +219,15 @@
 }
 
 @container character-overview (min-width: 48rem) {
+  .overview-journey {
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.32fr);
+  }
+
+  .overview-journey-unlock {
+    border-top: 0;
+    border-left: 1px solid var(--ll-color-border);
+  }
+
   .overview-profile-primary {
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr) 12.5rem;
   }
@@ -251,6 +311,8 @@
   }
 
   .overview-profile-identity,
+  .overview-journey-main,
+  .overview-journey-unlock,
   .overview-combat-rating,
   .overview-character-level,
   .overview-skills,

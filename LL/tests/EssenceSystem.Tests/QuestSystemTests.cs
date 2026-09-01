@@ -634,13 +634,15 @@ public sealed class QuestSystemTests
             characterId,
             definitions.Get(QuestConstants.ArmorAndAdornment),
             isPinned: false));
+        var systemChatPublisher = new RecordingQuestSystemChatPublisher();
         var service = new QuestService(
             repository,
             definitions,
             itemBases: new RecordingItemBaseRepository(),
             inventoryItemFactory: new RecordingInventoryItemFactory(),
             lootRewardWriter: new RecordingLootRewardWriter(),
-            TimeProvider.System);
+            TimeProvider.System,
+            systemChatPublisher: systemChatPublisher);
 
         await service.ProcessAsync(
             characterId,
@@ -652,6 +654,7 @@ public sealed class QuestSystemTests
             x => x.QuestId == QuestConstants.ArmorAndAdornment);
         Assert.Null(progress.Objectives.Single(x => x.ObjectiveKey == "craft_armor").CompletedAt);
         Assert.NotNull(progress.Objectives.Single(x => x.ObjectiveKey == "craft_jewelry").CompletedAt);
+        Assert.Empty(systemChatPublisher.Publications);
 
         await service.ProcessAsync(
             characterId,
@@ -662,6 +665,11 @@ public sealed class QuestSystemTests
 
         Assert.Equal(QuestStatus.Completed, progress.Status);
         Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
+        var publication = Assert.Single(systemChatPublisher.Publications);
+        Assert.Equal(characterId, publication.CharacterId);
+        var completion = Assert.Single(publication.Completions);
+        Assert.Equal(QuestConstants.ArmorAndAdornment, completion.QuestId);
+        Assert.Equal("Armor and Adornment", completion.Title);
     }
 
     [Fact]
@@ -1255,5 +1263,20 @@ public sealed class QuestSystemTests
             string source,
             string? location,
             CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    private sealed class RecordingQuestSystemChatPublisher : IQuestSystemChatPublisher
+    {
+        public List<(Guid CharacterId, IReadOnlyCollection<QuestCompletionChatMessage> Completions)>
+            Publications { get; } = [];
+
+        public Task PublishAsync(
+            Guid characterId,
+            IReadOnlyCollection<QuestCompletionChatMessage> completions,
+            CancellationToken cancellationToken)
+        {
+            Publications.Add((characterId, completions));
+            return Task.CompletedTask;
+        }
     }
 }

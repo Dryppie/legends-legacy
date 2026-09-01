@@ -32,6 +32,8 @@ import { ProfessionType } from '../../../../shared/models/Dtos/characterProfessi
 import { EssencePreviewComponent } from '../../../../shared/components/essences/essence-preview/essence-preview.component';
 import { PresenceIndicatorComponent } from '../../../../shared/components/character/presence-indicator/presence-indicator.component';
 import { EssenceLoadoutDto } from '../../../../shared/models/essence-system';
+import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
+import { buildPlayerJourneyGuidance } from '../../../../core/services/client-side/player-journey/player-journey';
 
 export function estimateEssenceThreatPerSecond(
   loadout: EssenceLoadoutDto | null | undefined,
@@ -108,6 +110,12 @@ export class CharacterOverviewComponent implements OnDestroy {
   );
   readonly estimatedEssenceThreatPerSecond = computed(() =>
     estimateEssenceThreatPerSecond(this.character()?.essenceLoadout),
+  );
+  readonly journeyGuidance = computed(() =>
+    buildPlayerJourneyGuidance(
+      this.questState.journal(),
+      this.characterState.currentCharacter()?.level ?? 1,
+    ),
   );
   private readonly currentCharacterOverview = computed(() => {
     const overview = this.characterState.overview();
@@ -217,6 +225,7 @@ export class CharacterOverviewComponent implements OnDestroy {
     private characterService: CharacterService,
     private readonly characterState: CharacterStateService,
     private readonly professionsService: ProfessionsService,
+    private readonly questState: QuestStateService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {
@@ -373,6 +382,10 @@ export class CharacterOverviewComponent implements OnDestroy {
     }
 
     this.characterState.refresh();
+  }
+
+  navigateToJourney(route: string): void {
+    void this.router.navigateByUrl(route);
   }
 
   private navigateToCharacter(characterName: string | null): void {

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
 import { GUIDE_PAGE_IDS } from '../../shared/help/guide-catalog';
+import { focusedBetaUnavailableMatchGuard } from '../../core/guards/focused-beta-journey.guard';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -27,6 +28,7 @@ export const DASHBOARD_ROUTES: Routes = [
       },
       {
         path: 'city',
+        canMatch: [focusedBetaUnavailableMatchGuard],
         loadChildren: () =>
           import('./../../features/game/city/city.routes').then(
             (m) => m.CITY_ROUTES,
@@ -48,6 +50,7 @@ export const DASHBOARD_ROUTES: Routes = [
       },
       {
         path: 'prophecies',
+        canMatch: [focusedBetaUnavailableMatchGuard],
         loadChildren: () =>
           import('./../../features/game/prophecies/prophecies.routes').then(
             (m) => m.PROPHECIES_ROUTES,

@@ -88,7 +88,10 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
   styleUrl: './region.component.scss',
 })
 export class RegionComponent implements OnInit, OnDestroy {
-  readonly raidsEnabled = environment.features.raids;
+  readonly focusedBetaJourney = environment.features.focusedBetaJourney;
+  readonly raidsEnabled =
+    environment.features.raids && !environment.features.focusedBetaJourney;
+  readonly regionBossEnabled = !environment.features.focusedBetaJourney;
   regionId = '';
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
@@ -247,14 +250,13 @@ export class RegionComponent implements OnInit, OnDestroy {
       ...region,
       areas: region.areas
         .filter(
-          (area) => this.questState.accessFor(area.id)?.isVisible !== false,
+          (area) =>
+            this.questState.accessFor(area.id)?.isVisible !== false &&
+            (!this.focusedBetaJourney || area.levelRequirement <= 30),
         )
         .map((area) => ({
           ...area,
-          essenceProgress: calculateAreaEssenceProgress(
-            area,
-            this.soulArchive,
-          ),
+          essenceProgress: calculateAreaEssenceProgress(area, this.soulArchive),
           possibleDrops: this.possibleDropsFor(area),
         })),
     };

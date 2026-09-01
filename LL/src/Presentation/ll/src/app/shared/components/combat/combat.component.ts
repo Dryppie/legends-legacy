@@ -28,7 +28,6 @@ import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
-import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { Router } from '@angular/router';
 import { HelpLauncherComponent } from '../../help/help-launcher.component';
 import { GUIDE_PAGE_IDS } from '../../help/guide-catalog';
@@ -115,7 +114,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly characterActionService: CharacterActionsStateService,
     private readonly gameService: GameService,
     public readonly combatStateService: CombatStateService,
-    private readonly tour: FirstPartyTourService,
     private readonly router: Router,
     private readonly equipmentState: EquipmentStateService,
     private readonly regionService: RegionService,
@@ -297,9 +295,6 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.isDestroyed = true;
-    if (this.battleType === BattleType.Training) {
-      this.tour.stop(false);
-    }
     this.subscriptions.unsubscribe();
     if (this.flavorIntervalId) clearInterval(this.flavorIntervalId);
     if (this.flavorVisibilityTimeoutId) {
@@ -516,25 +511,5 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.flavorVisibilityTimeoutId = setTimeout(() => {
       this.flavorTextVisible = true;
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.waitForTourElements().then(() => {
-      if (!this.isDestroyed && this.battleType === BattleType.Training) {
-        this.tour.start('tutorial-combat');
-      }
-    });
-  }
-
-  private async waitForTourElements(): Promise<void> {
-    const maxAttempts = 20;
-    const delay = 10; // ms
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      if (this.isDestroyed) return;
-      const allExist = !!this.entityStats.length;
-      if (allExist) return;
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
   }
 }

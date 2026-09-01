@@ -21,7 +21,8 @@ public sealed class QuestService(
     TimeProvider timeProvider,
     IGameRealtimeBroadcaster? eventPublisher = null,
     IStateSyncService? stateSync = null,
-    IMapper? mapper = null) : IQuestService, IQuestProgressionService
+    IMapper? mapper = null,
+    IQuestSystemChatPublisher? systemChatPublisher = null) : IQuestService, IQuestProgressionService
 {
     public async Task<QuestJournal> GetJournalAsync(
         Guid characterId,
@@ -223,6 +224,17 @@ public sealed class QuestService(
         if (journalChanged)
         {
             await PublishChangedAsync(characterId, journal, cancellationToken);
+        }
+        if (completedQuestIds.Count > 0 && systemChatPublisher is not null)
+        {
+            var completedQuests = journal.Quests
+                .Where(quest => completedQuestIds.Contains(quest.QuestId, StringComparer.OrdinalIgnoreCase))
+                .Select(quest => new QuestCompletionChatMessage(quest.QuestId, quest.Title))
+                .ToList();
+            await systemChatPublisher.PublishAsync(
+                characterId,
+                completedQuests,
+                cancellationToken);
         }
         return new QuestProgressionResult(journal, completedQuestIds, loot, journalChanged);
     }

@@ -164,6 +164,44 @@ public sealed class StandardConditionSystemTests
     }
 
     [Fact]
+    public void Basic_attacks_do_not_reduce_damage_with_or_consume_guard()
+    {
+        var attacker = Combatant(
+            "attacker",
+            CombatTeam.Friendly,
+            [],
+            power: 0,
+            weaponDamage: 100);
+        var guardSetup = Passive(
+            "guard.setup",
+            ConditionEffect("guard", StandardConditionType.Guard, AbilityTargetSelector.Self, 1));
+        var guarded = Combatant(
+            "guarded",
+            CombatTeam.Hostile,
+            [guardSetup],
+            basicAttackIntervalMultiplier: 1000);
+
+        Run([attacker], [guarded], maxTicks: 1, basicAttackIntervalTicks: 1);
+
+        var baselineAttacker = Combatant(
+            "baseline.attacker",
+            CombatTeam.Friendly,
+            [],
+            power: 0,
+            weaponDamage: 100);
+        var unguarded = Combatant(
+            "unguarded",
+            CombatTeam.Hostile,
+            [],
+            basicAttackIntervalMultiplier: 1000);
+
+        Run([baselineAttacker], [unguarded], maxTicks: 1, basicAttackIntervalTicks: 1);
+
+        Assert.Equal(1000 - unguarded.Health, 1000 - guarded.Health);
+        Assert.Equal(1, guarded.GetConditionStacks(StandardConditionType.Guard));
+    }
+
+    [Fact]
     public void Vulnerable_amplifies_and_consumes_one_stack_per_direct_hit()
     {
         var attack = Passive(

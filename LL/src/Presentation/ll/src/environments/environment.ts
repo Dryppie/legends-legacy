@@ -27,6 +27,8 @@ export const environment = {
   production: false,
   features: {
     raids: env.environment !== 'prod',
+    focusedBetaJourney:
+      runtimeText(env.focusedBetaJourney, 'true').toLowerCase() !== 'false',
   },
   googleClientId: env.googleClientId,
   isLocal: env.isLocal === 'true',

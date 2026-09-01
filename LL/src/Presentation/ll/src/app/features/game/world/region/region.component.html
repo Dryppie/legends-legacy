@@ -88,23 +88,25 @@
       >
         Shenic
       </a>
-      <a
-        *ngIf="isMeranUnlocked(); else lockedMeranLink"
-        routerLink="/game/world/meran"
-        [class.active]="regionId === 'meran'"
-        [attr.aria-current]="regionId === 'meran' ? 'page' : null"
-      >
-        Meran
-      </a>
-      <ng-template #lockedMeranLink>
-        <span
-          class="locked-region"
-          title="Complete World Tower Floor 10 to unlock Meran"
-          aria-disabled="true"
+      <ng-container *ngIf="!focusedBetaJourney">
+        <a
+          *ngIf="isMeranUnlocked(); else lockedMeranLink"
+          routerLink="/game/world/meran"
+          [class.active]="regionId === 'meran'"
+          [attr.aria-current]="regionId === 'meran' ? 'page' : null"
         >
           Meran
-        </span>
-      </ng-template>
+        </a>
+        <ng-template #lockedMeranLink>
+          <span
+            class="locked-region"
+            title="Complete World Tower Floor 10 to unlock Meran"
+            aria-disabled="true"
+          >
+            Meran
+          </span>
+        </ng-template>
+      </ng-container>
     </nav>
 
     <div *ngIf="isRegionTowerLocked(); else unlockedRegion" class="map-lock">
@@ -307,7 +309,10 @@
               <p class="activity-empty">No raids are available here yet.</p>
             </ng-template>
           </section>
-          <section *ngIf="regionNumber() === 1" class="activity-panel">
+          <section
+            *ngIf="regionBossEnabled && regionNumber() === 1"
+            class="activity-panel"
+          >
             <header>
               <h2>Region Boss</h2>
               <span>Every 4–8h</span>

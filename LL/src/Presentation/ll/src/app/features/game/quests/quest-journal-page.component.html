@@ -860,11 +860,15 @@
                     <button
                       *ngFor="let option of choice.options"
                       type="button"
-                      class="overflow-hidden rounded border border-light_gray/20 bg-black/15 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                      class="flex flex-col items-stretch justify-start overflow-hidden rounded border border-light_gray/20 bg-black/15 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                      [class.ll-quest-choice-option-attention]="
+                        pendingChoiceKey() === null
+                      "
                       [ngClass]="{
                         'border-primary bg-primary/10':
                           pendingChoiceKey() === option.key,
                       }"
+                      [attr.aria-pressed]="pendingChoiceKey() === option.key"
                       [disabled]="questState.loading()"
                       (click)="chooseOption(option)"
                     >
@@ -954,7 +958,7 @@
                       </ng-container>
 
                       <span
-                        class="flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[var(--ll-text-xs)] text-zinc-300"
+                        class="mt-auto flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[var(--ll-text-xs)] text-zinc-300"
                       >
                         <span class="ll-eyebrow text-xs">Guaranteed</span>
                         <app-base-item

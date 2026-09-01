@@ -120,6 +120,49 @@
     *ngIf="character() as characterOverview"
     class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
   >
+    <section
+      *ngIf="!isViewingSearchResult() && journeyGuidance() as journey"
+      class="overview-journey ll-panel mb-4 overflow-hidden"
+      aria-labelledby="overview-journey-title"
+    >
+      <div class="overview-journey-main">
+        <div>
+          <p class="ll-eyebrow text-primary">{{ journey.phaseLabel }}</p>
+          <h2 id="overview-journey-title" class="ll-heading mt-1 text-xl">
+            {{ journey.title }}
+          </h2>
+          <p class="ll-copy mt-2 max-w-3xl">{{ journey.summary }}</p>
+        </div>
+
+        <div class="overview-journey-objective">
+          <span class="ll-stat-label">Recommended now</span>
+          <strong>{{ journey.objective }}</strong>
+        </div>
+
+        <div class="overview-journey-actions">
+          <button
+            type="button"
+            class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
+            (click)="navigateToJourney(journey.primaryAction.route)"
+          >
+            {{ journey.primaryAction.label }}
+          </button>
+          <button
+            type="button"
+            class="ll-button min-h-9 px-4 py-2 text-xs"
+            (click)="navigateToJourney(journey.optionalAction.route)"
+          >
+            Optional: {{ journey.optionalAction.label }}
+          </button>
+        </div>
+      </div>
+
+      <aside class="overview-journey-unlock">
+        <span class="ll-stat-label">Next unlock</span>
+        <strong>{{ journey.nextUnlock }}</strong>
+      </aside>
+    </section>
+
     <div class="overview-layout grid gap-4">
       <div class="overview-main-column min-w-0">
         <section class="overview-profile ll-panel overflow-hidden">
