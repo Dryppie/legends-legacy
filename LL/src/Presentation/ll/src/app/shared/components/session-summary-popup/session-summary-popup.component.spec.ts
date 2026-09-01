@@ -22,7 +22,7 @@ describe('SessionSummaryPopupComponent', () => {
     expect(gathering?.metrics).toEqual([{ label: 'Mining XP', value: 125 }]);
     expect(
       gathering?.items.map((item) => item.itemInstance.itemBase.name),
-    ).toEqual(['Fury Heart', 'Ore']);
+    ).toEqual(['Fury Catalyst', 'Ore']);
     expect(
       gathering?.items.find((item) => item.key === 'fury_heart')?.isRare,
     ).toBeTrue();
@@ -49,7 +49,7 @@ function combatSession(): CombatSessionDto {
           experienceGained: 125,
           itemsGained: [
             item('ore', 'Ore', Rarity.Common, 20),
-            item('fury_heart', 'Fury Heart', Rarity.Rare, 1),
+            item('fury_heart', 'Fury Catalyst', Rarity.Rare, 1),
           ],
           appliedBonusEffects: ['+25% gathering XP'],
         },

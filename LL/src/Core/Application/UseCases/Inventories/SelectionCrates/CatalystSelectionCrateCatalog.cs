@@ -18,17 +18,17 @@ public static class CatalystSelectionCrateCatalog
 
     public static IReadOnlyList<SelectionContainerOptionDefinition> Options { get; } =
     [
-        new("fury", "Fury Hearts", "fury_heart", 6),
-        new("arcane", "Arcane Focuses", "arcane_focus", 6),
-        new("execution", "Executioner's Marks", "executioners_mark", 6),
-        new("aegis", "Aegis Runestones", "aegis_runestone", 6),
-        new("warden", "Warden Sigils", "warden_sigil", 6),
-        new("endurance", "Endurance Cores", "endurance_core", 6),
-        new("phoenix", "Phoenix Embers", "phoenix_ember", 6),
-        new("spirit", "Spirit Prisms", "spirit_prism", 6),
-        new("primal", "Hive Ichor", "hive_ichor", 6),
-        new("venom", "Venom Glands", "venom_gland", 6),
-        new("hive", "Royal Chitin Plates", "royal_chitin_plate", 6)
+        new("fury", "Fury Catalysts", "fury_heart", 6),
+        new("arcane", "Arcane Catalysts", "arcane_focus", 6),
+        new("execution", "Execution Catalysts", "executioners_mark", 6),
+        new("aegis", "Aegis Catalysts", "aegis_runestone", 6),
+        new("warden", "Warden Catalysts", "warden_sigil", 6),
+        new("endurance", "Endurance Catalysts", "endurance_core", 6),
+        new("phoenix", "Phoenix Catalysts", "phoenix_ember", 6),
+        new("spirit", "Spirit Catalysts", "spirit_prism", 6),
+        new("primal", "Primal Catalysts", "hive_ichor", 6),
+        new("venom", "Venom Catalysts", "venom_gland", 6),
+        new("hive", "Hive Catalysts", "royal_chitin_plate", 6)
     ];
 }
 

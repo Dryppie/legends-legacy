@@ -113,7 +113,7 @@ public sealed class ProphecyDtoMappingTests
         var itemBase = new ItemBase
         {
             Id = "fury_heart",
-            Name = "Fury Heart",
+            Name = "Fury Catalyst",
             ItemType = ItemType.Resource,
             Stackable = true
         };

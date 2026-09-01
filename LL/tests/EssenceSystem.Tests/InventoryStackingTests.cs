@@ -18,7 +18,7 @@ public sealed class InventoryStackingTests
         var itemBase = new ItemBase
         {
             Id = "arcane_focus",
-            Name = "Arcane Focus",
+            Name = "Arcane Catalyst",
             ItemType = ItemType.Resource,
             Stackable = true
         };

@@ -420,7 +420,7 @@
     {
       "key": "common.fury_catalyst_cache",
       "name": "Fury Catalyst Cache",
-      "description": "Two Fury Hearts for Fury Blueprint recipes.",
+      "description": "Two Fury Catalysts for Fury Blueprint recipes.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
@@ -432,14 +432,14 @@
           "type": "Item",
           "amount": 2,
           "key": "fury_heart",
-          "name": "Fury Heart"
+          "name": "Fury Catalyst"
         }
       ]
     },
     {
       "key": "common.arcane_catalyst_cache",
       "name": "Arcane Catalyst Cache",
-      "description": "Two Arcane Focuses for Arcane Blueprint recipes.",
+      "description": "Two Arcane Catalysts for Arcane Blueprint recipes.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
@@ -451,14 +451,14 @@
           "type": "Item",
           "amount": 2,
           "key": "arcane_focus",
-          "name": "Arcane Focus"
+          "name": "Arcane Catalyst"
         }
       ]
     },
     {
       "key": "common.venom_catalyst_cache",
       "name": "Venom Catalyst Cache",
-      "description": "Two Venom Glands for Venom Blueprint recipes.",
+      "description": "Two Venom Catalysts for Venom Blueprint recipes.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
@@ -470,14 +470,14 @@
           "type": "Item",
           "amount": 2,
           "key": "venom_gland",
-          "name": "Venom Gland"
+          "name": "Venom Catalyst"
         }
       ]
     },
     {
       "key": "common.hive_catalyst_cache",
       "name": "Hive Catalyst Cache",
-      "description": "Two Royal Chitin Plates for Hive Blueprint recipes.",
+      "description": "Two Hive Catalysts for Hive Blueprint recipes.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
@@ -489,14 +489,14 @@
           "type": "Item",
           "amount": 2,
           "key": "royal_chitin_plate",
-          "name": "Royal Chitin Plate"
+          "name": "Hive Catalyst"
         }
       ]
     },
     {
       "key": "common.primal_catalyst_cache",
       "name": "Primal Catalyst Cache",
-      "description": "Two Hive Ichors for Primal Blueprint recipes.",
+      "description": "Two Primal Catalysts for Primal Blueprint recipes.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
@@ -508,7 +508,7 @@
           "type": "Item",
           "amount": 2,
           "key": "hive_ichor",
-          "name": "Hive Ichor"
+          "name": "Primal Catalyst"
         }
       ]
     },
@@ -563,7 +563,7 @@
     {
       "key": "rare.fury_catalyst_cache",
       "name": "Rare Fury Catalyst Cache",
-      "description": "Six Fury Hearts for Fury Blueprint recipes.",
+      "description": "Six Fury Catalysts for Fury Blueprint recipes.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
@@ -575,14 +575,14 @@
           "type": "Item",
           "amount": 6,
           "key": "fury_heart",
-          "name": "Fury Heart"
+          "name": "Fury Catalyst"
         }
       ]
     },
     {
       "key": "rare.arcane_catalyst_cache",
       "name": "Rare Arcane Catalyst Cache",
-      "description": "Six Arcane Focuses for Arcane Blueprint recipes.",
+      "description": "Six Arcane Catalysts for Arcane Blueprint recipes.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
@@ -594,14 +594,14 @@
           "type": "Item",
           "amount": 6,
           "key": "arcane_focus",
-          "name": "Arcane Focus"
+          "name": "Arcane Catalyst"
         }
       ]
     },
     {
       "key": "rare.venom_catalyst_cache",
       "name": "Rare Venom Catalyst Cache",
-      "description": "Six Venom Glands for Venom Blueprint recipes.",
+      "description": "Six Venom Catalysts for Venom Blueprint recipes.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
@@ -613,14 +613,14 @@
           "type": "Item",
           "amount": 6,
           "key": "venom_gland",
-          "name": "Venom Gland"
+          "name": "Venom Catalyst"
         }
       ]
     },
     {
       "key": "rare.hive_catalyst_cache",
       "name": "Rare Hive Catalyst Cache",
-      "description": "Six Royal Chitin Plates for Hive Blueprint recipes.",
+      "description": "Six Hive Catalysts for Hive Blueprint recipes.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
@@ -632,14 +632,14 @@
           "type": "Item",
           "amount": 6,
           "key": "royal_chitin_plate",
-          "name": "Royal Chitin Plate"
+          "name": "Hive Catalyst"
         }
       ]
     },
     {
       "key": "rare.primal_catalyst_cache",
       "name": "Rare Primal Catalyst Cache",
-      "description": "Six Hive Ichors for Primal Blueprint recipes.",
+      "description": "Six Primal Catalysts for Primal Blueprint recipes.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
@@ -651,7 +651,7 @@
           "type": "Item",
           "amount": 6,
           "key": "hive_ichor",
-          "name": "Hive Ichor"
+          "name": "Primal Catalyst"
         }
       ]
     },

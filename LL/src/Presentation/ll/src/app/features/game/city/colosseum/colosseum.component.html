@@ -1,7 +1,7 @@
 <ng-container
   *ngIf="
     combatStateService.getIsCombatActive(battleType)() as isCombatActive;
-    else showNonCombat
+    else showInactiveCombat
   "
 >
   <app-combat
@@ -10,6 +10,56 @@
     (skipBattle)="skipBattle()"
   ></app-combat>
 </ng-container>
+<ng-template #showInactiveCombat>
+  <ng-container
+    *ngIf="selectedCombatSummary() as selectedMatch; else showNonCombat"
+  >
+    <div
+      *ngIf="selectedMatch.combatSummary as summary"
+      class="flex h-full min-h-0 w-full flex-col overflow-y-auto overscroll-contain lg:overflow-hidden"
+    >
+      <section
+        class="ll-panel flex min-h-full w-full flex-col overflow-hidden px-4 py-4 sm:px-6 lg:h-full lg:min-h-0"
+      >
+        <header
+          class="flex shrink-0 flex-col gap-4 border-b border-primary/40 pb-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1">
+            <h2 class="ll-heading truncate text-2xl uppercase tracking-tight">
+              Arena Battle
+            </h2>
+            <span
+              class="ll-badge"
+              [ngClass]="combatSummaryResultClass(selectedMatch)"
+            >
+              {{ combatSummaryResultLabel(selectedMatch) }}
+            </span>
+            <span *ngIf="summary.duration > 0" class="text-xs text-light_gray">
+              Duration {{ combatDurationLabel(summary.duration) }}
+            </span>
+          </div>
+
+          <app-mini-button
+            class="block shrink-0 self-end sm:self-auto"
+            text="Back to Battle Record (Esc)"
+            mobileText="Back"
+            [width]="'176px'"
+            (click)="closeCombatSummary()"
+          ></app-mini-button>
+        </header>
+
+        <app-combat-entity-stats
+          class="flex min-h-0 w-full flex-1"
+          [playerTeam]="summary.playerTeam"
+          [enemyTeam]="summary.enemyTeam"
+          [entityStats]="summary.entityStats"
+          [currentCharacterId]="currentCharacterId"
+          [combatDurationTicks]="summary.duration"
+        ></app-combat-entity-stats>
+      </section>
+    </div>
+  </ng-container>
+</ng-template>
 <ng-template #showNonCombat>
   <div class="ll-page-stack items-center gap-2 overflow-hidden sm:gap-4">
     <app-default-header
@@ -193,6 +243,7 @@
         <app-record-of-battle
           class="min-h-0 flex-1 overflow-hidden"
           [previousMatches]="state.previousMatches()"
+          (viewCombatSummary)="openCombatSummary($event)"
         >
         </app-record-of-battle>
       </app-tab>

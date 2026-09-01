@@ -546,19 +546,25 @@ describe('CharacterActionsStateService', () => {
     expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
   });
 
-  it('allows an immediate action after stopping Combat once its initial lock expired', () => {
+  it('blocks a new Combat after stopping until the rolling encounter boundary', () => {
     actions.stop.and.returnValue(of(undefined));
+    const nextEncounter = new Date(Date.now() + 9_000);
     service.applyCurrentActionSnapshot({
       ...combatAction(),
       blockedUntilUtc: new Date(Date.now() - 1_000),
-      nextResolutionAtUtc: new Date(Date.now() + 9_000),
+      nextResolutionAtUtc: nextEncounter,
       revision: 'unlocked-combat-revision',
     });
 
     service.stopAction();
 
-    expect(service.isActionCooldown()).toBeFalse();
+    expect(service.isActionCooldown()).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
     expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+    expect(
+      new Date(service.currentAction()!.blockedUntilUtc!).getTime(),
+    ).toBe(nextEncounter.getTime());
+    expect(service.currentAction()!.nextResolutionAtUtc).toBeNull();
   });
 
   it('preserves the original Combat lock when queued Tempering is stopped', () => {

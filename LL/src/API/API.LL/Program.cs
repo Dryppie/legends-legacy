@@ -262,6 +262,7 @@ await app.Services.ValidateCreatureBuildProfilesAsync();
 // Configure the HTTP request pipeline.
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
+app.UseMiddleware<ClientDisconnectMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

@@ -463,11 +463,11 @@ internal static class GuildContentDefaults
 
     private static IEnumerable<GuildShopItemDefinition> CreateCommonCatalystShopItems()
     {
-        yield return CreateCommonCatalystShopItem("fury", "Fury", "fury_heart", "Fury Heart");
-        yield return CreateCommonCatalystShopItem("arcane", "Arcane", "arcane_focus", "Arcane Focus");
-        yield return CreateCommonCatalystShopItem("venom", "Venom", "venom_gland", "Venom Gland");
-        yield return CreateCommonCatalystShopItem("hive", "Hive", "royal_chitin_plate", "Royal Chitin Plate");
-        yield return CreateCommonCatalystShopItem("primal", "Primal", "hive_ichor", "Hive Ichor");
+        yield return CreateCommonCatalystShopItem("fury", "Fury", "fury_heart", "Fury Catalyst");
+        yield return CreateCommonCatalystShopItem("arcane", "Arcane", "arcane_focus", "Arcane Catalyst");
+        yield return CreateCommonCatalystShopItem("venom", "Venom", "venom_gland", "Venom Catalyst");
+        yield return CreateCommonCatalystShopItem("hive", "Hive", "royal_chitin_plate", "Hive Catalyst");
+        yield return CreateCommonCatalystShopItem("primal", "Primal", "hive_ichor", "Primal Catalyst");
     }
 
     private static GuildShopItemDefinition CreateCommonCatalystShopItem(
@@ -489,11 +489,11 @@ internal static class GuildContentDefaults
 
     private static IEnumerable<GuildShopItemDefinition> CreateRareCatalystShopItems()
     {
-        yield return CreateRareCatalystShopItem("fury", "Fury", "fury_heart", "Fury Heart");
-        yield return CreateRareCatalystShopItem("arcane", "Arcane", "arcane_focus", "Arcane Focus");
-        yield return CreateRareCatalystShopItem("venom", "Venom", "venom_gland", "Venom Gland");
-        yield return CreateRareCatalystShopItem("hive", "Hive", "royal_chitin_plate", "Royal Chitin Plate");
-        yield return CreateRareCatalystShopItem("primal", "Primal", "hive_ichor", "Hive Ichor");
+        yield return CreateRareCatalystShopItem("fury", "Fury", "fury_heart", "Fury Catalyst");
+        yield return CreateRareCatalystShopItem("arcane", "Arcane", "arcane_focus", "Arcane Catalyst");
+        yield return CreateRareCatalystShopItem("venom", "Venom", "venom_gland", "Venom Catalyst");
+        yield return CreateRareCatalystShopItem("hive", "Hive", "royal_chitin_plate", "Hive Catalyst");
+        yield return CreateRareCatalystShopItem("primal", "Primal", "hive_ichor", "Primal Catalyst");
     }
 
     private static GuildShopItemDefinition CreateRareCatalystShopItem(
@@ -541,13 +541,5 @@ internal static class GuildContentDefaults
             RotationGroup: "rare-blueprints",
             [new GuildShopRewardDto(GuildShopRewardType.Item, 1, $"blueprint_{id}", name)]);
 
-    private static string PluralizeCatalystName(string itemName) => itemName switch
-    {
-        "Fury Heart" => "Fury Hearts",
-        "Arcane Focus" => "Arcane Focuses",
-        "Venom Gland" => "Venom Glands",
-        "Royal Chitin Plate" => "Royal Chitin Plates",
-        "Hive Ichor" => "Hive Ichors",
-        _ => itemName
-    };
+    private static string PluralizeCatalystName(string itemName) => $"{itemName}s";
 }

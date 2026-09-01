@@ -1184,7 +1184,7 @@
   },
   {
     "id": "venom_gland",
-    "name": "Venom Gland",
+    "name": "Venom Catalyst",
     "description": "A volatile reagent used for venom-focused crafting variants.",
     "itemType": "Resource",
     "rarity": "Uncommon",
@@ -1195,7 +1195,7 @@
   },
   {
     "id": "royal_chitin_plate",
-    "name": "Royal Chitin Plate",
+    "name": "Hive Catalyst",
     "description": "A dense chitin plate suitable for precise variant crafting.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1206,7 +1206,7 @@
   },
   {
     "id": "hive_ichor",
-    "name": "Hive Ichor",
+    "name": "Primal Catalyst",
     "description": "A rare catalyst used to carry hive properties into crafted gear.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1217,7 +1217,7 @@
   },
   {
     "id": "fury_heart",
-    "name": "Fury Heart",
+    "name": "Fury Catalyst",
     "description": "A crystallized pulse of battle rage used to bind the Fury design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1228,7 +1228,7 @@
   },
   {
     "id": "arcane_focus",
-    "name": "Arcane Focus",
+    "name": "Arcane Catalyst",
     "description": "A concentrated magical lens used to bind the Arcane design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1239,7 +1239,7 @@
   },
   {
     "id": "executioners_mark",
-    "name": "Executioner\u0027s Mark",
+    "name": "Execution Catalyst",
     "description": "A grim token used to bind the Execution design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1250,7 +1250,7 @@
   },
   {
     "id": "aegis_runestone",
-    "name": "Aegis Runestone",
+    "name": "Aegis Catalyst",
     "description": "A warded stone used to bind the Aegis design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1261,7 +1261,7 @@
   },
   {
     "id": "warden_sigil",
-    "name": "Warden Sigil",
+    "name": "Warden Catalyst",
     "description": "A protective insignia used to bind the Warden design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1272,7 +1272,7 @@
   },
   {
     "id": "endurance_core",
-    "name": "Endurance Core",
+    "name": "Endurance Catalyst",
     "description": "A resilient mineral heart used to bind the Endurance design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1283,7 +1283,7 @@
   },
   {
     "id": "phoenix_ember",
-    "name": "Phoenix Ember",
+    "name": "Phoenix Catalyst",
     "description": "An undying spark used to bind the Phoenix design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1294,7 +1294,7 @@
   },
   {
     "id": "spirit_prism",
-    "name": "Spirit Prism",
+    "name": "Spirit Catalyst",
     "description": "A soul-attuned crystal used to bind the Spirit design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",

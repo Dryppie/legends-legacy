@@ -360,7 +360,7 @@ export class CharacterActionsStateService {
     this._stoppingAction.set(true);
     this.handleDeletionOfCurrentAction();
     // Tear down the old action synchronously. The retained deleted snapshot
-    // still carries the original combat lock, so Tempering remains clickable.
+    // carries the effective combat restart boundary, so Tempering remains clickable.
     // Doing this in the response callback could clear a successor action.
     this.clear();
 
@@ -393,15 +393,16 @@ export class CharacterActionsStateService {
     const currentAction = this._currentAction();
     if (!currentAction) return;
 
-    const waitsForSwitchUnlock =
-      this.switchUnlockDeadline(currentAction) > Date.now();
+    const unlockDeadline = this.stopUnlockDeadline(currentAction);
+    const waitsForSwitchUnlock = unlockDeadline > Date.now();
     const updated = {
       ...currentAction,
       isDeleted: true,
       updatedAt: waitsForSwitchUnlock ? currentAction.updatedAt : new Date(),
-      nextResolutionAtUtc: waitsForSwitchUnlock
-        ? currentAction.nextResolutionAtUtc
+      blockedUntilUtc: waitsForSwitchUnlock
+        ? new Date(unlockDeadline)
         : null,
+      nextResolutionAtUtc: null,
       craftingActionDetails: undefined,
       combatActionDetails: undefined,
     };
@@ -930,5 +931,20 @@ export class CharacterActionsStateService {
   private switchUnlockDeadline(action: CharacterActionDto): number {
     const deadline = action.blockedUntilUtc ?? action.updatedAt;
     return new Date(deadline).getTime();
+  }
+
+  private stopUnlockDeadline(action: CharacterActionDto): number {
+    const switchDeadline = this.switchUnlockDeadline(action);
+    if (
+      action.characterActionType !== CharacterActionType.Combat ||
+      !action.nextResolutionAtUtc
+    ) {
+      return switchDeadline;
+    }
+
+    return Math.max(
+      switchDeadline,
+      new Date(action.nextResolutionAtUtc).getTime(),
+    );
   }
 }

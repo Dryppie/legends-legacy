@@ -40,7 +40,7 @@ const TOOL_BONUS_TOOLTIPS: Partial<
   [ToolBonusType.RareMaterialChancePercent]: {
     title: 'Catalytic · Catalyst Chance',
     description:
-      "The Catalytic profile increases the relative weight of reward-table entries tagged as rare, such as Fury Heart and other Catalysts. It does not change normal materials or the node's base success chance.",
+      "The Catalytic profile increases the relative weight of reward-table entries tagged as rare, such as Fury Catalyst and other Catalysts. It does not change normal materials or the node's base success chance.",
   },
 };
 

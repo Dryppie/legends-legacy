@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ColosseumMatchResult } from '../../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
@@ -6,9 +6,6 @@ import { CharacterTagComponent } from '../../../../../shared/components/characte
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { FilterTabsComponent } from '../../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date.pipe';
-import { CombatEntityStatsComponent } from '../../../../../shared/components/combat/combat-entity-stats/combat-entity-stats.component';
-import { DialogFocusDirective } from '../../../../../shared/directives/dialog-focus/dialog-focus.directive';
-import { CombatResultDto } from '../../../../../shared/models/Dtos/combatResultDto';
 
 @Component({
     selector: 'app-record-of-battle',
@@ -20,17 +17,15 @@ import { CombatResultDto } from '../../../../../shared/models/Dtos/combatResultD
         CharacterTagComponent,
         NumberFormatPipe,
         FilterTabsComponent,
-        CombatEntityStatsComponent,
-        DialogFocusDirective,
     ],
     templateUrl: './record-of-battle.component.html'
 })
 export class RecordOfBattleComponent {
   @Input() previousMatches: ColosseumMatchResult[] = [];
+  @Output() viewCombatSummary = new EventEmitter<ColosseumMatchResult>();
   readonly id;
   filter: 'all' | 'attacks' | 'defenses' = 'all';
   readonly filters = ['All', 'Attacks', 'Defenses'];
-  selectedCombatSummary: CombatResultDto | null = null;
 
   constructor(private state: CharacterStateService) {
     this.id = state.currentCharacterId();
@@ -134,17 +129,6 @@ export class RecordOfBattleComponent {
   }
 
   openCombatSummary(match: ColosseumMatchResult): void {
-    this.selectedCombatSummary = match.combatSummary ?? null;
-  }
-
-  closeCombatSummary(): void {
-    this.selectedCombatSummary = null;
-  }
-
-  combatDurationLabel(durationTicks: number): string {
-    const totalSeconds = Math.max(0, Math.round(durationTicks / 10));
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    if (match.combatSummary) this.viewCombatSummary.emit(match);
   }
 }

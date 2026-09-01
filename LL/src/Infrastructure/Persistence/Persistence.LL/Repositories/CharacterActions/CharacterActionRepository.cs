@@ -87,6 +87,9 @@ public class CharacterActionRepository : ICharacterActionRepository
     public async Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var stoppedCombat = characterAction.ActionDetails as CombatActionDetails;
+        var combatRestartBlockedUntil = stoppedCombat == null
+            ? null
+            : GetCombatRestartLock(characterAction, now);
         if (stoppedCombat != null)
         {
             characterAction.ReturnToCombatAreaId = stoppedCombat.AreaId;
@@ -109,9 +112,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
-        characterAction.BlockedUntilUtc = stoppedCombat != null && characterAction.BlockedUntilUtc > now
-            ? characterAction.BlockedUntilUtc
-            : null;
+        characterAction.BlockedUntilUtc = combatRestartBlockedUntil;
         characterAction.NextResolutionAtUtc = null;
         characterAction.UpdatedAt = now;
         characterAction.RowVersion++;
@@ -489,6 +490,19 @@ public class CharacterActionRepository : ICharacterActionRepository
         actionDetails is CombatActionDetails
             ? now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds)
             : null;
+
+    private static DateTimeOffset? GetCombatRestartLock(
+        CharacterAction characterAction,
+        DateTimeOffset now)
+    {
+        var deadline = characterAction.BlockedUntilUtc;
+        if (characterAction.NextResolutionAtUtc > deadline)
+        {
+            deadline = characterAction.NextResolutionAtUtc;
+        }
+
+        return deadline > now ? deadline : null;
+    }
 
     public async Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken)
     {

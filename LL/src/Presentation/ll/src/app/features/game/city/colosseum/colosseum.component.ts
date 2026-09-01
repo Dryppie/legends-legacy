@@ -1,10 +1,17 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  effect,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { Location, NgIf, NgTemplateOutlet } from '@angular/common';
+import { Location, NgClass, NgIf, NgTemplateOutlet } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -21,6 +28,8 @@ import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/lea
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
 import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
+import { CombatEntityStatsComponent } from '../../../../shared/components/combat/combat-entity-stats/combat-entity-stats.component';
+import { MiniButtonComponent } from '../../../../shared/components/custom-components/buttons/mini-button/mini-button.component';
 
 @Component({
   selector: 'app-colosseum',
@@ -28,6 +37,7 @@ import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pi
     DefaultHeaderComponent,
     TabComponent,
     CombatComponent,
+    NgClass,
     NgIf,
     NgTemplateOutlet,
     LocalDatePipe,
@@ -38,6 +48,8 @@ import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pi
     TournamentGroundsComponent,
     TabsComponent,
     NumberFormatPipe,
+    CombatEntityStatsComponent,
+    MiniButtonComponent,
   ],
   templateUrl: './colosseum.component.html',
 })
@@ -47,6 +59,7 @@ export class ColosseumComponent implements OnInit {
   private readonly location = inject(Location);
 
   battleType = BattleType.Colosseum;
+  readonly selectedCombatSummary = signal<ColosseumMatchResult | null>(null);
   readonly selectedTabIndex = toSignal(
     this.route.queryParamMap.pipe(
       map((params) => colosseumTabIndex(params.get('tab'))),
@@ -87,6 +100,39 @@ export class ColosseumComponent implements OnInit {
     this.state.skipColosseumMatch();
   }
 
+  openCombatSummary(match: ColosseumMatchResult): void {
+    if (match.combatSummary) this.selectedCombatSummary.set(match);
+  }
+
+  closeCombatSummary(): void {
+    this.selectedCombatSummary.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  closeCombatSummaryOnEscape(): void {
+    if (this.selectedCombatSummary()) this.closeCombatSummary();
+  }
+
+  combatDurationLabel(durationTicks: number): string {
+    const totalSeconds = Math.max(0, Math.round(durationTicks / 10));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  combatSummaryResultLabel(match: ColosseumMatchResult): string {
+    const id = this.characterState.currentCharacterId();
+    if (!match.winnerId) return 'Draw';
+    return match.winnerId === id ? 'Victory' : 'Defeat';
+  }
+
+  combatSummaryResultClass(match: ColosseumMatchResult): string {
+    const result = this.combatSummaryResultLabel(match);
+    if (result === 'Victory') return 'll-badge-success';
+    if (result === 'Defeat') return 'll-badge-danger';
+    return 'll-badge-warning';
+  }
+
   onRefreshOpponents(): void {
     this.state.pickRandomOpponents();
   }
@@ -114,6 +160,10 @@ export class ColosseumComponent implements OnInit {
     if (!id) return undefined;
 
     return this.state.rankings().find((ranking) => ranking.characterId === id);
+  }
+
+  get currentCharacterId(): string | null {
+    return this.characterState.currentCharacterId();
   }
 
   get recentRecord(): { wins: number; losses: number; draws: number } {

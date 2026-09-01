@@ -512,7 +512,7 @@ describe('InventoryComponent quest presentation', () => {
         'Flame Evolution Catalyst',
         'item.evolution_catalyst.flame',
       ),
-      inventoryStock('warden-sigil-stock', 'Warden Sigil', 'warden_sigil'),
+      inventoryStock('warden-sigil-stock', 'Warden Catalyst', 'warden_sigil'),
     ]);
     const objective = signal<QuestObjectiveState | undefined>(undefined);
     const component = TestBed.runInInjectionContext(

@@ -108,13 +108,13 @@ public sealed class CharacterActionRepositoryTests
         var characterId = Guid.NewGuid();
         var area = new Area { Id = "first-area", Name = "First Area" };
         var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
-        var switchUnlock = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
+        var nextEncounter = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
         var action = new CharacterAction(
             characterId,
             new CombatActionDetails([characterId], area),
             now)
         {
-            NextResolutionAtUtc = now.AddSeconds(30)
+            NextResolutionAtUtc = nextEncounter
         };
         db.Areas.Add(area);
         var repository = new CharacterActionRepository(db);
@@ -140,8 +140,58 @@ public sealed class CharacterActionRepositoryTests
             new CharacterAction(
                 characterId,
                 new CombatActionDetails([characterId], area),
-                switchUnlock),
-            switchUnlock,
+                nextEncounter),
+            nextEncounter,
+            CancellationToken.None);
+
+        Assert.Null(blocked);
+        Assert.NotNull(accepted);
+    }
+
+    [Fact]
+    public async Task Stopped_combat_blocks_replacement_until_the_next_rolling_encounter()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        var startedAt = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
+        var stoppedAt = startedAt.AddSeconds(11);
+        var nextEncounter = startedAt.AddSeconds(20);
+        db.Areas.Add(area);
+
+        var repository = new CharacterActionRepository(db);
+        var combat = (await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                startedAt),
+            startedAt,
+            CancellationToken.None))!;
+        combat.NextResolutionAtUtc = nextEncounter;
+        await db.SaveChangesAsync();
+
+        await repository.DeleteCharacterActionAsync(
+            combat,
+            stoppedAt,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.Equal(nextEncounter, combat.BlockedUntilUtc);
+        Assert.Null(combat.NextResolutionAtUtc);
+
+        var blocked = await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                stoppedAt),
+            stoppedAt,
+            CancellationToken.None);
+        var accepted = await repository.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], area),
+                nextEncounter),
+            nextEncounter,
             CancellationToken.None);
 
         Assert.Null(blocked);
@@ -156,7 +206,7 @@ public sealed class CharacterActionRepositoryTests
         var area = new Area { Id = "first-area", Name = "First Area" };
         var equipment = AddTemperableEquipment(db, characterId);
         var now = DateTimeOffset.Parse("2026-08-18T12:00:00Z");
-        var switchUnlock = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
+        var nextEncounter = now.AddSeconds(30);
         db.Areas.Add(area);
 
         var repository = new CharacterActionRepository(db);
@@ -168,7 +218,7 @@ public sealed class CharacterActionRepositoryTests
             now,
             CancellationToken.None))!;
         Assert.Equal("first-area", combat.ReturnToCombatAreaId);
-        combat.NextResolutionAtUtc = now.AddSeconds(30);
+        combat.NextResolutionAtUtc = nextEncounter;
         await db.SaveChangesAsync();
 
         var stoppedAt = now.AddSeconds(1);
@@ -194,9 +244,9 @@ public sealed class CharacterActionRepositoryTests
         Assert.True(queued);
         Assert.False(action.IsDeleted);
         Assert.IsType<CraftingActionDetails>(action.ActionDetails);
-        Assert.Equal(switchUnlock, action.BlockedUntilUtc);
+        Assert.Equal(nextEncounter, action.BlockedUntilUtc);
         Assert.Equal(
-            switchUnlock.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            nextEncounter.AddSeconds(TemperingConstants.ActionDurationSeconds),
             action.NextResolutionAtUtc);
         Assert.Equal("first-area", action.ReturnToCombatAreaId);
     }
@@ -255,7 +305,7 @@ public sealed class CharacterActionRepositoryTests
     }
 
     [Fact]
-    public async Task Stopped_combat_can_start_tempering_immediately_after_the_initial_lock()
+    public async Task Stopped_combat_queues_tempering_after_the_next_rolling_encounter()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -272,7 +322,8 @@ public sealed class CharacterActionRepositoryTests
                 now),
             now,
             CancellationToken.None))!;
-        combat.NextResolutionAtUtc = now.AddSeconds(30);
+        var nextEncounter = now.AddSeconds(30);
+        combat.NextResolutionAtUtc = nextEncounter;
         await db.SaveChangesAsync();
 
         var switchTime = now.AddSeconds(15);
@@ -297,9 +348,9 @@ public sealed class CharacterActionRepositoryTests
         Assert.True(updated);
         var action = await db.CharacterActions.SingleAsync();
         Assert.Equal(
-            switchTime.AddSeconds(TemperingConstants.ActionDurationSeconds),
+            nextEncounter.AddSeconds(TemperingConstants.ActionDurationSeconds),
             action.NextResolutionAtUtc);
-        Assert.Null(action.BlockedUntilUtc);
+        Assert.Equal(nextEncounter, action.BlockedUntilUtc);
         Assert.Equal("first-area", action.ReturnToCombatAreaId);
     }
 

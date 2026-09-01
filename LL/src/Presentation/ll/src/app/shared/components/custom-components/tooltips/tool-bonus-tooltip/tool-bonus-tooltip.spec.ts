@@ -17,7 +17,7 @@ describe('toolBonusTooltip', () => {
 
     expect(tooltip?.title).toContain('Catalytic');
     expect(description).toContain('tagged as rare');
-    expect(description).toContain('Fury Heart');
+    expect(description).toContain('Fury Catalyst');
     expect(description).toContain('does not change normal materials');
   });
 

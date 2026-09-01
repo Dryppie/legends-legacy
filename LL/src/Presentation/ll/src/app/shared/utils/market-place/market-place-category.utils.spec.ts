@@ -57,7 +57,7 @@ describe('marketplace category matching', () => {
     ).toBeFalse();
     expect(
       matchesMarketplaceResourceSubcategory(
-        resource('venom_gland', 'Venom Gland'),
+        resource('venom_gland', 'Venom Catalyst'),
         'Ore',
       ),
     ).toBeFalse();
