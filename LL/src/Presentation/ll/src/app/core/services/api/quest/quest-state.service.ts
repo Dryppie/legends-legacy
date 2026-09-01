@@ -118,7 +118,6 @@ export class QuestStateService {
           }
         });
       },
-      { allowSignalWrites: true },
     );
 
     // Area access is immediately derived from character level. Quest state is
@@ -135,7 +134,6 @@ export class QuestStateService {
           this.synchronizeAreaAccess().subscribe({ error: () => undefined });
         });
       },
-      { allowSignalWrites: true },
     );
 
     this.lastLogoutCount = this.eventBus.logout();
@@ -146,7 +144,6 @@ export class QuestStateService {
         this.lastLogoutCount = logoutCount;
         this.reset();
       },
-      { allowSignalWrites: true },
     );
   }
 

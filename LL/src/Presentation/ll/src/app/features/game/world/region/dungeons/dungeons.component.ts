@@ -124,7 +124,6 @@ export class DungeonsComponent implements OnInit {
         );
         if (selectedDungeon) this.openRecords(selectedDungeon);
       },
-      { allowSignalWrites: true },
     );
   }
 

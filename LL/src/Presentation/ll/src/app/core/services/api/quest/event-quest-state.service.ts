@@ -47,7 +47,6 @@ export class EventQuestStateService {
           if (this.activeViews > 0) this.load(true);
         });
       },
-      { allowSignalWrites: true },
     );
 
     this.lastLogoutCount = eventBus.logout();
@@ -58,7 +57,6 @@ export class EventQuestStateService {
         this.lastLogoutCount = logoutCount;
         this.reset();
       },
-      { allowSignalWrites: true },
     );
   }
 

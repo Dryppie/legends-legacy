@@ -222,7 +222,6 @@ export class CharacterActionsStateService {
           untracked(() => this.reset());
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

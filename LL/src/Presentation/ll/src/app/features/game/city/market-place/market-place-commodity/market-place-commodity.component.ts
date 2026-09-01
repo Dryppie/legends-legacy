@@ -561,7 +561,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
         untracked(() => this.essenceState.refreshArchive());
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -580,7 +579,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
           },
         );
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -602,7 +600,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
           error: () => this.marketSummary.set(null),
         });
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -623,7 +620,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
           this.selectedCommodityId.set(commodities[0].base.id);
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -643,7 +639,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
           this.selectSellOrder(firstSellOrder, false);
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -663,7 +658,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
           this.selectBuyOrder(firstBuyOrder, false);
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

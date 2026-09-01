@@ -185,7 +185,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
         this.applyProgressUpdate(update);
       },
-      { allowSignalWrites: true },
     );
   }
 

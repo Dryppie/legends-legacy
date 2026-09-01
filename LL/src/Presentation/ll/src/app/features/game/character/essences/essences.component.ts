@@ -427,7 +427,6 @@ export class EssencesComponent implements OnInit {
           untracked(() => this.questPresenter.presentCurrentObjective());
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(() => {

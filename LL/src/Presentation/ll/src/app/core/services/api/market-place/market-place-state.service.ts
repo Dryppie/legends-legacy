@@ -102,7 +102,6 @@ export class MarketplaceStateService {
           untracked(() => this.applySemanticChanges(event.changes));
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -116,7 +115,6 @@ export class MarketplaceStateService {
         }
         this.activeCharacterId = characterId;
       },
-      { allowSignalWrites: true },
     );
   }
 

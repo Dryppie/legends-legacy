@@ -69,7 +69,6 @@ export class QuestTrackerComponent implements OnDestroy {
           this.welcomeOpen.set(false);
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

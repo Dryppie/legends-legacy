@@ -632,9 +632,7 @@ export class RegularCraftingComponent {
     private readonly craftingService: CraftingService,
   ) {
     this.inventoryState.load(true);
-    effect(() => this.loadRecipes(this.targetTier()), {
-      allowSignalWrites: true,
-    });
+    effect(() => this.loadRecipes(this.targetTier()));
     effect(
       () => {
         const crafted = this.craftedItem();
@@ -650,14 +648,12 @@ export class RegularCraftingComponent {
           this.craftedItem.set(null);
         }
       },
-      { allowSignalWrites: true },
     );
     effect(
       () => {
         this.isOnboardingWeaponSelectionActive();
         this.selectFirstVisibleRecipeIfNeeded();
       },
-      { allowSignalWrites: true },
     );
     effect(
       () => {
@@ -678,7 +674,6 @@ export class RegularCraftingComponent {
             break;
         }
       },
-      { allowSignalWrites: true },
     );
     this.craftingService.blueprintLearned$
       .pipe(takeUntilDestroyed(this.destroyRef))

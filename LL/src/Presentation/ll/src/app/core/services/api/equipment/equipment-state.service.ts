@@ -47,7 +47,6 @@ export class EquipmentStateService {
           untracked(() => this.reset());
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

@@ -27,7 +27,6 @@ export class GuildComponent implements OnInit {
 
         this.state.markGuildNotificationsSeen();
       },
-      { allowSignalWrites: true },
     );
   }
   ngOnInit(): void {

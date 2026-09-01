@@ -83,7 +83,6 @@ export class ColosseumComponent implements OnInit {
           this.state.loadColosseumMatchResults();
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

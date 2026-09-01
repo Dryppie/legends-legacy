@@ -61,7 +61,6 @@ export class CraftingComponent implements OnInit {
           this.getProfessionDetails(id);
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

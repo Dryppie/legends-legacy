@@ -67,7 +67,6 @@ export class RealTimeFacade {
             );
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(() => {

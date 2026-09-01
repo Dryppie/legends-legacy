@@ -222,7 +222,6 @@ export class TemperingComponent implements OnDestroy {
           this.selectedItemId.set(active.equipmentInstance.id);
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

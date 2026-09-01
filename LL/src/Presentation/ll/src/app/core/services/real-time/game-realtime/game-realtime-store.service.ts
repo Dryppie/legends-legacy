@@ -20,7 +20,6 @@ export class GameRealtimeStore {
           untracked(() => this.clear());
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

@@ -29,7 +29,6 @@ export class CombatService {
           untracked(() => this.handleLogout());
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

@@ -85,7 +85,6 @@ export class TowerOverviewComponent implements OnInit, OnDestroy {
           this.synchronize().subscribe({ error: () => undefined });
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

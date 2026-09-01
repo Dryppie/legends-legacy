@@ -238,7 +238,6 @@ export class ChatService {
           }
         }); // or current channel from state
       },
-      { allowSignalWrites: true },
     );
   }
 

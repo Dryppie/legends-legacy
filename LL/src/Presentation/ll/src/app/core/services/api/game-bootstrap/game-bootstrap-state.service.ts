@@ -69,7 +69,6 @@ export class GameBootstrapStateService {
           });
         });
       },
-      { allowSignalWrites: true },
     );
   }
 

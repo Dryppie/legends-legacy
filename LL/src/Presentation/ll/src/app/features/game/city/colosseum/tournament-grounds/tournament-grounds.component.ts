@@ -332,7 +332,6 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
           this.refresh();
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

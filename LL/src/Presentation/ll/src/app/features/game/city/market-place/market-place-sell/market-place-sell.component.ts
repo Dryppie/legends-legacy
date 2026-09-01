@@ -118,7 +118,6 @@ export class MarketPlaceSellComponent implements OnInit {
       () => {
         this.myListings.set(this.marketplaceState.myListings());
       },
-      { allowSignalWrites: true }, // ✅ Add this option
     );
 
     this.setActiveTab(this.tabs[0]?.label || '');

@@ -99,7 +99,6 @@ export class CharacterStateService {
           this.refresh(); // writes _loading, _overview
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -118,7 +117,6 @@ export class CharacterStateService {
           this.patchOverviewFromSummary(updated);
         });
       },
-      { allowSignalWrites: true },
     );
   }
 

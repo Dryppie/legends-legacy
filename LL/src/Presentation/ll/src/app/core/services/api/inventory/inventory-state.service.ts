@@ -67,7 +67,6 @@ export class InventoryStateService {
         if (!this.auth.isAuthenticated()) return;
         untracked(() => this.load());
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -76,7 +75,6 @@ export class InventoryStateService {
           untracked(() => this.reset());
         }
       },
-      { allowSignalWrites: true },
     );
   }
 

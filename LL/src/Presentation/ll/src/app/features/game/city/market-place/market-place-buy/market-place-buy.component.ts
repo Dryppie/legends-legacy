@@ -264,7 +264,6 @@ export class MarketPlaceBuyComponent implements OnInit {
       () => {
         this.allListings.set(this.marketplaceState.listings());
       },
-      { allowSignalWrites: true }, // ✅ Add this option
     );
 
     effect(() => {

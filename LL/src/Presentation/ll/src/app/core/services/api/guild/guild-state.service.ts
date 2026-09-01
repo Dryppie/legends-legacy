@@ -246,7 +246,6 @@ export class GuildStateService {
       () => {
         this.handleGuildRealtimeEvents();
       },
-      { allowSignalWrites: true },
     );
   }
 

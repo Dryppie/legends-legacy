@@ -105,7 +105,6 @@ export class ColosseumStateService {
         this.applyArenaRating(event, characterId);
         this.addNotification();
       },
-      { allowSignalWrites: true },
     );
   }
 

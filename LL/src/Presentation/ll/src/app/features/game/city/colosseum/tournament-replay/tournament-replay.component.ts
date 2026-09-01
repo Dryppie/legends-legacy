@@ -160,7 +160,6 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
         const matchId = this.matchId();
         if (tournamentId && matchId) this.loadMetadata(tournamentId, matchId);
       },
-      { allowSignalWrites: true },
     );
     effect(
       () => {
@@ -171,7 +170,6 @@ export class TournamentReplayComponent implements OnInit, OnDestroy {
         const matchId = this.matchId();
         if (tournamentId && matchId) this.loadMetadata(tournamentId, matchId);
       },
-      { allowSignalWrites: true },
     );
   }
 

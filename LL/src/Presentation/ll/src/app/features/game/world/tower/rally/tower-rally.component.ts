@@ -86,7 +86,6 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
 
         this.load(false);
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -96,7 +95,6 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
         this.lastReconnectCount = reconnectCount;
         this.load(false);
       },
-      { allowSignalWrites: true },
     );
   }
 

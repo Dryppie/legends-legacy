@@ -299,7 +299,6 @@ export class EssenceStateService {
           untracked(() => this.reset());
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -317,7 +316,6 @@ export class EssenceStateService {
           untracked(() => this.refreshLoadouts(true));
         }
       },
-      { allowSignalWrites: true },
     );
 
     effect(
@@ -333,7 +331,6 @@ export class EssenceStateService {
           this._seenEssenceFocusReadyKey.set(readyKey);
         }
       },
-      { allowSignalWrites: true },
     );
   }
 
