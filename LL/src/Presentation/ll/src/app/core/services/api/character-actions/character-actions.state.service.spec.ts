@@ -132,6 +132,7 @@ describe('CharacterActionsStateService', () => {
     service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
 
     expect(service.currentAction()).toBe(action);
+    expect(service.loadingCombat()).toBeFalse();
     expect(service.idleCombatPhase()).toBe('active');
     expect(polling.start).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
@@ -508,11 +509,24 @@ describe('CharacterActionsStateService', () => {
     expect(service.temperingCombatUnlockSeconds()).toBe(0);
   }));
 
-  it('allows Tempering to replace active Combat but blocks another Combat start', () => {
-    service.applyCurrentActionSnapshot(combatAction());
+  it('allows Tempering or another area to replace active Combat after its switch lock', () => {
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      blockedUntilUtc: new Date(Date.now() - 1_000),
+    });
 
     expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
-    expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeTrue();
+  });
+
+  it('allows moving to another combat area during the current switch lock', () => {
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      blockedUntilUtc: new Date(Date.now() + 5_000),
+    });
+
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeTrue();
   });
 
   it('allows a new action immediately after Tempering is stopped', () => {

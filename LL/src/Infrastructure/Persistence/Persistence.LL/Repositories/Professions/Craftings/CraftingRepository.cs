@@ -180,6 +180,38 @@ public class CraftingRepository : ICraftingRepository
         return true;
     }
 
+    public async Task<bool> SetRemoveAfterNextRarityUpgradeAsync(
+        Guid characterId,
+        Guid queueItemId,
+        bool enabled,
+        CancellationToken cancellationToken)
+    {
+        var queueItem = await _dbContext.CraftingQueueItems
+            .FirstOrDefaultAsync(
+                item => item.Id == queueItemId &&
+                    (item.PausedForCharacterId == characterId ||
+                     item.CraftingActionDetailsId != null &&
+                     _dbContext.ActionDetails.Any(details =>
+                         details.Id == item.CraftingActionDetailsId &&
+                         details.CharacterActionId == characterId)),
+                cancellationToken);
+        if (queueItem is null)
+        {
+            return false;
+        }
+
+        queueItem.RemoveAfterNextRarityUpgrade = enabled;
+        var action = await _dbContext.CharacterActions
+            .FirstOrDefaultAsync(item => item.CharacterId == characterId, cancellationToken);
+        if (action is not null)
+        {
+            action.UpdatedAt = _timeProvider.GetUtcNow();
+            action.RowVersion++;
+        }
+
+        return true;
+    }
+
     public async Task<IReadOnlyList<CharacterRecipeUnlock>> GetBlueprintUnlocksAsync(
         Guid characterId,
         CancellationToken cancellationToken) =>

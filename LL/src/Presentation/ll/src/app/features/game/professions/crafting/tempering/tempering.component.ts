@@ -106,6 +106,7 @@ export class TemperingComponent implements OnDestroy {
   readonly error = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly movingQueueItemId = signal<string | null>(null);
+  readonly updatingRarityStopItemId = signal<string | null>(null);
   readonly cancellingQueue = signal(false);
   readonly temperingSort = signal<TemperingSort>('Gear Power');
   readonly sortDirection = signal<SortDirection>('desc');
@@ -540,10 +541,38 @@ export class TemperingComponent implements OnDestroy {
     });
   }
 
+  toggleRarityStop(queueItem: CraftingQueueItem, event: Event): void {
+    event.stopPropagation();
+    if (this.queueIsBusy()) return;
+
+    const enabled = !queueItem.removeAfterNextRarityUpgrade;
+    this.updatingRarityStopItemId.set(queueItem.id);
+    this.error.set(null);
+
+    this.craftingService.setRarityStop(queueItem.id, enabled).subscribe({
+      next: (response) => {
+        const queue =
+          response.currentAction.temperingQueueItems ??
+          response.currentAction.craftingActionDetails?.craftingQueueItems ??
+          [];
+        this.craftingService.setQueue(queue);
+        this.characterActionsState.applyCurrentActionSnapshot(
+          response.currentAction,
+        );
+        this.updatingRarityStopItemId.set(null);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to update the rarity stop.');
+        this.updatingRarityStopItemId.set(null);
+      },
+    });
+  }
+
   queueIsBusy(): boolean {
     return (
       !!this.movingQueueItemId() ||
       !!this.removingQueueItemId() ||
+      !!this.updatingRarityStopItemId() ||
       this.cancellingQueue()
     );
   }

@@ -9,6 +9,7 @@ public class CraftingQueueItemDto : IMapFrom<CraftingQueueItem>
     public Guid Id { get; set; }
     public Guid EquipmentInstanceId { get; set; }
     public EquipmentInstanceDto EquipmentInstance { get; set; } = null!;
+    public bool RemoveAfterNextRarityUpgrade { get; set; }
     
     public void Mapping(Profile profile)
     {

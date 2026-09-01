@@ -1,3 +1,5 @@
+import { CombatResultDto } from '../combatResultDto';
+
 export interface ColosseumMatchResult {
   characterAId: string;
   characterAName: string;
@@ -17,4 +19,5 @@ export interface ColosseumMatchResult {
   characterBGloryEarned: number;
   characterAStreakBefore: number;
   characterAStreakAfter: number;
+  combatSummary?: CombatResultDto | null;
 }

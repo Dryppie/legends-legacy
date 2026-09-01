@@ -177,7 +177,8 @@ public class CraftingService : ICraftingService
                 NewStatValue = result.NewStatValue
             });
 
-            if (!_temperingService.CanTemper(current))
+            if (!_temperingService.CanTemper(current) ||
+                current.RemoveAfterNextRarityUpgrade && result.RarityUpgraded)
             {
                 await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
                 if (actionDetails.CraftingQueueItems.Count == 0)
@@ -286,6 +287,17 @@ public class CraftingService : ICraftingService
             characterId,
             queueItemId,
             direction,
+            cancellationToken);
+
+    public Task<bool> SetRemoveAfterNextRarityUpgradeAsync(
+        Guid characterId,
+        Guid queueItemId,
+        bool enabled,
+        CancellationToken cancellationToken) =>
+        _craftingRepository.SetRemoveAfterNextRarityUpgradeAsync(
+            characterId,
+            queueItemId,
+            enabled,
             cancellationToken);
 
     public async Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken)

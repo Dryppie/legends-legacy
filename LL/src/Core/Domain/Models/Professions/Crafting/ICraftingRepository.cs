@@ -17,6 +17,11 @@ public interface ICraftingRepository
         Guid queueItemId,
         CraftingQueueMoveDirection direction,
         CancellationToken cancellationToken);
+    Task<bool> SetRemoveAfterNextRarityUpgradeAsync(
+        Guid characterId,
+        Guid queueItemId,
+        bool enabled,
+        CancellationToken cancellationToken);
     Task<IReadOnlyList<CharacterRecipeUnlock>> GetBlueprintUnlocksAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyDictionary<string, int>> GetRecipeMasteryLevelsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<CharacterRecipeMastery>> GetRecipeMasteriesAsync(Guid characterId, CancellationToken cancellationToken);

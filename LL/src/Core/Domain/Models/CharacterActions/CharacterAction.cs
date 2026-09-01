@@ -27,8 +27,8 @@ public class CharacterAction
     /// </summary>
     public DateTimeOffset UpdatedAt { get; set; }
     /// <summary>
-    /// Earliest UTC timestamp at which combat may be replaced by another action.
-    /// This is a fixed lock from combat start, not the rolling resolution boundary.
+    /// Earliest UTC timestamp at which combat may be replaced by a non-combat action.
+    /// Moving between combat areas preserves this fixed lock and the rolling schedule.
     /// </summary>
     public DateTimeOffset? BlockedUntilUtc { get; set; }
     /// <summary>

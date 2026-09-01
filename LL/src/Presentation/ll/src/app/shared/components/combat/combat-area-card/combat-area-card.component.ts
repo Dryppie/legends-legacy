@@ -100,6 +100,7 @@ export class CombatAreaCardComponent implements OnInit {
 
   canStartAction(): boolean {
     return (
+      !this.isActiveBattle &&
       !this.isStartingIdleCombat() &&
       this.characterActionService.canStartAction(CharacterActionType.Combat)
     );
@@ -129,8 +130,14 @@ export class CombatAreaCardComponent implements OnInit {
   }
 
   battleButtonText(): string {
-    return this.isStartingTrainingBattle || this.isStartingIdleCombat()
-      ? '...'
+    if (this.isStartingTrainingBattle || this.isStartingIdleCombat()) {
+      return '...';
+    }
+
+    const currentAction = this.characterActionService.currentAction();
+    return currentAction?.characterActionType === CharacterActionType.Combat &&
+      !currentAction.isDeleted
+      ? 'Move'
       : 'Battle';
   }
 

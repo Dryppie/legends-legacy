@@ -164,6 +164,15 @@ public class ColosseumService : IColosseumService
             Outcome = ToHistoryOutcome(combatResult.Outcome),
             PlayedAt = now
         };
+        matchResult.SetCombatResult(new CombatResult
+        {
+            PlayerTeam = combatResult.PlayerTeam,
+            EnemyTeam = combatResult.EnemyTeam,
+            EntityStats = combatResult.EntityStats,
+            Outcome = combatResult.Outcome,
+            StartedAt = combatResult.StartedAt,
+            Duration = combatResult.Duration
+        });
 
         await _colosseumRepository.SaveArenaMatchResult(matchResult, cancellationToken);
 

@@ -49,7 +49,7 @@ public sealed class CharacterActionRepositoryTests
     }
 
     [Fact]
-    public async Task StartCharacterActionAsync_replaces_existing_combat_details()
+    public async Task StartCharacterActionAsync_moves_active_combat_without_restarting_its_schedule()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -66,9 +66,14 @@ public sealed class CharacterActionRepositoryTests
             now);
 
         var startedFirst = await repository.StartCharacterActionAsync(firstAction, now, CancellationToken.None);
+        var nextEncounter = now.AddSeconds(10);
+        startedFirst!.NextResolutionAtUtc = nextEncounter;
         await db.SaveChangesAsync();
+        var originalDetailsId = startedFirst.ActionDetails!.Id;
+        var originalSwitchLock = startedFirst.BlockedUntilUtc;
+        var originalScheduleGeneration = startedFirst.ScheduleGeneration;
 
-        var secondStart = now.AddSeconds(CharacterActionTimingConstants.CombatSwitchLockSeconds);
+        var secondStart = now.AddSeconds(1);
         var secondAction = new CharacterAction(
             characterId,
             new CombatActionDetails([characterId], secondArea),
@@ -87,6 +92,12 @@ public sealed class CharacterActionRepositoryTests
         Assert.NotNull(startedSecond);
         Assert.False(currentAction.IsDeleted);
         Assert.Equal("second-area", currentDetails.Area.Id);
+        Assert.Equal(originalDetailsId, currentDetails.Id);
+        Assert.Equal(nextEncounter, currentAction.NextResolutionAtUtc);
+        Assert.Equal(originalSwitchLock, currentAction.BlockedUntilUtc);
+        Assert.Equal(originalScheduleGeneration, currentAction.ScheduleGeneration);
+        Assert.Equal(secondStart, currentAction.UpdatedAt);
+        Assert.Equal("second-area", currentAction.ReturnToCombatAreaId);
         Assert.Single(db.ActionDetails);
     }
 

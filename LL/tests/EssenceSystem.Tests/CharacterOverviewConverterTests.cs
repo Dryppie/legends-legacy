@@ -42,7 +42,7 @@ public sealed class CharacterOverviewConverterTests
             ]
         };
 
-        var result = new CharacterOverviewConverter(new EmptyEssenceDefinitions())
+        var result = CreateConverter()
             .Convert(character, null!, null!);
 
         Assert.Equal(5, result.CraftingLevel);
@@ -55,7 +55,7 @@ public sealed class CharacterOverviewConverterTests
     [Fact]
     public void Convert_DefaultsToLevelOneCraftingProgress()
     {
-        var result = new CharacterOverviewConverter(new EmptyEssenceDefinitions())
+        var result = CreateConverter()
             .Convert(new Character(), null!, null!);
 
         Assert.Equal(1, result.CraftingLevel);
@@ -87,7 +87,7 @@ public sealed class CharacterOverviewConverterTests
             ]
         };
 
-        var result = new CharacterOverviewConverter(new EmptyEssenceDefinitions())
+        var result = CreateConverter()
             .Convert(character, null!, null!);
 
         Assert.Collection(
@@ -117,7 +117,7 @@ public sealed class CharacterOverviewConverterTests
     [Fact]
     public void Convert_ProjectsDefaultThreatForExistingCharactersWithoutAStoredAttribute()
     {
-        var result = new CharacterOverviewConverter(new EmptyEssenceDefinitions())
+        var result = CreateConverter()
             .Convert(new Character(), null!, null!);
 
         Assert.Equal(
@@ -180,6 +180,34 @@ public sealed class CharacterOverviewConverterTests
         Assert.Equal(expectedOnline, result.IsOnline);
         Assert.Equal(lastSeenAt, result.LastSeenAt);
     }
+
+    [Fact]
+    public void Convert_IncludesUnlockedEmptyEssenceSlotsInDefaultLoadout()
+    {
+        var loadout = new Domain.Models.Essences.EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            Name = "Default"
+        };
+        loadout.Slots.Add(new Domain.Models.Essences.EssenceLoadoutSlot
+        {
+            SlotIndex = 0
+        });
+        var character = new Character
+        {
+            Level = 10,
+            EssenceLoadouts = [loadout]
+        };
+
+        var result = CreateConverter().Convert(character, null!, null!);
+
+        Assert.NotNull(result.EssenceLoadout);
+        Assert.Equal([0, 1], result.EssenceLoadout.Slots.Select(slot => slot.SlotIndex));
+        Assert.Null(result.EssenceLoadout.Slots[1].PlayerEssenceId);
+    }
+
+    private static CharacterOverviewConverter CreateConverter() =>
+        new(new EmptyEssenceDefinitions());
 
     private sealed class EmptyEssenceDefinitions : IEssenceDefinitionRepository
     {

@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Route, Router, UrlSegment, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, UrlTree } from '@angular/router';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { CharacterActionsStateService } from '../services/api/character-actions/character-actions.state.service';
 import { GameBootstrapStateService } from '../services/api/game-bootstrap/game-bootstrap-state.service';
@@ -9,10 +9,10 @@ import { CharacterActionDto } from '../../shared/models/Dtos/characterActionDto'
 import { CharacterActionType } from '../../shared/models/enums/characterActionType';
 import {
   getWorldMapRegionId,
-  worldMapRegionGuard,
+  worldMapRegionRedirect,
 } from './world-map-region.guard';
 
-describe('worldMapRegionGuard', () => {
+describe('worldMapRegionRedirect', () => {
   let currentAction: ReturnType<typeof signal<CharacterActionDto | null>>;
   let bootstrap: jasmine.SpyObj<GameBootstrapStateService>;
   let regions: jasmine.SpyObj<RegionService>;
@@ -95,7 +95,7 @@ describe('worldMapRegionGuard', () => {
     router.createUrlTree.and.returnValue(tree);
 
     const result = TestBed.runInInjectionContext(() =>
-      worldMapRegionGuard({} as Route, [] as UrlSegment[]),
+      worldMapRegionRedirect({} as ActivatedRouteSnapshot),
     ) as Observable<boolean | UrlTree>;
 
     expect(await firstValueFrom(result)).toBe(tree);

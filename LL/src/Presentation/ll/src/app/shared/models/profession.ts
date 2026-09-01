@@ -27,6 +27,7 @@ export interface Recipe {
 export interface CraftingQueueItem {
   id: string;
   equipmentInstance: EquipmentInstance;
+  removeAfterNextRarityUpgrade?: boolean;
 }
 
 export interface Material {

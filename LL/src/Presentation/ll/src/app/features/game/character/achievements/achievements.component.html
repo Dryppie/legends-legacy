@@ -353,6 +353,12 @@
               <div class="min-w-0">
                 <h3 class="ll-heading text-base">{{ title.name }}</h3>
                 <p class="ll-copy mt-1">{{ titlePreview(title) }}</p>
+                <p class="mt-2 text-xs text-secondary">
+                  <span class="font-semibold text-zinc-300">
+                    {{ title.isUnlocked ? "Unlocked by:" : "Unlock condition:" }}
+                  </span>
+                  {{ title.description }}
+                </p>
                 <div class="mt-2 flex flex-wrap gap-2">
                   <span class="ll-badge rounded">{{ title.rarity }}</span>
                   <span class="ll-badge rounded text-zinc-400">

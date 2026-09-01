@@ -414,6 +414,9 @@ export class CharacterActionsStateService {
   }
 
   canStartAction(type: CharacterActionType): boolean {
+    // Keep time-based switch eligibility reactive while an active combat
+    // snapshot itself remains unchanged.
+    this._tickingDuration();
     const action = this._currentAction();
     if (!action) return true;
     if (this.isActionCooldown()) {
@@ -434,6 +437,13 @@ export class CharacterActionsStateService {
         action.blockedUntilUtc &&
         new Date(action.blockedUntilUtc).getTime() > Date.now()
       );
+    }
+
+    if (
+      action.characterActionType === CharacterActionType.Combat &&
+      type === CharacterActionType.Combat
+    ) {
+      return true;
     }
 
     return (
@@ -836,6 +846,7 @@ export class CharacterActionsStateService {
 
     this._idleCombatError.set(null);
     this._resolvingOfflineProgress.set(false);
+    this._loadingCombat.set(false);
     this._idleCombatPhase.set('active');
     // A successful command response is authoritative. Polling updates still
     // use freshness checks, but a previously cached/deleted combat action must

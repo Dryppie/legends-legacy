@@ -7,6 +7,7 @@ using Application.UseCases.Crafting.Queries.GetRecipeMasteries;
 using Application.UseCases.Professions.Commands.CancelTemperingQueue;
 using Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
 using Application.UseCases.Professions.Commands.MoveCraftingQueueItem;
+using Application.UseCases.Professions.Commands.SetTemperingRarityStop;
 using Application.UseCases.Professions.Dtos;
 using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
@@ -54,4 +55,14 @@ public class CraftingController : BaseController
             CurrentCharacterGuid,
             request.QueueItemId,
             request.Direction));
+
+    [HttpPost("queue/rarity-stop")]
+    public async Task<ActionResult<Response<MoveCraftingQueueItemResponseDto>>> SetTemperingRarityStop(
+        [FromBody] SetTemperingRarityStopRequestDto request) =>
+        await Mediator.Send(new SetTemperingRarityStopCommand(
+            CurrentCharacterGuid,
+            request.QueueItemId,
+            request.Enabled));
 }
+
+public sealed record SetTemperingRarityStopRequestDto(Guid QueueItemId, bool Enabled);

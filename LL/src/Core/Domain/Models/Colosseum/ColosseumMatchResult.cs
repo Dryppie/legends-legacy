@@ -1,6 +1,13 @@
 ﻿namespace Domain.Models.Colosseum;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Domain.Models.Combat;
+
 public class ColosseumMatchResult
 {
+    private static readonly JsonSerializerOptions CombatResultJsonOptions = CreateCombatResultJsonOptions();
+
     public Guid Id { get; set; }
 
     public Guid CharacterAId { get; set; }
@@ -24,4 +31,22 @@ public class ColosseumMatchResult
     public int CharacterBGloryEarned { get; set; }
     public int CharacterAStreakBefore { get; set; }
     public int CharacterAStreakAfter { get; set; }
+    public string? CombatResultJson { get; private set; }
+
+    [NotMapped]
+    public CombatResult? CombatResult => string.IsNullOrWhiteSpace(CombatResultJson)
+        ? null
+        : JsonSerializer.Deserialize<CombatResult>(CombatResultJson, CombatResultJsonOptions);
+
+    public void SetCombatResult(CombatResult combatResult)
+    {
+        CombatResultJson = JsonSerializer.Serialize(combatResult, CombatResultJsonOptions);
+    }
+
+    private static JsonSerializerOptions CreateCombatResultJsonOptions()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        options.Converters.Add(new JsonStringEnumConverter());
+        return options;
+    }
 }

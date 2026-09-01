@@ -89,7 +89,7 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
 })
 export class RegionComponent implements OnInit, OnDestroy {
   readonly raidsEnabled = environment.features.raids;
-  regionId!: string;
+  regionId = '';
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
   private soulArchive: SoulArchiveDto | null = null;

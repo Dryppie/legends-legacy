@@ -199,15 +199,19 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
         var loadout = EssenceLoadoutSelection.Select(source.EssenceLoadouts, EssenceCombatActivity.None);
         if (loadout is null) return null;
 
+        var slotsByIndex = loadout.Slots.ToDictionary(slot => slot.SlotIndex);
+        var unlockedSlots = EssenceSlotProgression.GetUnlockedSlotCount(source.Level);
+
         return new EssenceLoadoutDto(
             loadout.Id,
             loadout.Name,
             Enum.GetValues<EssenceCombatActivity>()
                 .Where(activity => EssenceLoadoutSelection.IsValidSingleActivity(activity) && loadout.AutoUseActivities.HasFlag(activity))
                 .ToList(),
-            loadout.Slots
-                .OrderBy(slot => slot.SlotIndex)
-                .Select(slot => MapSlot(slot, context))
+            Enumerable.Range(0, unlockedSlots)
+                .Select(slotIndex => slotsByIndex.TryGetValue(slotIndex, out var slot)
+                    ? MapSlot(slot, context)
+                    : new EssenceLoadoutSlotDto(slotIndex, null, null, null, null))
                 .ToList());
     }
 

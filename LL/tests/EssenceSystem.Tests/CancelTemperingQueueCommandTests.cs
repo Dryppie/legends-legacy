@@ -59,6 +59,9 @@ public sealed class CancelTemperingQueueCommandTests
             throw new NotSupportedException();
         public Task<bool> MoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CraftingQueueMoveDirection direction, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
+
+        public Task<bool> SetRemoveAfterNextRarityUpgradeAsync(Guid characterId, Guid queueItemId, bool enabled, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
         public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
         public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) =>

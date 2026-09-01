@@ -232,6 +232,19 @@
               </div>
             </div>
             <div class="flex shrink-0 flex-col items-end gap-2">
+              <label
+                class="flex cursor-pointer items-center gap-2 text-xs text-secondary"
+                title="Return this item to inventory immediately after its next rarity upgrade"
+                (click)="$event.stopPropagation()"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="workingItem.removeAfterNextRarityUpgrade"
+                  [disabled]="queueIsBusy()"
+                  (change)="toggleRarityStop(workingItem, $event)"
+                />
+                Stop at rarity
+              </label>
               <div class="flex gap-1" aria-label="Queue position controls">
                 <button
                   type="button"
@@ -308,6 +321,19 @@
                 </div>
               </div>
               <div class="flex shrink-0 flex-col items-end gap-2">
+                <label
+                  class="flex cursor-pointer items-center gap-2 text-xs text-secondary"
+                  title="Return this item to inventory immediately after its next rarity upgrade"
+                  (click)="$event.stopPropagation()"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="queueItem.removeAfterNextRarityUpgrade"
+                    [disabled]="queueIsBusy()"
+                    (change)="toggleRarityStop(queueItem, $event)"
+                  />
+                  Stop at rarity
+                </label>
                 <div class="flex gap-1" aria-label="Queue position controls">
                   <button
                     type="button"

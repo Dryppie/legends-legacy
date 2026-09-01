@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanMatchFn, Router } from '@angular/router';
+import { RedirectFunction, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { CharacterActionsStateService } from '../services/api/character-actions/character-actions.state.service';
 import { GameBootstrapStateService } from '../services/api/game-bootstrap/game-bootstrap-state.service';
@@ -25,7 +25,7 @@ export function getWorldMapRegionId(
   );
 }
 
-export const worldMapRegionGuard: CanMatchFn = () => {
+export const worldMapRegionRedirect: RedirectFunction = () => {
   const bootstrap = inject(GameBootstrapStateService);
   const actions = inject(CharacterActionsStateService);
   const regions = inject(RegionService);

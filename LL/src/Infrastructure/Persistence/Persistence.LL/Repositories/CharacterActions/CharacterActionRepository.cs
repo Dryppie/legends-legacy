@@ -33,6 +33,19 @@ public class CharacterActionRepository : ICharacterActionRepository
             return characterAction;
         }
 
+        if (!existingAction.IsDeleted &&
+            existingAction.ActionDetails is CombatActionDetails existingCombatDetails &&
+            characterAction.ActionDetails is CombatActionDetails requestedCombatDetails)
+        {
+            existingCombatDetails.AreaId = requestedCombatDetails.AreaId;
+            existingCombatDetails.Area = requestedCombatDetails.Area;
+            existingAction.UpdatedAt = now;
+            existingAction.RowVersion++;
+            existingAction.ReturnToCombatAreaId = requestedCombatDetails.AreaId;
+            _context.CharacterActions.Update(existingAction);
+            return existingAction;
+        }
+
         if (existingAction.BlockedUntilUtc > now)
         {
             return null;

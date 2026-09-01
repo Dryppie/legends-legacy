@@ -134,6 +134,19 @@
           >
             +{{ gloryEarned(match) }} Glory
           </span>
+          <button
+            type="button"
+            class="ll-button px-2 py-1 text-xs"
+            [disabled]="!match.combatSummary"
+            [title]="
+              match.combatSummary
+                ? 'View final combat summary'
+                : 'Combat details are unavailable for this older battle'
+            "
+            (click)="openCombatSummary(match)"
+          >
+            Combat Summary
+          </button>
         </div>
       </div>
     </article>
@@ -142,4 +155,44 @@
   <ng-template #noMatches>
     <div class="ll-empty-state mt-4">No previous matches.</div>
   </ng-template>
+
+  <div *ngIf="selectedCombatSummary as summary" class="ll-modal-backdrop z-40">
+    <section
+      appDialogFocus
+      class="ll-modal-panel flex max-h-[92vh] w-[min(96vw,72rem)] max-w-6xl flex-col overflow-hidden"
+      aria-labelledby="arena-combat-summary-title"
+      (dialogEscape)="closeCombatSummary()"
+    >
+      <header
+        class="flex items-start justify-between gap-3 border-b border-light_gray/60 pb-3"
+      >
+        <div>
+          <h2 id="arena-combat-summary-title" class="ll-heading text-xl">
+            Final Combat Summary
+          </h2>
+          <p class="ll-copy mt-1">
+            {{ summary.outcome }} · {{ combatDurationLabel(summary.duration) }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="ll-button shrink-0 px-3 py-1.5 text-sm"
+          (click)="closeCombatSummary()"
+        >
+          Close
+        </button>
+      </header>
+
+      <div class="min-h-0 flex-1 overflow-y-auto">
+        <app-combat-entity-stats
+          [playerTeam]="summary.playerTeam"
+          [enemyTeam]="summary.enemyTeam"
+          [entityStats]="summary.entityStats"
+          [currentCharacterId]="id"
+          [combatDurationTicks]="summary.duration"
+          [useParentScroll]="true"
+        ></app-combat-entity-stats>
+      </div>
+    </section>
+  </div>
 </div>

@@ -1,14 +1,12 @@
 using Application.Interfaces.Services.LL.Essences;
+using Domain.Models.Essences;
 
 namespace Services.LL.Essences;
 
 public sealed class EssenceSlotUnlockService : IEssenceSlotUnlockService
 {
     public int GetUnlockedSlotCount(int characterLevel)
-    {
-        var unlocked = Math.Max(1, characterLevel / 10 + 1);
-        return Math.Clamp(unlocked, 1, 10);
-    }
+        => EssenceSlotProgression.GetUnlockedSlotCount(characterLevel);
 }
 
 public sealed class EssenceLoadoutLimitService : IEssenceLoadoutLimitService

@@ -151,6 +151,36 @@ public sealed class CraftingQueueReorderingTests
     }
 
     [Fact]
+    public async Task SetRemoveAfterNextRarityUpgradeAsync_persists_for_an_active_queue_item()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var queueItem = QueueItem(0);
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            ActionDetails = new CraftingActionDetails
+            {
+                CraftingQueueItems = [queueItem]
+            }
+        });
+        await db.SaveChangesAsync();
+
+        var updated = await new CraftingRepository(db)
+            .SetRemoveAfterNextRarityUpgradeAsync(
+                characterId,
+                queueItem.Id,
+                true,
+                CancellationToken.None);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.True(updated);
+        Assert.True((await db.CraftingQueueItems.SingleAsync()).RemoveAfterNextRarityUpgrade);
+    }
+
+    [Fact]
     public async Task Removing_a_completed_tempering_item_deletes_the_queue_row()
     {
         await using var db = CreateDb();

@@ -201,6 +201,27 @@ export class CraftingService {
       );
   }
 
+  setRarityStop(
+    queueItemId: string,
+    enabled: boolean,
+  ): Observable<MoveCraftingQueueItemResponse> {
+    return this.api
+      .post('Crafting/queue/rarity-stop', { queueItemId, enabled })
+      .pipe(
+        map((response) =>
+          this.unwrapResponse<MoveCraftingQueueItemResponse>(response),
+        ),
+        catchError((error) =>
+          throwError(
+            () =>
+              new Error(
+                error?.message ?? 'Failed to update the rarity stop.',
+              ),
+          ),
+        ),
+      );
+  }
+
   setQueue(nextQueue: CraftingQueueItem[]): void {
     // Use a defensive copy so callers can keep mutating their own array safely
     this.queueSubject.next([...nextQueue]);

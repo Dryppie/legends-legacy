@@ -106,6 +106,42 @@ public sealed class CharacterActionFlowTests
     }
 
     [Fact]
+    public async Task Moving_active_combat_preserves_the_next_encounter_boundary()
+    {
+        var characterId = Guid.NewGuid();
+        var firstArea = new Area { Id = "first-area", Name = "First Area" };
+        var secondArea = new Area { Id = "second-area", Name = "Second Area" };
+        var nextEncounter = Now.AddSeconds(10);
+        var switchLock = Now.AddSeconds(10);
+        var activeCombat = new CharacterAction(
+            characterId,
+            new CombatActionDetails([characterId], firstArea),
+            Now)
+        {
+            NextResolutionAtUtc = nextEncounter,
+            BlockedUntilUtc = switchLock
+        };
+        var repository = new CharacterActionRepositoryStub { Current = activeCombat };
+        var combat = new CombatServiceStub();
+        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+
+        var result = await service.StartCharacterActionAsync(
+            new CharacterAction(
+                characterId,
+                new CombatActionDetails([characterId], secondArea),
+                Now.AddSeconds(1)),
+            Now.AddSeconds(1),
+            CancellationToken.None);
+
+        Assert.Same(activeCombat, result);
+        Assert.Equal("second-area", Assert.IsType<CombatActionDetails>(result!.ActionDetails).AreaId);
+        Assert.Equal(nextEncounter, result.NextResolutionAtUtc);
+        Assert.Equal(switchLock, result.BlockedUntilUtc);
+        Assert.Equal(0, combat.CallCount);
+        Assert.Equal(0, repository.UpdateCount);
+    }
+
+    [Fact]
     public async Task Peek_is_read_only_and_does_not_resolve_elapsed_combat()
     {
         var repository = new CharacterActionRepositoryStub
@@ -438,6 +474,16 @@ public sealed class CharacterActionFlowTests
 
         public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
+            if (Current is { IsDeleted: false, ActionDetails: CombatActionDetails currentCombat } &&
+                characterAction.ActionDetails is CombatActionDetails requestedCombat)
+            {
+                StartCount++;
+                currentCombat.AreaId = requestedCombat.AreaId;
+                currentCombat.Area = requestedCombat.Area;
+                Current.ReturnToCombatAreaId = requestedCombat.AreaId;
+                return Task.FromResult<CharacterAction?>(Current);
+            }
+
             if (Current?.BlockedUntilUtc > now)
                 return Task.FromResult<CharacterAction?>(null);
 
@@ -565,6 +611,7 @@ public sealed class CharacterActionFlowTests
         public Task<TemperingQueueRemovalResult> CancelTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(new TemperingQueueRemovalResult(null, [], []));
         public Task<bool> MoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CraftingQueueMoveDirection direction, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> SetRemoveAfterNextRarityUpgradeAsync(Guid characterId, Guid queueItemId, bool enabled, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();

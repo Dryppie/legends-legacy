@@ -1,6 +1,7 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
 using Domain.Models.Colosseum;
+using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 
 namespace Application.UseCases.Colosseum.Dtos;
 public class ColosseumMatchResultDto : IMapFrom<ColosseumMatchResult>
@@ -25,9 +26,12 @@ public class ColosseumMatchResultDto : IMapFrom<ColosseumMatchResult>
     public int CharacterBGloryEarned { get; set; }
     public int CharacterAStreakBefore { get; set; }
     public int CharacterAStreakAfter { get; set; }
+    public CombatResultDto? CombatSummary { get; set; }
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<ColosseumMatchResult, ColosseumMatchResultDto>();
+        profile.CreateMap<ColosseumMatchResult, ColosseumMatchResultDto>()
+            .ForMember(destination => destination.CombatSummary, options =>
+                options.MapFrom(source => source.CombatResult));
     }
 }

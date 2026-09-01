@@ -21,6 +21,11 @@ public interface ICraftingService
         Guid queueItemId,
         CraftingQueueMoveDirection direction,
         CancellationToken cancellationToken);
+    Task<bool> SetRemoveAfterNextRarityUpgradeAsync(
+        Guid characterId,
+        Guid queueItemId,
+        bool enabled,
+        CancellationToken cancellationToken);
     Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken);
     Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken);
     Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken);

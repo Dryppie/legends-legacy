@@ -54,9 +54,10 @@ public class CharacterActionService : ICharacterActionService
     {
         var startedAction = await _characterActionRepository.StartCharacterActionAsync(characterAction, now, cancellationToken);
 
-        // A combat action is immediately due for its first encounter. Resolve it in the
-        // same transaction so clients never receive an unhydrated combat shell.
-        if (startedAction?.ActionDetails is CombatActionDetails)
+        // A newly established combat schedule is immediately due. Moving an active
+        // combat action only changes its area and preserves its existing boundary.
+        if (startedAction?.ActionDetails is CombatActionDetails &&
+            startedAction.NextResolutionAtUtc <= now)
         {
             startedAction.CombatSession = await HandleCombatActionAsync(
                 startedAction,
