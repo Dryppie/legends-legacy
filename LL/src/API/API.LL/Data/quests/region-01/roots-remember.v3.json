@@ -1,0 +1,48 @@
+{
+  "id": "quest.shenic.roots_remember",
+  "version": 3,
+  "title": "The Roots Remember",
+  "summary": "Follow the corruption through Old Forest and open the road to Shenic's heart.",
+  "category": "Shenic",
+  "chain": {
+    "id": "chain.shenic.chapter_03",
+    "title": "Chapter III — Heart of Shenic",
+    "description": "Refine your chosen identity through Twilight and the Old Forest, then clear the Hollow's Final Trial.",
+    "goal": "Reach level 30, master Thornroot Hollow, and clear Forgotten Catacombs I.",
+    "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
+    "step": 2,
+    "totalSteps": 3
+  },
+  "sortOrder": 150,
+  "objectiveMode": "All",
+  "availability": {
+    "minimumLevel": 25,
+    "completedQuestIds": ["quest.shenic.between_day_and_night"]
+  },
+  "objectives": [
+    {
+      "key": "cross_old_forest",
+      "description": "Win 6 encounters in Old Forest and keep your chosen build identity intact.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 6,
+      "filters": { "areaId": "region_01_area_08", "requiresVictory": true },
+      "presentation": {
+        "actionLabel": "Head to Old Forest",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_08"
+      }
+    },
+    {
+      "key": "reach_level_30",
+      "description": "Reach character level 30 to unlock Thornroot Hollow and your fourth Essence slot.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 30,
+      "filters": {},
+      "presentation": { "actionLabel": "View Shenic", "destinationRoute": "/game/world/shenic" }
+    }
+  ],
+  "rewards": [
+    { "key": "ancient_wood", "type": "Item", "itemBaseId": "wood", "quantity": 40 },
+    { "key": "stag_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 25 },
+    { "key": "old_forest_essence_token", "type": "Item", "itemBaseId": "item.essence_token.old_forest", "quantity": 1 }
+  ]
+}

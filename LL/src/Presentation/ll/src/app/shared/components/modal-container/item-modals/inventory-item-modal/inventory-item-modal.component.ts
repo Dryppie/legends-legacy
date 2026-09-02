@@ -18,6 +18,7 @@ import {
 import { ItemComponent } from '../../../item/item.component';
 import { InventoryService } from '../../../../../core/services/api/inventory/inventory.service';
 import { SelectionCrateOption } from '../../../../models/item';
+import { initialSelectionContainerOptionId } from '../../../../utils/inventory/selection-container.utils';
 import { InventoryTransferComponent } from '../../../inventory-transfer/inventory-transfer.component';
 import { BlueprintAttributeSummaryComponent } from '../../../blueprint-attribute-summary/blueprint-attribute-summary.component';
 
@@ -77,7 +78,9 @@ export class InventoryItemModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.selectedCrateOptionId.set(this.selectionCrate?.options[0]?.id ?? '');
+    this.selectedCrateOptionId.set(
+      initialSelectionContainerOptionId(this.inventoryItem.itemInstance.itemBase),
+    );
     this.loadAvailableRecipes();
   }
 

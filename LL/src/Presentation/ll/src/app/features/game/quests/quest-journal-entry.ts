@@ -12,6 +12,58 @@ export interface QuestJournalEntry {
   quests: QuestState[];
 }
 
+export type QuestJournalGroupKey =
+  | 'World Map'
+  | 'Crafting'
+  | 'Character'
+  | 'Other'
+  | 'Tutorial';
+
+export interface QuestJournalEntryGroup {
+  key: QuestJournalGroupKey;
+  entries: QuestJournalEntry[];
+}
+
+const questJournalGroupOrder: readonly QuestJournalGroupKey[] = [
+  'World Map',
+  'Crafting',
+  'Character',
+  'Other',
+  'Tutorial',
+];
+
+const worldMapCategories = new Set([
+  'shenic',
+  'future shenic',
+  'gathering',
+  'dungeons',
+  'combat',
+]);
+
+const characterCategories = new Set(['character', 'essences']);
+
+export function questJournalGroupForCategory(
+  category: string,
+): QuestJournalGroupKey {
+  const normalizedCategory = category.trim().toLowerCase();
+  if (worldMapCategories.has(normalizedCategory)) return 'World Map';
+  if (normalizedCategory === 'crafting') return 'Crafting';
+  if (characterCategories.has(normalizedCategory)) return 'Character';
+  if (normalizedCategory === 'tutorial') return 'Tutorial';
+  return 'Other';
+}
+
+export function groupQuestJournalEntries(
+  entries: readonly QuestJournalEntry[],
+): QuestJournalEntryGroup[] {
+  return questJournalGroupOrder.flatMap((key) => {
+    const groupedEntries = entries.filter(
+      (entry) => questJournalGroupForCategory(entry.category) === key,
+    );
+    return groupedEntries.length ? [{ key, entries: groupedEntries }] : [];
+  });
+}
+
 export function buildQuestJournalEntries(
   quests: readonly QuestState[],
 ): QuestJournalEntry[] {

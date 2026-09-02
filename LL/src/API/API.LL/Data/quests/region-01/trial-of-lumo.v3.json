@@ -1,0 +1,48 @@
+{
+  "id": "quest.shenic.trial_of_lumo",
+  "version": 3,
+  "title": "Trial of Lumo",
+  "summary": "Learn the rhythm of Shenic combat and open the road to Blood Grove.",
+  "category": "Shenic",
+  "chain": {
+    "id": "chain.shenic.chapter_01",
+    "title": "Chapter I — First Blood",
+    "description": "Establish your first build, cross Lumo and Blood Grove, then break the Goblin Gate.",
+    "goal": "Reach level 10 and defeat the boss of Goblin Mines I.",
+    "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
+    "step": 1,
+    "totalSteps": 2
+  },
+  "sortOrder": 100,
+  "objectiveMode": "All",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+  },
+  "objectives": [
+    {
+      "key": "hold_the_lumo_line",
+      "description": "Win 4 encounters in Lumo Ruins to prove your first build can hold the line.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 4,
+      "filters": { "areaId": "region_01_area_01", "requiresVictory": true },
+      "presentation": {
+        "actionLabel": "Head to Lumo Ruins",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_01"
+      }
+    },
+    {
+      "key": "reach_level_5",
+      "description": "Reach character level 5 to unlock Blood Grove.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 5,
+      "filters": {},
+      "presentation": { "actionLabel": "View Shenic", "destinationRoute": "/game/world/shenic" }
+    }
+  ],
+  "rewards": [
+    { "key": "lumo_ore", "type": "Item", "itemBaseId": "ore", "quantity": 15 },
+    { "key": "lumo_wood", "type": "Item", "itemBaseId": "wood", "quantity": 10 },
+    { "key": "lumo_essence_token", "type": "Item", "itemBaseId": "item.essence_token.lumo_ruins", "quantity": 1 }
+  ]
+}

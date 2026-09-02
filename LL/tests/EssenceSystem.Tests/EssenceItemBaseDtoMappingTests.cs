@@ -1,12 +1,15 @@
 using Application;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Quests;
+using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Items.Dtos;
 using Application.UseCases.Quests.Dtos;
 using Application.WebSockets.Contracts;
 using AutoMapper;
+using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,6 +78,36 @@ public sealed class EssenceItemBaseDtoMappingTests
         Assert.NotNull(optionItem.Essence);
         Assert.Equal("Raging Cleave", optionItem.Essence.ActiveAbility.Name);
         Assert.Equal("Battle Fury", optionItem.Essence.PassiveAbility.Name);
+
+        var inventoryItem = new InventoryItem
+        {
+            ItemInstanceId = Guid.NewGuid(),
+            ItemInstance = new EssenceItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBaseId = itemBase.Id,
+                ItemBase = itemBase
+            }
+        };
+        var combatResult = mapper.Map<CombatResultDto>(new CombatResult
+        {
+            Loot = [inventoryItem]
+        });
+        var combatLoot = Assert.Single(combatResult.Loot);
+        var combatLootItem = Assert.IsType<EssenceItemBaseDto>(
+            combatLoot.ItemInstance.ItemBase);
+
+        Assert.NotNull(combatLootItem.Essence);
+        Assert.Equal("Raging Cleave", combatLootItem.Essence.ActiveAbility.Name);
+        Assert.Equal("Battle Fury", combatLootItem.Essence.PassiveAbility.Name);
+
+        var combatJson = JsonSerializer.Serialize(
+            combatResult,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        Assert.Contains("\"essence\":", combatJson, StringComparison.Ordinal);
+        Assert.Contains("Raging Cleave", combatJson, StringComparison.Ordinal);
+        Assert.Contains("Battle Fury", combatJson, StringComparison.Ordinal);
 
         var realtimeEvent = new QuestJournalChanged(
             new QuestJournalDto

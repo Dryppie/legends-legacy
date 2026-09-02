@@ -69,7 +69,8 @@ public sealed class QuestGameEventOutboxConsumer(
             GameEventTypes.ColosseumBattleCompleted => QuestTrigger.ColosseumBattleStarted(),
             GameEventTypes.TournamentBattleCompleted => QuestTrigger.TournamentBattleCompleted(),
             GameEventTypes.DungeonRunStarted => QuestTrigger.DungeonRunStarted(),
-            GameEventTypes.DungeonRunCompleted => QuestTrigger.DungeonRunCompleted(),
+            GameEventTypes.DungeonRunCompleted => QuestTrigger.DungeonRunCompleted(
+                Read<DungeonRunCompletedPayload>(message).DungeonDefinitionId),
             GameEventTypes.ProphecyCompleted when
                 Read<ProphecyCompletedPayload>(message).Scope.Equals(
                     "Daily",

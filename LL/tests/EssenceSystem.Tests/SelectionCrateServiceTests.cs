@@ -1,4 +1,5 @@
 using Application.Common.Mappings;
+using System.Text.Json;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.WebSockets;
@@ -9,6 +10,7 @@ using Application.WebSockets.Contracts;
 using AutoMapper;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.EssenceItems;
 using Domain.Models.Items.Equipments;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions.Crafting;
@@ -19,6 +21,120 @@ namespace EssenceSystem.Tests;
 
 public sealed class SelectionCrateServiceTests
 {
+    [Fact]
+    public void ShenicEssenceTokensOfferFiveAreaEssencesEach()
+    {
+        Assert.Equal(10, ShenicEssenceTokenCatalog.Definitions.Count);
+        Assert.Equal(
+            10,
+            ShenicEssenceTokenCatalog.Definitions
+                .Select(definition => definition.ItemBaseId)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count());
+        Assert.All(ShenicEssenceTokenCatalog.Definitions, definition =>
+        {
+            Assert.Equal("Essence", definition.SelectionLabel);
+            Assert.Equal(5, definition.Options.Count);
+            Assert.All(definition.Options, option =>
+            {
+                Assert.StartsWith("item.essence.", option.ItemId);
+                Assert.EndsWith(" Essence", option.Name);
+                Assert.Equal(1, option.Quantity);
+            });
+        });
+    }
+
+    [Fact]
+    public async Task ShenicEssenceTokenCatalogMatchesAreaCreatureAndItemCatalogs()
+    {
+        var dataRoot = Path.Combine(TestContentPaths.FindApiRoot(), "Data");
+        using var regionDocument = JsonDocument.Parse(await File.ReadAllTextAsync(
+            Path.Combine(dataRoot, "world", "regions.json")));
+        using var creatureDocument = JsonDocument.Parse(await File.ReadAllTextAsync(
+            Path.Combine(dataRoot, "world", "creatures.json")));
+        using var itemDocument = JsonDocument.Parse(await File.ReadAllTextAsync(
+            Path.Combine(dataRoot, "items", "items.json")));
+
+        var creaturesById = creatureDocument.RootElement
+            .GetProperty("creatures")
+            .EnumerateArray()
+            .ToDictionary(creature => creature.GetProperty("id").GetGuid());
+        var itemIds = itemDocument.RootElement
+            .EnumerateArray()
+            .Select(item => item.GetProperty("id").GetString()!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var shenicAreas = regionDocument.RootElement
+            .GetProperty("regions")
+            .EnumerateArray()
+            .Single(region => region.GetProperty("name").GetString() == "Shenic")
+            .GetProperty("areas")
+            .EnumerateArray()
+            .Where(area => area.GetProperty("id").GetString() != "tutorial_area_training_grounds")
+            .ToList();
+
+        Assert.Equal(ShenicEssenceTokenCatalog.Definitions.Count, shenicAreas.Count);
+        foreach (var area in shenicAreas)
+        {
+            var areaName = area.GetProperty("name").GetString()!;
+            var areaKey = areaName.ToLowerInvariant().Replace(' ', '_');
+            var definition = Assert.Single(ShenicEssenceTokenCatalog.Definitions, candidate =>
+                candidate.ItemBaseId == ShenicEssenceTokenCatalog.ItemBaseId(areaKey));
+            var expectedEssenceItemIds = area
+                .GetProperty("creatures")
+                .EnumerateArray()
+                .Select(spawn => creaturesById[spawn.GetProperty("creatureId").GetGuid()])
+                .Select(creature => $"item.essence.{creature.GetProperty("imagePath").GetString()}")
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal($"{areaName} - Essence Token", definition.DisplayName);
+            Assert.Equal(
+                expectedEssenceItemIds.Order(StringComparer.OrdinalIgnoreCase),
+                definition.Options.Select(option => option.ItemId).Order(StringComparer.OrdinalIgnoreCase));
+            Assert.Contains(definition.ItemBaseId, itemIds);
+            Assert.All(definition.Options, option => Assert.Contains(option.ItemId, itemIds));
+        }
+    }
+
+    [Fact]
+    public async Task OpeningShenicEssenceTokenConsumesTokenAndGrantsSelectedUnboundEssence()
+    {
+        var characterId = Guid.NewGuid();
+        var tokenDefinition = ShenicEssenceTokenCatalog.Definitions.Single(definition =>
+            definition.ItemBaseId == "item.essence_token.blood_grove");
+        var token = CreateInventoryItem(
+            characterId,
+            tokenDefinition.ItemBaseId,
+            ItemType.Resource,
+            quantity: 1);
+        var inventory = new FakeInventoryService(token);
+        var itemBases = new FakeItemBaseRepository(tokenDefinition.Options.Select(option =>
+            new EssenceItemBase
+            {
+                Id = option.ItemId,
+                Name = option.Name,
+                ItemType = ItemType.Essence,
+                Stackable = false
+            }));
+        var service = new SelectionCrateService(
+            inventory,
+            itemBases,
+            new InventoryItemFactory());
+
+        var result = await service.OpenSelectionContainerAsync(
+            characterId,
+            token.ItemInstanceId,
+            "nightshade_blossom",
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Blood Grove - Essence Token", result.ContainerName);
+        Assert.Equal(0, token.Quantity);
+        var reward = Assert.Single(result.Rewards);
+        Assert.Equal("item.essence.nightshade_blossom", reward.ItemInstance.ItemBaseId);
+        Assert.IsType<EssenceItemInstance>(reward.ItemInstance);
+        Assert.Equal(1, reward.Quantity);
+    }
+
     [Fact]
     public async Task OpeningCatalystCrateConsumesOneCrateAndGrantsSelectedBundle()
     {

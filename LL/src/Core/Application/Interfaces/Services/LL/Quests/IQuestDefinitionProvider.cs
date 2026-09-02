@@ -28,6 +28,7 @@ public sealed class QuestChoiceDefinition
     public string SelectionTitle { get; set; } = string.Empty;
     public string SelectionSummary { get; set; } = string.Empty;
     public string ConfirmationText { get; set; } = string.Empty;
+    public bool ReplaceQuestIdentity { get; set; } = true;
     public List<QuestChoiceOptionDefinition> Options { get; set; } = [];
 }
 
@@ -49,6 +50,8 @@ public sealed class QuestChainDefinition
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string Goal { get; set; } = string.Empty;
+    public string PromisedReward { get; set; } = string.Empty;
     public int Step { get; set; }
     public int TotalSteps { get; set; }
 }
@@ -72,6 +75,7 @@ public sealed class QuestObjectiveDefinition
 public sealed class QuestObjectiveFilterDefinition
 {
     public string? AreaId { get; set; }
+    public string? DungeonDefinitionId { get; set; }
     public bool? RequiresVictory { get; set; }
     public string? EssenceDefinitionId { get; set; }
     public string? EssenceDefinitionFromChoiceQuestId { get; set; }

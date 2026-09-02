@@ -70,6 +70,8 @@ public sealed record QuestChain(
     string Id,
     string Title,
     string Description,
+    string Goal,
+    string PromisedReward,
     int Step,
     int TotalSteps);
 
@@ -104,6 +106,7 @@ public sealed record QuestProgressionResult(
 public sealed record QuestTrigger(
     string Type,
     string? AreaId = null,
+    string? DungeonDefinitionId = null,
     bool? WonEncounter = null,
     string? EssenceDefinitionId = null,
     IReadOnlyCollection<string>? CraftedItemBaseIds = null,
@@ -194,7 +197,8 @@ public sealed record QuestTrigger(
 
     public static QuestTrigger DungeonRunStarted() => new("DungeonRunStarted");
 
-    public static QuestTrigger DungeonRunCompleted() => new("DungeonRunCompleted");
+    public static QuestTrigger DungeonRunCompleted(string? dungeonDefinitionId = null) =>
+        new("DungeonRunCompleted", DungeonDefinitionId: dungeonDefinitionId);
 
     public static QuestTrigger DailyProphecyCompleted() => new("DailyProphecyCompleted");
 }

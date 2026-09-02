@@ -41,6 +41,8 @@ import { RegionBossComponent } from '../region-boss/region-boss.component';
 import { EssencesService } from '../../../../core/services/api/essences/essences.service';
 import { SoulArchiveDto } from '../../../../shared/models/essence-system';
 import { calculateAreaEssenceProgress } from './area-essence-progress';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import { PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL } from '../../../../core/services/client-side/player-journey/player-journey';
 
 interface WorldMapDungeonEntry {
   id: string;
@@ -88,10 +90,19 @@ const PRE_IMPLEMENTATION_SIGIL_DROPS_BY_AREA: Readonly<
   styleUrl: './region.component.scss',
 })
 export class RegionComponent implements OnInit, OnDestroy {
-  readonly focusedBetaJourney = environment.features.focusedBetaJourney;
-  readonly raidsEnabled =
-    environment.features.raids && !environment.features.focusedBetaJourney;
-  readonly regionBossEnabled = !environment.features.focusedBetaJourney;
+  get focusedBetaJourney(): boolean {
+    return (
+      environment.features.focusedBetaJourney &&
+      (this.characterState.currentCharacter()?.level ?? 1) <
+        PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL
+    );
+  }
+  get raidsEnabled(): boolean {
+    return environment.features.raids && !this.focusedBetaJourney;
+  }
+  get regionBossEnabled(): boolean {
+    return !this.focusedBetaJourney;
+  }
   regionId = '';
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
@@ -119,6 +130,7 @@ export class RegionComponent implements OnInit, OnDestroy {
     private readonly stateSync: StateSyncCoordinator,
     private readonly ngZone: NgZone,
     private readonly essences: EssencesService,
+    private readonly characterState: CharacterStateService,
     characterActions: CharacterActionsStateService,
   ) {
     this.raidSyncCleanup = this.stateSync.register(

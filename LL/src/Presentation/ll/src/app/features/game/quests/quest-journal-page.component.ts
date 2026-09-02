@@ -1,5 +1,6 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import {
+  AfterViewChecked,
   Component,
   computed,
   ElementRef,
@@ -31,11 +32,15 @@ import {
   QuestRewardState,
   QuestState,
   QuestStatus,
+  TRAINING_DAY_QUEST_ID,
 } from '../../../shared/models/quest';
 import {
   buildQuestJournalEntries,
+  groupQuestJournalEntries,
   preferredQuestForEntry,
   QuestJournalEntry,
+  QuestJournalEntryGroup,
+  QuestJournalGroupKey,
 } from './quest-journal-entry';
 
 type QuestJournalTab = QuestStatus.Active | QuestStatus.Completed;
@@ -56,7 +61,9 @@ type QuestSortMode = 'Order' | 'Progress';
   ],
   templateUrl: './quest-journal-page.component.html',
 })
-export class QuestJournalPageComponent implements OnInit, OnDestroy {
+export class QuestJournalPageComponent
+  implements OnInit, OnDestroy, AfterViewChecked
+{
   @ViewChild('questDetailScroller')
   private questDetailScroller?: ElementRef<HTMLElement>;
   @ViewChild('firstHuntConfirmation')
@@ -68,6 +75,9 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
   ];
   readonly activeTab = signal<QuestJournalTab>(QuestStatus.Active);
   readonly sortMode = signal<QuestSortMode>('Order');
+  readonly expandedGroups = signal<
+    Partial<Record<QuestJournalGroupKey, boolean>>
+  >({});
   readonly selectedEntryKey = signal<string | null>(null);
   readonly selectedPartQuestId = signal<string | null>(null);
   readonly pendingChoiceKey = signal<string | null>(null);
@@ -75,7 +85,7 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
   readonly clock = signal(Date.now());
   readonly realmProgressMarkers = [25, 50, 75, 100];
   private countdownTimer: number | null = null;
-  private choiceScrollFrame: number | null = null;
+  private choiceScrollPending = false;
   readonly journalEntries = computed(() =>
     buildQuestJournalEntries(this.questState.journal().quests),
   );
@@ -88,6 +98,9 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
             a.sortOrder - b.sortOrder
           : a.sortOrder - b.sortOrder,
       ),
+  );
+  readonly visibleEntryGroups = computed(() =>
+    groupQuestJournalEntries(this.visibleEntries()),
   );
   readonly visibleEvents = computed(() =>
     this.eventQuestState
@@ -162,15 +175,26 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
     if (this.countdownTimer !== null) {
       window.clearInterval(this.countdownTimer);
     }
-    if (this.choiceScrollFrame !== null) {
-      window.cancelAnimationFrame(this.choiceScrollFrame);
-    }
+  }
+
+  ngAfterViewChecked(): void {
+    if (!this.choiceScrollPending) return;
+
+    this.choiceScrollPending = false;
+    this.scrollChoiceConfirmationIntoView();
   }
 
   setTab(tab: QuestJournalTab): void {
     this.activeTab.set(tab);
-    this.selectedEntryKey.set(null);
-    this.selectedPartQuestId.set(null);
+    this.expandedGroups.set({});
+    const firstEntry =
+      tab === QuestStatus.Completed
+        ? (this.visibleEntryGroups()[0]?.entries[0] ?? null)
+        : null;
+    this.selectedEntryKey.set(firstEntry?.key ?? null);
+    this.selectedPartQuestId.set(
+      firstEntry ? preferredQuestForEntry(firstEntry).questId : null,
+    );
     this.pendingChoiceKey.set(null);
     this.selectedEventQuestId.set(null);
   }
@@ -186,6 +210,19 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
     return (
       !this.showingEventDetail() && this.selectedEntry()?.key === entry.key
     );
+  }
+
+  isGroupExpanded(group: QuestJournalEntryGroup): boolean {
+    const preference = this.expandedGroups()[group.key];
+    return preference ?? true;
+  }
+
+  toggleGroup(group: QuestJournalEntryGroup): void {
+    const isExpanded = this.isGroupExpanded(group);
+    this.expandedGroups.update((groups) => ({
+      ...groups,
+      [group.key]: !isExpanded,
+    }));
   }
 
   toggleSort(): void {
@@ -488,15 +525,15 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
     return !!quest.choice && !quest.choice.selectedOptionKey;
   }
 
+  choiceConfirmationLabel(quest: QuestState): string {
+    return quest.questId === TRAINING_DAY_QUEST_ID
+      ? 'Confirm First Hunt'
+      : 'Confirm Reward';
+  }
+
   chooseOption(option: QuestChoiceOption): void {
     this.pendingChoiceKey.set(option.key);
-    if (this.choiceScrollFrame !== null) {
-      window.cancelAnimationFrame(this.choiceScrollFrame);
-    }
-    this.choiceScrollFrame = window.requestAnimationFrame(() => {
-      this.choiceScrollFrame = null;
-      this.scrollChoiceConfirmationIntoView();
-    });
+    this.choiceScrollPending = true;
   }
 
   private scrollChoiceConfirmationIntoView(): void {

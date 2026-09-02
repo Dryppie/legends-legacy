@@ -1,5 +1,6 @@
 import {
   FIRST_WEAPON_QUEST_ID,
+  HEART_OF_THE_HOLLOW_QUEST_ID,
   INTO_LUMO_RUINS_QUEST_ID,
   QuestJournal,
   QuestState,
@@ -17,7 +18,12 @@ export enum PlayerJourneyStage {
   GatheringTool = 3,
   EnterLumo = 4,
   Shenic = 5,
+  BetaComplete = 6,
 }
+
+export const PLAYER_JOURNEY_SOCIAL_UNLOCK_LEVEL = 10;
+export const PLAYER_JOURNEY_ECONOMY_UNLOCK_LEVEL = 20;
+export const PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL = 30;
 
 export interface PlayerJourneyAction {
   label: string;
@@ -32,6 +38,7 @@ export interface PlayerJourneyGuidance {
   objective: string;
   primaryAction: PlayerJourneyAction;
   optionalAction: PlayerJourneyAction;
+  nextUnlockLabel: string;
   nextUnlock: string;
 }
 
@@ -58,13 +65,17 @@ export function resolvePlayerJourneyStage(
     }
   }
 
+  if (isQuestCompleted(journal, HEART_OF_THE_HOLLOW_QUEST_ID)) {
+    return PlayerJourneyStage.BetaComplete;
+  }
+
   return PlayerJourneyStage.Shenic;
 }
 
 export function buildPlayerJourneyGuidance(
   journal: QuestJournal,
   characterLevel: number,
-): PlayerJourneyGuidance {
+): PlayerJourneyGuidance | null {
   const stage = resolvePlayerJourneyStage(journal);
   const stageQuestId = STAGE_QUESTS.find(
     (entry) => entry.stage === stage,
@@ -72,8 +83,9 @@ export function buildPlayerJourneyGuidance(
   const stageQuest = stageQuestId
     ? journal.quests.find((quest) => quest.questId === stageQuestId)
     : undefined;
-  const pinnedQuest = findPinnedQuest(journal);
-  const quest = stage === PlayerJourneyStage.Shenic ? pinnedQuest : stageQuest;
+  const journeyQuest = findJourneyQuest(journal);
+  const quest =
+    stage >= PlayerJourneyStage.Shenic ? journeyQuest : stageQuest;
   const incompleteObjective = quest?.objectives.find(
     (objective) => !objective.isCompleted,
   );
@@ -82,7 +94,7 @@ export function buildPlayerJourneyGuidance(
   if (quest) {
     return {
       stage,
-      phaseLabel: phaseLabel(stage),
+      phaseLabel: quest.chain?.title ?? phaseLabel(stage),
       title: quest.title,
       summary: quest.summary,
       objective: requiresChoice
@@ -91,7 +103,9 @@ export function buildPlayerJourneyGuidance(
           'Claim the reward and continue.'),
       primaryAction: {
         label: requiresChoice
-          ? 'Choose First Hunt'
+          ? quest.questId === TRAINING_DAY_QUEST_ID
+            ? 'Choose First Hunt'
+            : 'Choose Chapter Reward'
           : (incompleteObjective?.presentation.actionLabel ?? 'Open Quests'),
         route: requiresChoice
           ? '/game/quests'
@@ -99,34 +113,61 @@ export function buildPlayerJourneyGuidance(
             '/game/quests',
       },
       optionalAction: optionalAction(stage),
-      nextUnlock: nextUnlock(stage, characterLevel),
+      nextUnlockLabel: quest.chain?.promisedReward
+        ? 'Chapter reward'
+        : 'Next unlock',
+      nextUnlock:
+        quest.chain?.promisedReward ?? nextUnlock(stage, characterLevel),
     };
+  }
+
+  if (
+    stage === PlayerJourneyStage.BetaComplete &&
+    characterLevel > PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL
+  ) {
+    return null;
   }
 
   return {
     stage,
     phaseLabel: phaseLabel(stage),
     title:
-      stage === PlayerJourneyStage.Shenic
+      stage === PlayerJourneyStage.BetaComplete
+        ? 'Shenic Beta journey complete'
+        : stage === PlayerJourneyStage.Shenic
         ? 'Develop your Shenic build'
         : 'Continue the First Steps',
     summary:
-      stage === PlayerJourneyStage.Shenic
+      stage === PlayerJourneyStage.BetaComplete
+        ? 'You reached level 30, cleared the Heart of the Hollow, and completed the focused Beta journey.'
+        : stage === PlayerJourneyStage.Shenic
         ? 'Fight in the newest available area, strengthen your loadout, and prepare for the next Shenic challenge.'
         : 'Open the Quest Journal to continue the guided introduction.',
     objective:
-      stage === PlayerJourneyStage.Shenic
+      stage === PlayerJourneyStage.BetaComplete
+        ? 'Review the build that carried you through Shenic and the choices you made along the way.'
+        : stage === PlayerJourneyStage.Shenic
         ? 'Choose a current quest or return to the World Map.'
         : 'Open the Quest Journal and follow the highlighted objective.',
     primaryAction: {
       label:
-        stage === PlayerJourneyStage.Shenic ? 'Open World Map' : 'Open Quests',
+        stage === PlayerJourneyStage.BetaComplete
+          ? 'Review Your Build'
+          : stage === PlayerJourneyStage.Shenic
+            ? 'Open World Map'
+            : 'Open Quests',
       route:
-        stage === PlayerJourneyStage.Shenic
-          ? '/game/world/shenic'
-          : '/game/quests',
+        stage === PlayerJourneyStage.BetaComplete
+          ? '/game/character/essences'
+          : stage === PlayerJourneyStage.Shenic
+            ? '/game/world/shenic'
+            : '/game/quests',
     },
     optionalAction: optionalAction(stage),
+    nextUnlockLabel:
+      stage === PlayerJourneyStage.BetaComplete
+        ? 'Future aspiration'
+        : 'Next unlock',
     nextUnlock: nextUnlock(stage, characterLevel),
   };
 }
@@ -140,6 +181,10 @@ export function filterSidebarForPlayerJourney(
   if (!focusedBetaJourney) return sections;
 
   const stage = resolvePlayerJourneyStage(journal);
+  if (characterLevel >= PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL) {
+    return sections;
+  }
+
   const visibleItemIds = new Set(['character-overview', 'quests', 'settings']);
 
   if (stage >= PlayerJourneyStage.SoulArchive) {
@@ -152,9 +197,20 @@ export function filterSidebarForPlayerJourney(
   if (stage >= PlayerJourneyStage.EnterLumo) {
     visibleItemIds.add('world');
   }
-  if (stage >= PlayerJourneyStage.Shenic && characterLevel >= 10) {
-    visibleItemIds.add('achievements');
-    visibleItemIds.add('soulstone-archive');
+  if (stage >= PlayerJourneyStage.Shenic) {
+    visibleItemIds.add('prophecies');
+    visibleItemIds.add('colosseum');
+
+    if (characterLevel >= PLAYER_JOURNEY_SOCIAL_UNLOCK_LEVEL) {
+      visibleItemIds.add('achievements');
+      visibleItemIds.add('soulstone-archive');
+      visibleItemIds.add('guild');
+    }
+
+    if (characterLevel >= PLAYER_JOURNEY_ECONOMY_UNLOCK_LEVEL) {
+      visibleItemIds.add('market-place');
+      visibleItemIds.add('tavern');
+    }
   }
 
   const destinationRoute = getPlayerJourneyDestinationRoute(journal);
@@ -170,6 +226,16 @@ export function filterSidebarForPlayerJourney(
       ),
     }))
     .filter((section) => section.items.length > 0);
+}
+
+export function isPlayerJourneyOnboardingComplete(
+  journal: QuestJournal,
+  characterLevel: number,
+): boolean {
+  return (
+    characterLevel >= PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL ||
+    resolvePlayerJourneyStage(journal) >= PlayerJourneyStage.Shenic
+  );
 }
 
 export function getPlayerJourneyDestinationRoute(
@@ -194,6 +260,19 @@ function findPinnedQuest(journal: QuestJournal): QuestState | undefined {
     journal.quests.find((quest) => quest.questId === journal.pinnedQuestId) ??
     journal.quests.find((quest) => quest.isPinned)
   );
+}
+
+function findJourneyQuest(journal: QuestJournal): QuestState | undefined {
+  const pinnedQuest = findPinnedQuest(journal);
+  if (pinnedQuest?.status === QuestStatus.Active) {
+    return pinnedQuest;
+  }
+
+  return journal.quests
+    .filter(
+      (quest) => quest.status === QuestStatus.Active && !!quest.chain,
+    )
+    .sort((left, right) => left.sortOrder - right.sortOrder)[0];
 }
 
 function isQuestCompleted(journal: QuestJournal, questId: string): boolean {
@@ -232,6 +311,8 @@ function phaseLabel(stage: PlayerJourneyStage): string {
       return 'Choose a Trade';
     case PlayerJourneyStage.EnterLumo:
       return 'Enter Shenic';
+    case PlayerJourneyStage.BetaComplete:
+      return 'Journey Complete';
     default:
       return 'Shenic Journey';
   }
@@ -248,6 +329,8 @@ function optionalAction(stage: PlayerJourneyStage): PlayerJourneyAction {
       return { label: 'Review Loadout', route: '/game/character/essences' };
     case PlayerJourneyStage.EnterLumo:
       return { label: 'Check Equipment', route: '/game/character/inventory' };
+    case PlayerJourneyStage.BetaComplete:
+      return { label: 'Review Completed Quests', route: '/game/quests' };
     default:
       return { label: 'Review Loadout', route: '/game/character/essences' };
   }
@@ -265,6 +348,8 @@ function nextUnlock(stage: PlayerJourneyStage, characterLevel: number): string {
       return 'World Map after equipping a gathering tool';
     case PlayerJourneyStage.EnterLumo:
       return 'The Shenic journey after your first Lumo victory';
+    case PlayerJourneyStage.BetaComplete:
+      return 'Future Shenic chapters beyond the focused Beta';
     default:
       if (characterLevel < 10) return 'A second Essence slot at level 10';
       if (characterLevel < 20) return 'A third Essence slot at level 20';

@@ -1,0 +1,47 @@
+{
+  "id": "quest.shenic.crystal_currents",
+  "version": 2,
+  "title": "Crystal Currents",
+  "summary": "Read the creek's changing threats and discover where your first build needs an answer.",
+  "category": "Shenic",
+  "chain": {
+    "id": "chain.shenic.chapter_02",
+    "title": "Chapter II — Resonant Paths",
+    "description": "Identify a weakness, craft an answer, and carry the adapted build through Moonlit Graves.",
+    "goal": "Reach level 20 after crafting a Tier 1 equipment answer for your build.",
+    "promisedReward": "Choose one of three guaranteed Essences for your third slot.",
+    "step": 1,
+    "totalSteps": 2
+  },
+  "sortOrder": 120,
+  "objectiveMode": "All",
+  "availability": {
+    "minimumLevel": 10,
+    "completedQuestIds": ["quest.shenic.blood_in_the_grove"]
+  },
+  "objectives": [
+    {
+      "key": "read_the_crystal_current",
+      "description": "Win 5 encounters in Crystal Creek while assessing your build's weak point.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 5,
+      "filters": { "areaId": "region_01_area_03", "requiresVictory": true },
+      "presentation": {
+        "actionLabel": "Head to Crystal Creek",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_03"
+      }
+    },
+    {
+      "key": "reach_level_15",
+      "description": "Reach character level 15 to unlock Moonlit Graves.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 15,
+      "filters": {},
+      "presentation": { "actionLabel": "View Shenic", "destinationRoute": "/game/world/shenic" }
+    }
+  ],
+  "rewards": [
+    { "key": "crystal_ore", "type": "Item", "itemBaseId": "ore", "quantity": 25 },
+    { "key": "resonant_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 10 }
+  ]
+}

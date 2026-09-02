@@ -118,7 +118,7 @@
   >
     {{
       requiresChoice()
-        ? "Choose Hunt"
+        ? choiceActionLabel(activeQuest)
         : objective()?.presentation?.actionLabel || "Go"
     }}
   </button>
@@ -156,8 +156,7 @@
     </p>
 
     <p *ngIf="requiresChoice()" class="mt-3 text-xs leading-5 text-zinc-300">
-      Review the three creatures and choose the Essence that will begin your
-      Soul Archive.
+      {{ activeQuest.choice?.selectionSummary }}
     </p>
 
     <div *ngIf="!requiresChoice()" class="mt-3 space-y-2">

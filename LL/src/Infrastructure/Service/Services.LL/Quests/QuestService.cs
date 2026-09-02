@@ -71,7 +71,13 @@ public sealed class QuestService(
             return await MapJournalAsync(progresses, cancellationToken);
         }
 
-        if (progress.Objectives.Any(x => x.CurrentAmount > 0 || x.CompletedAt.HasValue))
+        var automaticObjectiveKeys = definition.Objectives
+            .Where(objective => objective.Type == "CharacterLevelReached")
+            .Select(objective => objective.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (progress.Objectives.Any(x =>
+                !automaticObjectiveKeys.Contains(x.ObjectiveKey) &&
+                (x.CurrentAmount > 0 || x.CompletedAt.HasValue)))
         {
             throw new InvalidOperationException("A quest choice cannot be changed after progress has started.");
         }
@@ -171,6 +177,12 @@ public sealed class QuestService(
         foreach (var progress in progresses.Where(x => x.Status == QuestStatus.Active).ToList())
         {
             var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+            if (definition.Choice is not null &&
+                string.IsNullOrWhiteSpace(progress.SelectedOptionKey))
+            {
+                continue;
+            }
+
             var candidates = GetCandidateObjectives(progress, definition);
             foreach (var (objectiveProgress, objective) in candidates)
             {
@@ -460,9 +472,7 @@ public sealed class QuestService(
         {
             var current = definitions.Get(progress.QuestId, progress.DefinitionVersion);
             var latest = definitions.Get(progress.QuestId);
-            if (current.Choice is null ||
-                latest.Choice is null ||
-                latest.Version <= current.Version)
+            if (current.Choice is null || latest.Version <= current.Version)
             {
                 continue;
             }
@@ -623,7 +633,9 @@ public sealed class QuestService(
 
             "DungeonRunStarted" when trigger.Type == "DungeonRunStarted" => 1,
 
-            "DungeonRunCompleted" when trigger.Type == "DungeonRunCompleted" => 1,
+            "DungeonRunCompleted" when
+                trigger.Type == "DungeonRunCompleted" &&
+                Matches(filters.DungeonDefinitionId, trigger.DungeonDefinitionId) => 1,
 
             "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
 
@@ -784,8 +796,12 @@ public sealed class QuestService(
                 return new QuestState(
                     progress.QuestId,
                     progress.DefinitionVersion,
-                    selectedOption?.Title ?? definition.Choice?.SelectionTitle ?? definition.Title,
-                    selectedOption?.Summary ?? definition.Choice?.SelectionSummary ?? definition.Summary,
+                    definition.Choice?.ReplaceQuestIdentity == true
+                        ? selectedOption?.Title ?? definition.Choice.SelectionTitle
+                        : definition.Title,
+                    definition.Choice?.ReplaceQuestIdentity == true
+                        ? selectedOption?.Summary ?? definition.Choice.SelectionSummary
+                        : definition.Summary,
                     definition.Category,
                     definition.ObjectiveMode,
                     definition.Chain is null
@@ -794,6 +810,8 @@ public sealed class QuestService(
                             definition.Chain.Id,
                             definition.Chain.Title,
                             definition.Chain.Description,
+                            definition.Chain.Goal,
+                            definition.Chain.PromisedReward,
                             definition.Chain.Step,
                             definition.Chain.TotalSteps),
                     definition.Choice is null

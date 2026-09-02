@@ -1,7 +1,9 @@
 import { QuestState, QuestStatus } from '../../../shared/models/quest';
 import {
   buildQuestJournalEntries,
+  groupQuestJournalEntries,
   preferredQuestForEntry,
+  questJournalGroupForCategory,
 } from './quest-journal-entry';
 
 describe('quest journal entries', () => {
@@ -55,6 +57,51 @@ describe('quest journal entries', () => {
     expect(entry.isChain).toBeFalse();
     expect(entry.status).toBe(QuestStatus.Completed);
   });
+
+  it('maps detailed quest categories into journal sections', () => {
+    expect(questJournalGroupForCategory('Shenic')).toBe('World Map');
+    expect(questJournalGroupForCategory('Dungeons')).toBe('World Map');
+    expect(questJournalGroupForCategory('Gathering')).toBe('World Map');
+    expect(questJournalGroupForCategory('Crafting')).toBe('Crafting');
+    expect(questJournalGroupForCategory('Character')).toBe('Character');
+    expect(questJournalGroupForCategory('Essences')).toBe('Character');
+    expect(questJournalGroupForCategory('Tutorial')).toBe('Tutorial');
+    expect(questJournalGroupForCategory('Colosseum')).toBe('Other');
+    expect(questJournalGroupForCategory('New category')).toBe('Other');
+  });
+
+  it('groups entries in a stable journal section order', () => {
+    const categories = [
+      'Tutorial',
+      'Colosseum',
+      'Essences',
+      'Crafting',
+      'Shenic',
+    ];
+    const entries = categories.map((category, index) => {
+      const state = quest('quest-' + index, QuestStatus.Active);
+      state.chain = null;
+      state.category = category;
+      return buildQuestJournalEntries([state])[0];
+    });
+
+    const groups = groupQuestJournalEntries(entries);
+
+    expect(groups.map((group) => group.key)).toEqual([
+      'World Map',
+      'Crafting',
+      'Character',
+      'Other',
+      'Tutorial',
+    ]);
+    expect(groups.map((group) => group.entries[0].category)).toEqual([
+      'Shenic',
+      'Crafting',
+      'Essences',
+      'Colosseum',
+      'Tutorial',
+    ]);
+  });
 });
 
 function quest(
@@ -74,6 +121,8 @@ function quest(
       id: 'campaign',
       title: 'Campaign',
       description: 'Campaign description',
+      goal: 'Complete the campaign.',
+      promisedReward: 'A campaign reward.',
       step,
       totalSteps,
     },

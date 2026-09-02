@@ -12,9 +12,14 @@ import { raidFeatureGuard } from '../../../core/guards/raid-feature.guard';
 import { RegionBossComponent } from './region-boss/region-boss.component';
 import { worldMapRegionRedirect } from '../../../core/guards/world-map-region.guard';
 import {
+  focusedBetaMinimumLevelGuard,
   focusedBetaRegionGuard,
-  focusedBetaUnavailableGuard,
 } from '../../../core/guards/focused-beta-journey.guard';
+import { PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL } from '../../../core/services/client-side/player-journey/player-journey';
+
+const focusedBetaFullGameGuard = focusedBetaMinimumLevelGuard(
+  PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL,
+);
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -29,19 +34,19 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'raid/:raidId',
         component: RaidPageComponent,
-        canActivate: [focusedBetaUnavailableGuard, raidFeatureGuard],
+        canActivate: [focusedBetaFullGameGuard, raidFeatureGuard],
         data: { guidePageId: GUIDE_PAGE_IDS.raids },
       },
       {
         path: 'tower',
         component: TowerOverviewComponent,
-        canActivate: [focusedBetaUnavailableGuard],
+        canActivate: [focusedBetaFullGameGuard],
         data: { guideDisabled: true },
       },
       {
         path: 'tower/expeditions/:rallyId',
         component: TowerRallyComponent,
-        canActivate: [focusedBetaUnavailableGuard],
+        canActivate: [focusedBetaFullGameGuard],
         data: { guideDisabled: true },
       },
       {
@@ -52,19 +57,19 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'tower/hall-of-fame',
         component: TowerHallOfFameComponent,
-        canActivate: [focusedBetaUnavailableGuard],
+        canActivate: [focusedBetaFullGameGuard],
         data: { guideDisabled: true },
       },
       {
         path: 'tower/personal-expeditions',
         component: TowerPersonalExpeditionsComponent,
-        canActivate: [focusedBetaUnavailableGuard],
+        canActivate: [focusedBetaFullGameGuard],
         data: { guideDisabled: true },
       },
       {
         path: 'region-boss',
         component: RegionBossComponent,
-        canActivate: [focusedBetaUnavailableGuard],
+        canActivate: [focusedBetaFullGameGuard],
         data: { guideDisabled: true },
       },
       {

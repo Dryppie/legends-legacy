@@ -12,6 +12,10 @@ import {
 import { Router } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
 import { DialogFocusDirective } from '../../../shared/directives/dialog-focus/dialog-focus.directive';
+import {
+  QuestState,
+  TRAINING_DAY_QUEST_ID,
+} from '../../../shared/models/quest';
 
 @Component({
   selector: 'app-quest-tracker',
@@ -83,6 +87,12 @@ export class QuestTrackerComponent implements OnDestroy {
   objectiveProgress(currentAmount: number, requiredAmount: number): number {
     if (requiredAmount <= 0) return 0;
     return Math.min(100, Math.round((currentAmount / requiredAmount) * 100));
+  }
+
+  choiceActionLabel(quest: QuestState): string {
+    return quest.questId === TRAINING_DAY_QUEST_ID
+      ? 'Choose Hunt'
+      : 'Choose Reward';
   }
 
   beginTutorial(): void {

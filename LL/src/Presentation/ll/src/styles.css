@@ -866,6 +866,12 @@
     color: var(--ll-color-on-primary);
   }
 
+  .ll-button-primary:disabled {
+    color: var(--ll-color-on-primary);
+    opacity: 1;
+    filter: saturate(0.55);
+  }
+
   .ll-input,
   .ll-select {
     border: 1px solid var(--ll-color-border);

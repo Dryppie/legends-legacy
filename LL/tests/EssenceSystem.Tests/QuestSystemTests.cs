@@ -52,14 +52,21 @@ public sealed class QuestSystemTests
             provider.Get(QuestConstants.BloodInTheGrove).Availability.CompletedQuestIds);
         var trialChain = Assert.IsType<QuestChainDefinition>(
             provider.Get(QuestConstants.TrialOfLumo).Chain);
-        Assert.Equal("chain.shenic", trialChain.Id);
-        Assert.Equal("Shenic Campaign", trialChain.Title);
+        Assert.Equal("chain.shenic.chapter_01", trialChain.Id);
+        Assert.Equal("Chapter I — First Blood", trialChain.Title);
         Assert.Equal(
-            "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
-            trialChain.Description);
+            "Reach level 10 and defeat the boss of Goblin Mines I.",
+            trialChain.Goal);
+        Assert.Contains("area Essence Token", trialChain.PromisedReward);
         Assert.Equal(1, trialChain.Step);
-        Assert.Equal(10, trialChain.TotalSteps);
-        Assert.Equal(10, provider.Get(QuestConstants.LastLightInDuskmire).Chain?.Step);
+        Assert.Equal(2, trialChain.TotalSteps);
+        Assert.Equal(
+            "chain.shenic.chapter_02",
+            provider.Get(QuestConstants.CrystalCurrents).Chain?.Id);
+        Assert.Equal(
+            "chain.shenic.chapter_03",
+            provider.Get(QuestConstants.HeartOfTheHollow).Chain?.Id);
+        Assert.Equal(3, provider.Get(QuestConstants.HeartOfTheHollow).Chain?.Step);
         var shenicLevelRequirements = new[]
         {
             (QuestConstants.TrialOfLumo, 5, "Blood Grove"),
@@ -68,7 +75,6 @@ public sealed class QuestSystemTests
             (QuestConstants.RestlessDead, 20, "Twilight Clearing"),
             (QuestConstants.BetweenDayAndNight, 25, "Old Forest"),
             (QuestConstants.RootsRemember, 30, "Thornroot Hollow"),
-            (QuestConstants.HeartOfTheHollow, 35, "Embercap Burrows"),
             (QuestConstants.AshBeneathTheEarth, 40, "Moonveil Marsh"),
             (QuestConstants.VeilOverTheMarsh, 45, "Duskmire Hollow")
         };
@@ -82,8 +88,46 @@ public sealed class QuestSystemTests
             Assert.Contains(nextArea, levelObjective.Description);
         }
         Assert.DoesNotContain(
+            provider.Get(QuestConstants.HeartOfTheHollow).Objectives,
+            objective => objective.Type == "CharacterLevelReached");
+        Assert.DoesNotContain(
             provider.Get(QuestConstants.LastLightInDuskmire).Objectives,
             objective => objective.Type == "CharacterLevelReached");
+        var chapterMilestones = new[]
+        {
+            (QuestConstants.BloodInTheGrove, "goblin_mines"),
+            (QuestConstants.HeartOfTheHollow, "forgotten_catacombs")
+        };
+        foreach (var (questId, dungeonDefinitionId) in chapterMilestones)
+        {
+            var milestone = Assert.Single(
+                provider.Get(questId).Objectives,
+                objective => objective.Type == "DungeonRunCompleted");
+            Assert.Equal(dungeonDefinitionId, milestone.Filters.DungeonDefinitionId);
+        }
+        Assert.Equal(
+            "EquipmentCrafted",
+            provider.Get(QuestConstants.RestlessDead).Objectives[0].Type);
+        var areaTokenRewards = new Dictionary<string, string>
+        {
+            [QuestConstants.TrialOfLumo] = "item.essence_token.lumo_ruins",
+            [QuestConstants.BloodInTheGrove] = "item.essence_token.blood_grove",
+            [QuestConstants.CrystalCurrents] = "item.essence_token.crystal_creek",
+            [QuestConstants.RestlessDead] = "item.essence_token.moonlit_graves",
+            [QuestConstants.BetweenDayAndNight] = "item.essence_token.twilight_clearing",
+            [QuestConstants.RootsRemember] = "item.essence_token.old_forest",
+            [QuestConstants.HeartOfTheHollow] = "item.essence_token.thornroot_hollow",
+            [QuestConstants.AshBeneathTheEarth] = "item.essence_token.embercap_burrows",
+            [QuestConstants.VeilOverTheMarsh] = "item.essence_token.moonveil_marsh",
+            [QuestConstants.LastLightInDuskmire] = "item.essence_token.duskmire_hollow"
+        };
+        foreach (var (questId, tokenItemBaseId) in areaTokenRewards)
+        {
+            var quest = provider.Get(questId);
+            Assert.Equal(3, quest.Version);
+            Assert.Null(quest.Choice);
+            Assert.Contains(quest.Rewards, reward => reward.ItemBaseId == tokenItemBaseId && reward.Quantity == 1);
+        }
         Assert.Equal("All", provider.Get(QuestConstants.ArmsOfChoice).ObjectiveMode);
         var armorAndAdornment = provider.Get(QuestConstants.ArmorAndAdornment);
         Assert.Equal("Crafting", armorAndAdornment.Category);
@@ -308,7 +352,7 @@ public sealed class QuestSystemTests
     {
         var characterId = Guid.NewGuid();
         var definitions = CreateDefinitions();
-        var definition = definitions.Get(QuestConstants.RestlessDead);
+        var definition = definitions.Get(QuestConstants.RestlessDead, version: 1);
         var combatObjective = definition.Objectives.Single(objective =>
             objective.Type == "CombatEncounterCompleted");
         var repository = new RecordingQuestRepository(level: 20);
@@ -386,6 +430,61 @@ public sealed class QuestSystemTests
                 QuestConstants.TrainingDay,
                 "hollow_stag",
                 CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Area_token_quest_progresses_without_preselection_and_filters_the_milestone_dungeon()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var definition = definitions.Get(QuestConstants.BloodInTheGrove);
+        var repository = new RecordingQuestRepository(level: 10);
+        repository.Progresses.Add(CreateActiveProgress(characterId, definition, isPinned: true));
+        var service = new QuestService(
+            repository,
+            definitions,
+            new RecordingItemBaseRepository(),
+            inventoryItemFactory: null!,
+            lootRewardWriter: null!,
+            TimeProvider.System);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted("region_01_area_02", true),
+            null,
+            "test",
+            CancellationToken.None);
+        var secureGrove = repository.Progresses.Single(progress =>
+                progress.QuestId == definition.Id).Objectives.Single(objective =>
+                objective.ObjectiveKey == "secure_blood_grove");
+        Assert.Equal(1, secureGrove.CurrentAmount);
+
+        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
+        var quest = Assert.Single(journal.Quests, candidate =>
+            candidate.QuestId == definition.Id);
+        Assert.Null(quest.Choice);
+        Assert.Equal("Blood in the Grove", quest.Title);
+        Assert.Contains(quest.Rewards, reward =>
+            reward.ItemBaseId == "item.essence_token.blood_grove");
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.DungeonRunCompleted("forgotten_catacombs"),
+            null,
+            "test",
+            CancellationToken.None);
+        var milestone = repository.Progresses.Single(progress =>
+            progress.QuestId == definition.Id).Objectives.Single(objective =>
+            objective.ObjectiveKey == "break_the_goblin_gate");
+        Assert.Equal(0, milestone.CurrentAmount);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.DungeonRunCompleted("goblin_mines"),
+            null,
+            "test",
+            CancellationToken.None);
+        Assert.Equal(1, milestone.CurrentAmount);
     }
 
     [Fact]
@@ -598,6 +697,36 @@ public sealed class QuestSystemTests
             ["Goblin Warrior", "Hollow Stag", "Skeleton"],
             choice.Options.Select(option => option.CreatureName));
         Assert.Equal(4, Assert.Single(repository.Progresses).DefinitionVersion);
+    }
+
+    [Fact]
+    public async Task Unstarted_legacy_chapter_choice_upgrades_to_the_area_token_contract()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 10);
+        repository.Progresses.Add(CreateActiveProgress(
+            characterId,
+            definitions.Get(QuestConstants.BloodInTheGrove, 2),
+            isPinned: true));
+        var service = new QuestService(
+            repository,
+            definitions,
+            itemBases: new RecordingItemBaseRepository(),
+            inventoryItemFactory: null!,
+            lootRewardWriter: null!,
+            TimeProvider.System);
+
+        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
+
+        var quest = Assert.Single(journal.Quests, candidate =>
+            candidate.QuestId == QuestConstants.BloodInTheGrove);
+        Assert.Equal(3, quest.Version);
+        Assert.Null(quest.Choice);
+        Assert.Contains(quest.Rewards, reward =>
+            reward.ItemBaseId == "item.essence_token.blood_grove");
+        Assert.Equal(3, repository.Progresses.Single(progress =>
+            progress.QuestId == QuestConstants.BloodInTheGrove).DefinitionVersion);
     }
 
     [Fact]

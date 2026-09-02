@@ -569,73 +569,113 @@ describe('InventoryComponent quest presentation', () => {
     expect(component.collectionView()).toBe('Stock');
   });
 
-  it('opens a selected cache with the chosen reward and updates inventory state', () => {
-    const cache = inventorySelectionContainer('catalyst-cache');
-    const reward = inventoryStock('flame-catalyst', 'Flame Evolution Catalyst');
-    const inventoryItems = signal<InventoryItem[]>([cache]);
-    const inventoryState = {
-      items: inventoryItems.asReadonly(),
-      materials: inventoryItems.asReadonly(),
-      essences: signal<InventoryItem[]>([]).asReadonly(),
-      applyVersionedInventory: jasmine
-        .createSpy('applyVersionedInventory')
-        .and.callFake(() => {
-          inventoryItems.set([]);
-          return true;
+  for (const isEssenceToken of [false, true]) {
+    it(`opens a ${isEssenceToken ? 'token only after an explicit choice' : 'cache with the chosen reward'} and updates inventory state`, () => {
+      const cache = isEssenceToken
+        ? inventoryEssenceToken('essence-token')
+        : inventorySelectionContainer('catalyst-cache');
+      const reward = isEssenceToken
+        ? inventoryStock('skeleton', 'Skeleton Essence')
+        : inventoryStock('frost-catalyst', 'Frost Evolution Catalyst');
+      const inventoryItems = signal<InventoryItem[]>([cache]);
+      const inventoryState = {
+        items: inventoryItems.asReadonly(),
+        materials: inventoryItems.asReadonly(),
+        essences: signal<InventoryItem[]>([]).asReadonly(),
+        applyVersionedInventory: jasmine
+          .createSpy('applyVersionedInventory')
+          .and.callFake(() => {
+            inventoryItems.set([]);
+            return true;
+          }),
+      } as unknown as InventoryStateService;
+      const inventoryService = jasmine.createSpyObj<InventoryService>(
+        'InventoryService',
+        ['openSelectionContainer'],
+      );
+      inventoryService.openSelectionContainer.and.returnValue(
+        of({
+          data: {
+            consumedItemInstanceId: cache.itemInstance.id,
+            grantId: 'grant-1',
+            rewards: [reward],
+            inventoryItems: [],
+          },
+          domainVersions: { inventory: 1 },
         }),
-    } as unknown as InventoryStateService;
-    const inventoryService = jasmine.createSpyObj<InventoryService>(
-      'InventoryService',
-      ['openSelectionContainer'],
-    );
-    inventoryService.openSelectionContainer.and.returnValue(
-      of({
-        data: {
-          consumedItemInstanceId: cache.itemInstance.id,
-          grantId: 'grant-1',
-          rewards: [reward],
-          inventoryItems: [],
-        },
-        domainVersions: { inventory: 1 },
-      }),
-    );
-    const component = TestBed.runInInjectionContext(
-      () =>
-        new InventoryComponent(
-          inventoryState,
-          {
-            pinnedOnboardingObjective: signal<QuestObjectiveState | undefined>(
-              undefined,
-            ).asReadonly(),
-          } as QuestStateService,
-          jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
-            'presentCurrentObjective',
-          ]),
-          undefined,
-          undefined,
-          undefined,
-          inventoryService,
-        ),
-    );
+      );
+      const component = TestBed.runInInjectionContext(
+        () =>
+          new InventoryComponent(
+            inventoryState,
+            {
+              pinnedOnboardingObjective: signal<
+                QuestObjectiveState | undefined
+              >(undefined).asReadonly(),
+            } as QuestStateService,
+            jasmine.createSpyObj<QuestPresenterService>(
+              'QuestPresenterService',
+              ['presentCurrentObjective'],
+            ),
+            undefined,
+            undefined,
+            undefined,
+            inventoryService,
+          ),
+      );
+
+      component.selectInventoryItem(cache);
+      expect(component.selectedContainerOptionId()).toBe(
+        isEssenceToken ? '' : 'flame',
+      );
+
+      if (isEssenceToken) {
+        component.openSelectionContainer(cache);
+        expect(inventoryService.openSelectionContainer).not.toHaveBeenCalled();
+        expect(component.isOpeningContainer()).toBeFalse();
+      }
+
+      component.selectContainerOption(
+        cache.itemInstance.itemBase.selectionCrate!.options[1],
+      );
+      component.openSelectionContainer(cache);
+
+      expect(inventoryService.openSelectionContainer).toHaveBeenCalledOnceWith(
+        cache.itemInstance.id,
+        cache.itemInstance.itemBase.selectionCrate!.options[1].id,
+      );
+      expect(inventoryState.applyVersionedInventory).toHaveBeenCalledOnceWith(
+        jasmine.objectContaining({ domainVersions: { inventory: 1 } }),
+        'grant-1',
+      );
+      expect(component.selectedItem()).toBeNull();
+      expect(component.isOpeningContainer()).toBeFalse();
+    });
+  }
+
+  it('clears Essence Token choices when switching or reopening inspected items', () => {
+    const token = inventoryEssenceToken('essence-token');
+    const otherToken = inventoryEssenceToken('other-token');
+    const cache = inventorySelectionContainer('catalyst-cache');
+    const component = createStockComponent([token, otherToken, cache]);
 
     component.selectInventoryItem(cache);
     expect(component.selectedContainerOptionId()).toBe('flame');
+    component.selectInventoryItem(token);
+    expect(component.selectedContainerOptionId()).toBe('');
 
     component.selectContainerOption(
-      cache.itemInstance.itemBase.selectionCrate!.options[1],
+      token.itemInstance.itemBase.selectionCrate!.options[0],
     );
-    component.openSelectionContainer(cache);
+    component.selectInventoryItem(otherToken);
+    expect(component.selectedContainerOptionId()).toBe('');
 
-    expect(inventoryService.openSelectionContainer).toHaveBeenCalledOnceWith(
-      'catalyst-cache',
-      'frost',
+    component.selectContainerOption(
+      otherToken.itemInstance.itemBase.selectionCrate!.options[1],
     );
-    expect(inventoryState.applyVersionedInventory).toHaveBeenCalledOnceWith(
-      jasmine.objectContaining({ domainVersions: { inventory: 1 } }),
-      'grant-1',
-    );
-    expect(component.selectedItem()).toBeNull();
-    expect(component.isOpeningContainer()).toBeFalse();
+    component.closeItemInspector();
+    component.selectInventoryItem(otherToken);
+    expect(component.selectedContainerOptionId()).toBe('');
   });
 
   it('requires an explicit compatible recipe selection before learning a blueprint', () => {
@@ -874,6 +914,22 @@ function inventorySelectionContainer(id: string): InventoryItem {
     options: [
       { id: 'flame', name: 'Flame Evolution Catalyst', quantity: 6 },
       { id: 'frost', name: 'Frost Evolution Catalyst', quantity: 6 },
+    ],
+  };
+  return item;
+}
+
+function inventoryEssenceToken(id: string): InventoryItem {
+  const item = inventoryStock(
+    id,
+    'Lumo Ruins - Essence Token',
+    'item.essence_token.lumo_ruins',
+  );
+  item.itemInstance.itemBase.selectionCrate = {
+    selectionLabel: 'Essence',
+    options: [
+      { id: 'goblin', name: 'Goblin Essence', quantity: 1 },
+      { id: 'skeleton', name: 'Skeleton Essence', quantity: 1 },
     ],
   };
   return item;

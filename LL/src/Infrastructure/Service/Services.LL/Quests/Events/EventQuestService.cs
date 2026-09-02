@@ -671,7 +671,9 @@ public sealed class EventQuestService(
             "ColosseumBattleStarted" when trigger.Type == "ColosseumBattleStarted" => 1,
             "TournamentBattleCompleted" when trigger.Type == "TournamentBattleCompleted" => 1,
             "DungeonRunStarted" when trigger.Type == "DungeonRunStarted" => 1,
-            "DungeonRunCompleted" when trigger.Type == "DungeonRunCompleted" => 1,
+            "DungeonRunCompleted" when
+                trigger.Type == "DungeonRunCompleted" &&
+                Matches(filters.DungeonDefinitionId, trigger.DungeonDefinitionId) => 1,
             "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
             _ => 0
         };

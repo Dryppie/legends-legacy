@@ -57,18 +57,83 @@ describe('QuestJournalPageComponent', () => {
         firstHuntConfirmation: { nativeElement: HTMLElement };
       }
     ).firstHuntConfirmation = { nativeElement: confirmation };
-    spyOn(window, 'requestAnimationFrame').and.callFake((callback) => {
-      callback(0);
-      return 1;
-    });
 
     component.chooseOption({ key: 'goblin-warrior' } as never);
+
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    component.ngAfterViewChecked();
 
     expect(component.pendingChoiceKey()).toBe('goblin-warrior');
     expect(scrollTo).toHaveBeenCalledOnceWith({
       top: 262,
       behavior: 'smooth',
     });
+  });
+
+  it('opens all quest groups by default and lets them collapse independently', () => {
+    const worldQuest = createQuest();
+    worldQuest.category = 'Shenic';
+    const craftingQuest = {
+      ...createQuest(),
+      questId: 'quest.crafting',
+      category: 'Crafting',
+      sortOrder: 2,
+    };
+    const component = new QuestJournalPageComponent(
+      {
+        journal: signal({ quests: [worldQuest, craftingQuest] }).asReadonly(),
+      } as unknown as QuestStateService,
+      {
+        journal: signal({ events: [] }).asReadonly(),
+      } as unknown as EventQuestStateService,
+      {} as Router,
+      new EssenceItemViewService(),
+    );
+    const [worldGroup, craftingGroup] = component.visibleEntryGroups();
+
+    expect(component.isGroupExpanded(worldGroup)).toBeTrue();
+    expect(component.isGroupExpanded(craftingGroup)).toBeTrue();
+
+    component.toggleGroup(craftingGroup);
+
+    expect(component.isGroupExpanded(worldGroup)).toBeTrue();
+    expect(component.isGroupExpanded(craftingGroup)).toBeFalse();
+  });
+
+  it('selects the first quest in the first displayed group when opening Completed', () => {
+    const tutorialQuest = {
+      ...createQuest(),
+      questId: 'quest.tutorial',
+      category: 'Tutorial',
+      status: QuestStatus.Completed,
+      sortOrder: 1,
+    };
+    const worldQuest = {
+      ...createQuest(),
+      questId: 'quest.world',
+      category: 'Shenic',
+      status: QuestStatus.Completed,
+      sortOrder: 100,
+    };
+    const component = new QuestJournalPageComponent(
+      {
+        journal: signal({ quests: [tutorialQuest, worldQuest] }).asReadonly(),
+      } as unknown as QuestStateService,
+      {
+        journal: signal({ events: [] }).asReadonly(),
+      } as unknown as EventQuestStateService,
+      {} as Router,
+      new EssenceItemViewService(),
+    );
+
+    component.setTab(QuestStatus.Completed);
+
+    expect(component.visibleEntryGroups()[0].key).toBe('World Map');
+    expect(component.selectedQuest()?.questId).toBe('quest.world');
+    expect(
+      component.isGroupExpanded(component.visibleEntryGroups()[0]),
+    ).toBeTrue();
   });
 });
 

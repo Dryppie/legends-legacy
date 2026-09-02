@@ -71,6 +71,8 @@ public sealed class QuestChainDto
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string Goal { get; set; } = string.Empty;
+    public string PromisedReward { get; set; } = string.Empty;
     public int Step { get; set; }
     public int TotalSteps { get; set; }
 }

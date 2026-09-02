@@ -15,6 +15,20 @@ The Essence system is split between immutable content definitions and player-own
 9. At the tier cap, the Essence can ascend by consuming the matching Monster Core.
 10. Each Essence can evolve once by meeting its required Ascension Tier and consuming its catalyst.
 
+## Shenic Area Essence Tokens
+
+Updated 2 September 2026. First Hunt keeps its tutorial choice; new Shenic area quest progress awards an area-specific Essence Token instead of requiring a quest-level Essence selection.
+
+- Each of Shenic's ten areas has a bound, stackable token named `<Area Name> - Essence Token`, with item ID `item.essence_token.<area_key>`.
+- The covered areas are Lumo Ruins, Blood Grove, Crystal Creek, Moonlit Graves, Twilight Clearing, Old Forest, Thornroot Hollow, Embercap Burrows, Moonveil Marsh, and Duskmire Hollow.
+- Inspecting a token in the Inventory detail panel or item modal presents exactly the five Essences native to that area, with **none selected initially**. **Open** stays disabled until the player chooses one.
+- Switching items or closing and reopening the inspector clears the previous token choice. Merely inspecting or selecting a reward does not consume the token.
+- Opening consumes one token and grants one selected **Unbound Essence** item. It does not absorb or attune that Essence; the normal lifecycle above still applies.
+- Catalyst and Blueprint selection containers retain their existing default-selection behavior.
+- Untouched, unselected legacy chapter-choice quests upgrade to the token-reward definition. Progressed, selected, or completed quests keep their original version and rewards; completed quests do not receive retroactive tokens.
+
+Token items are authored in `LL/src/API/API.LL/Data/items/items.json`. Area reward pools are defined by `ShenicEssenceTokenCatalog` in `LL/src/Core/Application/UseCases/Inventories/SelectionCrates/CatalystSelectionCrateCatalog.cs`, and the version-3 area quests in `LL/src/API/API.LL/Data/quests/region-01/` award them. Redemption reuses the existing selection-container flow; the frontend shares its initial-selection rule through `LL/src/Presentation/ll/src/app/shared/utils/inventory/selection-container.utils.ts`.
+
 ## Data Model
 
 Content lives in `LL/src/API/API.LL/Data/essences.json`.

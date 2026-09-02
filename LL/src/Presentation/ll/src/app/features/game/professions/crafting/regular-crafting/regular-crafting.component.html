@@ -718,14 +718,14 @@
         <div class="grid grid-cols-2 gap-2">
           <button
             type="button"
-            class="ll-button min-h-10 whitespace-nowrap px-1 text-[var(--ll-text-xs)]"
+            class="ll-button min-h-10 whitespace-nowrap px-1 text-[length:var(--ll-text-xs)]"
             (click)="dismissCraftedItem()"
           >
             Back
           </button>
           <button
             type="button"
-            class="ll-button ll-button-primary min-h-10 whitespace-nowrap px-1 text-[var(--ll-text-xs)]"
+            class="ll-button ll-button-primary min-h-10 whitespace-nowrap px-1 text-[length:var(--ll-text-xs)]"
             [disabled]="!canCraftSelected() || isLoading()"
             (click)="craft()"
           >

@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { initialSelectionContainerOptionId } from '../../../../shared/utils/inventory/selection-container.utils';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { FilterTabsComponent } from '../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
@@ -1028,7 +1029,7 @@ export class InventoryComponent implements OnInit {
 
   private resetContainerAction(item?: InventoryItem): void {
     this.selectedContainerOptionId.set(
-      item?.itemInstance.itemBase.selectionCrate?.options[0]?.id ?? '',
+      initialSelectionContainerOptionId(item?.itemInstance.itemBase),
     );
     this.containerActionError.set(null);
   }

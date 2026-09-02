@@ -35,6 +35,28 @@
       </a>
     </app-default-header>
 
+    <nav class="mobile-tower-actions" aria-label="World Tower actions">
+      <button
+        type="button"
+        class="tower-button ll-button mobile-tower-shop"
+        (click)="openShop()"
+      >
+        Shop · {{ vm.towerTokens | number }} Tokens
+      </button>
+      <a
+        class="tower-button ll-button"
+        routerLink="/game/world/tower/hall-of-fame"
+      >
+        Hall of Fame
+      </a>
+      <a
+        class="tower-button ll-button"
+        routerLink="/game/world/tower/personal-expeditions"
+      >
+        Personal Expeditions
+      </a>
+    </nav>
+
     <div class="campaign-stats ll-panel" aria-label="World Tower progress">
       <article class="campaign-stat">
         <span>Floors cleared</span>

@@ -123,7 +123,14 @@ public sealed class CharacterActionFlowTests
         };
         var repository = new CharacterActionRepositoryStub { Current = activeCombat };
         var combat = new CombatServiceStub();
-        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+        var service = new CharacterActionService(
+            repository,
+            combat,
+            new CraftingServiceStub(),
+            idleCombatOptions: Options.Create(new IdleCombatProgressionOptions
+            {
+                EncounterCadenceSeconds = 12
+            }));
 
         var result = await service.StartCharacterActionAsync(
             new CharacterAction(
@@ -137,6 +144,7 @@ public sealed class CharacterActionFlowTests
         Assert.Equal("second-area", Assert.IsType<CombatActionDetails>(result!.ActionDetails).AreaId);
         Assert.Equal(nextEncounter, result.NextResolutionAtUtc);
         Assert.Equal(switchLock, result.BlockedUntilUtc);
+        Assert.Equal(12_000, result.ResolutionIntervalMs);
         Assert.Equal(0, combat.CallCount);
         Assert.Equal(0, repository.UpdateCount);
     }

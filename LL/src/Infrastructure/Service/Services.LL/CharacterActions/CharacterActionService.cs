@@ -66,6 +66,7 @@ public class CharacterActionService : ICharacterActionService
             _characterActionRepository.UpdateCharacterAction(startedAction);
         }
 
+        PopulateScheduleMetadata(startedAction, now);
         await PopulatePausedTemperingQueueAsync(startedAction, cancellationToken);
 
         return startedAction;
