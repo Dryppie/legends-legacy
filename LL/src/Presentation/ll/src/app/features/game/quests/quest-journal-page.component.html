@@ -28,13 +28,6 @@
     </div>
   </app-default-header>
 
-    <a
-      routerLink="/game/character/forge"
-      [queryParams]="{ tab: 'rewards' }"
-      class="ll-button shrink-0 self-start text-primary"
-      >Equipment rewards & recovery</a
-    >
-
   <section class="ll-panel flex min-h-0 flex-1 flex-col overflow-hidden">
     <p
       *ngIf="questState.error() as error"

@@ -1,4 +1,3 @@
-﻿using Application.UseCases.Inventories.Commands.ScrapEquipments;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Inventories.Commands.MarkInventoryItemSeen;
 using Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate;
@@ -19,11 +18,7 @@ public class InventoryController : BaseController
     public async Task<ActionResult<Response<InventoryDto>>> Get() =>
         await Mediator.Send(new GetInventoryByIdQuery(CurrentCharacterGuid));
 
-    [HttpPost("Scrap")]
-    public async Task<ActionResult<Response<ScrapEquipmentsResponseDto>>> Scrap([FromBody] List<string> itemIds) =>
-        await Mediator.Send(new ScrapEquipmentsCommand(CurrentCharacterGuid, itemIds));
-
-    [HttpPost("items/{crateItemInstanceId:guid}/open-catalyst-selection-crate")]
+   [HttpPost("items/{crateItemInstanceId:guid}/open-catalyst-selection-crate")]
     [HttpPost("items/{crateItemInstanceId:guid}/open-selection-container")]
     public async Task<ActionResult<Response<OpenSelectionCrateResultDto>>> OpenSelectionContainer(
         Guid crateItemInstanceId,

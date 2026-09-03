@@ -623,8 +623,8 @@ The Blueprint and preview panes should show:
 - Current equipped-item count
 - Active and inactive styling where equipment state is available
 
-The existing Blueprint selection and preview UI in
-`regular-crafting.component.html` is the appropriate integration surface.
+The Blueprint selection and crafting integration proposed here was removed. Future set-item
+acquisition must use the current authored-drop model or a separately approved design.
 
 ### Inventory and equipment tooltips
 

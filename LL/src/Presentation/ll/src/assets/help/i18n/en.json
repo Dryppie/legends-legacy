@@ -1,10 +1,1 @@
-{
-  "potential": {
-    "title": "Potential",
-    "body": "Potential is how many tempering actions you can perform on an item."
-  },
-  "scrap_mode": {
-    "title": "Scrap Mode",
-    "body": "Switching to scrap mode allows you to turn equipment into tempered scrap. You can only scrap equipment with 0 potential remaining."
-  }
-}
+{}

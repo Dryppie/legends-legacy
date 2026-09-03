@@ -5,7 +5,6 @@ using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Domain.Models.Guilds.Shop;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL;
@@ -18,48 +17,18 @@ namespace EssenceSystem.Tests;
 public sealed partial class GuildShopServiceTests
 {
     [Fact]
-    public void Default_stock_prioritizes_progression_resources_and_blueprints()
+    public void Default_stock_contains_only_fixed_currency_supplies()
     {
         var content = new DefaultGuildContentProvider();
 
-        var commonScraps = content.ShopItems
-            .Where(x => x.RotationGroup == "common-scrap")
-            .ToList();
-        var soulstoneReserve = content.ShopItems.Single(x => x.Key == "common.soulstone_cache");
-        var fragmentCase = content.ShopItems.Single(x => x.Key == "common.sigil_fragment_case");
-        var rareScraps = content.ShopItems
-            .Where(x => x.RotationGroup == "rare-scrap")
-            .ToList();
-        var blueprints = content.ShopItems
-            .Where(x => x.RotationGroup == "rare-blueprints")
-            .ToList();
-
-        Assert.Equal(5, commonScraps.Count);
-        Assert.All(commonScraps, item =>
+        Assert.Equal(4, content.ShopItems.Count);
+        Assert.All(content.ShopItems, item =>
         {
-            Assert.Equal(GuildShopStockType.Common, item.StockType);
-            Assert.Equal(100, item.GuildFavorCost);
-            Assert.True(item.RotatesWeekly);
-            Assert.Contains(item.Rewards, reward => reward.Type == GuildShopRewardType.Item && reward.Amount == 2);
+            Assert.False(item.RotatesWeekly);
+            Assert.Null(item.RotationGroup);
+            Assert.All(item.Rewards, reward => Assert.True(
+                reward.Type is GuildShopRewardType.Soulstones or GuildShopRewardType.SigilFragments));
         });
-        Assert.Contains(soulstoneReserve.Rewards, x => x.Type == GuildShopRewardType.Soulstones && x.Amount == 25);
-        Assert.Contains(fragmentCase.Rewards, x => x.Type == GuildShopRewardType.SigilFragments && x.Amount == 10);
-        Assert.Equal(5, rareScraps.Count);
-        Assert.All(rareScraps, item =>
-        {
-            Assert.Equal(GuildShopStockType.Rare, item.StockType);
-            Assert.Equal(250, item.GuildFavorCost);
-            Assert.Contains(item.Rewards, reward => reward.Type == GuildShopRewardType.Item && reward.Amount == 6);
-        });
-        Assert.Equal(11, blueprints.Count);
-        Assert.All(blueprints, item =>
-        {
-            Assert.Equal(4, item.RequiredMarketOfficeLevel);
-            Assert.Contains(item.Rewards, reward => reward.Type == GuildShopRewardType.Item && reward.Key!.StartsWith("blueprint_"));
-        });
-        Assert.DoesNotContain(
-            content.ShopItems.SelectMany(item => item.Rewards),
-            reward => reward.Type is GuildShopRewardType.Cinders or GuildShopRewardType.FateEcho);
     }
 
     [Fact]
@@ -83,37 +52,6 @@ public sealed partial class GuildShopServiceTests
     }
 
     [Fact]
-    public async Task Level_four_offers_and_grants_one_rotating_blueprint()
-    {
-        await using var db = CreateDbContext();
-        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
-        var characterId = SeedGuild(db, now);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-
-        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
-        var blueprint = Assert.Single(overview!.Items, x => x.Key.StartsWith("rare.blueprint_"));
-        var reward = Assert.Single(blueprint.Rewards);
-        db.ItemBases.Add(new ItemBase
-        {
-            Id = reward.Key!,
-            Name = reward.Name!,
-            ItemType = ItemType.Resource,
-            Rarity = Rarity.Rare,
-            Stackable = true
-        });
-        await db.SaveChangesAsync();
-
-        var result = await service.PurchaseAsync(characterId, blueprint.Key, now, CancellationToken.None);
-
-        Assert.True(result.Succeeded);
-        Assert.Equal(50, result.Value!.Shop.GuildFavor);
-        Assert.Single(result.Value.InventoryItemsGranted);
-        Assert.Contains(db.InventoryItems.Local, item =>
-            item.InventoryId == characterId && item.ItemInstance.ItemBaseId == reward.Key);
-    }
-
-    [Fact]
     public async Task Market_office_level_unlocks_stock_without_weekly_contribution()
     {
         await using var db = CreateDbContext();
@@ -125,129 +63,8 @@ public sealed partial class GuildShopServiceTests
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
         Assert.Empty(await db.GuildMemberContributionPeriods.ToListAsync());
-        Assert.All(overview!.Items, item =>
-            Assert.DoesNotContain("contribution", item.LockedReason ?? string.Empty, StringComparison.OrdinalIgnoreCase));
-        Assert.True(overview.Items.Single(x => x.Key.StartsWith("rare.blueprint_")).CanPurchase);
-    }
-
-    [Fact]
-    public async Task Common_scrap_cache_grants_two_stackable_tempered_scrap()
-    {
-        await using var db = CreateDbContext();
-        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
-        var characterId = SeedGuild(db, now);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-
-        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
-        var scrapCache = overview!.Items.First(x =>
-            x.StockType == GuildShopStockType.Common
-            && x.Key.Contains(".scrap_cache_"));
-        var reward = Assert.Single(scrapCache.Rewards);
-        db.ItemBases.Add(CreateResource(reward.Key!, reward.Name!));
-        await db.SaveChangesAsync();
-
-        var result = await service.PurchaseAsync(
-            characterId,
-            scrapCache.Key,
-            now,
-            CancellationToken.None);
-
-        Assert.True(result.Succeeded);
-        Assert.Equal(400, result.Value!.Shop.GuildFavor);
-        var grantedItem = Assert.Single(result.Value.InventoryItemsGranted);
-        Assert.Equal(2, grantedItem.Quantity);
-        Assert.Contains(db.InventoryItems.Local, item =>
-            item.InventoryId == characterId
-            && item.ItemInstance.ItemBaseId == reward.Key
-            && item.Quantity == 2);
-    }
-
-    [Fact]
-    public async Task Scrap_cache_merges_into_an_existing_stack()
-    {
-        await using var db = CreateDbContext();
-        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
-        var characterId = SeedGuild(db, now);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-
-        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
-        var scrapCache = overview!.Items.First(x =>
-            x.StockType == GuildShopStockType.Common
-            && x.Key.Contains(".scrap_cache_"));
-        var reward = Assert.Single(scrapCache.Rewards);
-        var itemBase = CreateResource(reward.Key!, reward.Name!);
-        db.ItemBases.Add(itemBase);
-        db.InventoryItems.Add(new InventoryItem
-        {
-            InventoryId = characterId,
-            ItemInstance = new ItemInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            },
-            Quantity = 3
-        });
-        await db.SaveChangesAsync();
-
-        var result = await service.PurchaseAsync(
-            characterId,
-            scrapCache.Key,
-            now,
-            CancellationToken.None);
-        await db.SaveChangesAsync();
-
-        Assert.True(result.Succeeded);
-        var stored = await db.InventoryItems
-            .Include(item => item.ItemInstance)
-            .Where(item => item.InventoryId == characterId
-                           && item.ItemInstance.ItemBaseId == reward.Key)
-            .ToListAsync();
-        Assert.Single(stored);
-        Assert.Equal(5, stored[0].Quantity);
-        Assert.Equal(2, Assert.Single(result.Value!.InventoryItemsGranted).Quantity);
-    }
-
-    [Fact]
-    public async Task Common_stock_offers_two_of_five_rotating_scrap_caches()
-    {
-        await using var db = CreateDbContext();
-        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
-        var characterId = SeedGuild(db, now);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-
-        var rotations = new HashSet<string>();
-        for (var week = 0; week < 8; week++)
-        {
-            var overview = await service.GetOverviewAsync(characterId, now.AddDays(7 * week), CancellationToken.None);
-            var keys = overview!.Items
-                .Where(x => x.StockType == GuildShopStockType.Common && x.Key.Contains(".scrap_cache_"))
-                .Select(x => x.Key)
-                .OrderBy(x => x)
-                .ToList();
-
-            Assert.Equal(2, keys.Count);
-            rotations.Add(string.Join('|', keys));
-        }
-
-        Assert.True(rotations.Count > 1);
-    }
-
-    [Fact]
-    public async Task Level_five_adds_a_second_rotating_rare_scrap_cache()
-    {
-        await using var db = CreateDbContext();
-        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
-        var characterId = SeedGuild(db, now, marketOfficeLevel: 5);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-
-        var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
-
-        Assert.Equal(2, overview!.Items.Count(x => x.Key.Contains(".scrap_cache_") && x.StockType == GuildShopStockType.Rare));
+        Assert.Equal(4, overview!.Items.Count);
+        Assert.All(overview.Items, item => Assert.True(item.CanPurchase));
     }
 
     private static LLDbContext CreateDbContext()
@@ -265,15 +82,6 @@ public sealed partial class GuildShopServiceTests
             new DefaultGuildContentProvider(),
             new InventoryItemFactory(),
             new InventoryService(new InventoryRepository(db)));
-
-    private static ItemBase CreateResource(string id, string name) => new()
-    {
-        Id = id,
-        Name = name,
-        ItemType = ItemType.Resource,
-        Rarity = Rarity.Rare,
-        Stackable = true
-    };
 
     private static Guid SeedGuild(LLDbContext db, DateTimeOffset now, int marketOfficeLevel = 4)
     {

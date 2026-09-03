@@ -76,7 +76,7 @@ The remaining Tutorial order stays unchanged:
 
 1. Choose Your First Hunt;
 2. The Soul Archive;
-3. Forge Your Path;
+3. the original equipment-introduction quest;
 4. Tools of the Trade;
 5. Into the Ruins.
 

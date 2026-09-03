@@ -1052,76 +1052,6 @@ public sealed partial class TournamentGroundsServiceTests
     }
 
     [Fact]
-    public async Task ClaimRewardsAsync_grants_finalist_milestone_items_and_sigil_fragments()
-    {
-        await using var db = CreateDbContext();
-        var inventory = new RecordingInventoryService();
-        var itemBases = new FakeItemBaseRepository(
-        [
-            new ItemBase
-            {
-                Id = "tempered_scrap",
-                Name = "Catalyst Selection Cache",
-                ItemType = ItemType.Resource,
-                Stackable = true
-            },
-            new ItemBase
-            {
-                Id = BlueprintSelectionBoxCatalog.ItemBaseId,
-                Name = "Blueprint Selection Box",
-                ItemType = ItemType.Resource,
-                Stackable = true
-            }
-        ]);
-        var service = CreateService(
-            db,
-            inventoryService: inventory,
-            itemBaseRepository: itemBases);
-        var tournament = SeedTournament(db, TournamentStatus.Completed);
-        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
-
-        await db.TournamentRewardGrants.AddAsync(new TournamentRewardGrant
-        {
-            Id = Guid.NewGuid(),
-            TournamentId = tournament.Id,
-            Tournament = tournament,
-            CharacterId = character.Id,
-            RewardKey = "finalist",
-            Placement = 2,
-            ArenaGlory = 425,
-            Soulstones = 40,
-            TemperedScrap = 1,
-            BlueprintSelectionBoxes = 1,
-            SigilFragments = 20,
-            Status = TournamentRewardStatus.Unclaimed,
-            CreatedAtUtc = Now
-        });
-        await db.SaveChangesAsync();
-
-        var claim = await service.ClaimRewardsAsync(
-            character.Id,
-            tournament.Id,
-            CancellationToken.None);
-
-        Assert.True(claim.Claimed);
-        Assert.Equal(425, claim.ArenaGlory);
-        Assert.Equal(40, claim.Soulstones);
-        Assert.Equal(20, claim.SigilFragments);
-        Assert.Equal(1, claim.TemperedScrap);
-        Assert.Equal(1, claim.BlueprintSelectionBoxes);
-        Assert.NotNull(claim.InventoryGrantId);
-        Assert.Equal(20, character.SigilFragments);
-        Assert.Equal(2, claim.InventoryRewards.Count);
-        Assert.Equal(2, inventory.AddedRewards.Count);
-        Assert.Contains(
-            inventory.AddedRewards,
-            reward => reward.ItemInstance.ItemBaseId == "tempered_scrap" && reward.Quantity == 1);
-        Assert.Contains(
-            inventory.AddedRewards,
-            reward => reward.ItemInstance.ItemBaseId == BlueprintSelectionBoxCatalog.ItemBaseId && reward.Quantity == 1);
-    }
-
-    [Fact]
     public async Task AdvanceDueTournamentsAsync_prepares_playback_before_the_public_start_time()
     {
         await using var db = CreateDbContext();
@@ -1353,10 +1283,6 @@ public sealed partial class TournamentGroundsServiceTests
             Assert.InRange(reward.Soulstones, 20, 50);
             Assert.Equal(0, reward.Cinders);
         });
-        Assert.All(rewardGrants.Where(reward => reward.Placement <= 8), reward =>
-            Assert.Equal(2, reward.TemperedScrap));
-        Assert.All(rewardGrants.Where(reward => reward.Placement <= 4), reward =>
-            Assert.Equal(1, reward.BlueprintSelectionBoxes));
         Assert.All(rewardGrants.Where(reward => reward.Placement <= 2), reward =>
             Assert.Equal(20, reward.SigilFragments));
         Assert.Contains(
@@ -1850,9 +1776,6 @@ public sealed partial class TournamentGroundsServiceTests
                 new SnapshotCombatantBuilder(db, combatSetup),
                 combatSetup),
             characterSnapshotService ?? new DbCharacterSnapshotService(db),
-            itemBaseRepository ?? new NoOpItemBaseRepository(),
-            inventoryService ?? new RecordingInventoryService(),
-            inventoryItemFactory ?? new InventoryItemFactory(),
             combatEngineExecutor ?? new ThrowingCombatEngineExecutor(),
             combatEncounterResultFactory ?? new ThrowingCombatEncounterResultFactory(),
             realtimeBroadcaster,

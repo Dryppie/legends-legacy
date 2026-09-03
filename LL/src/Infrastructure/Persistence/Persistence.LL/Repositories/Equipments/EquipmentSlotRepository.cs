@@ -3,6 +3,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.EntityFrameworkCore;
 
@@ -147,7 +148,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipmentInstance = (EquipmentInstance)inventoryItem.ItemInstance;
         if (equipmentInstance.ProgressionData is { } progression)
         {
-            if (!progression.State.Ownership.CanPersonallyModifyOrSalvage)
+            if (progression.State.Ownership.Kind == EquipmentOwnershipKind.GuildOwned)
             {
                 var loan = await _context.GuildVaultItems.SingleOrDefaultAsync(x =>
                     x.EquipmentInstanceId == equipmentId && x.GuildId == progression.State.Ownership.OwnerId

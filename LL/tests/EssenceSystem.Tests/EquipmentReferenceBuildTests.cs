@@ -60,8 +60,6 @@ public sealed class EquipmentReferenceBuildTests
                 Assert.Null(item.BaseRecipeId);
                 Assert.Null(item.Potential);
                 Assert.Empty(item.BaseModifiers);
-                Assert.Empty(data.State.Investments);
-                Assert.Equal(0, data.EquipmentState.GetSalvageScrap());
                 Assert.Equal(build.Character.Id, data.State.Ownership.OwnerId);
                 Assert.Equal(catalog.Evaluator.Evaluate(data.EquipmentState).Stats.OrderBy(x => x.Key), data.Stats.OrderBy(x => x.Key));
             });

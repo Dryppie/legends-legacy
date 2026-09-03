@@ -169,8 +169,7 @@
         "Soulstones",
         "Fate Echo",
         "Sigil Fragments",
-        "Monster Cores",
-        "Tempered Scrap"
+        "Monster Cores"
       ],
       "rewards": [
         {
@@ -220,12 +219,7 @@
         {
           "weight": 5,
           "reward": {
-            "items": [
-              {
-                "itemId": "tempered_scrap",
-                "quantity": 2
-              }
-            ]
+            "items": []
           }
         }
       ]

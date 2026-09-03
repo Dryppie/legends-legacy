@@ -14,8 +14,6 @@ public sealed class EquipmentDto : IMapFrom<EquipmentData>
     public string? NativeStyleId { get; set; }
     public string? ActiveStyleId { get; set; }
     public EquipmentOwnershipKind Ownership { get; set; }
-    public long PaidScrap { get; set; }
-    public long PaidCinders { get; set; }
 
     public void Mapping(Profile profile) => profile.CreateMap<EquipmentData, EquipmentDto>()
         .ForMember(x => x.ModelVersion, o => o.MapFrom(x => x.State.ModelVersion))
@@ -25,7 +23,5 @@ public sealed class EquipmentDto : IMapFrom<EquipmentData>
         .ForMember(x => x.Rank, o => o.MapFrom(x => x.State.Rank))
         .ForMember(x => x.NativeStyleId, o => o.MapFrom(x => x.State.NativeStyleId))
         .ForMember(x => x.ActiveStyleId, o => o.MapFrom(x => x.State.ActiveStyleId))
-        .ForMember(x => x.Ownership, o => o.MapFrom(x => x.State.Ownership.Kind))
-        .ForMember(x => x.PaidScrap, o => o.MapFrom(x => x.EquipmentState.PaidScrap))
-        .ForMember(x => x.PaidCinders, o => o.MapFrom(x => x.EquipmentState.PaidCinders));
+        .ForMember(x => x.Ownership, o => o.MapFrom(x => x.State.Ownership.Kind));
 }

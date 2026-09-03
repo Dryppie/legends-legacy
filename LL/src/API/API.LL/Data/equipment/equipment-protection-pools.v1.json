@@ -9,7 +9,6 @@
     "requiredQuestId": "quest.shenic.trial_of_lumo",
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 4,
     "targetDefinitionIds": [
       "model_e.r1.goblin_mines.shortsword.blueprint_fury",
       "model_e.r1.goblin_mines.dagger.blueprint_fury",
@@ -32,7 +31,6 @@
     "requiredQuestId": "quest.shenic.trial_of_lumo",
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 4,
     "targetDefinitionIds": [
       "model_e.r1.goblin_mines.shortsword.blueprint_fury",
       "model_e.r1.goblin_mines.dagger.blueprint_fury",
@@ -55,7 +53,6 @@
     "requiredQuestId": "quest.shenic.trial_of_lumo",
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 4,
     "targetDefinitionIds": [
       "model_e.r1.goblin_mines.shortsword.blueprint_fury",
       "model_e.r1.goblin_mines.dagger.blueprint_fury",
@@ -78,7 +75,6 @@
     "requiredQuestId": "quest.shenic.crystal_currents",
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 4,
     "targetDefinitionIds": [
       "model_e.r1.forgotten_catacombs.wand.blueprint_arcane",
       "model_e.r1.forgotten_catacombs.staff.blueprint_arcane",
@@ -101,7 +97,6 @@
     "requiredQuestId": "quest.shenic.crystal_currents",
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 4,
     "targetDefinitionIds": [
       "model_e.r1.forgotten_catacombs.wand.blueprint_arcane",
       "model_e.r1.forgotten_catacombs.staff.blueprint_arcane",
@@ -124,7 +119,6 @@
     "requiredQuestId": "quest.shenic.crystal_currents",
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 4,
     "targetDefinitionIds": [
       "model_e.r1.forgotten_catacombs.wand.blueprint_arcane",
       "model_e.r1.forgotten_catacombs.staff.blueprint_arcane",
@@ -147,7 +141,6 @@
     "requiredQuestId": null,
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 8,
     "targetDefinitionIds": [
       "named.tangled_cave.execution_greatsword",
       "named.tangled_cave.execution_crossbow",
@@ -170,7 +163,6 @@
     "requiredQuestId": null,
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 8,
     "targetDefinitionIds": [
       "named.tangled_cave.execution_greatsword",
       "named.tangled_cave.execution_crossbow",
@@ -193,7 +185,6 @@
     "requiredQuestId": null,
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 8,
     "targetDefinitionIds": [
       "named.tangled_cave.execution_greatsword",
       "named.tangled_cave.execution_crossbow",
@@ -216,7 +207,6 @@
     "requiredQuestId": null,
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 8,
     "targetDefinitionIds": [
       "named.great_tree.spirit_staff",
       "named.great_tree.spirit_robe",
@@ -239,7 +229,6 @@
     "requiredQuestId": null,
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 8,
     "targetDefinitionIds": [
       "named.great_tree.spirit_staff",
       "named.great_tree.spirit_robe",
@@ -262,7 +251,6 @@
     "requiredQuestId": null,
     "matchingChance": 0.2,
     "guaranteeCompletions": 8,
-    "completionScrap": 8,
     "targetDefinitionIds": [
       "named.great_tree.spirit_staff",
       "named.great_tree.spirit_robe",

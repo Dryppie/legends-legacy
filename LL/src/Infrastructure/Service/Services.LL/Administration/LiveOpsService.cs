@@ -472,7 +472,7 @@ public sealed class LiveOpsService(
             var archetype = evaluator.GetArchetype(definition.ArchetypeId);
             return new CompensationEquipmentOption(definition.Id, definition.Name, archetype.ItemBaseId, archetype.Id,
                 archetype.MinimumTier, archetype.MaximumTier, definition.NativeStyleId,
-                equipmentProgressionCatalog.Styles.Where(style => style.Style.CompatibleArchetypeIds.Contains(archetype.Id))
+                equipmentProgressionCatalog.Styles.Where(style => style.CompatibleArchetypeIds.Contains(archetype.Id))
                     .Select(style => style.Id).Order(StringComparer.Ordinal).ToArray());
         }).Where(choice => choice.ItemBaseId == itemBaseId).ToArray();
         return new(true, EquipmentProgressionAdministrativeEquipment.MaximumQuantity, choices);

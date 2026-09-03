@@ -4,11 +4,6 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
-export interface ScrapEquipmentsResponse {
-  gainedItem: InventoryItem;
-  inventoryItems: InventoryItem[];
-}
-
 export interface OpenSelectionCrateResponse {
   consumedItemInstanceId: string;
   grantId: string;
@@ -60,34 +55,6 @@ export class InventoryService {
         return throwError(() => new Error('Failed to get inventory'));
       }),
     );
-  }
-
-  scrapEquipment(
-    equipmentIds: string[],
-  ): Observable<VersionedMutationResult<ScrapEquipmentsResponse>> {
-    return this.apiService
-      .postVersioned<ScrapEquipmentsResponse>('inventory/scrap', equipmentIds, {
-        stateSyncScopesHandledByResponse: ['inventory'],
-      })
-      .pipe(
-        map((inventory) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return inventory;
-        }),
-
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to scrap equipment'));
-        }),
-      );
   }
 
   openSelectionContainer(

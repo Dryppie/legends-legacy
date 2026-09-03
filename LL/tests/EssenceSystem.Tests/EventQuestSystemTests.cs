@@ -39,11 +39,8 @@ public sealed partial class EventQuestSystemTests
         Assert.Equal("event.lumo_defense.example", definition.Id);
         Assert.True(definition.Enabled);
         Assert.Equal("CombatEncounterCompleted", Assert.Single(definition.Objectives).Type);
-        var communityReward = Assert.Single(definition.Rewards);
-        Assert.Equal("Item", communityReward.Type);
-        Assert.Equal(2, communityReward.Quantity);
-        Assert.Equal("tempered_scrap", communityReward.ItemBaseId);
-        Assert.Equal(3, definition.PersonalMilestones.Count);
+        Assert.Empty(definition.Rewards);
+        Assert.Equal(2, definition.PersonalMilestones.Count);
         Assert.Equal(250, definition.PersonalMilestones[0].RequiredContribution);
         Assert.Collection(
             definition.PersonalMilestones,
@@ -52,10 +49,7 @@ public sealed partial class EventQuestSystemTests
                 (Assert.Single(milestone.Rewards).ItemBaseId, Assert.Single(milestone.Rewards).Quantity)),
             milestone => Assert.Equal(
                 ("item.monster_core.lesser", 6),
-                (Assert.Single(milestone.Rewards).ItemBaseId, Assert.Single(milestone.Rewards).Quantity)),
-            milestone => Assert.Equal(
-                ["item.blueprint_selection_box"],
-                milestone.Rewards.Select(reward => reward.ItemBaseId)));
+                (Assert.Single(milestone.Rewards).ItemBaseId, Assert.Single(milestone.Rewards).Quantity)));
 
     }
 

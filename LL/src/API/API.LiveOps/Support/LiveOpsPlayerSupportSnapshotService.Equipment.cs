@@ -45,24 +45,20 @@ public sealed partial class LiveOpsPlayerSupportSnapshotService
             .Where(x => x.CharacterId == target.CharacterId).OrderBy(x => x.PoolId).Take(limit + 1).ToListAsync(ct);
         var ordinary = await db.CombatAcquisitionProgress.AsNoTracking()
             .Where(x => x.CharacterId == target.CharacterId).OrderBy(x => x.PoolId).Take(limit + 1).ToListAsync(ct);
-        var styles = await db.LearnedEquipmentStyles.AsNoTracking()
-            .Where(x => x.CharacterId == target.CharacterId).OrderBy(x => x.StyleId).Take(limit + 1).ToListAsync(ct);
-
         var dungeonRun = await LoadEquipmentDungeonRunAsync(db, target.CharacterId, limit, ct);
 
         return new(limit, equipmentCount, pendingCount,
-            protection.Count > limit || ordinary.Count > limit || styles.Count > limit,
+            protection.Count > limit || ordinary.Count > limit,
             mapped,
             pending.Select(x => new EquipmentSupportPendingRewardDto(x.RunId, x.Outcome.PoolId, x.Outcome.SecuredAtUtc,
-                x.Outcome.Scrap, x.Outcome.Equipment is { } data
+                x.Outcome.Equipment is { } data
                     ? new(data.State.Id, data.ItemBaseId, data.DisplayName, ["Pending dungeon reward"], DescribeEquipment(data)) : null)).ToArray(),
             protection.Take(limit).Select(x => new EquipmentSupportProtectionDto(x.PoolId, x.SelectedDefinitionId,
                 x.CompletionsWithoutMatch, x.Revision)).ToArray(),
             ordinary.Take(limit).Select(x => new EquipmentSupportOrdinaryDto(x.PoolId, x.HasEnteredRegion,
                 x.Plain?.Equipment.State.DefinitionId, x.PlainVictories, x.Plain?.RequiredVictories,
-                x.Sigil?.FamilyId, x.SigilVictories, x.Sigil?.RequiredVictories, x.ScrapRemainder, x.Revision,
-                x.LastEncounterAtUtc)).ToArray(),
-            styles.Take(limit).Select(x => new EquipmentSupportStyleDto(x.StyleId, x.LearnedAtUtc, x.FreeApplicationOperationId)).ToArray())
+                x.Sigil?.FamilyId, x.SigilVictories, x.Sigil?.RequiredVictories, x.Revision,
+                x.LastEncounterAtUtc)).ToArray())
         { DungeonRun = dungeonRun };
     }
 
@@ -73,8 +69,6 @@ public sealed partial class LiveOpsPlayerSupportSnapshotService
         return new(state.DefinitionId, state.ArchetypeId, state.Tier, state.Rank, state.BalanceVersion,
             data.Rarity.ToString(), state.NativeStyleId, state.ActiveStyleId, state.Ownership.Kind.ToString(),
             state.Ownership.OwnerId, state.Provenance.Kind.ToString(), state.Provenance.SourceId,
-            state.Provenance.AwardId, state.BaseSalvageScrap, state.Investments.Sum(x => x.Scrap),
-            state.Investments.Sum(x => x.Cinders), state.Investments.Select(x =>
-                new EquipmentSupportInvestmentDto(x.OperationId, x.Rank, x.Scrap, x.Cinders)).ToArray());
+            state.Provenance.AwardId);
     }
 }

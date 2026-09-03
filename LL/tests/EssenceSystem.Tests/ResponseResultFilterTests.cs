@@ -11,28 +11,6 @@ namespace EssenceSystem.Tests;
 public sealed class ResponseResultFilterTests
 {
     [Fact]
-    public async Task Forge_conflict_preserves_public_fresh_quote_for_explicit_review()
-    {
-        var quote = new Application.UseCases.Equipments.Dtos.ForgeQuoteDto { Token = "fresh-token", CanExecute = true };
-        var response = new Response<Application.UseCases.Equipments.Dtos.ForgeMutationDto>
-        {
-            IsSuccess = false,
-            IsConflict = true,
-            ErrorMessage = "Review the new quote.",
-            Data = new() { FreshQuote = quote }
-        };
-        var action = new ActionContext(new DefaultHttpContext(), new RouteData(), new ActionDescriptor());
-        var context = new ResultExecutingContext(action, [], new ObjectResult(response), new object());
-        await new ResponseResultFilter().OnResultExecutionAsync(context, () =>
-            Task.FromResult(new ResultExecutedContext(action, [], context.Result, context.Controller)));
-        var result = Assert.IsType<ObjectResult>(context.Result);
-        Assert.Equal(409, result.StatusCode);
-        var details = Assert.IsType<ProblemDetails>(result.Value);
-        Assert.Same(quote, details.Extensions["freshQuote"]);
-        Assert.False(details.Extensions.ContainsKey("data"));
-    }
-
-    [Fact]
     public async Task Expected_business_failure_remains_bad_request()
     {
         var filter = new ResponseResultFilter();

@@ -307,8 +307,6 @@ export interface TournamentRewardGrant {
   arenaGlory: number;
   cinders: number;
   soulstones: number;
-  temperedScrap?: number;
-  blueprintSelectionBoxes: number;
   sigilFragments: number;
   status: string;
   createdAtUtc: string;
@@ -321,8 +319,6 @@ export interface TournamentRewardTier {
   arenaGlory: number;
   cinders: number;
   soulstones: number;
-  temperedScrap?: number;
-  blueprintSelectionBoxes: number;
   sigilFragments: number;
 }
 
@@ -332,8 +328,5 @@ export interface ClaimTournamentRewardsResponse {
   cinders: number;
   soulstones: number;
   sigilFragments: number;
-  temperedScrap?: number;
-  blueprintSelectionBoxes: number;
-  inventoryGrantId?: string | null;
   inventoryRewards: InventoryItem[];
 }

@@ -65,6 +65,6 @@ public sealed partial class CombatAcquisitionTests
     private sealed class SigilSettlementWriter(Fixture fixture) : ILootRewardWriter
     {
         public Task AddLootAsync(Guid id, IReadOnlyCollection<InventoryItem> items, string source,
-            string? location, CancellationToken ct) => fixture.Settle(new([], [], items.ToArray()));
+            string? location, CancellationToken ct) => fixture.Settle(new([], items.ToArray()));
     }
 }

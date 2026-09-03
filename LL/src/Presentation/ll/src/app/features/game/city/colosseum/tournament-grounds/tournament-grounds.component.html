@@ -581,12 +581,6 @@
                   <span *ngIf="tier.soulstones">
                     · +{{ tier.soulstones }} Soulstones
                   </span>
-                  <span *ngIf="tier.temperedScrap">
-                    · +{{ tier.temperedScrap }} Tempered Scrap
-                  </span>
-                  <span *ngIf="tier.blueprintSelectionBoxes">
-                    · +{{ tier.blueprintSelectionBoxes }} Blueprint Box
-                  </span>
                   <span *ngIf="tier.sigilFragments">
                     · +{{ tier.sigilFragments }} Sigil Fragments
                   </span>
@@ -619,13 +613,6 @@
                 <span *ngIf="reward.soulstones">
                   +{{ reward.soulstones }} Soulstones
                 </span>
-                <span *ngIf="reward.temperedScrap">
-                  <br />+{{ reward.temperedScrap }} Tempered Scrap
-                </span>
-                <br *ngIf="reward.blueprintSelectionBoxes" />
-                <span *ngIf="reward.blueprintSelectionBoxes">
-                  +{{ reward.blueprintSelectionBoxes }} Blueprint Box
-                </span>
                 <br *ngIf="reward.sigilFragments" />
                 <span *ngIf="reward.sigilFragments">
                   +{{ reward.sigilFragments }} Sigil Fragments
@@ -648,12 +635,6 @@
               <p class="text-right text-xs text-primary">
                 +{{ reward.arenaGlory }} Glory<br />
                 +{{ reward.soulstones }} Soulstones
-                <span *ngIf="reward.temperedScrap">
-                  <br />+{{ reward.temperedScrap }} Tempered Scrap
-                </span>
-                <span *ngIf="reward.blueprintSelectionBoxes">
-                  <br />+{{ reward.blueprintSelectionBoxes }} Blueprint Box
-                </span>
                 <span *ngIf="reward.sigilFragments">
                   <br />+{{ reward.sigilFragments }} Sigil Fragments
                 </span>

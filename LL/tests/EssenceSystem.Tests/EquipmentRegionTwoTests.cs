@@ -35,8 +35,6 @@ public sealed partial class CombatAcquisitionTests
         Assert.Equal(2, award.State.Tier);
         Assert.Equal(0, award.State.Rank);
         Assert.Equal(EquipmentOwnershipKind.BoundPersonal, award.State.Ownership.Kind);
-        Assert.Equal(0, award.State.BaseSalvageScrap);
-        Assert.Equal(3, Assert.Single(first.Scrap).Quantity);
         var shenic = (await f.Service.GetAsync(f.Id, Ct)).Single(p => p.EquipmentTier == 1);
         Assert.Equal(359, shenic.PlainVictories);
         Assert.NotNull(shenic.SelectedDefinitionId);
@@ -98,8 +96,7 @@ public sealed partial class CombatAcquisitionTests
         var expected = one.Equipment.Select(x => ((EquipmentInstance)x.ItemInstance).ProgressionData!).ToArray();
         var actual = parts.SelectMany(x => x.Equipment).Select(x => ((EquipmentInstance)x.ItemInstance).ProgressionData!).ToArray();
         Assert.Equal(expected.Select(x => x.Serialize()), actual.Select(x => x.Serialize()));
-        Assert.All(expected, x => { Assert.Equal(2, x.State.Tier); Assert.Equal(2, x.State.BaseSalvageScrap); Assert.Equal(EquipmentOwnershipKind.UnboundPersonal, x.State.Ownership.Kind); });
-        Assert.Equal(one.Scrap.Sum(x => x.Quantity), parts.Sum(x => x.Scrap.Sum(i => i.Quantity)));
+        Assert.All(expected, x => { Assert.Equal(2, x.State.Tier); Assert.Equal(EquipmentOwnershipKind.UnboundPersonal, x.State.Ownership.Kind); });
     }
 }
 
@@ -131,52 +128,8 @@ public sealed partial class EquipmentAcquisitionTests
         Assert.Equal(1, gear.State.Rank);
         Assert.Equal(pool.TargetDefinitionIds[0], gear.State.DefinitionId);
         Assert.Equal(gear.State.NativeStyleId, gear.State.ActiveStyleId);
-        Assert.Equal(8, Assert.Single(run.PendingRewards, r => r.ItemId == "tempered_scrap").Quantity);
         await f.Service.CompleteAsync(run, false, Ct);
-        Assert.Equal(2, run.PendingRewards.Count);
+        Assert.Single(run.PendingRewards);
         Assert.Single(await f.Db.EquipmentProtectionReceipts.ToListAsync());
-    }
-}
-
-public sealed partial class ForgeTests
-{
-    [Theory]
-    [InlineData(1, 155, 7750, 77)]
-    [InlineData(2, 310, 15500, 155)]
-    public async Task Authored_tier_prices_charge_paid_ranks_and_salvage_only_recorded_investment(int tier, long scrap, long cinders, long returned)
-    {
-        await using var f = await Fixture.Create(scrap: 1000, cinders: 100000, tier: tier);
-        for (var rank = 1; rank <= 5; rank++)
-        {
-            var quote = await f.Preview(ForgeOperationKind.ImproveRank);
-            Assert.True(quote.CanExecute, quote.UnavailableReason);
-            Assert.Null((await f.Execute(quote)).Error);
-            Assert.Equal(rank, f.Gear.ProgressionData!.State.Rank);
-        }
-        Assert.Equal(scrap, f.Gear.ProgressionData!.EquipmentState.PaidScrap);
-        Assert.Equal(100000 - cinders, f.Character.Cinders);
-        Assert.False((await f.Preview(ForgeOperationKind.ImproveRank)).CanExecute);
-        var salvage = await f.Preview(ForgeOperationKind.Salvage);
-        Assert.Equal(returned, salvage.ScrapReturned);
-        Assert.Null((await f.Execute(salvage)).Error);
-        Assert.Null((await f.Execute(salvage)).Error);
-        Assert.Equal(1000 - scrap + returned, await f.Scrap());
-    }
-
-    [Fact]
-    public async Task Learned_style_and_its_free_application_are_shared_across_tiers()
-    {
-        await using var f = await Fixture.Create();
-        await f.Learn(Fury);
-        var first = await f.Preview(ForgeOperationKind.ChangeStyle, Fury);
-        Assert.True(first.UsesFreeApplication);
-        Assert.Null((await f.Execute(first)).Error);
-        var tierTwo = await f.AddEquipment("plain.staff", tier: 2);
-        var next = await f.Preview(ForgeOperationKind.ChangeStyle, Fury, tierTwo.Id);
-        Assert.True(next.CanExecute, next.UnavailableReason);
-        Assert.False(next.UsesFreeApplication);
-        Assert.Equal(500, next.CinderCost);
-        Assert.Null((await f.Execute(next)).Error);
-        Assert.Equal(2, tierTwo.ProgressionData!.State.Tier);
     }
 }

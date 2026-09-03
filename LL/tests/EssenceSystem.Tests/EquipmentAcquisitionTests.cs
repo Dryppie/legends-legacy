@@ -64,8 +64,6 @@ public sealed partial class EquipmentAcquisitionTests
                 Assert.Equal(EquipmentRarity.Rare, state.Rarity);
                 Assert.NotNull(state.EquipmentSetId);
                 Assert.Equal(state.State.NativeStyleId, state.State.ActiveStyleId);
-                Assert.Equal(pool.EquipmentTier == 1 ? 2 : 4, state.State.BaseSalvageScrap);
-                Assert.Empty(state.State.Investments);
             }
         }
         var views = await f.Service.GetPoolsAsync(f.Id, Ct);
@@ -76,10 +74,10 @@ public sealed partial class EquipmentAcquisitionTests
     }
 
     [Theory]
-    [InlineData(false, 0.9, 8, true, 0)]
-    [InlineData(false, 0.1, 1, false, 2)]
-    [InlineData(true, 0.9, 1, true, 0)]
-    public async Task Matching_and_guaranteed_awards_share_stats_but_keep_correct_binding_and_scrap(bool first, double roll, int clears, bool bound, int baseScrap)
+    [InlineData(false, 0.9, 8, true)]
+    [InlineData(false, 0.1, 1, false)]
+    [InlineData(true, 0.9, 1, true)]
+    public async Task Matching_and_guaranteed_awards_share_stats_but_keep_correct_binding(bool first, double roll, int clears, bool bound)
     {
         await using var f = await Fixture.Create();
         var pool = f.Catalog.Pools[0];
@@ -88,7 +86,7 @@ public sealed partial class EquipmentAcquisitionTests
         EquipmentProtectionOutcome? outcome = null;
         for (var index = 1; index <= clears; index++)
         {
-            var commitment = new DungeonEquipmentCommitment(f.Id, Guid.NewGuid(), pool.Id, pool.DungeonId, pool.Difficulty, .2, 8, 4, data);
+            var commitment = new DungeonEquipmentCommitment(f.Id, Guid.NewGuid(), pool.Id, pool.DungeonId, pool.Difficulty, .2, 8, data);
             outcome = progress.Complete(commitment, first, roll, DateTimeOffset.UtcNow);
             if (index < clears) Assert.Null(outcome.Equipment);
         }
@@ -96,8 +94,6 @@ public sealed partial class EquipmentAcquisitionTests
         Assert.NotNull(reward);
         Assert.Equal(data.Stats, reward.Stats);
         Assert.Equal(bound ? EquipmentOwnershipKind.BoundPersonal : EquipmentOwnershipKind.UnboundPersonal, reward.State.Ownership.Kind);
-        Assert.Equal(baseScrap, reward.EquipmentState.GetSalvageScrap());
-        Assert.Empty(reward.State.Investments);
         Assert.Equal(0, progress.CompletionsWithoutMatch);
     }
 
@@ -146,7 +142,7 @@ public sealed partial class EquipmentAcquisitionTests
         await f.Service.CompleteAsync(run, false, Ct);
         await f.Db.SaveChangesAsync();
         Assert.Equal(revision, progress.Revision);
-        Assert.Equal(2, run.PendingRewards.Count);
+        Assert.Single(run.PendingRewards);
         Assert.Single(await f.Db.EquipmentProtectionReceipts.ToListAsync());
         Assert.Single(await f.Db.GameEventOutboxMessages.ToListAsync());
         Assert.Equal(pending.ProgressionData.DisplayName, Mapper().Map<RunRewardDto>(pending).ProgressionData!.DisplayName);
@@ -170,15 +166,13 @@ public sealed partial class EquipmentAcquisitionTests
     }
 
     [Fact]
-    public async Task No_target_earns_only_completion_scrap_without_advancing_protection()
+    public async Task No_target_does_not_award_equipment_or_advance_protection()
     {
         await using var f = await Fixture.Create();
         var run = await f.NewRun(f.Catalog.Pools[0]);
         await f.Complete(run, first: true);
         Assert.Null(run.EquipmentCommitment!.Target);
-        var reward = Assert.Single(run.PendingRewards);
-        Assert.Equal("tempered_scrap", reward.ItemId);
-        Assert.Equal(4, reward.Quantity);
+        Assert.Empty(run.PendingRewards);
         Assert.Equal(0, (await f.Db.EquipmentProtectionProgress.SingleAsync()).CompletionsWithoutMatch);
     }
 
@@ -207,20 +201,17 @@ public sealed partial class EquipmentAcquisitionTests
         await f.Service.CompleteAsync(run, true, Ct);
         Assert.Equal(1, progress.CompletionsWithoutMatch);
         Assert.Single(await f.Db.ItemInstances.OfType<EquipmentInstance>().ToListAsync());
-        Assert.Equal(4, (await f.Db.InventoryItems.SingleAsync(x => x.ItemInstance.ItemBaseId == "tempered_scrap")).Quantity);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Missing_secured_item_base_aborts_claim_before_other_rewards_are_paid(bool missingScrap)
+    [Fact]
+    public async Task Missing_secured_equipment_base_aborts_claim_before_other_rewards_are_paid()
     {
         await using var f = await Fixture.Create();
         var pool = f.Catalog.Pools[0];
         await f.Select(pool, 0);
         var run = await f.NewRun(pool);
         await f.Complete(run, first: true);
-        var itemId = missingScrap ? "tempered_scrap" : run.PendingRewards.Single(x => x.ProgressionData != null).ItemId;
+        var itemId = run.PendingRewards.Single(x => x.ProgressionData != null).ItemId;
         f.Db.ItemBases.Remove(await f.Db.ItemBases.SingleAsync(x => x.Id == itemId));
         await f.Db.SaveChangesAsync();
         run.PendingCinders = 100;
@@ -290,8 +281,6 @@ public sealed partial class EquipmentAcquisitionTests
             Assert.Null(item.State.ActiveStyleId);
             Assert.Equal(EquipmentAwardKind.Recovery, item.State.Provenance.Kind);
             Assert.Equal(EquipmentOwnershipKind.BoundPersonal, item.State.Ownership.Kind);
-            Assert.Equal(0, item.EquipmentState.GetSalvageScrap());
-            Assert.Empty(item.State.Investments);
         });
         Assert.Equal(1000, f.Character.Cinders);
         Assert.Equal(4, await f.Db.EconomyLedger.CountAsync());
@@ -312,13 +301,12 @@ public sealed partial class EquipmentAcquisitionTests
     }
 
     [Fact]
-    public async Task Dual_wield_entitlement_counts_equipped_and_pending_copies_once_and_preserves_modifications()
+    public async Task Dual_wield_entitlement_counts_equipped_and_pending_copies_once_and_preserves_authored_state()
     {
         await using var f = await Fixture.Create();
         var grant = await f.Baseline(dual: true);
         var first = grant.Equipment.First(x => x.State.DefinitionId == "plain.dagger");
-        var modified = EquipmentData.Create(first.EquipmentState.RecordPaidRankImprovement(f.Catalog.Evaluator, Guid.NewGuid(), 5, 250)
-            .ChangeStyle(f.Catalog.Evaluator, "blueprint_fury", new HashSet<string> { "blueprint_fury" }), f.Catalog.Evaluator);
+        var modified = EquipmentData.Create(EquipmentState.Restore(first.State with { Rank = 3 }), f.Catalog.Evaluator);
         var equipped = await f.AddItem(modified);
         Assert.True((await new EquipmentSlotRepository(f.Db).EquipEquipmentAsync(f.Id, equipped.Id, EquipmentSlotType.MainHand, Ct)).Succeeded);
         var second = grant.Equipment.Last(x => x.State.DefinitionId == "plain.dagger");
@@ -430,7 +418,6 @@ public sealed partial class EquipmentAcquisitionTests
         Assert.Equal(recipientId, equipment.ProgressionData!.State.Ownership.OwnerId);
         Assert.Equal(data.Stats, equipment.ProgressionData.Stats);
         Assert.Equal(data.State.Provenance, equipment.ProgressionData.State.Provenance);
-        Assert.Equal(2, equipment.ProgressionData.EquipmentState.GetSalvageScrap());
         Assert.False(equipment.IsBound);
         Assert.True((await new EquipmentSlotRepository(f.Db).EquipEquipmentAsync(recipientId, equipment.Id, null, Ct)).Succeeded);
         await f.Db.SaveChangesAsync();
@@ -482,7 +469,6 @@ public sealed partial class EquipmentAcquisitionTests
                 var item = f.Equipment.Evaluator.Evaluate(option.DefinitionId, 1, 0, null);
                 f.Db.ItemBases.Add(new EquipmentBase { Id = item.Archetype.ItemBaseId, Name = option.Name, EquipmentType = option.EquipmentType });
             }
-            f.Db.ItemBases.Add(new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap" });
             foreach (var family in f.Catalog.Pools.Select(x => x.FamilyId).Distinct())
                 f.Db.ItemBases.Add(new ItemBase { Id = "sigil_" + family, Name = family });
             await f.Db.SaveChangesAsync();

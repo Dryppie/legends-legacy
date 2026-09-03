@@ -1,6 +1,6 @@
 # Reusable Equipment Blueprints
 
-**Post-Alpha update, 3 September 2026:** this document is historical. Player crafting, recipe mastery and queued/random tempering have been removed. Current gear comes from content and uses deterministic Forge ranks and reusable Blueprint styles. Alpha recipe unlocks, materials and equipment do not require conversion or compensation. Shared recipe/stat simulation helpers remain only where current tools use them. See the [cleanup record](../../docs/design/equipment-post-alpha-cleanup.md) and [current specification](../../docs/design/equipment-specification.md).
+**Superseded 3 September 2026:** this document is historical. Player crafting, tempering, reusable Blueprint items, and the later equipment Forge have been removed. Current gear comes from authored grants and drops and cannot be upgraded. See the [Forge removal](../../docs/design/equipment-forge-removal.md) and [current specification](../../docs/design/equipment-specification.md).
 
 Equipment crafting now starts from the item the player actually wants to make:
 Dagger, Greatsword, Cloth Robe, Tower Shield, and the other concrete equipment

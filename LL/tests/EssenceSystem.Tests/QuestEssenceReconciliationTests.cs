@@ -98,7 +98,6 @@ public sealed partial class QuestSystemTests
         {
             Assert.Contains(StateSyncScopes.Character, stateSync.InvalidatedScopes);
             Assert.Contains(StateSyncScopes.AreaAccess, stateSync.InvalidatedScopes);
-            Assert.Contains(StateSyncScopes.EquipmentForge, stateSync.InvalidatedScopes);
         }
     }
 

@@ -84,8 +84,6 @@ public interface IDbContext
     DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses { get; }
     DbSet<QuestEventLedger> QuestEventLedgers { get; }
     DbSet<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant> StarterEquipmentGrants { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.ForgeReceipt> ForgeReceipts { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle> LearnedEquipmentStyles { get; }
     DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress> EquipmentProtectionProgress { get; }
     DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt> EquipmentProtectionReceipts { get; }
     DbSet<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt> BaselineEquipmentRecoveryReceipts { get; }

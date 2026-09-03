@@ -11,7 +11,7 @@ public sealed class StarterEquipmentCatalog
     private readonly IReadOnlyDictionary<string, StarterEquipmentOption> _options;
     private readonly IReadOnlyList<string> _accessories;
 
-    public StarterEquipmentCatalog(EquipmentEvaluator evaluator, IEnumerable<string> definitionIds, IEnumerable<EquipmentProgressionStyleSource>? styles = null)
+    public StarterEquipmentCatalog(EquipmentEvaluator evaluator, IEnumerable<string> definitionIds, IEnumerable<EquipmentStyle>? styles = null)
     {
         Evaluator = evaluator;
         Styles = Array.AsReadOnly((styles ?? []).ToArray());
@@ -30,7 +30,7 @@ public sealed class StarterEquipmentCatalog
     }
 
     public EquipmentEvaluator Evaluator { get; }
-    public IReadOnlyList<EquipmentProgressionStyleSource> Styles { get; }
+    public IReadOnlyList<EquipmentStyle> Styles { get; }
     public IReadOnlyList<StarterEquipmentOption> Options => _options.Values.OrderBy(x => x.EquipmentType).ThenBy(x => x.DefinitionId, StringComparer.Ordinal).ToArray();
 
     public IReadOnlyList<StarterEquipmentOption> GetOptions(int tier) => Options.Select(option =>

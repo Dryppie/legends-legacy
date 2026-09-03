@@ -60,12 +60,6 @@
       "key": "first_sigil",
       "quantity": 1,
       "type": "Item"
-    },
-    {
-      "key": "area_scrap",
-      "type": "Item",
-      "itemBaseId": "tempered_scrap",
-      "quantity": 2
     }
   ]
 }

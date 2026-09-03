@@ -8,7 +8,6 @@ public sealed class EquipmentAccessDto : IMapFrom<EquipmentAccess>
 {
 
     public bool StarterAcquisitionEnabled { get; set; }
-    public bool ForgeEnabled { get; set; }
     public bool ProtectedAcquisitionEnabled { get; set; }
     public bool BaselineRecoveryEnabled { get; set; }
     public bool OrdinaryAcquisitionEnabled { get; set; }

@@ -44,7 +44,7 @@ describe('PlayerWorkspaceComponent Equipment progression compensation', () => {
     let resolve!: (value: Awaited<ReturnType<LiveOpsApiService['compensationEquipmentOptions']>>) => void;
     api.compensationEquipmentOptions.and.returnValue(new Promise(done => { resolve = done; }));
     const pending = component.chooseItem(sword);
-    await component.chooseItem({ id: 'tempered_scrap', name: 'Tempered Scrap', itemType: 'Resource' } as ItemCatalogEntry);
+    await component.chooseItem({ id: 'item.monster_core.lesser', name: 'Lesser Monster Core', itemType: 'Resource' } as ItemCatalogEntry);
     resolve({ isSuccess: true, data: choices, errorMessage: '' });
     await pending;
     expect(component.equipmentOptions).toBeNull();

@@ -8,7 +8,6 @@ namespace EssenceSystem.Tests;
 public sealed partial class SelectionCrateServiceTests
 {
     [Theory]
-    [InlineData("item.blueprint_selection_box", "fury", "blueprint_fury")]
     [InlineData("item.essence_token.lumo_ruins", "goblin", "item.essence.goblin")]
     public async Task EquipmentProgression_preserves_supported_container_choices(string containerId, string option, string rewardId)
     {

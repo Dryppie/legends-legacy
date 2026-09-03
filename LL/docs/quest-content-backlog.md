@@ -152,7 +152,6 @@ reward IDs still need to be selected from live content before authoring JSON.
 | A Second Soul         | Essences  | Absorb any additional Essence                          | 10 Soul Dust            | Implemented |
 | An Adaptable Archive  | Essences  | Equip Goblin, Lumo Wisp, and Lumo Sentinel in sequence | 25 Soul Dust            | Implemented |
 | Arms of Choice        | Crafting  | Craft one weapon from each supported one-handed family | 50 Ore and 25 Wood      | Implemented |
-| Made by Your Own Hand | Crafting  | Craft a Tier 2 weapon, then equip a crafted Tier 2 one | 5 Tempered Scrap        | Implemented |
 | Blood Grove Veteran   | Combat    | Win 25 encounters in Blood Grove                       | 25 Rawhide              | Implemented |
 | A Name in Shenic      | Character | Reach level 10                                         | 1 Advancement Stone     | Implemented |
 | Tested Wanderer       | Character | Reach level 25                                         | 2 Advancement Stones    | Implemented |

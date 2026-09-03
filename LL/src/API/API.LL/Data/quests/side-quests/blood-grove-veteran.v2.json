@@ -28,12 +28,5 @@
       }
     }
   ],
-  "rewards": [
-    {
-      "key": "veteran_scrap",
-      "type": "Item",
-      "itemBaseId": "tempered_scrap",
-      "quantity": 2
-    }
-  ]
+  "rewards": []
 }

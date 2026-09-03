@@ -43,7 +43,7 @@ public sealed class CombatAcquisitionService(CombatAcquisitionCatalog catalog, I
             progress?.Plain?.Equipment.State.DefinitionId, progress?.PlainVictories ?? 0,
             progress?.Plain?.RequiredVictories ?? rules.PlainTargetVictories,
             progress?.Sigil?.FamilyId, progress?.SigilVictories ?? 0,
-            progress?.Sigil?.RequiredVictories ?? rules.SigilVictories, progress?.ScrapRemainder ?? 0,
+            progress?.Sigil?.RequiredVictories ?? rules.SigilVictories,
             rules.DiscoveryChance, catalog.Equipment.GetOptions(rules.EquipmentTier), sigils);
     }
 

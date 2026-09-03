@@ -20,9 +20,6 @@ namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 
 public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApplier
 {
-    private static readonly IReadOnlySet<string> FirstCompletionExcludedRollIds =
-        new HashSet<string>(["blueprint_drop"], StringComparer.OrdinalIgnoreCase);
-
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonRunRepository _dungeonRuns;
     private readonly IItemBaseRepository _itemBases;
@@ -78,7 +75,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
                     rewardTableId,
                     "Dungeon Completion",
                     masteryBenefits.CompletionCurrencyBonusPercent,
-                    isFirstCompletion ? FirstCompletionExcludedRollIds : null,
+                    excludedRollIds: null,
                     cancellationToken);
             }
         }

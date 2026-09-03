@@ -188,21 +188,12 @@ public sealed class DungeonCatalogTests
     }
 
     [Fact]
-    public void Region_two_dungeons_reward_their_blueprints_once_without_crafting_materials()
+    public void Region_two_dungeons_have_no_upgrade_items_or_crafting_materials()
     {
         var allDungeons = MaterializeCurrentCatalog();
-        var expectedCatalystChances = new[] { 0.22, 0.16, 0.12 };
-        var expectedByFamily = new Dictionary<string, (string[] Blueprints, string[] Catalysts)>
-        {
-            ["tangled_cave"] = (
-                ["blueprint_execution", "blueprint_venom_touched_sword", "blueprint_hivefang_dagger"],
-                ["executioners_mark", "venom_gland", "royal_chitin_plate"]),
-            ["great_tree"] = (
-                ["blueprint_spirit", "blueprint_warden", "blueprint_primal", "blueprint_aegis"],
-                ["spirit_prism", "warden_sigil", "hive_ichor", "aegis_runestone"])
-        };
+        var familyIds = new[] { "tangled_cave", "great_tree" };
 
-        foreach (var (familyId, expected) in expectedByFamily)
+        foreach (var familyId in familyIds)
         {
             var family = allDungeons
                 .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == familyId)
@@ -213,16 +204,8 @@ public sealed class DungeonCatalogTests
             for (var index = 0; index < family.Count; index++)
             {
                 var dungeon = family[index];
-                foreach (var blueprintItemId in expected.Blueprints)
-                {
-                    var blueprint = Assert.Single(
-                        dungeon.RewardTable.FirstClearRewards,
-                        reward => reward.ItemId == blueprintItemId);
-                    Assert.Equal(1, blueprint.MinAmount);
-                    Assert.Equal(1, blueprint.MaxAmount);
-                    Assert.Equal(1, blueprint.Chance);
-                }
-
+                Assert.All(dungeon.RewardTable.FirstClearRewards, reward =>
+                    Assert.StartsWith("item.monster_core.", reward.ItemId));
                 Assert.Empty(dungeon.RewardTable.CompletionRewards);
             }
         }

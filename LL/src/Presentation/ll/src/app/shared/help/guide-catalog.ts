@@ -8,7 +8,6 @@ export const GUIDE_PAGE_IDS = {
   dungeons: 'dungeons',
   raids: 'raids',
   prophecies: 'prophecies',
-  equipmentForge: 'equipment-forge',
   guild: 'guild',
   colosseum: 'colosseum',
   tournamentReplay: 'tournament-replay',

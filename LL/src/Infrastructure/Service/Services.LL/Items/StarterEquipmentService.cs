@@ -32,7 +32,7 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
                 starters.Add(new(kind, reason is null, reason, grant));
             }
         }
-        return new(flags.StarterAcquisitionEnabled, flags.ForgeEnabled, flags.ProtectedAcquisitionEnabled,
+        return new(flags.StarterAcquisitionEnabled, flags.ProtectedAcquisitionEnabled,
             flags.BaselineRecoveryEnabled, flags.OrdinaryAcquisitionEnabled, starters);
     }
 

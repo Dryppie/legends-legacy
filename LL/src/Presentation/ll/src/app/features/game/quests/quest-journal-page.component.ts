@@ -9,7 +9,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
 import { EventQuestStateService } from '../../../core/services/api/quest/event-quest-state.service';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
@@ -53,7 +53,6 @@ type QuestSortMode = 'Order' | 'Progress';
     NgClass,
     NgFor,
     NgIf,
-    RouterLink,
     BaseItemComponent,
     CharacterTagComponent,
     DefaultHeaderComponent,

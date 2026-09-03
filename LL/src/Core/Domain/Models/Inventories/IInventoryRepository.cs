@@ -1,4 +1,4 @@
-﻿using Domain.Models.Items;
+using Domain.Models.Items;
 using Domain.Models.MarketPlaces;
 
 namespace Domain.Models.Inventories;
@@ -62,7 +62,6 @@ public interface IInventoryRepository
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken);
     Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken);
-    Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken);
     Task<InventoryTransferResult> TransferItemAsync(
         Guid senderCharacterId,
         Guid recipientCharacterId,

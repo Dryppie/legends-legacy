@@ -135,106 +135,6 @@ public sealed partial class SelectionCrateServiceTests
         Assert.Equal(1, reward.Quantity);
     }
 
-    [Fact]
-    public async Task OpeningBlueprintChoiceConsumesOneCrateAndGrantsSelectedBundle()
-    {
-        var characterId = Guid.NewGuid();
-        var crate = CreateInventoryItem(
-            characterId,
-            BlueprintSelectionBoxCatalog.ItemBaseId,
-            ItemType.Resource,
-            quantity: 1);
-        var inventory = new FakeInventoryService(crate);
-        var itemBases = new FakeItemBaseRepository(BlueprintSelectionBoxCatalog.Options.Select(option =>
-            new ItemBase
-            {
-                Id = option.ItemId,
-                Name = option.Name,
-                ItemType = ItemType.Resource,
-                Stackable = true
-            }));
-        var service = new SelectionCrateService(
-            inventory,
-            itemBases,
-            new InventoryItemFactory());
-
-        var result = await service.OpenSelectionContainerAsync(
-            characterId,
-            crate.ItemInstanceId,
-            "fury",
-            CancellationToken.None);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal("Blueprint Selection Box", result.ContainerName);
-        Assert.Equal(0, crate.Quantity);
-        var reward = Assert.Single(result.Rewards);
-        Assert.Equal("blueprint_fury", reward.ItemInstance.ItemBaseId);
-        Assert.Equal(1, reward.Quantity);
-        Assert.Single(inventory.AddedRewards);
-    }
-
-    [Fact]
-    public async Task InvalidBlueprintChoiceDoesNotConsumeCrate()
-    {
-        var characterId = Guid.NewGuid();
-        var crate = CreateInventoryItem(
-            characterId,
-            BlueprintSelectionBoxCatalog.ItemBaseId,
-            ItemType.Resource,
-            quantity: 1);
-        var inventory = new FakeInventoryService(crate);
-        var service = new SelectionCrateService(
-            inventory,
-            new FakeItemBaseRepository([]),
-            new InventoryItemFactory());
-
-        var result = await service.OpenSelectionContainerAsync(
-            characterId,
-            crate.ItemInstanceId,
-            "unknown",
-            CancellationToken.None);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal(1, crate.Quantity);
-        Assert.Empty(inventory.AddedRewards);
-    }
-
-    [Fact]
-    public async Task OpeningBlueprintBoxConsumesOneBoxAndGrantsSelectedBlueprint()
-    {
-        var characterId = Guid.NewGuid();
-        var box = CreateInventoryItem(
-            characterId,
-            BlueprintSelectionBoxCatalog.ItemBaseId,
-            ItemType.Resource,
-            quantity: 1);
-        var inventory = new FakeInventoryService(box);
-        var itemBases = new FakeItemBaseRepository(BlueprintSelectionBoxCatalog.Options.Select(option =>
-            new ItemBase
-            {
-                Id = option.ItemId,
-                Name = option.Name,
-                ItemType = ItemType.Resource,
-                Stackable = true
-            }));
-        var service = new SelectionCrateService(
-            inventory,
-            itemBases,
-            new InventoryItemFactory());
-
-        var result = await service.OpenSelectionContainerAsync(
-            characterId,
-            box.ItemInstanceId,
-            "primal",
-            CancellationToken.None);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal("Blueprint Selection Box", result.ContainerName);
-        Assert.Equal(0, box.Quantity);
-        var reward = Assert.Single(result.Rewards);
-        Assert.Equal("blueprint_primal", reward.ItemInstance.ItemBaseId);
-        Assert.Equal(1, reward.Quantity);
-    }
 
     [Fact]
     public async Task OpeningSelectionContainerRecordsAndPublishesLootWithContainerOrigin()
@@ -242,11 +142,11 @@ public sealed partial class SelectionCrateServiceTests
         var characterId = Guid.NewGuid();
         var crate = CreateInventoryItem(
             characterId,
-            BlueprintSelectionBoxCatalog.ItemBaseId,
+            ShenicEssenceTokenCatalog.ItemBaseId("lumo_ruins"),
             ItemType.Resource,
             quantity: 1);
         var inventory = new FakeInventoryService(crate);
-        var itemBases = new FakeItemBaseRepository(BlueprintSelectionBoxCatalog.Options.Select(option =>
+        var itemBases = new FakeItemBaseRepository(ShenicEssenceTokenCatalog.Definitions[0].Options.Select(option =>
             new ItemBase
             {
                 Id = option.ItemId,
@@ -264,18 +164,18 @@ public sealed partial class SelectionCrateServiceTests
             CreateMapper());
 
         var response = await handler.Handle(
-            new OpenCatalystSelectionCrateCommand(characterId, crate.ItemInstanceId, "fury"),
+            new OpenCatalystSelectionCrateCommand(characterId, crate.ItemInstanceId, "goblin"),
             CancellationToken.None);
 
         Assert.True(response.IsSuccess);
         Assert.NotNull(response.Data);
         Assert.Equal("container-reward", lootHistory.Source);
-        Assert.Equal("Blueprint Selection Box", lootHistory.Location);
+        Assert.Equal("Lumo Ruins - Essence Token", lootHistory.Location);
         Assert.Equal(1, Assert.Single(lootHistory.Items!).Quantity);
 
         var realtimeMessage = Assert.IsType<LootReceived>(realtime.Message);
         Assert.Equal(response.Data.GrantId, realtimeMessage.GrantId);
-        Assert.Equal("Blueprint Selection Box", realtimeMessage.Location);
+        Assert.Equal("Lumo Ruins - Essence Token", realtimeMessage.Location);
     }
 
     private static IMapper CreateMapper()

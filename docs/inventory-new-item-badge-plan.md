@@ -183,9 +183,8 @@ stamp `SeenAtUtc = UtcNow` when creating the recipient row in `TransferItemAsync
 `AddItemToInventoryFromMarketPlace`, and `AddItemInstanceBackToInventory`. **This needs a decision
 before Phase 1 lands**, because it determines whether those three methods are touched.
 
-**Scrap mode.** `handleInventoryItemClick` toggles selection rather than inspecting when
-`isScrapMode` is true. Clearing the marker there would wipe badges during a bulk-scrap sweep, so
-gate the `markSeen` call on `isBrowseMode`.
+**Historical Scrap mode.** The bulk-scrap interaction described here was removed with the
+equipment Forge. Current marker clearing only needs to account for genuine item inspection.
 
 **Guild-borrowed items.** Borrowed equipment surfaces through the same list. It is not crafted by
 the borrower, but check whether the vault path preserves a crafting `AcquisitionSource` — if it

@@ -5,7 +5,7 @@ namespace Domain.Models.Items.Equipments.Progression;
 
 public sealed record EquipmentProtectionPool(string Id, string DungeonId, string FamilyId, int Difficulty,
     int EquipmentTier, int MinimumLevel, string? RequiredQuestId, double MatchingChance, int GuaranteeCompletions,
-    int CompletionScrap, IReadOnlyList<string> TargetDefinitionIds, int Region);
+    IReadOnlyList<string> TargetDefinitionIds, int Region);
 
 public sealed class EquipmentAcquisitionCatalog
 {
@@ -23,7 +23,7 @@ public sealed class EquipmentAcquisitionCatalog
             if (pool.RequiredQuestId != null) EquipmentValidation.Id(pool.RequiredQuestId);
             if (pool.Difficulty is < 1 or > 3 || pool.Region < 1 || pool.MinimumLevel < 1
                 || !double.IsFinite(pool.MatchingChance) || pool.MatchingChance is < 0 or > 1
-                || pool.GuaranteeCompletions < 1 || pool.CompletionScrap < 0 || pool.TargetDefinitionIds.Count == 0
+                || pool.GuaranteeCompletions < 1 || pool.TargetDefinitionIds.Count == 0
                 || pool.TargetDefinitionIds.Distinct().Count() != pool.TargetDefinitionIds.Count)
                 throw new ArgumentException("Invalid equipment protection terms.");
             foreach (var target in pool.TargetDefinitionIds)
@@ -42,7 +42,7 @@ public sealed class EquipmentAcquisitionCatalog
 
 /// <summary>Frozen at run commitment. Completion never consults the current target or evaluator.</summary>
 public sealed record DungeonEquipmentCommitment(Guid CharacterId, Guid RunId, string PoolId, string DungeonId,
-    int Difficulty, double MatchingChance, int GuaranteeCompletions, int CompletionScrap, EquipmentData? Target);
+    int Difficulty, double MatchingChance, int GuaranteeCompletions, EquipmentData? Target);
 
 public sealed class EquipmentProtectionProgress
 {
@@ -74,8 +74,7 @@ public sealed class EquipmentProtectionProgress
                 {
                     Ownership = new(guaranteed ? EquipmentOwnershipKind.BoundPersonal : EquipmentOwnershipKind.UnboundPersonal, CharacterId),
                     Provenance = new(guaranteed ? EquipmentAwardKind.ProtectedReward : EquipmentAwardKind.RandomDiscovery,
-                        commitment.DungeonId, commitment.RunId.ToString("N")),
-                    BaseSalvageScrap = guaranteed ? 0 : target.State.BaseSalvageScrap
+                        commitment.DungeonId, commitment.RunId.ToString("N"))
                 };
                 award = new(state, target.ItemBaseId, target.DisplayName, target.Rarity, target.EquipmentType,
                     target.Behavior, target.Stats, target.EquipmentSetId);
@@ -84,12 +83,12 @@ public sealed class EquipmentProtectionProgress
             else CompletionsWithoutMatch = checked(CompletionsWithoutMatch + 1);
             Revision++;
         }
-        return new(commitment.RunId, commitment.PoolId, before, CompletionsWithoutMatch, award, commitment.CompletionScrap, now);
+        return new(commitment.RunId, commitment.PoolId, before, CompletionsWithoutMatch, award, now);
     }
 }
 
 public sealed record EquipmentProtectionOutcome(Guid RunId, string PoolId, int PreviousProgress, int Progress,
-    EquipmentData? Equipment, int Scrap, DateTimeOffset SecuredAtUtc);
+    EquipmentData? Equipment, DateTimeOffset SecuredAtUtc);
 
 /// <summary>No run/item FK: completion evidence survives claimed run deletion and salvage.</summary>
 public sealed class EquipmentProtectionReceipt

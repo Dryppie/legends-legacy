@@ -11,8 +11,6 @@ public sealed class TournamentRewardGrant
     public int ArenaGlory { get; set; }
     public int Cinders { get; set; }
     public int Soulstones { get; set; }
-    public int TemperedScrap { get; set; }
-    public int BlueprintSelectionBoxes { get; set; }
     public int SigilFragments { get; set; }
     public TournamentRewardStatus Status { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }

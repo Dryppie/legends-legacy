@@ -9,51 +9,42 @@ public sealed class MeranProgressionTests
 {
     private static string ContentRoot => BalancePathLocator.FindApiContentRoot(null);
 
-    private static (CombatAcquisitionRules Pool, ForgeTierPrices Prices) EconomyContent()
+    private static CombatAcquisitionRules EconomyContent()
     {
         var root = Path.Combine(ContentRoot, "Data", "equipment");
         var equipment = JsonStarterEquipmentCatalog.Load(Path.Combine(root, "equipment-starters.v1.json"));
-        return (JsonStarterEquipmentCatalog.LoadOrdinary(equipment, Path.Combine(root, "equipment-ordinary.v1.json"))
-                .Pools.Single(p => p.EquipmentTier == 2),
-            JsonStarterEquipmentCatalog.LoadForgePrices(Path.Combine(root, "equipment-forge-prices.v1.json")).ForTier(2));
+        return JsonStarterEquipmentCatalog.LoadOrdinary(equipment, Path.Combine(root, "equipment-ordinary.v1.json"))
+            .Pools.Single(p => p.EquipmentTier == 2);
     }
 
     [Fact]
     public void Economy_counts_losses_and_timeouts_in_elapsed_time_and_preserves_per_encounter_cinder_rounding()
     {
-        var (pool, prices) = EconomyContent();
+        var pool = EconomyContent();
         MeranTrial[] trials = [new(1, "Victory", 200, ["A", "B"], 7),
             new(2, "Defeat", 500, ["A", "B"], 0), new(3, "Draw", 6000, ["A", "B"], 0),
             new(4, "Victory", 100, ["A"], 3)];
-        var result = MeranProgressionAnalyzer.ProjectEconomy(trials, 72, pool, prices);
+        var result = MeranProgressionAnalyzer.ProjectEconomy(trials, pool);
 
         Assert.Equal(0.5, result.WinRate);
-        Assert.Equal(36, result.ScrapPerDay);
         Assert.Equal(21600, result.CindersPerDay);
         Assert.Equal(2d, result.PlainTargetHours);
         Assert.Equal(24d, result.SigilHours);
-        Assert.Equal(310d / 36, result.FullItemScrapDays!.Value, 8);
-        Assert.Equal(15500d / 21600, result.FullItemCinderDays!.Value, 8);
     }
 
     [Fact]
     public void No_income_has_no_finite_completion_estimate()
     {
-        var (pool, prices) = EconomyContent();
-        var stalled = MeranProgressionAnalyzer.ProjectEconomy([new(1, "Draw", 6000, ["A"], 0)], 72, pool, prices);
+        var pool = EconomyContent();
+        var stalled = MeranProgressionAnalyzer.ProjectEconomy([new(1, "Draw", 6000, ["A"], 0)], pool);
         Assert.Equal(0, stalled.WinRate);
-        Assert.Equal(0, stalled.ScrapPerDay);
         Assert.Equal(0, stalled.CindersPerDay);
         Assert.Null(stalled.PlainTargetHours);
         Assert.Null(stalled.SigilHours);
-        Assert.Null(stalled.FullItemScrapDays);
-        Assert.Null(stalled.FullItemCinderDays);
 
-        var freeFight = MeranProgressionAnalyzer.ProjectEconomy([new(1, "Victory", 10, ["A"], 0)], 0, pool, prices);
+        var freeFight = MeranProgressionAnalyzer.ProjectEconomy([new(1, "Victory", 10, ["A"], 0)], pool);
         Assert.Equal(1d, freeFight.PlainTargetHours);
-        Assert.Null(freeFight.FullItemScrapDays);
-        Assert.Null(freeFight.FullItemCinderDays);
-        Assert.Throws<ArgumentException>(() => MeranProgressionAnalyzer.ProjectEconomy([], 72, pool, prices));
+        Assert.Throws<ArgumentException>(() => MeranProgressionAnalyzer.ProjectEconomy([], pool));
     }
 
     [Fact]

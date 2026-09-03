@@ -8,6 +8,6 @@ public sealed class BaselineEquipmentRecoveryDto : IMapFrom<BaselineEquipmentRec
     public Guid OperationId { get; set; }
     public StarterEquipmentGrantKind Kind { get; set; }
     public DateTimeOffset RecoveredAtUtc { get; set; }
-    public IReadOnlyList<ForgeItemDto> Equipment { get; set; } = [];
+    public IReadOnlyList<EquipmentProgressionItemDto> Equipment { get; set; } = [];
     public void Mapping(Profile profile) => profile.CreateMap<BaselineEquipmentRecovery, BaselineEquipmentRecoveryDto>();
 }

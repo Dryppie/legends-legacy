@@ -11,6 +11,6 @@ public sealed class EquipmentProtectionPoolDto : IMapFrom<EquipmentProtectionPoo
     public bool FirstClearGuaranteeAvailable { get; set; }
     public bool CanSelect { get; set; }
     public IReadOnlyList<string> MissingRequirements { get; set; } = [];
-    public IReadOnlyList<ForgeItemDto> Targets { get; set; } = [];
+    public IReadOnlyList<EquipmentProgressionItemDto> Targets { get; set; } = [];
     public void Mapping(Profile profile) => profile.CreateMap<EquipmentProtectionPoolView, EquipmentProtectionPoolDto>();
 }

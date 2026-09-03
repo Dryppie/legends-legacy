@@ -319,16 +319,16 @@ internal static class GuildContentDefaults
             MaxLevel: 5,
             IsPermanent: false,
             RequiredGuildHallLevel: 1,
-            "Unlocks rotating Tempered Scrap caches, currencies and reusable-style Blueprints by level.",
+            "Unlocks additional currency supplies by level.",
             BaseCost: 150,
             UpgradeCostStep: 125,
             Benefits:
             [
-                new(1, "Common Stock", "Two common Tempered Scrap caches rotate weekly alongside Soulstone reserves.", true),
+                new(1, "Common Stock", "Soulstone reserves become available.", true),
                 new(2, "Sigil Supplies", "Sigil Fragment stock becomes available.", true),
-                new(3, "Rare Stock", "Rare supplies and one rotating Tempered Scrap cache become available.", true),
-                new(4, "Blueprint Archive", "One rotating reusable-style Blueprint becomes available each week.", true),
-                new(5, "Expanded Rare Stock", "A second rotating rare Tempered Scrap cache becomes available each week.", true)
+                new(3, "Rare Stock", "Greater Soulstone and Sigil Fragment supplies become available.", true),
+                new(4, "Expanded Stock", "The Market Office is ready for future additions.", true),
+                new(5, "Master Market", "The Market Office reaches its current maximum.", true)
             ]),
         new(
             GuildBuildingType.RaidHall,
@@ -435,53 +435,10 @@ internal static class GuildContentDefaults
 
     private static readonly GuildShopItemDefinition[] ShopItemDefinitions =
     [
-        .. CreateCommonScrapShopItems(),
         new("common.soulstone_cache", "Soulstone Reserve", "A dependable supply of Soulstones for constellation progression.", GuildShopStockType.Common, 200, 2, 1, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 25)]),
         new("common.sigil_fragment_case", "Sigil Fragment Case", "Enough fragments to assemble a meaningful supply of dungeon sigils.", GuildShopStockType.Common, 200, 2, 2, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 10)]),
         new("rare.soulstone_bundle", "Greater Soulstone Reserve", "A concentrated Soulstone shipment for long-term constellation upgrades.", GuildShopStockType.Rare, 350, 1, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 50)]),
-        new("rare.sigilwright_cache", "Sigilwright's Cache", "A large fragment cache for assembling dungeon sigils.", GuildShopStockType.Rare, 350, 1, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 30)]),
-        .. CreateRareScrapShopItems(),
-        .. CreateBlueprintShopItems(),
+        new("rare.sigilwright_cache", "Sigilwright's Cache", "A large fragment cache for assembling dungeon sigils.", GuildShopStockType.Rare, 350, 1, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 30)])
     ];
-
-    private static IEnumerable<GuildShopItemDefinition> CreateCommonScrapShopItems() =>
-        Enumerable.Range(1, 5).Select(index => new GuildShopItemDefinition(
-            $"common.scrap_cache_{index}", "Common Scrap Cache", "Tempered Scrap for equipment improvements at the Forge.",
-            GuildShopStockType.Common, 100, 2, 1, true, "common-scrap",
-            [new GuildShopRewardDto(GuildShopRewardType.Item, 2, "tempered_scrap", "Tempered Scrap")]));
-
-    private static IEnumerable<GuildShopItemDefinition> CreateRareScrapShopItems() =>
-        Enumerable.Range(1, 5).Select(index => new GuildShopItemDefinition(
-            $"rare.scrap_cache_{index}", "Rare Scrap Cache", "Tempered Scrap for equipment improvements at the Forge.",
-            GuildShopStockType.Rare, 250, 1, 3, true, "rare-scrap",
-            [new GuildShopRewardDto(GuildShopRewardType.Item, 6, "tempered_scrap", "Tempered Scrap")]));
-
-    private static IEnumerable<GuildShopItemDefinition> CreateBlueprintShopItems()
-    {
-        yield return CreateBlueprintShopItem("fury", "Blueprint: Fury");
-        yield return CreateBlueprintShopItem("arcane", "Blueprint: Arcane");
-        yield return CreateBlueprintShopItem("execution", "Blueprint: Execution");
-        yield return CreateBlueprintShopItem("aegis", "Blueprint: Aegis");
-        yield return CreateBlueprintShopItem("warden", "Blueprint: Warden");
-        yield return CreateBlueprintShopItem("endurance", "Blueprint: Endurance");
-        yield return CreateBlueprintShopItem("phoenix", "Blueprint: Phoenix");
-        yield return CreateBlueprintShopItem("spirit", "Blueprint: Spirit");
-        yield return CreateBlueprintShopItem("primal", "Blueprint: Primal");
-        yield return CreateBlueprintShopItem("venom_touched_sword", "Blueprint: Venom-Touched Sword");
-        yield return CreateBlueprintShopItem("hivefang_dagger", "Blueprint: Hivefang Dagger");
-    }
-
-    private static GuildShopItemDefinition CreateBlueprintShopItem(string id, string name) =>
-        new(
-            $"rare.blueprint_{id}",
-            name,
-            "Learn a reusable equipment style in Equipment & Forge.",
-            GuildShopStockType.Rare,
-            GuildFavorCost: 450,
-            WeeklyLimit: 1,
-            RequiredMarketOfficeLevel: 4,
-            RotatesWeekly: true,
-            RotationGroup: "rare-blueprints",
-            [new GuildShopRewardDto(GuildShopRewardType.Item, 1, $"blueprint_{id}", name)]);
 
 }

@@ -1,4 +1,3 @@
-import { RouterLink } from '@angular/router';
 import { itemDescription } from '../../../../utils/inventory/item-description';
 import { NgFor, NgIf } from '@angular/common';
 import {
@@ -12,7 +11,6 @@ import {
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../models/inventoryItem';
 import {
-  DropdownComponent,
   DropdownOption,
   DropdownSelection,
 } from '../../../custom-components/dropdown/dropdown.component';
@@ -28,10 +26,8 @@ import { InventoryTransferComponent } from '../../../inventory-transfer/inventor
 @Component({
   selector: 'app-inventory-item-modal',
   imports: [
-    RouterLink,
     NgFor,
     NgIf,
-    DropdownComponent,
     ItemComponent,
     InventoryTransferComponent,
   ],
@@ -57,10 +53,6 @@ export class InventoryItemModalComponent implements OnInit {
       this.inventoryItem.itemInstance.displayName ||
       this.inventoryItem.itemInstance.itemBase.name
     );
-  }
-
-  get blueprint() {
-    return this.inventoryItem.itemInstance.itemBase.blueprint ?? null;
   }
 
   get selectionCrate() {

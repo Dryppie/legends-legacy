@@ -13,14 +13,6 @@
       <div class="ll-copy mt-3">Quantity: {{ inventoryItem.quantity }}</div>
     </div>
 
-    <a
-      *ngIf="blueprint"
-      routerLink="/game/character/forge"
-      (click)="close.emit()"
-      class="ll-button ll-button-primary text-center"
-      >Learn a reusable style in the Forge</a
-    >
-
     <div *ngIf="selectionCrate as metadata" class="ll-card p-3">
       <h3 class="ll-heading text-base">
         Choose Your {{ metadata.selectionLabel }}

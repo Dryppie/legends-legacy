@@ -1,6 +1,6 @@
 # Guild Buildings: Current-System Analysis
 
-**Equipment progression update, 2 September 2026:** the analysis below records the legacy building system. Equipment progression building overviews and mutation responses now use descriptions from [equipment-guild.v1.json](../src/API/API.LL/Data/equipment/equipment-guild.v1.json). Market Office copy matches the implemented rotating Tempered Scrap and reusable-style Blueprint stock. Workshop copy explicitly states that it has no equipment progression benefit; no new Workshop mechanic was added. Prices, level requirements, client building visibility and shared legacy definitions are preserved. The [implementation ledger](../../docs/design/equipment-implementation-status.md) covers the separate mission, shop and permanent guild-equipment integration, its tests, and remaining conversion work. Equipment progression activation flags remain off.
+**Equipment update, 3 September 2026:** the analysis below is historical. Market Office Forge stock has been removed; its current shop has four fixed Soulstone/Sigil Fragment offers. The Workshop has no equipment-upgrade benefit. See the [current equipment status](../../docs/design/equipment-implementation-status.md).
 
 ## Scope
 

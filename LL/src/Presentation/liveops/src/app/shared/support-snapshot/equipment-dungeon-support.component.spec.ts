@@ -9,19 +9,19 @@ describe('EquipmentSupportComponent dungeon evidence', () => {
       definitionId: 'historical.target', archetypeId: 'plain.sword', tier: 1, rank: 1,
       balanceVersion: 91, rarity: 'Rare', nativeStyleId: 'old-style', activeStyleId: 'old-style',
       ownership: 'UnboundPersonal', ownerId: 'owner', awardKind: 'RandomDiscovery', sourceId: 'dungeon',
-      awardId: 'run', baseSalvageScrap: 6, paidScrap: 0, paidCinders: 0, investments: [],
+      awardId: 'run',
     },
   });
   const run = (): EquipmentSupportDungeonRun => ({
     runId: 'run', dungeonId: 'old-dungeon', name: 'Saved Dungeon', status: 'Active', currentRoomIndex: 4,
     createdAtUtc: '2026-09-03T08:00:00Z', completedAtUtc: null, rewardsClaimedAtUtc: null,
     commitment: { characterId: 'owner', runId: 'run', dungeonId: 'old-dungeon', poolId: 'old-pool',
-      difficulty: 2, matchingChance: 0.125, guaranteeCompletions: 11, completionScrap: 37, target: item() },
+      difficulty: 2, matchingChance: 0.125, guaranteeCompletions: 11, target: item() },
     receipt: null, rewardRowCount: 0, rewardRows: [],
   });
   const snapshot = (dungeonRun?: EquipmentSupportDungeonRun | null): EquipmentSupportSnapshot => ({
     rowLimit: 100, equipmentCount: 0, pendingRewardCount: 0, progressTruncated: false,
-    items: [], pendingRewards: [], protection: [], ordinary: [], learnedStyles: [], dungeonRun,
+    items: [], pendingRewards: [], protection: [], ordinary: [], dungeonRun,
   });
   async function render(data: EquipmentSupportSnapshot): Promise<string> {
     await TestBed.configureTestingModule({ imports: [EquipmentSupportComponent] }).compileComponents();
@@ -39,7 +39,6 @@ describe('EquipmentSupportComponent dungeon evidence', () => {
     expect(text).toContain('Balance 91');
     expect(text).toContain('12.5% matching chance');
     expect(text).toContain('11 completion threshold');
-    expect(text).toContain('37 completion Scrap');
     expect(text).toContain('No protected completion receipt recorded');
     expect(text).toContain('Current target selection and content changes do not replace');
   });
@@ -49,7 +48,7 @@ describe('EquipmentSupportComponent dungeon evidence', () => {
     saved.status = 'RewardsClaimed';
     saved.rewardsClaimedAtUtc = '2026-09-03T09:00:00Z';
     saved.receipt = { runId: 'run', poolId: 'old-pool', securedAtUtc: '2026-09-03T08:55:00Z',
-      claimedAtUtc: saved.rewardsClaimedAtUtc, previousProgress: 7, progress: 0, scrap: 37, equipment: item() };
+      claimedAtUtc: saved.rewardsClaimedAtUtc, previousProgress: 7, progress: 0, equipment: item() };
     saved.rewardRowCount = 1;
     saved.rewardRows = [{ rewardRowId: 'exact-reward-row', itemBaseId: 'sword', name: 'Frozen Sword',
       itemType: 'Equipment', quantity: 1, source: 'saved-source', equipment: item() }];
@@ -81,11 +80,10 @@ describe('EquipmentSupportComponent dungeon evidence', () => {
     expect(text).not.toContain('No equipment target was committed');
   });
 
-  it('retains Scrap terms for a commitment without an equipment target', async () => {
+  it('shows a commitment without an equipment target', async () => {
     const saved = run(); saved.commitment!.target = null;
     const text = await render(snapshot(saved));
     expect(text).toContain('No equipment target was committed');
-    expect(text).toContain('37 completion Scrap');
   });
 
   it('reports reward-row truncation independently of holdings', async () => {

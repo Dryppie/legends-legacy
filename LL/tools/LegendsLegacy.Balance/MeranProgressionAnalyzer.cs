@@ -23,8 +23,8 @@ using Services.LL.Spawnings;
 namespace LegendsLegacy.Balance;
 
 public sealed record MeranTrial(int Seed, string Outcome, int Ticks, IReadOnlyList<string> Enemies, int Cinders);
-public sealed record MeranEconomy(double WinRate, double ScrapPerDay, double CindersPerDay,
-    double? PlainTargetHours, double? SigilHours, double? FullItemScrapDays, double? FullItemCinderDays);
+public sealed record MeranEconomy(double WinRate, double CindersPerDay,
+    double? PlainTargetHours, double? SigilHours);
 public sealed record MeranEncounterResult(string SourceId, string Room, string BuildId, int Level, int Tier, int Rank,
     int EssenceLevel, IReadOnlyList<string> EssenceIds, IReadOnlyList<MeranTrial> Trials, MeranEconomy? Economy);
 public sealed record MeranProgressionReport(int Version, int Seed, int TrialsPerCase, string Purpose,
@@ -50,7 +50,6 @@ public sealed class MeranProgressionAnalyzer(string contentRoot, EquipmentRefere
         var equipment = JsonStarterEquipmentCatalog.Load(Data("equipment/equipment-starters.v1.json"));
         var ordinary = JsonStarterEquipmentCatalog.LoadOrdinary(equipment, Data("equipment/equipment-ordinary.v1.json"));
         var pool = ordinary.Pools.Single(p => p.EquipmentTier == 2);
-        var prices = JsonStarterEquipmentCatalog.LoadForgePrices(Data("equipment/equipment-forge-prices.v1.json"));
         var areas = Read<RegionDocument>(Data("world/regions.json")).Regions.SelectMany(r => r.Areas)
             .Where(a => pool.Areas.Any(p => p.AreaId == a.Id)).ToArray();
         var dungeons = new DungeonDefinitionMaterializer(new DungeonCatalogValidator())
@@ -76,8 +75,7 @@ public sealed class MeranProgressionAnalyzer(string contentRoot, EquipmentRefere
                         .Select(c => creatures[c.CreatureId]).ToArray();
                     outcomes.Add(await Fight(build, enemies, area, null, encounterSeed, essenceLevel, ct));
                 }
-                var economy = ProjectEconomy(outcomes, pool.Areas.Single(a => a.AreaId == area.Id).ScrapPerPerfectDay,
-                    pool, prices.ForTier(2));
+                var economy = ProjectEconomy(outcomes, pool);
                 cases.Add(Result(area.Id, "Ordinary", build, outcomes, economy, essenceLevel));
             }
             foreach (var dungeon in dungeons)
@@ -133,20 +131,16 @@ public sealed class MeranProgressionAnalyzer(string contentRoot, EquipmentRefere
             dungeon == null && result.Outcome == BattleOutcome.Victory ? income.CalculateEncounterCinders(area.Id, sources.Count) : 0);
     }
 
-    public static MeranEconomy ProjectEconomy(IReadOnlyList<MeranTrial> outcomes, int scrapPerDay,
-        CombatAcquisitionRules pool, ForgeTierPrices price)
+    public static MeranEconomy ProjectEconomy(IReadOnlyList<MeranTrial> outcomes, CombatAcquisitionRules pool)
     {
         if (outcomes.Count == 0) throw new ArgumentException("Measured encounters are required.");
         var wins = outcomes.Count(x => x.Outcome == nameof(BattleOutcome.Victory));
         var winRate = (double)wins / outcomes.Count;
-        var scrap = scrapPerDay * winRate;
         var cinders = outcomes.Sum(x => (double)x.Cinders) / outcomes.Count * pool.VictoriesPerPerfectDay;
         var victoriesPerHour = pool.VictoriesPerPerfectDay / 24d * winRate;
-        return new(winRate, scrap, cinders,
+        return new(winRate, cinders,
             wins == 0 ? null : pool.PlainTargetVictories / victoriesPerHour,
-            wins == 0 ? null : pool.SigilVictories / victoriesPerHour,
-            scrap == 0 ? null : price.RankScrapCosts.Sum() / scrap,
-            cinders == 0 ? null : price.RankCinderCosts.Sum() / cinders);
+            wins == 0 ? null : pool.SigilVictories / victoriesPerHour);
     }
 
     private static MeranEncounterResult Result(string source, string room, EquipmentReferenceBuildDefinition build,

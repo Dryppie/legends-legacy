@@ -36,14 +36,12 @@ public sealed class EquipmentContentRegistrationTests
 
         Assert.Same(equipment, ordinary.Equipment);
         Assert.Equal(new[] { 1, 2 }, ordinary.Pools.Select(p => p.EquipmentTier).Order());
-        var prices = provider.GetRequiredService<ForgePrices>();
         var acquisition = provider.GetRequiredService<EquipmentAcquisitionCatalog>();
         var dungeons = provider.GetRequiredService<Application.Interfaces.Services.LL.Dungeons.IDungeonDefinitions>();
         foreach (var pool in ordinary.Pools)
         {
             Assert.NotEmpty(pool.Areas);
             Assert.Equal(31, equipment.GetOptions(pool.EquipmentTier).Count);
-            Assert.Equal(pool.EquipmentTier, prices.ForTier(pool.EquipmentTier).Tier);
             foreach (var sigil in pool.Sigils)
             {
                 var dungeon = dungeons.GetByKey(sigil.FamilyId);
@@ -56,7 +54,6 @@ public sealed class EquipmentContentRegistrationTests
         {
             Assert.Equal(pool.Region, dungeons.GetByKey(pool.DungeonId).Region);
             Assert.Equal(pool.Difficulty, (int)dungeons.GetByKey(pool.DungeonId).Grade);
-            Assert.Equal(pool.EquipmentTier, prices.ForTier(pool.EquipmentTier).Tier);
         }
     }
 }

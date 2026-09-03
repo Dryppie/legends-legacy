@@ -23,14 +23,14 @@
   },
   "objectives": [
     {
-      "key": "forge_an_answer",
+      "key": "equip_an_answer",
       "description": "Earn a plain target through Shenic combat and equip that archetype. Previously earned targets count.",
       "type": "ModelEPlainTargetEquipped",
       "requiredAmount": 1,
       "filters": {},
       "presentation": {
-        "actionLabel": "Choose plain target",
-        "destinationRoute": "/game/character/forge?tab=rewards"
+        "actionLabel": "Open Inventory",
+        "destinationRoute": "/game/character/inventory"
       }
     },
     {
@@ -65,12 +65,6 @@
       "type": "Item",
       "itemBaseId": "item.essence_token.moonlit_graves",
       "quantity": 1
-    },
-    {
-      "key": "area_scrap",
-      "type": "Item",
-      "itemBaseId": "tempered_scrap",
-      "quantity": 2
     }
   ]
 }

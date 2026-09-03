@@ -43,9 +43,7 @@
       "difficulties": [
         {
           "id": "goblin_mines",
-          "completionRewardTableIds": [
-            "reward.dungeon.goblin_mines.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1,
           "minRooms": 10,
@@ -56,16 +54,6 @@
                 "itemId": "item.monster_core.lesser",
                 "minAmount": 6,
                 "maxAmount": 6
-              },
-              {
-                "itemId": "blueprint_fury",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_phoenix",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -73,9 +61,7 @@
         },
         {
           "id": "goblin_mines_ii",
-          "completionRewardTableIds": [
-            "reward.dungeon.goblin_mines_ii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1,
           "minRooms": 11,
@@ -86,16 +72,6 @@
                 "itemId": "item.monster_core.greater",
                 "minAmount": 12,
                 "maxAmount": 12
-              },
-              {
-                "itemId": "blueprint_fury",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_phoenix",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -103,9 +79,7 @@
         },
         {
           "id": "goblin_mines_iii",
-          "completionRewardTableIds": [
-            "reward.dungeon.goblin_mines_iii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 3,
           "enemyStrengthMultiplier": 1,
           "minRooms": 12,
@@ -116,16 +90,6 @@
                 "itemId": "item.monster_core.primal",
                 "minAmount": 24,
                 "maxAmount": 24
-              },
-              {
-                "itemId": "blueprint_fury",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_phoenix",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -216,9 +180,7 @@
       "difficulties": [
         {
           "id": "forgotten_catacombs",
-          "completionRewardTableIds": [
-            "reward.dungeon.forgotten_catacombs.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.05,
           "minRooms": 11,
@@ -229,16 +191,6 @@
                 "itemId": "item.monster_core.lesser",
                 "minAmount": 6,
                 "maxAmount": 6
-              },
-              {
-                "itemId": "blueprint_arcane",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_endurance",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -246,9 +198,7 @@
         },
         {
           "id": "forgotten_catacombs_ii",
-          "completionRewardTableIds": [
-            "reward.dungeon.forgotten_catacombs_ii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.02,
           "minRooms": 12,
@@ -259,16 +209,6 @@
                 "itemId": "item.monster_core.greater",
                 "minAmount": 12,
                 "maxAmount": 12
-              },
-              {
-                "itemId": "blueprint_arcane",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_endurance",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -276,9 +216,7 @@
         },
         {
           "id": "forgotten_catacombs_iii",
-          "completionRewardTableIds": [
-            "reward.dungeon.forgotten_catacombs_iii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.04,
           "minRooms": 13,
@@ -289,16 +227,6 @@
                 "itemId": "item.monster_core.primal",
                 "minAmount": 24,
                 "maxAmount": 24
-              },
-              {
-                "itemId": "blueprint_arcane",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_endurance",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -356,9 +284,7 @@
       "difficulties": [
         {
           "id": "tangled_cave",
-          "completionRewardTableIds": [
-            "reward.dungeon.tangled_cave.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.5,
           "minRooms": 11,
@@ -369,21 +295,6 @@
                 "itemId": "item.monster_core.lesser",
                 "minAmount": 6,
                 "maxAmount": 6
-              },
-              {
-                "itemId": "blueprint_execution",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_venom_touched_sword",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_hivefang_dagger",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -391,9 +302,7 @@
         },
         {
           "id": "tangled_cave_ii",
-          "completionRewardTableIds": [
-            "reward.dungeon.tangled_cave_ii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.25,
           "minRooms": 12,
@@ -404,21 +313,6 @@
                 "itemId": "item.monster_core.greater",
                 "minAmount": 12,
                 "maxAmount": 12
-              },
-              {
-                "itemId": "blueprint_execution",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_venom_touched_sword",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_hivefang_dagger",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -426,9 +320,7 @@
         },
         {
           "id": "tangled_cave_iii",
-          "completionRewardTableIds": [
-            "reward.dungeon.tangled_cave_iii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.1,
           "minRooms": 13,
@@ -439,21 +331,6 @@
                 "itemId": "item.monster_core.primal",
                 "minAmount": 24,
                 "maxAmount": 24
-              },
-              {
-                "itemId": "blueprint_execution",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_venom_touched_sword",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_hivefang_dagger",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -512,9 +389,7 @@
       "difficulties": [
         {
           "id": "great_tree",
-          "completionRewardTableIds": [
-            "reward.dungeon.great_tree.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.25,
           "minRooms": 11,
@@ -525,26 +400,6 @@
                 "itemId": "item.monster_core.lesser",
                 "minAmount": 6,
                 "maxAmount": 6
-              },
-              {
-                "itemId": "blueprint_spirit",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_warden",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_primal",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_aegis",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -552,9 +407,7 @@
         },
         {
           "id": "great_tree_ii",
-          "completionRewardTableIds": [
-            "reward.dungeon.great_tree_ii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.1,
           "minRooms": 12,
@@ -565,26 +418,6 @@
                 "itemId": "item.monster_core.greater",
                 "minAmount": 12,
                 "maxAmount": 12
-              },
-              {
-                "itemId": "blueprint_spirit",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_warden",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_primal",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_aegis",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []
@@ -592,9 +425,7 @@
         },
         {
           "id": "great_tree_iii",
-          "completionRewardTableIds": [
-            "reward.dungeon.great_tree_iii.completion"
-          ],
+          "completionRewardTableIds": [],
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.2,
           "minRooms": 13,
@@ -605,26 +436,6 @@
                 "itemId": "item.monster_core.primal",
                 "minAmount": 24,
                 "maxAmount": 24
-              },
-              {
-                "itemId": "blueprint_spirit",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_warden",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_primal",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_aegis",
-                "minAmount": 1,
-                "maxAmount": 1
               }
             ],
             "completionRewards": []

@@ -424,21 +424,7 @@ public sealed partial class RaidSystemTests
             apiRoot,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
         var vendorItems = bosses.SelectMany(boss => vendor.GetForBoss(boss.Id)).ToArray();
-        Assert.Equal(4, vendorItems.Length);
-        Assert.All(vendorItems, item =>
-        {
-            Assert.Contains(item.RaidBossId, bosses.Select(x => x.Id));
-            Assert.Contains(item.RewardItemId, itemIds!);
-        });
-
-        using var blueprintDocument = JsonDocument.Parse(
-            File.ReadAllText(Path.Combine(apiRoot, "Data", "crafting", "blueprints.json")));
-        var blueprintIds = blueprintDocument.RootElement.EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(x => x is not null)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        Assert.Contains("blueprint_raidforged", blueprintIds!);
-        Assert.Contains("blueprint_gravebound", blueprintIds!);
+        Assert.Empty(vendorItems);
     }
 
     [Fact]

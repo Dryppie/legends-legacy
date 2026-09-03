@@ -32,11 +32,13 @@ describe('HelpDrawerComponent', () => {
       title: 'Inventory Guide',
       lastReviewed: '2026-09-03',
       sections: [
-        { heading: 'Rank and Style', body: 'Review the Forge preview.' },
+        { heading: 'Equipment', body: 'Review your current equipment.' },
       ],
     });
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Rank and Style');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Review your current equipment.',
+    );
     expect(fixture.nativeElement.textContent).not.toContain('Loading guide');
   });
 

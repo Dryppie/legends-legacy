@@ -2,7 +2,6 @@ import { ItemType } from '../../models/enums/itemType';
 import { ItemBase } from '../../models/item';
 import {
   getMarketplaceResourceSortRank,
-  isMarketplaceBlueprintResource,
   isMarketplaceTradableItemBase,
   matchesMarketplaceResourceSubcategory,
 } from './market-place-category.utils';
@@ -48,27 +47,13 @@ describe('marketplace category matching', () => {
     ).toBe(1);
   });
 
-  it('keeps blueprints and catalysts out of normal resource families', () => {
-    expect(
-      matchesMarketplaceResourceSubcategory(
-        resource('blueprint_aegis', 'Blueprint: Aegis'),
-        'Ore',
-      ),
-    ).toBeFalse();
+  it('keeps catalysts out of normal resource families', () => {
     expect(
       matchesMarketplaceResourceSubcategory(
         resource('venom_gland', 'Venom Catalyst'),
         'Ore',
       ),
     ).toBeFalse();
-  });
-
-  it('recognizes blueprint resources consistently', () => {
-    expect(
-      isMarketplaceBlueprintResource(
-        resource('blueprint_aegis', 'Blueprint: Aegis'),
-      ),
-    ).toBeTrue();
   });
 
   it('allows unbound items and rejects bound items from marketplace actions', () => {

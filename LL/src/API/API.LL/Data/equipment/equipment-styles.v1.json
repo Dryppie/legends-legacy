@@ -1,8 +1,6 @@
 [
   {
     "id": "blueprint_fury",
-    "name": "Blueprint: Fury",
-    "itemBaseId": "blueprint_fury",
     "compatibleArchetypeIds": [
       "plain.band",
       "plain.amulet",
@@ -30,8 +28,6 @@
   },
   {
     "id": "blueprint_arcane",
-    "name": "Blueprint: Arcane",
-    "itemBaseId": "blueprint_arcane",
     "compatibleArchetypeIds": [
       "plain.band",
       "plain.amulet",
@@ -63,8 +59,6 @@
   },
   {
     "id": "blueprint_execution",
-    "name": "Blueprint: Execution",
-    "itemBaseId": "blueprint_execution",
     "compatibleArchetypeIds": [
       "plain.band",
       "plain.amulet",
@@ -92,8 +86,6 @@
   },
   {
     "id": "blueprint_aegis",
-    "name": "Blueprint: Aegis",
-    "itemBaseId": "blueprint_aegis",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",
@@ -124,8 +116,6 @@
   },
   {
     "id": "blueprint_warden",
-    "name": "Blueprint: Warden",
-    "itemBaseId": "blueprint_warden",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",
@@ -156,8 +146,6 @@
   },
   {
     "id": "blueprint_endurance",
-    "name": "Blueprint: Endurance",
-    "itemBaseId": "blueprint_endurance",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",
@@ -185,8 +173,6 @@
   },
   {
     "id": "blueprint_phoenix",
-    "name": "Blueprint: Phoenix",
-    "itemBaseId": "blueprint_phoenix",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",
@@ -227,8 +213,6 @@
   },
   {
     "id": "blueprint_spirit",
-    "name": "Blueprint: Spirit",
-    "itemBaseId": "blueprint_spirit",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",
@@ -272,8 +256,6 @@
   },
   {
     "id": "blueprint_primal",
-    "name": "Blueprint: Primal",
-    "itemBaseId": "blueprint_primal",
     "compatibleArchetypeIds": [
       "plain.band",
       "plain.amulet",
@@ -304,8 +286,6 @@
   },
   {
     "id": "blueprint_venom",
-    "name": "Blueprint: Venom",
-    "itemBaseId": "blueprint_venom_touched_sword",
     "compatibleArchetypeIds": [
       "plain.shortsword",
       "plain.dagger",
@@ -331,8 +311,6 @@
   },
   {
     "id": "blueprint_hive",
-    "name": "Blueprint: Hive",
-    "itemBaseId": "blueprint_hivefang_dagger",
     "compatibleArchetypeIds": [
       "plain.dagger"
     ],
@@ -346,8 +324,6 @@
   },
   {
     "id": "blueprint_raidforged",
-    "name": "Blueprint: Raidforged",
-    "itemBaseId": "blueprint_raidforged",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",
@@ -391,8 +367,6 @@
   },
   {
     "id": "blueprint_gravebound",
-    "name": "Blueprint: Gravebound",
-    "itemBaseId": "blueprint_gravebound",
     "compatibleArchetypeIds": [
       "plain.heavy_helm",
       "plain.medium_helm",

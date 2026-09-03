@@ -7,47 +7,36 @@
     "plainTargetVictories": 360,
     "sigilVictories": 4320,
     "discoveryChance": 0.0003,
-    "discoveryBaseScrap": 1,
     "areas": [
       {
-        "areaId": "region_01_area_01",
-        "scrapPerPerfectDay": 36
+        "areaId": "region_01_area_01"
       },
       {
-        "areaId": "region_01_area_02",
-        "scrapPerPerfectDay": 38
+        "areaId": "region_01_area_02"
       },
       {
-        "areaId": "region_01_area_03",
-        "scrapPerPerfectDay": 40
+        "areaId": "region_01_area_03"
       },
       {
-        "areaId": "region_01_area_04",
-        "scrapPerPerfectDay": 42
+        "areaId": "region_01_area_04"
       },
       {
-        "areaId": "region_01_area_06",
-        "scrapPerPerfectDay": 44
+        "areaId": "region_01_area_06"
       },
       {
-        "areaId": "region_01_area_08",
-        "scrapPerPerfectDay": 46
+        "areaId": "region_01_area_08"
       },
       {
-        "areaId": "region_01_area_09",
-        "scrapPerPerfectDay": 48
+        "areaId": "region_01_area_09"
       },
       {
-        "areaId": "region_01_area_10",
-        "scrapPerPerfectDay": 50
+        "areaId": "region_01_area_10"
       },
       {
-        "areaId": "region_01_area_11",
-        "scrapPerPerfectDay": 52
+        "areaId": "region_01_area_11"
       },
       {
-        "areaId": "region_01_area_07",
-        "scrapPerPerfectDay": 54
+        "areaId": "region_01_area_07"
       }
     ],
     "sigils": [
@@ -75,23 +64,18 @@
     "plainTargetVictories": 360,
     "sigilVictories": 4320,
     "discoveryChance": 0.0003,
-    "discoveryBaseScrap": 2,
     "areas": [
       {
-        "areaId": "region_02_area_01",
-        "scrapPerPerfectDay": 72
+        "areaId": "region_02_area_01"
       },
       {
-        "areaId": "region_02_area_02",
-        "scrapPerPerfectDay": 84
+        "areaId": "region_02_area_02"
       },
       {
-        "areaId": "region_02_area_03",
-        "scrapPerPerfectDay": 96
+        "areaId": "region_02_area_03"
       },
       {
-        "areaId": "region_02_area_04",
-        "scrapPerPerfectDay": 108
+        "areaId": "region_02_area_04"
       }
     ],
     "sigils": [

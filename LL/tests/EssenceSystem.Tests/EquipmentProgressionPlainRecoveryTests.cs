@@ -53,8 +53,6 @@ public sealed partial class EquipmentAcquisitionTests
         {
             Assert.Equal(0, item.State.Rank);
             Assert.Null(item.State.ActiveStyleId);
-            Assert.Empty(item.State.Investments);
-            Assert.Equal(0, item.EquipmentState.GetSalvageScrap());
             Assert.Equal(EquipmentOwnershipKind.BoundPersonal, item.State.Ownership.Kind);
         });
         var lost = (await f.Db.InventoryItems.Include(x => x.ItemInstance).ToListAsync()).First(x => result.Recovery.Equipment.Any(e => e.State.Id == x.ItemInstanceId));

@@ -2,7 +2,7 @@
 
 ## Equipment progression update — 3 September 2026
 
-The implemented equipment transition supersedes profession/default-board assumptions below. Forge characters start on Combat Level without Total Level or Professions navigation. Combat Level still compares all eligible characters by combat level and XP. Total Level and the four profession boards rank legacy characters only, using exact saved Soul Archive definitions and the existing fallback for unassigned characters. Eligibility precedes ranking, search, paging and viewer lookup. Profession data and board/cursor keys are unchanged. The frontend waits for saved-cohort access and supports retry. See the [equipment consumer audit](design/equipment-consumer-audit.md) for the implemented contract. Other recommendations below remain historical design proposals unless separately implemented.
+The equipment/crafting transition supersedes the profession/default-board assumptions below. Combat Level is the current equipment-era default; references to cohorts, legacy professions, or Forge navigation are historical. See the [equipment consumer audit](design/equipment-consumer-audit.md) and [current equipment status](design/equipment-implementation-status.md).
 
 ## Executive summary
 

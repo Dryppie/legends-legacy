@@ -36,9 +36,8 @@ public sealed class CombatAcquisitionRewardProcessor(CombatAcquisitionCatalog ca
         var definitions = catalog.Equipment.Options.OrderBy(x => x.DefinitionId, StringComparer.Ordinal).ToArray();
         foreach (var encounter in facts.Encounters.OrderBy(x => x.StartedAt))
         {
-            var result = progress.Apply(facts.ScheduleGeneration, encounter.StartedAt, encounter.IsVictory, area.ScrapPerPerfectDay);
+            var result = progress.Apply(facts.ScheduleGeneration, encounter.StartedAt, encounter.IsVictory);
             if (!result.Applied) continue;
-            if (result.Scrap > 0) AddResource("tempered_scrap", result.Scrap);
             if (result.SigilItemBaseId != null) AddResource(result.SigilItemBaseId, 1);
             if (result.Target is { } target) { equipment.Add(target); targetAwards.Add(target); }
             if (!encounter.IsVictory) continue;
@@ -52,16 +51,13 @@ public sealed class CombatAcquisitionRewardProcessor(CombatAcquisitionCatalog ca
                 definition, rules!.EquipmentTier, 0,
                 new(EquipmentAwardKind.RandomDiscovery, facts.Area.Id, string.Join(":", identity.Skip(1))),
                 new(EquipmentOwnershipKind.UnboundPersonal, facts.CharacterId)), catalog.Equipment.Evaluator);
-            // Plain starter definitions retain zero base value; only this discovery route receives its authored salvage entitlement.
-            equipment.Add(new(data.State with { BaseSalvageScrap = rules!.DiscoveryBaseScrap }, data.ItemBaseId,
-                data.DisplayName, data.Rarity, data.EquipmentType, data.Behavior, data.Stats, data.EquipmentSetId));
+            equipment.Add(data);
         }
         var ids = equipment.Select(x => x.ItemBaseId).Concat(resources.Keys).Distinct().ToArray();
         if (ids.Length == 0) return CombatAcquisitionRewardOutcome.Empty;
         var bases = await itemBases.GetItemBasesByIdsAsync(ids, ct);
         if (equipment.Any(x => !bases.TryGetValue(x.ItemBaseId, out var b) || b is not EquipmentBase e || b.Stackable || e.EquipmentType != x.EquipmentType)
-            || resources.Keys.Any(x => !bases.TryGetValue(x, out var b) || !b.Stackable)
-            || resources.Keys.Where(x => x != "tempered_scrap").Any(x => !bases[x].IsBound))
+            || resources.Keys.Any(x => !bases.TryGetValue(x, out var b) || !b.Stackable || !b.IsBound))
             throw new InvalidOperationException("Ordinary Equipment progression reward definitions are unavailable or invalid.");
         var items = equipment.Select(data =>
         {
@@ -79,8 +75,7 @@ public sealed class CombatAcquisitionRewardProcessor(CombatAcquisitionCatalog ca
             await entitlements.RecordAwardAsync(facts.CharacterId, target, ct);
             await outbox.EnqueueAsync(GameEventTypes.PlainEquipmentTargetSecured, target, facts.CharacterId, null, ct);
         }
-        return new(items, resourceItems.Where(x => x.ItemInstance.ItemBaseId == "tempered_scrap").ToArray(),
-            resourceItems.Where(x => x.ItemInstance.ItemBaseId != "tempered_scrap").ToArray());
+        return new(items, resourceItems);
 
         void AddResource(string id, int count) => resources[id] = checked(resources.GetValueOrDefault(id) + count);
     }

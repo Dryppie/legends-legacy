@@ -194,12 +194,10 @@ public sealed record TournamentRewardGrantEntry(
     int ArenaGlory,
     int Cinders,
     int Soulstones,
-    int BlueprintSelectionBoxes,
     int SigilFragments,
     string Status,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset? ClaimedAtUtc,
-    int TemperedScrap = 0);
+    DateTimeOffset? ClaimedAtUtc);
 
 public sealed record TournamentRewardTier(
     string Key,
@@ -207,9 +205,7 @@ public sealed record TournamentRewardTier(
     int ArenaGlory,
     int Cinders,
     int Soulstones,
-    int BlueprintSelectionBoxes,
-    int SigilFragments,
-    int TemperedScrap = 0);
+    int SigilFragments);
 
 public sealed record ClaimTournamentRewardsResult(
     bool Claimed,
@@ -217,8 +213,4 @@ public sealed record ClaimTournamentRewardsResult(
     int Cinders,
     int Soulstones,
     int SigilFragments,
-    int BlueprintSelectionBoxes,
-    Guid? InventoryGrantId,
-    IReadOnlyList<Domain.Models.Inventories.InventoryItem> InventoryRewards,
-    int TemperedScrap = 0);
-
+    IReadOnlyList<Domain.Models.Inventories.InventoryItem> InventoryRewards);

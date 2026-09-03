@@ -44,7 +44,5 @@ public sealed class TournamentRewardTierOptions
     public int ArenaGlory { get; set; }
     public int Cinders { get; set; }
     public int Soulstones { get; set; }
-    public int TemperedScrap { get; set; }
-    public int BlueprintSelectionBoxes { get; set; }
     public int SigilFragments { get; set; }
 }

@@ -21,14 +21,7 @@
       }
     }
   ],
-  "rewards": [
-    {
-      "key": "tempered-scrap",
-      "type": "Item",
-      "itemBaseId": "tempered_scrap",
-      "quantity": 2
-    }
-  ],
+  "rewards": [],
   "personalMilestones": [
     {
       "key": "first-response",
@@ -51,18 +44,6 @@
           "type": "Item",
           "itemBaseId": "item.monster_core.lesser",
           "quantity": 6
-        }
-      ]
-    },
-    {
-      "key": "champion-of-lumo",
-      "requiredContribution": 2500,
-      "rewards": [
-        {
-          "key": "blueprint-selection-box",
-          "type": "Item",
-          "itemBaseId": "item.blueprint_selection_box",
-          "quantity": 1
         }
       ]
     }

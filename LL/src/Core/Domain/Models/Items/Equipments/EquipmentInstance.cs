@@ -42,7 +42,7 @@ public class EquipmentInstance : ItemInstance
             && loan.GuildId == data.State.Ownership.OwnerId && loan.BorrowedByCharacterId == characterId)
             return; // The repository verifies current membership before equipping this loan.
         if (data.State.Ownership.OwnerId != characterId
-            || !data.State.Ownership.CanPersonallyModifyOrSalvage)
+            || data.State.Ownership.Kind == EquipmentOwnershipKind.GuildOwned)
             throw new InvalidOperationException("This Equipment progression equipment is not owned by the character.");
         ProgressionData = data.BindForPersonalUse();
     }

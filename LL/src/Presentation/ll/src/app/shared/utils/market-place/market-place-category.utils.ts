@@ -40,14 +40,6 @@ export function isMarketplaceTradableItemBase(base: ItemBase): boolean {
   return base.isBound !== true;
 }
 
-export function isMarketplaceBlueprintResource(base: ItemBase): boolean {
-  return (
-    base.itemType === ItemType.Resource &&
-    (base.id.toLowerCase().startsWith('blueprint_') ||
-      base.name.toLowerCase().startsWith('blueprint:'))
-  );
-}
-
 export function matchesMarketplaceResourceSubcategory(
   base: ItemBase,
   subcategory: string | null | undefined,
@@ -59,8 +51,6 @@ export function matchesMarketplaceResourceSubcategory(
   switch (normalized) {
     case 'all resources':
       return true;
-    case 'blueprints':
-      return isMarketplaceBlueprintResource(base);
     case 'catalysts':
       return MARKETPLACE_CATALYST_ITEM_IDS.has(base.id);
     default:

@@ -35,14 +35,7 @@ public sealed class DungeonPreviewRewardServiceTests
             foreach (var firstClear in dungeon.RewardTable.FirstClearRewards)
                 Assert.Contains(rewards, reward => reward.ItemBase.Id == firstClear.ItemId);
 
-            var books = rewards.Where(reward => reward.Category == "Completion Loot").ToArray();
-            Assert.NotEmpty(books);
-            Assert.All(books, book => {
-                Assert.StartsWith("blueprint_", book.ItemBase.Id);
-                Assert.True(book.CanDropNothing);
-                Assert.Equal(90d, book.NoDropChancePercent);
-            });
-            Assert.InRange(books.Sum(book => book.DropChancePercent!.Value), 9.999d, 10.001d);
+            Assert.DoesNotContain(rewards, reward => reward.Category == "Completion Loot");
         }
     }
 

@@ -2,10 +2,10 @@
 
 ## Equipment progression integration — 2 September 2026
 
-The following additions exist in the working tree for the saved equipment progression cohort; they are not a deployment or activation record. The legacy guild implementation described below remains available to older cohorts.
+The cohort and legacy-guild split described below has been retired. Guild equipment ownership remains current, while Forge-oriented shop stock, missions, Scrap, and Blueprint rewards have been removed. See the [current equipment status](design/equipment-implementation-status.md).
 
 - Personal orders and mixed-guild weekly choices replace retired profession objectives with compatible dungeon/Essence objectives. Earned history and partly progressed or selected legacy orders retain their identity pending conversion.
-- Guild shop material offers project to provisional Tempered Scrap rewards. Existing offer keys, rotation, Favor prices, limits and purchased counts remain; compatible Blueprints teach reusable Forge styles.
+- Guild shop equipment-upgrade stock has been removed; the Market Office now offers fixed Soulstone and Sigil Fragment supplies.
 - Unbound discoveries can be donated permanently to the guild. Loans retain guild ownership, require the recorded borrower to equip, and return on leave/kick. Equipment progression property cannot be withdrawn personally; disbanding destroys it without personal gear or salvage awards.
 - Market Office and Workshop descriptions follow the requesting character's cohort. This updates copy without adding building mechanics, changing costs or exposing hidden buildings.
 

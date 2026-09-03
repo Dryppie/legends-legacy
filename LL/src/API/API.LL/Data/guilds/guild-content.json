@@ -81,14 +81,14 @@
       "maxLevel": 5,
       "isPermanent": false,
       "requiredGuildHallLevel": 1,
-      "unlockSummary": "Unlocks rotating Tempered Scrap caches, currencies and reusable-style Blueprints by level.",
+      "unlockSummary": "Unlocks additional currency supplies by level.",
       "baseCost": 150,
       "upgradeCostStep": 125,
       "benefits": [
         {
           "level": 1,
           "title": "Common Stock",
-          "description": "Two common Tempered Scrap caches rotate weekly alongside Soulstone reserves.",
+          "description": "Soulstone reserves become available.",
           "isImplemented": true
         },
         {
@@ -100,19 +100,19 @@
         {
           "level": 3,
           "title": "Rare Stock",
-          "description": "Rare supplies and one rotating Tempered Scrap cache become available.",
+          "description": "Greater Soulstone and Sigil Fragment supplies become available.",
           "isImplemented": true
         },
         {
           "level": 4,
-          "title": "Blueprint Archive",
-          "description": "One rotating reusable-style Blueprint becomes available each week.",
+          "title": "Expanded Stock",
+          "description": "The Market Office is ready for future additions.",
           "isImplemented": true
         },
         {
           "level": 5,
-          "title": "Expanded Rare Stock",
-          "description": "A second rotating rare Tempered Scrap cache becomes available each week.",
+          "title": "Master Market",
+          "description": "The Market Office reaches its current maximum.",
           "isImplemented": true
         }
       ]
@@ -381,101 +381,6 @@
   ],
   "shopItems": [
     {
-      "key": "common.scrap_cache_1",
-      "name": "Common Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Common",
-      "guildFavorCost": 100,
-      "weeklyLimit": 2,
-      "requiredMarketOfficeLevel": 1,
-      "rotatesWeekly": true,
-      "rotationGroup": "common-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 2,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "common.scrap_cache_2",
-      "name": "Common Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Common",
-      "guildFavorCost": 100,
-      "weeklyLimit": 2,
-      "requiredMarketOfficeLevel": 1,
-      "rotatesWeekly": true,
-      "rotationGroup": "common-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 2,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "common.scrap_cache_3",
-      "name": "Common Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Common",
-      "guildFavorCost": 100,
-      "weeklyLimit": 2,
-      "requiredMarketOfficeLevel": 1,
-      "rotatesWeekly": true,
-      "rotationGroup": "common-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 2,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "common.scrap_cache_4",
-      "name": "Common Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Common",
-      "guildFavorCost": 100,
-      "weeklyLimit": 2,
-      "requiredMarketOfficeLevel": 1,
-      "rotatesWeekly": true,
-      "rotationGroup": "common-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 2,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "common.scrap_cache_5",
-      "name": "Common Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Common",
-      "guildFavorCost": 100,
-      "weeklyLimit": 2,
-      "requiredMarketOfficeLevel": 1,
-      "rotatesWeekly": true,
-      "rotationGroup": "common-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 2,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
       "key": "common.soulstone_cache",
       "name": "Soulstone Reserve",
       "description": "A dependable supply of Soulstones for constellation progression.",
@@ -540,310 +445,6 @@
         {
           "type": "SigilFragments",
           "amount": 30
-        }
-      ]
-    },
-    {
-      "key": "rare.scrap_cache_1",
-      "name": "Rare Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 250,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 3,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 6,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "rare.scrap_cache_2",
-      "name": "Rare Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 250,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 3,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 6,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "rare.scrap_cache_3",
-      "name": "Rare Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 250,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 3,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 6,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "rare.scrap_cache_4",
-      "name": "Rare Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 250,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 3,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 6,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "rare.scrap_cache_5",
-      "name": "Rare Scrap Cache",
-      "description": "Tempered Scrap for equipment improvements at the Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 250,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 3,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-scrap",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 6,
-          "key": "tempered_scrap",
-          "name": "Tempered Scrap"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_fury",
-      "name": "Blueprint: Fury",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_fury",
-          "name": "Blueprint: Fury"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_arcane",
-      "name": "Blueprint: Arcane",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_arcane",
-          "name": "Blueprint: Arcane"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_execution",
-      "name": "Blueprint: Execution",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_execution",
-          "name": "Blueprint: Execution"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_aegis",
-      "name": "Blueprint: Aegis",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_aegis",
-          "name": "Blueprint: Aegis"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_warden",
-      "name": "Blueprint: Warden",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_warden",
-          "name": "Blueprint: Warden"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_endurance",
-      "name": "Blueprint: Endurance",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_endurance",
-          "name": "Blueprint: Endurance"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_phoenix",
-      "name": "Blueprint: Phoenix",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_phoenix",
-          "name": "Blueprint: Phoenix"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_spirit",
-      "name": "Blueprint: Spirit",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_spirit",
-          "name": "Blueprint: Spirit"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_primal",
-      "name": "Blueprint: Primal",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_primal",
-          "name": "Blueprint: Primal"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_venom_touched_sword",
-      "name": "Blueprint: Venom-Touched Sword",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_venom_touched_sword",
-          "name": "Blueprint: Venom-Touched Sword"
-        }
-      ]
-    },
-    {
-      "key": "rare.blueprint_hivefang_dagger",
-      "name": "Blueprint: Hivefang Dagger",
-      "description": "Learn a reusable equipment style in Equipment & Forge.",
-      "stockType": "Rare",
-      "guildFavorCost": 450,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 4,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-blueprints",
-      "rewards": [
-        {
-          "type": "Item",
-          "amount": 1,
-          "key": "blueprint_hivefang_dagger",
-          "name": "Blueprint: Hivefang Dagger"
         }
       ]
     }

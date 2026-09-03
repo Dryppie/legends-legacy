@@ -165,7 +165,6 @@ These are backed by new requirement types and live gameplay hooks. Recalculation
 | Progression       | Soulstone Spark               | Purchase your first Soulstone upgrade.                  | Account   |      5 | Player-only system message |
 | Progression       | Soulstone Sovereign           | Max every available Soulstone upgrade.                  | Account   |    150 | **Broadcast to all**       |
 | Dungeons          | Dungeon Master                | Reach mastery level 10 in any dungeon family.           | Account   |    100 | **Broadcast to all**       |
-| Crafting          | Master of the Forge           | Reach Crafting Mastery level 100.                       | Account   |    100 | **Broadcast to all**       |
 | Achievements      | Trophy Cabinet                | Unlock 25 achievements.                                 | Account   |     25 | Player-only system message |
 | Achievements      | Completionist                 | Unlock every active non-hidden achievement.             | Account   |    250 | **Broadcast to all**       |
 | Titles            | Name of Renown                | Unlock 10 titles.                                       | Account   |     50 | Player-only system message |

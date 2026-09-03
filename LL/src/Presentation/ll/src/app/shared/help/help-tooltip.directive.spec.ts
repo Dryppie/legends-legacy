@@ -7,7 +7,7 @@ import { HelpTooltipDirective } from './help-tooltip.directive';
 
 @Component({
   imports: [HelpTooltipDirective],
-  template: '<button appHelp="scrap_mode">?</button>',
+  template: '<button appHelp="inventory_overview">?</button>',
 })
 class TooltipHostComponent {}
 
@@ -42,7 +42,10 @@ describe('HelpTooltipDirective', () => {
     button.dispatchEvent(new MouseEvent('mouseenter'));
     button.dispatchEvent(new MouseEvent('mouseleave'));
     helpEntries.next({
-      scrap_mode: { title: 'Scrap Mode', body: 'Choose equipment to scrap.' },
+      inventory_overview: {
+        title: 'Inventory',
+        body: 'Review the items and equipment you carry.',
+      },
     });
     helpEntries.complete();
     await fixture.whenStable();

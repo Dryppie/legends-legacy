@@ -563,8 +563,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses => Set<CharacterQuestObjectiveProgress>();
     public DbSet<QuestEventLedger> QuestEventLedgers => Set<QuestEventLedger>();
     public DbSet<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant> StarterEquipmentGrants => Set<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant>();
-    public DbSet<Domain.Models.Items.Equipments.Progression.ForgeReceipt> ForgeReceipts => Set<Domain.Models.Items.Equipments.Progression.ForgeReceipt>();
-    public DbSet<Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle> LearnedEquipmentStyles => Set<Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle>();
     public DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress> EquipmentProtectionProgress => Set<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress>();
     public DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt> EquipmentProtectionReceipts => Set<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt>();
     public DbSet<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt> BaselineEquipmentRecoveryReceipts => Set<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt>();

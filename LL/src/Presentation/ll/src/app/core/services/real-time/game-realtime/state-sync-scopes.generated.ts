@@ -7,7 +7,6 @@ export const stateSyncScopes = [
   'inventory',
   'loot-history',
   'equipment',
-  'equipment-forge',
   'quests',
   'area-access',
   'event-quests',

@@ -208,12 +208,7 @@
       "category": "Crafting",
       "difficulty": "Uncommon",
       "reward": {
-        "items": [
-          {
-            "itemId": "tempered_scrap",
-            "quantity": 2
-          }
-        ]
+        "items": []
       }
     }
   ]

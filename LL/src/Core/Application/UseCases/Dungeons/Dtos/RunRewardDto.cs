@@ -14,7 +14,7 @@ public class RunRewardDto : IMapFrom<RunReward>
     public ItemType ItemType { get; set; }
     public int Quantity { get; set; }
     public string Source { get; set; } = string.Empty;
-    public Application.UseCases.Equipments.Dtos.ForgeItemDto? ProgressionData { get; set; }
+    public Application.UseCases.Equipments.Dtos.EquipmentProgressionItemDto? ProgressionData { get; set; }
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<RunReward, RunRewardDto>();

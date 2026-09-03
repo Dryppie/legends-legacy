@@ -7,7 +7,7 @@ describe('StateSyncDiagnostics', () => {
 
     diagnostics.recordMutation(
       'POST',
-      '/api/v1/inventory/scrap',
+      '/api/v1/inventory/equip',
       { inventory: 3 },
       ['inventory'],
     );

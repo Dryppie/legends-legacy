@@ -10,8 +10,6 @@ public sealed class TournamentRewardGrantConfiguration : IEntityTypeConfiguratio
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.RewardKey).HasMaxLength(120).IsRequired();
-        builder.Property(x => x.TemperedScrap).HasDefaultValue(0);
-        builder.Property(x => x.BlueprintSelectionBoxes).HasDefaultValue(0);
         builder.Property(x => x.SigilFragments).HasDefaultValue(0);
         builder.HasOne(x => x.Tournament).WithMany().HasForeignKey(x => x.TournamentId);
         builder.HasIndex(x => new { x.TournamentId, x.CharacterId, x.RewardKey }).IsUnique();

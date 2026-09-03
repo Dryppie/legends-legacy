@@ -6,7 +6,6 @@ public sealed class EquipmentProgressionOptions
 {
     public const string SectionName = "EquipmentProgression";
     public bool StarterAcquisitionEnabled { get; set; } = true;
-    public bool ForgeEnabled { get; set; } = true;
     public bool ProtectedAcquisitionEnabled { get; set; } = true;
     public bool BaselineRecoveryEnabled { get; set; } = true;
     public bool OrdinaryAcquisitionEnabled { get; set; } = true;

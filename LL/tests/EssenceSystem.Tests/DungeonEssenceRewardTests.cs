@@ -158,7 +158,7 @@ public sealed class DungeonEssenceRewardTests
         db.ItemBases.AddRange(
             new ItemBase
             {
-                Id = "tempered_scrap",
+                Id = "completion_item",
                 Name = "Completion Item",
                 ItemType = ItemType.Resource,
                 Stackable = true
@@ -189,7 +189,7 @@ public sealed class DungeonEssenceRewardTests
                 [
                     new DungeonRewardGrant
                     {
-                        ItemId = "tempered_scrap",
+                        ItemId = "completion_item",
                         Chance = 1,
                         MinAmount = 2,
                         MaxAmount = 2
@@ -211,7 +211,7 @@ public sealed class DungeonEssenceRewardTests
 
         await applier.ApplyAsync(run, CancellationToken.None);
         var loot = pendingRewards.Batches.SelectMany(x => x.Loot).ToArray();
-        Assert.Equal(2, loot.Where(x => x.ItemInstance.ItemBaseId == "tempered_scrap").Sum(x => x.Quantity));
+        Assert.Equal(2, loot.Where(x => x.ItemInstance.ItemBaseId == "completion_item").Sum(x => x.Quantity));
         Assert.Contains(loot, x => x.ItemInstance.ItemBaseId == "item.monster_core.lesser");
 
         var expectedQuantity = pendingRewards.Batches
@@ -224,45 +224,6 @@ public sealed class DungeonEssenceRewardTests
         Assert.Equal(ProphecyProgressKind.TreasureProgress, notification.ProgressEvent.Kind);
         Assert.Equal(expectedQuantity, notification.ProgressEvent.Amount);
         Assert.True(expectedQuantity >= 5);
-    }
-
-    [Theory]
-    [InlineData(false, true)]
-    [InlineData(true, false)]
-    public async Task Blueprint_roll_is_excluded_on_first_completion_only(
-        bool hasCompleted,
-        bool expectedExcluded)
-    {
-        await using var db = CreateDb();
-        var run = new DungeonRun
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = Guid.NewGuid(),
-            DungeonDefinitionId = "blueprint_dungeon"
-        };
-        var definition = new DungeonDefinition
-        {
-            Id = run.DungeonDefinitionId,
-            Tier = 1,
-            CompletionRewardTableIds = ["reward.dungeon.blueprint.completion"]
-        };
-        var rewardRoller = new CapturingRewardRoller();
-        var applier = new DungeonCompletionRewardApplier(
-            new SingleDungeonDefinitions(definition),
-            new EmptyDungeonRunRepository(run, hasCompleted),
-            new ItemBaseRepository(db),
-            rewardRoller,
-            new CapturingDungeonPendingRewardWriter(),
-            new InventoryItemFactory(),
-            new NoOpDungeonMasteryService(),
-            new RecordingPublisher());
-
-        await applier.ApplyAsync(run, CancellationToken.None);
-
-        var context = Assert.Single(rewardRoller.Contexts);
-        Assert.Equal(
-            expectedExcluded,
-            context.ExcludedRollIds?.Contains("blueprint_drop") == true);
     }
 
     [Theory]

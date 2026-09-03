@@ -17,7 +17,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         var target = FrozenSupportEquipment(seeded.CharacterId);
         var run = SupportRun(seeded.CharacterId, DungeonRunStatus.Active);
         run.EquipmentCommitment = new(seeded.CharacterId, run.Id, "old-pool", run.DungeonDefinitionId,
-            2, 0.125, 11, 37, target);
+            2, 0.125, 11, target);
         db.DungeonRuns.Add(run);
         var current = new EquipmentProtectionProgress { CharacterId = seeded.CharacterId, PoolId = "old-pool" };
         current.Select("new-target");
@@ -35,8 +35,8 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
             Assert.Equal("Active", inspected.Status);
             Assert.Equal(4, inspected.CurrentRoomIndex);
             Assert.Equal("new-target", Assert.Single(snapshot.Protection).TargetDefinitionId);
-            Assert.Equal((0.125, 11, 37), (inspected.Commitment!.MatchingChance,
-                inspected.Commitment.GuaranteeCompletions, inspected.Commitment.CompletionScrap));
+            Assert.Equal((0.125, 11), (inspected.Commitment!.MatchingChance,
+                inspected.Commitment.GuaranteeCompletions));
             Assert.Equal("historical.target", inspected.Commitment.Target!.Progression!.DefinitionId);
             Assert.Equal(91, inspected.Commitment.Target.Progression.BalanceVersion);
             Assert.Equal(target.State.Id, inspected.Commitment.Target.InstanceId);
@@ -66,7 +66,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         var run = SupportRun(seeded.CharacterId, claimed ? DungeonRunStatus.RewardsClaimed : DungeonRunStatus.Completed);
         run.CompletedAt = Now;
         run.RewardsClaimedAt = claimed ? Now.AddMinutes(1) : null;
-        run.EquipmentCommitment = new(seeded.CharacterId, run.Id, "pool", run.DungeonDefinitionId, 1, 0.2, 8, 4, equipment);
+        run.EquipmentCommitment = new(seeded.CharacterId, run.Id, "pool", run.DungeonDefinitionId, 1, 0.2, 8, equipment);
         run.PendingRewards.Add(new RunReward { Id = equipment.State.Id, ItemId = equipment.ItemBaseId,
             Name = equipment.DisplayName, ItemType = ItemType.Equipment, Quantity = 1,
             Source = EquipmentKeys.ProtectedDungeonSource, ProgressionData = equipment });
@@ -74,10 +74,10 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         run.PendingRewards.Add(legacy);
         db.DungeonRuns.Add(run);
         db.EquipmentProtectionReceipts.Add(new() { CharacterId = seeded.CharacterId, RunId = run.Id,
-            Outcome = new(run.Id, "pool", 7, 0, equipment, 4, Now), ClaimedAtUtc = run.RewardsClaimedAt });
+            Outcome = new(run.Id, "pool", 7, 0, equipment, Now), ClaimedAtUtc = run.RewardsClaimedAt });
         // Same run identifier on another character's receipt must never be used for this lookup.
         db.EquipmentProtectionReceipts.Add(new() { CharacterId = Guid.NewGuid(), RunId = run.Id,
-            Outcome = new(run.Id, "foreign-pool", 1, 0, null, 999, Now) });
+            Outcome = new(run.Id, "foreign-pool", 1, 0, null, Now) });
         var other = SupportRun(Guid.NewGuid(), DungeonRunStatus.Active);
         other.PendingRewards.Add(new() { ItemId = "foreign", Name = "Foreign", Quantity = 99 });
         db.DungeonRuns.Add(other);
@@ -89,7 +89,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         Assert.Equal(claimed ? 0 : 1, snapshot.PendingRewardCount);
         Assert.Equal(run.RewardsClaimedAt, inspected.RewardsClaimedAtUtc);
         Assert.Equal(run.RewardsClaimedAt, inspected.Receipt!.ClaimedAtUtc);
-        Assert.Equal((7, 0, 4), (inspected.Receipt.PreviousProgress, inspected.Receipt.Progress, inspected.Receipt.Scrap));
+        Assert.Equal((7, 0), (inspected.Receipt.PreviousProgress, inspected.Receipt.Progress));
         Assert.Equal("pool", inspected.Receipt.PoolId);
         Assert.Equal(equipment.State.Id, inspected.Receipt.Equipment!.InstanceId);
         Assert.Equal(2, inspected.RewardRowCount);
@@ -119,14 +119,13 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         var legacy = (await service.GetAsync(seeded.CharacterId, default))!.Equipment.Data!.DungeonRun!;
         Assert.Null(legacy.Commitment);
         Assert.Null(legacy.Receipt);
-        run.EquipmentCommitment = new(seeded.CharacterId, run.Id, "pool", run.DungeonDefinitionId, 2, 0.2, 8, 4, null);
+        run.EquipmentCommitment = new(seeded.CharacterId, run.Id, "pool", run.DungeonDefinitionId, 2, 0.2, 8, null);
         await db.SaveChangesAsync();
         var modern = (await service.GetAsync(seeded.CharacterId, default))!.Equipment.Data!.DungeonRun!;
         Assert.Equal(status.ToString(), modern.Status);
         Assert.NotNull(modern.Commitment);
         Assert.Null(modern.Commitment.Target);
         Assert.Null(modern.Receipt);
-        Assert.Equal(4, modern.Commitment.CompletionScrap);
     }
 
     [Fact]
@@ -153,7 +152,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         await using var db = new LLDbContext(seeded.Options);
         var runId = Guid.NewGuid();
         db.EquipmentProtectionReceipts.Add(new() { CharacterId = seeded.CharacterId, RunId = runId,
-            Outcome = new(runId, "pool", 0, 1, null, 4, Now) });
+            Outcome = new(runId, "pool", 0, 1, null, Now) });
         await db.SaveChangesAsync();
         var snapshot = (await CreateService(new TestContextFactory(seeded.Options)).GetAsync(seeded.CharacterId, default))!.Equipment.Data!;
         Assert.Null(snapshot.DungeonRun);

@@ -104,7 +104,6 @@ public sealed class QuestGameEventOutboxConsumer(
             if (result.Journal.Quests.Any(x => result.CompletedQuestIds.Contains(x.QuestId)))
             {
                 scopes.Add(StateSyncScopes.Character);
-                scopes.Add(StateSyncScopes.EquipmentForge);
             }
         }
         if (result.Loot.Count > 0)

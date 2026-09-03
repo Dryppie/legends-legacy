@@ -15,27 +15,19 @@ namespace EssenceSystem.Tests;
 
 public sealed partial class QuestSystemTests
 {
-    private static JsonQuestDefinitionProvider EquipmentDefinitions(bool enabled = true, bool capabilities = true)
-    {
-        var flags = new Dictionary<string, string?> { ["EquipmentProgression:QuestIntegrationEnabled"] = enabled.ToString() };
-        foreach (var key in new[] { "StarterAcquisitionEnabled", "ForgeEnabled", "BaselineRecoveryEnabled", "ProtectedAcquisitionEnabled", "OrdinaryAcquisitionEnabled" })
-            flags["EquipmentProgression:" + key] = capabilities.ToString();
-        return new(new ConfigurationBuilder().AddInMemoryCollection(flags).Build(), FindApiRoot(), new(JsonSerializerDefaults.Web));
-    }
+    private static JsonQuestDefinitionProvider EquipmentDefinitions() =>
+        new(new ConfigurationBuilder().Build(), FindApiRoot(), new(JsonSerializerDefaults.Web));
 
     [Fact]
-    public void EquipmentProgression_quest_catalog_is_opt_in_and_preserves_area_tokens_and_core_rewards()
+    public void Equipment_quest_catalog_preserves_area_tokens_and_core_rewards_without_scrap()
     {
         var definitions = EquipmentDefinitions();
         Assert.Equal(29, definitions.GetAll().Count);
-        Assert.Equal(3, EquipmentDefinitions(false).Get(QuestConstants.SoulArchive).Version);
-        Assert.Equal(3, EquipmentDefinitions(false).GetLatestVersion(QuestConstants.SoulArchive));
         Assert.Equal(500, Assert.Single(definitions.Get(QuestConstants.SoulArchive).Rewards).Quantity);
         Assert.Equal("Cinders", Assert.Single(definitions.Get(QuestConstants.SoulArchive).Rewards).Type);
-        Assert.Equal(10, Assert.Single(definitions.Get(QuestConstants.FirstWeapon).Rewards).Quantity);
+        Assert.Empty(definitions.Get(QuestConstants.FirstWeapon).Rewards);
         foreach (var quest in definitions.GetAll().Where(x => x.Chain?.Id == "quest.chain.shenic" && x.Version == 4))
         {
-            Assert.Equal(2, Assert.Single(quest.Rewards, x => x.ItemBaseId == "tempered_scrap").Quantity);
             Assert.DoesNotContain(quest.Rewards, x => new[] { "ore", "wood", "rawhide", "soul_dust" }.Contains(x.ItemBaseId));
         }
         Assert.Contains(definitions.Get(QuestConstants.TrialOfLumo).Rewards, x => x.ItemBaseId == "sigil_goblin_mines" && x.Quantity == 1);
@@ -93,8 +85,7 @@ public sealed partial class QuestSystemTests
         Assert.Equal(0, equipment.Claims);
         equipment.Equipped = true;
         var result = await service.ProcessAsync(id, QuestTrigger.EquipmentChanged(), null, GameEventTypes.EquipmentChanged, CancellationToken.None);
-        Assert.Equal(10, Assert.Single(result.Loot).Quantity);
-        Assert.Equal("tempered_scrap", Assert.Single(result.Loot).ItemInstance.ItemBaseId);
+        Assert.Empty(result.Loot);
         Assert.Contains(result.Journal.Quests, x => x.QuestId == QuestConstants.ToolsOfTheTrade && x.Version == 2 && x.Title == "Ready for the Road");
         await service.ProcessAsync(id, QuestTrigger.EquipmentChanged(), null, GameEventTypes.EquipmentChanged, CancellationToken.None);
         Assert.Equal(1, equipment.Claims);

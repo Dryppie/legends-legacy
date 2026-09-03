@@ -16,7 +16,6 @@ public sealed class CombatAcquisitionDto : IMapFrom<CombatAcquisitionView>
     public string? SelectedSigilFamilyId { get; set; }
     public int SigilVictories { get; set; }
     public int RequiredSigilVictories { get; set; }
-    public int ScrapRemainder { get; set; }
     public double DiscoveryChance { get; set; }
     public IReadOnlyList<StarterEquipmentOptionDto> Targets { get; set; } = [];
     public IReadOnlyList<CombatAcquisitionSigilOption> Sigils { get; set; } = [];

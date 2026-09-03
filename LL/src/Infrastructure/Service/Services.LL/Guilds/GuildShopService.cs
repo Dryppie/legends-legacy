@@ -16,10 +16,6 @@ namespace Services.LL.Guilds;
 
 public class GuildShopService : IGuildShopService
 {
-    private const string CommonScrapRotationGroup = "common-scrap";
-    private const string RareScrapRotationGroup = "rare-scrap";
-    private const string BlueprintRotationGroup = "rare-blueprints";
-
     private readonly IDbContext _context;
     private readonly IInventoryService _inventory;
     private readonly IInventoryItemFactory _inventoryItemFactory;
@@ -155,36 +151,8 @@ public class GuildShopService : IGuildShopService
 
     private IReadOnlyList<GuildShopItemDefinition> GetActiveItems(ShopState state)
     {
-        var fixedItems = _items.Where(x => !x.RotatesWeekly);
-        var marketOfficeLevel = GetMarketOfficeLevel(state.Guild);
-        var commonScrapItems = GuildContentHelpers.PickWeeklyRotation(
-            _items.Where(x =>
-                x.RotatesWeekly
-                && x.StockType == GuildShopStockType.Common
-                && string.Equals(x.RotationGroup, CommonScrapRotationGroup, StringComparison.OrdinalIgnoreCase)),
-            state.WeeklyPeriodKey,
-            count: 2,
-            x => x.Key);
-        var rareScrapItems = GuildContentHelpers.PickWeeklyRotation(
-            _items.Where(x =>
-                x.RotatesWeekly
-                && x.StockType == GuildShopStockType.Rare
-                && string.Equals(x.RotationGroup, RareScrapRotationGroup, StringComparison.OrdinalIgnoreCase)),
-            state.WeeklyPeriodKey,
-            count: marketOfficeLevel >= 5 ? 2 : 1,
-            x => x.Key);
-        var rareBlueprintItems = GuildContentHelpers.PickWeeklyRotation(
-            _items.Where(x =>
-                x.RotatesWeekly
-                && x.StockType == GuildShopStockType.Rare
-                && string.Equals(x.RotationGroup, BlueprintRotationGroup, StringComparison.OrdinalIgnoreCase)),
-            state.WeeklyPeriodKey,
-            count: 1,
-            x => x.Key);
-        return fixedItems
-            .Concat(commonScrapItems)
-            .Concat(rareScrapItems)
-            .Concat(rareBlueprintItems)
+        return _items
+            .Where(x => !x.RotatesWeekly)
             .OrderBy(x => x.StockType)
             .ThenBy(x => x.RequiredMarketOfficeLevel)
             .ThenBy(x => x.Key)

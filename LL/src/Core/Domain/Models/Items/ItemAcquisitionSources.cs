@@ -17,7 +17,6 @@ public static class ItemAcquisitionSources
     public const string GuildShop = "guild-shop";
     public const string QuestReward = "quest-reward";
     public const string EventQuestReward = "event-quest-reward";
-    public const string EquipmentScrapping = "equipment-scrapping";
     public const string LootGeneratedEvent = "loot-generated-event";
     public const string AdminCompensation = "admin-compensation";
     public const string RaidReward = "raid-reward";

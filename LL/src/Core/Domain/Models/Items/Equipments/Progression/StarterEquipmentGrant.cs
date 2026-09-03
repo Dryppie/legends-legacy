@@ -15,8 +15,7 @@ public sealed class StarterEquipmentGrant
             || equipment.Any(x => x.State.Ownership.OwnerId != characterId
                 || x.State.Ownership.Kind != EquipmentOwnershipKind.BoundPersonal
                 || x.State.Provenance.Kind != EquipmentAwardKind.QuestReward
-                || x.State.Tier != 1 || x.State.Rank != 0 || x.State.ActiveStyleId != null
-                || x.State.BaseSalvageScrap != 0 || x.State.Investments.Count != 0))
+                || x.State.Tier != 1 || x.State.Rank != 0 || x.State.ActiveStyleId != null))
             throw new ArgumentException("Invalid starter equipment grant.");
         CharacterId = characterId;
         Kind = kind;

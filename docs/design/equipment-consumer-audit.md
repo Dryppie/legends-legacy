@@ -1,6 +1,6 @@
 # Equipment consumer audit
 
-> Historical record — superseded 3 September 2026. The owner dropped Alpha-data preservation. Crafting/gathering, queued tempering, profession storage, cohort logic, conversion/refund adapters and old aliases are now removed. The quest cleanup also deletes saved IDs/versions absent from the frozen current catalog. Use the [current status](equipment-implementation-status.md#current-implementation-and-remaining-work) and [cleanup record](equipment-post-alpha-cleanup.md) for remaining work and verification. Further LiveOps work and raid redesign remain deferred.
+> Historical record — superseded 3 September 2026. Crafting, gathering, queued tempering, profession storage, cohort logic, conversion/refund adapters, and the equipment Forge are now removed. All Forge/Scrap/Blueprint consumer statements below describe an abandoned intermediate design. Use the [current status](equipment-implementation-status.md), [Forge removal](equipment-forge-removal.md), and [cleanup record](equipment-post-alpha-cleanup.md).
 
 ## Historical findings and verification
 
@@ -77,6 +77,6 @@ Remaining operator work: lookup/pagination for complete histories beyond the sna
 
 ## Validation and transition
 
-The [implementation status](equipment-implementation-status.md#consumer-and-operator-inspection--3-september-2026) records the current commands and results. Regression coverage includes item scoping/deduplication, real paid basis versus awarded ranks, repeated pending-reward reads, explicit list bounds, independent section failure and server-side tool guards. Player tests cover legacy preservation, occupied-tool removal access and canonical rank/style sorting/search.
+The [implementation status](equipment-implementation-status.md) records the current commands and results. Regression coverage includes item scoping/deduplication, real paid basis versus awarded ranks, repeated pending-reward reads, explicit list bounds, independent section failure and server-side tool guards. Player tests cover legacy preservation, occupied-tool removal access and canonical rank/style sorting/search.
 
 Contracts are additive. Existing retained data, six prior schema migrations, activation flags, authored balance and raid behavior are unchanged. Authenticated gameplay, real PostgreSQL transaction behavior and conversion rehearsal remain unverified by this local milestone.

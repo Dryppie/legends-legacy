@@ -1,4 +1,4 @@
-﻿using Domain.Models.Inventories;
+using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions.Crafting;
@@ -53,7 +53,6 @@ public interface IInventoryService
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken);
     Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken);
-    Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken);
     Task<InventoryTransferResult> TransferItemAsync(
         Guid senderCharacterId,
         Guid recipientCharacterId,

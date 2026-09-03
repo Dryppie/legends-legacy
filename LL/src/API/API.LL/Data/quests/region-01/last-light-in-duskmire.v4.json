@@ -49,12 +49,6 @@
       "type": "Item",
       "itemBaseId": "item.essence_token.duskmire_hollow",
       "quantity": 1
-    },
-    {
-      "key": "area_scrap",
-      "type": "Item",
-      "itemBaseId": "tempered_scrap",
-      "quantity": 2
     }
   ]
 }

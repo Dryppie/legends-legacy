@@ -87,19 +87,15 @@ public sealed class EquipmentDefinition
         string name,
         string archetypeId,
         EquipmentRarity rarity,
-        string? nativeStyleId = null,
-        long randomDiscoveryBaseScrap = 0)
+        string? nativeStyleId = null)
     {
         Id = EquipmentValidation.Id(id);
         Name = EquipmentValidation.Id(name);
         ArchetypeId = EquipmentValidation.Id(archetypeId);
         if (!Enum.IsDefined(rarity))
             throw new ArgumentOutOfRangeException(nameof(rarity));
-        if (randomDiscoveryBaseScrap < 0)
-            throw new ArgumentOutOfRangeException(nameof(randomDiscoveryBaseScrap));
         Rarity = rarity;
         NativeStyleId = nativeStyleId is null ? null : EquipmentValidation.Id(nativeStyleId);
-        RandomDiscoveryBaseScrap = randomDiscoveryBaseScrap;
     }
 
     public string Id { get; }
@@ -107,7 +103,6 @@ public sealed class EquipmentDefinition
     public string ArchetypeId { get; }
     public EquipmentRarity Rarity { get; }
     public string? NativeStyleId { get; }
-    public long RandomDiscoveryBaseScrap { get; }
 }
 
 internal static class EquipmentValidation

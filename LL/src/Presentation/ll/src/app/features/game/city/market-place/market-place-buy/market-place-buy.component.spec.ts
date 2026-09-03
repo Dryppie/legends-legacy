@@ -300,8 +300,6 @@ function listing(
             ownership,
             modelVersion: 1,
             balanceVersion: 1,
-            paidScrap: 0,
-            paidCinders: 0,
           },
   } as unknown as EquipmentInstance;
   return {

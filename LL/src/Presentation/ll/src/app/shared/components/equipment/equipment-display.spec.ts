@@ -152,7 +152,7 @@ describe('mapInstanceToDisplay', () => {
     item.equipmentSet = {
       id: 'set.stormguard',
       name: 'Stormguard',
-      description: 'Equipment forged for the storm.',
+      description: 'Equipment shaped for the storm.',
       bonuses: [],
     };
 
@@ -185,8 +185,6 @@ describe('EquipmentDisplayComponent', () => {
       nativeStyleId: null,
       activeStyleId: null,
       ownership: 'BoundPersonal',
-      paidScrap: 15,
-      paidCinders: 750,
     };
     fixture.componentRef.setInput('item', item);
     fixture.detectChanges();
@@ -207,7 +205,7 @@ describe('EquipmentDisplayComponent', () => {
       const item = equipmentInstance('canonical', AttributeType.Armor, 12);
       item.progression = { modelVersion: 1, balanceVersion: 1, definitionId: 'plain.helm',
         archetypeId: 'heavy_helm', rank: 2, nativeStyleId: null, activeStyleId: null,
-        ownership: 'BoundPersonal', paidScrap: 15, paidCinders: 750 };
+        ownership: 'BoundPersonal' };
       item.rollRange = { minimumPotential: 100, maximumPotential: 200, attributes: [{
         attributeType: AttributeType.Armor, minimumAmount: 5, maximumAmount: 20,
         rarityBonusAmount: 3, hasCraftedRange: true }] };
@@ -236,7 +234,7 @@ describe('EquipmentDisplayComponent', () => {
     const item = equipmentInstance('canonical', AttributeType.Armor, 12);
     item.progression = { modelVersion: 1, balanceVersion: 1, definitionId: 'plain.helm',
       archetypeId: 'heavy_helm', rank: 2, nativeStyleId: null, activeStyleId: null,
-      ownership: 'BoundPersonal', paidScrap: 0, paidCinders: 0 };
+      ownership: 'BoundPersonal' };
     fixture.componentRef.setInput('item', item);
     fixture.componentRef.setInput('comparisonItem', equipmentInstance('legacy', AttributeType.Armor, 9));
     fixture.detectChanges();

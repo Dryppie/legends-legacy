@@ -147,17 +147,6 @@ export class InventoryStateService {
     this.inventoryGrantDeduper.clear();
   }
 
-  scrapEquipment(equipmentIds: string[]) {
-    this._loading.set(true);
-    this.inventoryService
-      .scrapEquipment(equipmentIds)
-      .pipe(finalize(() => this._loading.set(false)))
-      .subscribe({
-        next: (response) => this.applyVersionedInventory(response),
-        error: (err) => this._error.set(err.message ?? 'Unknown error'),
-      });
-  }
-
   applyVersionedInventory<T extends { inventoryItems: InventoryItem[] }>(
     result: VersionedMutationResult<T>,
     grantId?: string | null,

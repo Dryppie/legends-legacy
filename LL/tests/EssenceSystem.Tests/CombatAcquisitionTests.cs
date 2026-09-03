@@ -64,11 +64,8 @@ public sealed partial class CombatAcquisitionTests
     {
         var equipment = Equipment();
         var catalog = Catalog(equipment);
-        using var inputs = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root(), "docs/design/equipment-region-one-inputs.json")));
         Assert.Equal(31, equipment.Options.Count);
         Assert.Equal(10, catalog.Pools[0].Areas.Count);
-        foreach (var area in inputs.RootElement.GetProperty("areas").EnumerateArray())
-            Assert.Equal(area.GetProperty("scrapPerPerfectDay").GetInt32(), catalog.Pools[0].Areas.Single(x => x.AreaId == area.GetProperty("id").GetString()).ScrapPerPerfectDay);
         var protection = JsonStarterEquipmentCatalog.LoadAcquisition(equipment, Path.Combine(Content(), "equipment-protection-pools.v1.json"));
         foreach (var sigil in catalog.Pools[0].Sigils)
         {
@@ -85,7 +82,7 @@ public sealed partial class CombatAcquisitionTests
     }
 
     [Fact]
-    public async Task Full_day_and_small_batches_produce_identical_discoveries_progress_scrap_and_sigils()
+    public async Task Full_day_and_small_batches_produce_identical_discoveries_progress_and_sigils()
     {
         var id = Guid.NewGuid();
         await using var full = await Fixture.Create(id, chance: 0.01);
@@ -99,9 +96,7 @@ public sealed partial class CombatAcquisitionTests
         var many = new List<InventoryItem>();
         for (var cursor = 0; cursor < 8640; cursor += 37)
             many.AddRange(Flatten(await split.Process(cursor, Math.Min(37, 8640 - cursor))));
-        Assert.Equal(36, one.Scrap.Sum(x => x.Quantity));
         Assert.Equal(2, one.Sigils.Sum(x => x.Quantity));
-        Assert.Equal(36, many.Where(x => x.ItemInstance.ItemBaseId == "tempered_scrap").Sum(x => x.Quantity));
         Assert.Equal(2, many.Where(x => x.ItemInstance.ItemBaseId == "sigil_goblin_mines").Sum(x => x.Quantity));
         var fullDiscoveries = one.Equipment.Select(x => ((EquipmentInstance)x.ItemInstance).ProgressionData!)
             .Where(x => x.State.Provenance.Kind == EquipmentAwardKind.RandomDiscovery).Select(x => JsonSerializer.Serialize(x)).ToArray();
@@ -114,23 +109,6 @@ public sealed partial class CombatAcquisitionTests
         var splitState = await split.Service.GetAsync(id, Ct);
         Assert.Equal(JsonSerializer.Serialize(fullState), JsonSerializer.Serialize(splitState));
         Assert.Null(fullState[0].SelectedDefinitionId);
-        Assert.Equal(0, fullState[0].ScrapRemainder);
-    }
-
-    [Fact]
-    public async Task Fractional_scrap_survives_reload_area_change_and_defeats()
-    {
-        await using var f = await Fixture.Create();
-        Assert.Empty((await f.Process(0, 239)).Scrap);
-        await f.Db.SaveChangesAsync();
-        f.Db.ChangeTracker.Clear();
-        Assert.Equal(8604, (await f.Progress()).ScrapRemainder);
-        Assert.Empty((await f.Process(239, 8, win: false)).Scrap);
-        var result = await f.Process(247, 1, area: "region_01_area_02");
-        Assert.Equal(1, Assert.Single(result.Scrap).Quantity);
-        Assert.Equal(2, (await f.Progress()).ScrapRemainder);
-        Assert.Equal(0, (await f.Progress()).PlainVictories);
-        Assert.Equal(0, (await f.Progress()).SigilVictories);
     }
 
     [Fact]
@@ -153,8 +131,6 @@ public sealed partial class CombatAcquisitionTests
         Assert.Equal(JsonSerializer.Serialize(frozen), JsonSerializer.Serialize(target!.ProgressionData));
         Assert.True(target.IsBound);
         Assert.Equal(0, target.ProgressionData!.State.Rank);
-        Assert.Equal(0, target.ProgressionData.State.BaseSalvageScrap);
-        Assert.Empty(target.ProgressionData.State.Investments);
         Assert.Equal(1, Assert.Single(await new PlainEquipmentRepository(f.Db).GetAsync(f.Id, Ct)).Copies);
         await f.Select("plain.dagger", operation: operation);
         Assert.Null((await f.Progress()).Plain);
@@ -166,7 +142,7 @@ public sealed partial class CombatAcquisitionTests
     }
 
     [Fact]
-    public async Task Discovery_keeps_base_salvage_without_paid_ranks_and_does_not_cancel_target()
+    public async Task Discovery_preserves_authored_state_and_does_not_cancel_target()
     {
         await using var f = await Fixture.Create(chance: 1);
         await f.Process(0, 1, win: false);
@@ -177,7 +153,6 @@ public sealed partial class CombatAcquisitionTests
         {
             var data = ((EquipmentInstance)x.ItemInstance).ProgressionData!;
             Assert.False(x.ItemInstance.IsBound);
-            Assert.Equal(1, data.State.BaseSalvageScrap);
             Assert.Equal(0, data.State.Rank);
             Assert.Null(data.State.ActiveStyleId);
             Assert.Equal(f.Id, data.State.Ownership.OwnerId);
@@ -185,10 +160,6 @@ public sealed partial class CombatAcquisitionTests
         Assert.Equal(3, result.Equipment.Select(x => x.ItemInstanceId).Distinct().Count());
         Assert.Equal(3, (await f.Progress()).PlainVictories);
         Assert.Equal("plain.staff", (await f.Progress()).Plain!.Equipment.State.DefinitionId);
-        var starter = EquipmentData.Create(EquipmentState.Award(Guid.NewGuid(), f.Catalog.Equipment.Evaluator,
-            "plain.staff", 1, 0, new(EquipmentAwardKind.QuestReward, "starter", "test"),
-            new(EquipmentOwnershipKind.BoundPersonal, f.Id)), f.Catalog.Equipment.Evaluator);
-        Assert.Equal(0, starter.State.BaseSalvageScrap);
     }
 
     [Fact]
@@ -296,9 +267,11 @@ public sealed partial class CombatAcquisitionTests
     public async Task Invalid_reward_definitions_abort_instead_of_losing_earned_rewards()
     {
         await using var f = await Fixture.Create();
-        f.Db.ItemBases.Remove(await f.Db.ItemBases.SingleAsync(x => x.Id == "tempered_scrap"));
+        await f.Process(0, 1, win: false);
+        await f.Select("plain.staff");
+        f.Db.ItemBases.Remove(await f.Db.ItemBases.SingleAsync(x => x.Id == "staff"));
         await f.Db.SaveChangesAsync();
-        await Assert.ThrowsAsync<InvalidOperationException>(() => f.Process(0, 240));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => f.Process(1, 360));
         Assert.Empty(await f.Db.InventoryItems.ToListAsync());
     }
 
@@ -371,7 +344,7 @@ public sealed partial class CombatAcquisitionTests
         Assert.Single(receipt.GetForeignKeys());
     }
 
-    private static IEnumerable<InventoryItem> Flatten(CombatAcquisitionRewardOutcome outcome) => outcome.Equipment.Concat(outcome.Scrap).Concat(outcome.Sigils);
+    private static IEnumerable<InventoryItem> Flatten(CombatAcquisitionRewardOutcome outcome) => outcome.Equipment.Concat(outcome.Sigils);
 
     [Fact]
     public async Task Real_calculator_includes_ordinary_rewards_and_summary_preserves_frozen_item_identities()
@@ -388,7 +361,6 @@ public sealed partial class CombatAcquisitionTests
             Assert.Equal(240, result.PowerRewards.Count);
             Assert.Equal(240, result.TotalCinders);
             Assert.Equal(480, result.TotalExperience);
-            Assert.Equal(1, result.CraftingRewards.Where(x => x.ItemInstance.ItemBaseId == "tempered_scrap").Sum(x => x.Quantity));
             Assert.Equal(240, result.CraftingRewards.Where(x => x.ItemInstance.ItemBaseId == "soul_dust").Sum(x => x.Quantity));
             foreach (var item in result.PowerRewards) Assert.True(awardedIds.Add(item.ItemInstanceId));
             sessions.Enqueue(new IdleCombatSessionFactory().Create(facts, result));
@@ -401,7 +373,6 @@ public sealed partial class CombatAcquisitionTests
         Assert.Equal(960, session.CombatSummary.TotalExperience);
         Assert.Equal(awardedIds.Order(), session.CombatSummary.RewardBreakdown.PowerItems.Select(x => x.ItemInstanceId).Order());
         Assert.All(session.CombatSummary.RewardBreakdown.PowerItems, x => Assert.Equal(1, x.Quantity));
-        Assert.Equal(2, session.CombatSummary.RewardBreakdown.CraftingItems.Where(x => x.ItemInstance.ItemBaseId == "tempered_scrap").Sum(x => x.Quantity));
     }
 
     private sealed class RewardDependencies : IBonusService, ILootService, ISoulstoneRewardCalculator,
@@ -490,7 +461,6 @@ public sealed partial class CombatAcquisitionTests
                 var definition = equipment.Evaluator.Evaluate(option.DefinitionId, 1, 0, null);
                 f.Db.ItemBases.Add(new EquipmentBase { Id = definition.Archetype.ItemBaseId, Name = option.Name, EquipmentType = option.EquipmentType });
             }
-            f.Db.ItemBases.Add(new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource });
             foreach (var sigil in f.Catalog.Pools.SelectMany(p => p.Sigils))
                 f.Db.ItemBases.Add(new ItemBase { Id = sigil.ItemBaseId, Name = sigil.FamilyId, IsBound = true, ItemType = ItemType.Resource });
             await f.Db.SaveChangesAsync();

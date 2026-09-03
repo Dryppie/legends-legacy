@@ -29,13 +29,13 @@ public sealed partial class LiveOpsPlayerSupportSnapshotService
             run.CurrentRoomIndex, run.CreatedAt, run.CompletedAt, run.RewardsClaimedAt,
             commitment is null ? null : new(commitment.CharacterId, commitment.RunId,
                 commitment.DungeonId, commitment.PoolId, commitment.Difficulty, commitment.MatchingChance,
-                commitment.GuaranteeCompletions, commitment.CompletionScrap,
+                commitment.GuaranteeCompletions,
                 commitment.Target is { } target
                     ? new(target.State.Id, target.ItemBaseId, target.DisplayName,
                         ["Frozen target; not an award"], DescribeEquipment(target)) : null),
             receipt is null ? null : new(receipt.RunId, receipt.Outcome.PoolId,
                 receipt.Outcome.SecuredAtUtc, receipt.ClaimedAtUtc, receipt.Outcome.PreviousProgress,
-                receipt.Outcome.Progress, receipt.Outcome.Scrap,
+                receipt.Outcome.Progress,
                 receipt.Outcome.Equipment is { } award
                     ? new(award.State.Id, award.ItemBaseId, award.DisplayName,
                         ["Recorded dungeon award"], DescribeEquipment(award)) : null),

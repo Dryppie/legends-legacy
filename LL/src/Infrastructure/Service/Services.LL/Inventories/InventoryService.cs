@@ -95,11 +95,6 @@ public class InventoryService : IInventoryService
         await _inventoryRepository.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
     }
 
-    public async Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken)
-    {
-        return await _inventoryRepository.ScrapEquipments(characterId, parsedGuids, cancellationToken);
-    }
-
     public async Task<InventoryTransferResult> TransferItemAsync(
         Guid senderCharacterId,
         Guid recipientCharacterId,

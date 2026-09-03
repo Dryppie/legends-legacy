@@ -116,7 +116,7 @@ presenter
     expect(presenter.presentCurrentObjective).toHaveBeenCalledOnceWith();
   });
 
-  it('clears the new marker when an item is inspected but not when scrapped', () => {
+  it('clears the new marker when an item is inspected', () => {
     const newItem = inventoryEquipment('weapon', EquipmentType.OneHanded);
     newItem.isNew = true;
     const equipment = signal<InventoryItem[]>([newItem]);
@@ -141,65 +141,9 @@ jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
         ),
     );
 
-    component.enterScrapMode();
-    component.handleInventoryItemClick(newItem);
-    expect(state.markSeen).not.toHaveBeenCalled();
-
-    component.enterBrowseMode();
     component.handleInventoryItemClick(newItem);
     expect(state.markSeen).toHaveBeenCalledOnceWith('weapon');
     expect(component.selectedItem()?.isNew).toBeFalse();
-  });
-
-  it('includes tools in scrap mode', () => {
-    const equipment = signal<InventoryItem[]>([
-      inventoryEquipment('weapon', EquipmentType.OneHanded),
-      inventoryEquipment('tool', EquipmentType.Tool),
-    ]);
-    const objective = signal<QuestObjectiveState | undefined>(undefined);
-
-    const component = TestBed.runInInjectionContext(
-      () =>
-        new InventoryComponent({ equipment: equipment.asReadonly() } as InventoryStateService,
-{
-            journal: signal<QuestJournal>({ quests: [] }).asReadonly(),
-            pinnedOnboardingObjective: objective.asReadonly(),
-          } as QuestStateService,
-jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
-            'presentCurrentObjective',
-          ])
-        ),
-    );
-
-    expect(
-      component.scrapableEquipment().map((item) => item.itemInstance.id),
-    ).toEqual(['weapon', 'tool']);
-  });
-
-  it('opens scrap mode with the inspected equipment preselected', () => {
-    const equipmentItem = inventoryEquipment(
-      'selected-weapon',
-      EquipmentType.OneHanded,
-    );
-    const equipment = signal<InventoryItem[]>([equipmentItem]);
-    const objective = signal<QuestObjectiveState | undefined>(undefined);
-    const component = TestBed.runInInjectionContext(
-      () =>
-        new InventoryComponent({ equipment: equipment.asReadonly() } as InventoryStateService,
-{
-            journal: signal<QuestJournal>({ quests: [] }).asReadonly(),
-            pinnedOnboardingObjective: objective.asReadonly(),
-          } as QuestStateService,
-jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
-            'presentCurrentObjective',
-          ])
-        ),
-    );
-
-    component.beginScrappingItem(equipmentItem);
-
-    expect(component.isScrapMode).toBeTrue();
-    expect(component.selectedItems).toEqual([equipmentItem]);
   });
 
   it('donates owned unequipped equipment to the current guild', () => {
@@ -274,7 +218,7 @@ guildState
     expect(guildState.donateVaultItem).not.toHaveBeenCalled();
   });
 
-  it('sorts scrap equipment by quality from highest to lowest', () => {
+  it('sorts equipment by quality from highest to lowest', () => {
     const equipment = signal<InventoryItem[]>([
       inventoryEquipment('standard', EquipmentType.Head, ItemQuality.Standard),
       inventoryEquipment(
@@ -297,8 +241,6 @@ jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
           ])
         ),
     );
-    component.enterScrapMode();
-
     component.setInventorySort('Quality');
 
     expect(component.filteredItems.map((item) => item.itemInstance.id)).toEqual(
@@ -573,13 +515,13 @@ jasmine.createSpyObj<QuestPresenterService>('QuestPresenterService', [
     const cache = inventorySelectionContainer('held-cache');
     cache.itemInstance.itemBase.selectionCrate = {
       selectionLabel: 'Resource',
-      options: [{ id: 'tempered_scrap', name: 'Tempered Scrap', quantity: 2 }],
+      options: [{ id: 'item.monster_core.lesser', name: 'Lesser Monster Core', quantity: 2 }],
     };
     const component = createStockComponent([cache]);
     component.selectInventoryItem(cache);
-    expect(component.selectedContainerOptionId()).toBe('tempered_scrap');
+    expect(component.selectedContainerOptionId()).toBe('item.monster_core.lesser');
     expect(component.selectionContainerMetadata(cache)?.options).toEqual([
-      { id: 'tempered_scrap', name: 'Tempered Scrap', quantity: 2 },
+      { id: 'item.monster_core.lesser', name: 'Lesser Monster Core', quantity: 2 },
     ]);
   });
 
@@ -722,13 +664,13 @@ inventoryService
     );
   });
 
-  it('sorts and searches Forge equipment by rank and style', () => {
+  it('sorts and searches equipment by authored rank and style', () => {
     const items = [inventoryEquipment('alpha', EquipmentType.Head), inventoryEquipment('zeta', EquipmentType.Head)];
     items.forEach((item, index) => {
       (item.itemInstance as EquipmentInstance).progression = {
         modelVersion: 1, balanceVersion: 1, definitionId: item.itemInstance.id, archetypeId: 'plain.head',
         rank: index ? 4 : 1, nativeStyleId: null, activeStyleId: index ? 'blueprint_fury' : null,
-        ownership: 'BoundPersonal', paidScrap: 0, paidCinders: 0,
+        ownership: 'BoundPersonal',
       };
     });
     const component = TestBed.runInInjectionContext(() => new InventoryComponent({ equipment: signal(items) } as unknown as InventoryStateService,
@@ -834,20 +776,6 @@ function inventoryStock(
     },
     quantity: 1,
   } as InventoryItem;
-}
-
-function inventoryBlueprint(id: string): InventoryItem {
-  const item = inventoryStock(id, 'Blueprint: Endurance', 'blueprint-item');
-  item.itemInstance.itemBase.blueprint = {
-    blueprintId: 'blueprint.endurance',
-    name: 'Endurance',
-    bonusStatProfile: {},
-    requiredRecipeTags: [],
-    anyRecipeTags: [],
-    compatibleRecipeCount: 1,
-    compatibleRecipes: [{ id: 'recipe.sword', name: 'Sword' }],
-  };
-  return item;
 }
 
 function inventorySelectionContainer(id: string): InventoryItem {

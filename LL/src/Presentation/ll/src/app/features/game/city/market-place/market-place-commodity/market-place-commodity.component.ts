@@ -43,7 +43,6 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
   getMarketplaceResourceSortRank,
-  isMarketplaceBlueprintResource,
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
 import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
@@ -236,11 +235,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
     }
 
     return [...byBase.values()].sort((a, b) => {
-      const blueprintRank =
-        Number(isMarketplaceBlueprintResource(b.base)) -
-        Number(isMarketplaceBlueprintResource(a.base));
-      if (blueprintRank !== 0) return blueprintRank;
-
       const tierRank =
         getMarketplaceResourceSortRank(a.base, this._subcategory()) -
         getMarketplaceResourceSortRank(b.base, this._subcategory());
@@ -336,8 +330,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly catalogueTitle = computed(() => {
     switch (this._category()) {
-      case 'blueprints':
-        return 'Blueprint catalogue';
       case 'catalysts':
         return 'Catalyst catalogue';
       case 'essences':
@@ -349,8 +341,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly catalogueHeading = computed(() => {
     switch (this._category()) {
-      case 'blueprints':
-        return 'Blueprints';
       case 'catalysts':
         return 'Catalysts';
       case 'essences':
@@ -763,9 +753,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   commodityDisplayName(commodity: Commodity): string {
-    return this._category() === 'blueprints'
-      ? commodity.base.name.replace(/^Blueprint:\s*/i, '')
-      : commodity.base.name;
+    return commodity.base.name;
   }
 
   isFavoriteCommodity(commodity: Commodity): boolean {

@@ -270,8 +270,6 @@ export interface EquipmentSupportDescriptor {
   definitionId: string; archetypeId: string; tier: number; rank: number; balanceVersion: number;
   rarity: string; nativeStyleId: string | null; activeStyleId: string | null;
   ownership: string; ownerId: string; awardKind: string; sourceId: string; awardId: string;
-  baseSalvageScrap: number; paidScrap: number; paidCinders: number;
-  investments: { operationId: string; rank: number; scrap: number; cinders: number }[];
 }
 
 export interface EquipmentSupportItem {
@@ -284,12 +282,12 @@ export interface EquipmentSupportDungeonRun {
   createdAtUtc: string; completedAtUtc: string | null; rewardsClaimedAtUtc: string | null;
   commitment: {
     characterId: string; runId: string; dungeonId: string; poolId: string; difficulty: number;
-    matchingChance: number; guaranteeCompletions: number; completionScrap: number;
+    matchingChance: number; guaranteeCompletions: number;
     target: EquipmentSupportItem | null;
   } | null;
   receipt: {
     runId: string; poolId: string; securedAtUtc: string; claimedAtUtc: string | null;
-    previousProgress: number; progress: number; scrap: number; equipment: EquipmentSupportItem | null;
+    previousProgress: number; progress: number; equipment: EquipmentSupportItem | null;
   } | null;
   rewardRowCount: number;
   rewardRows: {
@@ -302,14 +300,13 @@ export interface EquipmentSupportSnapshot {
   dungeonRun?: EquipmentSupportDungeonRun | null;
   rowLimit: number; equipmentCount: number; pendingRewardCount: number; progressTruncated: boolean;
   items: EquipmentSupportItem[];
-  pendingRewards: { runId: string; poolId: string; securedAtUtc: string; scrap: number; equipment: EquipmentSupportItem | null }[];
+  pendingRewards: { runId: string; poolId: string; securedAtUtc: string; equipment: EquipmentSupportItem | null }[];
   protection: { poolId: string; targetDefinitionId: string | null; completionsWithoutMatch: number; revision: number }[];
   ordinary: {
     poolId: string; hasEnteredRegion: boolean; targetDefinitionId: string | null; plainVictories: number;
     requiredPlainVictories: number | null; sigilFamilyId: string | null; sigilVictories: number;
-    requiredSigilVictories: number | null; scrapRemainder: number; revision: number; lastEncounterAtUtc: string | null;
+    requiredSigilVictories: number | null; revision: number; lastEncounterAtUtc: string | null;
   }[];
-  learnedStyles: { styleId: string; learnedAtUtc: string; freeApplicationOperationId: string | null }[];
 }
 
 export interface PlayerSupportSnapshot {

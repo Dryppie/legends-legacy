@@ -9,12 +9,10 @@ public static class EquipmentKeys
     public const string ProtectedDungeonSource = "model-e:protected-dungeon";
     public const string PlainRecoverySource = "model-e:plain-recovery";
     public const string BaselineRecoverySource = "model-e:baseline-recovery";
-    public const string SalvageSource = "model-e:salvage";
     public const string AdministrationGrantIdentity = "model-e:admin-compensation";
     public const string StarterLoadoutObjective = "ModelEStarterLoadoutEquipped";
     public const string PlainTargetObjective = "ModelEPlainTargetEquipped";
     public const string PlainTargetTrigger = "ModelEPlainTargetSecured";
-    public const string ForgeSettlementReason = "ModelEForgeCombatSettlement";
     public const string TargetSelectionSettlementReason = "ModelEOrdinarySelectionSettlement";
     public const string ReferenceCharacterIdentity = "model-e-reference-character-v1";
     public const string ReferenceEquipmentIdentity = "model-e-reference-equipment-v1";

@@ -89,7 +89,7 @@ public sealed class EquipmentAcquisitionService(EquipmentAcquisitionCatalog cata
                 new(EquipmentOwnershipKind.UnboundPersonal, run.CharacterId)), catalog.Evaluator);
         }
         run.EquipmentCommitment = new(run.CharacterId, run.Id, pool.Id, dungeon.Id, pool.Difficulty,
-            pool.MatchingChance, pool.GuaranteeCompletions, pool.CompletionScrap, target);
+            pool.MatchingChance, pool.GuaranteeCompletions, target);
     }
 
     public async Task CompleteAsync(DungeonRun run, bool firstCompletion, CancellationToken ct)
@@ -108,9 +108,6 @@ public sealed class EquipmentAcquisitionService(EquipmentAcquisitionCatalog cata
             await runs.AddPendingRewardAsync(run, new RunReward { Id = equipment.State.Id, ItemId = equipment.ItemBaseId,
                 Name = equipment.DisplayName, ItemType = ItemType.Equipment, Quantity = 1, Source = EquipmentKeys.ProtectedDungeonSource,
                 ProgressionData = equipment }, ct);
-        if (outcome.Scrap > 0)
-            await runs.AddPendingRewardAsync(run, new RunReward { ItemId = "tempered_scrap", Name = "Tempered Scrap",
-                ItemType = ItemType.Resource, Quantity = outcome.Scrap, Source = EquipmentKeys.DungeonCompletionSource }, ct);
         repository.AddCompletion(new() { CharacterId = run.CharacterId, RunId = run.Id, Outcome = outcome });
         await outbox.EnqueueAsync(GameEventTypes.EquipmentSecured, outcome, run.CharacterId, null, ct);
     }

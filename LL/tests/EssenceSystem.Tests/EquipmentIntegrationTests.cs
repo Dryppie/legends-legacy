@@ -46,7 +46,6 @@ public sealed class EquipmentIntegrationTests
         var writer = new RepositoryRewardWriter(db);
         var disabled = await Service(db, writer, false).GetAccessAsync(characterId, CancellationToken.None);
         Assert.False(disabled.StarterAcquisitionEnabled);
-        Assert.False(disabled.ForgeEnabled);
         Assert.Empty(disabled.Starters);
         var service = Service(db, writer);
         var access = await service.GetAccessAsync(characterId, CancellationToken.None);
@@ -92,27 +91,26 @@ public sealed class EquipmentIntegrationTests
     }
 
     [Fact]
-    public void Frozen_json_preserves_paid_basis_and_rejects_unsupported_or_corrupt_state()
+    public void Frozen_json_preserves_authored_state_and_rejects_unsupported_or_corrupt_state()
     {
         var catalog = Catalog();
-        var state = Award(catalog, Guid.NewGuid(), EquipmentAwardKind.RandomDiscovery)
-            .RecordPaidRankImprovement(catalog.Evaluator, Guid.NewGuid(), 5, 250);
+        var state = EquipmentState.Restore(
+            Award(catalog, Guid.NewGuid(), EquipmentAwardKind.RandomDiscovery).ToSnapshot() with { Rank = 3 });
         var descriptor = EquipmentData.Create(state, catalog.Evaluator);
         var restored = EquipmentData.Deserialize(descriptor.Serialize());
         Assert.Equal(descriptor.Serialize(), restored.Serialize());
-        Assert.Equal(5, restored.EquipmentState.PaidScrap);
-        Assert.Equal(250, restored.EquipmentState.PaidCinders);
-        Assert.Equal(2, restored.EquipmentState.GetSalvageScrap());
+        Assert.Equal(3, restored.EquipmentState.Rank);
         Assert.Throws<InvalidOperationException>(() => EquipmentState.Restore(state.ToSnapshot() with { ModelVersion = 999 }));
-        Assert.Throws<InvalidOperationException>(() => EquipmentState.Restore(state.ToSnapshot() with { Rank = 0 }));
+        Assert.Throws<InvalidOperationException>(() => EquipmentState.Restore(state.ToSnapshot() with { Rank = 6 }));
         Assert.Throws<InvalidOperationException>(() => EquipmentState.Restore(state.ToSnapshot() with
         {
+            Provenance = new(EquipmentAwardKind.QuestReward, "quest.test", "award.test"),
             Ownership = new(EquipmentOwnershipKind.UnboundPersonal, state.Ownership.OwnerId)
         }));
     }
 
     [Fact]
-    public async Task Descriptor_and_snapshot_roundtrip_keep_stats_and_behavior_after_live_upgrade()
+    public async Task Descriptor_and_snapshot_roundtrip_keep_frozen_stats_after_live_item_changes()
     {
         await using var db = CreateDb();
         var catalog = Catalog();
@@ -125,7 +123,8 @@ public sealed class EquipmentIntegrationTests
         db.ItemInstances.Add(instance);
         db.CharacterSnapshots.Add(snapshot);
         await db.SaveChangesAsync();
-        instance.ApplyProgressionData(EquipmentData.Create(state.RecordPaidRankImprovement(catalog.Evaluator, Guid.NewGuid(), 5, 250), catalog.Evaluator));
+        instance.ApplyProgressionData(EquipmentData.Create(
+            EquipmentState.Restore(state.ToSnapshot() with { Rank = 1 }), catalog.Evaluator));
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
 
@@ -182,7 +181,7 @@ public sealed class EquipmentIntegrationTests
         db.ChangeTracker.Clear();
         var awarded = await db.ItemInstances.OfType<EquipmentInstance>().Include(x => x.ItemBase).ToListAsync();
         Assert.Equal(selection.Length, awarded.Count);
-        Assert.All(awarded, x => { Assert.True(x.IsBound); Assert.Equal(0, x.ProgressionData!.EquipmentState.GetSalvageScrap()); Assert.Null(x.BaseRecipeId); });
+        Assert.All(awarded, x => { Assert.True(x.IsBound); Assert.Null(x.BaseRecipeId); });
         var repository = new EquipmentSlotRepository(db);
         foreach (var equipment in awarded.OrderBy(x => x.EquipmentBase.EquipmentType == EquipmentType.OffHand))
             Assert.True((await repository.EquipEquipmentAsync(characterId, equipment.Id, null, CancellationToken.None)).Succeeded);
@@ -259,7 +258,7 @@ public sealed class EquipmentIntegrationTests
     }
 
     [Fact]
-    public async Task Equip_binds_discoveries_and_legacy_scrap_cannot_destroy_model_e_equipment()
+    public async Task Equip_binds_discoveries_and_current_equipment_rejects_legacy_tempering()
     {
         await using var db = CreateDb();
         var characterId = await Seed(db);
@@ -278,7 +277,6 @@ public sealed class EquipmentIntegrationTests
         var persisted = await db.ItemInstances.OfType<EquipmentInstance>().Include(x => x.ItemBase).SingleAsync();
         Assert.True(persisted.IsBound);
         Assert.Throws<InvalidOperationException>(() => persisted.BindEquipmentProgressionForEquip(Guid.NewGuid()));
-        Assert.Null(await new InventoryRepository(db).ScrapEquipments(characterId, [persisted.Id], CancellationToken.None));
         Assert.Single(await db.InventoryItems.ToListAsync());
         Assert.Throws<InvalidOperationException>(() => new TemperingMechanicsService().ApplyTemperingAttempt(persisted, null!, new Random(1)));
     }
@@ -300,7 +298,7 @@ public sealed class EquipmentIntegrationTests
     private static LLDbContext CreateDb() => new(DbOptions());
     private static StarterEquipmentService Service(LLDbContext db, ILootRewardWriter writer, bool enabled = true) => new(Catalog(),
         new StarterEquipmentRepository(db), new QuestRepository(db), new ItemBaseRepository(db), writer,
-        Options.Create(new EquipmentProgressionOptions { StarterAcquisitionEnabled = enabled, ForgeEnabled = enabled }));
+        Options.Create(new EquipmentProgressionOptions { StarterAcquisitionEnabled = enabled }));
 
     private static async Task<Guid> Seed(LLDbContext db, bool completeSoulArchive = true)
     {

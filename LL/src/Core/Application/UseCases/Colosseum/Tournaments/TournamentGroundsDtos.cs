@@ -369,15 +369,13 @@ public sealed record TournamentRewardGrantDto(
     int ArenaGlory,
     int Cinders,
     int Soulstones,
-    int BlueprintSelectionBoxes,
     int SigilFragments,
     string Status,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset? ClaimedAtUtc,
-    int TemperedScrap = 0) : IMapFrom<TournamentRewardGrantEntry>
+    DateTimeOffset? ClaimedAtUtc) : IMapFrom<TournamentRewardGrantEntry>
 {
     public TournamentRewardGrantDto()
-        : this(Guid.Empty, Guid.Empty, string.Empty, string.Empty, null, 0, 0, 0, 0, 0, string.Empty, default, null)
+        : this(Guid.Empty, Guid.Empty, string.Empty, string.Empty, null, 0, 0, 0, 0, string.Empty, default, null)
     {
     }
 
@@ -393,12 +391,10 @@ public sealed record TournamentRewardTierDto(
     int ArenaGlory,
     int Cinders,
     int Soulstones,
-    int BlueprintSelectionBoxes,
-    int SigilFragments,
-    int TemperedScrap = 0) : IMapFrom<TournamentRewardTier>
+    int SigilFragments) : IMapFrom<TournamentRewardTier>
 {
     public TournamentRewardTierDto()
-        : this(string.Empty, null, 0, 0, 0, 0, 0, 0)
+        : this(string.Empty, null, 0, 0, 0, 0)
     {
     }
 
@@ -414,13 +410,10 @@ public sealed record ClaimTournamentRewardsResponseDto(
     int Cinders,
     int Soulstones,
     int SigilFragments,
-    int BlueprintSelectionBoxes,
-    Guid? InventoryGrantId,
-    IReadOnlyList<InventoryItemDto> InventoryRewards,
-    int TemperedScrap = 0) : IMapFrom<ClaimTournamentRewardsResult>
+    IReadOnlyList<InventoryItemDto> InventoryRewards) : IMapFrom<ClaimTournamentRewardsResult>
 {
     public ClaimTournamentRewardsResponseDto()
-        : this(false, 0, 0, 0, 0, 0, null, [])
+        : this(false, 0, 0, 0, 0, [])
     {
     }
 
@@ -429,4 +422,3 @@ public sealed record ClaimTournamentRewardsResponseDto(
         profile.CreateMap<ClaimTournamentRewardsResult, ClaimTournamentRewardsResponseDto>();
     }
 }
-

@@ -20,7 +20,7 @@ import {
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 
 describe('player journey', () => {
-  it('guides character using the Forges through equipment and accessories without unlocking tutorial crafting', () => {
+  it('guides the character through equipment and accessories without unlocking tutorial crafting', () => {
     const current = journal(
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,

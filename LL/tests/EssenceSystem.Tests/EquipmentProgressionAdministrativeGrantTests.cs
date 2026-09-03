@@ -106,15 +106,12 @@ public sealed partial class LiveOpsAdministrationTests
             Assert.Equal(EquipmentOwnershipKind.BoundPersonal, data.State.Ownership.Kind);
             Assert.Equal(EquipmentAwardKind.Administrative, data.State.Provenance.Kind);
             Assert.Equal(operation.ToString("N"), data.State.Provenance.AwardId);
-            Assert.Equal(0, data.EquipmentState.GetSalvageScrap());
-            Assert.Empty(data.State.Investments);
             Assert.False(data.State.Ownership.CanTradeOrDonate);
         });
         Assert.Equal(AdministrationRiskLevel.HighValue, first.Value.Action.RiskLevel);
         using var audit = JsonDocument.Parse(first.Value.Action.DetailsJson);
         Assert.Equal(definition, audit.RootElement.GetProperty("Equipment").GetProperty("DefinitionId").GetString());
         Assert.Equal(2, audit.RootElement.GetProperty("InstanceIds").GetArrayLength());
-        Assert.Equal(0, audit.RootElement.GetProperty("EquipmentItem").GetProperty("State").GetProperty("BaseSalvageScrap").GetInt32());
         var ledgerCount = await db.EconomyLedger.CountAsync();
         Assert.True(ledgerCount > 0);
         db.ChangeTracker.Clear();
@@ -177,12 +174,10 @@ public sealed partial class LiveOpsAdministrationTests
         else Assert.Empty(options.Options);
     }
 
-    [Theory]
-    [InlineData("tempered_scrap", true)]
-    [InlineData("item.monster_core.lesser", true)]
-    [InlineData("item.blueprint_selection_box", true)]
-    public async Task EquipmentProgression_compensation_grants_supported_items(string id, bool allowed)
+    [Fact]
+    public async Task EquipmentProgression_compensation_grants_supported_items()
     {
+        const string id = "item.monster_core.lesser";
         await using var db = CreateDb();
         var (_, owner) = AddPlayer(db);
         db.Inventories.Add(new Inventory { CharacterId = owner });
@@ -191,8 +186,7 @@ public sealed partial class LiveOpsAdministrationTests
         var service = CreateService(db, new RecordingRefreshTokenRepository(), equipmentProgressionCatalog: EquipmentCatalog());
         var result = await service.GrantCompensationItemsAsync(Guid.NewGuid(), owner, new("support|one", "Support One"), id, 3,
             "CASE-resource", null, CancellationToken.None);
-        Assert.Equal(allowed, result.IsSuccess);
-        if (allowed) Assert.Equal(id, Assert.Single(result.Value!.GrantedItems).ItemInstance.ItemBaseId);
-        else Assert.Empty(db.AdminActions.Local);
+        Assert.True(result.IsSuccess);
+        Assert.Equal(id, Assert.Single(result.Value!.GrantedItems).ItemInstance.ItemBaseId);
     }
 }

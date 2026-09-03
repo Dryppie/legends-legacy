@@ -16,12 +16,8 @@
             <div><dt>Native / active style</dt><dd>{{ gear.nativeStyleId || 'Plain' }} / {{ gear.activeStyleId || 'Plain' }}</dd></div>
             <div><dt>Ownership</dt><dd>{{ gear.ownership }} · <code>{{ gear.ownerId }}</code></dd></div>
             <div><dt>Original award</dt><dd>{{ gear.awardKind }} · {{ gear.sourceId }} · <code>{{ gear.awardId }}</code></dd></div>
-            <div><dt>Salvage basis</dt><dd>{{ gear.baseSalvageScrap }} base Scrap · {{ gear.paidScrap }} paid Scrap · {{ gear.paidCinders }} paid Cinders</dd></div>
           </dl>
-          <div class="support-list">@for (investment of gear.investments; track investment.operationId) {
-            <div><div><strong>Paid rank {{ investment.rank }} · {{ investment.scrap }} Scrap / {{ investment.cinders }} Cinders</strong><code>{{ investment.operationId }}</code></div></div>
-          } @empty { <p class="support-empty">No paid rank investment recorded. Awarded ranks are not paid investment.</p> }</div>
-        } @else { <p class="support-note">Retained legacy equipment; no Forge investment or ownership is inferred.</p> }
+        } @else { <p class="support-note">This item has no current equipment descriptor.</p> }
       </details>
     } @empty { <p class="support-empty">No equipment in the inspected locations.</p> }
   </section>
@@ -41,7 +37,7 @@
           <dl class="support-definition">
             <div><dt>Saved owner / run</dt><dd><code>{{ commitment.characterId }}</code> / <code>{{ commitment.runId }}</code></dd></div>
             <div><dt>Saved dungeon / pool</dt><dd>{{ commitment.dungeonId }} / {{ commitment.poolId }}</dd></div>
-            <div><dt>Terms at entry</dt><dd>Difficulty {{ commitment.difficulty }} · {{ commitment.matchingChance | percent: '1.0-4' }} matching chance · {{ commitment.guaranteeCompletions }} completion threshold · {{ commitment.completionScrap }} completion Scrap</dd></div>
+            <div><dt>Terms at entry</dt><dd>Difficulty {{ commitment.difficulty }} · {{ commitment.matchingChance | percent: '1.0-4' }} matching chance · {{ commitment.guaranteeCompletions }} completion threshold</dd></div>
           </dl>
           @if (commitment.target; as target) {
             <p><strong>{{ target.name }}</strong> · Frozen target; not an award</p>
@@ -50,10 +46,10 @@
               <div><dt>Frozen identity</dt><dd>{{ target.progression?.definitionId }} / {{ target.progression?.archetypeId }}</dd></div>
               <div><dt>Frozen equipment</dt><dd>Tier {{ target.progression?.tier }} · {{ target.progression?.rarity }} · Rank {{ target.progression?.rank }} · Balance {{ target.progression?.balanceVersion }}</dd></div>
               <div><dt>Native / active style</dt><dd>{{ target.progression?.nativeStyleId || 'Plain' }} / {{ target.progression?.activeStyleId || 'Plain' }}</dd></div>
-              <div><dt>Template ownership / salvage</dt><dd>{{ target.progression?.ownership }} · {{ target.progression?.baseSalvageScrap }} base Scrap</dd></div>
+              <div><dt>Template ownership</dt><dd>{{ target.progression?.ownership }}</dd></div>
             </dl>
-            <p class="support-note">The recorded outcome determines final binding and salvage basis. Current target selection and content changes do not replace these saved entry terms.</p>
-          } @else { <p class="support-empty">No equipment target was committed. The saved completion Scrap terms still apply to a qualifying completion.</p> }
+            <p class="support-note">The recorded outcome determines final ownership. Current target selection and content changes do not replace these saved entry terms.</p>
+          } @else { <p class="support-empty">No equipment target was committed.</p> }
         } @else { <p class="support-empty">No equipment commitment recorded for this run. No current target or cohort is inferred.</p> }
       </details>
       <details class="equipment-support-detail" open><summary>Recorded protected completion</summary>
@@ -63,11 +59,10 @@
             <div><dt>Secured</dt><dd>{{ receipt.securedAtUtc | date: 'medium' }}</dd></div>
             <div><dt>Receipt claimed</dt><dd>{{ receipt.claimedAtUtc ? (receipt.claimedAtUtc | date: 'medium') : 'Unclaimed' }}</dd></div>
             <div><dt>Recorded progress change</dt><dd>{{ receipt.previousProgress }} → {{ receipt.progress }}</dd></div>
-            <div><dt>Recorded Scrap</dt><dd>{{ receipt.scrap }}</dd></div>
           </dl>
           @if (receipt.equipment; as award) {
             <p><strong>{{ award.name }}</strong> · <code>{{ award.instanceId }}</code></p>
-            <p>Rank {{ award.progression?.rank }} · Balance {{ award.progression?.balanceVersion }} · {{ award.progression?.activeStyleId || 'Plain' }} · {{ award.progression?.ownership }} · {{ award.progression?.baseSalvageScrap }} base Scrap</p>
+            <p>Rank {{ award.progression?.rank }} · Balance {{ award.progression?.balanceVersion }} · {{ award.progression?.activeStyleId || 'Plain' }} · {{ award.progression?.ownership }}</p>
           } @else { <p class="support-empty">This receipt records no equipment award.</p> }
         } @else { <p class="support-empty">No protected completion receipt recorded for this run.</p> }
       </details>
@@ -97,20 +92,15 @@
     </div></section>
     <section><h3>Ordinary acquisition</h3><div class="support-list">
       @for (pool of data.ordinary; track pool.poolId) {
-        <div><div><strong>{{ pool.poolId }}</strong><small>Target: {{ pool.targetDefinitionId || 'None selected' }} · {{ pool.plainVictories }} / {{ pool.requiredPlainVictories ?? '—' }} victories</small><small>Sigil: {{ pool.sigilFamilyId || 'None selected' }} · {{ pool.sigilVictories }} / {{ pool.requiredSigilVictories ?? '—' }} victories</small><small>Fractional Scrap: {{ pool.scrapRemainder }}/8640 · Revision {{ pool.revision }}</small><small>Last encounter: {{ pool.lastEncounterAtUtc ? (pool.lastEncounterAtUtc | date: 'medium') : 'None recorded' }}</small></div></div>
+        <div><div><strong>{{ pool.poolId }}</strong><small>Target: {{ pool.targetDefinitionId || 'None selected' }} · {{ pool.plainVictories }} / {{ pool.requiredPlainVictories ?? '—' }} victories</small><small>Sigil: {{ pool.sigilFamilyId || 'None selected' }} · {{ pool.sigilVictories }} / {{ pool.requiredSigilVictories ?? '—' }} victories</small><small>Revision {{ pool.revision }}</small><small>Last encounter: {{ pool.lastEncounterAtUtc ? (pool.lastEncounterAtUtc | date: 'medium') : 'None recorded' }}</small></div></div>
       } @empty { <p class="support-empty">No saved ordinary acquisition progress.</p> }
     </div></section>
   </div>
   <section><h3>Unclaimed protected rewards</h3><div class="support-list">
     @for (reward of data.pendingRewards; track reward.runId) {
-      <div><div><strong>{{ reward.equipment?.name || 'No equipment award' }} · {{ reward.scrap }} Scrap</strong><small>{{ reward.poolId }} · Secured {{ reward.securedAtUtc | date: 'medium' }}</small><code>Run {{ reward.runId }}</code>
+      <div><div><strong>{{ reward.equipment?.name || 'No equipment award' }}</strong><small>{{ reward.poolId }} · Secured {{ reward.securedAtUtc | date: 'medium' }}</small><code>Run {{ reward.runId }}</code>
         @if (reward.equipment; as item) { <small>Instance {{ item.instanceId }} · Rank {{ item.progression?.rank }} · {{ item.progression?.activeStyleId || 'Plain' }} · {{ item.progression?.ownership }}</small> }
       </div></div>
     } @empty { <p class="support-empty">No unclaimed protected reward receipts.</p> }
   </div></section>
-  <details class="equipment-support-detail"><summary>Learned styles ({{ data.learnedStyles.length }})</summary><div class="support-list">
-    @for (style of data.learnedStyles; track style.styleId) {
-      <div><div><strong>{{ style.styleId }}</strong><small>Learned {{ style.learnedAtUtc | date: 'medium' }} · {{ style.freeApplicationOperationId ? 'Free application used' : 'Free application available' }}</small>@if (style.freeApplicationOperationId) { <code>{{ style.freeApplicationOperationId }}</code> }</div></div>
-    } @empty { <p class="support-empty">No learned styles.</p> }
-  </div></details>
 } @else { <p class="support-unavailable">{{ section.message }}</p> }

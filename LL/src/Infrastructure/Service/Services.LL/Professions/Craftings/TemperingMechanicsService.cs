@@ -27,7 +27,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         double negativeOutcomeReductionBps = 0)
     {
         if (equipment.HasEquipmentProgression)
-            throw new InvalidOperationException("equipment uses Forge rank improvements.");
+            throw new InvalidOperationException("Current equipment cannot be tempered.");
         if ((equipment.Potential ?? 0) < TemperingConstants.PotentialCost)
             throw new InvalidOperationException("Equipment does not have enough Potential.");
 

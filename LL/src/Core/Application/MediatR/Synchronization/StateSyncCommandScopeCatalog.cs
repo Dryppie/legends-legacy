@@ -224,13 +224,6 @@ public static class StateSyncCommandScopeCatalog
         Register(profiles, [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Character], [],
             refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Equipments.Commands.SelectCombatAcquisition.SelectCombatAcquisitionCommand));
-        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.EquipmentForge], [],
-            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Equipments.Commands.ImproveEquipmentProgressionRank.ImproveEquipmentProgressionRankCommand),
-            typeof(global::Application.UseCases.Equipments.Commands.ChangeEquipmentProgressionStyle.ChangeEquipmentProgressionStyleCommand),
-            typeof(global::Application.UseCases.Equipments.Commands.LearnEquipmentProgressionStyle.LearnEquipmentProgressionStyleCommand),
-            typeof(global::Application.UseCases.Equipments.Commands.SalvageEquipment.SalvageEquipmentCommand));
-
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.Equipment, StateSyncScopes.Inventory], [],
             [StateSyncScopes.Equipment, StateSyncScopes.Inventory],
             refreshCharacterOverview: true,
@@ -406,7 +399,6 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Inventories.Commands.MarkInventoryItemSeen.MarkInventoryItemSeenCommand),
             typeof(global::Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate.OpenCatalystSelectionCrateCommand),
-            typeof(global::Application.UseCases.Inventories.Commands.ScrapEquipments.ScrapEquipmentsCommand),
             typeof(global::Application.UseCases.Inventories.Commands.TransferInventoryItem.TransferInventoryItemCommand));
 
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],

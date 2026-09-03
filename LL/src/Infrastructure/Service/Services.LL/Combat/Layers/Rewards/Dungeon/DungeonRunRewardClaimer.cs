@@ -41,12 +41,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
         var rewardState = GetClaimableRewards(run);
         var equipmentProgressionRewards = run.Status == DungeonRunStatus.Completed
             ? run.PendingRewards.Where(x => x.ProgressionData != null).ToArray() : [];
-        var equipmentProgressionResources = run.Status == DungeonRunStatus.Completed
-            ? run.PendingRewards.Where(x => x.Source == EquipmentKeys.DungeonCompletionSource).ToArray() : [];
-        var frozenBases = await _itemBases.GetItemBasesByIdsAsync(equipmentProgressionRewards.Concat(equipmentProgressionResources).Select(x => x.ItemId).Distinct().ToArray(), cancellationToken);
-        if (equipmentProgressionResources.Any(x => x.ItemId != "tempered_scrap" || x.Quantity <= 0
-            || !frozenBases.TryGetValue(x.ItemId, out var itemBase) || !itemBase.Stackable))
-            throw new InvalidOperationException("The secured Equipment progression completion resources are unavailable or invalid.");
+        var frozenBases = await _itemBases.GetItemBasesByIdsAsync(equipmentProgressionRewards.Select(x => x.ItemId).Distinct().ToArray(), cancellationToken);
         if (equipmentProgressionRewards.Any(x => x.Quantity != 1 || x.ProgressionData!.ItemBaseId != x.ItemId
             || x.ProgressionData.State.Ownership.OwnerId != run.CharacterId || !frozenBases.TryGetValue(x.ItemId, out var itemBase)
             || itemBase is not EquipmentBase equipmentBase || equipmentBase.Stackable || equipmentBase.EquipmentType != x.ProgressionData.EquipmentType))

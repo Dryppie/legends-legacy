@@ -298,8 +298,6 @@ public static class DependencyInjection
                         reward.ArenaGlory is >= 250 and <= 500
                         && reward.Cinders >= 0
                         && reward.Soulstones is >= 20 and <= 50
-                        && reward.TemperedScrap >= 0
-                        && reward.BlueprintSelectionBoxes >= 0
                         && reward.SigilFragments >= 0)),
                 "Tournament Grounds scheduling, playback, and reward settings are invalid.")
             .ValidateOnStart();
@@ -381,9 +379,6 @@ public static class DependencyInjection
         services.AddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(contentRootPath,
             config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
         services.AddScoped<IStarterEquipmentService, StarterEquipmentService>();
-        services.AddSingleton(_ => JsonStarterEquipmentCatalog.LoadForgePrices(Path.Combine(contentRootPath,
-            config["Content:Root"] ?? "Data", "equipment", "equipment-forge-prices.v1.json")));
-        services.AddScoped<IForgeService, ForgeService>();
         services.AddSingleton(sp => JsonStarterEquipmentCatalog.LoadAcquisition(sp.GetRequiredService<StarterEquipmentCatalog>(),
             Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "equipment", "equipment-protection-pools.v1.json")));
         services.AddScoped<IEquipmentAcquisitionEligibility, EquipmentAcquisitionEligibility>();

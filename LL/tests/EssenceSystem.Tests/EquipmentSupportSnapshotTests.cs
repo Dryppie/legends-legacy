@@ -23,7 +23,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
     }
 
     [Fact]
-    public async Task Equipment_snapshot_preserves_paid_basis_locations_and_character_isolation()
+    public async Task Equipment_snapshot_preserves_authored_state_locations_and_character_isolation()
     {
         var seeded = await SeedAsync();
         await using var db = new LLDbContext(seeded.Options);
@@ -32,8 +32,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         var state = EquipmentState.Award(Guid.NewGuid(), catalog.Evaluator, "plain.shortsword", 1, 2,
             new(EquipmentAwardKind.Administrative, "support-test", "award-42"),
             new(EquipmentOwnershipKind.BoundPersonal, seeded.CharacterId));
-        var operation = Guid.NewGuid();
-        state = state.RecordPaidRankImprovement(catalog.Evaluator, operation, 20, 1000);
+        state = EquipmentState.Restore(state.ToSnapshot() with { Rank = 3 });
         var data = EquipmentData.Create(state, catalog.Evaluator);
         var gear = new EquipmentInstance { Id = state.Id, ItemBaseId = basis.Id, ItemBase = basis };
         gear.ApplyProgressionData(data);
@@ -55,11 +54,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
         var item = Assert.Single(snapshot.Items, x => x.InstanceId == gear.Id);
         Assert.Equal(["Inventory", "Equipped: MainHand"], item.Locations);
         Assert.Equal(3, item.Progression!.Rank);
-        Assert.Equal(20, item.Progression.PaidScrap);
-        Assert.Equal(1000, item.Progression.PaidCinders);
-        Assert.Equal(0, item.Progression.BaseSalvageScrap);
         Assert.Equal("award-42", item.Progression.AwardId);
-        Assert.Equal(operation, Assert.Single(item.Progression.Investments).OperationId);
         Assert.Null(Assert.Single(snapshot.Items, x => x.InstanceId == listed.Id).Progression);
         Assert.Equal(data.Serialize(), (await db.Set<EquipmentInstance>().SingleAsync(x => x.Id == gear.Id)).ProgressionData!.Serialize());
     }
@@ -75,16 +70,16 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
             new(EquipmentOwnershipKind.BoundPersonal, seeded.CharacterId)), catalog.Evaluator);
         var runId = Guid.NewGuid();
         db.EquipmentProtectionReceipts.Add(new() { CharacterId = seeded.CharacterId, RunId = runId,
-            Outcome = new(runId, "pool", 7, 0, data, 4, Now) });
+            Outcome = new(runId, "pool", 7, 0, data, Now) });
         var claimedId = Guid.NewGuid();
         db.EquipmentProtectionReceipts.Add(new() { CharacterId = seeded.CharacterId, RunId = claimedId,
-            Outcome = new(claimedId, "pool", 7, 0, data, 4, Now), ClaimedAtUtc = Now });
+            Outcome = new(claimedId, "pool", 7, 0, data, Now), ClaimedAtUtc = Now });
         var protection = new EquipmentProtectionProgress { CharacterId = seeded.CharacterId, PoolId = "pool" };
         protection.Select("later-target");
         db.EquipmentProtectionProgress.Add(protection);
         var ordinary = new CombatAcquisitionProgress { CharacterId = seeded.CharacterId, PoolId = "ordinary" };
         ordinary.Select(null, new("sigil", "sigil-book", 4320));
-        ordinary.Apply(1, Now, true, 36);
+        ordinary.Apply(1, Now, true);
         db.CombatAcquisitionProgress.Add(ordinary);
         await db.SaveChangesAsync();
 
@@ -98,7 +93,6 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
             Assert.Equal(data.State.Id, pending.Equipment!.InstanceId);
             Assert.Equal(1, pending.Equipment.Progression!.Rank);
             Assert.Equal("later-target", Assert.Single(snapshot.Protection).TargetDefinitionId);
-            Assert.Equal(36, Assert.Single(snapshot.Ordinary).ScrapRemainder);
             Assert.Equal(1, Assert.Single(snapshot.Ordinary).SigilVictories);
         }
         db.ChangeTracker.Clear();

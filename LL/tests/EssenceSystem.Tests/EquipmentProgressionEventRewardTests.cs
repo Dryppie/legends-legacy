@@ -34,7 +34,6 @@ public sealed partial class EventQuestSystemTests
         var batch = QuestTrigger.CombatCompleted("region_01_area_01", true, actionCount: 10, winningEncounterCount: 4, gatheredResourceCount: 99);
         await service.ProcessAsync(id, batch, messageId, "IdleCombatEncounterCompleted", default);
         await service.ProcessAsync(id, batch, messageId, "IdleCombatEncounterCompleted", default);
-        await service.ProcessAsync(id, new QuestTrigger("EquipmentTempered", ActionCount: 100), Guid.NewGuid(), "EquipmentTempered", default);
         await service.ProcessAsync(id, QuestTrigger.CombatCompleted("region_01_area_01", false, winningEncounterCount: 0), Guid.NewGuid(), "IdleCombatEncounterCompleted", default);
         var state = Assert.Single((await service.GetJournalAsync(id, default)).Events);
         Assert.Equal(4, state.MyContribution);
@@ -75,7 +74,7 @@ public sealed partial class EventQuestSystemTests
     {
         await using var db = CreateDb();
         var definition = CreateActiveDefinition(1);
-        foreach (var milestone in definition.PersonalMilestones) { milestone.Rewards[0].ItemBaseId = "tempered_scrap"; milestone.Rewards[0].Quantity = 1; }
+        foreach (var milestone in definition.PersonalMilestones) { milestone.Rewards[0].ItemBaseId = "item.monster_core.lesser"; milestone.Rewards[0].Quantity = 1; }
         var id = Guid.NewGuid();
         CompleteTutorial(db, id);
         await db.SaveChangesAsync();
@@ -83,22 +82,22 @@ public sealed partial class EventQuestSystemTests
         var service = EquipmentProgressionEventService(db, definition, writer);
         await service.ProcessAsync(id, QuestTrigger.CombatCompleted("region_01_area_01", true, winningEncounterCount: 3), Guid.NewGuid(), "IdleCombatEncounterCompleted", default);
         var preview = Assert.Single((await service.GetJournalAsync(id, default)).Events);
-        Assert.All(preview.PersonalMilestones, x => Assert.Equal("tempered_scrap", Assert.Single(x.Rewards).ItemBaseId));
+        Assert.All(preview.PersonalMilestones, x => Assert.Equal("item.monster_core.lesser", Assert.Single(x.Rewards).ItemBaseId));
         if (claimAll) await service.ClaimAllMilestonesAsync(id, definition.Id, default);
         else foreach (var milestone in definition.PersonalMilestones) await service.ClaimMilestoneAsync(id, definition.Id, milestone.Key, default);
         Assert.Equal(2, writer.Items.Sum(x => x.Quantity));
-        Assert.All(writer.Items, x => Assert.Equal("tempered_scrap", x.ItemInstance.ItemBaseId));
+        Assert.All(writer.Items, x => Assert.Equal("item.monster_core.lesser", x.ItemInstance.ItemBaseId));
         Assert.Equal(2, await db.EventQuestMilestoneClaims.CountAsync());
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.ClaimAllMilestonesAsync(id, definition.Id, default));
         Assert.Equal(2, writer.Items.Sum(x => x.Quantity));
     }
 
     [Fact]
-    public async Task EquipmentProgression_event_completion_grants_scrap_currency_and_claim_once()
+    public async Task EquipmentProgression_event_completion_grants_item_currency_and_claim_once()
     {
         await using var db = CreateDb();
         var definition = CreateActiveDefinition(1);
-        definition.Rewards = [new() { Key = "scrap", Type = "Item", ItemBaseId = "tempered_scrap", Quantity = 2 },
+        definition.Rewards = [new() { Key = "core", Type = "Item", ItemBaseId = "item.monster_core.lesser", Quantity = 2 },
             new() { Key = "fragments", Type = "SigilFragments", Quantity = 5 }];
         var id = Guid.NewGuid();
         db.Characters.Add(new Character { Id = id, Name = "Event hero" });
@@ -108,7 +107,7 @@ public sealed partial class EventQuestSystemTests
         var service = EquipmentProgressionEventService(db, definition, writer);
         await service.ProcessAsync(id, QuestTrigger.CombatCompleted("region_01_area_01", true), Guid.NewGuid(), "IdleCombatEncounterCompleted", default);
         var preview = Assert.Single((await service.GetJournalAsync(id, default)).Events);
-        Assert.Contains(preview.Rewards, x => x.ItemBaseId == "tempered_scrap" && x.Quantity == 2);
+        Assert.Contains(preview.Rewards, x => x.ItemBaseId == "item.monster_core.lesser" && x.Quantity == 2);
         await service.ClaimAsync(id, definition.Id, default);
         Assert.Equal(2, Assert.Single(writer.Items).Quantity);
         Assert.Equal(5, (await db.Characters.SingleAsync()).SigilFragments);

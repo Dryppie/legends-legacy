@@ -38,7 +38,6 @@ import {
 } from '../../../../../shared/utils/market-place/marketplace-equipment';
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
-  isMarketplaceBlueprintResource,
   isMarketplaceTradableItemBase,
   MARKETPLACE_CATALYST_ITEM_IDS,
   matchesMarketplaceResourceSubcategory,
@@ -414,7 +413,6 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   get inventoryTitle(): string {
-    if (this.selectedCategory() === 'blueprints') return 'Blueprints';
     if (this.selectedCategory() === 'catalysts') return 'Catalysts';
 
     switch (this.selectedItemType()) {
@@ -430,10 +428,6 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   private matchesSelectedCategory(base: ItemBase): boolean {
-    if (this.selectedCategory() === 'blueprints') {
-      return isMarketplaceBlueprintResource(base);
-    }
-
     if (this.selectedCategory() === 'catalysts') {
       return MARKETPLACE_CATALYST_ITEM_IDS.has(base.id);
     }

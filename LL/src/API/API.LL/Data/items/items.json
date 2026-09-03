@@ -176,15 +176,6 @@
     "attributeModifiers": []
   },
   {
-    "id": "tempered_scrap",
-    "name": "Tempered Scrap",
-    "description": "A material gotten by scrapping tempered equipment",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
     "id": "heavy_helm",
     "name": "Heavy Helm",
     "description": "",
@@ -852,115 +843,6 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "isBound": true,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "item.blueprint_selection_box",
-    "name": "Blueprint Selection Box",
-    "description": "Open this box from your inventory to choose one Blueprint.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "isBound": true,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_venom_touched_sword",
-    "name": "Blueprint: Venom-Touched Sword",
-    "description": "Permanently unlocks the Venom design for compatible weapon recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_hivefang_dagger",
-    "name": "Blueprint: Hivefang Dagger",
-    "description": "Permanently unlocks the Hive design for Dagger recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_fury",
-    "name": "Blueprint: Fury",
-    "description": "Permanently unlocks the Fury design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_arcane",
-    "name": "Blueprint: Arcane",
-    "description": "Permanently unlocks the Arcane design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_execution",
-    "name": "Blueprint: Execution",
-    "description": "Permanently unlocks the Execution design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_aegis",
-    "name": "Blueprint: Aegis",
-    "description": "Permanently unlocks the Aegis design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_warden",
-    "name": "Blueprint: Warden",
-    "description": "Permanently unlocks the Warden design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_endurance",
-    "name": "Blueprint: Endurance",
-    "description": "Permanently unlocks the Endurance design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_phoenix",
-    "name": "Blueprint: Phoenix",
-    "description": "Permanently unlocks the Phoenix design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_spirit",
-    "name": "Blueprint: Spirit",
-    "description": "Permanently unlocks the Spirit design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_primal",
-    "name": "Blueprint: Primal",
-    "description": "Permanently unlocks the Primal design for compatible jewelry recipes.",
-    "itemType": "Resource",
-    "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": []
   },
@@ -1708,24 +1590,6 @@
     "itemType": "Essence",
     "rarity": "Common",
     "essenceDefinitionId": "essence.pack_howler",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_raidforged",
-    "name": "Blueprint: Raidforged",
-    "description": "Permanently teaches the Raidforged design for one compatible recipe.",
-    "itemType": "Resource",
-    "rarity": "Epic",
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "blueprint_gravebound",
-    "name": "Blueprint: Gravebound",
-    "description": "Permanently teaches the Gravebound design for one compatible recipe.",
-    "itemType": "Resource",
-    "rarity": "Epic",
     "equipmentType": "Head",
     "attributeModifiers": []
   }

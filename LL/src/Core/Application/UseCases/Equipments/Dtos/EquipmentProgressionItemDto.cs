@@ -5,7 +5,7 @@ using Domain.Models.Items.Equipments.Progression;
 
 namespace Application.UseCases.Equipments.Dtos;
 
-public sealed class ForgeItemDto : IMapFrom<EquipmentData>
+public sealed class EquipmentProgressionItemDto : IMapFrom<EquipmentData>
 {
     public Guid Id { get; set; }
     public string DefinitionId { get; set; } = string.Empty;
@@ -19,7 +19,7 @@ public sealed class ForgeItemDto : IMapFrom<EquipmentData>
     public string? EquipmentSetId { get; set; }
     public EquipmentOwnershipKind Ownership { get; set; }
     public IReadOnlyDictionary<AttributeType, float> Stats { get; set; } = new Dictionary<AttributeType, float>();
-    public void Mapping(Profile profile) => profile.CreateMap<EquipmentData, ForgeItemDto>()
+    public void Mapping(Profile profile) => profile.CreateMap<EquipmentData, EquipmentProgressionItemDto>()
         .ForMember(x => x.Id, o => o.MapFrom(x => x.State.Id))
         .ForMember(x => x.DefinitionId, o => o.MapFrom(x => x.State.DefinitionId))
         .ForMember(x => x.NativeStyleId, o => o.MapFrom(x => x.State.NativeStyleId))

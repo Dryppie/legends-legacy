@@ -7,7 +7,6 @@ public static class StateSyncScopes
     public const string Inventory = "inventory";
     public const string LootHistory = "loot-history";
     public const string Equipment = "equipment";
-    public const string EquipmentForge = "equipment-forge";
     public const string Quests = "quests";
     public const string AreaAccess = "area-access";
     public const string EventQuests = "event-quests";
@@ -36,7 +35,6 @@ public static class StateSyncScopes
         Inventory,
         LootHistory,
         Equipment,
-        EquipmentForge,
         Quests,
         AreaAccess,
         EventQuests,

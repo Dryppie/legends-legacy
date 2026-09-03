@@ -15,8 +15,8 @@
   "objectives": [
     {
       "presentation": {
-        "actionLabel": "Equipment & Forge",
-        "destinationRoute": "/game/character/forge?tab=rewards"
+        "actionLabel": "Open Inventory",
+        "destinationRoute": "/game/character/inventory"
       },
       "filters": {
         "starterEquipmentKind": "FirstWeapon"
@@ -27,12 +27,5 @@
       "description": "Choose your hands and armor, then equip the complete starter kit."
     }
   ],
-  "rewards": [
-    {
-      "itemBaseId": "tempered_scrap",
-      "key": "starter_scrap",
-      "quantity": 10,
-      "type": "Item"
-    }
-  ]
+  "rewards": []
 }

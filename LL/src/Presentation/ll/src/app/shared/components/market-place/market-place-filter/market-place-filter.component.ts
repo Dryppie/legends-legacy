@@ -33,13 +33,6 @@ export class MarketPlaceFilterComponent {
       subOptions: ['Ore', 'Wood', 'Hide'],
     },
     {
-      id: 'blueprints',
-      label: 'Blueprints',
-      itemType: ItemType.Resource,
-      defaultSubcategory: 'Blueprints',
-      subOptions: [],
-    },
-    {
       id: 'catalysts',
       label: 'Catalysts',
       itemType: ItemType.Resource,

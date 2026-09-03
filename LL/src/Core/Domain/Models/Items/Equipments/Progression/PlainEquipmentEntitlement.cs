@@ -13,7 +13,7 @@ public sealed class PlainEquipmentEntitlement
         if (award.State.DefinitionId != DefinitionId || award.State.Tier != Tier
             || award.State.Ownership.OwnerId != CharacterId || award.State.Ownership.Kind != EquipmentOwnershipKind.BoundPersonal
             || award.State.Provenance.Kind != EquipmentAwardKind.ProtectedReward || award.State.Rank != 0
-            || award.State.ActiveStyleId != null || award.State.BaseSalvageScrap != 0 || award.State.Investments.Count != 0)
+            || award.State.ActiveStyleId != null)
             throw new ArgumentException("Only earned plain target awards establish recovery rights.");
         Copies = checked(Copies + 1);
     }

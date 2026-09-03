@@ -154,10 +154,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         {
             var ordinary = await _progression.ProcessAsync(facts, cancellationToken);
             totalLoot.AddRange(ordinary.Equipment);
-            totalLoot.AddRange(ordinary.Scrap);
             totalLoot.AddRange(ordinary.Sigils);
             powerRewards.AddRange(ordinary.Equipment);
-            craftingRewards.AddRange(ordinary.Scrap);
             dungeonAccessRewards.AddRange(ordinary.Sigils);
         }
 

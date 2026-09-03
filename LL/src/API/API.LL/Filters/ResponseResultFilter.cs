@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Common.Primitives;
 using API.LL.Common;
-using Application.UseCases.Equipments.Dtos;
 
 namespace API.LL.Filters;
 
@@ -72,11 +71,6 @@ public sealed class ResponseResultFilter : IAsyncResultFilter
             isConflict
                 ? ApiErrorContract.ConflictCategory
                 : ApiErrorContract.BusinessCategory);
-        // A Forge conflict is a review step. Only expose its explicitly public quote,
-        // never arbitrary failed response data.
-        if (response is Response<ForgeMutationDto> { Data.FreshQuote: { } quote })
-            problem.Extensions["freshQuote"] = quote;
-
         return new ObjectResult(problem)
         {
             StatusCode = status

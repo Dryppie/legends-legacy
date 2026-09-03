@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Application.UseCases.Inventories.SelectionCrates;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Colosseum;
 
@@ -8,7 +7,7 @@ namespace EssenceSystem.Tests;
 public sealed class ChampionMarketCatalogTests
 {
     [Fact]
-    public void CatalogContainsTitlesAndSixRewardingWeeklyCaches()
+    public void Catalog_contains_titles_and_five_rewarding_weekly_caches()
     {
         var apiRoot = TestContentPaths.FindApiRoot();
         var config = new ConfigurationBuilder()
@@ -37,33 +36,16 @@ public sealed class ChampionMarketCatalogTests
         var activeItemsLaterThatWeek = catalog.GetActive(currentWeek.AddDays(4));
 
         Assert.Equal(2, items.Count(x => x.Category == "Title"));
-        Assert.Equal(6, weeklyCaches.Count);
-        Assert.Equal(11, items.Count(x => x.Category == "Blueprint"));
-        Assert.All(
-            items.Where(x => x.Category == "Blueprint"),
-            blueprint =>
-            {
-                Assert.Equal(1, blueprint.WeeklyPurchaseLimit);
-                Assert.Null(blueprint.LifetimePurchaseLimit);
-                Assert.True(blueprint.RotatesWeekly);
-            });
-        var activeBlueprint = Assert.Single(activeItems, x => x.Category == "Blueprint");
-        var activeBlueprintLaterThatWeek = Assert.Single(
-            activeItemsLaterThatWeek,
-            x => x.Category == "Blueprint");
-        Assert.Equal(
-            activeBlueprint.Id,
-            activeBlueprintLaterThatWeek.Id);
+        Assert.Equal(5, weeklyCaches.Count);
+        Assert.Equal(activeItems.Select(x => x.Id), activeItemsLaterThatWeek.Select(x => x.Id));
         Assert.DoesNotContain(items, x => x.Category == "Cosmetic");
+        Assert.DoesNotContain(items, x => x.Category == "Blueprint");
         Assert.DoesNotContain(weeklyCaches, x => x.CindersGranted > 0);
         Assert.All(weeklyCaches, cache => Assert.True(
             cache.CindersGranted > 0 ||
             cache.SoulstonesGranted > 0 ||
             cache.SigilFragmentsGranted > 0 ||
             cache.RewardItemQuantity > 0));
-        var catalystCrate = Assert.Single(weeklyCaches, x => x.Id == "cache.catalyst_selection");
-        Assert.Equal("tempered_scrap", catalystCrate.RewardItemId);
-        Assert.Equal(2, catalystCrate.RewardItemQuantity);
         Assert.All(
             items.Where(x => x.RewardItemQuantity > 0),
             item => Assert.Contains(item.RewardItemId, itemBaseIds));
@@ -74,10 +56,6 @@ public sealed class ChampionMarketCatalogTests
         Assert.All(
             items.Where(item => item.Category == "Title"),
             item => Assert.Contains(item.RewardTitleKey!, titleKeys));
-        var crateItem = itemDocument.RootElement
-            .EnumerateArray()
-            .Single(item => item.GetProperty("id").GetString() == "tempered_scrap");
-        Assert.Equal("Resource", crateItem.GetProperty("itemType").GetString());
         Assert.Equal(
             [
                 "item.monster_core.lesser",

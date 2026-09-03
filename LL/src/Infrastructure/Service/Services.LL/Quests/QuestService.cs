@@ -48,7 +48,7 @@ public sealed class QuestService(
             {
                 var scopes = new List<string>
                 {
-                    StateSyncScopes.Character, StateSyncScopes.AreaAccess, StateSyncScopes.EquipmentForge
+                    StateSyncScopes.Character, StateSyncScopes.AreaAccess
                 };
                 if (loot.Count > 0) scopes.Add(StateSyncScopes.Inventory);
                 await stateSync.InvalidateCharacterScopesAsync(
@@ -687,9 +687,8 @@ public sealed class QuestService(
         CancellationToken cancellationToken)
     {
         var rewards = GetResolvedRewards(progress, definition);
-        if (progress.RewardsGrantedAt.HasValue || rewards.Count == 0)
+        if (progress.RewardsGrantedAt.HasValue)
         {
-            progress.RewardsGrantedAt ??= timeProvider.GetUtcNow();
             return [];
         }
 

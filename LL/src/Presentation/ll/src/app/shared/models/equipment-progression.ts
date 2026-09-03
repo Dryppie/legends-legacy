@@ -1,11 +1,6 @@
 import { EquipmentType } from './enums/equipmentType';
 
 export type StarterEquipmentKind = 'FirstWeapon' | 'ReadyForRoad';
-export type ForgeKind =
-  | 'ImproveRank'
-  | 'ChangeStyle'
-  | 'Salvage'
-  | 'LearnStyle';
 export type EquipmentOwnership =
   | 'BoundPersonal'
   | 'UnboundPersonal'
@@ -20,8 +15,6 @@ export interface EquipmentProgression {
   nativeStyleId: string | null;
   activeStyleId: string | null;
   ownership: EquipmentOwnership;
-  paidScrap: number;
-  paidCinders: number;
 }
 
 export interface StarterEquipmentOption {
@@ -40,7 +33,6 @@ export interface StarterEquipmentGrant {
 
 export interface EquipmentAccess {
   starterAcquisitionEnabled: boolean;
-  forgeEnabled: boolean;
   protectedAcquisitionEnabled: boolean;
   baselineRecoveryEnabled: boolean;
   ordinaryAcquisitionEnabled: boolean;
@@ -58,14 +50,13 @@ export function hasEquipmentProgressionAccess(
   return (
     !!access &&
     (access.starterAcquisitionEnabled ||
-      access.forgeEnabled ||
       access.protectedAcquisitionEnabled ||
       access.baselineRecoveryEnabled ||
       access.ordinaryAcquisitionEnabled)
   );
 }
 
-export interface ForgeItem {
+export interface EquipmentProgressionItem {
   id: string;
   definitionId: string;
   nativeStyleId: string | null;
@@ -80,61 +71,6 @@ export interface ForgeItem {
   stats: Record<string, number>;
 }
 
-export interface ForgeRequest {
-  kind: ForgeKind;
-  itemInstanceId: string;
-  styleId?: string | null;
-  allowFavoriteSalvage?: boolean;
-}
-
-export interface ForgeQuote {
-  operationId: string;
-  request: ForgeRequest;
-  token: string;
-  expiresAtUtc: string;
-  canExecute: boolean;
-  unavailableReason: string | null;
-  before: ForgeItem | null;
-  after: ForgeItem | null;
-  scrapCost: number;
-  cinderCost: number;
-  scrapReturned: number;
-  usesFreeApplication: boolean;
-  isNoOp: boolean;
-  equippedImpact: {
-    beforeAttributes: Record<string, number>;
-    afterAttributes: Record<string, number>;
-    beforeSetBonusIds: string[];
-    afterSetBonusIds: string[];
-    beforeAbilityIds: string[];
-    afterAbilityIds: string[];
-  } | null;
-}
-
-export interface ForgeMutation {
-  outcome: {
-    operationId: string;
-    kind: ForgeKind;
-    after: ForgeItem | null;
-    scrapSpent: number;
-    cindersSpent: number;
-    scrapReturned: number;
-    wasNoOp: boolean;
-  } | null;
-  freshQuote: ForgeQuote | null;
-}
-
-export interface ForgeStyle {
-  id: string;
-  name: string;
-  itemBaseId: string;
-  isLearned: boolean;
-  freeApplicationAvailable: boolean;
-  isCompatible: boolean;
-  isNative: boolean;
-  isActive: boolean;
-}
-
 export interface CombatAcquisition {
   poolId: string;
   rulesVersion: string;
@@ -147,7 +83,6 @@ export interface CombatAcquisition {
   selectedSigilFamilyId: string | null;
   sigilVictories: number;
   requiredSigilVictories: number;
-  scrapRemainder: number;
   discoveryChance: number;
   targets: StarterEquipmentOption[];
   sigils: {
@@ -169,14 +104,13 @@ export interface EquipmentProtectionPool {
     requiredQuestId: string;
     matchingChance: number;
     guaranteeCompletions: number;
-    completionScrap: number;
   };
   selectedDefinitionId: string | null;
   progress: number;
   firstClearGuaranteeAvailable: boolean;
   canSelect: boolean;
   missingRequirements: string[];
-  targets: ForgeItem[];
+  targets: EquipmentProgressionItem[];
 }
 
 export interface PlainEquipmentRecoveryOption {
