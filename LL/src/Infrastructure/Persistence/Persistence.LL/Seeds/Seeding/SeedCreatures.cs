@@ -4,7 +4,6 @@ using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates;
 using Domain.Models.Entities.Creatures.Templates.Enums;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
@@ -259,7 +258,6 @@ public static class SeedCreatures
             .Include(region => region.Areas)
             .ThenInclude(area => area.Creatures)
             .Include(region => region.Areas)
-            .ThenInclude(area => area.GatheringNodes)
             .Where(region => seedRegionNames.Contains(region.Name))
             .ToDictionaryAsync(region => region.Name, StringComparer.OrdinalIgnoreCase);
         var changed = false;
@@ -320,9 +318,6 @@ public static class SeedCreatures
                     WeightedSpawnRate = creature.WeightedSpawnRate
                 })
                 .ToList(),
-            GatheringNodes = seed.GatheringNodes
-                .Select(node => CreateGatheringNode(seed.Id, node))
-                .ToList()
         };
 
     private static bool SyncArea(LLDbContext context, Area area, AreaSeed seed)
@@ -343,7 +338,6 @@ public static class SeedCreatures
         }
 
         changed |= SyncAreaCreatures(context, area, seed.Creatures);
-        changed |= SyncGatheringNodes(context, area, seed.GatheringNodes);
 
         return changed;
     }
@@ -387,63 +381,6 @@ public static class SeedCreatures
 
         return changed;
     }
-
-    private static bool SyncGatheringNodes(
-        LLDbContext context,
-        Area area,
-        IReadOnlyCollection<AreaGatheringNodeSeed> desiredNodes)
-    {
-        var changed = false;
-        var desiredById = desiredNodes.ToDictionary(node => node.Id, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var existing in area.GatheringNodes.ToList())
-        {
-            if (!desiredById.Remove(existing.Id, out var desired))
-            {
-                area.GatheringNodes.Remove(existing);
-                context.Remove(existing);
-                changed = true;
-                continue;
-            }
-
-            changed |= SetIfChanged(existing.AreaId, area.Id, value => existing.AreaId = value);
-            changed |= SetIfChanged(existing.Name, desired.Name, value => existing.Name = value);
-            changed |= SetIfChanged(existing.Type, desired.Type, value => existing.Type = value);
-            changed |= SetIfChanged(existing.LevelRequirement, desired.LevelRequirement, value => existing.LevelRequirement = value);
-            changed |= SetIfChanged(existing.RewardTableId, desired.RewardTableId, value => existing.RewardTableId = value);
-            if (Math.Abs(existing.YieldBonusPercent - desired.YieldBonusPercent) > double.Epsilon)
-            {
-                existing.YieldBonusPercent = desired.YieldBonusPercent;
-                changed = true;
-            }
-            if (Math.Abs(existing.ProcChance - desired.ProcChance) > FloatTolerance)
-            {
-                existing.ProcChance = desired.ProcChance;
-                changed = true;
-            }
-        }
-
-        foreach (var desired in desiredById.Values)
-        {
-            area.GatheringNodes.Add(CreateGatheringNode(area.Id, desired));
-            changed = true;
-        }
-
-        return changed;
-    }
-
-    private static AreaGatheringNode CreateGatheringNode(string areaId, AreaGatheringNodeSeed seed) =>
-        new()
-        {
-            Id = seed.Id,
-            Name = seed.Name,
-            AreaId = areaId,
-            Type = seed.Type,
-            LevelRequirement = seed.LevelRequirement,
-            ProcChance = seed.ProcChance,
-            YieldBonusPercent = seed.YieldBonusPercent,
-            RewardTableId = seed.RewardTableId
-        };
 
     private static bool FloatsEqual(IReadOnlyList<float> existing, IReadOnlyList<float> desired)
     {
@@ -528,7 +465,6 @@ public static class SeedCreatures
         public bool HideWhenLocked { get; set; }
         public List<float> SpawnProbabilities { get; set; } = [];
         public List<AreaCreatureSeed> Creatures { get; set; } = [];
-        public List<AreaGatheringNodeSeed> GatheringNodes { get; set; } = [];
     }
 
     private sealed class AreaCreatureSeed
@@ -537,14 +473,4 @@ public static class SeedCreatures
         public float WeightedSpawnRate { get; set; }
     }
 
-    private sealed class AreaGatheringNodeSeed
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public GatheringType Type { get; set; }
-        public int? LevelRequirement { get; set; }
-        public float ProcChance { get; set; } = 1f;
-        public double YieldBonusPercent { get; set; }
-        public string? RewardTableId { get; set; }
-    }
 }

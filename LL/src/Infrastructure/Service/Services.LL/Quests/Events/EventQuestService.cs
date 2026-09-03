@@ -1,4 +1,6 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using System.Text;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
@@ -299,6 +301,10 @@ public sealed class EventQuestService(
                     : "This personal milestone is locked or has already been claimed.");
         }
 
+        var loot = await CreateRewardLootAsync(
+            characterId,
+            selected.SelectMany(x => x.Rewards).ToList(),
+            cancellationToken);
         foreach (var milestone in selected)
         {
             repository.AddMilestoneClaim(new EventQuestMilestoneClaim
@@ -311,10 +317,6 @@ public sealed class EventQuestService(
             });
         }
 
-        var loot = await CreateRewardLootAsync(
-            characterId,
-            selected.SelectMany(x => x.Rewards).ToList(),
-            cancellationToken);
         await AddCurrencyRewardsAsync(
             characterId,
             selected.SelectMany(x => x.Rewards).ToList(),
@@ -334,7 +336,8 @@ public sealed class EventQuestService(
         IReadOnlyCollection<QuestRewardDefinition> rewards,
         CancellationToken cancellationToken)
     {
-        var rewardsByItem = rewards
+        var effectiveRewards = rewards;
+        var rewardsByItem = effectiveRewards
             .Where(x => x.Type == "Item")
             .GroupBy(x => x.ItemBaseId!, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(x => x.Key, x => x.Sum(reward => reward.Quantity), StringComparer.OrdinalIgnoreCase);
@@ -542,6 +545,7 @@ public sealed class EventQuestService(
                 return definition.Rewards.Concat(
                     definition.PersonalMilestones.SelectMany(milestone => milestone.Rewards));
             })
+            
             .Where(x => x.Type == "Item")
             .Select(x => x.ItemBaseId!)
             .Distinct(StringComparer.OrdinalIgnoreCase)

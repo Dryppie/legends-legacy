@@ -20,6 +20,28 @@ import {
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 
 describe('player journey', () => {
+  it('guides character using the Forges through equipment and accessories without unlocking tutorial crafting', () => {
+    const current = journal(
+      TRAINING_DAY_QUEST_ID,
+      SOUL_ARCHIVE_QUEST_ID,
+      FIRST_WEAPON_QUEST_ID,
+    );
+    const accessories = quest(
+      TOOLS_OF_THE_TRADE_QUEST_ID,
+      QuestStatus.Active,
+      true,
+    );
+    accessories.title = 'Ready for the Road';
+    current.quests.push(accessories);
+    const guidance = buildPlayerJourneyGuidance(current, 1)!;
+    expect(guidance.title).toBe('Ready for the Road');
+    expect(guidance.phaseLabel).toBe('Ready for the Road');
+    expect(guidance.optionalAction.route).toBe('/game/character/inventory');
+    expect(guidance.nextUnlock).toContain('equipping your accessories');
+    expect(
+      itemIds(filterSidebarForPlayerJourney(sidebar(), current, 1, true)),
+    ).not.toContain('crafting');
+  });
   it('advances through the tutorial using completed quest state', () => {
     expect(resolvePlayerJourneyStage(journal())).toBe(
       PlayerJourneyStage.FirstHunt,
@@ -71,7 +93,11 @@ describe('player journey', () => {
   });
 
   it('shows authored chapter identity and promised reward for the current Shenic quest', () => {
-    const current = quest('quest.shenic.blood_in_the_grove', QuestStatus.Active, true);
+    const current = quest(
+      'quest.shenic.blood_in_the_grove',
+      QuestStatus.Active,
+      true,
+    );
     current.chain = {
       id: 'chain.shenic.chapter_01',
       title: 'Chapter I — First Blood',
@@ -162,9 +188,7 @@ describe('player journey', () => {
 
     expect(guidance.title).toBe('Ash Beneath the Earth');
     expect(guidance.phaseLabel).toBe('Beyond the Focused Beta');
-    expect(guidance.objective).toBe(
-      'Win 12 encounters in Embercap Burrows.',
-    );
+    expect(guidance.objective).toBe('Win 12 encounters in Embercap Burrows.');
     expect(guidance.primaryAction).toEqual({
       label: 'Head to Embercap Burrows',
       route: '/game/world/shenic?area=region_01_area_10',
@@ -205,7 +229,6 @@ describe('player journey', () => {
       'inventory',
       'essences',
       'quests',
-      'crafting',
       'settings',
     ]);
 
@@ -233,7 +256,6 @@ describe('player journey', () => {
       'world',
       'quests',
       'prophecies',
-      'crafting',
       'guild',
       'colosseum',
       'settings',
@@ -248,12 +270,7 @@ describe('player journey', () => {
     );
     expect(
       itemIds(
-        filterSidebarForPlayerJourney(
-          sidebar(),
-          completedOnboarding,
-          20,
-          true,
-        ),
+        filterSidebarForPlayerJourney(sidebar(), completedOnboarding, 20, true),
       ),
     ).toEqual([
       'character-overview',
@@ -264,7 +281,6 @@ describe('player journey', () => {
       'world',
       'quests',
       'prophecies',
-      'crafting',
       'guild',
       'colosseum',
       'market-place',
@@ -383,7 +399,6 @@ function sidebar(): SidebarSection[] {
       'soulstone-archive',
     ]),
     section('world', ['world', 'legacy-ascension', 'quests', 'prophecies']),
-    section('professions', ['crafting']),
     section('city', ['guild', 'colosseum', 'market-place', 'tavern']),
     section('system', ['settings']),
   ];
@@ -403,8 +418,6 @@ function routeFor(itemId: string): string[] {
     case 'prophecies':
     case 'settings':
       return [itemId];
-    case 'crafting':
-      return ['professions', 'crafting'];
     default:
       return ['city', itemId];
   }

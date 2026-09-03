@@ -7,7 +7,6 @@ using Domain.Models.Users;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.QueryProfiles;
-using Persistence.LL.Seeds.Helpers;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
 
@@ -38,7 +37,6 @@ public class CharacterRepository : ICharacterRepository
                 CurrentTickets = 5,
                 LastTicketUpdate = DateTimeOffset.UtcNow
             },
-            Professions = ProfessionsSeederHelper.CreateProfessions(characterId)
         };
         character.NormalizeName();
 

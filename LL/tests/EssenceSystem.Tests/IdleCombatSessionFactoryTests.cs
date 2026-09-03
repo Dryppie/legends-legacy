@@ -33,7 +33,6 @@ public sealed class IdleCombatSessionFactoryTests
             to - from,
             new Area { Id = "test-area" },
             [],
-            null,
             [
                 new IdleEncounterRewardFacts(
                     Guid.NewGuid(),
@@ -56,7 +55,6 @@ public sealed class IdleCombatSessionFactoryTests
             [crafting, moreCrafting],
             [essence],
             [sigil],
-            [],
             []);
 
         var session = new IdleCombatSessionFactory().Create(facts, outcome);
@@ -94,7 +92,6 @@ public sealed class IdleCombatSessionFactoryTests
             TimeSpan.Zero,
             new Area { Id = "test-area" },
             [],
-            null,
             [
                 new IdleEncounterRewardFacts(
                     Guid.NewGuid(),
@@ -112,7 +109,6 @@ public sealed class IdleCombatSessionFactoryTests
             0,
             0,
             0,
-            [],
             [],
             [],
             [],

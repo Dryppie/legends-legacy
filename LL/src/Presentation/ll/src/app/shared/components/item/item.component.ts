@@ -1,3 +1,4 @@
+import { itemDescription } from '../../utils/inventory/item-description';
 import { Component, Input } from '@angular/core';
 import {
   Equipment,
@@ -19,7 +20,6 @@ import {
   EquippedComparison,
   findEquippedComparisons,
 } from '../../utils/equipment/equipment.utils';
-import { BlueprintAttributeSummaryComponent } from '../blueprint-attribute-summary/blueprint-attribute-summary.component';
 
 @Component({
   selector: 'app-item',
@@ -29,7 +29,6 @@ import { BlueprintAttributeSummaryComponent } from '../blueprint-attribute-summa
     EssenceDetailsComponent,
     EquipmentDisplayComponent,
     PopoverComponent,
-    BlueprintAttributeSummaryComponent,
   ],
   templateUrl: './item.component.html',
 })
@@ -39,6 +38,11 @@ export class ItemComponent {
   @Input() popoverFocusable = true;
   itemHovered: boolean = false;
   tooltipPosition = {};
+
+  get description(): string {
+    return itemDescription(this.item.itemBase);
+  }
+
 
   constructor(
     private readonly essenceItemView: EssenceItemViewService,

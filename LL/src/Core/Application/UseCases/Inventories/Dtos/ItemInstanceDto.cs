@@ -15,6 +15,7 @@ namespace Application.UseCases.Inventories.Dtos;
 public class ItemInstanceDto : IMapFrom<ItemInstance>
 {
     public Guid Id { get; set; }
+    public bool IsBound { get; set; }
     public ItemBaseDto ItemBase { get; set; } = null!;
 
     public void Mapping(Profile profile)

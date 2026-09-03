@@ -1,4 +1,5 @@
-﻿using Application.Authorization.Interfaces;
+using Domain.Models.Items.Equipments.Progression;
+using Application.Authorization.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL;
@@ -108,6 +109,12 @@ public static class DependencyInjection
         IConfiguration config)
     {
         services.AddLiveOpsAdministrationServices(config);
+        // The standalone operator host needs the same equipment rules as the game.
+        services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
+        services.TryAddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(AppContext.BaseDirectory,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.TryAddSingleton<IQuestDefinitionProvider>(sp => new JsonQuestDefinitionProvider(config,
+            AppContext.BaseDirectory, sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
@@ -256,13 +263,6 @@ public static class DependencyInjection
                            options.MaximumBatchesPerResolution > 0,
                 "Idle combat progression settings are invalid.")
             .ValidateOnStart();
-        services.AddOptions<TemperingProgressionOptions>()
-            .Configure(options => config.GetSection(TemperingProgressionOptions.SectionName).Bind(options))
-            .Validate(
-                options => options.MaximumAttemptsPerResolution > 0 &&
-                           options.MaximumBatchesPerResolution > 0,
-                "Tempering progression settings are invalid.")
-            .ValidateOnStart();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
             new JsonChampionMarketCatalog(
@@ -298,7 +298,7 @@ public static class DependencyInjection
                         reward.ArenaGlory is >= 250 and <= 500
                         && reward.Cinders >= 0
                         && reward.Soulstones is >= 20 and <= 50
-                        && reward.CatalystSelectionCaches >= 0
+                        && reward.TemperedScrap >= 0
                         && reward.BlueprintSelectionBoxes >= 0
                         && reward.SigilFragments >= 0)),
                 "Tournament Grounds scheduling, playback, and reward settings are invalid.")
@@ -343,16 +343,10 @@ public static class DependencyInjection
         services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value.ToAbilityThreatTuning());
 
-        services.AddScoped<ICraftingService, CraftingService>();
         services.Configure<CraftingBalanceOptions>(config.GetSection("Crafting:Balance"));
-        services.AddScoped<ITemperingService, TemperingService>();
-        services.AddScoped<ITemperingProfileResolver, TemperingProfileResolver>();
         services.AddScoped<ITemperingMechanicsService, TemperingMechanicsService>();
-        services.AddScoped<ICraftingProgressionService, CraftingProgressionService>();
-        services.AddScoped<ICraftingItemCatalogService, CraftingItemCatalogService>();
         services.AddScoped<IItemQualityRollService, ItemQualityRollService>();
         services.AddScoped<IItemPotentialService, ItemPotentialService>();
-        services.AddScoped<ICraftingRequirementResolver, CraftingRequirementResolver>();
         services.AddScoped<IItemStatRollService, ItemStatRollService>();
         services.AddScoped<IEquipmentRollRangeService, EquipmentRollRangeService>();
         services.AddSingleton<ICraftingDefinitionProvider>(sp =>
@@ -369,11 +363,8 @@ public static class DependencyInjection
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
-        services.AddSingleton<IIdleDungeonSigilDropPool>(sp =>
-            new JsonIdleDungeonSigilDropPool(
-                config,
-                contentRootPath,
-                sp.GetRequiredService<JsonSerializerOptions>()));
+
+
         services.AddScoped<IDungeonSigilAssemblyService, DungeonSigilAssemblyService>();
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
         services.AddScoped<IDungeonMasteryService, DungeonMasteryService>();
@@ -386,6 +377,22 @@ public static class DependencyInjection
         services.AddScoped<IDungeonRouteService, DungeonRouteService>();
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
+        services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
+        services.AddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(contentRootPath,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.AddScoped<IStarterEquipmentService, StarterEquipmentService>();
+        services.AddSingleton(_ => JsonStarterEquipmentCatalog.LoadForgePrices(Path.Combine(contentRootPath,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-forge-prices.v1.json")));
+        services.AddScoped<IForgeService, ForgeService>();
+        services.AddSingleton(sp => JsonStarterEquipmentCatalog.LoadAcquisition(sp.GetRequiredService<StarterEquipmentCatalog>(),
+            Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "equipment", "equipment-protection-pools.v1.json")));
+        services.AddScoped<IEquipmentAcquisitionEligibility, EquipmentAcquisitionEligibility>();
+        services.AddScoped<IEquipmentAcquisitionService, EquipmentAcquisitionService>();
+        services.AddSingleton(sp => JsonStarterEquipmentCatalog.LoadOrdinary(sp.GetRequiredService<StarterEquipmentCatalog>(),
+            Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "equipment", "equipment-ordinary.v1.json")));
+        services.AddScoped<ICombatAcquisitionService, CombatAcquisitionService>();
+        services.AddScoped<ICombatAcquisitionRewardProcessor, CombatAcquisitionRewardProcessor>();
+
 
         services.AddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
         services.AddSingleton<IEssenceDefinitionRepository>(sp =>
@@ -576,7 +583,6 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
-        services.AddScoped<IProfessionService, ProfessionService>();
 
         services.AddScoped<IPlayerService, PlayerService>();
         services.AddSingleton<IProphecyDefinitionProvider>(sp =>
@@ -648,6 +654,8 @@ public static class DependencyInjection
         services.AddScoped<IEventQuestProgressionService>(sp => sp.GetRequiredService<EventQuestService>());
         services.AddScoped<ICombatAreaAccessService, CombatAreaAccessService>();
         services.AddScoped<IQuestEncounterService, QuestEncounterService>();
+        services.AddScoped<IEquipmentQuestSupport, EquipmentQuestSupport>();
+        services.AddScoped<IPlainEquipmentRecoveryService, PlainEquipmentRecoveryService>();
 
         services.AddSingleton(_ => new SoulstoneUpgradeDefinitionProvider(contentRootPath));
 
@@ -692,8 +700,6 @@ public static class DependencyInjection
         services.AddScoped<IDungeonCombatSessionFactory, DungeonCombatSessionFactory>();
         services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
         services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();
-        services.AddScoped<ICombatGatheringRewardProcessor, CombatGatheringRewardProcessor>();
-        services.AddScoped<IIdleDungeonSigilDropCalculator, IdleDungeonSigilDropCalculator>();
         services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();
         services.AddScoped<IIdleCombatSessionFactory, IdleCombatSessionFactory>();
         services.AddScoped<ILootRewardWriter, InventoryLootRewardWriter>();

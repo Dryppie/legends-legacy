@@ -35,13 +35,6 @@ export const DASHBOARD_ROUTES: Routes = [
           ),
       },
       {
-        path: 'professions',
-        loadChildren: () =>
-          import('./../../features/game/professions/professions.routes').then(
-            (m) => m.PROFESSIONS_ROUTES,
-          ),
-      },
-      {
         path: 'world',
         loadChildren: () =>
           import('./../../features/game/world/world.routes').then(

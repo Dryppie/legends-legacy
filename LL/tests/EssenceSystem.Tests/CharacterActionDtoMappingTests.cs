@@ -23,7 +23,6 @@ public sealed class CharacterActionDtoMappingTests
         {
             CharacterId = Guid.NewGuid(),
             ActionDetails = new CombatActionDetails(),
-            ReturnToCombatAreaId = "region_02_area_03",
             UpdatedAt = DateTimeOffset.Parse("2026-08-17T12:00:00Z"),
             NextResolutionAtUtc = DateTimeOffset.Parse("2026-08-17T12:00:10Z"),
             HasMoreDueWork = true,
@@ -37,7 +36,6 @@ public sealed class CharacterActionDtoMappingTests
         Assert.Equal(action.NextResolutionAtUtc, dto.NextResolutionAtUtc);
         Assert.Equal(100, dto.ProcessedCount);
         Assert.Equal(10_000, dto.ResolutionIntervalMs);
-        Assert.Equal("region_02_area_03", dto.ReturnToCombatAreaId);
     }
 
     [Fact]
@@ -74,50 +72,9 @@ public sealed class CharacterActionDtoMappingTests
 
         Assert.True(contract.TryGetProperty("nextResolutionAtUtc", out _));
         Assert.True(contract.TryGetProperty("hasMoreDueWork", out _));
-        Assert.True(contract.TryGetProperty("returnToCombatAreaId", out _));
+        Assert.False(contract.TryGetProperty("returnToCombatAreaId", out _));
         Assert.False(contract.TryGetProperty("nextResolutionAt", out _));
         Assert.False(contract.TryGetProperty("hasPendingCombatResolution", out _));
     }
 
-    [Fact]
-    public void Combat_action_maps_its_paused_tempering_queue_in_position_order()
-    {
-        var first = QueueItem(position: 0, "First");
-        var second = QueueItem(position: 1, "Second");
-        var action = new CharacterAction
-        {
-            CharacterId = Guid.NewGuid(),
-            ActionDetails = new CombatActionDetails(),
-            UpdatedAt = DateTimeOffset.Parse("2026-08-18T12:00:00Z"),
-            PausedTemperingQueueItems = [second, first]
-        };
-
-        var dto = _mapper.Map<CharacterActionDto>(action);
-
-        Assert.Equal([first.Id, second.Id], dto.TemperingQueueItems.Select(item => item.Id));
-        Assert.Null(dto.CraftingActionDetails);
-    }
-
-    private static CraftingQueueItem QueueItem(int position, string name)
-    {
-        var equipmentBase = new EquipmentBase
-        {
-            Id = $"test-{position}",
-            Name = name,
-            EquipmentType = EquipmentType.OneHanded
-        };
-        var equipment = new EquipmentInstance
-        {
-            Id = Guid.NewGuid(),
-            ItemBaseId = equipmentBase.Id,
-            ItemBase = equipmentBase
-        };
-        return new CraftingQueueItem
-        {
-            Id = Guid.NewGuid(),
-            Position = position,
-            EquipmentInstanceId = equipment.Id,
-            EquipmentInstance = equipment
-        };
-    }
 }

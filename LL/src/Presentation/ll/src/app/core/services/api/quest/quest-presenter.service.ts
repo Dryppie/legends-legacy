@@ -71,7 +71,16 @@ export class QuestPresenterService {
   private start(key: string, tourPageId: string): void {
     if (this.lastStartedKey === key) return;
     this.lastStartedKey = key;
-    setTimeout(() => void this.tour.start(tourPageId), 0);
+    setTimeout(() => {
+      const presentation = this.activePresentation();
+      if (
+        presentation?.key === key &&
+        presentation.tourPageId === tourPageId &&
+        this.isCurrentRoute(presentation.route, this.currentUrl())
+      ) {
+        void this.tour.start(tourPageId);
+      }
+    }, 0);
   }
 
   private isCurrentRoute(expected: string, actual: string): boolean {

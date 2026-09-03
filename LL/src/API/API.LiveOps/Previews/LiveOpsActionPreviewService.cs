@@ -3,6 +3,7 @@ using System.Text.Json;
 using Application.Interfaces.Services.LL.Administration;
 using Common.Primitives;
 using Domain.Models.Administration;
+using Domain.Models.Items.Equipments.Progression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
@@ -352,7 +353,8 @@ public sealed class LiveOpsActionPreviewService(
         int quantity,
         string reason,
         string? internalNotes,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        EquipmentGrantRequest? equipment = null)
     {
         var validation = ValidateCommon(operationId, reason, internalNotes);
         if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
@@ -371,7 +373,34 @@ public sealed class LiveOpsActionPreviewService(
         var item = (await liveOps.SearchItemsAsync(normalizedItemId, 20, cancellationToken))
             .FirstOrDefault(x => string.Equals(x.Id, normalizedItemId, StringComparison.Ordinal));
         if (item is null) return Response<ActionPreviewDto>.Fail("The item-base ID does not exist in the server catalog.");
-        var isHighValue = quantity >= Math.Max(1, _options.LargeGrantAuditThreshold) ||
+        var prepared = await liveOps.PrepareCompensationGrantAsync(operationId, characterId, normalizedItemId, quantity, cancellationToken, equipment);
+        if (!prepared.IsSuccess || prepared.Value is null) return Response<ActionPreviewDto>.Fail(prepared.ErrorMessage);
+        var plan = prepared.Value;
+        var data = plan.Equipment;
+        var fields = new List<ActionPreviewField>
+        {
+            new("Character", player.CharacterName),
+            new("Item", $"{item.Name} ({item.Id})"),
+            new("Quantity", quantity.ToString("N0")),
+            new("Type and rarity", $"{item.ItemType} · {data?.Rarity.ToString() ?? item.Rarity.ToString()}"),
+            new("Behavior", data is not null ? "Individual instances · Bound to recipient" : $"{(item.Stackable ? "Stackable" : "Individual instances")} · {(item.IsBound ? "Bound" : "Unbound")}"),
+            new("Reason", reason.Trim()),
+            new("Internal notes", Normalize(internalNotes) ?? "None")
+        };
+        if (data is not null)
+        {
+            fields.AddRange([
+                new("Definition", $"{data.DisplayName} ({data.State.DefinitionId})"),
+                new("Archetype", data.State.ArchetypeId),
+                new("Tier / Rank", $"{data.State.Tier} / {data.State.Rank}"),
+                new("Native / Active style", $"{data.State.NativeStyleId ?? "Plain"} / {data.State.ActiveStyleId ?? "Plain"}"),
+                new("Owner", data.State.Ownership.OwnerId.ToString()),
+                new("Balance version", data.State.BalanceVersion.ToString()),
+                new("Salvage", "0 base Scrap; no paid investment. Only later paid ranks create refundable value."),
+                new("Stats", string.Join(", ", data.Stats.OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture)}")))
+            ]);
+        }
+        var isHighValue = data is not null || quantity >= Math.Max(1, _options.LargeGrantAuditThreshold) ||
             !item.Stackable ||
             item.Rarity >= Domain.Models.Items.Rarity.Rare;
 
@@ -386,23 +415,16 @@ public sealed class LiveOpsActionPreviewService(
                 ItemBaseId = normalizedItemId,
                 Quantity = quantity,
                 Reason = reason.Trim(),
-                InternalNotes = Normalize(internalNotes)
+                InternalNotes = Normalize(internalNotes),
+                Equipment = equipment
             }),
-            GrantStateHash(player, item),
-            new PreviewContext(characterId, normalizedItemId),
+            GrantStateHash(player, item, plan),
+            new PreviewContext(characterId, normalizedItemId, quantity, equipment),
             "Grant compensation items",
             player.CharacterName,
             isHighValue ? "HighValue" : "Normal",
             isHighValue ? player.CharacterName : null,
-            [
-                new("Character", player.CharacterName),
-                new("Item", $"{item.Name} ({item.Id})"),
-                new("Quantity", quantity.ToString("N0")),
-                new("Type and rarity", $"{item.ItemType} · {item.Rarity}"),
-                new("Behavior", $"{(item.Stackable ? "Stackable" : "Individual instances")} · {(item.IsBound ? "Bound" : "Unbound")}"),
-                new("Reason", reason.Trim()),
-                new("Internal notes", Normalize(internalNotes) ?? "None")
-            ],
+            fields,
             isHighValue
                 ? ["This quantity is classified as a high-value grant.", "The operation writes inventory, provenance, economy ledger, realtime, and audit records."]
                 : ["The operation writes inventory, provenance, economy ledger, realtime, and audit records."],
@@ -470,12 +492,12 @@ public sealed class LiveOpsActionPreviewService(
     public Task<PreviewSubmissionResult> BeginCompensationGrantAsync(
         Guid token, Guid operationId, Guid characterId, AdministrationActor actor,
         string itemBaseId, int quantity, string reason, string? internalNotes,
-        CancellationToken cancellationToken) => BeginAsync(
+        CancellationToken cancellationToken, EquipmentGrantRequest? equipment = null) => BeginAsync(
             token, operationId, AdminActionPreviewKinds.CompensationGrant, characterId, actor,
             RequestHash(AdminActionPreviewKinds.CompensationGrant, new
             {
                 CharacterId = characterId, ItemBaseId = itemBaseId?.Trim() ?? string.Empty, Quantity = quantity,
-                Reason = NormalizeRequired(reason), InternalNotes = Normalize(internalNotes)
+                Reason = NormalizeRequired(reason), InternalNotes = Normalize(internalNotes), Equipment = equipment
             }), cancellationToken);
 
     public async Task CompleteAsync(
@@ -527,7 +549,8 @@ public sealed class LiveOpsActionPreviewService(
             return PreviewSubmissionResult.Fail("The submitted operation does not match its preview.", true);
         }
 
-        if (preview.SubmittedAt.HasValue) return PreviewSubmissionResult.Success();
+        if (preview.SubmittedAt.HasValue && (preview.CompletedAt.HasValue || preview.ActionKind != AdminActionPreviewKinds.CompensationGrant))
+            return PreviewSubmissionResult.Success();
         var currentState = await CurrentStateHashAsync(preview, cancellationToken);
         if (!currentState.IsSuccess)
         {
@@ -622,9 +645,12 @@ public sealed class LiveOpsActionPreviewService(
                 var player = await liveOps.GetPlayerAsync(context.CharacterId.Value, cancellationToken);
                 var item = (await liveOps.SearchItemsAsync(context.ItemBaseId, 20, cancellationToken))
                     .FirstOrDefault(x => string.Equals(x.Id, context.ItemBaseId, StringComparison.Ordinal));
-                return player is null || item is null
-                    ? StateResult.Fail("The player or item is no longer available.")
-                    : StateResult.Success(GrantStateHash(player, item));
+                if (player is null || item is null) return StateResult.Fail("The player or item is no longer available.");
+                var prepared = await liveOps.PrepareCompensationGrantAsync(preview.OperationId, context.CharacterId.Value,
+                    context.ItemBaseId, context.Quantity, cancellationToken, context.Equipment);
+                return prepared.IsSuccess && prepared.Value is not null
+                    ? StateResult.Success(GrantStateHash(player, item, prepared.Value))
+                    : StateResult.Fail(prepared.ErrorMessage);
             }
             default:
                 return StateResult.Fail("The preview action type is unsupported.");
@@ -728,7 +754,7 @@ public sealed class LiveOpsActionPreviewService(
 
     private static string GrantStateHash(
         PlayerAdministrationSnapshot player,
-        AdministrationItemCatalogEntry item) =>
+        AdministrationItemCatalogEntry item, CompensationGrantPlan plan) =>
         StateHash(new
         {
             player.AccountId,
@@ -738,7 +764,9 @@ public sealed class LiveOpsActionPreviewService(
             item.ItemType,
             item.Rarity,
             item.Stackable,
-            item.IsBound
+            item.IsBound,
+            plan.UsesEquipmentProgression,
+            plan.Equipment
         });
 
     private static string? Normalize(string? value) =>
@@ -747,7 +775,7 @@ public sealed class LiveOpsActionPreviewService(
     private static string NormalizeRequired(string? value) =>
         value?.Trim() ?? string.Empty;
 
-    private sealed record PreviewContext(Guid? CharacterId, string? ItemBaseId);
+    private sealed record PreviewContext(Guid? CharacterId, string? ItemBaseId, int Quantity = 1, EquipmentGrantRequest? Equipment = null);
     private sealed record StateResult(bool IsSuccess, string Hash, string ErrorMessage)
     {
         public static StateResult Success(string hash) => new(true, hash, string.Empty);

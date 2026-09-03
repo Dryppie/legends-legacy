@@ -17,7 +17,8 @@ public sealed record PlayerSupportSnapshotDto(
     PlayerSupportSection<GuildSupportSnapshotDto> Guild,
     PlayerSupportSection<MarketplaceSupportSnapshotDto> Marketplace,
     PlayerSupportSection<TransferHistorySupportSnapshotDto> Transfers,
-    PlayerSupportSection<SynchronizationSupportSnapshotDto> Synchronization);
+    PlayerSupportSection<SynchronizationSupportSnapshotDto> Synchronization,
+    PlayerSupportSection<EquipmentSupportSnapshotDto> Equipment);
 
 public sealed record AccountSupportSnapshotDto(
     DateTime AccountCreatedUtc,

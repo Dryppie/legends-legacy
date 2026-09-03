@@ -5,16 +5,36 @@
     "displayName": "Essence Resonance",
     "description": "Increases creature Essence drop chances.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "EssenceDropRateRelativeBps",
         "unit": "RelativeBasisPoints",
-        "valuesByRank": [300, 600, 900, 1200, 1500]
+        "valuesByRank": [
+          300,
+          600,
+          900,
+          1200,
+          1500
+        ]
       }
     ],
-    "appliesTo": ["Idle combat Essence drops", "Dungeon combat Essence drops"],
-    "doesNotApplyTo": ["Quest rewards", "Guaranteed rewards", "Shop purchases", "Soulstone drops"],
+    "appliesTo": [
+      "Idle combat Essence drops",
+      "Dungeon combat Essence drops"
+    ],
+    "doesNotApplyTo": [
+      "Quest rewards",
+      "Guaranteed rewards",
+      "Shop purchases",
+      "Soulstone drops"
+    ],
     "enabled": true,
     "sortOrder": 10
   },
@@ -24,16 +44,34 @@
     "displayName": "Echo Memory",
     "description": "Essence bad-luck protection builds faster after failed drop rolls.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "EssencePityProgressionGainBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [500, 1000, 1500, 2000, 2500]
+        "valuesByRank": [
+          500,
+          1000,
+          1500,
+          2000,
+          2500
+        ]
       }
     ],
-    "appliesTo": ["Creature Essence resonance buildup"],
-    "doesNotApplyTo": ["Guaranteed rewards", "Shop purchases", "Soulstone drops"],
+    "appliesTo": [
+      "Creature Essence resonance buildup"
+    ],
+    "doesNotApplyTo": [
+      "Guaranteed rewards",
+      "Shop purchases",
+      "Soulstone drops"
+    ],
     "enabled": true,
     "sortOrder": 20
   },
@@ -43,16 +81,33 @@
     "displayName": "Duplicate Echoes",
     "description": "Dismantling duplicate Essences has a chance to grant extra Essence Dust.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "DuplicateEssenceExtraMaterialChanceBps",
         "unit": "ChanceBasisPoints",
-        "valuesByRank": [200, 400, 600, 800, 1000]
+        "valuesByRank": [
+          200,
+          400,
+          600,
+          800,
+          1000
+        ]
       }
     ],
-    "appliesTo": ["Duplicate Essence dismantling"],
-    "doesNotApplyTo": ["Initial Essence drops", "Non-duplicate Essence dismantling"],
+    "appliesTo": [
+      "Duplicate Essence dismantling"
+    ],
+    "doesNotApplyTo": [
+      "Initial Essence drops",
+      "Non-duplicate Essence dismantling"
+    ],
     "enabled": true,
     "sortOrder": 30
   },
@@ -62,16 +117,34 @@
     "displayName": "Archive Focus",
     "description": "Selected Creature Focus has increased essence drop rate.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "FocusedMonsterEssenceDropRateRelativeBps",
         "unit": "RelativeBasisPoints",
-        "valuesByRank": [500, 1000, 1500, 2000, 2500]
+        "valuesByRank": [
+          500,
+          1000,
+          1500,
+          2000,
+          2500
+        ]
       }
     ],
-    "appliesTo": ["Focused Creature Essence drops"],
-    "doesNotApplyTo": ["Other creatures", "Guaranteed rewards", "Shop purchases"],
+    "appliesTo": [
+      "Focused Creature Essence drops"
+    ],
+    "doesNotApplyTo": [
+      "Other creatures",
+      "Guaranteed rewards",
+      "Shop purchases"
+    ],
     "enabled": true,
     "sortOrder": 40
   },
@@ -81,16 +154,35 @@
     "displayName": "Battle Lessons",
     "description": "Increases combat experience earned from victorious idle and dungeon encounters.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "CombatExperienceGainBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [150, 300, 450, 600, 750]
+        "valuesByRank": [
+          150,
+          300,
+          450,
+          600,
+          750
+        ]
       }
     ],
-    "appliesTo": ["Idle combat EXP", "Dungeon combat EXP"],
-    "doesNotApplyTo": ["Gathering EXP", "Crafting EXP", "PvP"],
+    "appliesTo": [
+      "Idle combat EXP",
+      "Dungeon combat EXP"
+    ],
+    "doesNotApplyTo": [
+      "Gathering EXP",
+      "Crafting EXP",
+      "PvP"
+    ],
     "enabled": true,
     "sortOrder": 110
   },
@@ -100,151 +192,36 @@
     "displayName": "Survival Notes",
     "description": "Retains a portion of idle encounter experience when an encounter is lost.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "IdleCombatDefeatExperienceRetentionBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [1000, 2000, 3000, 4000, 5000]
+        "valuesByRank": [
+          1000,
+          2000,
+          3000,
+          4000,
+          5000
+        ]
       }
     ],
-    "appliesTo": ["Idle combat defeats"],
-    "doesNotApplyTo": ["Dungeon defeats", "Loot", "PvP"],
+    "appliesTo": [
+      "Idle combat defeats"
+    ],
+    "doesNotApplyTo": [
+      "Dungeon defeats",
+      "Loot",
+      "PvP"
+    ],
     "enabled": true,
     "sortOrder": 130
-  },
-  {
-    "id": "gathering.careful-harvest",
-    "branch": "Gathering",
-    "displayName": "Careful Harvest",
-    "description": "Increases gathered material yield from combat-adjacent gathering nodes.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "GatheringYieldBps",
-        "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [100, 200, 300, 400, 500]
-      }
-    ],
-    "appliesTo": ["Combat-adjacent gathering loot"],
-    "doesNotApplyTo": ["Combat loot tables", "Dungeon fixed rewards", "Shop purchases"],
-    "enabled": true,
-    "sortOrder": 210
-  },
-  {
-    "id": "gathering.gathering-lessons",
-    "branch": "Gathering",
-    "displayName": "Gathering Lessons",
-    "description": "Increases gathering profession experience from combat-adjacent gathering.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "GatheringExperienceGainBps",
-        "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [150, 300, 450, 600, 750]
-      }
-    ],
-    "appliesTo": ["Mining EXP", "Woodcutting EXP", "Skinning EXP"],
-    "doesNotApplyTo": ["Combat EXP", "Crafting EXP"],
-    "enabled": true,
-    "sortOrder": 220
-  },
-  {
-    "id": "gathering.rare-node-sense",
-    "branch": "Gathering",
-    "displayName": "Rare Node Sense",
-    "description": "Improves rare material weighting from gathering nodes.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "GatheringRareDropChanceRelativeBps",
-        "unit": "RelativeBasisPoints",
-        "valuesByRank": [200, 400, 600, 800, 1000]
-      }
-    ],
-    "appliesTo": ["Rare gathering loot weights"],
-    "doesNotApplyTo": ["Normal gathering quantity", "Creature loot rarity", "Shop purchases"],
-    "enabled": true,
-    "sortOrder": 230
-  },
-  {
-    "id": "crafting.crafting-lessons",
-    "branch": "Crafting",
-    "displayName": "Crafting Lessons",
-    "description": "Increases crafting profession experience earned while tempering equipment.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "CraftingExperienceGainBps",
-        "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [150, 300, 450, 600, 750]
-      }
-    ],
-    "appliesTo": ["Tempering crafting EXP"],
-    "doesNotApplyTo": ["Recipe mastery EXP", "Gathering EXP"],
-    "enabled": true,
-    "sortOrder": 310
-  },
-  {
-    "id": "crafting.steady-temper",
-    "branch": "Crafting",
-    "displayName": "Steady Temper",
-    "description": "Reduces the percentage-point chance of negative tempering outcomes.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "TemperingNegativeOutcomeReductionBps",
-        "unit": "PercentagePointBasisPoints",
-        "valuesByRank": [30, 60, 90, 120, 150]
-      }
-    ],
-    "appliesTo": ["Tempering outcome rolls"],
-    "doesNotApplyTo": ["Success chance", "Great success chance", "Crafting material costs"],
-    "enabled": true,
-    "sortOrder": 320
-  },
-  {
-    "id": "crafting.blueprint-study",
-    "branch": "Crafting",
-    "displayName": "Blueprint Study",
-    "description": "Increases recipe mastery progression from crafting items.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "BlueprintProgressionGainBps",
-        "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [200, 400, 600, 800, 1000]
-      }
-    ],
-    "appliesTo": ["Recipe mastery EXP"],
-    "doesNotApplyTo": ["Tempering crafting EXP", "Item quality", "Potential"],
-    "enabled": true,
-    "sortOrder": 340
-  },
-  {
-    "id": "dungeon.sigil-traces",
-    "branch": "Dungeons",
-    "displayName": "Sigil Traces",
-    "description": "Slightly improves idle dungeon Sigil drop discovery.",
-    "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
-    "effects": [
-      {
-        "kind": "DungeonSigilDropRateRelativeBps",
-        "unit": "RelativeBasisPoints",
-        "valuesByRank": [150, 300, 450, 600, 750]
-      }
-    ],
-    "appliesTo": ["Idle dungeon Sigil drops"],
-    "doesNotApplyTo": ["Dungeon attempts", "Soulstone drops"],
-    "enabled": true,
-    "sortOrder": 410
   },
   {
     "id": "dungeon.rest-site-satchel",
@@ -252,16 +229,33 @@
     "displayName": "Rest Site Satchel",
     "description": "Improves retained rewards when resting at a dungeon Rest Site.",
     "maxRank": 5,
-    "costsByRank": [25, 75, 150, 300, 600],
+    "costsByRank": [
+      25,
+      75,
+      150,
+      300,
+      600
+    ],
     "effects": [
       {
         "kind": "DungeonRewardRetentionBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [200, 400, 600, 800, 1000]
+        "valuesByRank": [
+          200,
+          400,
+          600,
+          800,
+          1000
+        ]
       }
     ],
-    "appliesTo": ["Dungeon Rest Site rewards"],
-    "doesNotApplyTo": ["Full-clear final rewards", "Combat stats"],
+    "appliesTo": [
+      "Dungeon Rest Site rewards"
+    ],
+    "doesNotApplyTo": [
+      "Full-clear final rewards",
+      "Combat stats"
+    ],
     "enabled": true,
     "sortOrder": 430
   }

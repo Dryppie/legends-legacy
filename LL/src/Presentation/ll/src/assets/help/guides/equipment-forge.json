@@ -1,0 +1,26 @@
+{
+  "title": "Equipment & Forge Guide",
+  "lastReviewed": "2026-09-02",
+  "sections": [
+    {
+      "heading": "Your first equipment",
+      "body": "After attuning your First Hunt Essence, choose your armor and hand configuration in Equipment & Forge. Equip the kit from Inventory. First Weapon awards Scrap and your band, amulet and vial; equip those accessories to enter Lumo. Spending at the Forge is optional."
+    },
+    {
+      "heading": "Choose rewards",
+      "body": "In Shenic, select a plain equipment target and an unlocked sigil family. Victories advance the displayed counters. A plain target pauses after one award; choose another when you need it. Select a named target before entering a dungeon. Existing runs keep their original target."
+    },
+    {
+      "heading": "Improve and specialize",
+      "body": "Rank improvements cost the displayed Scrap and Cinders and succeed deterministically, up to rank 5. A Blueprint teaches one reusable style across its compatible equipment, including one free first application. Review the exact stats, costs, binding and equipped-loadout changes before confirming. No gathering, recipe mastery, Quality or Potential is required."
+    },
+    {
+      "heading": "Recover missing equipment",
+      "body": "The rewards tab and Quest Journal recovery link restore missing starter and earned plain-target copies for free. Inventory, equipped items and pending rewards count as owned. Replacements are plain, bound and rank 0; lost upgrades and style payments are not restored."
+    },
+    {
+      "heading": "Salvage and retries",
+      "body": "Unequip an item before salvaging it. The preview shows its exact Scrap return, based on its saved award value and actual paid rank Scrap. Cinders and style fees are not refunded. If a request has an unknown result, retry it to retrieve the saved outcome. A changed quote needs another confirmation."
+    }
+  ]
+}

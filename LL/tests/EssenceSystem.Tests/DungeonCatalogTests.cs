@@ -8,6 +8,10 @@ using Services.LL.JsonDefinitions;
 using Services.LL.JsonDefinitions.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
 using Services.LL.Combat.Layers.Resolution.Dungeon;
+using Microsoft.Extensions.Configuration;
+using Services.LL.Rewards;
+using Services.LL.Regions;
+using Domain.Models.Regions.Areas;
 
 namespace EssenceSystem.Tests;
 
@@ -34,7 +38,7 @@ public sealed class DungeonCatalogTests
             new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii", 1.04f),
             new ExpectedDungeon("tangled_cave", "Tangled Cave I", DungeonGrade.GradeI, 11, 13, 1, null, 1.5f),
             new ExpectedDungeon("tangled_cave_ii", "Tangled Cave II", DungeonGrade.GradeII, 12, 14, 1, "tangled_cave", 1.25f),
-            new ExpectedDungeon("tangled_cave_iii", "Tangled Cave III", DungeonGrade.GradeIII, 13, 15, 1, "tangled_cave_ii", 1.3f),
+            new ExpectedDungeon("tangled_cave_iii", "Tangled Cave III", DungeonGrade.GradeIII, 13, 15, 1, "tangled_cave_ii", 1.1f),
             new ExpectedDungeon("great_tree", "The Great Tree I", DungeonGrade.GradeI, 11, 13, 1, null, 1.25f),
             new ExpectedDungeon("great_tree_ii", "The Great Tree II", DungeonGrade.GradeII, 12, 14, 1, "great_tree", 1.1f),
             new ExpectedDungeon("great_tree_iii", "The Great Tree III", DungeonGrade.GradeIII, 13, 15, 1, "great_tree_ii", 1.2f)
@@ -156,25 +160,35 @@ public sealed class DungeonCatalogTests
     public void Region_two_dungeon_grades_increase_in_effective_enemy_pressure()
     {
         var dungeons = MaterializeCurrentCatalog();
+        var scaling = new RegionCreatureScalingProvider(new ConfigurationBuilder().Build(),
+            Path.GetDirectoryName(FindDataRoot())!, CreateJsonOptions());
 
         foreach (var familyId in new[] { "tangled_cave", "great_tree" })
         {
             var pressure = dungeons
                 .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == familyId)
                 .OrderBy(dungeon => dungeon.Tier)
-                .Select(dungeon => DungeonEnemyDifficultyScaling.GetStrengthMultiplier(
-                    dungeon.Tier,
-                    dungeon.EnemyStrengthMultiplier))
+                .Select(dungeon =>
+                {
+                    // Grade III also raises the shared curve from step 20 to 30. The authored
+                    // multiplier alone cannot describe the resulting encounter difficulty.
+                    var baseline = scaling.GetScaling(new Area { DifficultyTier =
+                        DungeonEnemyDifficultyScaling.GetProgressionPosition(dungeon.Tier, dungeon.Region) });
+                    var multiplier = DungeonEnemyDifficultyScaling.GetStrengthMultiplier(dungeon.Tier, dungeon.EnemyStrengthMultiplier);
+                    return (Health: baseline.HealthMultiplier * multiplier, Power: baseline.OffenseMultiplier * multiplier);
+                })
                 .ToArray();
 
             Assert.Equal(3, pressure.Length);
-            Assert.True(pressure[0] < pressure[1]);
-            Assert.True(pressure[1] < pressure[2]);
+            Assert.True(pressure[0].Health < pressure[1].Health);
+            Assert.True(pressure[1].Health < pressure[2].Health);
+            Assert.True(pressure[0].Power < pressure[1].Power);
+            Assert.True(pressure[1].Power < pressure[2].Power);
         }
     }
 
     [Fact]
-    public void Region_two_dungeons_reward_their_blueprints_once_and_their_catalysts_on_runs()
+    public void Region_two_dungeons_reward_their_blueprints_once_without_crafting_materials()
     {
         var allDungeons = MaterializeCurrentCatalog();
         var expectedCatalystChances = new[] { 0.22, 0.16, 0.12 };
@@ -209,17 +223,7 @@ public sealed class DungeonCatalogTests
                     Assert.Equal(1, blueprint.Chance);
                 }
 
-                Assert.Equal(
-                    expected.Catalysts.Order(StringComparer.OrdinalIgnoreCase),
-                    dungeon.RewardTable.CompletionRewards
-                        .Select(reward => reward.ItemId)
-                        .Order(StringComparer.OrdinalIgnoreCase));
-                Assert.All(dungeon.RewardTable.CompletionRewards, catalyst =>
-                {
-                    Assert.Equal(2, catalyst.MinAmount);
-                    Assert.Equal(2, catalyst.MaxAmount);
-                    Assert.Equal(expectedCatalystChances[index], catalyst.Chance, 3);
-                });
+                Assert.Empty(dungeon.RewardTable.CompletionRewards);
             }
         }
     }
@@ -306,11 +310,69 @@ public sealed class DungeonCatalogTests
         var provider = new JsonDungeonDefinitions(
             CreateReader(),
             new DungeonDefinitionMaterializer(new DungeonCatalogValidator()),
-            new DungeonDefinitionValidator());
+            new DungeonDefinitionValidator(),
+            CreateRewardTables());
 
         Assert.Equal(12, provider.GetAll().Count);
         Assert.DoesNotContain(provider.GetAll(), x => x.Id.StartsWith("hives_abyss", StringComparison.OrdinalIgnoreCase));
     }
+
+    [Fact]
+    public void Materializer_uses_only_authored_completion_tables_and_copies_the_list()
+    {
+        var catalog = CreateReader().Value;
+        var difficulties = catalog.Families[0].Difficulties;
+        difficulties[0].CompletionRewardTableIds = ["reward.shared.blueprints", "reward.extra"];
+        difficulties[1].CompletionRewardTableIds = [];
+
+        var definitions = new DungeonDefinitionMaterializer(new DungeonCatalogValidator()).Materialize(catalog);
+
+        Assert.Equal(
+            ["reward.shared.blueprints", "reward.extra"],
+            definitions.Single(d => d.Id == difficulties[0].Id).CompletionRewardTableIds);
+        Assert.NotSame(
+            difficulties[0].CompletionRewardTableIds,
+            definitions.Single(d => d.Id == difficulties[0].Id).CompletionRewardTableIds);
+        Assert.Empty(definitions.Single(d => d.Id == difficulties[1].Id).CompletionRewardTableIds);
+    }
+
+    [Fact]
+    public void Provider_rejects_missing_authored_completion_tables_with_dungeon_context()
+    {
+        var reader = CreateReader();
+        var difficulty = reader.Value.Families[0].Difficulties[0];
+        difficulty.CompletionRewardTableIds = ["reward.missing"];
+
+        var error = Assert.Throws<InvalidOperationException>(() => new JsonDungeonDefinitions(
+            reader,
+            new DungeonDefinitionMaterializer(new DungeonCatalogValidator()),
+            new DungeonDefinitionValidator(),
+            CreateRewardTables()));
+
+        Assert.Contains(difficulty.Id, error.Message);
+        Assert.Contains("reward.missing", error.Message);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("reward.duplicate")]
+    public void Catalog_rejects_blank_or_duplicate_completion_table_ids(string id)
+    {
+        var catalog = CreateReader().Value;
+        var difficulty = catalog.Families[0].Difficulties[0];
+        difficulty.CompletionRewardTableIds = [id, id];
+
+        var errors = new DungeonCatalogValidator().Validate(catalog);
+
+        Assert.Contains(errors, error =>
+            error.Contains(difficulty.Id) && error.Contains("completion reward table"));
+    }
+
+    private static JsonRewardTableDefinitionProvider CreateRewardTables() => new(
+        new ConfigurationBuilder().Build(),
+        TestContentPaths.FindApiRoot(),
+        CreateJsonOptions(),
+        new RewardTableDefinitionValidator());
 
     private static void AssertEncounterRoles(
         DungeonDefinition dungeon,
@@ -371,10 +433,7 @@ public sealed class DungeonCatalogTests
         Assert.Equal(expected.RequiredPreviousDungeonId, actual.RequiredPreviousDungeonId);
         Assert.Equal(expected.EnemyStrengthMultiplier, actual.EnemyStrengthMultiplier);
         Assert.Equal(expected.RequiredPreviousDungeonId is null ? null : (DungeonGrade?)((int)expected.Grade - 1), actual.RequiredPreviousDungeonGrade);
-        Assert.Equal([$"reward.dungeon.{expected.Id}.completion"], actual.CompletionRewardTableIds);
-        Assert.Equal(
-            [$"reward.dungeon.region.{actual.Region}.tier.{(int)expected.Grade}"],
-            actual.TierRewardTableIds);
+        Assert.Empty(actual.TierRewardTableIds);
     }
 
     private static string FindDataRoot()

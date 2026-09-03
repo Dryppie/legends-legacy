@@ -66,10 +66,6 @@ public sealed class DungeonCatalogValidator
         if (family.RequiredTowerFloor is <= 0)
             errors.Add($"{familyLabel}: requiredTowerFloor must be greater than zero when specified.");
 
-        AddDuplicateErrors(
-            family.GatheringBonusRewardTableIds,
-            $"gathering bonus reward table in family '{familyLabel}'",
-            errors);
 
         AddDuplicateErrors(
             family.RoomTemplates.Select(x => x.Id),
@@ -111,6 +107,11 @@ public sealed class DungeonCatalogValidator
 
             if (difficulty.MinRooms <= 0)
                 errors.Add($"{difficultyLabel}: minRooms must be greater than zero.");
+
+            AddDuplicateErrors(
+                difficulty.CompletionRewardTableIds,
+                $"completion reward table in dungeon '{difficultyLabel}'",
+                errors);
 
             if (difficulty.MaxRooms < difficulty.MinRooms)
                 errors.Add($"{difficultyLabel}: maxRooms must be greater than or equal to minRooms.");

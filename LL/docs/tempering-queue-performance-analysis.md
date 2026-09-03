@@ -1,5 +1,7 @@
 # Tempering Queue Performance Analysis
 
+> Historical Alpha plan, superseded 3 September 2026. Crafting/gathering progression, queued tempering and their obsolete quest content have been removed. Conversion, refund and compatibility/backfill proposals below are not current implementation work. Shared numerical helpers with active consumers may remain. See the [post-Alpha cleanup](../../docs/design/equipment-post-alpha-cleanup.md) and [current quest flow](../../LEGENDSLEGACY_QUEST_FLOW.md) for supported behavior.
+
 ## Executive summary
 
 The 200+ ms baseline latency observed when adding or removing Tempering queue items was primarily caused by redundant database round trips and oversized entity graphs, rather than missing indexes.

@@ -15,16 +15,17 @@
       "monsterLootModifiers": {
         "Essence": 25
       },
-      "gatheringBonusRewardTableIds": [
-        "reward.gathering.region_01.catalysts"
-      ],
       "restSiteCount": 2,
       "roomTemplates": [
         {
           "id": "combat.1",
           "type": "Combat",
           "weight": 1,
-          "encounterIds": ["goblin", "goblin_archer", "goblin_warrior"]
+          "encounterIds": [
+            "goblin",
+            "goblin_archer",
+            "goblin_warrior"
+          ]
         },
         {
           "id": "boss.1",
@@ -42,8 +43,11 @@
       "difficulties": [
         {
           "id": "goblin_mines",
+          "completionRewardTableIds": [
+            "reward.dungeon.goblin_mines.completion"
+          ],
           "difficulty": 1,
-          "enemyStrengthMultiplier": 1.0,
+          "enemyStrengthMultiplier": 1,
           "minRooms": 10,
           "maxRooms": 12,
           "rewardTable": {
@@ -65,59 +69,15 @@
               }
             ],
             "completionRewards": []
-          },
-          "gatheringNodes": [
-            {
-              "id": "goblin_mines_dungeon_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.35,
-              "loot": [
-                {
-                  "itemId": "ore",
-                  "weight": 100,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "goblin_mines_dungeon_timber_cache",
-              "name": "Reclaimed Timber Cache",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.22,
-              "loot": [
-                {
-                  "itemId": "wood",
-                  "weight": 95,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "goblin_mines_dungeon_stream",
-              "name": "Cave Beast Den",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.18,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 75,
-                  "minQuantity": 8,
-                  "maxQuantity": 16
-                }
-              ]
-            }
-          ]
+          }
         },
         {
           "id": "goblin_mines_ii",
+          "completionRewardTableIds": [
+            "reward.dungeon.goblin_mines_ii.completion"
+          ],
           "difficulty": 2,
-          "enemyStrengthMultiplier": 1.0,
+          "enemyStrengthMultiplier": 1,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -139,59 +99,15 @@
               }
             ],
             "completionRewards": []
-          },
-          "gatheringNodes": [
-            {
-              "id": "goblin_mines_ii_rich_ore_vein",
-              "name": "Rich Ore Vein",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.4,
-              "loot": [
-                {
-                  "itemId": "ore",
-                  "weight": 100,
-                  "minQuantity": 8,
-                  "maxQuantity": 32
-                }
-              ]
-            },
-            {
-              "id": "goblin_mines_ii_support_timber",
-              "name": "Support Timber Cache",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.24,
-              "loot": [
-                {
-                  "itemId": "wood",
-                  "weight": 90,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "goblin_mines_ii_deep_stream",
-              "name": "Deep Beast Den",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.2,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 70,
-                  "minQuantity": 8,
-                  "maxQuantity": 16
-                }
-              ]
-            }
-          ]
+          }
         },
         {
           "id": "goblin_mines_iii",
+          "completionRewardTableIds": [
+            "reward.dungeon.goblin_mines_iii.completion"
+          ],
           "difficulty": 3,
-          "enemyStrengthMultiplier": 1.0,
+          "enemyStrengthMultiplier": 1,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -213,54 +129,7 @@
               }
             ],
             "completionRewards": []
-          },
-          "gatheringNodes": [
-            {
-              "id": "goblin_mines_iii_verdant_vein",
-              "name": "Verdant Deep Vein",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.45,
-              "loot": [
-                {
-                  "itemId": "ore",
-                  "weight": 100,
-                  "minQuantity": 8,
-                  "maxQuantity": 32
-                }
-              ]
-            },
-            {
-              "id": "goblin_mines_iii_living_timber",
-              "name": "Living Timber Cache",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.26,
-              "loot": [
-                {
-                  "itemId": "wood",
-                  "weight": 90,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "goblin_mines_iii_black_stream",
-              "name": "Shadow Beast Den",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.22,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 65,
-                  "minQuantity": 8,
-                  "maxQuantity": 16
-                }
-              ]
-            }
-          ]
+          }
         }
       ]
     },
@@ -278,40 +147,57 @@
       "monsterLootModifiers": {
         "Essence": 15
       },
-      "gatheringBonusRewardTableIds": [
-        "reward.gathering.region_01.catalysts"
-      ],
       "restSiteCount": 1,
       "roomTemplates": [
         {
           "id": "combat.1",
           "type": "Combat",
           "weight": 1,
-          "encounterIds": ["blood_zombie", "undead", "skeleton"]
+          "encounterIds": [
+            "blood_zombie",
+            "undead",
+            "skeleton"
+          ]
         },
         {
           "id": "combat.2",
           "type": "Combat",
           "weight": 0.8,
-          "encounterIds": ["grave_hound", "grave_wisp", "skeleton"]
+          "encounterIds": [
+            "grave_hound",
+            "grave_wisp",
+            "skeleton"
+          ]
         },
         {
           "id": "combat.3",
           "type": "Combat",
           "weight": 0.8,
-          "encounterIds": ["lost_soul", "undead", "skeleton"]
+          "encounterIds": [
+            "lost_soul",
+            "undead",
+            "skeleton"
+          ]
         },
         {
           "id": "combat.4",
           "type": "Combat",
           "weight": 0.6,
-          "encounterIds": ["blood_zombie", "grave_wisp", "skeleton"]
+          "encounterIds": [
+            "blood_zombie",
+            "grave_wisp",
+            "skeleton"
+          ]
         },
         {
           "id": "miniboss.1",
           "type": "MiniBoss",
           "weight": 1,
-          "encounterIds": ["grave_hound", "undead", "skeleton"],
+          "encounterIds": [
+            "grave_hound",
+            "undead",
+            "skeleton"
+          ],
           "featuredEncounterId": "skeleton"
         },
         {
@@ -330,6 +216,9 @@
       "difficulties": [
         {
           "id": "forgotten_catacombs",
+          "completionRewardTableIds": [
+            "reward.dungeon.forgotten_catacombs.completion"
+          ],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.05,
           "minRooms": 11,
@@ -353,42 +242,13 @@
               }
             ],
             "completionRewards": []
-          },
-          "gatheringNodes": [
-            {
-              "id": "forgotten_catacombs_ossuary",
-              "name": "Dusty Ossuary",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.3,
-              "loot": [
-                {
-                  "itemId": "ore",
-                  "weight": 95,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "forgotten_catacombs_funeral_wrappings",
-              "name": "Funeral Wrappings",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.24,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 90,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            }
-          ]
+          }
         },
         {
           "id": "forgotten_catacombs_ii",
+          "completionRewardTableIds": [
+            "reward.dungeon.forgotten_catacombs_ii.completion"
+          ],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.02,
           "minRooms": 12,
@@ -412,42 +272,13 @@
               }
             ],
             "completionRewards": []
-          },
-          "gatheringNodes": [
-            {
-              "id": "forgotten_catacombs_ii_bone_pile",
-              "name": "Grave Bone Pile",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.34,
-              "loot": [
-                {
-                  "itemId": "ore",
-                  "weight": 95,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "forgotten_catacombs_ii_spectral_webbing",
-              "name": "Spectral Webbing",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.26,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 88,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            }
-          ]
+          }
         },
         {
           "id": "forgotten_catacombs_iii",
+          "completionRewardTableIds": [
+            "reward.dungeon.forgotten_catacombs_iii.completion"
+          ],
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.04,
           "minRooms": 13,
@@ -471,39 +302,7 @@
               }
             ],
             "completionRewards": []
-          },
-          "gatheringNodes": [
-            {
-              "id": "forgotten_catacombs_iii_ancient_ossuary",
-              "name": "Ancient Ossuary",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.38,
-              "loot": [
-                {
-                  "itemId": "ore",
-                  "weight": 95,
-                  "minQuantity": 8,
-                  "maxQuantity": 24
-                }
-              ]
-            },
-            {
-              "id": "forgotten_catacombs_iii_soulglass_font",
-              "name": "Soulglass Font",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.28,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 85,
-                  "minQuantity": 8,
-                  "maxQuantity": 16
-                }
-              ]
-            }
-          ]
+          }
         }
       ]
     },
@@ -525,13 +324,20 @@
           "id": "combat.1",
           "type": "Combat",
           "weight": 1,
-          "encounterIds": ["venomous_spiderling", "giant_spider"]
+          "encounterIds": [
+            "venomous_spiderling",
+            "giant_spider"
+          ]
         },
         {
           "id": "miniboss.1",
           "type": "MiniBoss",
           "weight": 1,
-          "encounterIds": ["web_weaver_spider", "venomous_spiderling", "giant_spider"],
+          "encounterIds": [
+            "web_weaver_spider",
+            "venomous_spiderling",
+            "giant_spider"
+          ],
           "featuredEncounterId": "web_weaver_spider"
         },
         {
@@ -550,6 +356,9 @@
       "difficulties": [
         {
           "id": "tangled_cave",
+          "completionRewardTableIds": [
+            "reward.dungeon.tangled_cave.completion"
+          ],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.5,
           "minRooms": 11,
@@ -577,30 +386,14 @@
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "executioners_mark",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "venom_gland",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "royal_chitin_plate",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              }
-            ]
+            "completionRewards": []
           }
         },
         {
           "id": "tangled_cave_ii",
+          "completionRewardTableIds": [
+            "reward.dungeon.tangled_cave_ii.completion"
+          ],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.25,
           "minRooms": 12,
@@ -628,32 +421,16 @@
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "executioners_mark",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              },
-              {
-                "itemId": "venom_gland",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              },
-              {
-                "itemId": "royal_chitin_plate",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              }
-            ]
+            "completionRewards": []
           }
         },
         {
           "id": "tangled_cave_iii",
+          "completionRewardTableIds": [
+            "reward.dungeon.tangled_cave_iii.completion"
+          ],
           "difficulty": 3,
-          "enemyStrengthMultiplier": 1.3,
+          "enemyStrengthMultiplier": 1.1,
           "minRooms": 13,
           "maxRooms": 15,
           "rewardTable": {
@@ -679,26 +456,7 @@
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "executioners_mark",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              },
-              {
-                "itemId": "venom_gland",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              },
-              {
-                "itemId": "royal_chitin_plate",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              }
-            ]
+            "completionRewards": []
           }
         }
       ]
@@ -721,26 +479,42 @@
           "id": "combat.1",
           "type": "Combat",
           "weight": 1,
-          "encounterIds": ["wood_nymph", "forest_spirit", "bark_golem"]
+          "encounterIds": [
+            "wood_nymph",
+            "forest_spirit",
+            "bark_golem"
+          ]
         },
         {
           "id": "miniboss.1",
           "type": "MiniBoss",
           "weight": 1,
-          "encounterIds": ["treant_guardian", "bark_golem", "wood_nymph"],
+          "encounterIds": [
+            "treant_guardian",
+            "bark_golem",
+            "wood_nymph"
+          ],
           "featuredEncounterId": "treant_guardian"
         },
         {
           "id": "boss.1",
           "type": "Boss",
           "weight": 1,
-          "encounterIds": ["elder_treant", "treant_guardian", "forest_spirit", "wood_nymph"],
+          "encounterIds": [
+            "elder_treant",
+            "treant_guardian",
+            "forest_spirit",
+            "wood_nymph"
+          ],
           "featuredEncounterId": "elder_treant"
         }
       ],
       "difficulties": [
         {
           "id": "great_tree",
+          "completionRewardTableIds": [
+            "reward.dungeon.great_tree.completion"
+          ],
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.25,
           "minRooms": 11,
@@ -773,36 +547,14 @@
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "spirit_prism",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "warden_sigil",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "hive_ichor",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              },
-              {
-                "itemId": "aegis_runestone",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.22
-              }
-            ]
+            "completionRewards": []
           }
         },
         {
           "id": "great_tree_ii",
+          "completionRewardTableIds": [
+            "reward.dungeon.great_tree_ii.completion"
+          ],
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.1,
           "minRooms": 12,
@@ -835,36 +587,14 @@
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "spirit_prism",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              },
-              {
-                "itemId": "warden_sigil",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              },
-              {
-                "itemId": "hive_ichor",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              },
-              {
-                "itemId": "aegis_runestone",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.16
-              }
-            ]
+            "completionRewards": []
           }
         },
         {
           "id": "great_tree_iii",
+          "completionRewardTableIds": [
+            "reward.dungeon.great_tree_iii.completion"
+          ],
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.2,
           "minRooms": 13,
@@ -897,32 +627,7 @@
                 "maxAmount": 1
               }
             ],
-            "completionRewards": [
-              {
-                "itemId": "spirit_prism",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              },
-              {
-                "itemId": "warden_sigil",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              },
-              {
-                "itemId": "hive_ichor",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              },
-              {
-                "itemId": "aegis_runestone",
-                "minAmount": 2,
-                "maxAmount": 2,
-                "chance": 0.12
-              }
-            ]
+            "completionRewards": []
           }
         }
       ]

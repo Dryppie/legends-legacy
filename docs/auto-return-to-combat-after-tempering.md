@@ -1,5 +1,7 @@
 # Automatic Return to Combat After Tempering
 
+> Historical Alpha plan, superseded 3 September 2026. Crafting/gathering progression, queued tempering and their obsolete quest content have been removed. Conversion, refund and compatibility/backfill proposals below are not current implementation work. Shared numerical helpers with active consumers may remain. See the [post-Alpha cleanup](design/equipment-post-alpha-cleanup.md) and [current quest flow](../LEGENDSLEGACY_QUEST_FLOW.md) for supported behavior.
+
 ## Summary
 
 Whenever a player enters a standard combat area, the game should remember that area as the eligible return destination. Once a later tempering queue finishes naturally, the character should automatically resume combat in that area.

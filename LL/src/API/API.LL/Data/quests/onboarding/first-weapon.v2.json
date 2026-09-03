@@ -1,0 +1,38 @@
+{
+  "id": "quest.onboarding.first_weapon",
+  "version": 2,
+  "title": "First Weapon",
+  "summary": "Choose your hands and armor, then equip the complete starter kit.",
+  "category": "Tutorial",
+  "sortOrder": 30,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": [
+      "quest.onboarding.soul_archive"
+    ]
+  },
+  "objectives": [
+    {
+      "presentation": {
+        "actionLabel": "Equipment & Forge",
+        "destinationRoute": "/game/character/forge?tab=rewards"
+      },
+      "filters": {
+        "starterEquipmentKind": "FirstWeapon"
+      },
+      "type": "ModelEStarterLoadoutEquipped",
+      "requiredAmount": 1,
+      "key": "equip_starter_loadout",
+      "description": "Choose your hands and armor, then equip the complete starter kit."
+    }
+  ],
+  "rewards": [
+    {
+      "itemBaseId": "tempered_scrap",
+      "key": "starter_scrap",
+      "quantity": 10,
+      "type": "Item"
+    }
+  ]
+}

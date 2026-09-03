@@ -24,7 +24,7 @@ interface PopoverCoordinates {
           [class.first-party-tour-backdrop-tutorial]="isTutorial(tour)"
           [ngStyle]="style"
           [style.pointer-events]="
-            tour.blocksInteraction || isTutorial(tour) ? 'auto' : 'none'
+            tour.blocksInteraction && tour.targetRect ? 'auto' : 'none'
           "
         ></div>
 
@@ -64,6 +64,14 @@ interface PopoverCoordinates {
             </span>
 
             <div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                class="ll-button px-3 py-1.5"
+                aria-label="Close guidance"
+                (click)="closeGuidance()"
+              >
+                Close
+              </button>
               <button
                 *ngIf="showBackButton(tour)"
                 type="button"

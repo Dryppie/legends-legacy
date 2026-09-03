@@ -10,17 +10,12 @@ import { CombatLogService } from '../../../client-side/combat/combat-log/combat-
 import { SessionSummaryService } from '../../../client-side/session-summary/session-summary.service';
 import { CurrencyService } from '../../currency/currency.service';
 import { CombatActionHandler } from './combat-action-handler';
-import { LevelingService } from '../../../client-side/leveling/leveling.service';
-import { GatheringType } from '../../../../../shared/models/enums/gatheringType';
-import { ProfessionType } from '../../../../../shared/models/Dtos/characterProfession';
-import { Rarity } from '../../../../../shared/models/enums/rarity';
 
 describe('CombatActionHandler', () => {
   let combat: jasmine.SpyObj<CombatService>;
   let summary: jasmine.SpyObj<SessionSummaryService>;
   let currency: jasmine.SpyObj<CurrencyService>;
   let combatLog: jasmine.SpyObj<CombatLogService>;
-  let leveling: jasmine.SpyObj<LevelingService>;
   let handler: CombatActionHandler;
 
   beforeEach(() => {
@@ -36,15 +31,11 @@ describe('CombatActionHandler', () => {
       'gainSoulstones',
     ]);
     combatLog = jasmine.createSpyObj('CombatLogService', ['addSession']);
-    leveling = jasmine.createSpyObj('LevelingService', [
-      'gainProfessionExperience',
-    ]);
     handler = new CombatActionHandler(
       combat,
       summary,
       currency,
       combatLog,
-      leveling,
     );
   });
 
@@ -62,7 +53,6 @@ describe('CombatActionHandler', () => {
     expect(currency.gainSoulstones).not.toHaveBeenCalled();
     expect(combat.startCombatSimulation).not.toHaveBeenCalled();
     expect(combatLog.addSession).not.toHaveBeenCalled();
-    expect(leveling.gainProfessionExperience).not.toHaveBeenCalled();
   });
 
   it('renders once and logs the combined session when catch-up completes', () => {
@@ -78,10 +68,6 @@ describe('CombatActionHandler', () => {
     expect(combat.applyIdleCombatExperience).toHaveBeenCalledOnceWith(640);
     expect(currency.gainCinders).toHaveBeenCalledOnceWith(12);
     expect(currency.gainSoulstones).toHaveBeenCalledOnceWith(3);
-    expect(leveling.gainProfessionExperience).toHaveBeenCalledOnceWith(
-      ProfessionType.Mining,
-      100,
-    );
     expect(combatLog.addSession).toHaveBeenCalledOnceWith(combinedSession);
   });
 
@@ -123,19 +109,6 @@ function combatSession(experience: number): CombatSessionDto {
       startedAt: new Date('2026-08-11T00:16:30Z'),
       outcome: BattleOutcome.Victory,
       experienceGained: experience,
-      gatheringRewards: [
-        {
-          toolType: GatheringType.Mining,
-          nodeId: 'ore',
-          nodeName: 'Ore',
-          toolName: 'Pickaxe',
-          toolRarity: Rarity.Common,
-          success: false,
-          experienceGained: 100,
-          itemsGained: [],
-          appliedBonusEffects: [],
-        },
-      ],
       playerTeam: [{}],
       enemyTeam: [{}],
     } as unknown as CombatResultDto,

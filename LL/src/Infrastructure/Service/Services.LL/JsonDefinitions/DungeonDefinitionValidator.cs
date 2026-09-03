@@ -1,6 +1,5 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
-using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Professions.Gathering.GatheringNodes;
@@ -86,7 +85,6 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
             ValidateRoom(label, room, errors);
         }
 
-        ValidateGatheringNodes(label, dungeon.GatheringNodes, errors);
 
         foreach (var cost in dungeon.EntryCosts)
         {
@@ -102,56 +100,6 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
         ValidateRewards(label, "completionRewards", dungeon.RewardTable.CompletionRewards, errors);
         ValidateRewards(label, "bonusRewards", dungeon.RewardTable.BonusRewards, errors);
         ValidateRewards(label, "firstClearRewards", dungeon.RewardTable.FirstClearRewards, errors);
-    }
-
-    private static void ValidateGatheringNodes(
-        string dungeonId,
-        IReadOnlyCollection<DungeonGatheringNodeDefinition> nodes,
-        List<string> errors)
-    {
-        foreach (var node in nodes)
-        {
-            if (string.IsNullOrWhiteSpace(node.Id))
-                errors.Add($"{dungeonId}: gathering node id is required.");
-
-            if (string.IsNullOrWhiteSpace(node.Name))
-                errors.Add($"{dungeonId}: gathering node '{node.Id}' name is required.");
-
-            if (node.Type == GatheringType.None)
-                errors.Add($"{dungeonId}: gathering node '{node.Id}' type is required.");
-
-            if (node.ProcChance is < 0 or > 1)
-                errors.Add($"{dungeonId}: gathering node '{node.Id}' procChance must be between 0 and 1.");
-
-            if (node.LevelRequirement is < 1)
-                errors.Add($"{dungeonId}: gathering node '{node.Id}' levelRequirement must be greater than zero.");
-
-            if (node.Loot.Count == 0 &&
-                string.IsNullOrWhiteSpace(node.RewardTableId) &&
-                node.BonusRewardTableIds.Count == 0)
-                errors.Add($"{dungeonId}: gathering node '{node.Id}' requires either rewardTableId or at least one loot entry.");
-
-            ValidateRewardTableIds(
-                dungeonId,
-                $"gathering node '{node.Id}' bonusRewardTableIds",
-                node.BonusRewardTableIds,
-                errors);
-
-            foreach (var loot in node.Loot)
-            {
-                if (string.IsNullOrWhiteSpace(loot.ItemId))
-                    errors.Add($"{dungeonId}: gathering node '{node.Id}' loot itemId is required.");
-
-                if (loot.Weight <= 0)
-                    errors.Add($"{dungeonId}: gathering node '{node.Id}' loot '{loot.ItemId}' weight must be greater than zero.");
-
-                if (loot.MinQuantity <= 0)
-                    errors.Add($"{dungeonId}: gathering node '{node.Id}' loot '{loot.ItemId}' minQuantity must be greater than zero.");
-
-                if (loot.MaxQuantity < loot.MinQuantity)
-                    errors.Add($"{dungeonId}: gathering node '{node.Id}' loot '{loot.ItemId}' maxQuantity must be greater than or equal to minQuantity.");
-            }
-        }
     }
 
     private static void ValidateRewardTableIds(

@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   ApiResponse,
   ActionPreview,
+  CompensationEquipmentOptions,
   AccountRiskDetails,
   AccountRiskFilters,
   AccountRiskOperation,
@@ -283,6 +284,10 @@ export class LiveOpsApiService {
       `/api/liveops/chat/mutes/${restrictionId}/revoke/preview`,
       body,
     );
+  }
+
+  compensationEquipmentOptions(characterId: string, itemBaseId: string): Promise<ApiResponse<CompensationEquipmentOptions>> {
+    return firstValueFrom(this.http.get<ApiResponse<CompensationEquipmentOptions>>(`/api/liveops/characters/${characterId}/item-grants/equipment-options`, { params: new HttpParams().set('itemBaseId', itemBaseId) }));
   }
 
   grantItems(characterId: string, body: object): Promise<ApiResponse<unknown>> {

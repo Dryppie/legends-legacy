@@ -85,7 +85,7 @@ export class EquipmentOverviewComponent implements OnInit {
 
   slots = computed(() => {
     const stateSlots = this.equipmentState.equipmentSlots();
-    return this.baseSlots.map((slot) => {
+    return this.baseSlots.filter(slot => slot.equipmentSlotType !== EquipmentSlotType.Tool).map((slot) => {
       const live = stateSlots.find(
         (s) => s.equipmentSlotType === slot.equipmentSlotType,
       );

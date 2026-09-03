@@ -7,6 +7,8 @@ simplified further: definitions remain locked until their level and quest
 prerequisites are met, then become Active immediately. The journal no longer
 has an Available/acceptance state.
 
+**Post-Alpha update, 3 September 2026:** First Hunt and automatic quest activation remain. The crafting branch below is historical and has been removed. Current onboarding grants a hands/armor starter kit and accessories. Alpha quest definitions and superseded versions are gone; a one-time migration deletes their saved progress rather than preserving alternate cohorts. See the [current quest flow](../../LEGENDSLEGACY_QUEST_FLOW.md) and [cleanup record](../../docs/design/equipment-post-alpha-cleanup.md).
+
 ## Goal
 
 Replace the fixed `Training Day` encounter with a meaningful starter choice:
@@ -100,7 +102,7 @@ Treant Sapling with Skeleton.
 This uses the quest catalog's existing version support and avoids a risky
 backfill of completed player progress.
 
-## Quest Model Extension
+## Quest equipment progressionxtension
 
 ### Definition contract
 

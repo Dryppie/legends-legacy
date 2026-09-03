@@ -23,6 +23,8 @@ such as raid and World Tower roster displays. Snapshot fingerprints include the
 inputs that can change the rating. Temporary combat modifiers and encounter-only
 effects are excluded.
 
+The [equipment reference command](../../docs/content-balancing/equipment-reference-builds.md) now feeds canonical frozen equipment into this calculator and separately records prepared combat attributes and production-engine outcomes. It does not change rating semantics or validate content readiness.
+
 Increment `PowerRatingAlgorithm.Version` whenever rating semantics change.
 Tests for this subsystem verify deterministic arithmetic, modifier application,
 caps, fingerprints, and party aggregation.

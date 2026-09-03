@@ -29,6 +29,12 @@ The local MVP described in work packages 1–4 is implemented:
 
 Production activation remains intentionally external to this repository: the Google client, Cloudflare hostname/access policy, SealedSecret values, migrations, monitoring, backups, and staging sign-off must be completed before the infrastructure `liveOps.enabled` gate is switched on.
 
+## Equipment progression compensation controls — 3 September 2026
+
+The player workspace now loads equipment options for the selected recipient and item base. Equipment progression grants expose canonical definition, supported tier, rank 0–5 and compatible active style, including Plain. The form explains recipient binding, zero initial salvage and the 100-instance cap. Pending or failed option loads and unsupported equipment block preview; responses for an old player/item selection cannot overwrite the current choices.
+
+The existing confirmation dialog shows the exact definition, styles, rank, owner, evaluated stats and salvage treatment. Canonical grants use high-value confirmation and retain server-side authorization, mandatory reasons, preview/state validation and idempotent retry. Legacy equipment and valid resource grants continue through their supported forms. The [equipment progression ledger](design/equipment-implementation-status.md) records verification and the required standalone-host content/configuration alignment; no deployment or activation was performed.
+
 ## Decision: create a new dashboard
 
 Create `LL/src/Presentation/liveops` instead of turning `LL/src/Presentation/dashboard` into a production tool.

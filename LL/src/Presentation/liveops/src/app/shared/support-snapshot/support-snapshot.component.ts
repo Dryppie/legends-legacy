@@ -1,4 +1,6 @@
+import { equipmentSourceLabel } from './acquisition-source';
 import { CommonModule } from '@angular/common';
+import { EquipmentSupportComponent } from './equipment-support.component';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   PlayerSupportSnapshot,
@@ -10,10 +12,11 @@ import {
 @Component({
   selector: 'app-support-snapshot',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, EquipmentSupportComponent],
   templateUrl: './support-snapshot.component.html',
 })
 export class SupportSnapshotComponent {
+  readonly acquisitionSourceLabel = equipmentSourceLabel;
   @Input() snapshot: PlayerSupportSnapshot | null = null;
   @Input() loading = false;
   @Input() error = '';

@@ -23,9 +23,6 @@ public sealed class AchievementGameEventOutboxConsumer(
         eventType is GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
             or GameEventTypes.EssenceAscended
-            or GameEventTypes.EquipmentCrafted
-            or GameEventTypes.EquipmentTempered
-            or GameEventTypes.BlueprintUnlocked
             or GameEventTypes.IdleCombatEncounterCompleted
             or GameEventTypes.CharacterCreated
             or GameEventTypes.CharacterLevelReached
@@ -70,15 +67,6 @@ public sealed class AchievementGameEventOutboxConsumer(
 
             GameEventTypes.EssenceAscended =>
                 HandleEssenceAscendedAsync(Read<EssenceAscendedPayload>(message), cancellationToken),
-
-            GameEventTypes.EquipmentCrafted =>
-                HandleEquipmentCraftedAsync(Read<EquipmentCraftedPayload>(message), cancellationToken),
-
-            GameEventTypes.EquipmentTempered =>
-                HandleEquipmentTemperedAsync(Read<EquipmentTemperedPayload>(message), cancellationToken),
-
-            GameEventTypes.BlueprintUnlocked =>
-                HandleBlueprintUnlockedAsync(Read<BlueprintUnlockedPayload>(message), cancellationToken),
 
             GameEventTypes.IdleCombatEncounterCompleted =>
                 HandleIdleCombatAsync(Read<IdleCombatEncounterCompletedPayload>(message), cancellationToken),
@@ -129,29 +117,6 @@ public sealed class AchievementGameEventOutboxConsumer(
             payload.AscensionTier,
             payload.AscendedToTierCount,
             cancellationToken);
-
-    private Task HandleEquipmentCraftedAsync(
-        EquipmentCraftedPayload payload,
-        CancellationToken cancellationToken) =>
-        achievementService.RecordItemsCraftedAsync(
-            payload.CharacterId,
-            payload.CraftedItems.Select(ToEquipmentInstance).ToList(),
-            payload.CraftingMasteryLevel,
-            cancellationToken);
-
-    private Task HandleEquipmentTemperedAsync(
-        EquipmentTemperedPayload payload,
-        CancellationToken cancellationToken) =>
-        achievementService.RecordItemsTemperedAsync(
-            payload.CharacterId,
-            payload.Summary ?? new TemperingSummary(),
-            payload.CompletedItems.Select(ToEquipmentInstance).ToList(),
-            cancellationToken);
-
-    private Task HandleBlueprintUnlockedAsync(
-        BlueprintUnlockedPayload payload,
-        CancellationToken cancellationToken) =>
-        achievementService.RecordBlueprintUnlockedAsync(payload.CharacterId, cancellationToken);
 
     private Task HandleIdleCombatAsync(
         IdleCombatEncounterCompletedPayload payload,
@@ -204,20 +169,6 @@ public sealed class AchievementGameEventOutboxConsumer(
             payload.CharacterRatingBefore,
             payload.OpponentRatingBefore,
             cancellationToken);
-
-    private static EquipmentInstance ToEquipmentInstance(OutboxEquipmentItemPayload item) =>
-        new()
-        {
-            ItemBaseId = item.ItemBaseId,
-            Tier = item.Tier,
-            Rarity = item.Rarity,
-            Quality = item.Quality,
-            Potential = item.Potential,
-            BaseRecipeId = item.BaseRecipeId,
-            BlueprintId = item.BlueprintId,
-            AffinityTags = item.AffinityTags.ToList(),
-            IsMasterpiece = item.IsMasterpiece
-        };
 
     private T Read<T>(GameEventOutboxMessage message) =>
         JsonSerializer.Deserialize<T>(message.PayloadJson, jsonOptions)

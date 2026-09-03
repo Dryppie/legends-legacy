@@ -8,7 +8,9 @@
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,
-    "completedQuestIds": ["quest.essences.a_second_soul"]
+    "completedQuestIds": [
+      "quest.essences.a_second_soul"
+    ]
   },
   "objectives": [
     {
@@ -24,6 +26,11 @@
     }
   ],
   "rewards": [
-    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 25 }
+    {
+      "key": "soul_dust",
+      "type": "Item",
+      "itemBaseId": "soul_dust",
+      "quantity": 25
+    }
   ]
 }

@@ -10,9 +10,9 @@ public sealed record IdleCombatRewardFacts(
     TimeSpan ProcessedDuration,
     Area Area,
     IReadOnlyList<Guid> PlayerEntityIds,
-    EquippedGatheringTool? EquippedTool,
     IReadOnlyList<IdleEncounterRewardFacts> Encounters)
 {
+    public long ScheduleGeneration { get; init; }
     public IdleEncounterRewardFacts? LastEncounter =>
         Encounters.Count == 0 ? null : Encounters[^1];
 }

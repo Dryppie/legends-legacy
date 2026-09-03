@@ -1,4 +1,6 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
@@ -366,10 +368,8 @@ public class ColosseumService : IColosseumService
         return await _colosseumRepository.GetArenaDefenseSnapshotAsync(characterId, cancellationToken);
     }
 
-    public IReadOnlyList<ChampionMarketItem> GetChampionMarketItems()
-    {
-        return _championMarketCatalog.GetActive(DateTimeOffset.UtcNow);
-    }
+    public Task<IReadOnlyList<ChampionMarketItem>> GetChampionMarketItemsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        Task.FromResult(_championMarketCatalog.GetActive(DateTimeOffset.UtcNow));
 
     public async Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(
         Guid characterId,
@@ -380,8 +380,7 @@ public class ColosseumService : IColosseumService
         if (quantity < 1) return null;
 
         var now = DateTimeOffset.UtcNow;
-        var item = _championMarketCatalog
-            .GetActive(now)
+        var item = (await GetChampionMarketItemsAsync(characterId, cancellationToken))
             .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
         if (item?.IsEnabled != true) return null;
 

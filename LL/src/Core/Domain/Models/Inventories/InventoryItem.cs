@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 
@@ -30,14 +30,14 @@ public class InventoryItem
     /// <summary>
     /// True while this is an eligible equipment acquisition the owner has not inspected yet.
     /// Eligible acquisitions are crafted equipment, marketplace equipment purchases, and
-    /// gathering tools dropped by dungeons.
+    /// gathering tools dropped by dungeons, and Equipment progression equipment awards.
     /// </summary>
     [NotMapped]
     public bool IsNew =>
         SeenAtUtc is null
         && ItemInstance is EquipmentInstance equipment
         && equipment.ItemBase is EquipmentBase equipmentBase
-        && (string.Equals(
+        && (equipment.HasEquipmentProgression || string.Equals(
                 equipment.AcquisitionSource,
                 ItemAcquisitionSources.Crafting,
                 StringComparison.Ordinal)

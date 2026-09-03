@@ -1,5 +1,13 @@
 # `dungeons.json` Difficulty-Family Redesign
 
+## Post-Alpha reward-table update — 3 September 2026
+
+Each difficulty now authors `completionRewardTableIds` explicitly. An omitted or empty list means no completion-table rolls; it does not disable first-clear rewards or the standard Monster Core rewards. The materializer copies this list and never invents a table ID from the dungeon name. Goblin Mines and Forgotten Catacombs retain their six Blueprint completion tables. Great Tree and Tangled Cave initially used empty lists after their gathering-tool tables were removed. The [Meran expansion](design/equipment-region-two-progression.md) now gives their six difficulties explicit Blueprint-only completion tables, with a 10% total book chance per completion.
+
+Catalog validation rejects blank/duplicate IDs, and `JsonDungeonDefinitions` checks referenced tables when loading, reporting the dungeon and missing table together. This fixes reward previews and completion processing requesting deleted tables such as `reward.dungeon.great_tree.completion`. The new preview regression reproduced the failure before the fix; afterward, 77 focused backend tests passed through `build/run-tests.ps1`, covering all 12 current difficulties and related reward/equipment paths.
+
+Rebuild and restart the API with the updated catalog. No new schema migration, configuration setting or database change is required. The earlier gathering/derived-reward proposals below are historical where superseded by this update and the [Alpha cleanup](design/equipment-post-alpha-cleanup.md).
+
 ## Purpose
 
 `dungeons.json` previously stored each difficulty as a complete `DungeonDefinition`. Goblin Mines I, II, and III therefore repeated the same family identity, sigil, entry cost, encounter catalog, loot modifiers, and other configuration. Forgotten Catacombs had the same problem.
@@ -193,8 +201,8 @@ The materializer can safely derive current conventions while allowing explicit o
 | `Tier` | Defaults to the numeric difficulty. |
 | `RequiredPreviousDungeonId` | Previous entry in the same family's ordered difficulty list. |
 | `RequiredPreviousDungeonGrade` | Previous difficulty's derived grade. |
-| `TierRewardTableIds` | `reward.dungeon.tier.{difficulty}`. |
-| `CompletionRewardTableIds` | `reward.dungeon.{difficultyId}.completion`. |
+| `TierRewardTableIds` | Empty; obsolete material-tier tables were removed. |
+| `CompletionRewardTableIds` | Copy the difficulty's explicit `completionRewardTableIds`; no generated default. |
 | `MinRooms` / `MaxRooms` | Copied from the difficulty's `minRooms` and `maxRooms`. |
 
 Do not derive stable dungeon IDs from Roman-numeral formatting. IDs are referenced by saves, achievements, prerequisites, and APIs, so every difficulty should continue authoring its exact `id`.
@@ -222,7 +230,7 @@ Introduce authoring-only models, for example:
 Materialization order should be deterministic:
 
 1. Deep-copy family-owned lists and dictionaries.
-2. Derive difficulty identity, grade, tier, prerequisite chain, and conventional reward-table IDs.
+2. Derive difficulty identity, grade, tier and prerequisite chain; copy explicitly authored completion-table IDs.
 3. Apply scalar difficulty overrides.
 4. Normalize and deduplicate family encounter IDs while preserving order.
 5. Put the family-owned featured encounter first for Boss and Miniboss templates.
@@ -262,7 +270,7 @@ Validate the authoring document before or during materialization:
 - Every Miniboss and Boss template has exactly one featured encounter and it exists in that template.
 - Difficulty definitions cannot contain room or encounter overrides.
 - Every materialized difficulty has the same room templates and ordered encounter IDs as its family.
-- Derived prerequisite IDs and reward-table IDs resolve.
+- Derived prerequisite IDs and explicitly authored reward-table IDs resolve.
 - Materialized collections are not reference-equal across difficulties.
 - The existing `DungeonDefinitionValidator` accepts every flattened result.
 

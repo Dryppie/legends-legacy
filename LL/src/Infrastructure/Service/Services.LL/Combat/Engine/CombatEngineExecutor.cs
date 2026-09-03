@@ -421,6 +421,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
     private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)
     {
+        if (combatant.MainHandEquipment?.ProgressionData is { } progression)
+            return ToBasicAttackBehavior(progression.Behavior);
         if (_craftingDefinitions is null || combatant.MainHandEquipment is null)
             return BasicAttackBehavior.Default;
         if (string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BaseRecipeId))
@@ -434,7 +436,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             (!string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BlueprintId) && blueprint is null))
             return BasicAttackBehavior.Default;
         var behavior = EquipmentCraftingDesignComposer.Compose(recipe, blueprint).Behavior;
+        return ToBasicAttackBehavior(behavior);
+    }
 
+    private static BasicAttackBehavior ToBasicAttackBehavior(EquipmentBehaviorDefinition behavior)
+    {
         var attackType = behavior.RangeCategory.Equals("Ranged", StringComparison.OrdinalIgnoreCase)
             ? AttackType.Ranged
             : AttackType.Melee;

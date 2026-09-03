@@ -1,0 +1,116 @@
+[
+  {
+    "version": "model-e.ordinary.r1.v1",
+    "poolId": "model_e.r1.plain.tier1.v1",
+    "equipmentTier": 1,
+    "victoriesPerPerfectDay": 8640,
+    "plainTargetVictories": 360,
+    "sigilVictories": 4320,
+    "discoveryChance": 0.0003,
+    "discoveryBaseScrap": 1,
+    "areas": [
+      {
+        "areaId": "region_01_area_01",
+        "scrapPerPerfectDay": 36
+      },
+      {
+        "areaId": "region_01_area_02",
+        "scrapPerPerfectDay": 38
+      },
+      {
+        "areaId": "region_01_area_03",
+        "scrapPerPerfectDay": 40
+      },
+      {
+        "areaId": "region_01_area_04",
+        "scrapPerPerfectDay": 42
+      },
+      {
+        "areaId": "region_01_area_06",
+        "scrapPerPerfectDay": 44
+      },
+      {
+        "areaId": "region_01_area_08",
+        "scrapPerPerfectDay": 46
+      },
+      {
+        "areaId": "region_01_area_09",
+        "scrapPerPerfectDay": 48
+      },
+      {
+        "areaId": "region_01_area_10",
+        "scrapPerPerfectDay": 50
+      },
+      {
+        "areaId": "region_01_area_11",
+        "scrapPerPerfectDay": 52
+      },
+      {
+        "areaId": "region_01_area_07",
+        "scrapPerPerfectDay": 54
+      }
+    ],
+    "sigils": [
+      {
+        "familyId": "goblin_mines",
+        "itemBaseId": "sigil_goblin_mines",
+        "minimumLevel": 5,
+        "requiredQuestId": "quest.shenic.trial_of_lumo"
+      },
+      {
+        "familyId": "forgotten_catacombs",
+        "itemBaseId": "sigil_forgotten_catacombs",
+        "minimumLevel": 15,
+        "requiredQuestId": "quest.shenic.crystal_currents"
+      }
+    ],
+    "regionName": "Shenic",
+    "minimumLevel": 1
+  },
+  {
+    "version": "model-e.ordinary.r2.v1",
+    "poolId": "model_e.r2.plain.tier2.v1",
+    "equipmentTier": 2,
+    "victoriesPerPerfectDay": 8640,
+    "plainTargetVictories": 360,
+    "sigilVictories": 4320,
+    "discoveryChance": 0.0003,
+    "discoveryBaseScrap": 2,
+    "areas": [
+      {
+        "areaId": "region_02_area_01",
+        "scrapPerPerfectDay": 72
+      },
+      {
+        "areaId": "region_02_area_02",
+        "scrapPerPerfectDay": 84
+      },
+      {
+        "areaId": "region_02_area_03",
+        "scrapPerPerfectDay": 96
+      },
+      {
+        "areaId": "region_02_area_04",
+        "scrapPerPerfectDay": 108
+      }
+    ],
+    "sigils": [
+      {
+        "familyId": "tangled_cave",
+        "itemBaseId": "sigil_tangled_cave",
+        "minimumLevel": 50,
+        "requiredQuestId": null,
+        "requiredTowerFloor": 10
+      },
+      {
+        "familyId": "great_tree",
+        "itemBaseId": "sigil_great_tree",
+        "minimumLevel": 50,
+        "requiredQuestId": null,
+        "requiredTowerFloor": 10
+      }
+    ],
+    "regionName": "Meran",
+    "minimumLevel": 50
+  }
+]

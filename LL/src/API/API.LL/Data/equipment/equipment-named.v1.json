@@ -1,0 +1,226 @@
+[
+  {
+    "id": "model_e.r1.goblin_mines.shortsword.blueprint_fury",
+    "name": "Fury Shortsword",
+    "archetypeId": "plain.shortsword",
+    "nativeStyleId": "blueprint_fury",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.dagger.blueprint_fury",
+    "name": "Fury Dagger",
+    "archetypeId": "plain.dagger",
+    "nativeStyleId": "blueprint_fury",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.greatsword.blueprint_fury",
+    "name": "Fury Greatsword",
+    "archetypeId": "plain.greatsword",
+    "nativeStyleId": "blueprint_fury",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.band.blueprint_fury",
+    "name": "Fury Ring",
+    "archetypeId": "plain.band",
+    "nativeStyleId": "blueprint_fury",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.cloth_robe.blueprint_phoenix",
+    "name": "Phoenix Cloth Robe",
+    "archetypeId": "plain.cloth_robe",
+    "nativeStyleId": "blueprint_phoenix",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.heavy_breastplate.blueprint_phoenix",
+    "name": "Phoenix Heavy Breastplate",
+    "archetypeId": "plain.heavy_breastplate",
+    "nativeStyleId": "blueprint_phoenix",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.staff.blueprint_phoenix",
+    "name": "Phoenix Staff",
+    "archetypeId": "plain.staff",
+    "nativeStyleId": "blueprint_phoenix",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.goblin_mines.vial.blueprint_phoenix",
+    "name": "Phoenix Relic",
+    "archetypeId": "plain.vial",
+    "nativeStyleId": "blueprint_phoenix",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.wand.blueprint_arcane",
+    "name": "Arcane Wand",
+    "archetypeId": "plain.wand",
+    "nativeStyleId": "blueprint_arcane",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.staff.blueprint_arcane",
+    "name": "Arcane Staff",
+    "archetypeId": "plain.staff",
+    "nativeStyleId": "blueprint_arcane",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.grimoire.blueprint_arcane",
+    "name": "Arcane Grimoire",
+    "archetypeId": "plain.grimoire",
+    "nativeStyleId": "blueprint_arcane",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.amulet.blueprint_arcane",
+    "name": "Arcane Amulet",
+    "archetypeId": "plain.amulet",
+    "nativeStyleId": "blueprint_arcane",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.heavy_breastplate.blueprint_endurance",
+    "name": "Endurance Heavy Breastplate",
+    "archetypeId": "plain.heavy_breastplate",
+    "nativeStyleId": "blueprint_endurance",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.light_leggings.blueprint_endurance",
+    "name": "Endurance Light Legwraps",
+    "archetypeId": "plain.light_leggings",
+    "nativeStyleId": "blueprint_endurance",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.heavy_helm.blueprint_endurance",
+    "name": "Endurance Heavy Helm",
+    "archetypeId": "plain.heavy_helm",
+    "nativeStyleId": "blueprint_endurance",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "model_e.r1.forgotten_catacombs.band.blueprint_endurance",
+    "name": "Endurance Ring",
+    "archetypeId": "plain.band",
+    "nativeStyleId": "blueprint_endurance",
+    "randomDiscoveryBaseScrap": 2
+  },
+  {
+    "id": "named.tangled_cave.execution_greatsword",
+    "name": "Cavern Executioner",
+    "archetypeId": "plain.greatsword",
+    "nativeStyleId": "blueprint_execution",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.execution_crossbow",
+    "name": "Cavern Repeater",
+    "archetypeId": "plain.crossbow",
+    "nativeStyleId": "blueprint_execution",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.execution_band",
+    "name": "Silken Death Band",
+    "archetypeId": "plain.band",
+    "nativeStyleId": "blueprint_execution",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.venom_shortsword",
+    "name": "Venom-Touched Sword",
+    "archetypeId": "plain.shortsword",
+    "nativeStyleId": "blueprint_venom",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.venom_spear",
+    "name": "Broodstalker Spear",
+    "archetypeId": "plain.spear",
+    "nativeStyleId": "blueprint_venom",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.venom_wand",
+    "name": "Toxic Whisper",
+    "archetypeId": "plain.wand",
+    "nativeStyleId": "blueprint_venom",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.hive_dagger",
+    "name": "Hivefang Dagger",
+    "archetypeId": "plain.dagger",
+    "nativeStyleId": "blueprint_hive",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.tangled_cave.execution_gauntlets",
+    "name": "Broodbreaker Gauntlets",
+    "archetypeId": "plain.gauntlets",
+    "nativeStyleId": "blueprint_execution",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.spirit_staff",
+    "name": "Heartwood Staff",
+    "archetypeId": "plain.staff",
+    "nativeStyleId": "blueprint_spirit",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.spirit_robe",
+    "name": "Canopy Spirit Robe",
+    "archetypeId": "plain.cloth_robe",
+    "nativeStyleId": "blueprint_spirit",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.warden_mail",
+    "name": "Rootwarden Mail",
+    "archetypeId": "plain.medium_mail",
+    "nativeStyleId": "blueprint_warden",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.warden_leggings",
+    "name": "Rootwarden Leggings",
+    "archetypeId": "plain.light_leggings",
+    "nativeStyleId": "blueprint_warden",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.primal_longbow",
+    "name": "Wildheart Longbow",
+    "archetypeId": "plain.longbow",
+    "nativeStyleId": "blueprint_primal",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.primal_amulet",
+    "name": "Wildheart Amulet",
+    "archetypeId": "plain.amulet",
+    "nativeStyleId": "blueprint_primal",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.aegis_shield",
+    "name": "Great Tree Bulwark",
+    "archetypeId": "plain.towershield",
+    "nativeStyleId": "blueprint_aegis",
+    "randomDiscoveryBaseScrap": 4
+  },
+  {
+    "id": "named.great_tree.aegis_helm",
+    "name": "Ancient Bark Helm",
+    "archetypeId": "plain.heavy_helm",
+    "nativeStyleId": "blueprint_aegis",
+    "randomDiscoveryBaseScrap": 4
+  }
+]

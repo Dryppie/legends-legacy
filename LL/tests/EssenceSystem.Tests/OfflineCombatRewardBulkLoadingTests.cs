@@ -46,40 +46,6 @@ public sealed class OfflineCombatRewardBulkLoadingTests
         Assert.All(loot, encounterLoot => Assert.Single(encounterLoot));
     }
 
-    [Fact]
-    public async Task Gathering_batch_loads_item_bases_once_for_all_victories()
-    {
-        var itemBases = new CountingItemBaseRepository();
-        var processor = new CombatGatheringRewardProcessor(
-            new StaticRewardRoller(),
-            itemBases,
-            new InventoryItemFactory(),
-            new ZeroRandomSource(),
-            new StaticProfessionService(),
-            new NoopLevelingService(),
-            new EmptyBonusService());
-        var facts = new CombatGatheringRewardFacts(
-            Guid.NewGuid(),
-            Victories: 3,
-            new EquippedGatheringTool
-            {
-                Name = "Test Pickaxe",
-                GatheringType = GatheringType.Mining
-            },
-            [new CombatGatheringNode("ore", "Ore", GatheringType.Mining, null, 1, "loot.test")]);
-
-        var rewards = await processor.ProcessAsync(facts, CancellationToken.None);
-
-        Assert.Equal(1, itemBases.GetByIdsCallCount);
-        Assert.Equal(["item.test"], itemBases.LastRequestedIds);
-        Assert.Equal(3, rewards.Count);
-        Assert.All(rewards, reward =>
-        {
-            Assert.True(reward.Success);
-            Assert.Single(reward.ItemsGained);
-        });
-    }
-
     private sealed class StaticRewardRoller : IRewardRoller
     {
         private static readonly RewardRollResult Result = new(
@@ -139,37 +105,11 @@ public sealed class OfflineCombatRewardBulkLoadingTests
         public double NextDouble() => 0;
     }
 
-    private sealed class StaticProfessionService : IProfessionService
-    {
-        public Task<Profession> GetOrCreateProfessionAsync(
-            Guid characterId,
-            ProfessionType professionType,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(new Profession
-            {
-                CharacterId = characterId,
-                ProfessionType = professionType,
-                Level = 1
-            });
-
-        public Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public void UpdateProfessionLevel(List<Profession> professions)
-        {
-        }
-    }
-
     private sealed class NoopLevelingService : ILevelingService
     {
         public Task UpdateCharacterLevel(Character entity, CancellationToken cancellationToken) =>
             Task.CompletedTask;
 
-        public Task UpdateProfessionLevel(Profession profession, CancellationToken cancellationToken) =>
-            Task.CompletedTask;
     }
 
     private sealed class EmptyBonusService : IBonusService

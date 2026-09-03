@@ -1,8 +1,10 @@
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Essences;
+using Domain.Models.Items.Equipments;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
@@ -16,24 +18,39 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IInventoryService _inventoryService;
+    private readonly Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? _progression;
 
     public DungeonRunRewardClaimer(
         IExperienceRewardWriter experienceWriter,
         ICurrencyRewardWriter currencyWriter,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? progression = null)
     {
         _experienceWriter = experienceWriter;
         _currencyWriter = currencyWriter;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _inventoryService = inventoryService;
+        _progression = progression;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
     {
         var rewardState = GetClaimableRewards(run);
+        var equipmentProgressionRewards = run.Status == DungeonRunStatus.Completed
+            ? run.PendingRewards.Where(x => x.ProgressionData != null).ToArray() : [];
+        var equipmentProgressionResources = run.Status == DungeonRunStatus.Completed
+            ? run.PendingRewards.Where(x => x.Source == EquipmentKeys.DungeonCompletionSource).ToArray() : [];
+        var frozenBases = await _itemBases.GetItemBasesByIdsAsync(equipmentProgressionRewards.Concat(equipmentProgressionResources).Select(x => x.ItemId).Distinct().ToArray(), cancellationToken);
+        if (equipmentProgressionResources.Any(x => x.ItemId != "tempered_scrap" || x.Quantity <= 0
+            || !frozenBases.TryGetValue(x.ItemId, out var itemBase) || !itemBase.Stackable))
+            throw new InvalidOperationException("The secured Equipment progression completion resources are unavailable or invalid.");
+        if (equipmentProgressionRewards.Any(x => x.Quantity != 1 || x.ProgressionData!.ItemBaseId != x.ItemId
+            || x.ProgressionData.State.Ownership.OwnerId != run.CharacterId || !frozenBases.TryGetValue(x.ItemId, out var itemBase)
+            || itemBase is not EquipmentBase equipmentBase || equipmentBase.Stackable || equipmentBase.EquipmentType != x.ProgressionData.EquipmentType))
+            throw new InvalidOperationException("The frozen dungeon equipment reward is unavailable or invalid.");
 
         if (rewardState.Experience > 0)
         {
@@ -53,8 +70,9 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
                 cancellationToken);
         }
 
-        if (rewardState.Items.Count <= 0)
+        if (rewardState.Items.Count <= 0 && equipmentProgressionRewards.Length == 0)
         {
+            if (_progression != null) await _progression.MarkClaimedAsync(run, cancellationToken);
             return [];
         }
 
@@ -69,6 +87,14 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             cancellationToken);
 
         var inventoryItems = new List<InventoryItem>();
+        foreach (var reward in equipmentProgressionRewards)
+        {
+            var data = reward.ProgressionData!;
+            var instance = new EquipmentInstance { Id = data.State.Id, ItemBaseId = data.ItemBaseId, ItemBase = frozenBases[data.ItemBaseId],
+                AcquisitionSource = ItemAcquisitionSources.DungeonReward, AcquiredAtUtc = run.CompletedAt ?? run.CreatedAt };
+            instance.ApplyProgressionData(data);
+            inventoryItems.Add(new InventoryItem { InventoryId = run.CharacterId, ItemInstanceId = instance.Id, ItemInstance = instance, Quantity = 1 });
+        }
         foreach (var reward in rewardState.Items)
         {
             if (reward.Value <= 0 || !itemBases.TryGetValue(reward.Key, out var itemBase))
@@ -88,6 +114,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
                 cancellationToken);
         }
 
+        if (_progression != null) await _progression.MarkClaimedAsync(run, cancellationToken);
         return inventoryItems;
     }
 
@@ -104,7 +131,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             Cinders = run.PendingCinders,
             Soulstones = run.PendingSoulstones,
             Items = run.PendingRewards
-                .Where(x => !string.IsNullOrWhiteSpace(x.ItemId) && x.Quantity > 0)
+                .Where(x => x.ProgressionData == null && !string.IsNullOrWhiteSpace(x.ItemId) && x.Quantity > 0)
                 .GroupBy(x => x.ItemId, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(x => x.Key, x => x.Sum(reward => reward.Quantity), StringComparer.OrdinalIgnoreCase)
         };

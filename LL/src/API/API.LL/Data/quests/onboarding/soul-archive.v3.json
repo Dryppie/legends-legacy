@@ -1,0 +1,52 @@
+{
+  "id": "quest.onboarding.soul_archive",
+  "version": 3,
+  "title": "The Soul Archive",
+  "summary": "Bind the Essence from your First Hunt, then equip any Essence for battle.",
+  "category": "Tutorial",
+  "sortOrder": 20,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": [
+      "quest.onboarding.training_day"
+    ]
+  },
+  "objectives": [
+    {
+      "key": "absorb_first_hunt_essence",
+      "description": "Absorb your First Hunt Essence into the Soul Archive.",
+      "type": "EssenceAbsorbed",
+      "requiredAmount": 1,
+      "filters": {
+        "essenceDefinitionFromChoiceQuestId": "quest.onboarding.training_day"
+      },
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences",
+        "guidePageId": "tutorial-essence-absorb",
+        "tourPageId": "tutorial-essence-absorb"
+      }
+    },
+    {
+      "key": "equip_first_hunt_essence",
+      "description": "Equip an Essence in a loadout.",
+      "type": "EssenceEquipped",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences",
+        "guidePageId": "tutorial-essence-loadout",
+        "tourPageId": "tutorial-essence-loadout"
+      }
+    }
+  ],
+  "rewards": [
+    {
+      "key": "starter_cinders",
+      "quantity": 500,
+      "type": "Cinders"
+    }
+  ]
+}

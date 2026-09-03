@@ -34,29 +34,5 @@
     "isHiddenUntilUnlocked": true,
     "isActive": true,
     "sortOrder": 23
-  },
-  {
-    "key": "title.tempered",
-    "name": "Tempered",
-    "description": "Earned by pushing a crafted item to its limit.",
-    "category": "Hidden",
-    "rarity": "Exalted",
-    "scope": "Account",
-    "sourceAchievementKey": "crafting.tempered",
-    "isHiddenUntilUnlocked": true,
-    "isActive": true,
-    "sortOrder": 27
-  },
-  {
-    "key": "title.cursed_hands",
-    "name": "Cursed Hands",
-    "description": "Earned by triggering many cursed crafting outcomes.",
-    "category": "Hidden",
-    "rarity": "Renowned",
-    "scope": "Account",
-    "sourceAchievementKey": "crafting.cursed_hands",
-    "isHiddenUntilUnlocked": true,
-    "isActive": true,
-    "sortOrder": 28
   }
 ]

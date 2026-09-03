@@ -6,6 +6,7 @@ import { ItemQuality } from './enums/itemQuality';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
 import { EssenceDefinitionDto } from './essence-system';
+import { EquipmentProgression } from './equipment-progression';
 
 export interface ItemInstance {
   id: string;
@@ -13,9 +14,11 @@ export interface ItemInstance {
   displayName?: string;
   source?: string;
   category?: string;
+  isBound?: boolean;
 }
 
 export interface EquipmentInstance extends ItemInstance {
+  progression?: EquipmentProgression | null;
   displayName: string;
   isFavorite?: boolean;
   rarity: Rarity;

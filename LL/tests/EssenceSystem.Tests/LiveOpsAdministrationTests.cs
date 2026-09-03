@@ -17,7 +17,7 @@ using Services.LL.Inventories;
 
 namespace EssenceSystem.Tests;
 
-public sealed class LiveOpsAdministrationTests
+public sealed partial class LiveOpsAdministrationTests
 {
     private static readonly DateTimeOffset Now = new(2026, 8, 17, 8, 0, 0, TimeSpan.Zero);
 
@@ -452,7 +452,8 @@ public sealed class LiveOpsAdministrationTests
     private static LiveOpsService CreateService(
         LLDbContext db,
         IRefreshTokenRepository refreshTokens,
-        IGameEventOutbox? outbox = null) =>
+        IGameEventOutbox? outbox = null,
+        Domain.Models.Items.Equipments.Progression.StarterEquipmentCatalog? equipmentProgressionCatalog = null) =>
         new(
             new AdministrationRepository(db),
             refreshTokens,
@@ -461,7 +462,7 @@ public sealed class LiveOpsAdministrationTests
             new InventoryItemFactory(),
             outbox ?? new NoopGameEventOutbox(),
             Options.Create(new LiveOpsOptions { MaximumGrantQuantity = 100_000 }),
-            new FixedTimeProvider(Now));
+            new FixedTimeProvider(Now), equipmentProgressionCatalog);
 
     private static LLDbContext CreateDb()
     {

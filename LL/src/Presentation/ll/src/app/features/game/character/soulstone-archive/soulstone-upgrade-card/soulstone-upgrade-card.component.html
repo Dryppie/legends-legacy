@@ -64,12 +64,14 @@
         class="flex items-end justify-between gap-3 border-t border-light_gray/40 pt-3"
       >
         <div>
-          <div class="ll-stat-label">Next cost</div>
+          <div class="ll-stat-label">
+            Next cost
+          </div>
           <div class="text-sm text-primary">
             {{
               view.nextCost == null
-                ? "Max rank"
-                : view.nextCost + " Soulstones"
+                  ? "Max rank"
+                  : view.nextCost + " Soulstones"
             }}
           </div>
         </div>

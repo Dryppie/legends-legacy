@@ -239,34 +239,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     });
   }
 
-  readonly gatheringToolWarning = computed(() => {
-    if (this.battleTypeSignal() !== BattleType.IdleCombat) return null;
-
-    const area = this.currentAction()?.combatActionDetails?.area;
-    const availableTypes = Array.from(
-      new Set([
-        ...(area?.gatheringTypes ?? []),
-        ...(area?.gatheringNodes ?? []).map((node) => node.type),
-      ]),
-    );
-    if (!availableTypes.length) return null;
-
-    const equippedType = this.equipmentState.getSlot(EquipmentSlotType.Tool)
-      ?.equipmentInstance?.equipmentBase.gatheringType;
-    if (equippedType && availableTypes.includes(equippedType)) return null;
-
-    const requiredTools = this.formatGatheringTypes(availableTypes);
-    return equippedType
-      ? 'Your ' +
-          equippedType +
-          ' tool cannot gather resources here. Equip a ' +
-          requiredTools +
-          ' tool to collect resources while fighting.'
-      : 'No gathering tool is equipped. Equip a ' +
-          requiredTools +
-          ' tool to collect resources while fighting here.';
-  });
-
   private syncCharactersFromResult(result: CombatResultDto) {
     // Update all player team members
     result.playerTeam.forEach((entity) => this.updateCharacter(entity));

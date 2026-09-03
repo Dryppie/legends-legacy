@@ -12,6 +12,7 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
 import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-format/equipment-type.pipe';
 import { AttributeDisplayPipe } from '../../../../pipes/attributes/attribute-display/attribute-display.pipe';
 import { AttributeTooltipDirective } from '../../../../directives/attribute-tooltip/attribute-tooltip.directive';
+import { EquipmentType } from '../../../../models/enums/equipmentType';
 
 @Component({
     selector: 'app-overview-equipment-modal',
@@ -49,7 +50,8 @@ export class OverviewEquipmentModalComponent implements OnInit {
     );
 
     this.equipmentInstances = allItems.filter((ii) =>
-      allowedTypes.includes((ii.itemBase as Equipment).equipmentType),
+      allowedTypes.includes((ii.itemBase as Equipment).equipmentType) &&
+      !!ii.progression && (ii.itemBase as Equipment).equipmentType !== EquipmentType.Tool,
     );
 
     const equipmentSlots = this.equipmentState.equipmentSlots();
@@ -63,6 +65,8 @@ export class OverviewEquipmentModalComponent implements OnInit {
   }
 
   onEquip(): void {
+    if (!this.selectedEquipmentInstance ||
+      this.selectedEquipmentInstance.equipmentBase.equipmentType === EquipmentType.Tool) return;
     this.equipmentState.equip(
       this.selectedEquipmentInstance,
       this.equipmentSlotType,

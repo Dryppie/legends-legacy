@@ -1,23 +1,44 @@
 {
   "favorRewards": [
-    { "scope": "Daily", "amount": 1 },
-    { "scope": "Weekly", "amount": 2 }
+    {
+      "scope": "Daily",
+      "amount": 1
+    },
+    {
+      "scope": "Weekly",
+      "amount": 2
+    }
   ],
   "milestones": [
     {
       "favorRequired": 3,
       "title": "Small Revelation Cache",
-      "reward": { "soulstones": 2, "sigilFragments": 2, "fateEcho": 10, "cacheItemId": "revelation_cache_small" }
+      "reward": {
+        "soulstones": 2,
+        "sigilFragments": 2,
+        "fateEcho": 10,
+        "cacheItemId": "revelation_cache_small"
+      }
     },
     {
       "favorRequired": 5,
       "title": "Greater Revelation Cache",
-      "reward": { "soulstones": 4, "sigilFragments": 4, "fateEcho": 20, "cacheItemId": "revelation_cache_greater" }
+      "reward": {
+        "soulstones": 4,
+        "sigilFragments": 4,
+        "fateEcho": 20,
+        "cacheItemId": "revelation_cache_greater"
+      }
     },
     {
       "favorRequired": 7,
       "title": "Perfect Week Bonus",
-      "reward": { "soulstones": 8, "sigilFragments": 6, "fateEcho": 35, "cacheItemId": "revelation_cache_perfect_week" }
+      "reward": {
+        "soulstones": 8,
+        "sigilFragments": 6,
+        "fateEcho": 35,
+        "cacheItemId": "revelation_cache_perfect_week"
+      }
     }
   ]
 }

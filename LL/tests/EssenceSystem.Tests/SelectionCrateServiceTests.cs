@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EssenceSystem.Tests;
 
-public sealed class SelectionCrateServiceTests
+public sealed partial class SelectionCrateServiceTests
 {
     [Fact]
     public void ShenicEssenceTokensOfferFiveAreaEssencesEach()
@@ -136,16 +136,16 @@ public sealed class SelectionCrateServiceTests
     }
 
     [Fact]
-    public async Task OpeningCatalystCrateConsumesOneCrateAndGrantsSelectedBundle()
+    public async Task OpeningBlueprintChoiceConsumesOneCrateAndGrantsSelectedBundle()
     {
         var characterId = Guid.NewGuid();
         var crate = CreateInventoryItem(
             characterId,
-            CatalystSelectionCrateCatalog.ItemBaseId,
+            BlueprintSelectionBoxCatalog.ItemBaseId,
             ItemType.Resource,
             quantity: 1);
         var inventory = new FakeInventoryService(crate);
-        var itemBases = new FakeItemBaseRepository(CatalystSelectionCrateCatalog.Options.Select(option =>
+        var itemBases = new FakeItemBaseRepository(BlueprintSelectionBoxCatalog.Options.Select(option =>
             new ItemBase
             {
                 Id = option.ItemId,
@@ -165,21 +165,21 @@ public sealed class SelectionCrateServiceTests
             CancellationToken.None);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal("Catalyst Selection Cache", result.ContainerName);
+        Assert.Equal("Blueprint Selection Box", result.ContainerName);
         Assert.Equal(0, crate.Quantity);
         var reward = Assert.Single(result.Rewards);
-        Assert.Equal("fury_heart", reward.ItemInstance.ItemBaseId);
-        Assert.Equal(6, reward.Quantity);
+        Assert.Equal("blueprint_fury", reward.ItemInstance.ItemBaseId);
+        Assert.Equal(1, reward.Quantity);
         Assert.Single(inventory.AddedRewards);
     }
 
     [Fact]
-    public async Task InvalidCatalystChoiceDoesNotConsumeCrate()
+    public async Task InvalidBlueprintChoiceDoesNotConsumeCrate()
     {
         var characterId = Guid.NewGuid();
         var crate = CreateInventoryItem(
             characterId,
-            CatalystSelectionCrateCatalog.ItemBaseId,
+            BlueprintSelectionBoxCatalog.ItemBaseId,
             ItemType.Resource,
             quantity: 1);
         var inventory = new FakeInventoryService(crate);
@@ -242,11 +242,11 @@ public sealed class SelectionCrateServiceTests
         var characterId = Guid.NewGuid();
         var crate = CreateInventoryItem(
             characterId,
-            CatalystSelectionCrateCatalog.ItemBaseId,
+            BlueprintSelectionBoxCatalog.ItemBaseId,
             ItemType.Resource,
             quantity: 1);
         var inventory = new FakeInventoryService(crate);
-        var itemBases = new FakeItemBaseRepository(CatalystSelectionCrateCatalog.Options.Select(option =>
+        var itemBases = new FakeItemBaseRepository(BlueprintSelectionBoxCatalog.Options.Select(option =>
             new ItemBase
             {
                 Id = option.ItemId,
@@ -270,12 +270,12 @@ public sealed class SelectionCrateServiceTests
         Assert.True(response.IsSuccess);
         Assert.NotNull(response.Data);
         Assert.Equal("container-reward", lootHistory.Source);
-        Assert.Equal("Catalyst Selection Cache", lootHistory.Location);
-        Assert.Equal(6, Assert.Single(lootHistory.Items!).Quantity);
+        Assert.Equal("Blueprint Selection Box", lootHistory.Location);
+        Assert.Equal(1, Assert.Single(lootHistory.Items!).Quantity);
 
         var realtimeMessage = Assert.IsType<LootReceived>(realtime.Message);
         Assert.Equal(response.Data.GrantId, realtimeMessage.GrantId);
-        Assert.Equal("Catalyst Selection Cache", realtimeMessage.Location);
+        Assert.Equal("Blueprint Selection Box", realtimeMessage.Location);
     }
 
     private static IMapper CreateMapper()

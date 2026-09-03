@@ -23,9 +23,9 @@ describe('FirstPartyTourService', () => {
     const characterState = {
       currentCharacter: () => null,
     } as unknown as CharacterStateService;
-    const actionWatcher = {
-      watch: () => () => undefined,
-    } as unknown as FirstPartyTourActionWatcherService;
+    const actionWatcher = new FirstPartyTourActionWatcherService(
+      router as unknown as Router,
+    );
 
     service = new FirstPartyTourService(
       storage,
@@ -36,6 +36,89 @@ describe('FirstPartyTourService', () => {
   });
 
   afterEach(() => service.stop(false));
+
+  it('runs the authored Lumo combat tour through its card and Battle action', async () => {
+    const response = await fetch('/assets/help/tours/tutorial-lumo-ruins.json');
+    expect(response.ok).toBeTrue();
+    const steps = await response.json();
+    expect(steps.map((step: { element: string }) => step.element)).toEqual([
+      '[data-tour=lumo-ruins-card]',
+      '[data-tour=lumo-ruins-battle]',
+    ]);
+    spyOn(window, 'fetch').and.resolveTo({
+      ok: true,
+      json: async () => steps,
+    } as Response);
+    const card = document.createElement('div');
+    card.dataset['tour'] = 'lumo-ruins-card';
+    card.textContent = 'Lumo Ruins';
+    const battle = document.createElement('button');
+    battle.dataset['tour'] = 'lumo-ruins-battle';
+    battle.textContent = 'Battle';
+    card.appendChild(battle);
+    document.body.appendChild(card);
+
+    try {
+      await service.start('tutorial-lumo-ruins');
+      expect(service.state()?.stepIndex).toBe(0);
+      expect(service.state()?.targetRect).not.toBeNull();
+      service.next();
+      const deadline = performance.now() + 1500;
+      while (service.state()?.stepIndex !== 1 && performance.now() < deadline) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+      expect(service.state()?.stepIndex).toBe(1);
+      expect(service.state()?.targetRect).not.toBeNull();
+      battle.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(service.state()).toBeNull();
+    } finally {
+      card.remove();
+    }
+  });
+
+  it('advances the authored essence tour when any archived essence is selected', async () => {
+    const response = await fetch(
+      '/assets/help/tours/tutorial-essence-loadout.json',
+    );
+    expect(response.ok).toBeTrue();
+    const steps = await response.json();
+    spyOn(window, 'fetch').and.resolveTo({
+      ok: true,
+      json: async () => steps,
+    } as Response);
+    router.url = '/game/character/essences';
+    const archive = document.createElement('div');
+    archive.dataset['tour'] = 'essence-archive';
+    const wrongEssence = document.createElement('button');
+    wrongEssence.dataset['tour'] = 'essence-archive-list';
+    wrongEssence.textContent = 'Wood Nymph';
+    const equip = document.createElement('button');
+    equip.dataset['tour'] = 'tutorial-equip-essence';
+    equip.textContent = 'Equip Essence';
+    wrongEssence.addEventListener('click', () => archive.appendChild(equip));
+    archive.append(wrongEssence);
+    document.body.appendChild(archive);
+
+    try {
+      await service.start('tutorial-essence-loadout');
+      wrongEssence.click();
+      const deadline = performance.now() + 1500;
+      while (service.state()?.stepIndex !== 1 && performance.now() < deadline) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+      expect(service.state()?.stepIndex).toBe(1);
+      expect(service.state()?.targetRect).not.toBeNull();
+      expect(service.state()?.blocksInteraction).toBeFalse();
+      expect(service.state()?.step.showBack).toBeTrue();
+
+      equip.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(service.state()).toBeNull();
+    } finally {
+      archive.remove();
+    }
+  });
 
   it('does not restore a pending step after the tour is stopped', async () => {
     spyOn(window, 'fetch').and.resolveTo({

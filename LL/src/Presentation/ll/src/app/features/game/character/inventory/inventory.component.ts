@@ -1,3 +1,5 @@
+import { itemDescription } from '../../../../shared/utils/inventory/item-description';
+import { RouterLink } from '@angular/router';
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
@@ -9,7 +11,10 @@ import {
 } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { initialSelectionContainerOptionId } from '../../../../shared/utils/inventory/selection-container.utils';
+import {
+  initialSelectionContainerOptionId,
+  selectionContainerMetadata,
+} from '../../../../shared/utils/inventory/selection-container.utils';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { FilterTabsComponent } from '../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
@@ -22,6 +27,7 @@ import { ItemType } from '../../../../shared/models/enums/itemType';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
 import { ItemQuality } from '../../../../shared/models/enums/itemQuality';
+import { marketplaceStyleLabel } from '../../../../shared/utils/market-place/marketplace-equipment';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.directive';
@@ -53,12 +59,11 @@ import {
   MARKETPLACE_CATALYST_ITEM_IDS,
 } from '../../../../shared/utils/market-place/market-place-category.utils';
 import { InventoryTransferComponent } from '../../../../shared/components/inventory-transfer/inventory-transfer.component';
-import { BlueprintAttributeSummaryComponent } from '../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
-import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 import { finalize } from 'rxjs';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import { ForgeLinkComponent } from '../../../../shared/components/equipment/forge-link/forge-link.component';
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -66,14 +71,15 @@ type StockCategory =
   | 'Blueprints'
   | 'Entrance Keys'
   | 'Catalysts';
-type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Gear Power';
-type EquipmentInventorySort = 'Name' | 'Quality' | 'Potential' | 'Gear Power';
+type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Rank' | 'Gear Power';
+type EquipmentInventorySort = 'Name' | 'Quality' | 'Potential' | 'Rank' | 'Style' | 'Gear Power';
 type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-inventory',
   imports: [
     NgFor,
+    RouterLink,
     NgIf,
     NgClass,
     DecimalPipe,
@@ -87,7 +93,7 @@ type SortDirection = 'asc' | 'desc';
     HelpTooltipDirective,
     DropdownComponent,
     InventoryTransferComponent,
-    BlueprintAttributeSummaryComponent,
+    ForgeLinkComponent,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -108,14 +114,7 @@ export class InventoryComponent implements OnInit {
   inventorySearch = '';
   readonly selectedItem = signal<InventoryItem | null>(null);
   readonly mobileItemInspectorOpen = signal(false);
-  readonly selectedBlueprintRecipeId = signal('');
-  readonly blueprintRecipeOptions = signal<readonly DropdownOption<string>[]>(
-    [],
-  );
-  readonly isLoadingBlueprintRecipes = signal(false);
-  readonly hasLoadedBlueprintRecipes = signal(false);
-  readonly isLearningBlueprint = signal(false);
-  readonly blueprintActionError = signal<string | null>(null);
+  readonly itemDescription = itemDescription;
   readonly selectedContainerOptionId = signal('');
   readonly isOpeningContainer = signal(false);
   readonly containerActionError = signal<string | null>(null);
@@ -130,7 +129,9 @@ export class InventoryComponent implements OnInit {
     this.state
       .equipment()
       .filter(
-        (item) => !(item.itemInstance as EquipmentInstance).isGuildBorrowed,
+        (item) =>
+          !(item.itemInstance as EquipmentInstance).isGuildBorrowed &&
+          !(item.itemInstance as EquipmentInstance).progression,
       ),
   );
 
@@ -139,13 +140,16 @@ export class InventoryComponent implements OnInit {
   inventorySort: EquipmentInventorySort = 'Gear Power';
   inventorySortDirection: SortDirection = 'desc';
   stockSort: InventorySort = 'Name';
-  readonly sortDropdownOptions: DropdownOption<InventorySort>[] = [
+  get rankColumnSort(): EquipmentInventorySort { return 'Rank'; }
+  get styleColumnSort(): EquipmentInventorySort { return 'Style'; }
+  readonly equipmentStyleLabel = marketplaceStyleLabel;
+  get sortDropdownOptions(): DropdownOption<InventorySort>[] { return [
     { label: 'Name A-Z', value: 'Name' },
     { label: 'Tier: high to low', value: 'Tier' },
     { label: 'Rarity: high to low', value: 'Rarity' },
-    { label: 'Quality: high to low', value: 'Quality' },
+    { label: 'Rank: high to low', value: 'Rank' },
     { label: 'Gear Power: high to low', value: 'Gear Power' },
-  ];
+  ]; }
   rarities = Object.keys(Rarity);
   rarityDropdownOptions: DropdownOption<Rarity>[] = this.rarities.map(
     (rarity) => ({
@@ -176,7 +180,6 @@ export class InventoryComponent implements OnInit {
     private readonly questPresenter: QuestPresenterService,
     private readonly modalService?: ModalService,
     private readonly equipmentState?: EquipmentStateService,
-    private readonly craftingService?: CraftingService,
     private readonly inventoryService?: InventoryService,
     private readonly guildState?: GuildStateService,
     private readonly characterState?: CharacterStateService,
@@ -267,7 +270,7 @@ export class InventoryComponent implements OnInit {
     }
 
     this.inventorySort = sort;
-    this.inventorySortDirection = sort === 'Name' ? 'asc' : 'desc';
+    this.inventorySortDirection = sort === 'Name' || sort === 'Style' ? 'asc' : 'desc';
   }
 
   inventorySortIndicator(sort: EquipmentInventorySort): string {
@@ -313,6 +316,7 @@ export class InventoryComponent implements OnInit {
     return (
       !!this.guildState?.isInGuild() &&
       !!equipment &&
+      !equipment.progression &&
       !equipment.isGuildBorrowed &&
       !this.isSelectedEquippedItem(item)
     );
@@ -503,7 +507,8 @@ export class InventoryComponent implements OnInit {
             item.itemInstance.itemBase.rarity,
             equipment?.equipmentBase.equipmentType,
             equipment?.rarity,
-            equipment?.quality,
+            equipment?.progression ? `Rank ${equipment.progression.rank}` : equipment?.quality,
+            equipment?.progression ? this.equipmentStyleLabel(equipment.progression.activeStyleId) : null,
           ].some((value) => value?.toString().toLowerCase().includes(query));
         })
       : items;
@@ -606,9 +611,7 @@ export class InventoryComponent implements OnInit {
     if (changedItem) {
       this.favoriteActionError.set(null);
       this.donationActionError.set(null);
-      this.resetBlueprintAction();
       this.resetContainerAction(item);
-      this.loadBlueprintRecipes(item);
     }
   }
 
@@ -656,7 +659,9 @@ export class InventoryComponent implements OnInit {
   }
 
   selectionContainerMetadata(item: InventoryItem) {
-    return item.itemInstance.itemBase.selectionCrate ?? null;
+    return selectionContainerMetadata(
+      item.itemInstance.itemBase,
+    );
   }
 
   selectContainerOption(option: SelectionCrateOption): void {
@@ -682,10 +687,7 @@ export class InventoryComponent implements OnInit {
       .subscribe({
         next: (response) => {
           const data = response.data;
-          this.state.applyVersionedInventory(
-            response,
-            data.grantId,
-          );
+          this.state.applyVersionedInventory(response, data.grantId);
           this.isOpeningContainer.set(false);
 
           if (this.selectedItem()?.itemInstance.id !== item.itemInstance.id) {
@@ -715,57 +717,7 @@ export class InventoryComponent implements OnInit {
       });
   }
 
-  selectBlueprintRecipe(selection: DropdownSelection<unknown>): void {
-    this.selectedBlueprintRecipeId.set(selection.main as string);
-    this.blueprintActionError.set(null);
-  }
 
-  learnSelectedBlueprint(item: InventoryItem): void {
-    const recipeId = this.selectedBlueprintRecipeId();
-    const blueprint = this.blueprintMetadata(item);
-    if (
-      !blueprint ||
-      !recipeId ||
-      !this.craftingService ||
-      this.isLearningBlueprint()
-    ) {
-      return;
-    }
-
-    this.isLearningBlueprint.set(true);
-    this.blueprintActionError.set(null);
-    this.craftingService
-      .learnBlueprint(item.itemInstance.id, recipeId)
-      .subscribe({
-        next: (result) => {
-          this.state.applyVersionedInventoryDelta(result, () =>
-            this.state.decrementItem(item.itemInstance.id, 1),
-          );
-          const remainingItem = this.state
-            .items()
-            .find(
-              (candidate) => candidate.itemInstance.id === item.itemInstance.id,
-            );
-
-          this.blueprintRecipeOptions.update((options) =>
-            options.filter((option) => option.value !== recipeId),
-          );
-          this.selectedBlueprintRecipeId.set('');
-          this.isLearningBlueprint.set(false);
-          if (remainingItem) {
-            this.selectedItem.set(remainingItem);
-          } else {
-            this.clearSelectedItem();
-          }
-        },
-        error: (error) => {
-          this.blueprintActionError.set(
-            error.message ?? 'Failed to learn blueprint.',
-          );
-          this.isLearningBlueprint.set(false);
-        },
-      });
-  }
 
   blueprintMetadata(item: InventoryItem) {
     return item.itemInstance.itemBase.blueprint ?? null;
@@ -910,7 +862,7 @@ export class InventoryComponent implements OnInit {
     if (!equipment) return false;
 
     if (equipment.equipmentBase.equipmentType === EquipmentType.Tool) {
-      return true;
+      return false;
     }
 
     const characterLevel =
@@ -932,7 +884,7 @@ export class InventoryComponent implements OnInit {
   itemMetaLabel(item: InventoryItem): string {
     const equipment = this.equipmentInstance(item);
     if (equipment) {
-      return `Tier ${equipment.tier} · ${equipment.quality}`;
+      return `Tier ${equipment.tier} · ${equipment.progression ? 'Rank ' + equipment.progression.rank : equipment.quality}`;
     }
 
     return item.quantity === 1 ? '1 held' : `${item.quantity} held`;
@@ -995,6 +947,13 @@ export class InventoryComponent implements OnInit {
             (aEquipment ? this.QUALITY_ORDER[aEquipment.quality] : -1) -
             (bEquipment ? this.QUALITY_ORDER[bEquipment.quality] : -1);
           break;
+        case 'Rank':
+          difference = (aEquipment?.progression?.rank ?? -1) - (bEquipment?.progression?.rank ?? -1);
+          break;
+        case 'Style':
+          difference = this.equipmentStyleLabel(aEquipment?.progression?.activeStyleId)
+            .localeCompare(this.equipmentStyleLabel(bEquipment?.progression?.activeStyleId));
+          break;
         case 'Potential':
           difference =
             (aEquipment?.potential ?? 0) - (bEquipment?.potential ?? 0);
@@ -1023,88 +982,19 @@ export class InventoryComponent implements OnInit {
     this.selectedItem.set(null);
     this.mobileItemInspectorOpen.set(false);
     this.donationActionError.set(null);
-    this.resetBlueprintAction();
     this.resetContainerAction();
   }
 
   private resetContainerAction(item?: InventoryItem): void {
     this.selectedContainerOptionId.set(
-      initialSelectionContainerOptionId(item?.itemInstance.itemBase),
+      initialSelectionContainerOptionId(
+        item?.itemInstance.itemBase,
+      ),
     );
     this.containerActionError.set(null);
   }
 
-  private resetBlueprintAction(): void {
-    this.selectedBlueprintRecipeId.set('');
-    this.blueprintRecipeOptions.set([]);
-    this.isLoadingBlueprintRecipes.set(false);
-    this.hasLoadedBlueprintRecipes.set(false);
-    this.isLearningBlueprint.set(false);
-    this.blueprintActionError.set(null);
-  }
 
-  private loadBlueprintRecipes(item: InventoryItem): void {
-    const blueprint = this.blueprintMetadata(item);
-    if (!blueprint) {
-      this.hasLoadedBlueprintRecipes.set(true);
-      return;
-    }
-
-    if (!this.craftingService) {
-      this.blueprintRecipeOptions.set(
-        blueprint.compatibleRecipes.map((recipe) => ({
-          label: recipe.name,
-          value: recipe.id,
-        })),
-      );
-      this.hasLoadedBlueprintRecipes.set(true);
-      return;
-    }
-
-    const itemInstanceId = item.itemInstance.id;
-    const compatibleRecipeIds = new Set(
-      blueprint.compatibleRecipes.map((recipe) => recipe.id),
-    );
-    this.isLoadingBlueprintRecipes.set(true);
-    this.craftingService.getRecipes().subscribe({
-      next: (recipes) => {
-        if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
-
-        const availableRecipeIds = new Set(
-          recipes
-            .filter(
-              (recipe) =>
-                compatibleRecipeIds.has(recipe.id) &&
-                recipe.blueprints.some(
-                  (candidate) =>
-                    candidate.id === blueprint.blueprintId &&
-                    !candidate.isLearned,
-                ),
-            )
-            .map((recipe) => recipe.id),
-        );
-        this.blueprintRecipeOptions.set(
-          blueprint.compatibleRecipes
-            .filter((recipe) => availableRecipeIds.has(recipe.id))
-            .map((recipe) => ({
-              label: recipe.name,
-              value: recipe.id,
-            })),
-        );
-        this.isLoadingBlueprintRecipes.set(false);
-        this.hasLoadedBlueprintRecipes.set(true);
-      },
-      error: (error) => {
-        if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
-
-        this.blueprintActionError.set(
-          error.message ?? 'Failed to load available recipes.',
-        );
-        this.isLoadingBlueprintRecipes.set(false);
-        this.hasLoadedBlueprintRecipes.set(true);
-      },
-    });
-  }
 
   private isBlueprintResource(item: InventoryItem): boolean {
     return isMarketplaceBlueprintResource(item.itemInstance.itemBase);

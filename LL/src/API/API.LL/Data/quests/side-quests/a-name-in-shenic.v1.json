@@ -8,7 +8,9 @@
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,
-    "completedQuestIds": ["quest.shenic.trial_of_lumo"]
+    "completedQuestIds": [
+      "quest.shenic.trial_of_lumo"
+    ]
   },
   "objectives": [
     {
@@ -24,6 +26,11 @@
     }
   ],
   "rewards": [
-    { "key": "lesser_monster_core", "type": "Item", "itemBaseId": "item.monster_core.lesser", "quantity": 1 }
+    {
+      "key": "lesser_monster_core",
+      "type": "Item",
+      "itemBaseId": "item.monster_core.lesser",
+      "quantity": 1
+    }
   ]
 }

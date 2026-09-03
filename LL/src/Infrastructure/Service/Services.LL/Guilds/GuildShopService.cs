@@ -1,4 +1,6 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Achievements;
@@ -14,8 +16,8 @@ namespace Services.LL.Guilds;
 
 public class GuildShopService : IGuildShopService
 {
-    private const string CommonCatalystRotationGroup = "common-catalysts";
-    private const string RareCatalystRotationGroup = "rare-catalysts";
+    private const string CommonScrapRotationGroup = "common-scrap";
+    private const string RareScrapRotationGroup = "rare-scrap";
     private const string BlueprintRotationGroup = "rare-blueprints";
 
     private readonly IDbContext _context;
@@ -155,19 +157,19 @@ public class GuildShopService : IGuildShopService
     {
         var fixedItems = _items.Where(x => !x.RotatesWeekly);
         var marketOfficeLevel = GetMarketOfficeLevel(state.Guild);
-        var commonCatalystItems = GuildContentHelpers.PickWeeklyRotation(
+        var commonScrapItems = GuildContentHelpers.PickWeeklyRotation(
             _items.Where(x =>
                 x.RotatesWeekly
                 && x.StockType == GuildShopStockType.Common
-                && string.Equals(x.RotationGroup, CommonCatalystRotationGroup, StringComparison.OrdinalIgnoreCase)),
+                && string.Equals(x.RotationGroup, CommonScrapRotationGroup, StringComparison.OrdinalIgnoreCase)),
             state.WeeklyPeriodKey,
             count: 2,
             x => x.Key);
-        var rareCatalystItems = GuildContentHelpers.PickWeeklyRotation(
+        var rareScrapItems = GuildContentHelpers.PickWeeklyRotation(
             _items.Where(x =>
                 x.RotatesWeekly
                 && x.StockType == GuildShopStockType.Rare
-                && string.Equals(x.RotationGroup, RareCatalystRotationGroup, StringComparison.OrdinalIgnoreCase)),
+                && string.Equals(x.RotationGroup, RareScrapRotationGroup, StringComparison.OrdinalIgnoreCase)),
             state.WeeklyPeriodKey,
             count: marketOfficeLevel >= 5 ? 2 : 1,
             x => x.Key);
@@ -180,8 +182,8 @@ public class GuildShopService : IGuildShopService
             count: 1,
             x => x.Key);
         return fixedItems
-            .Concat(commonCatalystItems)
-            .Concat(rareCatalystItems)
+            .Concat(commonScrapItems)
+            .Concat(rareScrapItems)
             .Concat(rareBlueprintItems)
             .OrderBy(x => x.StockType)
             .ThenBy(x => x.RequiredMarketOfficeLevel)

@@ -28,16 +28,15 @@ public sealed class DungeonMasteryBenefitsTests
 
         Assert.Equal(visibility, benefits.AdditionalVisibilityRows);
         Assert.Equal(restBonus, benefits.RestSiteVigorBonus);
-        Assert.Equal(gatheringBonus, benefits.GatheringProcChanceBonus, 3);
         Assert.Equal(vigorReduction, benefits.CombatVigorCostReduction);
         Assert.Equal(currencyBonus, benefits.CompletionCurrencyBonusPercent);
     }
 
     [Fact]
-    public void Definitions_cover_every_mastery_level_once()
+    public void Definitions_cover_current_mastery_benefits_once()
     {
         Assert.Equal(
-            Enumerable.Range(1, DungeonMasteryBenefits.MaxLevel),
+            new[] { 1, 2, 4, 5, 6, 7, 9, 10 },
             DungeonMasteryBenefits.Definitions.Select(benefit => benefit.Level));
         Assert.Equal(
             DungeonMasteryBenefits.Definitions.Count,

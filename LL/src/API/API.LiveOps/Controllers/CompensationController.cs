@@ -2,6 +2,8 @@ using Application.UseCases.Administration;
 using Application.UseCases.Administration.Commands.GrantCompensationItems;
 using Application.UseCases.Administration.Dtos;
 using API.LiveOps.Previews;
+using Domain.Models.Items.Equipments.Progression;
+using Application.UseCases.Administration.Queries.GetCompensationEquipmentOptions;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +19,8 @@ public sealed class CompensationController(
         string ItemBaseId,
         int Quantity,
         string Reason,
-        string? InternalNotes);
+        string? InternalNotes,
+        EquipmentGrantRequest? Equipment = null);
 
     public sealed record GrantItemsRequest(
         Guid PreviewToken,
@@ -25,7 +28,17 @@ public sealed class CompensationController(
         string ItemBaseId,
         int Quantity,
         string Reason,
-        string? InternalNotes);
+        string? InternalNotes,
+        EquipmentGrantRequest? Equipment = null);
+
+    [HttpGet("{characterId:guid}/item-grants/equipment-options")]
+    [Authorize(Policy = AdministrationPermissions.EconomyCompensation)]
+    public async Task<ActionResult<Response<CompensationEquipmentOptionsDto>>> EquipmentOptions(
+        Guid characterId, [FromQuery] string itemBaseId, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new GetCompensationEquipmentOptionsQuery(characterId, itemBaseId), cancellationToken);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
+    }
 
     [HttpPost("{characterId:guid}/item-grants/preview")]
     [Authorize(Policy = AdministrationPermissions.EconomyCompensation)]
@@ -42,7 +55,7 @@ public sealed class CompensationController(
             request.Quantity,
             request.Reason,
             request.InternalNotes,
-            cancellationToken);
+            cancellationToken, request.Equipment);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
@@ -62,7 +75,7 @@ public sealed class CompensationController(
             request.Quantity,
             request.Reason,
             request.InternalNotes,
-            cancellationToken);
+            cancellationToken, request.Equipment);
         if (!validation.IsSuccess)
         {
             var failure = Response<CompensationItemGrantResultDto>.Fail(validation.ErrorMessage);
@@ -75,7 +88,7 @@ public sealed class CompensationController(
             request.ItemBaseId,
             request.Quantity,
             request.Reason,
-            request.InternalNotes), cancellationToken);
+            request.InternalNotes, request.Equipment), cancellationToken);
         await previews.CompleteAsync(request.PreviewToken, result.IsSuccess, cancellationToken);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }

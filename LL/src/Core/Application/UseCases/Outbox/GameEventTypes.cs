@@ -1,8 +1,13 @@
-﻿namespace Application.UseCases.Outbox;
+namespace Application.UseCases.Outbox;
 
 public static class GameEventTypes
 {
+    public const string PlainEquipmentRecovered = "equipment.model_e_plain_recovered";
     public const string EquipmentChanged = "equipment.changed";
+    public const string ForgeCompleted = "equipment.model_e_forge_completed";
+    public const string EquipmentSecured = "equipment.model_e_secured";
+    public const string BaselineEquipmentRecovered = "equipment.model_e_baseline_recovered";
+    public const string PlainEquipmentTargetSecured = "equipment.model_e_plain_target_secured";
     public const string EssenceAbsorbed = "essence.absorbed";
     public const string EssenceLoadoutChanged = "essence.loadout_changed";
     public const string EssenceFocusSet = "essence.focus_set";

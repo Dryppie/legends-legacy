@@ -10,7 +10,8 @@
           <h2 class="ll-heading text-2xl">Guild Vault</h2>
           <p class="ll-copy mt-1">
             Donated equipment remains guild property while members borrow and
-            equip it.
+            equip it. Equipment donations are permanent: borrowers cannot improve,
+            restyle, salvage, sell or transfer them.
           </p>
         </div>
 
@@ -103,7 +104,7 @@
         >
           <div>Equipment</div>
           <div>Slot</div>
-          <div>Quality</div>
+          <div>Rank / quality</div>
           <div>Status</div>
           <div></div>
         </div>
@@ -142,7 +143,7 @@
             class="text-sm"
             [ngClass]="qualityClass(vaultItem.equipment.quality)"
           >
-            {{ vaultItem.equipment.quality }}
+            {{ vaultItem.equipment.progression ? ('Rank ' + vaultItem.equipment.progression.rank) : vaultItem.equipment.quality }}
           </div>
 
           <div class="text-sm">
@@ -186,7 +187,7 @@
                 Borrow
               </app-regular-button>
               <app-regular-button
-                *ngIf="!vaultItem.borrowedByCharacterId && canWithdraw"
+                *ngIf="!vaultItem.borrowedByCharacterId && canWithdraw && !vaultItem.equipment.progression"
                 variant="danger"
                 [disabled]="busy"
                 (pressed)="requestWithdraw(vaultItem.id)"
@@ -214,8 +215,10 @@
     <header class="shrink-0">
       <p class="ll-eyebrow">Donate Equipment</p>
       <p class="ll-copy mt-2 text-xs leading-relaxed">
-        Only unequipped items can be donated.<br />
-        Donations cannot be reclaimed.
+        Only unequipped items can be donated. Equipment must be an unbound,
+        unfavorited discovery. Donations cannot be reclaimed; equipment keeps
+        its current rank and style, cannot use the Forge and is destroyed if the
+        guild disbands.
       </p>
     </header>
 
@@ -238,15 +241,24 @@
               $any(inventoryItem.itemInstance).equipmentBase.equipmentType
                 | equipmentType
             }}
-            · {{ $any(inventoryItem.itemInstance).quality }}
+            · {{ $any(inventoryItem.itemInstance).progression ? ('Rank ' + $any(inventoryItem.itemInstance).progression.rank) : $any(inventoryItem.itemInstance).quality }}
           </div>
         </div>
-        <app-regular-button
-          [disabled]="busy"
-          (pressed)="donate(inventoryItem.itemInstance.id)"
-        >
-          Donate
-        </app-regular-button>
+        <div class="shrink-0 space-y-1">
+          <p *ngIf="pendingDonationId === inventoryItem.itemInstance.id" class="max-w-32 text-xs text-amber-300">
+            Make this permanent guild property?
+          </p>
+          <app-regular-button
+            [disabled]="busy"
+            (pressed)="donate(inventoryItem.itemInstance.id)"
+          >
+            {{ pendingDonationId === inventoryItem.itemInstance.id ? 'Confirm donation' : 'Donate' }}
+          </app-regular-button>
+          <app-regular-button *ngIf="pendingDonationId === inventoryItem.itemInstance.id"
+            variant="secondary" [disabled]="busy" (pressed)="pendingDonationId = null">
+            Cancel
+          </app-regular-button>
+        </div>
       </div>
     </div>
   </aside>

@@ -32,7 +32,6 @@ public interface IAchievementRepository
 
     Task<IReadOnlyList<PlayerEssence>> GetPlayerEssencesAsync(Guid characterId, CancellationToken cancellationToken);
     Task<int> GetEquippedEssenceCountAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<int> GetBlueprintUnlockCountAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<EquipmentInstance>> GetOwnedEquipmentAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<DungeonCompletionRecord>> GetDungeonCompletionsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<ColosseumMatchResult>> GetColosseumMatchesAsync(Guid characterId, CancellationToken cancellationToken);
@@ -46,7 +45,6 @@ public interface IAchievementRepository
     Task<int> GetSoulstoneUpgradeRankCountAsync(Guid accountId, CancellationToken cancellationToken);
     Task<IReadOnlyDictionary<string, int>> GetSoulstoneUpgradeRanksAsync(Guid characterId, CancellationToken cancellationToken);
     Task<int> GetMaxDungeonMasteryLevelAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<int> GetMaxCraftingMasteryLevelAsync(Guid characterId, CancellationToken cancellationToken);
     Task<(int Completed, int Won)> GetTournamentSummaryAsync(Guid characterId, CancellationToken cancellationToken);
     Task<int> GetChampionMarketPurchaseCountAsync(Guid characterId, CancellationToken cancellationToken);
 }

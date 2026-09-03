@@ -1,3 +1,4 @@
+using Domain.Models.Items.Equipments.Progression;
 using System.Text.Json;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Quests;
@@ -20,6 +21,7 @@ public sealed class QuestGameEventOutboxConsumer(
 
     public bool CanHandle(string eventType) =>
         eventType is GameEventTypes.EquipmentChanged
+            or GameEventTypes.PlainEquipmentTargetSecured
             or GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
             or GameEventTypes.EssenceFocusSet
@@ -49,6 +51,7 @@ public sealed class QuestGameEventOutboxConsumer(
         var trigger = message.EventType switch
         {
             GameEventTypes.EquipmentChanged => QuestTrigger.EquipmentChanged(),
+            GameEventTypes.PlainEquipmentTargetSecured => new QuestTrigger(EquipmentKeys.PlainTargetTrigger),
             GameEventTypes.EssenceAbsorbed => QuestTrigger.EssenceAbsorbed(
                 Read<EssenceAbsorbedPayload>(message).EssenceDefinitionId),
             GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(
@@ -98,6 +101,11 @@ public sealed class QuestGameEventOutboxConsumer(
         if (result.CompletedQuestIds.Count > 0)
         {
             scopes.Add(StateSyncScopes.AreaAccess);
+            if (result.Journal.Quests.Any(x => result.CompletedQuestIds.Contains(x.QuestId)))
+            {
+                scopes.Add(StateSyncScopes.Character);
+                scopes.Add(StateSyncScopes.EquipmentForge);
+            }
         }
         if (result.Loot.Count > 0)
         {

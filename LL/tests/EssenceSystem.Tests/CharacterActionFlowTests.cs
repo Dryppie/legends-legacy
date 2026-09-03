@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Quests;
-using Application.UseCases.Crafting.Dtos;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -22,7 +21,7 @@ public sealed class CharacterActionFlowTests
     {
         var repository = new CharacterActionRepositoryStub();
         var combat = new CombatServiceStub();
-        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+        var service = new CharacterActionService(repository, combat);
         var action = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now);
 
         var result = await service.StartCharacterActionAsync(action, Now, CancellationToken.None);
@@ -31,78 +30,6 @@ public sealed class CharacterActionFlowTests
         Assert.Same(combat.Session, result!.CombatSession);
         Assert.Equal(1, combat.CallCount);
         Assert.Equal(1, repository.UpdateCount);
-    }
-
-    [Fact]
-    public async Task Start_combat_pauses_tempering_and_preserves_its_queue()
-    {
-        var characterId = Guid.NewGuid();
-        var firstQueueItemId = Guid.NewGuid();
-        var secondQueueItemId = Guid.NewGuid();
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(
-                characterId,
-                new CraftingActionDetails
-                {
-                    CraftingQueueItems =
-                    [
-                        new CraftingQueueItem { Id = firstQueueItemId },
-                        new CraftingQueueItem { Id = secondQueueItemId }
-                    ]
-                },
-                Now)
-        };
-        var crafting = new CraftingServiceStub();
-        var combat = new CombatServiceStub();
-        var service = new CharacterActionService(repository, combat, crafting);
-        var requestedCombat = new CharacterAction(
-            characterId,
-            new CombatActionDetails(),
-            Now);
-
-        var result = await service.StartCharacterActionAsync(
-            requestedCombat,
-            Now,
-            CancellationToken.None);
-
-        Assert.Same(requestedCombat, result);
-        Assert.Equal(
-            [firstQueueItemId, secondQueueItemId],
-            result!.PausedTemperingQueueItems.Select(item => item.Id));
-        Assert.Equal(1, repository.StartCount);
-        Assert.Equal(1, combat.CallCount);
-    }
-
-    [Fact]
-    public async Task Start_combat_does_not_bypass_a_lock_inherited_by_tempering()
-    {
-        var characterId = Guid.NewGuid();
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(
-                characterId,
-                new CraftingActionDetails
-                {
-                    CraftingQueueItems = [new CraftingQueueItem { Id = Guid.NewGuid() }]
-                },
-                Now)
-            {
-                BlockedUntilUtc = Now.AddSeconds(5)
-            }
-        };
-        var crafting = new CraftingServiceStub();
-        var combat = new CombatServiceStub();
-        var service = new CharacterActionService(repository, combat, crafting);
-
-        var result = await service.StartCharacterActionAsync(
-            new CharacterAction(characterId, new CombatActionDetails(), Now),
-            Now,
-            CancellationToken.None);
-
-        Assert.Null(result);
-        Assert.Equal(0, repository.StartCount);
-        Assert.Equal(0, combat.CallCount);
     }
 
     [Fact]
@@ -126,7 +53,6 @@ public sealed class CharacterActionFlowTests
         var service = new CharacterActionService(
             repository,
             combat,
-            new CraftingServiceStub(),
             idleCombatOptions: Options.Create(new IdleCombatProgressionOptions
             {
                 EncounterCadenceSeconds = 12
@@ -160,7 +86,6 @@ public sealed class CharacterActionFlowTests
         var service = new CharacterActionService(
             repository,
             combat,
-            new CraftingServiceStub(),
             new FixedTimeProvider(Now),
             idleCombatOptions: Options.Create(new IdleCombatProgressionOptions
             {
@@ -193,7 +118,6 @@ public sealed class CharacterActionFlowTests
         var service = new CharacterActionService(
             repository,
             new CombatServiceStub(),
-            new CraftingServiceStub(),
             new FixedTimeProvider(Now));
 
         var result = await service.PeekCharacterActionAsync(
@@ -216,7 +140,7 @@ public sealed class CharacterActionFlowTests
             Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var combat = new CombatServiceStub { AdvanceBoundary = true };
-        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+        var service = new CharacterActionService(repository, combat);
 
         var result = await service.GetCharacterActionAsync(
             repository.Current.CharacterId,
@@ -235,7 +159,7 @@ public sealed class CharacterActionFlowTests
             Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails(), Now),
         };
         var combat = new CombatServiceStub { ReturnNoSession = true };
-        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+        var service = new CharacterActionService(repository, combat);
 
         var result = await service.GetCharacterActionAsync(
             repository.Current.CharacterId,
@@ -260,7 +184,6 @@ public sealed class CharacterActionFlowTests
         var service = new CharacterActionService(
             repository,
             combat,
-            new CraftingServiceStub(),
             new FixedTimeProvider(Now));
 
         await service.GetCharacterActionAsync(
@@ -279,8 +202,7 @@ public sealed class CharacterActionFlowTests
         };
         var service = new CharacterActionService(
             repository,
-            new CombatServiceStub(),
-            new CraftingServiceStub());
+            new CombatServiceStub());
 
         var stopped = await service.DeleteCharacterActionAsync(
             repository.Current.CharacterId,
@@ -288,187 +210,6 @@ public sealed class CharacterActionFlowTests
 
         Assert.True(stopped);
         Assert.Equal(1, repository.DeleteCount);
-    }
-
-    [Fact]
-    public async Task Tempering_catch_up_is_bounded_and_continues_from_the_persisted_boundary()
-    {
-        var firstDue = Now.AddMinutes(-5);
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(Guid.NewGuid(), new CraftingActionDetails(), Now)
-            {
-                NextResolutionAtUtc = firstDue
-            }
-        };
-        var crafting = new CraftingServiceStub { AdvanceSchedule = true };
-        var service = new CharacterActionService(
-            repository,
-            new CombatServiceStub(),
-            crafting,
-            new FixedTimeProvider(Now),
-            Options.Create(new TemperingProgressionOptions
-            {
-                MaximumAttemptsPerResolution = 3,
-                MaximumBatchesPerResolution = 1
-            }));
-
-        var result = await service.GetCharacterActionAsync(repository.Current.CharacterId, CancellationToken.None);
-
-        Assert.Equal(3, crafting.LastActionsToPerform);
-        Assert.Equal(3, result!.ProcessedCount);
-        Assert.True(result.HasMoreDueWork);
-        Assert.Equal(firstDue.AddSeconds(30), result.NextResolutionAtUtc);
-    }
-
-    [Fact]
-    public async Task Queued_tempering_does_not_resolve_before_combat_unlock_and_its_first_interval()
-    {
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(Guid.NewGuid(), new CraftingActionDetails(), Now)
-            {
-                BlockedUntilUtc = Now.AddSeconds(5),
-                NextResolutionAtUtc = Now.AddSeconds(15)
-            }
-        };
-        var crafting = new CraftingServiceStub();
-        var service = new CharacterActionService(
-            repository,
-            new CombatServiceStub(),
-            crafting,
-            new FixedTimeProvider(Now));
-
-        var result = await service.GetCharacterActionAsync(
-            repository.Current.CharacterId,
-            CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.Equal(0, crafting.CallCount);
-        Assert.Equal(0, result.ProcessedCount);
-        Assert.Equal(Now.AddSeconds(15), result.NextResolutionAtUtc);
-    }
-
-    [Fact]
-    public async Task Tempering_24_hour_progress_is_aggregated_server_side()
-    {
-        var firstDue = Now.AddHours(-24);
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(Guid.NewGuid(), new CraftingActionDetails(), Now)
-            {
-                NextResolutionAtUtc = firstDue
-            }
-        };
-        var crafting = new CraftingServiceStub { AdvanceSchedule = true };
-        var service = new CharacterActionService(
-            repository,
-            new CombatServiceStub(),
-            crafting,
-            new FixedTimeProvider(Now),
-            Options.Create(new TemperingProgressionOptions
-            {
-                MaximumAttemptsPerResolution = 100,
-                MaximumBatchesPerResolution = 100
-            }));
-
-        var result = await service.GetCharacterActionAsync(
-            repository.Current.CharacterId,
-            CancellationToken.None);
-
-        Assert.Equal(87, crafting.CallCount);
-        Assert.Equal(8_641, crafting.TotalActionsRequested);
-        Assert.Equal(8_641, result!.ProcessedCount);
-        Assert.False(result.HasMoreDueWork);
-        Assert.Equal(Now.AddSeconds(10), result.NextResolutionAtUtc);
-        Assert.Equal(8_641, result.TemperingSession!.TemperingSummary.TotalActions);
-        Assert.Equal(8_641, result.TemperingSession.TemperingSummary.CraftingExperience);
-        Assert.Equal(5, result.TemperingSession.Outcomes.Count);
-        Assert.Equal(Now, result.TemperingSession.Outcomes[0].OccurredAt);
-    }
-
-    [Fact]
-    public async Task Completed_tempering_resumes_combat_from_the_queue_completion_boundary()
-    {
-        var completionBoundary = Now.AddHours(-1);
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(
-                Guid.NewGuid(),
-                new CraftingActionDetails
-                {
-                    CraftingQueueItems = [new CraftingQueueItem { Id = Guid.NewGuid() }]
-                },
-                completionBoundary)
-            {
-                NextResolutionAtUtc = completionBoundary,
-                ReturnToCombatAreaId = "first-area"
-            }
-        };
-        var crafting = new CraftingServiceStub { CompleteQueue = true };
-        var combat = new CombatServiceStub { AdvanceBoundary = true };
-        var service = new CharacterActionService(
-            repository,
-            combat,
-            crafting,
-            new FixedTimeProvider(Now),
-            actionDetailsService: new ActionDetailsServiceStub(),
-            combatAreaAccessService: new CombatAreaAccessServiceStub());
-
-        var result = await service.GetCharacterActionAsync(
-            repository.Current.CharacterId,
-            CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.Equal(CharacterActionType.Combat, result.CharacterActionType);
-        Assert.False(result.IsDeleted);
-        Assert.True(result.AutoResumedFromTempering);
-        Assert.Equal("first-area", result.ReturnToCombatAreaId);
-        Assert.NotNull(result.TemperingSession);
-        Assert.Same(combat.Session, result.CombatSession);
-        Assert.Equal(completionBoundary, repository.LastCombatResumeAt);
-        Assert.Equal(completionBoundary, combat.LastBoundaryAtCall);
-        Assert.Equal(Now, combat.LastNow);
-        Assert.Equal(1, repository.ResumeCombatCount);
-    }
-
-    [Fact]
-    public async Task Completed_tempering_stays_idle_when_the_return_area_is_inaccessible()
-    {
-        var repository = new CharacterActionRepositoryStub
-        {
-            Current = new CharacterAction(
-                Guid.NewGuid(),
-                new CraftingActionDetails
-                {
-                    CraftingQueueItems = [new CraftingQueueItem { Id = Guid.NewGuid() }]
-                },
-                Now)
-            {
-                NextResolutionAtUtc = Now,
-                ReturnToCombatAreaId = "locked-area"
-            }
-        };
-        var combat = new CombatServiceStub();
-        var service = new CharacterActionService(
-            repository,
-            combat,
-            new CraftingServiceStub { CompleteQueue = true },
-            new FixedTimeProvider(Now),
-            actionDetailsService: new ActionDetailsServiceStub(),
-            combatAreaAccessService: new CombatAreaAccessServiceStub(canAccess: false));
-
-        var result = await service.GetCharacterActionAsync(
-            repository.Current.CharacterId,
-            CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.Equal(CharacterActionType.Crafting, result.CharacterActionType);
-        Assert.True(result.IsDeleted);
-        Assert.Null(result.ReturnToCombatAreaId);
-        Assert.False(result.AutoResumedFromTempering);
-        Assert.Equal(0, combat.CallCount);
-        Assert.Equal(0, repository.ResumeCombatCount);
     }
 
     private sealed class CharacterActionRepositoryStub : ICharacterActionRepository
@@ -488,7 +229,6 @@ public sealed class CharacterActionFlowTests
                 StartCount++;
                 currentCombat.AreaId = requestedCombat.AreaId;
                 currentCombat.Area = requestedCombat.Area;
-                Current.ReturnToCombatAreaId = requestedCombat.AreaId;
                 return Task.FromResult<CharacterAction?>(Current);
             }
 
@@ -496,12 +236,6 @@ public sealed class CharacterActionFlowTests
                 return Task.FromResult<CharacterAction?>(null);
 
             StartCount++;
-            if (characterAction.ActionDetails is CombatActionDetails &&
-                Current?.ActionDetails is CraftingActionDetails craftingDetails)
-            {
-                characterAction.PausedTemperingQueueItems =
-                    [.. craftingDetails.CraftingQueueItems];
-            }
             Current = characterAction;
             return Task.FromResult<CharacterAction?>(characterAction);
         }
@@ -510,9 +244,6 @@ public sealed class CharacterActionFlowTests
             Task.FromResult<CharacterAction?>(Current);
         public Task<CharacterAction?> GetCombatActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<CharacterAction?>(Current);
-        public Task<CharacterAction?> GetCraftingActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult<CharacterAction?>(Current);
-
         public void UpdateCharacterAction(CharacterAction characterAction) => UpdateCount++;
         public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
         {
@@ -520,34 +251,6 @@ public sealed class CharacterActionFlowTests
             characterAction.IsDeleted = true;
             return Task.FromResult(true);
         }
-        public Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<CharacterAction?> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, Domain.Models.Inventories.InventoryItem inventoryItem, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken) =>
-            Task.FromResult<CharacterAction?>(Current.ActionDetails is CraftingActionDetails ? Current : null);
-        public bool ResumeCombatAfterTempering(
-            CharacterAction characterAction,
-            CombatActionDetails combatActionDetails,
-            DateTimeOffset combatStartsAt,
-            DateTimeOffset now)
-        {
-            if (characterAction.ActionDetails is not CraftingActionDetails crafting ||
-                crafting.CraftingQueueItems.Count != 0)
-                return false;
-
-            ResumeCombatCount++;
-            LastCombatResumeAt = combatStartsAt;
-            characterAction.ActionDetails = combatActionDetails;
-            characterAction.IsDeleted = false;
-            characterAction.NextResolutionAtUtc = combatStartsAt;
-            characterAction.BlockedUntilUtc = combatStartsAt.AddSeconds(
-                CharacterActionTimingConstants.CombatSwitchLockSeconds);
-            characterAction.ScheduleGeneration++;
-            characterAction.ReturnToCombatAreaId = combatActionDetails.AreaId;
-            characterAction.AutoResumedFromTempering = true;
-            return true;
-        }
-        public Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<CraftingQueueItem>>(Current.PausedTemperingQueueItems.ToList());
         public Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<CharacterAction?>(Current);
     }
@@ -572,57 +275,6 @@ public sealed class CharacterActionFlowTests
             }
             return Task.FromResult(ReturnNoSession ? null : Session);
         }
-    }
-
-    private sealed class CraftingServiceStub : ICraftingService
-    {
-        public bool AdvanceSchedule { get; init; }
-        public bool CompleteQueue { get; init; }
-        public int LastActionsToPerform { get; private set; }
-        public int CallCount { get; private set; }
-        public int TotalActionsRequested { get; private set; }
-
-        public Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, DateTimeOffset now, CancellationToken cancellationToken)
-        {
-            CallCount++;
-            LastActionsToPerform = actionsToPerform;
-            TotalActionsRequested = checked(TotalActionsRequested + actionsToPerform);
-            var from = characterAction.NextResolutionAtUtc!.Value;
-            if (CompleteQueue)
-            {
-                ((CraftingActionDetails)characterAction.ActionDetails!).CraftingQueueItems.Clear();
-                characterAction.IsDeleted = true;
-                characterAction.NextResolutionAtUtc = null;
-            }
-            else if (AdvanceSchedule)
-                characterAction.NextResolutionAtUtc = characterAction.NextResolutionAtUtc?.AddSeconds(actionsToPerform * 10);
-            return Task.FromResult(new TemperingSession
-            {
-                From = from,
-                To = now,
-                QueueCompletedAtUtc = CompleteQueue ? from : null,
-                TemperingSummary = new TemperingSummary
-                {
-                    TotalActions = actionsToPerform,
-                    CraftingExperience = actionsToPerform
-                },
-                Outcomes = [.. Enumerable.Range(0, actionsToPerform).Select(index =>
-                    new TemperingOutcomeEntry
-                    {
-                        Id = Guid.NewGuid(),
-                        OccurredAt = from.AddSeconds(index * 10)
-                    })]
-            });
-        }
-        public Task<TemperingQueueRemovalResult?> RemoveCraftingQueueItemsAsync(Guid characterId, IReadOnlyCollection<Guid> queueItemIds, CancellationToken cancellationToken) =>
-            Task.FromResult<TemperingQueueRemovalResult?>(null);
-        public Task<TemperingQueueRemovalResult> CancelTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult(new TemperingQueueRemovalResult(null, [], []));
-        public Task<bool> MoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CraftingQueueMoveDirection direction, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<bool> SetRemoveAfterNextRarityUpgradeAsync(Guid characterId, Guid queueItemId, bool enabled, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class ActionDetailsServiceStub : IActionDetailsService

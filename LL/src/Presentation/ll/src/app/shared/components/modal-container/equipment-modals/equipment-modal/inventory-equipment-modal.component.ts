@@ -85,6 +85,7 @@ export class InventoryEquipmentModalComponent implements OnInit {
     );
   }
 
+
   get inventoryItem(): InventoryItem | undefined {
     return this.inventoryState
       .items()

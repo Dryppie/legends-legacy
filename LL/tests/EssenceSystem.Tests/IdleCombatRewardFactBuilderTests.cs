@@ -17,6 +17,7 @@ public sealed class IdleCombatRewardFactBuilderTests
         var action = new CharacterAction
         {
             CharacterId = characterId,
+            ScheduleGeneration = 7,
             UpdatedAt = now.AddSeconds(10),
             ActionDetails = new CombatActionDetails(
                 [characterId],
@@ -38,6 +39,6 @@ public sealed class IdleCombatRewardFactBuilderTests
 
         Assert.Empty(facts.Encounters);
         Assert.Equal(characterId, facts.CharacterId);
-        Assert.Null(facts.EquippedTool);
+        Assert.Equal(7, facts.ScheduleGeneration);
     }
 }

@@ -3,6 +3,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Achievements;
@@ -1046,7 +1048,7 @@ public sealed class RaidService(
         if (character is null)
             return null;
 
-        var items = trophyVendor.GetForBoss(raidBossId);
+        var items = trophyVendor.GetForBoss(raidBossId).ToArray();
         var itemIds = items.Select(x => x.Id).ToArray();
         var weekKey = GetWeekKey(timeProvider.GetUtcNow());
         var purchases = await db.RaidTrophyPurchases.AsNoTracking()

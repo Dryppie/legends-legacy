@@ -1,10 +1,14 @@
-# LegendsLegacy equipment, Gathering, Crafting, and Tempering design review
+# LegendsLegacy Equipment, Gathering, Crafting, and Tempering design review
+
+> Post-Alpha update (3 September 2026): the owner has dropped Alpha-data preservation. Cohort/conversion/retirement-adapter recommendations in this historical review are superseded by [the cleanup record](equipment-post-alpha-cleanup.md).
 
 **Date:** 2 September 2026. **Status:** design recommendation; no implementation authorized by this document.
 
+**Subsequent owner decisions and implementation:** this review is retained as the original comparison/evidence record. The selected [equipment progression specification](equipment-specification.md) supersedes its merchant fallback and balance-before-implementation recommendations: gear-selling merchants are excluded, and the complete loop is being built with provisional values before content balancing. Canonical equipment, starter grants, Forge, protected dungeon acquisition, baseline recovery and ordinary Region 1 acquisition/resource income now have backend implementations and an Equipment & Forge screen. Versioned main-quest replacements, first-entry/resource grants and earned plain-target recovery are implemented behind disabled flags; cohort-specific profession actions, optional profession branches and old combat/dungeon gear/material rewards are now retired with matching navigation/help. Prophecy objectives/cache awards and obsolete achievement goals now follow equipment progression retirement rules. Guild orders/shared missions and permanent equipment donation/loans are implemented. Guild shop/event rewards and raid Trophy vendors now use equipment progression resource/style rules, with compatible shared-event participation. Six obsolete Soulstone constellations now have cohort-specific purchase/bonus guards and an explicit refund that preserves active upgrades. Blueprint/item/market and guild-building descriptions follow the same cohort. The 3 September follow-up makes sigil income exclusive by saved cohort and adds Sigil Traces refunds. Exact equipment-market filters, canonical administrative grants and equipment reference builds are also implemented. Remaining consumer/operational cleanup, later-region coverage and conversion remain pending; raids are deferred. See [implementation status](equipment-implementation-status.md) for current scope, tests and unapplied migrations. Merchant examples and the original sequence below are historical proposals, not current requirements.
+
 ## 1. Executive Summary
 
-**If I were designing LegendsLegacy, I would choose content-earned equipment, deterministic Tempering, and collectible Blueprint specializations, without Gathering professions or an equipment-production profession.** This is Model E below: a deliberately narrow development of Model D.
+**If I were designing LegendsLegacy, I would choose content-earned equipment, deterministic Tempering, and collectible Blueprint specializations, without Gathering professions or an equipment-production profession.** This is equipment progression below: a deliberately narrow development of Model D.
 
 The intended loop is:
 
@@ -445,7 +449,7 @@ Drops supply equipment; Tempering supplies deliberate improvement; ordinary prod
 
 **Verdict:** the correct foundation, provided acquisition guarantees, lifespan, and specialization are specified rather than left to later patching.
 
-### Model E — Targeted equipment, guaranteed access, predictable investment
+### Equipment progression — Targeted equipment, guaranteed access, predictable investment
 
 Develop D into a complete contract: sparse useful drops, source-local guaranteed acquisition, immediately usable named equipment, five deterministic Tempering ranks, one Blueprint style, no gathering or production levels, no Quality or Potential, and explicit ownership/salvage rules.
 
@@ -483,7 +487,7 @@ E does not win on economic breadth or crafting identity. It wins because the use
 
 ### 13.1 The complete decision
 
-Adopt **Model E**. Ordinary equipment is found or awarded through content. A small merchant floor protects basic functionality. Deterministic reward protection replaces routine crafting's acquisition-insurance role. Tempering improves owned equipment; Blueprints select one compatible style. There is no separate equipment-production profession.
+Adopt **Equipment progression**. Ordinary equipment is found or awarded through content. A small merchant floor protects basic functionality. Deterministic reward protection replaces routine crafting's acquisition-insurance role. Tempering improves owned equipment; Blueprints select one compatible style. There is no separate equipment-production profession.
 
 | Existing concept            | Recommended destination                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -825,7 +829,7 @@ Document verification covers required sections/questions, source-link targets, a
 
 ## 24. Final Verdict
 
-**Choose Model E: earn equipment through content, protect targeted acquisition, improve it deterministically, and specialize it with reusable Blueprints. Remove Gathering professions and routine equipment crafting.**
+**Choose equipment progression: earn equipment through content, protect targeted acquisition, improve it deterministically, and specialize it with reusable Blueprints. Remove Gathering professions and routine equipment crafting.**
 
 LegendsLegacy does not need a second major game about becoming qualified to manufacture its combat rewards. Its existing combat, Essence, dungeon, Tower, raid, guild, and recurring progression already offer abundant goals. The equipment system should make those activities more satisfying and build choices more tangible.
 

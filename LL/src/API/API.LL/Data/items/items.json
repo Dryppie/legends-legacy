@@ -6,9 +6,7 @@
     "itemType": "Resource",
     "rarity": "Uncommon",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "soul_dust",
@@ -17,9 +15,7 @@
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "sigil_goblin_mines",
@@ -29,9 +25,7 @@
     "rarity": "Common",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "sigil_forgotten_catacombs",
@@ -41,21 +35,17 @@
     "rarity": "Common",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "sigil_hives_abyss",
     "name": "Hive Sigil",
-    "description": "A sigil used to open a run into The Hive\u0027s Abyss.",
+    "description": "A sigil used to open a run into The Hive's Abyss.",
     "itemType": "Resource",
     "rarity": "Common",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "sigil_tangled_cave",
@@ -65,9 +55,7 @@
     "rarity": "Common",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "sigil_great_tree",
@@ -77,9 +65,7 @@
     "rarity": "Common",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.monster_core.lesser",
@@ -88,9 +74,7 @@
     "itemType": "Resource",
     "rarity": "Uncommon",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.monster_core.greater",
@@ -99,9 +83,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.monster_core.primal",
@@ -110,9 +92,7 @@
     "itemType": "Resource",
     "rarity": "Epic",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.cunning",
@@ -121,9 +101,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.warden",
@@ -132,9 +110,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.flame",
@@ -143,9 +119,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.echo",
@@ -154,9 +128,7 @@
     "itemType": "Resource",
     "rarity": "Uncommon",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.hollow",
@@ -165,9 +137,7 @@
     "itemType": "Resource",
     "rarity": "Epic",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.holy",
@@ -176,9 +146,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.beast",
@@ -187,9 +155,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.undead",
@@ -198,9 +164,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.evolution_catalyst.boss_soul_core",
@@ -209,9 +173,7 @@
     "itemType": "Resource",
     "rarity": "Epic",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "tempered_scrap",
@@ -220,9 +182,7 @@
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "heavy_helm",
@@ -250,9 +210,7 @@
         "amount": 100,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "heavy_breastplate",
@@ -280,9 +238,7 @@
         "amount": 100,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "heavy_legplates",
@@ -310,9 +266,7 @@
         "amount": 100,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "medium_helm",
@@ -340,9 +294,7 @@
         "amount": 20,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "medium_mail",
@@ -370,9 +322,7 @@
         "amount": 20,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "medium_greaves",
@@ -400,9 +350,7 @@
         "amount": 20,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "light_hood",
@@ -430,9 +378,7 @@
         "amount": 30,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "light_vest",
@@ -460,9 +406,7 @@
         "amount": 30,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "light_leggings",
@@ -490,9 +434,7 @@
         "amount": 30,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "cloth_cowl",
@@ -520,9 +462,7 @@
         "amount": 30,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "cloth_robe",
@@ -550,9 +490,7 @@
         "amount": 30,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "cloth_pants",
@@ -580,9 +518,7 @@
         "amount": 30,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "band",
@@ -591,9 +527,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Ring",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "tutorial_sword",
@@ -602,9 +536,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "OneHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "tutorial_ring",
@@ -626,9 +558,7 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "amulet",
@@ -637,9 +567,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Necklace",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "vial",
@@ -648,9 +576,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Relic",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "shortsword",
@@ -659,9 +585,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "OneHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "hatchet",
@@ -670,9 +594,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "OneHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "mace",
@@ -681,9 +603,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "OneHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "dagger",
@@ -692,9 +612,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "OneHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "greatsword",
@@ -703,9 +621,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "battle_axe",
@@ -714,9 +630,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "maul",
@@ -725,9 +639,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "spear",
@@ -736,9 +648,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "towershield",
@@ -760,9 +670,7 @@
         "amount": 5,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "Spiritward",
@@ -784,9 +692,7 @@
         "amount": 5,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "staff",
@@ -795,9 +701,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "grimoire",
@@ -813,9 +717,7 @@
         "amount": 10,
         "modifierType": "Flat"
       }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
+    ]
   },
   {
     "id": "wand",
@@ -824,9 +726,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "OneHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "longbow",
@@ -835,9 +735,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "crossbow",
@@ -846,9 +744,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "gauntlets",
@@ -857,306 +753,7 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "basic_pickaxe",
-    "name": "Pickaxe",
-    "description": "A simple mining tool.",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "basic_hatchet",
-    "name": "Hatchet",
-    "description": "A simple woodcutting tool.",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "basic_skinning_knife",
-    "name": "Skinning Knife",
-    "description": "A simple skinning tool.",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "pickaxe",
-    "name": "Pickaxe",
-    "description": "A mining tool.",
-    "itemType": "Equipment",
-    "rarity": "Uncommon",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "woodcutting_hatchet",
-    "name": "Hatchet",
-    "description": "A woodcutting tool.",
-    "itemType": "Equipment",
-    "rarity": "Uncommon",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "skinning_knife",
-    "name": "Skinning Knife",
-    "description": "A skinning tool.",
-    "itemType": "Equipment",
-    "rarity": "Uncommon",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "rare_pickaxe",
-    "name": "Pickaxe",
-    "description": "A refined mining tool.",
-    "itemType": "Equipment",
-    "rarity": "Rare",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "rare_hatchet",
-    "name": "Hatchet",
-    "description": "A refined woodcutting tool.",
-    "itemType": "Equipment",
-    "rarity": "Rare",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "rare_skinning_knife",
-    "name": "Skinning Knife",
-    "description": "A refined skinning tool.",
-    "itemType": "Equipment",
-    "rarity": "Rare",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "epic_pickaxe",
-    "name": "Pickaxe",
-    "description": "An exceptional mining tool.",
-    "itemType": "Equipment",
-    "rarity": "Epic",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "epic_hatchet",
-    "name": "Hatchet",
-    "description": "An exceptional woodcutting tool.",
-    "itemType": "Equipment",
-    "rarity": "Epic",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "epic_skinning_knife",
-    "name": "Skinning Knife",
-    "description": "An exceptional skinning tool.",
-    "itemType": "Equipment",
-    "rarity": "Epic",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "unique_pickaxe",
-    "name": "Pickaxe",
-    "description": "A remarkable mining tool.",
-    "itemType": "Equipment",
-    "rarity": "Unique",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "unique_hatchet",
-    "name": "Hatchet",
-    "description": "A remarkable woodcutting tool.",
-    "itemType": "Equipment",
-    "rarity": "Unique",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "unique_skinning_knife",
-    "name": "Skinning Knife",
-    "description": "A remarkable skinning tool.",
-    "itemType": "Equipment",
-    "rarity": "Unique",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "legendary_pickaxe",
-    "name": "Pickaxe",
-    "description": "A masterwork mining tool.",
-    "itemType": "Equipment",
-    "rarity": "Legendary",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "legendary_hatchet",
-    "name": "Hatchet",
-    "description": "A masterwork woodcutting tool.",
-    "itemType": "Equipment",
-    "rarity": "Legendary",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "legendary_skinning_knife",
-    "name": "Skinning Knife",
-    "description": "A masterwork skinning tool.",
-    "itemType": "Equipment",
-    "rarity": "Legendary",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "legacy_pickaxe",
-    "name": "Pickaxe",
-    "description": "A storied mining tool from a fallen age.",
-    "itemType": "Equipment",
-    "rarity": "Legacy",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Mining"
-  },
-  {
-    "id": "legacy_hatchet",
-    "name": "Hatchet",
-    "description": "A storied woodcutting tool from a fallen age.",
-    "itemType": "Equipment",
-    "rarity": "Legacy",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "legacy_skinning_knife",
-    "name": "Skinning Knife",
-    "description": "A storied skinning tool from a fallen age.",
-    "itemType": "Equipment",
-    "rarity": "Legacy",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Skinning"
-  },
-  {
-    "id": "ore",
-    "name": "Ore",
-    "description": "Raw metal-bearing stone suitable for basic crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "wood",
-    "name": "Wood",
-    "description": "Common timber used for basic crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "rawhide",
-    "name": "Hide",
-    "description": "Flexible hide used for armor and bindings.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "copper_ore",
-    "name": "Copper Ore",
-    "description": "Dense copper-bearing stone gathered in the Meran region for Tier 2 crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "bloodwood",
-    "name": "Bloodwood",
-    "description": "Hard, crimson timber gathered in the Meran region for Tier 2 crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "thick_hide",
-    "name": "Thick Hide",
-    "description": "Tough frontier hide gathered in the Meran region for Tier 2 crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.lumo_ruins",
@@ -1166,9 +763,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.blood_grove",
@@ -1178,9 +773,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.crystal_creek",
@@ -1190,9 +783,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.moonlit_graves",
@@ -1202,9 +793,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.twilight_clearing",
@@ -1214,9 +803,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.old_forest",
@@ -1226,9 +813,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.thornroot_hollow",
@@ -1238,9 +823,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.embercap_burrows",
@@ -1250,9 +833,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.moonveil_marsh",
@@ -1262,9 +843,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence_token.duskmire_hollow",
@@ -1274,9 +853,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.blueprint_selection_box",
@@ -1286,142 +863,7 @@
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "item.catalyst_selection_crate",
-    "name": "Catalyst Selection Cache",
-    "description": "Open this cache from your inventory to choose six catalysts for a specialized Blueprint recipe.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "isBound": true,
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "venom_gland",
-    "name": "Venom Catalyst",
-    "description": "A volatile reagent used for venom-focused crafting variants.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "royal_chitin_plate",
-    "name": "Hive Catalyst",
-    "description": "A dense chitin plate suitable for precise variant crafting.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "hive_ichor",
-    "name": "Primal Catalyst",
-    "description": "A rare catalyst used to carry hive properties into crafted gear.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "fury_heart",
-    "name": "Fury Catalyst",
-    "description": "A crystallized pulse of battle rage used to bind the Fury design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "arcane_focus",
-    "name": "Arcane Catalyst",
-    "description": "A concentrated magical lens used to bind the Arcane design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "executioners_mark",
-    "name": "Execution Catalyst",
-    "description": "A grim token used to bind the Execution design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "aegis_runestone",
-    "name": "Aegis Catalyst",
-    "description": "A warded stone used to bind the Aegis design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "warden_sigil",
-    "name": "Warden Catalyst",
-    "description": "A protective insignia used to bind the Warden design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "endurance_core",
-    "name": "Endurance Catalyst",
-    "description": "A resilient mineral heart used to bind the Endurance design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "phoenix_ember",
-    "name": "Phoenix Catalyst",
-    "description": "An undying spark used to bind the Phoenix design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "spirit_prism",
-    "name": "Spirit Catalyst",
-    "description": "A soul-attuned crystal used to bind the Spirit design to crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_venom_touched_sword",
@@ -1430,9 +872,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_hivefang_dagger",
@@ -1441,9 +881,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_fury",
@@ -1452,9 +890,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_arcane",
@@ -1463,9 +899,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_execution",
@@ -1474,9 +908,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_aegis",
@@ -1485,9 +917,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_warden",
@@ -1496,9 +926,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_endurance",
@@ -1507,9 +935,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_phoenix",
@@ -1518,9 +944,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_spirit",
@@ -1529,9 +953,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_primal",
@@ -1540,9 +962,7 @@
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.vampire_bat",
@@ -1551,9 +971,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.raven",
@@ -1562,9 +980,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.venomous_snake",
@@ -1573,9 +989,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.nightshade_blossom",
@@ -1584,9 +998,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.blood_zombie",
@@ -1595,9 +1007,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.lumo_wisp",
@@ -1606,9 +1016,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.lumo_sentinel",
@@ -1617,9 +1025,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.goblin",
@@ -1628,9 +1034,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.goblin_archer",
@@ -1639,9 +1043,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.goblin_warrior",
@@ -1650,9 +1052,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.goblin_shaman",
@@ -1661,31 +1061,25 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.hobgoblin",
-    "name": "Unbound Hobgoblin Essence \u2014 Intimidating Slam",
+    "name": "Unbound Hobgoblin Essence — Intimidating Slam",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.hobgoblin_brutal_charge",
-    "name": "Unbound Hobgoblin Essence \u2014 Brutal Charge",
+    "name": "Unbound Hobgoblin Essence — Brutal Charge",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.frost_imp",
@@ -1694,9 +1088,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.crystal_wisp",
@@ -1705,9 +1097,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.blue_slime",
@@ -1716,9 +1106,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.transparent_slime",
@@ -1727,9 +1115,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.moss_lizard",
@@ -1738,9 +1124,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.shadow_imp",
@@ -1749,9 +1133,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.grave_hound",
@@ -1760,9 +1142,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.lost_soul",
@@ -1771,9 +1151,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.grave_wisp",
@@ -1782,9 +1160,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.skeleton",
@@ -1793,9 +1169,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.pixie",
@@ -1804,9 +1178,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.wood_nymph",
@@ -1815,9 +1187,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.rainbow_slime",
@@ -1826,9 +1196,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.enchanted_fairy",
@@ -1837,9 +1205,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.illusion_fox",
@@ -1848,9 +1214,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.thornback_boar",
@@ -1859,9 +1223,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.hollow_stag",
@@ -1870,9 +1232,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.treant_sapling",
@@ -1881,9 +1241,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.glade_panther",
@@ -1892,9 +1250,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.forest_spirit",
@@ -1903,9 +1259,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.rotroot_shambler",
@@ -1914,9 +1268,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.spider",
@@ -1925,9 +1277,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.giant_spider",
@@ -1936,9 +1286,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.venomous_spiderling",
@@ -1947,9 +1295,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.blackjaw_spider",
@@ -1958,9 +1304,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.flame_imp",
@@ -1969,9 +1313,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.smolder_rat",
@@ -1980,9 +1322,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.cinder_beetle",
@@ -1991,9 +1331,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.red_slime",
@@ -2002,9 +1340,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.giant_worm",
@@ -2013,9 +1349,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.bog_mite",
@@ -2024,9 +1358,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.green_slime",
@@ -2035,9 +1367,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.large_rat",
@@ -2046,9 +1376,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.viper",
@@ -2057,9 +1385,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.poisonous_rat",
@@ -2068,9 +1394,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.rotfly_toad",
@@ -2079,9 +1403,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.brown_slime",
@@ -2090,9 +1412,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.cave_bat",
@@ -2101,9 +1421,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.giant_bat",
@@ -2112,9 +1430,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.undead",
@@ -2123,9 +1439,7 @@
     "itemType": "Essence",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.gnoll_pack_leader",
@@ -2135,9 +1449,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.gnoll_pack_leader",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.gnoll_raider",
@@ -2147,9 +1459,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.gnoll_raider",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.gnoll_shaman",
@@ -2159,9 +1469,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.gnoll_shaman",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.kobold_skirmisher",
@@ -2171,9 +1479,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.kobold_skirmisher",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.kobold_sorcerer",
@@ -2183,9 +1489,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.kobold_sorcerer",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.feral_ghoul",
@@ -2195,9 +1499,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.feral_ghoul",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.plague_ghoul",
@@ -2207,9 +1509,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.plague_ghoul",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.ravenous_ghoul",
@@ -2219,9 +1519,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.ravenous_ghoul",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.vampire_fledgeling",
@@ -2231,9 +1529,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.vampire_fledgeling",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.wandering_ghost",
@@ -2243,9 +1539,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.wandering_ghost",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.web_weaver_spider",
@@ -2255,33 +1549,27 @@
     "rarity": "Rare",
     "essenceDefinitionId": "essence.web_weaver_spider",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.spider_queen",
-    "name": "Unbound Spider Queen Essence \u2014 Webbed Domain",
+    "name": "Unbound Spider Queen Essence — Webbed Domain",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
     "essenceDefinitionId": "essence.spider_queen",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.spider_queen_royal_venom",
-    "name": "Unbound Spider Queen Essence \u2014 Royal Venom",
+    "name": "Unbound Spider Queen Essence — Royal Venom",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
     "essenceDefinitionId": "essence.spider_queen_royal_venom",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.bark_golem",
@@ -2291,9 +1579,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.bark_golem",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.treant_guardian",
@@ -2303,33 +1589,27 @@
     "rarity": "Rare",
     "essenceDefinitionId": "essence.treant_guardian",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.elder_treant",
-    "name": "Unbound Elder Treant Essence \u2014 Ancient Sap",
+    "name": "Unbound Elder Treant Essence — Ancient Sap",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
     "essenceDefinitionId": "essence.elder_treant",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.elder_treant_thornstorm",
-    "name": "Unbound Elder Treant Essence \u2014 Thornstorm",
+    "name": "Unbound Elder Treant Essence — Thornstorm",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
     "essenceDefinitionId": "essence.elder_treant_thornstorm",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.blood_harpy",
@@ -2339,9 +1619,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.blood_harpy",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.flame_harpy",
@@ -2351,9 +1629,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.flame_harpy",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.ice_harpy",
@@ -2363,9 +1639,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.ice_harpy",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.shadow_harpy",
@@ -2375,9 +1649,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.shadow_harpy",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.wind_harpy",
@@ -2387,9 +1659,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.wind_harpy",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.alpha_wolf",
@@ -2399,9 +1669,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.alpha_wolf",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.dire_wolf",
@@ -2411,9 +1679,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.dire_wolf",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.horned_wolf",
@@ -2423,9 +1689,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.horned_wolf",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.bloodfang_wolf",
@@ -2435,9 +1699,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.bloodfang_wolf",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "item.essence.pack_howler",
@@ -2447,9 +1709,7 @@
     "rarity": "Common",
     "essenceDefinitionId": "essence.pack_howler",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_raidforged",
@@ -2458,20 +1718,7 @@
     "itemType": "Resource",
     "rarity": "Epic",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "raidforged_ingot",
-    "name": "Raidforged Ingot",
-    "description": "A Trophy-forged ingot used in Raidforged crafting.",
-    "itemType": "Resource",
-    "rarity": "Epic",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   },
   {
     "id": "blueprint_gravebound",
@@ -2480,19 +1727,6 @@
     "itemType": "Resource",
     "rarity": "Epic",
     "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "sanguine_ichor",
-    "name": "Sanguine Ichor",
-    "description": "A rare binder harvested from the Sanguine Horror.",
-    "itemType": "Resource",
-    "rarity": "Epic",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
+    "attributeModifiers": []
   }
 ]

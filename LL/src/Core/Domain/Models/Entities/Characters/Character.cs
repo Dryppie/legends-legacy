@@ -40,7 +40,6 @@ public class Character : Entity
     public TitleDefinition? EquippedTitleDefinition { get; set; }
     //public Guid? GuildId { get; set; }
     public Guild? Guild { get; set; }
-    public ICollection<Profession> Professions { get; set; } = [];
 
     public void NormalizeName()
     {

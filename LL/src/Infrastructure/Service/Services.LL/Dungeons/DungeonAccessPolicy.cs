@@ -17,19 +17,22 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
     private readonly IItemBaseRepository _itemBases;
     private readonly IDbContext _db;
     private readonly string _serverId;
+    private readonly Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionEligibility? _progression;
 
     public DungeonAccessPolicy(
         IDungeonRunRepository dungeonRuns,
         IInventoryRepository inventory,
         IItemBaseRepository itemBases,
         IDbContext db,
-        IOptions<WorldTowerOptions> towerOptions)
+        IOptions<WorldTowerOptions> towerOptions,
+        Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionEligibility? progression = null)
     {
         _dungeonRuns = dungeonRuns;
         _inventory = inventory;
         _itemBases = itemBases;
         _db = db;
         _serverId = towerOptions.Value.ServerId;
+        _progression = progression;
     }
 
     public async Task<DungeonAccessResult> EvaluateAsync(
@@ -104,7 +107,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var clearedTowerFloors = await GetClearedTowerFloorsAsync(dungeons, cancellationToken);
 
-        return dungeons.ToDictionary(
+        var result = dungeons.ToDictionary(
             dungeon => dungeon.Id,
             dungeon =>
             {
@@ -131,6 +134,14 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
                 return new DungeonPreviewAccess(entry, sigilAssembly);
             },
             StringComparer.OrdinalIgnoreCase);
+        if (_progression != null)
+            foreach (var dungeon in dungeons)
+                if (await _progression.GetErrorAsync(characterId, dungeon.Id, cancellationToken) is { } error)
+                {
+                    var current = result[dungeon.Id];
+                    result[dungeon.Id] = new(Block(current.Entry, error), current.SigilAssembly is null ? null : Block(current.SigilAssembly, error));
+                }
+        return result;
     }
 
     private async Task<DungeonAccessResult> EvaluateAsync(
@@ -153,13 +164,18 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
             dungeon.RequiredTowerFloor,
             cancellationToken);
 
-        return BuildAccessResult(
+        var result = BuildAccessResult(
             entryRequirements,
             completedPrevious,
             towerFloorRequirementMet,
             dungeon.RequiredTowerFloor,
             ignoredEntryCostItemId);
+        var equipmentProgressionError = _progression == null ? null : await _progression.GetErrorAsync(characterId, dungeon.Id, cancellationToken);
+        return equipmentProgressionError == null ? result : Block(result, equipmentProgressionError);
     }
+
+    private static DungeonAccessResult Block(DungeonAccessResult result, string error) =>
+        result with { CanEnter = false, MissingRequirements = result.MissingRequirements.Append(error).ToArray() };
 
     private async Task<bool> HasClearedRequiredTowerFloorAsync(
         int? requiredTowerFloor,

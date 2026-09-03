@@ -113,7 +113,7 @@ public sealed class TournamentGroundsProgressionJobTests
         public Task<CombatResult?> GetMatchReplayAsync(Guid characterId, Guid tournamentId, Guid matchId, CancellationToken cancellationToken)
             => throw new NotSupportedException();
 
-        public IReadOnlyList<TournamentRewardTier> GetRewardTiers()
+        public Task<IReadOnlyList<TournamentRewardTier>> GetRewardTiersAsync(Guid characterId, CancellationToken cancellationToken)
             => throw new NotSupportedException();
 
         public Task<IReadOnlyList<TournamentRewardGrantEntry>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken)

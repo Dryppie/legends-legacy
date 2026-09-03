@@ -599,7 +599,6 @@ public sealed class GameEventOutboxTests
             TimeSpan.FromMinutes(3),
             area,
             [],
-            new EquippedGatheringTool { GatheringType = GatheringType.Mining },
             [
                 CreateEncounter(
                     1,
@@ -621,20 +620,7 @@ public sealed class GameEventOutboxTests
                     [new SimpleCombatEntity { MaxHealth = 100, Health = 12 }])
             ]);
 
-        var outcome = new IdleCombatCalculatedOutcome(
-            characterId,
-            from,
-            Now,
-            0,
-            0,
-            0,
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []);
+        var outcome = new IdleCombatCalculatedOutcome(characterId, from, Now, 0, 0, 0, [], [], [], [], [], []);
         var outbox = new RecordingGameEventOutbox();
         var publisher = new RecordingPublisher();
         var processor = new IdleCombatOutcomeProcessor(
@@ -681,7 +667,7 @@ public sealed class GameEventOutboxTests
         Assert.Equal(1, payload.PlayerDefeats);
         Assert.Equal(12, payload.LowestWinningHealthPercent);
         Assert.Equal(3, payload.ActionCount);
-        Assert.Equal("Mining", payload.EquippedGatheringType);
+        Assert.Null(payload.EquippedGatheringType);
         Assert.Equal(2, payload.WinningEncounterCount);
 
         var prophecyBatch = Assert.Single(publisher.Notifications.OfType<ProphecyProgressBatchNotification>());
@@ -704,22 +690,8 @@ public sealed class GameEventOutboxTests
             TimeSpan.FromMinutes(1),
             area,
             [],
-            null,
             [CreateEncounter(1, BattleOutcome.Victory, [creature], [new SimpleCombatEntity { MaxHealth = 100, Health = 50 }])]);
-        var outcome = new IdleCombatCalculatedOutcome(
-            characterId,
-            from,
-            Now,
-            0,
-            0,
-            0,
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []);
+        var outcome = new IdleCombatCalculatedOutcome(characterId, from, Now, 0, 0, 0, [], [], [], [], [], []);
         var outbox = new RecordingGameEventOutbox();
         var publisher = new RecordingPublisher();
         var archive = new RecordingCreatureArchiveService();

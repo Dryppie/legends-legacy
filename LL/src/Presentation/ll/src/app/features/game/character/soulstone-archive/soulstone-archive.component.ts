@@ -9,17 +9,17 @@ import { TabsComponent } from '../../../../shared/components/custom-components/t
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 
 @Component({
-    selector: 'app-soulstone-archive',
-    imports: [
-        DefaultHeaderComponent,
-        NgIf,
-        NgFor,
-        SoulstoneUpgradeCardComponent,
-        RegularButtonComponent,
-        TabsComponent,
-        TabComponent,
-    ],
-    templateUrl: './soulstone-archive.component.html'
+  selector: 'app-soulstone-archive',
+  imports: [
+    DefaultHeaderComponent,
+    NgIf,
+    NgFor,
+    SoulstoneUpgradeCardComponent,
+    RegularButtonComponent,
+    TabsComponent,
+    TabComponent,
+  ],
+  templateUrl: './soulstone-archive.component.html',
 })
 export class SoulstoneArchiveComponent implements OnInit {
   readonly character;
@@ -81,10 +81,8 @@ export class SoulstoneArchiveComponent implements OnInit {
   }
 
   maxUpgradeRanks(): number {
-    return this.allUpgrades().reduce(
-      (total, upgrade) => total + upgrade.maxRank,
-      0,
-    );
+    return this.allUpgrades()
+            .reduce((total, upgrade) => total + upgrade.maxRank, 0);
   }
 
   maxedUpgradeCount(): number {
@@ -103,7 +101,11 @@ export class SoulstoneArchiveComponent implements OnInit {
       { label: 'Available soulstones', value: character?.soulstones ?? 0 },
       {
         label: 'Ranks',
-        value: `${this.totalUpgradeRanks()} / ${this.maxUpgradeRanks()}`,
+        value: `${this.allUpgrades()
+                    .reduce(
+            (total, upgrade) => total + upgrade.currentRank,
+            0,
+          )} / ${this.maxUpgradeRanks()}`,
       },
       { label: 'Purchasable', value: this.affordableUpgradeCount() },
       { label: 'Maxed', value: this.maxedUpgradeCount() },

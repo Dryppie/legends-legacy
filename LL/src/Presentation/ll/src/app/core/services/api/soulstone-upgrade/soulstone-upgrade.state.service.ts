@@ -56,31 +56,29 @@ export class SoulstoneUpgradeStateService {
       () => this.synchronize(true),
       () => !!this.characterState.currentCharacterId(),
     );
-    effect(
-      () => {
-        const characterId = this.characterState.currentCharacterId();
+    effect(() => {
+      const characterId = this.characterState.currentCharacterId();
 
-        untracked(() => {
-          this._upgradeLoading.set(new Map());
-          this._lastRefund.set(0);
-          this._error.set(null);
-          this.loadEpoch += 1;
+      untracked(() => {
+        this._upgradeLoading.set(new Map());
+        this._lastRefund.set(0);
+        this._error.set(null);
+        this.loadEpoch += 1;
 
-          if (!characterId) {
-            this._upgrades.set([]);
-            this._loadedCharacterId.set(null);
-            this._loadingCharacterId.set(null);
-            return;
-          }
+        if (!characterId) {
+          this._upgrades.set([]);
+          this._loadedCharacterId.set(null);
+          this._loadingCharacterId.set(null);
+          return;
+        }
 
-          this.stateSync.activate('soulstones', 'soulstone-upgrades');
-          if (characterId !== this._loadedCharacterId()) {
-            this._upgrades.set([]);
-            this.load(true);
-          }
-        });
-      },
-    );
+        this.stateSync.activate('soulstones', 'soulstone-upgrades');
+        if (characterId !== this._loadedCharacterId()) {
+          this._upgrades.set([]);
+          this.load(true);
+        }
+      });
+    });
   }
 
   load(force = false): void {
@@ -197,8 +195,7 @@ export class SoulstoneUpgradeStateService {
     this._loadingCharacterId.set(characterId);
     this._error.set(null);
 
-    this.service
-      .resetSoulstoneUpgrades()
+    this.service.resetSoulstoneUpgrades()
       .pipe(
         finalize(() => {
           if (this._loadingCharacterId() === characterId) {

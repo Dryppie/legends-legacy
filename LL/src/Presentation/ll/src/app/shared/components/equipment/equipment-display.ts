@@ -15,8 +15,10 @@ import {
 } from '../../utils/attributes/attribute-order.utils';
 import { AttributeModifier } from '../../models/Dtos/attributesDto';
 import { AttributeType } from '../../models/enums/attributeType';
+import { EquipmentProgression } from '../../models/equipment-progression';
 
 export interface EquipmentDisplay {
+  progression?: EquipmentProgression | null;
   // Common
   name: string;
   rarity: Rarity;
@@ -110,11 +112,12 @@ export function mapInstanceToDisplay(
   return {
     name: inst.displayName || base.name,
     rarity: inst.rarity ?? base.rarity,
-    quality: inst.quality,
+    quality: inst.progression ? undefined : inst.quality,
+    progression: inst.progression,
     equipmentType: base.equipmentType,
     description: base.description,
     attributes,
-    itemBudget: inst.itemBudget ?? 0,
+    itemBudget: inst.progression ? 0 : (inst.itemBudget ?? 0),
     itemBudgetTier: inst.itemBudgetTier ?? inst.tier ?? 1,
     requiredLevel:
       base.equipmentType === EquipmentType.Tool ? 1 : (inst.requiredLevel ?? 1),
@@ -124,11 +127,11 @@ export function mapInstanceToDisplay(
     toolAffixes,
     baseToolBonuses,
 
-    potential: inst.potential,
-    minimumPotential: inst.rollRange?.minimumPotential,
-    maximumPotential: inst.rollRange?.maximumPotential,
-    attributeRollRanges: inst.rollRange?.attributes ?? [],
-    craftingDesign: inst.craftingDesign,
+    potential: inst.progression ? undefined : inst.potential,
+    minimumPotential: inst.progression ? undefined : inst.rollRange?.minimumPotential,
+    maximumPotential: inst.progression ? undefined : inst.rollRange?.maximumPotential,
+    attributeRollRanges: inst.progression ? [] : inst.rollRange?.attributes ?? [],
+    craftingDesign: inst.progression ? undefined : inst.craftingDesign,
     equipmentSet: inst.equipmentSet,
   };
 }

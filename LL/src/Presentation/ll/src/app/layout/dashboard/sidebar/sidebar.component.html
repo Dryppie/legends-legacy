@@ -95,12 +95,6 @@
         <span class="text-xs uppercase tracking-[0.12em]">
           {{ currentActionLabel() }}
         </span>
-        <span
-          *ngIf="compactQueueDuration() as duration"
-          class="text-xs font-semibold tabular-nums leading-none text-secondary"
-        >
-          {{ duration }}
-        </span>
       </button>
 
       <ng-template #compactCrest>

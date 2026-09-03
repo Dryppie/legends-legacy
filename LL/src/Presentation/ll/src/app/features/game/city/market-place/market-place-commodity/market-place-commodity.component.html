@@ -169,13 +169,8 @@
               class="ll-copy mt-2 max-w-2xl text-sm"
               *ngIf="selected.base.description"
             >
-              {{ selected.base.description }}
+              {{ itemDescription(selected.base) }}
             </p>
-            <app-blueprint-attribute-summary
-              *ngIf="selected.base.blueprint as blueprint"
-              class="mt-1 block max-w-2xl"
-              [blueprint]="blueprint"
-            ></app-blueprint-attribute-summary>
 
             <section
               *ngIf="selectedEssenceDefinition() as essence"

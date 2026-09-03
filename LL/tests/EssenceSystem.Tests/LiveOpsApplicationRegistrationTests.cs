@@ -42,7 +42,8 @@ public sealed class LiveOpsApplicationRegistrationTests
                     typeof(IRequestHandler<,>)))
             .ToList();
 
-        Assert.Equal(18, handlers.Count);
+        Assert.Equal(19, handlers.Count);
+        Assert.Contains(handlers, descriptor => descriptor.ImplementationType == typeof(Application.UseCases.Administration.Queries.GetCompensationEquipmentOptions.GetCompensationEquipmentOptionsQueryHandler));
         Assert.All(handlers, descriptor => Assert.StartsWith(
             "Application.UseCases.Administration",
             descriptor.ImplementationType?.Namespace,

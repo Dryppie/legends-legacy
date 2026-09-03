@@ -23,6 +23,17 @@ export class LeaderboardStateService {
 
   constructor(private readonly leaderboardService: LeaderboardService) {}
 
+  // Clear the previous character's cached standings and invalidate in-flight responses.
+  reset(): void {
+    ++this.requestSequence;
+    this._board.set(null);
+    this._activeKey.set(null);
+    this._loading.set(false);
+    this._error.set(null);
+    this.currentCursor = null;
+    this.currentSearch = null;
+  }
+
   load(boardKey: string, force = false): void {
     if (!force && this._activeKey() === boardKey && this._board()) return;
 

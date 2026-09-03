@@ -9,7 +9,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
 import { EventQuestStateService } from '../../../core/services/api/quest/event-quest-state.service';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
@@ -53,6 +53,7 @@ type QuestSortMode = 'Order' | 'Progress';
     NgClass,
     NgFor,
     NgIf,
+    RouterLink,
     BaseItemComponent,
     CharacterTagComponent,
     DefaultHeaderComponent,
@@ -513,11 +514,14 @@ export class QuestJournalPageComponent
   }
 
   rewardLabel(reward: QuestRewardState, includeQuantity = true): string {
-    const name = (reward.itemBaseId ?? reward.key)
-      .split(/[._-]/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+    const name =
+      reward.type === 'Cinders'
+        ? 'Cinders'
+        : (reward.itemBaseId ?? reward.key)
+            .split(/[._-]/)
+            .filter(Boolean)
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ');
     return includeQuantity ? `${reward.quantity} ${name}` : name;
   }
 

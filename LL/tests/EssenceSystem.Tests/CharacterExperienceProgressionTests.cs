@@ -6,7 +6,6 @@ using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Progression;
 using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Professions;
-using Domain.Models.Professions.Gathering;
 using Domain.Helpers.Constants;
 using Domain.Helpers;
 using MediatR;
@@ -166,63 +165,6 @@ public sealed class CharacterExperienceProgressionTests
         Assert.Equal(4, character.Level);
         Assert.Equal(10.75f, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.Power).Value);
         Assert.Equal(200, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.MaxHealth).Value);
-    }
-
-    [Fact]
-    public async Task Profession_leveling_remains_independent_from_the_character_curve()
-    {
-        var service = new LevelingService(new RecordingPublisher(), new FlatProgressionProvider());
-        var profession = new Profession
-        {
-            Level = 1,
-            Experience = EntityLevelConstants.XP_REQUIRED(1)
-        };
-
-        await service.UpdateProfessionLevel(profession, CancellationToken.None);
-
-        Assert.Equal(2, profession.Level);
-        Assert.Equal(0, profession.Experience);
-    }
-
-    [Theory]
-    [InlineData(1, 474)]
-    [InlineData(20, 189_600)]
-    [InlineData(50, 1_185_000)]
-    [InlineData(99, 4_645_674)]
-    public void Gathering_professions_use_the_quadratic_360_day_curve(
-        int level,
-        int expectedExperience)
-    {
-        Assert.Equal(
-            expectedExperience,
-            GatheringProfessionProgression.GetRequiredExperience(level));
-    }
-
-    [Fact]
-    public void Gathering_level_one_hundred_requires_the_planned_total_experience()
-    {
-        var totalExperience = GatheringProfessionProgression.GetCumulativeExperienceForLevel(100);
-        var idealDays = totalExperience / 432_000d;
-
-        Assert.Equal(155_637_900, totalExperience);
-        Assert.Equal(360.27d, idealDays, precision: 2);
-    }
-
-    [Fact]
-    public async Task Gathering_professions_stop_at_level_one_hundred()
-    {
-        var service = new LevelingService(new RecordingPublisher(), new FlatProgressionProvider());
-        var profession = new Profession
-        {
-            ProfessionType = ProfessionType.Mining,
-            Level = 99,
-            Experience = GatheringProfessionProgression.GetRequiredExperience(99) + 500
-        };
-
-        await service.UpdateProfessionLevel(profession, CancellationToken.None);
-
-        Assert.Equal(100, profession.Level);
-        Assert.Equal(0, profession.Experience);
     }
 
     [Fact]

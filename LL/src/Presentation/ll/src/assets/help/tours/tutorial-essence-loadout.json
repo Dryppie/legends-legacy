@@ -1,10 +1,10 @@
 [
   {
     "kind": "click",
-    "element": "[data-tour=essence-archive-list]",
+    "element": "[data-tour=essence-archive]",
     "actionSelector": "[data-tour=essence-archive-list]",
     "title": "1. Soul Archive",
-    "description": "Absorbed Essences appear in your Soul Archive. Select an archived Essence to view it and prepare it for a loadout.",
+    "description": "Select any archived Essence you want to equip in a loadout.",
     "position": "right"
   },
   {
@@ -12,9 +12,10 @@
     "element": "[data-tour=tutorial-equip-essence]",
     "actionSelector": "[data-tour=tutorial-equip-essence]",
     "waitForEnabled": true,
+    "showBack": true,
     "targetTimeoutMs": 5000,
     "title": "2. Equip your Essence",
-    "description": "Equip your first Essence. Loadout slot changes save automatically, and combat uses this first loadout unless another is assigned to that activity.",
+    "description": "Equip the selected Essence in a loadout. If every slot is occupied, clear one first. Slot changes save automatically.",
     "position": "left"
   }
 ]

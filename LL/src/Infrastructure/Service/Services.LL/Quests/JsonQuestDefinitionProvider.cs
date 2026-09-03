@@ -1,3 +1,4 @@
+using Domain.Models.Items.Equipments.Progression;
 using System.Text.Json;
 using Application.Interfaces.Services.LL.Quests;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
     [
         "CombatEncounterCompleted",
         "EssenceAbsorbed",
+        "EssenceOwned",
         "EssenceEquipped",
         "EssenceFocusSet",
         "FocusedCreatureEssenceReceived",
@@ -18,6 +20,8 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "EquipmentCrafted",
         "EquipmentTempered",
         "EquipmentEquipped",
+        EquipmentKeys.StarterLoadoutObjective,
+        EquipmentKeys.PlainTargetObjective,
         "GatheringToolEquipped",
         "AreaActionCompletedWithTool",
         "CharacterLevelReached",
@@ -34,7 +38,7 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
     private static readonly HashSet<string> GatheringTypes =
         ["Mining", "Woodcutting", "Skinning"];
 
-    private static readonly HashSet<string> RewardTypes = ["Item"];
+    private static readonly HashSet<string> RewardTypes = ["Item", "Cinders"];
     private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<int, QuestDefinition>> _definitions;
     private readonly IReadOnlyList<QuestDefinition> _latest;
 
@@ -83,14 +87,14 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                     $"Unknown quest definition '{questId}' version {version.Value}.");
         }
 
-        return versions.Values.MaxBy(x => x.Version)!;
+        return _latest.Single(x => x.Id.Equals(questId, StringComparison.OrdinalIgnoreCase));
     }
 
     public bool TryGet(string questId, out QuestDefinition definition)
     {
         if (_definitions.TryGetValue(questId, out var versions))
         {
-            definition = versions.Values.MaxBy(x => x.Version)!;
+            definition = Get(questId);
             return true;
         }
 
@@ -101,6 +105,8 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
     private static QuestDefinition Read(string path, JsonSerializerOptions options) =>
         JsonSerializer.Deserialize<QuestDefinition>(File.ReadAllText(path), options)
         ?? throw new InvalidOperationException($"Quest definition '{path}' was empty.");
+
+    public int GetLatestVersion(string questId) => _definitions[questId].Keys.Max();
 
     private static void Validate(IReadOnlyList<QuestDefinition> definitions)
     {
@@ -139,6 +145,14 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
             {
                 throw new InvalidOperationException(
                     $"Quest '{definition.Id}' has unsupported objective mode '{definition.ObjectiveMode}'.");
+            }
+
+            foreach (var objective in definition.Objectives.Where(x => x.Type is EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.PlainTargetObjective))
+            {
+                if (objective.RequiredAmount != 1 ||
+                    objective.Type == EquipmentKeys.StarterLoadoutObjective &&
+                    objective.Filters.StarterEquipmentKind is not ("FirstWeapon" or "ReadyForRoad"))
+                    throw new InvalidOperationException($"Quest '{definition.Id}' has an invalid Equipment progression objective.");
             }
 
             if (definition.Chain is not null &&
@@ -237,7 +251,8 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
             {
                 if (string.IsNullOrWhiteSpace(reward.Key) ||
                     !RewardTypes.Contains(reward.Type) ||
-                    string.IsNullOrWhiteSpace(reward.ItemBaseId) ||
+                    (reward.Type == "Item" && string.IsNullOrWhiteSpace(reward.ItemBaseId)) ||
+                    (reward.Type == "Cinders" && reward.ItemBaseId != null) ||
                     reward.Quantity <= 0)
                 {
                     throw new InvalidOperationException(

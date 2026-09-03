@@ -1,3 +1,4 @@
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
@@ -66,7 +67,8 @@ internal sealed class CombatSessionAccumulator
 
     private static List<InventoryItem> SummarizeItems(IEnumerable<InventoryItem> items) =>
         items
-            .GroupBy(item => item.ItemInstance.ItemBaseId, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(item => item.ItemInstance is Domain.Models.Items.Equipments.EquipmentInstance { ProgressionData: not null }
+                ? EquipmentKeys.SourcePrefix + $"{item.ItemInstanceId:N}" : $"base:{item.ItemInstance.ItemBaseId}", StringComparer.OrdinalIgnoreCase)
             .Select(group =>
             {
                 var first = group.First();

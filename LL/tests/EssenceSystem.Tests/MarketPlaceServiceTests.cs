@@ -4,6 +4,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions.Crafting;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,7 @@ using Services.LL.MarketPlaces;
 
 namespace EssenceSystem.Tests;
 
-public sealed class MarketPlaceServiceTests
+public sealed partial class MarketPlaceServiceTests
 {
     [Fact]
     public async Task CreateListing_RejectsBoundItemBeforeEscrow()
@@ -105,7 +106,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateListing_ForPartOfStack_ReturnsReducedInventoryQuantity()
     {
         var characterId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 20));
         var service = CreateService(
             new FakeMarketRepository(),
@@ -151,7 +152,7 @@ public sealed class MarketPlaceServiceTests
     [Fact]
     public async Task CreateListing_RejectsFullOrderBookBeforeEscrow()
     {
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 20));
         var market = new FakeMarketRepository { ListingCount = 10 };
         var service = CreateService(market, inventory, [resource]);
@@ -174,7 +175,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateListing_RejectsActiveBuyOrderForTheSameItemBeforeEscrow()
     {
         var characterId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 20));
         var market = new FakeMarketRepository();
         market.BuyOrders.Add(new MarketPlaceBuyOrder
@@ -208,7 +209,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateListing_RejectsSecondActiveListingForTheSameStackableItem()
     {
         var characterId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var listedItem = CreateInventoryItem(resource, 5);
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 20));
         var market = new FakeMarketRepository();
@@ -248,7 +249,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateListing_AllowsActiveBuyOrderForADifferentItem()
     {
         var characterId = Guid.NewGuid();
-        var ore = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var ore = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var wood = new ItemBase { Id = "wood", Name = "Wood", Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(ore, 20));
         var market = new FakeMarketRepository();
@@ -289,7 +290,7 @@ public sealed class MarketPlaceServiceTests
         var sellerId = Guid.NewGuid();
         var firstBuyerId = Guid.NewGuid();
         var secondBuyerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 6));
         var now = DateTimeOffset.UtcNow;
         var highestOrder = new MarketPlaceBuyOrder
@@ -374,7 +375,7 @@ public sealed class MarketPlaceServiceTests
     {
         var sellerId = Guid.NewGuid();
         var buyerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 2));
         var now = DateTimeOffset.UtcNow;
         var market = new FakeMarketRepository { ListingCount = 10 };
@@ -416,7 +417,7 @@ public sealed class MarketPlaceServiceTests
     {
         var buyerId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var instance = new ItemInstance
         {
             Id = Guid.NewGuid(),
@@ -462,19 +463,8 @@ public sealed class MarketPlaceServiceTests
     {
         var buyerId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var equipmentBase = new EquipmentBase
-        {
-            Id = "marketplace_sword",
-            Name = "Marketplace Sword",
-            EquipmentType = EquipmentType.OneHanded
-        };
-        var equipment = new EquipmentInstance
-        {
-            Id = Guid.NewGuid(),
-            ItemBaseId = equipmentBase.Id,
-            ItemBase = equipmentBase,
-            AcquisitionSource = ItemAcquisitionSources.Crafting
-        };
+        var equipment = MarketEquipment(sellerId, EquipmentOwnershipKind.UnboundPersonal);
+        var equipmentBase = equipment.EquipmentBase;
         var listing = new MarketPlaceListing
         {
             Id = Guid.NewGuid(),
@@ -513,7 +503,7 @@ public sealed class MarketPlaceServiceTests
     {
         var buyerId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var ownListedItem = CreateInventoryItem(resource, 5);
         var otherListedItem = CreateInventoryItem(resource, 3);
         var now = DateTimeOffset.UtcNow;
@@ -569,7 +559,7 @@ public sealed class MarketPlaceServiceTests
     {
         var sellerId = Guid.NewGuid();
         var buyerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var inventory = new FakeInventoryService(CreateInventoryItem(resource, 10));
         var market = new FakeMarketRepository();
         market.BuyOrders.Add(new MarketPlaceBuyOrder
@@ -606,7 +596,7 @@ public sealed class MarketPlaceServiceTests
         var buyerId = Guid.NewGuid();
         var firstSellerId = Guid.NewGuid();
         var secondSellerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var firstListedItem = CreateInventoryItem(resource, 2);
         var secondListedItem = CreateInventoryItem(resource, 1);
         var firstListing = new MarketPlaceListing
@@ -726,7 +716,7 @@ public sealed class MarketPlaceServiceTests
     {
         var buyerId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var listedItem = CreateInventoryItem(resource, 2);
         var market = new FakeMarketRepository { BuyOrderCount = 10 };
         market.Listings.Add(new MarketPlaceListing
@@ -769,7 +759,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateBuyOrder_RejectsActiveSellListingForTheSameItem()
     {
         var characterId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var listedItem = CreateInventoryItem(resource, 2);
         var market = new FakeMarketRepository();
         market.Listings.Add(new MarketPlaceListing
@@ -810,7 +800,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateBuyOrder_RejectsSecondActiveBuyOrderForTheSameItem()
     {
         var characterId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var existingOrder = new MarketPlaceBuyOrder
         {
             Id = Guid.NewGuid(),
@@ -851,7 +841,7 @@ public sealed class MarketPlaceServiceTests
     public async Task CreateBuyOrder_AllowsActiveSellListingForADifferentItem()
     {
         var characterId = Guid.NewGuid();
-        var ore = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var ore = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var wood = new ItemBase { Id = "wood", Name = "Wood", Stackable = true };
         var listedWood = CreateInventoryItem(wood, 2);
         var market = new FakeMarketRepository();
@@ -895,7 +885,7 @@ public sealed class MarketPlaceServiceTests
         var now = DateTimeOffset.UtcNow;
         var sellerId = Guid.NewGuid();
         var buyerId = Guid.NewGuid();
-        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var resource = new ItemBase { Id = "tempered_scrap", Name = "Tempered Scrap", ItemType = ItemType.Resource, Stackable = true };
         var listedItem = CreateInventoryItem(resource, 4);
         var listing = new MarketPlaceListing
         {

@@ -30,7 +30,8 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
         var weeklyResetAt = weekStart.AddDays(7);
 
         var items = new List<ChampionMarketItemModel>();
-        foreach (var item in _colosseumService.GetChampionMarketItems().Where(x => x.IsEnabled).OrderBy(x => x.SortOrder))
+        var offers = await _colosseumService.GetChampionMarketItemsAsync(request.CharacterId, cancellationToken);
+        foreach (var item in offers.Where(x => x.IsEnabled).OrderBy(x => x.SortOrder))
         {
             var weeklyPurchased = await _colosseumService.CountChampionMarketPurchasesAsync(request.CharacterId, item.Id, weekStart, cancellationToken);
             var lifetimePurchased = await _colosseumService.CountChampionMarketPurchasesAsync(request.CharacterId, item.Id, null, cancellationToken);

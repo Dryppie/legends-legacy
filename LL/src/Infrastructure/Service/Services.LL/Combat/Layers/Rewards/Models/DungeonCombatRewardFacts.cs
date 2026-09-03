@@ -12,8 +12,6 @@ public sealed record DungeonCombatRewardFacts(
     string? FeaturedEssenceMonsterDefinitionId,
     IReadOnlyDictionary<ItemType, double> MonsterLootModifiers,
     IReadOnlyList<Guid> PlayerEntityIds,
-    EquippedGatheringTool? EquippedTool,
-    IReadOnlyList<CombatGatheringNode> GatheringNodes,
     IReadOnlyList<DungeonEncounterRewardFacts> Encounters)
 {
     public DungeonEncounterRewardFacts? LastEncounter =>

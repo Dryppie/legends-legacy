@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
+using Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
 using Application.UseCases.Soulstones.Commands.ResetSoulstoneUpgrades;
 using Application.UseCases.Soulstones.Queries;
 using Common.Primitives;

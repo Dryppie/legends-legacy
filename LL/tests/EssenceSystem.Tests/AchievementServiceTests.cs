@@ -15,7 +15,7 @@ using System.Text.Json.Serialization;
 
 namespace EssenceSystem.Tests;
 
-public sealed class AchievementServiceTests
+public sealed partial class AchievementServiceTests
 {
     [Fact]
     public void Achievement_catalog_deserializes_all_domain_enum_values()
@@ -29,9 +29,9 @@ public sealed class AchievementServiceTests
             .SelectMany(path => JsonSerializer.Deserialize<List<AchievementCatalogEntry>>(File.ReadAllText(path), options) ?? [])
             .ToList();
 
-        Assert.Equal(101, achievements.Count);
-        Assert.Equal(101, achievements.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(101, achievements.Select(x => x.SortOrder).Distinct().Count());
+        Assert.Equal(82, achievements.Count);
+        Assert.Equal(82, achievements.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(82, achievements.Select(x => x.SortOrder).Distinct().Count());
     }
 
     [Fact]
@@ -76,12 +76,7 @@ public sealed class AchievementServiceTests
         Assert.False(Assert.Single(titles, x => x.Key == "title.hivebreaker").IsActive);
         Assert.False(Assert.Single(titles, x => x.Key == "title.royal_exterminator").IsActive);
 
-        var completionist = Assert.Single(achievements, x => x.Key == "legacy.completionist");
-        var requiredActiveAchievements = achievements.Count(x =>
-            x.IsActive
-            && x.Visibility != AchievementVisibility.Hidden
-            && x.RequirementType != AchievementRequirementType.NonHiddenAchievementsCompleted);
-        Assert.Equal(requiredActiveAchievements, completionist.RequirementAmount);
+        Assert.DoesNotContain(achievements, x => x.Key == "legacy.completionist");
     }
 
     [Fact]
@@ -488,48 +483,6 @@ public sealed class AchievementServiceTests
     }
 
     [Fact]
-    public async Task Crafting_record_methods_update_crafting_progress()
-    {
-        await using var db = CreateDbContext();
-        var accountId = Guid.NewGuid();
-        var characterId = Guid.NewGuid();
-        SeedCharacter(db, accountId, characterId);
-        SeedAchievement(db, "craft.items", AchievementRequirementType.ItemsCrafted, 2, category: AchievementCategory.Crafting);
-        SeedAchievement(db, "craft.set", AchievementRequirementType.SetItemsCrafted, 1, category: AchievementCategory.Crafting);
-        SeedAchievement(db, "craft.tempers", AchievementRequirementType.ItemsTempered, 3, category: AchievementCategory.Crafting);
-        SeedAchievement(db, "craft.masterpiece", AchievementRequirementType.MasterpiecesCrafted, 1, category: AchievementCategory.Crafting);
-        SeedAchievement(db, "craft.cursed", AchievementRequirementType.CursedCraftingOutcomes, 2, category: AchievementCategory.Hidden, visibility: AchievementVisibility.Hidden);
-        SeedAchievement(db, "craft.low_potential", AchievementRequirementType.HighQualityItemCraftedBelowPotential, 10, category: AchievementCategory.Hidden, visibility: AchievementVisibility.Hidden);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-        var setItem = new EquipmentInstance { Id = Guid.NewGuid(), BaseRecipeId = "recipe.weapon.sword", AffinityTags = ["set:ember"] };
-        var normalItem = new EquipmentInstance { Id = Guid.NewGuid(), BaseRecipeId = "recipe.jewelry.ring" };
-        var completedItem = new EquipmentInstance
-        {
-            Id = Guid.NewGuid(),
-            BaseRecipeId = "recipe.weapon.sword",
-            Quality = ItemQuality.Exceptional,
-            Potential = 9
-        };
-
-        await service.RecordItemsCraftedAsync(characterId, [setItem, normalItem], null, CancellationToken.None);
-        await service.RecordItemsTemperedAsync(
-            characterId,
-            new TemperingSummary { TotalActions = 3, Masterpieces = 1, CursedOutcomes = 2 },
-            [completedItem],
-            CancellationToken.None);
-        await db.SaveChangesAsync();
-
-        var achievements = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
-        Assert.True(achievements.Single(x => x.Key == "craft.items").IsCompleted);
-        Assert.True(achievements.Single(x => x.Key == "craft.set").IsCompleted);
-        Assert.True(achievements.Single(x => x.Key == "craft.tempers").IsCompleted);
-        Assert.True(achievements.Single(x => x.Key == "craft.masterpiece").IsCompleted);
-        Assert.True(achievements.Single(x => x.Key == "craft.cursed").IsCompleted);
-        Assert.True(achievements.Single(x => x.Key == "craft.low_potential").IsCompleted);
-    }
-
-    [Fact]
     public async Task Recalculation_repairs_progress_from_current_state()
     {
         await using var db = CreateDbContext();
@@ -538,10 +491,6 @@ public sealed class AchievementServiceTests
         SeedCharacter(db, accountId, characterId, level: 10);
         SeedAchievement(db, "general.started", AchievementRequirementType.AccountCreatedOrFirstCharacterCreated, 1, category: AchievementCategory.General);
         SeedAchievement(db, "general.level", AchievementRequirementType.CharacterLevelReached, 10, AchievementScope.Character, AchievementCategory.General);
-        SeedAchievement(db, "craft.blueprints", AchievementRequirementType.BlueprintsUnlocked, 2, category: AchievementCategory.Crafting);
-        db.CharacterRecipeUnlocks.AddRange(
-            new CharacterRecipeUnlock { CharacterId = characterId, BlueprintId = "ember" },
-            new CharacterRecipeUnlock { CharacterId = characterId, BlueprintId = "moon" });
         await db.SaveChangesAsync();
         var service = CreateService(db);
 
@@ -550,11 +499,10 @@ public sealed class AchievementServiceTests
 
         Assert.NotNull(result);
         Assert.Equal(0, result!.CompletedBefore);
-        Assert.Equal(3, result.CompletedAfter);
+        Assert.Equal(2, result.CompletedAfter);
         var achievements = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
         Assert.True(achievements.Single(x => x.Key == "general.started").IsCompleted);
         Assert.True(achievements.Single(x => x.Key == "general.level").IsCompleted);
-        Assert.True(achievements.Single(x => x.Key == "craft.blueprints").IsCompleted);
     }
 
     [Fact]
@@ -641,29 +589,6 @@ public sealed class AchievementServiceTests
         await db.SaveChangesAsync();
 
         Assert.Contains(unlocks, x => x.AchievementKey == "legacy.completionist");
-    }
-
-    [Fact]
-    public async Task Item_variant_progress_counts_each_recipe_and_blueprint_design_once()
-    {
-        await using var db = CreateDbContext();
-        var accountId = Guid.NewGuid();
-        var characterId = Guid.NewGuid();
-        SeedCharacter(db, accountId, characterId);
-        SeedAchievement(db, "crafting.variants", AchievementRequirementType.UniqueItemVariantsCrafted, 2, category: AchievementCategory.Crafting);
-        await db.SaveChangesAsync();
-        var service = CreateService(db);
-        var firstVariant = new EquipmentInstance { BaseRecipeId = "sword", BlueprintId = "ember" };
-        var secondVariant = new EquipmentInstance { BaseRecipeId = "sword", BlueprintId = "frost" };
-
-        await service.RecordItemsCraftedAsync(characterId, [firstVariant], null, CancellationToken.None);
-        await service.RecordItemsCraftedAsync(characterId, [firstVariant], null, CancellationToken.None);
-        var beforeSecondVariant = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
-        await service.RecordItemsCraftedAsync(characterId, [secondVariant], null, CancellationToken.None);
-        await db.SaveChangesAsync();
-
-        Assert.False(Assert.Single(beforeSecondVariant).IsCompleted);
-        Assert.True(Assert.Single(await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None)).IsCompleted);
     }
 
     private static LLDbContext CreateDbContext()

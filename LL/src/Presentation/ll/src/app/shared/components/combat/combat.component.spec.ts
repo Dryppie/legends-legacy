@@ -105,33 +105,6 @@ describe('CombatComponent', () => {
     expect(fixture.nativeElement.querySelector('app-help-launcher')).toBeNull();
   });
 
-  it('keeps a gathering-tool mismatch visible during idle combat', () => {
-    currentAction.set({
-      characterActionType: CharacterActionType.Combat,
-      isDeleted: false,
-      combatActionDetails: {
-        area: {
-          gatheringNodes: [{ type: 'Woodcutting' }],
-        },
-      },
-    });
-    const equipmentState = TestBed.inject(
-      EquipmentStateService,
-    ) as jasmine.SpyObj<EquipmentStateService>;
-    equipmentState.getSlot.and.returnValue({
-      id: 'tool-slot',
-      iconPath: '',
-      equipmentSlotType: 'Tool',
-      equipmentInstance: {
-        equipmentBase: { gatheringType: 'Mining' },
-      },
-    } as any);
-
-    expect(fixture.componentInstance.gatheringToolWarning()).toContain(
-      'cannot gather resources here',
-    );
-  });
-
   it('keeps the combat route stable while a missing action is reconciled', async () => {
     fixture.detectChanges();
 

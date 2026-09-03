@@ -46,7 +46,9 @@ public sealed record QuestState(
     DateTimeOffset? AcceptedAt,
     DateTimeOffset? CompletedAt,
     IReadOnlyList<QuestObjectiveState> Objectives,
-    IReadOnlyList<QuestRewardState> Rewards);
+    IReadOnlyList<QuestRewardState> Rewards)
+{
+}
 
 public sealed record QuestChoice(
     string SelectionTitle,

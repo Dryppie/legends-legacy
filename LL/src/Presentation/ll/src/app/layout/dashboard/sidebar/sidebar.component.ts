@@ -34,7 +34,6 @@ import { SidebarLayoutPreferenceService } from '../../../core/services/client-si
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
 import { QuestPresenterService } from '../../../core/services/api/quest/quest-presenter.service';
 import { ProgressBarComponent } from '../../../shared/components/progress-bar/progress-bar.component';
-import { getEstimatedTemperingQueueDuration } from '../../../shared/utils/tempering/tempering-duration.utils';
 import { RegionService } from '../../../core/services/client-side/region/region.service';
 import {
   filterSidebarForPlayerJourney,
@@ -77,24 +76,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     switch (this.state.currentAction()?.characterActionType) {
       case CharacterActionType.Combat:
         return 'Battling';
-      case CharacterActionType.Crafting:
-        return 'Tempering';
       default:
         return 'Action';
     }
-  });
-  readonly compactQueueDuration = computed<string | null>(() => {
-    const action = this.state.currentAction();
-    const queue = action?.craftingActionDetails?.craftingQueueItems;
-
-    if (
-      action?.characterActionType !== CharacterActionType.Crafting ||
-      !queue?.length
-    ) {
-      return null;
-    }
-
-    return getEstimatedTemperingQueueDuration(queue);
   });
   readonly hasActiveDungeon: DungeonStateService['hasActiveDungeon'];
   readonly hasActiveRaid: RaidService['hasActiveRaid'];

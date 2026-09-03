@@ -1,17 +1,18 @@
 {
   "title": "First Steps - Essence Loadout",
+  "lastReviewed": "2026-09-03",
   "sections": [
     {
-      "heading": "Equipping an Essence",
-      "body": "Absorbing an Essence unlocks it, but it does not help in combat until it is placed in a loadout."
+      "heading": "Equip your Essence",
+      "body": "Absorbing an Essence adds it to your Soul Archive. Select your First Hunt Essence and equip it in a loadout so it can take part in combat. Slot changes save automatically."
     },
     {
-      "heading": "What to do",
-      "body": "Open the Archive tab, select Equip Essence to add your First Hunt Essence to your draft, then save the loadout to apply your changes. Unsaved loadout changes are highlighted on the Save button."
+      "heading": "Choose your first equipment",
+      "body": "After attuning your First Hunt Essence, open Equipment & Forge and choose your starter hands and armor. Equip the complete kit from Inventory. First Weapon then awards Scrap and your band, amulet and vial; equip those accessories to prepare for Lumo Ruins."
     },
     {
-      "heading": "Why it matters",
-      "body": "After this step, you will craft and equip your first weapon. Your Essence and weapon together prepare you for your first Lumo Ruins expedition."
+      "heading": "Follow the Quest Journal",
+      "body": "The journal shows your next objective and where to complete it. Spending resources at the Forge is optional for these first steps."
     }
   ]
 }

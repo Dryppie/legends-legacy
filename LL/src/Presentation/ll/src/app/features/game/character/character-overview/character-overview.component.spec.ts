@@ -5,7 +5,6 @@ import { of } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
-import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import {
   CharacterProfession,
   ProfessionType,
@@ -40,68 +39,6 @@ describe('CharacterOverviewComponent', () => {
         ],
       }),
     ).toBe(10.75);
-  });
-
-  it('updates current character and profession experience from live state', () => {
-    const currentCharacter = signal<CharacterDto>(createCharacter());
-    const overview = signal<CharacterOverviewDto>(createOverview());
-    const craftingProfession = signal<CharacterProfession>(createCrafting());
-    const miningProfession = signal<CharacterProfession>(
-      createGatheringProfession(ProfessionType.Mining, 4, 120, 7_584),
-    );
-    const component = new CharacterOverviewComponent(
-      {
-        currentCharacter: currentCharacter.asReadonly(),
-      } as unknown as CharacterService,
-      {
-        overview: overview.asReadonly(),
-        currentCharacter: currentCharacter.asReadonly(),
-        loading: signal(false).asReadonly(),
-        error: signal(null).asReadonly(),
-        refreshIfDirty: jasmine.createSpy('refreshIfDirty'),
-      } as unknown as CharacterStateService,
-      {
-        getProfession: (type: ProfessionType) => {
-          if (type === ProfessionType.Crafting) return craftingProfession();
-          if (type === ProfessionType.Mining) return miningProfession();
-          return undefined;
-        },
-      } as unknown as ProfessionsService,
-      {
-        journal: signal({ quests: [] }).asReadonly(),
-      } as unknown as QuestStateService,
-      {
-        snapshot: { queryParamMap: convertToParamMap({}) },
-        queryParamMap: of(convertToParamMap({})),
-      } as ActivatedRoute,
-      { navigate: jasmine.createSpy('navigate') } as unknown as Router,
-    );
-
-    expect(component.character()?.experience).toBe(10);
-    expect(component.character()?.craftingExperience).toBe(20);
-    expect(component.character()?.gatheringProfessions[0].experience).toBe(120);
-    expect(
-      component.attributeSections.find((section) => section.title === 'Utility')
-        ?.attributes,
-    ).toContain(AttributeType.Threat);
-
-    currentCharacter.update((character) => ({
-      ...character,
-      experience: 35,
-    }));
-    craftingProfession.update((profession) => ({
-      ...profession,
-      experience: 45,
-    }));
-    miningProfession.update((profession) => ({
-      ...profession,
-      experience: 170,
-    }));
-
-    expect(component.character()?.experience).toBe(35);
-    expect(component.character()?.craftingExperience).toBe(45);
-    expect(component.character()?.gatheringProfessions[0].experience).toBe(170);
-    component.ngOnDestroy();
   });
 
   it('loads character suggestions after typing two characters', fakeAsync(() => {
@@ -146,26 +83,22 @@ function createComponent(
     { currentCharacter: signal(createCharacter()).asReadonly() },
   ),
 ): CharacterOverviewComponent {
-  return new CharacterOverviewComponent(
-    characterService,
-    {
+  return new CharacterOverviewComponent(characterService,
+{
       overview: signal(createOverview()).asReadonly(),
       currentCharacter: signal(createCharacter()).asReadonly(),
       loading: signal(false).asReadonly(),
       error: signal(null).asReadonly(),
       refreshIfDirty: jasmine.createSpy('refreshIfDirty'),
     } as unknown as CharacterStateService,
-    {
-      getProfession: () => undefined,
-    } as unknown as ProfessionsService,
-    {
+{
       journal: signal({ quests: [] }).asReadonly(),
     } as unknown as QuestStateService,
-    {
+{
       snapshot: { queryParamMap: convertToParamMap({}) },
       queryParamMap: of(convertToParamMap({})),
     } as ActivatedRoute,
-    { navigate: jasmine.createSpy('navigate') } as unknown as Router,
+{ navigate: jasmine.createSpy('navigate') } as unknown as Router
   );
 }
 

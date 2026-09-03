@@ -1,5 +1,9 @@
 # Leaderboard Redesign Plan
 
+## Equipment progression update — 3 September 2026
+
+The implemented equipment transition supersedes profession/default-board assumptions below. Forge characters start on Combat Level without Total Level or Professions navigation. Combat Level still compares all eligible characters by combat level and XP. Total Level and the four profession boards rank legacy characters only, using exact saved Soul Archive definitions and the existing fallback for unassigned characters. Eligibility precedes ranking, search, paging and viewer lookup. Profession data and board/cursor keys are unchanged. The frontend waits for saved-cohort access and supports retry. See the [equipment consumer audit](design/equipment-consumer-audit.md) for the implemented contract. Other recommendations below remain historical design proposals unless separately implemented.
+
 ## Executive summary
 
 The leaderboard should become the **Hall of Legends**: a central competitive hub that explains what is ranked, shows the current player's position immediately, and connects progression, PvE, PvP, professions, and guild prestige.

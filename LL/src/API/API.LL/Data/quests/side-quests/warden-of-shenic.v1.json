@@ -19,7 +19,10 @@
       "description": "Win an encounter in Duskmire Hollow as a level 45 adventurer.",
       "type": "CombatEncounterCompleted",
       "requiredAmount": 1,
-      "filters": { "areaId": "region_01_area_07", "requiresVictory": true },
+      "filters": {
+        "areaId": "region_01_area_07",
+        "requiresVictory": true
+      },
       "presentation": {
         "actionLabel": "Head to Duskmire Hollow",
         "destinationRoute": "/game/world/shenic?area=region_01_area_07"
@@ -27,6 +30,11 @@
     }
   ],
   "rewards": [
-    { "key": "lesser_monster_cores", "type": "Item", "itemBaseId": "item.monster_core.lesser", "quantity": 5 }
+    {
+      "key": "lesser_monster_cores",
+      "type": "Item",
+      "itemBaseId": "item.monster_core.lesser",
+      "quantity": 5
+    }
   ]
 }

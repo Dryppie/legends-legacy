@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Common.Primitives;
 using API.LL.Common;
+using Application.UseCases.Equipments.Dtos;
 
 namespace API.LL.Filters;
 
@@ -62,7 +63,7 @@ public sealed class ResponseResultFilter : IAsyncResultFilter
             ? StatusCodes.Status409Conflict
             : StatusCodes.Status400BadRequest;
 
-        return new ObjectResult(ApiErrorContract.Create(
+        var problem = ApiErrorContract.Create(
             httpContext,
             status,
             isConflict ? "Conflict" : "Action rejected",
@@ -70,7 +71,13 @@ public sealed class ResponseResultFilter : IAsyncResultFilter
             code,
             isConflict
                 ? ApiErrorContract.ConflictCategory
-                : ApiErrorContract.BusinessCategory))
+                : ApiErrorContract.BusinessCategory);
+        // A Forge conflict is a review step. Only expose its explicitly public quote,
+        // never arbitrary failed response data.
+        if (response is Response<ForgeMutationDto> { Data.FreshQuote: { } quote })
+            problem.Extensions["freshQuote"] = quote;
+
+        return new ObjectResult(problem)
         {
             StatusCode = status
         };

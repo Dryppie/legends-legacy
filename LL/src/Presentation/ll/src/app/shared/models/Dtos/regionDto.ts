@@ -1,5 +1,3 @@
-import { GatheringType } from '../enums/gatheringType';
-
 export interface Region {
   name: string;
   requiredTowerFloor?: number;
@@ -15,8 +13,6 @@ export interface Area {
   creatures: string[];
   essenceProgress?: AreaEssenceProgress;
   possibleDrops?: AreaDrop[];
-  gatheringTypes?: GatheringType[];
-  gatheringNodes?: AreaGatheringNode[];
   // creatures: Creature[];
 }
 
@@ -28,17 +24,6 @@ export interface AreaEssenceProgress {
 export interface AreaDrop {
   itemId: string;
   name: string;
-}
-
-export interface AreaGatheringNode {
-  id: string;
-  name: string;
-  type: GatheringType;
-  levelRequirement?: number | null;
-  procChance?: number;
-  yieldBonusPercent?: number;
-  minQuantity?: number | null;
-  maxQuantity?: number | null;
 }
 
 export interface Dungeon {

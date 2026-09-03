@@ -1,3 +1,5 @@
+import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
+import { itemDescription } from '../../../../../shared/utils/inventory/item-description';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -44,7 +46,6 @@ import {
   isMarketplaceBlueprintResource,
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
-import { BlueprintAttributeSummaryComponent } from '../../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
 import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
 import { AbilityTagsComponent } from '../../../../../shared/components/essences/ability-tags/ability-tags.component';
 import { marketplaceCommoditySearchText } from './market-place-commodity-search';
@@ -83,7 +84,6 @@ type MarketTicketSide = 'buy' | 'sell';
     CommonModule,
     ReactiveFormsModule,
     NumberFormatPipe,
-    BlueprintAttributeSummaryComponent,
     EssenceDescriptionComponent,
     AbilityTagsComponent,
   ],
@@ -544,121 +544,113 @@ export class MarketPlaceCommodityComponent implements OnInit {
     () => this.marketSummary()?.medianUnitPrice7Days ?? undefined,
   );
 
+  readonly itemDescription = itemDescription;
+
+
   constructor(
     private readonly inventoryState: InventoryStateService,
     private readonly marketplaceState: MarketplaceStateService,
     private readonly characterService: CharacterService,
     private readonly marketplaceService: MarketPlaceService,
     private readonly essenceState: EssenceStateService,
+    private readonly questState: QuestStateService,
   ) {
     // The Soul Archive snapshot is normally only fetched by the Essences page, so pull it in the
     // first time the Essence catalogue is shown. Both dependencies are stable while the request
     // is in flight, so this runs once rather than per change detection.
-    effect(
-      () => {
-        if (!this.isEssenceCatalogue()) return;
-        if (this.essenceState.archive()) return;
+    effect(() => {
+      if (!this.isEssenceCatalogue()) return;
+      if (this.essenceState.archive()) return;
 
-        untracked(() => this.essenceState.refreshArchive());
-      },
-    );
+      untracked(() => this.essenceState.refreshArchive());
+    });
 
-    effect(
-      () => {
-        this._itemType();
-        this._subcategory();
-        this.selectedCommodityId();
-        const ticketSide = untracked(() => this.ticketSide());
-        this.quantityCtrl.setValue(1, { emitEvent: false });
-        this.unitPriceCtrl.setValue(
-          ticketSide === 'buy'
-            ? (this.bestSellPrice() ?? this.bestBuyPrice())
-            : (this.bestBuyPrice() ?? this.bestSellPrice()),
-          {
-            emitEvent: false,
-          },
-        );
-      },
-    );
+    effect(() => {
+      this._itemType();
+      this._subcategory();
+      this.selectedCommodityId();
+      const ticketSide = untracked(() => this.ticketSide());
+      this.quantityCtrl.setValue(1, { emitEvent: false });
+      this.unitPriceCtrl.setValue(
+        ticketSide === 'buy'
+          ? (this.bestSellPrice() ?? this.bestBuyPrice())
+          : (this.bestBuyPrice() ?? this.bestSellPrice()),
+        {
+          emitEvent: false,
+        },
+      );
+    });
 
-    effect(
-      () => {
-        const itemBaseId = this.selectedCommodity()?.base.id;
-        this.marketplaceState.listings();
-        this.marketplaceState.buyOrders();
-        if (!itemBaseId) {
-          this.marketSummary.set(null);
-          return;
-        }
+    effect(() => {
+      const itemBaseId = this.selectedCommodity()?.base.id;
+      this.marketplaceState.listings();
+      this.marketplaceState.buyOrders();
+      if (!itemBaseId) {
+        this.marketSummary.set(null);
+        return;
+      }
 
-        this.marketplaceService.getSummary(itemBaseId).subscribe({
-          next: (summary) => {
-            if (this.selectedCommodity()?.base.id === summary.itemBaseId) {
-              this.marketSummary.set(summary);
-            }
-          },
-          error: () => this.marketSummary.set(null),
-        });
-      },
-    );
+      this.marketplaceService.getSummary(itemBaseId).subscribe({
+        next: (summary) => {
+          if (this.selectedCommodity()?.base.id === summary.itemBaseId) {
+            this.marketSummary.set(summary);
+          }
+        },
+        error: () => this.marketSummary.set(null),
+      });
+    });
 
-    effect(
-      () => {
-        const commodities = this.commodities();
-        const selectedCommodityId = this.selectedCommodityId();
-        if (!commodities.length) {
-          this.selectedCommodityId.set(null);
-          return;
-        }
+    effect(() => {
+      const commodities = this.commodities();
+      const selectedCommodityId = this.selectedCommodityId();
+      if (!commodities.length) {
+        this.selectedCommodityId.set(null);
+        return;
+      }
 
-        if (
-          !selectedCommodityId ||
-          !commodities.some(
-            (commodity) => commodity.base.id === selectedCommodityId,
-          )
-        ) {
-          this.selectedCommodityId.set(commodities[0].base.id);
-        }
-      },
-    );
+      if (
+        !selectedCommodityId ||
+        !commodities.some(
+          (commodity) => commodity.base.id === selectedCommodityId,
+        )
+      ) {
+        this.selectedCommodityId.set(commodities[0].base.id);
+      }
+    });
 
-    effect(
-      () => {
-        this.selectedCommodityId();
-        const firstSellOrder = this.sellOrderRows()[0];
-        const current = this.selectedSellPrice();
-        if (!firstSellOrder) {
-          this.selectedSellPrice.set(null);
-          return;
-        }
+    effect(() => {
+      this.selectedCommodityId();
+      const firstSellOrder = this.sellOrderRows()[0];
+      const current = this.selectedSellPrice();
+      if (!firstSellOrder) {
+        this.selectedSellPrice.set(null);
+        return;
+      }
 
-        if (
-          !current ||
-          !this.sellOrderRows().some((row) => row.unitPrice === current)
-        ) {
-          this.selectSellOrder(firstSellOrder, false);
-        }
-      },
-    );
+      if (
+        !current ||
+        !this.sellOrderRows().some((row) => row.unitPrice === current)
+      ) {
+        this.selectSellOrder(firstSellOrder, false);
+      }
+    });
 
-    effect(
-      () => {
-        this.selectedCommodityId();
-        const firstBuyOrder = this.buyOrderRows()[0];
-        const current = this.selectedBuyPrice();
-        if (!firstBuyOrder) {
-          this.selectedBuyPrice.set(null);
-          return;
-        }
+    effect(() => {
+      this.selectedCommodityId();
+      const firstBuyOrder = this.buyOrderRows()[0];
+      const current = this.selectedBuyPrice();
+      if (!firstBuyOrder) {
+        this.selectedBuyPrice.set(null);
+        return;
+      }
 
-        if (
-          !current ||
-          !this.buyOrderRows().some((row) => row.unitPrice === current)
-        ) {
-          this.selectBuyOrder(firstBuyOrder, false);
-        }
-      },
-    );
+      if (
+        !current ||
+        !this.buyOrderRows().some((row) => row.unitPrice === current)
+      ) {
+        this.selectBuyOrder(firstBuyOrder, false);
+      }
+    });
   }
 
   ngOnInit(): void {

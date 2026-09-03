@@ -15,9 +15,17 @@ public interface IQuestRepository
 
     Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken);
 
+    Task<IReadOnlySet<string>> GetOwnedEssenceDefinitionIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken);
+
     Task<bool> HasEssenceInAnyLoadoutAsync(
         Guid characterId,
         string essenceDefinitionId,
+        CancellationToken cancellationToken);
+
+    Task<bool> HasAnyEssenceInLoadoutAsync(
+        Guid characterId,
         CancellationToken cancellationToken);
 
     Task<bool> HasQualifyingEquipmentEquippedAsync(
@@ -26,10 +34,6 @@ public interface IQuestRepository
         int? tier,
         bool mustBeCrafted,
         bool toolSlotOnly,
-        CancellationToken cancellationToken);
-
-    Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(
-        Guid characterId,
         CancellationToken cancellationToken);
 
     void AddProgress(CharacterQuestProgress progress);

@@ -4,7 +4,6 @@ import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
-import { getEstimatedTemperingQueueDuration } from '../../utils/tempering/tempering-duration.utils';
 
 @Component({
   selector: 'app-current-action',
@@ -16,7 +15,6 @@ export class CurrentActionComponent {
   currentAction: CharacterActionDto | null = null;
   remainingTime: string = '00:00'; // Add a property to track the remaining time
   performingAction = '';
-  queueDuration = '';
   duration = 0;
   readonly totalDuration;
 
@@ -25,9 +23,8 @@ export class CurrentActionComponent {
 
     effect(() => {
       const action = this.state.currentAction();
-      const waitingForCombat = this.state.isTemperingPendingCombatUnlock();
       this.currentAction = action;
-      this.setPerformingAction(waitingForCombat);
+      this.setPerformingAction();
     });
   }
 
@@ -40,9 +37,8 @@ export class CurrentActionComponent {
     this.state.stopAction();
   }
 
-  private setPerformingAction(waitingForCombat = false): void {
+  private setPerformingAction(): void {
     const action = this.currentAction;
-    this.queueDuration = '';
 
     if (!action) {
       this.performingAction = 'Idle';
@@ -59,22 +55,9 @@ export class CurrentActionComponent {
       return;
     }
 
-    if (waitingForCombat) {
-      this.performingAction = 'Combat ending - Tempering queued';
-      return;
-    }
-
     switch (action.characterActionType) {
       case CharacterActionType.Combat:
         this.performingAction = 'Engaged in Combat';
-        break;
-      case CharacterActionType.Crafting:
-        this.performingAction = 'Tempering Items';
-        if (action.craftingActionDetails?.craftingQueueItems.length) {
-          this.queueDuration = getEstimatedTemperingQueueDuration(
-            action.craftingActionDetails.craftingQueueItems,
-          );
-        }
         break;
       case CharacterActionType.Idle:
         this.performingAction = 'Idle';

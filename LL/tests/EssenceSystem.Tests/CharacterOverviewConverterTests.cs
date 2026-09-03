@@ -8,112 +8,11 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Guilds;
 using Domain.Models.Professions;
-using Domain.Models.Professions.Gathering;
 
 namespace EssenceSystem.Tests;
 
 public sealed class CharacterOverviewConverterTests
 {
-    [Fact]
-    public void Convert_UsesHighestCraftingProfessionForLevelAndExperience()
-    {
-        var character = new Character
-        {
-            Professions =
-            [
-                new Profession
-                {
-                    ProfessionType = ProfessionType.Mining,
-                    Level = 20,
-                    Experience = 99
-                },
-                new Profession
-                {
-                    ProfessionType = ProfessionType.Crafting,
-                    Level = 4,
-                    Experience = 75
-                },
-                new Profession
-                {
-                    ProfessionType = (ProfessionType)3,
-                    Level = 5,
-                    Experience = 42
-                }
-            ]
-        };
-
-        var result = CreateConverter()
-            .Convert(character, null!, null!);
-
-        Assert.Equal(5, result.CraftingLevel);
-        Assert.Equal(42, result.CraftingExperience);
-        Assert.Equal(
-            EntityLevelConstants.XP_REQUIRED(5),
-            result.CraftingExperienceUntilNextLevel);
-    }
-
-    [Fact]
-    public void Convert_DefaultsToLevelOneCraftingProgress()
-    {
-        var result = CreateConverter()
-            .Convert(new Character(), null!, null!);
-
-        Assert.Equal(1, result.CraftingLevel);
-        Assert.Equal(0, result.CraftingExperience);
-        Assert.Equal(
-            EntityLevelConstants.XP_REQUIRED(1),
-            result.CraftingExperienceUntilNextLevel);
-    }
-
-    [Fact]
-    public void Convert_ProjectsAllGatheringProfessionsWithTheirCanonicalCurve()
-    {
-        var character = new Character
-        {
-            Professions =
-            [
-                new Profession
-                {
-                    ProfessionType = ProfessionType.Mining,
-                    Level = 12,
-                    Experience = 345
-                },
-                new Profession
-                {
-                    ProfessionType = ProfessionType.Skinning,
-                    Level = 100,
-                    Experience = 0
-                }
-            ]
-        };
-
-        var result = CreateConverter()
-            .Convert(character, null!, null!);
-
-        Assert.Collection(
-            result.GatheringProfessions,
-            mining =>
-            {
-                Assert.Equal(ProfessionType.Mining, mining.ProfessionType);
-                Assert.Equal(12, mining.Level);
-                Assert.Equal(345, mining.Experience);
-                Assert.Equal(GatheringProfessionProgression.GetRequiredExperience(12), mining.ExperienceUntilNextLevel);
-            },
-            woodcutting =>
-            {
-                Assert.Equal(ProfessionType.Woodcutting, woodcutting.ProfessionType);
-                Assert.Equal(1, woodcutting.Level);
-                Assert.Equal(0, woodcutting.Experience);
-                Assert.Equal(GatheringProfessionProgression.GetRequiredExperience(1), woodcutting.ExperienceUntilNextLevel);
-            },
-            skinning =>
-            {
-                Assert.Equal(ProfessionType.Skinning, skinning.ProfessionType);
-                Assert.Equal(100, skinning.Level);
-                Assert.Equal(0, skinning.ExperienceUntilNextLevel);
-            });
-    }
-
     [Fact]
     public void Convert_ProjectsDefaultThreatForExistingCharactersWithoutAStoredAttribute()
     {

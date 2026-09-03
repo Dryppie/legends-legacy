@@ -1,5 +1,7 @@
 # LegendsLegacy Gameplay Depth Analysis: Soulstone Constellations
 
+**Equipment progression status, 2 September 2026:** this remains a proposal for a separate Soulstone depth expansion. It does not supersede the owner's current sequence: complete equipment with provisional values before balancing. Six obsolete gathering/crafting constellations now have purchase and bonus guards plus a refund that preserves active upgrades; branching paths, keystones and trade-offs proposed below have not been implemented by that work. The retained Sigil Traces bonus and legacy random-sigil overlap are the next integration task. See the [current implementation ledger](../design/equipment-implementation-status.md) and [Soulstone implementation note](../../LL/docs/soulstones-page-analysis-and-plan.md).
+
 ## Executive conclusion
 
 The next major depth expansion should be the **Soulstone Archive**, rebuilt into a genuine **Soulstone Constellation system with branching paths, mutually exclusive keystones, and playstyle trade-offs**.

@@ -21,13 +21,6 @@ public sealed class SoulstoneConstellationDefinitionTests
                 "essence.archive-focus",
                 "combat.battle-lessons",
                 "combat.survival-notes",
-                "gathering.careful-harvest",
-                "gathering.gathering-lessons",
-                "gathering.rare-node-sense",
-                "crafting.crafting-lessons",
-                "crafting.steady-temper",
-                "crafting.blueprint-study",
-                "dungeon.sigil-traces",
                 "dungeon.rest-site-satchel"
         ];
 
@@ -49,13 +42,6 @@ public sealed class SoulstoneConstellationDefinitionTests
         AssertValues(definitions["essence.archive-focus"], [500, 1000, 1500, 2000, 2500]);
         AssertValues(definitions["combat.battle-lessons"], [150, 300, 450, 600, 750]);
         AssertValues(definitions["combat.survival-notes"], [1000, 2000, 3000, 4000, 5000]);
-        AssertValues(definitions["gathering.careful-harvest"], [100, 200, 300, 400, 500]);
-        AssertValues(definitions["gathering.gathering-lessons"], [150, 300, 450, 600, 750]);
-        AssertValues(definitions["gathering.rare-node-sense"], [200, 400, 600, 800, 1000]);
-        AssertValues(definitions["crafting.crafting-lessons"], [150, 300, 450, 600, 750]);
-        AssertValues(definitions["crafting.steady-temper"], [30, 60, 90, 120, 150]);
-        AssertValues(definitions["crafting.blueprint-study"], [200, 400, 600, 800, 1000]);
-        AssertValues(definitions["dungeon.sigil-traces"], [150, 300, 450, 600, 750]);
         AssertValues(definitions["dungeon.rest-site-satchel"], [200, 400, 600, 800, 1000]);
     }
 

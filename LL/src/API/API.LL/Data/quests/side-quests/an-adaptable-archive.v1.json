@@ -8,7 +8,9 @@
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 5,
-    "completedQuestIds": ["quest.essences.a_second_soul"]
+    "completedQuestIds": [
+      "quest.essences.a_second_soul"
+    ]
   },
   "objectives": [
     {
@@ -16,7 +18,9 @@
       "description": "Attune the Goblin Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
-      "filters": { "essenceDefinitionId": "essence.goblin" },
+      "filters": {
+        "essenceDefinitionId": "essence.goblin"
+      },
       "presentation": {
         "actionLabel": "Head to Essences",
         "destinationRoute": "/game/character/essences"
@@ -27,7 +31,9 @@
       "description": "Attune the Lumo Wisp Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
-      "filters": { "essenceDefinitionId": "essence.lumo_wisp" },
+      "filters": {
+        "essenceDefinitionId": "essence.lumo_wisp"
+      },
       "presentation": {
         "actionLabel": "Head to Essences",
         "destinationRoute": "/game/character/essences"
@@ -38,7 +44,9 @@
       "description": "Attune the Lumo Sentinel Essence in a loadout.",
       "type": "EssenceEquipped",
       "requiredAmount": 1,
-      "filters": { "essenceDefinitionId": "essence.lumo_sentinel" },
+      "filters": {
+        "essenceDefinitionId": "essence.lumo_sentinel"
+      },
       "presentation": {
         "actionLabel": "Head to Essences",
         "destinationRoute": "/game/character/essences"
@@ -46,6 +54,11 @@
     }
   ],
   "rewards": [
-    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 25 }
+    {
+      "key": "soul_dust",
+      "type": "Item",
+      "itemBaseId": "soul_dust",
+      "quantity": 25
+    }
   ]
 }

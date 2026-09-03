@@ -8,7 +8,7 @@ using Services.LL.Prophecies;
 
 namespace EssenceSystem.Tests;
 
-public sealed class ProphecyLifecycleTests
+public sealed partial class ProphecyLifecycleTests
 {
     private static readonly DateTimeOffset Now = new(2026, 7, 14, 12, 0, 0, TimeSpan.Zero);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -223,7 +223,7 @@ public sealed class ProphecyLifecycleTests
         Assert.Equal(7, fixture.Repository.Instances.Count);
     }
 
-    private static Fixture CreateFixture(IReadOnlyList<ProphecyDefinition>? definitions = null)
+    private static Fixture CreateFixture(IReadOnlyList<ProphecyDefinition>? definitions = null, bool progression = false)
     {
         var playerId = Guid.NewGuid();
         var characterId = Guid.NewGuid();

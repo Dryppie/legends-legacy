@@ -1,10 +1,14 @@
 {
   "title": "Cinder Bazaar Guide",
-  "lastReviewed": "2026-08-09",
+  "lastReviewed": "2026-09-03",
   "sections": [
     {
       "heading": "Browse and buy",
       "body": "Browse filters the market by item category. Commodity markets group interchangeable resources and Essences into buy and sell order books; unique equipment is listed as exact items. Always review quantity, unit price, and total before confirming."
+    },
+    {
+      "heading": "Forge equipment",
+      "body": "For Forge equipment, filter exact listings by identity, active style, minimum tier and minimum rank. Review the native and active styles and the item stats before buying. Only unbound equipment can be traded. Buying keeps it unbound; equipping it or investing at the Forge binds it to you. Characters using legacy equipment can choose the separate Legacy equipment filters."
     },
     {
       "heading": "Sell and place orders",

@@ -29,7 +29,11 @@ public sealed class SelectionCrateMetadataResolver
         var definition = SelectionContainerCatalog.Find(source.Id);
         if (definition is null) return null;
 
-        return new SelectionCrateMetadataDto
+        return Map(definition);
+    }
+
+    private static SelectionCrateMetadataDto Map(SelectionContainerDefinition definition) =>
+        new()
         {
             SelectionLabel = definition.SelectionLabel,
             Options = definition.Options
@@ -41,5 +45,4 @@ public sealed class SelectionCrateMetadataResolver
                 })
                 .ToList()
         };
-    }
 }

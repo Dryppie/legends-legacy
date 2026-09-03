@@ -760,25 +760,25 @@
       "baseLevel": 65,
       "tier": 2
     },
-  {
-    "id": "00000000-0000-0000-0000-000000000106",
+    {
+      "id": "00000000-0000-0000-0000-000000000106",
       "name": "Caldris, Smith of the Fallen Star",
       "imagePath": "",
       "archetype": "Bruiser",
       "damageProfile": "Physical",
       "defenseProfile": "Balanced",
-    "baseLevel": 61,
-    "tier": 2
-  },
-  {
-    "id": "00000000-0000-0000-0000-000000000107",
-    "name": "Serath, the Second Warden",
-    "imagePath": "",
-    "archetype": "Bruiser",
-    "damageProfile": "Hybrid",
-    "defenseProfile": "Balanced",
-    "baseLevel": 63,
-    "tier": 2
-  }
-]
+      "baseLevel": 61,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000107",
+      "name": "Serath, the Second Warden",
+      "imagePath": "",
+      "archetype": "Bruiser",
+      "damageProfile": "Hybrid",
+      "defenseProfile": "Balanced",
+      "baseLevel": 63,
+      "tier": 2
+    }
+  ]
 }

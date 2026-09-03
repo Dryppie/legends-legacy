@@ -1,9 +1,7 @@
 import { signal } from '@angular/core';
 import { CharacterStateService } from '../../api/character/character-state.service';
-import { ProfessionsService } from '../../api/professions/professions.service';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { LevelingService } from './leveling.service';
-import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 
 describe('LevelingService', () => {
   it('resynchronizes the shared character state after crossing a level boundary', () => {
@@ -13,7 +11,7 @@ describe('LevelingService', () => {
       updateCharacter: jasmine.createSpy('updateCharacter'),
       refreshCurrentCharacter: jasmine.createSpy('refreshCurrentCharacter'),
     } as unknown as CharacterStateService;
-    const service = new LevelingService(state, {} as ProfessionsService);
+    const service = new LevelingService(state);
 
     service.gainExperience(15);
 
@@ -28,7 +26,7 @@ describe('LevelingService', () => {
       updateCharacter: jasmine.createSpy('updateCharacter'),
       refreshCurrentCharacter: jasmine.createSpy('refreshCurrentCharacter'),
     } as unknown as CharacterStateService;
-    const service = new LevelingService(state, {} as ProfessionsService);
+    const service = new LevelingService(state);
 
     service.gainExperience(5);
 
@@ -39,23 +37,7 @@ describe('LevelingService', () => {
     expect(state.refreshCurrentCharacter).not.toHaveBeenCalled();
   });
 
-  it('delegates profession experience to the canonical profession state service', () => {
-    const professionService = jasmine.createSpyObj<ProfessionsService>(
-      'ProfessionsService',
-      ['addExperience'],
-    );
-    const service = new LevelingService(
-      {} as CharacterStateService,
-      professionService,
-    );
 
-    service.gainProfessionExperience(ProfessionType.Mining, 125);
-
-    expect(professionService.addExperience).toHaveBeenCalledOnceWith(
-      ProfessionType.Mining,
-      125,
-    );
-  });
 });
 
 function createCharacter(): CharacterDto {

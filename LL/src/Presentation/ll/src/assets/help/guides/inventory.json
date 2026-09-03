@@ -1,18 +1,18 @@
 {
   "title": "Inventory Guide",
-  "lastReviewed": "2026-08-06",
+  "lastReviewed": "2026-09-03",
   "sections": [
     {
-      "heading": "Browse and filter",
-      "body": "Switch inventory modes to browse items or use the Scrap Bench. Category, rarity, search, and sorting controls narrow the list without changing your items. Select an item to inspect its full details and available actions."
+      "heading": "Find your equipment",
+      "body": "Use category, rarity, search and sorting controls to find an item. Equipment shows its Rank and Style; select it to review its stats, ownership and available actions."
     },
     {
-      "heading": "Equipment and tools",
-      "body": "Equipping an item moves it into the matching equipment slot and updates your active attributes. Gathering activities can require an appropriate equipped tool. Items that cannot be equipped or used show their requirement in the detail panel."
+      "heading": "Equip your loadout",
+      "body": "Equip your chosen hands, armor and accessories from Inventory. Equipping updates your active attributes. Old items in the Tool slot can still be removed, but gathering tools are no longer part of your progression."
     },
     {
-      "heading": "Scrapping",
-      "body": "The Scrap Bench permanently converts eligible items into the rewards shown by the interface. Review the selected item and confirmation carefully; equipped, protected, or otherwise ineligible items cannot be scrapped."
+      "heading": "Improve or salvage",
+      "body": "Open Equipment & Forge to improve Rank, apply a learned style or salvage equipment. Review the preview before confirming. Unequip equipment before salvage; the return uses its saved award value and actual paid rank Scrap. Cinders and style fees are not refunded."
     }
   ]
 }

@@ -1,5 +1,4 @@
 ﻿using Domain.Models.CharacterActions;
-using Domain.Models.Professions.Crafting;
 
 namespace Application.Interfaces.Services.LL.CharacterActions;
 public interface ICharacterActionService
@@ -32,10 +31,5 @@ public interface ICharacterActionService
     /// <param name="characterId"></param>
     /// <returns></returns>
     public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<CharacterAction?> UpdateCraftingCharacterActionAsync(
-        Guid characterId,
-        CraftingQueueItem characterAction,
-        Domain.Models.Inventories.InventoryItem inventoryItem,
-        CancellationToken cancellationToken);
-    Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, CancellationToken cancellationToken);
+
 }

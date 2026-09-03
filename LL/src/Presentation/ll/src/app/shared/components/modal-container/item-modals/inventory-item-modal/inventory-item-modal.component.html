@@ -8,56 +8,18 @@
     <div class="ll-card p-3">
       <app-item [item]="inventoryItem.itemInstance"></app-item>
       <p class="ll-copy mt-3">
-        {{ inventoryItem.itemInstance.itemBase.description }}
+        {{ itemDescription(inventoryItem.itemInstance.itemBase) }}
       </p>
       <div class="ll-copy mt-3">Quantity: {{ inventoryItem.quantity }}</div>
     </div>
 
-    <div *ngIf="blueprint as metadata" class="ll-card p-3">
-      <h3 class="ll-heading text-base">Reusable Blueprint</h3>
-      <div class="mt-3 font-semibold text-white">
-        {{ metadata.name }}
-      </div>
-      <div class="ll-copy mt-1">
-        Learning permanently unlocks this Blueprint for one base recipe.
-      </div>
-      <app-blueprint-attribute-summary
-        [blueprint]="metadata"
-      ></app-blueprint-attribute-summary>
-      <div *ngIf="isLoadingRecipes()" class="ll-state mt-3">
-        Loading available base recipes...
-      </div>
-      <div *ngIf="compatibleRecipeOptions.length" class="ll-copy mt-3">
-        <div>Base recipe</div>
-        <app-dropdown
-          class="mt-1 block w-full"
-          appearance="field"
-          label="Select a base recipe"
-          [value]="selectedRecipeId()"
-          [options]="compatibleRecipeOptions"
-          [selectedValue]="selectedRecipeId()"
-          (selection)="selectRecipe($event)"
-        ></app-dropdown>
-      </div>
-      <div
-        *ngIf="
-          hasLoadedRecipes() &&
-          !isLoadingRecipes() &&
-          !compatibleRecipeOptions.length
-        "
-        class="ll-state mt-3"
-      >
-        You have already learned this Blueprint for every compatible base
-        recipe.
-      </div>
-      <div class="ll-copy mt-2 text-xs text-secondary">
-        Source: {{ metadata.sourceType || "Unknown" }}
-        <ng-container *ngIf="metadata.sourceId">
-          · {{ metadata.sourceId }}</ng-container
-        >
-      </div>
-      <div class="ll-state mt-3">Learning consumes one physical Blueprint.</div>
-    </div>
+    <a
+      *ngIf="blueprint"
+      routerLink="/game/character/forge"
+      (click)="close.emit()"
+      class="ll-button ll-button-primary text-center"
+      >Learn a reusable style in the Forge</a
+    >
 
     <div *ngIf="selectionCrate as metadata" class="ll-card p-3">
       <h3 class="ll-heading text-base">
@@ -94,15 +56,6 @@
     <div class="flex justify-end gap-2">
       <button type="button" (click)="close.emit()" class="ll-button">
         Close
-      </button>
-      <button
-        *ngIf="blueprint && compatibleRecipeOptions.length"
-        type="button"
-        class="ll-button"
-        [disabled]="isLearning() || !selectedRecipeId()"
-        (click)="learnBlueprint()"
-      >
-        {{ isLearning() ? "Learning..." : "Learn Blueprint" }}
       </button>
       <button
         *ngIf="selectionCrate"

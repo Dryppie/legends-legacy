@@ -14,7 +14,7 @@ using Services.LL.Administration;
 
 namespace EssenceSystem.Tests;
 
-public sealed class LiveOpsPlayerSupportSnapshotTests
+public sealed partial class LiveOpsPlayerSupportSnapshotTests
 {
     private static readonly DateTimeOffset Now =
         new(2026, 8, 18, 8, 0, 0, TimeSpan.Zero);
@@ -97,7 +97,7 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
 
         Assert.NotNull(result);
         Assert.Equal(1, Sections(result).Count(section => !section.IsAvailable));
-        Assert.Equal(6, Sections(result).Count(section => section.IsAvailable));
+        Assert.Equal(7, Sections(result).Count(section => section.IsAvailable));
     }
 
     [Fact]
@@ -119,7 +119,8 @@ public sealed class LiveOpsPlayerSupportSnapshotTests
         new SectionState(snapshot.Guild.IsAvailable),
         new SectionState(snapshot.Marketplace.IsAvailable),
         new SectionState(snapshot.Transfers.IsAvailable),
-        new SectionState(snapshot.Synchronization.IsAvailable)
+        new SectionState(snapshot.Synchronization.IsAvailable),
+        new SectionState(snapshot.Equipment.IsAvailable)
     ];
 
     private static LiveOpsPlayerSupportSnapshotService CreateService(

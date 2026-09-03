@@ -52,10 +52,6 @@ import {
   essenceDustActionLabel,
   essenceDustLevelingDescription,
 } from './essence-leveling.utils';
-import {
-  ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID,
-  TRAINING_DAY_QUEST_ID,
-} from '../../../../shared/models/quest';
 import { PopoverComponent } from '../../../../shared/components/custom-components/popover/popover.component';
 import { EssenceItemViewService } from '../../../../core/services/api/essences/essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
@@ -479,19 +475,7 @@ export class EssencesComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    if (
-      this.essenceState.archive() &&
-      this.essenceState.loadouts() &&
-      this.essenceState.creatureArchive() &&
-      this.essenceState.codex()
-    ) {
-      if (this.essenceState.activeView() === 'creatures') {
-        this.essenceState.refreshCreatureArchive();
-      }
-      return;
-    }
-
-    this.essenceState.refresh(true);
+    this.essenceState.refreshIfDirty();
   }
 
   public selectView(view: string): void {
@@ -559,6 +543,9 @@ export class EssencesComponent implements OnInit {
 
   public selectPlayerEssence(essence: PlayerEssenceDto): void {
     this.essenceState.selectPlayerEssence(essence);
+    requestAnimationFrame(() =>
+      window.dispatchEvent(new Event('ll-tour-layout-change')),
+    );
 
     if (window.matchMedia('(max-width: 639px)').matches) {
       this.mobileLoadoutOpen.set(false);
@@ -807,13 +794,8 @@ export class EssencesComponent implements OnInit {
     this.essenceState.saveDraftSlots();
   }
 
-  public isOnboardingStarterAttunement(essence: PlayerEssenceDto): boolean {
-    const starterEssenceDefinitionId =
-      this.onboardingStarterEssenceDefinitionId();
-    return (
-      this.questState.pinnedOnboardingObjective()?.type === 'EssenceEquipped' &&
-      essence.essenceDefinitionId === starterEssenceDefinitionId
-    );
+  public isOnboardingEssenceAttunement(): boolean {
+    return this.questState.pinnedOnboardingObjective()?.type === 'EssenceEquipped';
   }
 
   public equipOnboardingStarterEssence(essence: PlayerEssenceDto): void {
@@ -847,21 +829,6 @@ export class EssencesComponent implements OnInit {
 
   public saveLoadout(): void {
     this.essenceState.saveDraftLoadout();
-  }
-
-  private onboardingStarterEssenceDefinitionId(): string {
-    const firstHunt = this.questState
-      .journal()
-      .quests.find((quest) => quest.questId === TRAINING_DAY_QUEST_ID);
-    if (!firstHunt?.choice) {
-      return ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID;
-    }
-
-    return (
-      firstHunt.choice.options.find(
-        (option) => option.key === firstHunt.choice?.selectedOptionKey,
-      )?.essenceDefinitionId ?? ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID
-    );
   }
 
   public canToggleEssenceSlot(essence: PlayerEssenceDto): boolean {

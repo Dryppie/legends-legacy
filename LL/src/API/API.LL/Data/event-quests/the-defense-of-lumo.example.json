@@ -23,10 +23,10 @@
   ],
   "rewards": [
     {
-      "key": "catalyst-selection-cache",
+      "key": "tempered-scrap",
       "type": "Item",
-      "itemBaseId": "item.catalyst_selection_crate",
-      "quantity": 1
+      "itemBaseId": "tempered_scrap",
+      "quantity": 2
     }
   ],
   "personalMilestones": [

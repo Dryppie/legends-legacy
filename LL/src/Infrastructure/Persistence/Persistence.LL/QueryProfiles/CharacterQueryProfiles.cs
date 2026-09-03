@@ -10,7 +10,6 @@ public static class CharacterQueryProfiles
         => q
             .Include(c => c.BaseAttributes)
             .Include(c => c.CharacterAction)
-            .Include(c => c.Professions)
             .Include(c => c.EssenceLoadouts)
                 .ThenInclude(x => x.Slots)
                     .ThenInclude(x => x.PlayerEssence)

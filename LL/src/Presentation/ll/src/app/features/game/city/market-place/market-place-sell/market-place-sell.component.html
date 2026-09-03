@@ -183,10 +183,10 @@
           >
             <app-item [item]="l.itemInstance"></app-item>
             <span
-              *ngIf="listingQuality(l) as quality"
+              *ngIf="listingEquipmentSummary(l) as equipmentSummary"
               class="ll-item-chip ll-item-chip-accent"
             >
-              {{ quality }}
+              {{ equipmentSummary }}
             </span>
             <div class="text-sm text-zinc-200">
               <span>x{{ l.quantity | numberFormat }}</span>

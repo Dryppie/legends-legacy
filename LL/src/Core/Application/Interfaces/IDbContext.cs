@@ -83,6 +83,16 @@ public interface IDbContext
     DbSet<CharacterQuestProgress> CharacterQuestProgresses { get; }
     DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses { get; }
     DbSet<QuestEventLedger> QuestEventLedgers { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant> StarterEquipmentGrants { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.ForgeReceipt> ForgeReceipts { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle> LearnedEquipmentStyles { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress> EquipmentProtectionProgress { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt> EquipmentProtectionReceipts { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt> BaselineEquipmentRecoveryReceipts { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.PlainEquipmentEntitlement> PlainEquipmentEntitlements { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.PlainEquipmentRecoveryReceipt> PlainEquipmentRecoveryReceipts { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.CombatAcquisitionProgress> CombatAcquisitionProgress { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.CombatAcquisitionSelectionReceipt> CombatAcquisitionSelectionReceipts { get; }
     DbSet<EventQuestInstance> EventQuestInstances { get; }
     DbSet<EventQuestObjectiveProgress> EventQuestObjectiveProgresses { get; }
     DbSet<EventQuestCharacterContribution> EventQuestCharacterContributions { get; }
@@ -111,7 +121,6 @@ public interface IDbContext
     // Player Actions
     DbSet<CharacterAction> CharacterActions { get; }
     DbSet<ActionDetails> ActionDetails { get; }
-    DbSet<CraftingQueueItem> CraftingQueueItems { get; }
 
     //DbSet<Equipment> Equipments { get; }
     DbSet<Guild> Guilds { get; }
@@ -143,15 +152,12 @@ public interface IDbContext
     DbSet<StateSyncRevision> StateSyncRevisions { get; }
     //DbSet<Party> Parties { get; }
     //DbSet<PartyMember> PartyMembers { get; }
-    DbSet<Profession> Professions { get; }
     //DbSet<Quest> Quests { get; }
     //DbSet<QuestStage> QuestStages { get; }
     //DbSet<Stat> Stats { get; }
     //DbSet<Title> Titles { get; }
     //DbSet<Town> Towns { get; }
     //DbSet<TownBuilding> TownBuildings { get; }
-    DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks { get; }
-    DbSet<CharacterRecipeMastery> CharacterRecipeMasteries { get; }
     DbSet<ProphecyDefinition> ProphecyDefinitions { get; }
     DbSet<PlayerProphecyInstance> PlayerProphecyInstances { get; }
     DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress { get; }

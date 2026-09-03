@@ -146,7 +146,7 @@ public class ColosseumController : BaseController
 
     [HttpGet("tournaments/reward-tiers")]
     public async Task<ActionResult<IReadOnlyList<TournamentRewardTierDto>>> GetTournamentRewardTiers() =>
-        Ok(await Mediator.Send(new GetTournamentRewardTiersQuery()));
+        Ok(await Mediator.Send(new GetTournamentRewardTiersQuery(CurrentCharacterGuid)));
 
     [HttpGet("tournaments/{tournamentId:guid}/rewards")]
     public async Task<ActionResult<IReadOnlyList<TournamentRewardGrantDto>>> GetTournamentRewards(Guid tournamentId) =>

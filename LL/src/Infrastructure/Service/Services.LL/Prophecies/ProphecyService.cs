@@ -1,3 +1,5 @@
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Prophecies;
@@ -131,6 +133,7 @@ public sealed class ProphecyService : IProphecyService
         {
             return ProphecyOperationResult<PropheciesOverview>.Fail("Prophecy was not found for the current daily period.");
         }
+
 
         if (prophecy.Status != ProphecyStatus.Offered)
         {
@@ -412,6 +415,9 @@ public sealed class ProphecyService : IProphecyService
 
         await EnsureCacheItemBasesAsync([cache.Id], cancellationToken);
 
+        var reward = CreateCacheOpenReward(cache.Id);
+        var preparedItems = await CreateRewardInventoryItemsAsync(characterId, reward, cancellationToken);
+
         var removed = await _inventoryRepository.TryRemoveItemsByBaseIdAsync(
             characterId,
             new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { [cache.Id] = 1 },
@@ -422,8 +428,7 @@ public sealed class ProphecyService : IProphecyService
             return ProphecyOperationResult<ProphecyCacheOpenResult>.Fail("You do not have that prophecy cache.");
         }
 
-        var reward = CreateCacheOpenReward(cache.Id);
-        var rewards = await ApplyRewardAsync(characterId, reward, cancellationToken);
+        var rewards = await ApplyRewardAsync(characterId, reward, cancellationToken, preparedItems);
 
         return ProphecyOperationResult<ProphecyCacheOpenResult>.Success(
             new ProphecyCacheOpenResult(
@@ -465,6 +470,7 @@ public sealed class ProphecyService : IProphecyService
             from,
             to,
             cancellationToken);
+
 
         var initialValues = new Dictionary<Guid, int>();
         var changedProphecies = new List<PlayerProphecyInstance>();
@@ -716,7 +722,7 @@ public sealed class ProphecyService : IProphecyService
             TargetValue = target,
             ObjectiveParameterSnapshotJson = definition.ObjectiveParameterJson,
             ProgressJson = "{}",
-            RewardSnapshotJson = JsonSerializer.Serialize(_rewardResolver.Resolve(definition, rewardContext), JsonOptions)
+            RewardSnapshotJson = JsonSerializer.Serialize(ResolveReward(definition, rewardContext), JsonOptions)
         };
     }
 
@@ -733,7 +739,7 @@ public sealed class ProphecyService : IProphecyService
         instance.CurrentValue = 0;
         instance.ObjectiveParameterSnapshotJson = definition.ObjectiveParameterJson;
         instance.ProgressJson = "{}";
-        instance.RewardSnapshotJson = JsonSerializer.Serialize(_rewardResolver.Resolve(definition, rewardContext), JsonOptions);
+        instance.RewardSnapshotJson = JsonSerializer.Serialize(ResolveReward(definition, rewardContext), JsonOptions);
     }
 
     private ProphecyDefinition? GetDefinition(PlayerProphecyInstance instance) =>
@@ -811,7 +817,8 @@ public sealed class ProphecyService : IProphecyService
     private async Task<IReadOnlyList<InventoryItem>> ApplyRewardAsync(
         Guid characterId,
         ProphecyRewardSnapshot reward,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        List<InventoryItem>? preparedItems = null)
     {
         if (reward.Cinders <= 0 &&
             reward.Soulstones <= 0 &&
@@ -822,6 +829,8 @@ public sealed class ProphecyService : IProphecyService
         {
             return [];
         }
+
+        var inventoryItems = preparedItems ?? await CreateRewardInventoryItemsAsync(characterId, reward, cancellationToken);
 
         if (HasCharacterReward(reward))
         {
@@ -847,7 +856,7 @@ public sealed class ProphecyService : IProphecyService
 
         if (HasInventoryReward(reward))
         {
-            var rewards = await CreateRewardInventoryItemsAsync(characterId, reward, cancellationToken);
+            var rewards = inventoryItems;
             await _inventoryService.AddItemsToInventory(
                 characterId,
                 rewards,
@@ -1061,6 +1070,9 @@ public sealed class ProphecyService : IProphecyService
             return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
     }
+
+    private ProphecyRewardSnapshot ResolveReward(ProphecyDefinition definition, ProphecyRewardContext context) =>
+        _rewardResolver.Resolve(definition, context);
 
     private static ItemBase CreateCacheItemBase(ProphecyCacheDefinition definition) =>
         new()

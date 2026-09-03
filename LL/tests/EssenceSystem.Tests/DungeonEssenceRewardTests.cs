@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Prophecies;
@@ -150,13 +152,13 @@ public sealed class DungeonEssenceRewardTests
     }
 
     [Fact]
-    public async Task Dungeon_completion_items_publish_aggregated_treasure_prophecy_progress()
+    public async Task Dungeon_resources_publish_aggregated_treasure_prophecy_progress()
     {
         await using var db = CreateDb();
         db.ItemBases.AddRange(
             new ItemBase
             {
-                Id = "completion_item",
+                Id = "tempered_scrap",
                 Name = "Completion Item",
                 ItemType = ItemType.Resource,
                 Stackable = true
@@ -187,7 +189,7 @@ public sealed class DungeonEssenceRewardTests
                 [
                     new DungeonRewardGrant
                     {
-                        ItemId = "completion_item",
+                        ItemId = "tempered_scrap",
                         Chance = 1,
                         MinAmount = 2,
                         MaxAmount = 2
@@ -208,6 +210,9 @@ public sealed class DungeonEssenceRewardTests
             publisher);
 
         await applier.ApplyAsync(run, CancellationToken.None);
+        var loot = pendingRewards.Batches.SelectMany(x => x.Loot).ToArray();
+        Assert.Equal(2, loot.Where(x => x.ItemInstance.ItemBaseId == "tempered_scrap").Sum(x => x.Quantity));
+        Assert.Contains(loot, x => x.ItemInstance.ItemBaseId == "item.monster_core.lesser");
 
         var expectedQuantity = pendingRewards.Batches
             .SelectMany(batch => batch.Loot)
@@ -272,8 +277,7 @@ public sealed class DungeonEssenceRewardTests
             new EmptyBonusService(),
             new EmptyLootService(),
             new EmptyDungeonRewardBalanceProvider(),
-            essenceResonance,
-            new EmptyGatheringRewardProcessor());
+            essenceResonance);
         var encounter = new DungeonEncounterRewardFacts(
             EncounterId: Guid.NewGuid(),
             Outcome: BattleOutcome.Victory,
@@ -289,8 +293,6 @@ public sealed class DungeonEssenceRewardTests
             FeaturedEssenceMonsterDefinitionId: "monster.specter",
             MonsterLootModifiers: new Dictionary<ItemType, double>(),
             PlayerEntityIds: [],
-            EquippedTool: null,
-            GatheringNodes: [],
             Encounters: [encounter]);
 
         await calculator.CalculateAsync(facts, CancellationToken.None);
@@ -548,12 +550,4 @@ public sealed class DungeonEssenceRewardTests
         IReadOnlyList<Creature> Creatures,
         EssenceDropRollModifiers? Modifiers);
 
-    private sealed class EmptyGatheringRewardProcessor : ICombatGatheringRewardProcessor
-    {
-        public Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
-            CombatGatheringRewardFacts facts,
-            CancellationToken cancellationToken,
-            IReadOnlyDictionary<BonusKind, double>? bonusFactors = null) =>
-            Task.FromResult<IReadOnlyList<GatheringRewardResult>>([]);
-    }
 }

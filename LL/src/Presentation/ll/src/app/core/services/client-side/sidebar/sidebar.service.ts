@@ -125,19 +125,6 @@ function getSidebarSections(): SidebarSection[] {
       ],
     },
     {
-      id: 'professions',
-      label: 'Professions',
-      items: [
-        {
-          id: 'crafting',
-          route: ['professions', 'crafting'],
-          icon: 'sidebar/professions/crafting',
-          title: 'Crafting',
-          description: 'Craft and temper equipment',
-        },
-      ],
-    },
-    {
       id: 'city',
       label: 'City',
       items: [

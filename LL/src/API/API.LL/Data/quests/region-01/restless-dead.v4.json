@@ -1,0 +1,76 @@
+{
+  "id": "quest.shenic.restless_dead",
+  "version": 4,
+  "title": "The Restless Dead",
+  "summary": "Earn and equip an answer to your build weakness, then prove the adaptation in Moonlit Graves.",
+  "category": "Shenic",
+  "chain": {
+    "id": "chain.shenic.chapter_02",
+    "title": "Chapter II — Resonant Paths",
+    "description": "Identify a weakness, earn a plain equipment answer, and carry the adapted build through Moonlit Graves.",
+    "goal": "Reach level 20 after earning and equipping a plain target that supports your build.",
+    "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
+    "step": 2,
+    "totalSteps": 2
+  },
+  "sortOrder": 130,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 15,
+    "completedQuestIds": [
+      "quest.shenic.crystal_currents"
+    ]
+  },
+  "objectives": [
+    {
+      "key": "forge_an_answer",
+      "description": "Earn a plain target through Shenic combat and equip that archetype. Previously earned targets count.",
+      "type": "ModelEPlainTargetEquipped",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Choose plain target",
+        "destinationRoute": "/game/character/forge?tab=rewards"
+      }
+    },
+    {
+      "key": "quiet_moonlit_graves",
+      "description": "Win 5 encounters in Moonlit Graves with your adapted build.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 5,
+      "filters": {
+        "areaId": "region_01_area_04",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Moonlit Graves",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_04"
+      }
+    },
+    {
+      "key": "reach_level_20",
+      "description": "Reach character level 20 to unlock Twilight Clearing and your third Essence slot.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 20,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    {
+      "key": "moonlit_graves_essence_token",
+      "type": "Item",
+      "itemBaseId": "item.essence_token.moonlit_graves",
+      "quantity": 1
+    },
+    {
+      "key": "area_scrap",
+      "type": "Item",
+      "itemBaseId": "tempered_scrap",
+      "quantity": 2
+    }
+  ]
+}

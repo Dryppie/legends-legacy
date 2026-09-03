@@ -187,7 +187,7 @@ export class EquipmentDisplayComponent {
   }
 
   get attributeSectionLabel(): string {
-    return this.isTool || !this.isInstanceItem
+    return this.isTool || !this.isInstanceItem || !!this.data.progression
       ? 'Attributes'
       : 'Rolled attributes';
   }
@@ -196,6 +196,22 @@ export class EquipmentDisplayComponent {
     return [
       this.formatDisplayLabel(item.equipmentType),
       this.formatDisplayLabel(item.rarity),
+      item.progression ? `Rank ${item.progression.rank}` : null,
+      item.progression
+        ? this.formatDisplayLabel(
+            item.progression.activeStyleId
+              ?.split('.')
+              .pop()
+              ?.replace(/[_-]/g, ' ') || 'Plain',
+          )
+        : null,
+      item.progression
+        ? item.progression.ownership === 'BoundPersonal'
+          ? 'Bound'
+          : item.progression.ownership === 'GuildOwned'
+            ? 'Guild owned'
+            : 'Unbound'
+        : null,
       item.quality ? `${this.formatDisplayLabel(item.quality)} quality` : null,
     ]
       .filter((label): label is string => !!label)

@@ -85,6 +85,8 @@ public sealed class SnapshotCombatantBuilder(
                     .Select(x => x.ToInstanceModifier(equipment.EquipmentInstanceId))
                     .ToList()
             };
+            if (equipment.ProgressionData is { } progressionData)
+                instance.ApplyProgressionData(progressionData);
             return new EquipmentSlot
             {
                 EntityId = character.Id,

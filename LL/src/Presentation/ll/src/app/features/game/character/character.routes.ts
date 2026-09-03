@@ -23,6 +23,12 @@ export const CHARACTER_ROUTES: Routes = [
         data: { guidePageId: GUIDE_PAGE_IDS.characterOverview },
       },
       {
+        path: 'forge',
+        loadComponent: () =>
+          import('./forge/forge.component').then((m) => m.ForgeComponent),
+        data: { guidePageId: GUIDE_PAGE_IDS.equipmentForge },
+      },
+      {
         path: 'inventory',
         component: InventoryComponent,
         data: { guidePageId: GUIDE_PAGE_IDS.inventory },

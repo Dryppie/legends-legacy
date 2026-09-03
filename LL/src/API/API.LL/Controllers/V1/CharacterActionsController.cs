@@ -1,11 +1,8 @@
 using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
 using Application.UseCases.CharacterActions.Commands.StartCombatAction;
-using Application.UseCases.CharacterActions.Commands.StartCraftingAction;
 using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
-using Application.UseCases.CharacterActions.Commands.ResumeTempering;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
-using Application.UseCases.Professions.Dtos;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +12,6 @@ namespace API.LL.Controllers.V1;
 public class CharacterActionsController : BaseController
 {
     public record StartCombatActionRequest(string AreaId);
-    public record StartCraftingActionRequest(string QueueId, string ItemInstanceId);
 
     [HttpGet]
     public async Task<ActionResult<Response<CharacterActionDto?>>> Get() =>
@@ -29,13 +25,6 @@ public class CharacterActionsController : BaseController
     public async Task<ActionResult<Response<CharacterActionDto>>> StartCombat([FromBody] StartCombatActionRequest request) =>
         await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, request.AreaId));
 
-    [HttpPost("StartCrafting")]
-    public async Task<ActionResult<Response<TemperingQueueMutationResponseDto>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
-        await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
-
-    [HttpPost("ResumeTempering")]
-    public async Task<ActionResult<Response<CharacterActionDto>>> ResumeTempering() =>
-        await Mediator.Send(new ResumeTemperingCommand(CurrentCharacterGuid));
 
     [HttpDelete]
     public async Task<ActionResult<Response<bool>>> Delete() =>

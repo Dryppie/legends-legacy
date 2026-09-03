@@ -1,4 +1,4 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +84,7 @@ public class GuildRepository : IGuildRepository
 
         if (member == null || member.Role == GuildRole.Leader) return false;
 
+        await _context.AcquireStateSyncScopeLockAsync($"guild-vault:{member.GuildId:N}", cancellationToken);
         await ReturnBorrowedItemsAsync(characterId, cancellationToken);
         _context.GuildMembers.Remove(member);
         return true;
@@ -91,15 +92,29 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> DisbandGuildAsync(Guid characterId, CancellationToken cancellationToken)
     {
+        var guildId = await _context.Guilds.Where(g => g.OwnerId == characterId)
+            .Select(g => (Guid?)g.Id).SingleOrDefaultAsync(cancellationToken);
+        if (guildId is null) return false;
+        await _context.AcquireStateSyncScopeLockAsync($"guild-vault:{guildId:N}", cancellationToken);
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Invites)
-            .Include(g => g.VaultItems)
+            .Include(g => g.VaultItems).ThenInclude(x => x.EquipmentInstance)
             .FirstOrDefaultAsync(g => g.OwnerId == characterId, cancellationToken);
 
         if (guild == null) return false;
 
-        foreach (var vaultItem in guild.VaultItems.Where(x => x.BorrowedByCharacterId is null))
+        // Permanent guild property is retired on dissolution, never made saleable personal gear.
+        var guildEquipment = guild.VaultItems.Where(x => x.EquipmentInstance.HasEquipmentProgression).ToList();
+        var equipmentIds = guildEquipment.Select(x => x.EquipmentInstanceId).ToList();
+        var heldItems = await _context.InventoryItems.Where(x => equipmentIds.Contains(x.ItemInstanceId)).ToListAsync(cancellationToken);
+        var heldSlots = await _context.EquipmentSlots.Where(x => x.EquipmentInstanceId.HasValue && equipmentIds.Contains(x.EquipmentInstanceId.Value)).ToListAsync(cancellationToken);
+        _context.InventoryItems.RemoveRange(heldItems);
+        foreach (var slot in heldSlots) { slot.EquipmentInstanceId = null; slot.EquipmentInstance = null; }
+        _context.GuildVaultItems.RemoveRange(guildEquipment);
+        _context.ItemInstances.RemoveRange(guildEquipment.Select(x => x.EquipmentInstance));
+
+        foreach (var vaultItem in guild.VaultItems.Where(x => !x.EquipmentInstance.HasEquipmentProgression && x.BorrowedByCharacterId is null))
         {
             _context.InventoryItems.Add(new Domain.Models.Inventories.InventoryItem
             {
@@ -294,6 +309,7 @@ public class GuildRepository : IGuildRepository
             .FirstOrDefaultAsync(x => x.GuildId == guildId && x.CharacterId == characterId, cancellationToken);
         if (member is null) return false;
 
+        await _context.AcquireStateSyncScopeLockAsync($"guild-vault:{member.GuildId:N}", cancellationToken);
         await ReturnBorrowedItemsAsync(characterId, cancellationToken);
         _context.GuildMembers.Remove(member);
         return true;

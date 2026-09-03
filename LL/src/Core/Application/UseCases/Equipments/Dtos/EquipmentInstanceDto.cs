@@ -1,4 +1,4 @@
-﻿using Application.Common.Mappings;
+using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
@@ -14,6 +14,7 @@ namespace Application.UseCases.Equipments.Dtos;
 public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
 {
     public string DisplayName { get; set; } = string.Empty;
+    public EquipmentDto? Progression { get; set; }
     public Rarity Rarity { get; set; } = Rarity.Common;
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
     public string? BaseRecipeId { get; set; }
@@ -47,7 +48,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>()
-            .BeforeMap((source, _) => EquipmentStatModelMigrator.MigrateToCurrent(source))
+            .ForMember(destination => destination.Progression, options => options.MapFrom(source => source.ProgressionData))
             .ForMember(
                 destination => destination.ItemBudget,
                 options => options.MapFrom(source =>

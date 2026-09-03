@@ -143,7 +143,7 @@ export class InventoryTransferComponent implements OnChanges, OnDestroy {
   }
 
   get transferRestriction(): string | null {
-    if (this.inventoryItem.itemInstance.itemBase.isBound) {
+    if (this.inventoryItem.itemInstance.isBound ?? this.inventoryItem.itemInstance.itemBase.isBound) {
       return 'Bound items cannot be transferred.';
     }
 

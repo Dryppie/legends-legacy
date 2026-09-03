@@ -581,8 +581,8 @@
                   <span *ngIf="tier.soulstones">
                     · +{{ tier.soulstones }} Soulstones
                   </span>
-                  <span *ngIf="tier.catalystSelectionCaches">
-                    · +{{ tier.catalystSelectionCaches }} Catalyst Cache
+                  <span *ngIf="tier.temperedScrap">
+                    · +{{ tier.temperedScrap }} Tempered Scrap
                   </span>
                   <span *ngIf="tier.blueprintSelectionBoxes">
                     · +{{ tier.blueprintSelectionBoxes }} Blueprint Box
@@ -619,9 +619,8 @@
                 <span *ngIf="reward.soulstones">
                   +{{ reward.soulstones }} Soulstones
                 </span>
-                <br *ngIf="reward.catalystSelectionCaches" />
-                <span *ngIf="reward.catalystSelectionCaches">
-                  +{{ reward.catalystSelectionCaches }} Catalyst Cache
+                <span *ngIf="reward.temperedScrap">
+                  <br />+{{ reward.temperedScrap }} Tempered Scrap
                 </span>
                 <br *ngIf="reward.blueprintSelectionBoxes" />
                 <span *ngIf="reward.blueprintSelectionBoxes">
@@ -649,8 +648,8 @@
               <p class="text-right text-xs text-primary">
                 +{{ reward.arenaGlory }} Glory<br />
                 +{{ reward.soulstones }} Soulstones
-                <span *ngIf="reward.catalystSelectionCaches">
-                  <br />+{{ reward.catalystSelectionCaches }} Catalyst Cache
+                <span *ngIf="reward.temperedScrap">
+                  <br />+{{ reward.temperedScrap }} Tempered Scrap
                 </span>
                 <span *ngIf="reward.blueprintSelectionBoxes">
                   <br />+{{ reward.blueprintSelectionBoxes }} Blueprint Box

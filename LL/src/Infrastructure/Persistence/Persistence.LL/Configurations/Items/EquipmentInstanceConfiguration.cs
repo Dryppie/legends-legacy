@@ -1,4 +1,4 @@
-﻿using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +12,7 @@ public class EquipmentInstanceConfiguration : ItemInstanceConfiguration, IEntity
         b.Property(e => e.EquipmentSetId).HasMaxLength(160);
         b.HasIndex(e => e.EquipmentSetId);
         b.Property(e => e.Version).IsRowVersion();
+        b.Property(e => e.ProgressionData).HasColumnName("ModelEData").HasConversion<EquipmentDataConverter>().HasColumnType("jsonb");
 
         // If you keep it as a separate entity (not owned):
         b.HasMany(e => e.InstanceModifiers)

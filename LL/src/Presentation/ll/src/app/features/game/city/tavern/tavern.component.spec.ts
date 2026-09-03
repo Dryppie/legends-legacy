@@ -1,4 +1,5 @@
 import { signal } from '@angular/core';
+import { of, Subject, throwError } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { LeaderboardBoard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
@@ -15,12 +16,17 @@ describe('TavernComponent', () => {
     refreshing: signal(false),
     error: signal<string | null>(null),
     load: jasmine.createSpy('load'),
+    reset: jasmine.createSpy('reset'),
     loadPage: jasmine.createSpy('loadPage'),
     jumpToParticipant: jasmine.createSpy('jumpToParticipant'),
     clearJump: jasmine.createSpy('clearJump'),
     refresh: jasmine.createSpy('refresh'),
   };
   beforeEach(async () => {
+    state.reset.calls.reset();
+    state.reset.and.stub();
+    state.loading.set(false);
+    state.error.set(null);
     state.load.calls.reset();
     state.loadPage.calls.reset();
     state.jumpToParticipant.calls.reset();
@@ -51,7 +57,7 @@ describe('TavernComponent', () => {
     ) as HTMLElement;
 
     expect(text).toContain('Leaderboard');
-    expect(text).toContain('Total Level');
+    expect(text).toContain('Combat Level');
     expect(viewerRank.textContent).toContain('Your rank:');
     expect(viewerRank.textContent).toContain('#4 of 10');
     expect(text).not.toContain('Your standing');
@@ -71,22 +77,6 @@ describe('TavernComponent', () => {
     expect(viewerRank.textContent).toContain('Your rank:');
     expect(viewerRank.textContent).toContain('Unranked');
     expect(fixture.nativeElement.textContent).not.toContain('Your standing');
-  });
-
-  it('exposes every implemented profession board', () => {
-    fixture.componentInstance.selectCategory('Professions');
-    fixture.detectChanges();
-    const boardLabels = fixture.componentInstance.categoryBoards.map(
-      (option) => option.label,
-    );
-
-    expect(boardLabels).toEqual([
-      'Crafting',
-      'Mining',
-      'Woodcutting',
-      'Skinning',
-    ]);
-    expect(state.load).toHaveBeenCalledWith('profession-crafting');
   });
 
   it('exposes collection, achievement, and dungeon mastery boards', () => {
@@ -142,7 +132,7 @@ describe('TavernComponent', () => {
     expect(fixture.componentInstance.activeBoardKey).toBe('tournament-points');
     expect(state.load).toHaveBeenCalledWith('tournament-points');
     expect(fixture.nativeElement.querySelectorAll('app-dropdown').length).toBe(
-      5,
+      4,
     );
   });
 
@@ -244,9 +234,9 @@ describe('TavernComponent', () => {
 
 function createBoard(): LeaderboardBoard {
   return {
-    key: 'total-level',
+    key: 'combat-level',
     category: 'Overall',
-    title: 'Total Level',
+    title: 'Combat Level',
     description: 'Combined progression.',
     participantLabel: 'Character',
     metricLabel: 'Total level',

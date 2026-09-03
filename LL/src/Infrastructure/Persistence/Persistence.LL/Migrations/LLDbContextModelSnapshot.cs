@@ -828,10 +828,6 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset?>("NextResolutionAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("ReturnToCombatAreaId")
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
                     b.Property<long>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("bigint");
@@ -1531,11 +1527,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
-                    b.Property<int>("CatalystSelectionCaches")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
 
@@ -1566,6 +1557,11 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<int>("TemperedScrap")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<Guid>("TournamentId")
                         .HasColumnType("uuid");
@@ -1842,6 +1838,10 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("EquipmentCommitment")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ModelECommitment");
+
                     b.Property<int>("PendingCinders")
                         .HasColumnType("integer");
 
@@ -1929,6 +1929,10 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ProgressionData")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ModelEData");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
@@ -2887,6 +2891,242 @@ namespace Persistence.LL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("CharacterId", "OperationId");
+
+                    b.ToTable("ModelEBaselineRecoveryReceipts", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.CombatAcquisitionProgress", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PoolId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<bool>("HasEnteredRegion")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastEncounterAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("LastScheduleGeneration")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Plain")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("PlainVictories")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ScrapRemainder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sigil")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("SigilVictories")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CharacterId", "PoolId");
+
+                    b.ToTable("ModelEOrdinaryProgress", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.CombatAcquisitionSelectionReceipt", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DefinitionId")
+                        .HasMaxLength(240)
+                        .HasColumnType("character varying(240)");
+
+                    b.Property<string>("PoolId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("SigilFamilyId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.HasKey("CharacterId", "OperationId");
+
+                    b.ToTable("ModelEOrdinarySelectionReceipts", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PoolId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<int>("CompletionsWithoutMatch")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SelectedDefinitionId")
+                        .HasMaxLength(240)
+                        .HasColumnType("character varying(240)");
+
+                    b.HasKey("CharacterId", "PoolId");
+
+                    b.ToTable("ModelEProtectionProgress", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ClaimedAtUtc")
+                        .IsConcurrencyToken()
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("CharacterId", "RunId");
+
+                    b.ToTable("ModelEProtectionReceipts", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.ForgeReceipt", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("RequestFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("CharacterId", "OperationId");
+
+                    b.ToTable("ModelEForgeReceipts", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StyleId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid?>("FreeApplicationOperationId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LearnedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "StyleId");
+
+                    b.ToTable("ModelECharacterStyles", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.PlainEquipmentEntitlement", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DefinitionId")
+                        .HasMaxLength(240)
+                        .HasColumnType("character varying(240)");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Baseline")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Copies")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("CharacterId", "DefinitionId", "Tier");
+
+                    b.ToTable("ModelEPlainEntitlements", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.PlainEquipmentRecoveryReceipt", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("CharacterId", "OperationId");
+
+                    b.ToTable("ModelEPlainRecoveryReceipts", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Equipment")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("GrantedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "Kind");
+
+                    b.ToTable("ModelEStarterGrants", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Items.Equipments.Slots.EquipmentSlot", b =>
                 {
                     b.Property<Guid>("EntityId")
@@ -3282,118 +3522,6 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterId", "CreatedAt");
 
                     b.ToTable("GameEventOutboxMessages", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeMastery", b =>
-                {
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RecipeId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<int>("Experience")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CharacterId", "RecipeId");
-
-                    b.ToTable("CharacterRecipeMasteries");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeUnlock", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("BlueprintId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RecipeId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<DateTimeOffset>("UnlockedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId", "RecipeId", "BlueprintId")
-                        .IsUnique();
-
-                    b.ToTable("CharacterRecipeUnlocks");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("AddedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CraftType")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("CraftingActionDetailsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("EquipmentInstanceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("PausedForCharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("RemoveAfterNextRarityUpgrade")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EquipmentInstanceId");
-
-                    b.HasIndex("CraftingActionDetailsId", "Position");
-
-                    b.HasIndex("PausedForCharacterId", "Position");
-
-                    b.ToTable("CraftingQueueItems", t =>
-                        {
-                            t.HasCheckConstraint("CK_CraftingQueueItems_ActiveOrPaused", "(\"CraftingActionDetailsId\" IS NOT NULL AND \"PausedForCharacterId\" IS NULL) OR (\"CraftingActionDetailsId\" IS NULL AND \"PausedForCharacterId\" IS NOT NULL)");
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
-                {
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("ProfessionType")
-                        .HasColumnType("integer");
-
-                    b.Property<float>("Experience")
-                        .HasColumnType("real");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.HasKey("CharacterId", "ProfessionType");
-
-                    b.ToTable("Professions");
                 });
 
             modelBuilder.Entity("Domain.Models.Prophecies.DailyProphecyRerollState", b =>
@@ -4792,41 +4920,6 @@ namespace Persistence.LL.Migrations
                     b.ToTable("AreaCreature");
                 });
 
-            modelBuilder.Entity("Domain.Models.Regions.Areas.AreaGatheringNode", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AreaId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("LevelRequirement")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<float>("ProcChance")
-                        .HasColumnType("real");
-
-                    b.Property<string>("RewardTableId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("YieldBonusPercent")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AreaId");
-
-                    b.ToTable("AreaGatheringNode");
-                });
-
             modelBuilder.Entity("Domain.Models.Regions.Region", b =>
                 {
                     b.Property<int>("Id")
@@ -4950,6 +5043,10 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int?>("Potential")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ProgressionData")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ModelEData");
 
                     b.Property<int>("Quality")
                         .HasColumnType("integer");
@@ -5731,13 +5828,6 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(1);
                 });
 
-            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", b =>
-                {
-                    b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
-
-                    b.HasDiscriminator().HasValue(3);
-                });
-
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
@@ -5912,6 +6002,10 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int?>("Potential")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ProgressionData")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ModelEData");
 
                     b.Property<int>("Quality")
                         .HasColumnType("integer");
@@ -6505,6 +6599,96 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstance");
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.CombatAcquisitionProgress", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.CombatAcquisitionSelectionReceipt", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.ForgeReceipt", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.PlainEquipmentEntitlement", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.PlainEquipmentRecoveryReceipt", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Items.Equipments.Slots.EquipmentSlot", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Entity", "Entity")
@@ -6603,36 +6787,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Message");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
-                {
-                    b.HasOne("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", null)
-                        .WithMany("CraftingQueueItems")
-                        .HasForeignKey("CraftingActionDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
-                        .WithMany()
-                        .HasForeignKey("EquipmentInstanceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
-                        .WithMany()
-                        .HasForeignKey("PausedForCharacterId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("EquipmentInstance");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
-                {
-                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
-                        .WithMany("Professions")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Models.Prophecies.PlayerProphecyInstance", b =>
@@ -6882,17 +7036,6 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("CreatureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Models.Regions.Areas.AreaGatheringNode", b =>
-                {
-                    b.HasOne("Domain.Models.Regions.Areas.Area", "Area")
-                        .WithMany("GatheringNodes")
-                        .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Area");
                 });
 
             modelBuilder.Entity("Domain.Models.Snapshots.EntityAttributeSnapshot", b =>
@@ -7207,8 +7350,6 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Navigation("Creatures");
-
-                    b.Navigation("GatheringNodes");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Region", b =>
@@ -7256,11 +7397,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Participants");
                 });
 
-            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", b =>
-                {
-                    b.Navigation("CraftingQueueItems");
-                });
-
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
                     b.Navigation("ArenaProfile")
@@ -7281,8 +7417,6 @@ namespace Persistence.LL.Migrations
 
                     b.Navigation("Inventory")
                         .IsRequired();
-
-                    b.Navigation("Professions");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Creatures.Creature", b =>

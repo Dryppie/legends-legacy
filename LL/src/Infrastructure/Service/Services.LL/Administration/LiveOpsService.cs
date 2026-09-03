@@ -1,4 +1,9 @@
 using System.Text.Json;
+using Application.Interfaces.Services.LL.Items;
+using Common.Randomness;
+using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Outbox;
@@ -21,7 +26,8 @@ public sealed class LiveOpsService(
     IInventoryItemFactory itemFactory,
     IGameEventOutbox gameEvents,
     IOptions<LiveOpsOptions> options,
-    TimeProvider timeProvider) : ILiveOpsService
+    TimeProvider timeProvider,
+    StarterEquipmentCatalog? equipmentProgressionCatalog = null) : ILiveOpsService
 {
     private readonly LiveOpsOptions _options = options.Value;
 
@@ -456,6 +462,56 @@ public sealed class LiveOpsService(
             new MultiplayerRestrictionOperation(action, restriction, false));
     }
 
+    public async Task<CompensationEquipmentOptions> GetCompensationEquipmentOptionsAsync(
+        Guid characterId, string itemBaseId, CancellationToken cancellationToken)
+    {
+        if (equipmentProgressionCatalog is null) return new(true, EquipmentProgressionAdministrativeEquipment.MaximumQuantity, []);
+        var evaluator = equipmentProgressionCatalog.Evaluator;
+        var choices = evaluator.Definitions.Select(definition =>
+        {
+            var archetype = evaluator.GetArchetype(definition.ArchetypeId);
+            return new CompensationEquipmentOption(definition.Id, definition.Name, archetype.ItemBaseId, archetype.Id,
+                archetype.MinimumTier, archetype.MaximumTier, definition.NativeStyleId,
+                equipmentProgressionCatalog.Styles.Where(style => style.Style.CompatibleArchetypeIds.Contains(archetype.Id))
+                    .Select(style => style.Id).Order(StringComparer.Ordinal).ToArray());
+        }).Where(choice => choice.ItemBaseId == itemBaseId).ToArray();
+        return new(true, EquipmentProgressionAdministrativeEquipment.MaximumQuantity, choices);
+    }
+
+    public async Task<AdministrationOperationResult<CompensationGrantPlan>> PrepareCompensationGrantAsync(
+        Guid operationId, Guid characterId, string itemBaseId, int quantity, CancellationToken cancellationToken,
+        EquipmentGrantRequest? equipment = null)
+    {
+        var bases = await itemBases.GetItemBasesByIdsAsync([itemBaseId], cancellationToken);
+        if (!bases.TryGetValue(itemBaseId, out var item))
+            return AdministrationOperationResult<CompensationGrantPlan>.Fail("item-not-found", "The item-base ID does not exist in the server catalog.");
+        if (quantity < 1 || quantity > _options.MaximumGrantQuantity)
+            return AdministrationOperationResult<CompensationGrantPlan>.Fail("invalid-quantity", "The requested quantity is outside the compensation limit.");
+        if (item.ItemType != ItemType.Equipment)
+        {
+            if (equipment is not null)
+                return AdministrationOperationResult<CompensationGrantPlan>.Fail("invalid-equipment", "Equipment options require an equipment item.");
+            return AdministrationOperationResult<CompensationGrantPlan>.Success(new(item, true, null));
+        }
+        if (equipment is null || equipmentProgressionCatalog is null)
+            return AdministrationOperationResult<CompensationGrantPlan>.Fail("equipment-definition-required", "Select an equipment definition, tier, rank and style before granting equipment.");
+        if (quantity > EquipmentProgressionAdministrativeEquipment.MaximumQuantity)
+            return AdministrationOperationResult<CompensationGrantPlan>.Fail("invalid-quantity", $"Equipment grants are limited to {EquipmentProgressionAdministrativeEquipment.MaximumQuantity} instances.");
+        try
+        {
+            var data = EquipmentProgressionAdministrativeEquipment.Create(equipmentProgressionCatalog.Evaluator, equipment, characterId,
+                StableRandom.Guid(EquipmentKeys.AdministrationGrantIdentity, operationId.ToString("N"), "0"), operationId);
+            if (item is not EquipmentBase equipmentBase || item.Stackable || data.ItemBaseId != item.Id
+                || data.EquipmentType != equipmentBase.EquipmentType)
+                return AdministrationOperationResult<CompensationGrantPlan>.Fail("invalid-equipment-base", "The selected equipment definition does not match this equipment item base.");
+            return AdministrationOperationResult<CompensationGrantPlan>.Success(new(item, true, data));
+        }
+        catch (Exception error) when (error is ArgumentException or InvalidOperationException)
+        {
+            return AdministrationOperationResult<CompensationGrantPlan>.Fail("invalid-equipment", error.Message);
+        }
+    }
+
     public async Task<AdministrationOperationResult<ItemGrantOperation>> GrantCompensationItemsAsync(
         Guid operationId,
         Guid characterId,
@@ -464,7 +520,8 @@ public sealed class LiveOpsService(
         int quantity,
         string reason,
         string? internalNotes,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        EquipmentGrantRequest? equipment = null)
     {
         var validation = ValidateOperation(operationId, actor, reason);
         if (validation is not null)
@@ -480,7 +537,7 @@ public sealed class LiveOpsService(
                 "Internal notes cannot exceed 4,000 characters.");
         }
 
-        var normalizedItemBaseId = itemBaseId.Trim();
+        var normalizedItemBaseId = itemBaseId?.Trim() ?? string.Empty;
         if (normalizedItemBaseId.Length == 0)
         {
             return AdministrationOperationResult<ItemGrantOperation>.Fail(
@@ -503,6 +560,7 @@ public sealed class LiveOpsService(
                 details is null ||
                 !string.Equals(details.ItemBaseId, normalizedItemBaseId, StringComparison.Ordinal) ||
                 details.Quantity != quantity ||
+                details.Equipment != equipment ||
                 existingAction.TargetAccountId is not Guid existingAccountId)
             {
                 return IdempotencyConflict<ItemGrantOperation>();
@@ -531,19 +589,21 @@ public sealed class LiveOpsService(
                 "The target character was not found.");
         }
 
-        var catalog = await itemBases.GetItemBasesByIdsAsync(
-            [normalizedItemBaseId],
-            cancellationToken);
-        if (!catalog.TryGetValue(normalizedItemBaseId, out var itemBase))
-        {
-            return AdministrationOperationResult<ItemGrantOperation>.Fail(
-                "item-not-found",
-                "The item-base ID does not exist in the server catalog.");
-        }
-
-        var grantedItems = itemFactory
-            .CreateForQuantity(itemBase, quantity, characterId)
-            .ToList();
+        var prepared = await PrepareCompensationGrantAsync(operationId, characterId, normalizedItemBaseId, quantity, cancellationToken, equipment);
+        if (!prepared.IsSuccess || prepared.Value is null)
+            return AdministrationOperationResult<ItemGrantOperation>.Fail(prepared.ErrorCode, prepared.ErrorMessage);
+        var plan = prepared.Value;
+        var grantedItems = plan.Equipment is null
+            ? itemFactory.CreateForQuantity(plan.ItemBase, quantity, characterId).ToList()
+            : Enumerable.Range(0, quantity).Select(index =>
+            {
+                var data = EquipmentProgressionAdministrativeEquipment.Create(equipmentProgressionCatalog!.Evaluator, equipment!, characterId,
+                    StableRandom.Guid(EquipmentKeys.AdministrationGrantIdentity, operationId.ToString("N"), index.ToString(System.Globalization.CultureInfo.InvariantCulture)), operationId);
+                var instance = new EquipmentInstance { Id = data.State.Id, ItemBaseId = data.ItemBaseId,
+                    ItemBase = plan.ItemBase, AcquiredAtUtc = now, AcquisitionSource = ItemAcquisitionSources.AdminCompensation };
+                instance.ApplyProgressionData(data);
+                return new InventoryItem { InventoryId = characterId, ItemInstanceId = instance.Id, ItemInstance = instance, Quantity = 1 };
+            }).ToList();
         await inventory.AddItemsToInventory(
             characterId,
             grantedItems,
@@ -552,7 +612,8 @@ public sealed class LiveOpsService(
             cancellationToken);
 
         var detailsJson = JsonSerializer.Serialize(
-            new GrantDetails(normalizedItemBaseId, quantity));
+            new GrantDetails(normalizedItemBaseId, quantity, equipment,
+                plan.Equipment, grantedItems.Select(item => item.ItemInstanceId).ToArray()));
         var action = CreateAction(
             operationId,
             AdminActionType.CompensationItemsGranted,
@@ -564,7 +625,7 @@ public sealed class LiveOpsService(
             reason,
             internalNotes,
             detailsJson,
-            quantity >= Math.Max(1, _options.LargeGrantAuditThreshold)
+            plan.Equipment is not null || quantity >= Math.Max(1, _options.LargeGrantAuditThreshold)
                 ? AdministrationRiskLevel.HighValue
                 : AdministrationRiskLevel.Normal,
             now);
@@ -734,5 +795,6 @@ public sealed class LiveOpsService(
         }
     }
 
-    private sealed record GrantDetails(string ItemBaseId, int Quantity);
+    private sealed record GrantDetails(string ItemBaseId, int Quantity, EquipmentGrantRequest? Equipment = null,
+        EquipmentData? EquipmentItem = null, IReadOnlyList<Guid>? InstanceIds = null);
 }

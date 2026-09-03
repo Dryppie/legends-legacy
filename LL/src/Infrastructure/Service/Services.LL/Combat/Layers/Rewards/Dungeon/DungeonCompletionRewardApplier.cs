@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Achievements;
@@ -31,6 +32,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     private readonly IDungeonMasteryService _mastery;
     private readonly IAchievementService? _achievementService;
     private readonly IPublisher _publisher;
+    private readonly Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? _progression;
 
     public DungeonCompletionRewardApplier(
         IDungeonDefinitions dungeonDefinitions,
@@ -41,7 +43,8 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         IInventoryItemFactory inventoryItemFactory,
         IDungeonMasteryService mastery,
         IPublisher publisher,
-        IAchievementService? achievementService = null)
+        IAchievementService? achievementService = null,
+        Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? progression = null)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;
@@ -52,6 +55,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         _mastery = mastery;
         _achievementService = achievementService;
         _publisher = publisher;
+        _progression = progression;
     }
 
     public async Task ApplyAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -63,13 +67,14 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             run.DungeonDefinitionId,
             cancellationToken);
         var treasureProgress = 0;
+        if (_progression != null) await _progression.CompleteAsync(run, isFirstCompletion, cancellationToken);
 
         if (dungeon.CompletionRewardTableIds.Count > 0)
         {
             foreach (var rewardTableId in dungeon.CompletionRewardTableIds)
             {
                 treasureProgress += await RollRewardTableAndAddAsync(
-                    run.Id,
+                    run.Id, run.CharacterId,
                     rewardTableId,
                     "Dungeon Completion",
                     masteryBenefits.CompletionCurrencyBonusPercent,
@@ -83,7 +88,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             foreach (var rewardTableId in dungeon.TierRewardTableIds)
             {
                 treasureProgress += await RollRewardTableAndAddAsync(
-                    run.Id,
+                    run.Id, run.CharacterId,
                     rewardTableId,
                     $"Tier {dungeon.Tier} Completion",
                     masteryBenefits.CompletionCurrencyBonusPercent,
@@ -93,12 +98,12 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         }
 
         treasureProgress += await AddItemGrantsAsync(
-            run.Id,
+            run.Id, run.CharacterId,
             dungeon.RewardTable.CompletionRewards,
             "Dungeon Completion Rewards",
             cancellationToken);
 
-        treasureProgress += await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
+        treasureProgress += await AddMonsterCoreRewardsAsync(run.Id, run.CharacterId, dungeon.Grade, cancellationToken);
         treasureProgress += await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, isFirstCompletion, cancellationToken);
         var masteryAward = await _mastery.AwardCompletionAsync(run, cancellationToken);
         if (_achievementService is not null)
@@ -111,7 +116,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             masteryAward.Level >= DungeonMasteryBenefits.MaxLevel)
         {
             treasureProgress += await AddRewardRollResultAsync(
-                run.Id,
+                run.Id, run.CharacterId,
                 new RewardRollResult(
                     [],
                     Cinders: 0,
@@ -143,6 +148,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
     private async Task<int> RollRewardTableAndAddAsync(
         Guid dungeonRunId,
+        Guid characterId,
         string rewardTableId,
         string source,
         int completionCurrencyBonusPercent,
@@ -156,7 +162,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         result = ApplyCompletionCurrencyBonus(result, completionCurrencyBonusPercent);
 
         return await AddRewardRollResultAsync(
-            dungeonRunId,
+            dungeonRunId, characterId,
             result,
             source,
             cancellationToken);
@@ -200,6 +206,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
     private async Task<int> AddRewardRollResultAsync(
         Guid dungeonRunId,
+        Guid characterId,
         RewardRollResult result,
         string source,
         CancellationToken cancellationToken)
@@ -252,6 +259,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
     private async Task<int> AddMonsterCoreRewardsAsync(
         Guid dungeonRunId,
+        Guid characterId,
         DungeonGrade dungeonGrade,
         CancellationToken cancellationToken)
     {
@@ -289,7 +297,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
         var grants = DungeonRewardCatalog.GetFirstCompletionGrants(dungeon);
         return await AddItemGrantsAsync(
-            run.Id,
+            run.Id, run.CharacterId,
             grants,
             $"{FormatGrade(dungeon.Grade)} First Completion",
             cancellationToken);
@@ -297,6 +305,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
     private async Task<int> AddItemGrantsAsync(
         Guid dungeonRunId,
+        Guid characterId,
         IReadOnlyList<DungeonRewardGrant> grants,
         string source,
         CancellationToken cancellationToken)

@@ -1,6 +1,6 @@
 {
   "title": "Soulstone Archive Guide",
-  "lastReviewed": "2026-08-06",
+  "lastReviewed": "2026-09-03",
   "sections": [
     {
       "heading": "Permanent progression",
@@ -12,7 +12,11 @@
     },
     {
       "heading": "Before purchasing",
-      "body": "A Soulstone purchase is permanent and spends the displayed currency immediately. Compare the next-rank effect with your build and current activities before committing your stones."
+      "body": "Purchasing spends the displayed Soulstones immediately. You can reset all ranks from this page to reclaim their displayed refund value."
+    },
+    {
+      "heading": "Retired constellations",
+      "body": "If your character has retired constellations, including Sigil Traces, their ranks remain visible with no active effect. Use Refund retired upgrades to reclaim their displayed Soulstone value while keeping active upgrades. Refunded retired ranks cannot be purchased again."
     }
   ]
 }

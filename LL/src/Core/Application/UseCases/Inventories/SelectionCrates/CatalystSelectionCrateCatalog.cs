@@ -12,26 +12,6 @@ public sealed record SelectionContainerDefinition(
     string SelectionLabel,
     IReadOnlyList<SelectionContainerOptionDefinition> Options);
 
-public static class CatalystSelectionCrateCatalog
-{
-    public const string ItemBaseId = "item.catalyst_selection_crate";
-
-    public static IReadOnlyList<SelectionContainerOptionDefinition> Options { get; } =
-    [
-        new("fury", "Fury Catalysts", "fury_heart", 6),
-        new("arcane", "Arcane Catalysts", "arcane_focus", 6),
-        new("execution", "Execution Catalysts", "executioners_mark", 6),
-        new("aegis", "Aegis Catalysts", "aegis_runestone", 6),
-        new("warden", "Warden Catalysts", "warden_sigil", 6),
-        new("endurance", "Endurance Catalysts", "endurance_core", 6),
-        new("phoenix", "Phoenix Catalysts", "phoenix_ember", 6),
-        new("spirit", "Spirit Catalysts", "spirit_prism", 6),
-        new("primal", "Primal Catalysts", "hive_ichor", 6),
-        new("venom", "Venom Catalysts", "venom_gland", 6),
-        new("hive", "Hive Catalysts", "royal_chitin_plate", 6)
-    ];
-}
-
 public static class BlueprintSelectionBoxCatalog
 {
     public const string ItemBaseId = "item.blueprint_selection_box";
@@ -136,11 +116,6 @@ public static class SelectionContainerCatalog
         new List<SelectionContainerDefinition>
         {
             new SelectionContainerDefinition(
-                CatalystSelectionCrateCatalog.ItemBaseId,
-                "Catalyst Selection Cache",
-                "Catalyst",
-                CatalystSelectionCrateCatalog.Options),
-            new SelectionContainerDefinition(
                 BlueprintSelectionBoxCatalog.ItemBaseId,
                 "Blueprint Selection Box",
                 "Blueprint",
@@ -151,4 +126,5 @@ public static class SelectionContainerCatalog
 
     public static SelectionContainerDefinition? Find(string itemBaseId) =>
         Definitions.GetValueOrDefault(itemBaseId);
+
 }

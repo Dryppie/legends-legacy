@@ -7,9 +7,6 @@
   >
     <span class="truncate text-primary">{{ performingAction }}</span>
     <span class="flex shrink-0 items-center gap-2">
-      <span *ngIf="queueDuration" class="text-secondary">
-        Queue {{ queueDuration }}
-      </span>
       <span>{{ remainingTime }}</span>
     </span>
   </div>
@@ -42,9 +39,6 @@
         >
         </app-progress-bar>
       </div>
-      <label *ngIf="queueDuration" class="text-nowrap text-xs text-secondary">
-        Queue {{ queueDuration }}
-      </label>
       <label class="cursor-pointer text-nowrap text-primary underline"
         >Go to action</label
       >

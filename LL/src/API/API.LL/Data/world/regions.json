@@ -11,12 +11,12 @@
           "requiredActiveQuestId": "quest.onboarding.training_day",
           "hideWhenLocked": true,
           "spawnProbabilities": [
-            1.0
+            1
           ],
           "creatures": [
             {
               "creatureId": "00000000-0000-0000-0000-000000000001",
-              "weightedSpawnRate": 1.0
+              "weightedSpawnRate": 1
             }
           ]
         },
@@ -52,32 +52,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000002",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "lumo_ruins_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "lumo_ruins_fallen_tree",
-              "name": "Fallen Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "lumo_ruins_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
-            }
           ]
         },
         {
@@ -111,30 +85,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000047",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "blood_grove_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "blood_grove_bloodwood_tree",
-              "name": "Bloodwood Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.blood_grove.bloodwood_tree"
-            },
-            {
-              "id": "blood_grove_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
             }
           ]
         },
@@ -170,30 +120,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000021",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "crystal_creek_crystal_seam",
-              "name": "Crystal Seam",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "crystal_creek_fallen_tree",
-              "name": "Fallen Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "crystal_creek_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
-            }
           ]
         },
         {
@@ -227,31 +153,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000031",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "moonlit_graves_grave_ore",
-              "name": "Grave Ore",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "moonlit_graves_fallen_tree",
-              "name": "Fallen Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "moonlit_graves_gravebeast_remains",
-              "name": "Gravebeast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
             }
           ]
         },
@@ -287,30 +188,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000017",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "twilight_clearing_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "twilight_clearing_duskwood_thicket",
-              "name": "Duskwood Thicket",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "twilight_clearing_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
-            }
           ]
         },
         {
@@ -344,31 +221,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000034",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "old_forest_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "old_forest_ancient_tree",
-              "name": "Ancient Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "old_forest_stag_remains",
-              "name": "Stag Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
             }
           ]
         },
@@ -404,30 +256,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000038",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "thornroot_hollow_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "thornroot_hollow_thornroot_tree",
-              "name": "Thornroot Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "thornroot_hollow_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
-            }
           ]
         },
         {
@@ -461,30 +289,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000048",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "embercap_burrows_ember_ore_seam",
-              "name": "Ember Ore Seam",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "embercap_burrows_fallen_tree",
-              "name": "Fallen Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "embercap_burrows_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
             }
           ]
         },
@@ -520,30 +324,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000045",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "moonveil_marsh_ore_vein",
-              "name": "Ore Vein",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "moonveil_marsh_fallen_tree",
-              "name": "Fallen Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "moonveil_marsh_marsh_beast_remains",
-              "name": "Marsh Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
-            }
           ]
         },
         {
@@ -577,30 +357,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000046",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "duskmire_hollow_ore_deposit",
-              "name": "Duskmire Ore Deposit",
-              "type": "Mining",
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
-            },
-            {
-              "id": "duskmire_hollow_fallen_tree",
-              "name": "Fallen Tree",
-              "type": "Woodcutting",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
-            },
-            {
-              "id": "duskmire_hollow_beast_remains",
-              "name": "Beast Remains",
-              "type": "Skinning",
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
             }
           ]
         }
@@ -641,35 +397,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000070",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "warfang_frontier_copper_vein",
-              "name": "Copper Vein",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.warfang_frontier.copper_vein"
-            },
-            {
-              "id": "warfang_frontier_bloodwood_tree",
-              "name": "Bloodwood Tree",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
-            },
-            {
-              "id": "warfang_frontier_beast_remains",
-              "name": "Frontier Beast Remains",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
-            }
           ]
         },
         {
@@ -703,33 +430,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000075",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "rotgrave_fields_copper_deposit",
-              "name": "Copper Deposit",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.rotgrave_fields.copper_deposit"
-            },
-            {
-              "id": "rotgrave_fields_bloodwood_tree",
-              "name": "Bloodwood Tree",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
-            },
-            {
-              "id": "rotgrave_fields_beast_remains",
-              "name": "Rotgrave Beast Remains",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
             }
           ]
         },
@@ -765,33 +465,6 @@
               "creatureId": "00000000-0000-0000-0000-000000000097",
               "weightedSpawnRate": 0.2
             }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "tempest_aerie_copper_outcrop",
-              "name": "Stormworn Copper Outcrop",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.warfang_frontier.copper_vein"
-            },
-            {
-              "id": "tempest_aerie_windswept_bloodwood",
-              "name": "Windswept Bloodwood",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
-            },
-            {
-              "id": "tempest_aerie_harpy_roost",
-              "name": "Abandoned Harpy Roost",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
-            }
           ]
         },
         {
@@ -825,33 +498,6 @@
             {
               "creatureId": "00000000-0000-0000-0000-000000000105",
               "weightedSpawnRate": 0.2
-            }
-          ],
-          "gatheringNodes": [
-            {
-              "id": "wolfsbane_reach_copper_outcrop",
-              "name": "Fangscar Copper Outcrop",
-              "type": "Mining",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.warfang_frontier.copper_vein"
-            },
-            {
-              "id": "wolfsbane_reach_bloodwood",
-              "name": "Moonclaw Bloodwood",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "rewardTableId": "reward.gathering.warfang_frontier.bloodwood_tree"
-            },
-            {
-              "id": "wolfsbane_reach_wolf_remains",
-              "name": "Wolfsbane Pack Remains",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.0037,
-              "yieldBonusPercent": 50,
-              "rewardTableId": "reward.gathering.warfang_frontier.beast_remains"
             }
           ]
         }

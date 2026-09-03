@@ -40,7 +40,6 @@ public sealed class DungeonPreviewDto
     public DungeonRecordDto Record { get; set; } = new();
     public DungeonMasteryDto Mastery { get; set; } = new();
     public List<DungeonPreviewRewardDto> Rewards { get; set; } = [];
-    public List<DungeonGatheringNodePreviewDto> GatheringNodes { get; set; } = [];
 }
 
 public sealed class DungeonMasteryDto : IMapFrom<DungeonMasterySnapshot>
@@ -63,7 +62,6 @@ public sealed class DungeonMasteryBenefitSummaryDto
 {
     public int AdditionalVisibilityRows { get; set; }
     public int RestSiteVigorBonus { get; set; }
-    public double GatheringProcChanceBonus { get; set; }
     public int CombatVigorCostReduction { get; set; }
     public int CompletionCurrencyBonusPercent { get; set; }
 
@@ -74,7 +72,6 @@ public sealed class DungeonMasteryBenefitSummaryDto
         {
             AdditionalVisibilityRows = benefits.AdditionalVisibilityRows,
             RestSiteVigorBonus = benefits.RestSiteVigorBonus,
-            GatheringProcChanceBonus = benefits.GatheringProcChanceBonus,
             CombatVigorCostReduction = benefits.CombatVigorCostReduction,
             CompletionCurrencyBonusPercent = benefits.CompletionCurrencyBonusPercent
         };
@@ -130,23 +127,3 @@ public sealed class DungeonEntryRequirementDto : IMapFrom<DungeonEntryRequiremen
         profile.CreateMap<DungeonEntryRequirementResult, DungeonEntryRequirementDto>();
 }
 
-public sealed class DungeonGatheringNodePreviewDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public int? LevelRequirement { get; set; }
-    public float ProcChance { get; set; }
-    public List<DungeonGatheringLootPreviewDto> Loot { get; set; } = [];
-}
-
-public sealed class DungeonGatheringLootPreviewDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string ItemId { get; set; } = string.Empty;
-    public ItemBaseDto ItemBase { get; set; } = null!;
-    public int MinQuantity { get; set; }
-    public int MaxQuantity { get; set; }
-    public double DropChancePercent { get; set; }
-    public bool IsRare { get; set; }
-}

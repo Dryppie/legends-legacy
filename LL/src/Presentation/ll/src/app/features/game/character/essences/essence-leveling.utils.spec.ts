@@ -18,7 +18,7 @@ describe('Essence leveling presentation', () => {
 
   it('explains Dust leveling and the current cap', () => {
     expect(essenceDustLevelingDescription(6, 10, true, 1)).toBe(
-      '1 Dust grants 1 level. Level 6 / 10. You have 1 Dust.',
+      "1 Dust grants the current level's full XP requirement. Excess XP carries over until the level cap. Level 6 / 10. You have 1 Dust.",
     );
     expect(essenceDustLevelingDescription(10, 10, true, 1)).toContain(
       'Ascend to unlock more levels',

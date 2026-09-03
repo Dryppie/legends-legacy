@@ -2,6 +2,10 @@
 
 Milestone 1 establishes a dedicated executable that loads production combat and Essence data, runs a deterministic production-engine smoke simulation, and persists machine-readable and human-readable reports.
 
+## Equipment reference mode — 3 September 2026
+
+The separate [equipment reference command](equipment-reference-builds.md) uses canonical Tier-1 rank/style equipment and production combat. The existing pipeline below retains its legacy Quality/rarity gear packages and calibration policies; its results do not certify equipment progression readiness.
+
 ## Command
 
 The one-action entry point from the repository root is:

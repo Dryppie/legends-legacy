@@ -21,7 +21,7 @@ using Services.LL.Interfaces.Combat.Reward;
 
 namespace EssenceSystem.Tests;
 
-public sealed class EventQuestSystemTests
+public sealed partial class EventQuestSystemTests
 {
     private static readonly DateTimeOffset Now = new(2026, 8, 10, 12, 0, 0, TimeSpan.Zero);
 
@@ -34,15 +34,15 @@ public sealed class EventQuestSystemTests
             apiRoot,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        Assert.Equal(3, provider.GetAll().Count);
+        Assert.Single(provider.GetAll());
         var definition = provider.Get("event.lumo_defense.example");
         Assert.Equal("event.lumo_defense.example", definition.Id);
         Assert.True(definition.Enabled);
         Assert.Equal("CombatEncounterCompleted", Assert.Single(definition.Objectives).Type);
         var communityReward = Assert.Single(definition.Rewards);
         Assert.Equal("Item", communityReward.Type);
-        Assert.Equal(1, communityReward.Quantity);
-        Assert.Equal("item.catalyst_selection_crate", communityReward.ItemBaseId);
+        Assert.Equal(2, communityReward.Quantity);
+        Assert.Equal("tempered_scrap", communityReward.ItemBaseId);
         Assert.Equal(3, definition.PersonalMilestones.Count);
         Assert.Equal(250, definition.PersonalMilestones[0].RequiredContribution);
         Assert.Collection(
@@ -57,41 +57,6 @@ public sealed class EventQuestSystemTests
                 ["item.blueprint_selection_box"],
                 milestone.Rewards.Select(reward => reward.ItemBaseId)));
 
-        var tempering = provider.Get("event.a_broken_curse.2026_08");
-        Assert.Equal(new DateTimeOffset(2026, 8, 16, 0, 0, 0, TimeSpan.Zero), tempering.StartsAtUtc);
-        Assert.Equal(new DateTimeOffset(2026, 8, 19, 0, 0, 0, TimeSpan.Zero), tempering.EndsAtUtc);
-        Assert.Equal("TemperingActionCompleted", Assert.Single(tempering.Objectives).Type);
-        Assert.Equal(100_000, tempering.Objectives[0].RequiredAmount);
-        Assert.Equal(50, Assert.Single(tempering.Rewards).Quantity);
-        Assert.Equal("SigilFragments", tempering.Rewards[0].Type);
-        Assert.Equal([500L, 1500L, 3000L], tempering.PersonalMilestones.Select(x => x.RequiredContribution));
-        Assert.Equal(
-            [("ore", 200), ("wood", 200), ("rawhide", 200)],
-            tempering.PersonalMilestones[0].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
-        Assert.Equal(
-            "item.blueprint_selection_box",
-            Assert.Single(tempering.PersonalMilestones[1].Rewards).ItemBaseId);
-        Assert.Equal(
-            "item.catalyst_selection_crate",
-            Assert.Single(tempering.PersonalMilestones[2].Rewards).ItemBaseId);
-
-        var gathering = provider.Get("event.a_realm_replenished.2026_08");
-        Assert.Equal(new DateTimeOffset(2026, 8, 23, 0, 0, 0, TimeSpan.Zero), gathering.StartsAtUtc);
-        Assert.Equal(new DateTimeOffset(2026, 8, 30, 0, 0, 0, TimeSpan.Zero), gathering.EndsAtUtc);
-        Assert.Equal("ResourceGathered", Assert.Single(gathering.Objectives).Type);
-        Assert.Equal(50_000, gathering.Objectives[0].RequiredAmount);
-        Assert.Equal(("SigilFragments", 50),
-            (Assert.Single(gathering.Rewards).Type, Assert.Single(gathering.Rewards).Quantity));
-        Assert.Equal([500L, 1000L, 2000L], gathering.PersonalMilestones.Select(x => x.RequiredContribution));
-        Assert.Equal(
-            [("soul_dust", 50), ("item.monster_core.lesser", 10)],
-            gathering.PersonalMilestones[0].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
-        Assert.Equal(
-            [("item.blueprint_selection_box", 1), ("item.monster_core.greater", 15)],
-            gathering.PersonalMilestones[1].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
-        Assert.Equal(
-            [("item.catalyst_selection_crate", 1), ("item.monster_core.primal", 20)],
-            gathering.PersonalMilestones[2].Rewards.Select(x => (x.ItemBaseId, x.Quantity)));
     }
 
     [Fact]

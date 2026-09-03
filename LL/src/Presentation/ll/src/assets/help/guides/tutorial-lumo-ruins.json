@@ -1,17 +1,18 @@
 {
   "title": "First Steps - Lumo Ruins",
+  "lastReviewed": "2026-09-03",
   "sections": [
     {
       "heading": "Your first expedition",
-      "body": "Lumo Ruins is your first normal combat area. Starting combat creates an ongoing action rather than a single training encounter."
+      "body": "Lumo Ruins is your first normal combat area. Equip your starter kit and accessories, then start its battle from Shenic. Combat continues as an ongoing action."
     },
     {
-      "heading": "Combat continues",
-      "body": "Your character keeps resolving encounters over time until you stop the action. After each victory, your equipped tool can automatically gather its matching resource. Lumo Ruins is abundant in Mining, Woodcutting, and Skinning, granting +50% yield to all three."
+      "heading": "Win an encounter",
+      "body": "Into the Ruins requires a victory in Lumo Ruins. Starting the action alone does not complete the objective. Return to Combat to inspect encounters and rewards, and follow the journal when the victory is recorded."
     },
     {
-      "heading": "Completing First Steps",
-      "body": "Start the Lumo Ruins expedition to complete First Steps and unlock normal Shenic combat areas. Return to Combat to inspect both battle and gathering results."
+      "heading": "Equipment from victories",
+      "body": "Equipment & Forge shows your available equipment targets and progress. Select a plain equipment target when you need another piece; victories advance its displayed counter. The target pauses after its award. Your combat rewards do not require gathering tools."
     }
   ]
 }

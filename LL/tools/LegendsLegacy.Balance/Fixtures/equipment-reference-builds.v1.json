@@ -1,0 +1,507 @@
+[
+  {
+    "id": "balanced-plain",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.medium_mail"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.greatsword"
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_archer"
+    ]
+  },
+  {
+    "id": "balanced-styled",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl",
+        "activeStyleId": "blueprint_aegis"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.medium_mail",
+        "activeStyleId": "blueprint_aegis"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings",
+        "activeStyleId": "blueprint_aegis"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band",
+        "activeStyleId": "blueprint_fury"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet",
+        "activeStyleId": "blueprint_fury"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial",
+        "activeStyleId": "blueprint_fury"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.greatsword",
+        "activeStyleId": "blueprint_fury"
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_archer"
+    ]
+  },
+  {
+    "id": "offense",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.light_hood"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.light_vest"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.gauntlets"
+      }
+    ],
+    "essenceIds": [
+      "essence.green_slime",
+      "essence.cinder_beetle"
+    ]
+  },
+  {
+    "id": "sustain",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.cloth_robe"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.cloth_pants"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.staff"
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_shaman"
+    ]
+  },
+  {
+    "id": "defensive-shield",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.heavy_helm"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.heavy_breastplate"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.heavy_legplates"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.mace"
+      },
+      {
+        "slot": "OffHand",
+        "definitionId": "plain.towershield"
+      }
+    ],
+    "essenceIds": [
+      "essence.red_slime",
+      "essence.goblin_warrior"
+    ]
+  },
+  {
+    "id": "area-styled",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl",
+        "activeStyleId": "blueprint_spirit"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.cloth_robe",
+        "activeStyleId": "blueprint_spirit"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.cloth_pants",
+        "activeStyleId": "blueprint_spirit"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band",
+        "activeStyleId": "blueprint_arcane"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet",
+        "activeStyleId": "blueprint_arcane"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial",
+        "activeStyleId": "blueprint_arcane"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.staff",
+        "activeStyleId": "blueprint_arcane"
+      }
+    ],
+    "essenceIds": [
+      "essence.flame_imp",
+      "essence.pixie"
+    ]
+  },
+  {
+    "id": "dual-wield",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.light_hood"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.light_vest"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.dagger"
+      },
+      {
+        "slot": "OffHand",
+        "definitionId": "plain.dagger"
+      }
+    ],
+    "essenceIds": [
+      "essence.green_slime",
+      "essence.cinder_beetle"
+    ]
+  },
+  {
+    "id": "ranged",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.light_hood"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.light_vest"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.longbow"
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_archer"
+    ]
+  },
+  {
+    "id": "named-native",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.medium_mail"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "model_e.r1.goblin_mines.greatsword.blueprint_fury",
+        "activeStyleId": null,
+        "useNativeStyle": true
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_archer"
+    ]
+  },
+  {
+    "id": "named-restyled",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.medium_mail"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "model_e.r1.goblin_mines.greatsword.blueprint_fury",
+        "activeStyleId": "blueprint_arcane",
+        "useNativeStyle": true
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_archer"
+    ]
+  },
+  {
+    "id": "named-cleared",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.medium_mail"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "model_e.r1.goblin_mines.greatsword.blueprint_fury",
+        "activeStyleId": null,
+        "useNativeStyle": false
+      }
+    ],
+    "essenceIds": [
+      "essence.goblin",
+      "essence.goblin_archer"
+    ]
+  },
+  {
+    "id": "equipment-only",
+    "characterLevel": 10,
+    "tier": 1,
+    "rank": 0,
+    "equipment": [
+      {
+        "slot": "Head",
+        "definitionId": "plain.cloth_cowl"
+      },
+      {
+        "slot": "Chest",
+        "definitionId": "plain.medium_mail"
+      },
+      {
+        "slot": "Legs",
+        "definitionId": "plain.light_leggings"
+      },
+      {
+        "slot": "Ring",
+        "definitionId": "plain.band"
+      },
+      {
+        "slot": "Necklace",
+        "definitionId": "plain.amulet"
+      },
+      {
+        "slot": "Relic",
+        "definitionId": "plain.vial"
+      },
+      {
+        "slot": "MainHand",
+        "definitionId": "plain.greatsword"
+      }
+    ],
+    "essenceIds": []
+  }
+]

@@ -8,7 +8,9 @@
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,
-    "completedQuestIds": ["quest.colosseum.the_arena_calls"]
+    "completedQuestIds": [
+      "quest.colosseum.the_arena_calls"
+    ]
   },
   "objectives": [
     {
@@ -24,6 +26,11 @@
     }
   ],
   "rewards": [
-    { "key": "lesser_monster_cores", "type": "Item", "itemBaseId": "item.monster_core.lesser", "quantity": 2 }
+    {
+      "key": "lesser_monster_cores",
+      "type": "Item",
+      "itemBaseId": "item.monster_core.lesser",
+      "quantity": 2
+    }
   ]
 }

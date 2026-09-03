@@ -167,7 +167,7 @@
         </span>
       </div>
 
-      <div class="mt-3 border-t border-primary/20 pt-3">
+      <div *ngIf="!data.progression" class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
           <span class="ll-item-meta text-primary">Gear Value</span>
           <span class="font-serif text-xl tabular-nums text-primary">
@@ -359,7 +359,7 @@
         </span>
       </div>
 
-      <div class="mt-3 border-t border-primary/20 pt-3">
+      <div *ngIf="!equipped.data.progression" class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
           <span class="ll-item-meta">Gear Value</span>
           <span class="flex items-baseline gap-2 tabular-nums">
@@ -367,6 +367,7 @@
               {{ equipped.data.itemBudget | number: "1.0-2" }}
             </span>
             <span
+              *ngIf="!data.progression"
               class="text-xs font-semibold"
               [ngClass]="
                 comparisonClass(data.itemBudget - equipped.data.itemBudget)
@@ -848,7 +849,7 @@
         <span class="font-medium tabular-nums text-primary">
           {{ data.itemBudget | number: "1.0-2" }}
           <span
-            *ngIf="inlineComparison && comparisonData"
+            *ngIf="inlineComparison && comparisonData && !comparisonData.progression"
             data-testid="inline-gear-value-difference"
             class="equipment-inline-delta ml-2"
             [ngClass]="

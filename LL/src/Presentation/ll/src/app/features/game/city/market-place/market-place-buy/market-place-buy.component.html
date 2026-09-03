@@ -27,22 +27,43 @@
         (selection)="setRaritySelection($event)"
       ></app-dropdown>
 
-      <ng-container *ngIf="selectedItemType() === 'Equipment'">
+      <ng-container
+        *ngIf="selectedItemType() === 'Equipment'"
+      >
+        <ng-container>
+          <app-dropdown
+            label="Any identity"
+            [value]="definitionId()"
+            [selectedValue]="definitionId()"
+            [options]="definitionOptions()"
+            (selection)="setDefinitionSelection($event)"
+          ></app-dropdown>
+          <app-dropdown
+            label="Any active style"
+            [value]="activeStyleId()"
+            [selectedValue]="activeStyleId()"
+            [options]="styleOptions()"
+            (selection)="setStyleSelection($event)"
+          ></app-dropdown>
+          <input
+            type="number"
+            min="0"
+            max="5"
+            step="1"
+            [formControl]="minimumRankCtrl"
+            placeholder="Min rank"
+            aria-label="Minimum equipment rank"
+            class="ll-input ll-input-compact no-spinner w-24"
+          />
+        </ng-container>
         <app-dropdown
           label="Any slot"
           [value]="equipmentType()"
-          [options]="equipmentTypeOptions"
+          [options]="equipmentTypeOptions()"
           [selectedValue]="equipmentType()"
           (selection)="setEquipmentTypeSelection($event)"
         ></app-dropdown>
 
-        <app-dropdown
-          label="Any quality"
-          [value]="quality()"
-          [options]="qualityOptions"
-          [selectedValue]="quality()"
-          (selection)="setQualitySelection($event)"
-        ></app-dropdown>
 
         <input
           type="number"
@@ -53,14 +74,6 @@
           class="ll-input ll-input-compact no-spinner w-24"
         />
 
-        <input
-          type="number"
-          min="0"
-          [formControl]="minimumPotentialCtrl"
-          placeholder="Min potential"
-          aria-label="Minimum equipment potential"
-          class="ll-input ll-input-compact no-spinner w-28"
-        />
       </ng-container>
 
       <button
@@ -87,11 +100,15 @@
     <div class="ll-table-header grid grid-cols-5">
       <label class="col-start-1 col-end-3">Name</label>
       <label>Quantity</label>
-      <label>Quality</label>
+      <label>{{
+        selectedItemType() === "Equipment"
+          ? "Tier / Rank / Style"
+          : "Details"
+      }}</label>
       <label class="justify-self-end">Cinders per unit</label>
     </div>
     <div
-      class="ll-panel max-h-[22rem] flex-none overflow-y-auto rounded-t-none border-t-0 xl:min-h-0 xl:max-h-none xl:flex-1"
+      class="ll-panel max-h-[22rem] flex-none overflow-y-auto rounded-t-none border-t-0 xl:max-h-none xl:min-h-0 xl:flex-1"
     >
       <div
         *ngFor="let l of filteredListings(); trackBy: trackByListing"
@@ -124,6 +141,24 @@
         <app-item [item]="sel.itemInstance"></app-item>
       </div>
 
+      <ng-container *ngIf="selectedEquipment() as equipment">
+        <dl
+          *ngIf="equipment.progression as model"
+          class="grid grid-cols-2 gap-2 text-sm"
+        >
+          <dt class="text-zinc-400">Tier / Rank</dt>
+          <dd class="text-right">{{ equipment.tier }} / {{ model.rank }}</dd>
+          <dt class="text-zinc-400">Native style</dt>
+          <dd class="text-right">{{ styleLabel(model.nativeStyleId) }}</dd>
+          <dt class="text-zinc-400">Active style</dt>
+          <dd class="text-right">{{ styleLabel(model.activeStyleId) }}</dd>
+        </dl>
+        <p *ngIf="equipment.progression" class="mt-2 text-sm text-zinc-300">
+          Unbound. Buying keeps this item tradeable. Equipping it or investing
+          at the Forge binds it to you.
+        </p>
+      </ng-container>
+
       <p
         class="max-h-36 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-neutral-300"
       >
@@ -151,7 +186,9 @@
             [appAttributeTooltip]="mod"
           >
             {{ mod.attributeType | attributeTypeFormat: true }}:
-            {{ mod.amount | attributeValueFormat: mod.attributeType : true : true }}
+            {{
+              mod.amount | attributeValueFormat: mod.attributeType : true : true
+            }}
           </div>
         </div>
       </ng-container>
@@ -187,7 +224,7 @@
       <app-regular-button
         class="w-full"
         [text]="isOwnListing(sel) ? 'Your listing' : 'Buy'"
-        [disabled]="isOwnListing(sel)"
+        [disabled]="isOwnListing(sel) || qtyCtrl.invalid"
         fullWidth
         (pressed)="buyoutListing()"
       />

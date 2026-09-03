@@ -158,10 +158,24 @@
               <label class="wide">Find item<span class="inline-search"><input [(ngModel)]="itemQuery" placeholder="Item name or server ID" /><button class="secondary" type="button" [disabled]="loadingItems" (click)="searchItems()">Find</button></span></label>
               @if (itemResults.length) { <div class="item-results wide">@for (item of itemResults; track item.id) { <button type="button" (click)="chooseItem(item)"><span class="item-rarity">{{ item.rarity }}</span><strong>{{ item.name }}</strong><small>{{ item.id }} · {{ item.itemType }} · {{ item.stackable ? 'Stackable' : 'Individual instances' }}</small></button> }</div> }
               @if (selectedItem) { <div class="selected-item wide"><div><span>{{ selectedItem.rarity }}</span><strong>{{ selectedItem.name }}</strong><small>{{ selectedItem.id }}</small></div><p>{{ selectedItem.description }}</p></div> }
+              @if (loadingEquipmentOptions) { <p class="wide">Loading equipment definitions…</p> }
+              @if (equipmentOptions?.usesEquipmentProgression) {
+                <label class="wide">equipment definition<select [(ngModel)]="equipmentDefinitionId" (ngModelChange)="chooseEquipmentDefinition()">
+                  @for (option of equipmentOptions!.options; track option.definitionId) { <option [value]="option.definitionId">{{ option.name }} · {{ option.definitionId }}</option> }
+                </select></label>
+                @if (selectedEquipmentDefinition; as definition) {
+                  <label>Tier<input type="number" [min]="definition.minimumTier" [max]="definition.maximumTier" step="1" [(ngModel)]="equipmentTier" /></label>
+                  <label>Rank<input type="number" min="0" max="5" step="1" [(ngModel)]="equipmentRank" /></label>
+                  <label class="wide">Active style<select [(ngModel)]="equipmentStyleId"><option value="">Plain</option>
+                    @for (style of definition.compatibleStyleIds; track style) { <option [value]="style">{{ style }}</option> }
+                  </select></label>
+                  <p class="wide">Bound to this character. Awarded ranks have no refundable investment and base salvage is zero. Maximum {{ equipmentOptions!.maximumQuantity }} instances.</p>
+                } @else { <p class="wide">This item has no supported equipment definition.</p> }
+              }
               <label>Quantity<input type="number" min="1" step="1" [(ngModel)]="grantQuantity" /></label>
               <label class="wide">Reason or support reference<textarea [(ngModel)]="grantReason" placeholder="Required compensation justification"></textarea></label>
               <label class="wide">Internal notes<textarea [(ngModel)]="grantNotes" placeholder="Optional bug or incident context"></textarea></label>
-              <button class="primary" type="button" [disabled]="!!busyAction || !selectedItem" (click)="grantItems()">Preview and grant items</button>
+              <button class="primary" type="button" [disabled]="!!busyAction || !selectedItem || loadingEquipmentOptions || (selectedItem.itemType === 'Equipment' && !equipmentOptions) || (equipmentOptions?.usesEquipmentProgression && !selectedEquipmentDefinition)" (click)="grantItems()">Preview and grant items</button>
             </div>
           }
         }

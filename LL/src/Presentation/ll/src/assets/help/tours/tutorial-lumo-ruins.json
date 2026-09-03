@@ -1,10 +1,10 @@
 [
   {
-    "id": "review-lumo-gathering",
+    "id": "review-lumo-expedition",
     "kind": "info",
-    "element": "[data-tour=lumo-ruins-gathering]",
-    "title": "1. Gathering while fighting",
-    "description": "Every normal combat area supports Mining, Woodcutting, and Skinning. Lumo Ruins is abundant in all three, granting +50% yield when your equipped tool gathers after a victory.",
+    "element": "[data-tour=lumo-ruins-card]",
+    "title": "1. Your first expedition",
+    "description": "Lumo Ruins is an ongoing combat area. Your equipped starter kit and Essence loadout prepare you for the encounters ahead.",
     "position": "left"
   },
   {
@@ -12,8 +12,8 @@
     "kind": "click",
     "element": "[data-tour=lumo-ruins-battle]",
     "actionSelector": "[data-tour=lumo-ruins-battle]",
-    "title": "2. Fight and gather",
-    "description": "Start combat in Lumo Ruins. The expedition continues over time, and victories can yield the resource gathered by your equipped tool.",
+    "title": "2. Win an encounter",
+    "description": "Start combat in Lumo Ruins. Win an encounter to complete Into the Ruins, then follow your Quest Journal. You can inspect battle results and rewards in Combat.",
     "position": "left"
   }
 ]

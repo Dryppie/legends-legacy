@@ -1,4 +1,4 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
@@ -40,6 +40,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
     public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentSlotType slotType, CancellationToken cancellationToken)
     {
+        await LockGuildLoansAsync(entityId, null, cancellationToken);
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
@@ -102,6 +103,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
     public async Task<EquipmentEquipResult> EquipEquipmentAsync(Guid entityId, Guid equipmentId, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
+        await LockGuildLoansAsync(entityId, equipmentId, cancellationToken);
         // Include all equipped items, and all items from inventory
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
@@ -143,6 +145,21 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             return EquipmentEquipResult.Fail("That inventory item is not equipment.");
         }
         var equipmentInstance = (EquipmentInstance)inventoryItem.ItemInstance;
+        if (equipmentInstance.ProgressionData is { } progression)
+        {
+            if (!progression.State.Ownership.CanPersonallyModifyOrSalvage)
+            {
+                var loan = await _context.GuildVaultItems.SingleOrDefaultAsync(x =>
+                    x.EquipmentInstanceId == equipmentId && x.GuildId == progression.State.Ownership.OwnerId
+                    && x.BorrowedByCharacterId == entityId, cancellationToken);
+                if (loan is null || !await _context.GuildMembers.AnyAsync(x =>
+                    x.GuildId == loan.GuildId && x.CharacterId == entityId, cancellationToken))
+                    return EquipmentEquipResult.Fail("Only the current guild borrower can equip this item.");
+                equipmentInstance.GuildVaultItem = loan;
+            }
+            else if (progression.State.Ownership.OwnerId != entityId)
+                return EquipmentEquipResult.Fail("That equipment is not personally owned by this character.");
+        }
         var isTool = equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool;
         var requiredLevel = EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(equipmentInstance.Tier);
         if (!isTool && character.Level < requiredLevel)
@@ -151,6 +168,15 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         }
 
         return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, slotType, cancellationToken);
+    }
+
+    private async Task LockGuildLoansAsync(Guid characterId, Guid? equipmentId, CancellationToken ct)
+    {
+        var guildIds = await _context.GuildVaultItems
+            .Where(x => x.BorrowedByCharacterId == characterId || (equipmentId.HasValue && x.EquipmentInstanceId == equipmentId))
+            .Select(x => x.GuildId).Distinct().OrderBy(x => x).ToListAsync(ct);
+        foreach (var guildId in guildIds)
+            await _context.AcquireStateSyncScopeLockAsync($"guild-vault:{guildId:N}", ct);
     }
 
     private async Task<EquipmentEquipResult> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance,
@@ -275,6 +301,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                 }
         }
 
+        equipmentInstance.BindEquipmentProgressionForEquip(character.Id);
         equipmentInstance.IsFavorite = inventoryItem.IsFavorite;
         _context.InventoryItems.Remove(inventoryItem);
         inventory.InventoryItems.Remove(inventoryItem);

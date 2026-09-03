@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Regions;
@@ -21,26 +22,23 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private readonly ILootService _lootService;
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
     private readonly IEssenceResonanceService _essenceResonanceService;
-    private readonly IIdleDungeonSigilDropCalculator _sigilDropCalculator;
-    private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
     private readonly IAreaExperienceBalanceProvider _areaExperienceBalance;
+    private readonly ICombatAcquisitionRewardProcessor? _progression;
 
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
         IEssenceResonanceService essenceResonanceService,
-        IIdleDungeonSigilDropCalculator sigilDropCalculator,
-        ICombatGatheringRewardProcessor gatheringRewardProcessor,
-        IAreaExperienceBalanceProvider areaExperienceBalance)
+        IAreaExperienceBalanceProvider areaExperienceBalance,
+        ICombatAcquisitionRewardProcessor? progression = null)
     {
         _bonusService = bonusService;
         _lootService = lootService;
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
         _essenceResonanceService = essenceResonanceService;
-        _sigilDropCalculator = sigilDropCalculator;
-        _gatheringRewardProcessor = gatheringRewardProcessor;
         _areaExperienceBalance = areaExperienceBalance;
+        _progression = progression;
     }
 
     public async Task<IdleCombatCalculatedOutcome> CalculateAsync(
@@ -63,7 +61,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         var dungeonAccessRewards = new List<InventoryItem>();
         var totalExperience = 0;
         var totalCinders = 0;
-        var sigilEligibleVictories = 0;
         var orderedEncounters = facts.Encounters.OrderBy(x => x.Sequence).ToArray();
         var victoriousEncounters = orderedEncounters.Where(x => x.IsVictory).ToArray();
         var combatLootByEncounterId = new Dictionary<Guid, IReadOnlyList<InventoryItem>>();
@@ -127,7 +124,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     essenceRewards.AddRange(essenceDrops);
                 }
 
-                sigilEligibleVictories++;
 
                 experience = bonusAdjustedExperience;
 
@@ -154,45 +150,15 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 Loot: loot));
         }
 
-        var sigilDrops = await _sigilDropCalculator.RollAsync(
-            facts.CharacterId,
-            facts.Area,
-            sigilEligibleVictories,
-            cancellationToken,
-            factors);
-
-        if (sigilDrops.Count > 0)
+        if (_progression != null)
         {
-            totalLoot.AddRange(sigilDrops);
-            dungeonAccessRewards.AddRange(sigilDrops);
-        }
-
-        var gatheringRewards = await _gatheringRewardProcessor.ProcessAsync(
-            new CombatGatheringRewardFacts(
-                facts.CharacterId,
-                facts.Encounters.Count(x => x.IsVictory),
-                facts.EquippedTool,
-                facts.Area.GatheringNodes
-                    .Select(node => new CombatGatheringNode(
-                        node.Id,
-                        node.Name,
-                        node.Type,
-                        node.LevelRequirement,
-                        node.ProcChance,
-                        node.RewardTableId,
-                        YieldMultiplier: AreaGatheringYieldBalance.ResolveMultiplier(node.YieldBonusPercent),
-                        AreaYieldBonusPercent: node.YieldBonusPercent))
-                    .ToArray()),
-            cancellationToken,
-            factors);
-
-        var gatheringLoot = gatheringRewards
-            .SelectMany(x => x.ItemsGained)
-            .ToList();
-
-        if (gatheringLoot.Count > 0)
-        {
-            totalLoot.AddRange(gatheringLoot);
+            var ordinary = await _progression.ProcessAsync(facts, cancellationToken);
+            totalLoot.AddRange(ordinary.Equipment);
+            totalLoot.AddRange(ordinary.Scrap);
+            totalLoot.AddRange(ordinary.Sigils);
+            powerRewards.AddRange(ordinary.Equipment);
+            craftingRewards.AddRange(ordinary.Scrap);
+            dungeonAccessRewards.AddRange(ordinary.Sigils);
         }
 
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(
@@ -212,7 +178,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             CraftingRewards: craftingRewards,
             EssenceRewards: essenceRewards,
             DungeonAccessRewards: dungeonAccessRewards,
-            GatheringRewards: gatheringRewards,
             EncounterOutcomes: encounterOutcomes);
     }
 

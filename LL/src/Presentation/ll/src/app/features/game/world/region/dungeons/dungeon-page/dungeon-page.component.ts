@@ -1,3 +1,4 @@
+import { equipmentSourceLabel } from '../../../../../../shared/utils/equipment/acquisition-source';
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
@@ -798,10 +799,7 @@ export class DungeonPageComponent {
   }
 
   formatRewardSource(value: string | null | undefined): string {
-    if (!value) return 'Dungeon';
-    return value
-      .replace(/[:_-]/g, ' ')
-      .replace(/\b\w/g, (character) => character.toUpperCase());
+    return equipmentSourceLabel(value, 'Dungeon');
   }
 
   trackByIndex(index: number): number {

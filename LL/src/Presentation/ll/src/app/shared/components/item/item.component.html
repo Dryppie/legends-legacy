@@ -62,37 +62,17 @@
       {{ item.itemBase.itemType }}
     </div>
 
-    <p *ngIf="item.itemBase.description" class="ll-item-description">
-      {{ item.itemBase.description }}
+    <p *ngIf="description" class="ll-item-description">
+      {{ description }}
     </p>
-
-    <div
-      *ngIf="item.itemBase.blueprint as blueprint"
-      class="ll-item-detail-section"
-    >
-      <div class="ll-item-meta">Blueprint</div>
-      <div class="mt-1 font-medium text-white">
-        {{ blueprint.name }}
-      </div>
-      <div class="mt-1 text-xs text-secondary">
-        Applies to {{ blueprint.compatibleRecipeCount }} compatible recipes.
-      </div>
-      <app-blueprint-attribute-summary
-        [blueprint]="blueprint"
-      ></app-blueprint-attribute-summary>
-      <div class="mt-1 text-xs text-secondary">
-        {{ blueprint.sourceType || "Unknown source" }}
-        <ng-container *ngIf="blueprint.sourceId">
-          · {{ blueprint.sourceId }}</ng-container
-        >
-      </div>
-    </div>
 
     <div class="ll-item-detail-section flex flex-wrap gap-2">
       <span *ngIf="item.itemBase.stackable" class="ll-item-chip">
         Stackable
       </span>
-      <span *ngIf="item.itemBase.isBound" class="ll-item-chip"> Bound </span>
+      <span *ngIf="item.isBound ?? item.itemBase.isBound" class="ll-item-chip">
+        Bound
+      </span>
       <span *ngIf="rewardCategory" class="ll-item-chip ll-item-chip-accent">
         {{ rewardCategory }}
       </span>

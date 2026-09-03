@@ -14,6 +14,7 @@ import {
   Input,
   OnInit,
   signal,
+  untracked,
 } from '@angular/core';
 import {
   FormControl,
@@ -67,30 +68,36 @@ import { AttributeDisplayPipe } from '../../../../../shared/pipes/attributes/att
 import { aggregateAttributes } from '../../../../../shared/utils/attributes/attribute-order.utils';
 import { AttributeTooltipDirective } from '../../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
 import { marketplaceCommoditySearchText } from '../market-place-commodity/market-place-commodity-search';
+import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
+import {
+  marketplaceEquipment,
+  marketplaceItemIsBound,
+  marketplaceStyleLabel,
+} from '../../../../../shared/utils/market-place/marketplace-equipment';
 
 @Component({
-    selector: 'app-market-place-buy',
-    imports: [
-        NgFor,
-        NgIf,
-        NgClass,
-        FormsModule,
-        ReactiveFormsModule,
-        RegularButtonComponent,
-        NumberFormatPipe,
-        MarketPlaceListingItemComponent,
-        NgSwitch,
-        NgSwitchCase,
-        NgSwitchDefault,
-        ItemComponent,
-        DecimalPipe,
-        AttributeTypeFormatPipe,
-        AttributeValueFormatPipe,
-        AttributeDisplayPipe,
-        AttributeTooltipDirective,
-        DropdownComponent,
-    ],
-    templateUrl: './market-place-buy.component.html'
+  selector: 'app-market-place-buy',
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FormsModule,
+    ReactiveFormsModule,
+    RegularButtonComponent,
+    NumberFormatPipe,
+    MarketPlaceListingItemComponent,
+    NgSwitch,
+    NgSwitchCase,
+    NgSwitchDefault,
+    ItemComponent,
+    DecimalPipe,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
+    AttributeDisplayPipe,
+    AttributeTooltipDirective,
+    DropdownComponent,
+  ],
+  templateUrl: './market-place-buy.component.html',
 })
 export class MarketPlaceBuyComponent implements OnInit {
   readonly allListings = signal<MarketPlaceListing[]>([]);
@@ -127,6 +134,58 @@ export class MarketPlaceBuyComponent implements OnInit {
   readonly rarity = signal<string>('');
   readonly equipmentType = signal<string>('');
   readonly quality = signal<string>('');
+  readonly definitionId = signal('');
+  readonly activeStyleId = signal('');
+  readonly minimumRankCtrl = new FormControl<number | null>(null, {
+    validators: [
+      Validators.min(0),
+      Validators.max(5),
+      Validators.pattern(/^[0-5]$/),
+    ],
+  });
+  readonly minimumRank = toSignal(
+    this.minimumRankCtrl.valueChanges.pipe(
+      startWith(this.minimumRankCtrl.value),
+    ),
+    { initialValue: null },
+  );
+  readonly styleLabel = marketplaceStyleLabel;
+  readonly definitionOptions = computed<DropdownOption<string>[]>(() => {
+    const choices = new Map<string, string>();
+    for (const listing of this.allListings()) {
+      const item = marketplaceEquipment(listing.itemInstance);
+      if (item?.progression && !marketplaceItemIsBound(item))
+        choices.set(
+          item.progression.definitionId,
+          item.displayName || item.equipmentBase.name,
+        );
+    }
+    return [
+      { label: 'Any identity', value: '' },
+      ...[...choices]
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([value, label]) => ({ label, value })),
+    ];
+  });
+  readonly styleOptions = computed<DropdownOption<string>[]>(() => {
+    const styles = new Set<string>();
+    for (const listing of this.allListings()) {
+      const item = marketplaceEquipment(listing.itemInstance);
+      if (
+        item?.progression &&
+        !marketplaceItemIsBound(item) &&
+        item.progression.activeStyleId
+      )
+        styles.add(item.progression.activeStyleId);
+    }
+    return [
+      { label: 'Any active style', value: '' },
+      { label: 'Plain', value: 'plain' },
+      ...[...styles]
+        .sort()
+        .map((value) => ({ value, label: marketplaceStyleLabel(value) })),
+    ];
+  });
   readonly priceSort = signal<'' | 'asc' | 'desc'>('');
   readonly minimumTierCtrl = new FormControl<number | null>(null, {
     validators: [Validators.min(1)],
@@ -135,7 +194,9 @@ export class MarketPlaceBuyComponent implements OnInit {
     validators: [Validators.min(0)],
   });
   readonly minimumTier = toSignal(
-    this.minimumTierCtrl.valueChanges.pipe(startWith(this.minimumTierCtrl.value)),
+    this.minimumTierCtrl.valueChanges.pipe(
+      startWith(this.minimumTierCtrl.value),
+    ),
     { initialValue: null },
   );
   readonly minimumPotential = toSignal(
@@ -158,13 +219,17 @@ export class MarketPlaceBuyComponent implements OnInit {
     { label: 'Any rarity', value: '' },
     ...this.rarities.map((rarity) => ({ label: rarity, value: rarity })),
   ];
-  readonly equipmentTypeOptions: DropdownOption<string>[] = [
+  readonly equipmentTypeOptions = computed<DropdownOption<string>[]>(() => [
     { label: 'Any slot', value: '' },
-    ...Object.values(EquipmentType).map((value) => ({
-      label: new EquipmentTypePipe().transform(value),
-      value,
-    })),
-  ];
+    ...Object.values(EquipmentType)
+      .filter(
+        (value) => value !== EquipmentType.Tool,
+      )
+      .map((value) => ({
+        label: new EquipmentTypePipe().transform(value),
+        value,
+      })),
+  ]);
   readonly qualityOptions: DropdownOption<string>[] = [
     { label: 'Any quality', value: '' },
     ...Object.values(ItemQuality).map((value) => ({ label: value, value })),
@@ -174,13 +239,27 @@ export class MarketPlaceBuyComponent implements OnInit {
   readonly selectedListing = signal<MarketPlaceListing | null>(null);
 
   readonly filteredListings = computed(() => {
-    let items = [...this.allListings()];
+    let items = this.allListings().filter((listing) => {
+      if (marketplaceItemIsBound(listing.itemInstance)) return false;
+      const equipment = marketplaceEquipment(listing.itemInstance);
+      if (!equipment) return true;
+      return (
+        !!equipment.progression
+      );
+    });
 
     const q = this.searchTerm();
     if (q) {
       items = items.filter((l) =>
         [
           l.itemInstance.displayName ?? '',
+          marketplaceEquipment(l.itemInstance)?.progression?.definitionId ?? '',
+          marketplaceEquipment(l.itemInstance)?.progression?.archetypeId ?? '',
+          marketplaceEquipment(l.itemInstance)?.progression
+            ? marketplaceStyleLabel(
+                marketplaceEquipment(l.itemInstance)?.progression?.activeStyleId,
+              )
+            : '',
           marketplaceCommoditySearchText(l.itemInstance.itemBase),
         ]
           .join(' ')
@@ -214,12 +293,6 @@ export class MarketPlaceBuyComponent implements OnInit {
         );
       }
 
-      if (this.quality()) {
-        items = items.filter(
-          (listing) =>
-            (listing.itemInstance as EquipmentInstance).quality === this.quality(),
-        );
-      }
 
       const minimumTier = this.minimumTier();
       if (minimumTier !== null) {
@@ -229,17 +302,33 @@ export class MarketPlaceBuyComponent implements OnInit {
         );
       }
 
-      const minimumPotential = this.minimumPotential();
-      if (minimumPotential !== null) {
-        items = items.filter(
-          (listing) =>
-            ((listing.itemInstance as EquipmentInstance).potential ?? 0) >=
-            minimumPotential,
-        );
-      }
     }
 
-    /* 4️⃣ Sort */
+    if (
+      this.selectedItemType() === ItemType.Equipment
+    ) {
+      if (this.definitionId())
+        items = items.filter(
+          (l) =>
+            marketplaceEquipment(l.itemInstance)?.progression?.definitionId ===
+            this.definitionId(),
+        );
+      if (this.activeStyleId())
+        items = items.filter(
+          (l) =>
+            (marketplaceEquipment(l.itemInstance)?.progression?.activeStyleId ??
+              'plain') === this.activeStyleId(),
+        );
+      const minimumRank = this.minimumRank();
+      if (minimumRank !== null)
+        items = items.filter(
+          (l) =>
+            (marketplaceEquipment(l.itemInstance)?.progression?.rank ?? -1) >=
+            minimumRank,
+        );
+    }
+
+    /* Sort */
     if (this.priceSort()) {
       items.sort((a, b) =>
         this.priceSort() === 'asc'
@@ -256,15 +345,33 @@ export class MarketPlaceBuyComponent implements OnInit {
     private readonly inventoryState: InventoryStateService,
     private readonly equipmentState: EquipmentStateService,
     public readonly characterState: CharacterStateService,
+    private readonly questState: QuestStateService,
   ) {
     this.inventoryState.load();
     this.equipmentState.load();
+    effect(() => {
+      this.characterState.currentCharacterId();
+      untracked(() => {
+        this.resetFilters();
+        this.selectedListing.set(null);
+        this.selectedListingId = '';
+      });
+    });
+    effect(() => {
+      const listings = this.filteredListings();
+      const selected = untracked(() => this.selectedListing());
+      if (!selected) return;
+      const current =
+        listings.find((listing) => listing.id === selected.id) ?? null;
+      if (current !== selected) {
+        this.selectedListing.set(current);
+        this.selectedListingId = current?.id ?? '';
+      }
+    });
     /* Keep our local copy of listings in sync with the store */
-    effect(
-      () => {
-        this.allListings.set(this.marketplaceState.listings());
-      },
-    );
+    effect(() => {
+      this.allListings.set(this.marketplaceState.listings());
+    });
 
     effect(() => {
       const pi = this.selectedListing();
@@ -282,6 +389,7 @@ export class MarketPlaceBuyComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.questState.loaded()) this.questState.load();
     /* Load remote data once */
     this.marketplaceState.load();
 
@@ -404,7 +512,13 @@ export class MarketPlaceBuyComponent implements OnInit {
 
   buyoutListing(): void {
     const sel = this.selectedListing();
-    if (!sel || this.isOwnListing(sel) || this.qtyCtrl.invalid) return;
+    if (
+      !sel ||
+      this.isOwnListing(sel) ||
+      this.qtyCtrl.invalid ||
+      !this.filteredListings().some((l) => l.id === sel.id)
+    )
+      return;
     const qty = this.qtyCtrl.value!;
 
     // 👇 Replace with your real service / API call
@@ -447,6 +561,9 @@ export class MarketPlaceBuyComponent implements OnInit {
     this.rarity.set('');
     this.equipmentType.set('');
     this.quality.set('');
+    this.definitionId.set('');
+    this.activeStyleId.set('');
+    this.minimumRankCtrl.reset();
     this.minimumTierCtrl.reset();
     this.minimumPotentialCtrl.reset();
     this.priceSort.set('');
@@ -456,7 +573,6 @@ export class MarketPlaceBuyComponent implements OnInit {
     this.rarity.set(selection.main as string);
   }
 
-
   setEquipmentTypeSelection(selection: DropdownSelection<unknown>) {
     this.equipmentType.set(selection.main as string);
   }
@@ -465,7 +581,22 @@ export class MarketPlaceBuyComponent implements OnInit {
     this.quality.set(selection.main as string);
   }
 
+  setDefinitionSelection(selection: DropdownSelection<unknown>) {
+    this.definitionId.set(selection.main as string);
+  }
+
+  setStyleSelection(selection: DropdownSelection<unknown>) {
+    this.activeStyleId.set(selection.main as string);
+  }
+
+  readonly selectedEquipment = computed(() => {
+    const selected = this.selectedListing();
+    return selected ? marketplaceEquipment(selected.itemInstance) : null;
+  });
+
   selectListing(listing: MarketPlaceListing) {
+    if (!this.filteredListings().some((current) => current.id === listing.id))
+      return;
     this.selectedListing.set(listing);
     this.selectedListingId = listing.id;
   }

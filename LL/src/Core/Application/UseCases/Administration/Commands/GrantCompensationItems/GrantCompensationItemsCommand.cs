@@ -8,6 +8,7 @@ using AutoMapper;
 using Common.Primitives;
 using Domain.Models.Administration;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Progression;
 using MediatR;
 
 namespace Application.UseCases.Administration.Commands.GrantCompensationItems;
@@ -19,7 +20,8 @@ public sealed record GrantCompensationItemsCommand(
     string ItemBaseId,
     int Quantity,
     string Reason,
-    string? InternalNotes) : ICommand<Response<CompensationItemGrantResultDto>>;
+    string? InternalNotes,
+    EquipmentGrantRequest? Equipment = null) : ICommand<Response<CompensationItemGrantResultDto>>;
 
 public sealed class GrantCompensationItemsCommandHandler(
     ILiveOpsService liveOps,
@@ -39,7 +41,7 @@ public sealed class GrantCompensationItemsCommandHandler(
             request.Quantity,
             request.Reason,
             request.InternalNotes,
-            cancellationToken);
+            cancellationToken, request.Equipment);
         if (!result.IsSuccess || result.Value is null)
         {
             return Response<CompensationItemGrantResultDto>.Fail(result.ErrorMessage);

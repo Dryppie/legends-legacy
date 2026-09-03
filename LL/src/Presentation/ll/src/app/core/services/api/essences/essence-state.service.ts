@@ -6,6 +6,7 @@ import {
   from,
   last,
   Observable,
+  of,
   catchError,
   finalize,
   map,
@@ -65,6 +66,9 @@ export class EssenceStateService {
   private readonly _loading = signal(false);
   private readonly _spendingDust = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly _dirty = signal(true);
+  private dirtyVersion = 0;
+  private refreshedRevision = 0;
   private readonly eventDeduper = new RealtimeSignalDeduper();
   private resetVersion = 0;
   private dustMutationVersion = 0;
@@ -123,6 +127,7 @@ export class EssenceStateService {
   readonly loading = computed(() => this._loading());
   readonly spendingDust = computed(() => this._spendingDust());
   readonly error = computed(() => this._error());
+  readonly dirty = this._dirty.asReadonly();
 
   readonly inventoryEssences = computed(() =>
     this.inventoryState
@@ -288,7 +293,10 @@ export class EssenceStateService {
     this.stateSync.register(
       'essences',
       'essences',
-      () => this.synchronize(true),
+      ({ targetRevision }) => {
+        if (targetRevision > this.refreshedRevision) this._dirty.set(true);
+        return of(undefined);
+      },
       () => this._archive() !== null || this._loadouts() !== null,
     );
     setInterval(() => this._now.set(Date.now()), 60_000);
@@ -313,7 +321,7 @@ export class EssenceStateService {
           levelUp.unlockedEssenceSlots > loadouts.unlockedSlots &&
           this.eventDeduper.shouldProcess('essence-slot-unlock', envelope)
         ) {
-          untracked(() => this.refreshLoadouts(true));
+          untracked(() => this.markDirty());
         }
       },
     );
@@ -350,10 +358,36 @@ export class EssenceStateService {
     });
   }
 
+  private markDirty(): void {
+    this.dirtyVersion += 1;
+    this._dirty.set(true);
+  }
+
+  private latestRevision(): number {
+    return Math.max(
+      this.stateSync.latestRevision('essences'),
+      this.domainVersions.latest('essences'),
+    );
+  }
+
+  /** Combat invalidations only dirty the cache; page entry owns fetching it. */
+  refreshIfDirty(): void {
+    const needsRefresh =
+      this._dirty() ||
+      this.latestRevision() > this.refreshedRevision ||
+      !this._archive() ||
+      !this._loadouts() ||
+      !this._creatureArchive() ||
+      !this._codex();
+    if (needsRefresh && !this._loading()) this.refresh(true);
+  }
+
   private synchronize(preserveLoadoutDraft = false): Observable<unknown> {
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
+    const requestDirtyVersion = this.dirtyVersion;
+    const requestRevision = this.latestRevision();
     const refreshEpoch = ++this.fullRefreshEpoch;
     const archiveEpoch = ++this.archiveRequestEpoch;
     const loadoutEpoch = ++this.loadoutRequestEpoch;
@@ -390,6 +424,11 @@ export class EssenceStateService {
             this._creatureArchive.set(creatureArchive);
           }
           if (codexEpoch === this.codexRequestEpoch) this._codex.set(codex);
+          this.refreshedRevision = requestRevision;
+          this._dirty.set(
+            requestDirtyVersion !== this.dirtyVersion ||
+              this.latestRevision() > requestRevision,
+          );
           this.stateSync.activate('essences', 'essences');
         },
         error: (error) => {
@@ -397,6 +436,7 @@ export class EssenceStateService {
             requestVersion === this.resetVersion &&
             refreshEpoch === this.fullRefreshEpoch
           ) {
+            this._dirty.set(true);
             this._error.set(error?.message ?? 'Failed to load essences');
           }
         },
@@ -470,6 +510,9 @@ export class EssenceStateService {
   }
 
   reset(): void {
+    this.dirtyVersion = 0;
+    this.refreshedRevision = 0;
+    this._dirty.set(true);
     this.resetVersion += 1;
     this.dustMutationVersion += 1;
     this.fullRefreshEpoch += 1;
@@ -931,6 +974,10 @@ export class EssenceStateService {
     this._loadouts.set(response.loadouts);
     this._creatureArchive.set(response.creatureArchive);
     this._codex.set(response.codex);
+    this.refreshedRevision =
+      result.domainVersions['essences'] ?? this.latestRevision();
+    this._dirty.set(false);
+    this._loading.set(false);
     this.ensureSelectedEssence(response.archive);
 
     const preferredLoadout = preferredLoadoutId
@@ -1033,56 +1080,6 @@ export class EssenceStateService {
     }
 
     return fallback;
-  }
-
-  private refreshLoadouts(preserveDraft = false): void {
-    this._loading.set(true);
-    const requestVersion = this.resetVersion;
-    const requestEpoch = ++this.loadoutRequestEpoch;
-
-    this.essencesService
-      .getLoadouts()
-      .pipe(
-        finalize(() => {
-          if (requestEpoch === this.loadoutRequestEpoch) {
-            this._loading.set(false);
-          }
-        }),
-      )
-      .subscribe({
-        next: (loadouts) => {
-          if (
-            requestVersion !== this.resetVersion ||
-            requestEpoch !== this.loadoutRequestEpoch
-          ) {
-            return;
-          }
-          const shouldPreserveDraft =
-            preserveDraft &&
-            this.hasDraftChanges() &&
-            this.canPreserveLoadoutDraft(loadouts);
-          const draftSlots = shouldPreserveDraft ? this._draftSlots() : [];
-          this._loadouts.set(loadouts);
-          if (shouldPreserveDraft) {
-            this._draftSlots.set(
-              Array.from(
-                { length: loadouts.unlockedSlots },
-                (_, index) => draftSlots[index] ?? null,
-              ),
-            );
-          }
-          this.ensureSelectedLoadout(loadouts, shouldPreserveDraft);
-        },
-        error: (error) => {
-          if (
-            requestVersion !== this.resetVersion ||
-            requestEpoch !== this.loadoutRequestEpoch
-          ) {
-            return;
-          }
-          this._error.set(error?.message ?? 'Failed to load Essence loadouts');
-        },
-      });
   }
 
   private ensureSelectedLoadout(

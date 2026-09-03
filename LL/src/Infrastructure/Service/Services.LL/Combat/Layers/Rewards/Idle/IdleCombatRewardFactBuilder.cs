@@ -75,27 +75,7 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
             ProcessedDuration: context.Details.ProcessedDuration,
             Area: context.Area,
             PlayerEntityIds: [.. context.PlayerEntityIds],
-            EquippedTool: ResolveEquippedTool(context),
-            Encounters: encounterFacts));
+            Encounters: encounterFacts) { ScheduleGeneration = context.OrchestrationRequest.CharacterAction.ScheduleGeneration });
     }
 
-    private static EquippedGatheringTool? ResolveEquippedTool(IdleCombatOutcomeContext context)
-    {
-        if (context.OrchestrationResult.SourceEntitiesById is null ||
-            !context.OrchestrationResult.SourceEntitiesById.TryGetValue(context.CharacterId, out var character))
-        {
-            return null;
-        }
-
-        var tool = character.EquipmentSlots
-            .FirstOrDefault(slot => slot.EquipmentSlotType == EquipmentSlotType.Tool)
-            ?.EquipmentInstance;
-
-        if (tool?.EquipmentBase.GatheringType is null)
-        {
-            return null;
-        }
-
-        return EquippedGatheringTool.From(tool);
-    }
 }

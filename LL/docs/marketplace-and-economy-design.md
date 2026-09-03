@@ -1,5 +1,11 @@
 # Marketplace and Economy Design
 
+**Equipment progression update, 2 September 2026:** the economy counts, crafting loops and Quality/Potential discussion below describe the legacy design. Equipment progression retains the Cinder marketplace, fees, escrow and transfer infrastructure, while eligibility for its equipment uses the frozen instance's ownership and binding. Unbound discoveries transfer their owner on delivery; bound or guild-owned equipment cannot be traded personally. Marketplace commodity details, item popovers and inventory descriptions now describe Blueprints as reusable Forge styles, omit legacy recipe stat previews for this cohort, and direct learning to the Forge. Exact compatibility and stat projections are available there. These descriptions do not change market prices or eligibility rules. Existing obsolete material holdings and affected listings/orders still need a conversion policy. See the [equipment progression implementation ledger](../../docs/design/equipment-implementation-status.md). Gear-selling merchants remain excluded, activation flags remain off, and no market conversion has run.
+
+**3 September reward update:** Champion Market offers now preview and deliver two Tempered Scrap instead of a catalyst cache for characters using the Forge, preserving authored prices, rotation, rank requirements and purchase limits/history. Its Blueprint rewards describe Forge styles. Tournament cache rewards and already-held caches use the same replacement. No player-market listing/escrow conversion or gear-selling merchant was added. Tournament delivery history introduces one further unapplied migration; details and verification are in the ledger.
+
+**3 September exact-equipment update:** Forge equipment now has identity, active-style, minimum-rank/tier and slot filters. Canonical rows show tier/rank/style, and purchase details show native/active style and binding consequences. Characters using the Forge cannot buy legacy equipment, including through direct requests. Legacy characters retain Quality/Potential filters in their legacy view and can also browse Forge equipment. Bound personal and guild-owned instances are excluded from new buy/sell actions. Shared market snapshots, listing cancellation/history, exact-instance transfer, prices and fees remain intact; holdings and escrow conversion still need the broader transition plan. See the ledger for verification.
+
 ## Purpose
 
 This document records the current Legends Legacy item economy, assesses the existing marketplace implementation, and defines the target marketplace experience and implementation priorities.
@@ -7,7 +13,7 @@ This document records the current Legends Legacy item economy, assesses the exis
 The recommended marketplace has one consistent shell with two trading models:
 
 - **Commodity markets** for stackable and interchangeable items: resources, catalysts, blueprints, and unbound essences.
-- **Exact-item listings** for rolled equipment, where the individual instance, attributes, quality, Potential, blueprint, and tempering history matter.
+- **Exact-item listings** for individual equipment instances. Equipment progression uses identity, tier, rank, active/native styles, stats and binding; retained legacy equipment also has Quality, Potential, Blueprint and Tempering fields.
 
 ## Current item economy
 

@@ -41,6 +41,7 @@ type VaultSlotFilter = EquipmentType | 'all';
 })
 export class GuildVaultComponent {
   @Input({ required: true }) guild!: Guild;
+  pendingDonationId: string | null = null;
   busy = false;
   searchTerm = '';
   activeFilter: VaultFilter = 'all';
@@ -73,7 +74,11 @@ export class GuildVaultComponent {
     this.inventoryState
       .equipment()
       .filter(
-        (item) => !(item.itemInstance as EquipmentInstance).isGuildBorrowed,
+        (item) => {
+          const equipment = item.itemInstance as EquipmentInstance;
+          return !equipment.isGuildBorrowed && (!equipment.progression ||
+            (equipment.progression.ownership === 'UnboundPersonal' && !item.isFavorite && !equipment.isFavorite));
+        },
       ),
   );
 
@@ -210,11 +215,17 @@ export class GuildVaultComponent {
 
   donate(equipmentInstanceId: string): void {
     if (this.busy) return;
+    const item = this.donateOptions().find(x => x.itemInstance.id === equipmentInstanceId);
+    if (!item) return;
+    if ((item.itemInstance as EquipmentInstance).progression && this.pendingDonationId !== equipmentInstanceId) {
+      this.pendingDonationId = equipmentInstanceId;
+      return;
+    }
     this.busy = true;
     this.guildState
       .donateVaultItem(equipmentInstanceId)
       .pipe(finalize(() => (this.busy = false)))
-      .subscribe();
+      .subscribe({ next: () => { this.pendingDonationId = null; } });
   }
 
   borrow(vaultItemId: string): void {
@@ -236,7 +247,7 @@ export class GuildVaultComponent {
   }
 
   requestWithdraw(vaultItemId: string): void {
-    if (this.busy) return;
+    if (this.busy || this.vaultItems.find(x => x.id === vaultItemId)?.equipment.progression) return;
     this.pendingWithdrawId = vaultItemId;
   }
 
@@ -245,7 +256,7 @@ export class GuildVaultComponent {
   }
 
   withdraw(vaultItemId: string): void {
-    if (this.busy || this.pendingWithdrawId !== vaultItemId) return;
+    if (this.busy || this.pendingWithdrawId !== vaultItemId || this.vaultItems.find(x => x.id === vaultItemId)?.equipment.progression) return;
     this.busy = true;
     this.guildState
       .withdrawVaultItem(vaultItemId)

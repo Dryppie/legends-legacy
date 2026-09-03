@@ -17,6 +17,15 @@ describe('LiveOpsApiService', () => {
 
   afterEach(() => http.verify());
 
+  it('loads compensation definitions for the selected character and item', async () => {
+    const promise = service.compensationEquipmentOptions('owner-1', 'shortsword');
+    const request = http.expectOne(candidate => candidate.url === '/api/liveops/characters/owner-1/item-grants/equipment-options'
+      && candidate.params.get('itemBaseId') === 'shortsword');
+    expect(request.request.method).toBe('GET');
+    request.flush({ isSuccess: true, data: { usesEquipmentProgression: true, maximumQuantity: 100, options: [] }, errorMessage: '' });
+    expect((await promise).data?.usesEquipmentProgression).toBeTrue();
+  });
+
   it('uses the antiforgery token for mutations', async () => {
     const tokenPromise = service.initializeAntiforgery();
     http.expectOne('/auth/antiforgery').flush({ requestToken: 'xsrf-token' });

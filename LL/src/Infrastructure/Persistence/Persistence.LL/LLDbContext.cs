@@ -78,7 +78,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        MigrateTrackedEquipment();
         NormalizeIdentityFields();
         EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
@@ -94,21 +93,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             .Any(x => x.State is EntityState.Modified or EntityState.Deleted))
         {
             throw new InvalidOperationException("Administration audit entries are append-only and cannot be modified or deleted.");
-        }
-    }
-
-    private void MigrateTrackedEquipment()
-    {
-        foreach (var entry in ChangeTracker.Entries<EquipmentInstance>()
-                     .Where(entry => entry.State is EntityState.Added or EntityState.Modified))
-        {
-            EquipmentStatModelMigrator.MigrateToCurrent(entry.Entity);
-        }
-
-        foreach (var entry in ChangeTracker.Entries<EquipmentSnapshot>()
-                     .Where(entry => entry.State is EntityState.Added or EntityState.Modified))
-        {
-            EquipmentStatModelMigrator.MigrateToCurrent(entry.Entity);
         }
     }
 
@@ -518,8 +502,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
         modelBuilder.Entity<ActionDetails>()
             .HasDiscriminator<CharacterActionType>("ActionType")
-            .HasValue<CombatActionDetails>(CharacterActionType.Combat)
-            .HasValue<CraftingActionDetails>(CharacterActionType.Crafting);
+            .HasValue<CombatActionDetails>(CharacterActionType.Combat);
 
     }
 
@@ -579,6 +562,16 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<CharacterQuestProgress> CharacterQuestProgresses => Set<CharacterQuestProgress>();
     public DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses => Set<CharacterQuestObjectiveProgress>();
     public DbSet<QuestEventLedger> QuestEventLedgers => Set<QuestEventLedger>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant> StarterEquipmentGrants => Set<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.ForgeReceipt> ForgeReceipts => Set<Domain.Models.Items.Equipments.Progression.ForgeReceipt>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle> LearnedEquipmentStyles => Set<Domain.Models.Items.Equipments.Progression.LearnedEquipmentStyle>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress> EquipmentProtectionProgress => Set<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt> EquipmentProtectionReceipts => Set<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt> BaselineEquipmentRecoveryReceipts => Set<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.PlainEquipmentEntitlement> PlainEquipmentEntitlements => Set<Domain.Models.Items.Equipments.Progression.PlainEquipmentEntitlement>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.PlainEquipmentRecoveryReceipt> PlainEquipmentRecoveryReceipts => Set<Domain.Models.Items.Equipments.Progression.PlainEquipmentRecoveryReceipt>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.CombatAcquisitionProgress> CombatAcquisitionProgress => Set<Domain.Models.Items.Equipments.Progression.CombatAcquisitionProgress>();
+    public DbSet<Domain.Models.Items.Equipments.Progression.CombatAcquisitionSelectionReceipt> CombatAcquisitionSelectionReceipts => Set<Domain.Models.Items.Equipments.Progression.CombatAcquisitionSelectionReceipt>();
     public DbSet<EventQuestInstance> EventQuestInstances => Set<EventQuestInstance>();
     public DbSet<EventQuestObjectiveProgress> EventQuestObjectiveProgresses => Set<EventQuestObjectiveProgress>();
     public DbSet<EventQuestCharacterContribution> EventQuestCharacterContributions => Set<EventQuestCharacterContribution>();
@@ -611,7 +604,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     // Player Actions
     public DbSet<CharacterAction> CharacterActions => Set<CharacterAction>();
     public DbSet<ActionDetails> ActionDetails => Set<ActionDetails>();
-    public DbSet<CraftingQueueItem> CraftingQueueItems => Set<CraftingQueueItem>(); 
 
     //public DbSet<Equipment> Equipments => Set<Equipment>();
 
@@ -652,7 +644,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     //public DbSet<PartyMember> PartyMembers => Set<PartyMember>();
 
-    public DbSet<Profession> Professions => Set<Profession>();
 
     //public DbSet<Quest> Quests => Set<Quest>();
 
@@ -666,8 +657,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     //public DbSet<TownBuilding> TownBuildings => Set<TownBuilding>();
 
-    public DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks => Set<CharacterRecipeUnlock>();
-    public DbSet<CharacterRecipeMastery> CharacterRecipeMasteries => Set<CharacterRecipeMastery>();
     public DbSet<ProphecyDefinition> ProphecyDefinitions => Set<ProphecyDefinition>();
     public DbSet<PlayerProphecyInstance> PlayerProphecyInstances => Set<PlayerProphecyInstance>();
     public DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress => Set<WeeklyRevelationProgress>();

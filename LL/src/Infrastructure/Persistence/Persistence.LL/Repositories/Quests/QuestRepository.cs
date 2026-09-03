@@ -35,6 +35,16 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
     public Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken) =>
         context.QuestEventLedgers.AnyAsync(x => x.OutboxMessageId == outboxMessageId, cancellationToken);
 
+    public async Task<IReadOnlySet<string>> GetOwnedEssenceDefinitionIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        (await context.PlayerEssences
+            .Where(x => x.CharacterId == characterId)
+            .Select(x => x.EssenceDefinitionId)
+            .Distinct()
+            .ToListAsync(cancellationToken))
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
     public Task<bool> HasEssenceInAnyLoadoutAsync(
         Guid characterId,
         string essenceDefinitionId,
@@ -44,8 +54,16 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
             .SelectMany(x => x.Slots)
             .AnyAsync(
                 x => x.PlayerEssence != null &&
-                     x.PlayerEssence.EssenceDefinitionId == essenceDefinitionId,
+                x.PlayerEssence.EssenceDefinitionId == essenceDefinitionId,
                 cancellationToken);
+
+    public Task<bool> HasAnyEssenceInLoadoutAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        context.EssenceLoadouts
+            .Where(x => x.CharacterId == characterId)
+            .SelectMany(x => x.Slots)
+            .AnyAsync(x => x.PlayerEssenceId != null, cancellationToken);
 
     public Task<bool> HasQualifyingEquipmentEquippedAsync(
         Guid characterId,
@@ -66,19 +84,6 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
                      (!mustBeCrafted || x.EquipmentInstance.BaseRecipeId != null) &&
                      (!toolSlotOnly || x.EquipmentSlotType == EquipmentSlotType.Tool),
                 cancellationToken);
-    }
-
-    public async Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(
-        Guid characterId,
-        CancellationToken cancellationToken)
-    {
-        var recipeIds = await context.CharacterRecipeMasteries
-            .AsNoTracking()
-            .Where(x => x.CharacterId == characterId && x.Experience > 0)
-            .Select(x => x.RecipeId)
-            .ToListAsync(cancellationToken);
-
-        return recipeIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
     public void AddProgress(CharacterQuestProgress progress) =>

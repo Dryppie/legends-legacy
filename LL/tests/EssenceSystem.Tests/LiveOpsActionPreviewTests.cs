@@ -2,6 +2,7 @@ using API.LiveOps.Previews;
 using Application.Interfaces.Services.LL.Administration;
 using Domain.Models.Administration;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
@@ -9,7 +10,7 @@ using Services.LL.Administration;
 
 namespace EssenceSystem.Tests;
 
-public sealed class LiveOpsActionPreviewTests
+public sealed partial class LiveOpsActionPreviewTests
 {
     private static readonly DateTimeOffset Now =
         new(2026, 8, 18, 8, 0, 0, TimeSpan.Zero);
@@ -171,6 +172,11 @@ public sealed class LiveOpsActionPreviewTests
 
     private sealed class TestLiveOpsService : ILiveOpsService
     {
+        public CompensationGrantPlan? GrantPlan { get; set; }
+        public Task<CompensationEquipmentOptions> GetCompensationEquipmentOptionsAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<AdministrationOperationResult<CompensationGrantPlan>> PrepareCompensationGrantAsync(Guid operationId, Guid characterId, string itemBaseId, int quantity, CancellationToken cancellationToken, EquipmentGrantRequest? equipment = null) =>
+            Task.FromResult(AdministrationOperationResult<CompensationGrantPlan>.Success(GrantPlan ?? new(
+                new ItemBase { Id = Item.Id, Name = Item.Name, ItemType = Item.ItemType, Rarity = Item.Rarity, Stackable = Item.Stackable }, false, null)));
         public required PlayerAdministrationSnapshot Player { get; set; }
         public AdministrationItemCatalogEntry Item { get; set; } = new(
             "healing-potion", "Healing Potion", "Restores health", ItemType.Misc,
@@ -190,7 +196,7 @@ public sealed class LiveOpsActionPreviewTests
         public Task<AdministrationOperationResult<AccountBanOperation>> RevokeAccountBanAsync(Guid operationId, Guid restrictionId, AdministrationActor actor, string reason, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RestrictMultiplayerAsync(Guid operationId, Guid accountId, AdministrationActor actor, string reason, string? internalNotes, DateTimeOffset? expiresAt, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<AdministrationOperationResult<MultiplayerRestrictionOperation>> RevokeMultiplayerRestrictionAsync(Guid operationId, Guid restrictionId, AdministrationActor actor, string reason, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<AdministrationOperationResult<ItemGrantOperation>> GrantCompensationItemsAsync(Guid operationId, Guid characterId, AdministrationActor actor, string itemBaseId, int quantity, string reason, string? internalNotes, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<AdministrationOperationResult<ItemGrantOperation>> GrantCompensationItemsAsync(Guid operationId, Guid characterId, AdministrationActor actor, string itemBaseId, int quantity, string reason, string? internalNotes, CancellationToken cancellationToken, EquipmentGrantRequest? equipment = null) => throw new NotSupportedException();
     }
 
     private sealed class TestChatGateway : IChatModerationGateway

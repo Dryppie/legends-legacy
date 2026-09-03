@@ -11,7 +11,9 @@
       "objectiveType": "KillCreatures",
       "rewardProfileId": "Daily.Common",
       "weight": 120,
-      "allowedSlots": [ "Steady" ]
+      "allowedSlots": [
+        "Steady"
+      ]
     },
     {
       "id": "daily.combat.kills.uncommon",
@@ -24,7 +26,10 @@
       "objectiveType": "KillCreatures",
       "rewardProfileId": "Daily.Uncommon",
       "weight": 90,
-      "allowedSlots": [ "Steady", "Focused" ]
+      "allowedSlots": [
+        "Steady",
+        "Focused"
+      ]
     },
     {
       "id": "daily.combat.unique",
@@ -38,7 +43,10 @@
       "rewardProfileId": "Daily.Uncommon",
       "minPlayerLevel": 5,
       "weight": 75,
-      "allowedSlots": [ "Focused", "Ominous" ]
+      "allowedSlots": [
+        "Focused",
+        "Ominous"
+      ]
     },
     {
       "id": "daily.combat.group",
@@ -53,7 +61,9 @@
       "rewardProfileId": "Daily.Rare",
       "minPlayerLevel": 5,
       "weight": 70,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     },
     {
       "id": "daily.combat.wins",
@@ -66,7 +76,9 @@
       "objectiveType": "WinEncounters",
       "rewardProfileId": "Daily.Common",
       "weight": 90,
-      "allowedSlots": [ "Steady" ]
+      "allowedSlots": [
+        "Steady"
+      ]
     },
     {
       "id": "daily.dungeon.rooms",
@@ -79,7 +91,10 @@
       "objectiveType": "ClearDungeonRooms",
       "rewardProfileId": "Daily.Uncommon",
       "weight": 85,
-      "allowedSlots": [ "Focused", "Ominous" ]
+      "allowedSlots": [
+        "Focused",
+        "Ominous"
+      ]
     },
     {
       "id": "daily.dungeon.complete",
@@ -92,7 +107,9 @@
       "objectiveType": "CompleteDungeons",
       "rewardProfileId": "Daily.Rare",
       "weight": 55,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     },
     {
       "id": "daily.essence.xp",
@@ -105,7 +122,10 @@
       "objectiveType": "GainEssenceXp",
       "rewardProfileId": "Daily.Common",
       "weight": 80,
-      "allowedSlots": [ "Steady", "Focused" ]
+      "allowedSlots": [
+        "Steady",
+        "Focused"
+      ]
     },
     {
       "id": "daily.essence.absorb",
@@ -118,7 +138,9 @@
       "objectiveType": "AbsorbEssence",
       "rewardProfileId": "Daily.Epic",
       "weight": 35,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     },
     {
       "id": "daily.treasure.progress",
@@ -131,75 +153,10 @@
       "objectiveType": "TreasureProgress",
       "rewardProfileId": "Daily.Uncommon",
       "weight": 75,
-      "allowedSlots": [ "Steady", "Focused" ]
-    },
-    {
-      "id": "daily.gathering.ore",
-      "title": "The Mountain Will Give Up Its Bones",
-      "flavorText": "Stone remembers every strike. Make it remember yours.",
-      "objectiveText": "Gather {target} ore.",
-      "scope": "Daily",
-      "category": "Gathering",
-      "difficulty": "Common",
-      "objectiveType": "GatherResources",
-      "objectiveParameterJson": "{\"requiredProfession\":\"Mining\"}",
-      "rewardProfileId": "Daily.Common",
-      "weight": 70,
-      "allowedSlots": [ "Focused" ]
-    },
-    {
-      "id": "daily.gathering.wood",
-      "title": "The Forest Will Remember Your Axe",
-      "flavorText": "Roots hold secrets. Wood carries them away.",
-      "objectiveText": "Gather {target} wood.",
-      "scope": "Daily",
-      "category": "Gathering",
-      "difficulty": "Common",
-      "objectiveType": "GatherResources",
-      "objectiveParameterJson": "{\"requiredProfession\":\"Woodcutting\"}",
-      "rewardProfileId": "Daily.Common",
-      "weight": 70,
-      "allowedSlots": [ "Focused" ]
-    },
-    {
-      "id": "daily.gathering.hide",
-      "title": "The Wild Will Yield Its Hide",
-      "flavorText": "Claw and fang guard what patient hands can claim.",
-      "objectiveText": "Gather {target} hide.",
-      "scope": "Daily",
-      "category": "Gathering",
-      "difficulty": "Common",
-      "objectiveType": "GatherResources",
-      "objectiveParameterJson": "{\"requiredProfession\":\"Skinning\"}",
-      "rewardProfileId": "Daily.Common",
-      "weight": 70,
-      "allowedSlots": [ "Focused" ]
-    },
-    {
-      "id": "daily.crafting.temper",
-      "title": "A Flawed Blade Will Seek Perfection",
-      "flavorText": "Greatness is not found. It is forced into shape.",
-      "objectiveText": "Temper items {target} times.",
-      "scope": "Daily",
-      "category": "Crafting",
-      "difficulty": "Common",
-      "objectiveType": "TemperItems",
-      "rewardProfileId": "Daily.Common",
-      "weight": 75,
-      "allowedSlots": [ "Focused" ]
-    },
-    {
-      "id": "daily.crafting.potential",
-      "title": "Potential Must Be Spent Before Greatness Wakes",
-      "flavorText": "Power unused is power wasted.",
-      "objectiveText": "Spend {target} item Potential.",
-      "scope": "Daily",
-      "category": "Crafting",
-      "difficulty": "Uncommon",
-      "objectiveType": "SpendPotential",
-      "rewardProfileId": "Daily.Uncommon",
-      "weight": 60,
-      "allowedSlots": [ "Focused", "Ominous" ]
+      "allowedSlots": [
+        "Steady",
+        "Focused"
+      ]
     },
     {
       "id": "daily.survival.recover",
@@ -212,7 +169,9 @@
       "objectiveType": "MeaningfulDefeatThenWins",
       "rewardProfileId": "Daily.Rare",
       "weight": 65,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     },
     {
       "id": "daily.combat.elite",
@@ -225,7 +184,9 @@
       "objectiveType": "KillCreatures",
       "rewardProfileId": "Daily.Rare",
       "weight": 50,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     },
     {
       "id": "daily.treasure.ominous",
@@ -238,7 +199,9 @@
       "objectiveType": "TreasureProgress",
       "rewardProfileId": "Daily.Rare",
       "weight": 45,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     },
     {
       "id": "daily.essence.ominous",
@@ -251,7 +214,9 @@
       "objectiveType": "GainEssenceXp",
       "rewardProfileId": "Daily.Rare",
       "weight": 45,
-      "allowedSlots": [ "Ominous" ]
+      "allowedSlots": [
+        "Ominous"
+      ]
     }
   ]
 }

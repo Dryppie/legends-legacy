@@ -1,6 +1,5 @@
 using Application.Common.Mappings;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
-using Application.UseCases.CharacterActions.Dtos.Responses.CraftingDtos;
 using AutoMapper;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -17,13 +16,8 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public bool HasMoreDueWork { get; set; }
     public int? ResolutionIntervalMs { get; set; }
     public bool IsDeleted { get; set; }
-    public bool AutoResumedFromTempering { get; set; }
-    public string? ReturnToCombatAreaId { get; set; }
     public CombatSessionDto? CombatSession { get; set; }
-    public TemperingSessionDto? TemperingSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }
-    public CraftingActionDetailsDto? CraftingActionDetails { get; set; }
-    public List<CraftingQueueItemDto> TemperingQueueItems { get; set; } = [];
 
     public string Revision => string.Join(':',
         ScheduleGeneration,
@@ -36,28 +30,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CharacterAction, CharacterActionDto>()
-            .ForMember(dest => dest.CombatActionDetails, opt => opt.MapFrom<CombatActionDetailsResolver>())
-            .ForMember(dest => dest.CraftingActionDetails, opt => opt.MapFrom<CraftingActionDetailsResolver>())
-            .ForMember(dest => dest.TemperingQueueItems, opt => opt.MapFrom<TemperingQueueItemsResolver>());
-    }
-}
-
-public class TemperingQueueItemsResolver : IValueResolver<CharacterAction, CharacterActionDto, List<CraftingQueueItemDto>>
-{
-    public List<CraftingQueueItemDto> Resolve(
-        CharacterAction source,
-        CharacterActionDto destination,
-        List<CraftingQueueItemDto> destMember,
-        ResolutionContext context)
-    {
-        var queue = source.ActionDetails is CraftingActionDetails craftingDetails
-            ? craftingDetails.CraftingQueueItems
-            : source.PausedTemperingQueueItems;
-
-        return context.Mapper.Map<List<CraftingQueueItemDto>>(queue
-            .OrderBy(item => item.Position)
-            .ThenBy(item => item.AddedAt)
-            .ThenBy(item => item.Id));
+            .ForMember(dest => dest.CombatActionDetails, opt => opt.MapFrom<CombatActionDetailsResolver>());
     }
 }
 
@@ -71,12 +44,3 @@ public class CombatActionDetailsResolver : IValueResolver<CharacterAction, Chara
     }
 }
 
-public class CraftingActionDetailsResolver : IValueResolver<CharacterAction, CharacterActionDto, CraftingActionDetailsDto?>
-{
-    public CraftingActionDetailsDto? Resolve(CharacterAction source, CharacterActionDto destination, CraftingActionDetailsDto? destMember, ResolutionContext context)
-    {
-        return source.CharacterActionType == CharacterActionType.Crafting
-            ? context.Mapper.Map<CraftingActionDetailsDto>(source.ActionDetails)
-            : null;
-    }
-}

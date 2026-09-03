@@ -197,15 +197,6 @@ public sealed class AchievementRepository(IDbContext context) : IAchievementRepo
             .OrderByDescending(x => x)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public Task<int> GetBlueprintUnlockCountAsync(Guid characterId, CancellationToken cancellationToken) =>
-        context.CharacterRecipeUnlocks
-            .AsNoTracking()
-            .Where(x => x.CharacterId == characterId)
-            .Select(x => x.BlueprintId)
-            .Where(x => x != string.Empty)
-            .Distinct()
-            .CountAsync(cancellationToken);
-
     public async Task<IReadOnlyList<EquipmentInstance>> GetOwnedEquipmentAsync(Guid characterId, CancellationToken cancellationToken) =>
         await context.ItemInstances
             .AsNoTracking()
@@ -295,13 +286,6 @@ public sealed class AchievementRepository(IDbContext context) : IAchievementRepo
 
     public Task<int> GetMaxDungeonMasteryLevelAsync(Guid characterId, CancellationToken cancellationToken) =>
         context.CharacterDungeonMasteries
-            .Where(x => x.CharacterId == characterId)
-            .Select(x => x.Level)
-            .DefaultIfEmpty()
-            .MaxAsync(cancellationToken);
-
-    public Task<int> GetMaxCraftingMasteryLevelAsync(Guid characterId, CancellationToken cancellationToken) =>
-        context.CharacterRecipeMasteries
             .Where(x => x.CharacterId == characterId)
             .Select(x => x.Level)
             .DefaultIfEmpty()

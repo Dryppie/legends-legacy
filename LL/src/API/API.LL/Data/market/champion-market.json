@@ -30,8 +30,8 @@
     },
     {
       "id": "cache.catalyst_selection",
-      "name": "Catalyst Selection Cache",
-      "description": "Open this cache from your inventory to choose six catalysts for a specialized Blueprint recipe.",
+      "name": "Tempered Scrap",
+      "description": "Receive 2 Tempered Scrap for equipment improvements in the Forge.",
       "category": "Weekly Cache",
       "gloryCost": 220,
       "weeklyPurchaseLimit": 1,
@@ -40,9 +40,9 @@
       "requiredRankTier": "silver",
       "isEnabled": true,
       "sortOrder": 30,
-      "rewardItemId": "item.catalyst_selection_crate",
-      "rewardItemName": "Catalyst Selection Cache",
-      "rewardItemQuantity": 1
+      "rewardItemId": "tempered_scrap",
+      "rewardItemName": "Tempered Scrap",
+      "rewardItemQuantity": 2
     },
     {
       "id": "cache.soulstones",
@@ -123,7 +123,7 @@
     {
       "id": "blueprint.fury",
       "name": "Blueprint: Fury",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -141,7 +141,7 @@
     {
       "id": "blueprint.arcane",
       "name": "Blueprint: Arcane",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -159,7 +159,7 @@
     {
       "id": "blueprint.execution",
       "name": "Blueprint: Execution",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -177,7 +177,7 @@
     {
       "id": "blueprint.aegis",
       "name": "Blueprint: Aegis",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -195,7 +195,7 @@
     {
       "id": "blueprint.warden",
       "name": "Blueprint: Warden",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -213,7 +213,7 @@
     {
       "id": "blueprint.endurance",
       "name": "Blueprint: Endurance",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -231,7 +231,7 @@
     {
       "id": "blueprint.phoenix",
       "name": "Blueprint: Phoenix",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -249,7 +249,7 @@
     {
       "id": "blueprint.spirit",
       "name": "Blueprint: Spirit",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -267,7 +267,7 @@
     {
       "id": "blueprint.primal",
       "name": "Blueprint: Primal",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -285,7 +285,7 @@
     {
       "id": "blueprint.venom_touched_sword",
       "name": "Blueprint: Venom-Touched Sword",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,
@@ -303,7 +303,7 @@
     {
       "id": "blueprint.hivefang_dagger",
       "name": "Blueprint: Hivefang Dagger",
-      "description": "A rotating crafting design from the Champion's Blueprint Archive.",
+      "description": "Learn a reusable equipment style in the Forge. The first application is free.",
       "category": "Blueprint",
       "gloryCost": 500,
       "weeklyPurchaseLimit": 1,

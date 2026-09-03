@@ -1,210 +1,6 @@
 {
   "rewardTables": [
     {
-      "id": "reward.dungeon.region.1.tier.1",
-      "displayName": "Region 1 Dungeon Tier 1 Tool Loot",
-      "rolls": [
-        {
-          "id": "tier_1_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 80,
-          "entries": [
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 6,
-              "tags": ["tool"]
-            },
-            {
-              "id": "woodcutting_hatchet",
-              "type": "Item",
-              "itemId": "woodcutting_hatchet",
-              "weight": 6,
-              "tags": ["tool"]
-            },
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 8,
-              "tags": ["tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.region.1.tier.2",
-      "displayName": "Region 1 Dungeon Tier 2 Tool Loot",
-      "rolls": [
-        {
-          "id": "tier_2_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 78,
-          "entries": [
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 5.5,
-              "tags": ["tool"]
-            },
-            {
-              "id": "woodcutting_hatchet",
-              "type": "Item",
-              "itemId": "woodcutting_hatchet",
-              "weight": 5.5,
-              "tags": ["tool"]
-            },
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 11,
-              "tags": ["tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.region.1.tier.3",
-      "displayName": "Region 1 Dungeon Tier 3 Tool Loot",
-      "rolls": [
-        {
-          "id": "tier_3_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 72.2,
-          "entries": [
-            {
-              "id": "rare_pickaxe",
-              "type": "Item",
-              "itemId": "rare_pickaxe",
-              "weight": 6.95,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_hatchet",
-              "type": "Item",
-              "itemId": "rare_hatchet",
-              "weight": 6.95,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_skinning_knife",
-              "type": "Item",
-              "itemId": "rare_skinning_knife",
-              "weight": 13.9,
-              "tags": ["rare", "tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.region.2.tier.1",
-      "displayName": "Region 2 Dungeon Tier 1 Tool Loot",
-      "rolls": [
-        {
-          "id": "tier_1_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 80,
-          "entries": [
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 6,
-              "tags": ["tool"]
-            },
-            {
-              "id": "woodcutting_hatchet",
-              "type": "Item",
-              "itemId": "woodcutting_hatchet",
-              "weight": 6,
-              "tags": ["tool"]
-            },
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 8,
-              "tags": ["tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.region.2.tier.2",
-      "displayName": "Region 2 Dungeon Tier 2 Tool Loot",
-      "rolls": [
-        {
-          "id": "tier_2_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 78,
-          "entries": [
-            {
-              "id": "rare_pickaxe",
-              "type": "Item",
-              "itemId": "rare_pickaxe",
-              "weight": 5.5,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_hatchet",
-              "type": "Item",
-              "itemId": "rare_hatchet",
-              "weight": 5.5,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_skinning_knife",
-              "type": "Item",
-              "itemId": "rare_skinning_knife",
-              "weight": 11,
-              "tags": ["rare", "tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.region.2.tier.3",
-      "displayName": "Region 2 Dungeon Tier 3 Tool Loot",
-      "rolls": [
-        {
-          "id": "tier_3_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 72.2,
-          "entries": [
-            {
-              "id": "epic_pickaxe",
-              "type": "Item",
-              "itemId": "epic_pickaxe",
-              "weight": 6.95,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "epic_hatchet",
-              "type": "Item",
-              "itemId": "epic_hatchet",
-              "weight": 6.95,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "epic_skinning_knife",
-              "type": "Item",
-              "itemId": "epic_skinning_knife",
-              "weight": 13.9,
-              "tags": ["rare", "tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "reward.dungeon.goblin_mines.completion",
       "displayName": "Goblin Mines I Completion Loot",
       "rolls": [
@@ -224,27 +20,6 @@
               "type": "Item",
               "itemId": "blueprint_phoenix",
               "weight": 5
-            }
-          ]
-        },
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 95.25,
-          "entries": [
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 9,
-              "tags": ["tool"]
-            },
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 5.75,
-              "tags": ["tool"]
             }
           ]
         }
@@ -272,27 +47,6 @@
               "weight": 5
             }
           ]
-        },
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 84.1,
-          "entries": [
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 9.4,
-              "tags": ["tool"]
-            },
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 6.5,
-              "tags": ["tool"]
-            }
-          ]
         }
       ]
     },
@@ -316,27 +70,6 @@
               "type": "Item",
               "itemId": "blueprint_phoenix",
               "weight": 5
-            }
-          ]
-        },
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 82.8,
-          "entries": [
-            {
-              "id": "rare_pickaxe",
-              "type": "Item",
-              "itemId": "rare_pickaxe",
-              "weight": 10.45,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_skinning_knife",
-              "type": "Item",
-              "itemId": "rare_skinning_knife",
-              "weight": 6.75,
-              "tags": ["rare", "tool"]
             }
           ]
         }
@@ -364,27 +97,6 @@
               "weight": 5
             }
           ]
-        },
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 102.25,
-          "entries": [
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 9,
-              "tags": ["tool"]
-            },
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 4.75,
-              "tags": ["tool"]
-            }
-          ]
         }
       ]
     },
@@ -408,27 +120,6 @@
               "type": "Item",
               "itemId": "blueprint_endurance",
               "weight": 5
-            }
-          ]
-        },
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 85.35,
-          "entries": [
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 9.4,
-              "tags": ["tool"]
-            },
-            {
-              "id": "pickaxe",
-              "type": "Item",
-              "itemId": "pickaxe",
-              "weight": 5.25,
-              "tags": ["tool"]
             }
           ]
         }
@@ -456,27 +147,6 @@
               "weight": 5
             }
           ]
-        },
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 84.05,
-          "entries": [
-            {
-              "id": "rare_skinning_knife",
-              "type": "Item",
-              "itemId": "rare_skinning_knife",
-              "weight": 10.45,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_pickaxe",
-              "type": "Item",
-              "itemId": "rare_pickaxe",
-              "weight": 5.5,
-              "tags": ["rare", "tool"]
-            }
-          ]
         }
       ]
     },
@@ -487,7 +157,7 @@
         {
           "id": "completion_weighted_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 85.25,
+          "noDropWeight": 100,
           "entries": [
             {
               "id": "blueprint_warden",
@@ -512,372 +182,6 @@
               "type": "Item",
               "itemId": "blueprint_hivefang_dagger",
               "weight": 4
-            },
-            {
-              "id": "woodcutting_hatchet",
-              "type": "Item",
-              "itemId": "woodcutting_hatchet",
-              "weight": 8
-            },
-            {
-              "id": "skinning_knife",
-              "type": "Item",
-              "itemId": "skinning_knife",
-              "weight": 5
-            },
-            {
-              "id": "rare_hatchet",
-              "type": "Item",
-              "itemId": "rare_hatchet",
-              "weight": 1,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_skinning_knife",
-              "type": "Item",
-              "itemId": "rare_skinning_knife",
-              "weight": 0.75,
-              "tags": ["rare", "tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.hives_abyss_ii.completion",
-      "displayName": "Hive's Abyss II Completion Loot",
-      "rolls": [
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 84.1,
-          "entries": [
-            {
-              "id": "rare_hatchet",
-              "type": "Item",
-              "itemId": "rare_hatchet",
-              "weight": 7,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "rare_skinning_knife",
-              "type": "Item",
-              "itemId": "rare_skinning_knife",
-              "weight": 5,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "epic_hatchet",
-              "type": "Item",
-              "itemId": "epic_hatchet",
-              "weight": 2,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "epic_skinning_knife",
-              "type": "Item",
-              "itemId": "epic_skinning_knife",
-              "weight": 1.5,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "unique_hatchet",
-              "type": "Item",
-              "itemId": "unique_hatchet",
-              "weight": 0.4,
-              "tags": ["rare", "tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.dungeon.hives_abyss_iii.completion",
-      "displayName": "Hive's Abyss III Completion Loot",
-      "rolls": [
-        {
-          "id": "completion_weighted_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 82.8,
-          "entries": [
-            {
-              "id": "epic_hatchet",
-              "type": "Item",
-              "itemId": "epic_hatchet",
-              "weight": 7,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "epic_skinning_knife",
-              "type": "Item",
-              "itemId": "epic_skinning_knife",
-              "weight": 5,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "unique_hatchet",
-              "type": "Item",
-              "itemId": "unique_hatchet",
-              "weight": 2.5,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "unique_skinning_knife",
-              "type": "Item",
-              "itemId": "unique_skinning_knife",
-              "weight": 1.75,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "legendary_hatchet",
-              "type": "Item",
-              "itemId": "legendary_hatchet",
-              "weight": 0.75,
-              "tags": ["rare", "tool"]
-            },
-            {
-              "id": "legacy_hatchet",
-              "type": "Item",
-              "itemId": "legacy_hatchet",
-              "weight": 0.2,
-              "tags": ["rare", "tool"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.region_01.catalysts",
-      "displayName": "Shenic Gathering Catalysts",
-      "rolls": [
-        {
-          "id": "rare_catalyst_drop",
-          "type": "WeightedWithNoDrop",
-          "noDropWeight": 96,
-          "entries": [
-            {
-              "id": "fury_heart",
-              "type": "Item",
-              "itemId": "fury_heart",
-              "weight": 1,
-              "tags": ["rare", "catalyst"]
-            },
-            {
-              "id": "phoenix_ember",
-              "type": "Item",
-              "itemId": "phoenix_ember",
-              "weight": 1,
-              "tags": ["rare", "catalyst"]
-            },
-            {
-              "id": "arcane_focus",
-              "type": "Item",
-              "itemId": "arcane_focus",
-              "weight": 1,
-              "tags": ["rare", "catalyst"]
-            },
-            {
-              "id": "endurance_core",
-              "type": "Item",
-              "itemId": "endurance_core",
-              "weight": 1,
-              "tags": ["rare", "catalyst"]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.lumo_ruins.ore_vein",
-      "displayName": "Lumo Ruins Ore Vein",
-      "rolls": [
-        {
-          "id": "mining_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "ore",
-              "type": "Item",
-              "itemId": "ore",
-              "weight": 60,
-              "quantity": { "min": 8, "max": 24 }
-            }
-          ]
-        },
-        {
-          "id": "region_01_catalyst",
-          "type": "Reference",
-          "entries": [
-            {
-              "id": "region_01_catalyst_pool",
-              "type": "RewardTableReference",
-              "rewardTableId": "reward.gathering.region_01.catalysts"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.lumo_ruins.fallen_tree",
-      "displayName": "Lumo Ruins Fallen Tree",
-      "rolls": [
-        {
-          "id": "woodcutting_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "wood",
-              "type": "Item",
-              "itemId": "wood",
-              "weight": 60,
-              "quantity": { "min": 8, "max": 24 }
-            }
-          ]
-        },
-        {
-          "id": "region_01_catalyst",
-          "type": "Reference",
-          "entries": [
-            {
-              "id": "region_01_catalyst_pool",
-              "type": "RewardTableReference",
-              "rewardTableId": "reward.gathering.region_01.catalysts"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.lumo_ruins.beast_remains",
-      "displayName": "Lumo Ruins Beast Remains",
-      "rolls": [
-        {
-          "id": "skinning_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "rawhide",
-              "type": "Item",
-              "itemId": "rawhide",
-              "weight": 60,
-              "quantity": { "min": 8, "max": 24 }
-            }
-          ]
-        },
-        {
-          "id": "region_01_catalyst",
-          "type": "Reference",
-          "entries": [
-            {
-              "id": "region_01_catalyst_pool",
-              "type": "RewardTableReference",
-              "rewardTableId": "reward.gathering.region_01.catalysts"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.blood_grove.bloodwood_tree",
-      "displayName": "Blood Grove Bloodwood Tree",
-      "rolls": [
-        {
-          "id": "woodcutting_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "wood",
-              "type": "Item",
-              "itemId": "wood",
-              "weight": 60,
-              "quantity": { "min": 8, "max": 24 }
-            }
-          ]
-        },
-        {
-          "id": "region_01_catalyst",
-          "type": "Reference",
-          "entries": [
-            {
-              "id": "region_01_catalyst_pool",
-              "type": "RewardTableReference",
-              "rewardTableId": "reward.gathering.region_01.catalysts"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.warfang_frontier.copper_vein",
-      "displayName": "Warfang Frontier Copper Vein",
-      "rolls": [
-        {
-          "id": "mining_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "copper_ore",
-              "type": "Item",
-              "itemId": "copper_ore",
-              "weight": 60,
-              "quantity": { "min": 12, "max": 32 }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.warfang_frontier.bloodwood_tree",
-      "displayName": "Warfang Frontier Bloodwood Tree",
-      "rolls": [
-        {
-          "id": "woodcutting_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "bloodwood",
-              "type": "Item",
-              "itemId": "bloodwood",
-              "weight": 60,
-              "quantity": { "min": 12, "max": 32 }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.warfang_frontier.beast_remains",
-      "displayName": "Warfang Frontier Beast Remains",
-      "rolls": [
-        {
-          "id": "skinning_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "thick_hide",
-              "type": "Item",
-              "itemId": "thick_hide",
-              "weight": 60,
-              "quantity": { "min": 12, "max": 32 }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reward.gathering.rotgrave_fields.copper_deposit",
-      "displayName": "Rotgrave Fields Copper Deposit",
-      "rolls": [
-        {
-          "id": "mining_material",
-          "type": "Weighted",
-          "entries": [
-            {
-              "id": "copper_ore",
-              "type": "Item",
-              "itemId": "copper_ore",
-              "weight": 60,
-              "quantity": { "min": 12, "max": 32 }
             }
           ]
         }
@@ -885,84 +189,204 @@
     },
     {
       "id": "reward.dungeon.tangled_cave.completion",
-      "displayName": "Tangled Cave I Completion Loot",
+      "displayName": "Tangled Cave 1 Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 85.25,
+          "noDropWeight": 27,
           "entries": [
-            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 9, "tags": ["tool"] }
+            {
+              "id": "blueprint_execution",
+              "type": "Item",
+              "itemId": "blueprint_execution",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_venom_touched_sword",
+              "type": "Item",
+              "itemId": "blueprint_venom_touched_sword",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_hivefang_dagger",
+              "type": "Item",
+              "itemId": "blueprint_hivefang_dagger",
+              "weight": 1
+            }
           ]
         }
       ]
     },
     {
       "id": "reward.dungeon.tangled_cave_ii.completion",
-      "displayName": "Tangled Cave II Completion Loot",
+      "displayName": "Tangled Cave 2 Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 84.1,
+          "noDropWeight": 27,
           "entries": [
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 9.4, "tags": ["rare", "tool"] }
+            {
+              "id": "blueprint_execution",
+              "type": "Item",
+              "itemId": "blueprint_execution",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_venom_touched_sword",
+              "type": "Item",
+              "itemId": "blueprint_venom_touched_sword",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_hivefang_dagger",
+              "type": "Item",
+              "itemId": "blueprint_hivefang_dagger",
+              "weight": 1
+            }
           ]
         }
       ]
     },
     {
       "id": "reward.dungeon.tangled_cave_iii.completion",
-      "displayName": "Tangled Cave III Completion Loot",
+      "displayName": "Tangled Cave 3 Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 82.8,
+          "noDropWeight": 27,
           "entries": [
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 10.25, "tags": ["rare", "tool"] }
+            {
+              "id": "blueprint_execution",
+              "type": "Item",
+              "itemId": "blueprint_execution",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_venom_touched_sword",
+              "type": "Item",
+              "itemId": "blueprint_venom_touched_sword",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_hivefang_dagger",
+              "type": "Item",
+              "itemId": "blueprint_hivefang_dagger",
+              "weight": 1
+            }
           ]
         }
       ]
     },
     {
       "id": "reward.dungeon.great_tree.completion",
-      "displayName": "The Great Tree I Completion Loot",
+      "displayName": "The Great Tree 1 Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 85.25,
+          "noDropWeight": 36,
           "entries": [
-            { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 9, "tags": ["tool"] }
+            {
+              "id": "blueprint_spirit",
+              "type": "Item",
+              "itemId": "blueprint_spirit",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_warden",
+              "type": "Item",
+              "itemId": "blueprint_warden",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_primal",
+              "type": "Item",
+              "itemId": "blueprint_primal",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_aegis",
+              "type": "Item",
+              "itemId": "blueprint_aegis",
+              "weight": 1
+            }
           ]
         }
       ]
     },
     {
       "id": "reward.dungeon.great_tree_ii.completion",
-      "displayName": "The Great Tree II Completion Loot",
+      "displayName": "The Great Tree 2 Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 84.1,
+          "noDropWeight": 36,
           "entries": [
-            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 9.4, "tags": ["rare", "tool"] }
+            {
+              "id": "blueprint_spirit",
+              "type": "Item",
+              "itemId": "blueprint_spirit",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_warden",
+              "type": "Item",
+              "itemId": "blueprint_warden",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_primal",
+              "type": "Item",
+              "itemId": "blueprint_primal",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_aegis",
+              "type": "Item",
+              "itemId": "blueprint_aegis",
+              "weight": 1
+            }
           ]
         }
       ]
     },
     {
       "id": "reward.dungeon.great_tree_iii.completion",
-      "displayName": "The Great Tree III Completion Loot",
+      "displayName": "The Great Tree 3 Completion Loot",
       "rolls": [
         {
-          "id": "completion_weighted_drop",
+          "id": "blueprint_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 82.8,
+          "noDropWeight": 36,
           "entries": [
-            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 10.25, "tags": ["rare", "tool"] }
+            {
+              "id": "blueprint_spirit",
+              "type": "Item",
+              "itemId": "blueprint_spirit",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_warden",
+              "type": "Item",
+              "itemId": "blueprint_warden",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_primal",
+              "type": "Item",
+              "itemId": "blueprint_primal",
+              "weight": 1
+            },
+            {
+              "id": "blueprint_aegis",
+              "type": "Item",
+              "itemId": "blueprint_aegis",
+              "weight": 1
+            }
           ]
         }
       ]

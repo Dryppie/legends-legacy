@@ -2,6 +2,7 @@
 using Services.LL.JsonDefinitions.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Rewards;
 
 namespace Services.LL.JsonDefinitions;
 
@@ -19,10 +20,21 @@ public sealed class JsonDungeonDefinitions : IDungeonDefinitions
     public JsonDungeonDefinitions(
         JsonDocumentReader<DungeonCatalogDocument> reader,
         DungeonDefinitionMaterializer materializer,
-        IDungeonDefinitionValidator validator)
+        IDungeonDefinitionValidator validator,
+        IRewardTableDefinitionProvider rewardTables)
     {
         var definitions = materializer.Materialize(reader.Value);
         validator.ThrowIfInvalid(definitions);
+        foreach (var dungeon in definitions)
+        {
+            foreach (var rewardTableId in dungeon.CompletionRewardTableIds)
+            {
+                if (rewardTables.FindById(rewardTableId) is null)
+                    throw new InvalidOperationException(
+                        $"Dungeon '{dungeon.Id}': completion reward table '{rewardTableId}' does not exist.");
+            }
+        }
+
         _byId = definitions
             .Where(d => !RetiredDungeonIds.Contains(d.Id))
             .ToDictionary(d => d.Id, d => d, StringComparer.OrdinalIgnoreCase);

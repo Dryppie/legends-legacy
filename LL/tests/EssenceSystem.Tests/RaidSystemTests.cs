@@ -32,7 +32,7 @@ using Services.LL.Interfaces;
 
 namespace EssenceSystem.Tests;
 
-public sealed class RaidSystemTests
+public sealed partial class RaidSystemTests
 {
     [Fact]
     public void Raid_playback_bundle_preserves_entity_and_ability_threat()

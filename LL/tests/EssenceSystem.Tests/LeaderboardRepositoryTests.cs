@@ -16,7 +16,7 @@ using Persistence.LL.Repositories.Leaderboards;
 
 namespace EssenceSystem.Tests;
 
-public sealed class LeaderboardRepositoryTests
+public sealed partial class LeaderboardRepositoryTests
 {
     [Fact]
     public async Task GetLeaderboardAsync_includes_all_profiles_and_returns_viewer_separately()

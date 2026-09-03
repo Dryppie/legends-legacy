@@ -1,11 +1,10 @@
 import { Component, effect, Input, OnInit } from '@angular/core';
-import { Area, AreaGatheringNode } from '../../../models/Dtos/regionDto';
+import { Area } from '../../../models/Dtos/regionDto';
 import { MiniButtonComponent } from '../../custom-components/buttons/mini-button/mini-button.component';
 import { StartCombatActionRequest } from '../../../../shared/models/Dtos/characterActionDto';
 import { CommonModule, NgIf } from '@angular/common';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../models/enums/characterActionType';
-import { GatheringType } from '../../../models/enums/gatheringType';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import { QuestService } from '../../../../core/services/api/quest/quest.service';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
@@ -29,7 +28,6 @@ import { EquipmentSlotType } from '../../../models/Dtos/equipment-slots/equipmen
   styleUrl: './combat-area-card.component.scss',
 })
 export class CombatAreaCardComponent implements OnInit {
-  readonly GatheringType = GatheringType;
 
   @Input() area!: Area;
   @Input() isLastInRow = false;
@@ -38,38 +36,6 @@ export class CombatAreaCardComponent implements OnInit {
   readonly isStartingIdleCombat;
   isLocked = true;
   isStartingTrainingBattle = false;
-  activeGatheringTooltipNodeId: string | null = null;
-  readonly gatheringTooltipPositions: ConnectedPosition[] = [
-    {
-      originX: 'center',
-      originY: 'top',
-      overlayX: 'center',
-      overlayY: 'bottom',
-      offsetY: -8,
-    },
-    {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 8,
-    },
-    {
-      originX: 'start',
-      originY: 'center',
-      overlayX: 'end',
-      overlayY: 'center',
-      offsetX: -8,
-    },
-    {
-      originX: 'end',
-      originY: 'center',
-      overlayX: 'start',
-      overlayY: 'center',
-      offsetX: 8,
-    },
-  ];
-
   constructor(
     private readonly characterActionService: CharacterActionsStateService,
     private readonly questState: QuestStateService,
@@ -159,10 +125,6 @@ export class CombatAreaCardComponent implements OnInit {
     return this.isQuestGuidedLumoArea() ? 'lumo-ruins-battle' : null;
   }
 
-  gatheringTourId(): string | null {
-    return this.isQuestGuidedLumoArea() ? 'lumo-ruins-gathering' : null;
-  }
-
   setIsLocked(): void {
     if (!this.area) {
       return;
@@ -173,72 +135,6 @@ export class CombatAreaCardComponent implements OnInit {
       !access?.canAccess ||
       (this.area.id === TRAINING_GROUNDS_AREA_ID &&
         !this.selectedTrainingEncounterKey());
-  }
-
-  gatheringNodes(): AreaGatheringNode[] {
-    return (this.area.gatheringNodes ?? [])
-      .filter(
-        (node) => this.isAbundant(node) && node.procChance !== undefined,
-      )
-      .sort(
-        (left, right) =>
-          this.gatheringTypeOrder(left.type) -
-          this.gatheringTypeOrder(right.type),
-      );
-  }
-
-  gatheringTypeInitial(gatheringType: GatheringType): string {
-    return gatheringType.charAt(0).toUpperCase();
-  }
-
-  isAbundant(node: AreaGatheringNode): boolean {
-    return (node.yieldBonusPercent ?? 0) > 0;
-  }
-
-  procChancePercent(node: AreaGatheringNode): number {
-    return Math.max(0, node.procChance ?? 0) * 100;
-  }
-
-  successfulDropQuantity(node: AreaGatheringNode): string {
-    const minimum = node.minQuantity;
-    const maximum = node.maxQuantity;
-    if (minimum === undefined || minimum === null) return '—';
-    if (maximum === undefined || maximum === null || maximum === minimum) {
-      return `${minimum}`;
-    }
-    return `${minimum}–${maximum}`;
-  }
-
-  showGatheringTooltip(nodeId: string): void {
-    this.activeGatheringTooltipNodeId = nodeId;
-  }
-
-  hideGatheringTooltip(nodeId: string): void {
-    if (this.activeGatheringTooltipNodeId === nodeId) {
-      this.activeGatheringTooltipNodeId = null;
-    }
-  }
-
-  isGatheringTooltipOpen(nodeId: string): boolean {
-    return this.activeGatheringTooltipNodeId === nodeId;
-  }
-
-  gatheringTooltipId(node: AreaGatheringNode): string {
-    return `gathering-tooltip-${this.area.id}-${node.id}`;
-  }
-
-  incorrectToolMessage(node: AreaGatheringNode): string | null {
-    const equippedTool = this.equipmentState.getSlot(
-      EquipmentSlotType.Tool,
-    )?.equipmentInstance;
-    if (
-      !equippedTool ||
-      equippedTool.equipmentBase.gatheringType === node.type
-    ) {
-      return null;
-    }
-
-    return `Incorrect tool equipped — requires ${node.type}.`;
   }
 
   isEssenceCollectionCompleted(): boolean {
@@ -254,14 +150,6 @@ export class CombatAreaCardComponent implements OnInit {
 
   private shouldStartTrainingBattle(): boolean {
     return this.area.id === TRAINING_GROUNDS_AREA_ID;
-  }
-
-  private gatheringTypeOrder(type: GatheringType): number {
-    return [
-      GatheringType.Mining,
-      GatheringType.Woodcutting,
-      GatheringType.Skinning,
-    ].indexOf(type);
   }
 
   private startTrainingBattle(): void {

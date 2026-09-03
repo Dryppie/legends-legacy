@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+.forge-panel {
+  @apply rounded border border-light_gray p-4;
+}
+.forge-input {
+  @apply w-full rounded border border-light_gray bg-black/40 px-3 py-2 text-sm text-white focus:border-primary;
+}
+.forge-label {
+  @apply block text-sm text-zinc-300;
+}
+.forge-note {
+  @apply text-xs leading-relaxed text-zinc-400;
+}
+.forge-table {
+  @apply w-full text-left text-xs;
+}
+.forge-table th {
+  @apply py-2 font-medium text-zinc-400;
+}
+.forge-table td {
+  @apply border-t border-light_gray py-2;
+}

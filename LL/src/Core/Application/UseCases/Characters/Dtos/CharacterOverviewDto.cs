@@ -14,7 +14,6 @@ using Domain.Models.Essences;
 using Domain.Models.Guilds;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting.V2;
-using Domain.Models.Professions.Gathering;
 
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
@@ -24,10 +23,6 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public int Level { get; set; }
     public long Experience { get; set; }
     public long ExperienceUntilNextLevel { get; set; }
-    public int CraftingLevel { get; set; }
-    public int CraftingExperience { get; set; }
-    public int CraftingExperienceUntilNextLevel { get; set; }
-    public List<GatheringProfessionOverviewDto> GatheringProfessions { get; set; } = [];
     public OverallPowerRating? Power { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
@@ -70,13 +65,6 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
 
     public CharacterOverviewDto Convert(Character source, CharacterOverviewDto destination, ResolutionContext context)
     {
-        var craftingProfession = source.Professions
-            .Where(profession => (int)profession.ProfessionType is 1 or 2 or 3)
-            .OrderByDescending(profession => profession.Level)
-            .ThenByDescending(profession => profession.Experience)
-            .FirstOrDefault();
-        var craftingLevel = craftingProfession?.Level ?? 1;
-
         return new CharacterOverviewDto
         {
             Id = source.Id,
@@ -84,10 +72,6 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             Level = source.Level,
             Experience = source.Experience,
             ExperienceUntilNextLevel = source.ExperienceUntilNextLevel,
-            CraftingLevel = craftingLevel,
-            CraftingExperience = (int)MathF.Floor(craftingProfession?.Experience ?? 0),
-            CraftingExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(craftingLevel),
-            GatheringProfessions = MapGatheringProfessions(source),
             BaseAttributes = MapBaseAttributes(source),
             BaseCombatAttributes = MapBaseCombatAttributes(source),
             EquipmentRatings = AttributeCalculator
@@ -108,34 +92,6 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             IsOnline = source.CharacterAction?.UpdatedAt >
                        _timeProvider.GetUtcNow().Subtract(PlayerActivityConstants.OnlineWindow)
         };
-    }
-
-    private static List<GatheringProfessionOverviewDto> MapGatheringProfessions(Character source)
-    {
-        var professions = source.Professions
-            .Where(profession => GatheringProfessionProgression.IsGatheringProfession(profession.ProfessionType))
-            .ToDictionary(profession => profession.ProfessionType);
-
-        return new[]
-            {
-                ProfessionType.Mining,
-                ProfessionType.Woodcutting,
-                ProfessionType.Skinning
-            }
-            .Select(professionType =>
-            {
-                professions.TryGetValue(professionType, out var profession);
-                var level = profession?.Level ?? 1;
-
-                return new GatheringProfessionOverviewDto
-                {
-                    ProfessionType = professionType,
-                    Level = level,
-                    Experience = (int)MathF.Floor(profession?.Experience ?? 0),
-                    ExperienceUntilNextLevel = GatheringProfessionProgression.GetRequiredExperience(level)
-                };
-            })
-            .ToList();
     }
 
     private static List<EntityAttribute> MapBaseAttributes(Character source)
@@ -232,10 +188,3 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
     }
 }
 
-public sealed class GatheringProfessionOverviewDto
-{
-    public ProfessionType ProfessionType { get; set; }
-    public int Level { get; set; }
-    public int Experience { get; set; }
-    public int ExperienceUntilNextLevel { get; set; }
-}

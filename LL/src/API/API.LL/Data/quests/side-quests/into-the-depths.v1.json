@@ -8,7 +8,9 @@
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 5,
-    "completedQuestIds": ["quest.dungeons.sigils_in_the_dust"]
+    "completedQuestIds": [
+      "quest.dungeons.sigils_in_the_dust"
+    ]
   },
   "objectives": [
     {
@@ -24,6 +26,11 @@
     }
   ],
   "rewards": [
-    { "key": "lesser_monster_cores", "type": "Item", "itemBaseId": "item.monster_core.lesser", "quantity": 3 }
+    {
+      "key": "lesser_monster_cores",
+      "type": "Item",
+      "itemBaseId": "item.monster_core.lesser",
+      "quantity": 3
+    }
   ]
 }

@@ -10,7 +10,7 @@ import { OverlayRef } from '@angular/cdk/overlay';
 import { HelpService } from './help.service';
 import { HELP_PAGE_ID } from './help.tokens';
 import { Observable, of } from 'rxjs';
-import { catchError, map, shareReplay } from 'rxjs/operators';
+import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 import { Guide } from './help.models';
 import { A11yModule } from '@angular/cdk/a11y';
 import { environment } from '../../../environments/environment';
@@ -93,24 +93,27 @@ export class HelpDrawerComponent implements OnInit {
   guide$!: Observable<Guide>;
 
   ngOnInit() {
-    this.guide$ = this.help
-      .load<Guide>(`assets/help/guides/${this.pageId}.json`)
-      .pipe(
-        map((g) => this.availableGuide(g)),
-        catchError(() =>
-          of({
-            title: 'Guide unavailable',
-            lastReviewed: '',
-            sections: [
-              {
-                heading: 'Unable to load this guide',
-                body: 'Please close the guide and try again.',
-              },
-            ],
-          }),
-        ),
-        shareReplay({ bufferSize: 1, refCount: false }),
-      );
+    this.guide$ = this.help.loadGuide(this.pageId).pipe(
+      map((g) => this.availableGuide(g)),
+      catchError(() =>
+        of({
+          title: 'Guide unavailable',
+          lastReviewed: '',
+          sections: [
+            {
+              heading: 'Unable to load this guide',
+              body: 'Please close the guide and try again.',
+            },
+          ],
+        }),
+      ),
+      startWith({
+        title: 'Loading guide…',
+        lastReviewed: '',
+        sections: [],
+      } as Guide),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
   }
 
   private availableGuide(guide: Guide | null): Guide {

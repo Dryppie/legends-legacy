@@ -7,6 +7,8 @@ import { Subscription } from 'rxjs';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import {
   ActionPreview,
+  CompensationEquipmentOption,
+  CompensationEquipmentOptions,
   ApiResponse,
   ItemCatalogEntry,
   PlayerDetails,
@@ -71,6 +73,21 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   itemResults: ItemCatalogEntry[] = [];
   selectedItem: ItemCatalogEntry | null = null;
   grantQuantity = 1;
+  equipmentOptions: CompensationEquipmentOptions | null = null;
+  loadingEquipmentOptions = false;
+  equipmentDefinitionId = '';
+  equipmentTier = 1;
+  equipmentRank = 0;
+  equipmentStyleId = '';
+
+  get selectedEquipmentDefinition(): CompensationEquipmentOption | undefined {
+    return this.equipmentOptions?.options.find(option => option.definitionId === this.equipmentDefinitionId);
+  }
+
+  chooseEquipmentDefinition(): void {
+    this.equipmentTier = this.selectedEquipmentDefinition?.minimumTier ?? 1;
+    this.equipmentStyleId = this.selectedEquipmentDefinition?.nativeStyleId ?? '';
+  }
   grantReason = '';
   grantNotes = '';
   loadingItems = false;
@@ -397,10 +414,29 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  chooseItem(item: ItemCatalogEntry): void {
+  async chooseItem(item: ItemCatalogEntry): Promise<void> {
     this.selectedItem = item;
     this.itemResults = [];
     this.itemQuery = item.name;
+    this.equipmentOptions = null;
+    this.equipmentDefinitionId = '';
+    this.loadingEquipmentOptions = false;
+    this.equipmentRank = 0;
+    const characterId = this.selectedPlayer?.player.characterId;
+    if (!characterId || item.itemType !== 'Equipment') return;
+    this.loadingEquipmentOptions = true;
+    try {
+      const result = await this.api.compensationEquipmentOptions(characterId, item.id);
+      if (this.selectedPlayer?.player.characterId !== characterId || this.selectedItem !== item) return;
+      if (!result.isSuccess || !result.data) { this.showError(result.errorMessage || 'Equipment options could not be loaded.'); return; }
+      this.equipmentOptions = result.data;
+      this.equipmentDefinitionId = result.data.options[0]?.definitionId ?? '';
+      this.chooseEquipmentDefinition();
+    } catch (error) {
+      if (this.selectedPlayer?.player.characterId === characterId && this.selectedItem === item) this.showError(this.errorMessage(error));
+    } finally {
+      if (this.selectedItem === item) this.loadingEquipmentOptions = false;
+    }
   }
 
   async grantItems(): Promise<void> {
@@ -408,7 +444,14 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     const item = this.selectedItem;
     if (!player || !item || !this.requireReason(this.grantReason)) return;
     if (!Number.isInteger(this.grantQuantity) || this.grantQuantity < 1) { this.showError('Quantity must be a positive whole number.'); return; }
-    const body = { itemBaseId: item.id, quantity: this.grantQuantity, reason: this.grantReason.trim(), internalNotes: this.cleanOptional(this.grantNotes) };
+    if (item.itemType === 'Equipment' && !this.equipmentOptions) { this.showError('Load the equipment options before previewing this grant.'); return; }
+    if (this.equipmentOptions?.usesEquipmentProgression && (!this.selectedEquipmentDefinition || this.grantQuantity > this.equipmentOptions.maximumQuantity)) {
+      this.showError('Select a supported equipment definition and stay within the equipment grant limit.'); return;
+    }
+    const equipment = this.equipmentOptions?.usesEquipmentProgression ? {
+      definitionId: this.equipmentDefinitionId, tier: this.equipmentTier, rank: this.equipmentRank, activeStyleId: this.equipmentStyleId || null,
+    } : null;
+    const body = { itemBaseId: item.id, quantity: this.grantQuantity, reason: this.grantReason.trim(), internalNotes: this.cleanOptional(this.grantNotes), equipment };
     await this.openActionPreview(
       'grant',
       (operationId) => this.api.previewGrantItems(player.characterId, { operationId, ...body }),
@@ -452,6 +495,9 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   private async loadPlayer(characterId: string): Promise<void> {
     this.loadingPlayer = true;
     this.selectedPlayer = null;
+    this.selectedItem = null;
+    this.equipmentOptions = null;
+    this.loadingEquipmentOptions = false;
     this.supportSnapshot = null;
     this.supportSnapshotError = '';
     this.transferHistoryError = '';
@@ -474,6 +520,9 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
 
   private clearPlayer(): void {
     this.selectedPlayer = null;
+    this.selectedItem = null;
+    this.equipmentOptions = null;
+    this.loadingEquipmentOptions = false;
     this.supportSnapshot = null;
     this.supportSnapshotError = '';
     this.transferHistoryError = '';

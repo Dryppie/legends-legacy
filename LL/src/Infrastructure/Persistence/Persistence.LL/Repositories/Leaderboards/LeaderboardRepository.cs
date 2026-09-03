@@ -2,7 +2,6 @@ using Application.Common.Interfaces;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Leaderboards;
-using Domain.Models.Professions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Leaderboards;
@@ -35,9 +34,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
 
         var now = DateTimeOffset.UtcNow;
         var definition = GetDefinition(normalizedKey);
-        var scores = definition.Profession is { } profession
-            ? await GetProfessionScoresAsync(profession, cancellationToken)
-            : LeaderboardBoardKey.TryGetFastestRaidBossId(normalizedKey, out var fastestRaidBossId)
+        var scores = LeaderboardBoardKey.TryGetFastestRaidBossId(normalizedKey, out var fastestRaidBossId)
                 ? await GetFastestRaidSlainScoresAsync(fastestRaidBossId, cancellationToken)
             : normalizedKey switch
             {
@@ -59,7 +56,7 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
                     await GetGuildRenownScoresAsync(cancellationToken),
                 LeaderboardBoardKey.RaidBossKills =>
                     await GetRaidBossKillScoresAsync(cancellationToken),
-                _ => await GetCharacterScoresAsync(normalizedKey, cancellationToken)
+                _ => await GetCharacterScoresAsync(cancellationToken)
             };
         var ranked = LeaderboardRanking.Rank(scores, definition.PrimaryAscending).ToList();
         var viewerParticipantId = definition.IsGuildBoard
@@ -173,47 +170,9 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             : Math.Max(0, anchorIndex - limit);
     }
 
-    private async Task<List<LeaderboardScore>> GetCharacterScoresAsync(
-        string boardKey,
-        CancellationToken cancellationToken)
-    {
-        var query = EligibleCharacters();
-
-        if (boardKey == LeaderboardBoardKey.CombatLevel)
-        {
-            return await query
-                .Select(x => new LeaderboardScore(
-                    x.Id,
-                    x.Name,
-                    x.Level,
-                    x.Experience))
-                .ToListAsync(cancellationToken);
-        }
-
-        return await query
-            .Select(x => new LeaderboardScore(
-                x.Id,
-                x.Name,
-                x.Level + x.Professions.Sum(p => p.Level),
-                null))
+    private Task<List<LeaderboardScore>> GetCharacterScoresAsync(CancellationToken cancellationToken) =>
+        EligibleCharacters().Select(x => new LeaderboardScore(x.Id, x.Name, x.Level, x.Experience))
             .ToListAsync(cancellationToken);
-    }
-
-    private async Task<List<LeaderboardScore>> GetProfessionScoresAsync(
-        ProfessionType profession,
-        CancellationToken cancellationToken)
-    {
-        return await EligibleCharacters()
-            .SelectMany(
-                character => character.Professions
-                    .Where(characterProfession => characterProfession.ProfessionType == profession),
-                (character, characterProfession) => new LeaderboardScore(
-                    character.Id,
-                    character.Name,
-                    characterProfession.Level,
-                    (long)characterProfession.Experience))
-            .ToListAsync(cancellationToken);
-    }
 
     private async Task<List<LeaderboardScore>> GetSoulArchiveScoresAsync(
         CancellationToken cancellationToken)
@@ -513,13 +472,6 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
 
     private static BoardDefinition GetDefinition(string boardKey) => boardKey switch
     {
-        LeaderboardBoardKey.TotalLevel => new(
-            boardKey,
-            "Overall",
-            "Total Level",
-            "Combined combat and profession levels across your character.",
-            "Total level",
-            null),
         LeaderboardBoardKey.CombatLevel => new(
             boardKey,
             "Overall",
@@ -611,24 +563,8 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
             "Victories",
             UnrankedReason: "Slay this raid boss to record a time.",
             PrimaryAscending: true),
-        LeaderboardBoardKey.Crafting => ProfessionDefinition(boardKey, ProfessionType.Crafting),
-        LeaderboardBoardKey.Mining => ProfessionDefinition(boardKey, ProfessionType.Mining),
-        LeaderboardBoardKey.Woodcutting => ProfessionDefinition(boardKey, ProfessionType.Woodcutting),
-        LeaderboardBoardKey.Skinning => ProfessionDefinition(boardKey, ProfessionType.Skinning),
         _ => throw new ArgumentOutOfRangeException(nameof(boardKey), boardKey, null)
     };
-
-    private static BoardDefinition ProfessionDefinition(
-        string boardKey,
-        ProfessionType profession) => new(
-            boardKey,
-            "Professions",
-            profession.ToString(),
-            $"The realm's most accomplished {profession.ToString().ToLowerInvariant()} specialists.",
-            "Level",
-            "Experience",
-            profession,
-            $"Start {profession} to earn a place on this leaderboard.");
 
     private sealed record BoardDefinition(
         string Key,
@@ -637,7 +573,6 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         string Description,
         string MetricLabel,
         string? SecondaryMetricLabel,
-        ProfessionType? Profession = null,
         string? UnrankedReason = null,
         string ParticipantLabel = "Character",
         string PeriodLabel = "All-time",

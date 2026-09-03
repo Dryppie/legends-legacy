@@ -1,6 +1,4 @@
-using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Achievements;
 using Common.Primitives;
 using Domain.Models.Entities.Characters;
@@ -14,26 +12,23 @@ namespace Services.LL.Soulstones;
 
 public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
 {
-    private readonly ICharacterService _characterService;
+    private readonly ISoulstoneUpgradeRepository _repository;
     private readonly SoulstoneUpgradeDefinitionProvider _provider;
-    private readonly IDbContext _dbContext;
     private readonly IAchievementService? _achievementService;
 
     public SoulstoneUpgradeService(
-        ICharacterService characterService,
+        ISoulstoneUpgradeRepository repository,
         SoulstoneUpgradeDefinitionProvider provider,
-        IDbContext dbContext,
         IAchievementService? achievementService = null)
     {
-        _characterService = characterService;
+        _repository = repository;
         _provider = provider;
-        _dbContext = dbContext;
         _achievementService = achievementService;
     }
 
     public async Task<List<SoulstoneUpgradeView>> GetForCharacterAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var character = await _characterService.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(characterId, cancellationToken);
         if (character is null)
         {
             return [];
@@ -63,7 +58,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             return Response<SoulstoneUpgradeMutationResult>.Fail("This Soulstone constellation is not available yet.");
         }
 
-        var character = await _characterService.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(characterId, cancellationToken);
         if (character is null)
         {
             return Response<SoulstoneUpgradeMutationResult>.Fail("Character was not found.");
@@ -91,11 +86,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             return Response<SoulstoneUpgradeMutationResult>.Fail("Not enough Soulstones.");
         }
 
-        var startedTransaction = _dbContext.CurrentTransaction is null;
-        await using var transaction = startedTransaction
-            ? await _dbContext.BeginTransactionAsync(cancellationToken)
-            : null;
-
         if (entry is null)
         {
             character.CharacterSoulstoneUpgrades.Add(new CharacterSoulstoneUpgrade
@@ -110,20 +100,13 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             entry.Level = nextRank;
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
         if (_achievementService is not null)
         {
-            var upgrades = BuildViews(character);
+            var upgrades = BuildViews(character).ToList();
             await _achievementService.RecordSoulstoneUpgradePurchasedAsync(
                 characterId,
                 upgrades.Count > 0 && upgrades.All(x => x.CurrentRank >= x.MaxRank),
                 cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        if (transaction is not null)
-        {
-            await transaction.CommitAsync(cancellationToken);
         }
 
         return Response<SoulstoneUpgradeMutationResult>.Success(new SoulstoneUpgradeMutationResult(
@@ -133,27 +116,17 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
 
     public async Task<Response<SoulstoneUpgradeMutationResult>> ResetSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var character = await _characterService.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(characterId, cancellationToken);
         if (character is null)
         {
             return Response<SoulstoneUpgradeMutationResult>.Fail("Character was not found.");
         }
 
-        var totalRefund = character.CharacterSoulstoneUpgrades.Sum(GetRefundForUpgrade);
+        var totalRefund = character.CharacterSoulstoneUpgrades.Sum(x => GetRefundForUpgrade(x));
+        var balance = checked(character.Soulstones + totalRefund);
 
-        var startedTransaction = _dbContext.CurrentTransaction is null;
-        await using var transaction = startedTransaction
-            ? await _dbContext.BeginTransactionAsync(cancellationToken)
-            : null;
-
-        character.CharacterSoulstoneUpgrades.Clear();
-        character.Soulstones += totalRefund;
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        if (transaction is not null)
-        {
-            await transaction.CommitAsync(cancellationToken);
-        }
+        _repository.Remove(character, character.CharacterSoulstoneUpgrades.ToArray());
+        character.Soulstones = balance;
 
         return Response<SoulstoneUpgradeMutationResult>.Success(new SoulstoneUpgradeMutationResult(
             BuildViews(character),
@@ -175,7 +148,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             .Select(def =>
             {
                 levels.TryGetValue(def.Id, out var currentRank);
-                return BuildView(def, Math.Clamp((int)currentRank, 0, def.MaxRank), character.Soulstones, character);
+                return BuildView(def, Math.Clamp(currentRank, 0, def.MaxRank), character.Soulstones, character);
             })
             .ToList();
     }

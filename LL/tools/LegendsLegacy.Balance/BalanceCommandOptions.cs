@@ -34,6 +34,7 @@ public sealed record BalanceCommandOptions(
           dotnet run --project LL/tools/LegendsLegacy.Balance -- [--full] [options]
 
         Options:
+          --equipment-reference-builds Run the separate Tier 1 Equipment progression rank/style reference matrix. Accepts only seed, content-root, output, help.
           --seed <number>         Deterministic simulation seed (default: 1337).
           --build-count <number>  Random builds per 4/5/6-slot profile (default: 10).
           --capability-seeds <number> Common support/wave probe seeds per build, 1-32 (default: 1).

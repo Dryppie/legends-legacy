@@ -27,8 +27,6 @@ import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/at
 import { ActivatedRoute, Router } from '@angular/router';
 import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating-display';
 import { AttributeTooltipDirective } from '../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
-import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
-import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 import { EssencePreviewComponent } from '../../../../shared/components/essences/essence-preview/essence-preview.component';
 import { PresenceIndicatorComponent } from '../../../../shared/components/character/presence-indicator/presence-indicator.component';
 import { EssenceLoadoutDto } from '../../../../shared/models/essence-system';
@@ -124,32 +122,11 @@ export class CharacterOverviewComponent implements OnDestroy {
       return overview;
     }
 
-    const craftingProfession = this.professionsService.getProfession(
-      ProfessionType.Crafting,
-    );
-    const gatheringProfessions = (overview.gatheringProfessions ?? []).map(
-      (profession) => {
-        const liveProfession = this.professionsService.getProfession(
-          profession.professionType,
-        );
-        return liveProfession ?? profession;
-      },
-    );
-
     return {
       ...overview,
       level: currentCharacter.level,
       experience: currentCharacter.experience,
       experienceUntilNextLevel: currentCharacter.experienceUntilNextLevel,
-      gatheringProfessions,
-      ...(craftingProfession
-        ? {
-            craftingLevel: craftingProfession.level,
-            craftingExperience: craftingProfession.experience,
-            craftingExperienceUntilNextLevel:
-              craftingProfession.experienceUntilNextLevel,
-          }
-        : {}),
     };
   });
   readonly isLoading = computed(
@@ -224,7 +201,6 @@ export class CharacterOverviewComponent implements OnDestroy {
   constructor(
     private characterService: CharacterService,
     private readonly characterState: CharacterStateService,
-    private readonly professionsService: ProfessionsService,
     private readonly questState: QuestStateService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,

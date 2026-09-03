@@ -1,28 +1,83 @@
 import { signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { FirstPartyTourViewState } from '../../../core/services/client-side/first-party-tour/first-party-tour.models';
 import { FirstPartyTourOverlayComponent } from './first-party-tour-overlay.component';
 
 describe('FirstPartyTourOverlayComponent', () => {
   let component: FirstPartyTourOverlayComponent;
+  let fixture: ComponentFixture<FirstPartyTourOverlayComponent>;
+  const tourState = signal<FirstPartyTourViewState | null>(null);
+  const stop = jasmine.createSpy('stop');
 
   beforeEach(() => {
+    tourState.set(null);
+    stop.calls.reset();
     TestBed.configureTestingModule({
       imports: [FirstPartyTourOverlayComponent],
       providers: [
         {
           provide: FirstPartyTourService,
           useValue: {
-            state: signal(null).asReadonly(),
+            state: tourState.asReadonly(),
+            stop,
           },
         },
       ],
     });
 
-    component = TestBed.createComponent(
-      FirstPartyTourOverlayComponent,
-    ).componentInstance;
+    fixture = TestBed.createComponent(FirstPartyTourOverlayComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('keeps the archive clickable when a tutorial equip target is missing', () => {
+    const tour = viewState('tutorial-essence-loadout');
+    tour.step.kind = 'click';
+    tourState.set(tour);
+    fixture.detectChanges();
+
+    const backdrop = fixture.nativeElement.querySelector(
+      '.first-party-tour-backdrop',
+    ) as HTMLElement;
+    expect(backdrop.style.pointerEvents).toBe('none');
+    expect(fixture.nativeElement.querySelector('.first-party-tour-highlight')).toBeNull();
+  });
+
+  it('does not block the whole screen when a blocking guide loses its target', () => {
+    const tour = viewState('essences');
+    tour.blocksInteraction = true;
+    tourState.set(tour);
+    fixture.detectChanges();
+
+    const backdrop = fixture.nativeElement.querySelector(
+      '.first-party-tour-backdrop',
+    ) as HTMLElement;
+    expect(backdrop.style.pointerEvents).toBe('none');
+  });
+
+  it('lets the player close a stuck tutorial without marking it completed', () => {
+    tourState.set(viewState('tutorial-essence-loadout'));
+    fixture.detectChanges();
+
+    const close = fixture.nativeElement.querySelector(
+      'button[aria-label="Close guidance"]',
+    ) as HTMLButtonElement;
+    close.click();
+
+    expect(stop).toHaveBeenCalledOnceWith(false);
+  });
+
+  it('keeps archive and slot controls usable around a highlighted tutorial action', () => {
+    const tour = viewState('tutorial-essence-loadout');
+    tour.targetRect = { top: 100, left: 100, bottom: 140, right: 200, width: 100, height: 40 };
+    tourState.set(tour);
+    fixture.detectChanges();
+
+    const backdrops = Array.from(fixture.nativeElement.querySelectorAll(
+      '.first-party-tour-backdrop',
+    )) as HTMLElement[];
+    expect(backdrops.length).toBe(4);
+    expect(backdrops.every((backdrop) => backdrop.style.pointerEvents === 'none')).toBeTrue();
   });
 
   it('shows Back for a tutorial step that opts in', () => {

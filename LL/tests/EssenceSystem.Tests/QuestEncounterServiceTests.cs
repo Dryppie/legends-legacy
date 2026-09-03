@@ -238,9 +238,16 @@ public sealed class QuestEncounterServiceTests
         public Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
+        public Task<IReadOnlySet<string>> GetOwnedEssenceDefinitionIdsAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
         public Task<bool> HasEssenceInAnyLoadoutAsync(
             Guid requestedCharacterId,
             string essenceDefinitionId,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<bool> HasAnyEssenceInLoadoutAsync(
+            Guid requestedCharacterId,
             CancellationToken cancellationToken) => throw new NotSupportedException();
 
         public Task<bool> HasQualifyingEquipmentEquippedAsync(

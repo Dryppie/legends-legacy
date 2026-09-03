@@ -1,5 +1,7 @@
 # Guild Buildings: Current-System Analysis
 
+**Equipment progression update, 2 September 2026:** the analysis below records the legacy building system. Equipment progression building overviews and mutation responses now use descriptions from [equipment-guild.v1.json](../src/API/API.LL/Data/equipment/equipment-guild.v1.json). Market Office copy matches the implemented rotating Tempered Scrap and reusable-style Blueprint stock. Workshop copy explicitly states that it has no equipment progression benefit; no new Workshop mechanic was added. Prices, level requirements, client building visibility and shared legacy definitions are preserved. The [implementation ledger](../../docs/design/equipment-implementation-status.md) covers the separate mission, shop and permanent guild-equipment integration, its tests, and remaining conversion work. Equipment progression activation flags remain off.
+
 ## Scope
 
 This document analyzes the guild building system as it currently exists in `LL/`. It covers:

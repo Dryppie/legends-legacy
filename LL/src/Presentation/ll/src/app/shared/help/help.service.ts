@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { shareReplay } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { Guide } from './help.models';
 
 export interface HelpEntry {
   title: string;
@@ -11,7 +12,13 @@ export interface HelpEntry {
 
 @Injectable({ providedIn: 'root' })
 export class HelpService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+  ) {}
+
+  loadGuide(pageId: string): Observable<Guide> {
+    return this.load<Guide>(`assets/help/guides/${pageId}.json`);
+  }
 
   private cache = new Map<string, any>();
 

@@ -1,6 +1,5 @@
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
-using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Definitions.Rooms;
 
 namespace Services.LL.JsonDefinitions.Dungeons;
@@ -43,12 +42,8 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 RequiredPreviousDungeonGrade = previous is null ? null : (DungeonGrade)previous.Difficulty,
                 EntryCosts = family.EntryCosts.Select(Clone).ToList(),
                 RewardTable = Clone(difficulty.RewardTable),
-                CompletionRewardTableIds = [$"reward.dungeon.{difficulty.Id}.completion"],
-                TierRewardTableIds = [$"reward.dungeon.region.{family.Region}.tier.{difficulty.Difficulty}"],
+                CompletionRewardTableIds = difficulty.CompletionRewardTableIds.ToList(),
                 MonsterLootModifiers = family.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value),
-                GatheringNodes = difficulty.GatheringNodes
-                    .Select(node => Clone(node, family.GatheringBonusRewardTableIds))
-                    .ToList(),
                 RestSiteCount = family.RestSiteCount,
                 MinRooms = difficulty.MinRooms,
                 MaxRooms = difficulty.MaxRooms,
@@ -106,33 +101,6 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
         MinAmount = reward.MinAmount,
         MaxAmount = reward.MaxAmount,
         Chance = reward.Chance
-    };
-
-    private static DungeonGatheringNodeDefinition Clone(
-        DungeonGatheringNodeDefinition node,
-        IReadOnlyCollection<string> familyBonusRewardTableIds) => new()
-    {
-        Id = node.Id,
-        Name = node.Name,
-        Type = node.Type,
-        LevelRequirement = node.LevelRequirement,
-        ProcChance = node.ProcChance,
-        RewardTableId = node.RewardTableId,
-        BonusRewardTableIds = node.BonusRewardTableIds
-            .Concat(familyBonusRewardTableIds)
-            .Where(id => !string.IsNullOrWhiteSpace(id))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList(),
-        Loot = node.Loot.Select(Clone).ToList()
-    };
-
-    private static DungeonGatheringLootEntryDefinition Clone(DungeonGatheringLootEntryDefinition loot) => new()
-    {
-        ItemId = loot.ItemId,
-        Weight = loot.Weight,
-        MinQuantity = loot.MinQuantity,
-        MaxQuantity = loot.MaxQuantity,
-        IsRare = loot.IsRare
     };
 
     private static string ToRomanNumeral(int difficulty) => difficulty switch

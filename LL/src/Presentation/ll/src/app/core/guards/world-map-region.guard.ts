@@ -17,7 +17,7 @@ export function getWorldMapRegionId(
     action.characterActionType === CharacterActionType.Combat
       ? action.combatActionDetails?.area?.id
       : null;
-  const areaId = activeCombatAreaId ?? action?.returnToCombatAreaId;
+  const areaId = activeCombatAreaId;
 
   return (
     (areaId ? regions.getRegionIdByAreaId(areaId) : null) ??

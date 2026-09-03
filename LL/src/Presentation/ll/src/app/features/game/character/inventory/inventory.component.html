@@ -1,4 +1,5 @@
 <div class="ll-page-stack inventory-page">
+  <app-forge-link />
   <app-default-header
     class="pr-4 sm:pr-6"
     section="Character"
@@ -261,34 +262,34 @@
           </div>
           <div
             role="columnheader"
-            [attr.aria-sort]="inventoryAriaSort('Quality')"
+            [attr.aria-sort]="inventoryAriaSort(rankColumnSort)"
           >
             <button
               type="button"
               class="w-full text-left transition-colors hover:text-primary"
-              [ngClass]="{ 'text-primary': inventorySort === 'Quality' }"
-              (click)="setInventorySort('Quality')"
+              [ngClass]="{ 'text-primary': inventorySort === rankColumnSort }"
+              (click)="setInventorySort(rankColumnSort)"
             >
-              Quality
+              {{ rankColumnSort }}
               <span aria-hidden="true">{{
-                inventorySortIndicator("Quality")
+                inventorySortIndicator(rankColumnSort)
               }}</span>
             </button>
           </div>
           <div
             class="text-center"
             role="columnheader"
-            [attr.aria-sort]="inventoryAriaSort('Potential')"
+            [attr.aria-sort]="inventoryAriaSort(styleColumnSort)"
           >
             <button
               type="button"
               class="w-full transition-colors hover:text-primary"
-              [ngClass]="{ 'text-primary': inventorySort === 'Potential' }"
-              (click)="setInventorySort('Potential')"
+              [ngClass]="{ 'text-primary': inventorySort === styleColumnSort }"
+              (click)="setInventorySort(styleColumnSort)"
             >
-              Potential
+              {{ styleColumnSort }}
               <span aria-hidden="true">{{
-                inventorySortIndicator("Potential")
+                inventorySortIndicator(styleColumnSort)
               }}</span>
             </button>
           </div>
@@ -375,14 +376,19 @@
               *ngIf="equipmentInstance(inventoryItem) as equipment"
               class="inventory-list-quality"
             >
-              {{ equipment.quality }}
+              {{
+                equipment.progression
+                  ? "Rank " + equipment.progression.rank
+                  : '—'
+              }}
             </span>
 
             <span
               *ngIf="equipmentInstance(inventoryItem) as equipment"
-              class="inventory-list-potential tabular-nums"
+              class="inventory-list-potential min-w-0 truncate tabular-nums"
+              [title]="equipment.progression ? equipmentStyleLabel(equipment.progression.activeStyleId) : ''"
             >
-              {{ equipment.potential ?? 0 }}
+              {{ equipment.progression ? equipmentStyleLabel(equipment.progression.activeStyleId) : '—' }}
             </span>
 
             <span
@@ -454,7 +460,7 @@
               <app-item [item]="item.itemInstance"></app-item>
               <p class="ll-copy mt-3">
                 {{
-                  item.itemInstance.itemBase.description ||
+                  itemDescription(item.itemInstance.itemBase) ||
                     "No description available."
                 }}
               </p>
@@ -552,6 +558,12 @@
                   Scrap
                 </button>
 
+                <a
+                  *ngIf="blueprintMetadata(item)"
+                  routerLink="/game/character/forge"
+                  class="ll-button ll-button-primary mb-2 block w-full text-center"
+                  >Learn a reusable style in the Forge</a
+                >
                 <app-inventory-transfer
                   [compact]="true"
                   [inventoryItem]="item"
@@ -781,7 +793,7 @@
             <app-item [item]="item.itemInstance"></app-item>
             <p class="ll-copy mt-3">
               {{
-                item.itemInstance.itemBase.description ||
+                itemDescription(item.itemInstance.itemBase) ||
                   "No description available."
               }}
             </p>
@@ -790,46 +802,6 @@
               <strong class="tabular-nums text-primary">
                 {{ item.quantity | number: "1.0-0" }}
               </strong>
-            </div>
-          </div>
-
-          <div
-            *ngIf="blueprintMetadata(item) as blueprint"
-            class="ll-card mt-3 p-3"
-          >
-            <p class="ll-eyebrow">Blueprint</p>
-            <h3 class="ll-heading mt-1 text-base">{{ blueprint.name }}</h3>
-
-            <app-blueprint-attribute-summary
-              [blueprint]="blueprint"
-            ></app-blueprint-attribute-summary>
-
-            <div *ngIf="isLoadingBlueprintRecipes()" class="ll-state mt-3">
-              Loading available recipes...
-            </div>
-
-            <div *ngIf="blueprintRecipeOptions().length" class="mt-3">
-              <p class="ll-copy mb-1">Recipe to learn it on</p>
-              <app-dropdown
-                class="block w-full"
-                appearance="field"
-                label="Select a recipe"
-                [value]="selectedBlueprintRecipeId()"
-                [options]="blueprintRecipeOptions()"
-                [selectedValue]="selectedBlueprintRecipeId()"
-                (selection)="selectBlueprintRecipe($event)"
-              ></app-dropdown>
-            </div>
-
-            <div
-              *ngIf="
-                hasLoadedBlueprintRecipes() &&
-                !isLoadingBlueprintRecipes() &&
-                !blueprintRecipeOptions().length
-              "
-              class="ll-state mt-3"
-            >
-              This Blueprint is already learned on every compatible recipe.
             </div>
           </div>
 
@@ -865,12 +837,6 @@
             </div>
           </div>
 
-          <div
-            *ngIf="blueprintActionError() as message"
-            class="ll-state ll-state-danger mt-3"
-          >
-            {{ message }}
-          </div>
 
           <div
             *ngIf="containerActionError() as message"
@@ -916,20 +882,13 @@
             {{ isOpeningContainer() ? "Opening..." : "Open" }}
           </button>
 
-          <button
-            *ngIf="blueprintMetadata(item)"
-            type="button"
-            class="ll-button ll-button-primary mb-2 w-full"
-            [disabled]="
-              isLoadingBlueprintRecipes() ||
-              isLearningBlueprint() ||
-              !selectedBlueprintRecipeId()
-            "
-            (click)="learnSelectedBlueprint(item)"
-          >
-            {{ isLearningBlueprint() ? "Learning..." : "Learn" }}
-          </button>
 
+          <a
+            *ngIf="blueprintMetadata(item)"
+            routerLink="/game/character/forge"
+            class="ll-button ll-button-primary mb-2 block w-full text-center"
+            >Learn a reusable style in the Forge</a
+          >
           <app-inventory-transfer
             [compact]="true"
             [inventoryItem]="item"

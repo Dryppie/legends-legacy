@@ -9,6 +9,8 @@ public class RunRewardConfiguration : IEntityTypeConfiguration<RunReward>
     public void Configure(EntityTypeBuilder<RunReward> builder)
     {
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.ProgressionData).HasColumnName("ModelEData").HasColumnType("jsonb")
+            .HasConversion<Persistence.LL.Configurations.Items.EquipmentDataConverter>();
 
         builder.Property(x => x.ItemId)
             .IsRequired();

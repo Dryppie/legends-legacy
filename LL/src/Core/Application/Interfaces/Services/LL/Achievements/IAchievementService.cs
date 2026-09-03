@@ -64,17 +64,6 @@ public interface IAchievementService
         CancellationToken cancellationToken);
     Task RecordEssenceLoadoutSavedAsync(Guid characterId, int equippedEssenceCount, CancellationToken cancellationToken);
     Task RecordEssenceAscendedAsync(Guid characterId, int ascensionTier, int ascendedToTierCount, CancellationToken cancellationToken);
-    Task RecordItemsCraftedAsync(
-        Guid characterId,
-        IReadOnlyCollection<EquipmentInstance> craftedItems,
-        int? craftingMasteryLevel,
-        CancellationToken cancellationToken);
-    Task RecordItemsTemperedAsync(
-        Guid characterId,
-        TemperingSummary summary,
-        IReadOnlyCollection<EquipmentInstance> completedItems,
-        CancellationToken cancellationToken);
-    Task RecordBlueprintUnlockedAsync(Guid characterId, CancellationToken cancellationToken);
     Task RecordCharacterCreatedAsync(Guid characterId, CancellationToken cancellationToken);
     Task RecordCharacterLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken);
     Task RecordProphecyCompletedAsync(Guid characterId, bool completedWeeklyCycle, CancellationToken cancellationToken);

@@ -48,7 +48,6 @@ export interface DungeonMastery {
 export interface DungeonMasteryBenefitSummary {
   additionalVisibilityRows: number;
   restSiteVigorBonus: number;
-  gatheringProcChanceBonus: number;
   combatVigorCostReduction: number;
   completionCurrencyBonusPercent: number;
 }
@@ -95,7 +94,6 @@ export interface DungeonPreviewData {
   record?: DungeonRecord;
   mastery?: DungeonMastery;
   rewards: DungeonPreviewReward[];
-  gatheringNodes?: DungeonGatheringNodePreview[];
   unlockedDifficulties: DungeonDifficulty[];
   difficultyVariants?: Partial<Record<DungeonDifficulty, DungeonPreviewData>>;
 }

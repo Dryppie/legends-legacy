@@ -1,5 +1,10 @@
 import { signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import {
+  discardPeriodicTasks,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
@@ -8,6 +13,7 @@ import { EquipmentStateService } from '../equipment/equipment-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { VersionedMutationResult } from '../api.service';
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
+import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-coordinator.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EssenceStateService } from './essence-state.service';
 import { EssencesService } from './essences.service';
@@ -183,7 +189,7 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.hasDraftChanges()).toBeFalse();
   });
 
-  it('live-refreshes loadouts when a level-up unlocks an Essence slot', () => {
+  it('defers an unlocked Essence slot refresh until page entry', () => {
     essences.getLoadouts.and.returnValue(
       of({
         loadouts: [
@@ -212,10 +218,148 @@ describe('EssenceStateService loadout drafts', () => {
     });
     TestBed.flushEffects();
 
+    expect(essences.getLoadouts).toHaveBeenCalledTimes(1);
+    expect(service.dirty()).toBeTrue();
+    service.refreshIfDirty();
+
     expect(essences.getLoadouts).toHaveBeenCalledTimes(2);
     expect(service.loadouts()?.unlockedSlots).toBe(2);
     expect(service.draftSlots()).toEqual([null, null]);
   });
+
+  it('coalesces combat invalidations into one fetch on page entry', fakeAsync(() => {
+    const sync = TestBed.inject(StateSyncCoordinator);
+    for (let revision = 1; revision <= 5; revision++) {
+      sync.acceptInvalidations({ essences: revision });
+      tick(60);
+    }
+
+    expect(service.dirty()).toBeTrue();
+    expect(essences.getArchive).toHaveBeenCalledTimes(1);
+    expect(essences.getLoadouts).toHaveBeenCalledTimes(1);
+    expect(essences.getCreatureArchive).toHaveBeenCalledTimes(1);
+    expect(essences.getCodex).toHaveBeenCalledTimes(1);
+
+    essences.getArchive.and.returnValue(of({
+      essences: [{ id: 'essence-1', currentXp: 129600 } as PlayerEssenceDto],
+      essenceDust: 0,
+    }));
+    service.refreshIfDirty();
+    tick(60);
+
+    expect(service.archive()?.essences[0].currentXp).toBe(129600);
+    expect(service.dirty()).toBeFalse();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    expect(essences.getLoadouts).toHaveBeenCalledTimes(2);
+    service.refreshIfDirty();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    discardPeriodicTasks();
+  }));
+
+  it('sees a pending invalidation on entry without an extra fetch after its callback', fakeAsync(() => {
+    TestBed.inject(StateSyncCoordinator).acceptInvalidations({ essences: 1 });
+    service.refreshIfDirty();
+    tick(60);
+
+    expect(service.dirty()).toBeFalse();
+    service.refreshIfDirty();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    discardPeriodicTasks();
+  }));
+
+  it('keeps an in-flight combat update dirty for the next entry without fetching again', fakeAsync(() => {
+    const sync = TestBed.inject(StateSyncCoordinator);
+    sync.acceptInvalidations({ essences: 1 });
+    tick(60);
+    const archiveResponse = new Subject<any>();
+    essences.getArchive.and.returnValue(archiveResponse);
+    service.refreshIfDirty();
+    service.refreshIfDirty();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+
+    sync.acceptInvalidations({ essences: 2 });
+    tick(60);
+    archiveResponse.next({ essences: [], essenceDust: 0 });
+    archiveResponse.complete();
+    tick(60);
+
+    expect(service.dirty()).toBeTrue();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
+    service.refreshIfDirty();
+    expect(essences.getArchive).toHaveBeenCalledTimes(3);
+    expect(service.dirty()).toBeFalse();
+    discardPeriodicTasks();
+  }));
+
+  it('cleans an async fetch when a delayed invalidation was already known at request time', fakeAsync(() => {
+    TestBed.inject(StateSyncCoordinator).acceptInvalidations({ essences: 1 });
+    const archiveResponse = new Subject<any>();
+    essences.getArchive.and.returnValue(archiveResponse);
+    service.refreshIfDirty();
+    tick(60);
+    archiveResponse.next({ essences: [], essenceDust: 0 });
+    archiveResponse.complete();
+    service.refreshIfDirty();
+
+    expect(service.dirty()).toBeFalse();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    discardPeriodicTasks();
+  }));
+
+  it('keeps a failed refresh dirty and retries only on page entry', fakeAsync(() => {
+    TestBed.inject(StateSyncCoordinator).acceptInvalidations({ essences: 1 });
+    tick(60);
+    essences.getArchive.and.returnValue(throwError(() => new Error('Unavailable')));
+    service.refreshIfDirty();
+    tick(1000);
+    expect(service.dirty()).toBeTrue();
+    expect(service.loading()).toBeFalse();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+
+    essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
+    service.refreshIfDirty();
+    expect(service.dirty()).toBeFalse();
+    expect(essences.getArchive).toHaveBeenCalledTimes(3);
+    discardPeriodicTasks();
+  }));
+
+  it('uses an authoritative mutation response to clean the dirty cache', fakeAsync(() => {
+    const sync = TestBed.inject(StateSyncCoordinator);
+    sync.acceptInvalidations({ essences: 1 });
+    tick(60);
+    essences.spendDust.and.returnValue(of(versionedMutation({}, { essences: 2 })));
+    service.spendDust({ id: 'essence-1' } as PlayerEssenceDto);
+    sync.acceptInvalidations({ essences: 2 });
+    tick(60);
+    service.refreshIfDirty();
+
+    expect(service.dirty()).toBeFalse();
+    expect(essences.getArchive).toHaveBeenCalledTimes(1);
+    discardPeriodicTasks();
+  }));
+
+  it('allows a later dirty refresh when a mutation supersedes an in-flight fetch', fakeAsync(() => {
+    const sync = TestBed.inject(StateSyncCoordinator);
+    sync.acceptInvalidations({ essences: 1 });
+    const archiveResponse = new Subject<any>();
+    essences.getArchive.and.returnValue(archiveResponse);
+    service.refreshIfDirty();
+    essences.spendDust.and.returnValue(of(versionedMutation({}, { essences: 2 })));
+    service.spendDust({ id: 'essence-1' } as PlayerEssenceDto);
+    archiveResponse.next({ essences: [], essenceDust: 999 });
+    archiveResponse.complete();
+
+    expect(service.archive()?.essenceDust).toBe(0);
+    expect(service.loading()).toBeFalse();
+    sync.acceptInvalidations({ essences: 3 });
+    tick(60);
+    essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
+    service.refreshIfDirty();
+    expect(essences.getArchive).toHaveBeenCalledTimes(3);
+    expect(service.dirty()).toBeFalse();
+    discardPeriodicTasks();
+  }));
 
   it('persists an equipped Essence immediately without enabling name save', () => {
     essences.updateLoadout.and.returnValue(

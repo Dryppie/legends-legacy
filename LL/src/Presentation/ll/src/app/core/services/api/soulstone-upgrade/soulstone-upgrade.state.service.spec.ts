@@ -9,6 +9,7 @@ import { SoulstoneUpgradeStateService } from './soulstone-upgrade.state.service'
 import { SoulstoneUpgradeService } from './soulstone-upgrade.service';
 
 describe('SoulstoneUpgradeStateService', () => {
+
   it('reacts to the live Soulstone balance without unlocking prerequisites', () => {
     const character = signal(createCharacter(70));
     const api = jasmine.createSpyObj<SoulstoneUpgradeService>(

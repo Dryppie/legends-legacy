@@ -1,13 +1,60 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Guilds;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Domain.Models.Items.Equipments;
 public class EquipmentInstance : ItemInstance
 {
+    public EquipmentData? ProgressionData { get; private set; }
+    [NotMapped] public bool HasEquipmentProgression => ProgressionData is not null;
+
+    public void ApplyProgressionData(EquipmentData data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+        if (data.State.Id != Id || data.ItemBaseId != ItemBaseId
+            || (ItemBase is EquipmentBase equipmentBase && equipmentBase.EquipmentType != data.EquipmentType))
+            throw new InvalidOperationException("Equipment progression descriptor does not match its equipment instance.");
+        ProgressionData = data;
+        Tier = data.State.Tier;
+        Rarity = (Rarity)data.Rarity;
+        CraftedName = data.DisplayName;
+        BaseRecipeId = null;
+        BlueprintId = data.State.ActiveStyleId;
+        EquipmentSetId = data.EquipmentSetId;
+        StatModelVersion = EquipmentBalance.StatUnitVersion;
+        Quality = ItemQuality.Standard;
+        Potential = MaxPotential = null;
+        ItemXp = TemperingProgress = 0;
+        IsMasterpiece = IsLevelingItem = false;
+        InstanceModifiers = data.Stats.OrderBy(x => x.Key)
+            .Select(x => new InstanceAttributeModifier(x.Key, x.Value) { ItemInstanceId = Id }).ToList();
+    }
+
+    public void BindEquipmentProgressionForEquip(Guid characterId)
+    {
+        if (ProgressionData is not { } data) return;
+        if (data.State.Ownership.Kind == EquipmentOwnershipKind.GuildOwned
+            && GuildVaultItem is { } loan && loan.EquipmentInstanceId == Id
+            && loan.GuildId == data.State.Ownership.OwnerId && loan.BorrowedByCharacterId == characterId)
+            return; // The repository verifies current membership before equipping this loan.
+        if (data.State.Ownership.OwnerId != characterId
+            || !data.State.Ownership.CanPersonallyModifyOrSalvage)
+            throw new InvalidOperationException("This Equipment progression equipment is not owned by the character.");
+        ProgressionData = data.BindForPersonalUse();
+    }
+    public void DonateEquipmentProgressionToGuild(Guid expectedOwnerId, Guid guildId)
+    {
+        if (ProgressionData is { } data) ProgressionData = data.DonateToGuild(expectedOwnerId, guildId);
+    }
+    public void TransferEquipmentProgressionToCharacter(Guid expectedOwnerId, Guid recipientId)
+    {
+        if (ProgressionData is { } data)
+            ProgressionData = data.TransferToCharacter(expectedOwnerId, recipientId);
+    }
     public Rarity Rarity { get; set; } = Rarity.Common;
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
     public string? BaseRecipeId { get; set; }
@@ -34,18 +81,18 @@ public class EquipmentInstance : ItemInstance
     public EquipmentBase EquipmentBase => (EquipmentBase)ItemBase;
 
     [NotMapped]
-    public string DisplayName => !string.IsNullOrWhiteSpace(CraftedName)
+    public string DisplayName => ProgressionData?.DisplayName ?? (!string.IsNullOrWhiteSpace(CraftedName)
         ? CraftedName.Trim()
         : EquipmentBase.EquipmentType == EquipmentType.Tool
             ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
-            : EquipmentBase.Name;
+            : EquipmentBase.Name);
 
     [NotMapped]
     public bool UsesRecipeStatBudget => !string.IsNullOrWhiteSpace(BaseRecipeId);
 
     [NotMapped]
     public bool UsesProgressionNormalizedRatings =>
-        UsesRecipeStatBudget
+        (HasEquipmentProgression || UsesRecipeStatBudget)
         && StatModelVersion >= EquipmentStatBudgetCatalog.BalanceVersion;
 
     /// <summary>
@@ -55,7 +102,7 @@ public class EquipmentInstance : ItemInstance
     /// </summary>
     [NotMapped]
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
-        UsesRecipeStatBudget
+        HasEquipmentProgression || UsesRecipeStatBudget
             ? []
             : EquipmentBase?.AttributeModifiers
             .Select(attr => new ItemAttributeModifier(
@@ -76,8 +123,9 @@ public class EquipmentInstance : ItemInstance
     public GuildVaultItem? GuildVaultItem { get; set; }
 
     [NotMapped]
-    public List<AttributeModifierBase> AttributeModifiers =>
-    [
+    public List<AttributeModifierBase> AttributeModifiers => ProgressionData is { } data
+        ? data.Stats.OrderBy(x => x.Key).Select(x => (AttributeModifierBase)new InstanceAttributeModifier(x.Key, x.Value)).ToList()
+        : [
         .. BaseModifiers,
         .. InstanceModifiers,
     ];
@@ -89,7 +137,7 @@ public class EquipmentInstance : ItemInstance
         .. ToolAffixes,
     ];
 
-    public float Boost => GetRarityBoost(Rarity);
+    public float Boost => HasEquipmentProgression ? 1f : GetRarityBoost(Rarity);
 
     public static float GetRarityBoost(Rarity rarity) =>
         (float)CalculateRarityBoost(rarity);

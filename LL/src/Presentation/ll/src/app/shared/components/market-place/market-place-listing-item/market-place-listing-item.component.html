@@ -8,7 +8,18 @@
     </ng-container>
   </div>
   <div class="text-white">x{{ listing.quantity | numberFormat }}</div>
-  <div class="truncate text-zinc-300">{{ qualityLabel }}</div>
+  <div class="min-w-0 text-zinc-300">
+    <div class="truncate" [title]="equipmentSummary">
+      {{ equipmentSummary }}
+    </div>
+    <div
+      *ngIf="activeStyleLabel"
+      class="truncate text-xs text-zinc-400"
+      [title]="activeStyleLabel"
+    >
+      {{ activeStyleLabel }}
+    </div>
+  </div>
 
   <div class="ml-auto flex items-center gap-1 text-primary">
     <div>{{ listing.unitPrice | numberFormat }}</div>

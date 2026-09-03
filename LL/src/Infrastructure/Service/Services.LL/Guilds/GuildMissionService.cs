@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
@@ -741,25 +742,27 @@ public class GuildMissionService : IGuildMissionService
     private IReadOnlyList<GuildMissionDefinition> GetWeeklyMissionOptions(Guild guild, string weekKey)
     {
         var missionBoardLevel = GetMissionBoardLevel(guild);
+        var definitions = _weeklyDefinitions;
         if (missionBoardLevel < 2)
         {
-            return _weeklyDefinitions.Take(WeeklyMissionOptionCount).ToList();
+            return definitions.Take(WeeklyMissionOptionCount).ToList();
         }
 
         var count = WeeklyMissionOptionCount + 1;
-        return GuildContentHelpers.PickWeeklyRotation(_weeklyDefinitions, weekKey, count, x => x.Key);
+        return GuildContentHelpers.PickWeeklyRotation(definitions, weekKey, count, x => x.Key);
     }
 
     private IReadOnlyList<GuildMissionDefinition> GetDailyOrderDefinitions(Guild guild, string dailyKey)
     {
         var missionBoardLevel = GetMissionBoardLevel(guild);
+        var definitions = _dailyDefinitions;
         if (missionBoardLevel < 3)
         {
-            return _dailyDefinitions.Take(DailyOrdersPerMember).ToList();
+            return definitions.Take(DailyOrdersPerMember).ToList();
         }
 
         var count = DailyOrdersPerMember + 1;
-        return GuildContentHelpers.PickWeeklyRotation(_dailyDefinitions, dailyKey, count, x => x.Key);
+        return GuildContentHelpers.PickWeeklyRotation(definitions, dailyKey, count, x => x.Key);
     }
 
     private static int GetMissionBoardLevel(Guild guild) =>

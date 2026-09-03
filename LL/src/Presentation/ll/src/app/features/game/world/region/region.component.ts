@@ -119,6 +119,7 @@ export class RegionComponent implements OnInit, OnDestroy {
   private contentResizeObserver: ResizeObserver | null = null;
   private readonly raidSyncCleanup: () => void;
 
+
   constructor(
     private route: ActivatedRoute,
     private regionService: RegionService,

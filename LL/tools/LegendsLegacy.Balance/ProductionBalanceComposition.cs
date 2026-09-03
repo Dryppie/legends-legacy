@@ -15,6 +15,42 @@ namespace LegendsLegacy.Balance;
 
 public static class ProductionBalanceComposition
 {
+    public static MeranProgressionAnalyzer CreateMeranAssessment(string contentRoot)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" }).Build();
+        var json = CreateProductionJsonOptions();
+        var abilities = new JsonAbilityCatalogProvider(configuration, contentRoot, json, new ThreatAndTankingOptions());
+        var essences = new JsonEssenceDefinitionRepository(configuration, contentRoot, json, new EssenceDefinitionValidator());
+        var loadouts = new CatalogEssenceLoadoutResolver(essences);
+        var items = new JsonCraftingDefinitionProvider(configuration, contentRoot, json);
+        var progression = Services.LL.Items.JsonStarterEquipmentCatalog.Load(
+            Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
+        var setup = new CombatSetupService(new CreatureScaler(new RegionCreatureScalingProvider(configuration, contentRoot, json)),
+            loadouts, essences, new JsonCreatureEssenceLootTableRepository(configuration, contentRoot, json, essences),
+            new JsonCreatureAbilityDefinitionProvider(configuration, contentRoot, json), items);
+        return new(contentRoot, new EquipmentReferenceBuildFactory(progression, items, essences, loadouts), setup,
+            new CombatEngineExecutor(abilities, essences, items), new JsonAreaExperienceBalanceProvider(configuration, contentRoot, json));
+    }
+
+    public static EquipmentReferenceReportRunner CreateEquipmentReferences(string contentRoot)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" }).Build();
+        var json = CreateProductionJsonOptions();
+        var abilities = new JsonAbilityCatalogProvider(configuration, contentRoot, json, new ThreatAndTankingOptions());
+        var essences = new JsonEssenceDefinitionRepository(configuration, contentRoot, json, new EssenceDefinitionValidator());
+        var loadouts = new CatalogEssenceLoadoutResolver(essences);
+        var items = new JsonCraftingDefinitionProvider(configuration, contentRoot, json);
+        var progression = Services.LL.Items.JsonStarterEquipmentCatalog.Load(
+            Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
+        var setup = new CombatSetupService(
+            new CreatureScaler(new RegionCreatureScalingProvider(configuration, contentRoot, json)), loadouts, essences,
+            new JsonCreatureEssenceLootTableRepository(configuration, contentRoot, json, essences), craftingDefinitions: items);
+        return new(new EquipmentReferenceBuildFactory(progression, items, essences, loadouts), setup,
+            new CombatEngineExecutor(abilities, essences, items));
+    }
+
     public static ProductionBalanceRunner Create(
         string contentRoot,
         TimeProvider? timeProvider = null)

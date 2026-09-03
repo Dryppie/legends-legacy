@@ -1,5 +1,4 @@
-﻿using Domain.Models.Professions.Crafting;
-
+﻿
 namespace Domain.Models.CharacterActions;
 public interface ICharacterActionRepository
 {
@@ -17,7 +16,6 @@ public interface ICharacterActionRepository
     /// <returns></returns>
     public Task<CharacterAction?> GetActionScheduleAsync(Guid characterId, CancellationToken cancellationToken);
     public Task<CharacterAction?> GetCombatActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken);
-    public Task<CharacterAction?> GetCraftingActionForResolutionAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Update a character's current action
@@ -33,25 +31,5 @@ public interface ICharacterActionRepository
     /// <returns></returns>
     public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Get a character's crafting action
-    /// </summary>
-    /// <param name="characterId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<CharacterAction?> UpdateCraftingActionAsync(
-        Guid characterId,
-        CraftingQueueItem characterAction,
-        Domain.Models.Inventories.InventoryItem inventoryItem,
-        DateTimeOffset now,
-        CancellationToken cancellationToken);
-    Task<CharacterAction?> ResumeTemperingAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken);
-    bool ResumeCombatAfterTempering(
-        CharacterAction characterAction,
-        CharacterActionDetails.CombatActionDetails combatActionDetails,
-        DateTimeOffset combatStartsAt,
-        DateTimeOffset now);
-    Task<IReadOnlyList<CraftingQueueItem>> GetPausedTemperingQueueAsync(Guid characterId, CancellationToken cancellationToken);
     Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken);
 }

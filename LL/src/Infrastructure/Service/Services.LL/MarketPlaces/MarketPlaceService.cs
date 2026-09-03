@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Achievements;
 using Domain.Models.Entities.Characters;
@@ -71,7 +73,7 @@ public class MarketPlaceService : IMarketPlaceService
         if (!IsValidQuantityAndPrice(marketPlaceListing.Quantity, marketPlaceListing.UnitPrice)) return null;
 
         var inventoryItem = await _inventoryService.GetInventoryItemAsync(characterId, marketPlaceListing.ItemInstanceId, cancellationToken);
-        if (inventoryItem?.ItemInstance?.ItemBase == null || inventoryItem.ItemInstance.ItemBase.IsBound)
+        if (inventoryItem?.ItemInstance?.ItemBase == null || inventoryItem.ItemInstance.IsBound)
             return null;
         if (!inventoryItem.ItemInstance.ItemBase.Stackable && marketPlaceListing.Quantity != 1)
             return null;
@@ -306,7 +308,7 @@ public class MarketPlaceService : IMarketPlaceService
                 locked.ExpiresAt <= now ||
                 locked.UnitPrice > buyOrder.UnitPrice ||
                 !string.Equals(locked.ItemInstance.ItemBaseId, buyOrder.ItemBaseId, StringComparison.Ordinal) ||
-                locked.ItemInstance.ItemBase.IsBound ||
+                locked.ItemInstance.IsBound ||
                 !locked.ItemInstance.ItemBase.Stackable)
             {
                 continue;
@@ -478,12 +480,15 @@ public class MarketPlaceService : IMarketPlaceService
                 cancellationToken)) return null;
         if (listing == null || listing.ExpiresAt <= now || listing.Quantity < quantity || listing.SellerId.Equals(characterId) ||
             !IsValidQuantityAndPrice(quantity, listing.UnitPrice) ||
-            listing.ItemInstance.ItemBase.IsBound ||
+            listing.ItemInstance.IsBound ||
             (!listing.ItemInstance.ItemBase.Stackable && quantity != 1) ||
             !TryCalculateTotal(listing.UnitPrice, quantity, out var totalPrice))
             return null;
 
         await _marketPlaceRepository.LockCharactersAsync([characterId, listing.SellerId], cancellationToken);
+        if (listing.ItemInstance.ItemBase.ItemType == ItemType.Equipment
+            && listing.ItemInstance is not EquipmentInstance { ProgressionData: not null })
+            return null;
         var buyer = await _characterService.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
         if (buyer == null) return null;
         var seller = await _characterService.GetCharacterByCharacterIdAsync(listing.SellerId, cancellationToken);
@@ -574,7 +579,7 @@ public class MarketPlaceService : IMarketPlaceService
                 locked.ExpiresAt <= now ||
                 locked.UnitPrice > maximumUnitPrice ||
                 !string.Equals(locked.ItemInstance.ItemBaseId, itemBaseId, StringComparison.Ordinal) ||
-                locked.ItemInstance.ItemBase.IsBound ||
+                locked.ItemInstance.IsBound ||
                 !locked.ItemInstance.ItemBase.Stackable)
             {
                 continue;
@@ -692,7 +697,7 @@ public class MarketPlaceService : IMarketPlaceService
 
         var sellerInventoryItem = await _inventoryService.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);
         if (sellerInventoryItem == null || sellerInventoryItem.Quantity < quantity) return null;
-        if (!sellerInventoryItem.ItemInstance.ItemBase.Stackable || sellerInventoryItem.ItemInstance.ItemBase.IsBound) return null;
+        if (!sellerInventoryItem.ItemInstance.ItemBase.Stackable || sellerInventoryItem.ItemInstance.IsBound) return null;
         if (!string.Equals(sellerInventoryItem.ItemInstance.ItemBase.Id, buyOrder.ItemBaseId, StringComparison.Ordinal)) return null;
 
         await _marketPlaceRepository.LockCharactersAsync([characterId, buyOrder.BuyerId], cancellationToken);
@@ -781,7 +786,7 @@ public class MarketPlaceService : IMarketPlaceService
         if (inventoryItem?.ItemInstance?.ItemBase == null ||
             inventoryItem.Quantity < quantity ||
             !inventoryItem.ItemInstance.ItemBase.Stackable ||
-            inventoryItem.ItemInstance.ItemBase.IsBound)
+            inventoryItem.ItemInstance.IsBound)
             return null;
 
         var itemBaseId = inventoryItem.ItemInstance.ItemBaseId;

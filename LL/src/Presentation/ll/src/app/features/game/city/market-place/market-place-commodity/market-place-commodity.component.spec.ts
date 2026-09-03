@@ -1,3 +1,4 @@
+import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NEVER } from 'rxjs';
@@ -46,6 +47,7 @@ describe('MarketPlaceCommodityComponent absorbed Essences', () => {
             absorbedEssenceDefinitionIds: signal(new Set(absorbedIds)),
             refreshArchive,
           } as unknown as EssenceStateService,
+          { journal: signal({ quests: [] }) } as unknown as QuestStateService,
         ),
     );
 

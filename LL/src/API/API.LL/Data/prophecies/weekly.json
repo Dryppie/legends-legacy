@@ -11,7 +11,9 @@
       "objectiveType": "KillCreatures",
       "rewardProfileId": "Weekly.Uncommon",
       "weight": 100,
-      "allowedSlots": [ "Greater" ]
+      "allowedSlots": [
+        "Greater"
+      ]
     },
     {
       "id": "weekly.combat.unique",
@@ -25,7 +27,9 @@
       "rewardProfileId": "Weekly.Rare",
       "minPlayerLevel": 45,
       "weight": 80,
-      "allowedSlots": [ "Greater" ]
+      "allowedSlots": [
+        "Greater"
+      ]
     },
     {
       "id": "weekly.dungeon.complete",
@@ -38,7 +42,9 @@
       "objectiveType": "CompleteDungeons",
       "rewardProfileId": "Weekly.Rare",
       "weight": 75,
-      "allowedSlots": [ "Greater" ]
+      "allowedSlots": [
+        "Greater"
+      ]
     },
     {
       "id": "weekly.dungeon.rooms",
@@ -51,7 +57,9 @@
       "objectiveType": "ClearDungeonRooms",
       "rewardProfileId": "Weekly.Uncommon",
       "weight": 90,
-      "allowedSlots": [ "Greater" ]
+      "allowedSlots": [
+        "Greater"
+      ]
     },
     {
       "id": "weekly.essence.xp",
@@ -64,33 +72,9 @@
       "objectiveType": "GainEssenceXp",
       "rewardProfileId": "Weekly.Uncommon",
       "weight": 85,
-      "allowedSlots": [ "Greater" ]
-    },
-    {
-      "id": "weekly.gathering",
-      "title": "The World Itself Will Be Harvested",
-      "flavorText": "Stone, wood, and river will all give testimony.",
-      "objectiveText": "Gather {target} resources this week.",
-      "scope": "Weekly",
-      "category": "Gathering",
-      "difficulty": "Uncommon",
-      "objectiveType": "GatherResources",
-      "rewardProfileId": "Weekly.Uncommon",
-      "weight": 80,
-      "allowedSlots": [ "Greater" ]
-    },
-    {
-      "id": "weekly.crafting",
-      "title": "Steel Will Remember Your Hands",
-      "flavorText": "Enough work becomes a signature.",
-      "objectiveText": "Temper items {target} times this week.",
-      "scope": "Weekly",
-      "category": "Crafting",
-      "difficulty": "Uncommon",
-      "objectiveType": "TemperItems",
-      "rewardProfileId": "Weekly.Uncommon",
-      "weight": 80,
-      "allowedSlots": [ "Greater" ]
+      "allowedSlots": [
+        "Greater"
+      ]
     },
     {
       "id": "weekly.survival",
@@ -103,7 +87,9 @@
       "objectiveType": "MeaningfulDefeatThenWins",
       "rewardProfileId": "Weekly.Epic",
       "weight": 45,
-      "allowedSlots": [ "Greater" ]
+      "allowedSlots": [
+        "Greater"
+      ]
     }
   ]
 }

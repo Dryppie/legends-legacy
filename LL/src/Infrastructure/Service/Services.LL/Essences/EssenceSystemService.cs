@@ -200,8 +200,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var levelsGained = 0;
         for (var index = 0; index < dustToSpend; index++)
         {
-            var xpToNextLevel = _progression.GetXpRequiredForNextLevel(essence, definition) - essence.CurrentXp;
-            var result = _progression.GrantXp(essence, definition, xpToNextLevel);
+            var xpForFullLevel = _progression.GetXpRequiredForNextLevel(essence, definition);
+            var result = _progression.GrantXp(essence, definition, xpForFullLevel);
             xpGained += result.XpGained;
             levelsGained += result.LevelsGained;
         }

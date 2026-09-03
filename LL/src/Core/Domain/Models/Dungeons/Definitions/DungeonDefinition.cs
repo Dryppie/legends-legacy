@@ -1,6 +1,5 @@
 ﻿using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Encounters;
-using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Items;
 
@@ -25,7 +24,6 @@ public sealed class DungeonDefinition
     public List<string> CompletionRewardTableIds { get; set; } = [];
     public List<string> TierRewardTableIds { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
-    public List<DungeonGatheringNodeDefinition> GatheringNodes { get; set; } = [];
     public int RestSiteCount { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }

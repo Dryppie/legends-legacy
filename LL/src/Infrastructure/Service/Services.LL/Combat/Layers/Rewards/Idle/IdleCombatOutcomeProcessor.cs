@@ -206,7 +206,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
             facts.ProcessedUntil,
             facts.Area.Id,
             facts.Area.Name,
-            facts.EquippedTool?.GatheringType.ToString(),
+            null,
             outcome.TotalLoot,
             outcome.TotalCinders,
             outcome.TotalSoulstones,
@@ -276,22 +276,6 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         IdleCombatRewardFacts facts,
         IdleCombatCalculatedOutcome outcome)
     {
-        foreach (var gathered in outcome.GatheringRewards.Where(x => x.Success))
-        {
-            var amount = gathered.ItemsGained.Sum(x => x.Quantity);
-            if (amount <= 0)
-            {
-                continue;
-            }
-
-            progressEvents.Add(new ProphecyProgressEvent(
-                facts.CharacterId,
-                outcome.ProcessedUntil,
-                ProphecyProgressKind.ResourceGathered,
-                amount,
-                Profession: gathered.ToolType.ToString()));
-        }
-
         if (outcome.TotalLoot.Count > 0)
         {
             var treasureProgress = outcome.TotalLoot.Sum(item => Math.Max(1, item.Quantity));

@@ -30,12 +30,6 @@ describe('SessionSummaryService', () => {
     expect(summary?.combatSummary.rewardBreakdown?.powerItems[0].quantity).toBe(
       5,
     );
-    expect(summary?.combatResult.gatheringRewards[0].experienceGained).toBe(
-      8_000,
-    );
-    expect(
-      summary?.combatResult.gatheringRewards[0].itemsGained[0].quantity,
-    ).toBe(5);
     expect(new Date(summary!.from).toISOString()).toBe(
       '2026-08-11T00:00:00.000Z',
     );
@@ -80,23 +74,6 @@ function session(
     combatResult: {
       startedAt: new Date(to),
       outcome: BattleOutcome.Victory,
-      gatheringRewards:
-        battles > 0
-          ? [
-              {
-                toolType: GatheringType.Mining,
-                nodeId: 'ore',
-                nodeName: 'Ore',
-                toolName: 'Pickaxe',
-                toolRarity: Rarity.Common,
-                success: itemQuantity > 0,
-                experienceGained: battles * 50,
-                itemsGained:
-                  itemQuantity > 0 ? [gatheringItem(itemQuantity)] : [],
-                appliedBonusEffects: [],
-              },
-            ]
-          : [],
     } as unknown as CombatResultDto,
     combatSummary: {
       totalBattles: battles,
@@ -115,21 +92,6 @@ function session(
       },
     },
   };
-}
-
-function gatheringItem(quantity: number): InventoryItem {
-  const result = item(quantity);
-  result.id = 'gathering-item';
-  result.itemInstance = {
-    ...result.itemInstance,
-    id: 'gathering-item-instance',
-    itemBase: {
-      ...result.itemInstance.itemBase,
-      id: 'ore',
-      name: 'Ore',
-    },
-  };
-  return result;
 }
 
 function item(quantity: number): InventoryItem {

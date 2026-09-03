@@ -1,4 +1,5 @@
-﻿using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Items.Equipments.Progression;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -18,7 +19,6 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
         lastCombatResult.Loot = SummarizeItems(outcome.TotalLoot);
         lastCombatResult.ExperienceGained = outcome.TotalExperience;
 
-        lastCombatResult.GatheringRewards = [.. outcome.GatheringRewards];
 
         var summary = new CombatSummary
         {
@@ -51,7 +51,8 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
         IReadOnlyList<InventoryItem> items) =>
         items
             .GroupBy(
-                item => item.ItemInstance.ItemBaseId,
+                item => item.ItemInstance is Domain.Models.Items.Equipments.EquipmentInstance { ProgressionData: not null }
+                    ? EquipmentKeys.SourcePrefix + $"{item.ItemInstanceId:N}" : $"base:{item.ItemInstance.ItemBaseId}",
                 StringComparer.OrdinalIgnoreCase)
             .Select(group =>
             {

@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;

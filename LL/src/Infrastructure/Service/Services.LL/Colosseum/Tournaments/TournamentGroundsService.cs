@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Colosseum;
@@ -44,10 +46,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         TournamentMeter.CreateHistogram<long>("tournament_ground.playback.bundle.size", "By");
     private static readonly IReadOnlyList<TournamentRewardTierOptions> DefaultRewardTiers =
     [
-        new() { Key = "champion", MaxPlacement = 1, ArenaGlory = 500, Soulstones = 50, CatalystSelectionCaches = 1, BlueprintSelectionBoxes = 1, SigilFragments = 20 },
-        new() { Key = "finalist", MaxPlacement = 2, ArenaGlory = 425, Soulstones = 40, CatalystSelectionCaches = 1, BlueprintSelectionBoxes = 1, SigilFragments = 20 },
-        new() { Key = "semi-finalist", MaxPlacement = 4, ArenaGlory = 350, Soulstones = 30, CatalystSelectionCaches = 1, BlueprintSelectionBoxes = 1 },
-        new() { Key = "quarter-finalist", MaxPlacement = 8, ArenaGlory = 300, Soulstones = 25, CatalystSelectionCaches = 1 },
+        new() { Key = "champion", MaxPlacement = 1, ArenaGlory = 500, Soulstones = 50, TemperedScrap = 2, BlueprintSelectionBoxes = 1, SigilFragments = 20 },
+        new() { Key = "finalist", MaxPlacement = 2, ArenaGlory = 425, Soulstones = 40, TemperedScrap = 2, BlueprintSelectionBoxes = 1, SigilFragments = 20 },
+        new() { Key = "semi-finalist", MaxPlacement = 4, ArenaGlory = 350, Soulstones = 30, TemperedScrap = 2, BlueprintSelectionBoxes = 1 },
+        new() { Key = "quarter-finalist", MaxPlacement = 8, ArenaGlory = 300, Soulstones = 25, TemperedScrap = 2 },
         new() { Key = "participant", MaxPlacement = null, ArenaGlory = 250, Soulstones = 20 }
     ];
 
@@ -696,7 +698,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             query = query.Where(r => r.TournamentId == tournamentId.Value);
         }
 
-        return await query
+        var rewards = await query
             .OrderByDescending(r => r.CreatedAtUtc)
             .Select(r => new TournamentRewardGrantEntry(
                 r.Id,
@@ -707,27 +709,30 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 r.ArenaGlory,
                 r.Cinders,
                 r.Soulstones,
-                r.CatalystSelectionCaches,
                 r.BlueprintSelectionBoxes,
                 r.SigilFragments,
                 r.Status.ToString(),
                 r.CreatedAtUtc,
-                r.ClaimedAtUtc))
+                r.ClaimedAtUtc,
+                r.TemperedScrap))
             .ToListAsync(cancellationToken);
+        return rewards;
     }
 
-    public IReadOnlyList<TournamentRewardTier> GetRewardTiers() =>
-        GetConfiguredRewardTiers()
+    public Task<IReadOnlyList<TournamentRewardTier>> GetRewardTiersAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<TournamentRewardTier>>(GetConfiguredRewardTiers()
             .Select(tier => new TournamentRewardTier(
                 tier.Key,
                 tier.MaxPlacement,
                 tier.ArenaGlory,
                 tier.Cinders,
                 tier.Soulstones,
-                tier.CatalystSelectionCaches,
                 tier.BlueprintSelectionBoxes,
-                tier.SigilFragments))
-            .ToList();
+                tier.SigilFragments,
+                tier.TemperedScrap))
+            .ToList());
+    }
 
     public async Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
@@ -1394,19 +1399,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var cinders = rewards.Sum(r => r.Cinders);
         var soulstones = rewards.Sum(r => r.Soulstones);
         var sigilFragments = rewards.Sum(r => r.SigilFragments);
-        var catalystSelectionCaches = rewards.Sum(r => r.CatalystSelectionCaches);
         var blueprintSelectionBoxes = rewards.Sum(r => r.BlueprintSelectionBoxes);
+        var temperedScrap = rewards.Sum(r => r.TemperedScrap);
+
+        var inventoryRewards = await CreateRewardInventoryItemsAsync(
+            characterId, blueprintSelectionBoxes, temperedScrap, cancellationToken);
 
         character.ArenaProfile.Glory += glory;
         character.Cinders += cinders;
         character.Soulstones += soulstones;
         character.SigilFragments += sigilFragments;
 
-        var inventoryRewards = await CreateRewardInventoryItemsAsync(
-            characterId,
-            catalystSelectionCaches,
-            blueprintSelectionBoxes,
-            cancellationToken);
         if (inventoryRewards.Count > 0)
         {
             await _inventoryService.AddItemsToInventory(
@@ -1428,10 +1431,10 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             cinders,
             soulstones,
             sigilFragments,
-            catalystSelectionCaches,
             blueprintSelectionBoxes,
             inventoryRewards.Count > 0 ? Guid.NewGuid() : null,
-            inventoryRewards);
+            inventoryRewards,
+            temperedScrap);
     }
 
     private async Task<TournamentInstance?> OpenDevelopmentRegistrationAsync(
@@ -2787,7 +2790,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             ArenaGlory = tier.ArenaGlory,
             Cinders = tier.Cinders,
             Soulstones = tier.Soulstones,
-            CatalystSelectionCaches = tier.CatalystSelectionCaches,
+            TemperedScrap = tier.TemperedScrap,
             BlueprintSelectionBoxes = tier.BlueprintSelectionBoxes,
             SigilFragments = tier.SigilFragments,
             Status = TournamentRewardStatus.Unclaimed,
@@ -2809,20 +2812,16 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task<List<Domain.Models.Inventories.InventoryItem>> CreateRewardInventoryItemsAsync(
         Guid characterId,
-        int catalystSelectionCaches,
         int blueprintSelectionBoxes,
+        int temperedScrap,
         CancellationToken cancellationToken)
     {
         var quantities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        if (catalystSelectionCaches > 0)
-        {
-            quantities[CatalystSelectionCrateCatalog.ItemBaseId] = catalystSelectionCaches;
-        }
-
         if (blueprintSelectionBoxes > 0)
         {
             quantities[BlueprintSelectionBoxCatalog.ItemBaseId] = blueprintSelectionBoxes;
         }
+        if (temperedScrap > 0) quantities["tempered_scrap"] = temperedScrap;
 
         if (quantities.Count == 0)
         {
@@ -2848,7 +2847,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     }
 
     private static ClaimTournamentRewardsResult EmptyClaimResult() =>
-        new(false, 0, 0, 0, 0, 0, 0, null, []);
+        new(false, 0, 0, 0, 0, 0, null, []);
 
     private async Task ScheduleTournamentMatchesAsync(
         Guid tournamentId,

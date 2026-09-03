@@ -136,7 +136,6 @@ public static class AttributeCalculator
 
         foreach (var item in equipment.DistinctBy(item => item.Id))
         {
-            EquipmentStatModelMigrator.MigrateToCurrent(item);
             foreach (var modifier in item.AttributeModifiers)
             {
                 if (item.UsesProgressionNormalizedRatings
@@ -175,7 +174,6 @@ public static class AttributeCalculator
         var ratings = new Dictionary<AttributeType, double>();
         foreach (var item in equipment.DistinctBy(item => item.Id))
         {
-            EquipmentStatModelMigrator.MigrateToCurrent(item);
             if (!item.UsesProgressionNormalizedRatings)
                 continue;
 

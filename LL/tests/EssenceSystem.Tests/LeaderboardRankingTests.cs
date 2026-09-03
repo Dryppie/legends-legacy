@@ -71,7 +71,7 @@ public sealed class LeaderboardRankingTests
         Assert.Equal(LeaderboardCursorDirection.After, position.Direction);
         Assert.Equal(participantId, position.AnchorParticipantId);
         Assert.False(LeaderboardCursor.TryDecode(
-            LeaderboardBoardKey.TotalLevel,
+            LeaderboardBoardKey.ArenaRating,
             cursor,
             out _));
     }

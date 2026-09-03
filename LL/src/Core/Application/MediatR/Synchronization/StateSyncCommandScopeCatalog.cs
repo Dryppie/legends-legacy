@@ -62,7 +62,6 @@ public static class StateSyncCommandScopeCatalog
         "Application.UseCases.Achievements.",
         "Application.UseCases.CharacterActions.",
         "Application.UseCases.Colosseum.",
-        "Application.UseCases.Crafting.",
         "Application.UseCases.Dungeons.",
         "Application.UseCases.Equipments.",
         "Application.UseCases.Essences.",
@@ -117,17 +116,9 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.CharacterActions.Commands.DeleteCharacterAction.DeleteCharacterActionCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.ResolveCharacterAction.ResolveCharacterActionCommand),
-            typeof(global::Application.UseCases.CharacterActions.Commands.ResumeTempering.ResumeTemperingCommand),
             typeof(global::Application.UseCases.CharacterActions.Commands.StartCombatAction.StartCombatActionCommand));
 
-        RegisterOrderedDeltaResponse(
-            profiles,
-            [],
-            [StateSyncScopes.Inventory],
-            refreshCharacterOverview: false,
-            inventoryWhenChanged: true,
-            refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.CharacterActions.Commands.StartCraftingAction.StartCraftingActionCommand));
+
 
         Register(
             profiles,
@@ -174,25 +165,9 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterSummaryWhenChanged: false,
             typeof(global::Application.UseCases.Colosseum.Tournaments.Commands.ClaimTournamentRewardsCommand));
 
-        RegisterAuthoritativeResponse(
-            profiles,
-            [StateSyncScopes.Inventory],
-            [],
-            [StateSyncScopes.Inventory],
-            refreshCharacterOverview: true,
-            refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Crafting.Commands.CraftItems.CraftItemsCommand),
-            typeof(global::Application.UseCases.Crafting.Commands.LearnBlueprint.LearnBlueprintCommand));
 
-        RegisterOrderedDeltaResponse(
-            profiles,
-            [StateSyncScopes.Inventory],
-            [StateSyncScopes.Inventory],
-            refreshCharacterOverview: false,
-            inventoryWhenChanged: false,
-            refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Professions.Commands.CancelTemperingQueue.CancelTemperingQueueCommand),
-            typeof(global::Application.UseCases.Professions.Commands.RemoveCraftingQueueItem.RemoveCraftingQueueItemCommand));
+
+
 
         RegisterAuthoritativeResponse(
             profiles,
@@ -238,6 +213,23 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterOverview: true,
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Dungeons.Commands.ClaimDungeonRewards.ClaimDungeonRewardsCommand));
+
+        Register(profiles, [StateSyncScopes.Inventory], [],
+            typeof(global::Application.UseCases.Equipments.Commands.ClaimStarterEquipment.ClaimStarterEquipmentCommand));
+        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],
+            typeof(global::Application.UseCases.Equipments.Commands.RecoverPlainEquipment.RecoverPlainEquipmentCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.RecoverBaselineEquipment.RecoverBaselineEquipmentCommand));
+        Register(profiles, [StateSyncScopes.Dungeons], [],
+            typeof(global::Application.UseCases.Equipments.Commands.SelectEquipmentProgressionTarget.SelectEquipmentProgressionTargetCommand));
+        Register(profiles, [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Character], [],
+            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Equipments.Commands.SelectCombatAcquisition.SelectCombatAcquisitionCommand));
+        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.EquipmentForge], [],
+            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Equipments.Commands.ImproveEquipmentProgressionRank.ImproveEquipmentProgressionRankCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.ChangeEquipmentProgressionStyle.ChangeEquipmentProgressionStyleCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.LearnEquipmentProgressionStyle.LearnEquipmentProgressionStyleCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.SalvageEquipment.SalvageEquipmentCommand));
 
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.Equipment, StateSyncScopes.Inventory], [],
             [StateSyncScopes.Equipment, StateSyncScopes.Inventory],

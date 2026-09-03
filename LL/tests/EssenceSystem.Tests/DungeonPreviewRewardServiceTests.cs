@@ -1,15 +1,51 @@
 using Application.Interfaces.Services.LL.Rewards;
+using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Rewards;
 using Services.LL.Dungeons;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Services.LL;
 
 namespace EssenceSystem.Tests;
 
 public sealed class DungeonPreviewRewardServiceTests
 {
+    [Fact]
+    public async Task Current_catalog_previews_all_difficulties_with_only_authored_rewards()
+    {
+        var services = new ServiceCollection();
+        services.AddServices(new ConfigurationBuilder().Build(), TestContentPaths.FindApiRoot());
+        using var provider = services.BuildServiceProvider();
+        var dungeons = provider.GetRequiredService<IDungeonDefinitions>().GetAll();
+        var service = new DungeonPreviewRewardService(
+            new CountingItemBaseRepository(),
+            provider.GetRequiredService<IRewardTableDefinitionProvider>());
+
+        var previews = await service.GetPossibleCompletionRewardsAsync(dungeons, CancellationToken.None);
+
+        Assert.Equal(12, previews.Count);
+        foreach (var dungeon in dungeons)
+        {
+            var rewards = previews[dungeon.Id];
+            Assert.Contains(rewards, reward => reward.Category == "Monster Cores");
+            foreach (var firstClear in dungeon.RewardTable.FirstClearRewards)
+                Assert.Contains(rewards, reward => reward.ItemBase.Id == firstClear.ItemId);
+
+            var books = rewards.Where(reward => reward.Category == "Completion Loot").ToArray();
+            Assert.NotEmpty(books);
+            Assert.All(books, book => {
+                Assert.StartsWith("blueprint_", book.ItemBase.Id);
+                Assert.True(book.CanDropNothing);
+                Assert.Equal(90d, book.NoDropChancePercent);
+            });
+            Assert.InRange(books.Sum(book => book.DropChancePercent!.Value), 9.999d, 10.001d);
+        }
+    }
+
     [Fact]
     public async Task Batch_preview_loads_item_bases_once_for_all_dungeons()
     {

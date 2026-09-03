@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
@@ -26,20 +27,17 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
     private readonly ILootService _lootService;
     private readonly IDungeonRewardBalanceProvider _rewardBalance;
     private readonly IEssenceResonanceService _essenceResonanceService;
-    private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
 
     public DungeonCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
         IDungeonRewardBalanceProvider rewardBalance,
-        IEssenceResonanceService essenceResonanceService,
-        ICombatGatheringRewardProcessor gatheringRewardProcessor)
+        IEssenceResonanceService essenceResonanceService)
     {
         _bonusService = bonusService;
         _lootService = lootService;
         _rewardBalance = rewardBalance;
         _essenceResonanceService = essenceResonanceService;
-        _gatheringRewardProcessor = gatheringRewardProcessor;
     }
 
     public async Task<DungeonCombatCalculatedOutcome> CalculateAsync(
@@ -98,23 +96,6 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
                 Loot: loot));
         }
 
-        var gatheringRewards = await _gatheringRewardProcessor.ProcessAsync(
-            new CombatGatheringRewardFacts(
-                facts.CharacterId,
-                facts.Encounters.Count(x => x.IsVictory),
-                facts.EquippedTool,
-                facts.GatheringNodes),
-            cancellationToken);
-
-        var gatheringLoot = gatheringRewards
-            .SelectMany(x => x.ItemsGained)
-            .ToList();
-
-        if (gatheringLoot.Count > 0)
-        {
-            totalLoot.AddRange(gatheringLoot);
-        }
-
         var totalSoulstones = 5;
 
         return new DungeonCombatCalculatedOutcome(
@@ -123,7 +104,6 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
             TotalCinders: totalCinders,
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
-            GatheringRewards: gatheringRewards,
             EncounterOutcomes: encounterOutcomes);
     }
 

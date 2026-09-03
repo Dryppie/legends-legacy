@@ -18,7 +18,7 @@ using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
-public sealed class QuestSystemTests
+public sealed partial class QuestSystemTests
 {
     [Fact]
     public void Quest_catalog_loads_the_tutorial_shenic_and_side_quest_content()
@@ -27,210 +27,25 @@ public sealed class QuestSystemTests
 
         var definitions = provider.GetAll();
 
-        Assert.Equal(36, definitions.Count);
+        Assert.Equal(29, definitions.Count);
         Assert.Equal(QuestConstants.TrainingDay, definitions[0].Id);
-        var firstHunt = provider.Get(QuestConstants.TrainingDay);
-        Assert.Equal(4, firstHunt.Version);
-        Assert.All(
-            Enumerable.Range(1, firstHunt.Version),
-            version => Assert.Null(Assert.Single(
-                provider.Get(QuestConstants.TrainingDay, version).Objectives).Presentation.TourPageId));
-        var firstHuntChoice = Assert.IsType<QuestChoiceDefinition>(firstHunt.Choice);
-        Assert.Equal(3, firstHuntChoice.Options.Count);
-        Assert.Equal(
-            ["Goblin Warrior", "Hollow Stag", "Skeleton"],
-            firstHuntChoice.Options.Select(option => option.CreatureName));
-        Assert.Equal(
-            [QuestConstants.ToolsOfTheTrade],
-            provider.Get(QuestConstants.IntoLumoRuins).Availability.CompletedQuestIds);
-        Assert.Equal("Tutorial", provider.Get(QuestConstants.IntoLumoRuins).Category);
-        Assert.Equal(
-            [QuestConstants.IntoLumoRuins],
-            provider.Get(QuestConstants.TrialOfLumo).Availability.CompletedQuestIds);
-        Assert.Equal(
-            [QuestConstants.TrialOfLumo],
-            provider.Get(QuestConstants.BloodInTheGrove).Availability.CompletedQuestIds);
-        var trialChain = Assert.IsType<QuestChainDefinition>(
-            provider.Get(QuestConstants.TrialOfLumo).Chain);
-        Assert.Equal("chain.shenic.chapter_01", trialChain.Id);
-        Assert.Equal("Chapter I — First Blood", trialChain.Title);
-        Assert.Equal(
-            "Reach level 10 and defeat the boss of Goblin Mines I.",
-            trialChain.Goal);
-        Assert.Contains("area Essence Token", trialChain.PromisedReward);
-        Assert.Equal(1, trialChain.Step);
-        Assert.Equal(2, trialChain.TotalSteps);
-        Assert.Equal(
-            "chain.shenic.chapter_02",
-            provider.Get(QuestConstants.CrystalCurrents).Chain?.Id);
-        Assert.Equal(
-            "chain.shenic.chapter_03",
-            provider.Get(QuestConstants.HeartOfTheHollow).Chain?.Id);
-        Assert.Equal(3, provider.Get(QuestConstants.HeartOfTheHollow).Chain?.Step);
-        var shenicLevelRequirements = new[]
-        {
-            (QuestConstants.TrialOfLumo, 5, "Blood Grove"),
-            (QuestConstants.BloodInTheGrove, 10, "Crystal Creek"),
-            (QuestConstants.CrystalCurrents, 15, "Moonlit Graves"),
-            (QuestConstants.RestlessDead, 20, "Twilight Clearing"),
-            (QuestConstants.BetweenDayAndNight, 25, "Old Forest"),
-            (QuestConstants.RootsRemember, 30, "Thornroot Hollow"),
-            (QuestConstants.AshBeneathTheEarth, 40, "Moonveil Marsh"),
-            (QuestConstants.VeilOverTheMarsh, 45, "Duskmire Hollow")
-        };
-        foreach (var (questId, level, nextArea) in shenicLevelRequirements)
-        {
-            var quest = provider.Get(questId);
-            Assert.Equal("All", quest.ObjectiveMode);
-            var levelObjective = Assert.Single(quest.Objectives, objective =>
-                objective.Type == "CharacterLevelReached");
-            Assert.Equal(level, levelObjective.RequiredAmount);
-            Assert.Contains(nextArea, levelObjective.Description);
-        }
-        Assert.DoesNotContain(
-            provider.Get(QuestConstants.HeartOfTheHollow).Objectives,
-            objective => objective.Type == "CharacterLevelReached");
-        Assert.DoesNotContain(
-            provider.Get(QuestConstants.LastLightInDuskmire).Objectives,
-            objective => objective.Type == "CharacterLevelReached");
-        var chapterMilestones = new[]
-        {
-            (QuestConstants.BloodInTheGrove, "goblin_mines"),
-            (QuestConstants.HeartOfTheHollow, "forgotten_catacombs")
-        };
-        foreach (var (questId, dungeonDefinitionId) in chapterMilestones)
-        {
-            var milestone = Assert.Single(
-                provider.Get(questId).Objectives,
-                objective => objective.Type == "DungeonRunCompleted");
-            Assert.Equal(dungeonDefinitionId, milestone.Filters.DungeonDefinitionId);
-        }
-        Assert.Equal(
-            "EquipmentCrafted",
-            provider.Get(QuestConstants.RestlessDead).Objectives[0].Type);
-        var areaTokenRewards = new Dictionary<string, string>
-        {
-            [QuestConstants.TrialOfLumo] = "item.essence_token.lumo_ruins",
-            [QuestConstants.BloodInTheGrove] = "item.essence_token.blood_grove",
-            [QuestConstants.CrystalCurrents] = "item.essence_token.crystal_creek",
-            [QuestConstants.RestlessDead] = "item.essence_token.moonlit_graves",
-            [QuestConstants.BetweenDayAndNight] = "item.essence_token.twilight_clearing",
-            [QuestConstants.RootsRemember] = "item.essence_token.old_forest",
-            [QuestConstants.HeartOfTheHollow] = "item.essence_token.thornroot_hollow",
-            [QuestConstants.AshBeneathTheEarth] = "item.essence_token.embercap_burrows",
-            [QuestConstants.VeilOverTheMarsh] = "item.essence_token.moonveil_marsh",
-            [QuestConstants.LastLightInDuskmire] = "item.essence_token.duskmire_hollow"
-        };
-        foreach (var (questId, tokenItemBaseId) in areaTokenRewards)
-        {
-            var quest = provider.Get(questId);
-            Assert.Equal(3, quest.Version);
-            Assert.Null(quest.Choice);
-            Assert.Contains(quest.Rewards, reward => reward.ItemBaseId == tokenItemBaseId && reward.Quantity == 1);
-        }
-        Assert.Equal("All", provider.Get(QuestConstants.ArmsOfChoice).ObjectiveMode);
-        var armorAndAdornment = provider.Get(QuestConstants.ArmorAndAdornment);
-        Assert.Equal("Crafting", armorAndAdornment.Category);
-        Assert.Equal("All", armorAndAdornment.ObjectiveMode);
-        Assert.Equal(
-            [QuestConstants.IntoLumoRuins],
-            armorAndAdornment.Availability.CompletedQuestIds);
-        Assert.Equal(2, armorAndAdornment.Objectives.Count);
-        var stoneTimberAndHide = provider.Get(QuestConstants.StoneTimberAndHide);
-        Assert.Equal("Gathering", stoneTimberAndHide.Category);
-        Assert.Equal("All", stoneTimberAndHide.ObjectiveMode);
-        Assert.Equal(
-            [QuestConstants.IntoLumoRuins],
-            stoneTimberAndHide.Availability.CompletedQuestIds);
-        Assert.Equal(3, stoneTimberAndHide.Objectives.Count);
-        Assert.All(stoneTimberAndHide.Objectives, objective => Assert.Equal(10, objective.RequiredAmount));
-        Assert.Equal(
-            [12, 12, 12],
-            stoneTimberAndHide.Rewards.Select(reward => reward.Quantity));
-        var focusedPursuit = provider.Get(QuestConstants.FocusedPursuit);
-        Assert.Equal(
-            "FocusedCreatureEssenceReceived",
-            Assert.Single(focusedPursuit.Objectives).Type);
-        Assert.Equal(
-            "/game/character/essences?view=creatures",
-            focusedPursuit.Objectives[0].Presentation.DestinationRoute);
-        Assert.Equal(
-            "ColosseumBattleStarted",
-            Assert.Single(provider.Get(QuestConstants.TheArenaCalls).Objectives).Type);
-        Assert.Equal(
-            "DailyProphecyCompleted",
-            Assert.Single(provider.Get(QuestConstants.AnOmenFulfilled).Objectives).Type);
-        Assert.Equal(
-            "EquipmentTempered",
-            Assert.Single(provider.Get(QuestConstants.TemperedResolve).Objectives).Type);
-        Assert.True(provider.Get(QuestConstants.TemperedResolve).Objectives[0].Filters.MustBeCrafted);
-        Assert.True(provider.Get(QuestConstants.TemperedResolve).Objectives[0].Filters.RequiresNoPotential);
-        Assert.Equal(
-            "Fine",
-            Assert.Single(provider.Get(QuestConstants.ACraftersSignature).Objectives).Filters.Quality);
-        Assert.Equal(
-            [QuestConstants.ArmsOfChoice],
-            provider.Get(QuestConstants.ACraftersSignature).Availability.CompletedQuestIds);
-        Assert.Equal("Exceptional Work", provider.Get(QuestConstants.ExceptionalWork).Title);
-        Assert.Equal(
-            "Exceptional",
-            Assert.Single(provider.Get(QuestConstants.ExceptionalWork).Objectives).Filters.Quality);
-        Assert.Equal(
-            [QuestConstants.ACraftersSignature],
-            provider.Get(QuestConstants.ExceptionalWork).Availability.CompletedQuestIds);
-        Assert.Equal(
-            "EssenceAscended",
-            Assert.Single(provider.Get(QuestConstants.TheArchiveDeepens).Objectives).Type);
-        Assert.Equal(20, provider.Get(QuestConstants.ResonantPair).Availability.MinimumLevel);
-        Assert.Equal(
-            "CompatibleEssenceLoadout",
-            Assert.Single(provider.Get(QuestConstants.ResonantPair).Objectives).Type);
-        Assert.Equal(
-            "DungeonRunStarted",
-            Assert.Single(provider.Get(QuestConstants.SigilsInTheDust).Objectives).Type);
-        Assert.Equal(
-            [QuestConstants.SigilsInTheDust],
-            provider.Get(QuestConstants.IntoTheDepths).Availability.CompletedQuestIds);
-        Assert.Equal(
-            "DungeonRunCompleted",
-            Assert.Single(provider.Get(QuestConstants.IntoTheDepths).Objectives).Type);
-        Assert.Equal(
-            "TournamentBattleCompleted",
-            Assert.Single(provider.Get(QuestConstants.TournamentTested).Objectives).Type);
-        var formerAdvancementStoneRewards = new Dictionary<string, int>
-        {
-            [QuestConstants.LastLightInDuskmire] = 3,
-            [QuestConstants.TheArenaCalls] = 1,
-            [QuestConstants.AnOmenFulfilled] = 1,
-            [QuestConstants.ANameInShenic] = 1,
-            [QuestConstants.TestedWanderer] = 2,
-            [QuestConstants.WardenOfShenic] = 5,
-            [QuestConstants.ExceptionalWork] = 2,
-            [QuestConstants.SigilsInTheDust] = 1,
-            [QuestConstants.IntoTheDepths] = 3,
-            [QuestConstants.TournamentTested] = 2
-        };
-        foreach (var (questId, expectedQuantity) in formerAdvancementStoneRewards)
-        {
-            var reward = Assert.Single(provider.Get(questId).Rewards, candidate =>
-                candidate.ItemBaseId == "item.monster_core.lesser");
-            Assert.Equal(expectedQuantity, reward.Quantity);
-        }
-        Assert.DoesNotContain(
-            definitions.SelectMany(quest => quest.Rewards),
-            reward => reward.ItemBaseId == "advancement_stone");
-        Assert.All(
-            definitions.SelectMany(quest => quest.Objectives),
-            objective => Assert.False(string.IsNullOrWhiteSpace(objective.Presentation.DestinationRoute)));
+        Assert.Equal(4, provider.Get(QuestConstants.TrainingDay).Version);
+        Assert.All(definitions, definition => Assert.Equal(definition.Version, provider.GetLatestVersion(definition.Id)));
+        Assert.DoesNotContain(definitions, definition => definition.Id.StartsWith("quest.crafting.") || definition.Id.StartsWith("quest.gathering."));
+        Assert.Equal("ModelEPlainTargetEquipped", provider.Get(QuestConstants.RestlessDead).Objectives[0].Type);
+        var soulArchiveEquip = provider.Get(QuestConstants.SoulArchive).Objectives.Single(x => x.Type == "EssenceEquipped");
+        Assert.Null(soulArchiveEquip.Filters.EssenceDefinitionId);
+        Assert.Null(soulArchiveEquip.Filters.EssenceDefinitionFromChoiceQuestId);
     }
 
     [Fact]
-    public void A_second_soul_only_requires_absorbing_an_essence()
+    public void A_second_soul_requires_owning_two_distinct_essences()
     {
         var quest = CreateDefinitions().Get(QuestConstants.ASecondSoul);
 
         var objective = Assert.Single(quest.Objectives);
-        Assert.Equal("EssenceAbsorbed", objective.Type);
+        Assert.Equal("EssenceOwned", objective.Type);
+        Assert.Equal(2, objective.RequiredAmount);
         Assert.Null(objective.Filters.EssenceDefinitionId);
         Assert.DoesNotContain(quest.Objectives, x => x.Type == "EssenceEquipped");
     }
@@ -345,55 +160,6 @@ public sealed class QuestSystemTests
         Assert.Equal(20, levelObjective.RequiredAmount);
         Assert.False(levelObjective.IsCompleted);
         Assert.Equal(QuestStatus.Active, restlessDead.Status);
-    }
-
-    [Fact]
-    public async Task Shenic_level_objectives_are_backfilled_for_existing_completed_progress()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var definition = definitions.Get(QuestConstants.RestlessDead, version: 1);
-        var combatObjective = definition.Objectives.Single(objective =>
-            objective.Type == "CombatEncounterCompleted");
-        var repository = new RecordingQuestRepository(level: 20);
-        repository.Progresses.Add(new CharacterQuestProgress
-        {
-            CharacterId = characterId,
-            QuestId = definition.Id,
-            DefinitionVersion = definition.Version,
-            Status = QuestStatus.Completed,
-            CompletedAt = DateTimeOffset.UtcNow,
-            Objectives =
-            [
-                new CharacterQuestObjectiveProgress
-                {
-                    CharacterId = characterId,
-                    QuestId = definition.Id,
-                    ObjectiveKey = combatObjective.Key,
-                    CurrentAmount = combatObjective.RequiredAmount,
-                    RequiredAmount = combatObjective.RequiredAmount,
-                    CompletedAt = DateTimeOffset.UtcNow
-                }
-            ]
-        });
-        var service = new QuestService(
-            repository,
-            definitions,
-            new RecordingItemBaseRepository(),
-            inventoryItemFactory: null!,
-            lootRewardWriter: null!,
-            TimeProvider.System);
-
-        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
-
-        var restlessDead = journal.Quests.Single(quest =>
-            quest.QuestId == QuestConstants.RestlessDead);
-        var levelObjective = restlessDead.Objectives.Single(objective =>
-            objective.Type == "CharacterLevelReached");
-        Assert.Equal(20, levelObjective.CurrentAmount);
-        Assert.True(levelObjective.IsCompleted);
-        Assert.Equal(2, repository.Progresses.Single(progress =>
-            progress.QuestId == QuestConstants.RestlessDead).Objectives.Count);
     }
 
     [Fact]
@@ -661,305 +427,10 @@ public sealed class QuestSystemTests
 
         Assert.Equal(
             QuestStatus.Active,
-            journal.Quests.Single(x => x.QuestId == QuestConstants.ArmorAndAdornment).Status);
-        Assert.Equal(
-            QuestStatus.Active,
             journal.Quests.Single(x => x.QuestId == QuestConstants.ASecondSoul).Status);
         Assert.Equal(
             QuestStatus.Active,
             journal.Quests.Single(x => x.QuestId == QuestConstants.TrialOfLumo).Status);
-    }
-
-    [Fact]
-    public async Task Unselected_older_first_hunt_upgrades_to_the_latest_roster()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 1);
-        repository.Progresses.Add(CreateActiveProgress(
-            characterId,
-            definitions.Get(QuestConstants.TrainingDay, 2),
-            isPinned: true));
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: null!,
-            lootRewardWriter: null!,
-            TimeProvider.System);
-
-        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
-
-        var firstHunt = Assert.Single(journal.Quests);
-        Assert.Equal(4, firstHunt.Version);
-        var choice = Assert.IsType<QuestChoice>(firstHunt.Choice);
-        Assert.Equal(
-            ["Goblin Warrior", "Hollow Stag", "Skeleton"],
-            choice.Options.Select(option => option.CreatureName));
-        Assert.Equal(4, Assert.Single(repository.Progresses).DefinitionVersion);
-    }
-
-    [Fact]
-    public async Task Unstarted_legacy_chapter_choice_upgrades_to_the_area_token_contract()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 10);
-        repository.Progresses.Add(CreateActiveProgress(
-            characterId,
-            definitions.Get(QuestConstants.BloodInTheGrove, 2),
-            isPinned: true));
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: null!,
-            lootRewardWriter: null!,
-            TimeProvider.System);
-
-        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
-
-        var quest = Assert.Single(journal.Quests, candidate =>
-            candidate.QuestId == QuestConstants.BloodInTheGrove);
-        Assert.Equal(3, quest.Version);
-        Assert.Null(quest.Choice);
-        Assert.Contains(quest.Rewards, reward =>
-            reward.ItemBaseId == "item.essence_token.blood_grove");
-        Assert.Equal(3, repository.Progresses.Single(progress =>
-            progress.QuestId == QuestConstants.BloodInTheGrove).DefinitionVersion);
-    }
-
-    [Fact]
-    public async Task Version_one_training_progress_unlocks_the_compatible_soul_archive_version()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 1);
-        repository.Progresses.Add(CreateCompletedProgress(
-            characterId,
-            definitions.Get(QuestConstants.TrainingDay, 1)));
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: null!,
-            lootRewardWriter: null!,
-            TimeProvider.System);
-
-        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
-
-        var soulArchive = journal.Quests.Single(x => x.QuestId == QuestConstants.SoulArchive);
-        Assert.Equal(1, soulArchive.Version);
-        Assert.Null(soulArchive.Choice);
-    }
-
-    [Fact]
-    public async Task Armor_and_adornment_accepts_armor_and_jewelry_in_either_order()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 1);
-        repository.Progresses.Add(CreateActiveProgress(
-            characterId,
-            definitions.Get(QuestConstants.ArmorAndAdornment),
-            isPinned: false));
-        var systemChatPublisher = new RecordingQuestSystemChatPublisher();
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: new RecordingInventoryItemFactory(),
-            lootRewardWriter: new RecordingLootRewardWriter(),
-            TimeProvider.System,
-            systemChatPublisher: systemChatPublisher);
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentCrafted(["band"], [1]),
-            null,
-            "test",
-            CancellationToken.None);
-        var progress = repository.Progresses.Single(
-            x => x.QuestId == QuestConstants.ArmorAndAdornment);
-        Assert.Null(progress.Objectives.Single(x => x.ObjectiveKey == "craft_armor").CompletedAt);
-        Assert.NotNull(progress.Objectives.Single(x => x.ObjectiveKey == "craft_jewelry").CompletedAt);
-        Assert.Empty(systemChatPublisher.Publications);
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentCrafted(["light_hood"], [1]),
-            null,
-            "test",
-            CancellationToken.None);
-
-        Assert.Equal(QuestStatus.Completed, progress.Status);
-        Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
-        var publication = Assert.Single(systemChatPublisher.Publications);
-        Assert.Equal(characterId, publication.CharacterId);
-        var completion = Assert.Single(publication.Completions);
-        Assert.Equal(QuestConstants.ArmorAndAdornment, completion.QuestId);
-        Assert.Equal("Armor and Adornment", completion.Title);
-    }
-
-    [Fact]
-    public async Task Arms_of_choice_advances_each_objective_from_its_one_handed_weapon_recipe()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 5);
-        repository.Progresses.Add(CreateActiveProgress(
-            characterId,
-            definitions.Get(QuestConstants.ArmsOfChoice),
-            isPinned: false));
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: new RecordingInventoryItemFactory(),
-            lootRewardWriter: new RecordingLootRewardWriter(),
-            TimeProvider.System);
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentCrafted(
-                ["shortsword", "dagger", "hatchet", "mace", "wand"],
-                [1, 1, 1, 1, 1],
-                [
-                    "recipe.weapon.one_handed.shortsword",
-                    "recipe.weapon.one_handed.dagger",
-                    "recipe.weapon.one_handed.hand_axe",
-                    "recipe.weapon.one_handed.mace",
-                    "recipe.weapon.one_handed.wand"
-                ]),
-            null,
-            "test",
-            CancellationToken.None);
-
-        var progress = repository.Progresses.Single(
-            x => x.QuestId == QuestConstants.ArmsOfChoice);
-        Assert.Equal(QuestStatus.Completed, progress.Status);
-        Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
-    }
-
-    [Fact]
-    public async Task Arms_of_choice_counts_a_weapon_crafted_before_the_quest_unlocked()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 5);
-        repository.Progresses.Add(CreateCompletedProgress(
-            characterId,
-            definitions.Get(QuestConstants.ToolsOfTheTrade)));
-        repository.CraftedRecipeIds.Add("recipe.weapon.one_handed.hand_axe");
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: new RecordingInventoryItemFactory(),
-            lootRewardWriter: new RecordingLootRewardWriter(),
-            TimeProvider.System);
-
-        var journal = await service.GetJournalAsync(
-            characterId,
-            CancellationToken.None);
-
-        var armsOfChoice = journal.Quests.Single(
-            quest => quest.QuestId == QuestConstants.ArmsOfChoice);
-        var handAxe = armsOfChoice.Objectives.Single(
-            objective => objective.Key == "craft_hatchet");
-        Assert.Equal(1, handAxe.CurrentAmount);
-        Assert.True(handAxe.IsCompleted);
-        Assert.All(
-            armsOfChoice.Objectives.Where(objective => objective != handAxe),
-            objective => Assert.Equal(0, objective.CurrentAmount));
-    }
-
-    [Fact]
-    public async Task Stone_timber_and_hide_counts_Lumo_actions_for_each_equipped_tool_and_grants_materials()
-    {
-        var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
-        var repository = new RecordingQuestRepository(level: 1);
-        repository.Progresses.Add(CreateActiveProgress(
-            characterId,
-            definitions.Get(QuestConstants.StoneTimberAndHide),
-            isPinned: false));
-        var service = new QuestService(
-            repository,
-            definitions,
-            itemBases: new RecordingItemBaseRepository(),
-            inventoryItemFactory: new RecordingInventoryItemFactory(),
-            lootRewardWriter: new RecordingLootRewardWriter(),
-            TimeProvider.System);
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.CombatCompleted(
-                QuestConstants.BloodGroveAreaId,
-                wonEncounter: false,
-                actionCount: 10,
-                equippedGatheringType: "Mining"),
-            null,
-            "test",
-            CancellationToken.None);
-        var progress = repository.Progresses.Single(
-            x => x.QuestId == QuestConstants.StoneTimberAndHide);
-        Assert.All(progress.Objectives, objective => Assert.Equal(0, objective.CurrentAmount));
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.CombatCompleted(
-                QuestConstants.LumoRuinsAreaId,
-                wonEncounter: false,
-                actionCount: 7,
-                equippedGatheringType: "Mining"),
-            null,
-            "test",
-            CancellationToken.None);
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.CombatCompleted(
-                QuestConstants.LumoRuinsAreaId,
-                wonEncounter: false,
-                actionCount: 10,
-                equippedGatheringType: "Woodcutting"),
-            null,
-            "test",
-            CancellationToken.None);
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.CombatCompleted(
-                QuestConstants.LumoRuinsAreaId,
-                wonEncounter: false,
-                actionCount: 10,
-                equippedGatheringType: "Skinning"),
-            null,
-            "test",
-            CancellationToken.None);
-
-        Assert.Equal(7, progress.Objectives.Single(x => x.ObjectiveKey == "mine_in_lumo_ruins").CurrentAmount);
-        Assert.Equal(10, progress.Objectives.Single(x => x.ObjectiveKey == "cut_timber_in_lumo_ruins").CurrentAmount);
-        Assert.Equal(10, progress.Objectives.Single(x => x.ObjectiveKey == "skin_in_lumo_ruins").CurrentAmount);
-        Assert.Equal(QuestStatus.Active, progress.Status);
-
-        var result = await service.ProcessAsync(
-            characterId,
-            QuestTrigger.CombatCompleted(
-                QuestConstants.LumoRuinsAreaId,
-                wonEncounter: false,
-                actionCount: 3,
-                equippedGatheringType: "Mining"),
-            null,
-            "test",
-            CancellationToken.None);
-
-        Assert.Equal(QuestStatus.Completed, progress.Status);
-        Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
-        Assert.Equal(
-            [("ore", 12), ("rawhide", 12), ("wood", 12)],
-            result.Loot
-                .Select(item => (item.ItemInstance.ItemBaseId, item.Quantity))
-                .OrderBy(item => item.ItemBaseId));
     }
 
     [Fact]
@@ -1132,9 +603,6 @@ public sealed class QuestSystemTests
         var repository = new RecordingQuestRepository(level: 20);
         var questIds = new[]
         {
-            QuestConstants.TemperedResolve,
-            QuestConstants.ACraftersSignature,
-            QuestConstants.ExceptionalWork,
             QuestConstants.TheArchiveDeepens,
             QuestConstants.ResonantPair,
             QuestConstants.SigilsInTheDust,
@@ -1151,55 +619,6 @@ public sealed class QuestSystemTests
             new RecordingLootRewardWriter(),
             TimeProvider.System);
 
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentCrafted(
-                ["band"],
-                [1],
-                ["recipe.jewelry.band"],
-                [ItemQuality.Fine],
-                [10]),
-            null,
-            GameEventTypes.EquipmentCrafted,
-            CancellationToken.None);
-        Assert.Equal(QuestStatus.Completed, GetStatus(QuestConstants.ACraftersSignature));
-        Assert.Equal(QuestStatus.Active, GetStatus(QuestConstants.ExceptionalWork));
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentCrafted(
-                ["band"],
-                [1],
-                ["recipe.jewelry.band"],
-                [ItemQuality.Exceptional],
-                [10]),
-            null,
-            GameEventTypes.EquipmentCrafted,
-            CancellationToken.None);
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentTempered(
-                ["shortsword"],
-                [2],
-                ["recipe.weapon.one_handed.shortsword"],
-                [ItemQuality.Standard],
-                [1]),
-            null,
-            GameEventTypes.EquipmentTempered,
-            CancellationToken.None);
-        Assert.Equal(QuestStatus.Active, GetStatus(QuestConstants.TemperedResolve));
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentTempered(
-                ["shortsword"],
-                [2],
-                ["recipe.weapon.one_handed.shortsword"],
-                [ItemQuality.Standard],
-                [0]),
-            null,
-            GameEventTypes.EquipmentTempered,
-            CancellationToken.None);
         await service.ProcessAsync(characterId, QuestTrigger.EssenceAscended(), null, GameEventTypes.EssenceAscended, CancellationToken.None);
         await service.ProcessAsync(characterId, QuestTrigger.EssenceLoadoutChanged(true), null, GameEventTypes.EssenceLoadoutChanged, CancellationToken.None);
         await service.ProcessAsync(characterId, QuestTrigger.DungeonRunStarted(), null, GameEventTypes.DungeonRunStarted, CancellationToken.None);
@@ -1301,6 +720,9 @@ public sealed class QuestSystemTests
         public HashSet<string> CraftedRecipeIds { get; } =
             new(StringComparer.OrdinalIgnoreCase);
         public int SaveCalls { get; private set; }
+        public HashSet<string> OwnedEssences { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> EquippedEssences { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<Guid> ProcessedEvents { get; } = [];
 
         public Task<IReadOnlyList<CharacterQuestProgress>> GetProgressesAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<CharacterQuestProgress>>(Progresses);
@@ -1312,10 +734,16 @@ public sealed class QuestSystemTests
             Task.FromResult<int?>(level);
 
         public Task<bool> HasProcessedEventAsync(Guid outboxMessageId, CancellationToken cancellationToken) =>
-            Task.FromResult(false);
+            Task.FromResult(ProcessedEvents.Contains(outboxMessageId));
+
+        public Task<IReadOnlySet<string>> GetOwnedEssenceDefinitionIdsAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlySet<string>>(OwnedEssences);
 
         public Task<bool> HasEssenceInAnyLoadoutAsync(Guid characterId, string essenceDefinitionId, CancellationToken cancellationToken) =>
-            Task.FromResult(false);
+            Task.FromResult(EquippedEssences.Contains(essenceDefinitionId));
+
+        public Task<bool> HasAnyEssenceInLoadoutAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(EquippedEssences.Count > 0);
 
         public Task<bool> HasQualifyingEquipmentEquippedAsync(Guid characterId, IReadOnlyCollection<string> itemBaseIds, int? tier, bool mustBeCrafted, bool toolSlotOnly, CancellationToken cancellationToken) =>
             Task.FromResult(false);
@@ -1326,7 +754,7 @@ public sealed class QuestSystemTests
             Task.FromResult<IReadOnlySet<string>>(CraftedRecipeIds);
 
         public void AddProgress(CharacterQuestProgress progress) => Progresses.Add(progress);
-        public void AddEventLedger(QuestEventLedger ledger) { }
+        public void AddEventLedger(QuestEventLedger ledger) => ProcessedEvents.Add(ledger.OutboxMessageId);
 
         public Task SaveChangesAsync(CancellationToken cancellationToken)
         {
@@ -1386,12 +814,18 @@ public sealed class QuestSystemTests
 
     private sealed class RecordingLootRewardWriter : ILootRewardWriter
     {
+        public List<InventoryItem> GrantedItems { get; } = [];
+
         public Task AddLootAsync(
             Guid characterId,
             IReadOnlyCollection<InventoryItem> items,
             string source,
             string? location,
-            CancellationToken cancellationToken) => Task.CompletedTask;
+            CancellationToken cancellationToken)
+        {
+            GrantedItems.AddRange(items);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class RecordingQuestSystemChatPublisher : IQuestSystemChatPublisher

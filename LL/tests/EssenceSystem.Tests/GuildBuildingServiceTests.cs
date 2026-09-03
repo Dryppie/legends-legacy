@@ -7,7 +7,7 @@ using Services.LL.Guilds;
 
 namespace EssenceSystem.Tests;
 
-public sealed class GuildBuildingServiceTests
+public sealed partial class GuildBuildingServiceTests
 {
     [Fact]
     public async Task GetOverview_creates_guild_hall_lazily()

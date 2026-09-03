@@ -15,7 +15,6 @@ public sealed record IdleCombatCalculatedOutcome(
     IReadOnlyList<InventoryItem> CraftingRewards,
     IReadOnlyList<InventoryItem> EssenceRewards,
     IReadOnlyList<InventoryItem> DungeonAccessRewards,
-    IReadOnlyList<GatheringRewardResult> GatheringRewards,
     IReadOnlyList<IdleEncounterCalculatedOutcome> EncounterOutcomes)
 {
     public IdleEncounterCalculatedOutcome? LastEncounterOutcome =>

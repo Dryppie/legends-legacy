@@ -15,7 +15,7 @@ import { CharacterTagComponent } from '../../../../shared/components/character/c
 import { environment } from '../../../../../environments/environment';
 import { LocalDatePipe } from '../../../../shared/pipes/local-date/local-date.pipe';
 
-type LeaderboardCategory = 'Overall' | 'PvE' | 'PvP' | 'Professions' | 'Guilds';
+type LeaderboardCategory = 'Overall' | 'PvE' | 'PvP' | 'Guilds';
 
 interface BoardOption {
   key: string;
@@ -39,15 +39,13 @@ interface BoardOption {
 })
 export class TavernComponent implements OnInit {
   readonly podiumOrder = [0, 1, 2];
-  readonly categories: readonly LeaderboardCategory[] = [
+  private readonly allCategories: readonly LeaderboardCategory[] = [
     'Overall',
     'PvE',
     'PvP',
-    'Professions',
     'Guilds',
   ];
-  readonly boards: BoardOption[] = [
-    { key: 'total-level', label: 'Total Level', category: 'Overall' },
+  private readonly allBoards: BoardOption[] = [
     { key: 'combat-level', label: 'Combat Level', category: 'Overall' },
     {
       key: 'soul-archive-completion',
@@ -86,14 +84,6 @@ export class TavernComponent implements OnInit {
       : []),
     { key: 'arena-rating', label: 'Arena Rating', category: 'PvP' },
     { key: 'tournament-points', label: 'Tournament Points', category: 'PvP' },
-    { key: 'profession-crafting', label: 'Crafting', category: 'Professions' },
-    { key: 'profession-mining', label: 'Mining', category: 'Professions' },
-    {
-      key: 'profession-woodcutting',
-      label: 'Woodcutting',
-      category: 'Professions',
-    },
-    { key: 'profession-skinning', label: 'Skinning', category: 'Professions' },
     {
       key: 'weekly-guild-contribution',
       label: 'Weekly Contribution',
@@ -103,13 +93,18 @@ export class TavernComponent implements OnInit {
   ];
 
   activeCategory: LeaderboardCategory = 'Overall';
-  activeBoardKey = 'total-level';
+  activeBoardKey = 'combat-level';
 
   constructor(readonly state: LeaderboardStateService) {}
 
   ngOnInit(): void {
+    this.state.reset();
     this.state.load(this.activeBoardKey);
   }
+
+  get categories(): readonly LeaderboardCategory[] { return this.allCategories; }
+
+  get boards(): BoardOption[] { return this.allBoards; }
 
   get categoryBoards(): BoardOption[] {
     return this.boards.filter(
@@ -147,7 +142,11 @@ export class TavernComponent implements OnInit {
   }
 
   selectBoard(boardKey: string): void {
-    if (boardKey === this.activeBoardKey) return;
+    if (
+      boardKey === this.activeBoardKey ||
+      !this.boards.some((board) => board.key === boardKey)
+    )
+      return;
     this.activeBoardKey = boardKey;
     this.state.load(boardKey);
   }

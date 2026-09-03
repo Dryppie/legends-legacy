@@ -47,7 +47,7 @@ using Worker.LL.BackgroundJobs;
 
 namespace EssenceSystem.Tests;
 
-public sealed class TournamentGroundsServiceTests
+public sealed partial class TournamentGroundsServiceTests
 {
     private static readonly DateTimeOffset Now = new(2026, 6, 27, 18, 30, 0, TimeSpan.Zero);
 
@@ -181,7 +181,7 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
-    public void GetRewardTiers_returns_the_configured_placement_rewards()
+    public async Task GetRewardTiers_returns_the_configured_placement_rewards()
     {
         using var db = CreateDbContext();
         var service = CreateService(
@@ -205,7 +205,7 @@ public sealed class TournamentGroundsServiceTests
                 ]
             });
 
-        var tiers = service.GetRewardTiers();
+        var tiers = await service.GetRewardTiersAsync(Guid.NewGuid(), CancellationToken.None);
 
         Assert.Collection(
             tiers,
@@ -1060,7 +1060,7 @@ public sealed class TournamentGroundsServiceTests
         [
             new ItemBase
             {
-                Id = CatalystSelectionCrateCatalog.ItemBaseId,
+                Id = "tempered_scrap",
                 Name = "Catalyst Selection Cache",
                 ItemType = ItemType.Resource,
                 Stackable = true
@@ -1090,7 +1090,7 @@ public sealed class TournamentGroundsServiceTests
             Placement = 2,
             ArenaGlory = 425,
             Soulstones = 40,
-            CatalystSelectionCaches = 1,
+            TemperedScrap = 1,
             BlueprintSelectionBoxes = 1,
             SigilFragments = 20,
             Status = TournamentRewardStatus.Unclaimed,
@@ -1107,7 +1107,7 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(425, claim.ArenaGlory);
         Assert.Equal(40, claim.Soulstones);
         Assert.Equal(20, claim.SigilFragments);
-        Assert.Equal(1, claim.CatalystSelectionCaches);
+        Assert.Equal(1, claim.TemperedScrap);
         Assert.Equal(1, claim.BlueprintSelectionBoxes);
         Assert.NotNull(claim.InventoryGrantId);
         Assert.Equal(20, character.SigilFragments);
@@ -1115,7 +1115,7 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(2, inventory.AddedRewards.Count);
         Assert.Contains(
             inventory.AddedRewards,
-            reward => reward.ItemInstance.ItemBaseId == CatalystSelectionCrateCatalog.ItemBaseId && reward.Quantity == 1);
+            reward => reward.ItemInstance.ItemBaseId == "tempered_scrap" && reward.Quantity == 1);
         Assert.Contains(
             inventory.AddedRewards,
             reward => reward.ItemInstance.ItemBaseId == BlueprintSelectionBoxCatalog.ItemBaseId && reward.Quantity == 1);
@@ -1354,7 +1354,7 @@ public sealed class TournamentGroundsServiceTests
             Assert.Equal(0, reward.Cinders);
         });
         Assert.All(rewardGrants.Where(reward => reward.Placement <= 8), reward =>
-            Assert.Equal(1, reward.CatalystSelectionCaches));
+            Assert.Equal(2, reward.TemperedScrap));
         Assert.All(rewardGrants.Where(reward => reward.Placement <= 4), reward =>
             Assert.Equal(1, reward.BlueprintSelectionBoxes));
         Assert.All(rewardGrants.Where(reward => reward.Placement <= 2), reward =>

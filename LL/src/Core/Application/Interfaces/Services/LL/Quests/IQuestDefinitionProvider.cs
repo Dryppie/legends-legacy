@@ -5,6 +5,7 @@ public interface IQuestDefinitionProvider
     IReadOnlyList<QuestDefinition> GetAll();
     QuestDefinition Get(string questId, int? version = null);
     bool TryGet(string questId, out QuestDefinition definition);
+    int GetLatestVersion(string questId) => Get(questId).Version;
 }
 
 public sealed class QuestDefinition
@@ -74,6 +75,7 @@ public sealed class QuestObjectiveDefinition
 
 public sealed class QuestObjectiveFilterDefinition
 {
+    public string? StarterEquipmentKind { get; set; }
     public string? AreaId { get; set; }
     public string? DungeonDefinitionId { get; set; }
     public bool? RequiresVictory { get; set; }

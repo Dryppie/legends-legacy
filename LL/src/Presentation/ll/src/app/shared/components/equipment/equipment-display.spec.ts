@@ -170,6 +170,82 @@ describe('mapInstanceToDisplay', () => {
 describe('EquipmentDisplayComponent', () => {
   afterEach(() => setAttributeDefinitions([]));
 
+  it('shows Equipment progression rank, style and binding without legacy quality or Potential', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance('model-e', AttributeType.Armor, 12);
+    item.progression = {
+      modelVersion: 1,
+      balanceVersion: 1,
+      definitionId: 'plain.helm',
+      archetypeId: 'heavy_helm',
+      rank: 2,
+      nativeStyleId: null,
+      activeStyleId: null,
+      ownership: 'BoundPersonal',
+      paidScrap: 15,
+      paidCinders: 750,
+    };
+    fixture.componentRef.setInput('item', item);
+    fixture.detectChanges();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Rank 2');
+    expect(text).toContain('Plain');
+    expect(text).toContain('Bound');
+    expect(text).not.toContain('quality');
+    expect(text).not.toContain('Potential');
+    expect(text).not.toContain('Rolled attributes');
+    expect(fixture.componentInstance.data.attributes[0].amount).toBe(12);
+  });
+
+  for (const inlineComparison of [false, true]) {
+    it('keeps canonical comparisons free of crafting roll metadata (inline=' + inlineComparison + ')', async () => {
+      await TestBed.configureTestingModule({ imports: [EquipmentDisplayComponent] }).compileComponents();
+      const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+      const item = equipmentInstance('canonical', AttributeType.Armor, 12);
+      item.progression = { modelVersion: 1, balanceVersion: 1, definitionId: 'plain.helm',
+        archetypeId: 'heavy_helm', rank: 2, nativeStyleId: null, activeStyleId: null,
+        ownership: 'BoundPersonal', paidScrap: 15, paidCinders: 750 };
+      item.rollRange = { minimumPotential: 100, maximumPotential: 200, attributes: [{
+        attributeType: AttributeType.Armor, minimumAmount: 5, maximumAmount: 20,
+        rarityBonusAmount: 3, hasCraftedRange: true }] };
+      item.craftingDesign = { recipeId: 'old.recipe', name: 'Old recipe design',
+        handedness: '', attackCategory: '', rangeCategory: '', basicAttackIntervalMultiplier: 1,
+        basicAttackDamageMultiplier: 1, role: '', primaryTemperingStats: [], secondaryTemperingStats: [] };
+      const equipped = { ...item, id: 'equipped', displayName: 'Equipped helm' };
+      fixture.componentRef.setInput('item', item);
+      fixture.componentRef.setInput('comparisonItem', equipped);
+      fixture.componentRef.setInput('inlineComparison', inlineComparison);
+      fixture.detectChanges();
+      const text = fixture.nativeElement.textContent as string;
+      expect(text).toContain('Rank 2');
+      expect(text).not.toContain('Gear Value');
+      expect(text).not.toContain('Potential');
+      expect(text).not.toContain('Old recipe design');
+      expect(fixture.nativeElement.querySelector('[data-testid="tempering-bonus"]')).toBeNull();
+      expect(fixture.componentInstance.data.attributes[0].amount).toBe(12);
+      expect(item.rollRange.attributes[0].rarityBonusAmount).toBe(3);
+    });
+  }
+
+  it('does not compare canonical gear against a legacy production budget', async () => {
+    await TestBed.configureTestingModule({ imports: [EquipmentDisplayComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+    const item = equipmentInstance('canonical', AttributeType.Armor, 12);
+    item.progression = { modelVersion: 1, balanceVersion: 1, definitionId: 'plain.helm',
+      archetypeId: 'heavy_helm', rank: 2, nativeStyleId: null, activeStyleId: null,
+      ownership: 'BoundPersonal', paidScrap: 0, paidCinders: 0 };
+    fixture.componentRef.setInput('item', item);
+    fixture.componentRef.setInput('comparisonItem', equipmentInstance('legacy', AttributeType.Armor, 9));
+    fixture.detectChanges();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text.match(/Gear Value/g)?.length).toBe(1);
+    expect(text).toContain('Potential');
+    expect(fixture.nativeElement.querySelector('[data-testid="comparison-difference"]')?.textContent).toContain('+3');
+  });
+
   it('renders the crowd control resistance difference from the visible values', async () => {
     setAttributeDefinitions([
       {

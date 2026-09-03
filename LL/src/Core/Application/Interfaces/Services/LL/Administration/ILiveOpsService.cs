@@ -1,9 +1,13 @@
 using Domain.Models.Administration;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Application.Interfaces.Services.LL.Administration;
 
 public interface ILiveOpsService
 {
+    Task<CompensationEquipmentOptions> GetCompensationEquipmentOptionsAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken);
+    Task<AdministrationOperationResult<CompensationGrantPlan>> PrepareCompensationGrantAsync(Guid operationId, Guid characterId,
+        string itemBaseId, int quantity, CancellationToken cancellationToken, EquipmentGrantRequest? equipment = null);
     Task<IReadOnlyList<PlayerAdministrationSnapshot>> SearchPlayersAsync(
         string query,
         int limit,
@@ -79,5 +83,6 @@ public interface ILiveOpsService
         int quantity,
         string reason,
         string? internalNotes,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        EquipmentGrantRequest? equipment = null);
 }

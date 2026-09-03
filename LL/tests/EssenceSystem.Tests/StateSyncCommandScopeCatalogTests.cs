@@ -8,7 +8,6 @@ using Application.UseCases.Colosseum.Commands.PurchaseChampionMarketItem;
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
 using Application.UseCases.Colosseum.Commands.UpdateArenaDefenseSnapshot;
 using Application.UseCases.Colosseum.Tournaments.Commands;
-using Application.UseCases.Crafting.Commands.CraftItems;
 using Application.UseCases.Dungeons.Commands.ClaimDungeonRewards;
 using Application.UseCases.Essences.Commands.AbsorbUnboundEssence;
 using Application.UseCases.Essences.Commands.AscendEssence;
@@ -318,36 +317,6 @@ public sealed class StateSyncCommandScopeCatalogTests
     }
 
     [Theory]
-    [InlineData(typeof(global::Application.UseCases.Professions.Commands.CancelTemperingQueue.CancelTemperingQueueCommand))]
-    [InlineData(typeof(global::Application.UseCases.Professions.Commands.RemoveCraftingQueueItem.RemoveCraftingQueueItemCommand))]
-    public void TemperingQueueDeltasAdvanceInventoryWithoutCharacterRefreshes(Type commandType)
-    {
-        var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
-
-        Assert.Equal([StateSyncScopes.Inventory], profile.CharacterScopes);
-        Assert.Equal([StateSyncScopes.Inventory], profile.CharacterResponseSemantics.Keys);
-        Assert.Equal(
-            StateSyncResponseSemantics.OrderedDelta,
-            profile.CharacterResponseSemantics[StateSyncScopes.Inventory]);
-        Assert.False(profile.RefreshCharacterOverview);
-        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
-    }
-
-    [Fact]
-    public void StartTemperingReturnsAnOrderedInventoryDelta()
-    {
-        var profile = StateSyncCommandScopeCatalog.GetProfile(
-            typeof(global::Application.UseCases.CharacterActions.Commands.StartCraftingAction.StartCraftingActionCommand));
-
-        Assert.Empty(profile.CharacterScopes);
-        Assert.Equal(
-            StateSyncResponseSemantics.OrderedDelta,
-            profile.CharacterResponseSemantics[StateSyncScopes.Inventory]);
-        Assert.True(profile.InventoryWhenChanged);
-        Assert.False(profile.RefreshCharacterOverview);
-    }
-
-    [Theory]
     [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.StartDungeonRun.StartDungeonRunCommand))]
     [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand))]
     [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun.DismissFailedDungeonRunCommand))]
@@ -363,8 +332,6 @@ public sealed class StateSyncCommandScopeCatalogTests
     }
 
     [Theory]
-    [InlineData(typeof(CraftItemsCommand))]
-    [InlineData(typeof(global::Application.UseCases.Crafting.Commands.LearnBlueprint.LearnBlueprintCommand))]
     [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.StartDungeonRun.StartDungeonRunCommand))]
     [InlineData(typeof(global::Application.UseCases.Dungeons.Commands.ExecuteDungeonAction.ExecuteDungeonActionCommand))]
     [InlineData(typeof(PurchaseSoulstoneUpgradeCommand))]
@@ -422,7 +389,6 @@ public sealed class StateSyncCommandScopeCatalogTests
     }
 
     [Theory]
-    [InlineData(typeof(CraftItemsCommand), StateSyncScopes.Inventory)]
     [InlineData(typeof(AcceptProphecyCommand), StateSyncScopes.Prophecies)]
     [InlineData(typeof(PurchaseSoulstoneUpgradeCommand), StateSyncScopes.Soulstones)]
     [InlineData(typeof(EquipTitleCommand), StateSyncScopes.Achievements)]

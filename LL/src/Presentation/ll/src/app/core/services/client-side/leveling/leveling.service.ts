@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
-import { ProfessionsService } from '../../api/professions/professions.service';
-import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 import { CharacterStateService } from '../../api/character/character-state.service';
 
 @Injectable({
@@ -10,7 +8,6 @@ import { CharacterStateService } from '../../api/character/character-state.servi
 export class LevelingService {
   constructor(
     private readonly state: CharacterStateService,
-    private readonly professionService: ProfessionsService,
   ) {}
 
   /* ────────────────────────────────────────────────────────
@@ -41,10 +38,4 @@ export class LevelingService {
     this.state.updateCharacter(updated);
   }
 
-  /* ────────────────────────────────────────────────────────
-   *  PROFESSION XP / LEVEL
-   * ────────────────────────────────────────────────────────*/
-  gainProfessionExperience(type: ProfessionType, xp: number): void {
-    this.professionService.addExperience(type, xp);
-  }
 }

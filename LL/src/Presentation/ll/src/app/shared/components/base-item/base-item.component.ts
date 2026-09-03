@@ -1,3 +1,4 @@
+import { itemDescription } from '../../utils/inventory/item-description';
 import { NgClass, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import {
@@ -39,6 +40,10 @@ export class BaseItemComponent {
     private readonly inventoryState: InventoryStateService,
     private readonly equipmentState: EquipmentStateService,
   ) {}
+
+  get description(): string {
+    return itemDescription(this.item);
+  }
 
   get isEssence(): boolean {
     return this.item.itemType === ItemType.Essence;

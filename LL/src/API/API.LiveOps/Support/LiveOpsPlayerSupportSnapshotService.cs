@@ -12,7 +12,7 @@ using Services.LL.Administration;
 
 namespace API.LiveOps.Support;
 
-public sealed class LiveOpsPlayerSupportSnapshotService(
+public sealed partial class LiveOpsPlayerSupportSnapshotService(
     IDbContextFactory<LLDbContext> contextFactory,
     IChatModerationGateway chat,
     IOptions<LiveOpsOptions> options,
@@ -77,7 +77,8 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
             token => LoadSynchronizationAsync(target, token),
             cancellationToken);
 
-        await Task.WhenAll(account, activity, economy, guild, marketplace, transfers, synchronization);
+        var equipment = CaptureAsync("equipment", token => LoadEquipmentAsync(target, token), cancellationToken);
+        await Task.WhenAll(account, activity, economy, guild, marketplace, transfers, synchronization, equipment);
         return new PlayerSupportSnapshotDto(
             target.AccountId,
             target.CharacterId,
@@ -88,7 +89,8 @@ public sealed class LiveOpsPlayerSupportSnapshotService(
             await guild,
             await marketplace,
             await transfers,
-            await synchronization);
+            await synchronization,
+            await equipment);
     }
 
     public async Task<TransferHistoryLookupResult> GetTransferHistoryAsync(

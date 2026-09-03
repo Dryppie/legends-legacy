@@ -1,5 +1,6 @@
+import { signal } from '@angular/core';
+import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
 import { of } from 'rxjs';
-import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryService } from '../../../../../core/services/api/inventory/inventory.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../models/inventoryItem';
@@ -21,10 +22,8 @@ describe('InventoryItemModalComponent selection containers', () => {
       'InventoryStateService',
       ['applyVersionedInventory'],
     );
-    component = new InventoryItemModalComponent(
-      jasmine.createSpyObj<CraftingService>('CraftingService', ['getRecipes']),
-      inventoryService,
-      inventoryState,
+    component = new InventoryItemModalComponent(inventoryService,
+inventoryState
     );
     component.inventoryItem = {
       id: 'token',

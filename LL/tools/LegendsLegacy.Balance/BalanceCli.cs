@@ -6,6 +6,8 @@ public static class BalanceCli
     {
         try
         {
+            if (args.Contains(EquipmentReferenceCommand.Switch, StringComparer.Ordinal))
+                return EquipmentReferenceCommand.Run(args);
             var options = BalanceCommandOptions.Parse(args);
             if (options.ShowHelp)
             {

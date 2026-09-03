@@ -62,14 +62,11 @@ public sealed class ChampionMarketCatalogTests
             cache.SigilFragmentsGranted > 0 ||
             cache.RewardItemQuantity > 0));
         var catalystCrate = Assert.Single(weeklyCaches, x => x.Id == "cache.catalyst_selection");
-        Assert.Equal(CatalystSelectionCrateCatalog.ItemBaseId, catalystCrate.RewardItemId);
-        Assert.Equal(1, catalystCrate.RewardItemQuantity);
+        Assert.Equal("tempered_scrap", catalystCrate.RewardItemId);
+        Assert.Equal(2, catalystCrate.RewardItemQuantity);
         Assert.All(
             items.Where(x => x.RewardItemQuantity > 0),
             item => Assert.Contains(item.RewardItemId, itemBaseIds));
-        Assert.All(
-            CatalystSelectionCrateCatalog.Options,
-            option => Assert.Contains(option.ItemId, itemBaseIds));
         var titleKeys = Directory
             .EnumerateFiles(Path.Combine(apiRoot, "Data", "titles"), "*.json")
             .SelectMany(ReadTitleKeys)
@@ -77,13 +74,10 @@ public sealed class ChampionMarketCatalogTests
         Assert.All(
             items.Where(item => item.Category == "Title"),
             item => Assert.Contains(item.RewardTitleKey!, titleKeys));
-        Assert.Equal(11, CatalystSelectionCrateCatalog.Options.Count);
-        Assert.All(CatalystSelectionCrateCatalog.Options, option => Assert.Equal(6, option.Quantity));
         var crateItem = itemDocument.RootElement
             .EnumerateArray()
-            .Single(item => item.GetProperty("id").GetString() == CatalystSelectionCrateCatalog.ItemBaseId);
+            .Single(item => item.GetProperty("id").GetString() == "tempered_scrap");
         Assert.Equal("Resource", crateItem.GetProperty("itemType").GetString());
-        Assert.True(crateItem.GetProperty("isBound").GetBoolean());
         Assert.Equal(
             [
                 "item.monster_core.lesser",
@@ -104,28 +98,4 @@ public sealed class ChampionMarketCatalogTests
         }
     }
 
-    [Fact]
-    public void CatalystSelectionCacheMatchesAllBlueprintRequirementsExceptRaidforgedAndGravebound()
-    {
-        var apiRoot = TestContentPaths.FindApiRoot();
-        using var blueprintDocument = JsonDocument.Parse(File.ReadAllText(
-            Path.Combine(apiRoot, "Data", "crafting", "blueprints.json")));
-
-        var requiredCatalystItemIds = blueprintDocument.RootElement
-            .EnumerateArray()
-            .Where(blueprint => blueprint.GetProperty("id").GetString() is not
-                "blueprint_raidforged" and not "blueprint_gravebound")
-            .SelectMany(blueprint => blueprint
-                .GetProperty("additionalMaterialRequirements")
-                .EnumerateArray()
-                .Where(requirement => requirement.GetProperty("type").GetString() == "SpecialResource")
-                .Select(requirement => requirement.GetProperty("itemId").GetString()!))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        Assert.Equal(
-            requiredCatalystItemIds.OrderBy(itemId => itemId, StringComparer.OrdinalIgnoreCase),
-            CatalystSelectionCrateCatalog.Options
-                .Select(option => option.ItemId)
-                .OrderBy(itemId => itemId, StringComparer.OrdinalIgnoreCase));
-    }
 }

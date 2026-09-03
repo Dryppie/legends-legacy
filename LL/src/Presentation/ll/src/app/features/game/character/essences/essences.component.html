@@ -186,7 +186,11 @@
         </div>
       </div>
 
-      <cdk-virtual-scroll-viewport [itemSize]="64" class="min-h-0 flex-1">
+      <cdk-virtual-scroll-viewport
+        [itemSize]="64"
+        class="min-h-0 flex-1"
+        data-tour="essence-archive"
+      >
         <button
           *cdkVirtualFor="
             let essence of filteredArchiveEssences();
@@ -310,7 +314,7 @@
           <div class="soul-detail-actions ml-auto flex shrink-0 gap-2">
             <button
               *ngIf="
-                isOnboardingStarterAttunement(essence);
+                isOnboardingEssenceAttunement();
                 else regularAttunementButton
               "
               type="button"
@@ -526,7 +530,7 @@
         <footer class="soul-mobile-detail-footer bg-texture bg-auto">
           <ng-container
             *ngIf="
-              isOnboardingStarterAttunement(essence);
+              isOnboardingEssenceAttunement();
               else mobileRegularAttunementButton
             "
           >

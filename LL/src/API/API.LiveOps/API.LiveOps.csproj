@@ -34,6 +34,39 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\API.LL\Data\equipment\*.json">
+      <Link>Data\equipment\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\API.LL\Data\quests\**\*.json">
+      <Link>Data\quests\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\API.LL\Data\items\items.json">
+      <Link>Data\items\items.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\API.LL\Data\world\regions.json">
+      <Link>Data\world\regions.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\API.LL\Data\world\creatures.json">
+      <Link>Data\world\creatures.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\API.LL\Data\crafting\base-recipes.json">
+      <Link>Data\crafting\base-recipes.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <PropertyGroup>
     <LiveOpsUiDist>$(MSBuildProjectDirectory)\..\..\Presentation\liveops\dist\liveops\browser</LiveOpsUiDist>
   </PropertyGroup>

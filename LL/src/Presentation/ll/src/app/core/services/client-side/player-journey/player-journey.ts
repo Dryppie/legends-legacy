@@ -15,7 +15,7 @@ export enum PlayerJourneyStage {
   FirstHunt = 0,
   SoulArchive = 1,
   FirstWeapon = 2,
-  GatheringTool = 3,
+  ReadyForRoad = 3,
   EnterLumo = 4,
   Shenic = 5,
   BetaComplete = 6,
@@ -50,7 +50,7 @@ const STAGE_QUESTS: ReadonlyArray<{
   { stage: PlayerJourneyStage.SoulArchive, questId: SOUL_ARCHIVE_QUEST_ID },
   { stage: PlayerJourneyStage.FirstWeapon, questId: FIRST_WEAPON_QUEST_ID },
   {
-    stage: PlayerJourneyStage.GatheringTool,
+    stage: PlayerJourneyStage.ReadyForRoad,
     questId: TOOLS_OF_THE_TRADE_QUEST_ID,
   },
   { stage: PlayerJourneyStage.EnterLumo, questId: INTO_LUMO_RUINS_QUEST_ID },
@@ -84,8 +84,7 @@ export function buildPlayerJourneyGuidance(
     ? journal.quests.find((quest) => quest.questId === stageQuestId)
     : undefined;
   const journeyQuest = findJourneyQuest(journal);
-  const quest =
-    stage >= PlayerJourneyStage.Shenic ? journeyQuest : stageQuest;
+  const quest = stage >= PlayerJourneyStage.Shenic ? journeyQuest : stageQuest;
   const incompleteObjective = quest?.objectives.find(
     (objective) => !objective.isCompleted,
   );
@@ -94,7 +93,9 @@ export function buildPlayerJourneyGuidance(
   if (quest) {
     return {
       stage,
-      phaseLabel: quest.chain?.title ?? phaseLabel(stage),
+      phaseLabel:
+        quest.chain?.title ??
+        phaseLabel(stage),
       title: quest.title,
       summary: quest.summary,
       objective: requiresChoice
@@ -112,12 +113,17 @@ export function buildPlayerJourneyGuidance(
           : incompleteObjective?.presentation.destinationRoute ||
             '/game/quests',
       },
-      optionalAction: optionalAction(stage),
+      optionalAction:
+        (stage === PlayerJourneyStage.FirstWeapon ||
+          stage === PlayerJourneyStage.ReadyForRoad)
+          ? { label: 'Equip Your Gear', route: '/game/character/inventory' }
+          : optionalAction(stage),
       nextUnlockLabel: quest.chain?.promisedReward
         ? 'Chapter reward'
         : 'Next unlock',
       nextUnlock:
-        quest.chain?.promisedReward ?? nextUnlock(stage, characterLevel),
+        quest.chain?.promisedReward ??
+        nextUnlock(stage, characterLevel),
     };
   }
 
@@ -135,20 +141,20 @@ export function buildPlayerJourneyGuidance(
       stage === PlayerJourneyStage.BetaComplete
         ? 'Shenic Beta journey complete'
         : stage === PlayerJourneyStage.Shenic
-        ? 'Develop your Shenic build'
-        : 'Continue the First Steps',
+          ? 'Develop your Shenic build'
+          : 'Continue the First Steps',
     summary:
       stage === PlayerJourneyStage.BetaComplete
         ? 'You reached level 30, cleared the Heart of the Hollow, and completed the focused Beta journey.'
         : stage === PlayerJourneyStage.Shenic
-        ? 'Fight in the newest available area, strengthen your loadout, and prepare for the next Shenic challenge.'
-        : 'Open the Quest Journal to continue the guided introduction.',
+          ? 'Fight in the newest available area, strengthen your loadout, and prepare for the next Shenic challenge.'
+          : 'Open the Quest Journal to continue the guided introduction.',
     objective:
       stage === PlayerJourneyStage.BetaComplete
         ? 'Review the build that carried you through Shenic and the choices you made along the way.'
         : stage === PlayerJourneyStage.Shenic
-        ? 'Choose a current quest or return to the World Map.'
-        : 'Open the Quest Journal and follow the highlighted objective.',
+          ? 'Choose a current quest or return to the World Map.'
+          : 'Open the Quest Journal and follow the highlighted objective.',
     primaryAction: {
       label:
         stage === PlayerJourneyStage.BetaComplete
@@ -163,7 +169,11 @@ export function buildPlayerJourneyGuidance(
             ? '/game/world/shenic'
             : '/game/quests',
     },
-    optionalAction: optionalAction(stage),
+    optionalAction:
+      (stage === PlayerJourneyStage.FirstWeapon ||
+        stage === PlayerJourneyStage.ReadyForRoad)
+        ? { label: 'Equip Your Gear', route: '/game/character/inventory' }
+        : optionalAction(stage),
     nextUnlockLabel:
       stage === PlayerJourneyStage.BetaComplete
         ? 'Future aspiration'
@@ -179,7 +189,6 @@ export function filterSidebarForPlayerJourney(
   focusedBetaJourney: boolean,
 ): SidebarSection[] {
   if (!focusedBetaJourney) return sections;
-
   const stage = resolvePlayerJourneyStage(journal);
   if (characterLevel >= PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL) {
     return sections;
@@ -190,9 +199,6 @@ export function filterSidebarForPlayerJourney(
   if (stage >= PlayerJourneyStage.SoulArchive) {
     visibleItemIds.add('inventory');
     visibleItemIds.add('essences');
-  }
-  if (stage >= PlayerJourneyStage.FirstWeapon) {
-    visibleItemIds.add('crafting');
   }
   if (stage >= PlayerJourneyStage.EnterLumo) {
     visibleItemIds.add('world');
@@ -269,9 +275,7 @@ function findJourneyQuest(journal: QuestJournal): QuestState | undefined {
   }
 
   return journal.quests
-    .filter(
-      (quest) => quest.status === QuestStatus.Active && !!quest.chain,
-    )
+    .filter((quest) => quest.status === QuestStatus.Active && !!quest.chain)
     .sort((left, right) => left.sortOrder - right.sortOrder)[0];
 }
 
@@ -307,8 +311,8 @@ function phaseLabel(stage: PlayerJourneyStage): string {
       return 'Claim Your Power';
     case PlayerJourneyStage.FirstWeapon:
       return 'Prepare Your Gear';
-    case PlayerJourneyStage.GatheringTool:
-      return 'Choose a Trade';
+    case PlayerJourneyStage.ReadyForRoad:
+      return 'Ready for the Road';
     case PlayerJourneyStage.EnterLumo:
       return 'Enter Shenic';
     case PlayerJourneyStage.BetaComplete:
@@ -325,7 +329,7 @@ function optionalAction(stage: PlayerJourneyStage): PlayerJourneyAction {
     case PlayerJourneyStage.SoulArchive:
       return { label: 'Inspect Inventory', route: '/game/character/inventory' };
     case PlayerJourneyStage.FirstWeapon:
-    case PlayerJourneyStage.GatheringTool:
+    case PlayerJourneyStage.ReadyForRoad:
       return { label: 'Review Loadout', route: '/game/character/essences' };
     case PlayerJourneyStage.EnterLumo:
       return { label: 'Check Equipment', route: '/game/character/inventory' };
@@ -336,16 +340,19 @@ function optionalAction(stage: PlayerJourneyStage): PlayerJourneyAction {
   }
 }
 
-function nextUnlock(stage: PlayerJourneyStage, characterLevel: number): string {
+function nextUnlock(
+  stage: PlayerJourneyStage,
+  characterLevel: number,
+): string {
   switch (stage) {
     case PlayerJourneyStage.FirstHunt:
       return 'Soul Archive after completing your First Hunt';
     case PlayerJourneyStage.SoulArchive:
-      return 'Crafting after attuning your first Essence';
+      return 'Starter equipment after attuning your first Essence';
     case PlayerJourneyStage.FirstWeapon:
-      return 'Gathering tools after crafting your first weapon';
-    case PlayerJourneyStage.GatheringTool:
-      return 'World Map after equipping a gathering tool';
+      return 'Ready for the Road accessories after equipping your starter kit';
+    case PlayerJourneyStage.ReadyForRoad:
+      return 'World Map after equipping your accessories';
     case PlayerJourneyStage.EnterLumo:
       return 'The Shenic journey after your first Lumo victory';
     case PlayerJourneyStage.BetaComplete:

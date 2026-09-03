@@ -40,6 +40,26 @@ describe('LeaderboardStateService', () => {
     expect(state.activeKey()).toBe('combat-level');
   });
 
+  it('clears cached standings and ignores previous-character responses after reset', () => {
+    state.load('total-level');
+    firstRequest.next(board('total-level'));
+    state.reset();
+    expect(state.board()).toBeNull();
+    expect(state.activeKey()).toBeNull();
+    expect(state.error()).toBeNull();
+    expect(state.loading()).toBeFalse();
+
+    state.load('combat-level');
+    firstRequest.next(board('total-level'));
+    firstRequest.complete();
+    expect(state.board()).toBeNull();
+    expect(state.loading()).toBeTrue();
+    secondRequest.next(board('combat-level'));
+    secondRequest.complete();
+    expect(state.board()?.key).toBe('combat-level');
+    expect(state.loading()).toBeFalse();
+  });
+
   it('retains the existing board while refreshing', () => {
     state.load('total-level');
     firstRequest.next(board('total-level'));

@@ -1,0 +1,73 @@
+{
+  "id": "quest.shenic.heart_of_the_hollow",
+  "version": 4,
+  "title": "Heart of the Hollow",
+  "summary": "Master Thornroot's pressure, then carry your finished Beta build through the Hollow's Final Trial.",
+  "category": "Shenic",
+  "chain": {
+    "id": "chain.shenic.chapter_03",
+    "title": "Chapter III — Heart of Shenic",
+    "description": "Refine your chosen identity through Twilight and the Old Forest, then clear the Hollow's Final Trial.",
+    "goal": "Reach level 30, master Thornroot Hollow, and clear Forgotten Catacombs I.",
+    "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
+    "step": 3,
+    "totalSteps": 3
+  },
+  "sortOrder": 160,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 30,
+    "completedQuestIds": [
+      "quest.shenic.roots_remember"
+    ]
+  },
+  "objectives": [
+    {
+      "key": "master_thornroot_pressure",
+      "description": "Master Thornroot's pressure: win 6 encounters in Thornroot Hollow.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 6,
+      "filters": {
+        "areaId": "region_01_area_09",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Thornroot Hollow",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_09"
+      }
+    },
+    {
+      "key": "clear_the_hollows_final_trial",
+      "description": "Clear the Hollow's Final Trial: complete Forgotten Catacombs I and defeat its boss.",
+      "type": "DungeonRunCompleted",
+      "requiredAmount": 1,
+      "filters": {
+        "dungeonDefinitionId": "forgotten_catacombs"
+      },
+      "presentation": {
+        "actionLabel": "Enter Forgotten Catacombs",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    {
+      "key": "capstone_core",
+      "type": "Item",
+      "itemBaseId": "item.monster_core.lesser",
+      "quantity": 3
+    },
+    {
+      "key": "thornroot_hollow_essence_token",
+      "type": "Item",
+      "itemBaseId": "item.essence_token.thornroot_hollow",
+      "quantity": 1
+    },
+    {
+      "key": "area_scrap",
+      "type": "Item",
+      "itemBaseId": "tempered_scrap",
+      "quantity": 2
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { equipmentSourceLabel } from '../../../utils/equipment/acquisition-source';
 import {
   Component,
   EventEmitter,
@@ -12,7 +13,6 @@ import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
-  DungeonGatheringNodePreview,
   DungeonMastery,
   DungeonMasteryBenefitLevel,
   DungeonPreviewData,
@@ -43,7 +43,7 @@ interface MasteryBonusDisplay {
   label: string;
 }
 
-type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
+type DungeonDetailTab = 'rewards' | 'mastery';
 
 @Component({
   selector: 'app-dungeon-card',
@@ -71,11 +71,14 @@ export class DungeonCardComponent implements OnChanges {
     DungeonDifficulty.Mythic,
   ];
 
-  readonly detailTabs: { id: DungeonDetailTab; label: string }[] = [
+  private readonly allDetailTabs: { id: DungeonDetailTab; label: string }[] = [
     { id: 'rewards', label: 'Rewards' },
-    { id: 'gathering', label: 'Gathering' },
     { id: 'mastery', label: 'Mastery' },
   ];
+
+  get detailTabs(): { id: DungeonDetailTab; label: string }[] {
+    return this.allDetailTabs;
+  }
 
   difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
   private difficultyChosenManually = false;
@@ -437,7 +440,7 @@ export class DungeonCardComponent implements OnChanges {
     const groups = new Map<string, DungeonPreviewReward[]>();
 
     for (const reward of this.selectedPreviewData().rewards ?? []) {
-      const key = reward.category || reward.source || 'Rewards';
+      const key = reward.category || equipmentSourceLabel(reward.source);
       groups.set(key, [...(groups.get(key) ?? []), reward]);
     }
 
@@ -549,50 +552,12 @@ export class DungeonCardComponent implements OnChanges {
     return Math.sqrt(this.rewardChancePercent(reward) / 100) * 100;
   }
 
-  trackGatheringNode(_: number, node: DungeonGatheringNodePreview): string {
-    return node.id;
-  }
-
-  trackGatheringLoot(
-    _: number,
-    loot: DungeonGatheringNodePreview['loot'][number],
-  ): string {
-    return (
-      loot.id || loot.itemId || loot.itemBase?.id || loot.itemBase?.name || ''
-    );
-  }
-
-  selectedMainRewards(limit = 3): DungeonPreviewReward[] {
-    return this.selectedRewardGroups()
-      .flatMap((group) => group.rewards)
-      .slice(0, limit);
-  }
-
   selectedRewardCount(): number {
     return this.selectedPreviewData().rewards?.length ?? 0;
   }
 
   selectedRemainingRewardCount(limit = 3): number {
     return Math.max(0, this.selectedRewardCount() - limit);
-  }
-
-  selectedGatheringNodes(): DungeonGatheringNodePreview[] {
-    return this.selectedPreviewData().gatheringNodes ?? [];
-  }
-
-  selectedGatheringTypes(): string[] {
-    return [
-      ...new Set(
-        this.selectedGatheringNodes().map((node) =>
-          this.formatGatheringType(node.type),
-        ),
-      ),
-    ];
-  }
-
-  selectedGatheringSummary(): string {
-    const types = this.selectedGatheringTypes();
-    return types.length ? types.join(' · ') : 'None';
   }
 
   selectedMasteryLevel(): number {
@@ -635,12 +600,6 @@ export class DungeonCardComponent implements OnChanges {
       bonuses.push({
         id: 'rest',
         label: `+${benefits.restSiteVigorBonus} Vigor from Rest Sites`,
-      });
-    }
-    if (benefits.gatheringProcChanceBonus > 0) {
-      bonuses.push({
-        id: 'gathering',
-        label: `+${Math.round(benefits.gatheringProcChanceBonus * 100)} percentage points to gathering chance`,
       });
     }
     if (benefits.combatVigorCostReduction > 0) {
@@ -720,57 +679,10 @@ export class DungeonCardComponent implements OnChanges {
     return next ? `${experience} / ${next} XP` : `${experience} XP`;
   }
 
-  gatheringChanceLabel(node: DungeonGatheringNodePreview): string {
-    return `Base node ${this.formatDropChance((node.procChance ?? 0) * 100)}`;
-  }
-
-  gatheringLevelLabel(node: DungeonGatheringNodePreview): string {
-    return node.levelRequirement && node.levelRequirement > 0
-      ? `Lv. ${node.levelRequirement}`
-      : 'Any level';
-  }
-
-  gatheringLootQuantityLabel(
-    loot: DungeonGatheringNodePreview['loot'][number],
-  ): string {
-    return loot.minQuantity === loot.maxQuantity
-      ? `Qty ${loot.minQuantity}`
-      : `Qty ${loot.minQuantity}–${loot.maxQuantity}`;
-  }
-
-  gatheringLootDropChanceLabel(
-    loot: DungeonGatheringNodePreview['loot'][number],
-  ): string {
-    return `Base ${this.formatDropChance(loot.dropChancePercent ?? 0)} drop`;
-  }
-
   private formatDropChance(chance: number): string {
     const clamped = Math.max(0, Math.min(100, chance));
     const maximumFractionDigits = clamped > 0 && clamped < 1 ? 4 : 2;
     return `${Number(clamped.toFixed(maximumFractionDigits))}%`;
-  }
-
-  formatGatheringType(type: string | null | undefined): string {
-    if (!type) {
-      return 'Gathering';
-    }
-
-    return type.replace(/([a-z])([A-Z])/g, '$1 $2');
-  }
-
-  gatheringTypeClass(type: string | null | undefined): string {
-    switch (type?.toLowerCase()) {
-      case 'mining':
-        return 'll-badge-muted';
-      case 'woodcutting':
-        return 'll-badge-success';
-      case 'fishing':
-        return 'll-badge-info';
-      case 'skinning':
-        return 'll-badge-warning';
-      default:
-        return 'll-item-chip-accent';
-    }
   }
 
   private rewardGroupSortValue(title: string): number {

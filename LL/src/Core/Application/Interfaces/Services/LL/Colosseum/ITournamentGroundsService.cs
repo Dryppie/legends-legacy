@@ -20,7 +20,7 @@ public interface ITournamentGroundsService
         Task.FromResult<TournamentPlaybackManifestDto?>(null);
     Task<TournamentPlaybackBundleContentDto?> GetMatchPlaybackBundleAsync(Guid characterId, Guid tournamentId, Guid matchId, CancellationToken cancellationToken) =>
         Task.FromResult<TournamentPlaybackBundleContentDto?>(null);
-    IReadOnlyList<TournamentRewardTier> GetRewardTiers();
+    Task<IReadOnlyList<TournamentRewardTier>> GetRewardTiersAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<TournamentRewardGrantEntry>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken);
     Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);
     Task<TournamentTeamActionResult?> UpdateLoadoutAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken);

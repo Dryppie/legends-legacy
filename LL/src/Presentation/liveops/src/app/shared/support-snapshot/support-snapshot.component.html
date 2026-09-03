@@ -14,6 +14,9 @@
   </div>
 
   <div class="support-grid">
+    @if (support.equipment; as equipment) {
+      <app-equipment-support [section]="equipment"></app-equipment-support>
+    }
     <article class="support-card support-wide" [class.unavailable]="!support.account.isAvailable">
       <header><div><span>Account and restrictions</span><small>{{ support.account.source }} · {{ support.account.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ support.account.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
       @if (support.account.data; as account) {
@@ -50,7 +53,7 @@
         <div class="balance-grid"><div><span>Cinders</span><strong>{{ economy.cinders | number }}</strong></div><div><span>Soulstones</span><strong>{{ economy.soulstones | number }}</strong></div><div><span>Fate Echo</span><strong>{{ economy.fateEcho | number }}</strong></div><div><span>Sigil fragments</span><strong>{{ economy.sigilFragments | number }}</strong></div><div><span>Guild favor</span><strong>{{ economy.guildFavor | number }}</strong></div><div><span>Tower tokens</span><strong>{{ economy.towerTokens | number }}</strong></div></div>
         <div class="support-metrics three inventory-metrics"><div><span>Inventory rows</span><strong>{{ economy.inventoryRowCount }}</strong></div><div><span>Total quantity</span><strong>{{ economy.inventoryQuantity | number }}</strong></div><div><span>Unseen rows</span><strong>{{ economy.unseenInventoryRows }}</strong></div></div>
         <div class="support-split-list">
-          <section><h3>Recent acquisitions</h3><div class="support-list">@for (item of economy.recentAcquisitions; track item.itemInstanceId) { <div><div><strong>{{ item.quantity }} × {{ item.itemName }}</strong><small>{{ item.itemBaseId }} · {{ item.acquisitionSource }}</small></div><time>{{ item.acquiredAtUtc | date: 'short' }}</time></div> } @empty { <p class="support-empty">No retained inventory acquisitions.</p> }</div></section>
+          <section><h3>Recent acquisitions</h3><div class="support-list">@for (item of economy.recentAcquisitions; track item.itemInstanceId) { <div><div><strong>{{ item.quantity }} × {{ item.itemName }}</strong><small>{{ item.itemBaseId }} · {{ acquisitionSourceLabel(item.acquisitionSource) }}</small></div><time>{{ item.acquiredAtUtc | date: 'short' }}</time></div> } @empty { <p class="support-empty">No retained inventory acquisitions.</p> }</div></section>
           <section><h3>Recent compensation</h3><div class="support-list">@for (grant of economy.recentCompensationGrants; track grant.operationId) { <div><span class="support-state">{{ grant.riskLevel }}</span><div><strong>{{ grant.quantity }} × {{ grant.itemName }}</strong><small>{{ grant.reason }}</small></div><time>{{ grant.occurredAtUtc | date: 'short' }}</time></div> } @empty { <p class="support-empty">No compensation grants recorded.</p> }</div></section>
         </div>
       } @else { <p class="support-unavailable">{{ support.economy.message }}</p> }

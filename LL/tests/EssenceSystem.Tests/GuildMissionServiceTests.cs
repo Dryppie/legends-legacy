@@ -14,7 +14,7 @@ using Services.LL.Guilds;
 
 namespace EssenceSystem.Tests;
 
-public sealed class GuildMissionServiceTests
+public sealed partial class GuildMissionServiceTests
 {
     [Fact]
     public void Weekly_targets_match_five_day_activity_benchmarks()
@@ -23,13 +23,13 @@ public sealed class GuildMissionServiceTests
 
         Assert.Equal(432_000, missions["weekly.monster_extermination"].BaseTarget);
         Assert.Equal(1_000, missions["weekly.dungeon_expedition"].BaseTarget);
-        Assert.Equal(432_000, missions["weekly.craftsmens_commission"].BaseTarget);
+        Assert.Equal(100, missions["weekly.essence_stewardship"].BaseTarget);
         Assert.Equal(100, missions["weekly.dungeon_vanguard"].BaseTarget);
         Assert.DoesNotContain(missions.Values, mission => mission.Metric == GuildContributionMetric.ItemsCrafted);
 
         const long fiveDaysOfTenSecondActions = 5 * 24 * 60 * 60 / 10;
         Assert.Equal(fiveDaysOfTenSecondActions * 10, missions["weekly.monster_extermination"].BaseTarget);
-        Assert.Equal(fiveDaysOfTenSecondActions, missions["weekly.craftsmens_commission"].BaseTarget * 10 / 100);
+        Assert.Equal(fiveDaysOfTenSecondActions, missions["weekly.monster_extermination"].BaseTarget * 10 / 100);
         Assert.Equal(20 * 5 * 10, missions["weekly.dungeon_expedition"].BaseTarget);
         Assert.Equal(2 * 5 * 10, missions["weekly.dungeon_vanguard"].BaseTarget);
     }
@@ -49,14 +49,14 @@ public sealed class GuildMissionServiceTests
     }
 
     [Fact]
-    public async Task Platinum_requires_five_days_of_maximum_tempering_actions_even_after_guild_completion()
+    public async Task Platinum_requires_five_days_of_combat_actions_even_after_guild_completion()
     {
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         var guild = db.Guilds.Local.Single();
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
         var definition = new DefaultGuildContentProvider().WeeklyMissions
-            .Single(x => x.Key == "weekly.craftsmens_commission");
+            .Single(x => x.Key == "weekly.monster_extermination");
         var contribution = new GuildMissionContribution
         {
             GuildId = guild.Id,
@@ -83,8 +83,8 @@ public sealed class GuildMissionServiceTests
         var finalAction = await service.RecordContributionAsync(
             new GuildContributionEvent(
                 characterId,
-                GuildContributionSource.Tempering,
-                GuildContributionMetric.TemperingActionsCompleted,
+                GuildContributionSource.Combat,
+                GuildContributionMetric.CreaturesDefeated,
                 1,
                 OccurredAt: now,
                 IdempotencyKey: "tempering:platinum-action"),
@@ -119,7 +119,7 @@ public sealed class GuildMissionServiceTests
         var guild = db.Guilds.Local.Single();
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
         var definition = new DefaultGuildContentProvider().WeeklyMissions
-            .Single(x => x.Key == "weekly.craftsmens_commission");
+            .Single(x => x.Key == "weekly.monster_extermination");
         db.GuildMissionInstances.Add(new GuildMissionInstance
         {
             GuildId = guild.Id,
@@ -215,8 +215,8 @@ public sealed class GuildMissionServiceTests
         await service.RecordContributionAsync(
             new GuildContributionEvent(
                 characterId,
-                GuildContributionSource.Tempering,
-                GuildContributionMetric.TemperingActionsCompleted,
+                GuildContributionSource.Combat,
+                GuildContributionMetric.CreaturesDefeated,
                 8,
                 OccurredAt: now,
                 IdempotencyKey: "tempering:first"),
@@ -224,8 +224,8 @@ public sealed class GuildMissionServiceTests
         await service.RecordContributionAsync(
             new GuildContributionEvent(
                 characterId,
-                GuildContributionSource.Crafting,
-                GuildContributionMetric.ItemsCrafted,
+                GuildContributionSource.Dungeon,
+                GuildContributionMetric.DungeonRoomsCleared,
                 1,
                 OccurredAt: now,
                 IdempotencyKey: "crafting:second"),
@@ -235,7 +235,7 @@ public sealed class GuildMissionServiceTests
         Assert.Equal(
             8,
             db.PersonalGuildOrders.Local.Single(x =>
-                x.MissionDefinitionId == Guid.Parse("c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2")).CurrentAmount);
+                x.MissionDefinitionId == Guid.Parse("8d7a12db-39eb-44f0-8c66-3ba79b606ca2")).CurrentAmount);
 
         await db.SaveChangesAsync();
         Assert.Equal(3, await db.PersonalGuildOrders.CountAsync());

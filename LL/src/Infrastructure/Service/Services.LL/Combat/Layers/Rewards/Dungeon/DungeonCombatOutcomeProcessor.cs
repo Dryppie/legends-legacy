@@ -120,22 +120,6 @@ internal class DungeonCombatOutcomeProcessor : ICombatOutcomeProcessor
             }
         }
 
-        foreach (var gathered in outcome.GatheringRewards.Where(x => x.Success))
-        {
-            var amount = gathered.ItemsGained.Sum(x => x.Quantity);
-            if (amount <= 0)
-            {
-                continue;
-            }
-
-            progressEvents.Add(new ProphecyProgressEvent(
-                facts.CharacterId,
-                now,
-                ProphecyProgressKind.ResourceGathered,
-                amount,
-                Profession: gathered.ToolType.ToString()));
-        }
-
         if (outcome.TotalLoot.Count > 0)
         {
             var treasureProgress = outcome.TotalLoot.Sum(item => Math.Max(1, item.Quantity));

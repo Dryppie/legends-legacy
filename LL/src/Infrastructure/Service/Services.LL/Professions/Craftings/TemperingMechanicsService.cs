@@ -26,12 +26,11 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         Random rng,
         double negativeOutcomeReductionBps = 0)
     {
+        if (equipment.HasEquipmentProgression)
+            throw new InvalidOperationException("equipment uses Forge rank improvements.");
         if ((equipment.Potential ?? 0) < TemperingConstants.PotentialCost)
             throw new InvalidOperationException("Equipment does not have enough Potential.");
 
-        // Tempering is the explicit write boundary that upgrades legacy crafted
-        // items. Read-only combat continues to interpret v15 items unchanged.
-        EquipmentStatModelMigrator.MigrateToCurrent(equipment);
         QuantizeInstanceModifiers(equipment);
 
         var previousPotential = equipment.Potential ?? 0;

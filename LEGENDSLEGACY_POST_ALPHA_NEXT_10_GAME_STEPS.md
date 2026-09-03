@@ -2,22 +2,32 @@
 
 This assessment treats the repository as evidence of the game a player could experience on 31 August 2026. The original assessment remains the design baseline; the dated progress ledger below records implementation completed afterward.
 
-## Beta Preparation Progress — Updated 1 September 2026
+## Beta Preparation Progress — Updated 3 September 2026
 
 ### Current sequence status
 
 | Step | Status | Current interpretation |
 |---:|---|---|
-| 1 | **Implemented; awaiting player validation** | The focused early journey, staged navigation, route restrictions, mobile quest access, and onboarding presentation fixes are in place. Beta acceptance criteria still require an unaided new-player playtest. |
-| 2 | **Next** | Define and implement the three authored level-1-to-30 chapters and their memorable milestones. |
-| 3 | Not started | Four deliberately attainable build identities remain a design and content task. |
+| 1 | **Completed and validated** | The focused early journey, staged navigation, route restrictions, mobile quest access, and onboarding presentation fixes are in place. The owner confirmed the fresh-character acceptance experience on 1 September 2026. |
+| 2 | **Implemented; awaiting player validation** | Three named level-1-to-30 chapters, milestone objectives, area-specific Essence Tokens, an exact-dungeon capstone, and the Beta-complete state are implemented for new quest progress. |
+| 3 | **Next** | Formalize the four deliberately attainable build identities across the curated Beta Essence pool. |
 | 4 | Not started | Chapter teaching encounters and boss capability tests remain to be authored and certified. |
 | 5 | Not started | Combat-result diagnosis and inexpensive experiment/retry support remain outstanding. |
-| 6 | Not started | Build-fit equipment comparisons and the player-facing stat contract remain outstanding. |
-| 7 | Not started; supporting feedback added | Quest completion now produces a durable personal system-chat message, but the wider reward cadence has not been redesigned. |
-| 8 | Not started | The connected gathering/crafting combat project remains outstanding. |
+| 6 | Forge presentation added; wider integration pending | Equipment progression provides canonical stats, reviewed Forge/loadout previews and shared inventory rank/style/binding display. The broader stat contract and remaining client surfaces still need integration. |
+| 7 | Supporting backend work added; integration pending | Quest completion has durable personal system-chat feedback. Equipment progression adds starter/dungeon rewards, recovery and ordinary-combat equipment/Scrap/repeat-sigil income; versioned quest grants are implemented; the integrated reward cadence still needs player validation. |
+| 8 | Equipment loop and Alpha cleanup implemented; wider content/balance pending | Content-earned equipment, deterministic Forge investment and reusable styles replace the gathering/crafting project. Profession actions, queues, old content and compatibility adapters are removed. Later-region coverage and integrated player/balance acceptance remain. |
 | 9 | Not started | Beta-scoped daily intentions remain outstanding. |
 | 10 | Not started | Slice certification, instrumentation, and the pre-Beta feature freeze remain outstanding. |
+
+### Equipment update — 3 September 2026
+
+The selected [equipment progression contract](docs/design/equipment-specification.md) uses content drops, deterministic Forge ranks and reusable Blueprint styles. Gear-selling merchants remain excluded. Build the working loop with provisional values, then balance it; the original gathering/crafting and Quality/Potential recommendations below are historical.
+
+Shenic / Tier 1 and Meran / Tier 2 acquisition, starter and earned-target recovery, Forge investment, protected dungeon rewards, ordinary equipment/Scrap/sigil income, trade and guild equipment are implemented. Current quests and rewards use those systems directly. Alpha data does not need preserving: crafting/gathering, queued tempering, profession storage, obsolete quests/items/bonuses, cohort logic, conversion adapters, refunds and old API/configuration aliases have been removed.
+
+The five equipment capabilities default to enabled. Two cleanup migrations remove obsolete storage and saved quest progress; the latter fixes journals requesting deleted crafting quests or removed quest versions. The API applies pending migrations on startup. The task has not applied them to the game database or deployed anything. See the [cleanup record](docs/design/equipment-post-alpha-cleanup.md) for exact changes and the [status ledger](docs/design/equipment-implementation-status.md) for verification.
+
+The [Meran expansion](docs/design/equipment-region-two-progression.md) adds source, pricing, style and recovery coverage plus tier-transition checks. The first [actual-encounter and Forge pacing assessment](docs/design/equipment-meran-pve-balance-report.md) is complete, including a Tangled Cave III adjustment. Next equipment work is complete dungeon-run acceptance, broader Essence/counter-build progression and authenticated selection/equipment/Forge/reward claiming with reloads. Alpha conversion and compensation are no longer prerequisites. Raid redesign and further LiveOps work remain deferred. Earlier chapter acceptance does not certify the new equipment loop; the ten-step chapter/build roadmap remains the wider Beta plan.
 
 ### Step 1 implementation record
 
@@ -27,7 +37,7 @@ The following player-facing changes now establish the focused Beta journey:
 - Sidebar destinations are progressively revealed from quest and character state instead of presenting the full feature catalog immediately.
 - Direct routes into out-of-slice destinations are guarded while focused Beta mode is enabled. City systems, Prophecies, Tower, raids, region bosses, and Region 2 are outside the early journey; Shenic is intentionally limited beyond level 30.
 - The active quest remains available on constrained/mobile layouts.
-- The focused journey is controlled by `features.focusedBetaJourney` and currently defaults to enabled in the frontend environment and runtime environment templates.
+- The focused journey is controlled by `features.focusedBetaJourney` and defaults to enabled. It progressively reveals the normal game: onboarding essentials first, Prophecies and Colosseum after onboarding, social/character systems through levels 10-20, and the complete original navigation from level 30 onward. Route guards follow the same milestones.
 - An unresolved First Hunt keeps World Map hidden and unhighlighted. The three hunt options receive the attention treatment instead, without suggesting that one has already been selected.
 - First Hunt cards are top-aligned, retain a stable bottom reward row, and use a continuous highlight sweep without an unattractive held end frame.
 - The training fight now opens directly on the combat result. The former two-step combat-summary tour was removed so the normal quest tracker can lead into the next quest.
@@ -56,9 +66,9 @@ Verification completed during Step 1 and its follow-ups:
 - No database migration was introduced.
 - Quest-completion chat reuses the existing `Chat:SystemMessages` configuration. It requires the updated game API/worker service code to be deployed; no deployment was performed during this work.
 
-### Step 1 acceptance gate
+### Step 1 acceptance record
 
-Implementation does not by itself complete the design objective. Step 1 should be considered Beta-validated only after an unaided fresh-character session demonstrates that the player:
+The owner confirmed Step 1 completed and validated on 1 September 2026 after checking the fresh-character experience against the following acceptance criteria:
 
 1. Chooses a First Hunt without attempting to navigate to World Map first.
 2. Understands that all three highlighted cards are available choices and that none is preselected.
@@ -67,7 +77,67 @@ Implementation does not by itself complete the design objective. Step 1 should b
 5. Can state the immediate goal and next unlock after 15 minutes.
 6. Does not encounter an exposed out-of-slice route through navigation or a direct URL.
 
-Until that run is recorded, Step 1 is implemented but not empirically validated.
+No further Step 1 implementation work is required unless later chapter changes regress this journey.
+
+### Step 2 implementation record
+
+The focused Beta journey now uses three versioned authored chapters for new quest progress:
+
+| Chapter | Level band | Visible goal | Named milestone | Deterministic Essence rewards |
+|---|---:|---|---|---|
+| **Chapter I — First Blood** | 1-10 | Establish a first build, cross Lumo and Blood Grove, and reach level 10. | **Break the Goblin Gate:** complete Goblin Mines I and defeat its boss. | Lumo Ruins and Blood Grove Essence Tokens; each selects one of that area's five Essences. |
+| **Chapter II — Resonant Paths** | 11-20 | Identify a weakness, craft an equipment answer, and prove the adapted build in Moonlit Graves. | **Forge an Answer:** craft a Tier 1 equipment item that supports the build. | Crystal Creek and Moonlit Graves Essence Tokens. |
+| **Chapter III — Heart of Shenic** | 21-30 | Refine a three-slot identity through Twilight, Old Forest, and Thornroot. | **The Hollow's Final Trial:** after mastering Thornroot, complete Forgotten Catacombs I and defeat its boss. | Twilight Clearing, Old Forest, and Thornroot Hollow Essence Tokens, plus the explicit Beta-complete moment. |
+
+Implementation details:
+
+- Quest definitions are versioned rather than rewritten in place. New progress receives the area-token contract. Untouched, unselected legacy chapter-choice quests upgrade safely to it; progressed, selected, or completed quests retain the version and rewards they began with.
+- Chapter title, goal, and promised reward are first-class quest-chain data. The Quest Journal displays all three, and Character Overview uses the current chapter title and promised reward in its journey card.
+- First Hunt remains the only quest-level Essence choice. Every Shenic area quest instead awards a bound, area-specific Essence Token; using it from Inventory lets the player select one of all five unbound Essences native to that area. Quest activity no longer pauses for a chapter-reward preselection.
+- **2 September follow-up:** Essence Tokens start with no reward selected in both the Inventory detail panel and item modal. **Open** remains disabled until the player explicitly chooses an Essence. Switching items or closing and reopening the inspector clears the previous token choice. This change is limited to Essence Tokens; Catalyst and Blueprint selection containers retain their existing defaults.
+- Dungeon completion objectives can now target an exact dungeon definition. Goblin Mines I cannot satisfy the Forgotten Catacombs I capstone, or vice versa.
+- Heart of the Hollow is now the level-30 capstone instead of another five-level waiting gate. Completing it changes Character Overview to **Shenic Beta journey complete**, offers build/quest review, and labels later Shenic content as a future aspiration.
+- The completion presentation yields to normal quest guidance as soon as a post-level-30 Shenic chain quest is active, so established characters receive the next concrete objective rather than a permanent terminal card.
+- Levels 35-45 remain a separate **Beyond the Focused Beta** chain so the wider content can remain legible without redefining Beta completion.
+- Generic encounter counts were reduced and reframed around build development. The more specific pressure, vulnerability, and multi-target teaching encounters remain coordinated with Step 4 rather than being simulated with unsupported counters.
+
+Primary implementation evidence:
+
+- `LL/src/API/API.LL/Data/quests/region-01/*.v2.json` and `*.v3.json`
+- `LL/src/Core/Application/UseCases/Inventories/SelectionCrates/CatalystSelectionCrateCatalog.cs`
+- `LL/src/API/API.LL/Data/items/items.json`
+- `LL/src/Core/Application/Interfaces/Services/LL/Quests/IQuestDefinitionProvider.cs`
+- `LL/src/Core/Application/Interfaces/Services/LL/Quests/IQuestService.cs`
+- `LL/src/Infrastructure/Service/Services.LL/Quests/QuestService.cs`
+- `LL/src/Infrastructure/Service/Services.LL/Outbox/QuestGameEventOutboxConsumer.cs`
+- `LL/src/Presentation/ll/src/app/core/services/client-side/player-journey/player-journey.ts`
+- `LL/src/Presentation/ll/src/app/features/game/quests/quest-journal-page.component.html`
+
+Verification completed during Step 2:
+
+- The repository-required backend runner passes all 1,790 tests. Coverage includes full JSON catalog/reference validation, exact dungeon filtering, all ten area-token/quest mappings, each token's five-creature area roster, token consumption granting the selected unbound Essence, and safe upgrading of untouched legacy chapter-choice quests.
+- 10 focused Angular journey and quest-chain tests passed in Chrome Headless.
+- The Angular production build completed successfully; its existing initial-bundle budget warning remains (953.37 kB against a 500 kB warning budget).
+- The full Angular suite compiled and ran 618 tests; 613 passed. Five unrelated `FirstPartyTourService` timing tests timed out during that broad run, so they are recorded as a separate existing test-harness issue rather than a Step 2 regression.
+- No database migration or new configuration setting was introduced.
+
+Essence Token selection follow-up verification — 2 September 2026:
+
+- All **27 focused Inventory and inventory-item-modal tests passed** in Chrome Headless. Regression coverage checks the empty initial selection, no redemption before an explicit choice, successful redemption of the chosen reward, reset on item switching/reopening, and unchanged defaults for other containers.
+- The Angular production build (`ng build`) passed with the existing initial-bundle warning: 953.92 kB against the 500 kB warning budget. `git diff --check` passed.
+- Both views use `LL/src/Presentation/ll/src/app/shared/utils/inventory/selection-container.utils.ts` for the initial-selection rule; their corresponding component specs cover the behavior.
+- This follow-up changes the frontend only. Backend tests were not rerun for it; no migration or configuration change is required. The updated frontend must be served for players to receive the fix; no deployment was performed.
+
+### Step 2 acceptance gate
+
+Step 2 should be considered player-validated after a fresh character demonstrates that:
+
+1. The player can state the current chapter goal and promised reward from Character Overview or the Quest Journal.
+2. Each area token is easy to find and use from Inventory, clearly offers exactly the five Essences native to its area, starts with nothing selected, and keeps **Open** disabled until a deliberate choice. Opening consumes one token and grants one selected unbound Essence; switching items or reopening the inspector does not retain a previous token choice. Check both the detail panel and item modal.
+3. Goblin Mines I and Forgotten Catacombs I are encountered as distinct milestones rather than incidental side activities.
+4. The Chapter II crafting requirement causes a deliberate equipment choice rather than an arbitrary cheapest craft.
+5. Heart of the Hollow reads as the end of the focused journey, and later Shenic content does not feel like the next Beta requirement.
+6. The three chapters support several return sessions without the reduced encounter counts making level gates feel like idle waiting.
 
 ## 1. Direct Executive Assessment
 
@@ -122,7 +192,7 @@ The pre-Alpha assessment in `docs/alpha-release-game-analysis-and-14-day-plan.md
 | Loop | Rating | What works | Break and minimum pre-Beta change |
 |---|---|---|---|
 | Fight → receive XP/cinders/loot → increase power → enter harder area | **Functional but shallow** | Automated combat, offline accrual, capped return rewards, and the session summary create a good idle rhythm. | Area progression mostly changes numbers and enemy pools; the follow-up decision is often simply “wait or equip the higher number.” Give each Beta chapter a named capability test and a reward that prepares the next one. |
-| Defeat creature → acquire Essence → build loadout → test against content | **Strong in concept; confusing in acquisition** | The first guaranteed Essence proves the loop. Eighty active/passive packages, multiple slots, three loadouts, and rich ability mechanics provide depth. | Random 0.01% drops cannot carry the authored first-week arc; ordinary areas do not reliably test specialized answers. Curate 24 Beta Essences and place several deterministic choice rewards. |
+| Defeat creature → acquire Essence → build loadout → test against content | **Strong in concept; acquisition made deliberate through area tokens** | The first guaranteed Essence proves the loop. Area quest tokens now let players choose among the five native Essences after securing each Shenic area, while random drops retain discovery value. | Ordinary areas still need to test specialized answers clearly; Step 3 must make build identities legible across the broader token pools. |
 | Lose/underperform → inspect combat → revise build → retry | **Incomplete** | Per-entity, per-ability, damage-type, healing, barrier, threat, summon, stagger, and W/L data exist. | Data is not translated into a diagnosis or a cheap comparison workflow. Add failure causes, encounter demands, before/after loadout comparison, and a fast retry path. |
 | Gather materials → craft gear → temper it → improve combat | **Disconnected/overcomplicated** | Gathering happens naturally after wins; area abundance and tool choice can make location matter. Armor, weapons, and blueprints can support build identity. | Gathering skill progression is mostly nominal; crafting introduces quality, rarity, Potential, mastery, blueprints, and tempering before the player can judge an upgrade. Make one visible item project connect area, tool, recipe, and combat goal; restrict Beta to Tier 1. |
 | Acquire dungeon access → choose route/Vigor trade-offs → secure or risk rewards | **Strong with targeted improvements** | Forecast maps, 100 Vigor, rests, retreat, pending loot, and first-clear blueprints make this the best active PvE loop. | Failure advice is generic, success/retreat summaries lack route learning, tiers are more scaling than mechanics, and repeat rewards vary. Include only both Region-1 families at Difficulty I and make their tests and rewards distinct. |
@@ -171,7 +241,7 @@ The most important missing link is not another loop. It is the connective senten
 
 #### Implementation Status
 
-**Implemented on 1 September 2026; awaiting the Step 1 acceptance playtest.** See the progress ledger above for the shipped scope, verification, and remaining validation gate. The problem statement below is retained as the baseline this implementation is intended to solve.
+**Completed and player-validated on 1 September 2026.** See the progress ledger and acceptance record above. The problem statement below is retained as the baseline this implementation solved.
 
 #### Current Problem
 
@@ -223,6 +293,10 @@ Every subsequent Beta observation will be confounded by players entering the wro
 
 ### Step 2 — Levels 1-30 Form Three Authored Chapters With Memorable Milestones
 
+#### Implementation Status
+
+**Implemented on 1 September 2026; awaiting the Step 2 acceptance playtest.** See the implementation record above for the chapter contract, shipped scope, compatibility behavior, verification, and remaining player-validation gate. Capability-specific teaching encounters are intentionally coordinated with Step 4.
+
 #### Current Problem
 
 After onboarding, Shenic progression frequently asks for a number of encounter wins plus the next five character levels. The areas change, but the player's reason for advancing does not. The final available path then leads toward a multiplayer gate rather than a satisfying solo culmination.
@@ -252,7 +326,7 @@ Regions, areas, quests, encounters, rewards, character overview, unlock messagin
 
 #### Minimum Beta-Ready Version
 
-Three chapters, one named milestone per chapter, one meaningful choice reward in each, and one level-30 capstone. Existing areas and enemies should be reused wherever possible.
+Three chapters, one named milestone per chapter, one area-specific Essence Token per secured area, and one level-30 capstone. Existing areas and enemies should be reused wherever possible.
 
 #### How Beta Should Validate It
 
@@ -292,7 +366,7 @@ By level 10 a player has chosen a direction; by level 20 they have made a synerg
 
 - Curate 24 Essences for the slice and hide out-of-slice/undiscovered catalog clutter.
 - Support four named but flexible directions: physical burst/tempo, magical control/damage-over-time, sustain/barrier, and summon/attrition.
-- Give deterministic choice rewards at chapter milestones and bounded targeted pursuits through creature focus or quests.
+- Use the implemented area-specific Essence Tokens for deterministic acquisition, supplemented by bounded targeted pursuits through creature focus or quests.
 - Add build-role and synergy language derived from actual ability mechanics; do not rely on empty Essence tags.
 - Treat leveling and at most the first ascension as progression; exclude evolution from Beta claims.
 - Ensure no early choice permanently prevents switching direction.
@@ -492,7 +566,7 @@ Every milestone produces one of four readable outcomes: a new capability, a choi
 #### Required Game Changes
 
 - Define the level-1-to-30 reward cadence before adjusting individual values.
-- Use chapter rewards for Essence choices, build-supporting blueprints/items, the first ascension, and dungeon access.
+- Use area quest rewards for Essence Tokens, and chapter milestones for build-supporting blueprints/items, the first ascension, and dungeon access.
 - Reduce visible Beta currencies; postpone or convert out-of-slice rewards.
 - Give repeat dungeons a modest targeted reason to run without making them mandatory.
 - Show “this advances…” on material/currency gains and let the player pin a goal.
@@ -523,6 +597,8 @@ Beta will report that progress feels either stingy or cluttered, but the feedbac
 **Large.** It crosses most progression data, but the small Beta boundary prevents an economy-wide rebalance.
 
 ### Step 8 — Gathering and Crafting Complete One Visible Combat-Equipment Project
+
+**Superseded on 2 September 2026:** the owner selected equipment progression's content acquisition → equip → deterministic Forge investment → reusable style loop. The original proposal below is retained as assessment history. Its replacement now includes ordinary-combat acquisition, versioned quests, earned recovery, the Forge screen, core profession/combat retirement and personal Prophecy/achievement retirement. Guild/shared rewards and six obsolete Soulstone refunds are now implemented. The sigil overlap is resolved with cohort-specific income and Sigil Traces refunds. Remaining reward consumers, later-region coverage and conversion remain before activation; balancing follows implementation. See the equipment update above and its linked implementation ledger.
 
 #### Current Problem
 
@@ -684,7 +760,7 @@ The first Beta should be a **self-contained Shenic level-1-to-30 campaign**, del
 | Bosses | Hobgoblin Warden and The Bound Wraith as the two dungeon tests, plus one curated solo level-30 capstone encounter using an existing fitting enemy/mechanic where possible. Three lesson/milestone elites precede them. |
 | Equipment tiers | Tier 1 only. Tier 2 is neither required nor visible as an actionable Beta goal. |
 | Rarity and quality | Common through Epic should be realistically attainable. Crude through Exceptional qualities should occur naturally; Masterwork may remain a rare aspirational result, not an expected balance state. Unique, Legendary, and Legacy are outside the certified slice. |
-| Essences | Exactly 24 obtainable/visible Essences, including the three First Hunt choices. Curate six candidates around each of four overlapping directions; an Essence may support more than one direction. |
+| Essences | The three First Hunt choices plus the five-Essence pool for every Shenic area, exposed deliberately through one bound area token per area quest. Step 3 should organize these broader pools around four overlapping, legible build directions. |
 | Viable directions | Four: physical burst/tempo; magical control/DoT; sustain/barrier; summon/attrition. Hybrids are welcome, but Beta certification guarantees these four readable starting identities. |
 | Essence progression | Levels and no more than the first ascension. Focus may support bounded targeting after it is taught. Evolution is excluded; full codex optimization is not a Beta goal. Four equipped slots at level 30 are enough to test synergy without the endgame's 20 simultaneous ability effects. |
 | World Tower | Not included. Its population requirements and incomplete validation make it a separate future multiplayer test. It must not gate any Beta content. |
@@ -762,8 +838,8 @@ Do not use the first Beta to answer Tower raid composition, endgame PvP balance,
 
 | Order | Step | Player Problem Solved | Core Systems Affected | Must Be Completed Before Beta? | Beta Validation |
 |---:|---|---|---|---|---|
-| 1 | One coherent guided journey — implemented, validate next | Too many equal destinations obscure the core | Navigation, onboarding, overview, unlocks | Yes | Players state and follow the primary goal unaided |
-| 2 | Three authored level-1-to-30 chapters | Progress feels like repeated counters and levels | Quests, regions, encounters, rewards | Yes | Players remember milestones and sustain multi-day goals |
+| 1 | One coherent guided journey — completed and validated | Too many equal destinations obscure the core | Navigation, onboarding, overview, unlocks | Yes | Players state and follow the primary goal unaided |
+| 2 | Three authored level-1-to-30 chapters — implemented, validate next | Progress feels like repeated counters and levels | Quests, regions, encounters, rewards | Yes | Players remember milestones and sustain multi-day goals |
 | 3 | Four deliberately attainable build identities | Random acquisition and catalog breadth prevent intentional builds | Essences, drops, Soul Archive, quests | Yes | Distinct builds emerge and players explain them |
 | 4 | Teach demands before bosses test them | General power dominates specialization | Enemies, areas, bosses, dungeons, balance | Yes | Players recognize mechanics and adapt |
 | 5 | Actionable loss diagnosis and cheap retry | Players cannot learn confidently from experiments | Combat results, stats, loadouts, retry | Yes | Relevant change follows a loss |
@@ -773,7 +849,7 @@ Do not use the first Beta to answer Tower raid composition, endgame PvP balance,
 | 9 | Optional, aligned daily intentions | Recurring tasks risk obligation and scope mismatch | Prophecies, rewards, return flow | Yes, if Prophecies remain visible | Players choose goals without feeling forced |
 | 10 | Certify, observe, and freeze the slice | Gross traps and unfocused testing would waste Beta | Balance, content, progression, feedback | Yes | Beta can answer the defined design questions |
 
-1. **The single most important remaining change before Beta:** Turn levels 1-30 into three authored build-test-adapt chapters now that the focused journey shell is implemented.
+1. **The single most important remaining change before Beta:** Make the four intended combat identities deliberately attainable and legible through the new area-token choices now that the three-chapter structure is implemented.
 2. **The most serious weakness currently hidden by the game's large feature set:** The game lacks an authored cadence of consequential decisions and specialized challenges after its strong opening tutorial.
 3. **The strongest existing part of the game that should receive more focus:** Essence active/passive buildcraft, supported by automated combat and unusually rich performance telemetry.
 4. **The system most likely to require simplification:** The combined equipment/crafting presentation—especially percentage semantics, rarity, quality, Potential, blueprints, and tempering before the player can judge build fit.
@@ -782,4 +858,4 @@ Do not use the first Beta to answer Tower raid composition, endgame PvP balance,
 7. **The largest unanswered game-design question:** Will players form an emotional and strategic attachment to an Essence-based build when acquisition is deliberate and content actually asks that build to adapt?
 8. **The exact purpose the first Beta should have:** Validate that a new player can understand, construct, test, revise, and become attached to a distinctive four-Essence character across a satisfying multi-day Shenic progression arc, with equipment and crafting reinforcing that arc.
 9. **The point at which Beta preparation should stop and testing should begin:** When an unaided new-player run can complete the level-1-to-30 slice; all four certified directions can clear its six milestone encounters and two dungeons without a compulsory option; rewards and losses are understood; and every outside system is hidden or clearly unavailable. Do not wait for perfect balance or more content.
-10. **The next concrete action:** Run the Step 1 fresh-character acceptance session, record any blockers, then write the Step 2 level-1-to-30 content contract listing the seven areas, three chapters, six milestone encounters, two dungeons, 24 Essences, four build directions, and milestone rewards. Keep out-of-slice systems hidden while that contract is implemented.
+10. **The next concrete action:** Run the Step 2 fresh-character chapter acceptance session, record pacing and reward-choice observations, then proceed to Step 3's four-build-identity contract using the now-fixed chapter reward points. Keep the Step 4 encounter scripting and Step 7 reward-economy pass coordinated with those choices.

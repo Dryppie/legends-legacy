@@ -122,7 +122,7 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
             facts.ProcessedUntil,
             facts.Area.Id,
             facts.Area.Name,
-            facts.EquippedTool?.GatheringType.ToString(),
+            null,
             outcome.TotalLoot,
             outcome.TotalCinders,
             outcome.TotalSoulstones,

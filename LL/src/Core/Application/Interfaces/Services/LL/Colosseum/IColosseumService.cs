@@ -67,7 +67,7 @@ public interface IColosseumService
     Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
     Task<ArenaDefenseSnapshot?> UpdateDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken);
     Task<ArenaDefenseSnapshot?> GetArenaDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken);
-    IReadOnlyList<ChampionMarketItem> GetChampionMarketItems();
+    Task<IReadOnlyList<ChampionMarketItem>> GetChampionMarketItemsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(Guid characterId, string itemId, int quantity, CancellationToken cancellationToken);
     Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken);
 

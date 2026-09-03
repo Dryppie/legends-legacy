@@ -5,6 +5,7 @@ using Application.MediatR.Synchronization;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
+using Domain.Models.Essences;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -482,6 +483,11 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             yield return StateSyncScopes.Prophecies;
         }
 
+        if (HasEssenceProgressMutation(characterId))
+        {
+            yield return StateSyncScopes.Essences;
+        }
+
         if (profile.InventoryWhenChanged)
         {
             // Quest, event-quest, and achievement progress is applied later by
@@ -509,6 +515,15 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             && _db.GetEntry(character).State is EntityState.Added
                 or EntityState.Modified
                 or EntityState.Deleted);
+
+    private bool HasEssenceProgressMutation(Guid characterId) =>
+        _db.PlayerEssences.Local
+            .Where(essence => essence.CharacterId == characterId)
+            .Select(essence => _db.GetEntry(essence))
+            .Any(entry => entry.State == EntityState.Modified
+                && (entry.Property(nameof(PlayerEssence.CurrentXp)).IsModified
+                    || entry.Property(nameof(PlayerEssence.Level)).IsModified
+                    || entry.Property(nameof(PlayerEssence.AscensionTier)).IsModified));
 
     private bool HasInventoryMutation(Guid characterId) =>
         _db.InventoryItems.Local.Any(item =>

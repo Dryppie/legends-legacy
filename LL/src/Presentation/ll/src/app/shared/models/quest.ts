@@ -105,8 +105,7 @@ export const SOUL_ARCHIVE_QUEST_ID = 'quest.onboarding.soul_archive';
 export const FIRST_WEAPON_QUEST_ID = 'quest.onboarding.first_weapon';
 export const TOOLS_OF_THE_TRADE_QUEST_ID = 'quest.onboarding.tools_of_trade';
 export const INTO_LUMO_RUINS_QUEST_ID = 'quest.region01.into_lumo_ruins';
-export const HEART_OF_THE_HOLLOW_QUEST_ID =
-  'quest.shenic.heart_of_the_hollow';
+export const HEART_OF_THE_HOLLOW_QUEST_ID = 'quest.shenic.heart_of_the_hollow';
 export const TRAINING_GROUNDS_AREA_ID = 'tutorial_area_training_grounds';
 export const LUMO_RUINS_AREA_ID = 'region_01_area_01';
 export const ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS: ReadonlySet<string> =

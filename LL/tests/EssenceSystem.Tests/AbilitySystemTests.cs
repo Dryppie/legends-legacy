@@ -7815,6 +7815,40 @@ public sealed class AbilitySystemTests
             && log.EventType == EventType.Buff);
     }
 
+    [Theory]
+    [InlineData("plain.staff", DamageType.Magical)]
+    [InlineData("plain.longbow", DamageType.Physical)]
+    public async Task Frozen_model_e_weapon_uses_its_attack_behavior_without_recipe_lookup(string definitionId, DamageType expectedDamageType)
+    {
+        var catalog = Services.LL.Items.JsonStarterEquipmentCatalog.Load(
+            Path.Combine(FindApiContentRoot(), "Data", "equipment", "equipment-starters.v1.json"));
+        var runtime = CreateTrainingEncounterRuntime(out var character, out _);
+        var state = Domain.Models.Items.Equipments.Progression.EquipmentState.Award(
+            Guid.NewGuid(), catalog.Evaluator, definitionId, 1, 0,
+            new(Domain.Models.Items.Equipments.Progression.EquipmentAwardKind.QuestReward, "test", Guid.NewGuid().ToString()),
+            new(Domain.Models.Items.Equipments.Progression.EquipmentOwnershipKind.BoundPersonal, character.Id));
+        var data = Domain.Models.Items.Equipments.Progression.EquipmentData.Create(state, catalog.Evaluator);
+        var equipment = new EquipmentInstance
+        {
+            Id = state.Id, ItemBaseId = data.ItemBaseId,
+            ItemBase = new EquipmentBase { Id = data.ItemBaseId, Name = data.DisplayName, EquipmentType = data.EquipmentType }
+        };
+        equipment.ApplyProgressionData(Domain.Models.Items.Equipments.Progression.EquipmentData.Deserialize(data.Serialize()));
+        var friendly = runtime.FriendlyParticipants.Single().Combatant;
+        friendly.EquippedEssences.Clear();
+        friendly.MainHandEquipment = equipment;
+        friendly.Equipment = [equipment];
+        IncreaseMaxHealth(friendly, 10_000);
+        IncreaseMaxHealth(runtime.HostileParticipants.Single().Combatant, 10_000);
+        var executor = new CombatEngineExecutor(new JsonAbilityCatalogProvider(CreateConfig(), FindApiContentRoot(), CreateJsonOptions()));
+        var result = await executor.ExecuteSimulationAsync(runtime,
+            new CombatRuleset(RandomSeed: 123, MaxTicks: 10, BasicAttackIntervalTicks: 1), CancellationToken.None);
+        var attacks = result.EventLog.Where(log => log.ActorId == friendly.Id && log.Source == "Basic Attack"
+            && log.EventType == EventType.Damage).ToArray();
+        Assert.NotEmpty(attacks);
+        Assert.All(attacks, attack => Assert.Equal(expectedDamageType, attack.DamageType));
+    }
+
     [Fact]
     public void Ability_catalog_diagnostics_runs_training_encounter()
     {

@@ -1,0 +1,587 @@
+{
+  "balanceVersion": 1,
+  "baseTierBudget": 100,
+  "styleShare": 0.15,
+  "rankIncrement": 0.04,
+  "items": [
+    {
+      "id": "plain.heavy_helm",
+      "itemBaseId": "heavy_helm",
+      "name": "Heavy Helm",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Heavy"
+      },
+      "statWeights": {
+        "Armor": 0.35,
+        "MaxHealth": 0.35,
+        "Resistance": 0.3
+      }
+    },
+    {
+      "id": "plain.medium_helm",
+      "itemBaseId": "medium_helm",
+      "name": "Medium Helm",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Medium"
+      },
+      "statWeights": {
+        "Armor": 0.25,
+        "MaxHealth": 0.25,
+        "CritChance": 0.25,
+        "CritDamage": 0.25
+      }
+    },
+    {
+      "id": "plain.light_hood",
+      "itemBaseId": "light_hood",
+      "name": "Light Hood",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Light"
+      },
+      "statWeights": {
+        "MaxHealth": 0.25,
+        "HealthRegeneration": 0.25,
+        "DodgeChance": 0.25,
+        "AttackSpeed": 0.25
+      }
+    },
+    {
+      "id": "plain.cloth_cowl",
+      "itemBaseId": "cloth_cowl",
+      "name": "Cloth Cowl",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Cloth"
+      },
+      "statWeights": {
+        "Resistance": 0.25,
+        "HealthRegeneration": 0.25,
+        "HealingPowerPercent": 0.25,
+        "Cooldown": 0.25
+      }
+    },
+    {
+      "id": "plain.heavy_breastplate",
+      "itemBaseId": "heavy_breastplate",
+      "name": "Heavy Breastplate",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Heavy"
+      },
+      "statWeights": {
+        "Armor": 0.35,
+        "MaxHealth": 0.35,
+        "Resistance": 0.3
+      }
+    },
+    {
+      "id": "plain.medium_mail",
+      "itemBaseId": "medium_mail",
+      "name": "Medium Mail",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Medium"
+      },
+      "statWeights": {
+        "Armor": 0.25,
+        "MaxHealth": 0.25,
+        "CritChance": 0.25,
+        "CritDamage": 0.25
+      }
+    },
+    {
+      "id": "plain.light_vest",
+      "itemBaseId": "light_vest",
+      "name": "Light Vest",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Light"
+      },
+      "statWeights": {
+        "MaxHealth": 0.25,
+        "HealthRegeneration": 0.25,
+        "DodgeChance": 0.25,
+        "AttackSpeed": 0.25
+      }
+    },
+    {
+      "id": "plain.cloth_robe",
+      "itemBaseId": "cloth_robe",
+      "name": "Cloth Robe",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Cloth"
+      },
+      "statWeights": {
+        "Resistance": 0.25,
+        "HealthRegeneration": 0.25,
+        "HealingPowerPercent": 0.25,
+        "Cooldown": 0.25
+      }
+    },
+    {
+      "id": "plain.heavy_legplates",
+      "itemBaseId": "heavy_legplates",
+      "name": "Heavy Legplates",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Heavy"
+      },
+      "statWeights": {
+        "Armor": 0.35,
+        "MaxHealth": 0.35,
+        "Resistance": 0.3
+      }
+    },
+    {
+      "id": "plain.medium_greaves",
+      "itemBaseId": "medium_greaves",
+      "name": "Medium Greaves",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Medium"
+      },
+      "statWeights": {
+        "Armor": 0.25,
+        "MaxHealth": 0.25,
+        "CritChance": 0.25,
+        "CritDamage": 0.25
+      }
+    },
+    {
+      "id": "plain.light_leggings",
+      "itemBaseId": "light_leggings",
+      "name": "Light Legwraps",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Light"
+      },
+      "statWeights": {
+        "MaxHealth": 0.25,
+        "HealthRegeneration": 0.25,
+        "DodgeChance": 0.25,
+        "AttackSpeed": 0.25
+      }
+    },
+    {
+      "id": "plain.cloth_pants",
+      "itemBaseId": "cloth_pants",
+      "name": "Cloth Pants",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Cloth"
+      },
+      "statWeights": {
+        "Resistance": 0.25,
+        "HealthRegeneration": 0.25,
+        "HealingPowerPercent": 0.25,
+        "Cooldown": 0.25
+      }
+    },
+    {
+      "id": "plain.band",
+      "itemBaseId": "band",
+      "name": "Ring",
+      "equipmentType": "Ring",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 1
+      }
+    },
+    {
+      "id": "plain.amulet",
+      "itemBaseId": "amulet",
+      "name": "Amulet",
+      "equipmentType": "Necklace",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "MaxHealth": 1
+      }
+    },
+    {
+      "id": "plain.vial",
+      "itemBaseId": "vial",
+      "name": "Relic",
+      "equipmentType": "Relic",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "HealthRegeneration": 1
+      }
+    },
+    {
+      "id": "plain.shortsword",
+      "itemBaseId": "shortsword",
+      "name": "Shortsword",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "CritChance": 0.3
+      }
+    },
+    {
+      "id": "plain.dagger",
+      "itemBaseId": "dagger",
+      "name": "Dagger",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "AttackSpeed": 0.3
+      }
+    },
+    {
+      "id": "plain.hatchet",
+      "itemBaseId": "hatchet",
+      "name": "Hand Axe",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "CritDamage": 0.3
+      }
+    },
+    {
+      "id": "plain.mace",
+      "itemBaseId": "mace",
+      "name": "Mace",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "ArmorPenetration": 0.3
+      }
+    },
+    {
+      "id": "plain.wand",
+      "itemBaseId": "wand",
+      "name": "Wand",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Magical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "MagicPenetration": 0.3
+      }
+    },
+    {
+      "id": "plain.greatsword",
+      "itemBaseId": "greatsword",
+      "name": "Greatsword",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "CritChance": 0.3
+      }
+    },
+    {
+      "id": "plain.battle_axe",
+      "itemBaseId": "battle_axe",
+      "name": "Battle Axe",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "CritDamage": 0.3
+      }
+    },
+    {
+      "id": "plain.maul",
+      "itemBaseId": "maul",
+      "name": "Maul",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "ArmorPenetration": 0.3
+      }
+    },
+    {
+      "id": "plain.spear",
+      "itemBaseId": "spear",
+      "name": "Spear",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "AttackSpeed": 0.3
+      }
+    },
+    {
+      "id": "plain.staff",
+      "itemBaseId": "staff",
+      "name": "Staff",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Magical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "MagicPenetration": 0.3
+      }
+    },
+    {
+      "id": "plain.longbow",
+      "itemBaseId": "longbow",
+      "name": "Longbow",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "CritChance": 0.3
+      }
+    },
+    {
+      "id": "plain.crossbow",
+      "itemBaseId": "crossbow",
+      "name": "Crossbow",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "ArmorPenetration": 0.3
+      }
+    },
+    {
+      "id": "plain.gauntlets",
+      "itemBaseId": "gauntlets",
+      "name": "Gauntlets",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "AttackSpeed": 0.3
+      }
+    },
+    {
+      "id": "plain.towershield",
+      "itemBaseId": "towershield",
+      "name": "Towershield",
+      "equipmentType": "OffHand",
+      "behavior": {
+        "handedness": "OffHand",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Towershield"
+      },
+      "statWeights": {
+        "MaxHealth": 0.35,
+        "BlockChance": 0.35,
+        "Armor": 0.3
+      }
+    },
+    {
+      "id": "plain.spiritward",
+      "itemBaseId": "Spiritward",
+      "name": "Spiritward",
+      "equipmentType": "OffHand",
+      "behavior": {
+        "handedness": "OffHand",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Spiritward"
+      },
+      "statWeights": {
+        "MaxHealth": 0.35,
+        "BlockChance": 0.35,
+        "Resistance": 0.3
+      }
+    },
+    {
+      "id": "plain.grimoire",
+      "itemBaseId": "grimoire",
+      "name": "Grimoire",
+      "equipmentType": "OffHand",
+      "behavior": {
+        "handedness": "OffHand",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Grimoire"
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "Cooldown": 0.3
+      }
+    }
+  ],
+  "maximumTier": 2
+}

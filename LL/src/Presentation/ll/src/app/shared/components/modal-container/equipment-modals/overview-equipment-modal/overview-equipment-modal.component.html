@@ -31,7 +31,7 @@
             }}
           </span>
           <span class="ll-item-chip ll-item-chip-accent">
-            {{ currentEquippedEquipment.quality }}
+            {{ currentEquippedEquipment.progression ? 'Rank ' + currentEquippedEquipment.progression.rank : currentEquippedEquipment.quality }}
           </span>
         </div>
       </div>
@@ -83,7 +83,7 @@
                 {{ equipment.equipmentBase.equipmentType | equipmentType }}
               </span>
               <span class="ll-item-chip ll-item-chip-accent">
-                {{ equipment.quality }}
+                {{ equipment.progression ? 'Rank ' + equipment.progression.rank : equipment.quality }}
               </span>
             </div>
           </div>

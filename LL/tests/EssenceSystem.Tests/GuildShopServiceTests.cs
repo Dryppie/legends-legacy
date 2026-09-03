@@ -15,27 +15,27 @@ using Services.LL.Inventories;
 
 namespace EssenceSystem.Tests;
 
-public sealed class GuildShopServiceTests
+public sealed partial class GuildShopServiceTests
 {
     [Fact]
     public void Default_stock_prioritizes_progression_resources_and_blueprints()
     {
         var content = new DefaultGuildContentProvider();
 
-        var commonCatalysts = content.ShopItems
-            .Where(x => x.RotationGroup == "common-catalysts")
+        var commonScraps = content.ShopItems
+            .Where(x => x.RotationGroup == "common-scrap")
             .ToList();
         var soulstoneReserve = content.ShopItems.Single(x => x.Key == "common.soulstone_cache");
         var fragmentCase = content.ShopItems.Single(x => x.Key == "common.sigil_fragment_case");
-        var rareCatalysts = content.ShopItems
-            .Where(x => x.RotationGroup == "rare-catalysts")
+        var rareScraps = content.ShopItems
+            .Where(x => x.RotationGroup == "rare-scrap")
             .ToList();
         var blueprints = content.ShopItems
             .Where(x => x.RotationGroup == "rare-blueprints")
             .ToList();
 
-        Assert.Equal(5, commonCatalysts.Count);
-        Assert.All(commonCatalysts, item =>
+        Assert.Equal(5, commonScraps.Count);
+        Assert.All(commonScraps, item =>
         {
             Assert.Equal(GuildShopStockType.Common, item.StockType);
             Assert.Equal(100, item.GuildFavorCost);
@@ -44,8 +44,8 @@ public sealed class GuildShopServiceTests
         });
         Assert.Contains(soulstoneReserve.Rewards, x => x.Type == GuildShopRewardType.Soulstones && x.Amount == 25);
         Assert.Contains(fragmentCase.Rewards, x => x.Type == GuildShopRewardType.SigilFragments && x.Amount == 10);
-        Assert.Equal(5, rareCatalysts.Count);
-        Assert.All(rareCatalysts, item =>
+        Assert.Equal(5, rareScraps.Count);
+        Assert.All(rareScraps, item =>
         {
             Assert.Equal(GuildShopStockType.Rare, item.StockType);
             Assert.Equal(250, item.GuildFavorCost);
@@ -131,7 +131,7 @@ public sealed class GuildShopServiceTests
     }
 
     [Fact]
-    public async Task Common_catalyst_cache_grants_two_stackable_crafting_materials()
+    public async Task Common_scrap_cache_grants_two_stackable_tempered_scrap()
     {
         await using var db = CreateDbContext();
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
@@ -140,16 +140,16 @@ public sealed class GuildShopServiceTests
         var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
-        var catalystCache = overview!.Items.First(x =>
+        var scrapCache = overview!.Items.First(x =>
             x.StockType == GuildShopStockType.Common
-            && x.Key.EndsWith("_catalyst_cache"));
-        var reward = Assert.Single(catalystCache.Rewards);
+            && x.Key.Contains(".scrap_cache_"));
+        var reward = Assert.Single(scrapCache.Rewards);
         db.ItemBases.Add(CreateResource(reward.Key!, reward.Name!));
         await db.SaveChangesAsync();
 
         var result = await service.PurchaseAsync(
             characterId,
-            catalystCache.Key,
+            scrapCache.Key,
             now,
             CancellationToken.None);
 
@@ -164,7 +164,7 @@ public sealed class GuildShopServiceTests
     }
 
     [Fact]
-    public async Task Catalyst_cache_merges_into_an_existing_stack()
+    public async Task Scrap_cache_merges_into_an_existing_stack()
     {
         await using var db = CreateDbContext();
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
@@ -173,10 +173,10 @@ public sealed class GuildShopServiceTests
         var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
-        var catalystCache = overview!.Items.First(x =>
+        var scrapCache = overview!.Items.First(x =>
             x.StockType == GuildShopStockType.Common
-            && x.Key.EndsWith("_catalyst_cache"));
-        var reward = Assert.Single(catalystCache.Rewards);
+            && x.Key.Contains(".scrap_cache_"));
+        var reward = Assert.Single(scrapCache.Rewards);
         var itemBase = CreateResource(reward.Key!, reward.Name!);
         db.ItemBases.Add(itemBase);
         db.InventoryItems.Add(new InventoryItem
@@ -194,7 +194,7 @@ public sealed class GuildShopServiceTests
 
         var result = await service.PurchaseAsync(
             characterId,
-            catalystCache.Key,
+            scrapCache.Key,
             now,
             CancellationToken.None);
         await db.SaveChangesAsync();
@@ -211,7 +211,7 @@ public sealed class GuildShopServiceTests
     }
 
     [Fact]
-    public async Task Common_stock_offers_two_of_five_rotating_catalyst_caches()
+    public async Task Common_stock_offers_two_of_five_rotating_scrap_caches()
     {
         await using var db = CreateDbContext();
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
@@ -224,7 +224,7 @@ public sealed class GuildShopServiceTests
         {
             var overview = await service.GetOverviewAsync(characterId, now.AddDays(7 * week), CancellationToken.None);
             var keys = overview!.Items
-                .Where(x => x.StockType == GuildShopStockType.Common && x.Key.EndsWith("_catalyst_cache"))
+                .Where(x => x.StockType == GuildShopStockType.Common && x.Key.Contains(".scrap_cache_"))
                 .Select(x => x.Key)
                 .OrderBy(x => x)
                 .ToList();
@@ -237,7 +237,7 @@ public sealed class GuildShopServiceTests
     }
 
     [Fact]
-    public async Task Level_five_adds_a_second_rotating_rare_catalyst_cache()
+    public async Task Level_five_adds_a_second_rotating_rare_scrap_cache()
     {
         await using var db = CreateDbContext();
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
@@ -247,7 +247,7 @@ public sealed class GuildShopServiceTests
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
-        Assert.Equal(2, overview!.Items.Count(x => x.Key.EndsWith("_catalyst_cache") && x.StockType == GuildShopStockType.Rare));
+        Assert.Equal(2, overview!.Items.Count(x => x.Key.Contains(".scrap_cache_") && x.StockType == GuildShopStockType.Rare));
     }
 
     private static LLDbContext CreateDbContext()

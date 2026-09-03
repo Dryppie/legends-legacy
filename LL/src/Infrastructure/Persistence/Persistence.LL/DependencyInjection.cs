@@ -1,4 +1,4 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Domain.Models.Achievements;
 using Domain.Models.Administration;
@@ -53,8 +53,6 @@ using Persistence.LL.Repositories.Items;
 using Persistence.LL.Repositories.Leaderboards;
 using Persistence.LL.Repositories.MarketPlaces;
 using Persistence.LL.Repositories.Outbox;
-using Persistence.LL.Repositories.Professions;
-using Persistence.LL.Repositories.Professions.Craftings;
 using Persistence.LL.Repositories.Prophecies;
 using Persistence.LL.Repositories.Quests;
 using Persistence.LL.Repositories.Regions;
@@ -111,8 +109,13 @@ public static class DependencyInjection
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEconomyLedgerRepository, EconomyLedgerRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IStarterEquipmentRepository, StarterEquipmentRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IForgeRepository, ForgeRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentAcquisitionRepository, EquipmentAcquisitionRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.ICombatAcquisitionRepository, CombatAcquisitionRepository>();
         services.AddScoped<IEssenceRepository, EssenceRepository>();
 
+        services.AddScoped<Domain.Models.Guilds.IGuildVaultRepository, Persistence.LL.Repositories.Guilds.GuildVaultRepository>();
         services.AddScoped<IGuildRepository, GuildRepository>();
 
         services.AddScoped<ILeaderboardRepository, LeaderboardRepository>();
@@ -125,10 +128,10 @@ public static class DependencyInjection
 
         services.AddScoped<IRegionRepository, RegionRepository>();
 
-        services.AddScoped<IProfessionRepository, ProfessionRepository>();
-        services.AddScoped<ICraftingRepository, CraftingRepository>();
         services.AddScoped<IProphecyRepository, ProphecyRepository>();
         services.AddScoped<IQuestRepository, QuestRepository>();
+        services.AddScoped<Application.Interfaces.Services.LL.Quests.IQuestEquipmentRewardRepository, QuestEquipmentRewardRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IPlainEquipmentRepository, PlainEquipmentRepository>();
         services.AddScoped<IEventQuestRepository, EventQuestRepository>();
 
         services.AddScoped<IPlayerRepository, PlayerRepository>();

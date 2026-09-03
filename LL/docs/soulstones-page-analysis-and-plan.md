@@ -1,5 +1,29 @@
 # Soulstones Page Analysis and Plan
 
+## Current implementation — 3 September 2026
+
+This document's original analysis below describes an older Soulstone catalog and remains historical. Its 100-level upgrades, old IDs, costs and proposed fixes are not the current implementation or the next equipment progression milestone. The current source is [progression/soulstone-upgrades.json](../src/API/API.LL/Data/progression/soulstone-upgrades.json); the [equipment progression implementation ledger](../../docs/design/equipment-implementation-status.md) records current verification and remaining work.
+
+The current catalog has 14 constellations with five ranks each. For characters in the saved equipment progression quest cohort, seven remain active and these seven are retired:
+
+| Branch | Retired constellations |
+| --- | --- |
+| Gathering | Careful Harvest, Gathering Lessons, Rare Node Sense |
+| Crafting | Crafting Lessons, Steady Temper, Blueprint Study |
+| Dungeons | Sigil Traces |
+
+Unowned retired constellations are hidden. Owned ranks remain visible with no active effect and their refund value; purchase and bonus guards enforce retirement on the backend. Active-progress counts exclude retired ranks. Legacy characters retain their catalog and bonuses.
+
+The [versioned refund mapping](../src/API/API.LL/Data/equipment/equipment-soulstones.v1.json) records the seven current IDs and their historical per-rank costs: `25, 75, 150, 300, 600`. Cumulative refunds for ranks 1–5 are `25, 100, 250, 550, 1150`. These mappings do not cover the different IDs from the older analysis below; unknown historical upgrades still require explicit conversion decisions.
+
+`POST soulstoneUpgrade/RefundRetired` removes only mapped retired ranks and credits their refund in the character-locked command transaction. Retries cannot credit the same ranks again. The page provides a separate confirmation so active upgrades remain intact. Full Reset also uses these mappings for retired ranks. Reading the archive does not trigger a refund or conversion.
+
+Persistence now belongs to [SoulstoneUpgradeRepository](../src/Infrastructure/Persistence/Persistence.LL/Repositories/Soulstones/SoulstoneUpgradeRepository.cs); the service uses the existing command transaction pipeline. The client view adds `isRetired`, and refund responses use the existing Soulstone/character state revisions.
+
+Sigil Traces remains active for legacy characters. Equipment progression now earns ordinary sigils only through its selected-family counter; no additional random roll occurs, and its Sigil Traces ranks are inactive and refundable. Existing sigils and partial deterministic progress are retained. No constellation branching redesign or new bonus system is included. All six equipment progression activation flags remain off, and six earlier equipment progression migrations remain unapplied; this change adds no schema migration.
+
+## Historical analysis
+
 ## Scope
 
 This document analyzes the Soulstones page, its upgrade definitions, and the backend paths that make those upgrades meaningful.
@@ -8,7 +32,7 @@ Primary areas reviewed:
 
 - Angular page and card components under `LL/src/Presentation/ll/src/app/features/game/character/soulstone-archive/`
 - Angular state/API services under `LL/src/Presentation/ll/src/app/core/services/api/soulstone-upgrade/`
-- Upgrade definitions in `LL/src/API/API.LL/Data/soulstone-upgrades.json`
+- Upgrade definitions in `LL/src/API/API.LL/Data/progression/soulstone-upgrades.json`
 - API boundary in `LL/src/API/API.LL/Controllers/V1/SoulstoneUpgradeController.cs`
 - Upgrade purchase/reset logic in `LL/src/Infrastructure/Service/Services.LL/Soulstones/SoulstoneUpgradeService.cs`
 - Bonus projection in `LL/src/Infrastructure/Service/Services.LL/Bonuses/SoulstoneBonusProvider.cs`

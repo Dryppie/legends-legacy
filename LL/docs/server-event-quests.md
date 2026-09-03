@@ -1,5 +1,7 @@
 # Server-wide event quests
 
+> Content update, 3 September 2026: only the expired Defense of Lumo example remains in Data/event-quests. The former crafting/tempering and gathering events were deleted; no schedule was extended. Descriptions of those events below are historical. Further LiveOps work is deferred. See the [current quest flow](../../LEGENDSLEGACY_QUEST_FLOW.md#4-scheduled-server-wide-event-quests).
+
 Server-wide event quests are scheduled, content-driven quests where every character in the current Legends Legacy database contributes toward shared objectives. The first implementation deliberately treats one deployed database as one game server. If realms are introduced later, add a `RealmId` to each event quest persistence key and audience.
 
 ## What is implemented

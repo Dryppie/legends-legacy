@@ -1,3 +1,5 @@
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Achievements.Dtos;
@@ -132,7 +134,8 @@ public sealed class AchievementService : IAchievementService
 
         var characterName = character?.Name ?? "Character";
         var titles = await _repository.GetActiveTitlesAsync(cancellationToken);
-        var requirementAmountsByAchievement = (await _repository.GetActiveDefinitionsAsync(cancellationToken))
+        var definitions = await _repository.GetActiveDefinitionsAsync(cancellationToken);
+        var requirementAmountsByAchievement = definitions
             .ToDictionary(x => x.Key, x => x.RequirementAmount, StringComparer.OrdinalIgnoreCase);
         var unlocks = await _repository.GetTitleUnlocksAsync(accountId, characterId, cancellationToken);
 
@@ -290,7 +293,8 @@ public sealed class AchievementService : IAchievementService
             return [];
         }
 
-        var definitions = (await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken)).ToList();
+        var definitions = (await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken))
+            .ToList();
 
         definitions = definitions
             .Where(x => TargetMatches(x.RequirementTarget, requirementTarget))
@@ -636,115 +640,6 @@ public sealed class AchievementService : IAchievementService
             cancellationToken: cancellationToken);
     }
 
-    public async Task RecordItemsCraftedAsync(
-        Guid characterId,
-        IReadOnlyCollection<EquipmentInstance> craftedItems,
-        int? craftingMasteryLevel,
-        CancellationToken cancellationToken)
-    {
-        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
-        if (accountId == Guid.Empty || craftedItems.Count == 0)
-        {
-            return;
-        }
-
-        await AddProgressAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.ItemsCrafted,
-            craftedItems.Count,
-            cancellationToken: cancellationToken);
-
-        var setItemCount = craftedItems.Count(IsSetItem);
-        if (setItemCount > 0)
-        {
-            await AddProgressAsync(
-                accountId,
-                characterId,
-                AchievementRequirementType.SetItemsCrafted,
-                setItemCount,
-                cancellationToken: cancellationToken);
-        }
-
-        await RecordUniqueItemVariantsAsync(accountId, characterId, craftedItems, cancellationToken);
-
-        if (craftingMasteryLevel is > 0)
-        {
-            await AddProgressAsync(
-                accountId,
-                characterId,
-                AchievementRequirementType.CraftingMasteryLevelReached,
-                craftingMasteryLevel.Value,
-                setToMax: true,
-                cancellationToken: cancellationToken);
-        }
-    }
-
-    public async Task RecordItemsTemperedAsync(
-        Guid characterId,
-        TemperingSummary summary,
-        IReadOnlyCollection<EquipmentInstance> completedItems,
-        CancellationToken cancellationToken)
-    {
-        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
-        if (accountId == Guid.Empty)
-        {
-            return;
-        }
-
-        if (summary.TotalActions > 0)
-        {
-            await AddProgressAsync(
-                accountId,
-                characterId,
-                AchievementRequirementType.ItemsTempered,
-                summary.TotalActions,
-                cancellationToken: cancellationToken);
-        }
-
-        if (summary.Masterpieces > 0)
-        {
-            await AddProgressAsync(
-                accountId,
-                characterId,
-                AchievementRequirementType.MasterpiecesCrafted,
-                summary.Masterpieces,
-                cancellationToken: cancellationToken);
-        }
-
-        if (summary.CursedOutcomes > 0)
-        {
-            await AddProgressAsync(
-                accountId,
-                characterId,
-                AchievementRequirementType.CursedCraftingOutcomes,
-                summary.CursedOutcomes,
-                cancellationToken: cancellationToken);
-        }
-
-        var highQualityUnlocks = await CompleteHighQualityLowPotentialAchievementsAsync(
-            accountId,
-            characterId,
-            completedItems,
-            cancellationToken);
-        await PublishUnlockAnnouncementsAsync(characterId, highQualityUnlocks, cancellationToken);
-    }
-
-    public async Task RecordBlueprintUnlockedAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
-        if (accountId == Guid.Empty)
-        {
-            return;
-        }
-
-        await AddProgressAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.BlueprintsUnlocked,
-            cancellationToken: cancellationToken);
-    }
-
     public async Task RecordCharacterCreatedAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
@@ -907,7 +802,6 @@ public sealed class AchievementService : IAchievementService
             cancellationToken: cancellationToken));
 
         await RecalculateEssenceProgressAsync(accountId, characterId, unlocks, cancellationToken);
-        await RecalculateCraftingProgressAsync(accountId, characterId, unlocks, cancellationToken);
         await RecalculateDungeonProgressAsync(accountId, characterId, unlocks, cancellationToken);
         await RecalculateColosseumProgressAsync(accountId, characterId, unlocks, cancellationToken);
         await RecalculateAdditionalProgressAsync(accountId, characterId, unlocks, cancellationToken);
@@ -1013,133 +907,6 @@ public sealed class AchievementService : IAchievementService
             setToMax: true,
             syncLegacyProgress: false,
             cancellationToken: cancellationToken));
-    }
-
-    private async Task RecalculateCraftingProgressAsync(
-        Guid accountId,
-        Guid characterId,
-        List<AchievementUnlockDto> unlocks,
-        CancellationToken cancellationToken)
-    {
-        var blueprintUnlocks = await _repository.GetBlueprintUnlockCountAsync(characterId, cancellationToken);
-
-        unlocks.AddRange(await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.BlueprintsUnlocked,
-            blueprintUnlocks,
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken));
-
-        var equipment = await _repository.GetOwnedEquipmentAsync(characterId, cancellationToken);
-
-        var craftedItems = equipment
-            .Where(x => !string.IsNullOrWhiteSpace(x.BaseRecipeId))
-            .ToList();
-
-        unlocks.AddRange(await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.ItemsCrafted,
-            craftedItems.Count,
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken));
-
-        unlocks.AddRange(await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.MasterpiecesCrafted,
-            craftedItems.Count(x => x.IsMasterpiece),
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken));
-
-        unlocks.AddRange(await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.SetItemsCrafted,
-            craftedItems.Count(IsSetItem),
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken));
-
-        var uniqueVariantCount = craftedItems
-            .Select(x => $"{x.BaseRecipeId}\u001f{x.BlueprintId}")
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Count();
-        unlocks.AddRange(await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.UniqueItemVariantsCrafted,
-            uniqueVariantCount,
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken));
-
-        unlocks.AddRange(await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.CraftingMasteryLevelReached,
-            await _repository.GetMaxCraftingMasteryLevelAsync(characterId, cancellationToken),
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken));
-
-        unlocks.AddRange(await CompleteHighQualityLowPotentialAchievementsAsync(
-            accountId,
-            characterId,
-            craftedItems,
-            cancellationToken));
-    }
-
-    private async Task RecordUniqueItemVariantsAsync(
-        Guid accountId,
-        Guid characterId,
-        IReadOnlyCollection<EquipmentInstance> craftedItems,
-        CancellationToken cancellationToken)
-    {
-        var definitions = await _repository.GetActiveDefinitionsAsync(
-            AchievementRequirementType.UniqueItemVariantsCrafted,
-            cancellationToken);
-        var definition = definitions.FirstOrDefault();
-        if (definition is null)
-        {
-            return;
-        }
-
-        var progress = await _repository.GetProgressAsync(
-            accountId,
-            definition.Scope == AchievementScope.Character ? characterId : null,
-            definition.Id,
-            null,
-            cancellationToken);
-        var variants = new HashSet<string>(
-            string.IsNullOrWhiteSpace(progress?.MetadataJson)
-                ? []
-                : JsonSerializer.Deserialize<HashSet<string>>(progress.MetadataJson) ?? [],
-            StringComparer.OrdinalIgnoreCase);
-
-        // Preserve progress created before variant identities were recorded.
-        for (var index = variants.Count; index < (progress?.CurrentAmount ?? 0); index++)
-        {
-            variants.Add($"legacy:{index}");
-        }
-
-        foreach (var item in craftedItems.Where(x => !string.IsNullOrWhiteSpace(x.BaseRecipeId)))
-        {
-            variants.Add($"{item.BaseRecipeId}\u001f{item.BlueprintId}");
-        }
-
-        await AddProgressAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.UniqueItemVariantsCrafted,
-            variants.Count,
-            setToMax: true,
-            metadataJson: JsonSerializer.Serialize(variants),
-            cancellationToken: cancellationToken);
     }
 
     private async Task RecalculateDungeonProgressAsync(
@@ -1347,7 +1114,8 @@ public sealed class AchievementService : IAchievementService
         int? seasonId,
         CancellationToken cancellationToken)
     {
-        var definitions = await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken);
+        var definitions = (await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken))
+            .ToList();
 
         var now = DateTimeOffset.UtcNow;
         foreach (var definition in definitions.Where(x => TargetMatches(x.RequirementTarget, requirementTarget)))
@@ -1588,53 +1356,6 @@ public sealed class AchievementService : IAchievementService
             }
 
             unlocks.AddRange(passUnlocks);
-        }
-
-        return unlocks;
-    }
-
-    private async Task<IReadOnlyList<AchievementUnlockDto>> CompleteHighQualityLowPotentialAchievementsAsync(
-        Guid accountId,
-        Guid characterId,
-        IReadOnlyCollection<EquipmentInstance> items,
-        CancellationToken cancellationToken)
-    {
-        var bestMatch = items
-            .Where(x => x.Quality >= ItemQuality.Exceptional && x.Potential.HasValue)
-            .OrderBy(x => x.Potential!.Value)
-            .FirstOrDefault();
-        if (bestMatch is null)
-        {
-            return [];
-        }
-
-        var definitions = await _repository.GetActiveDefinitionsAsync(
-            AchievementRequirementType.HighQualityItemCraftedBelowPotential,
-            cancellationToken);
-
-        var now = DateTimeOffset.UtcNow;
-        var unlocks = new List<AchievementUnlockDto>();
-        foreach (var definition in definitions.Where(x => bestMatch.Potential!.Value < x.RequirementAmount))
-        {
-            var scopedCharacterId = definition.Scope == AchievementScope.Character ? (Guid?)characterId : null;
-            var progress = await GetOrCreateProgressAsync(accountId, scopedCharacterId, definition, null, now, cancellationToken);
-            if (progress.IsCompleted && !definition.IsRepeatable)
-            {
-                continue;
-            }
-
-            progress.CurrentAmount = definition.RequirementAmount;
-            progress.UpdatedAt = now;
-            var unlock = await CompleteAchievementAsync(progress, definition, characterId, now, cancellationToken);
-            if (unlock is not null)
-            {
-                unlocks.Add(unlock);
-            }
-        }
-
-        if (unlocks.Count > 0)
-        {
-            unlocks.AddRange(await SyncDependentAchievementProgressAsync(accountId, characterId, cancellationToken));
         }
 
         return unlocks;

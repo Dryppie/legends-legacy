@@ -1,0 +1,65 @@
+{
+  "id": "quest.shenic.between_day_and_night",
+  "version": 4,
+  "title": "Between Day and Night",
+  "summary": "Carry your three-slot build into permanent dusk and prepare it for Shenic's final descent.",
+  "category": "Shenic",
+  "chain": {
+    "id": "chain.shenic.chapter_03",
+    "title": "Chapter III — Heart of Shenic",
+    "description": "Refine your chosen identity through Twilight and the Old Forest, then clear the Hollow's Final Trial.",
+    "goal": "Reach level 30, master Thornroot Hollow, and clear Forgotten Catacombs I.",
+    "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
+    "step": 1,
+    "totalSteps": 3
+  },
+  "sortOrder": 140,
+  "objectiveMode": "All",
+  "availability": {
+    "minimumLevel": 20,
+    "completedQuestIds": [
+      "quest.shenic.restless_dead"
+    ]
+  },
+  "objectives": [
+    {
+      "key": "break_the_twilight",
+      "description": "Win 5 encounters in Twilight Clearing with your three-slot build.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 5,
+      "filters": {
+        "areaId": "region_01_area_06",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Twilight Clearing",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_06"
+      }
+    },
+    {
+      "key": "reach_level_25",
+      "description": "Reach character level 25 to unlock Old Forest.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 25,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    {
+      "key": "twilight_clearing_essence_token",
+      "type": "Item",
+      "itemBaseId": "item.essence_token.twilight_clearing",
+      "quantity": 1
+    },
+    {
+      "key": "area_scrap",
+      "type": "Item",
+      "itemBaseId": "tempered_scrap",
+      "quantity": 2
+    }
+  ]
+}

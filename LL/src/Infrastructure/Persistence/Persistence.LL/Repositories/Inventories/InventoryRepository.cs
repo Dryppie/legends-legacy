@@ -206,6 +206,8 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken)
     {
+        if (item.ItemInstance is EquipmentInstance { ProgressionData: { } data } equipment && data.State.Ownership.OwnerId != characterId)
+            equipment.TransferEquipmentProgressionToCharacter(data.State.Ownership.OwnerId, characterId);
         if (!item.ItemInstance.ItemBase.Stackable)
         {
             item.Quantity = 1;
@@ -445,7 +447,7 @@ public class InventoryRepository : IInventoryRepository
             x => x.BorrowedByCharacterId == characterId && parsedGuids.Contains(x.EquipmentInstanceId),
             cancellationToken))
             return null;
-        if (equipmentInventoryItems.Any(i => i.ItemInstance is not EquipmentInstance))
+        if (equipmentInventoryItems.Any(i => i.ItemInstance is not EquipmentInstance || i.ItemInstance is EquipmentInstance { HasEquipmentProgression: true }))
         {
             return null;
         }
@@ -564,7 +566,9 @@ public class InventoryRepository : IInventoryRepository
 
         if (senderItem?.ItemInstance?.ItemBase is null)
             return InventoryTransferResult.Fail(InventoryTransferFailure.ItemNotFound);
-        if (senderItem.ItemInstance.ItemBase.IsBound)
+        if (senderItem.ItemInstance is EquipmentInstance { ProgressionData: { } data } && data.State.Ownership.OwnerId != senderCharacterId)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.ItemNotFound);
+        if (senderItem.ItemInstance.IsBound)
             return InventoryTransferResult.Fail(InventoryTransferFailure.ItemIsBound);
         if (!senderItem.ItemInstance.ItemBase.Stackable && quantity != 1)
             return InventoryTransferResult.Fail(InventoryTransferFailure.NonStackableQuantity);
@@ -610,6 +614,8 @@ public class InventoryRepository : IInventoryRepository
             return InventoryTransferResult.Fail(InventoryTransferFailure.AccountRestricted);
 
         var itemBase = senderItem.ItemInstance.ItemBase;
+        if (senderItem.ItemInstance is EquipmentInstance equipment)
+            equipment.TransferEquipmentProgressionToCharacter(senderCharacterId, recipientCharacterId);
         InventoryItem recipientItem;
 
         if (itemBase.Stackable)

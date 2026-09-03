@@ -13,6 +13,14 @@ Production administration is handled through a separate LiveOps control plane:
 
 The security boundary is the API and its server-side authorization. Hiding a web dashboard is not an authorization mechanism.
 
+## Equipment progression compensation implementation — 3 September 2026
+
+Equipment compensation now follows the recipient's saved equipment progression cohort. The supported path requires a canonical definition, tier, rank and compatible active style. Each item is personally bound, carries Administrative provenance and starts with zero base salvage and no paid investment receipts. A granted style does not teach its Blueprint. Grants are limited to 100 individual equipment instances; valid resource grants retain the existing quantity limit.
+
+The options, preview and submission routes retain the EconomyCompensation permission. Exact preview parameters and evaluated state are checked before delivery, including interrupted submissions. Inventory, economy and audit records retain the operation ID; the audit records the frozen equipment descriptor and instance IDs. Identical retries do not grant again, while changed equipment parameters conflict. Item-base-only legacy gear and authored retired materials/catalysts/caches are rejected for equipment progression; operators must select a supported replacement resource explicitly.
+
+The standalone API now packages the canonical equipment and validated quest inputs and registers the saved-cohort policy. Future deployments must align equipment progression configuration with the game for recipients without saved quest progress. No new migration, activation or deployment accompanies this change. Broader equipment/protection/investment inspection and legacy conversion remain open. See the [equipment progression ledger](design/equipment-implementation-status.md) for files and verification.
+
 ## Architecture
 
 ```mermaid

@@ -19,7 +19,7 @@ export function essenceDustLevelingDescription(
       : `Level ${level} / ${levelCap}. Maximum Essence level reached.`;
   }
 
-  return `1 Dust grants 1 level. Level ${level} / ${levelCap}. You have ${dustHeld} Dust.`;
+  return `1 Dust grants the current level's full XP requirement. Excess XP carries over until the level cap. Level ${level} / ${levelCap}. You have ${dustHeld} Dust.`;
 }
 
 export function essenceDustActionLabel(

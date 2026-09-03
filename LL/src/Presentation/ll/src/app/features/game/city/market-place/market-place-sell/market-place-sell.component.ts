@@ -32,7 +32,10 @@ import { ItemComponent } from '../../../../../shared/components/item/item.compon
 import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
-import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
+import {
+  marketplaceEquipmentSummary,
+  marketplaceItemIsBound,
+} from '../../../../../shared/utils/market-place/marketplace-equipment';
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
   isMarketplaceBlueprintResource,
@@ -114,11 +117,9 @@ export class MarketPlaceSellComponent implements OnInit {
       this.qtyCtrl.updateValueAndValidity({ emitEvent: false });
     });
 
-    effect(
-      () => {
-        this.myListings.set(this.marketplaceState.myListings());
-      },
-    );
+    effect(() => {
+      this.myListings.set(this.marketplaceState.myListings());
+    });
 
     this.setActiveTab(this.tabs[0]?.label || '');
   }
@@ -242,7 +243,11 @@ export class MarketPlaceSellComponent implements OnInit {
   });
 
   selectItem(item: InventoryItem) {
-    if (!isMarketplaceTradableItemBase(item.itemInstance.itemBase)) return;
+    if (
+      !isMarketplaceTradableItemBase(item.itemInstance.itemBase) ||
+      marketplaceItemIsBound(item.itemInstance)
+    )
+      return;
 
     this.pendingItem.set(item);
     this.selectedItemId = item.itemInstance.id;
@@ -305,6 +310,7 @@ export class MarketPlaceSellComponent implements OnInit {
     return (
       !!pending &&
       isMarketplaceTradableItemBase(pending.itemInstance.itemBase) &&
+      !marketplaceItemIsBound(pending.itemInstance) &&
       !this.hasOwnBuyOrderForPendingItem() &&
       !this.hasOwnSellListingForPendingItem() &&
       !this.priceCtrl.invalid &&
@@ -320,9 +326,9 @@ export class MarketPlaceSellComponent implements OnInit {
     });
   }
 
-  listingQuality(listing: MarketPlaceListing): ItemQuality | null {
+  listingEquipmentSummary(listing: MarketPlaceListing): string | null {
     return listing.itemInstance.itemBase.itemType === ItemType.Equipment
-      ? (listing.itemInstance as EquipmentInstance).quality
+      ? marketplaceEquipmentSummary(listing.itemInstance)
       : null;
   }
 
@@ -379,6 +385,7 @@ export class MarketPlaceSellComponent implements OnInit {
     return items.filter(
       (item) =>
         isMarketplaceTradableItemBase(item.itemInstance.itemBase) &&
+        !marketplaceItemIsBound(item.itemInstance) &&
         this.matchesSelectedCategory(item.itemInstance.itemBase),
     );
   }

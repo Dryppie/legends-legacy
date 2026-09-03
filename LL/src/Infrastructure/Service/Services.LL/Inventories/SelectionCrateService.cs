@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.UseCases.Inventories.SelectionCrates;
 using Domain.Models.Items;

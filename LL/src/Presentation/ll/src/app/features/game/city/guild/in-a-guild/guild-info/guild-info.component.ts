@@ -232,7 +232,7 @@ export class GuildInfoComponent implements OnInit, OnChanges {
 
   get confirmMessage(): string {
     if (this.confirmAction === 'disband') {
-      return 'Are you sure you want to disband your guild? This action cannot be undone.';
+      return 'Are you sure you want to disband your guild? All donated equipment, including borrowed and equipped items, will be destroyed. This action cannot be undone.';
     }
     if (this.confirmAction === 'kick') {
       return `Are you sure you want to kick ${this.pendingKickMember?.name ?? 'this member'} from the guild?`;

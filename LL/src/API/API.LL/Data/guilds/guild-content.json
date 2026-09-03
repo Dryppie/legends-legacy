@@ -20,7 +20,7 @@
         {
           "level": 2,
           "title": "Support Buildings",
-          "description": "Workshop and Treasury become available.",
+          "description": "Treasury becomes available.",
           "isImplemented": true
         },
         {
@@ -81,14 +81,14 @@
       "maxLevel": 5,
       "isPermanent": false,
       "requiredGuildHallLevel": 1,
-      "unlockSummary": "Unlocks rotating common catalysts and rare stock by level.",
+      "unlockSummary": "Unlocks rotating Tempered Scrap caches, currencies and reusable-style Blueprints by level.",
       "baseCost": 150,
       "upgradeCostStep": 125,
       "benefits": [
         {
           "level": 1,
           "title": "Common Stock",
-          "description": "Two recipe catalyst caches rotate weekly alongside Soulstone reserves.",
+          "description": "Two common Tempered Scrap caches rotate weekly alongside Soulstone reserves.",
           "isImplemented": true
         },
         {
@@ -100,19 +100,19 @@
         {
           "level": 3,
           "title": "Rare Stock",
-          "description": "Rare supplies and one rotating six-catalyst cache become available.",
+          "description": "Rare supplies and one rotating Tempered Scrap cache become available.",
           "isImplemented": true
         },
         {
           "level": 4,
           "title": "Blueprint Archive",
-          "description": "One rotating Blueprint becomes available each week.",
+          "description": "One rotating reusable-style Blueprint becomes available each week.",
           "isImplemented": true
         },
         {
           "level": 5,
           "title": "Expanded Rare Stock",
-          "description": "A second rotating rare catalyst cache becomes available each week.",
+          "description": "A second rotating rare Tempered Scrap cache becomes available each week.",
           "isImplemented": true
         }
       ]
@@ -187,43 +187,6 @@
           "level": 5,
           "title": "Season Strategy",
           "description": "Planned support for seasonal war progression.",
-          "isImplemented": false
-        }
-      ]
-    },
-    {
-      "type": "Workshop",
-      "name": "Workshop",
-      "description": "Supports crafting-focused guild progression.",
-      "maxLevel": 5,
-      "isPermanent": false,
-      "requiredGuildHallLevel": 2,
-      "unlockSummary": "Adds crafting-flavored mission and shop support.",
-      "baseCost": 175,
-      "upgradeCostStep": 150,
-      "benefits": [
-        {
-          "level": 1,
-          "title": "Craft Orders",
-          "description": "Crafting and tempering guild orders can appear from the data-driven order pool.",
-          "isImplemented": true
-        },
-        {
-          "level": 2,
-          "title": "Workshop Stock",
-          "description": "Workshop-themed shop stock can be configured through guild content data.",
-          "isImplemented": true
-        },
-        {
-          "level": 3,
-          "title": "Supply Efficiency",
-          "description": "Planned support for crafting-related Guild Supply bonuses.",
-          "isImplemented": false
-        },
-        {
-          "level": 5,
-          "title": "Masterwork Support",
-          "description": "Planned support for high-tier crafting objectives.",
           "isImplemented": false
         }
       ]
@@ -360,13 +323,13 @@
       "baseTarget": 1000
     },
     {
-      "id": "d9a3f2d8-3a97-4e16-80fe-496d87afea70",
-      "key": "weekly.craftsmens_commission",
-      "name": "Craftsmen's Commission",
-      "description": "Complete tempering actions together as a guild.",
-      "category": "Crafting",
-      "metric": "TemperingActionsCompleted",
-      "baseTarget": 432000
+      "id": "3062cb4d-7c85-494a-89f2-4a9c6d0d1a96",
+      "key": "weekly.essence_stewardship",
+      "name": "Essence Stewardship",
+      "description": "Absorb essences together as a guild.",
+      "category": "Essence",
+      "metric": "EssencesAbsorbed",
+      "baseTarget": 100
     },
     {
       "id": "683a9d85-8d9c-4750-b9c7-e89f8b2b9b61",
@@ -398,117 +361,117 @@
       "baseTarget": 5
     },
     {
-      "id": "c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2",
-      "key": "daily.tempering_actions",
-      "name": "Temper the Arsenal",
-      "description": "Complete 20 tempering actions.",
-      "category": "Crafting",
-      "metric": "TemperingActionsCompleted",
-      "baseTarget": 20
+      "id": "f5774b7b-fdf9-4791-ab35-e025339dcc62",
+      "key": "daily.dungeon_completion",
+      "name": "Finish the Expedition",
+      "description": "Complete a dungeon run.",
+      "category": "Dungeon",
+      "metric": "DungeonsCompleted",
+      "baseTarget": 1
     },
     {
-      "id": "73254589-f56f-470b-9944-aa4d3a03322e",
-      "key": "daily.items_crafted",
-      "name": "Stock the Workshop",
-      "description": "Craft 5 items.",
-      "category": "Crafting",
-      "metric": "ItemsCrafted",
-      "baseTarget": 5
+      "id": "0171138e-654b-455b-9a81-8b681210ce76",
+      "key": "daily.essence_absorption",
+      "name": "Strengthen the Soul",
+      "description": "Absorb an essence.",
+      "category": "Essence",
+      "metric": "EssencesAbsorbed",
+      "baseTarget": 1
     }
   ],
   "shopItems": [
     {
-      "key": "common.fury_catalyst_cache",
-      "name": "Fury Catalyst Cache",
-      "description": "Two Fury Catalysts for Fury Blueprint recipes.",
+      "key": "common.scrap_cache_1",
+      "name": "Common Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
       "requiredMarketOfficeLevel": 1,
       "rotatesWeekly": true,
-      "rotationGroup": "common-catalysts",
+      "rotationGroup": "common-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 2,
-          "key": "fury_heart",
-          "name": "Fury Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "common.arcane_catalyst_cache",
-      "name": "Arcane Catalyst Cache",
-      "description": "Two Arcane Catalysts for Arcane Blueprint recipes.",
+      "key": "common.scrap_cache_2",
+      "name": "Common Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
       "requiredMarketOfficeLevel": 1,
       "rotatesWeekly": true,
-      "rotationGroup": "common-catalysts",
+      "rotationGroup": "common-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 2,
-          "key": "arcane_focus",
-          "name": "Arcane Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "common.venom_catalyst_cache",
-      "name": "Venom Catalyst Cache",
-      "description": "Two Venom Catalysts for Venom Blueprint recipes.",
+      "key": "common.scrap_cache_3",
+      "name": "Common Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
       "requiredMarketOfficeLevel": 1,
       "rotatesWeekly": true,
-      "rotationGroup": "common-catalysts",
+      "rotationGroup": "common-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 2,
-          "key": "venom_gland",
-          "name": "Venom Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "common.hive_catalyst_cache",
-      "name": "Hive Catalyst Cache",
-      "description": "Two Hive Catalysts for Hive Blueprint recipes.",
+      "key": "common.scrap_cache_4",
+      "name": "Common Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
       "requiredMarketOfficeLevel": 1,
       "rotatesWeekly": true,
-      "rotationGroup": "common-catalysts",
+      "rotationGroup": "common-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 2,
-          "key": "royal_chitin_plate",
-          "name": "Hive Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "common.primal_catalyst_cache",
-      "name": "Primal Catalyst Cache",
-      "description": "Two Primal Catalysts for Primal Blueprint recipes.",
+      "key": "common.scrap_cache_5",
+      "name": "Common Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Common",
       "guildFavorCost": 100,
       "weeklyLimit": 2,
       "requiredMarketOfficeLevel": 1,
       "rotatesWeekly": true,
-      "rotationGroup": "common-catalysts",
+      "rotationGroup": "common-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 2,
-          "key": "hive_ichor",
-          "name": "Primal Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
@@ -522,7 +485,12 @@
       "requiredMarketOfficeLevel": 1,
       "rotatesWeekly": false,
       "rotationGroup": null,
-      "rewards": [{ "type": "Soulstones", "amount": 25 }]
+      "rewards": [
+        {
+          "type": "Soulstones",
+          "amount": 25
+        }
+      ]
     },
     {
       "key": "common.sigil_fragment_case",
@@ -534,7 +502,12 @@
       "requiredMarketOfficeLevel": 2,
       "rotatesWeekly": false,
       "rotationGroup": null,
-      "rewards": [{ "type": "SigilFragments", "amount": 10 }]
+      "rewards": [
+        {
+          "type": "SigilFragments",
+          "amount": 10
+        }
+      ]
     },
     {
       "key": "rare.soulstone_bundle",
@@ -546,7 +519,12 @@
       "requiredMarketOfficeLevel": 3,
       "rotatesWeekly": false,
       "rotationGroup": null,
-      "rewards": [{ "type": "Soulstones", "amount": 50 }]
+      "rewards": [
+        {
+          "type": "Soulstones",
+          "amount": 50
+        }
+      ]
     },
     {
       "key": "rare.sigilwright_cache",
@@ -558,107 +536,112 @@
       "requiredMarketOfficeLevel": 3,
       "rotatesWeekly": false,
       "rotationGroup": null,
-      "rewards": [{ "type": "SigilFragments", "amount": 30 }]
-    },
-    {
-      "key": "rare.fury_catalyst_cache",
-      "name": "Rare Fury Catalyst Cache",
-      "description": "Six Fury Catalysts for Fury Blueprint recipes.",
-      "stockType": "Rare",
-      "guildFavorCost": 250,
-      "weeklyLimit": 1,
-      "requiredMarketOfficeLevel": 3,
-      "rotatesWeekly": true,
-      "rotationGroup": "rare-catalysts",
       "rewards": [
         {
-          "type": "Item",
-          "amount": 6,
-          "key": "fury_heart",
-          "name": "Fury Catalyst"
+          "type": "SigilFragments",
+          "amount": 30
         }
       ]
     },
     {
-      "key": "rare.arcane_catalyst_cache",
-      "name": "Rare Arcane Catalyst Cache",
-      "description": "Six Arcane Catalysts for Arcane Blueprint recipes.",
+      "key": "rare.scrap_cache_1",
+      "name": "Rare Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
       "requiredMarketOfficeLevel": 3,
       "rotatesWeekly": true,
-      "rotationGroup": "rare-catalysts",
+      "rotationGroup": "rare-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 6,
-          "key": "arcane_focus",
-          "name": "Arcane Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "rare.venom_catalyst_cache",
-      "name": "Rare Venom Catalyst Cache",
-      "description": "Six Venom Catalysts for Venom Blueprint recipes.",
+      "key": "rare.scrap_cache_2",
+      "name": "Rare Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
       "requiredMarketOfficeLevel": 3,
       "rotatesWeekly": true,
-      "rotationGroup": "rare-catalysts",
+      "rotationGroup": "rare-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 6,
-          "key": "venom_gland",
-          "name": "Venom Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "rare.hive_catalyst_cache",
-      "name": "Rare Hive Catalyst Cache",
-      "description": "Six Hive Catalysts for Hive Blueprint recipes.",
+      "key": "rare.scrap_cache_3",
+      "name": "Rare Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
       "requiredMarketOfficeLevel": 3,
       "rotatesWeekly": true,
-      "rotationGroup": "rare-catalysts",
+      "rotationGroup": "rare-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 6,
-          "key": "royal_chitin_plate",
-          "name": "Hive Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
-      "key": "rare.primal_catalyst_cache",
-      "name": "Rare Primal Catalyst Cache",
-      "description": "Six Primal Catalysts for Primal Blueprint recipes.",
+      "key": "rare.scrap_cache_4",
+      "name": "Rare Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
       "stockType": "Rare",
       "guildFavorCost": 250,
       "weeklyLimit": 1,
       "requiredMarketOfficeLevel": 3,
       "rotatesWeekly": true,
-      "rotationGroup": "rare-catalysts",
+      "rotationGroup": "rare-scrap",
       "rewards": [
         {
           "type": "Item",
           "amount": 6,
-          "key": "hive_ichor",
-          "name": "Primal Catalyst"
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
+        }
+      ]
+    },
+    {
+      "key": "rare.scrap_cache_5",
+      "name": "Rare Scrap Cache",
+      "description": "Tempered Scrap for equipment improvements at the Forge.",
+      "stockType": "Rare",
+      "guildFavorCost": 250,
+      "weeklyLimit": 1,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-scrap",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 6,
+          "key": "tempered_scrap",
+          "name": "Tempered Scrap"
         }
       ]
     },
     {
       "key": "rare.blueprint_fury",
       "name": "Blueprint: Fury",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -677,7 +660,7 @@
     {
       "key": "rare.blueprint_arcane",
       "name": "Blueprint: Arcane",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -696,7 +679,7 @@
     {
       "key": "rare.blueprint_execution",
       "name": "Blueprint: Execution",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -715,7 +698,7 @@
     {
       "key": "rare.blueprint_aegis",
       "name": "Blueprint: Aegis",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -734,7 +717,7 @@
     {
       "key": "rare.blueprint_warden",
       "name": "Blueprint: Warden",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -753,7 +736,7 @@
     {
       "key": "rare.blueprint_endurance",
       "name": "Blueprint: Endurance",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -772,7 +755,7 @@
     {
       "key": "rare.blueprint_phoenix",
       "name": "Blueprint: Phoenix",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -791,7 +774,7 @@
     {
       "key": "rare.blueprint_spirit",
       "name": "Blueprint: Spirit",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -810,7 +793,7 @@
     {
       "key": "rare.blueprint_primal",
       "name": "Blueprint: Primal",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -829,7 +812,7 @@
     {
       "key": "rare.blueprint_venom_touched_sword",
       "name": "Blueprint: Venom-Touched Sword",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,
@@ -848,7 +831,7 @@
     {
       "key": "rare.blueprint_hivefang_dagger",
       "name": "Blueprint: Hivefang Dagger",
-      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "description": "Learn a reusable equipment style in Equipment & Forge.",
       "stockType": "Rare",
       "guildFavorCost": 450,
       "weeklyLimit": 1,

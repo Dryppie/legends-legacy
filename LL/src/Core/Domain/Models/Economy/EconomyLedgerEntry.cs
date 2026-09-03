@@ -10,7 +10,9 @@ public enum EconomyEventType
     GuildVaultDonation,
     GuildVaultBorrow,
     GuildVaultReturn,
-    GuildVaultWithdrawal
+    GuildVaultWithdrawal,
+    EquipmentForge,
+    QuestReward
 }
 
 public enum EconomyAssetType

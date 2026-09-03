@@ -8,7 +8,9 @@
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,
-    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+    "completedQuestIds": [
+      "quest.region01.into_lumo_ruins"
+    ]
   },
   "objectives": [
     {
@@ -24,6 +26,11 @@
     }
   ],
   "rewards": [
-    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 10 }
+    {
+      "key": "soul_dust",
+      "type": "Item",
+      "itemBaseId": "soul_dust",
+      "quantity": 10
+    }
   ]
 }

@@ -10,7 +10,7 @@ using Persistence.LL;
 using Persistence.LL.Repositories.Economy;
 using Services.LL.Guilds;
 
-public sealed class GuildVaultWithdrawalTests
+public sealed partial class GuildVaultWithdrawalTests
 {
     [Fact]
     public async Task WithdrawAsync_AllowsLeaderAndTransfersEquipmentToInventory()
@@ -181,7 +181,7 @@ public sealed class GuildVaultWithdrawalTests
     }
 
     private static GuildVaultService CreateService(LLDbContext db) =>
-        new(db, new EconomyLedgerRepository(db));
+        new(new Persistence.LL.Repositories.Guilds.GuildVaultRepository(db), new EconomyLedgerRepository(db));
 
     private static async Task<SeededVault> SeedVaultAsync(
         LLDbContext db,

@@ -2,7 +2,6 @@ import { Route, Routes } from '@angular/router';
 import { DASHBOARD_ROUTES } from '../../layout/dashboard/dashboard.routes';
 import { CHARACTER_ROUTES } from '../../features/game/character/character.routes';
 import { CITY_ROUTES } from '../../features/game/city/city.routes';
-import { PROFESSIONS_ROUTES } from '../../features/game/professions/professions.routes';
 import { WORLD_ROUTES } from '../../features/game/world/world.routes';
 import { PROPHECIES_ROUTES } from '../../features/game/prophecies/prophecies.routes';
 import { SETTINGS_ROUTES } from '../../features/game/settings/settings.routes';
@@ -13,7 +12,6 @@ describe('guide route catalog', () => {
     DASHBOARD_ROUTES,
     CHARACTER_ROUTES,
     CITY_ROUTES,
-    PROFESSIONS_ROUTES,
     WORLD_ROUTES,
     PROPHECIES_ROUTES,
     SETTINGS_ROUTES,
@@ -47,7 +45,10 @@ describe('guide route catalog', () => {
 function concretePages(routes: Routes): Route[] {
   return routes.flatMap((route) => {
     if (route.children?.length) return concretePages(route.children);
-    if (route.redirectTo !== undefined || route.component === undefined) {
+    if (
+      route.redirectTo !== undefined ||
+      (route.component === undefined && route.loadComponent === undefined)
+    ) {
       return [];
     }
     return [route];

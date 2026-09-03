@@ -109,7 +109,6 @@ public sealed class RegionOneIdleAreaSeedTests
             .Include(region => region.Areas)
             .ThenInclude(area => area.Creatures)
             .Include(region => region.Areas)
-            .ThenInclude(area => area.GatheringNodes)
             .SingleAsync(region => region.Name == "Meran");
         var areas = meran.Areas.OrderBy(area => area.DifficultyTier).ToArray();
 
@@ -128,29 +127,6 @@ public sealed class RegionOneIdleAreaSeedTests
         Assert.Equal(
             ["Alpha Wolf", "Bloodfang Wolf", "Dire Wolf", "Horned Wolf", "Pack Howler"],
             areas[3].Creatures.Select(creature => creaturesById[creature.CreatureId]).OrderBy(name => name));
-        Assert.Equal(
-            [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
-            areas[0].GatheringNodes.Select(node => node.Type).Order());
-        Assert.Equal(
-            [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
-            areas[1].GatheringNodes.Select(node => node.Type).Order());
-        Assert.All(areas[0].GatheringNodes, node =>
-            Assert.Equal(AreaGatheringYieldBalance.AbundantBonusPercent, node.YieldBonusPercent));
-        Assert.Equal(
-            [GatheringType.Mining],
-            areas[1].GatheringNodes
-                .Where(node => node.YieldBonusPercent == AreaGatheringYieldBalance.AbundantBonusPercent)
-                .Select(node => node.Type));
-        Assert.Equal(
-            [GatheringType.Skinning],
-            areas[3].GatheringNodes
-                .Where(node => node.YieldBonusPercent == AreaGatheringYieldBalance.AbundantBonusPercent)
-                .Select(node => node.Type));
-        Assert.All(areas.SelectMany(area => area.GatheringNodes), node =>
-        {
-            Assert.Equal(1, node.LevelRequirement);
-            Assert.False(string.IsNullOrWhiteSpace(node.RewardTableId));
-        });
     }
 
     [Fact]
@@ -211,61 +187,6 @@ public sealed class RegionOneIdleAreaSeedTests
                 expectedCreatureNames.OrderBy(name => name),
                 creatureNamesByArea[areaName]);
         }
-    }
-
-    [Fact]
-    public async Task Lumo_Ruins_teaches_each_base_gathering_type()
-    {
-        await using var db = CreateDb();
-
-        await SeedCreatures.SeedCreaturesData(db);
-        await db.SaveChangesAsync();
-
-        var lumoRuins = await db.Areas
-            .Include(area => area.GatheringNodes)
-            .SingleAsync(area => area.Id == QuestConstants.LumoRuinsAreaId);
-
-        Assert.Equal(3, lumoRuins.GatheringNodes.Count);
-        Assert.Equal(
-            [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
-            lumoRuins.GatheringNodes.Select(node => node.Type).OrderBy(type => type).ToArray());
-        Assert.All(lumoRuins.GatheringNodes, node =>
-        {
-            Assert.Equal(0.0037, node.ProcChance, precision: 6);
-            Assert.Equal(AreaGatheringYieldBalance.AbundantBonusPercent, node.YieldBonusPercent);
-            Assert.False(string.IsNullOrWhiteSpace(node.RewardTableId));
-        });
-        Assert.Equal(1d, AreaGatheringYieldBalance.ResolveMultiplier(AreaGatheringYieldBalance.AbundantBonusPercent), 10);
-    }
-
-    [Fact]
-    public async Task Every_non_training_idle_area_supports_all_gathering_types()
-    {
-        await using var db = CreateDb();
-
-        await SeedCreatures.SeedCreaturesData(db);
-        await db.SaveChangesAsync();
-
-        var areas = await db.Areas
-            .Include(area => area.GatheringNodes)
-            .Where(area => area.Id.StartsWith("region_01_area_") || area.Id.StartsWith("region_02_area_"))
-            .ToListAsync();
-        var expectedTypes = new[]
-        {
-            GatheringType.Mining,
-            GatheringType.Woodcutting,
-            GatheringType.Skinning
-        };
-
-        Assert.NotEmpty(areas);
-        Assert.All(areas, area =>
-        {
-            Assert.Equal(expectedTypes, area.GatheringNodes.Select(node => node.Type).OrderBy(type => type));
-            Assert.All(area.GatheringNodes, node =>
-                Assert.True(
-                    node.YieldBonusPercent == 0d ||
-                    node.YieldBonusPercent == AreaGatheringYieldBalance.AbundantBonusPercent));
-        });
     }
 
     [Fact]

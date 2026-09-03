@@ -1,14 +1,16 @@
-﻿using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Domain.Models.Snapshots;
 
 public sealed class EquipmentSnapshot
 {
     public Guid Id { get; init; }
+    public EquipmentData? ProgressionData { get; init; }
     public EquipmentSlotType Slot { get; init; }
     public Guid EquipmentInstanceId { get; init; }
     public string ItemBaseId { get; init; } = default!;
@@ -34,12 +36,12 @@ public sealed class EquipmentSnapshot
         EquipmentSlotType slot,
         EquipmentInstance inst)
     {
-        EquipmentStatModelMigrator.MigrateToCurrent(inst);
         return new EquipmentSnapshot
         {
             Slot = slot,
             EquipmentInstanceId = inst.Id,
             ItemBaseId = inst.ItemBaseId,
+            ProgressionData = inst.ProgressionData,
             BaseRecipeId = inst.BaseRecipeId,
             BlueprintId = inst.BlueprintId,
             EquipmentSetId = inst.EquipmentSetId,

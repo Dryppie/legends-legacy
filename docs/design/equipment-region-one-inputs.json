@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "status": "Design candidate; not runtime configuration or combat-certified balance",
+  "region": 1,
+  "equipmentTier": 1,
+  "equipLevel": 1,
+  "merchantEquipmentEnabled": false,
+  "baseline": {
+    "rarity": "Common",
+    "rank": 0,
+    "style": null,
+    "binding": "PersonalOnAward",
+    "baseSalvage": 0,
+    "paidScrapBasis": 0,
+    "handQuest": "quest.onboarding.first_weapon",
+    "armorQuest": "quest.onboarding.first_weapon",
+    "accessoryQuest": "quest.onboarding.tools_of_trade",
+    "alternateTargetEligibleVictories": 360,
+    "starterScrap": 10,
+    "starterCinders": 500
+  },
+  "archetypeGroups": [
+    { "slot": "Head", "items": ["heavy_helm", "medium_helm", "light_hood", "cloth_cowl"] },
+    { "slot": "Chest", "items": ["heavy_breastplate", "medium_mail", "light_vest", "cloth_robe"] },
+    { "slot": "Legs", "items": ["heavy_legplates", "medium_greaves", "light_leggings", "cloth_pants"] },
+    { "slot": "Ring", "items": ["band"] },
+    { "slot": "Necklace", "items": ["amulet"] },
+    { "slot": "Relic", "items": ["vial"] },
+    { "slot": "OneHanded", "items": ["shortsword", "dagger", "hatchet", "mace", "wand"] },
+    { "slot": "TwoHanded", "items": ["greatsword", "battle_axe", "maul", "spear", "staff", "longbow", "crossbow", "gauntlets"] },
+    { "slot": "OffHand", "items": ["towershield", "Spiritward", "grimoire"] }
+  ],
+  "areas": [
+    { "id": "region_01_area_01", "scrapPerPerfectDay": 36 },
+    { "id": "region_01_area_02", "scrapPerPerfectDay": 38 },
+    { "id": "region_01_area_03", "scrapPerPerfectDay": 40 },
+    { "id": "region_01_area_04", "scrapPerPerfectDay": 42 },
+    { "id": "region_01_area_06", "scrapPerPerfectDay": 44 },
+    { "id": "region_01_area_08", "scrapPerPerfectDay": 46 },
+    { "id": "region_01_area_09", "scrapPerPerfectDay": 48 },
+    { "id": "region_01_area_10", "scrapPerPerfectDay": 50 },
+    { "id": "region_01_area_11", "scrapPerPerfectDay": 52 },
+    { "id": "region_01_area_07", "scrapPerPerfectDay": 54 }
+  ],
+  "dungeonPools": [
+    {
+      "familyId": "goblin_mines",
+      "styles": ["blueprint_fury", "blueprint_phoenix"],
+      "accessQuest": "quest.shenic.trial_of_lumo",
+      "minimumLevel": 5,
+      "firstEntrySigils": 1,
+      "targets": [
+        { "itemId": "shortsword", "styleId": "blueprint_fury" },
+        { "itemId": "dagger", "styleId": "blueprint_fury" },
+        { "itemId": "greatsword", "styleId": "blueprint_fury" },
+        { "itemId": "band", "styleId": "blueprint_fury" },
+        { "itemId": "cloth_robe", "styleId": "blueprint_phoenix" },
+        { "itemId": "heavy_breastplate", "styleId": "blueprint_phoenix" },
+        { "itemId": "staff", "styleId": "blueprint_phoenix" },
+        { "itemId": "vial", "styleId": "blueprint_phoenix" }
+      ]
+    },
+    {
+      "familyId": "forgotten_catacombs",
+      "styles": ["blueprint_arcane", "blueprint_endurance"],
+      "accessQuest": "quest.shenic.crystal_currents",
+      "minimumLevel": 15,
+      "firstEntrySigils": 1,
+      "targets": [
+        { "itemId": "wand", "styleId": "blueprint_arcane" },
+        { "itemId": "staff", "styleId": "blueprint_arcane" },
+        { "itemId": "grimoire", "styleId": "blueprint_arcane" },
+        { "itemId": "amulet", "styleId": "blueprint_arcane" },
+        { "itemId": "heavy_breastplate", "styleId": "blueprint_endurance" },
+        { "itemId": "light_leggings", "styleId": "blueprint_endurance" },
+        { "itemId": "heavy_helm", "styleId": "blueprint_endurance" },
+        { "itemId": "band", "styleId": "blueprint_endurance" }
+      ]
+    }
+  ],
+  "economy": {
+    "rankScrapCosts": [5, 10, 20, 40, 80],
+    "rankCinderCosts": [250, 500, 1000, 2000, 4000],
+    "styleChangeCinders": 250,
+    "paidScrapRecovery": 0.5,
+    "idleEquipmentChance": 0.0003,
+    "randomPlainBaseSalvage": 1,
+    "randomNamedBaseSalvage": 2,
+    "dungeonScrapPerClear": 4,
+    "areaQuestScrap": 2,
+    "dungeonMatchingChance": 0.2,
+    "dungeonGuaranteeClear": 8,
+    "dungeonAwardedRank": 1,
+    "targetedSigilEligibleVictories": 4320,
+    "archetypeBudgetShare": 0.85,
+    "rankBaselineBudgetIncrement": 0.04,
+    "nextBandBudgetGrowthCandidate": 1.25
+  },
+  "scenarios": [
+    { "id": "daily", "hoursBetweenClaims": 24, "winRate": 1, "dungeonClearsPerDay": 1, "otherCinderSpendFraction": 0.75 },
+    { "id": "less-frequent", "hoursBetweenClaims": 48, "winRate": 0.8, "dungeonClearsPerDay": 0.25, "otherCinderSpendFraction": 0.75 },
+    { "id": "active-dungeons", "hoursBetweenClaims": 24, "winRate": 1, "dungeonClearsPerDay": 2, "otherCinderSpendFraction": 0.75 }
+  ],
+  "modelAssumptions": {
+    "encounterSeconds": 10,
+    "offlineCapHours": 24,
+    "originalScrapPerDay": [20, 25, 30],
+    "referenceScrapPerDay": 45,
+    "fullLoadoutItems": [7, 8],
+    "ordinaryRank": 3,
+    "favoriteCount": 2,
+    "favoriteRank": 5,
+    "retentionDays": [7, 14],
+    "randomSigilsPerPerfectDay": 0
+  }
+}
