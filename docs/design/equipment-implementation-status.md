@@ -34,7 +34,7 @@ Existing equipment keeps its authored rank and style because those values are pa
 
 The generated `RemoveEquipmentForge` migration drops `ModelECharacterStyles`, `ModelEForgeReceipts`, tournament Blueprint/Scrap columns, and ordinary-acquisition Scrap remainder. It has not been applied. Historical migrations remain so a database can still be built through its migration chain.
 
-See [Forge removal](equipment-forge-removal.md), [current equipment contract](equipment-specification.md), and [post-Alpha cleanup](equipment-post-alpha-cleanup.md).
+See [Forge removal](equipment-forge-removal.md), [Forge responsibilities and removal impact](equipment-forge-removal-impact.md), [current equipment contract](equipment-specification.md), and [post-Alpha cleanup](equipment-post-alpha-cleanup.md).
 
 ## Verification record
 

@@ -35,3 +35,5 @@ The migration is generated but unapplied. It intentionally contains no data conv
 ## Follow-up boundary
 
 A future upgrade design must define how gear changes, what it costs, how stats are recalculated, how ownership and trading react, and whether new persistence is required. Quest gear selection likewise needs an authored selection contract. Neither concern is represented by a placeholder in the current implementation.
+
+See [Forge responsibilities and removal impact](equipment-forge-removal-impact.md) for the former behavior and the gameplay gaps created by removing the combined Equipment & Forge page.
