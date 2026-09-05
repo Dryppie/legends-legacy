@@ -7,7 +7,7 @@ simplified further: definitions remain locked until their level and quest
 prerequisites are met, then become Active immediately. The journal no longer
 has an Available/acceptance state.
 
-**Post-Alpha update, 3 September 2026:** First Hunt and automatic quest activation remain. The crafting branch below is historical and has been removed. Current onboarding grants a hands/armor starter kit and accessories. Alpha quest definitions and superseded versions are gone; a one-time migration deletes their saved progress rather than preserving alternate cohorts. See the [current quest flow](../../LEGENDSLEGACY_QUEST_FLOW.md) and [cleanup record](../../docs/design/equipment-post-alpha-cleanup.md).
+**Post-Alpha update, 4 September 2026:** First Hunt and automatic quest activation remain. The crafting branch below is historical and has been removed. Current onboarding grants one Arms Chest after The Soul Archive; it lets the player choose a Shortsword, Dagger, Hatchet, Mace, or Wand. The armor and accessory starter grants and Ready for the Road quest are retired. See the [current quest flow](../../LEGENDSLEGACY_QUEST_FLOW.md).
 
 ## Goal
 

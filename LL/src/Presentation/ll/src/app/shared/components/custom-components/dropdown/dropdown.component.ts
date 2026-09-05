@@ -55,6 +55,9 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** Visual treatment: toolbar button by default, form field when used in panels/forms. */
   @Input() appearance: 'button' | 'field' = 'button';
 
+  /** Prevent interaction while the owning action is pending. */
+  @Input() disabled = false;
+
   /** Allow the menu to grow to fit its option labels while retaining the trigger width as a minimum. */
   @Input() fitMenuToContent = false;
 
@@ -148,6 +151,8 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   }
 
   onButtonClick(event: MouseEvent): void {
+    if (this.disabled) return;
+
     // NOTE: do NOT stop propagation so other dropdowns can treat this as an outside click.
 
     // First, close any other dropdown that might be open.

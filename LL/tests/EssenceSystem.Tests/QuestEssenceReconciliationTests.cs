@@ -73,10 +73,14 @@ public sealed partial class QuestSystemTests
             var result = await service.ProcessAsync(id,
                 QuestTrigger.CombatCompleted("tutorial_area_training_grounds", true), Guid.NewGuid(),
                 GameEventTypes.IdleCombatEncounterCompleted, default);
-            Assert.Contains(QuestConstants.TrainingDay, result.CompletedQuestIds);
-            Assert.Contains(QuestConstants.SoulArchive, result.CompletedQuestIds);
+            Assert.Empty(result.CompletedQuestIds);
+            Assert.Empty(result.Loot);
+            await service.TurnInAsync(id, QuestConstants.TrainingDay, default);
         }
         var journal = await service.GetJournalAsync(id, default);
+        Assert.Equal(QuestStatus.Active, journal.Quests.Single(x => x.QuestId == QuestConstants.SoulArchive).Status);
+        Assert.DoesNotContain(journal.Quests, x => x.QuestId == QuestConstants.FirstWeapon);
+        journal = await service.TurnInAsync(id, QuestConstants.SoulArchive, default);
         var saveCalls = repository.SaveCalls;
         var soul = Assert.Single(journal.Quests, x => x.QuestId == QuestConstants.SoulArchive);
         Assert.Equal(QuestStatus.Completed, soul.Status);
@@ -94,11 +98,6 @@ public sealed partial class QuestSystemTests
         Assert.Equal(507, (await db.Characters.SingleAsync()).Cinders);
         Assert.Equal(500, (await db.EconomyLedger.SingleAsync()).Quantity);
         Assert.Single(chat.Publications.SelectMany(x => x.Completions), x => x.QuestId == QuestConstants.SoulArchive);
-        if (!finishFirstHuntByEvent)
-        {
-            Assert.Contains(StateSyncScopes.Character, stateSync.InvalidatedScopes);
-            Assert.Contains(StateSyncScopes.AreaAccess, stateSync.InvalidatedScopes);
-        }
     }
 
     [Fact]
@@ -121,8 +120,10 @@ public sealed partial class QuestSystemTests
         var journal = await service.GetJournalAsync(id, default);
 
         var soul = Assert.Single(journal.Quests, x => x.QuestId == QuestConstants.SoulArchive);
-        Assert.Equal(QuestStatus.Completed, soul.Status);
+        Assert.Equal(QuestStatus.Active, soul.Status);
         Assert.All(soul.Objectives, objective => Assert.True(objective.IsCompleted));
+        Assert.Equal(0, currency.AwardedCinders);
+        await service.TurnInAsync(id, soul.QuestId, default);
         Assert.Equal(500, currency.AwardedCinders);
     }
 
@@ -151,12 +152,13 @@ public sealed partial class QuestSystemTests
         var secondSoul = Assert.Single(journal.Quests, x => x.QuestId == QuestConstants.ASecondSoul);
         Assert.Equal(2, secondSoul.Objectives[0].RequiredAmount);
         Assert.Equal(Math.Min(2, ownedCount), secondSoul.Objectives[0].CurrentAmount);
-        Assert.Equal(ownedCount >= 2 ? QuestStatus.Completed : QuestStatus.Active, secondSoul.Status);
+        Assert.Equal(QuestStatus.Active, secondSoul.Status);
+        Assert.Empty(loot.GrantedItems);
         if (ownedCount >= 2)
         {
+            journal = await service.TurnInAsync(id, secondSoul.QuestId, default);
             Assert.Equal(10, Assert.Single(loot.GrantedItems).Quantity);
             Assert.Contains(journal.Quests, x => x.QuestId == QuestConstants.TheArchiveDeepens);
-            Assert.Contains(StateSyncScopes.Inventory, stateSync.InvalidatedScopes);
         }
         else Assert.Empty(loot.GrantedItems);
     }
@@ -185,9 +187,12 @@ public sealed partial class QuestSystemTests
         var retry = await service.ProcessAsync(id, QuestTrigger.EssenceAbsorbed("essence.skeleton"), eventId,
             GameEventTypes.EssenceAbsorbed, default);
 
-        Assert.Contains(QuestConstants.ASecondSoul, result.CompletedQuestIds);
-        Assert.Single(result.Loot);
+        Assert.Empty(result.CompletedQuestIds);
+        Assert.Empty(result.Loot);
         Assert.Empty(retry.Loot);
+        Assert.Empty(loot.GrantedItems);
+        await service.TurnInAsync(id, QuestConstants.ASecondSoul, default);
+        await service.TurnInAsync(id, QuestConstants.ASecondSoul, default);
         Assert.Single(loot.GrantedItems);
     }
 
@@ -271,6 +276,13 @@ public sealed partial class QuestSystemTests
         db.ChangeTracker.Clear();
 
         var savedSoul = await db.CharacterQuestProgresses.SingleAsync(x => x.CharacterId == id && x.QuestId == QuestConstants.SoulArchive);
+        Assert.Equal(QuestStatus.Active, savedSoul.Status);
+        Assert.Null(savedSoul.RewardsGrantedAt);
+        Assert.Empty(await db.EconomyLedger.ToListAsync());
+        await service.TurnInAsync(id, savedSoul.QuestId, default);
+        db.ChangeTracker.Clear();
+        await service.TurnInAsync(id, savedSoul.QuestId, default);
+        savedSoul = await db.CharacterQuestProgresses.SingleAsync(x => x.CharacterId == id && x.QuestId == QuestConstants.SoulArchive);
         Assert.Equal(QuestStatus.Completed, savedSoul.Status);
         Assert.NotNull(savedSoul.RewardsGrantedAt);
         Assert.Equal(500, (await db.Characters.SingleAsync()).Cinders);

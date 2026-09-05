@@ -178,11 +178,7 @@
       "Idle combat EXP",
       "Dungeon combat EXP"
     ],
-    "doesNotApplyTo": [
-      "Gathering EXP",
-      "Crafting EXP",
-      "PvP"
-    ],
+    "doesNotApplyTo": ["PvP"],
     "enabled": true,
     "sortOrder": 110
   },

@@ -129,7 +129,7 @@ export class GuildVaultComponent {
       [ItemQuality.Standard]: 1,
       [ItemQuality.Fine]: 2,
       [ItemQuality.Exceptional]: 3,
-      [ItemQuality.Masterwork]: 4,
+      [ItemQuality.Masterpiece]: 4,
     };
 
     return this.vaultItems
@@ -204,7 +204,7 @@ export class GuildVaultComponent {
         return 'text-sky-300';
       case ItemQuality.Exceptional:
         return 'text-violet-300';
-      case ItemQuality.Masterwork:
+      case ItemQuality.Masterpiece:
         return 'text-fuchsia-300';
       case ItemQuality.Crude:
         return 'text-zinc-500';

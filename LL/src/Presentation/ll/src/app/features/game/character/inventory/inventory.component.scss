@@ -113,7 +113,8 @@
 .inventory-list-header,
 .inventory-list-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 6.5rem 4.75rem 6.5rem;
+  grid-template-columns: minmax(8rem, 1fr) 6.5rem 3rem 4.75rem 6.5rem;
+  min-width: 33rem;
 }
 
 .inventory-list-header {
@@ -128,8 +129,7 @@
   text-transform: uppercase;
 }
 
-.inventory-list-header > :nth-child(3),
-.inventory-list-potential {
+.inventory-list-header > :nth-child(4) {
   text-align: center;
 }
 
@@ -139,7 +139,6 @@
 
 .inventory-list-row {
   width: 100%;
-  min-width: 0;
   min-height: 3rem;
   align-items: center;
   gap: var(--ll-space-2);
@@ -181,7 +180,8 @@
   line-height: 1;
 }
 
-.inventory-list-quality {
+.inventory-list-quality,
+.inventory-list-rank {
   color: var(--ll-color-text-muted);
   font-size: var(--ll-text-sm);
   white-space: nowrap;
@@ -446,7 +446,7 @@
 
   .inventory-list-header,
   .inventory-list-row {
-    grid-template-columns: minmax(0, 1fr) 7rem 5.25rem 7.75rem;
+    grid-template-columns: minmax(8rem, 1fr) 7rem 3rem 5.25rem 7.75rem;
   }
 
   .inventory-list-item {

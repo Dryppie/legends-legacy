@@ -34,7 +34,6 @@
 
 .world-map-eyebrow,
 .areas-summary h2,
-.gathering-legend,
 .activity-panel > header h2 {
   color: var(--ll-color-text-muted);
   font-size: var(--ll-text-xs);
@@ -72,8 +71,6 @@
 .world-map-actions,
 .areas-toolbar,
 .areas-summary,
-.gathering-legend,
-.gathering-legend li,
 .activity-panel > header,
 .dungeon-preview-toolbar {
   display: flex;
@@ -253,39 +250,6 @@
 .areas-summary span {
   color: var(--ll-color-text-subtle);
   font-size: var(--ll-text-xs);
-}
-
-.gathering-legend {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--ll-space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.gathering-legend li {
-  gap: var(--ll-space-2);
-  font-size: var(--ll-text-xs);
-}
-
-.legend-node {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 0.1rem;
-  transform: rotate(45deg);
-}
-
-.legend-node.mining {
-  background: #9bbde1;
-}
-
-.legend-node.woodcutting {
-  background: #50b790;
-}
-
-.legend-node.skinning {
-  background: #d9913e;
 }
 
 .area-grid {
@@ -518,10 +482,6 @@
 
   .area-grid app-combat-area-card {
     width: 100%;
-  }
-
-  .gathering-legend {
-    justify-content: flex-start;
   }
 
   .world-map-rail {

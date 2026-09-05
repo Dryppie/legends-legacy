@@ -13,6 +13,7 @@ import {
   ONBOARDING_QUEST_CATEGORY,
   QuestJournal,
   QuestStatus,
+  isQuestReadyToTurnIn,
 } from '../../../../shared/models/quest';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { RealtimeSignalDeduper } from '../../real-time/game-realtime/realtime-deduplication';
@@ -69,9 +70,9 @@ export class QuestStateService {
   /**
    * The pinned objective, but only while a tutorial quest is pinned.
    *
-   * Onboarding-only UI (scoped recipe lists, forced views, highlights) must key
+   * Onboarding-only UI (forced views and highlights) must key
    * off this rather than `pinnedObjective`, otherwise later quests that reuse
-   * the same objective type (e.g. the Tier 2 crafting side quests) re-trigger
+   * the same objective type in another quest re-trigger
    * the tutorial presentation.
    */
   readonly pinnedOnboardingObjective = computed(() =>
@@ -98,53 +99,47 @@ export class QuestStateService {
       () => this.synchronizeAreaAccess(),
       () => this._loaded(),
     );
-    effect(
-      () => {
-        const event = this.events.event.QuestJournalChanged();
-        if (!event?.journal) return;
-        untracked(() => {
-          if (
-            event.stateVersion > 0 &&
-            !this.domainVersions.isCurrent('quests', event.stateVersion)
-          ) {
-            return;
-          }
-          this.initialize(event.journal);
-          if (event.stateVersion > 0) {
-            this.stateSync.acceptSnapshotResponse(
-              { quests: event.stateVersion },
-              ['quests'],
-            );
-          }
-        });
-      },
-    );
+    effect(() => {
+      const event = this.events.event.QuestJournalChanged();
+      if (!event?.journal) return;
+      untracked(() => {
+        if (
+          event.stateVersion > 0 &&
+          !this.domainVersions.isCurrent('quests', event.stateVersion)
+        ) {
+          return;
+        }
+        this.initialize(event.journal);
+        if (event.stateVersion > 0) {
+          this.stateSync.acceptSnapshotResponse(
+            { quests: event.stateVersion },
+            ['quests'],
+          );
+        }
+      });
+    });
 
     // Area access is immediately derived from character level. Quest state is
     // delivered separately as an authoritative QuestJournalChanged snapshot.
-    effect(
-      () => {
-        const envelope = this.events.eventEnvelope.CharacterLevelUp();
-        const levelUp = envelope?.payload;
-        if (!levelUp) return;
-        untracked(() => {
-          const characterId = this.auth.currentCharacter()?.id;
-          if (!characterId || levelUp.characterId !== characterId) return;
-          if (!this.eventDeduper.shouldProcess('level-up', envelope)) return;
-          this.synchronizeAreaAccess().subscribe({ error: () => undefined });
-        });
-      },
-    );
+    effect(() => {
+      const envelope = this.events.eventEnvelope.CharacterLevelUp();
+      const levelUp = envelope?.payload;
+      if (!levelUp) return;
+      untracked(() => {
+        const characterId = this.auth.currentCharacter()?.id;
+        if (!characterId || levelUp.characterId !== characterId) return;
+        if (!this.eventDeduper.shouldProcess('level-up', envelope)) return;
+        this.synchronizeAreaAccess().subscribe({ error: () => undefined });
+      });
+    });
 
     this.lastLogoutCount = this.eventBus.logout();
-    effect(
-      () => {
-        const logoutCount = this.eventBus.logout();
-        if (logoutCount === this.lastLogoutCount) return;
-        this.lastLogoutCount = logoutCount;
-        this.reset();
-      },
-    );
+    effect(() => {
+      const logoutCount = this.eventBus.logout();
+      if (logoutCount === this.lastLogoutCount) return;
+      this.lastLogoutCount = logoutCount;
+      this.reset();
+    });
   }
 
   initialize(journal: QuestJournal): void {
@@ -203,6 +198,20 @@ export class QuestStateService {
       });
   }
 
+  turnIn(questId: string): void {
+    if (this._loading()) return;
+    this._loading.set(true);
+    this._error.set(null);
+    this.api
+      .turnIn(questId)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (result) => this.applyVersionedJournal(result),
+        error: (error) =>
+          this._error.set(error?.message ?? 'Failed to turn in quest'),
+      });
+  }
+
   acknowledgeWelcome(onComplete?: () => void, onError?: () => void): void {
     if (this._loading()) return;
     this._loading.set(true);
@@ -240,7 +249,10 @@ export class QuestStateService {
 
   navigateToPinnedObjective(): void {
     const quest = this.pinnedQuest();
-    if (quest?.choice && !quest.choice.selectedOptionKey) {
+    if (
+      isQuestReadyToTurnIn(quest) ||
+      (quest?.choice && !quest.choice.selectedOptionKey)
+    ) {
       void this.router.navigateByUrl('/game/quests');
       return;
     }

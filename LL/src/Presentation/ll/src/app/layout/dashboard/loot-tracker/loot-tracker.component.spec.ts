@@ -1,6 +1,15 @@
 import { lootHistoryLocationLabel } from './loot-tracker.component';
 
 describe('lootHistoryLocationLabel', () => {
+  it('does not expose the internal quest id for starter equipment', () => {
+    expect(
+      lootHistoryLocationLabel({
+        source: 'model-e:starter',
+        location: 'quest.onboarding.first_weapon',
+      }),
+    ).toBe('Starter Equipment');
+  });
+
   it('labels player transfers with the other player name', () => {
     expect(
       lootHistoryLocationLabel({

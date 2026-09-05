@@ -51,4 +51,18 @@ describe('DropdownComponent pointer selection', () => {
     expect(emitted).toEqual([]);
     expect(component.open()).toBeTrue();
   });
+
+  it('does not open or emit while disabled', () => {
+    component.open.set(false);
+    component.options = [option];
+    component.disabled = true;
+    const emitted: string[] = [];
+    component.selection.subscribe((selection) => emitted.push(selection.main));
+
+    component.onButtonClick(new MouseEvent('click'));
+
+    expect(component.open()).toBeFalse();
+    expect(emitted).toEqual([]);
+    expect(registry.register).not.toHaveBeenCalled();
+  });
 });

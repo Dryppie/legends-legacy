@@ -53,9 +53,7 @@ export type ProphecyGuidanceDestination =
   | 'WorldCombat'
   | 'Dungeons'
   | 'Essences'
-  | 'SoulArchive'
-  | 'Gathering'
-  | 'Crafting';
+  | 'SoulArchive';
 
 export interface ProphecyGuidanceDto {
   destination: ProphecyGuidanceDestination;

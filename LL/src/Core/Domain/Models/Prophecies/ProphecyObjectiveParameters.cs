@@ -7,7 +7,6 @@ public sealed class ProphecyObjectiveParameters
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public int? MinimumEnemyCount { get; set; }
-    public string? RequiredProfession { get; set; }
 
     public static bool TryParse(string? json, out ProphecyObjectiveParameters parameters)
     {

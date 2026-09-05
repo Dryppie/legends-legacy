@@ -1,17 +1,17 @@
 # Equipment naming and storage contracts
 
-Updated: 3 September 2026. Scope: the primary LL game, its player/API contracts, and offline equipment tools.
+Updated: 4 September 2026. Scope: the primary LL game, its player/API contracts, and offline equipment tools.
 
 The active game uses `EquipmentState`, `EquipmentData`, and equipment acquisition terminology. The equipment Forge and its public/storage contracts have been removed. Alpha compatibility is not supported.
 
 ## Current contracts
 
 - Player metadata uses `progression` for the canonical frozen equipment descriptor.
-- Starter routes are `equipment/starter-options` and `equipment/starter-claim`.
-- `EquipmentProgression` configures starter acquisition, protected acquisition, baseline recovery, and ordinary acquisition.
-- Runtime content uses `equipment-*.v1.json` catalogs for definitions, styles, acquisition pools, and starters.
+- The tutorial starter choice is redeemed through the normal Inventory selection-container route using `item.arms_chest`; the direct public starter-claim routes are retired.
+- `EquipmentProgression` configures starter grants, dungeon drops, and area drops through its three retained capability switches.
+- Runtime content uses `equipment-*.v1.json` catalogs for definitions, styles, regional drop profiles, and starters.
 - Persisted equipment JSON keeps authored identity, tier, rank, native/active style, stats, provenance, and ownership.
-- Current tables retain starter grants, ordinary selection/progress, protected reward progress/receipts, and recovery receipts.
+- Current tables retain starter grants and lightweight regional-drop entitlements used by quest objectives. Target-selection and protection tables are removed by `RestoreRandomEquipmentDrops`.
 
 `ModelECharacterStyles` and `ModelEForgeReceipts` are dropped by `RemoveEquipmentForge`. Tournament Blueprint/Scrap fields and ordinary Scrap remainder are also removed. Historical migrations and some physical `ModelE*` names remain only as the database creation history and established storage names for current equipment.
 

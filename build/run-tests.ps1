@@ -10,7 +10,8 @@
 #>
 param(
     [switch]$NoBuild,
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [string]$Filter
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,7 +31,12 @@ if (-not $NoBuild) {
     }
 }
 
-& dotnet test $testProject `
+$filterArguments = @()
+if (-not [string]::IsNullOrWhiteSpace($Filter)) {
+    $filterArguments = @("--filter", $Filter)
+}
+
+& dotnet test $testProject @filterArguments `
     --configuration $Configuration `
     --no-build `
     --logger "trx;LogFileName=tests.trx" `

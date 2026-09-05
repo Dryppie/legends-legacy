@@ -119,8 +119,8 @@ describe('equipment marketplace', () => {
         '[aria-label="Minimum equipment potential"]',
       ),
     ).toBeNull();
-    expect(fixture.nativeElement.textContent).not.toContain('Any quality');
-    expect(fixture.nativeElement.textContent).toContain('Tier 1 · Rank 3');
+    expect(fixture.nativeElement.textContent).toContain('Any quality');
+    expect(fixture.nativeElement.textContent).toContain('Tier 1 · Fine · Rank 3');
     expect(fixture.nativeElement.textContent).toContain('Fury');
     expect(
       component.definitionOptions().map((option) => option.value),
@@ -132,9 +132,8 @@ describe('equipment marketplace', () => {
     ]);
   });
 
-  it('combines identity, active style, rank, tier and slot filters and resets them', () => {
-    component.quality.set('Impossible legacy quality');
-    component.minimumPotentialCtrl.setValue(999);
+  it('combines quality, identity, active style, rank, tier and slot filters and resets them', () => {
+    dropdown('Any quality').selection.emit({ main: 'Fine', sub: null });
     dropdown('Any active style').selection.emit({
       main: 'blueprint_fury',
       sub: null,
@@ -246,7 +245,7 @@ describe('equipment marketplace', () => {
     sell.pendingItem.set(items[5]);
     sell.priceCtrl.setValue(100);
     expect(sell.canCreateListing()).toBeFalse();
-    expect(sell.listingEquipmentSummary(listings()[0])).toBe('Tier 1 · Rank 3');
+    expect(sell.listingEquipmentSummary(listings()[0])).toBe('Tier 1 · Fine · Rank 3');
     expect(sell.listingEquipmentSummary(listings()[3])).toBe('Fine');
   });
 
@@ -298,8 +297,10 @@ function listing(
             nativeStyleId: style,
             activeStyleId: style,
             ownership,
-            modelVersion: 1,
+            modelVersion: 2,
             balanceVersion: 1,
+            quality: 'Fine',
+            attributeRollMultiplier: 1,
           },
   } as unknown as EquipmentInstance;
   return {

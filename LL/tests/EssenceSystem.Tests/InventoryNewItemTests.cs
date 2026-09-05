@@ -11,7 +11,7 @@ namespace EssenceSystem.Tests;
 public sealed class InventoryNewItemTests
 {
     [Fact]
-    public async Task Crafted_equipment_is_new_until_the_owner_inspects_it()
+    public async Task Marketplace_equipment_is_new_until_the_owner_inspects_it()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -23,7 +23,7 @@ public sealed class InventoryNewItemTests
         await repository.AddItemsToInventory(
             characterId,
             [item],
-            ItemAcquisitionSources.Crafting,
+            ItemAcquisitionSources.Marketplace,
             CancellationToken.None);
         await db.SaveChangesAsync();
 
@@ -44,12 +44,10 @@ public sealed class InventoryNewItemTests
     }
 
     [Theory]
-    [InlineData(ItemAcquisitionSources.Crafting, EquipmentType.OneHanded, true)]
+    [InlineData(ItemAcquisitionSources.CombatReward, EquipmentType.OneHanded, false)]
     [InlineData(ItemAcquisitionSources.Marketplace, EquipmentType.OneHanded, true)]
-    [InlineData(ItemAcquisitionSources.Marketplace, EquipmentType.Tool, true)]
-    [InlineData(ItemAcquisitionSources.DungeonReward, EquipmentType.Tool, true)]
     [InlineData(ItemAcquisitionSources.DungeonReward, EquipmentType.OneHanded, false)]
-    [InlineData(ItemAcquisitionSources.QuestReward, EquipmentType.Tool, false)]
+    [InlineData(ItemAcquisitionSources.QuestReward, EquipmentType.Head, false)]
     public void Only_eligible_equipment_acquisitions_are_new(
         string acquisitionSource,
         EquipmentType equipmentType,
@@ -62,10 +60,10 @@ public sealed class InventoryNewItemTests
     }
 
     [Fact]
-    public void Crafted_non_equipment_is_not_new()
+    public void Non_equipment_is_not_new()
     {
         var item = BuildItem(Guid.NewGuid(), "crafted_resource");
-        item.ItemInstance.AcquisitionSource = ItemAcquisitionSources.Crafting;
+        item.ItemInstance.AcquisitionSource = ItemAcquisitionSources.CombatReward;
 
         Assert.False(item.IsNew);
     }
@@ -86,7 +84,7 @@ public sealed class InventoryNewItemTests
             CancellationToken.None);
         await db.SaveChangesAsync();
 
-        // Unseen, but not crafted, so it must not carry the marker.
+        // Unseen, but not an eligible equipment acquisition, so it must not carry the marker.
         Assert.Null(item.SeenAtUtc);
         Assert.False(item.IsNew);
     }
@@ -104,7 +102,7 @@ public sealed class InventoryNewItemTests
         await repository.AddItemsToInventory(
             characterId,
             [item],
-            ItemAcquisitionSources.Crafting,
+            ItemAcquisitionSources.CombatReward,
             CancellationToken.None);
         await db.SaveChangesAsync();
 
@@ -138,7 +136,7 @@ public sealed class InventoryNewItemTests
         await repository.AddItemsToInventory(
             ownerId,
             [item],
-            ItemAcquisitionSources.Crafting,
+            ItemAcquisitionSources.Marketplace,
             CancellationToken.None);
         await db.SaveChangesAsync();
 
@@ -166,7 +164,7 @@ public sealed class InventoryNewItemTests
         await repository.AddItemsToInventory(
             characterId,
             [item],
-            ItemAcquisitionSources.Crafting,
+            ItemAcquisitionSources.CombatReward,
             CancellationToken.None);
         await db.SaveChangesAsync();
 
@@ -201,7 +199,7 @@ public sealed class InventoryNewItemTests
         await repository.AddItemsToInventory(
             ownerId,
             [item],
-            ItemAcquisitionSources.Crafting,
+            ItemAcquisitionSources.CombatReward,
             CancellationToken.None);
         await db.SaveChangesAsync();
 

@@ -1,6 +1,5 @@
 using System.Collections.Frozen;
 using Domain.Models.Attributes;
-using Domain.Models.Professions.Crafting.V2;
 
 namespace Domain.Models.Items.Equipments.Progression;
 
@@ -44,15 +43,37 @@ public sealed class EquipmentEvaluator
     public EquipmentDefinition GetDefinition(string id) => _definitions.TryGetValue(id, out var definition)
         ? definition : throw new ArgumentException($"Unknown equipment definition '{id}'.", nameof(id));
 
+    public string GetDisplayName(EquipmentState state)
+    {
+        var definition = GetDefinition(state.DefinitionId);
+        if (!state.AdditiveVariantBonus || state.ActiveStyleId is null) return definition.Name;
+        var baseName = Definitions.FirstOrDefault(x => x.ArchetypeId == state.ArchetypeId && x.NativeStyleId is null)?.Name
+            ?? definition.Name;
+        var styleName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(
+            state.ActiveStyleId.Replace("blueprint_", "", StringComparison.Ordinal).Replace('_', ' '));
+        return $"{styleName} {baseName}";
+    }
+
     public EquipmentEvaluation Evaluate(EquipmentState item)
     {
         ArgumentNullException.ThrowIfNull(item);
         if (item.BalanceVersion != Balance.Version)
             throw new InvalidOperationException("Equipment must be evaluated with its recorded balance version.");
-        return Evaluate(item.DefinitionId, item.Tier, item.Rank, item.ActiveStyleId);
+        return Evaluate(item.DefinitionId, item.Tier, item.Rank, item.ActiveStyleId,
+            item.Quality, item.AttributeRollMultiplier, item.AdditiveVariantBonus);
     }
 
-    public EquipmentEvaluation Evaluate(string definitionId, int tier, int rank, string? activeStyleId)
+    public EquipmentEvaluation Evaluate(string definitionId, int tier, int rank, string? activeStyleId) =>
+        Evaluate(definitionId, tier, rank, activeStyleId, ItemQuality.Standard, 1d);
+
+    public EquipmentEvaluation Evaluate(
+        string definitionId,
+        int tier,
+        int rank,
+        string? activeStyleId,
+        ItemQuality quality,
+        double attributeRollMultiplier,
+        bool additiveVariantBonus = true)
     {
         var definition = GetDefinition(definitionId);
         var archetype = _archetypes[definition.ArchetypeId];
@@ -60,21 +81,43 @@ public sealed class EquipmentEvaluator
             throw new ArgumentOutOfRangeException(nameof(tier));
         if (rank < 0 || rank > EquipmentBalance.MaximumRank)
             throw new ArgumentOutOfRangeException(nameof(rank));
+        if (!Enum.IsDefined(quality))
+            throw new ArgumentOutOfRangeException(nameof(quality));
+        if (!double.IsFinite(attributeRollMultiplier) || attributeRollMultiplier is < 0.95d or > 1.05d)
+            throw new ArgumentOutOfRangeException(nameof(attributeRollMultiplier));
         var style = ResolveStyle(archetype.Id, activeStyleId);
-        var weights = archetype.StatWeights.ToDictionary(x => x.Key, x => x.Value * (style is null ? 1d : 1d - Balance.StyleBudgetShare));
-        if (style is not null)
+        var weights = archetype.StatWeights.ToDictionary(x => x.Key, x => x.Value * (style is null || additiveVariantBonus ? 1d : 1d - Balance.StyleBudgetShare));
+        if (style is not null && !additiveVariantBonus)
             foreach (var (attribute, weight) in style.StatWeights)
                 weights[attribute] = weights.GetValueOrDefault(attribute) + weight * Balance.StyleBudgetShare;
 
         var baselineBudget = Balance.GetBaselineBudget(tier, archetype.EquipmentType);
-        var targetBudget = baselineBudget * (1d + rank * Balance.RankBudgetIncrement);
+        var targetBudget = baselineBudget
+            * EquipmentBalance.GetRarityMultiplier(definition.Rarity)
+            * EquipmentBalance.GetQualityMultiplier(quality)
+            * (1d + rank * Balance.RankBudgetIncrement)
+            * attributeRollMultiplier;
         EquipmentValidation.PositiveFinite(targetBudget);
         var allocation = EquipmentBudgetAllocator.AllocateConstrained(
             tier, targetBudget, weights, [], archetype.OverflowWeights);
         if (allocation.UnspentBudget > Math.Max(0.000001d, targetBudget * 0.00000001d))
             throw new InvalidOperationException($"Equipment '{definitionId}' cannot spend its budget. Author overflow weights or revise its stat profile.");
 
-        var stats = allocation.AddedPoints.OrderBy(x => x.Key).ToDictionary(
+        var points = allocation.AddedPoints.ToDictionary(x => x.Key, x => x.Value);
+        if (style is not null && additiveVariantBonus)
+        {
+            // Allocate the base first. Caps on the bonus must never take points from it.
+            var bonus = EquipmentBudgetAllocator.AllocateConstrained(
+                tier, targetBudget * Balance.StyleBudgetShare, style.StatWeights, [],
+                archetype.StatWeights, currentPoints: points);
+            if (bonus.UnspentBudget > Math.Max(0.000001d, targetBudget * 0.00000001d))
+                throw new InvalidOperationException($"Variant '{style.Id}' cannot spend its bonus budget.");
+            foreach (var (attribute, amount) in bonus.AddedPoints)
+                points[attribute] = points.GetValueOrDefault(attribute) + amount;
+            targetBudget *= 1d + Balance.StyleBudgetShare;
+        }
+
+        var stats = points.OrderBy(x => x.Key).ToDictionary(
             x => x.Key,
             x => AttributeValueQuantizer.Quantize(x.Key, (float)x.Value));
         if (stats.Values.Any(value => !float.IsFinite(value) || value < 0) || !stats.Values.Any(value => value > 0))
@@ -85,7 +128,7 @@ public sealed class EquipmentEvaluator
 
         return new EquipmentEvaluation(
             definition, archetype, tier, rank, Balance.Version, style?.Id, style?.EquipmentSetId,
-            baselineBudget, targetBudget, stats.ToFrozenDictionary());
+            quality, attributeRollMultiplier, baselineBudget, targetBudget, stats.ToFrozenDictionary());
     }
 
     private EquipmentStyle? ResolveStyle(string archetypeId, string? styleId)
@@ -106,6 +149,8 @@ public sealed record EquipmentEvaluation(
     int BalanceVersion,
     string? ActiveStyleId,
     string? EquipmentSetId,
+    ItemQuality Quality,
+    double AttributeRollMultiplier,
     double BaselineBudget,
     double TargetBudget,
     IReadOnlyDictionary<AttributeType, float> Stats);

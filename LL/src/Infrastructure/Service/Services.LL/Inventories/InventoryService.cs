@@ -2,7 +2,6 @@ using Application.Interfaces.Services.LL;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.MarketPlaces;
-using Domain.Models.Professions.Crafting;
 
 namespace Services.LL.Inventories;
 public class InventoryService : IInventoryService
@@ -44,15 +43,6 @@ public class InventoryService : IInventoryService
     public async Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken)
     {
         await _inventoryRepository.CreateInventoryAsync(characterId, cancellationToken);
-    }
-
-    public async Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
-    {
-        var requiredByItemId = materials
-            .GroupBy(m => m.ItemId)
-            .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
-
-        return await _inventoryRepository.TryRemoveCraftingMaterialsAsync(characterId, requiredByItemId, cancellationToken);
     }
 
     public async Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken)

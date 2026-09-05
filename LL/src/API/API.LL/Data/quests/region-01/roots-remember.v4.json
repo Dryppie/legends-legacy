@@ -2,13 +2,13 @@
   "id": "quest.shenic.roots_remember",
   "version": 4,
   "title": "The Roots Remember",
-  "summary": "Follow the corruption through Old Forest and open the road to Shenic's heart.",
+  "summary": "Break the Goblin Gate, then follow the corruption through Old Forest toward Shenic's heart.",
   "category": "Shenic",
   "chain": {
     "id": "chain.shenic.chapter_03",
     "title": "Chapter III — Heart of Shenic",
-    "description": "Refine your chosen identity through Twilight and the Old Forest, then clear the Hollow's Final Trial.",
-    "goal": "Reach level 30, master Thornroot Hollow, and clear Forgotten Catacombs I.",
+    "description": "Earn a Goblin Sigil in Twilight, break the Goblin Gate, and cross the Old Forest before the Hollow's Final Trial.",
+    "goal": "Defeat the boss of Goblin Mines I, reach level 30, and clear Forgotten Catacombs I.",
     "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
     "step": 2,
     "totalSteps": 3
@@ -24,7 +24,7 @@
   "objectives": [
     {
       "key": "cross_old_forest",
-      "description": "Win 6 encounters in Old Forest and keep your chosen build identity intact.",
+      "description": "Win 6 encounters in Old Forest.",
       "type": "CombatEncounterCompleted",
       "requiredAmount": 6,
       "filters": {
@@ -34,6 +34,19 @@
       "presentation": {
         "actionLabel": "Head to Old Forest",
         "destinationRoute": "/game/world/shenic?area=region_01_area_08"
+      }
+    },
+    {
+      "key": "break_the_goblin_gate",
+      "description": "Break the Goblin Gate: complete Goblin Mines I and defeat its boss.",
+      "type": "DungeonRunCompleted",
+      "requiredAmount": 1,
+      "filters": {
+        "dungeonDefinitionId": "goblin_mines"
+      },
+      "presentation": {
+        "actionLabel": "Enter Goblin Mines",
+        "destinationRoute": "/game/world/shenic"
       }
     },
     {

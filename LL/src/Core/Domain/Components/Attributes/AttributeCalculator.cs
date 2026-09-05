@@ -5,7 +5,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator

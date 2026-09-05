@@ -1,6 +1,6 @@
 # Equipment Recipes, Reusable Blueprints, and Directed Tempering
 
-**Superseded 3 September 2026:** this document is historical. Player crafting, tempering, reusable Blueprint items, and the later equipment Forge have been removed. Current gear comes from authored grants and drops and cannot be upgraded. See the [Forge removal](../../docs/design/equipment-forge-removal.md) and [current specification](../../docs/design/equipment-specification.md).
+**Superseded 5 September 2026:** this document is historical. Player crafting, tempering, reusable Blueprint items, and the later equipment Forge have been removed. Current gear comes from authored grants and combat drops; Reinforcement advances rank and consumable Blueprint Variants replace compatible styles. See the [Forge removal](../../docs/design/equipment-forge-removal.md) and [current specification](../../docs/design/equipment-specification.md).
 
 ## Outcome
 

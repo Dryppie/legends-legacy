@@ -10,17 +10,17 @@ Validated 31 archetypes, 10 areas, 2 dungeon families, 4 core styles and 16 name
 
 | Slot/type | Existing output IDs | Initial deterministic route |
 | --- | --- | --- |
-| Head | `heavy_helm`, `medium_helm`, `light_hood`, `cloth_cowl` | First Weapon: choose armor |
-| Chest | `heavy_breastplate`, `medium_mail`, `light_vest`, `cloth_robe` | First Weapon: choose armor |
-| Legs | `heavy_legplates`, `medium_greaves`, `light_leggings`, `cloth_pants` | First Weapon: choose armor |
-| Ring | `band` | Rewritten Tools of the Trade: fixed accessory |
-| Necklace | `amulet` | Rewritten Tools of the Trade: fixed accessory |
-| Relic | `vial` | Rewritten Tools of the Trade: fixed accessory |
-| OneHanded | `shortsword`, `dagger`, `hatchet`, `mace`, `wand` | First Weapon: choose legal hands |
-| TwoHanded | `greatsword`, `battle_axe`, `maul`, `spear`, `staff`, `longbow`, `crossbow`, `gauntlets` | First Weapon: choose legal hands |
-| OffHand | `towershield`, `Spiritward`, `grimoire` | First Weapon: choose legal hands |
+| Head | `heavy_helm`, `medium_helm`, `light_hood`, `cloth_cowl` | Ordinary equipment acquisition |
+| Chest | `heavy_breastplate`, `medium_mail`, `light_vest`, `cloth_robe` | Ordinary equipment acquisition |
+| Legs | `heavy_legplates`, `medium_greaves`, `light_leggings`, `cloth_pants` | Ordinary equipment acquisition |
+| Ring | `band` | Ordinary equipment acquisition |
+| Necklace | `amulet` | Ordinary equipment acquisition |
+| Relic | `vial` | Ordinary equipment acquisition |
+| OneHanded | `shortsword`, `dagger`, `hatchet`, `mace`, `wand` | Tutorial Arms Chest |
+| TwoHanded | `greatsword`, `battle_axe`, `maul`, `spear`, `staff`, `longbow`, `crossbow`, `gauntlets` | Ordinary equipment acquisition |
+| OffHand | `towershield`, `Spiritward`, `grimoire` | Ordinary equipment acquisition |
 
-One two-handed weapon occupies both hand slots but is one item: 7 paid items per loadout. One-handed + offhand or dual wield uses 8. No Tool slot is included. Every listed archetype also has an elective plain-target route; initial rewards grant one selected loadout, not every variant.
+The tutorial grants exactly one selected one-handed weapon. Every listed archetype remains available through ordinary equipment acquisition.
 
 ## Area progression
 
@@ -28,7 +28,7 @@ All rows award Tier 1, equip level 1. Area difficulty is not equipment tier. Cin
 
 | Area | Level | Completed quest gate | Cinders/hour target | Proposed Scrap/day |
 | --- | --- | --- | --- | --- |
-| Lumo Ruins | 1 | `quest.onboarding.tools_of_trade` | 1080 | 36 |
+| Lumo Ruins | 1 | `quest.onboarding.first_weapon` | 1080 | 36 |
 | Blood Grove | 5 | `quest.shenic.trial_of_lumo` | 1166 | 38 |
 | Crystal Creek | 10 | `quest.shenic.blood_in_the_grove` | 1260 | 40 |
 | Moonlit Graves | 15 | `quest.shenic.crystal_currents` | 1360 | 42 |

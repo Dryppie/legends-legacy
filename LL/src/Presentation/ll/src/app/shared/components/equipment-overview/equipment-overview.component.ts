@@ -64,10 +64,6 @@ export class EquipmentOverviewComponent implements OnInit {
       label: 'Off hand',
       accepts: 'One-handed or off-hand items',
     },
-    [EquipmentSlotType.Tool]: {
-      label: 'Tool',
-      accepts: 'Profession tools',
-    },
   };
 
   isGhost(slot: EquipmentSlot): boolean {
@@ -85,7 +81,7 @@ export class EquipmentOverviewComponent implements OnInit {
 
   slots = computed(() => {
     const stateSlots = this.equipmentState.equipmentSlots();
-    return this.baseSlots.filter(slot => slot.equipmentSlotType !== EquipmentSlotType.Tool).map((slot) => {
+    return this.baseSlots.map((slot) => {
       const live = stateSlots.find(
         (s) => s.equipmentSlotType === slot.equipmentSlotType,
       );
@@ -153,11 +149,6 @@ export class EquipmentOverviewComponent implements OnInit {
         id: '',
         iconPath: 'empty_offhand',
         equipmentSlotType: EquipmentSlotType.OffHand,
-      },
-      {
-        id: '',
-        iconPath: 'empty_tool',
-        equipmentSlotType: EquipmentSlotType.Tool,
       },
     ];
   }

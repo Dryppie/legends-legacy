@@ -2,6 +2,7 @@ using Application.UseCases.Quests.Commands.AcknowledgeQuestWelcome;
 using Application.UseCases.Quests.Commands.PinQuest;
 using Application.UseCases.Quests.Commands.SelectQuestChoice;
 using Application.UseCases.Quests.Commands.StartQuestEncounter;
+using Application.UseCases.Quests.Commands.TurnInQuest;
 using Application.UseCases.Quests.Dtos;
 using Application.UseCases.Quests.Queries.GetCombatAreaAccess;
 using Application.UseCases.Quests.Queries.GetQuestJournal;
@@ -14,6 +15,10 @@ namespace API.LL.Controllers.V1;
 [Authorize]
 public sealed class QuestController : BaseController
 {
+    [HttpPost("{questId}/turn-in")]
+    public async Task<ActionResult<Response<QuestJournalDto>>> TurnIn(string questId) =>
+        await Mediator.Send(new TurnInQuestCommand(CurrentCharacterGuid, questId));
+
     [HttpGet]
     public async Task<ActionResult<QuestJournalDto>> Get() =>
         await Mediator.Send(new GetQuestJournalQuery(CurrentCharacterGuid));

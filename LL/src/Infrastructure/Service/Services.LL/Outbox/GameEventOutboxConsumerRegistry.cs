@@ -17,11 +17,6 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.FocusedCreatureEssenceReceived] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.EssenceAscended] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
-            [GameEventTypes.EquipmentCrafted] =
-                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
-            [GameEventTypes.EquipmentTempered] =
-                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
-            [GameEventTypes.BlueprintUnlocked] = [GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.IdleCombatEncounterCompleted] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.CharacterCreated] =

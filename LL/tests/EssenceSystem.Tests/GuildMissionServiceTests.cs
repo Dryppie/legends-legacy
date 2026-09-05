@@ -25,7 +25,6 @@ public sealed partial class GuildMissionServiceTests
         Assert.Equal(1_000, missions["weekly.dungeon_expedition"].BaseTarget);
         Assert.Equal(100, missions["weekly.essence_stewardship"].BaseTarget);
         Assert.Equal(100, missions["weekly.dungeon_vanguard"].BaseTarget);
-        Assert.DoesNotContain(missions.Values, mission => mission.Metric == GuildContributionMetric.ItemsCrafted);
 
         const long fiveDaysOfTenSecondActions = 5 * 24 * 60 * 60 / 10;
         Assert.Equal(fiveDaysOfTenSecondActions * 10, missions["weekly.monster_extermination"].BaseTarget);
@@ -296,7 +295,6 @@ public sealed partial class GuildMissionServiceTests
 
         Assert.Null(overview!.ActiveMission);
         Assert.Equal(3, overview.WeeklyOptions.Count);
-        Assert.DoesNotContain(overview.WeeklyOptions, option => option.Definition.Metric == GuildContributionMetric.ItemsCrafted);
         Assert.True(overview.CanSelectMission);
     }
 

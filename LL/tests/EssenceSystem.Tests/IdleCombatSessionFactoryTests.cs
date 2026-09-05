@@ -65,9 +65,9 @@ public sealed class IdleCombatSessionFactoryTests
             "sword",
             Assert.Single(session.CombatSummary.RewardBreakdown.PowerItems)
                 .ItemInstance.ItemBaseId);
-        var summarizedCrafting = Assert.Single(session.CombatSummary.RewardBreakdown.CraftingItems);
-        Assert.Equal("ore", summarizedCrafting.ItemInstance.ItemBaseId);
-        Assert.Equal(5, summarizedCrafting.Quantity);
+        var summarizedMiscellaneous = Assert.Single(session.CombatSummary.RewardBreakdown.MiscellaneousItems);
+        Assert.Equal("ore", summarizedMiscellaneous.ItemInstance.ItemBaseId);
+        Assert.Equal(5, summarizedMiscellaneous.Quantity);
         Assert.Equal(
             "essence.goblin",
             Assert.Single(session.CombatSummary.RewardBreakdown.EssenceItems)
@@ -122,7 +122,7 @@ public sealed class IdleCombatSessionFactoryTests
         Assert.Equal(1, session.CombatSummary.Losses);
         Assert.Empty(session.CombatResult.Loot);
         Assert.Empty(session.CombatSummary.RewardBreakdown.PowerItems);
-        Assert.Empty(session.CombatSummary.RewardBreakdown.CraftingItems);
+        Assert.Empty(session.CombatSummary.RewardBreakdown.MiscellaneousItems);
         Assert.Empty(session.CombatSummary.RewardBreakdown.EssenceItems);
         Assert.Empty(session.CombatSummary.RewardBreakdown.DungeonAccessItems);
     }

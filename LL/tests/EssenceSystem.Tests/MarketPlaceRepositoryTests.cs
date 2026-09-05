@@ -123,7 +123,6 @@ public sealed class MarketPlaceRepositoryTests
             Id = Guid.NewGuid(),
             ItemBaseId = equipmentBase.Id,
             ItemBase = equipmentBase,
-            BaseRecipeId = "relic_recipe",
             InstanceModifiers =
             [
                 new InstanceAttributeModifier(AttributeType.MaxHealth, 70)

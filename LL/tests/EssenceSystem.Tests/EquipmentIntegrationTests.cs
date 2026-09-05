@@ -32,7 +32,6 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.Items;
-using Services.LL.Professions.Craftings;
 
 namespace EssenceSystem.Tests;
 
@@ -49,11 +48,10 @@ public sealed class EquipmentIntegrationTests
         Assert.Empty(disabled.Starters);
         var service = Service(db, writer);
         var access = await service.GetAccessAsync(characterId, CancellationToken.None);
-        Assert.True(access.Starters.Single(x => x.Kind == StarterEquipmentGrantKind.FirstWeapon).CanClaim);
-        Assert.False(access.Starters.Single(x => x.Kind == StarterEquipmentGrantKind.ReadyForRoad).CanClaim);
+        Assert.True(Assert.Single(access.Starters).CanClaim);
         Assert.False(db.ChangeTracker.HasChanges());
         Assert.Equal(0, writer.Calls);
-        var claim = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, StaffKit, CancellationToken.None);
+        var claim = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, MaceSelection, CancellationToken.None);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
         var claimed = (await service.GetAccessAsync(characterId, CancellationToken.None)).Starters.Single(x => x.Kind == StarterEquipmentGrantKind.FirstWeapon);
@@ -63,13 +61,13 @@ public sealed class EquipmentIntegrationTests
         Assert.False(db.ChangeTracker.HasChanges());
         var mapper = new MapperConfiguration(config => config.AddProfile<MappingProfile>(), NullLoggerFactory.Instance).CreateMapper();
         var dto = mapper.Map<EquipmentAccessDto>(await service.GetAccessAsync(characterId, CancellationToken.None));
-        Assert.Equal(StaffKit.Order(), dto.Starters.Single(x => x.Kind == StarterEquipmentGrantKind.FirstWeapon).Grant!.DefinitionIds.Order());
-        var option = mapper.Map<StarterEquipmentOptionDto>(Catalog().Options.Single(x => x.DefinitionId == "plain.staff"));
+        Assert.Equal(MaceSelection, dto.Starters.Single().Grant!.DefinitionIds);
+        var option = mapper.Map<StarterEquipmentOptionDto>(Catalog().Options.Single(x => x.DefinitionId == "plain.mace"));
         Assert.NotEmpty(option.Stats);
-        Assert.Equal(Catalog().Evaluator.Evaluate("plain.staff", 1, 0, null).Stats, option.Stats);
+        Assert.Equal(Catalog().Evaluator.Evaluate("plain.mace", 1, 0, null).Stats, option.Stats);
     }
 
-    private static readonly string[] StaffKit = ["plain.staff", "plain.heavy_helm", "plain.light_vest", "plain.cloth_pants"];
+    private static readonly string[] MaceSelection = ["plain.mace"];
     private static StarterEquipmentCatalog Catalog() => JsonStarterEquipmentCatalog.Load(ContentPath());
 
     [Fact]
@@ -85,8 +83,6 @@ public sealed class EquipmentIntegrationTests
         Assert.Equal("plain.staff", dto.Progression.DefinitionId);
         Assert.Equal(0, dto.Progression.Rank);
         Assert.Equal(EquipmentOwnershipKind.BoundPersonal, dto.Progression.Ownership);
-        Assert.Null(dto.CraftingDesign);
-        Assert.Null(dto.Potential);
         Assert.Empty(dto.BaseModifiers);
     }
 
@@ -134,7 +130,6 @@ public sealed class EquipmentIntegrationTests
         Assert.All(persisted.Equipment, x => Assert.Equal(original, x.ProgressionData!.Serialize()));
         Assert.Empty(live.BaseModifiers);
         Assert.True(live.UsesProgressionNormalizedRatings);
-        Assert.Null(live.Potential);
         var participant = Assert.Single(await new SnapshotCombatantBuilder(db, new CombatSetupService(null!, null!, null!, null!))
             .BuildAsync([new SnapshotCombatantRequest(persisted, new CombatParticipantSlot(characterId.ToString(), characterId, CombatSide.Friendly, 1))], CancellationToken.None));
         var frozen = Assert.Single(participant.Combatant.Equipment);
@@ -162,17 +157,18 @@ public sealed class EquipmentIntegrationTests
     }
 
     [Theory]
-    [InlineData("plain.staff", null)]
-    [InlineData("plain.shortsword", "plain.towershield")]
-    [InlineData("plain.dagger", "plain.dagger")]
-    public async Task Starter_claim_reload_equip_and_retry_grant_exactly_one_chosen_kit(string main, string? off)
+    [InlineData("plain.shortsword")]
+    [InlineData("plain.dagger")]
+    [InlineData("plain.hatchet")]
+    [InlineData("plain.mace")]
+    [InlineData("plain.wand")]
+    public async Task Starter_claim_reload_equip_and_retry_grant_exactly_one_chosen_weapon(string definitionId)
     {
         await using var db = CreateDb();
         var characterId = await Seed(db);
         var writer = new RepositoryRewardWriter(db);
         var service = Service(db, writer);
-        var selection = off is null ? new[] { main, StaffKit[1], StaffKit[2], StaffKit[3] }
-            : new[] { main, off, StaffKit[1], StaffKit[2], StaffKit[3] };
+        var selection = new[] { definitionId };
         var result = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, selection, CancellationToken.None);
         Assert.Null(result.Error);
         var sameTransactionReplay = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, selection, CancellationToken.None);
@@ -181,10 +177,9 @@ public sealed class EquipmentIntegrationTests
         db.ChangeTracker.Clear();
         var awarded = await db.ItemInstances.OfType<EquipmentInstance>().Include(x => x.ItemBase).ToListAsync();
         Assert.Equal(selection.Length, awarded.Count);
-        Assert.All(awarded, x => { Assert.True(x.IsBound); Assert.Null(x.BaseRecipeId); });
+        Assert.All(awarded, x => Assert.True(x.IsBound));
         var repository = new EquipmentSlotRepository(db);
-        foreach (var equipment in awarded.OrderBy(x => x.EquipmentBase.EquipmentType == EquipmentType.OffHand))
-            Assert.True((await repository.EquipEquipmentAsync(characterId, equipment.Id, null, CancellationToken.None)).Succeeded);
+        Assert.True((await repository.EquipEquipmentAsync(characterId, Assert.Single(awarded).Id, null, CancellationToken.None)).Succeeded);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
         var replay = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, selection.Reverse().ToArray(), CancellationToken.None);
@@ -192,27 +187,12 @@ public sealed class EquipmentIntegrationTests
         Assert.Equal(1, writer.Calls);
         Assert.Empty(await db.InventoryItems.ToListAsync());
         var slots = await repository.GetEquipmentSlotsByEntityIdAsync(characterId, CancellationToken.None);
-        Assert.Equal(5, slots.Count(x => x.EquipmentInstanceId != null));
-        Assert.Equal(selection.Length, slots.Where(x => x.EquipmentInstanceId != null).Select(x => x.EquipmentInstanceId).Distinct().Count());
-        var conflict = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, ["plain.maul", StaffKit[1], StaffKit[2], StaffKit[3]], CancellationToken.None);
-        Assert.Null(conflict.Grant);
-    }
-
-    [Fact]
-    public async Task Accessory_stage_has_its_own_prerequisite_and_once_only_receipt()
-    {
-        await using var db = CreateDb();
-        var characterId = await Seed(db);
-        var writer = new RepositoryRewardWriter(db);
-        var service = Service(db, writer);
-        Assert.Null((await service.ClaimAsync(characterId, StarterEquipmentGrantKind.ReadyForRoad, [], CancellationToken.None)).Grant);
-        db.CharacterQuestProgresses.Add(new() { CharacterId = characterId, QuestId = "quest.onboarding.first_weapon", Status = QuestStatus.Completed });
-        await db.SaveChangesAsync();
-        var result = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.ReadyForRoad, [], CancellationToken.None);
-        await db.SaveChangesAsync();
-        Assert.Equal(new[] { "amulet", "band", "vial" }, result.Grant!.Equipment.Select(x => x.ItemBaseId).Order());
-        Assert.NotNull((await service.ClaimAsync(characterId, StarterEquipmentGrantKind.ReadyForRoad, [], CancellationToken.None)).Grant);
-        Assert.Equal(1, writer.Calls);
+        Assert.Single(slots.Where(x => x.EquipmentInstanceId != null));
+        var conflict = await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, ["plain.shortsword"], CancellationToken.None);
+        if (definitionId == "plain.shortsword")
+            Assert.NotNull(conflict.Grant);
+        else
+            Assert.Null(conflict.Grant);
     }
 
     [Fact]
@@ -223,12 +203,12 @@ public sealed class EquipmentIntegrationTests
         var writer = new RepositoryRewardWriter(db);
         var disabled = Service(db, writer, enabled: false);
         Assert.Empty(disabled.GetOptions());
-        Assert.Null((await disabled.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, StaffKit, CancellationToken.None)).Grant);
+        Assert.Null((await disabled.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, MaceSelection, CancellationToken.None)).Grant);
         var service = Service(db, writer);
-        Assert.Equal(31, service.GetOptions().Count);
-        Assert.Null((await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, StaffKit, CancellationToken.None)).Grant);
-        foreach (var invalid in new[] { new[] { "unknown" }, new[] { "plain.towershield", "plain.grimoire", StaffKit[1], StaffKit[2], StaffKit[3] },
-            new[] { "plain.staff", "plain.dagger", StaffKit[1], StaffKit[2], StaffKit[3] } })
+        Assert.Equal(5, service.GetOptions().Count);
+        Assert.Null((await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, MaceSelection, CancellationToken.None)).Grant);
+        foreach (var invalid in new[] { new[] { "unknown" }, new[] { "plain.towershield" },
+            new[] { "plain.staff" }, new[] { "plain.mace", "plain.dagger" } })
             Assert.Null((await service.ClaimAsync(characterId, StarterEquipmentGrantKind.FirstWeapon, invalid, CancellationToken.None)).Grant);
         Assert.False(db.ChangeTracker.HasChanges());
         Assert.Equal(0, writer.Calls);
@@ -240,7 +220,7 @@ public sealed class EquipmentIntegrationTests
         var options = DbOptions();
         await using var seed = new LLDbContext(options);
         var characterId = await Seed(seed);
-        var request = new ClaimStarterEquipmentCommand(characterId, StarterEquipmentGrantKind.FirstWeapon, StaffKit);
+        var request = new ClaimStarterEquipmentCommand(characterId, StarterEquipmentGrantKind.FirstWeapon, MaceSelection);
         var mapper = new MapperConfiguration(config => config.AddProfile<TestProfile>(), NullLoggerFactory.Instance).CreateMapper();
         async Task<Response<StarterEquipmentGrantDto>> Claim()
         {
@@ -253,8 +233,8 @@ public sealed class EquipmentIntegrationTests
         await Task.WhenAll(Claim(), Claim());
         await using var verify = new LLDbContext(options);
         Assert.Single(await verify.StarterEquipmentGrants.ToListAsync());
-        Assert.Equal(4, await verify.InventoryItems.CountAsync());
-        Assert.Equal(4, await verify.EconomyLedger.CountAsync());
+        Assert.Single(await verify.InventoryItems.ToListAsync());
+        Assert.Single(await verify.EconomyLedger.ToListAsync());
     }
 
     [Fact]
@@ -278,7 +258,6 @@ public sealed class EquipmentIntegrationTests
         Assert.True(persisted.IsBound);
         Assert.Throws<InvalidOperationException>(() => persisted.BindEquipmentProgressionForEquip(Guid.NewGuid()));
         Assert.Single(await db.InventoryItems.ToListAsync());
-        Assert.Throws<InvalidOperationException>(() => new TemperingMechanicsService().ApplyTemperingAttempt(persisted, null!, new Random(1)));
     }
 
     private static EquipmentState Award(StarterEquipmentCatalog catalog, Guid owner, EquipmentAwardKind kind = EquipmentAwardKind.QuestReward) =>

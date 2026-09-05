@@ -17,13 +17,9 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "FocusedCreatureEssenceReceived",
         "EssenceAscended",
         "CompatibleEssenceLoadout",
-        "EquipmentCrafted",
-        "EquipmentTempered",
         "EquipmentEquipped",
         EquipmentKeys.StarterLoadoutObjective,
-        EquipmentKeys.PlainTargetObjective,
-        "GatheringToolEquipped",
-        "AreaActionCompletedWithTool",
+        EquipmentKeys.AreaDropObjective,
         "CharacterLevelReached",
         "ColosseumBattleStarted",
         "TournamentBattleCompleted",
@@ -31,12 +27,6 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "DungeonRunCompleted",
         "DailyProphecyCompleted"
     ];
-
-    private static readonly HashSet<string> ItemQualities =
-        ["Crude", "Standard", "Fine", "Exceptional", "Masterwork"];
-
-    private static readonly HashSet<string> GatheringTypes =
-        ["Mining", "Woodcutting", "Skinning"];
 
     private static readonly HashSet<string> RewardTypes = ["Item", "Cinders"];
     private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<int, QuestDefinition>> _definitions;
@@ -147,11 +137,11 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                     $"Quest '{definition.Id}' has unsupported objective mode '{definition.ObjectiveMode}'.");
             }
 
-            foreach (var objective in definition.Objectives.Where(x => x.Type is EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.PlainTargetObjective))
+            foreach (var objective in definition.Objectives.Where(x => x.Type is EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.AreaDropObjective))
             {
                 if (objective.RequiredAmount != 1 ||
                     objective.Type == EquipmentKeys.StarterLoadoutObjective &&
-                    objective.Filters.StarterEquipmentKind is not ("FirstWeapon" or "ReadyForRoad"))
+                    objective.Filters.StarterEquipmentKind != "FirstWeapon")
                     throw new InvalidOperationException($"Quest '{definition.Id}' has an invalid Equipment progression objective.");
             }
 
@@ -214,37 +204,6 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                         $"Quest '{definition.Id}' has an invalid objective '{objective.Key}'.");
                 }
 
-                if (objective.Type == "AreaActionCompletedWithTool" &&
-                    (string.IsNullOrWhiteSpace(objective.Filters.AreaId) ||
-                     string.IsNullOrWhiteSpace(objective.Filters.GatheringType) ||
-                     !GatheringTypes.Contains(objective.Filters.GatheringType)))
-                {
-                    throw new InvalidOperationException(
-                        $"Quest '{definition.Id}' objective '{objective.Key}' requires a valid area and gathering type.");
-                }
-
-                if (objective.Filters.IncludePreviousCrafts &&
-                    (objective.Type != "EquipmentCrafted" ||
-                     objective.Filters.BaseRecipeIds.Count == 0))
-                {
-                    throw new InvalidOperationException(
-                        $"Quest '{definition.Id}' objective '{objective.Key}' can include previous crafts only when it matches equipment base recipes.");
-                }
-
-                if (!string.IsNullOrWhiteSpace(objective.Filters.Quality) &&
-                    (objective.Type != "EquipmentCrafted" ||
-                     !ItemQualities.Contains(objective.Filters.Quality)))
-                {
-                    throw new InvalidOperationException(
-                        $"Quest '{definition.Id}' objective '{objective.Key}' has an invalid crafted item quality filter.");
-                }
-
-                if (objective.Filters.RequiresNoPotential &&
-                    objective.Type != "EquipmentTempered")
-                {
-                    throw new InvalidOperationException(
-                        $"Quest '{definition.Id}' objective '{objective.Key}' can require exhausted Potential only for tempered equipment.");
-                }
             }
 
             foreach (var reward in definition.Rewards)
@@ -324,30 +283,6 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         {
             throw new InvalidOperationException(
                 "Quest rewards reference missing item bases: " + string.Join(", ", missingItems));
-        }
-
-        var recipePath = Path.Combine(dataRoot, "crafting", "base-recipes.json");
-        if (!File.Exists(recipePath))
-        {
-            throw new InvalidOperationException(
-                "Quest validation requires Data/crafting/base-recipes.json.");
-        }
-
-        using var recipeDocument = JsonDocument.Parse(File.ReadAllText(recipePath));
-        var recipeIds = recipeDocument.RootElement
-            .EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString()!)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var missingRecipes = definitions
-            .SelectMany(x => x.Objectives)
-            .SelectMany(x => x.Filters.BaseRecipeIds)
-            .Where(x => !recipeIds.Contains(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-        if (missingRecipes.Count > 0)
-        {
-            throw new InvalidOperationException(
-                "Quest objectives reference missing base recipes: " + string.Join(", ", missingRecipes));
         }
 
         var creaturePath = Path.Combine(dataRoot, "world", "creatures.json");

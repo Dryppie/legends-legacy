@@ -61,8 +61,7 @@ describe('quest journal entries', () => {
   it('maps detailed quest categories into journal sections', () => {
     expect(questJournalGroupForCategory('Shenic')).toBe('World Map');
     expect(questJournalGroupForCategory('Dungeons')).toBe('World Map');
-    expect(questJournalGroupForCategory('Gathering')).toBe('World Map');
-    expect(questJournalGroupForCategory('Crafting')).toBe('Crafting');
+    expect(questJournalGroupForCategory('Combat')).toBe('World Map');
     expect(questJournalGroupForCategory('Character')).toBe('Character');
     expect(questJournalGroupForCategory('Essences')).toBe('Character');
     expect(questJournalGroupForCategory('Tutorial')).toBe('Tutorial');
@@ -75,7 +74,6 @@ describe('quest journal entries', () => {
       'Tutorial',
       'Colosseum',
       'Essences',
-      'Crafting',
       'Shenic',
     ];
     const entries = categories.map((category, index) => {
@@ -89,14 +87,12 @@ describe('quest journal entries', () => {
 
     expect(groups.map((group) => group.key)).toEqual([
       'World Map',
-      'Crafting',
       'Character',
       'Other',
       'Tutorial',
     ]);
     expect(groups.map((group) => group.entries[0].category)).toEqual([
       'Shenic',
-      'Crafting',
       'Essences',
       'Colosseum',
       'Tutorial',

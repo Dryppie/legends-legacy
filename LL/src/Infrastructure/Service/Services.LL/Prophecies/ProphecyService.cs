@@ -782,22 +782,8 @@ public sealed class ProphecyService : IProphecyService
             case ProphecyObjectiveType.CompleteDungeons when progressEvent.Kind == ProphecyProgressKind.DungeonCompleted:
             case ProphecyObjectiveType.GainEssenceXp when progressEvent.Kind == ProphecyProgressKind.EssenceXpGained:
             case ProphecyObjectiveType.AbsorbEssence when progressEvent.Kind == ProphecyProgressKind.EssenceAbsorbed:
-            case ProphecyObjectiveType.TemperItems when progressEvent.Kind == ProphecyProgressKind.ItemTempered:
             case ProphecyObjectiveType.TreasureProgress when progressEvent.Kind == ProphecyProgressKind.TreasureProgress:
                 prophecy.CurrentValue += Math.Max(1, progressEvent.Amount);
-                return true;
-
-            case ProphecyObjectiveType.GatherResources when progressEvent.Kind == ProphecyProgressKind.ResourceGathered:
-                if (!MeetsGatheringRequirements(prophecy.ObjectiveParameterSnapshotJson, progressEvent.Profession))
-                {
-                    return false;
-                }
-
-                prophecy.CurrentValue += Math.Max(1, progressEvent.Amount);
-                return true;
-
-            case ProphecyObjectiveType.SpendPotential when progressEvent.Kind == ProphecyProgressKind.PotentialSpent:
-                prophecy.CurrentValue += Math.Max(1, progressEvent.PotentialSpent ?? progressEvent.Amount);
                 return true;
 
             case ProphecyObjectiveType.MeaningfulDefeatThenWins when progressEvent.Kind == ProphecyProgressKind.EncounterLost:
@@ -1217,18 +1203,6 @@ public sealed class ProphecyService : IProphecyService
         }
 
         return parameters.MinimumEnemyCount is null || enemyCount.Value >= parameters.MinimumEnemyCount.Value;
-    }
-
-    private static bool MeetsGatheringRequirements(string parameterJson, string? profession)
-    {
-        if (!ProphecyObjectiveParameters.TryParse(parameterJson, out var parameters))
-        {
-            return false;
-        }
-
-        var requiredProfession = parameters.RequiredProfession?.Trim();
-        return string.IsNullOrWhiteSpace(requiredProfession) ||
-            string.Equals(requiredProfession, profession?.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ExpireOldUnfinished(IReadOnlyList<PlayerProphecyInstance> instances, DateTimeOffset now)

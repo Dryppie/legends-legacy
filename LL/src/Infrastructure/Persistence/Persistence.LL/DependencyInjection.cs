@@ -20,8 +20,6 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Leaderboards;
 using Domain.Models.MarketPlaces;
-using Domain.Models.Professions;
-using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
@@ -109,9 +107,9 @@ public static class DependencyInjection
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEconomyLedgerRepository, EconomyLedgerRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentUpgradeRepository, EquipmentUpgradeRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentBlueprintRepository, EquipmentBlueprintRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IStarterEquipmentRepository, StarterEquipmentRepository>();
-        services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentAcquisitionRepository, EquipmentAcquisitionRepository>();
-        services.AddScoped<Domain.Models.Items.Equipments.Progression.ICombatAcquisitionRepository, CombatAcquisitionRepository>();
         services.AddScoped<IEssenceRepository, EssenceRepository>();
 
         services.AddScoped<Domain.Models.Guilds.IGuildVaultRepository, Persistence.LL.Repositories.Guilds.GuildVaultRepository>();

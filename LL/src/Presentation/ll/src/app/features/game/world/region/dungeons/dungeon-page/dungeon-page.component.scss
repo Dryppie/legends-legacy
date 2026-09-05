@@ -19,6 +19,7 @@
 
 .dungeon-header {
   display: flex;
+  flex-wrap: wrap;
   min-height: 4.5rem;
   align-items: center;
   justify-content: space-between;
@@ -55,6 +56,7 @@
 
 .dungeon-header__actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--ll-space-5);
 }

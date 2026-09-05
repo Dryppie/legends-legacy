@@ -32,8 +32,6 @@ public interface IQuestRepository
         Guid characterId,
         IReadOnlyCollection<string> itemBaseIds,
         int? tier,
-        bool mustBeCrafted,
-        bool toolSlotOnly,
         CancellationToken cancellationToken);
 
     void AddProgress(CharacterQuestProgress progress);

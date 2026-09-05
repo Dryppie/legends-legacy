@@ -5,8 +5,6 @@ import {
   CombatSessionDto,
 } from '../../../../shared/models/Dtos/combatResultDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { GatheringType } from '../../../../shared/models/enums/gatheringType';
-import { Rarity } from '../../../../shared/models/enums/rarity';
 
 describe('SessionSummaryService', () => {
   it('holds chunk summaries until catch-up completes and then shows their total', () => {
@@ -86,7 +84,7 @@ function session(
       totalSoulstones: 0,
       rewardBreakdown: {
         powerItems: [item(itemQuantity)],
-        craftingItems: [],
+        miscellaneousItems: [],
         essenceItems: [],
         dungeonAccessItems: [],
       },

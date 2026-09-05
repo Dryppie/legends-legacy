@@ -69,8 +69,6 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
         Guid characterId,
         IReadOnlyCollection<string> itemBaseIds,
         int? tier,
-        bool mustBeCrafted,
-        bool toolSlotOnly,
         CancellationToken cancellationToken)
     {
         var ids = itemBaseIds.ToArray();
@@ -80,9 +78,7 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
                 x => x.EntityId == characterId &&
                      x.EquipmentInstance != null &&
                      ids.Contains(x.EquipmentInstance.ItemBaseId) &&
-                     (!tier.HasValue || x.EquipmentInstance.Tier == tier.Value) &&
-                     (!mustBeCrafted || x.EquipmentInstance.BaseRecipeId != null) &&
-                     (!toolSlotOnly || x.EquipmentSlotType == EquipmentSlotType.Tool),
+                     (!tier.HasValue || x.EquipmentInstance.Tier == tier.Value),
                 cancellationToken);
     }
 

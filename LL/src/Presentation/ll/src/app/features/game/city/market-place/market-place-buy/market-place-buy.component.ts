@@ -190,22 +190,12 @@ export class MarketPlaceBuyComponent implements OnInit {
   readonly minimumTierCtrl = new FormControl<number | null>(null, {
     validators: [Validators.min(1)],
   });
-  readonly minimumPotentialCtrl = new FormControl<number | null>(null, {
-    validators: [Validators.min(0)],
-  });
   readonly minimumTier = toSignal(
     this.minimumTierCtrl.valueChanges.pipe(
       startWith(this.minimumTierCtrl.value),
     ),
     { initialValue: null },
   );
-  readonly minimumPotential = toSignal(
-    this.minimumPotentialCtrl.valueChanges.pipe(
-      startWith(this.minimumPotentialCtrl.value),
-    ),
-    { initialValue: null },
-  );
-
   readonly rarities = [
     'Common',
     'Uncommon',
@@ -222,9 +212,6 @@ export class MarketPlaceBuyComponent implements OnInit {
   readonly equipmentTypeOptions = computed<DropdownOption<string>[]>(() => [
     { label: 'Any slot', value: '' },
     ...Object.values(EquipmentType)
-      .filter(
-        (value) => value !== EquipmentType.Tool,
-      )
       .map((value) => ({
         label: new EquipmentTypePipe().transform(value),
         value,
@@ -290,6 +277,13 @@ export class MarketPlaceBuyComponent implements OnInit {
           (listing) =>
             (listing.itemInstance as EquipmentInstance).equipmentBase
               .equipmentType === this.equipmentType(),
+        );
+      }
+
+      if (this.quality()) {
+        items = items.filter(
+          (listing) =>
+            (listing.itemInstance as EquipmentInstance).quality === this.quality(),
         );
       }
 
@@ -565,7 +559,6 @@ export class MarketPlaceBuyComponent implements OnInit {
     this.activeStyleId.set('');
     this.minimumRankCtrl.reset();
     this.minimumTierCtrl.reset();
-    this.minimumPotentialCtrl.reset();
     this.priceSort.set('');
   }
 

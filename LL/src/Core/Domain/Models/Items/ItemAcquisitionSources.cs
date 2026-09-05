@@ -6,7 +6,6 @@ public static class ItemAcquisitionSources
     public const string LegacyBackfill = "legacy-backfill";
     public const string CombatReward = "combat-reward";
     public const string DungeonReward = "dungeon-reward";
-    public const string Crafting = "crafting";
     public const string Marketplace = "marketplace";
     public const string ProphecyReward = "prophecy-reward";
     public const string ChampionMarket = "champion-market";
@@ -21,4 +20,5 @@ public static class ItemAcquisitionSources
     public const string AdminCompensation = "admin-compensation";
     public const string RaidReward = "raid-reward";
     public const string RaidTrophyVendor = "raid-trophy-vendor";
+    public const string EquipmentDismantle = "equipment-dismantle";
 }

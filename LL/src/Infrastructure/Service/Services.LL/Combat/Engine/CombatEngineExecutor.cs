@@ -1,5 +1,4 @@
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
@@ -7,7 +6,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Damages;
-using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Sets;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -20,7 +19,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 {
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
-    private readonly ICraftingDefinitionProvider? _craftingDefinitions;
+    private readonly EquipmentCatalog? _equipmentCatalog;
     private readonly ThreatAndTankingOptions _threatAndTankingOptions;
     private readonly AbilityThreatTuning _abilityThreatTuning;
     private readonly Dictionary<EssenceAbilityCacheKey, CompiledAbility> _compiledEssenceAbilities = [];
@@ -28,12 +27,12 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     public CombatEngineExecutor(
         IAbilityCatalogProvider catalogProvider,
         IEssenceDefinitionRepository? essenceDefinitions = null,
-        ICraftingDefinitionProvider? craftingDefinitions = null,
+        EquipmentCatalog? equipmentCatalog = null,
         IOptions<ThreatAndTankingOptions>? threatAndTankingOptions = null)
     {
         _catalogProvider = catalogProvider;
         _essenceDefinitions = essenceDefinitions;
-        _craftingDefinitions = craftingDefinitions;
+        _equipmentCatalog = equipmentCatalog;
         _threatAndTankingOptions = threatAndTankingOptions?.Value ?? new ThreatAndTankingOptions();
         _abilityThreatTuning = _threatAndTankingOptions.ToAbilityThreatTuning();
     }
@@ -423,20 +422,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     {
         if (combatant.MainHandEquipment?.ProgressionData is { } progression)
             return ToBasicAttackBehavior(progression.Behavior);
-        if (_craftingDefinitions is null || combatant.MainHandEquipment is null)
-            return BasicAttackBehavior.Default;
-        if (string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BaseRecipeId))
-            return BasicAttackBehavior.Default;
-
-        var recipe = _craftingDefinitions.GetRecipe(combatant.MainHandEquipment.BaseRecipeId);
-        var blueprint = string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BlueprintId)
-            ? null
-            : _craftingDefinitions.GetBlueprint(combatant.MainHandEquipment.BlueprintId);
-        if (recipe is null ||
-            (!string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BlueprintId) && blueprint is null))
-            return BasicAttackBehavior.Default;
-        var behavior = EquipmentCraftingDesignComposer.Compose(recipe, blueprint).Behavior;
-        return ToBasicAttackBehavior(behavior);
+        return BasicAttackBehavior.Default;
     }
 
     private static BasicAttackBehavior ToBasicAttackBehavior(EquipmentBehaviorDefinition behavior)
@@ -1031,11 +1017,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     }
 
     private IEnumerable<string> GetEquipmentSetAbilityIds(CombatEntity combatant) =>
-        _craftingDefinitions is null
+        _equipmentCatalog is null
             ? []
             : EquipmentSetBonusResolver.ResolveGrantedAbilityIds(
                 combatant.Equipment,
-                _craftingDefinitions.GetEquipmentSets());
+                _equipmentCatalog.EquipmentSets);
 
     private IEnumerable<string> GetAbilityIdsForEssence(string essenceId, AbilityCatalog catalog)
     {

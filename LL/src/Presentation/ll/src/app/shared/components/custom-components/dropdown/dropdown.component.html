@@ -3,6 +3,7 @@
   #dropdownOrigin="cdkOverlayOrigin"
   cdkOverlayOrigin
   type="button"
+  [disabled]="disabled"
   class="flex w-full items-center justify-between gap-2 whitespace-nowrap px-3 text-left text-sm transition-colors"
   [ngClass]="buttonClasses"
   [attr.aria-expanded]="hasSubOptions || hasOptions ? open() : null"

@@ -9,9 +9,6 @@ public static class ProphecyObjectiveType
     public const string CompleteDungeons = nameof(CompleteDungeons);
     public const string GainEssenceXp = nameof(GainEssenceXp);
     public const string AbsorbEssence = nameof(AbsorbEssence);
-    public const string GatherResources = nameof(GatherResources);
-    public const string TemperItems = nameof(TemperItems);
-    public const string SpendPotential = nameof(SpendPotential);
     public const string TreasureProgress = nameof(TreasureProgress);
     public const string MeaningfulDefeatThenWins = nameof(MeaningfulDefeatThenWins);
 }

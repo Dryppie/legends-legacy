@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.Professions;
 using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Components.Attributes;
@@ -11,6 +10,7 @@ using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.Equipments.Sets;
+using Domain.Models.Items.Equipments.Progression;
 using MediatR;
 
 namespace Application.UseCases.Equipments.Queries.CompareEquipment;
@@ -42,18 +42,18 @@ public sealed class CompareEquipmentQueryHandler
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventories;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
-    private readonly ICraftingDefinitionProvider? _craftingDefinitions;
+    private readonly EquipmentCatalog? _equipmentCatalog;
 
     public CompareEquipmentQueryHandler(
         ICharacterService characters,
         IInventoryService inventories,
         IEssenceCombatLoadoutResolver essenceLoadouts,
-        ICraftingDefinitionProvider? craftingDefinitions = null)
+        EquipmentCatalog? equipmentCatalog = null)
     {
         _characters = characters;
         _inventories = inventories;
         _essenceLoadouts = essenceLoadouts;
-        _craftingDefinitions = craftingDefinitions;
+        _equipmentCatalog = equipmentCatalog;
     }
 
     public async Task<Response<EquipmentComparisonDto>> Handle(
@@ -90,7 +90,7 @@ public sealed class CompareEquipmentQueryHandler
                 candidate,
                 request.SlotType,
                 loadout.AttributeModifiers,
-                _craftingDefinitions?.GetEquipmentSets(),
+                _equipmentCatalog?.EquipmentSets,
                 out var comparison))
         {
             return Response<EquipmentComparisonDto>.Fail(
@@ -208,7 +208,6 @@ public static class EquipmentComparisonProjector
             EquipmentType.Ring => EquipmentSlotType.Ring,
             EquipmentType.TwoHanded => EquipmentSlotType.MainHand,
             EquipmentType.OffHand => EquipmentSlotType.OffHand,
-            EquipmentType.Tool => EquipmentSlotType.Tool,
             EquipmentType.OneHanded when requested is EquipmentSlotType.MainHand or EquipmentSlotType.OffHand => requested.Value,
             EquipmentType.OneHanded when slots.GetValueOrDefault(EquipmentSlotType.MainHand)?.EquipmentInstance is null => EquipmentSlotType.MainHand,
             EquipmentType.OneHanded when slots.GetValueOrDefault(EquipmentSlotType.OffHand)?.EquipmentInstance is null => EquipmentSlotType.OffHand,
@@ -217,10 +216,6 @@ public static class EquipmentComparisonProjector
         };
 
         if (!slots.ContainsKey(target))
-            return false;
-        if (candidate.EquipmentBase.EquipmentType == EquipmentType.Tool)
-            return requested is null or EquipmentSlotType.Tool;
-        if (requested == EquipmentSlotType.Tool)
             return false;
         return candidate.EquipmentBase.EquipmentType != EquipmentType.OneHanded ||
             requested is null or EquipmentSlotType.MainHand or EquipmentSlotType.OffHand;

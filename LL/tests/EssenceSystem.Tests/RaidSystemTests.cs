@@ -496,15 +496,11 @@ public sealed partial class RaidSystemTests
                 EntityId = character.Id,
                 Entity = character,
                 EquipmentSlotType = slotType,
-                EquipmentInstance = new EquipmentInstance
-                {
-                    Id = Guid.NewGuid(),
-                    ItemBaseId = armorBase.Id,
-                    ItemBase = armorBase,
-                    Tier = 1,
-                    Rarity = Rarity.Epic,
-                    BlueprintId = $"blueprint.test.{slotType.ToString().ToLowerInvariant()}"
-                }
+                EquipmentInstance = ProgressionTestEquipment.Create(
+                    activeStyleId: $"blueprint.test.{slotType.ToString().ToLowerInvariant()}",
+                    rarity: Rarity.Epic,
+                    ownerId: character.Id,
+                    itemBase: armorBase)
             });
         }
         var raidLoadout = new EssenceLoadout

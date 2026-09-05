@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "partsItemBaseId": "reinforcement_parts",
+  "dismantleRankRecovery": 0.5,
+  "tiers": [
+    {
+      "tier": 1,
+      "rankPartCosts": [5, 10, 20, 40, 80],
+      "rankCinderCosts": [250, 500, 1000, 2000, 4000],
+      "baseDismantleParts": 1
+    },
+    {
+      "tier": 2,
+      "rankPartCosts": [10, 20, 40, 80, 160],
+      "rankCinderCosts": [500, 1000, 2000, 4000, 8000],
+      "baseDismantleParts": 2
+    }
+  ]
+}

@@ -21,9 +21,6 @@ public sealed class ProphecyDtoMappingTests
     [InlineData(ProphecyObjectiveType.CompleteDungeons, ProphecyGuidanceDestination.Dungeons, "Run Dungeons")]
     [InlineData(ProphecyObjectiveType.GainEssenceXp, ProphecyGuidanceDestination.Essences, "Train Essences")]
     [InlineData(ProphecyObjectiveType.AbsorbEssence, ProphecyGuidanceDestination.SoulArchive, "Open Archive")]
-    [InlineData(ProphecyObjectiveType.GatherResources, ProphecyGuidanceDestination.Gathering, "Gather Resources")]
-    [InlineData(ProphecyObjectiveType.TemperItems, ProphecyGuidanceDestination.Crafting, "Temper Gear")]
-    [InlineData(ProphecyObjectiveType.SpendPotential, ProphecyGuidanceDestination.Crafting, "Temper Gear")]
     [InlineData(ProphecyObjectiveType.TreasureProgress, ProphecyGuidanceDestination.Dungeons, "Seek Treasure")]
     [InlineData(ProphecyObjectiveType.MeaningfulDefeatThenWins, ProphecyGuidanceDestination.WorldCombat, "Return To Battle")]
     public void ProphecyInstanceDto_maps_server_owned_guidance(
@@ -36,19 +33,6 @@ public sealed class ProphecyDtoMappingTests
         Assert.Equal(expectedDestination, dto.Guidance.Destination);
         Assert.Equal(expectedActionLabel, dto.Guidance.ActionLabel);
         Assert.False(string.IsNullOrWhiteSpace(dto.Guidance.Hint));
-    }
-
-    [Fact]
-    public void ProphecyInstanceDto_uses_snapshotted_gathering_profession_in_guidance()
-    {
-        var instance = CreateInstance(ProphecyObjectiveType.GatherResources);
-        instance.ProphecyDefinition!.ObjectiveParameterJson = "{\"requiredProfession\":\"Woodcutting\"}";
-        instance.ObjectiveParameterSnapshotJson = "{\"requiredProfession\":\"Mining\"}";
-
-        var dto = CreateMapper().Map<ProphecyInstanceDto>(instance);
-
-        Assert.Equal("Go Mining", dto.Guidance.ActionLabel);
-        Assert.Contains("Only Mining", dto.Guidance.Hint);
     }
 
     [Fact]

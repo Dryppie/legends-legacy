@@ -24,7 +24,7 @@ namespace LegendsLegacy.Balance;
 
 public sealed record MeranTrial(int Seed, string Outcome, int Ticks, IReadOnlyList<string> Enemies, int Cinders);
 public sealed record MeranEconomy(double WinRate, double CindersPerDay,
-    double? PlainTargetHours, double? SigilHours);
+    double? EquipmentDropHours, double? SigilDropHours);
 public sealed record MeranEncounterResult(string SourceId, string Room, string BuildId, int Level, int Tier, int Rank,
     int EssenceLevel, IReadOnlyList<string> EssenceIds, IReadOnlyList<MeranTrial> Trials, MeranEconomy? Economy);
 public sealed record MeranProgressionReport(int Version, int Seed, int TrialsPerCase, string Purpose,
@@ -133,14 +133,15 @@ public sealed class MeranProgressionAnalyzer(string contentRoot, EquipmentRefere
 
     public static MeranEconomy ProjectEconomy(IReadOnlyList<MeranTrial> outcomes, CombatAcquisitionRules pool)
     {
+        const double victoriesPerPerfectDay = 8640d;
         if (outcomes.Count == 0) throw new ArgumentException("Measured encounters are required.");
         var wins = outcomes.Count(x => x.Outcome == nameof(BattleOutcome.Victory));
         var winRate = (double)wins / outcomes.Count;
-        var cinders = outcomes.Sum(x => (double)x.Cinders) / outcomes.Count * pool.VictoriesPerPerfectDay;
-        var victoriesPerHour = pool.VictoriesPerPerfectDay / 24d * winRate;
+        var cinders = outcomes.Sum(x => (double)x.Cinders) / outcomes.Count * victoriesPerPerfectDay;
+        var victoriesPerHour = victoriesPerPerfectDay / 24d * winRate;
         return new(winRate, cinders,
-            wins == 0 ? null : pool.PlainTargetVictories / victoriesPerHour,
-            wins == 0 ? null : pool.SigilVictories / victoriesPerHour);
+            wins == 0 ? null : 1d / pool.AreaEquipment.DropChance / victoriesPerHour,
+            wins == 0 ? null : 1d / pool.SigilDropChance / victoriesPerHour);
     }
 
     private static MeranEncounterResult Result(string source, string room, EquipmentReferenceBuildDefinition build,

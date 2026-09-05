@@ -653,23 +653,12 @@ public sealed class EventQuestService(
         {
             "CombatEncounterCompleted" when trigger.Type == "CombatEncounterCompleted" &&
                 Matches(filters.AreaId, trigger.AreaId) => CountCombatEncounters(trigger, filters.RequiresVictory),
-            "AreaActionCompletedWithTool" when trigger.Type == "CombatEncounterCompleted" &&
-                Matches(filters.AreaId, trigger.AreaId) &&
-                Matches(filters.GatheringType, trigger.EquippedGatheringType) => Math.Max(0, trigger.ActionCount),
-            "ResourceGathered" when trigger.Type == "CombatEncounterCompleted" &&
-                Matches(filters.AreaId, trigger.AreaId) &&
-                Matches(filters.GatheringType, trigger.EquippedGatheringType) =>
-                Math.Max(0, trigger.GatheredResourceCount),
             "EssenceAbsorbed" when trigger.Type == "EssenceAbsorbed" &&
                 Matches(filters.EssenceDefinitionId, trigger.EssenceDefinitionId) => 1,
             "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,
             "FocusedCreatureEssenceReceived" when trigger.Type == "FocusedCreatureEssenceReceived" => 1,
             "EssenceAscended" when trigger.Type == "EssenceAscended" => 1,
             "CompatibleEssenceLoadout" when trigger.Type == "EssenceLoadoutChanged" && trigger.HasCompatibleEssenceTrio => 1,
-            "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" => CountMatchingItems(trigger, filters),
-            "EquipmentTempered" when trigger.Type == "EquipmentTempered" => CountMatchingItems(trigger, filters),
-            "TemperingActionCompleted" when trigger.Type == "EquipmentTempered" =>
-                Math.Max(0, trigger.ActionCount),
             "CharacterLevelReached" when trigger.Type == "CharacterLevelReached" &&
                 trigger.CharacterLevel >= objective.RequiredAmount => objective.RequiredAmount,
             "ColosseumBattleStarted" when trigger.Type == "ColosseumBattleStarted" => 1,
@@ -693,24 +682,6 @@ public sealed class EventQuestService(
         return Math.Max(
             0,
             trigger.WinningEncounterCount ?? (trigger.WonEncounter == true ? 1 : 0));
-    }
-
-    private static long CountMatchingItems(QuestTrigger trigger, QuestObjectiveFilterDefinition filters)
-    {
-        var ids = trigger.CraftedItemBaseIds?.ToList() ?? [];
-        var tiers = trigger.CraftedItemTiers?.ToList() ?? [];
-        var recipes = trigger.CraftedBaseRecipeIds?.ToList() ?? [];
-        var qualities = trigger.CraftedItemQualities?.ToList() ?? [];
-        var potentials = trigger.CraftedItemPotentials?.ToList() ?? [];
-        return Enumerable.Range(0, Math.Min(ids.Count, tiers.Count)).LongCount(index =>
-            (filters.ItemBaseIds.Count == 0 || filters.ItemBaseIds.Contains(ids[index], StringComparer.OrdinalIgnoreCase)) &&
-            (filters.BaseRecipeIds.Count == 0 || index < recipes.Count && recipes[index] is not null &&
-                filters.BaseRecipeIds.Contains(recipes[index]!, StringComparer.OrdinalIgnoreCase)) &&
-            (!filters.MustBeCrafted || index < recipes.Count && !string.IsNullOrWhiteSpace(recipes[index])) &&
-            (!filters.Tier.HasValue || tiers[index] == filters.Tier.Value) &&
-            (string.IsNullOrWhiteSpace(filters.Quality) || index < qualities.Count &&
-                filters.Quality.Equals(qualities[index].ToString(), StringComparison.OrdinalIgnoreCase)) &&
-            (!filters.RequiresNoPotential || index < potentials.Count && potentials[index] is <= 0));
     }
 
     private static bool Matches(string? expected, string? actual) =>

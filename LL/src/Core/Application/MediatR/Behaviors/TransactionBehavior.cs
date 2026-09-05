@@ -502,12 +502,10 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 
     private bool HasCharacterOverviewMutation() =>
         // Ordinary idle-combat resolutions only change fields already returned
-        // by CharacterDto. A level-up or crafting progression changes the richer
+        // by CharacterDto. A level-up changes the richer
         // overview and therefore still requires its own revision.
         _db.GameEventOutboxMessages.Local.Any(message =>
-            message.EventType is GameEventTypes.CharacterLevelReached
-                or GameEventTypes.EquipmentCrafted
-                or GameEventTypes.EquipmentTempered);
+            message.EventType is GameEventTypes.CharacterLevelReached);
 
     private bool HasCharacterSummaryMutation(Guid characterId) =>
         _db.Characters.Local.Any(character =>

@@ -58,18 +58,21 @@ public sealed class OpenCatalystSelectionCrateCommandHandler
         var grantId = Guid.NewGuid();
         const string source = "container-reward";
 
-        await _lootHistory.RecordAsync(
-            request.CharacterId,
-            rewards,
-            source,
-            result.ContainerName,
-            cancellationToken);
+        if (!result.RewardsAlreadyPublished)
+        {
+            await _lootHistory.RecordAsync(
+                request.CharacterId,
+                rewards,
+                source,
+                result.ContainerName,
+                cancellationToken);
 
-        await _gameRealtime.PublishAsync(
-            new Audience.Character(request.CharacterId),
-            new LootReceived(request.CharacterId, rewards, source, result.ContainerName, grantId),
-            nameof(OpenCatalystSelectionCrateCommandHandler),
-            cancellationToken);
+            await _gameRealtime.PublishAsync(
+                new Audience.Character(request.CharacterId),
+                new LootReceived(request.CharacterId, rewards, source, result.ContainerName, grantId),
+                nameof(OpenCatalystSelectionCrateCommandHandler),
+                cancellationToken);
+        }
 
         var inventory = await _inventory.GetInventoryByIdAsync(
             request.CharacterId,

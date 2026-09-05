@@ -48,11 +48,11 @@ public sealed record GearPackageItemSnapshot(
     string Slot,
     string ItemBaseId,
     string DisplayName,
-    string? RecipeId,
+    string? DefinitionId,
     int Tier,
     Rarity Rarity,
     ItemQuality Quality,
-    int StatModelVersion,
+    int BalanceVersion,
     IReadOnlyList<GearPackageModifierSnapshot> Modifiers);
 
 public sealed record GearPackageModifierSnapshot(
@@ -113,11 +113,11 @@ public sealed class GearPackageFactory(CanonicalEquipmentBuildFactory canonicalB
                     item.EquipmentBase.EquipmentType.ToString(),
                     item.ItemBaseId,
                     item.DisplayName,
-                    item.BaseRecipeId,
+                    item.ProgressionData?.State.DefinitionId,
                     item.Tier,
                     item.Rarity,
                     item.Quality,
-                    item.StatModelVersion,
+                    item.ProgressionData?.State.BalanceVersion ?? 0,
                     item.AttributeModifiers
                         .OrderBy(modifier => modifier.AttributeType)
                         .ThenBy(modifier => modifier.ModifierType)

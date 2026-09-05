@@ -31,6 +31,6 @@ export function marketplaceEquipmentSummary(item: ItemInstance): string {
   const equipment = marketplaceEquipment(item);
   if (!equipment) return '—';
   return equipment.progression
-    ? 'Tier ' + equipment.tier + ' · Rank ' + equipment.progression.rank
+    ? 'Tier ' + equipment.tier + ' · ' + equipment.quality + ' · Rank ' + equipment.progression.rank
     : equipment.quality;
 }

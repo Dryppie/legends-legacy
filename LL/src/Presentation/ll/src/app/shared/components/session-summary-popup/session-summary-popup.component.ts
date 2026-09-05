@@ -59,11 +59,6 @@ export class SessionSummaryPopupComponent {
   rewardSections(combatSession: CombatSessionDto): RewardSection[] {
     const summary = combatSession.combatSummary;
     const rewards = summary.rewardBreakdown;
-    const gatheringRewards = combatSession.combatResult.gatheringRewards ?? [];
-    const gatheringItems = gatheringRewards.flatMap(
-      (reward) => reward.itemsGained ?? [],
-    );
-
     const sections: RewardSection[] = [
       {
         key: 'power',
@@ -75,19 +70,11 @@ export class SessionSummaryPopupComponent {
         items: this.compactLoot(rewards?.powerItems ?? []),
       },
       {
-        key: 'gathering',
-        title: 'Gathering',
-        description:
-          'Profession progress, gathered materials, and rare Catalysts',
-        metrics: this.gatheringMetrics(gatheringRewards),
-        items: this.compactLoot(gatheringItems),
-      },
-      {
-        key: 'crafting',
-        title: 'Crafting',
-        description: 'Materials for forging and professions',
+        key: 'miscellaneous',
+        title: 'Other Items',
+        description: 'Additional items found during combat',
         metrics: [],
-        items: this.compactLoot(rewards?.craftingItems ?? []),
+        items: this.compactLoot(rewards?.miscellaneousItems ?? []),
       },
       {
         key: 'essence',
@@ -118,25 +105,6 @@ export class SessionSummaryPopupComponent {
     return sections.filter(
       (section) => section.metrics.length > 0 || section.items.length > 0,
     );
-  }
-
-  private gatheringMetrics(
-    rewards: CombatSessionDto['combatResult']['gatheringRewards'],
-  ): RewardMetric[] {
-    const experienceByProfession = new Map<string, number>();
-
-    for (const reward of rewards ?? []) {
-      experienceByProfession.set(
-        reward.toolType,
-        (experienceByProfession.get(reward.toolType) ?? 0) +
-          (reward.experienceGained ?? 0),
-      );
-    }
-
-    return Array.from(experienceByProfession, ([profession, value]) => ({
-      label: `${profession} XP`,
-      value,
-    })).filter((metric) => metric.value > 0);
   }
 
   hasRewards(combatSession: CombatSessionDto): boolean {

@@ -26,36 +26,54 @@ public sealed class QuestService(
     IMapper? mapper = null,
     IQuestSystemChatPublisher? systemChatPublisher = null,
     IEquipmentQuestSupport? equipmentProgressionEquipment = null,
-    IQuestEquipmentRewardRepository? currencyRewards = null,
-    Application.Interfaces.Services.LL.Items.IStarterEquipmentService? starterClaims = null) : IQuestService, IQuestProgressionService
+    IQuestEquipmentRewardRepository? currencyRewards = null) : IQuestService, IQuestProgressionService
 {
+    public async Task<QuestJournal> TurnInAsync(
+        Guid characterId,
+        string questId,
+        CancellationToken cancellationToken)
+    {
+        var progresses = (await repository.GetProgressesAsync(characterId, cancellationToken)).ToList();
+        var progress = progresses.FirstOrDefault(x =>
+            x.QuestId.Equals(questId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new ArgumentException("Quest was not found.");
+        if (progress.Status == QuestStatus.Completed)
+            return await MapJournalAsync(progresses, cancellationToken);
+
+        var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+        if (progress.Status != QuestStatus.Active ||
+            progress.Objectives.Count == 0 ||
+            progress.Objectives.Any(x => !x.CompletedAt.HasValue) ||
+            (definition.Choice is not null && string.IsNullOrWhiteSpace(progress.SelectedOptionKey)))
+        {
+            throw new ArgumentException("Complete all quest objectives before turning it in.");
+        }
+
+        var completedQuestIds = new List<string>();
+        var loot = new List<InventoryItem>();
+        await CompleteQuestAsync(progress, definition, completedQuestIds, loot, cancellationToken);
+        await ReconcileEssenceProgressAsync(characterId, progresses, cancellationToken);
+        EnsurePinnedQuest(progresses);
+        await repository.SaveChangesAsync(cancellationToken);
+        var journal = await MapJournalAsync(progresses, cancellationToken);
+        await PublishChangedAsync(characterId, journal, cancellationToken);
+        await PublishCompletionsAsync(characterId, journal, completedQuestIds, cancellationToken);
+        return journal;
+    }
+
     public async Task<QuestJournal> GetJournalAsync(
         Guid characterId,
         CancellationToken cancellationToken)
     {
         var progresses = (await repository.GetProgressesAsync(characterId, cancellationToken)).ToList();
-        var completedQuestIds = new List<string>();
-        var loot = new List<InventoryItem>();
         var changed = await ReconcileEssenceProgressAsync(
-            characterId, progresses, completedQuestIds, loot, cancellationToken);
+            characterId, progresses, cancellationToken);
         changed |= EnsurePinnedQuest(progresses);
         var journal = await MapJournalAsync(progresses, cancellationToken);
         if (changed)
         {
             await PublishChangedAsync(characterId, journal, cancellationToken);
-            // Journal reads also repair progress, outside the command/outbox scope invalidation pipeline.
-            if (completedQuestIds.Count > 0 && stateSync is not null)
-            {
-                var scopes = new List<string>
-                {
-                    StateSyncScopes.Character, StateSyncScopes.AreaAccess
-                };
-                if (loot.Count > 0) scopes.Add(StateSyncScopes.Inventory);
-                await stateSync.InvalidateCharacterScopesAsync(
-                    characterId, scopes, nameof(GetJournalAsync), cancellationToken);
-            }
             await repository.SaveChangesAsync(cancellationToken);
-            await PublishCompletionsAsync(characterId, journal, completedQuestIds, cancellationToken);
         }
 
         return journal;
@@ -194,7 +212,7 @@ public sealed class QuestService(
         var completedQuestIds = new List<string>();
         var loot = new List<InventoryItem>();
         var journalChanged = await ReconcileEssenceProgressAsync(
-            characterId, progresses, completedQuestIds, loot, cancellationToken);
+            characterId, progresses, cancellationToken);
         var now = timeProvider.GetUtcNow();
 
         foreach (var progress in progresses.Where(x => x.Status == QuestStatus.Active).ToList())
@@ -227,15 +245,10 @@ public sealed class QuestService(
                 progress.RowVersion++;
             }
 
-            if (progress.Objectives.All(x => x.CompletedAt.HasValue))
-            {
-                await CompleteQuestAsync(progress, definition, completedQuestIds, loot, cancellationToken);
-                journalChanged = true;
-            }
         }
 
         journalChanged |= await ReconcileEssenceProgressAsync(
-            characterId, progresses, completedQuestIds, loot, cancellationToken);
+            characterId, progresses, cancellationToken);
         journalChanged |= EnsurePinnedQuest(progresses);
 
         if (outboxMessageId.HasValue)
@@ -299,89 +312,77 @@ public sealed class QuestService(
     private async Task<bool> ReconcileEssenceProgressAsync(
         Guid characterId,
         List<CharacterQuestProgress> progresses,
-        List<string> completedQuestIds,
-        List<InventoryItem> loot,
         CancellationToken cancellationToken)
     {
         var changed = false;
         IReadOnlySet<string>? ownedEssences = null;
-        bool completedQuest;
-        do
+        changed |= await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
+        foreach (var progress in progresses.Where(x => x.Status == QuestStatus.Active).ToList())
         {
-            changed |= await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
-            completedQuest = false;
-            foreach (var progress in progresses.Where(x => x.Status == QuestStatus.Active).ToList())
-            {
-                var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
-                if (definition.Choice is not null && string.IsNullOrWhiteSpace(progress.SelectedOptionKey)) continue;
-                if (!definition.Objectives.Any(x => x.Type is "EssenceAbsorbed" or "EssenceOwned" or "EssenceEquipped")) continue;
+            var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+            if (definition.Choice is not null && string.IsNullOrWhiteSpace(progress.SelectedOptionKey)) continue;
+            if (!definition.Objectives.Any(x => x.Type is "EssenceAbsorbed" or "EssenceOwned" or "EssenceEquipped")) continue;
 
-                var now = timeProvider.GetUtcNow();
-                var progressChanged = false;
-                // Repair the old one-event requirement on active A Second Soul rows without resetting them.
-                foreach (var objective in definition.Objectives.Where(x => x.Type == "EssenceOwned"))
+            var now = timeProvider.GetUtcNow();
+            var progressChanged = false;
+            // Repair the old one-event requirement on active A Second Soul rows without resetting them.
+            foreach (var objective in definition.Objectives.Where(x => x.Type == "EssenceOwned"))
+            {
+                var saved = progress.Objectives.Single(x => x.ObjectiveKey == objective.Key);
+                if (saved.RequiredAmount == objective.RequiredAmount) continue;
+                saved.RequiredAmount = objective.RequiredAmount;
+                saved.CurrentAmount = Math.Min(saved.CurrentAmount, saved.RequiredAmount);
+                saved.CompletedAt = saved.CurrentAmount >= saved.RequiredAmount ? saved.CompletedAt ?? now : null;
+                saved.UpdatedAt = now;
+                progressChanged = true;
+            }
+
+            bool advanced;
+            do
+            {
+                advanced = false;
+                foreach (var (saved, objective) in GetCandidateObjectives(progress, definition))
                 {
-                    var saved = progress.Objectives.Single(x => x.ObjectiveKey == objective.Key);
-                    if (saved.RequiredAmount == objective.RequiredAmount) continue;
-                    saved.RequiredAmount = objective.RequiredAmount;
-                    saved.CurrentAmount = Math.Min(saved.CurrentAmount, saved.RequiredAmount);
-                    saved.CompletedAt = saved.CurrentAmount >= saved.RequiredAmount ? saved.CompletedAt ?? now : null;
+                    if (objective.Type is not ("EssenceAbsorbed" or "EssenceOwned" or "EssenceEquipped")) continue;
+                    var expected = await ResolveExpectedEssenceDefinitionIdAsync(
+                        characterId, objective.Filters, cancellationToken);
+                    long amount;
+                    if (objective.Type == "EssenceEquipped")
+                    {
+                        amount = string.IsNullOrWhiteSpace(expected)
+                            ? await repository.HasAnyEssenceInLoadoutAsync(characterId, cancellationToken) ? 1 : 0
+                            : await repository.HasEssenceInAnyLoadoutAsync(characterId, expected, cancellationToken) ? 1 : 0;
+                    }
+                    else
+                    {
+                        // Only a specific, one-time absorption can be proven from current ownership.
+                        // Unfiltered absorption events keep their authored event-counting behavior.
+                        if (objective.Type == "EssenceAbsorbed" &&
+                            (string.IsNullOrWhiteSpace(expected) || objective.RequiredAmount != 1)) continue;
+                        ownedEssences ??= await repository.GetOwnedEssenceDefinitionIdsAsync(characterId, cancellationToken);
+                        amount = ownedEssences.Count(id => Matches(expected, id));
+                    }
+
+                    var target = Math.Min(saved.RequiredAmount, amount);
+                    if (target <= saved.CurrentAmount) continue;
+                    saved.CurrentAmount = target;
                     saved.UpdatedAt = now;
+                    if (target >= saved.RequiredAmount)
+                    {
+                        saved.CompletedAt ??= now;
+                        advanced = true;
+                    }
                     progressChanged = true;
                 }
+            } while (advanced && definition.ObjectiveMode == "Sequential");
 
-                bool advanced;
-                do
-                {
-                    advanced = false;
-                    foreach (var (saved, objective) in GetCandidateObjectives(progress, definition))
-                    {
-                        if (objective.Type is not ("EssenceAbsorbed" or "EssenceOwned" or "EssenceEquipped")) continue;
-                        var expected = await ResolveExpectedEssenceDefinitionIdAsync(
-                            characterId, objective.Filters, cancellationToken);
-                        long amount;
-                        if (objective.Type == "EssenceEquipped")
-                        {
-                            amount = string.IsNullOrWhiteSpace(expected)
-                                ? await repository.HasAnyEssenceInLoadoutAsync(characterId, cancellationToken) ? 1 : 0
-                                : await repository.HasEssenceInAnyLoadoutAsync(characterId, expected, cancellationToken) ? 1 : 0;
-                        }
-                        else
-                        {
-                            // Only a specific, one-time absorption can be proven from current ownership.
-                            // Unfiltered absorption events keep their authored event-counting behavior.
-                            if (objective.Type == "EssenceAbsorbed" &&
-                                (string.IsNullOrWhiteSpace(expected) || objective.RequiredAmount != 1)) continue;
-                            ownedEssences ??= await repository.GetOwnedEssenceDefinitionIdsAsync(characterId, cancellationToken);
-                            amount = ownedEssences.Count(id => Matches(expected, id));
-                        }
-
-                        var target = Math.Min(saved.RequiredAmount, amount);
-                        if (target <= saved.CurrentAmount) continue;
-                        saved.CurrentAmount = target;
-                        saved.UpdatedAt = now;
-                        if (target >= saved.RequiredAmount)
-                        {
-                            saved.CompletedAt ??= now;
-                            advanced = true;
-                        }
-                        progressChanged = true;
-                    }
-                } while (advanced && definition.ObjectiveMode == "Sequential");
-
-                if (progressChanged)
-                {
-                    progress.UpdatedAt = now;
-                    progress.RowVersion++;
-                    changed = true;
-                }
-                if (progress.Objectives.All(x => x.CompletedAt.HasValue))
-                {
-                    await CompleteQuestAsync(progress, definition, completedQuestIds, loot, cancellationToken);
-                    changed = completedQuest = true;
-                }
+            if (progressChanged)
+            {
+                progress.UpdatedAt = now;
+                progress.RowVersion++;
+                changed = true;
             }
-        } while (completedQuest);
+        }
 
         return changed;
     }
@@ -395,6 +396,7 @@ public sealed class QuestService(
         var changed = false;
         var level = await repository.GetCharacterLevelAsync(characterId, cancellationToken)
             ?? throw new InvalidOperationException("Character was not found.");
+        changed |= RepairGoblinGateProgress(progresses, now);
         changed |= ApplyCharacterLevelProgress(progresses, level, now);
 
         foreach (var definition in definitions.GetAll())
@@ -450,6 +452,45 @@ public sealed class QuestService(
         }
 
 
+        return changed;
+    }
+
+    private bool RepairGoblinGateProgress(
+        IReadOnlyCollection<CharacterQuestProgress> progresses,
+        DateTimeOffset now)
+    {
+        var changed = false;
+        // Keep current v4 saves while moving the trial out of the early campaign.
+        foreach (var progress in progresses.Where(x => x.DefinitionVersion == 4 &&
+                     (x.QuestId == QuestConstants.BloodInTheGrove || x.QuestId == QuestConstants.RootsRemember)))
+        {
+            const string key = "break_the_goblin_gate";
+            var saved = progress.Objectives.SingleOrDefault(x => x.ObjectiveKey == key);
+            var objective = definitions.Get(progress.QuestId, progress.DefinitionVersion)
+                .Objectives.SingleOrDefault(x => x.Key == key);
+            if (saved is not null && objective is null)
+            {
+                progress.Objectives.Remove(saved);
+            }
+            else if (saved is null && objective is not null)
+            {
+                progress.Objectives.Add(new CharacterQuestObjectiveProgress
+                {
+                    CharacterId = progress.CharacterId,
+                    QuestId = progress.QuestId,
+                    ObjectiveKey = key,
+                    RequiredAmount = objective.RequiredAmount,
+                    CurrentAmount = progress.Status == QuestStatus.Completed ? objective.RequiredAmount : 0,
+                    CompletedAt = progress.Status == QuestStatus.Completed ? progress.CompletedAt ?? now : null,
+                    UpdatedAt = now
+                });
+            }
+            else continue;
+
+            progress.UpdatedAt = now;
+            progress.RowVersion++;
+            changed = true;
+        }
         return changed;
     }
 
@@ -544,19 +585,13 @@ public sealed class QuestService(
             cancellationToken);
         return objective.Type switch
         {
-            EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.PlainTargetObjective =>
+            EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.AreaDropObjective =>
                 await (equipmentProgressionEquipment ?? throw new InvalidOperationException("Equipment quest support is required."))
                     .IsEquippedAsync(characterId, objective.Type, filters.StarterEquipmentKind, cancellationToken) ? 1 : 0,
             "CombatEncounterCompleted" when
                 trigger.Type == "CombatEncounterCompleted" &&
                 Matches(filters.AreaId, trigger.AreaId) &&
                 (filters.RequiresVictory != true || trigger.WonEncounter == true) => 1,
-
-            "AreaActionCompletedWithTool" when
-                trigger.Type == "CombatEncounterCompleted" &&
-                Matches(filters.AreaId, trigger.AreaId) &&
-                Matches(filters.GatheringType, trigger.EquippedGatheringType) =>
-                Math.Max(0, trigger.ActionCount),
 
             "EssenceAbsorbed" when
                 trigger.Type == "EssenceAbsorbed" &&
@@ -582,28 +617,11 @@ public sealed class QuestService(
                 trigger.Type == "EssenceLoadoutChanged" &&
                 trigger.HasCompatibleEssenceTrio => 1,
 
-            "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" =>
-                CountMatchingCraftedItems(trigger, filters),
-
-            "EquipmentTempered" when trigger.Type == "EquipmentTempered" =>
-                CountMatchingCraftedItems(trigger, filters),
-
             "EquipmentEquipped" when trigger.Type == "EquipmentChanged" =>
                 await repository.HasQualifyingEquipmentEquippedAsync(
                     characterId,
                     filters.ItemBaseIds,
                     filters.Tier,
-                    filters.MustBeCrafted,
-                    false,
-                    cancellationToken) ? 1 : 0,
-
-            "GatheringToolEquipped" when trigger.Type == "EquipmentChanged" =>
-                await repository.HasQualifyingEquipmentEquippedAsync(
-                    characterId,
-                    filters.ItemBaseIds,
-                    filters.Tier,
-                    filters.MustBeCrafted,
-                    true,
                     cancellationToken) ? 1 : 0,
 
             "CharacterLevelReached" when
@@ -624,36 +642,6 @@ public sealed class QuestService(
 
             _ => 0
         };
-    }
-
-    private static long CountMatchingCraftedItems(
-        QuestTrigger trigger,
-        QuestObjectiveFilterDefinition filters)
-    {
-        var itemBaseIds = trigger.CraftedItemBaseIds?.ToList() ?? [];
-        var tiers = trigger.CraftedItemTiers?.ToList() ?? [];
-        var baseRecipeIds = trigger.CraftedBaseRecipeIds?.ToList() ?? [];
-        var qualities = trigger.CraftedItemQualities?.ToList() ?? [];
-        var potentials = trigger.CraftedItemPotentials?.ToList() ?? [];
-        var itemCount = Math.Min(itemBaseIds.Count, tiers.Count);
-
-        return Enumerable.Range(0, itemCount).LongCount(index =>
-            (filters.ItemBaseIds.Count == 0 ||
-             filters.ItemBaseIds.Contains(itemBaseIds[index], StringComparer.OrdinalIgnoreCase)) &&
-            (filters.BaseRecipeIds.Count == 0 ||
-             index < baseRecipeIds.Count &&
-             baseRecipeIds[index] is not null &&
-             filters.BaseRecipeIds.Contains(baseRecipeIds[index]!, StringComparer.OrdinalIgnoreCase)) &&
-            (!filters.MustBeCrafted ||
-             index < baseRecipeIds.Count &&
-             !string.IsNullOrWhiteSpace(baseRecipeIds[index])) &&
-            (!filters.Tier.HasValue || tiers[index] == filters.Tier.Value) &&
-            (string.IsNullOrWhiteSpace(filters.Quality) ||
-             index < qualities.Count &&
-             filters.Quality.Equals(qualities[index].ToString(), StringComparison.OrdinalIgnoreCase)) &&
-            (!filters.RequiresNoPotential ||
-             index < potentials.Count &&
-             potentials[index] is <= 0));
     }
 
     private async Task<string?> ResolveExpectedEssenceDefinitionIdAsync(
@@ -723,13 +711,6 @@ public sealed class QuestService(
         if (cinders > 0)
             await (currencyRewards ?? throw new InvalidOperationException("Quest currency rewards are required."))
                 .AwardCindersAsync(progress.CharacterId, definition.Id, cinders, cancellationToken);
-        if (definition.Id == QuestConstants.FirstWeapon)
-        {
-            // Award accessories with the completed quest inside the outbox transaction.
-            var grant = await (starterClaims ?? throw new InvalidOperationException("Starter equipment grants are required."))
-                .ClaimAsync(progress.CharacterId, Domain.Models.Items.Equipments.Progression.StarterEquipmentGrantKind.ReadyForRoad, [], cancellationToken);
-            if (grant.Error != null) throw new InvalidOperationException(grant.Error);
-        }
         progress.RewardsGrantedAt = timeProvider.GetUtcNow();
         return items;
     }

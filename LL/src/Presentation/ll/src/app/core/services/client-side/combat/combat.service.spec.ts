@@ -178,7 +178,6 @@ function combatResult(battleType: BattleType): CombatResultDto {
     startedAt: new Date('2026-08-09T12:00:00Z'),
     outcome: BattleOutcome.Victory,
     loot: [],
-    gatheringRewards: [],
     experienceGained: 0,
     battleType,
     entityStats: [],

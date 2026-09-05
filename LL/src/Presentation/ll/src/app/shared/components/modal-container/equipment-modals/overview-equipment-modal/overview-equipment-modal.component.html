@@ -31,7 +31,12 @@
             }}
           </span>
           <span class="ll-item-chip ll-item-chip-accent">
-            {{ currentEquippedEquipment.progression ? 'Rank ' + currentEquippedEquipment.progression.rank : currentEquippedEquipment.quality }}
+            {{
+              currentEquippedEquipment.quality +
+                (currentEquippedEquipment.progression
+                  ? " · Rank " + currentEquippedEquipment.progression.rank
+                  : "")
+            }}
           </span>
         </div>
       </div>
@@ -53,6 +58,14 @@
           }}
         </span>
       </div>
+      <app-equipment-upgrade-panel
+        *ngIf="
+          currentEquippedEquipment.progression &&
+          !currentEquippedEquipment.isGuildBorrowed
+        "
+        [equipmentInstance]="currentEquippedEquipment"
+        (completed)="onClose()"
+      ></app-equipment-upgrade-panel>
     </div>
   </div>
   <div class="shrink-0 border-t border-primary/20 pb-2"></div>
@@ -83,7 +96,12 @@
                 {{ equipment.equipmentBase.equipmentType | equipmentType }}
               </span>
               <span class="ll-item-chip ll-item-chip-accent">
-                {{ equipment.progression ? 'Rank ' + equipment.progression.rank : equipment.quality }}
+                {{
+                  equipment.quality +
+                    (equipment.progression
+                      ? " · Rank " + equipment.progression.rank
+                      : "")
+                }}
               </span>
             </div>
           </div>

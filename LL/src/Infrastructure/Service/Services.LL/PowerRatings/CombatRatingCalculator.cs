@@ -2,7 +2,7 @@ using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Services.LL.PowerRatings;
 
@@ -165,7 +165,7 @@ public static class CombatRatingCalculator
                         return 0;
                     if (!AttributeCatalog.TryGetEffectiveCharacterCap(
                             entry.Key,
-                            EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier,
+                            EquipmentBalance.MinimumSupportedBasicAttackIntervalMultiplier,
                             out var cap))
                     {
                         cap = float.MaxValue;

@@ -14,30 +14,24 @@ import {
   QuestState,
   QuestStatus,
   SOUL_ARCHIVE_QUEST_ID,
-  TOOLS_OF_THE_TRADE_QUEST_ID,
   TRAINING_DAY_QUEST_ID,
 } from '../../../../shared/models/quest';
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 
 describe('player journey', () => {
-  it('guides the character through equipment and accessories without unlocking tutorial crafting', () => {
+  it('guides the character to choose and equip a starter weapon without unlocking tutorial crafting', () => {
     const current = journal(
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,
-      FIRST_WEAPON_QUEST_ID,
     );
-    const accessories = quest(
-      TOOLS_OF_THE_TRADE_QUEST_ID,
-      QuestStatus.Active,
-      true,
-    );
-    accessories.title = 'Ready for the Road';
-    current.quests.push(accessories);
+    const firstWeapon = quest(FIRST_WEAPON_QUEST_ID, QuestStatus.Active, true);
+    firstWeapon.title = 'First Weapon';
+    current.quests.push(firstWeapon);
     const guidance = buildPlayerJourneyGuidance(current, 1)!;
-    expect(guidance.title).toBe('Ready for the Road');
-    expect(guidance.phaseLabel).toBe('Ready for the Road');
+    expect(guidance.title).toBe('First Weapon');
+    expect(guidance.phaseLabel).toBe('Prepare Your Gear');
     expect(guidance.optionalAction.route).toBe('/game/character/inventory');
-    expect(guidance.nextUnlock).toContain('equipping your accessories');
+    expect(guidance.nextUnlock).toContain('equipping your starter weapon');
     expect(
       itemIds(filterSidebarForPlayerJourney(sidebar(), current, 1, true)),
     ).not.toContain('crafting');
@@ -55,7 +49,6 @@ describe('player journey', () => {
           TRAINING_DAY_QUEST_ID,
           SOUL_ARCHIVE_QUEST_ID,
           FIRST_WEAPON_QUEST_ID,
-          TOOLS_OF_THE_TRADE_QUEST_ID,
           INTO_LUMO_RUINS_QUEST_ID,
         ),
       ),
@@ -111,7 +104,6 @@ describe('player journey', () => {
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,
       FIRST_WEAPON_QUEST_ID,
-      TOOLS_OF_THE_TRADE_QUEST_ID,
       INTO_LUMO_RUINS_QUEST_ID,
     );
     completedTutorial.quests.push(current);
@@ -131,7 +123,6 @@ describe('player journey', () => {
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,
       FIRST_WEAPON_QUEST_ID,
-      TOOLS_OF_THE_TRADE_QUEST_ID,
       INTO_LUMO_RUINS_QUEST_ID,
       HEART_OF_THE_HOLLOW_QUEST_ID,
     );
@@ -149,7 +140,6 @@ describe('player journey', () => {
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,
       FIRST_WEAPON_QUEST_ID,
-      TOOLS_OF_THE_TRADE_QUEST_ID,
       INTO_LUMO_RUINS_QUEST_ID,
       HEART_OF_THE_HOLLOW_QUEST_ID,
     );
@@ -200,7 +190,6 @@ describe('player journey', () => {
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,
       FIRST_WEAPON_QUEST_ID,
-      TOOLS_OF_THE_TRADE_QUEST_ID,
       INTO_LUMO_RUINS_QUEST_ID,
       HEART_OF_THE_HOLLOW_QUEST_ID,
     );
@@ -240,7 +229,6 @@ describe('player journey', () => {
             TRAINING_DAY_QUEST_ID,
             SOUL_ARCHIVE_QUEST_ID,
             FIRST_WEAPON_QUEST_ID,
-            TOOLS_OF_THE_TRADE_QUEST_ID,
             INTO_LUMO_RUINS_QUEST_ID,
           ),
           10,
@@ -265,7 +253,6 @@ describe('player journey', () => {
       TRAINING_DAY_QUEST_ID,
       SOUL_ARCHIVE_QUEST_ID,
       FIRST_WEAPON_QUEST_ID,
-      TOOLS_OF_THE_TRADE_QUEST_ID,
       INTO_LUMO_RUINS_QUEST_ID,
     );
     expect(

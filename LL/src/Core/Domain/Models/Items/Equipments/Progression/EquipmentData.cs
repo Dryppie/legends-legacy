@@ -2,7 +2,6 @@ using System.Collections.Frozen;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Models.Attributes;
-using Domain.Models.Professions.Crafting.V2;
 
 namespace Domain.Models.Items.Equipments.Progression;
 
@@ -18,7 +17,7 @@ public sealed class EquipmentData
         State = EquipmentState.ToSnapshot();
         ItemBaseId = EquipmentValidation.Id(itemBaseId);
         DisplayName = EquipmentValidation.Id(displayName);
-        if (!Enum.IsDefined(rarity) || !Enum.IsDefined(equipmentType) || equipmentType == EquipmentType.Tool)
+        if (!Enum.IsDefined(rarity) || !Enum.IsDefined(equipmentType))
             throw new InvalidOperationException("Invalid frozen equipment identity.");
         ArgumentNullException.ThrowIfNull(behavior);
         var expectedHandedness = equipmentType is EquipmentType.OneHanded or EquipmentType.TwoHanded or EquipmentType.OffHand
@@ -43,6 +42,8 @@ public sealed class EquipmentData
     public string ItemBaseId { get; }
     public string DisplayName { get; }
     public EquipmentRarity Rarity { get; }
+    public ItemQuality Quality => State.Quality;
+    public double AttributeRollMultiplier => State.AttributeRollMultiplier;
     public EquipmentType EquipmentType { get; }
     public EquipmentBehaviorDefinition Behavior { get; }
     public IReadOnlyDictionary<AttributeType, float> Stats { get; }
@@ -51,7 +52,7 @@ public sealed class EquipmentData
     public static EquipmentData Create(EquipmentState state, EquipmentEvaluator evaluator)
     {
         var evaluated = evaluator.Evaluate(state);
-        return new(state.ToSnapshot(), evaluated.Archetype.ItemBaseId, evaluated.Definition.Name,
+        return new(state.ToSnapshot(), evaluated.Archetype.ItemBaseId, evaluator.GetDisplayName(state),
             evaluated.Definition.Rarity, evaluated.Archetype.EquipmentType, evaluated.Archetype.Behavior,
             evaluated.Stats, evaluated.EquipmentSetId);
     }
@@ -63,6 +64,51 @@ public sealed class EquipmentData
     public EquipmentData TransferToCharacter(Guid expectedOwnerId, Guid recipientId) => new(
         EquipmentState.TransferToCharacter(expectedOwnerId, recipientId).ToSnapshot(), ItemBaseId, DisplayName, Rarity,
         EquipmentType, Behavior, Stats, EquipmentSetId);
+
+    /// <summary>
+    /// Advances a frozen descriptor whose original authored content is no longer
+    /// available. Existing stat proportions are retained instead of rerolling the
+    /// item against current definitions.
+    /// </summary>
+    public EquipmentData ReinforceFrozen(EquipmentBalance balance)
+    {
+        ArgumentNullException.ThrowIfNull(balance);
+        if (State.BalanceVersion != balance.Version)
+            throw new InvalidOperationException("Equipment needs its original balance version before it can be reinforced.");
+        if (State.Ownership.Kind == EquipmentOwnershipKind.GuildOwned)
+            throw new InvalidOperationException("Guild equipment must retain guild ownership.");
+        if (State.Rank >= EquipmentBalance.MaximumRank)
+            throw new InvalidOperationException($"Equipment is already at rank {EquipmentBalance.MaximumRank}.");
+
+        var currentRankScale = 1d + State.Rank * balance.RankBudgetIncrement;
+        var nextRankScale = 1d + (State.Rank + 1) * balance.RankBudgetIncrement;
+        var scale = nextRankScale / currentRankScale;
+        var nextStats = Stats.ToDictionary(
+            stat => stat.Key,
+            stat => Math.Min(
+                (float)AttributeValueQuantizer.Quantize(stat.Key, stat.Value * scale),
+                EquipmentStatBudgetCatalog.Get(stat.Key).PerItemHardCap));
+        if (nextStats.Any(stat => stat.Value < Stats.GetValueOrDefault(stat.Key))
+            || !nextStats.Any(stat => stat.Value > Stats.GetValueOrDefault(stat.Key)))
+            throw new InvalidOperationException("The next rank does not provide a representable improvement.");
+
+        var nextState = EquipmentState.Restore(State with
+        {
+            Rank = State.Rank + 1,
+            Ownership = new EquipmentOwnership(
+                EquipmentOwnershipKind.BoundPersonal,
+                State.Ownership.OwnerId)
+        });
+        return new EquipmentData(
+            nextState.ToSnapshot(),
+            ItemBaseId,
+            DisplayName,
+            Rarity,
+            EquipmentType,
+            Behavior,
+            nextStats,
+            EquipmentSetId);
+    }
 
     public EquipmentData DonateToGuild(Guid expectedOwnerId, Guid guildId)
     {

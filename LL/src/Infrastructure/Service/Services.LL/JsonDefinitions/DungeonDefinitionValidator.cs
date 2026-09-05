@@ -2,7 +2,6 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Rooms;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Services.LL.JsonDefinitions;
 

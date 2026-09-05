@@ -6,7 +6,6 @@ import {
   effect,
   OnInit,
   signal,
-  untracked,
 } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -34,11 +33,6 @@ import {
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
-import { QuestPresenterService } from '../../../../core/services/api/quest/quest-presenter.service';
-import {
-  ONBOARDING_GATHERING_TOOL_ITEM_BASE_IDS,
-  ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
-} from '../../../../shared/models/quest';
 import { EquipmentDisplayComponent } from '../../../../shared/components/equipment/equipment-display/equipment-display.component';
 import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 import { EquipmentStateService } from '../../../../core/services/api/equipment/equipment-state.service';
@@ -55,8 +49,22 @@ import { MARKETPLACE_CATALYST_ITEM_IDS } from '../../../../shared/utils/market-p
 import { InventoryTransferComponent } from '../../../../shared/components/inventory-transfer/inventory-transfer.component';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
-import { finalize } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  finalize,
+  from,
+  map,
+  of,
+  switchMap,
+  toArray,
+} from 'rxjs';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import {
+  EquipmentService,
+  EquipmentUpgradeMutation,
+  EquipmentUpgradeQuote,
+} from '../../../../core/services/api/equipment/equipment.service';
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -64,7 +72,7 @@ type StockCategory =
   | 'Entrance Keys'
   | 'Catalysts';
 type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Rank' | 'Gear Power';
-type EquipmentInventorySort = 'Name' | 'Quality' | 'Potential' | 'Rank' | 'Style' | 'Gear Power';
+type EquipmentInventorySort = 'Name' | 'Quality' | 'Rank' | 'Style' | 'Gear Power';
 type SortDirection = 'asc' | 'desc';
 
 @Component({
@@ -108,8 +116,30 @@ export class InventoryComponent implements OnInit {
   readonly favoriteActionError = signal<string | null>(null);
   readonly donationPendingItemId = signal<string | null>(null);
   readonly donationActionError = signal<string | null>(null);
+  readonly selectedDismantleQuote = signal<EquipmentUpgradeQuote | null>(null);
+  readonly selectedDismantleLoading = signal(false);
+  readonly selectedDismantleConfirmation = signal(false);
+  readonly selectedDismantleError = signal<string | null>(null);
+  readonly massDismantleRarity = signal<Rarity>(Rarity.Common);
+  readonly massDismantleConfirmation = signal(false);
+  readonly massDismantlePending = signal(false);
+  readonly massDismantleStatus = signal<string | null>(null);
   readonly selectedEquipmentSlot = signal<EquipmentSlotType | null>(null);
   readonly selectedSlotEquipment = signal<EquipmentInstance | null>(null);
+  readonly massDismantleRarities: readonly Rarity[] = [
+    Rarity.Common,
+    Rarity.Uncommon,
+    Rarity.Rare,
+    Rarity.Epic,
+    Rarity.Unique,
+    Rarity.Legendary,
+    Rarity.Legacy,
+  ];
+  readonly massDismantleRarityOptions: readonly DropdownOption<Rarity>[] =
+    this.massDismantleRarities.map((rarity) => ({
+      label: `${rarity} and below`,
+      value: rarity,
+    }));
 
   inventorySort: EquipmentInventorySort = 'Gear Power';
   inventorySortDirection: SortDirection = 'desc';
@@ -121,6 +151,7 @@ export class InventoryComponent implements OnInit {
     { label: 'Name A-Z', value: 'Name' },
     { label: 'Tier: high to low', value: 'Tier' },
     { label: 'Rarity: high to low', value: 'Rarity' },
+    { label: 'Quality: high to low', value: 'Quality' },
     { label: 'Rank: high to low', value: 'Rank' },
     { label: 'Gear Power: high to low', value: 'Gear Power' },
   ]; }
@@ -138,30 +169,23 @@ export class InventoryComponent implements OnInit {
     [ItemQuality.Standard]: 1,
     [ItemQuality.Fine]: 2,
     [ItemQuality.Exceptional]: 3,
-    [ItemQuality.Masterwork]: 4,
+    [ItemQuality.Masterpiece]: 4,
   };
 
   constructor(
     public state: InventoryStateService,
     private readonly questState: QuestStateService,
-    private readonly questPresenter: QuestPresenterService,
     private readonly modalService?: ModalService,
     private readonly equipmentState?: EquipmentStateService,
     private readonly inventoryService?: InventoryService,
     private readonly guildState?: GuildStateService,
     private readonly characterState?: CharacterStateService,
+    private readonly equipmentApi?: EquipmentService,
   ) {
     effect(() => {
       const objectiveType = this.questState.pinnedOnboardingObjective()?.type;
-      if (
-        objectiveType === 'EquipmentEquipped' ||
-        objectiveType === 'GatheringToolEquipped'
-      ) {
+      if (objectiveType === 'EquipmentEquipped') {
         this.collectionView.set('Equipment');
-
-        if (objectiveType === 'GatheringToolEquipped') {
-          untracked(() => this.questPresenter.presentCurrentObjective());
-        }
       }
     });
 
@@ -283,23 +307,6 @@ export class InventoryComponent implements OnInit {
       : null;
   }
 
-  isOnboardingCraftedWeapon(item: InventoryItem): boolean {
-    const equipment = this.equipmentInstance(item);
-    return (
-      equipment?.tier === 1 &&
-      !!equipment.baseRecipeId &&
-      ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(equipment.itemBase.id)
-    );
-  }
-
-  isOnboardingGatheringTool(item: InventoryItem): boolean {
-    const equipment = this.equipmentInstance(item);
-    return (
-      equipment?.equipmentBase.equipmentType === EquipmentType.Tool &&
-      ONBOARDING_GATHERING_TOOL_ITEM_BASE_IDS.has(equipment.itemBase.id)
-    );
-  }
-
   equipmentRarityClass(item: InventoryItem): string {
     const rarity = this.equipmentInstance(item)?.rarity ?? Rarity.Common;
 
@@ -386,7 +393,8 @@ export class InventoryComponent implements OnInit {
             item.itemInstance.itemBase.rarity,
             equipment?.equipmentBase.equipmentType,
             equipment?.rarity,
-            equipment?.progression ? `Rank ${equipment.progression.rank}` : equipment?.quality,
+            equipment?.quality,
+            equipment?.progression ? `Rank ${equipment.progression.rank}` : undefined,
             equipment?.progression ? this.equipmentStyleLabel(equipment.progression.activeStyleId) : null,
           ].some((value) => value?.toString().toLowerCase().includes(query));
         })
@@ -476,6 +484,7 @@ export class InventoryComponent implements OnInit {
       this.favoriteActionError.set(null);
       this.donationActionError.set(null);
       this.resetContainerAction(item);
+      this.loadSelectedDismantleQuote(inspected);
     }
   }
 
@@ -492,10 +501,18 @@ export class InventoryComponent implements OnInit {
     request.subscribe({
       next: () => {
         this.refreshSelectedInventoryItem(itemInstanceId);
+        const selected = this.selectedItem();
+        if (selected?.itemInstance.id === itemInstanceId) {
+          this.loadSelectedDismantleQuote(selected);
+        }
         this.favoritePendingItemId.set(null);
       },
       error: (error) => {
         this.refreshSelectedInventoryItem(itemInstanceId);
+        const selected = this.selectedItem();
+        if (selected?.itemInstance.id === itemInstanceId) {
+          this.loadSelectedDismantleQuote(selected);
+        }
         this.favoriteActionError.set(
           error?.message ?? 'Failed to update this favorite.',
         );
@@ -675,6 +692,148 @@ export class InventoryComponent implements OnInit {
     this.modalService?.toggleInventoryItemModal(item);
   }
 
+  canManageEquipment(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return !!equipment?.progression && !equipment.isGuildBorrowed;
+  }
+
+  manageEquipment(item: InventoryItem): void {
+    const equipment = this.equipmentInstance(item);
+    if (!equipment || !this.canManageEquipment(item)) return;
+    this.modalService?.toggleInventoryEquipItemModal(equipment, 'manage');
+  }
+
+  canDismantleEquipment(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return (
+      !!equipment?.progression &&
+      !equipment.isGuildBorrowed &&
+      !this.isSelectedEquippedItem(item) &&
+      item.quantity === 1
+    );
+  }
+
+  requestSelectedDismantle(item: InventoryItem): void {
+    if (
+      !this.equipmentApi ||
+      !this.canDismantleEquipment(item) ||
+      this.selectedDismantleLoading()
+    ) {
+      return;
+    }
+
+    const quote = this.selectedDismantleQuote();
+    if (!quote) {
+      this.loadSelectedDismantleQuote(item);
+      return;
+    }
+
+    if (!this.selectedDismantleConfirmation()) {
+      this.selectedDismantleConfirmation.set(true);
+      return;
+    }
+
+    if (this.isFavoriteDismantleConfirmationRequired(quote)) {
+      this.executeSelectedFavoriteDismantle(item);
+      return;
+    }
+
+    if (quote.canExecute) this.executeSelectedDismantle(item, quote);
+  }
+
+  cancelSelectedDismantle(): void {
+    this.selectedDismantleConfirmation.set(false);
+  }
+
+  selectMassDismantleRarity(value: string): void {
+    if (!this.massDismantleRarities.includes(value as Rarity)) return;
+    this.massDismantleRarity.set(value as Rarity);
+    this.massDismantleConfirmation.set(false);
+    this.massDismantleStatus.set(null);
+  }
+
+  selectMassDismantleRarityFromDropdown(
+    selection: DropdownSelection<unknown>,
+  ): void {
+    this.selectMassDismantleRarity(String(selection.main));
+  }
+
+  get massDismantleCandidates(): InventoryItem[] {
+    const maximumRarity = this.RARITY_ORDER[this.massDismantleRarity()];
+    return this.filteredItems.filter((item) => {
+      const equipment = this.equipmentInstance(item);
+      return (
+        !!equipment &&
+        this.canDismantleEquipment(item) &&
+        !item.isFavorite &&
+        this.RARITY_ORDER[equipment.rarity] <= maximumRarity
+      );
+    });
+  }
+
+  requestMassDismantle(): void {
+    if (
+      !this.equipmentApi ||
+      this.massDismantlePending() ||
+      !this.massDismantleCandidates.length
+    ) {
+      return;
+    }
+
+    if (!this.massDismantleConfirmation()) {
+      this.massDismantleConfirmation.set(true);
+      this.massDismantleStatus.set(null);
+      return;
+    }
+
+    const candidates = [...this.massDismantleCandidates];
+    this.massDismantlePending.set(true);
+    this.massDismantleStatus.set(null);
+    from(candidates)
+      .pipe(
+        concatMap((item) =>
+          this.equipmentApi!.previewUpgrade(
+            item.itemInstance.id,
+            'Dismantle',
+          ).pipe(
+            switchMap((quote) =>
+              quote.canExecute
+                ? this.equipmentApi!.dismantle(quote)
+                : of({ outcome: null } as EquipmentUpgradeMutation),
+            ),
+            map((result) => !!result.outcome),
+            catchError(() => of(false)),
+          ),
+        ),
+        toArray(),
+        finalize(() => this.massDismantlePending.set(false)),
+      )
+      .subscribe((results) => {
+        const dismantled = results.filter(Boolean).length;
+        const skipped = candidates.length - dismantled;
+        this.massDismantleConfirmation.set(false);
+        this.state.load(true);
+        if (
+          this.selectedItem() &&
+          candidates.some(
+            (item) =>
+              item.itemInstance.id === this.selectedItem()?.itemInstance.id,
+          )
+        ) {
+          this.clearSelectedItem();
+        }
+        this.massDismantleStatus.set(
+          skipped
+            ? `Dismantled ${dismantled} item${dismantled === 1 ? '' : 's'}; ${skipped} could not be dismantled.`
+            : `Dismantled ${dismantled} item${dismantled === 1 ? '' : 's'}.`,
+        );
+      });
+  }
+
+  cancelMassDismantle(): void {
+    this.massDismantleConfirmation.set(false);
+  }
+
   equipSlotOptions(item: InventoryItem): EquipmentSlotType[] {
     const equipment = this.equipmentInstance(item);
     return equipment
@@ -716,10 +875,6 @@ export class InventoryComponent implements OnInit {
     const equipment = this.equipmentInstance(item);
     if (!equipment) return false;
 
-    if (equipment.equipmentBase.equipmentType === EquipmentType.Tool) {
-      return false;
-    }
-
     const characterLevel =
       this.characterState?.currentCharacter()?.level ?? Number.MAX_SAFE_INTEGER;
     return characterLevel >= (equipment.requiredLevel ?? 1);
@@ -739,7 +894,7 @@ export class InventoryComponent implements OnInit {
   itemMetaLabel(item: InventoryItem): string {
     const equipment = this.equipmentInstance(item);
     if (equipment) {
-      return `Tier ${equipment.tier} · ${equipment.progression ? 'Rank ' + equipment.progression.rank : equipment.quality}`;
+      return `Tier ${equipment.tier} · ${equipment.quality}${equipment.progression ? ' · Rank ' + equipment.progression.rank : ''}`;
     }
 
     return item.quantity === 1 ? '1 held' : `${item.quantity} held`;
@@ -809,10 +964,6 @@ export class InventoryComponent implements OnInit {
           difference = this.equipmentStyleLabel(aEquipment?.progression?.activeStyleId)
             .localeCompare(this.equipmentStyleLabel(bEquipment?.progression?.activeStyleId));
           break;
-        case 'Potential':
-          difference =
-            (aEquipment?.potential ?? 0) - (bEquipment?.potential ?? 0);
-          break;
         case 'Gear Power':
           difference =
             (aEquipment?.itemBudget ?? 0) - (bEquipment?.itemBudget ?? 0);
@@ -837,7 +988,127 @@ export class InventoryComponent implements OnInit {
     this.selectedItem.set(null);
     this.mobileItemInspectorOpen.set(false);
     this.donationActionError.set(null);
+    this.selectedDismantleQuote.set(null);
+    this.selectedDismantleLoading.set(false);
+    this.selectedDismantleConfirmation.set(false);
+    this.selectedDismantleError.set(null);
     this.resetContainerAction();
+  }
+
+  private loadSelectedDismantleQuote(item: InventoryItem): void {
+    this.selectedDismantleQuote.set(null);
+    this.selectedDismantleConfirmation.set(false);
+    this.selectedDismantleError.set(null);
+    if (!this.equipmentApi || !this.canDismantleEquipment(item)) {
+      this.selectedDismantleLoading.set(false);
+      return;
+    }
+
+    const itemInstanceId = item.itemInstance.id;
+    this.selectedDismantleLoading.set(true);
+    this.equipmentApi
+      .previewUpgrade(itemInstanceId, 'Dismantle')
+      .pipe(finalize(() => {
+        if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+          this.selectedDismantleLoading.set(false);
+        }
+      }))
+      .subscribe({
+        next: (quote) => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.selectedDismantleQuote.set(quote);
+          }
+        },
+        error: (error) => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.selectedDismantleError.set(
+              this.equipmentUpgradeError(error, 'Dismantle preview failed.'),
+            );
+          }
+        },
+      });
+  }
+
+  private executeSelectedFavoriteDismantle(item: InventoryItem): void {
+    const itemInstanceId = item.itemInstance.id;
+    this.selectedDismantleLoading.set(true);
+    this.equipmentApi!
+      .previewUpgrade(itemInstanceId, 'Dismantle', true)
+      .subscribe({
+        next: (quote) => {
+          if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
+          this.selectedDismantleQuote.set(quote);
+          if (quote.canExecute) this.executeSelectedDismantle(item, quote);
+          else {
+            this.selectedDismantleLoading.set(false);
+            this.selectedDismantleError.set(
+              quote.unavailableReason ?? 'This item cannot be dismantled.',
+            );
+          }
+        },
+        error: (error) => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.selectedDismantleLoading.set(false);
+            this.selectedDismantleError.set(
+              this.equipmentUpgradeError(error, 'Dismantle preview failed.'),
+            );
+          }
+        },
+      });
+  }
+
+  private executeSelectedDismantle(
+    item: InventoryItem,
+    quote: EquipmentUpgradeQuote,
+  ): void {
+    const itemInstanceId = item.itemInstance.id;
+    this.selectedDismantleLoading.set(true);
+    this.selectedDismantleError.set(null);
+    this.equipmentApi!
+      .dismantle(quote)
+      .pipe(finalize(() => {
+        if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+          this.selectedDismantleLoading.set(false);
+        }
+      }))
+      .subscribe({
+        next: (result) => {
+          if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
+          if (!result.outcome) {
+            this.selectedDismantleQuote.set(result.freshQuote);
+            this.selectedDismantleConfirmation.set(false);
+            this.selectedDismantleError.set(
+              result.freshQuote?.unavailableReason ??
+                'The item changed. Review the dismantle action again.',
+            );
+            return;
+          }
+
+          this.state.load(true);
+          this.clearSelectedItem();
+        },
+        error: (error) => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.selectedDismantleConfirmation.set(false);
+            this.selectedDismantleError.set(
+              this.equipmentUpgradeError(error, 'Dismantling failed.'),
+            );
+          }
+        },
+      });
+  }
+
+  private isFavoriteDismantleConfirmationRequired(
+    quote: EquipmentUpgradeQuote,
+  ): boolean {
+    return quote.unavailableReason?.toLowerCase().includes('favorite') ?? false;
+  }
+
+  private equipmentUpgradeError(error: unknown, fallback: string): string {
+    if (typeof error === 'object' && error && 'errorMessage' in error) {
+      return String((error as { errorMessage: unknown }).errorMessage);
+    }
+    return fallback;
   }
 
   private resetContainerAction(item?: InventoryItem): void {

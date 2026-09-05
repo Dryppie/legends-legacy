@@ -30,8 +30,6 @@ export function getAllowedEquipmentTypesForSlot(
       return [EquipmentType.Necklace];
     case EquipmentSlotType.Ring:
       return [EquipmentType.Ring];
-    case EquipmentSlotType.Tool:
-      return [EquipmentType.Tool];
     default:
       return [];
   }
@@ -59,8 +57,6 @@ export function getSlotTypeFromEquipmentType(
       return EquipmentSlotType.MainHand;
     case EquipmentType.OffHand:
       return EquipmentSlotType.OffHand;
-    case EquipmentType.Tool:
-      return EquipmentSlotType.Tool;
     default:
       throw new Error(`Unhandled equipment type: ${equipmentType}`);
   }

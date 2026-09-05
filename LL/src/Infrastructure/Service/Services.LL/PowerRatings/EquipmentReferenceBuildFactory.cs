@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.Professions;
 using Common.Randomness;
 using Domain.Helpers;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Slots;
@@ -16,7 +16,9 @@ public sealed record EquipmentReferenceEquipmentSelection(
 
 public sealed record EquipmentReferenceBuildDefinition(
     string Id, int CharacterLevel, int Tier, int Rank,
-    IReadOnlyList<EquipmentReferenceEquipmentSelection> Equipment, IReadOnlyList<string> EssenceIds);
+    IReadOnlyList<EquipmentReferenceEquipmentSelection> Equipment, IReadOnlyList<string> EssenceIds,
+    ItemQuality Quality = ItemQuality.Standard,
+    double AttributeRollMultiplier = 1d);
 
 public sealed record EquipmentReferenceBuild(
     EquipmentReferenceBuildDefinition Definition, Character Character,
@@ -28,8 +30,7 @@ public sealed record EquipmentReferenceBuild(
 /// No crafting rolls, payments, persistence, grants, or unsupported tier projection occur here.
 /// </summary>
 public sealed class EquipmentReferenceBuildFactory(
-    StarterEquipmentCatalog catalog,
-    ICraftingDefinitionProvider itemDefinitions,
+    EquipmentCatalog catalog,
     IEssenceDefinitionRepository essenceDefinitions,
     IEssenceCombatLoadoutResolver essenceLoadouts)
 {
@@ -41,7 +42,7 @@ public sealed class EquipmentReferenceBuildFactory(
         ArgumentNullException.ThrowIfNull(definition.EssenceIds);
         if (definition.CharacterLevel is < 1 or > 100)
             throw new ArgumentOutOfRangeException(nameof(definition), "Reference character levels must be 1-100.");
-        if (definition.CharacterLevel < Domain.Models.Professions.Crafting.V2.EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(definition.Tier))
+        if (definition.CharacterLevel < EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(definition.Tier))
             throw new ArgumentException("The reference level cannot equip this tier.", nameof(definition));
         var selections = definition.Equipment.OrderBy(x => x.Slot).ToArray();
         if (selections.Length is < 7 or > 8 || selections.Select(x => x.Slot).Distinct().Count() != selections.Length)
@@ -70,7 +71,9 @@ public sealed class EquipmentReferenceBuildFactory(
             var state = EquipmentState.Award(itemId, catalog.Evaluator, selection.DefinitionId,
                 definition.Tier, definition.Rank,
                 new(EquipmentAwardKind.Administrative, "offline-reference-build", definition.Id),
-                new(EquipmentOwnershipKind.BoundPersonal, character.Id));
+                new(EquipmentOwnershipKind.BoundPersonal, character.Id),
+                definition.Quality,
+                definition.AttributeRollMultiplier);
             state = EquipmentState.Restore(state.ToSnapshot() with
             {
                 ActiveStyleId = selection.ActiveStyleId ?? (selection.UseNativeStyle ? state.NativeStyleId : null)
@@ -78,8 +81,7 @@ public sealed class EquipmentReferenceBuildFactory(
             var data = EquipmentData.Create(state, catalog.Evaluator);
             if (!MatchesSlot(selection.Slot, data.EquipmentType))
                 throw new ArgumentException($"'{selection.DefinitionId}' does not fit '{selection.Slot}'.", nameof(definition));
-            if (!itemDefinitions.GetEquipmentBases().TryGetValue(data.ItemBaseId, out var itemBase))
-                throw new InvalidOperationException($"Reference item base '{data.ItemBaseId}' was not found.");
+            var itemBase = catalog.GetEquipmentBase(data.ItemBaseId);
             var item = new EquipmentInstance { Id = itemId, ItemBaseId = data.ItemBaseId, ItemBase = itemBase };
             item.ApplyProgressionData(data);
             character.EquipmentSlots.Add(new EquipmentSlot

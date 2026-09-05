@@ -7,10 +7,6 @@ public class EquipmentInstanceConfiguration : ItemInstanceConfiguration, IEntity
 {
     public void Configure(EntityTypeBuilder<EquipmentInstance> b)
     {
-        b.Property(e => e.BaseRecipeId).HasMaxLength(128);
-        b.Property(e => e.BlueprintId).HasMaxLength(160);
-        b.Property(e => e.EquipmentSetId).HasMaxLength(160);
-        b.HasIndex(e => e.EquipmentSetId);
         b.Property(e => e.Version).IsRowVersion();
         b.Property(e => e.ProgressionData).HasColumnName("ModelEData").HasConversion<EquipmentDataConverter>().HasColumnType("jsonb");
 
@@ -18,11 +14,6 @@ public class EquipmentInstanceConfiguration : ItemInstanceConfiguration, IEntity
         b.HasMany(e => e.InstanceModifiers)
          .WithOne()
          .HasForeignKey(m => m.ItemInstanceId)
-         .HasPrincipalKey(e => e.Id);
-
-        b.HasMany(e => e.ToolAffixes)
-         .WithOne(x => x.EquipmentInstance)
-         .HasForeignKey(x => x.EquipmentInstanceId)
          .HasPrincipalKey(e => e.Id);
     }
 }

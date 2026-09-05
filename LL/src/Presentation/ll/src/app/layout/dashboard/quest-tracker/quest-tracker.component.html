@@ -13,7 +13,13 @@
         {{ activeQuest.title }}
       </strong>
       <span class="shrink-0 text-xs text-[var(--ll-color-text-muted)]">
-        {{ requiresChoice() ? "Choose" : "Current objective" }}
+        {{
+          readyToTurnIn()
+            ? "Ready to turn in"
+            : requiresChoice()
+              ? "Choose"
+              : "Current objective"
+        }}
       </span>
     </span>
     <span
@@ -111,15 +117,21 @@
   </div>
 
   <button
-    *ngIf="requiresChoice() || objective()?.presentation?.destinationRoute"
+    *ngIf="
+      readyToTurnIn() ||
+      requiresChoice() ||
+      objective()?.presentation?.destinationRoute
+    "
     type="button"
     class="ll-button shrink-0 px-2.5 py-1 text-xs"
     (click)="navigate()"
   >
     {{
-      requiresChoice()
-        ? choiceActionLabel(activeQuest)
-        : objective()?.presentation?.actionLabel || "Go"
+      readyToTurnIn()
+        ? "Turn In Quest"
+        : requiresChoice()
+          ? choiceActionLabel(activeQuest)
+          : objective()?.presentation?.actionLabel || "Go"
     }}
   </button>
 

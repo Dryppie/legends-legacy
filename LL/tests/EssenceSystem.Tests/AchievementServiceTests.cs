@@ -5,7 +5,6 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Achievements;
@@ -241,7 +240,7 @@ public sealed partial class AchievementServiceTests
         SeedAchievement(
             db,
             "hidden.test",
-            AchievementRequirementType.CursedCraftingOutcomes,
+            AchievementRequirementType.MonstersDefeated,
             1,
             category: AchievementCategory.Hidden,
             visibility: AchievementVisibility.Hidden,
@@ -265,7 +264,7 @@ public sealed partial class AchievementServiceTests
         Assert.Equal("Obscured hint", obscured.Description);
         Assert.Equal(0, obscured.RequiredAmount);
 
-        await service.AddProgressAsync(accountId, characterId, AchievementRequirementType.CursedCraftingOutcomes);
+        await service.AddProgressAsync(accountId, characterId, AchievementRequirementType.MonstersDefeated);
         await db.SaveChangesAsync();
         var revealed = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
 

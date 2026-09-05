@@ -18,10 +18,6 @@ public class DungeonRunConfiguration : IEntityTypeConfiguration<DungeonRun>
 
         builder.Property(x => x.RowVersion)
             .IsConcurrencyToken();
-        builder.Property(x => x.EquipmentCommitment).HasColumnName("ModelECommitment").HasColumnType("jsonb").HasConversion(
-            x => Persistence.LL.Configurations.Items.EquipmentAcquisitionJson.Serialize(x),
-            x => Persistence.LL.Configurations.Items.EquipmentAcquisitionJson.Deserialize<Domain.Models.Items.Equipments.Progression.DungeonEquipmentCommitment>(x));
-
         builder.Property(x => x.State)
             .HasColumnType("jsonb")
             .HasConversion(

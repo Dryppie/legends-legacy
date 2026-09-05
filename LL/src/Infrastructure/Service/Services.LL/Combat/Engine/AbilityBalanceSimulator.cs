@@ -4,7 +4,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Items;
-using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 using Services.LL.PowerRatings;
 
 namespace Services.LL.Combat.Engine;

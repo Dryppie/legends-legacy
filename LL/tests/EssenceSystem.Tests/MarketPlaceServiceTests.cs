@@ -6,7 +6,6 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.MarketPlaces;
-using Domain.Models.Professions.Crafting;
 using Microsoft.Extensions.Options;
 using Services.LL.MarketPlaces;
 
@@ -1010,7 +1009,6 @@ public sealed partial class MarketPlaceServiceTests
         public Task<IReadOnlyDictionary<string, ItemBase>> GetItemBasesByIdsAsync(IReadOnlyCollection<string> itemIds, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyDictionary<string, ItemBase>>(itemBases.Where(x => itemIds.Contains(x.Id)).ToDictionary(x => x.Id));
         public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyDictionary<string, string>>(new Dictionary<string, string>());
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken) => Task.FromResult(itemBases.OfType<EquipmentBase>().FirstOrDefault(x => x.Id == itemBaseId));
         public Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> itemBasesToAdd, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
@@ -1026,7 +1024,6 @@ public sealed partial class MarketPlaceServiceTests
             string acquisitionSource,
             CancellationToken cancellationToken) => Task.CompletedTask;
         public Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken) => Task.CompletedTask;
-        public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => Task.FromResult(Item?.ItemInstanceId == itemInstanceId ? Item : null);
         public Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();

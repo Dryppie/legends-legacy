@@ -52,5 +52,8 @@ function equipmentSet(): EquipmentSetMetadata {
 }
 
 function setItem(id: string): EquipmentInstance {
-  return { id, equipmentSetId: 'set_warden' } as EquipmentInstance;
+  return {
+    id,
+    equipmentSet: equipmentSet(),
+  } as unknown as EquipmentInstance;
 }

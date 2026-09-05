@@ -1,6 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
 import { EquipmentType } from './enums/equipmentType';
-import { GatheringType } from './enums/gatheringType';
 import { ItemType } from './enums/itemType';
 import { ItemQuality } from './enums/itemQuality';
 import { Rarity } from './enums/rarity';
@@ -23,46 +22,20 @@ export interface EquipmentInstance extends ItemInstance {
   isFavorite?: boolean;
   rarity: Rarity;
   quality: ItemQuality;
-  baseRecipeId?: string | null;
-  blueprintId?: string | null;
-  equipmentSetId?: string | null;
   equipmentSet?: EquipmentSetMetadata | null;
-  craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
   requiredLevel?: number;
-  statModelVersion?: number;
   equipmentBase: Equipment;
-  potential?: number;
-  maxPotential?: number | null;
-  temperingProgress: number;
-  itemXp: number;
   baseModifiers: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
   attributeModifiers: AttributeModifier[];
   effectiveAttributeModifiers?: AttributeModifier[];
-  toolAffixes: ToolBonusModifier[];
-  effectiveToolBonuses: ToolBonusModifier[];
   affinityTags: string[];
   itemBudget: number;
   itemBudgetTier: number;
-  rollRange?: EquipmentRollRange | null;
   isGuildBorrowed: boolean;
   guildVaultItemId?: string | null;
   borrowedFromGuildName?: string | null;
-}
-
-export interface EquipmentRollRange {
-  minimumPotential: number;
-  maximumPotential: number;
-  attributes: EquipmentAttributeRollRange[];
-}
-
-export interface EquipmentAttributeRollRange {
-  attributeType: AttributeModifier['attributeType'];
-  minimumAmount: number;
-  maximumAmount: number;
-  rarityBonusAmount: number;
-  hasCraftedRange: boolean;
 }
 
 export interface ItemBase {
@@ -73,7 +46,6 @@ export interface ItemBase {
   description: string;
   stackable: boolean;
   isBound?: boolean;
-  blueprint?: BlueprintItemMetadata | null;
   selectionCrate?: SelectionCrateMetadata | null;
 }
 
@@ -86,19 +58,6 @@ export interface SelectionCrateOption {
   id: string;
   name: string;
   quantity: number;
-}
-
-export interface BlueprintItemMetadata {
-  blueprintId: string;
-  name: string;
-  bonusStatProfile: Record<string, number>;
-  requiredRecipeTags: string[];
-  anyRecipeTags: string[];
-  compatibleRecipeCount: number;
-  compatibleRecipes: BlueprintCompatibleRecipe[];
-  sourceType?: string | null;
-  sourceId?: string | null;
-  equipmentSet?: EquipmentSetMetadata | null;
 }
 
 export interface EquipmentSetMetadata {
@@ -114,56 +73,11 @@ export interface EquipmentSetBonusMetadata {
   description: string;
 }
 
-export interface BlueprintCompatibleRecipe {
-  id: string;
-  name: string;
-}
-
-export interface EquipmentCraftingDesignMetadata {
-  recipeId: string;
-  blueprintId?: string | null;
-  name: string;
-  handedness: string;
-  attackCategory: string;
-  rangeCategory: string;
-  basicAttackIntervalMultiplier: number;
-  basicAttackDamageMultiplier: number;
-  role: string;
-  primaryTemperingStats: string[];
-  secondaryTemperingStats: string[];
-}
-
 export interface Equipment extends ItemBase {
   equipmentType: EquipmentType;
   attributeModifiers: AttributeModifier[];
-  toolBonuses?: ToolBonusModifier[];
-  gatheringType?: GatheringType | null;
   itemBudget: number;
   itemBudgetTier: number;
-}
-
-export interface ToolBonusModifier {
-  id: string;
-  equipmentBaseId?: string;
-  equipmentInstanceId?: string;
-  name?: string;
-  bonusType: ToolBonusType;
-  amount: number;
-  scopeId?: string;
-}
-
-export enum ToolBonusType {
-  GatheringYieldPercent = 'GatheringYieldPercent',
-  RareMaterialChancePercent = 'RareMaterialChancePercent',
-  DoubleGatherChancePercent = 'DoubleGatherChancePercent',
-  NodeSuccessChancePercent = 'NodeSuccessChancePercent',
-  SpecificNodeYieldPercent = 'SpecificNodeYieldPercent',
-  SpecificRegionYieldPercent = 'SpecificRegionYieldPercent',
-  SpecificResourceYieldPercent = 'SpecificResourceYieldPercent',
-  SpecificToolTypeYieldPercent = 'SpecificToolTypeYieldPercent',
-  BonusRollChancePercent = 'BonusRollChancePercent',
-  MinimumQuantityBonus = 'MinimumQuantityBonus',
-  MaximumQuantityBonus = 'MaximumQuantityBonus',
 }
 
 export interface EssenceItem extends ItemBase {

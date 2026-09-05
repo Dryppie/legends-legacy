@@ -1,5 +1,3 @@
-using Domain.Models.Professions.Crafting.V2;
-
 namespace Domain.Models.Items.Equipments.Progression;
 
 /// <summary>
@@ -9,8 +7,9 @@ namespace Domain.Models.Items.Equipments.Progression;
 /// </summary>
 public sealed class EquipmentBalance
 {
-    public const int ModelVersion = 1;
+    public const int ModelVersion = 2;
     public const int MaximumRank = 5;
+    public const double MinimumSupportedBasicAttackIntervalMultiplier = 0.75d;
     public const int StatUnitVersion = EquipmentStatBudgetCatalog.BalanceVersion;
 
     public EquipmentBalance(
@@ -40,7 +39,7 @@ public sealed class EquipmentBalance
     {
         if (tier < 1 || tier > EquipmentTierBudgetCurve.MaximumSupportedTier)
             throw new ArgumentOutOfRangeException(nameof(tier));
-        if (!Enum.IsDefined(type) || type == EquipmentType.Tool)
+        if (!Enum.IsDefined(type))
             throw new ArgumentOutOfRangeException(nameof(type));
         // Preserve current combined hand budgets: 2H = 1H + offhand = two 1H.
         var budget = BaseTierBudget * EquipmentTierBudgetCurve.GetScale(tier)
@@ -48,4 +47,26 @@ public sealed class EquipmentBalance
         EquipmentValidation.PositiveFinite(budget);
         return budget;
     }
+
+    public static double GetRarityMultiplier(EquipmentRarity rarity) => rarity switch
+    {
+        EquipmentRarity.Common => 1d,
+        EquipmentRarity.Uncommon => 1.1d,
+        EquipmentRarity.Rare => 1.3d,
+        EquipmentRarity.Epic => 1.6d,
+        EquipmentRarity.Unique => 2d,
+        EquipmentRarity.Legendary => 2.5d,
+        EquipmentRarity.Legacy => 3d,
+        _ => throw new ArgumentOutOfRangeException(nameof(rarity))
+    };
+
+    public static double GetQualityMultiplier(ItemQuality quality) => quality switch
+    {
+        ItemQuality.Crude => 0.90d,
+        ItemQuality.Standard => 1d,
+        ItemQuality.Fine => 1.12d,
+        ItemQuality.Exceptional => 1.26d,
+        ItemQuality.Masterpiece => 1.42d,
+        _ => throw new ArgumentOutOfRangeException(nameof(quality))
+    };
 }

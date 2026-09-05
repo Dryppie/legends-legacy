@@ -16,9 +16,6 @@ public sealed class JsonProphecyDefinitionProvider : IProphecyDefinitionProvider
         ProphecyObjectiveType.CompleteDungeons,
         ProphecyObjectiveType.GainEssenceXp,
         ProphecyObjectiveType.AbsorbEssence,
-        ProphecyObjectiveType.GatherResources,
-        ProphecyObjectiveType.TemperItems,
-        ProphecyObjectiveType.SpendPotential,
         ProphecyObjectiveType.TreasureProgress,
         ProphecyObjectiveType.MeaningfulDefeatThenWins
     };

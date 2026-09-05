@@ -4,7 +4,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
-using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 using Services.LL.Combat.Engine;
 
 namespace EssenceSystem.Tests;

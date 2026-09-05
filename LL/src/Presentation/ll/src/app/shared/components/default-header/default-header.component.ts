@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ProfessionIconComponent } from '../professions/profession-icon/profession-icon.component';
+import { FeatureIconComponent } from '../feature-icon/feature-icon.component';
 import { NgIf } from '@angular/common';
 import { HelpLauncherComponent } from '../../help/help-launcher.component';
 import { GuidePageId } from '../../help/guide-catalog';
@@ -7,7 +7,7 @@ import { GuidePageId } from '../../help/guide-catalog';
 @Component({
   selector: 'app-default-header',
   host: { class: 'block min-w-0 w-full' },
-  imports: [NgIf, ProfessionIconComponent, HelpLauncherComponent],
+  imports: [NgIf, FeatureIconComponent, HelpLauncherComponent],
   templateUrl: './default-header.component.html',
 })
 export class DefaultHeaderComponent {

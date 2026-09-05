@@ -7,7 +7,6 @@ using Domain.Models.CharacterActions;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Guilds;
-using Domain.Models.Professions;
 
 namespace EssenceSystem.Tests;
 

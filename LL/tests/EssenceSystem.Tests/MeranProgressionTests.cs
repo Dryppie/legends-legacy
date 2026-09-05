@@ -28,8 +28,8 @@ public sealed class MeranProgressionTests
 
         Assert.Equal(0.5, result.WinRate);
         Assert.Equal(21600, result.CindersPerDay);
-        Assert.Equal(2d, result.PlainTargetHours);
-        Assert.Equal(24d, result.SigilHours);
+        Assert.Equal(18.51851851851852d, result.EquipmentDropHours!.Value, 12);
+        Assert.Equal(24d, result.SigilDropHours);
     }
 
     [Fact]
@@ -39,11 +39,11 @@ public sealed class MeranProgressionTests
         var stalled = MeranProgressionAnalyzer.ProjectEconomy([new(1, "Draw", 6000, ["A"], 0)], pool);
         Assert.Equal(0, stalled.WinRate);
         Assert.Equal(0, stalled.CindersPerDay);
-        Assert.Null(stalled.PlainTargetHours);
-        Assert.Null(stalled.SigilHours);
+        Assert.Null(stalled.EquipmentDropHours);
+        Assert.Null(stalled.SigilDropHours);
 
         var freeFight = MeranProgressionAnalyzer.ProjectEconomy([new(1, "Victory", 10, ["A"], 0)], pool);
-        Assert.Equal(1d, freeFight.PlainTargetHours);
+        Assert.Equal(9.25925925925926d, freeFight.EquipmentDropHours!.Value, 12);
         Assert.Throws<ArgumentException>(() => MeranProgressionAnalyzer.ProjectEconomy([], pool));
     }
 

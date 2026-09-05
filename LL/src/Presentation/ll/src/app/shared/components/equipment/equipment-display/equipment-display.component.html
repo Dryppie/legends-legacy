@@ -1,382 +1,80 @@
-<ng-container
-  *ngIf="
-    sideBySideComparisons.length && !inlineComparison;
-    else standardEquipment
-  "
->
+<ng-container *ngIf="sideBySideComparisons.length && !inlineComparison; else standardEquipment">
   <div
     class="equipment-comparison-grid grid grid-cols-1 bg-texture"
     [ngClass]="{
-      'w-full sm:w-[min(50rem,calc(100vw-4rem))] sm:grid-cols-3':
-        fitComparisonToContainer && sideBySideComparisons.length > 1,
-      'w-full sm:w-[min(34rem,calc(100vw-4rem))] sm:grid-cols-2':
-        fitComparisonToContainer && sideBySideComparisons.length === 1,
-      'w-[min(50rem,calc(100vw-3rem))] sm:grid-cols-3':
-        !fitComparisonToContainer && sideBySideComparisons.length > 1,
-      'w-[min(34rem,calc(100vw-3rem))] sm:grid-cols-2':
-        !fitComparisonToContainer && sideBySideComparisons.length === 1,
+      'w-full sm:w-[min(50rem,calc(100vw-4rem))] sm:grid-cols-3': fitComparisonToContainer && sideBySideComparisons.length > 1,
+      'w-full sm:w-[min(34rem,calc(100vw-4rem))] sm:grid-cols-2': fitComparisonToContainer && sideBySideComparisons.length === 1,
+      'w-[min(50rem,calc(100vw-3rem))] sm:grid-cols-3': !fitComparisonToContainer && sideBySideComparisons.length > 1,
+      'w-[min(34rem,calc(100vw-3rem))] sm:grid-cols-2': !fitComparisonToContainer && sideBySideComparisons.length === 1
     }"
   >
     <section class="equipment-comparison-card flex min-w-0 flex-col sm:pr-4">
       <div class="flex items-start justify-between gap-3">
-        <div class="ll-item-meta text-primary">
-          {{ comparisonSubjectLabel }}
-        </div>
+        <div class="ll-item-meta text-primary">{{ comparisonSubjectLabel }}</div>
         <span class="ll-state shrink-0">T{{ data.itemBudgetTier }}</span>
       </div>
-      <h2
-        class="ll-item-detail-title mt-1 truncate"
-        [ngClass]="rarityClass(data.rarity)"
-      >
-        {{ data.name }}
-      </h2>
-      <div class="ll-item-meta mt-1 truncate">
-        {{ equipmentMeta(data) }}
-      </div>
-      <div
-        *ngIf="data.equipmentSet as equipmentSet"
-        class="mt-1 text-xs text-primary"
-      >
-        {{ equipmentSet.name }} Set
-      </div>
-      <div
-        *ngIf="data.requiredLevel > 1"
-        class="ll-item-meta mt-1 text-primary"
-      >
-        Requires level {{ data.requiredLevel }}
-      </div>
+      <h2 class="ll-item-detail-title mt-1 truncate" [ngClass]="rarityClass(data.rarity)">{{ data.name }}</h2>
+      <div class="ll-item-meta mt-1 truncate">{{ equipmentMeta(data) }}</div>
+      <div *ngIf="data.equipmentSet as equipmentSet" class="mt-1 text-xs text-primary">{{ equipmentSet.name }} Set</div>
+      <div *ngIf="data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">Requires level {{ data.requiredLevel }}</div>
 
       <div class="mt-3 flex-1 text-sm">
-        <div
-          *ngFor="let comparison of comparisonAttributeRows"
-          class="border-b border-white/5 py-1.5 last:border-b-0"
-          [attr.data-testid]="
-            temperingBonus(data, comparison.attributeType)
-              ? 'tempered-attribute-row'
-              : null
-          "
-          [appTemperingBonusTooltip]="
-            temperingTooltipDataOrNull(
-              data,
-              comparison.attributeType,
-              comparison.hoveredAmount
-            )
-          "
-        >
-          <div
-            class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
-          >
-            <ng-container
-              *ngIf="
-                temperingBonus(data, comparison.attributeType);
-                else hoveredAttributeName
-              "
-            >
-              <span
-                data-testid="tempered-attribute-name"
-                class="truncate text-secondary"
-              >
-                {{
-                  comparison.attributeType
-                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                }}
-              </span>
+        <div *ngFor="let comparison of comparisonAttributeRows" class="grid min-h-8 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-b border-white/5 py-1.5 last:border-b-0">
+          <span class="truncate text-secondary">{{ comparison.attributeType | attributeTypeFormat: usesV16EquipmentPresentation(data) }}</span>
+          <span data-testid="hovered-attribute-value" class="tabular-nums" [ngClass]="hasAttribute(data, comparison.attributeType) ? 'text-primary' : 'text-secondary'">
+            <ng-container *ngIf="hasAttribute(data, comparison.attributeType); else noHoveredAttribute">
+              {{ comparison.hoveredAmount | attributeValueFormat: comparison.attributeType: false: usesV16EquipmentPresentation(data) }}
             </ng-container>
-            <ng-template #hoveredAttributeName>
-              <span class="truncate text-secondary">
-                {{
-                  comparison.attributeType
-                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                }}
-              </span>
-            </ng-template>
-            <span
-              data-testid="hovered-attribute-value"
-              class="equipment-roll-value tabular-nums"
-              [ngClass]="
-                hasAttribute(data, comparison.attributeType)
-                  ? 'text-primary'
-                  : 'text-secondary'
-              "
-            >
-              <ng-container
-                *ngIf="
-                  hasAttribute(data, comparison.attributeType);
-                  else noHoveredAttribute
-                "
-              >
-                <strong class="font-medium">
-                  {{
-                    comparison.hoveredAmount
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(data)
-                  }}
-                </strong>
-                <span
-                  *ngIf="
-                    attributeRangeSummary(
-                      data,
-                      comparison.attributeType
-                    ) as rangeSummary
-                  "
-                  class="text-xs font-normal text-secondary"
-                >
-                  {{ rangeSummary }}
-                </span>
-                <span
-                  *ngIf="temperingBonus(data, comparison.attributeType)"
-                  data-testid="tempering-bonus"
-                  class="equipment-tempering-bonus"
-                >
-                  <span aria-hidden="true">✦</span>
-                  {{ formatTemperingBonus(data, comparison.attributeType) }}
-                </span>
-              </ng-container>
-              <ng-template #noHoveredAttribute>&mdash;</ng-template>
-            </span>
-          </div>
-          <div
-            *ngIf="
-              craftedAttributeRollRange(data, comparison.attributeType) as range
-            "
-            class="equipment-design-track"
-          >
-            <span
-              class="equipment-design-fill"
-              [style.width.%]="
-                rollPercentage(
-                  comparison.hoveredAmount,
-                  range.minimumAmount,
-                  range.maximumAmount
-                )
-              "
-            ></span>
-          </div>
+            <ng-template #noHoveredAttribute>&mdash;</ng-template>
+          </span>
         </div>
       </div>
 
-      <div
-        *ngIf="data.potential != null"
-        class="mt-3 flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-xs"
-      >
-        <span class="text-secondary">Potential</span>
-        <span class="font-medium tabular-nums text-primary">
-          {{ data.potential }}
-        </span>
-      </div>
-
-      <div *ngIf="!data.progression" class="mt-3 border-t border-primary/20 pt-3">
+      <div class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
           <span class="ll-item-meta text-primary">Gear Value</span>
-          <span class="font-serif text-xl tabular-nums text-primary">
-            {{ data.itemBudget | number: "1.0-2" }}
-          </span>
+          <span class="font-serif text-xl tabular-nums text-primary">{{ data.itemBudget | number: "1.0-2" }}</span>
         </div>
       </div>
     </section>
 
-    <section
-      *ngFor="let equipped of sideBySideComparisons"
-      class="equipment-comparison-card flex min-w-0 flex-col border-t border-primary/20 bg-black/20 sm:border-l sm:border-t-0 sm:pl-4"
-    >
+    <section *ngFor="let equipped of sideBySideComparisons" class="equipment-comparison-card flex min-w-0 flex-col border-t border-primary/20 bg-black/20 sm:border-l sm:border-t-0 sm:pl-4">
       <div class="flex items-start justify-between gap-3">
-        <div class="ll-item-meta">
-          {{ comparisonSlotLabel(equipped.slotType) }}
-        </div>
-        <span class="ll-state shrink-0">
-          T{{ equipped.data.itemBudgetTier }}
-        </span>
+        <div class="ll-item-meta">{{ comparisonSlotLabel(equipped.slotType) }}</div>
+        <span class="ll-state shrink-0">T{{ equipped.data.itemBudgetTier }}</span>
       </div>
-      <h2
-        class="ll-item-detail-title mt-1 truncate"
-        [ngClass]="rarityClass(equipped.data.rarity)"
-      >
-        {{ equipped.data.name }}
-      </h2>
-      <div class="ll-item-meta mt-1 truncate">
-        {{ equipmentMeta(equipped.data) }}
-      </div>
-      <div
-        *ngIf="equipped.data.equipmentSet as equipmentSet"
-        class="mt-1 text-xs text-primary"
-      >
-        {{ equipmentSet.name }} Set
-      </div>
-      <div
-        *ngIf="equipped.data.requiredLevel > 1"
-        class="ll-item-meta mt-1 text-primary"
-      >
-        Requires level {{ equipped.data.requiredLevel }}
-      </div>
+      <h2 class="ll-item-detail-title mt-1 truncate" [ngClass]="rarityClass(equipped.data.rarity)">{{ equipped.data.name }}</h2>
+      <div class="ll-item-meta mt-1 truncate">{{ equipmentMeta(equipped.data) }}</div>
+      <div *ngIf="equipped.data.equipmentSet as equipmentSet" class="mt-1 text-xs text-primary">{{ equipmentSet.name }} Set</div>
+      <div *ngIf="equipped.data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">Requires level {{ equipped.data.requiredLevel }}</div>
 
       <div class="mt-3 flex-1 text-sm">
-        <div
-          *ngFor="let comparison of comparisonAttributeRows"
-          class="border-b border-white/5 py-1.5 last:border-b-0"
-          [attr.data-testid]="
-            temperingBonus(equipped.data, comparison.attributeType)
-              ? 'tempered-attribute-row'
-              : null
-          "
-          [appTemperingBonusTooltip]="
-            temperingTooltipDataOrNull(
-              equipped.data,
-              comparison.attributeType,
-              equippedAmount(equipped, comparison.attributeType)
-            )
-          "
-        >
-          <div
-            class="grid min-h-6 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
-          >
-            <ng-container
-              *ngIf="
-                temperingBonus(equipped.data, comparison.attributeType);
-                else equippedAttributeName
-              "
-            >
-              <span
-                data-testid="tempered-attribute-name"
-                class="truncate text-secondary"
-              >
-                {{
-                  comparison.attributeType
-                    | attributeTypeFormat
-                      : usesV16EquipmentPresentation(equipped.data)
-                }}
-              </span>
+        <div *ngFor="let comparison of comparisonAttributeRows" class="grid min-h-8 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1.5 last:border-b-0">
+          <span class="truncate text-secondary">{{ comparison.attributeType | attributeTypeFormat: usesV16EquipmentPresentation(equipped.data) }}</span>
+          <span data-testid="equipped-attribute-value" class="tabular-nums text-white">
+            <ng-container *ngIf="hasAttribute(equipped.data, comparison.attributeType); else noEquippedAttribute">
+              {{ equippedAmount(equipped, comparison.attributeType) | attributeValueFormat: comparison.attributeType: false: usesV16EquipmentPresentation(equipped.data) }}
             </ng-container>
-            <ng-template #equippedAttributeName>
-              <span class="truncate text-secondary">
-                {{
-                  comparison.attributeType
-                    | attributeTypeFormat
-                      : usesV16EquipmentPresentation(equipped.data)
-                }}
-              </span>
-            </ng-template>
-            <span
-              data-testid="equipped-attribute-value"
-              class="equipment-roll-value tabular-nums text-white"
-            >
-              <ng-container
-                *ngIf="
-                  hasAttribute(equipped.data, comparison.attributeType);
-                  else noEquippedAttribute
-                "
-              >
-                <strong class="font-medium">
-                  {{
-                    equippedAmount(equipped, comparison.attributeType)
-                      | attributeValueFormat
-                        : comparison.attributeType
-                        : false
-                        : usesV16EquipmentPresentation(equipped.data)
-                  }}
-                </strong>
-                <span
-                  *ngIf="
-                    attributeRangeSummary(
-                      equipped.data,
-                      comparison.attributeType
-                    ) as rangeSummary
-                  "
-                  class="text-xs font-normal text-secondary"
-                >
-                  {{ rangeSummary }}
-                </span>
-                <span
-                  *ngIf="
-                    temperingBonus(equipped.data, comparison.attributeType)
-                  "
-                  data-testid="tempering-bonus"
-                  class="equipment-tempering-bonus"
-                >
-                  <span aria-hidden="true">✦</span>
-                  {{
-                    formatTemperingBonus(
-                      equipped.data,
-                      comparison.attributeType
-                    )
-                  }}
-                </span>
-              </ng-container>
-              <ng-template #noEquippedAttribute>&mdash;</ng-template>
-            </span>
-            <span
-              data-testid="comparison-difference"
-              [attr.data-attribute]="comparison.attributeType"
-              class="min-w-12 text-right font-semibold tabular-nums"
-              [ngClass]="
-                comparisonClass(
-                  comparison.hoveredAmount -
-                    equippedAmount(equipped, comparison.attributeType)
-                )
-              "
-            >
-              {{
-                comparison.hoveredAmount -
-                  equippedAmount(equipped, comparison.attributeType)
-                  | attributeValueFormat
-                    : comparison.attributeType
-                    : true
-                    : usesV16EquipmentPresentation(data)
-              }}
-            </span>
-          </div>
-          <div
-            *ngIf="
-              craftedAttributeRollRange(
-                equipped.data,
-                comparison.attributeType
-              ) as range
-            "
-            class="equipment-design-track"
+            <ng-template #noEquippedAttribute>&mdash;</ng-template>
+          </span>
+          <span
+            data-testid="comparison-difference"
+            [attr.data-attribute]="comparison.attributeType"
+            class="min-w-12 text-right font-semibold tabular-nums"
+            [ngClass]="comparisonClass(comparison.hoveredAmount - equippedAmount(equipped, comparison.attributeType))"
           >
-            <span
-              class="equipment-design-fill"
-              [style.width.%]="
-                rollPercentage(
-                  equippedAmount(equipped, comparison.attributeType),
-                  range.minimumAmount,
-                  range.maximumAmount
-                )
-              "
-            ></span>
-          </div>
+            {{ comparison.hoveredAmount - equippedAmount(equipped, comparison.attributeType) | attributeValueFormat: comparison.attributeType: true: usesV16EquipmentPresentation(data) }}
+          </span>
         </div>
       </div>
 
-      <div
-        *ngIf="equipped.data.potential != null"
-        class="mt-3 flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-xs"
-      >
-        <span class="text-secondary">Potential</span>
-        <span class="font-medium tabular-nums text-primary">
-          {{ equipped.data.potential }}
-        </span>
-      </div>
-
-      <div *ngIf="!equipped.data.progression" class="mt-3 border-t border-primary/20 pt-3">
+      <div class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
           <span class="ll-item-meta">Gear Value</span>
           <span class="flex items-baseline gap-2 tabular-nums">
-            <span class="font-serif text-xl text-white">
-              {{ equipped.data.itemBudget | number: "1.0-2" }}
-            </span>
-            <span
-              *ngIf="!data.progression"
-              class="text-xs font-semibold"
-              [ngClass]="
-                comparisonClass(data.itemBudget - equipped.data.itemBudget)
-              "
-            >
-              {{ data.itemBudget - equipped.data.itemBudget > 0 ? "+" : ""
-              }}{{
-                data.itemBudget - equipped.data.itemBudget | number: "1.0-2"
-              }}
+            <span class="font-serif text-xl text-white">{{ equipped.data.itemBudget | number: "1.0-2" }}</span>
+            <span class="text-xs font-semibold" [ngClass]="comparisonClass(data.itemBudget - equipped.data.itemBudget)">
+              {{ data.itemBudget - equipped.data.itemBudget > 0 ? "+" : "" }}{{ data.itemBudget - equipped.data.itemBudget | number: "1.0-2" }}
             </span>
           </span>
         </div>
@@ -386,416 +84,55 @@
 </ng-container>
 
 <ng-template #standardEquipment>
-  <div
-    class="equipment-design-card"
-    [ngClass]="{
-      'bg-texture': !embedded,
-      'equipment-design-card-embedded': embedded,
-    }"
-  >
+  <div class="equipment-detail-card" [ngClass]="{ 'bg-texture': !embedded, 'equipment-detail-card-embedded': embedded }">
     <ng-container *ngIf="!embedded">
       <div class="flex items-start justify-between gap-3">
-        <h2 class="ll-item-detail-title" [ngClass]="rarityClasses">
-          {{ data.name }}
-        </h2>
+        <h2 class="ll-item-detail-title" [ngClass]="rarityClasses">{{ data.name }}</h2>
         <span class="ll-state shrink-0">T{{ data.itemBudgetTier }}</span>
       </div>
-
-      <div class="ll-item-meta mt-1">
-        {{ equipmentMeta(data) }}
-      </div>
-      <div
-        *ngIf="data.requiredLevel > 1"
-        class="ll-item-meta mt-1 text-primary"
-      >
-        Requires level {{ data.requiredLevel }}
-      </div>
+      <div class="ll-item-meta mt-1">{{ equipmentMeta(data) }}</div>
+      <div *ngIf="data.requiredLevel > 1" class="ll-item-meta mt-1 text-primary">Requires level {{ data.requiredLevel }}</div>
     </ng-container>
 
-    <p *ngIf="data.description" class="ll-item-description">
-      {{ data.description }}
-    </p>
+    <p *ngIf="data.description" class="ll-item-description">{{ data.description }}</p>
 
-    <div *ngIf="data.craftingDesign as design" class="ll-item-detail-section">
-      <ng-container *ngIf="!compactCraftingDesign">
-        <div class="ll-item-meta">Crafting Design</div>
-        <div class="mt-1 font-medium text-white">{{ design.name }}</div>
-      </ng-container>
-      <div class="mt-2 flex flex-wrap gap-2">
-        <span *ngIf="design.handedness" class="ll-item-chip">{{
-          design.handedness
-        }}</span>
-        <span *ngIf="design.rangeCategory" class="ll-item-chip">{{
-          design.rangeCategory
-        }}</span>
-        <span *ngIf="design.attackCategory" class="ll-item-chip">{{
-          design.attackCategory
-        }}</span>
-        <span
-          *ngIf="design.role && !embedded"
-          class="ll-item-chip ll-item-chip-accent"
-          >{{ design.role }}</span
-        >
-      </div>
-      <div
-        *ngIf="showPossibleUpgradeAttributes"
-        class="mt-2 text-xs text-secondary"
-      >
-        <span class="ll-item-meta block">Possible upgrade attributes</span>
-        <span class="mt-1 block text-white">
-          {{
-            possibleDesignAttributes(
-              design.primaryTemperingStats,
-              design.secondaryTemperingStats
-            ).join(", ")
-          }}
-        </span>
-      </div>
-    </div>
+    <div *ngIf="data.attributes.length || (inlineComparison && comparisonRows.length)" class="equipment-detail-section ll-item-detail-section">
+      <div class="ll-item-meta">Attributes</div>
 
-    <div
-      *ngIf="
-        hasToolDetails ||
-        data.attributes.length ||
-        (inlineComparison &&
-          (comparisonRows.length || toolComparisonRows.length))
-      "
-      class="equipment-design-section ll-item-detail-section"
-      [attr.data-testid]="hasToolDetails ? 'tool-attributes' : null"
-    >
-      <div class="ll-item-meta">
-        {{ embedded ? "Attributes" : attributeSectionLabel }}
-      </div>
-
-      <ng-container
-        *ngIf="inlineComparison && comparisonData; else standardAttributeRows"
-      >
-        <ng-container *ngIf="isTool; else inlineEquipmentAttributeRows">
-          <div
-            *ngFor="let comparison of toolComparisonRows"
-            class="equipment-design-row ll-item-stat-row"
-            [appToolBonusTooltip]="comparison.bonusType"
-          >
-            <span>
-              {{
-                formatToolBonusLabel(comparison.bonusType, comparison.scopeId)
-              }}
-            </span>
-            <span class="flex items-baseline gap-2 tabular-nums">
-              <span class="text-primary">
-                <ng-container
-                  *ngIf="
-                    hasToolBonus(data, comparison);
-                    else noSelectedToolBonus
-                  "
-                >
-                  {{
-                    formatToolBonusValue(
-                      comparison.hoveredAmount,
-                      comparison.bonusType,
-                      true
-                    )
-                  }}
-                </ng-container>
-                <ng-template #noSelectedToolBonus>&mdash;</ng-template>
-              </span>
-              <span
-                data-testid="inline-tool-comparison-difference"
-                class="equipment-inline-delta"
-                [ngClass]="
-                  comparisonClass(
-                    comparison.hoveredAmount - comparison.equippedAmount
-                  )
-                "
-              >
-                <ng-container
-                  *ngIf="
-                    comparison.hoveredAmount !== comparison.equippedAmount;
-                    else unchangedToolBonus
-                  "
-                >
-                  {{
-                    formatToolBonusValue(
-                      comparison.hoveredAmount - comparison.equippedAmount,
-                      comparison.bonusType,
-                      true
-                    )
-                  }}
-                </ng-container>
-                <ng-template #unchangedToolBonus>=</ng-template>
-              </span>
-            </span>
-          </div>
-        </ng-container>
-
-        <ng-template #inlineEquipmentAttributeRows>
-          <div
-            *ngFor="let comparison of comparisonRows"
-            class="equipment-design-row"
-            [attr.data-testid]="
-              temperingBonus(data, comparison.attributeType)
-                ? 'tempered-attribute-row'
-                : null
-            "
-            [appInventoryTemperingBonusTooltip]="
-              temperingTooltipDataOrNull(
-                data,
-                comparison.attributeType,
-                comparison.hoveredAmount
-              )
-            "
-          >
-            <div class="flex items-baseline justify-between gap-3 text-xs">
-              <ng-container
-                *ngIf="
-                  temperingBonus(data, comparison.attributeType);
-                  else inlineAttributeName
-                "
-              >
-                <span
-                  data-testid="tempered-attribute-name"
-                  class="truncate text-white"
-                >
-                  {{
-                    comparison.attributeType
-                      | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                  }}
-                </span>
+      <ng-container *ngIf="inlineComparison && comparisonData; else standardAttributeRows">
+        <div *ngFor="let comparison of comparisonRows" class="equipment-detail-row">
+          <span class="truncate text-white">{{ comparison.attributeType | attributeTypeFormat: usesV16EquipmentPresentation(data) }}</span>
+          <span class="flex items-baseline gap-2 tabular-nums">
+            <strong class="font-medium text-primary">
+              <ng-container *ngIf="hasAttribute(data, comparison.attributeType); else noSelectedAttribute">
+                {{ comparison.hoveredAmount | attributeValueFormat: comparison.attributeType: true: usesV16EquipmentPresentation(data) }}
               </ng-container>
-              <ng-template #inlineAttributeName>
-                <span class="truncate text-white">
-                  {{
-                    comparison.attributeType
-                      | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                  }}
-                </span>
-              </ng-template>
-              <span class="equipment-roll-value tabular-nums">
-                <strong class="font-medium text-primary">
-                  <ng-container
-                    *ngIf="
-                      hasAttribute(data, comparison.attributeType);
-                      else noSelectedAttribute
-                    "
-                  >
-                    {{
-                      comparison.hoveredAmount
-                        | attributeValueFormat
-                          : comparison.attributeType
-                          : true
-                          : usesV16EquipmentPresentation(data)
-                    }}
-                  </ng-container>
-                  <ng-template #noSelectedAttribute>&mdash;</ng-template>
-                </strong>
-                <span
-                  *ngIf="
-                    attributeRangeSummary(
-                      data,
-                      comparison.attributeType
-                    ) as rangeSummary
-                  "
-                  class="text-xs text-secondary"
-                >
-                  {{ rangeSummary }}
-                </span>
-                <span
-                  *ngIf="temperingBonus(data, comparison.attributeType)"
-                  data-testid="tempering-bonus"
-                  class="equipment-tempering-bonus"
-                >
-                  <span aria-hidden="true">✦</span>
-                  {{ formatTemperingBonus(data, comparison.attributeType) }}
-                </span>
-                <span
-                  data-testid="inline-comparison-difference"
-                  [attr.data-attribute]="comparison.attributeType"
-                  class="equipment-inline-delta"
-                  [ngClass]="
-                    comparisonClass(
-                      comparison.hoveredAmount - comparison.equippedAmount
-                    )
-                  "
-                >
-                  <ng-container
-                    *ngIf="
-                      comparison.hoveredAmount !== comparison.equippedAmount;
-                      else unchangedAttribute
-                    "
-                  >
-                    {{
-                      comparison.hoveredAmount - comparison.equippedAmount
-                        | attributeValueFormat
-                          : comparison.attributeType
-                          : true
-                          : usesV16EquipmentPresentation(data)
-                    }}
-                  </ng-container>
-                  <ng-template #unchangedAttribute>=</ng-template>
-                </span>
-              </span>
-            </div>
-            <div
-              *ngIf="
-                craftedAttributeRollRange(
-                  data,
-                  comparison.attributeType
-                ) as range
-              "
-              class="equipment-design-track"
+              <ng-template #noSelectedAttribute>&mdash;</ng-template>
+            </strong>
+            <span
+              data-testid="inline-comparison-difference"
+              [attr.data-attribute]="comparison.attributeType"
+              class="equipment-inline-delta"
+              [ngClass]="comparisonClass(comparison.hoveredAmount - comparison.equippedAmount)"
             >
-              <span
-                class="equipment-design-fill"
-                [style.width.%]="
-                  rollPercentage(
-                    comparison.hoveredAmount,
-                    range.minimumAmount,
-                    range.maximumAmount
-                  )
-                "
-              ></span>
-            </div>
-          </div>
-        </ng-template>
+              <ng-container *ngIf="comparison.hoveredAmount !== comparison.equippedAmount; else unchangedAttribute">
+                {{ comparison.hoveredAmount - comparison.equippedAmount | attributeValueFormat: comparison.attributeType: true: usesV16EquipmentPresentation(data) }}
+              </ng-container>
+              <ng-template #unchangedAttribute>=</ng-template>
+            </span>
+          </span>
+        </div>
       </ng-container>
 
       <ng-template #standardAttributeRows>
-        <div
-          *ngFor="let bonus of data.toolBonuses"
-          class="equipment-design-row ll-item-stat-row"
-          [appToolBonusTooltip]="bonus.bonusType"
-        >
-          <span>{{
-            formatToolBonusLabel(bonus.bonusType, bonus.scopeId)
-          }}</span>
-          <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
+        <div *ngFor="let attr of data.attributes" class="equipment-detail-row">
+          <span class="truncate text-white" [appAttributeTooltip]="attr">
+            {{ attr.attributeType | attributeTypeFormat: usesV16EquipmentPresentation(data) }}
+          </span>
+          <strong class="font-medium tabular-nums text-primary">
+            {{ attr.amount | attributeValueFormat: attr.attributeType: true: usesV16EquipmentPresentation(data) }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span>
+          </strong>
         </div>
-
-        <ng-container *ngFor="let attr of data.attributes">
-          <ng-container *ngIf="inlineComparison; else temperingAttributeRow">
-            <div
-              class="equipment-design-row"
-              [attr.data-testid]="
-                temperingBonus(data, attr.attributeType)
-                  ? 'tempered-attribute-row'
-                  : null
-              "
-              [appInventoryTemperingBonusTooltip]="
-                temperingTooltipDataOrNull(
-                  data,
-                  attr.attributeType,
-                  attr.amount
-                )
-              "
-            >
-              <ng-container
-                *ngTemplateOutlet="
-                  standardAttributeRowContent;
-                  context: { $implicit: attr }
-                "
-              />
-            </div>
-          </ng-container>
-
-          <ng-template #temperingAttributeRow>
-            <div
-              class="equipment-design-row"
-              [attr.data-testid]="
-                temperingBonus(data, attr.attributeType)
-                  ? 'tempered-attribute-row'
-                  : null
-              "
-              [appTemperingBonusTooltip]="
-                temperingTooltipDataOrNull(
-                  data,
-                  attr.attributeType,
-                  attr.amount
-                )
-              "
-            >
-              <ng-container
-                *ngTemplateOutlet="
-                  standardAttributeRowContent;
-                  context: { $implicit: attr }
-                "
-              />
-            </div>
-          </ng-template>
-        </ng-container>
-
-        <ng-template #standardAttributeRowContent let-attr>
-          <div class="flex items-baseline justify-between gap-3 text-xs">
-            <ng-container
-              *ngIf="
-                temperingBonus(data, attr.attributeType);
-                else attributeName
-              "
-            >
-              <span
-                data-testid="tempered-attribute-name"
-                class="truncate text-white"
-              >
-                {{
-                  attr.attributeType
-                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                }}
-              </span>
-            </ng-container>
-            <ng-template #attributeName>
-              <span class="truncate text-white" [appAttributeTooltip]="attr">
-                {{
-                  attr.attributeType
-                    | attributeTypeFormat: usesV16EquipmentPresentation(data)
-                }}
-              </span>
-            </ng-template>
-            <span class="equipment-roll-value tabular-nums">
-              <strong class="font-medium text-primary">
-                {{
-                  attr.amount
-                    | attributeValueFormat
-                      : attr.attributeType
-                      : true
-                      : usesV16EquipmentPresentation(data)
-                }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span>
-              </strong>
-              <span
-                *ngIf="
-                  attributeRangeSummary(
-                    data,
-                    attr.attributeType
-                  ) as rangeSummary
-                "
-                class="text-xs text-secondary"
-              >
-                {{ rangeSummary }}
-              </span>
-              <span
-                *ngIf="temperingBonus(data, attr.attributeType)"
-                data-testid="tempering-bonus"
-                class="equipment-tempering-bonus"
-              >
-                <span aria-hidden="true">✦</span>
-                {{ formatTemperingBonus(data, attr.attributeType) }}
-              </span>
-            </span>
-          </div>
-          <div
-            *ngIf="craftedAttributeRollRange(data, attr.attributeType) as range"
-            class="equipment-design-track"
-          >
-            <span
-              class="equipment-design-fill"
-              [style.width.%]="
-                rollPercentage(
-                  attr.amount,
-                  range.minimumAmount,
-                  range.maximumAmount
-                )
-              "
-            ></span>
-          </div>
-        </ng-template>
       </ng-template>
     </div>
 
@@ -806,66 +143,14 @@
       [equippedItems]="equippedItems"
     ></app-equipment-set-progress>
 
-    <div
-      *ngIf="data.potential != null || data.itemBudget > 0"
-      class="equipment-design-section text-xs"
-    >
-      <div
-        *ngIf="data.potential != null"
-        class="flex items-center justify-between gap-4"
-      >
-        <span class="text-secondary">Potential</span>
-        <span class="font-medium tabular-nums text-primary">
-          {{ data.potential }}
-          <span
-            *ngIf="inlineComparison && comparisonData?.potential != null"
-            data-testid="inline-potential-difference"
-            class="equipment-inline-delta ml-2"
-            [ngClass]="
-              comparisonClass(data.potential - comparisonData!.potential!)
-            "
-          >
-            <ng-container
-              *ngIf="
-                data.potential !== comparisonData!.potential;
-                else unchangedPotential
-              "
-            >
-              {{ data.potential - comparisonData!.potential! > 0 ? "+" : ""
-              }}{{ data.potential - comparisonData!.potential! }}
-            </ng-container>
-            <ng-template #unchangedPotential>=</ng-template>
-          </span>
-        </span>
-      </div>
-      <div
-        *ngIf="data.itemBudget > 0"
-        class="flex items-end justify-between gap-4"
-        [ngClass]="
-          data.potential != null ? 'mt-3 border-t border-white/10 pt-3' : ''
-        "
-      >
+    <div *ngIf="data.itemBudget > 0" class="equipment-detail-section text-xs">
+      <div class="flex items-end justify-between gap-4">
         <span class="ll-item-meta">Gear Value</span>
         <span class="font-medium tabular-nums text-primary">
           {{ data.itemBudget | number: "1.0-2" }}
-          <span
-            *ngIf="inlineComparison && comparisonData && !comparisonData.progression"
-            data-testid="inline-gear-value-difference"
-            class="equipment-inline-delta ml-2"
-            [ngClass]="
-              comparisonClass(data.itemBudget - comparisonData.itemBudget)
-            "
-          >
-            <ng-container
-              *ngIf="
-                data.itemBudget !== comparisonData.itemBudget;
-                else unchangedGearValue
-              "
-            >
-              {{ data.itemBudget - comparisonData.itemBudget > 0 ? "+" : ""
-              }}{{
-                data.itemBudget - comparisonData.itemBudget | number: "1.0-2"
-              }}
+          <span *ngIf="inlineComparison && comparisonData" data-testid="inline-gear-value-difference" class="equipment-inline-delta ml-2" [ngClass]="comparisonClass(data.itemBudget - comparisonData.itemBudget)">
+            <ng-container *ngIf="data.itemBudget !== comparisonData.itemBudget; else unchangedGearValue">
+              {{ data.itemBudget - comparisonData.itemBudget > 0 ? "+" : "" }}{{ data.itemBudget - comparisonData.itemBudget | number: "1.0-2" }}
             </ng-container>
             <ng-template #unchangedGearValue>=</ng-template>
           </span>
@@ -873,114 +158,24 @@
       </div>
     </div>
 
-    <div
-      *ngIf="!inlineComparison && comparisonData as equipped"
-      class="ll-item-detail-section"
-    >
+    <div *ngIf="!inlineComparison && comparisonData as equipped" class="ll-item-detail-section">
       <div class="ll-item-meta">Compared with equipped</div>
       <div class="mt-1 font-medium text-white">{{ equipped.name }}</div>
-
-      <div
-        class="mt-2 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 text-xs uppercase tracking-wide text-secondary"
-      >
-        <span>Attribute</span>
-        <span>Equipped</span>
-        <span>Change</span>
+      <div class="mt-2 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 text-xs uppercase tracking-wide text-secondary">
+        <span>Attribute</span><span>Equipped</span><span>Change</span>
       </div>
-      <ng-container *ngIf="isTool; else equipmentComparisonRows">
-        <div
-          *ngFor="let comparison of toolComparisonRows"
-          class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1 text-sm last:border-b-0"
-          [appToolBonusTooltip]="comparison.bonusType"
-        >
-          <span class="text-secondary">
-            {{ formatToolBonusLabel(comparison.bonusType, comparison.scopeId) }}
-          </span>
-          <span class="tabular-nums text-white">
-            {{
-              formatToolBonusValue(
-                comparison.equippedAmount,
-                comparison.bonusType
-              )
-            }}
-          </span>
-          <span
-            data-testid="tool-comparison-difference"
-            [attr.data-bonus]="comparison.bonusType"
-            class="min-w-14 text-right tabular-nums"
-            [ngClass]="
-              comparisonClass(
-                comparison.hoveredAmount - comparison.equippedAmount
-              )
-            "
-          >
-            {{
-              formatToolBonusValue(
-                comparison.hoveredAmount - comparison.equippedAmount,
-                comparison.bonusType,
-                true
-              )
-            }}
-          </span>
-        </div>
-      </ng-container>
-
-      <ng-template #equipmentComparisonRows>
-        <div
-          *ngFor="let comparison of comparisonRows"
-          class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1 text-sm last:border-b-0"
-        >
-          <span class="text-secondary">
-            {{
-              comparison.attributeType
-                | attributeTypeFormat: usesV16EquipmentPresentation(data)
-            }}
-          </span>
-          <span class="tabular-nums text-white">
-            {{
-              comparison.equippedAmount
-                | attributeValueFormat
-                  : comparison.attributeType
-                  : false
-                  : usesV16EquipmentPresentation(data)
-            }}
-          </span>
-          <span
-            data-testid="comparison-difference"
-            [attr.data-attribute]="comparison.attributeType"
-            class="min-w-14 text-right tabular-nums"
-            [ngClass]="
-              comparisonClass(
-                comparison.hoveredAmount - comparison.equippedAmount
-              )
-            "
-          >
-            {{
-              comparison.hoveredAmount - comparison.equippedAmount
-                | attributeValueFormat
-                  : comparison.attributeType
-                  : true
-                  : usesV16EquipmentPresentation(data)
-            }}
-          </span>
-        </div>
-      </ng-template>
-
-      <div
-        *ngIf="data.itemBudget > 0 || equipped.itemBudget > 0"
-        class="ll-item-stat-row mt-1"
-      >
+      <div *ngFor="let comparison of comparisonRows" class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1 text-sm last:border-b-0">
+        <span class="text-secondary">{{ comparison.attributeType | attributeTypeFormat: usesV16EquipmentPresentation(data) }}</span>
+        <span class="tabular-nums text-white">{{ comparison.equippedAmount | attributeValueFormat: comparison.attributeType: false: usesV16EquipmentPresentation(data) }}</span>
+        <span data-testid="comparison-difference" [attr.data-attribute]="comparison.attributeType" class="min-w-14 text-right tabular-nums" [ngClass]="comparisonClass(comparison.hoveredAmount - comparison.equippedAmount)">
+          {{ comparison.hoveredAmount - comparison.equippedAmount | attributeValueFormat: comparison.attributeType: true: usesV16EquipmentPresentation(data) }}
+        </span>
+      </div>
+      <div *ngIf="data.itemBudget > 0 || equipped.itemBudget > 0" class="ll-item-stat-row mt-1">
         <span>Gear Value</span>
         <span class="flex gap-3 tabular-nums">
-          <span class="text-white">{{
-            equipped.itemBudget | number: "1.0-2"
-          }}</span>
-          <span
-            [ngClass]="comparisonClass(data.itemBudget - equipped.itemBudget)"
-          >
-            {{ data.itemBudget - equipped.itemBudget > 0 ? "+" : ""
-            }}{{ data.itemBudget - equipped.itemBudget | number: "1.0-2" }}
-          </span>
+          <span class="text-white">{{ equipped.itemBudget | number: "1.0-2" }}</span>
+          <span [ngClass]="comparisonClass(data.itemBudget - equipped.itemBudget)">{{ data.itemBudget - equipped.itemBudget > 0 ? "+" : "" }}{{ data.itemBudget - equipped.itemBudget | number: "1.0-2" }}</span>
         </span>
       </div>
     </div>

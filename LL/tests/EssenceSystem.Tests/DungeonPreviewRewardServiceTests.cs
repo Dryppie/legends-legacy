@@ -157,11 +157,6 @@ public sealed class DungeonPreviewRewardServiceTests
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(
-            string itemBaseId,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
         public Task AddMissingItemBasesAsync(
             IReadOnlyCollection<ItemBase> itemBases,
             CancellationToken cancellationToken) =>

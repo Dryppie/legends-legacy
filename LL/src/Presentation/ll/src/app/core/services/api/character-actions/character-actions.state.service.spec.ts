@@ -128,17 +128,17 @@ describe('CharacterActionsStateService', () => {
 
   it('lets polling stop after a resolve error instead of re-emitting the overdue action', () => {
     spyOn(console, 'error');
-    const overdueTempering: CharacterActionDto = {
+    const overdueCombat: CharacterActionDto = {
       ...combatAction(),
-      characterActionType: CharacterActionType.Crafting,
+      characterActionType: CharacterActionType.Combat,
       nextResolutionAtUtc: new Date(Date.now() - 1_000),
-      revision: 'overdue-tempering-revision',
+      revision: 'overdue-combat-revision',
     };
     const resolveError = new Error('save failed');
     actions.resolveCurrentAction.and.returnValue(
       throwError(() => resolveError),
     );
-    service.initializeFromBootstrap(overdueTempering);
+    service.initializeFromBootstrap(overdueCombat);
     const fetch = polling.start.calls.mostRecent().args[0];
     let observedError: unknown;
     let emittedAction = false;
@@ -193,10 +193,10 @@ describe('CharacterActionsStateService', () => {
     const deletedAt = new Date(Date.now() + 1_000);
     const deletedAction: CharacterActionDto = {
       ...combatAction(),
-      characterActionType: CharacterActionType.Crafting,
+      characterActionType: CharacterActionType.Combat,
       updatedAt: deletedAt,
       nextResolutionAtUtc: deletedAt,
-      revision: 'deleted-crafting-revision',
+      revision: 'deleted-combat-revision',
       isDeleted: true,
     };
     const startedAction = combatAction();
@@ -455,4 +455,3 @@ function combatAction(): CharacterActionDto {
     isDeleted: false,
   };
 }
-

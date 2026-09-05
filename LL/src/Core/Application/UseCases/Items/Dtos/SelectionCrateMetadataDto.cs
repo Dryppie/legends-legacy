@@ -17,16 +17,17 @@ public sealed class SelectionCrateOptionDto
     public int Quantity { get; init; }
 }
 
-public sealed class SelectionCrateMetadataResolver
+public sealed class SelectionCrateMetadataResolver(Domain.Models.Items.Equipments.Progression.EquipmentBlueprintCatalog? blueprints = null)
     : IValueResolver<ItemBase, ItemBaseDto, SelectionCrateMetadataDto?>
 {
+    public SelectionCrateMetadataResolver() : this(null) { }
     public SelectionCrateMetadataDto? Resolve(
         ItemBase source,
         ItemBaseDto destination,
         SelectionCrateMetadataDto? destinationMember,
         ResolutionContext context)
     {
-        var definition = SelectionContainerCatalog.Find(source.Id);
+        var definition = SelectionContainerCatalog.Find(source.Id, blueprints);
         if (definition is null) return null;
 
         return Map(definition);

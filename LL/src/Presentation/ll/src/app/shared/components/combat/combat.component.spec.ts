@@ -260,7 +260,7 @@ describe('CombatComponent', () => {
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world']);
   });
 
-  it('hides a cached idle-combat summary after the action switches to Tempering', async () => {
+  it('hides a cached idle-combat summary after the action switches to Idle', async () => {
     combatResult.set({
       playerTeam: [{ id: 'player' }],
       enemyTeam: [{ id: 'enemy' }],
@@ -271,7 +271,7 @@ describe('CombatComponent', () => {
     expect(fixture.componentInstance.displayCombat).toBeTrue();
 
     currentAction.set({
-      characterActionType: CharacterActionType.Crafting,
+      characterActionType: CharacterActionType.Idle,
       isDeleted: false,
     });
     fixture.detectChanges();

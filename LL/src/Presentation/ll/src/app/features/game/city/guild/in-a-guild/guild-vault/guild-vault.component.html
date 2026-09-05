@@ -104,7 +104,7 @@
         >
           <div>Equipment</div>
           <div>Slot</div>
-          <div>Rank / quality</div>
+          <div>Quality / rank</div>
           <div>Status</div>
           <div></div>
         </div>
@@ -143,7 +143,7 @@
             class="text-sm"
             [ngClass]="qualityClass(vaultItem.equipment.quality)"
           >
-            {{ vaultItem.equipment.progression ? ('Rank ' + vaultItem.equipment.progression.rank) : vaultItem.equipment.quality }}
+            {{ vaultItem.equipment.quality }}<ng-container *ngIf="vaultItem.equipment.progression as progression"><br />Rank {{ progression.rank }}</ng-container>
           </div>
 
           <div class="text-sm">
@@ -240,7 +240,7 @@
               $any(inventoryItem.itemInstance).equipmentBase.equipmentType
                 | equipmentType
             }}
-            · {{ $any(inventoryItem.itemInstance).progression ? ('Rank ' + $any(inventoryItem.itemInstance).progression.rank) : $any(inventoryItem.itemInstance).quality }}
+            · {{ $any(inventoryItem.itemInstance).quality }}<ng-container *ngIf="$any(inventoryItem.itemInstance).progression as progression"> · Rank {{ progression.rank }}</ng-container>
           </div>
         </div>
         <div class="shrink-0 space-y-1">

@@ -12,7 +12,7 @@ public sealed record IdleCombatCalculatedOutcome(
     int TotalSoulstones,
     IReadOnlyList<InventoryItem> TotalLoot,
     IReadOnlyList<InventoryItem> PowerRewards,
-    IReadOnlyList<InventoryItem> CraftingRewards,
+    IReadOnlyList<InventoryItem> MiscellaneousRewards,
     IReadOnlyList<InventoryItem> EssenceRewards,
     IReadOnlyList<InventoryItem> DungeonAccessRewards,
     IReadOnlyList<IdleEncounterCalculatedOutcome> EncounterOutcomes)

@@ -25,7 +25,7 @@ export class EquipmentSetProgressComponent {
       this.equippedItems
         .filter(
           (equipment) =>
-            equipment.equipmentSetId?.toLowerCase() === normalizedSetId,
+            equipment.equipmentSet?.id.toLowerCase() === normalizedSetId,
         )
         .map((equipment) => equipment.id),
     ).size;

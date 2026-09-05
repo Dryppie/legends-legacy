@@ -19,7 +19,6 @@ public class ItemBaseRepository : IItemBaseRepository
         await _context.ItemBases
             .AsNoTracking()
             .Include(x => (x as EquipmentBase)!.AttributeModifiers)
-            .Include(x => (x as EquipmentBase)!.ToolBonuses)
             .AsSplitQuery()
             .Where(x => !x.IsBound)
             .OrderBy(x => x.ItemType)
@@ -37,7 +36,6 @@ public class ItemBaseRepository : IItemBaseRepository
 
         return await _context.ItemBases
             .Include(x => (x as EquipmentBase)!.AttributeModifiers)
-            .Include(x => (x as EquipmentBase)!.ToolBonuses)
             .AsSplitQuery()
             .Where(x => itemIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
@@ -75,12 +73,6 @@ public class ItemBaseRepository : IItemBaseRepository
             item => item.Id,
             StringComparer.OrdinalIgnoreCase);
     }
-
-    public async Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken) =>
-        await _context.ItemBases
-            .OfType<EquipmentBase>()
-            .Include(x => x.AttributeModifiers)
-            .FirstOrDefaultAsync(x => x.Id == itemBaseId, cancellationToken);
 
     public async Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> itemBases, CancellationToken cancellationToken)
     {

@@ -35,18 +35,6 @@ public sealed record EssenceAscendedPayload(
     int AscensionTier,
     int AscendedToTierCount);
 
-public sealed record EquipmentCraftedPayload(
-    Guid CharacterId,
-    IReadOnlyCollection<OutboxEquipmentItemPayload> CraftedItems,
-    int CraftingMasteryLevel);
-
-public sealed record EquipmentTemperedPayload(
-    Guid CharacterId,
-    TemperingSummary Summary,
-    IReadOnlyCollection<OutboxEquipmentItemPayload> CompletedItems);
-
-public sealed record BlueprintUnlockedPayload(Guid CharacterId);
-
 public sealed record IdleCombatEncounterCompletedPayload(
     Guid CharacterId,
     string AreaId,
@@ -56,9 +44,7 @@ public sealed record IdleCombatEncounterCompletedPayload(
     int PlayerDefeats,
     int? LowestWinningHealthPercent,
     int ActionCount,
-    string? EquippedGatheringType,
-    int? WinningEncounterCount = null,
-    int GatheredResourceCount = 0);
+    int? WinningEncounterCount = null);
 
 public sealed record CharacterCreatedPayload(Guid CharacterId);
 
@@ -198,14 +184,3 @@ public sealed record InventoryItemsGrantedPayload(
     IReadOnlyList<InventoryItemDto> Items,
     string Source,
     string? Location);
-
-public sealed record OutboxEquipmentItemPayload(
-    string ItemBaseId,
-    int Tier,
-    Rarity Rarity,
-    ItemQuality Quality,
-    int? Potential,
-    string? BaseRecipeId,
-    string? BlueprintId,
-    IReadOnlyCollection<string> AffinityTags,
-    bool IsMasterpiece);

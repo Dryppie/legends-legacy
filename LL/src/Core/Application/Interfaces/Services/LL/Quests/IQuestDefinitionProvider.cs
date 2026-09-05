@@ -82,14 +82,7 @@ public sealed class QuestObjectiveFilterDefinition
     public string? EssenceDefinitionId { get; set; }
     public string? EssenceDefinitionFromChoiceQuestId { get; set; }
     public int? Tier { get; set; }
-    public string? Quality { get; set; }
-    public bool MustBeCrafted { get; set; }
-    public bool RequiresNoPotential { get; set; }
-    public bool IncludePreviousCrafts { get; set; }
-    public bool ToolSlotOnly { get; set; }
-    public string? GatheringType { get; set; }
     public List<string> ItemBaseIds { get; set; } = [];
-    public List<string> BaseRecipeIds { get; set; } = [];
 }
 
 public sealed class QuestPresentationDefinition

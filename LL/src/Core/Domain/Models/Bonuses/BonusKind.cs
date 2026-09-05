@@ -9,12 +9,6 @@ public enum BonusKind
     FocusedMonsterEssenceDropRateRelativeBps,
     CombatExperienceGainBps,
     IdleCombatDefeatExperienceRetentionBps,
-    GatheringYieldBps,
-    GatheringExperienceGainBps,
-    GatheringRareDropChanceRelativeBps,
-    CraftingExperienceGainBps,
-    TemperingNegativeOutcomeReductionBps,
-    BlueprintProgressionGainBps,
     DungeonSigilDropRateRelativeBps,
     DungeonRewardRetentionBps
 }

@@ -12,8 +12,6 @@ using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Guilds;
-using Domain.Models.Professions;
-using Domain.Models.Professions.Crafting.V2;
 
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
@@ -187,4 +185,3 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
                 : PlayerEssenceDefinitionDtoMapper.Map(definition, slot.PlayerEssence, context.Mapper));
     }
 }
-

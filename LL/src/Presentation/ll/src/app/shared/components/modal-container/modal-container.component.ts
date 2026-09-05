@@ -1,12 +1,14 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
 import { Subscription } from 'rxjs';
-import { ModalService } from '../../../core/services/client-side/modal/modal.service';
+import {
+  InventoryEquipmentModalRequest,
+  ModalService,
+} from '../../../core/services/client-side/modal/modal.service';
 import { NgClass, NgIf } from '@angular/common';
 import { Essence } from '../../models/essence';
 import { EssenceModalComponent } from './essence-modals/essence-modal/essence-modal.component';
 import { CombatFiltersModalComponent } from './combat-modals/combat-filters-modal/combat-filters-modal.component';
-import { EquipmentInstance } from '../../models/item';
 import { InventoryEquipmentModalComponent } from './equipment-modals/equipment-modal/inventory-equipment-modal.component';
 import { OverviewEquipmentModalComponent } from './equipment-modals/overview-equipment-modal/overview-equipment-modal.component';
 import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
@@ -31,7 +33,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private lastFocusedElement: HTMLElement | null = null;
 
-  inventoryEquipment: EquipmentInstance | null = null;
+  inventoryEquipment: InventoryEquipmentModalRequest | null = null;
   inventoryItem: InventoryItem | null = null;
   overviewEquipment: EquipmentSlotType | null = null;
   essence: Essence | null = null;
@@ -48,7 +50,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     );
     this.subscriptions.push(
       this.modalService.inventoryEquipmentModalState$.subscribe(
-        (data: EquipmentInstance | null) =>
+        (data: InventoryEquipmentModalRequest | null) =>
           this.updateModalState(() => (this.inventoryEquipment = data)),
       ),
     );

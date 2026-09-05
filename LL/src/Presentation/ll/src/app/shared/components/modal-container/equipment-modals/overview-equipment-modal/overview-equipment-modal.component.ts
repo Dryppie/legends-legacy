@@ -1,8 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Equipment, EquipmentInstance } from '../../../../models/item';
-import {
-  AttributeTypeFormatPipe,
-} from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { EquipmentSlotType } from '../../../../models/Dtos/equipment-slots/equipmentSlot';
@@ -12,21 +10,22 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
 import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-format/equipment-type.pipe';
 import { AttributeDisplayPipe } from '../../../../pipes/attributes/attribute-display/attribute-display.pipe';
 import { AttributeTooltipDirective } from '../../../../directives/attribute-tooltip/attribute-tooltip.directive';
-import { EquipmentType } from '../../../../models/enums/equipmentType';
+import { EquipmentUpgradePanelComponent } from '../../../equipment/equipment-upgrade-panel/equipment-upgrade-panel.component';
 
 @Component({
-    selector: 'app-overview-equipment-modal',
-    imports: [
-        AttributeTypeFormatPipe,
-        AttributeValueFormatPipe,
-        AttributeDisplayPipe,
-        AttributeTooltipDirective,
-        EquipmentTypePipe,
-        NgIf,
-        NgFor,
-        NgClass,
-    ],
-    templateUrl: './overview-equipment-modal.component.html'
+  selector: 'app-overview-equipment-modal',
+  imports: [
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
+    AttributeDisplayPipe,
+    AttributeTooltipDirective,
+    EquipmentTypePipe,
+    NgIf,
+    NgFor,
+    NgClass,
+    EquipmentUpgradePanelComponent,
+  ],
+  templateUrl: './overview-equipment-modal.component.html',
 })
 export class OverviewEquipmentModalComponent implements OnInit {
   @Input() equipmentSlotType!: EquipmentSlotType;
@@ -49,9 +48,10 @@ export class OverviewEquipmentModalComponent implements OnInit {
       this.equipmentSlotType,
     );
 
-    this.equipmentInstances = allItems.filter((ii) =>
-      allowedTypes.includes((ii.itemBase as Equipment).equipmentType) &&
-      !!ii.progression && (ii.itemBase as Equipment).equipmentType !== EquipmentType.Tool,
+    this.equipmentInstances = allItems.filter(
+      (ii) =>
+        allowedTypes.includes((ii.itemBase as Equipment).equipmentType) &&
+        !!ii.progression,
     );
 
     const equipmentSlots = this.equipmentState.equipmentSlots();
@@ -65,8 +65,7 @@ export class OverviewEquipmentModalComponent implements OnInit {
   }
 
   onEquip(): void {
-    if (!this.selectedEquipmentInstance ||
-      this.selectedEquipmentInstance.equipmentBase.equipmentType === EquipmentType.Tool) return;
+    if (!this.selectedEquipmentInstance) return;
     this.equipmentState.equip(
       this.selectedEquipmentInstance,
       this.equipmentSlotType,

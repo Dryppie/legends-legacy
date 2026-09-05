@@ -3,5 +3,5 @@ export enum ItemQuality {
   Standard = 'Standard',
   Fine = 'Fine',
   Exceptional = 'Exceptional',
-  Masterwork = 'Masterwork',
+  Masterpiece = 'Masterpiece',
 }

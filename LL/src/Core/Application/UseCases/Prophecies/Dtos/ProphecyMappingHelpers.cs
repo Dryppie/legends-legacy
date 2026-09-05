@@ -50,15 +50,6 @@ internal static class ProphecyMappingHelpers
                 ProphecyGuidanceDestination.SoulArchive,
                 "Open Archive",
                 "Absorb one new Unbound Essence into the Soul Archive."),
-            ProphecyObjectiveType.GatherResources => CreateGatheringGuidance(parameters.RequiredProfession),
-            ProphecyObjectiveType.TemperItems => CreateGuidance(
-                ProphecyGuidanceDestination.Crafting,
-                "Temper Gear",
-                "Complete tempering actions to progress this prophecy."),
-            ProphecyObjectiveType.SpendPotential => CreateGuidance(
-                ProphecyGuidanceDestination.Crafting,
-                "Temper Gear",
-                "Spend item Potential through tempering to progress this prophecy."),
             ProphecyObjectiveType.TreasureProgress => CreateGuidance(
                 ProphecyGuidanceDestination.Dungeons,
                 "Seek Treasure",
@@ -78,20 +69,6 @@ internal static class ProphecyMappingHelpers
                 "Every creature you defeat in combat counts toward this prophecy."),
             _ => new ProphecyGuidanceDto()
         };
-    }
-
-    private static ProphecyGuidanceDto CreateGatheringGuidance(string? requiredProfession)
-    {
-        var profession = requiredProfession?.Trim();
-        return string.IsNullOrWhiteSpace(profession)
-            ? CreateGuidance(
-                ProphecyGuidanceDestination.Gathering,
-                "Gather Resources",
-                "Gather resources from world activity to progress this prophecy.")
-            : CreateGuidance(
-                ProphecyGuidanceDestination.Gathering,
-                $"Go {profession}",
-                $"Only {profession} gathering rewards count toward this prophecy.");
     }
 
     private static ProphecyGuidanceDto CreateWinEncounterGuidance(int? minimumEnemyCount) =>

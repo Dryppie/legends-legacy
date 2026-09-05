@@ -1,5 +1,5 @@
 export interface Tab {
-  label: string; // Label of the tab (e.g., Daily, Weekly, Gathering, etc.)
+  label: string; // Label shown in the sidebar.
   items: any[]; // List of items for this tab
 }
 

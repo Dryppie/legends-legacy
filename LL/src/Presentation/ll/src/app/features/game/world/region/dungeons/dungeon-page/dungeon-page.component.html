@@ -143,6 +143,17 @@
             <b>{{ phaseLabel() }}</b>
             <span class="dungeon-status-note"> - {{ statusNote() }}</span>
           </div>
+          <button
+            class="dungeon-button ll-button"
+            type="button"
+            [class.ll-button-primary]="dungeonState.instantSkipBattles()"
+            [attr.aria-pressed]="dungeonState.instantSkipBattles()"
+            title="Skip battle playback and combat summaries. Battle results still apply."
+            (click)="dungeonState.toggleInstantSkipBattles()"
+          >
+            Instant-skip battles:
+            {{ dungeonState.instantSkipBattles() ? "On" : "Off" }}
+          </button>
           <app-help-launcher
             presentation="inline"
             ariaLabel="Open dungeon guide"

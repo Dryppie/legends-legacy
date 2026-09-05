@@ -21,7 +21,6 @@ using Domain.Models.Essences;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions.Areas;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -117,9 +116,6 @@ public sealed class GameEventOutboxTests
         Assert.Contains(
             GameEventOutboxConsumerNames.Quests,
             registry.GetConsumers(GameEventTypes.EssenceAscended));
-        Assert.Contains(
-            GameEventOutboxConsumerNames.Quests,
-            registry.GetConsumers(GameEventTypes.EquipmentTempered));
         Assert.Contains(
             GameEventOutboxConsumerNames.Quests,
             registry.GetConsumers(GameEventTypes.DungeonRunStarted));
@@ -288,9 +284,7 @@ public sealed class GameEventOutboxTests
                     0,
                     100,
                     3,
-                    "Mining",
-                    2,
-                    17)),
+                    2)),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -298,24 +292,11 @@ public sealed class GameEventOutboxTests
                 GameEventTypes.ProphecyCompleted,
                 new ProphecyCompletedPayload(characterId, Guid.NewGuid(), "Daily")),
             CancellationToken.None);
-        await consumer.HandleAsync(
-            CreateOutboxMessage(
-                characterId,
-                GameEventTypes.EquipmentTempered,
-                new EquipmentTemperedPayload(
-                    characterId,
-                    new TemperingSummary { TotalActions = 37 },
-                    [])),
-            CancellationToken.None);
-
         Assert.Equal(
-            ["CombatEncounterCompleted", "DailyProphecyCompleted", "EquipmentTempered"],
+            ["CombatEncounterCompleted", "DailyProphecyCompleted"],
             progression.Triggers.Select(x => x.Type));
         Assert.Equal(3, progression.Triggers[0].ActionCount);
-        Assert.Equal("Mining", progression.Triggers[0].EquippedGatheringType);
         Assert.Equal(2, progression.Triggers[0].WinningEncounterCount);
-        Assert.Equal(17, progression.Triggers[0].GatheredResourceCount);
-        Assert.Equal(37, progression.Triggers[2].ActionCount);
     }
 
     [Fact]
@@ -446,7 +427,6 @@ public sealed class GameEventOutboxTests
                     0,
                     100,
                     1,
-                    null,
                     1)),
             CancellationToken.None);
 
@@ -472,45 +452,10 @@ public sealed class GameEventOutboxTests
                     0,
                     100,
                     1,
-                    null,
                     1)),
             CancellationToken.None);
 
         Assert.Empty(consumer.ChangedCharacterScopes);
-    }
-
-    [Fact]
-    public async Task Quest_consumer_preserves_the_crafted_base_recipe_id()
-    {
-        var characterId = Guid.NewGuid();
-        var progression = new RecordingQuestProgressionService();
-        var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
-        var payload = new EquipmentCraftedPayload(
-            characterId,
-            [
-                new OutboxEquipmentItemPayload(
-                    "hatchet",
-                    1,
-                    Rarity.Common,
-                    ItemQuality.Standard,
-                    10,
-                    "recipe.weapon.one_handed.hand_axe",
-                    null,
-                    [],
-                    false)
-            ],
-            1);
-
-        await consumer.HandleAsync(
-            CreateOutboxMessage(characterId, GameEventTypes.EquipmentCrafted, payload),
-            CancellationToken.None);
-
-        var trigger = Assert.Single(progression.Triggers);
-        Assert.Equal(
-            ["recipe.weapon.one_handed.hand_axe"],
-            trigger.CraftedBaseRecipeIds);
-        Assert.Equal([ItemQuality.Standard], trigger.CraftedItemQualities);
-        Assert.Equal([10], trigger.CraftedItemPotentials);
     }
 
     [Fact]
@@ -519,17 +464,6 @@ public sealed class GameEventOutboxTests
         var characterId = Guid.NewGuid();
         var progression = new RecordingQuestProgressionService();
         var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
-        var temperedItem = new OutboxEquipmentItemPayload(
-            "shortsword",
-            2,
-            Rarity.Common,
-            ItemQuality.Fine,
-            0,
-            "recipe.weapon.one_handed.shortsword",
-            null,
-            [],
-            false);
-
         await consumer.HandleAsync(
             CreateOutboxMessage(
                 characterId,
@@ -541,15 +475,6 @@ public sealed class GameEventOutboxTests
                 characterId,
                 GameEventTypes.EssenceAscended,
                 new EssenceAscendedPayload(characterId, 1, 1)),
-            CancellationToken.None);
-        await consumer.HandleAsync(
-            CreateOutboxMessage(
-                characterId,
-                GameEventTypes.EquipmentTempered,
-                new EquipmentTemperedPayload(
-                    characterId,
-                    new TemperingSummary { TotalActions = 37 },
-                    [temperedItem])),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -574,15 +499,12 @@ public sealed class GameEventOutboxTests
             [
                 "EssenceLoadoutChanged",
                 "EssenceAscended",
-                "EquipmentTempered",
                 "DungeonRunStarted",
                 "DungeonRunCompleted",
                 "TournamentBattleCompleted"
             ],
             progression.Triggers.Select(trigger => trigger.Type));
         Assert.True(progression.Triggers[0].HasCompatibleEssenceTrio);
-        Assert.Equal([0], progression.Triggers[2].CraftedItemPotentials);
-        Assert.Equal(37, progression.Triggers[2].ActionCount);
     }
 
     [Fact]
@@ -667,7 +589,6 @@ public sealed class GameEventOutboxTests
         Assert.Equal(1, payload.PlayerDefeats);
         Assert.Equal(12, payload.LowestWinningHealthPercent);
         Assert.Equal(3, payload.ActionCount);
-        Assert.Null(payload.EquippedGatheringType);
         Assert.Equal(2, payload.WinningEncounterCount);
 
         var prophecyBatch = Assert.Single(publisher.Notifications.OfType<ProphecyProgressBatchNotification>());
@@ -1114,19 +1035,6 @@ public sealed class GameEventOutboxTests
             Task.CompletedTask;
 
         public Task RecordEssenceAscendedAsync(Guid characterId, int ascensionTier, int ascendedToTierCount, CancellationToken cancellationToken) =>
-            Task.CompletedTask;
-
-        public Task RecordItemsCraftedAsync(Guid characterId, IReadOnlyCollection<EquipmentInstance> craftedItems, int? craftingMasteryLevel, CancellationToken cancellationToken) =>
-            Task.CompletedTask;
-
-        public Task RecordItemsTemperedAsync(
-            Guid characterId,
-            TemperingSummary summary,
-            IReadOnlyCollection<EquipmentInstance> completedItems,
-            CancellationToken cancellationToken) =>
-            Task.CompletedTask;
-
-        public Task RecordBlueprintUnlockedAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.CompletedTask;
 
         public Task RecordCharacterLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken) =>

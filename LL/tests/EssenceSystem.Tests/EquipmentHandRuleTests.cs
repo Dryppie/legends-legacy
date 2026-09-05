@@ -2,9 +2,8 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.Professions.Crafting.V2;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Equipments;
@@ -184,7 +183,7 @@ public sealed class EquipmentHandRuleTests
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
         var sword = Equipment("crafted-sword", EquipmentType.OneHanded);
-        sword.AcquisitionSource = ItemAcquisitionSources.Crafting;
+        sword.AcquisitionSource = ItemAcquisitionSources.CombatReward;
         var character = CharacterWithHands(characterId, null, null, [sword]);
         db.Characters.Add(character);
         await db.SaveChangesAsync();
@@ -263,30 +262,6 @@ public sealed class EquipmentHandRuleTests
             tierTwoSword.Id,
             EquipmentSlotType.MainHand,
             CancellationToken.None)).Succeeded);
-    }
-
-    [Fact]
-    public async Task Gathering_tools_have_no_character_or_profession_level_requirements()
-    {
-        await using var db = CreateDb();
-        var characterId = Guid.NewGuid();
-        var pickaxe = Equipment("rare-pickaxe", EquipmentType.Tool);
-        pickaxe.Rarity = Rarity.Legacy;
-        pickaxe.Tier = 2;
-        ((EquipmentBase)pickaxe.ItemBase).GatheringType = GatheringType.Mining;
-        var character = CharacterWithHands(characterId, null, null, [pickaxe]);
-        character.Level = 1;
-        db.Characters.Add(character);
-        await db.SaveChangesAsync();
-        var repository = new EquipmentSlotRepository(db);
-
-        var result = await repository.EquipEquipmentAsync(
-            characterId,
-            pickaxe.Id,
-            EquipmentSlotType.Tool,
-            CancellationToken.None);
-
-        Assert.True(result.Succeeded, result.ErrorMessage);
     }
 
     private static LLDbContext CreateDb()

@@ -1,4 +1,5 @@
 import { EquipmentType } from './enums/equipmentType';
+import { ItemQuality } from './enums/itemQuality';
 
 export type StarterEquipmentKind = 'FirstWeapon' | 'ReadyForRoad';
 export type EquipmentOwnership =
@@ -12,6 +13,8 @@ export interface EquipmentProgression {
   definitionId: string;
   archetypeId: string;
   rank: number;
+  quality: ItemQuality;
+  attributeRollMultiplier: number;
   nativeStyleId: string | null;
   activeStyleId: string | null;
   ownership: EquipmentOwnership;
@@ -34,7 +37,6 @@ export interface StarterEquipmentGrant {
 export interface EquipmentAccess {
   starterAcquisitionEnabled: boolean;
   protectedAcquisitionEnabled: boolean;
-  baselineRecoveryEnabled: boolean;
   ordinaryAcquisitionEnabled: boolean;
   starters: {
     kind: StarterEquipmentKind;
@@ -51,7 +53,6 @@ export function hasEquipmentProgressionAccess(
     !!access &&
     (access.starterAcquisitionEnabled ||
       access.protectedAcquisitionEnabled ||
-      access.baselineRecoveryEnabled ||
       access.ordinaryAcquisitionEnabled)
   );
 }
@@ -65,68 +66,10 @@ export interface EquipmentProgressionItem {
   rank: number;
   balanceVersion: number;
   rarity: string;
+  quality: ItemQuality;
+  attributeRollMultiplier: number;
   activeStyleId: string | null;
   equipmentSetId: string | null;
   ownership: EquipmentOwnership;
   stats: Record<string, number>;
-}
-
-export interface CombatAcquisition {
-  poolId: string;
-  rulesVersion: string;
-  regionName: string;
-  equipmentTier: number;
-  hasEnteredRegion: boolean;
-  selectedDefinitionId: string | null;
-  plainVictories: number;
-  requiredPlainVictories: number;
-  selectedSigilFamilyId: string | null;
-  sigilVictories: number;
-  requiredSigilVictories: number;
-  discoveryChance: number;
-  targets: StarterEquipmentOption[];
-  sigils: {
-    familyId: string;
-    itemBaseId: string;
-    canSelect: boolean;
-    unavailableReason: string | null;
-  }[];
-}
-
-export interface EquipmentProtectionPool {
-  pool: {
-    id: string;
-    dungeonId: string;
-    familyId: string;
-    difficulty: number;
-    equipmentTier: number;
-    minimumLevel: number;
-    requiredQuestId: string;
-    matchingChance: number;
-    guaranteeCompletions: number;
-  };
-  selectedDefinitionId: string | null;
-  progress: number;
-  firstClearGuaranteeAvailable: boolean;
-  canSelect: boolean;
-  missingRequirements: string[];
-  targets: EquipmentProgressionItem[];
-}
-
-export interface PlainEquipmentRecoveryOption {
-  definitionId: string;
-  tier: number;
-  name: string;
-  entitled: number;
-  owned: number;
-  missing: number;
-}
-
-export interface EquipmentProgressionRecoveryOption {
-  kind: StarterEquipmentKind;
-  definitionId: string;
-  name: string;
-  entitled: number;
-  owned: number;
-  missing: number;
 }

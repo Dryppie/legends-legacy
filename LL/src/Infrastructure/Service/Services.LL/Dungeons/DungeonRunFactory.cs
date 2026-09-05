@@ -14,18 +14,15 @@ public sealed class DungeonRunFactory
     private readonly IDungeonDefinitions _dungeons;
     private readonly ICharacterSnapshotService _snapshotService;
     private readonly IDungeonDelveDefinitionProvider _delves;
-    private readonly Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? _progression;
 
     public DungeonRunFactory(
         IDungeonDefinitions dungeons,
         ICharacterSnapshotService snapshots,
-        IDungeonDelveDefinitionProvider delves,
-        Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? progression = null)
+        IDungeonDelveDefinitionProvider delves)
     {
         _dungeons = dungeons;
         _snapshotService = snapshots;
         _delves = delves;
-        _progression = progression;
     }
 
     public async Task<DungeonRun> CreateAsync(Guid characterId, string dungeonDefinitionId, int seed, CancellationToken ct)
@@ -37,7 +34,6 @@ public sealed class DungeonRunFactory
 
         var startedWithoutWeapon = snapshot.Equipment.All(x => x.Slot != EquipmentSlotType.MainHand);
         var run = CreateRun(characterId, snapshot.Id, dungeon, delve, seed, startedWithoutWeapon);
-        if (_progression != null) await _progression.FreezeAsync(run, dungeon, ct);
         return run;
     }
 

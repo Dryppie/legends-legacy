@@ -6,6 +6,7 @@ namespace Application.Interfaces.Services.LL.Quests;
 
 public interface IQuestService
 {
+    Task<QuestJournal> TurnInAsync(Guid characterId, string questId, CancellationToken cancellationToken);
     Task<QuestJournal> GetJournalAsync(Guid characterId, CancellationToken cancellationToken);
     Task<QuestJournal> AcknowledgeWelcomeAsync(Guid characterId, CancellationToken cancellationToken);
     Task<QuestJournal> SelectChoiceAsync(
@@ -111,34 +112,23 @@ public sealed record QuestTrigger(
     string? DungeonDefinitionId = null,
     bool? WonEncounter = null,
     string? EssenceDefinitionId = null,
-    IReadOnlyCollection<string>? CraftedItemBaseIds = null,
-    IReadOnlyCollection<int>? CraftedItemTiers = null,
-    IReadOnlyCollection<string?>? CraftedBaseRecipeIds = null,
-    IReadOnlyCollection<ItemQuality>? CraftedItemQualities = null,
-    IReadOnlyCollection<int?>? CraftedItemPotentials = null,
     int? CharacterLevel = null,
     int ActionCount = 1,
-    string? EquippedGatheringType = null,
     bool HasCompatibleEssenceTrio = false,
     string? CreatureDefinitionId = null,
-    int? WinningEncounterCount = null,
-    int GatheredResourceCount = 0)
+    int? WinningEncounterCount = null)
 {
     public static QuestTrigger CombatCompleted(
         string areaId,
         bool wonEncounter,
         int actionCount = 1,
-        string? equippedGatheringType = null,
-        int? winningEncounterCount = null,
-        int gatheredResourceCount = 0) =>
+        int? winningEncounterCount = null) =>
         new(
             "CombatEncounterCompleted",
             AreaId: areaId,
             WonEncounter: wonEncounter,
             ActionCount: actionCount,
-            EquippedGatheringType: equippedGatheringType,
-            WinningEncounterCount: winningEncounterCount,
-            GatheredResourceCount: gatheredResourceCount);
+            WinningEncounterCount: winningEncounterCount);
 
     public static QuestTrigger EssenceAbsorbed(string essenceDefinitionId) =>
         new("EssenceAbsorbed", EssenceDefinitionId: essenceDefinitionId);
@@ -157,36 +147,6 @@ public sealed record QuestTrigger(
             CreatureDefinitionId: creatureDefinitionId);
 
     public static QuestTrigger EssenceAscended() => new("EssenceAscended");
-
-    public static QuestTrigger EquipmentCrafted(
-        IReadOnlyCollection<string> itemBaseIds,
-        IReadOnlyCollection<int> tiers,
-        IReadOnlyCollection<string?>? baseRecipeIds = null,
-        IReadOnlyCollection<ItemQuality>? qualities = null,
-        IReadOnlyCollection<int?>? potentials = null) =>
-        new(
-            "EquipmentCrafted",
-            CraftedItemBaseIds: itemBaseIds,
-            CraftedItemTiers: tiers,
-            CraftedBaseRecipeIds: baseRecipeIds,
-            CraftedItemQualities: qualities,
-            CraftedItemPotentials: potentials);
-
-    public static QuestTrigger EquipmentTempered(
-        IReadOnlyCollection<string> itemBaseIds,
-        IReadOnlyCollection<int> tiers,
-        IReadOnlyCollection<string?> baseRecipeIds,
-        IReadOnlyCollection<ItemQuality> qualities,
-        IReadOnlyCollection<int?> potentials,
-        int actionCount = 1) =>
-        new(
-            "EquipmentTempered",
-            CraftedItemBaseIds: itemBaseIds,
-            CraftedItemTiers: tiers,
-            CraftedBaseRecipeIds: baseRecipeIds,
-            CraftedItemQualities: qualities,
-            CraftedItemPotentials: potentials,
-            ActionCount: actionCount);
 
     public static QuestTrigger EquipmentChanged() => new("EquipmentChanged");
 

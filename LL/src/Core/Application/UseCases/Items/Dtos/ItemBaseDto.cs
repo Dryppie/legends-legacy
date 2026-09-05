@@ -19,14 +19,10 @@ public class ItemBaseDto : IMapFrom<ItemBase>
     public bool IsBound { get; set; }
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }
-    public BlueprintItemMetadataDto? Blueprint { get; set; }
     public SelectionCrateMetadataDto? SelectionCrate { get; set; }
     public void Mapping(Profile profile)
     {
         profile.CreateMap<ItemBase, ItemBaseDto>()
-            .ForMember(
-                destination => destination.Blueprint,
-                options => options.MapFrom<BlueprintItemMetadataResolver>())
             .ForMember(
                 destination => destination.SelectionCrate,
                 options => options.MapFrom<SelectionCrateMetadataResolver>())

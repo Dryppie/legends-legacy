@@ -6,7 +6,6 @@ import {
   QuestState,
   QuestStatus,
   SOUL_ARCHIVE_QUEST_ID,
-  TOOLS_OF_THE_TRADE_QUEST_ID,
   TRAINING_DAY_QUEST_ID,
 } from '../../../../shared/models/quest';
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
@@ -15,10 +14,9 @@ export enum PlayerJourneyStage {
   FirstHunt = 0,
   SoulArchive = 1,
   FirstWeapon = 2,
-  ReadyForRoad = 3,
-  EnterLumo = 4,
-  Shenic = 5,
-  BetaComplete = 6,
+  EnterLumo = 3,
+  Shenic = 4,
+  BetaComplete = 5,
 }
 
 export const PLAYER_JOURNEY_SOCIAL_UNLOCK_LEVEL = 10;
@@ -49,10 +47,6 @@ const STAGE_QUESTS: ReadonlyArray<{
   { stage: PlayerJourneyStage.FirstHunt, questId: TRAINING_DAY_QUEST_ID },
   { stage: PlayerJourneyStage.SoulArchive, questId: SOUL_ARCHIVE_QUEST_ID },
   { stage: PlayerJourneyStage.FirstWeapon, questId: FIRST_WEAPON_QUEST_ID },
-  {
-    stage: PlayerJourneyStage.ReadyForRoad,
-    questId: TOOLS_OF_THE_TRADE_QUEST_ID,
-  },
   { stage: PlayerJourneyStage.EnterLumo, questId: INTO_LUMO_RUINS_QUEST_ID },
 ];
 
@@ -114,8 +108,7 @@ export function buildPlayerJourneyGuidance(
             '/game/quests',
       },
       optionalAction:
-        (stage === PlayerJourneyStage.FirstWeapon ||
-          stage === PlayerJourneyStage.ReadyForRoad)
+        stage === PlayerJourneyStage.FirstWeapon
           ? { label: 'Equip Your Gear', route: '/game/character/inventory' }
           : optionalAction(stage),
       nextUnlockLabel: quest.chain?.promisedReward
@@ -170,8 +163,7 @@ export function buildPlayerJourneyGuidance(
             : '/game/quests',
     },
     optionalAction:
-      (stage === PlayerJourneyStage.FirstWeapon ||
-        stage === PlayerJourneyStage.ReadyForRoad)
+      stage === PlayerJourneyStage.FirstWeapon
         ? { label: 'Equip Your Gear', route: '/game/character/inventory' }
         : optionalAction(stage),
     nextUnlockLabel:
@@ -311,8 +303,6 @@ function phaseLabel(stage: PlayerJourneyStage): string {
       return 'Claim Your Power';
     case PlayerJourneyStage.FirstWeapon:
       return 'Prepare Your Gear';
-    case PlayerJourneyStage.ReadyForRoad:
-      return 'Ready for the Road';
     case PlayerJourneyStage.EnterLumo:
       return 'Enter Shenic';
     case PlayerJourneyStage.BetaComplete:
@@ -329,7 +319,6 @@ function optionalAction(stage: PlayerJourneyStage): PlayerJourneyAction {
     case PlayerJourneyStage.SoulArchive:
       return { label: 'Inspect Inventory', route: '/game/character/inventory' };
     case PlayerJourneyStage.FirstWeapon:
-    case PlayerJourneyStage.ReadyForRoad:
       return { label: 'Review Loadout', route: '/game/character/essences' };
     case PlayerJourneyStage.EnterLumo:
       return { label: 'Check Equipment', route: '/game/character/inventory' };
@@ -350,9 +339,7 @@ function nextUnlock(
     case PlayerJourneyStage.SoulArchive:
       return 'Starter equipment after attuning your first Essence';
     case PlayerJourneyStage.FirstWeapon:
-      return 'Ready for the Road accessories after equipping your starter kit';
-    case PlayerJourneyStage.ReadyForRoad:
-      return 'World Map after equipping your accessories';
+      return 'World Map after equipping your starter weapon';
     case PlayerJourneyStage.EnterLumo:
       return 'The Shenic journey after your first Lumo victory';
     case PlayerJourneyStage.BetaComplete:

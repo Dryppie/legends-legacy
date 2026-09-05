@@ -31,6 +31,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
+import { EquipmentUpgradePanelComponent } from '../../../equipment/equipment-upgrade-panel/equipment-upgrade-panel.component';
 
 @Component({
   selector: 'app-inventory-equipment-modal',
@@ -42,6 +43,7 @@ import { CharacterStateService } from '../../../../../core/services/api/characte
     NgIf,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
+    EquipmentUpgradePanelComponent,
   ],
   templateUrl: './inventory-equipment-modal.component.html',
 })
@@ -49,6 +51,7 @@ export class InventoryEquipmentModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   @Input() equipmentInstance!: EquipmentInstance;
   @Input() slotType: EquipmentSlotType | null = null;
+  @Input() managementOnly = false;
   equipment!: Equipment;
   selectedSlotType!: EquipmentSlotType;
   equippedComparisons: EquippedComparison[] = [];
@@ -66,16 +69,12 @@ export class InventoryEquipmentModalComponent implements OnInit {
   get equippedItems(): EquipmentInstance[] {
     return this.equipmentState
       .equipmentSlots()
-      .flatMap((slot) => (slot.equipmentInstance ? [slot.equipmentInstance] : []));
+      .flatMap((slot) =>
+        slot.equipmentInstance ? [slot.equipmentInstance] : [],
+      );
   }
 
   get requiredLevel(): number {
-    if (
-      this.equipmentInstance.equipmentBase.equipmentType === EquipmentType.Tool
-    ) {
-      return 1;
-    }
-
     return this.equipmentInstance.requiredLevel ?? 1;
   }
 
@@ -85,18 +84,33 @@ export class InventoryEquipmentModalComponent implements OnInit {
     );
   }
 
-
   get inventoryItem(): InventoryItem | undefined {
     return this.inventoryState
       .items()
       .find((item) => item.itemInstance.id === this.equipmentInstance.id);
   }
 
+  get equippedSlotType(): EquipmentSlotType | null {
+    return (
+      this.equipmentState
+        .equipmentSlots()
+        .find(
+          (slot) => slot.equipmentInstance?.id === this.equipmentInstance.id,
+        )?.equipmentSlotType ?? null
+    );
+  }
+
+  get isEquipped(): boolean {
+    return this.equippedSlotType !== null;
+  }
+
   ngOnInit(): void {
     this.equipment = this.equipmentInstance.itemBase as Equipment;
     this.selectedSlotType =
+      this.equippedSlotType ??
       this.slotType ??
       getSlotTypeFromEquipmentType(this.equipment.equipmentType);
+    if (this.managementOnly || this.isEquipped) return;
     this.updateComparisons();
     this.loadCharacterComparison();
   }
@@ -106,7 +120,11 @@ export class InventoryEquipmentModalComponent implements OnInit {
   }
 
   get requiresHandSelection(): boolean {
-    return this.equipment.equipmentType === EquipmentType.OneHanded;
+    return (
+      !this.managementOnly &&
+      !this.isEquipped &&
+      this.equipment.equipmentType === EquipmentType.OneHanded
+    );
   }
 
   private updateComparisons(): void {

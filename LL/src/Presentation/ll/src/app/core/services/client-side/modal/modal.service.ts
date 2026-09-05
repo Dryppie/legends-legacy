@@ -5,6 +5,11 @@ import { EquipmentInstance } from '../../../../shared/models/item';
 import { EquipmentSlotType } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
+export interface InventoryEquipmentModalRequest {
+  equipment: EquipmentInstance;
+  mode: 'equip' | 'manage';
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -15,7 +20,7 @@ export class ModalService {
   );
 
   private inventoryEquipmentModalState =
-    new BehaviorSubject<EquipmentInstance | null>(null);
+    new BehaviorSubject<InventoryEquipmentModalRequest | null>(null);
   private overviewEquipmentModalState =
     new BehaviorSubject<EquipmentSlotType | null>(null);
 
@@ -45,8 +50,13 @@ export class ModalService {
     this.editCombatFiltersModalState.next(state);
   }
 
-  toggleInventoryEquipItemModal(equipment: EquipmentInstance | null = null) {
-    this.inventoryEquipmentModalState.next(equipment);
+  toggleInventoryEquipItemModal(
+    equipment: EquipmentInstance | null = null,
+    mode: InventoryEquipmentModalRequest['mode'] = 'equip',
+  ) {
+    this.inventoryEquipmentModalState.next(
+      equipment ? { equipment, mode } : null,
+    );
   }
 
   toggleOverviewEquipItemModal(equipment: EquipmentSlotType | null = null) {

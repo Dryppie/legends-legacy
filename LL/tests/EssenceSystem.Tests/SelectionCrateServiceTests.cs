@@ -13,7 +13,6 @@ using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.Items.Equipments;
 using Domain.Models.MarketPlaces;
-using Domain.Models.Professions.Crafting;
 using Services.LL.Inventories;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -266,7 +265,6 @@ public sealed partial class SelectionCrateServiceTests
             });
         }
         public Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> MarkItemSeenAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> SetItemFavoriteAsync(Guid characterId, Guid itemInstanceId, bool isFavorite, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken) => throw new NotSupportedException();
@@ -287,7 +285,6 @@ public sealed partial class SelectionCrateServiceTests
                     .ToDictionary(pair => pair.Key, pair => pair.Value));
 
         public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> itemBases, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 

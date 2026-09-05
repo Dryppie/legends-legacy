@@ -103,9 +103,6 @@ public sealed class EquipmentSetBonusResolverTests
         ]
     };
 
-    private static EquipmentInstance CreateItem(string setId) => new()
-    {
-        Id = Guid.NewGuid(),
-        EquipmentSetId = setId
-    };
+    private static EquipmentInstance CreateItem(string setId) =>
+        ProgressionTestEquipment.Create(setId);
 }

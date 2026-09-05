@@ -3,8 +3,7 @@ import { EquipmentSupportComponent } from './equipment-support.component';
 import { EquipmentSupportSnapshot } from '../../liveops.models';
 
 describe('EquipmentSupportComponent', () => {
-  const empty = (): EquipmentSupportSnapshot => ({ rowLimit: 100, equipmentCount: 0, pendingRewardCount: 0,
-    progressTruncated: false, items: [], pendingRewards: [], protection: [], ordinary: [] });
+  const empty = (): EquipmentSupportSnapshot => ({ rowLimit: 100, equipmentCount: 0, items: [] });
 
   it('shows unavailable data as unavailable rather than empty holdings', async () => {
     await TestBed.configureTestingModule({ imports: [EquipmentSupportComponent] }).compileComponents();

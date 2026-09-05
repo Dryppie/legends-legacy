@@ -12,101 +12,12 @@ public sealed class ProphecyServiceTests
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     [Theory]
-    [InlineData("Mining", "Mining")]
-    [InlineData("Woodcutting", "woodcutting")]
-    [InlineData("Skinning", " Skinning ")]
-    public async Task TrackProgressAsync_counts_gathering_from_required_profession(
-        string requiredProfession,
-        string eventProfession)
-    {
-        var prophecy = CreateGatheringProphecy($"{{\"requiredProfession\":\"{requiredProfession}\"}}");
-        var service = CreateService(prophecy);
-
-        var updates = await service.TrackProgressAsync(
-            new ProphecyProgressEvent(
-                prophecy.CharacterId,
-                Now,
-                ProphecyProgressKind.ResourceGathered,
-                Amount: 7,
-                Profession: eventProfession),
-            CancellationToken.None);
-
-        var update = Assert.Single(updates);
-        Assert.Equal(7, prophecy.CurrentValue);
-        Assert.Equal(7, update.AmountGained);
-    }
-
-    [Theory]
-    [InlineData("Mining", "Woodcutting")]
-    [InlineData("Skinning", "Mining")]
-    [InlineData("Woodcutting", null)]
-    public async Task TrackProgressAsync_ignores_gathering_from_other_professions(
-        string requiredProfession,
-        string? eventProfession)
-    {
-        var prophecy = CreateGatheringProphecy($"{{\"requiredProfession\":\"{requiredProfession}\"}}");
-        var service = CreateService(prophecy);
-
-        var updates = await service.TrackProgressAsync(
-            new ProphecyProgressEvent(
-                prophecy.CharacterId,
-                Now,
-                ProphecyProgressKind.ResourceGathered,
-                Amount: 7,
-                Profession: eventProfession),
-            CancellationToken.None);
-
-        Assert.Empty(updates);
-        Assert.Equal(0, prophecy.CurrentValue);
-    }
-
-    [Fact]
-    public async Task TrackProgressAsync_counts_unrestricted_weekly_gathering()
-    {
-        var prophecy = CreateGatheringProphecy("{}");
-        var service = CreateService(prophecy);
-
-        var updates = await service.TrackProgressAsync(
-            new ProphecyProgressEvent(
-                prophecy.CharacterId,
-                Now,
-                ProphecyProgressKind.ResourceGathered,
-                Amount: 11,
-                Profession: "Mining"),
-            CancellationToken.None);
-
-        Assert.Single(updates);
-        Assert.Equal(11, prophecy.CurrentValue);
-    }
-
-    [Fact]
-    public async Task TrackProgressAsync_fails_closed_for_malformed_gathering_parameters()
-    {
-        var prophecy = CreateGatheringProphecy("not-json");
-        var service = CreateService(prophecy);
-
-        var updates = await service.TrackProgressAsync(
-            new ProphecyProgressEvent(
-                prophecy.CharacterId,
-                Now,
-                ProphecyProgressKind.ResourceGathered,
-                Amount: 5,
-                Profession: "Mining"),
-            CancellationToken.None);
-
-        Assert.Empty(updates);
-        Assert.Equal(0, prophecy.CurrentValue);
-    }
-
-    [Theory]
     [InlineData(ProphecyObjectiveType.KillCreatures, ProphecyProgressKind.CreatureDefeated)]
     [InlineData(ProphecyObjectiveType.WinEncounters, ProphecyProgressKind.EncounterWon)]
     [InlineData(ProphecyObjectiveType.ClearDungeonRooms, ProphecyProgressKind.DungeonRoomCleared)]
     [InlineData(ProphecyObjectiveType.CompleteDungeons, ProphecyProgressKind.DungeonCompleted)]
     [InlineData(ProphecyObjectiveType.GainEssenceXp, ProphecyProgressKind.EssenceXpGained)]
     [InlineData(ProphecyObjectiveType.AbsorbEssence, ProphecyProgressKind.EssenceAbsorbed)]
-    [InlineData(ProphecyObjectiveType.TemperItems, ProphecyProgressKind.ItemTempered)]
-    [InlineData(ProphecyObjectiveType.SpendPotential, ProphecyProgressKind.PotentialSpent)]
     [InlineData(ProphecyObjectiveType.TreasureProgress, ProphecyProgressKind.TreasureProgress)]
     public async Task TrackProgressAsync_counts_each_direct_objective_matcher(
         string objectiveType,
@@ -247,7 +158,7 @@ public sealed class ProphecyServiceTests
     [Fact]
     public async Task TrackProgressAsync_aggregates_a_batch_into_one_update_per_prophecy()
     {
-        var prophecy = CreateGatheringProphecy("{}");
+        var prophecy = CreateProphecy(ProphecyObjectiveType.KillCreatures);
         prophecy.TargetValue = 10;
         var repository = new ProgressRepository(prophecy);
         var service = CreateService(repository);
@@ -258,15 +169,13 @@ public sealed class ProphecyServiceTests
             new ProphecyProgressEvent(
                 prophecy.CharacterId,
                 completionEventTime,
-                ProphecyProgressKind.ResourceGathered,
-                Amount: 7,
-                Profession: "Mining"),
+                ProphecyProgressKind.CreatureDefeated,
+                Amount: 7),
             new ProphecyProgressEvent(
                 prophecy.CharacterId,
                 Now.AddMinutes(5),
-                ProphecyProgressKind.ResourceGathered,
-                Amount: 4,
-                Profession: "Mining")
+                ProphecyProgressKind.CreatureDefeated,
+                Amount: 4)
         ], CancellationToken.None);
 
         var update = Assert.Single(updates);
@@ -281,7 +190,7 @@ public sealed class ProphecyServiceTests
     [Fact]
     public async Task ClaimAsync_credits_favor_to_week_containing_daily_prophecy()
     {
-        var prophecy = CreateGatheringProphecy("{}");
+        var prophecy = CreateProphecy(ProphecyObjectiveType.KillCreatures);
         prophecy.Status = ProphecyStatus.Completed;
         prophecy.Scope = ProphecyScope.Daily;
         prophecy.PeriodStart = new DateTimeOffset(2026, 7, 12, 0, 0, 0, TimeSpan.Zero);
@@ -335,7 +244,7 @@ public sealed class ProphecyServiceTests
     [Fact]
     public async Task ClaimAsync_credits_two_favor_for_greater_prophecy()
     {
-        var prophecy = CreateGatheringProphecy("{}");
+        var prophecy = CreateProphecy(ProphecyObjectiveType.KillCreatures);
         prophecy.Status = ProphecyStatus.Completed;
         prophecy.Scope = ProphecyScope.Weekly;
         prophecy.SlotType = ProphecySlotType.Greater;
@@ -476,9 +385,6 @@ public sealed class ProphecyServiceTests
         Assert.False(unknown.Succeeded);
     }
 
-    private static PlayerProphecyInstance CreateGatheringProphecy(string parameters)
-        => CreateProphecy(ProphecyObjectiveType.GatherResources, parameters);
-
     private static PlayerProphecyInstance CreateProphecy(
         string objectiveType,
         string parameters = "{}")
@@ -508,7 +414,7 @@ public sealed class ProphecyServiceTests
 
     private static PlayerProphecyInstance CreateCompletedProphecy()
     {
-        var prophecy = CreateProphecy(ProphecyObjectiveType.GatherResources);
+        var prophecy = CreateProphecy(ProphecyObjectiveType.KillCreatures);
         prophecy.Status = ProphecyStatus.Completed;
         prophecy.Scope = ProphecyScope.Daily;
         prophecy.PeriodStart = new DateTimeOffset(2026, 7, 14, 0, 0, 0, TimeSpan.Zero);

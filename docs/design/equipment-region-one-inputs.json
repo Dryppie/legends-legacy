@@ -13,8 +13,7 @@
     "baseSalvage": 0,
     "paidScrapBasis": 0,
     "handQuest": "quest.onboarding.first_weapon",
-    "armorQuest": "quest.onboarding.first_weapon",
-    "accessoryQuest": "quest.onboarding.tools_of_trade",
+    "starterContainer": "item.arms_chest",
     "alternateTargetEligibleVictories": 360,
     "starterScrap": 10,
     "starterCinders": 500

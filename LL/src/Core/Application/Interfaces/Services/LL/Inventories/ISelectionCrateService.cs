@@ -6,7 +6,8 @@ public sealed record SelectionCrateOpenResult(
     bool IsSuccess,
     string? ErrorMessage,
     IReadOnlyList<InventoryItem> Rewards,
-    string? ContainerName = null);
+    string? ContainerName = null,
+    bool RewardsAlreadyPublished = false);
 
 public interface ISelectionCrateService
 {

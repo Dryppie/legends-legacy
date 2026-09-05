@@ -1,4 +1,4 @@
-using Domain.Models.Professions.Crafting.V2;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Domain.Models.Attributes;
 

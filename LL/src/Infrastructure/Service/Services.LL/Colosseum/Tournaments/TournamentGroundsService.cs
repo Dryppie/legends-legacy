@@ -3688,12 +3688,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     e.Slot.ToString(),
                     e.EquipmentInstanceId,
                     e.ItemBaseId,
-                    e.BaseRecipeId,
+                    e.ProgressionData?.State.DefinitionId,
+                    e.Tier,
                     e.Rarity.ToString(),
-                    e.Potential,
-                    e.ItemXp,
-                    e.IsMasterpiece,
-                    e.IsLevelingItem,
+                    e.Quality.ToString(),
+                    e.ProgressionData?.State.Rank,
+                    e.ProgressionData?.State.ActiveStyleId,
                     e.InstanceModifiers
                         .OrderBy(m => m.AttributeType)
                         .Select(m => new TournamentSnapshotModifier(m.AttributeType.ToString(), m.Amount, m.ModifierType.ToString()))
@@ -3950,12 +3950,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         string Slot,
         Guid EquipmentInstanceId,
         string ItemBaseId,
-        string? BaseRecipeId,
+        string? DefinitionId,
+        int Tier,
         string Rarity,
-        int? Potential,
-        int ItemXp,
-        bool IsMasterpiece,
-        bool IsLevelingItem,
+        string Quality,
+        int? Rank,
+        string? ActiveStyleId,
         IReadOnlyList<TournamentSnapshotModifier> InstanceModifiers);
 
     private sealed record TournamentSnapshotModifier(
@@ -3972,4 +3972,3 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         int AscensionTier,
         bool IsEvolved);
 }
-

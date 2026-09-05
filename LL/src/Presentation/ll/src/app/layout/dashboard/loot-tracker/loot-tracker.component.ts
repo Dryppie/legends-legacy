@@ -13,6 +13,8 @@ export function lootHistoryLocationLabel(
   entry: Pick<LootHistoryEntry, 'source' | 'location'>,
 ): string {
   switch (entry.source) {
+    case 'model-e:starter':
+      return 'Starter Equipment';
     case 'quest-reward':
       return 'Quest Rewards';
     case 'event-quest-reward':

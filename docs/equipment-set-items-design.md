@@ -1,5 +1,7 @@
 # Equipment Set Items: Investigation and Technical Design
 
+> Historical implementation design, superseded 5 September 2026. Its crafting paths and reusable Blueprint mechanics no longer describe the game. Current set definitions live in `Data/equipment/equipment-sets.v1.json`; equipment drops and consumable Blueprint Variants assign set identity. Use the [current equipment contract](design/equipment-specification.md) and [Blueprint Variant implementation](design/equipment-blueprints-implementation.md).
+
 Status: Membership foundation implemented on 2026-08-24. Set benefits,
 threshold evaluation, aggregate equipped-set state, and combat integration are
 deferred to a later implementation phase.

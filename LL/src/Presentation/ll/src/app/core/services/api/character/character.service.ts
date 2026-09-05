@@ -35,7 +35,7 @@ export class CharacterService {
   readonly currentCharacterId = computed(
     () => this.currentCharacter()?.id ?? null,
   );
-  /** cached, shared stream of professions */
+  /** Cached, shared stream of character overview data. */
   private readonly characterOverviewObservable$ = this.refresh$.pipe(
     // make the first request immediately
     startWith(void 0),

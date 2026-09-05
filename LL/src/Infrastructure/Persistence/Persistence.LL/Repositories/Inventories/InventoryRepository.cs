@@ -26,13 +26,7 @@ public class InventoryRepository : IInventoryRepository
                     .ThenInclude(ii => ii.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .Include(i => i.InventoryItems)
-                .ThenInclude(ii => ii.ItemInstance)
-                    .ThenInclude(ii => ii.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
-            .Include(i => i.InventoryItems)
                 .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).InstanceModifiers)
-            .Include(i => i.InventoryItems)
-                .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
             .Include(i => i.InventoryItems)
                 .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).GuildVaultItem)
                     .ThenInclude(x => x!.Guild)
@@ -252,9 +246,6 @@ public class InventoryRepository : IInventoryRepository
         await _context.Inventories.AddAsync(inventory, cancellationToken);
     }
 
-    public async Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken) =>
-        await TryRemoveItemsByBaseIdAsync(characterId, requiredByItemId, cancellationToken);
-
     public async Task<bool> TryRemoveItemsByBaseIdAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken)
     {
         var candidateRows = await _context.InventoryItems
@@ -417,11 +408,6 @@ public class InventoryRepository : IInventoryRepository
                     _context.GetEntry(mod).State = EntityState.Added;
             }
 
-            foreach (var affix in eq.ToolAffixes)
-            {
-                if (_context.GetEntry(affix).State == EntityState.Detached)
-                    _context.GetEntry(affix).State = EntityState.Added;
-            }
         }
 
         await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
@@ -449,11 +435,7 @@ public class InventoryRepository : IInventoryRepository
             .Include(x => x.ItemInstance)
                 .ThenInclude(x => x.ItemBase)
                     .ThenInclude(x => (x as EquipmentBase).AttributeModifiers)
-            .Include(x => x.ItemInstance)
-                .ThenInclude(x => x.ItemBase)
-                    .ThenInclude(x => (x as EquipmentBase).ToolBonuses)
             .Include(x => (x.ItemInstance as EquipmentInstance).InstanceModifiers)
-            .Include(x => (x.ItemInstance as EquipmentInstance).ToolAffixes)
             .SingleOrDefaultAsync(
                 x => x.InventoryId == senderCharacterId && x.ItemInstanceId == itemInstanceId,
                 cancellationToken);

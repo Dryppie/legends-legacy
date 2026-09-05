@@ -14,6 +14,7 @@ import { QuestStateService } from '../../../core/services/api/quest/quest-state.
 import { DialogFocusDirective } from '../../../shared/directives/dialog-focus/dialog-focus.directive';
 import {
   QuestState,
+  isQuestReadyToTurnIn,
   TRAINING_DAY_QUEST_ID,
 } from '../../../shared/models/quest';
 
@@ -36,6 +37,7 @@ export class QuestTrackerComponent implements OnDestroy {
 
   readonly quest = this.questState.pinnedQuest;
   readonly objective = this.questState.pinnedObjective;
+  readonly readyToTurnIn = computed(() => isQuestReadyToTurnIn(this.quest()));
   readonly requiresChoice = computed(() => {
     const choice = this.quest()?.choice;
     return !!choice && !choice.selectedOptionKey;
@@ -61,19 +63,17 @@ export class QuestTrackerComponent implements OnDestroy {
   });
 
   constructor() {
-    effect(
-      () => {
-        const quest = this.quest();
-        if (quest?.requiresWelcome) {
-          this.welcomeOpen.set(true);
-          return;
-        }
+    effect(() => {
+      const quest = this.quest();
+      if (quest?.requiresWelcome) {
+        this.welcomeOpen.set(true);
+        return;
+      }
 
-        if (!quest && !this.welcomeTransitioning()) {
-          this.welcomeOpen.set(false);
-        }
-      },
-    );
+      if (!quest && !this.welcomeTransitioning()) {
+        this.welcomeOpen.set(false);
+      }
+    });
   }
 
   ngOnDestroy(): void {

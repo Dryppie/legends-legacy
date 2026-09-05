@@ -4,7 +4,7 @@
   "sections": [
     {
       "heading": "Your first expedition",
-      "body": "Lumo Ruins is your first normal combat area. Equip your starter kit and accessories, then start its battle from Shenic. Combat continues as an ongoing action."
+      "body": "Lumo Ruins is your first normal combat area. Equip the weapon chosen from your Arms Chest, then start its battle from Shenic. Combat continues as an ongoing action."
     },
     {
       "heading": "Win an encounter",
@@ -12,7 +12,7 @@
     },
     {
       "heading": "Equipment from victories",
-      "body": "Your Inventory shows the equipment you own. Equipment targets and their quest integration are being redesigned; combat rewards do not require gathering tools."
+      "body": "Victories in normal areas can drop equipment for the region's tier. Dungeons use the same equipment pool with a higher drop rate and better odds for higher rarities."
     }
   ]
 }

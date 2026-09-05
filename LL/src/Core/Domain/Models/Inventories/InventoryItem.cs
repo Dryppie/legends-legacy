@@ -29,25 +29,15 @@ public class InventoryItem
 
     /// <summary>
     /// True while this is an eligible equipment acquisition the owner has not inspected yet.
-    /// Eligible acquisitions are crafted equipment, marketplace equipment purchases, and
-    /// gathering tools dropped by dungeons, and Equipment progression equipment awards.
+    /// Eligible acquisitions are marketplace purchases and equipment progression awards.
     /// </summary>
     [NotMapped]
     public bool IsNew =>
         SeenAtUtc is null
         && ItemInstance is EquipmentInstance equipment
-        && equipment.ItemBase is EquipmentBase equipmentBase
+        && equipment.ItemBase is EquipmentBase
         && (equipment.HasEquipmentProgression || string.Equals(
                 equipment.AcquisitionSource,
-                ItemAcquisitionSources.Crafting,
-                StringComparison.Ordinal)
-            || string.Equals(
-                equipment.AcquisitionSource,
                 ItemAcquisitionSources.Marketplace,
-                StringComparison.Ordinal)
-            || equipmentBase.EquipmentType == EquipmentType.Tool
-                && string.Equals(
-                    equipment.AcquisitionSource,
-                    ItemAcquisitionSources.DungeonReward,
-                    StringComparison.Ordinal));
+                StringComparison.Ordinal));
 }

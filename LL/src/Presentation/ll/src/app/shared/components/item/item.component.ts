@@ -75,25 +75,11 @@ export class ItemComponent {
       return this.item.displayName;
     }
 
-    if (this.isTool) {
-      return this.getToolDisplayName(this.item.itemBase.name, this.rarity);
-    }
-
     return this.item.itemBase.name;
   }
 
   get isFavorite(): boolean {
     return this.inventoryState.isFavorite(this.item.id);
-  }
-
-  get isTool(): boolean {
-    const base = this.item.itemBase as Equipment;
-    const instance = this.item as EquipmentInstance;
-
-    return (
-      instance.equipmentBase?.equipmentType === EquipmentType.Tool ||
-      base.equipmentType === EquipmentType.Tool
-    );
   }
 
   get rewardSource(): string | null {
@@ -191,24 +177,4 @@ export class ItemComponent {
     }
   }
 
-  private getToolDisplayName(baseName: string, rarity: Rarity): string {
-    switch (rarity) {
-      case Rarity.Common:
-        return `Plain ${baseName}`;
-      case Rarity.Uncommon:
-        return `Sturdy ${baseName}`;
-      case Rarity.Rare:
-        return `Proven ${baseName}`;
-      case Rarity.Epic:
-        return `Exquisite ${baseName}`;
-      case Rarity.Unique:
-        return `Fabled ${baseName}`;
-      case Rarity.Legendary:
-        return `Mythic ${baseName}`;
-      case Rarity.Legacy:
-        return `Eternal ${baseName}`;
-      default:
-        return baseName;
-    }
-  }
 }

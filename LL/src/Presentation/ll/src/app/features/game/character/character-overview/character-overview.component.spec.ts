@@ -6,10 +6,6 @@ import { CharacterService } from '../../../../core/services/api/character/charac
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import {
-  CharacterProfession,
-  ProfessionType,
-} from '../../../../shared/models/Dtos/characterProfession';
-import {
   CharacterDto,
   CharacterOverviewDto,
 } from '../../../../shared/models/Dtos/characterDto';
@@ -125,40 +121,9 @@ function createOverview(): CharacterOverviewDto {
     level: 5,
     experience: 5,
     experienceUntilNextLevel: 100,
-    craftingLevel: 2,
-    craftingExperience: 15,
-    craftingExperienceUntilNextLevel: 75,
-    gatheringProfessions: [
-      createGatheringProfession(ProfessionType.Mining, 4, 100, 7_584),
-      createGatheringProfession(ProfessionType.Woodcutting, 2, 25, 1_896),
-      createGatheringProfession(ProfessionType.Skinning, 1, 0, 474),
-    ],
     baseAttributes: [],
     baseCombatAttributes: [],
     isOnline: true,
-  };
-}
-
-function createCrafting(): CharacterProfession {
-  return {
-    professionType: ProfessionType.Crafting,
-    level: 2,
-    experience: 20,
-    experienceUntilNextLevel: 75,
-  };
-}
-
-function createGatheringProfession(
-  professionType: ProfessionType,
-  level: number,
-  experience: number,
-  experienceUntilNextLevel: number,
-): CharacterProfession {
-  return {
-    professionType,
-    level,
-    experience,
-    experienceUntilNextLevel,
   };
 }
 

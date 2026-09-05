@@ -216,20 +216,17 @@ public static class StateSyncCommandScopeCatalog
 
         Register(profiles, [StateSyncScopes.Inventory], [],
             typeof(global::Application.UseCases.Equipments.Commands.ClaimStarterEquipment.ClaimStarterEquipmentCommand));
-        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],
-            typeof(global::Application.UseCases.Equipments.Commands.RecoverPlainEquipment.RecoverPlainEquipmentCommand),
-            typeof(global::Application.UseCases.Equipments.Commands.RecoverBaselineEquipment.RecoverBaselineEquipmentCommand));
-        Register(profiles, [StateSyncScopes.Dungeons], [],
-            typeof(global::Application.UseCases.Equipments.Commands.SelectEquipmentProgressionTarget.SelectEquipmentProgressionTargetCommand));
-        Register(profiles, [StateSyncScopes.Dungeons, StateSyncScopes.Inventory, StateSyncScopes.Character], [],
-            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Equipments.Commands.SelectCombatAcquisition.SelectCombatAcquisitionCommand));
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.Equipment, StateSyncScopes.Inventory], [],
             [StateSyncScopes.Equipment, StateSyncScopes.Inventory],
             refreshCharacterOverview: true,
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Equipments.Commands.EquipEquipment.EquipEquipmentCommand),
             typeof(global::Application.UseCases.Equipments.Commands.UnequipEquipment.UnequipEquipmentCommand));
+        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Character], [],
+            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Equipments.Commands.ReinforceEquipment.ReinforceEquipmentCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.DismantleEquipment.DismantleEquipmentCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentVariant.ApplyEquipmentVariantCommand));
 
         RegisterAuthoritativeResponse(
             profiles,
@@ -479,6 +476,15 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Quests.Commands.AcknowledgeQuestWelcome.AcknowledgeQuestWelcomeCommand),
             typeof(global::Application.UseCases.Quests.Commands.PinQuest.PinQuestCommand),
             typeof(global::Application.UseCases.Quests.Commands.SelectQuestChoice.SelectQuestChoiceCommand));
+
+        RegisterAuthoritativeResponse(
+            profiles,
+            [StateSyncScopes.Quests, StateSyncScopes.Inventory, StateSyncScopes.AreaAccess],
+            [],
+            [StateSyncScopes.Quests],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Quests.Commands.TurnInQuest.TurnInQuestCommand));
 
         profiles.Add(
             typeof(global::Application.UseCases.Quests.Commands.StartQuestEncounter.StartQuestEncounterCommand),

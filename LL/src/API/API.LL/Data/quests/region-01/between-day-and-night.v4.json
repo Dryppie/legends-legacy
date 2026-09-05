@@ -2,13 +2,13 @@
   "id": "quest.shenic.between_day_and_night",
   "version": 4,
   "title": "Between Day and Night",
-  "summary": "Carry your three-slot build into permanent dusk and prepare it for Shenic's final descent.",
+  "summary": "Secure Twilight Clearing and earn a Goblin Sigil for the trial ahead.",
   "category": "Shenic",
   "chain": {
     "id": "chain.shenic.chapter_03",
     "title": "Chapter III — Heart of Shenic",
-    "description": "Refine your chosen identity through Twilight and the Old Forest, then clear the Hollow's Final Trial.",
-    "goal": "Reach level 30, master Thornroot Hollow, and clear Forgotten Catacombs I.",
+    "description": "Earn a Goblin Sigil in Twilight, break the Goblin Gate, and cross the Old Forest before the Hollow's Final Trial.",
+    "goal": "Defeat the boss of Goblin Mines I, reach level 30, and clear Forgotten Catacombs I.",
     "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
     "step": 1,
     "totalSteps": 3
@@ -24,7 +24,7 @@
   "objectives": [
     {
       "key": "break_the_twilight",
-      "description": "Win 5 encounters in Twilight Clearing with your three-slot build.",
+      "description": "Win 5 encounters in Twilight Clearing.",
       "type": "CombatEncounterCompleted",
       "requiredAmount": 5,
       "filters": {
@@ -54,6 +54,12 @@
       "type": "Item",
       "itemBaseId": "item.essence_token.twilight_clearing",
       "quantity": 1
+    },
+    {
+      "itemBaseId": "sigil_goblin_mines",
+      "key": "first_sigil",
+      "quantity": 1,
+      "type": "Item"
     }
   ]
 }

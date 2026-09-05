@@ -36,7 +36,6 @@ public sealed class EquipmentContentRegistrationTests
 
         Assert.Same(equipment, ordinary.Equipment);
         Assert.Equal(new[] { 1, 2 }, ordinary.Pools.Select(p => p.EquipmentTier).Order());
-        var acquisition = provider.GetRequiredService<EquipmentAcquisitionCatalog>();
         var dungeons = provider.GetRequiredService<Application.Interfaces.Services.LL.Dungeons.IDungeonDefinitions>();
         foreach (var pool in ordinary.Pools)
         {
@@ -46,14 +45,9 @@ public sealed class EquipmentContentRegistrationTests
             {
                 var dungeon = dungeons.GetByKey(sigil.FamilyId);
                 Assert.Equal(dungeon.SigilItemId, sigil.ItemBaseId);
-                Assert.Equal(dungeon.RequiredTowerFloor, sigil.RequiredTowerFloor);
             }
         }
-        Assert.Equal(12, acquisition.Pools.Count);
-        foreach (var pool in acquisition.Pools)
-        {
-            Assert.Equal(pool.Region, dungeons.GetByKey(pool.DungeonId).Region);
-            Assert.Equal(pool.Difficulty, (int)dungeons.GetByKey(pool.DungeonId).Grade);
-        }
+        Assert.All(Enum.GetValues<EquipmentRarity>(), rarity =>
+            Assert.True(ordinary.DropDefinitions(rarity).Count >= 31));
     }
 }

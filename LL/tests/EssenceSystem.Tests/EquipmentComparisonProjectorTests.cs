@@ -3,8 +3,8 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.Professions.Crafting.V2;
 
 namespace EssenceSystem.Tests;
 
@@ -95,27 +95,8 @@ public sealed class EquipmentComparisonProjectorTests
 
     private static EquipmentInstance Equipment(EquipmentType type, float armorRating)
     {
-        var id = Guid.NewGuid();
-        return new EquipmentInstance
-        {
-            Id = id,
-            ItemBaseId = $"test.{id:N}",
-            ItemBase = new EquipmentBase
-            {
-                Id = $"test.{id:N}",
-                Name = "Test equipment",
-                EquipmentType = type
-            },
-            BaseRecipeId = $"recipe.test.{id:N}",
-            StatModelVersion = EquipmentStatBudgetCatalog.BalanceVersion,
-            InstanceModifiers =
-            [
-                new InstanceAttributeModifier(AttributeType.Armor, armorRating)
-                {
-                    Id = Guid.NewGuid(),
-                    ItemInstanceId = id
-                }
-            ]
-        };
+        return ProgressionTestEquipment.Create(
+            equipmentType: type,
+            stats: new Dictionary<AttributeType, float> { [AttributeType.Armor] = armorRating });
     }
 }

@@ -668,7 +668,11 @@
                     {{ chain.totalSteps }}
                   </span>
                   <span class="text-xs text-zinc-400">
-                    {{ quest.status }} quest
+                    {{
+                      isReadyToTurnIn(quest)
+                        ? "Ready to turn in"
+                        : quest.status + " quest"
+                    }}
                   </span>
                 </div>
 
@@ -1080,6 +1084,15 @@
 
                 <div class="flex flex-wrap gap-2">
                   <ng-container *ngIf="quest.status === QuestStatus.Active">
+                    <button
+                      *ngIf="isReadyToTurnIn(quest)"
+                      type="button"
+                      class="ll-button ll-button-primary px-5 py-3 text-xs"
+                      [disabled]="questState.loading()"
+                      (click)="questState.turnIn(quest.questId)"
+                    >
+                      Turn In Quest
+                    </button>
                     <button
                       type="button"
                       class="ll-button px-4 py-3 text-xs"

@@ -1,12 +1,50 @@
 [
   {
-    "version": "model-e.ordinary.r1.v1",
-    "poolId": "model_e.r1.plain.tier1.v1",
+    "version": "model-e.regional.r1.v1",
+    "poolId": "model_e.r1.regional.tier1.v1",
+    "region": 1,
     "equipmentTier": 1,
-    "victoriesPerPerfectDay": 8640,
-    "plainTargetVictories": 360,
-    "sigilVictories": 4320,
-    "discoveryChance": 0.0003,
+    "areaEquipment": {
+      "dropChance": 0.0003,
+      "rank": 0,
+      "rarities": {
+        "common": 0.7,
+        "uncommon": 0.2,
+        "rare": 0.07,
+        "epic": 0.02,
+        "unique": 0.008,
+        "legendary": 0.0018,
+        "legacy": 0.0002
+      },
+      "qualities": {
+        "crude": 0.0,
+        "standard": 0.35,
+        "fine": 0.45,
+        "exceptional": 0.16,
+        "masterpiece": 0.04
+      }
+    },
+    "dungeonEquipment": {
+      "dropChance": 0.2,
+      "rank": 1,
+      "rarities": {
+        "common": 0.4,
+        "uncommon": 0.3,
+        "rare": 0.18,
+        "epic": 0.08,
+        "unique": 0.03,
+        "legendary": 0.009,
+        "legacy": 0.001
+      },
+      "qualities": {
+        "crude": 0.0,
+        "standard": 0.35,
+        "fine": 0.45,
+        "exceptional": 0.16,
+        "masterpiece": 0.04
+      }
+    },
+    "sigilDropChance": 0.0002314814814814815,
     "areas": [
       {
         "areaId": "region_01_area_01"
@@ -42,28 +80,61 @@
     "sigils": [
       {
         "familyId": "goblin_mines",
-        "itemBaseId": "sigil_goblin_mines",
-        "minimumLevel": 5,
-        "requiredQuestId": "quest.shenic.trial_of_lumo"
+        "itemBaseId": "sigil_goblin_mines"
       },
       {
         "familyId": "forgotten_catacombs",
-        "itemBaseId": "sigil_forgotten_catacombs",
-        "minimumLevel": 15,
-        "requiredQuestId": "quest.shenic.crystal_currents"
+        "itemBaseId": "sigil_forgotten_catacombs"
       }
     ],
-    "regionName": "Shenic",
-    "minimumLevel": 1
+    "regionName": "Shenic"
   },
   {
-    "version": "model-e.ordinary.r2.v1",
-    "poolId": "model_e.r2.plain.tier2.v1",
+    "version": "model-e.regional.r2.v1",
+    "poolId": "model_e.r2.regional.tier2.v1",
+    "region": 2,
     "equipmentTier": 2,
-    "victoriesPerPerfectDay": 8640,
-    "plainTargetVictories": 360,
-    "sigilVictories": 4320,
-    "discoveryChance": 0.0003,
+    "areaEquipment": {
+      "dropChance": 0.0003,
+      "rank": 0,
+      "rarities": {
+        "common": 0.7,
+        "uncommon": 0.2,
+        "rare": 0.07,
+        "epic": 0.02,
+        "unique": 0.008,
+        "legendary": 0.0018,
+        "legacy": 0.0002
+      },
+      "qualities": {
+        "crude": 0.0,
+        "standard": 0.35,
+        "fine": 0.45,
+        "exceptional": 0.16,
+        "masterpiece": 0.04
+      }
+    },
+    "dungeonEquipment": {
+      "dropChance": 0.2,
+      "rank": 1,
+      "rarities": {
+        "common": 0.4,
+        "uncommon": 0.3,
+        "rare": 0.18,
+        "epic": 0.08,
+        "unique": 0.03,
+        "legendary": 0.009,
+        "legacy": 0.001
+      },
+      "qualities": {
+        "crude": 0.0,
+        "standard": 0.35,
+        "fine": 0.45,
+        "exceptional": 0.16,
+        "masterpiece": 0.04
+      }
+    },
+    "sigilDropChance": 0.0002314814814814815,
     "areas": [
       {
         "areaId": "region_02_area_01"
@@ -81,20 +152,13 @@
     "sigils": [
       {
         "familyId": "tangled_cave",
-        "itemBaseId": "sigil_tangled_cave",
-        "minimumLevel": 50,
-        "requiredQuestId": null,
-        "requiredTowerFloor": 10
+        "itemBaseId": "sigil_tangled_cave"
       },
       {
         "familyId": "great_tree",
-        "itemBaseId": "sigil_great_tree",
-        "minimumLevel": 50,
-        "requiredQuestId": null,
-        "requiredTowerFloor": 10
+        "itemBaseId": "sigil_great_tree"
       }
     ],
-    "regionName": "Meran",
-    "minimumLevel": 50
+    "regionName": "Meran"
   }
 ]

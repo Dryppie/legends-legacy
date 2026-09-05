@@ -32,6 +32,7 @@ import {
   QuestRewardState,
   QuestState,
   QuestStatus,
+  isQuestReadyToTurnIn,
   TRAINING_DAY_QUEST_ID,
 } from '../../../shared/models/quest';
 import {
@@ -388,6 +389,8 @@ export class QuestJournalPageComponent
     return quest.objectives.find((objective) => !objective.isCompleted) ?? null;
   }
 
+  readonly isReadyToTurnIn = isQuestReadyToTurnIn;
+
   isObjectiveAvailable(
     quest: QuestState,
     objective: QuestObjectiveState,
@@ -447,6 +450,8 @@ export class QuestJournalPageComponent
 
   entrySummary(entry: QuestJournalEntry): string {
     const current = this.entryCurrentPart(entry);
+    if (isQuestReadyToTurnIn(current))
+      return 'Ready to turn in: ' + current.title;
     if (!entry.isChain) {
       return (
         (this.requiresChoice(current)

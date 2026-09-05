@@ -27,12 +27,12 @@ public sealed partial class QuestSystemTests
 
         var definitions = provider.GetAll();
 
-        Assert.Equal(29, definitions.Count);
+        Assert.Equal(28, definitions.Count);
         Assert.Equal(QuestConstants.TrainingDay, definitions[0].Id);
         Assert.Equal(4, provider.Get(QuestConstants.TrainingDay).Version);
         Assert.All(definitions, definition => Assert.Equal(definition.Version, provider.GetLatestVersion(definition.Id)));
         Assert.DoesNotContain(definitions, definition => definition.Id.StartsWith("quest.crafting.") || definition.Id.StartsWith("quest.gathering."));
-        Assert.Equal("ModelEPlainTargetEquipped", provider.Get(QuestConstants.RestlessDead).Objectives[0].Type);
+        Assert.Equal("ModelEAreaDropEquipped", provider.Get(QuestConstants.RestlessDead).Objectives[0].Type);
         var soulArchiveEquip = provider.Get(QuestConstants.SoulArchive).Objectives.Single(x => x.Type == "EssenceEquipped");
         Assert.Null(soulArchiveEquip.Filters.EssenceDefinitionId);
         Assert.Null(soulArchiveEquip.Filters.EssenceDefinitionFromChoiceQuestId);
@@ -203,8 +203,8 @@ public sealed partial class QuestSystemTests
     {
         var characterId = Guid.NewGuid();
         var definitions = CreateDefinitions();
-        var definition = definitions.Get(QuestConstants.BloodInTheGrove);
-        var repository = new RecordingQuestRepository(level: 10);
+        var definition = definitions.Get(QuestConstants.RootsRemember);
+        var repository = new RecordingQuestRepository(level: 25);
         repository.Progresses.Add(CreateActiveProgress(characterId, definition, isPinned: true));
         var service = new QuestService(
             repository,
@@ -216,22 +216,22 @@ public sealed partial class QuestSystemTests
 
         await service.ProcessAsync(
             characterId,
-            QuestTrigger.CombatCompleted("region_01_area_02", true),
+            QuestTrigger.CombatCompleted("region_01_area_08", true),
             null,
             "test",
             CancellationToken.None);
         var secureGrove = repository.Progresses.Single(progress =>
                 progress.QuestId == definition.Id).Objectives.Single(objective =>
-                objective.ObjectiveKey == "secure_blood_grove");
+                objective.ObjectiveKey == "cross_old_forest");
         Assert.Equal(1, secureGrove.CurrentAmount);
 
         var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
         var quest = Assert.Single(journal.Quests, candidate =>
             candidate.QuestId == definition.Id);
         Assert.Null(quest.Choice);
-        Assert.Equal("Blood in the Grove", quest.Title);
+        Assert.Equal("The Roots Remember", quest.Title);
         Assert.Contains(quest.Rewards, reward =>
-            reward.ItemBaseId == "item.essence_token.blood_grove");
+            reward.ItemBaseId == "item.essence_token.old_forest");
 
         await service.ProcessAsync(
             characterId,
@@ -368,7 +368,6 @@ public sealed partial class QuestSystemTests
                      QuestConstants.TrainingDay,
                      QuestConstants.SoulArchive,
                      QuestConstants.FirstWeapon,
-                     QuestConstants.ToolsOfTheTrade,
                      QuestConstants.IntoLumoRuins
                  })
         {
@@ -406,7 +405,6 @@ public sealed partial class QuestSystemTests
                      QuestConstants.TrainingDay,
                      QuestConstants.SoulArchive,
                      QuestConstants.FirstWeapon,
-                     QuestConstants.ToolsOfTheTrade,
                      QuestConstants.IntoLumoRuins
                  })
         {
@@ -485,8 +483,9 @@ public sealed partial class QuestSystemTests
             CancellationToken.None);
 
         Assert.Equal(
-            QuestStatus.Completed,
+            QuestStatus.Active,
             repository.Progresses.Single(x => x.QuestId == QuestConstants.FocusedPursuit).Status);
+        await service.TurnInAsync(characterId, QuestConstants.FocusedPursuit, default);
 
         await service.ProcessAsync(
             characterId,
@@ -500,6 +499,9 @@ public sealed partial class QuestSystemTests
             null,
             GameEventTypes.ProphecyCompleted,
             CancellationToken.None);
+
+        await service.TurnInAsync(characterId, QuestConstants.TheArenaCalls, default);
+        await service.TurnInAsync(characterId, QuestConstants.AnOmenFulfilled, default);
 
         Assert.All(
             repository.Progresses.Where(progress =>
@@ -534,7 +536,7 @@ public sealed partial class QuestSystemTests
             {
                 Id = QuestConstants.LumoRuinsAreaId,
                 LevelRequirement = 1,
-                RequiredCompletedQuestId = QuestConstants.ToolsOfTheTrade
+                RequiredCompletedQuestId = QuestConstants.FirstWeapon
             }
         ]);
         var service = new CombatAreaAccessService(areas, repository);
@@ -546,7 +548,7 @@ public sealed partial class QuestSystemTests
         Assert.False(lumo.CanAccess);
         Assert.True(lumo.IsVisible);
         Assert.Equal("quest_requirement", lumo.ReasonCode);
-        Assert.Equal([QuestConstants.ToolsOfTheTrade], lumo.UnmetQuestIds);
+        Assert.Equal([QuestConstants.FirstWeapon], lumo.UnmetQuestIds);
     }
 
     [Fact]
@@ -625,6 +627,9 @@ public sealed partial class QuestSystemTests
         await service.ProcessAsync(characterId, QuestTrigger.DungeonRunCompleted(), null, GameEventTypes.DungeonRunCompleted, CancellationToken.None);
         await service.ProcessAsync(characterId, QuestTrigger.TournamentBattleCompleted(), null, GameEventTypes.TournamentBattleCompleted, CancellationToken.None);
 
+        Assert.All(questIds, questId => Assert.Equal(QuestStatus.Active, GetStatus(questId)));
+        foreach (var questId in questIds)
+            await service.TurnInAsync(characterId, questId, default);
         Assert.All(questIds, questId => Assert.Equal(QuestStatus.Completed, GetStatus(questId)));
 
         QuestStatus GetStatus(string questId) => repository.Progresses.Single(x => x.QuestId == questId).Status;
@@ -745,7 +750,7 @@ public sealed partial class QuestSystemTests
         public Task<bool> HasAnyEssenceInLoadoutAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(EquippedEssences.Count > 0);
 
-        public Task<bool> HasQualifyingEquipmentEquippedAsync(Guid characterId, IReadOnlyCollection<string> itemBaseIds, int? tier, bool mustBeCrafted, bool toolSlotOnly, CancellationToken cancellationToken) =>
+        public Task<bool> HasQualifyingEquipmentEquippedAsync(Guid characterId, IReadOnlyCollection<string> itemBaseIds, int? tier, CancellationToken cancellationToken) =>
             Task.FromResult(false);
 
         public Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(
@@ -778,11 +783,6 @@ public sealed partial class QuestSystemTests
             CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyDictionary<string, string>>(
                 new Dictionary<string, string>());
-
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(
-            string itemBaseId,
-            CancellationToken cancellationToken) =>
-            Task.FromResult<EquipmentBase?>(null);
 
         public Task AddMissingItemBasesAsync(
             IReadOnlyCollection<ItemBase> itemBases,

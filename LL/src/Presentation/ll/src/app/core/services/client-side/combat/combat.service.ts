@@ -103,7 +103,6 @@ export class CombatService {
       startedAt: new Date(),
       outcome: frame.outcome ?? BattleOutcome.Draw,
       loot: [],
-      gatheringRewards: [],
       experienceGained: 0,
       battleType: type,
       entityStats: frame.entityStats,

@@ -160,13 +160,13 @@ describe('InventoryStateService', () => {
       ['getInventory', 'markItemSeen'],
     );
     inventoryApi.getInventory.and.returnValue(
-      of({ inventoryItems: [item('crafted', true), item('old')] }),
+      of({ inventoryItems: [item('discovered', true), item('old')] }),
     );
     inventoryApi.markItemSeen.and.returnValue(
       of({
         data: {
-          itemInstanceId: 'crafted-instance',
-          inventoryItems: [item('crafted'), item('old')],
+          itemInstanceId: 'discovered-instance',
+          inventoryItems: [item('discovered'), item('old')],
         },
         domainVersions: { inventory: 1 },
       }),
@@ -176,18 +176,18 @@ describe('InventoryStateService', () => {
 
     expect(service.newItemCount()).toBe(1);
 
-    service.markSeen('crafted-instance');
+    service.markSeen('discovered-instance');
 
     expect(
-      service.items().find((entry) => entry.id === 'crafted')?.isNew,
+      service.items().find((entry) => entry.id === 'discovered')?.isNew,
     ).toBeFalse();
     expect(service.newItemCount()).toBe(0);
     expect(inventoryApi.markItemSeen).toHaveBeenCalledOnceWith(
-      'crafted-instance',
+      'discovered-instance',
     );
 
     // A second click must not produce a second write.
-    service.markSeen('crafted-instance');
+    service.markSeen('discovered-instance');
     expect(inventoryApi.markItemSeen).toHaveBeenCalledTimes(1);
   });
 
@@ -197,7 +197,7 @@ describe('InventoryStateService', () => {
       ['getInventory', 'markItemSeen'],
     );
     inventoryApi.getInventory.and.returnValue(
-      of({ inventoryItems: [item('crafted', true)] }),
+      of({ inventoryItems: [item('discovered', true)] }),
     );
     inventoryApi.markItemSeen.and.returnValue(
       throwError(() => new Error('offline')),
@@ -205,9 +205,9 @@ describe('InventoryStateService', () => {
 
     const service = createService(inventoryApi);
 
-    expect(() => service.markSeen('crafted-instance')).not.toThrow();
+    expect(() => service.markSeen('discovered-instance')).not.toThrow();
     expect(
-      service.items().find((entry) => entry.id === 'crafted')?.isNew,
+      service.items().find((entry) => entry.id === 'discovered')?.isNew,
     ).toBeFalse();
   });
 

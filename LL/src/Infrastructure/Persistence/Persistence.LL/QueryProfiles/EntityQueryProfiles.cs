@@ -15,14 +15,7 @@ public static class EntityQueryProfiles
                     .ThenInclude(ei => ei.InstanceModifiers)
             .Include(e => e.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ToolAffixes)
-            .Include(e => e.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase)!.AttributeModifiers)
-            .Include(e => e.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase)!.ToolBonuses)
             .Include(e => (e as Creature)!.StatOverrides);
 }

@@ -1,7 +1,7 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Tab } from '../../../../shared/models/sidebar-item';
-import { ProfessionIconComponent } from '../../../../shared/components/professions/profession-icon/profession-icon.component';
+import { FeatureIconComponent } from '../../../../shared/components/feature-icon/feature-icon.component';
 import { NotificationIndicatorComponent } from '../../../../shared/components/notification-indicator/notification-indicator.component';
 import { RouterLink } from '@angular/router';
 
@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
   imports: [
     NgClass,
     NgIf,
-    ProfessionIconComponent,
+    FeatureIconComponent,
     NotificationIndicatorComponent,
     RouterLink,
   ],

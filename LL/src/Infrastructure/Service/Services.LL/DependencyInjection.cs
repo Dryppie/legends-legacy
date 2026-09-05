@@ -17,7 +17,6 @@ using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL.Quests.Events;
-using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Regions;
 using Application.Interfaces.Services.LL.Rewards;
@@ -83,8 +82,6 @@ using Services.LL.Outbox;
 using Services.LL.Players;
 using Services.LL.Prophecies;
 using Services.LL.Quests;
-using Services.LL.Professions;
-using Services.LL.Professions.Craftings;
 using Services.LL.Providers;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
@@ -341,18 +338,6 @@ public static class DependencyInjection
         services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value.ToAbilityThreatTuning());
 
-        services.Configure<CraftingBalanceOptions>(config.GetSection("Crafting:Balance"));
-        services.AddScoped<ITemperingMechanicsService, TemperingMechanicsService>();
-        services.AddScoped<IItemQualityRollService, ItemQualityRollService>();
-        services.AddScoped<IItemPotentialService, ItemPotentialService>();
-        services.AddScoped<IItemStatRollService, ItemStatRollService>();
-        services.AddScoped<IEquipmentRollRangeService, EquipmentRollRangeService>();
-        services.AddSingleton<ICraftingDefinitionProvider>(sp =>
-            new JsonCraftingDefinitionProvider(
-                config,
-                contentRootPath,
-                sp.GetRequiredService<JsonSerializerOptions>()));
-
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
         services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
@@ -378,14 +363,16 @@ public static class DependencyInjection
         services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
         services.AddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(contentRootPath,
             config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.AddSingleton<EquipmentCatalog>(sp => sp.GetRequiredService<StarterEquipmentCatalog>());
         services.AddScoped<IStarterEquipmentService, StarterEquipmentService>();
-        services.AddSingleton(sp => JsonStarterEquipmentCatalog.LoadAcquisition(sp.GetRequiredService<StarterEquipmentCatalog>(),
-            Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "equipment", "equipment-protection-pools.v1.json")));
-        services.AddScoped<IEquipmentAcquisitionEligibility, EquipmentAcquisitionEligibility>();
-        services.AddScoped<IEquipmentAcquisitionService, EquipmentAcquisitionService>();
         services.AddSingleton(sp => JsonStarterEquipmentCatalog.LoadOrdinary(sp.GetRequiredService<StarterEquipmentCatalog>(),
             Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "equipment", "equipment-ordinary.v1.json")));
-        services.AddScoped<ICombatAcquisitionService, CombatAcquisitionService>();
+        services.AddScoped<IEquipmentAcquisitionService, EquipmentAcquisitionService>();
+        services.AddSingleton(_ => JsonEquipmentUpgradePrices.Load(Path.Combine(contentRootPath,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-upgrades.v1.json")));
+        services.AddScoped<IEquipmentUpgradeService, EquipmentUpgradeService>();
+        services.AddSingleton(sp => JsonEquipmentBlueprintCatalog.Load(Path.Combine(contentRootPath,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-blueprints.v1.json"), sp.GetRequiredService<StarterEquipmentCatalog>()));
         services.AddScoped<ICombatAcquisitionRewardProcessor, CombatAcquisitionRewardProcessor>();
 
 
@@ -442,6 +429,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<PowerBuildSnapshotFactory>();
+        services.AddScoped<EquipmentReferenceBuildFactory>();
         services.AddScoped<CanonicalEquipmentBuildFactory>();
         services.AddScoped<PowerRatingService>();
         services.AddScoped<IPowerRatingService>(sp => sp.GetRequiredService<PowerRatingService>());
@@ -650,8 +638,6 @@ public static class DependencyInjection
         services.AddScoped<ICombatAreaAccessService, CombatAreaAccessService>();
         services.AddScoped<IQuestEncounterService, QuestEncounterService>();
         services.AddScoped<IEquipmentQuestSupport, EquipmentQuestSupport>();
-        services.AddScoped<IPlainEquipmentRecoveryService, PlainEquipmentRecoveryService>();
-
         services.AddSingleton(_ => new SoulstoneUpgradeDefinitionProvider(contentRootPath));
 
         services.AddJsonDungeonDefinitions(config, contentRootPath);

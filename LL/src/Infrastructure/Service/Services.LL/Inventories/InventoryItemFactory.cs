@@ -1,7 +1,6 @@
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Items.EssenceItems;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
@@ -75,26 +74,13 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
 
     private EquipmentInstance CreateEquipmentInstance(EquipmentBase itemBase)
     {
-        var instance = new EquipmentInstance
+        return new EquipmentInstance
         {
             Id = NewGuid(),
             ItemBaseId = itemBase.Id,
             ItemBase = itemBase,
             Rarity = itemBase.Rarity
         };
-
-        if (itemBase.EquipmentType == EquipmentType.Tool)
-        {
-            instance.Potential = null;
-            instance.ToolAffixes = ToolAffixGenerator.RollAffixes(instance.Rarity, _resolutionRandom);
-
-            foreach (var affix in instance.ToolAffixes)
-            {
-                affix.EquipmentInstanceId = instance.Id;
-            }
-        }
-
-        return instance;
     }
 
     private Guid NewGuid() => _resolutionRandom?.NextGuid() ?? Guid.NewGuid();

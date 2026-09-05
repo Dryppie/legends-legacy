@@ -46,7 +46,7 @@ public sealed class CombatServiceBatchingTests
         Assert.Equal(250, Assert.Single(session.CombatResult.Loot).Quantity);
         Assert.Equal(
             250,
-            Assert.Single(session.CombatSummary.RewardBreakdown.CraftingItems).Quantity);
+            Assert.Single(session.CombatSummary.RewardBreakdown.MiscellaneousItems).Quantity);
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public sealed class CombatServiceBatchingTests
                     TotalExperience = count,
                     RewardBreakdown = new CombatRewardBreakdown
                     {
-                        CraftingItems = [item]
+                        MiscellaneousItems = [item]
                     }
                 }
             });

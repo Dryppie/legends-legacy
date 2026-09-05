@@ -93,7 +93,6 @@ export class AchievementsComponent implements OnInit, OnDestroy {
     'Combat',
     'Essences',
     'Dungeons',
-    'Crafting',
     'Colosseum',
     'Guild',
     'Prophecies',

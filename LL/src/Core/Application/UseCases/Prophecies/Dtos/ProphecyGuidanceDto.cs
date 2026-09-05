@@ -23,6 +23,4 @@ public static class ProphecyGuidanceDestination
     public const string Dungeons = nameof(Dungeons);
     public const string Essences = nameof(Essences);
     public const string SoulArchive = nameof(SoulArchive);
-    public const string Gathering = nameof(Gathering);
-    public const string Crafting = nameof(Crafting);
 }

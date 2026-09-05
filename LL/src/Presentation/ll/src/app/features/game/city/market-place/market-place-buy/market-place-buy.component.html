@@ -64,6 +64,14 @@
           (selection)="setEquipmentTypeSelection($event)"
         ></app-dropdown>
 
+        <app-dropdown
+          label="Any quality"
+          [value]="quality()"
+          [options]="qualityOptions"
+          [selectedValue]="quality()"
+          (selection)="setQualitySelection($event)"
+        ></app-dropdown>
+
 
         <input
           type="number"
@@ -146,8 +154,8 @@
           *ngIf="equipment.progression as model"
           class="grid grid-cols-2 gap-2 text-sm"
         >
-          <dt class="text-zinc-400">Tier / Rank</dt>
-          <dd class="text-right">{{ equipment.tier }} / {{ model.rank }}</dd>
+          <dt class="text-zinc-400">Tier / Quality / Rank</dt>
+          <dd class="text-right">{{ equipment.tier }} / {{ equipment.quality }} / {{ model.rank }}</dd>
           <dt class="text-zinc-400">Native style</dt>
           <dd class="text-right">{{ styleLabel(model.nativeStyleId) }}</dd>
           <dt class="text-zinc-400">Active style</dt>

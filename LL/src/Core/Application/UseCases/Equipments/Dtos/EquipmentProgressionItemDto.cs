@@ -1,6 +1,7 @@
 using Application.Common.Mappings;
 using AutoMapper;
 using Domain.Models.Attributes;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Progression;
 
 namespace Application.UseCases.Equipments.Dtos;
@@ -15,6 +16,8 @@ public sealed class EquipmentProgressionItemDto : IMapFrom<EquipmentData>
     public int Rank { get; set; }
     public int BalanceVersion { get; set; }
     public EquipmentRarity Rarity { get; set; }
+    public ItemQuality Quality { get; set; }
+    public double AttributeRollMultiplier { get; set; }
     public string? ActiveStyleId { get; set; }
     public string? EquipmentSetId { get; set; }
     public EquipmentOwnershipKind Ownership { get; set; }
@@ -26,6 +29,8 @@ public sealed class EquipmentProgressionItemDto : IMapFrom<EquipmentData>
         .ForMember(x => x.Tier, o => o.MapFrom(x => x.State.Tier))
         .ForMember(x => x.Rank, o => o.MapFrom(x => x.State.Rank))
         .ForMember(x => x.BalanceVersion, o => o.MapFrom(x => x.State.BalanceVersion))
+        .ForMember(x => x.Quality, o => o.MapFrom(x => x.State.Quality))
+        .ForMember(x => x.AttributeRollMultiplier, o => o.MapFrom(x => x.State.AttributeRollMultiplier))
         .ForMember(x => x.ActiveStyleId, o => o.MapFrom(x => x.State.ActiveStyleId))
         .ForMember(x => x.Ownership, o => o.MapFrom(x => x.State.Ownership.Kind));
 }

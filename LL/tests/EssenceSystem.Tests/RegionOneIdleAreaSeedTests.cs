@@ -1,7 +1,6 @@
 using Domain.Models.Essences;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Quests;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;

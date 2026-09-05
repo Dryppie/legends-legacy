@@ -37,28 +37,9 @@ public sealed partial class LiveOpsPlayerSupportSnapshotService
                 DescribeEquipment(item.ProgressionData));
         }).ToArray();
 
-        var pendingQuery = db.EquipmentProtectionReceipts.AsNoTracking()
-            .Where(x => x.CharacterId == target.CharacterId && x.ClaimedAtUtc == null);
-        var pendingCount = await pendingQuery.CountAsync(ct);
-        var pending = await pendingQuery.OrderBy(x => x.RunId).Take(limit).ToListAsync(ct);
-        var protection = await db.EquipmentProtectionProgress.AsNoTracking()
-            .Where(x => x.CharacterId == target.CharacterId).OrderBy(x => x.PoolId).Take(limit + 1).ToListAsync(ct);
-        var ordinary = await db.CombatAcquisitionProgress.AsNoTracking()
-            .Where(x => x.CharacterId == target.CharacterId).OrderBy(x => x.PoolId).Take(limit + 1).ToListAsync(ct);
         var dungeonRun = await LoadEquipmentDungeonRunAsync(db, target.CharacterId, limit, ct);
 
-        return new(limit, equipmentCount, pendingCount,
-            protection.Count > limit || ordinary.Count > limit,
-            mapped,
-            pending.Select(x => new EquipmentSupportPendingRewardDto(x.RunId, x.Outcome.PoolId, x.Outcome.SecuredAtUtc,
-                x.Outcome.Equipment is { } data
-                    ? new(data.State.Id, data.ItemBaseId, data.DisplayName, ["Pending dungeon reward"], DescribeEquipment(data)) : null)).ToArray(),
-            protection.Take(limit).Select(x => new EquipmentSupportProtectionDto(x.PoolId, x.SelectedDefinitionId,
-                x.CompletionsWithoutMatch, x.Revision)).ToArray(),
-            ordinary.Take(limit).Select(x => new EquipmentSupportOrdinaryDto(x.PoolId, x.HasEnteredRegion,
-                x.Plain?.Equipment.State.DefinitionId, x.PlainVictories, x.Plain?.RequiredVictories,
-                x.Sigil?.FamilyId, x.SigilVictories, x.Sigil?.RequiredVictories, x.Revision,
-                x.LastEncounterAtUtc)).ToArray())
+        return new(limit, equipmentCount, mapped)
         { DungeonRun = dungeonRun };
     }
 

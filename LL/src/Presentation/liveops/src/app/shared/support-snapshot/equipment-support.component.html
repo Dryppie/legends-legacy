@@ -1,8 +1,8 @@
 <header><div><span>Equipment and acquisition</span><small>{{ section.source }} · {{ section.fetchedAtUtc | date: 'mediumTime' }}</small></div><strong>{{ section.isAvailable ? 'Available' : 'Unavailable' }}</strong></header>
 @if (section.data; as data) {
-  <p class="support-note">Read-only saved state. Includes inventory, equipped items, marketplace escrow and current guild loans. Lists are limited to {{ data.rowLimit }} rows each, ordered by identifier.</p>
-  <div class="support-metrics"><div><span>Equipment instances</span><strong>{{ data.equipmentCount }}</strong></div><div><span>Unclaimed protected rewards</span><strong>{{ data.pendingRewardCount }}</strong></div></div>
-  @if (data.equipmentCount > data.items.length || data.pendingRewardCount > data.pendingRewards.length || data.progressTruncated) {
+  <p class="support-note">Read-only saved state. Includes inventory, equipped items, marketplace escrow, current guild loans, and the retained dungeon run. Lists are limited to {{ data.rowLimit }} rows each, ordered by identifier.</p>
+  <div class="support-metrics"><div><span>Equipment instances</span><strong>{{ data.equipmentCount }}</strong></div></div>
+  @if (data.equipmentCount > data.items.length) {
     <p class="support-unavailable">This snapshot is truncated. Displayed rows are a bounded sample, not complete holdings or history.</p>
   }
   <section><h3>Equipment holdings</h3>
@@ -23,7 +23,7 @@
   </section>
   <section data-testid="dungeon-equipment-support"><h3>Retained dungeon run</h3>
     @if (data.dungeonRun; as run) {
-      <p class="support-note">Saved run evidence, read without advancing or settling combat. Targets are possible rewards, not owned equipment. Reward rows and the protected receipt may describe the same award; do not add them together. This is not a complete loot/currency total or claim preview.</p>
+      <p class="support-note">Saved run rewards, read without advancing, settling, or claiming the run.</p>
       <dl class="support-definition">
         <div><dt>Dungeon</dt><dd>{{ run.name }} · <code>{{ run.dungeonId }}</code></dd></div>
         <div><dt>Run / status</dt><dd><code>{{ run.runId }}</code> · {{ run.status }}</dd></div>
@@ -32,75 +32,22 @@
         <div><dt>Completed</dt><dd>{{ run.completedAtUtc ? (run.completedAtUtc | date: 'medium') : 'Not recorded' }}</dd></div>
         <div><dt>Run rewards claimed</dt><dd>{{ run.rewardsClaimedAtUtc ? (run.rewardsClaimedAtUtc | date: 'medium') : 'Not recorded' }}</dd></div>
       </dl>
-      <details class="equipment-support-detail" open><summary>Frozen equipment commitment</summary>
-        @if (run.commitment; as commitment) {
-          <dl class="support-definition">
-            <div><dt>Saved owner / run</dt><dd><code>{{ commitment.characterId }}</code> / <code>{{ commitment.runId }}</code></dd></div>
-            <div><dt>Saved dungeon / pool</dt><dd>{{ commitment.dungeonId }} / {{ commitment.poolId }}</dd></div>
-            <div><dt>Terms at entry</dt><dd>Difficulty {{ commitment.difficulty }} · {{ commitment.matchingChance | percent: '1.0-4' }} matching chance · {{ commitment.guaranteeCompletions }} completion threshold</dd></div>
-          </dl>
-          @if (commitment.target; as target) {
-            <p><strong>{{ target.name }}</strong> · Frozen target; not an award</p>
-            <dl class="support-definition">
-              <div><dt>Reserved instance / base</dt><dd><code>{{ target.instanceId }}</code> / {{ target.itemBaseId }}</dd></div>
-              <div><dt>Frozen identity</dt><dd>{{ target.progression?.definitionId }} / {{ target.progression?.archetypeId }}</dd></div>
-              <div><dt>Frozen equipment</dt><dd>Tier {{ target.progression?.tier }} · {{ target.progression?.rarity }} · Rank {{ target.progression?.rank }} · Balance {{ target.progression?.balanceVersion }}</dd></div>
-              <div><dt>Native / active style</dt><dd>{{ target.progression?.nativeStyleId || 'Plain' }} / {{ target.progression?.activeStyleId || 'Plain' }}</dd></div>
-              <div><dt>Template ownership</dt><dd>{{ target.progression?.ownership }}</dd></div>
-            </dl>
-            <p class="support-note">The recorded outcome determines final ownership. Current target selection and content changes do not replace these saved entry terms.</p>
-          } @else { <p class="support-empty">No equipment target was committed.</p> }
-        } @else { <p class="support-empty">No equipment commitment recorded for this run. No current target or cohort is inferred.</p> }
-      </details>
-      <details class="equipment-support-detail" open><summary>Recorded protected completion</summary>
-        @if (run.receipt; as receipt) {
-          <dl class="support-definition">
-            <div><dt>Receipt run / pool</dt><dd><code>{{ receipt.runId }}</code> / {{ receipt.poolId }}</dd></div>
-            <div><dt>Secured</dt><dd>{{ receipt.securedAtUtc | date: 'medium' }}</dd></div>
-            <div><dt>Receipt claimed</dt><dd>{{ receipt.claimedAtUtc ? (receipt.claimedAtUtc | date: 'medium') : 'Unclaimed' }}</dd></div>
-            <div><dt>Recorded progress change</dt><dd>{{ receipt.previousProgress }} → {{ receipt.progress }}</dd></div>
-          </dl>
-          @if (receipt.equipment; as award) {
-            <p><strong>{{ award.name }}</strong> · <code>{{ award.instanceId }}</code></p>
-            <p>Rank {{ award.progression?.rank }} · Balance {{ award.progression?.balanceVersion }} · {{ award.progression?.activeStyleId || 'Plain' }} · {{ award.progression?.ownership }}</p>
-          } @else { <p class="support-empty">This receipt records no equipment award.</p> }
-        } @else { <p class="support-empty">No protected completion receipt recorded for this run.</p> }
-      </details>
-      <details class="equipment-support-detail"><summary>Saved run reward rows ({{ run.rewardRows.length }} of {{ run.rewardRowCount }})</summary>
+      <details class="equipment-support-detail" open><summary>Saved run reward rows ({{ run.rewardRows.length }} of {{ run.rewardRowCount }})</summary>
         @if (run.rewardRowCount > run.rewardRows.length) { <p class="support-unavailable">Run reward rows are truncated to {{ data.rowLimit }}. This is a bounded sample.</p> }
         <div class="support-list">
           @for (reward of run.rewardRows; track reward.rewardRowId) {
             <div><div><strong>{{ reward.name }} × {{ reward.quantity }}</strong>
               <small>{{ reward.itemType }} · {{ reward.itemBaseId }} · {{ reward.source }}</small>
               <code>Reward row {{ reward.rewardRowId }}</code>
-              @if (reward.equipment; as item) { <small>Saved instance {{ item.instanceId }} · {{ item.progression?.definitionId }} · Rank {{ item.progression?.rank }} · Balance {{ item.progression?.balanceVersion }} · {{ item.progression?.ownership }}</small> }
+              @if (reward.equipment; as item) { <small>Saved instance {{ item.instanceId }} · {{ item.progression?.definitionId }} · {{ item.progression?.rarity }} · Rank {{ item.progression?.rank }} · {{ item.progression?.ownership }}</small> }
             </div></div>
           } @empty { <p class="support-empty">No saved reward rows for this run.</p> }
         </div>
       </details>
     } @else if (data.dungeonRun === null) {
-      <p class="support-empty">No retained dungeon run. Unclaimed receipts can still appear below after a run is removed.</p>
+      <p class="support-empty">No retained dungeon run.</p>
     } @else {
       <p class="support-note">Dungeon run inspection was not included in this response.</p>
     }
   </section>
-  <div class="support-split-list">
-    <section><h3>Dungeon protection</h3><div class="support-list">
-      @for (pool of data.protection; track pool.poolId) {
-        <div><div><strong>{{ pool.poolId }}</strong><small>Target: {{ pool.targetDefinitionId || 'None selected' }}</small><small>{{ pool.completionsWithoutMatch }} completions without a match · Revision {{ pool.revision }}</small></div></div>
-      } @empty { <p class="support-empty">No saved dungeon protection progress.</p> }
-    </div></section>
-    <section><h3>Ordinary acquisition</h3><div class="support-list">
-      @for (pool of data.ordinary; track pool.poolId) {
-        <div><div><strong>{{ pool.poolId }}</strong><small>Target: {{ pool.targetDefinitionId || 'None selected' }} · {{ pool.plainVictories }} / {{ pool.requiredPlainVictories ?? '—' }} victories</small><small>Sigil: {{ pool.sigilFamilyId || 'None selected' }} · {{ pool.sigilVictories }} / {{ pool.requiredSigilVictories ?? '—' }} victories</small><small>Revision {{ pool.revision }}</small><small>Last encounter: {{ pool.lastEncounterAtUtc ? (pool.lastEncounterAtUtc | date: 'medium') : 'None recorded' }}</small></div></div>
-      } @empty { <p class="support-empty">No saved ordinary acquisition progress.</p> }
-    </div></section>
-  </div>
-  <section><h3>Unclaimed protected rewards</h3><div class="support-list">
-    @for (reward of data.pendingRewards; track reward.runId) {
-      <div><div><strong>{{ reward.equipment?.name || 'No equipment award' }}</strong><small>{{ reward.poolId }} · Secured {{ reward.securedAtUtc | date: 'medium' }}</small><code>Run {{ reward.runId }}</code>
-        @if (reward.equipment; as item) { <small>Instance {{ item.instanceId }} · Rank {{ item.progression?.rank }} · {{ item.progression?.activeStyleId || 'Plain' }} · {{ item.progression?.ownership }}</small> }
-      </div></div>
-    } @empty { <p class="support-empty">No unclaimed protected reward receipts.</p> }
-  </div></section>
 } @else { <p class="support-unavailable">{{ section.message }}</p> }

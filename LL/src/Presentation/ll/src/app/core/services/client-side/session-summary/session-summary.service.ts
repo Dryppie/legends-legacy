@@ -101,9 +101,9 @@ export class SessionSummaryService {
   ): CombatRewardBreakdown {
     return {
       powerItems: this.mergeItems(first?.powerItems, second?.powerItems),
-      craftingItems: this.mergeItems(
-        first?.craftingItems,
-        second?.craftingItems,
+      miscellaneousItems: this.mergeItems(
+        first?.miscellaneousItems,
+        second?.miscellaneousItems,
       ),
       essenceItems: this.mergeItems(first?.essenceItems, second?.essenceItems),
       dungeonAccessItems: this.mergeItems(

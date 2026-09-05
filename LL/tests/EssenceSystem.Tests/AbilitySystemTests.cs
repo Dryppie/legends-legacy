@@ -16,8 +16,8 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Combat;
 using Services.LL.Combat.Engine;
 using Services.LL.Essences;
+using Services.LL.Items;
 using Services.LL.PowerRatings;
-using Services.LL.Professions.Craftings;
 using Services.LL.Interfaces.Combat.Resolution;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -147,12 +147,15 @@ public sealed class AbilitySystemTests
         var essenceResolver = new EssenceSystemService(
             null!, null!, null!, essenceDefinitions, creatureEssences,
             null!, null!, null!, null!, null!, null!);
-        var balance = Options.Create(new CraftingBalanceOptions());
+        var equipmentCatalog = JsonStarterEquipmentCatalog.Load(
+            Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
+        var referenceBuilds = new EquipmentReferenceBuildFactory(
+            equipmentCatalog,
+            essenceDefinitions,
+            essenceResolver);
         var canonicalBuilds = new CanonicalEquipmentBuildFactory(
-            new JsonCraftingDefinitionProvider(configuration, contentRoot, jsonOptions),
-            new ItemStatRollService(balance),
-            new TemperingMechanicsService(balance),
-            new ItemPotentialService(balance),
+            equipmentCatalog,
+            referenceBuilds,
             essenceResolver,
             essenceDefinitions);
         var simulator = new AbilityBalanceSimulator(
@@ -168,11 +171,11 @@ public sealed class AbilitySystemTests
             TopResults: 2,
             CandidatePoolSize: 2,
             CandidateTeams: null,
-            EquipmentTier: 3,
+            EquipmentTier: 2,
             EquipmentRarity: "Rare",
             EquipmentProfile: "Offense"));
 
-        Assert.Equal(3, report.EquipmentTier);
+        Assert.Equal(2, report.EquipmentTier);
         Assert.Equal("Rare", report.EquipmentRarity);
         Assert.Equal("Offense", report.EquipmentProfile);
         Assert.True(report.ParticipantAttributes.Count > 3);
@@ -2111,12 +2114,13 @@ public sealed class AbilitySystemTests
             configuration,
             contentRoot,
             options).GetCatalog();
-        var crafting = new JsonCraftingDefinitionProvider(
-            configuration,
+        var equipment = JsonStarterEquipmentCatalog.Load(Path.Combine(
             contentRoot,
-            options);
+            "Data",
+            "equipment",
+            "equipment-starters.v1.json"));
 
-        var grantedAbilityIds = crafting.GetEquipmentSets()
+        var grantedAbilityIds = equipment.EquipmentSets
             .SelectMany(set => set.Bonuses)
             .SelectMany(bonus => bonus.GrantedAbilityIds)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -7788,8 +7792,8 @@ public sealed class AbilitySystemTests
         friendly.EquippedEssences.Clear();
         friendly.Equipment =
         [
-            new EquipmentInstance { Id = Guid.NewGuid(), EquipmentSetId = "set_hive" },
-            new EquipmentInstance { Id = Guid.NewGuid(), EquipmentSetId = "set_hive" }
+            ProgressionTestEquipment.Create("set_hive"),
+            ProgressionTestEquipment.Create("set_hive")
         ];
         IncreaseMaxHealth(friendly, 10_000);
         IncreaseMaxHealth(runtime.HostileParticipants.Single().Combatant, 10_000);
@@ -7797,9 +7801,11 @@ public sealed class AbilitySystemTests
         var configuration = CreateConfig();
         var contentRoot = FindApiContentRoot();
         var jsonOptions = CreateJsonOptions();
+        var equipmentCatalog = JsonStarterEquipmentCatalog.Load(
+            Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
         var executor = new CombatEngineExecutor(
             new JsonAbilityCatalogProvider(configuration, contentRoot, jsonOptions),
-            craftingDefinitions: new JsonCraftingDefinitionProvider(configuration, contentRoot, jsonOptions));
+            equipmentCatalog: equipmentCatalog);
 
         var result = await executor.ExecuteSimulationAsync(
             runtime,

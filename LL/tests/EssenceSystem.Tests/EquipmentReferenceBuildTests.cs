@@ -16,7 +16,6 @@ using Services.LL.Essences;
 using Services.LL.Items;
 using Services.LL.Interfaces.Combat.Resolution;
 using Services.LL.PowerRatings;
-using Services.LL.Professions.Craftings;
 
 namespace EssenceSystem.Tests;
 
@@ -35,9 +34,8 @@ public sealed class EquipmentReferenceBuildTests
         var catalog = JsonStarterEquipmentCatalog.Load(Path.Combine(ContentRoot, "Data", "equipment", "equipment-starters.v1.json"));
         var essences = new JsonEssenceDefinitionRepository(config, ContentRoot, json, new EssenceDefinitionValidator());
         var loadouts = new CatalogEssenceLoadoutResolver(essences);
-        var items = new JsonCraftingDefinitionProvider(config, ContentRoot, json);
-        return (new(catalog, items, essences, loadouts), catalog,
-            new CombatSetupService(null!, loadouts, essences, null!, craftingDefinitions: items));
+        return (new(catalog, essences, loadouts), catalog,
+            new CombatSetupService(null!, loadouts, essences, null!, equipmentCatalog: catalog));
     }
 
     [Fact]
@@ -57,8 +55,6 @@ public sealed class EquipmentReferenceBuildTests
                 var data = Assert.IsType<EquipmentData>(item.ProgressionData);
                 Assert.Equal(rank, data.State.Rank);
                 Assert.Equal(1, data.State.Tier);
-                Assert.Null(item.BaseRecipeId);
-                Assert.Null(item.Potential);
                 Assert.Empty(item.BaseModifiers);
                 Assert.Equal(build.Character.Id, data.State.Ownership.OwnerId);
                 Assert.Equal(catalog.Evaluator.Evaluate(data.EquipmentState).Stats.OrderBy(x => x.Key), data.Stats.OrderBy(x => x.Key));

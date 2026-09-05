@@ -19,11 +19,10 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
         var starters = new List<StarterEquipmentAccess>();
         if (flags.StarterAcquisitionEnabled)
         {
-            foreach (var kind in Enum.GetValues<StarterEquipmentGrantKind>())
+            foreach (var kind in new[] { StarterEquipmentGrantKind.FirstWeapon })
             {
                 var grant = await repository.GetGrantAsync(characterId, kind, cancellationToken);
-                var prerequisite = kind == StarterEquipmentGrantKind.FirstWeapon
-                    ? "quest.onboarding.soul_archive" : "quest.onboarding.first_weapon";
+                const string prerequisite = "quest.onboarding.soul_archive";
                 var progress = await quests.GetProgressAsync(characterId, prerequisite, cancellationToken);
                 var reason = grant is not null ? "Already claimed."
                     : progress?.Status != QuestStatus.Completed ? "Complete the preceding onboarding quest first."
@@ -33,11 +32,13 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
             }
         }
         return new(flags.StarterAcquisitionEnabled, flags.ProtectedAcquisitionEnabled,
-            flags.BaselineRecoveryEnabled, flags.OrdinaryAcquisitionEnabled, starters);
+            flags.OrdinaryAcquisitionEnabled, starters);
     }
 
     public IReadOnlyList<StarterEquipmentOption> GetOptions() =>
-        options.Value.StarterAcquisitionEnabled ? catalog.Options : [];
+        options.Value.StarterAcquisitionEnabled
+            ? catalog.Options.Where(x => x.EquipmentType == EquipmentType.OneHanded).ToArray()
+            : [];
 
     public async Task<StarterEquipmentClaimResult> ClaimAsync(Guid characterId, StarterEquipmentGrantKind kind,
         IReadOnlyList<string> definitionIds, CancellationToken cancellationToken)
@@ -50,7 +51,7 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
         // Read the frozen grant before consulting mutable content or quest requirements.
         var existing = await repository.GetGrantAsync(characterId, kind, cancellationToken);
         if (existing is not null)
-            return kind == StarterEquipmentGrantKind.ReadyForRoad && definitionIds.Count == 0 || existing.MatchesSelection(definitionIds)
+            return existing.MatchesSelection(definitionIds)
                 ? new(existing, null)
                 : StarterEquipmentClaimResult.Fail("You have already chosen this starter reward.");
 
@@ -58,8 +59,7 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
         try { selection = catalog.Select(kind, definitionIds); }
         catch (ArgumentException ex) { return StarterEquipmentClaimResult.Fail(ex.Message); }
 
-        var prerequisite = kind == StarterEquipmentGrantKind.FirstWeapon
-            ? "quest.onboarding.soul_archive" : "quest.onboarding.first_weapon";
+        const string prerequisite = "quest.onboarding.soul_archive";
         var progress = await quests.GetProgressAsync(characterId, prerequisite, cancellationToken);
         if (progress?.Status != QuestStatus.Completed)
             return StarterEquipmentClaimResult.Fail("Complete the preceding onboarding quest first.");
@@ -67,8 +67,7 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
             return StarterEquipmentClaimResult.Fail("Character inventory was not found.");
 
         var now = DateTimeOffset.UtcNow;
-        var source = kind == StarterEquipmentGrantKind.FirstWeapon
-            ? "quest.onboarding.first_weapon" : "quest.onboarding.tools_of_trade";
+        const string source = "quest.onboarding.first_weapon";
         var descriptors = selection.Select((id, index) => EquipmentData.Create(
             EquipmentState.Award(Guid.NewGuid(), catalog.Evaluator, id, 1, 0,
                 new(EquipmentAwardKind.QuestReward, source, $"{characterId:N}:{kind}:{index}"),
@@ -88,6 +87,6 @@ public sealed class StarterEquipmentService(StarterEquipmentCatalog catalog, ISt
         // ICommand owns the transaction and character lock. Writer, receipt and outbox share that transaction.
         repository.AddGrant(grant);
         await rewards.AddLootAsync(characterId, items, EquipmentKeys.StarterSource, source, cancellationToken);
-        return new(grant, null);
+        return new(grant, null) { Rewards = items };
     }
 }

@@ -63,8 +63,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     Dungeons: ['/game/world/dungeon'],
     Essences: ['/game/character/essences'],
     SoulArchive: ['/game/character/soulstone-archive'],
-    Gathering: ['/game/world/shenic'],
-    Crafting: ['/game/professions/crafting'],
   };
   readonly overview = signal<PropheciesOverviewDto | null>(null);
   readonly loading = signal(false);

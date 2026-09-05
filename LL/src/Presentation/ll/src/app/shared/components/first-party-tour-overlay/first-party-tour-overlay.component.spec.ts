@@ -81,13 +81,13 @@ describe('FirstPartyTourOverlayComponent', () => {
   });
 
   it('shows Back for a tutorial step that opts in', () => {
-    expect(component.showBackButton(viewState('tutorial-crafting', true))).toBe(
+    expect(component.showBackButton(viewState('tutorial-inventory', true))).toBe(
       true,
     );
   });
 
   it('keeps Back hidden for tutorial steps that do not opt in', () => {
-    expect(component.showBackButton(viewState('tutorial-crafting'))).toBe(
+    expect(component.showBackButton(viewState('tutorial-inventory'))).toBe(
       false,
     );
   });
@@ -150,7 +150,7 @@ describe('FirstPartyTourOverlayComponent', () => {
     spyOnProperty(window, 'innerWidth').and.returnValue(390);
     spyOnProperty(window, 'innerHeight').and.returnValue(800);
 
-    const tour = viewState('tutorial-crafting');
+    const tour = viewState('tutorial-inventory');
     tour.step.kind = 'click';
     tour.step.actionSelector = '[data-tour=recipe-action]';
 

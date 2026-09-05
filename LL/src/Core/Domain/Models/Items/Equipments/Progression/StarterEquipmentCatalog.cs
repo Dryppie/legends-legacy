@@ -1,4 +1,52 @@
+using Domain.Models.Items.Equipments.Sets;
+
 namespace Domain.Models.Items.Equipments.Progression;
+
+/// <summary>
+/// Authoritative runtime equipment content. This deliberately owns combat-facing
+/// definitions so live equipment never needs to consult the retired crafting catalog.
+/// </summary>
+public class EquipmentCatalog
+{
+    private readonly IReadOnlyDictionary<string, EquipmentBase> _equipmentBases;
+    private readonly IReadOnlyDictionary<string, EquipmentSetDefinition> _equipmentSets;
+
+    public EquipmentCatalog(
+        EquipmentEvaluator evaluator,
+        IEnumerable<EquipmentStyle>? styles = null,
+        IEnumerable<EquipmentSetDefinition>? equipmentSets = null,
+        IReadOnlyDictionary<string, EquipmentBase>? equipmentBases = null)
+    {
+        Evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
+        Styles = Array.AsReadOnly((styles ?? []).ToArray());
+        _equipmentSets = (equipmentSets ?? []).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        _equipmentBases = equipmentBases is null
+            ? new Dictionary<string, EquipmentBase>(StringComparer.OrdinalIgnoreCase)
+            : new Dictionary<string, EquipmentBase>(equipmentBases, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var style in Styles)
+        {
+            if (style.EquipmentSetId is not null && !_equipmentSets.ContainsKey(style.EquipmentSetId))
+                throw new ArgumentException(
+                    $"Equipment style '{style.Id}' references unknown set '{style.EquipmentSetId}'.",
+                    nameof(equipmentSets));
+        }
+    }
+
+    public EquipmentEvaluator Evaluator { get; }
+    public IReadOnlyList<EquipmentStyle> Styles { get; }
+    public IReadOnlyList<EquipmentSetDefinition> EquipmentSets =>
+        _equipmentSets.Values.OrderBy(x => x.Id, StringComparer.Ordinal).ToArray();
+    public IReadOnlyDictionary<string, EquipmentBase> EquipmentBases => _equipmentBases;
+
+    public EquipmentSetDefinition? GetEquipmentSet(string equipmentSetId) =>
+        _equipmentSets.GetValueOrDefault(equipmentSetId);
+
+    public EquipmentBase GetEquipmentBase(string itemBaseId) =>
+        _equipmentBases.TryGetValue(itemBaseId, out var itemBase)
+            ? itemBase
+            : throw new ArgumentException($"Unknown equipment item base '{itemBaseId}'.", nameof(itemBaseId));
+}
 
 public sealed record StarterEquipmentOption(string DefinitionId, string Name, EquipmentType EquipmentType)
 {
@@ -6,15 +54,18 @@ public sealed record StarterEquipmentOption(string DefinitionId, string Name, Eq
         new Dictionary<Domain.Models.Attributes.AttributeType, float>();
 }
 
-public sealed class StarterEquipmentCatalog
+public sealed class StarterEquipmentCatalog : EquipmentCatalog
 {
     private readonly IReadOnlyDictionary<string, StarterEquipmentOption> _options;
-    private readonly IReadOnlyList<string> _accessories;
 
-    public StarterEquipmentCatalog(EquipmentEvaluator evaluator, IEnumerable<string> definitionIds, IEnumerable<EquipmentStyle>? styles = null)
+    public StarterEquipmentCatalog(
+        EquipmentEvaluator evaluator,
+        IEnumerable<string> definitionIds,
+        IEnumerable<EquipmentStyle>? styles = null,
+        IEnumerable<EquipmentSetDefinition>? equipmentSets = null,
+        IReadOnlyDictionary<string, EquipmentBase>? equipmentBases = null)
+        : base(evaluator, styles, equipmentSets, equipmentBases)
     {
-        Evaluator = evaluator;
-        Styles = Array.AsReadOnly((styles ?? []).ToArray());
         _options = definitionIds.Select(id => evaluator.Evaluate(id, 1, 0, null))
             .Select(x =>
             {
@@ -22,15 +73,11 @@ public sealed class StarterEquipmentCatalog
                     throw new ArgumentException("Starter definitions must be plain Common equipment.");
                 return new StarterEquipmentOption(x.Definition.Id, x.Definition.Name, x.Archetype.EquipmentType) { Stats = x.Stats };
             }).ToDictionary(x => x.DefinitionId, StringComparer.Ordinal);
-        _accessories = new[] { EquipmentType.Ring, EquipmentType.Necklace, EquipmentType.Relic }
-            .Select(type => _options.Values.Single(x => x.EquipmentType == type).DefinitionId).ToArray();
         foreach (var type in new[] { EquipmentType.Head, EquipmentType.Chest, EquipmentType.Legs, EquipmentType.OneHanded, EquipmentType.TwoHanded, EquipmentType.OffHand })
             if (!_options.Values.Any(x => x.EquipmentType == type))
                 throw new ArgumentException($"Missing starter equipment type {type}.");
     }
 
-    public EquipmentEvaluator Evaluator { get; }
-    public IReadOnlyList<EquipmentStyle> Styles { get; }
     public IReadOnlyList<StarterEquipmentOption> Options => _options.Values.OrderBy(x => x.EquipmentType).ThenBy(x => x.DefinitionId, StringComparer.Ordinal).ToArray();
 
     public IReadOnlyList<StarterEquipmentOption> GetOptions(int tier) => Options.Select(option =>
@@ -38,20 +85,10 @@ public sealed class StarterEquipmentCatalog
 
     public IReadOnlyList<string> Select(StarterEquipmentGrantKind kind, IReadOnlyList<string> requestedIds)
     {
-        if (kind == StarterEquipmentGrantKind.ReadyForRoad && requestedIds.Count == 0)
-            return _accessories.ToArray();
-        if (kind != StarterEquipmentGrantKind.FirstWeapon || requestedIds.Count is < 4 or > 5
-            || requestedIds.Any(id => id is null || !_options.ContainsKey(id)))
-            throw new ArgumentException("Select legal hands and one item for each armor slot.");
-        var types = requestedIds.Select(id => _options[id].EquipmentType).ToArray();
-        var armor = new[] { EquipmentType.Head, EquipmentType.Chest, EquipmentType.Legs };
-        if (armor.Any(type => types.Count(x => x == type) != 1))
-            throw new ArgumentException("Choose one Head, Chest and Legs item.");
-        var hands = types.Where(type => !armor.Contains(type)).ToArray();
-        if (!(hands.Length == 1 && hands[0] == EquipmentType.TwoHanded
-            || hands.Length == 2 && hands.Count(x => x == EquipmentType.OneHanded) >= 1
-                && hands.All(x => x is EquipmentType.OneHanded or EquipmentType.OffHand)))
-            throw new ArgumentException("Choose one two-handed weapon, or a one-handed weapon with another weapon or offhand.");
-        return requestedIds.Order(StringComparer.Ordinal).ToArray();
+        if (kind != StarterEquipmentGrantKind.FirstWeapon || requestedIds.Count != 1
+            || requestedIds[0] is null || !_options.TryGetValue(requestedIds[0], out var option)
+            || option.EquipmentType != EquipmentType.OneHanded)
+            throw new ArgumentException("Select one starter one-handed weapon.");
+        return [option.DefinitionId];
     }
 }

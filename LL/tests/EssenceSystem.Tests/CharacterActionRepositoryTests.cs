@@ -2,8 +2,6 @@ using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Professions.Crafting;
-using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;

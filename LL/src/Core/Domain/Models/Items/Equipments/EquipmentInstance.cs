@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Guilds;
-using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Items.Equipments.Progression;
 
 namespace Domain.Models.Items.Equipments;
@@ -21,15 +19,7 @@ public class EquipmentInstance : ItemInstance
         ProgressionData = data;
         Tier = data.State.Tier;
         Rarity = (Rarity)data.Rarity;
-        CraftedName = data.DisplayName;
-        BaseRecipeId = null;
-        BlueprintId = data.State.ActiveStyleId;
-        EquipmentSetId = data.EquipmentSetId;
-        StatModelVersion = EquipmentBalance.StatUnitVersion;
-        Quality = ItemQuality.Standard;
-        Potential = MaxPotential = null;
-        ItemXp = TemperingProgress = 0;
-        IsMasterpiece = IsLevelingItem = false;
+        Quality = data.Quality;
         InstanceModifiers = data.Stats.OrderBy(x => x.Key)
             .Select(x => new InstanceAttributeModifier(x.Key, x.Value) { ItemInstanceId = Id }).ToList();
     }
@@ -57,19 +47,8 @@ public class EquipmentInstance : ItemInstance
     }
     public Rarity Rarity { get; set; } = Rarity.Common;
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
-    public string? BaseRecipeId { get; set; }
-    public string? BlueprintId { get; set; }
-    public string? EquipmentSetId { get; set; }
-    public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
-    public int StatModelVersion { get; set; } = EquipmentStatBudgetCatalog.LegacyBalanceVersion;
-    public int? Potential { get; set; } = null;
-    public int? MaxPotential { get; set; } = null;
-    public int TemperingProgress { get; set; } = 0;
     public uint Version { get; set; }
-    public int ItemXp { get; set; } = 0;
-    public bool IsMasterpiece { get; set; } = false;
-    public bool IsLevelingItem { get; set; } = false;
 
     /// <summary>
     /// Carries the owning character's favorite preference while this item is equipped.
@@ -81,28 +60,19 @@ public class EquipmentInstance : ItemInstance
     public EquipmentBase EquipmentBase => (EquipmentBase)ItemBase;
 
     [NotMapped]
-    public string DisplayName => ProgressionData?.DisplayName ?? (!string.IsNullOrWhiteSpace(CraftedName)
-        ? CraftedName.Trim()
-        : EquipmentBase.EquipmentType == EquipmentType.Tool
-            ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
-            : EquipmentBase.Name);
+    public string DisplayName => ProgressionData?.DisplayName ?? EquipmentBase.Name;
 
     [NotMapped]
-    public bool UsesRecipeStatBudget => !string.IsNullOrWhiteSpace(BaseRecipeId);
-
-    [NotMapped]
-    public bool UsesProgressionNormalizedRatings =>
-        (HasEquipmentProgression || UsesRecipeStatBudget)
-        && StatModelVersion >= EquipmentStatBudgetCatalog.BalanceVersion;
+    public bool UsesProgressionNormalizedRatings => HasEquipmentProgression;
 
     /// <summary>
     /// Authored item-base modifiers are retained for legacy and directly granted equipment.
-    /// Crafted equipment receives its complete combat budget through recipe-generated instance
-    /// modifiers, so applying these modifiers as well would budget the same item twice.
+    /// Progression equipment receives its complete combat budget through frozen instance
+    /// modifiers, so applying authored base modifiers as well would budget the same item twice.
     /// </summary>
     [NotMapped]
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
-        HasEquipmentProgression || UsesRecipeStatBudget
+        HasEquipmentProgression
             ? []
             : EquipmentBase?.AttributeModifiers
             .Select(attr => new ItemAttributeModifier(
@@ -118,7 +88,6 @@ public class EquipmentInstance : ItemInstance
 
     /// <summary>Modifiers that were added to *this* item as it levelled up.</summary>
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
-    public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
     public GuildVaultItem? GuildVaultItem { get; set; }
 
@@ -128,13 +97,6 @@ public class EquipmentInstance : ItemInstance
         : [
         .. BaseModifiers,
         .. InstanceModifiers,
-    ];
-
-    [NotMapped]
-    public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses =>
-    [
-        .. EquipmentBase.ToolBonuses,
-        .. ToolAffixes,
     ];
 
     public float Boost => HasEquipmentProgression ? 1f : GetRarityBoost(Rarity);

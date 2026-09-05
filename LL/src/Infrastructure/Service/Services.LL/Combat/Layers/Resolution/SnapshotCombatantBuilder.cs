@@ -70,17 +70,9 @@ public sealed class SnapshotCombatantBuilder(
                 Id = equipment.EquipmentInstanceId,
                 ItemBaseId = equipment.ItemBaseId,
                 ItemBase = equipmentBase,
-                BaseRecipeId = equipment.BaseRecipeId,
-                BlueprintId = equipment.BlueprintId,
-                EquipmentSetId = equipment.EquipmentSetId,
                 Rarity = equipment.Rarity,
                 Quality = equipment.Quality,
                 Tier = equipment.Tier,
-                StatModelVersion = equipment.StatModelVersion,
-                Potential = equipment.Potential,
-                ItemXp = equipment.ItemXp,
-                IsMasterpiece = equipment.IsMasterpiece,
-                IsLevelingItem = equipment.IsLevelingItem,
                 InstanceModifiers = equipment.InstanceModifiers
                     .Select(x => x.ToInstanceModifier(equipment.EquipmentInstanceId))
                     .ToList()

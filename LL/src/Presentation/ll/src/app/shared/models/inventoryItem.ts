@@ -6,6 +6,6 @@ export interface InventoryItem {
   quantity: number;
   /** Whether the current character marked this inventory row as a favorite. */
   isFavorite?: boolean;
-  /** A crafted item the character has not inspected yet. Server-owned. */
+  /** An item the character has not inspected yet. Server-owned. */
   isNew?: boolean;
 }

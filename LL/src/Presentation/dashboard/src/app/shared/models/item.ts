@@ -13,12 +13,7 @@ export interface ItemInstance {
 export interface EquipmentInstance extends ItemInstance {
   rarity: Rarity;
   quality: ItemQuality;
-  baseRecipeId?: string | null;
-  blueprintId?: string | null;
   tier: number;
-  potential?: number;
-  maxPotential?: number | null;
-  temperingProgress: number;
   affinityTags: string[];
 }
 

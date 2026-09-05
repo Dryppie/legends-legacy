@@ -4,8 +4,8 @@ using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Snapshots;
 using Domain.Models.Essences;
 using Persistence.LL;
@@ -18,8 +18,8 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Essences;
 using Services.LL.Interfaces.Combat.Resolution;
+using Services.LL.Items;
 using Services.LL.PowerRatings;
-using Services.LL.Professions.Craftings;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -127,7 +127,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         }).ToList();
 
         await using var db = CreateDbContext();
-        db.ItemBases.AddRange(services.CraftingDefinitions.GetEquipmentBases().Values);
+        db.ItemBases.AddRange(services.EquipmentCatalog.EquipmentBases.Values);
         var snapshotId = Guid.NewGuid();
         var snapshot = new CharacterSnapshot
         {
@@ -163,7 +163,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             services.EssenceResolver,
             services.EssenceDefinitions,
             services.CreatureEssences,
-            craftingDefinitions: services.CraftingDefinitions);
+            equipmentCatalog: services.EquipmentCatalog);
 
         var direct = setup.CreatePlayerCombatEntities([build.Character]).Single();
         direct.EquippedEssences = [.. build.EquippedEssences];
@@ -197,36 +197,36 @@ public sealed class CanonicalEquipmentBuildFactoryTests
     }
 
     [Fact]
-    public void Tier_one_epic_balanced_profile_uses_crafted_gear_with_balanced_defenses()
+    public void Tier_one_epic_balanced_profile_uses_live_equipment_with_balanced_defenses()
     {
         var services = CreateServices();
         var rung = GetTierOneEpicRung(services.Factory);
         var build = services.Factory.CreateBuild(CanonicalPartyProfile.Balanced, rung);
         var projected = ProjectAttributes(build);
 
-        Assert.InRange(projected[AttributeType.Armor], 35f, 45f);
-        Assert.InRange(projected[AttributeType.Resistance], 35f, 45f);
+        Assert.InRange(projected[AttributeType.Armor], 35f, 37f);
+        Assert.InRange(projected[AttributeType.Resistance], 31f, 33f);
         Assert.InRange(
             Math.Abs(projected[AttributeType.Armor] - projected[AttributeType.Resistance]),
             0f,
             5f);
         Assert.Equal(
             [
-                "recipe.armor.chest.medium_mail",
-                "recipe.armor.head.cloth_cowl",
-                "recipe.armor.legs.light_legwraps"
+                "plain.cloth_cowl",
+                "plain.light_leggings",
+                "plain.medium_mail"
             ],
             build.Equipment
                 .Where(item => item.EquipmentBase.EquipmentType is
                     EquipmentType.Chest or EquipmentType.Head or EquipmentType.Legs)
-                .Select(item => item.BaseRecipeId!)
+                .Select(item => item.ProgressionData!.State.ArchetypeId)
                 .Order()
                 .ToArray());
         Assert.All(build.Equipment, item =>
         {
-            Assert.False(string.IsNullOrWhiteSpace(item.BaseRecipeId));
-            Assert.NotNull(services.CraftingDefinitions.GetRecipe(item.BaseRecipeId!));
-            Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, item.StatModelVersion);
+            Assert.NotNull(item.ProgressionData);
+            Assert.Equal(services.EquipmentCatalog.Evaluator.Balance.Version,
+                item.ProgressionData!.State.BalanceVersion);
             Assert.NotEmpty(item.InstanceModifiers);
         });
     }
@@ -280,9 +280,9 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         combatant.Equipment.OrderBy(item => item.ItemBaseId).Select(item => new
         {
             item.ItemBaseId,
-            item.BaseRecipeId,
-            item.BlueprintId,
-            item.EquipmentSetId,
+            DefinitionId = item.ProgressionData?.State.DefinitionId,
+            ActiveStyleId = item.ProgressionData?.State.ActiveStyleId,
+            EquipmentSetId = item.ProgressionData?.EquipmentSetId,
             item.Tier,
             item.Rarity,
             item.Quality,
@@ -317,7 +317,6 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         EquipmentType.Ring => EquipmentSlotType.Ring,
         EquipmentType.OneHanded or EquipmentType.TwoHanded => EquipmentSlotType.MainHand,
         EquipmentType.OffHand => EquipmentSlotType.OffHand,
-        EquipmentType.Tool => EquipmentSlotType.Tool,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
@@ -357,23 +356,22 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         var essenceResolver = new EssenceSystemService(
             null!, null!, null!, essenceDefinitions, creatureEssences,
             null!, null!, null!, null!, null!, null!);
-        var balance = Options.Create(new CraftingBalanceOptions());
-        var craftingDefinitions = new JsonCraftingDefinitionProvider(
-            configuration,
-            contentRoot,
-            jsonOptions);
+        var equipmentCatalog = JsonStarterEquipmentCatalog.Load(
+            Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
+        var referenceBuilds = new EquipmentReferenceBuildFactory(
+            equipmentCatalog,
+            essenceDefinitions,
+            essenceResolver);
         var factory = new CanonicalEquipmentBuildFactory(
-            craftingDefinitions,
-            new ItemStatRollService(balance),
-            new TemperingMechanicsService(balance),
-            new ItemPotentialService(balance),
+            equipmentCatalog,
+            referenceBuilds,
             essenceResolver,
             essenceDefinitions);
         return new TestServices(
             configuration,
             contentRoot,
             jsonOptions,
-            craftingDefinitions,
+            equipmentCatalog,
             essenceDefinitions,
             creatureEssences,
             essenceResolver,
@@ -398,7 +396,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         IConfiguration Configuration,
         string ContentRoot,
         JsonSerializerOptions JsonOptions,
-        JsonCraftingDefinitionProvider CraftingDefinitions,
+        StarterEquipmentCatalog EquipmentCatalog,
         JsonEssenceDefinitionRepository EssenceDefinitions,
         JsonCreatureEssenceLootTableRepository CreatureEssences,
         EssenceSystemService EssenceResolver,

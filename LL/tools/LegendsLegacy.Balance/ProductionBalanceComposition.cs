@@ -5,7 +5,7 @@ using Services.LL.Combat;
 using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
 using Services.LL.PowerRatings;
-using Services.LL.Professions.Craftings;
+using Services.LL.Items;
 using Services.LL.Regions;
 using Services.LL.WorldTower;
 using System.Text.Json;
@@ -23,14 +23,13 @@ public static class ProductionBalanceComposition
         var abilities = new JsonAbilityCatalogProvider(configuration, contentRoot, json, new ThreatAndTankingOptions());
         var essences = new JsonEssenceDefinitionRepository(configuration, contentRoot, json, new EssenceDefinitionValidator());
         var loadouts = new CatalogEssenceLoadoutResolver(essences);
-        var items = new JsonCraftingDefinitionProvider(configuration, contentRoot, json);
         var progression = Services.LL.Items.JsonStarterEquipmentCatalog.Load(
             Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
         var setup = new CombatSetupService(new CreatureScaler(new RegionCreatureScalingProvider(configuration, contentRoot, json)),
             loadouts, essences, new JsonCreatureEssenceLootTableRepository(configuration, contentRoot, json, essences),
-            new JsonCreatureAbilityDefinitionProvider(configuration, contentRoot, json), items);
-        return new(contentRoot, new EquipmentReferenceBuildFactory(progression, items, essences, loadouts), setup,
-            new CombatEngineExecutor(abilities, essences, items), new JsonAreaExperienceBalanceProvider(configuration, contentRoot, json));
+            new JsonCreatureAbilityDefinitionProvider(configuration, contentRoot, json), progression);
+        return new(contentRoot, new EquipmentReferenceBuildFactory(progression, essences, loadouts), setup,
+            new CombatEngineExecutor(abilities, essences, progression), new JsonAreaExperienceBalanceProvider(configuration, contentRoot, json));
     }
 
     public static EquipmentReferenceReportRunner CreateEquipmentReferences(string contentRoot)
@@ -41,14 +40,13 @@ public static class ProductionBalanceComposition
         var abilities = new JsonAbilityCatalogProvider(configuration, contentRoot, json, new ThreatAndTankingOptions());
         var essences = new JsonEssenceDefinitionRepository(configuration, contentRoot, json, new EssenceDefinitionValidator());
         var loadouts = new CatalogEssenceLoadoutResolver(essences);
-        var items = new JsonCraftingDefinitionProvider(configuration, contentRoot, json);
         var progression = Services.LL.Items.JsonStarterEquipmentCatalog.Load(
             Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
         var setup = new CombatSetupService(
             new CreatureScaler(new RegionCreatureScalingProvider(configuration, contentRoot, json)), loadouts, essences,
-            new JsonCreatureEssenceLootTableRepository(configuration, contentRoot, json, essences), craftingDefinitions: items);
-        return new(new EquipmentReferenceBuildFactory(progression, items, essences, loadouts), setup,
-            new CombatEngineExecutor(abilities, essences, items));
+            new JsonCreatureEssenceLootTableRepository(configuration, contentRoot, json, essences), equipmentCatalog: progression);
+        return new(new EquipmentReferenceBuildFactory(progression, essences, loadouts), setup,
+            new CombatEngineExecutor(abilities, essences, progression));
     }
 
     public static ProductionBalanceRunner Create(
@@ -73,12 +71,12 @@ public static class ProductionBalanceComposition
             jsonOptions,
             new EssenceDefinitionValidator());
         var essenceLoadouts = new CatalogEssenceLoadoutResolver(essences);
-        var craftingDefinitions = new JsonCraftingDefinitionProvider(configuration, contentRoot, jsonOptions);
+        var equipment = JsonStarterEquipmentCatalog.Load(
+            Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
+        var referenceBuilds = new EquipmentReferenceBuildFactory(equipment, essences, essenceLoadouts);
         var canonicalBuilds = new CanonicalEquipmentBuildFactory(
-            craftingDefinitions,
-            new ItemStatRollService(),
-            new TemperingMechanicsService(),
-            new ItemPotentialService(),
+            equipment,
+            referenceBuilds,
             essenceLoadouts,
             essences);
         IAbilityBalanceSimulator simulator = new AbilityBalanceSimulator(catalog, essences);
@@ -105,7 +103,7 @@ public static class ProductionBalanceComposition
             essences,
             creatureLoot,
             creatureAbilities,
-            craftingDefinitions);
+            equipment);
         var towerDefinitions = new JsonWorldTowerDefinitionProvider(
             Path.Combine(contentRoot, "Data", "world-tower", "tower-floors.json"),
             jsonOptions);
@@ -116,7 +114,7 @@ public static class ProductionBalanceComposition
             towerDefinitions,
             creatures,
             combatSetup,
-            new CombatEngineExecutor(catalog, essences, craftingDefinitions),
+            new CombatEngineExecutor(catalog, essences, equipment),
             gearPackages);
         var partyFamilyBuilder = new PartyFamilyBuilder();
         var partyFamilyEncounterEvaluator = new PartyFamilyEncounterEvaluator(worldTowerAnalyzer);

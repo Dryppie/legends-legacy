@@ -1,10 +1,12 @@
 # Shenic / Tier 1 equipment progression
 
-Updated: 3 September 2026.
+Updated: 5 September 2026.
 
-Shenic supplies the first released equipment loop through starter grants, ordinary combat discoveries, six protected dungeon pools, target selection, and recovery. It does not use merchants, crafting, gathering, tempering, salvaging, Blueprints, or an equipment Forge.
+Shenic supplies the first released equipment loop through the Arms Chest, random area equipment drops, random regional Sigils, and random dungeon equipment drops. It does not use target selection, protection counters, merchants, crafting, gathering, tempering, salvaging, recovery, Blueprints, or an equipment Forge.
 
-Starter grants establish a legal armor and hand loadout. Ordinary areas offer plain equipment targets through durable per-pool progress. Dungeon runs freeze their named target and protection terms when committed so later content or selection changes cannot alter an earned outcome. Recovery restores a missing entitled copy without creating a repeat reward source.
+Every Shenic combat area can drop any equipment archetype as Tier 1, rank 0 gear. Each victorious encounter also has a 1/4,320 chance to drop either a Goblin Mines or Forgotten Catacombs Sigil. Completed Shenic dungeons have a 20% equipment chance, use improved rarity odds, and award Tier 1, rank 1 gear.
+
+Both sources use the former Mastery 100 quality odds (35% Standard, 45% Fine, 16% Exceptional, and 4% Masterpiece; Crude remains a supported authored quality at 0% natural drop chance) and a frozen ±5% attribute-budget roll.
 
 Items retain the tier, rank, style, stats, behavior, and set identity authored by their definition. Those properties currently cannot be upgraded or changed by a player.
 

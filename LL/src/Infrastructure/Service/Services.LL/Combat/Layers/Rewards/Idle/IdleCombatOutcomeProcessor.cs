@@ -129,11 +129,6 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
             .DefaultIfEmpty()
             .Min();
         var winningEncounterCount = checked(batches.Sum(batch => batch.WinningEncounterCount));
-        var gatheredResourceCount = checked(batches
-            .SelectMany(batch => batch.ProphecyProgressEvents)
-            .Where(progress => progress.Kind == ProphecyProgressKind.ResourceGathered)
-            .Sum(progress => progress.Amount));
-
         return _outbox.EnqueueAsync(
             GameEventTypes.IdleCombatEncounterCompleted,
             new IdleCombatEncounterCompletedPayload(
@@ -145,9 +140,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 batches.Sum(batch => batch.PlayerDefeats),
                 lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
                 actionCount,
-                batches[^1].EquippedGatheringType,
-                winningEncounterCount,
-                gatheredResourceCount),
+                winningEncounterCount),
             batches[0].CharacterId,
             null,
             cancellationToken);
@@ -206,7 +199,6 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
             facts.ProcessedUntil,
             facts.Area.Id,
             facts.Area.Name,
-            null,
             outcome.TotalLoot,
             outcome.TotalCinders,
             outcome.TotalSoulstones,

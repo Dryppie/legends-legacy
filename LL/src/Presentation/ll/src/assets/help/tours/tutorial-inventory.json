@@ -2,10 +2,10 @@
   {
     "id": "find-tutorial-equipment",
     "kind": "click",
-    "element": "[data-tour=inventory-equipment-item][data-tutorial-crafted-weapon=true]",
-    "actionSelector": "[data-tour=inventory-equipment-item][data-tutorial-crafted-weapon=true]",
-    "title": "1. Crafted weapon",
-    "description": "Select the Tier 1 weapon you just crafted to review its damage, quality, and combat properties.",
+    "element": "[data-tour=inventory-equipment-item]",
+    "actionSelector": "[data-tour=inventory-equipment-item]",
+    "title": "1. Chosen weapon",
+    "description": "Select the Tier 1 weapon you chose from the Arms Chest to review its damage, Quality, Rank, and combat properties.",
     "position": "bottom"
   },
   {
@@ -15,7 +15,7 @@
     "actionSelector": "[data-tour=tutorial-equipment-equip]",
     "targetTimeoutMs": 5000,
     "title": "2. Equip",
-    "description": "Equip your crafted weapon so your character can use it in combat.",
+    "description": "Equip your chosen weapon so your character can use it in combat.",
     "position": "bottom"
   }
 ]

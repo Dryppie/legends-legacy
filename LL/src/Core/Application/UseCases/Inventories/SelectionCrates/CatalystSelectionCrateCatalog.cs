@@ -12,6 +12,52 @@ public sealed record SelectionContainerDefinition(
     string SelectionLabel,
     IReadOnlyList<SelectionContainerOptionDefinition> Options);
 
+public static class LegacyBlueprintSelectionBoxCatalog
+{
+    public const string ItemBaseId = "item.blueprint_selection_box";
+
+    public static SelectionContainerDefinition Definition { get; } = new(
+        ItemBaseId,
+        "Blueprint Selection Box",
+        "Blueprint",
+        [
+            Blueprint("fury", "Fury"),
+            Blueprint("arcane", "Arcane"),
+            Blueprint("execution", "Execution"),
+            Blueprint("aegis", "Aegis"),
+            Blueprint("warden", "Warden"),
+            Blueprint("endurance", "Endurance"),
+            Blueprint("phoenix", "Phoenix"),
+            Blueprint("spirit", "Spirit"),
+            Blueprint("primal", "Primal"),
+            Blueprint("venom", "Venom"),
+            Blueprint("hive", "Hive")
+        ]);
+
+    private static SelectionContainerOptionDefinition Blueprint(string id, string name) =>
+        new(id, $"Blueprint: {name}", $"item.blueprint_{id}", 1);
+}
+
+public static class TutorialArmsChestCatalog
+{
+    public const string ItemBaseId = "item.arms_chest";
+
+    public static SelectionContainerDefinition Definition { get; } = new(
+        ItemBaseId,
+        "Arms Chest",
+        "Weapon",
+        [
+            Weapon("shortsword", "Shortsword"),
+            Weapon("dagger", "Dagger"),
+            Weapon("hatchet", "Hatchet"),
+            Weapon("mace", "Mace"),
+            Weapon("wand", "Wand")
+        ]);
+
+    private static SelectionContainerOptionDefinition Weapon(string id, string name) =>
+        new($"plain.{id}", name, id, 1);
+}
+
 public static class ShenicEssenceTokenCatalog
 {
     public static IReadOnlyList<SelectionContainerDefinition> Definitions { get; } =
@@ -94,9 +140,18 @@ public static class SelectionContainerCatalog
 {
     private static readonly IReadOnlyDictionary<string, SelectionContainerDefinition> Definitions =
         ShenicEssenceTokenCatalog.Definitions
+            .Append(TutorialArmsChestCatalog.Definition)
+            .Append(LegacyBlueprintSelectionBoxCatalog.Definition)
             .ToDictionary(definition => definition.ItemBaseId, StringComparer.OrdinalIgnoreCase);
 
-    public static SelectionContainerDefinition? Find(string itemBaseId) =>
-        Definitions.GetValueOrDefault(itemBaseId);
+    public static SelectionContainerDefinition? Find(string itemBaseId,
+        Domain.Models.Items.Equipments.Progression.EquipmentBlueprintCatalog? blueprints = null)
+    {
+        if (Definitions.TryGetValue(itemBaseId, out var definition)) return definition;
+        var source = blueprints?.Sources.SingleOrDefault(x => x.SelectionItemId == itemBaseId);
+        return source is null ? null : new(source.SelectionItemId, $"{source.Name} Blueprint Choice", "Blueprint",
+            source.StyleIds.Select(id => blueprints!.Find(id)!).Select(x =>
+                new SelectionContainerOptionDefinition(x.StyleId, $"Blueprint: {x.Name}", x.ItemId, 1)).ToArray());
+    }
 
 }

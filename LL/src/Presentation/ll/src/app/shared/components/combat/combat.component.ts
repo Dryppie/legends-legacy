@@ -36,7 +36,6 @@ import { GameBootstrapStateService } from '../../../core/services/api/game-boots
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
-import { GatheringType } from '../../models/enums/gatheringType';
 import { RegionService } from '../../../core/services/client-side/region/region.service';
 
 @Component({
@@ -429,12 +428,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';
-  }
-
-  private formatGatheringTypes(types: GatheringType[]): string {
-    if (types.length <= 1) return types[0] ?? 'matching gathering';
-
-    return types.slice(0, -1).join(', ') + ' or ' + types.at(-1);
   }
 
   flavorMessages: string[] = [

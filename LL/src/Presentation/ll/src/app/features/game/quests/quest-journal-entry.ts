@@ -14,7 +14,6 @@ export interface QuestJournalEntry {
 
 export type QuestJournalGroupKey =
   | 'World Map'
-  | 'Crafting'
   | 'Character'
   | 'Other'
   | 'Tutorial';
@@ -26,7 +25,6 @@ export interface QuestJournalEntryGroup {
 
 const questJournalGroupOrder: readonly QuestJournalGroupKey[] = [
   'World Map',
-  'Crafting',
   'Character',
   'Other',
   'Tutorial',
@@ -35,7 +33,6 @@ const questJournalGroupOrder: readonly QuestJournalGroupKey[] = [
 const worldMapCategories = new Set([
   'shenic',
   'future shenic',
-  'gathering',
   'dungeons',
   'combat',
 ]);
@@ -47,7 +44,6 @@ export function questJournalGroupForCategory(
 ): QuestJournalGroupKey {
   const normalizedCategory = category.trim().toLowerCase();
   if (worldMapCategories.has(normalizedCategory)) return 'World Map';
-  if (normalizedCategory === 'crafting') return 'Crafting';
   if (characterCategories.has(normalizedCategory)) return 'Character';
   if (normalizedCategory === 'tutorial') return 'Tutorial';
   return 'Other';

@@ -31,7 +31,7 @@ public sealed partial class EventQuestSystemTests
         await db.SaveChangesAsync();
         var service = EquipmentProgressionEventService(db, definition);
         var messageId = Guid.NewGuid();
-        var batch = QuestTrigger.CombatCompleted("region_01_area_01", true, actionCount: 10, winningEncounterCount: 4, gatheredResourceCount: 99);
+        var batch = QuestTrigger.CombatCompleted("region_01_area_01", true, actionCount: 10, winningEncounterCount: 4);
         await service.ProcessAsync(id, batch, messageId, "IdleCombatEncounterCompleted", default);
         await service.ProcessAsync(id, batch, messageId, "IdleCombatEncounterCompleted", default);
         await service.ProcessAsync(id, QuestTrigger.CombatCompleted("region_01_area_01", false, winningEncounterCount: 0), Guid.NewGuid(), "IdleCombatEncounterCompleted", default);

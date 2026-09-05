@@ -1620,17 +1620,16 @@ public sealed class RaidService(
             .Select(slot => new
             {
                 slot.EquipmentSlotType,
-                slot.EquipmentInstance!.Tier,
-                slot.EquipmentInstance.Rarity,
-                slot.EquipmentInstance.BlueprintId
+                Equipment = slot.EquipmentInstance!
             })
             .ToArrayAsync(cancellationToken);
         var armorMeetsRequirement = requiredArmorSlots.All(requiredSlot =>
             armor.Any(item => item.EquipmentSlotType == requiredSlot
-                              && item.Tier >= boss.RequiredEquipmentTier
-                              && item.Rarity >= boss.RequiredArmorRarity
+                              && item.Equipment.Tier >= boss.RequiredEquipmentTier
+                              && item.Equipment.Rarity >= boss.RequiredArmorRarity
                               && (!boss.RequiresBlueprintArmor
-                                  || !string.IsNullOrWhiteSpace(item.BlueprintId))));
+                                  || !string.IsNullOrWhiteSpace(
+                                      item.Equipment.ProgressionData?.State.ActiveStyleId))));
         if (!armorMeetsRequirement)
         {
             var blueprintLabel = boss.RequiresBlueprintArmor ? "Blueprint-crafted " : string.Empty;

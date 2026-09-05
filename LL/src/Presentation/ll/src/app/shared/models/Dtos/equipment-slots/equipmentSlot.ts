@@ -16,5 +16,4 @@ export enum EquipmentSlotType {
   Ring = 'Ring',
   MainHand = 'MainHand',
   OffHand = 'OffHand',
-  Tool = 'Tool',
 }

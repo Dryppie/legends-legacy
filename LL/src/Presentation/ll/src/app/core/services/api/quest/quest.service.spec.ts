@@ -4,6 +4,27 @@ import { QuestJournal } from '../../../../shared/models/quest';
 import { QuestService } from './quest.service';
 
 describe('QuestService', () => {
+  it('turns in a quest and leaves reward scopes available for synchronization', () => {
+    const journal: QuestJournal = { quests: [] };
+    const api = {
+      postVersioned: jasmine.createSpy('postVersioned').and.returnValue(
+        of({
+          data: { isSuccess: true, data: journal },
+          domainVersions: { quests: 8, inventory: 9, character: 10 },
+        }),
+      ),
+    };
+    new QuestService(api as never).turnIn('quest/one').subscribe((result) => {
+      expect(result.data).toBe(journal);
+      expect(result.domainVersions['inventory']).toBe(9);
+    });
+    expect(api.postVersioned).toHaveBeenCalledWith(
+      'Quest/quest%2Fone/turn-in',
+      {},
+      { stateSyncScopesHandledByResponse: ['quests'] },
+    );
+  });
+
   it('returns the quest generation and marks a complete choice response as owned', () => {
     const journal: QuestJournal = { quests: [], pinnedQuestId: null };
     const api = {

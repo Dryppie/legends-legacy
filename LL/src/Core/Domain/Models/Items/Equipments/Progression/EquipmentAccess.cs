@@ -4,7 +4,7 @@ public sealed record StarterEquipmentAccess(StarterEquipmentGrantKind Kind, bool
     string? UnavailableReason, StarterEquipmentGrant? Grant);
 
 public sealed record EquipmentAccess(bool StarterAcquisitionEnabled,
-    bool ProtectedAcquisitionEnabled, bool BaselineRecoveryEnabled, bool OrdinaryAcquisitionEnabled,
+    bool ProtectedAcquisitionEnabled, bool OrdinaryAcquisitionEnabled,
     IReadOnlyList<StarterEquipmentAccess> Starters)
 {
 }

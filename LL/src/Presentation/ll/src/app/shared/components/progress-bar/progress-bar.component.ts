@@ -9,7 +9,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
-import { CharacterActionType } from '../../models/enums/characterActionType';
 import { Subscription } from 'rxjs';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
@@ -73,11 +72,6 @@ export class ProgressBarComponent implements OnDestroy {
     const stoppedActionUnlock = stoppedActionUnlockDeadline
       ? new Date(stoppedActionUnlockDeadline).getTime()
       : null;
-    const combatUnlockDeadline =
-      action.characterActionType === CharacterActionType.Crafting &&
-      action.blockedUntilUtc
-        ? new Date(action.blockedUntilUtc).getTime()
-        : null;
     if (
       (stoppedActionUnlock === null && !Number.isFinite(resolutionDeadline)) ||
       (stoppedActionUnlock !== null && !Number.isFinite(stoppedActionUnlock))
@@ -90,11 +84,7 @@ export class ProgressBarComponent implements OnDestroy {
 
     const updateProgress = () => {
       const now = this.timeSync.now();
-      const isWaitingForCombat =
-        combatUnlockDeadline !== null && combatUnlockDeadline > now;
-      const deadline =
-        stoppedActionUnlock ??
-        (isWaitingForCombat ? combatUnlockDeadline : resolutionDeadline);
+      const deadline = stoppedActionUnlock ?? resolutionDeadline;
       const startTime = deadline - durationMs;
       const elapsed = (now - startTime) / 1000;
       const progress = Math.max(0, Math.min((elapsed / duration) * 100, 100));
@@ -104,7 +94,7 @@ export class ProgressBarComponent implements OnDestroy {
       const remainingSeconds = Math.max(duration - Math.floor(elapsed), 0);
       this.remainingTimeChange.emit(this.formatTime(remainingSeconds));
 
-      if (isWaitingForCombat || progress < 100) {
+      if (progress < 100) {
         this.animationFrameId = requestAnimationFrame(updateProgress);
       }
     };

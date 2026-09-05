@@ -33,6 +33,7 @@ export class DungeonStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly _combatSession = signal<CombatSessionDto | null>(null);
+  private readonly _instantSkipBattles = signal(false);
   private readonly _lastOutcome = signal<DungeonActionOutcome | null>(null);
   private readonly _message = signal<string | null>(null);
   private readonly _sigilFragments = signal(0);
@@ -45,6 +46,7 @@ export class DungeonStateService {
   readonly lastOutcome = computed(() => this._lastOutcome());
   readonly message = computed(() => this._message());
   readonly combatSession = computed(() => this._combatSession());
+  readonly instantSkipBattles = this._instantSkipBattles.asReadonly();
   readonly dungeons = computed(() => this._dungeons());
   readonly activeDungeon = computed(() => this._activeDungeon());
   readonly loading = computed(() => this._loading());
@@ -306,8 +308,12 @@ export class DungeonStateService {
   }
 
   /* ─────────── optional optimistic helpers ─────────── */
+  toggleInstantSkipBattles(): void {
+    this._instantSkipBattles.update((enabled) => !enabled);
+  }
+
   private handleActionCombat(result: ExecuteDungeonActionResponse): void {
-    if (!result.combatSession?.combatResult) return;
+    if (this.instantSkipBattles() || !result.combatSession?.combatResult) return;
 
     this.combatService.startDungeonCombatSimulation(
       result.combatSession.combatResult,

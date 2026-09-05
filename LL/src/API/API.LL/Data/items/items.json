@@ -1,5 +1,186 @@
 [
   {
+    "id": "item.blueprint_fury",
+    "name": "Blueprint: Fury",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Fury to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_arcane",
+    "name": "Blueprint: Arcane",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Arcane to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_execution",
+    "name": "Blueprint: Execution",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Execution to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_aegis",
+    "name": "Blueprint: Aegis",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Aegis to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_warden",
+    "name": "Blueprint: Warden",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Warden to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_endurance",
+    "name": "Blueprint: Endurance",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Endurance to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_phoenix",
+    "name": "Blueprint: Phoenix",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Phoenix to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_spirit",
+    "name": "Blueprint: Spirit",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Spirit to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_primal",
+    "name": "Blueprint: Primal",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Primal to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_venom",
+    "name": "Blueprint: Venom",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Venom to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_hive",
+    "name": "Blueprint: Hive",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Hive to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_raidforged",
+    "name": "Blueprint: Raidforged",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Raidforged to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_gravebound",
+    "name": "Blueprint: Gravebound",
+    "description": "Consumed with 100 Cinders per equipment tier to apply Gravebound to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_choice.goblin_mines",
+    "name": "Goblin Mines Blueprint Choice",
+    "description": "Choose one consumable blueprint from Goblin Mines. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_choice.forgotten_catacombs",
+    "name": "Forgotten Catacombs Blueprint Choice",
+    "description": "Choose one consumable blueprint from Forgotten Catacombs. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_choice.tangled_cave",
+    "name": "Tangled Cave Blueprint Choice",
+    "description": "Choose one consumable blueprint from Tangled Cave. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.blueprint_choice.great_tree",
+    "name": "Great Tree Blueprint Choice",
+    "description": "Choose one consumable blueprint from Great Tree. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "isBound": false,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  }
+,
+  {
+    "id": "reinforcement_parts",
+    "name": "Reinforcement Parts",
+    "description": "Bound components recovered from dismantled equipment and used with Cinders to reinforce equipment ranks.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
     "id": "advancement_stone",
     "name": "Advancement Stone",
     "description": "A dungeon reward used for future character and gear advancement.",
@@ -744,6 +925,16 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.arms_chest",
+    "name": "Arms Chest",
+    "description": "Open this chest to choose a Shortsword, Dagger, Hatchet, Mace, or Wand.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "isBound": true,
+    "equipmentType": "Head",
     "attributeModifiers": []
   },
   {

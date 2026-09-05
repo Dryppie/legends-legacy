@@ -25,7 +25,7 @@
           "name": "Lumo Ruins",
           "levelRequirement": 1,
           "difficultyTier": 1,
-          "requiredCompletedQuestId": "quest.onboarding.tools_of_trade",
+          "requiredCompletedQuestId": "quest.onboarding.first_weapon",
           "spawnProbabilities": [
             0.969,
             0.03,

@@ -184,14 +184,7 @@
                         class="reward-table-grid reward-row"
                       >
                         <div class="min-w-0 truncate text-sm text-white">
-                          <span
-                            *ngIf="isToolReward(reward); else guaranteedItem"
-                          >
-                            Random Tool
-                          </span>
-                          <ng-template #guaranteedItem>
-                            <app-item [item]="reward"></app-item>
-                          </ng-template>
+                          <app-item [item]="reward"></app-item>
                         </div>
                         <span
                           class="reward-quantity text-right text-sm tabular-nums text-white"
@@ -233,12 +226,7 @@
                         class="reward-table-grid reward-row"
                       >
                         <div class="min-w-0 truncate text-sm text-white">
-                          <span *ngIf="isToolReward(reward); else chanceItem">
-                            Random Tool
-                          </span>
-                          <ng-template #chanceItem>
-                            <app-item [item]="reward"></app-item>
-                          </ng-template>
+                          <app-item [item]="reward"></app-item>
                         </div>
                         <span
                           class="reward-quantity text-right text-sm tabular-nums text-white"
@@ -291,12 +279,7 @@
                       class="first-clear-row"
                     >
                       <div class="min-w-0 truncate text-sm text-white">
-                        <span *ngIf="isToolReward(reward); else firstClearItem">
-                          Random Tool
-                        </span>
-                        <ng-template #firstClearItem>
-                          <app-item [item]="reward"></app-item>
-                        </ng-template>
+                        <app-item [item]="reward"></app-item>
                       </div>
                       <span class="text-sm tabular-nums text-white">
                         {{ rewardQuantityValue(reward) }}

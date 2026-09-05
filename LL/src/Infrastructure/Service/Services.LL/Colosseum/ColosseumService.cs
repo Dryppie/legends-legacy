@@ -588,7 +588,10 @@ public class ColosseumService : IColosseumService
     {
         var payload = string.Join("|",
             snapshot.BaseAttributes.OrderBy(x => x.AttributeType).Select(x => $"a:{x.AttributeType}:{x.Value}")
-                .Concat(snapshot.Equipment.OrderBy(x => x.Slot).Select(x => $"e:{x.Slot}:{x.ItemBaseId}:{x.Rarity}:{x.Potential}:{x.ItemXp}:{x.IsMasterpiece}:{x.IsLevelingItem}:{string.Join(",", x.InstanceModifiers.OrderBy(m => m.AttributeType).Select(m => $"{m.AttributeType}:{m.Amount}:{m.ModifierType}"))}"))
+                .Concat(snapshot.Equipment.OrderBy(x => x.Slot).Select(x =>
+                    $"e:{x.Slot}:{x.ItemBaseId}:{x.Tier}:{x.Rarity}:{x.Quality}:" +
+                    $"{x.ProgressionData?.State.Rank}:{x.ProgressionData?.State.ActiveStyleId}:" +
+                    $"{string.Join(",", x.InstanceModifiers.OrderBy(m => m.AttributeType).Select(m => $"{m.AttributeType}:{m.Amount}:{m.ModifierType}"))}"))
                 .Concat(snapshot.EquippedEssences.OrderBy(x => x.SlotIndex).Select(x => $"s:{x.SlotIndex}:{x.EssenceDefinitionId}:{x.AscensionTier}:{x.IsEvolved}")));
 
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(payload));

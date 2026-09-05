@@ -1,11 +1,9 @@
 using Application.Interfaces.Services.LL.CharacterActions;
-using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Quests;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
-using Domain.Models.Professions.Crafting;
 using Domain.Models.Regions.Areas;
 using Services.LL.CharacterActions;
 using Services.LL.Combat.Layers.Orchestration.Models;

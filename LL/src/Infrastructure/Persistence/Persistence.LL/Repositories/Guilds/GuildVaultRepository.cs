@@ -23,9 +23,7 @@ public sealed class GuildVaultRepository(IDbContext context) : IGuildVaultReposi
     public Task<InventoryItem?> GetDonationAsync(Guid characterId, Guid equipmentId, CancellationToken ct) =>
         context.InventoryItems
             .Include(x => x.ItemInstance).ThenInclude(x => x.ItemBase).ThenInclude(x => (x as EquipmentBase)!.AttributeModifiers)
-            .Include(x => x.ItemInstance).ThenInclude(x => x.ItemBase).ThenInclude(x => (x as EquipmentBase)!.ToolBonuses)
             .Include(x => (x.ItemInstance as EquipmentInstance)!.InstanceModifiers)
-            .Include(x => (x.ItemInstance as EquipmentInstance)!.ToolAffixes)
             .FirstOrDefaultAsync(x => x.InventoryId == characterId && x.ItemInstanceId == equipmentId, ct);
 
     public Task<bool> IsEquippedAsync(Guid equipmentId, CancellationToken ct) =>
@@ -43,9 +41,7 @@ public sealed class GuildVaultRepository(IDbContext context) : IGuildVaultReposi
         await context.AcquireStateSyncScopeLockAsync($"guild-vault:{guildId:N}", ct);
         return await context.GuildVaultItems
             .Include(x => x.EquipmentInstance).ThenInclude(x => x.ItemBase).ThenInclude(x => (x as EquipmentBase)!.AttributeModifiers)
-            .Include(x => x.EquipmentInstance).ThenInclude(x => x.ItemBase).ThenInclude(x => (x as EquipmentBase)!.ToolBonuses)
             .Include(x => x.EquipmentInstance).ThenInclude(x => x.InstanceModifiers)
-            .Include(x => x.EquipmentInstance).ThenInclude(x => x.ToolAffixes)
             .FirstOrDefaultAsync(x => x.Id == vaultItemId, ct);
     }
 

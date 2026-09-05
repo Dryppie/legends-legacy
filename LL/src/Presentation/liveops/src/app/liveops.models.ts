@@ -280,15 +280,6 @@ export interface EquipmentSupportItem {
 export interface EquipmentSupportDungeonRun {
   runId: string; dungeonId: string; name: string; status: string; currentRoomIndex: number;
   createdAtUtc: string; completedAtUtc: string | null; rewardsClaimedAtUtc: string | null;
-  commitment: {
-    characterId: string; runId: string; dungeonId: string; poolId: string; difficulty: number;
-    matchingChance: number; guaranteeCompletions: number;
-    target: EquipmentSupportItem | null;
-  } | null;
-  receipt: {
-    runId: string; poolId: string; securedAtUtc: string; claimedAtUtc: string | null;
-    previousProgress: number; progress: number; equipment: EquipmentSupportItem | null;
-  } | null;
   rewardRowCount: number;
   rewardRows: {
     rewardRowId: string; itemBaseId: string; name: string; itemType: string;
@@ -298,15 +289,8 @@ export interface EquipmentSupportDungeonRun {
 
 export interface EquipmentSupportSnapshot {
   dungeonRun?: EquipmentSupportDungeonRun | null;
-  rowLimit: number; equipmentCount: number; pendingRewardCount: number; progressTruncated: boolean;
+  rowLimit: number; equipmentCount: number;
   items: EquipmentSupportItem[];
-  pendingRewards: { runId: string; poolId: string; securedAtUtc: string; equipment: EquipmentSupportItem | null }[];
-  protection: { poolId: string; targetDefinitionId: string | null; completionsWithoutMatch: number; revision: number }[];
-  ordinary: {
-    poolId: string; hasEnteredRegion: boolean; targetDefinitionId: string | null; plainVictories: number;
-    requiredPlainVictories: number | null; sigilFamilyId: string | null; sigilVictories: number;
-    requiredSigilVictories: number | null; revision: number; lastEncounterAtUtc: string | null;
-  }[];
 }
 
 export interface PlayerSupportSnapshot {

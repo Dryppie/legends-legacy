@@ -56,7 +56,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         var encounterOutcomes = new List<IdleEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();
         var powerRewards = new List<InventoryItem>();
-        var craftingRewards = new List<InventoryItem>();
+        var miscellaneousRewards = new List<InventoryItem>();
         var essenceRewards = new List<InventoryItem>();
         var dungeonAccessRewards = new List<InventoryItem>();
         var totalExperience = 0;
@@ -114,7 +114,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             if (encounter.IsVictory)
             {
                 loot = combatLootByEncounterId[encounter.EncounterId];
-                ClassifyCombatLoot(loot, powerRewards, craftingRewards, essenceRewards);
+                ClassifyCombatLoot(loot, powerRewards, miscellaneousRewards, essenceRewards);
 
                 var essenceDrops = essenceDropsByEncounterId[encounter.EncounterId];
 
@@ -173,7 +173,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
             PowerRewards: powerRewards,
-            CraftingRewards: craftingRewards,
+            MiscellaneousRewards: miscellaneousRewards,
             EssenceRewards: essenceRewards,
             DungeonAccessRewards: dungeonAccessRewards,
             EncounterOutcomes: encounterOutcomes);
@@ -182,7 +182,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private static void ClassifyCombatLoot(
         IReadOnlyList<InventoryItem> loot,
         ICollection<InventoryItem> powerRewards,
-        ICollection<InventoryItem> craftingRewards,
+        ICollection<InventoryItem> miscellaneousRewards,
         ICollection<InventoryItem> essenceRewards)
     {
         foreach (var item in loot)
@@ -196,7 +196,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     powerRewards.Add(item);
                     break;
                 default:
-                    craftingRewards.Add(item);
+                    miscellaneousRewards.Add(item);
                     break;
             }
         }

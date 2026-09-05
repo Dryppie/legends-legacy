@@ -27,8 +27,6 @@ internal sealed class CombatSessionAccumulator
         finalResult.Loot = SummarizeItems(previous.CombatResult.Loot.Concat(finalResult.Loot));
         finalResult.ExperienceGained = checked(
             previous.CombatResult.ExperienceGained + finalResult.ExperienceGained);
-        finalResult.GatheringRewards = SummarizeGatheringRewards(
-            previous.CombatResult.GatheringRewards.Concat(finalResult.GatheringRewards));
 
         _session = new CombatSession
         {
@@ -56,8 +54,8 @@ internal sealed class CombatSessionAccumulator
             {
                 PowerItems = SummarizeItems(
                     first.RewardBreakdown.PowerItems.Concat(second.RewardBreakdown.PowerItems)),
-                CraftingItems = SummarizeItems(
-                    first.RewardBreakdown.CraftingItems.Concat(second.RewardBreakdown.CraftingItems)),
+                MiscellaneousItems = SummarizeItems(
+                    first.RewardBreakdown.MiscellaneousItems.Concat(second.RewardBreakdown.MiscellaneousItems)),
                 EssenceItems = SummarizeItems(
                     first.RewardBreakdown.EssenceItems.Concat(second.RewardBreakdown.EssenceItems)),
                 DungeonAccessItems = SummarizeItems(
@@ -83,32 +81,4 @@ internal sealed class CombatSessionAccumulator
             .OrderBy(item => item.ItemInstance.ItemBase.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-    private static List<GatheringRewardResult> SummarizeGatheringRewards(
-        IEnumerable<GatheringRewardResult> rewards) =>
-        rewards
-            .GroupBy(reward => (reward.ToolType, reward.NodeId))
-            .Select(group =>
-            {
-                var first = group.First();
-                return new GatheringRewardResult
-                {
-                    ToolType = first.ToolType,
-                    NodeId = first.NodeId,
-                    NodeName = first.NodeName,
-                    ToolName = first.ToolName,
-                    ToolRarity = first.ToolRarity,
-                    Success = group.Any(reward => reward.Success),
-                    ExperienceGained = checked(group.Sum(reward => reward.ExperienceGained)),
-                    ItemsGained = SummarizeItems(group.SelectMany(reward => reward.ItemsGained)),
-                    AppliedBonusEffects = [.. group
-                        .SelectMany(reward => reward.AppliedBonusEffects)
-                        .Distinct(StringComparer.OrdinalIgnoreCase)],
-                    Message = group
-                        .Select(reward => reward.Message)
-                        .LastOrDefault(message => !string.IsNullOrWhiteSpace(message))
-                };
-            })
-            .OrderBy(reward => reward.ToolType)
-            .ThenBy(reward => reward.NodeId, StringComparer.OrdinalIgnoreCase)
-            .ToList();
 }

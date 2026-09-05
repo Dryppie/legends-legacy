@@ -7,8 +7,6 @@ export function equipmentSourceLabel(value: string | null | undefined, fallback 
     ordinary: 'Combat reward',
     'protected-dungeon': 'Protected dungeon reward',
     'dungeon-completion': 'Dungeon completion',
-    'plain-recovery': 'Equipment recovery',
-    'baseline-recovery': 'Starter equipment recovery',
     salvage: 'Salvage',
     'admin-compensation': 'Administrator compensation',
   };

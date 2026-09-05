@@ -5,7 +5,6 @@ using AutoMapper;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Professions.Crafting;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EssenceSystem.Tests;

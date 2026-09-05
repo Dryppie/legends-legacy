@@ -100,7 +100,7 @@
           <p class="ll-eyebrow">Loadout</p>
           <h2 class="ll-heading text-lg">Equipped</h2>
         </div>
-        <span class="ll-item-chip">9 slots</span>
+        <span class="ll-item-chip">8 slots</span>
       </header>
 
       <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto">
@@ -129,15 +129,71 @@
           </div>
         </div>
 
-        <button
-          *ngIf="selectedEquipmentSlot()"
-          type="button"
-          class="ll-button"
-          (click)="clearEquipmentSlotFilter()"
-        >
-          Clear filter
-        </button>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+          <ng-container
+            *ngIf="massDismantleConfirmation(); else massDismantleControls"
+          >
+            <span class="text-xs text-secondary">
+              Dismantle {{ massDismantleCandidates.length }} shown items?
+            </span>
+            <button
+              type="button"
+              class="ll-button"
+              [disabled]="massDismantlePending()"
+              (click)="cancelMassDismantle()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="ll-button border-rose-500/50 text-rose-200"
+              [disabled]="massDismantlePending()"
+              (click)="requestMassDismantle()"
+            >
+              {{ massDismantlePending() ? "Dismantling..." : "Confirm" }}
+            </button>
+          </ng-container>
+
+          <ng-template #massDismantleControls>
+            <app-dropdown
+              class="block w-44 shrink-0"
+              appearance="field"
+              label="Maximum rarity"
+              [value]="massDismantleRarity()"
+              [options]="massDismantleRarityOptions"
+              [selectedValue]="massDismantleRarity()"
+              [disabled]="massDismantlePending()"
+              (selection)="selectMassDismantleRarityFromDropdown($event)"
+            ></app-dropdown>
+            <button
+              type="button"
+              class="ll-button ll-button-primary min-w-32 shrink-0 whitespace-nowrap px-4"
+              [disabled]="
+                massDismantlePending() || !massDismantleCandidates.length
+              "
+              (click)="requestMassDismantle()"
+            >
+              Dismantle {{ massDismantleCandidates.length }}
+            </button>
+          </ng-template>
+
+          <button
+            *ngIf="selectedEquipmentSlot()"
+            type="button"
+            class="ll-button"
+            (click)="clearEquipmentSlotFilter()"
+          >
+            Clear filter
+          </button>
+        </div>
       </header>
+
+      <div
+        *ngIf="massDismantleStatus() as message"
+        class="ll-state mx-3 mt-3"
+      >
+        {{ message }} Favorites and equipped items were protected.
+      </div>
 
       <app-filter-tabs
         *ngIf="tabLabels.length > 1"
@@ -174,6 +230,17 @@
               <span aria-hidden="true">{{
                 inventorySortIndicator("Name")
               }}</span>
+            </button>
+          </div>
+          <div role="columnheader" [attr.aria-sort]="inventoryAriaSort('Quality')">
+            <button
+              type="button"
+              class="w-full text-left transition-colors hover:text-primary"
+              [ngClass]="{ 'text-primary': inventorySort === 'Quality' }"
+              (click)="setInventorySort('Quality')"
+            >
+              Quality
+              <span aria-hidden="true">{{ inventorySortIndicator("Quality") }}</span>
             </button>
           </div>
           <div
@@ -243,12 +310,6 @@
                 : 'inventory-items'
             "
             [attr.data-item-base-id]="inventoryItem.itemInstance.itemBase.id"
-            [attr.data-tutorial-crafted-weapon]="
-              isOnboardingCraftedWeapon(inventoryItem) ? 'true' : null
-            "
-            [attr.data-tutorial-gathering-tool]="
-              isOnboardingGatheringTool(inventoryItem) ? 'true' : null
-            "
             (click)="handleInventoryItemClick(inventoryItem)"
             (dblclick)="openItemDetails(inventoryItem)"
           >
@@ -282,16 +343,19 @@
               *ngIf="equipmentInstance(inventoryItem) as equipment"
               class="inventory-list-quality"
             >
-              {{
-                equipment.progression
-                  ? "Rank " + equipment.progression.rank
-                  : '—'
-              }}
+              {{ equipment.quality }}
             </span>
 
             <span
               *ngIf="equipmentInstance(inventoryItem) as equipment"
-              class="inventory-list-potential min-w-0 truncate tabular-nums"
+              class="inventory-list-rank tabular-nums"
+            >
+              {{ equipment.progression?.rank ?? '—' }}
+            </span>
+
+            <span
+              *ngIf="equipmentInstance(inventoryItem) as equipment"
+              class="inventory-list-style min-w-0 truncate tabular-nums"
               [title]="equipment.progression ? equipmentStyleLabel(equipment.progression.activeStyleId) : ''"
             >
               {{ equipment.progression ? equipmentStyleLabel(equipment.progression.activeStyleId) : '—' }}
@@ -357,7 +421,6 @@
             [fitComparisonToContainer]="true"
             [inlineComparison]="true"
             [embedded]="true"
-            [compactCraftingDesign]="true"
           ></app-equipment-display>
 
           <ng-template #genericItem>
@@ -406,6 +469,15 @@
           </div>
 
           <ng-container *ngIf="isEquipmentItem(item); else openItemAction">
+            <button
+              *ngIf="canManageEquipment(item)"
+              type="button"
+              class="ll-button mb-2 w-full"
+              (click)="manageEquipment(item)"
+            >
+              Reinforce &amp; manage
+            </button>
+
             <div
               *ngIf="!isSelectedEquippedItem(item); else currentlyEquipped"
               class="w-full"
@@ -450,6 +522,80 @@
                 class="ll-state ll-state-danger mt-2"
               >
                 {{ message }}
+              </div>
+
+              <div
+                *ngIf="canDismantleEquipment(item)"
+                class="mt-2 border-t border-primary/20 pt-2"
+              >
+                <ng-container
+                  *ngIf="
+                    selectedDismantleConfirmation();
+                    else dismantleItemButton
+                  "
+                >
+                  <p class="mb-2 text-xs text-rose-200">
+                    Permanently dismantle this item{{
+                      item.isFavorite ? " even though it is a favorite" : ""
+                    }}?
+                  </p>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      class="ll-button"
+                      [disabled]="selectedDismantleLoading()"
+                      (click)="cancelSelectedDismantle()"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      class="ll-button border-rose-500/50 text-rose-200"
+                      [disabled]="selectedDismantleLoading()"
+                      (click)="requestSelectedDismantle(item)"
+                    >
+                      {{
+                        selectedDismantleLoading()
+                          ? "Dismantling..."
+                          : "Confirm"
+                      }}
+                    </button>
+                  </div>
+                </ng-container>
+
+                <ng-template #dismantleItemButton>
+                  <button
+                    type="button"
+                    class="ll-button w-full border-rose-500/40 text-rose-200"
+                    [disabled]="
+                      selectedDismantleLoading() ||
+                      (selectedDismantleQuote() &&
+                        !selectedDismantleQuote()?.canExecute &&
+                        !item.isFavorite)
+                    "
+                    (click)="requestSelectedDismantle(item)"
+                  >
+                    <ng-container
+                      *ngIf="selectedDismantleLoading(); else dismantleLabel"
+                    >
+                      Calculating dismantle value...
+                    </ng-container>
+                    <ng-template #dismantleLabel>
+                      Dismantle<span
+                        *ngIf="selectedDismantleQuote() as quote"
+                      >
+                        for {{ quote.partsReturned }} Parts</span
+                      >
+                    </ng-template>
+                  </button>
+                </ng-template>
+
+                <div
+                  *ngIf="selectedDismantleError() as message"
+                  class="ll-state ll-state-danger mt-2"
+                >
+                  {{ message }}
+                </div>
               </div>
 
               <div class="inventory-secondary-actions">

@@ -8,7 +8,6 @@ public sealed class EquipmentSnapshotConfiguration : IEntityTypeConfiguration<Eq
 {
     public void Configure(EntityTypeBuilder<EquipmentSnapshot> builder)
     {
-        builder.Property(snapshot => snapshot.EquipmentSetId).HasMaxLength(160);
         builder.Property(snapshot => snapshot.ProgressionData).HasColumnName("ModelEData")
             .HasConversion<Items.EquipmentDataConverter>().HasColumnType("jsonb");
     }

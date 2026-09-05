@@ -6,6 +6,7 @@ namespace Domain.Models.Dungeons.Runs;
 public sealed class DungeonRunState
 {
     public Guid RunId { get; set; }
+    public bool EquipmentBlueprintProcessed { get; set; }
     public int MasteryLevelAtStart { get; set; }
     public bool StartedWithoutWeapon { get; set; }
     public DungeonLootBag SecuredLoot { get; set; } = new();

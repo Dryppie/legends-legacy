@@ -1567,8 +1567,7 @@ public sealed class AchievementService : IAchievementService
 
     private static bool IsSetItem(EquipmentInstance item) =>
         item.AffinityTags.Any(IsSetTag) ||
-        item.BlueprintId?.Contains("set", StringComparison.OrdinalIgnoreCase) == true ||
-        item.BaseRecipeId?.Contains("set", StringComparison.OrdinalIgnoreCase) == true;
+        !string.IsNullOrWhiteSpace(item.ProgressionData?.EquipmentSetId);
 
     private static bool IsSetTag(string value) =>
         value.Equals("set", StringComparison.OrdinalIgnoreCase) ||

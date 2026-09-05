@@ -1,6 +1,4 @@
 import { BattleType } from '../../../core/state/combat-state/combatState';
-import { GatheringType } from '../enums/gatheringType';
-import { Rarity } from '../enums/rarity';
 import { InventoryItem } from '../inventoryItem';
 import { EssenceAbilityDto } from '../essence-system';
 
@@ -11,23 +9,9 @@ export interface CombatResultDto {
   startedAt: Date;
   outcome: BattleOutcome;
   loot: InventoryItem[];
-  gatheringRewards: GatheringRewardResult[];
   experienceGained: number;
   battleType: BattleType;
   entityStats: EntityStats[];
-}
-
-export interface GatheringRewardResult {
-  toolType: GatheringType;
-  nodeId: string;
-  nodeName: string;
-  toolName: string;
-  toolRarity: Rarity;
-  success: boolean;
-  experienceGained: number;
-  itemsGained: InventoryItem[];
-  appliedBonusEffects: string[];
-  message?: string;
 }
 
 export interface EntityStats {
@@ -137,7 +121,7 @@ export interface SessionSummary {
 
 export interface CombatRewardBreakdown {
   powerItems: InventoryItem[];
-  craftingItems: InventoryItem[];
+  miscellaneousItems: InventoryItem[];
   essenceItems: InventoryItem[];
   dungeonAccessItems: InventoryItem[];
 }

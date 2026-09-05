@@ -3,8 +3,16 @@
 >
   <div class="mb-3 flex shrink-0 items-start justify-between gap-4">
     <div>
-      <h2 class="ll-heading text-xl">Equip equipment</h2>
-      <p class="ll-copy mt-1">Review the change before equipping this item.</p>
+      <h2 class="ll-heading text-xl">
+        {{ managementOnly ? "Manage equipment" : "Equip equipment" }}
+      </h2>
+      <p class="ll-copy mt-1">
+        {{
+          managementOnly
+            ? "Reinforce or switch the variant of this item."
+            : "Review the change before equipping this item."
+        }}
+      </p>
     </div>
     <button
       type="button"
@@ -16,142 +24,208 @@
     </button>
   </div>
 
-  <div class="min-h-0 flex-1 overflow-y-auto border-t border-primary/20 pt-3">
-    <div *ngIf="requiresHandSelection" class="mb-3">
-      <div class="ll-item-meta mb-2 text-primary">Equip to</div>
-      <div class="ll-segmented grid grid-cols-2" aria-label="Choose hand">
-        <button
-          *ngFor="let option of equipSlotOptions"
-          type="button"
-          class="ll-segmented-button"
-          [ngClass]="{
-            'll-segmented-button-active': selectedSlotType === option,
-          }"
-          [attr.aria-pressed]="selectedSlotType === option"
-          (click)="selectSlot(option)"
-        >
-          {{ slotLabel(option) }}
-        </button>
-      </div>
+  <ng-container *ngIf="managementOnly; else equipFlow">
+    <div
+      class="min-h-0 flex-1 overflow-y-auto border-t border-primary/20 lg:grid lg:grid-cols-[minmax(17rem,2fr)_minmax(0,3fr)] lg:overflow-hidden"
+    >
+      <aside
+        class="min-w-0 p-4 lg:overflow-y-auto lg:border-r lg:border-primary/20"
+        aria-label="Selected equipment"
+      >
+        <app-equipment-display
+          [item]="equipmentInstance"
+          [equippedItems]="equippedItems"
+        ></app-equipment-display>
+
+        <app-inventory-transfer
+          *ngIf="inventoryItem as item"
+          class="mt-4 block"
+          [inventoryItem]="item"
+          (transferred)="onClose()"
+        ></app-inventory-transfer>
+      </aside>
+
+      <main class="min-w-0 p-4 lg:overflow-y-auto" aria-label="Manage item">
+        <app-equipment-upgrade-panel
+          *ngIf="
+            equipmentInstance.progression && !equipmentInstance.isGuildBorrowed
+          "
+          [equipmentInstance]="equipmentInstance"
+          [tabbed]="true"
+          (completed)="onClose()"
+        ></app-equipment-upgrade-panel>
+      </main>
     </div>
 
-    <app-equipment-display
-      [item]="equipmentInstance"
-      [comparisonItems]="equippedComparisons"
-      [equippedItems]="equippedItems"
-      comparisonSubjectLabel="Equipping"
-      [fitComparisonToContainer]="true"
-    ></app-equipment-display>
+    <div class="mt-0 flex shrink-0 justify-end border-t border-primary/20 pt-3">
+      <button type="button" class="ll-button" (click)="onClose()">Close</button>
+    </div>
+  </ng-container>
 
-    <section
-      *ngIf="characterComparison as comparison"
-      class="mt-4 rounded border border-primary/20 bg-black/20 p-3"
-      aria-label="Complete character result"
-    >
-      <div class="ll-item-meta text-primary">Complete character result</div>
-      <p class="mt-1 text-xs text-secondary">
-        Server-calculated at level {{ comparison.characterLevel }}, including
-        all equipped ratings and diminishing returns.
+  <ng-template #equipFlow>
+    <div class="min-h-0 flex-1 overflow-y-auto border-t border-primary/20 pt-3">
+      <div *ngIf="requiresHandSelection" class="mb-3">
+        <div class="ll-item-meta mb-2 text-primary">Equip to</div>
+        <div class="ll-segmented grid grid-cols-2" aria-label="Choose hand">
+          <button
+            *ngFor="let option of equipSlotOptions"
+            type="button"
+            class="ll-segmented-button"
+            [ngClass]="{
+              'll-segmented-button-active': selectedSlotType === option,
+            }"
+            [attr.aria-pressed]="selectedSlotType === option"
+            (click)="selectSlot(option)"
+          >
+            {{ slotLabel(option) }}
+          </button>
+        </div>
+      </div>
+
+      <app-equipment-display
+        [item]="equipmentInstance"
+        [comparisonItems]="managementOnly ? [] : equippedComparisons"
+        [equippedItems]="equippedItems"
+        comparisonSubjectLabel="Equipping"
+        [fitComparisonToContainer]="true"
+      ></app-equipment-display>
+
+      <section
+        *ngIf="characterComparison as comparison"
+        class="mt-4 rounded border border-primary/20 bg-black/20 p-3"
+        aria-label="Complete character result"
+      >
+        <div class="ll-item-meta text-primary">Complete character result</div>
+        <p class="mt-1 text-xs text-secondary">
+          Server-calculated at level {{ comparison.characterLevel }}, including
+          all equipped ratings and diminishing returns.
+        </p>
+
+        <div *ngIf="comparison.ratings.length" class="mt-3">
+          <div class="mb-1 text-xs font-medium text-primary">Ratings</div>
+          <div
+            *ngFor="let value of comparison.ratings"
+            class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-white/5 py-1 text-xs last:border-b-0"
+          >
+            <span class="truncate text-secondary">
+              {{ value.attributeType | attributeTypeFormat: true }}
+            </span>
+            <span class="tabular-nums text-white">
+              {{
+                value.before
+                  | attributeValueFormat: value.attributeType : false : true
+              }}
+              &rarr;
+              {{
+                value.after
+                  | attributeValueFormat: value.attributeType : false : true
+              }}
+            </span>
+            <span
+              class="min-w-12 text-right font-semibold tabular-nums"
+              [ngClass]="{
+                'text-emerald-400': value.difference > 0,
+                'text-rose-400': value.difference < 0,
+                'text-secondary': value.difference === 0,
+              }"
+            >
+              {{
+                value.difference
+                  | attributeValueFormat: value.attributeType : true : true
+              }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="comparison.effectiveAttributes.length" class="mt-3">
+          <div class="mb-1 text-xs font-medium text-primary">
+            Effective combat attributes
+          </div>
+          <div
+            *ngFor="let value of comparison.effectiveAttributes"
+            class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-white/5 py-1 text-xs last:border-b-0"
+          >
+            <span class="truncate text-secondary">
+              {{ value.attributeType | attributeTypeFormat }}
+            </span>
+            <span class="tabular-nums text-white">
+              {{ value.before | attributeValueFormat: value.attributeType }}
+              &rarr;
+              {{ value.after | attributeValueFormat: value.attributeType }}
+            </span>
+            <span
+              class="min-w-12 text-right font-semibold tabular-nums"
+              [ngClass]="{
+                'text-emerald-400': value.difference > 0,
+                'text-rose-400': value.difference < 0,
+                'text-secondary': value.difference === 0,
+              }"
+            >
+              {{
+                value.difference
+                  | attributeValueFormat: value.attributeType : true
+              }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <p *ngIf="comparisonLoading" class="mt-3 text-xs text-secondary">
+        Calculating complete character result&hellip;
       </p>
 
-      <div *ngIf="comparison.ratings.length" class="mt-3">
-        <div class="mb-1 text-xs font-medium text-primary">Ratings</div>
-        <div
-          *ngFor="let value of comparison.ratings"
-          class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-white/5 py-1 text-xs last:border-b-0"
-        >
-          <span class="truncate text-secondary">
-            {{ value.attributeType | attributeTypeFormat: true }}
-          </span>
-          <span class="tabular-nums text-white">
-            {{ value.before | attributeValueFormat: value.attributeType:false:true }}
-            &rarr;
-            {{ value.after | attributeValueFormat: value.attributeType:false:true }}
-          </span>
-          <span
-            class="min-w-12 text-right font-semibold tabular-nums"
-            [ngClass]="{
-              'text-emerald-400': value.difference > 0,
-              'text-rose-400': value.difference < 0,
-              'text-secondary': value.difference === 0,
-            }"
-          >
-            {{ value.difference | attributeValueFormat: value.attributeType:true:true }}
-          </span>
-        </div>
-      </div>
+      <app-equipment-upgrade-panel
+        *ngIf="
+          equipmentInstance.progression && !equipmentInstance.isGuildBorrowed
+        "
+        [equipmentInstance]="equipmentInstance"
+        (completed)="onClose()"
+      ></app-equipment-upgrade-panel>
 
-      <div *ngIf="comparison.effectiveAttributes.length" class="mt-3">
-        <div class="mb-1 text-xs font-medium text-primary">Effective combat attributes</div>
-        <div
-          *ngFor="let value of comparison.effectiveAttributes"
-          class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-white/5 py-1 text-xs last:border-b-0"
-        >
-          <span class="truncate text-secondary">
-            {{ value.attributeType | attributeTypeFormat }}
-          </span>
-          <span class="tabular-nums text-white">
-            {{ value.before | attributeValueFormat: value.attributeType }}
-            &rarr;
-            {{ value.after | attributeValueFormat: value.attributeType }}
-          </span>
-          <span
-            class="min-w-12 text-right font-semibold tabular-nums"
-            [ngClass]="{
-              'text-emerald-400': value.difference > 0,
-              'text-rose-400': value.difference < 0,
-              'text-secondary': value.difference === 0,
-            }"
-          >
-            {{ value.difference | attributeValueFormat: value.attributeType:true }}
-          </span>
-        </div>
-      </div>
-    </section>
+      <app-inventory-transfer
+        *ngIf="inventoryItem as item"
+        class="mt-4 block"
+        [inventoryItem]="item"
+        (transferred)="onClose()"
+      ></app-inventory-transfer>
+    </div>
 
-    <p *ngIf="comparisonLoading" class="mt-3 text-xs text-secondary">
-      Calculating complete character result&hellip;
-    </p>
-
-    <app-inventory-transfer
-      *ngIf="inventoryItem as item"
-      class="mt-4 block"
-      [inventoryItem]="item"
-      (transferred)="onClose()"
-    ></app-inventory-transfer>
-  </div>
-
-  <div
-    class="mt-4 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-primary/20 pt-3"
-  >
-    <span
-      *ngIf="!meetsLevelRequirement"
-      class="ll-state ll-state-danger mr-auto"
+    <div
+      class="mt-4 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-primary/20 pt-3"
     >
-      Requires character level {{ requiredLevel }}
-    </span>
-    <span *ngIf="requiresHandSelection" class="mr-auto text-xs text-secondary">
-      Equipping to {{ slotLabel(selectedSlotType) }}
-    </span>
-    <button
-      type="button"
-      class="ll-button"
-      data-tour="tutorial-equipment-close"
-      (click)="onClose()"
-    >
-      Cancel
-    </button>
-
-    <button
-      type="button"
-      class="ll-button ll-button-primary"
-      data-tour="tutorial-equipment-equip"
-      [disabled]="equipmentState.loading() || !meetsLevelRequirement"
-      (click)="onEquip()"
-    >
-      Equip<span *ngIf="requiresHandSelection">
-        to {{ slotLabel(selectedSlotType) }}</span
+      <span
+        *ngIf="!managementOnly && !isEquipped && !meetsLevelRequirement"
+        class="ll-state ll-state-danger mr-auto"
       >
-    </button>
-  </div>
+        Requires character level {{ requiredLevel }}
+      </span>
+      <span
+        *ngIf="requiresHandSelection"
+        class="mr-auto text-xs text-secondary"
+      >
+        Equipping to {{ slotLabel(selectedSlotType) }}
+      </span>
+      <button
+        type="button"
+        class="ll-button"
+        data-tour="tutorial-equipment-close"
+        (click)="onClose()"
+      >
+        {{ managementOnly || isEquipped ? "Close" : "Cancel" }}
+      </button>
+
+      <button
+        *ngIf="!managementOnly && !isEquipped"
+        type="button"
+        class="ll-button ll-button-primary"
+        data-tour="tutorial-equipment-equip"
+        [disabled]="equipmentState.loading() || !meetsLevelRequirement"
+        (click)="onEquip()"
+      >
+        Equip<span *ngIf="requiresHandSelection">
+          to {{ slotLabel(selectedSlotType) }}</span
+        >
+      </button>
+    </div>
+  </ng-template>
 </div>

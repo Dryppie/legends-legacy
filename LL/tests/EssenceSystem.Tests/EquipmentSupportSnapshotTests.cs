@@ -1,8 +1,11 @@
 using Domain.Models.Inventories;
+using API.LiveOps.Support;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Dungeons.Runs;
+using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Services.LL.Items;
@@ -60,7 +63,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
     }
 
     [Fact]
-    public async Task Equipment_snapshot_reads_frozen_pending_rewards_without_claiming_or_advancing_targets()
+    public async Task Equipment_snapshot_reads_frozen_pending_rewards_without_claiming_them()
     {
         var seeded = await SeedAsync();
         await using var db = new LLDbContext(seeded.Options);
@@ -69,34 +72,40 @@ public sealed partial class LiveOpsPlayerSupportSnapshotTests
             new(EquipmentAwardKind.ProtectedReward, "dungeon-test", "secured"),
             new(EquipmentOwnershipKind.BoundPersonal, seeded.CharacterId)), catalog.Evaluator);
         var runId = Guid.NewGuid();
-        db.EquipmentProtectionReceipts.Add(new() { CharacterId = seeded.CharacterId, RunId = runId,
-            Outcome = new(runId, "pool", 7, 0, data, Now) });
-        var claimedId = Guid.NewGuid();
-        db.EquipmentProtectionReceipts.Add(new() { CharacterId = seeded.CharacterId, RunId = claimedId,
-            Outcome = new(claimedId, "pool", 7, 0, data, Now), ClaimedAtUtc = Now });
-        var protection = new EquipmentProtectionProgress { CharacterId = seeded.CharacterId, PoolId = "pool" };
-        protection.Select("later-target");
-        db.EquipmentProtectionProgress.Add(protection);
-        var ordinary = new CombatAcquisitionProgress { CharacterId = seeded.CharacterId, PoolId = "ordinary" };
-        ordinary.Select(null, new("sigil", "sigil-book", 4320));
-        ordinary.Apply(1, Now, true);
-        db.CombatAcquisitionProgress.Add(ordinary);
+        db.DungeonRuns.Add(new DungeonRun
+        {
+            Id = runId,
+            CharacterId = seeded.CharacterId,
+            DungeonDefinitionId = "goblin_mines",
+            DungeonDefinitionName = "Goblin Mines",
+            Status = DungeonRunStatus.Completed,
+            CreatedAt = Now,
+            CompletedAt = Now,
+            PendingRewards = [new RunReward
+            {
+                Id = data.State.Id,
+                ItemId = data.ItemBaseId,
+                Name = data.DisplayName,
+                ItemType = ItemType.Equipment,
+                Quantity = 1,
+                Source = "dungeon-completion",
+                ProgressionData = data
+            }]
+        });
         await db.SaveChangesAsync();
 
         var service = CreateService(new TestContextFactory(seeded.Options));
         for (var i = 0; i < 2; i++)
         {
             var snapshot = (await service.GetAsync(seeded.CharacterId, default))!.Equipment.Data!;
-            var pending = Assert.Single(snapshot.PendingRewards);
-            Assert.Equal(1, snapshot.PendingRewardCount);
-            Assert.Equal(runId, pending.RunId);
+            var run = Assert.IsType<EquipmentSupportDungeonRunDto>(snapshot.DungeonRun);
+            Assert.Equal(runId, run.RunId);
+            var pending = Assert.Single(run.RewardRows);
             Assert.Equal(data.State.Id, pending.Equipment!.InstanceId);
             Assert.Equal(1, pending.Equipment.Progression!.Rank);
-            Assert.Equal("later-target", Assert.Single(snapshot.Protection).TargetDefinitionId);
-            Assert.Equal(1, Assert.Single(snapshot.Ordinary).SigilVictories);
         }
         db.ChangeTracker.Clear();
-        Assert.Null((await db.EquipmentProtectionReceipts.SingleAsync(x => x.RunId == runId)).ClaimedAtUtc);
+        Assert.Null((await db.DungeonRuns.SingleAsync(x => x.Id == runId)).RewardsClaimedAt);
         Assert.Empty(await db.InventoryItems.Where(x => x.InventoryId == seeded.CharacterId).ToListAsync());
     }
 

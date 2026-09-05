@@ -10,16 +10,11 @@ public sealed class JsonEventQuestDefinitionProvider : IEventQuestDefinitionProv
     private static readonly HashSet<string> ObjectiveTypes =
     [
         "CombatEncounterCompleted",
-        "AreaActionCompletedWithTool",
-        "ResourceGathered",
         "EssenceAbsorbed",
         "EssenceFocusSet",
         "FocusedCreatureEssenceReceived",
         "EssenceAscended",
         "CompatibleEssenceLoadout",
-        "EquipmentCrafted",
-        "EquipmentTempered",
-        "TemperingActionCompleted",
         "CharacterLevelReached",
         "ColosseumBattleStarted",
         "TournamentBattleCompleted",

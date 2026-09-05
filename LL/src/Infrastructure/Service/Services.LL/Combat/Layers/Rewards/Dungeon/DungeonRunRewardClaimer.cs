@@ -18,22 +18,19 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IInventoryService _inventoryService;
-    private readonly Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? _progression;
 
     public DungeonRunRewardClaimer(
         IExperienceRewardWriter experienceWriter,
         ICurrencyRewardWriter currencyWriter,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
-        IInventoryService inventoryService,
-        Application.Interfaces.Services.LL.Items.IEquipmentAcquisitionService? progression = null)
+        IInventoryService inventoryService)
     {
         _experienceWriter = experienceWriter;
         _currencyWriter = currencyWriter;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _inventoryService = inventoryService;
-        _progression = progression;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -67,7 +64,6 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
 
         if (rewardState.Items.Count <= 0 && equipmentProgressionRewards.Length == 0)
         {
-            if (_progression != null) await _progression.MarkClaimedAsync(run, cancellationToken);
             return [];
         }
 
@@ -109,7 +105,6 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
                 cancellationToken);
         }
 
-        if (_progression != null) await _progression.MarkClaimedAsync(run, cancellationToken);
         return inventoryItems;
     }
 

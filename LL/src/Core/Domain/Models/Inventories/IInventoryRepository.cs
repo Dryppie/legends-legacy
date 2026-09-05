@@ -36,14 +36,6 @@ public interface IInventoryRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken);
-    /// <summary>
-    /// Try to remove quantity through item ids
-    /// </summary>
-    /// <param name="characterId"></param>
-    /// <param name=""></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
     Task<bool> TryRemoveItemsByBaseIdAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
     Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
     /// <summary>

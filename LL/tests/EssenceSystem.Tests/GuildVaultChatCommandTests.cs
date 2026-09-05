@@ -60,7 +60,7 @@ public sealed class GuildVaultChatCommandTests
             {
                 Id = "plain-hatchet",
                 Name = "Plain Hatchet",
-                EquipmentType = EquipmentType.Tool
+                EquipmentType = EquipmentType.Head
             }
         };
         public RecordingPublisher Publisher { get; } = new();

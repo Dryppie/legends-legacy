@@ -7,7 +7,9 @@
     class="max-h-full w-full overflow-hidden"
     [ngClass]="
       inventoryEquipment
-        ? 'sm:w-[min(52rem,calc(100vw-2rem))]'
+        ? inventoryEquipment.mode === 'manage'
+          ? 'sm:w-[min(64rem,calc(100vw-2rem))]'
+          : 'sm:w-[min(52rem,calc(100vw-2rem))]'
         : 'sm:w-2/3 lg:w-2/5'
     "
     role="dialog"
@@ -34,7 +36,8 @@
     ></app-inventory-item-modal>
     <app-inventory-equipment-modal
       *ngIf="inventoryEquipment"
-      [equipmentInstance]="inventoryEquipment"
+      [equipmentInstance]="inventoryEquipment.equipment"
+      [managementOnly]="inventoryEquipment.mode === 'manage'"
       (close)="onInventoryEquipmentModalClose()"
     >
     </app-inventory-equipment-modal>

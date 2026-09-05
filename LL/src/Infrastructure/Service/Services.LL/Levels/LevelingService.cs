@@ -4,7 +4,6 @@ using Domain.Helpers;
 using Domain.Helpers.Constants;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Professions;
 using MediatR;
 using Services.LL.Interfaces;
 

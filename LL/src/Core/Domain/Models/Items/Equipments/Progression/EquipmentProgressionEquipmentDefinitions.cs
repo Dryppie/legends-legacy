@@ -1,6 +1,5 @@
 using System.Collections.Frozen;
 using Domain.Models.Attributes;
-using Domain.Models.Professions.Crafting.V2;
 
 namespace Domain.Models.Items.Equipments.Progression;
 
@@ -8,8 +7,12 @@ namespace Domain.Models.Items.Equipments.Progression;
 public enum EquipmentRarity
 {
     Common = (int)Rarity.Common,
+    Uncommon = (int)Rarity.Uncommon,
     Rare = (int)Rarity.Rare,
-    Legendary = (int)Rarity.Legendary
+    Epic = (int)Rarity.Epic,
+    Unique = (int)Rarity.Unique,
+    Legendary = (int)Rarity.Legendary,
+    Legacy = (int)Rarity.Legacy
 }
 
 public sealed class EquipmentArchetype
@@ -26,7 +29,7 @@ public sealed class EquipmentArchetype
     {
         Id = EquipmentValidation.Id(id);
         ItemBaseId = EquipmentValidation.Id(itemBaseId);
-        if (!Enum.IsDefined(equipmentType) || equipmentType == EquipmentType.Tool)
+        if (!Enum.IsDefined(equipmentType))
             throw new ArgumentOutOfRangeException(nameof(equipmentType));
         ArgumentNullException.ThrowIfNull(behavior);
         var expectedHandedness = equipmentType is EquipmentType.OneHanded or EquipmentType.TwoHanded or EquipmentType.OffHand

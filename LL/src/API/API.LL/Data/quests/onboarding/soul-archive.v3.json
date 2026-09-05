@@ -44,6 +44,18 @@
   ],
   "rewards": [
     {
+      "key": "starter_fury_blueprint",
+      "quantity": 1,
+      "type": "Item",
+      "itemBaseId": "item.blueprint_fury"
+    },
+    {
+      "key": "starter_arms_chest",
+      "quantity": 1,
+      "type": "Item",
+      "itemBaseId": "item.arms_chest"
+    },
+    {
       "key": "starter_cinders",
       "quantity": 500,
       "type": "Cinders"

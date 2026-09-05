@@ -39,7 +39,9 @@ public sealed partial class LiveOpsAdministrationTests
         await db.SaveChangesAsync();
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Content:Root"] = Path.GetFullPath(Path.Combine(TestContentPaths.FindApiRoot(), "..", "API.LiveOps", "bin", "Release", "net10.0", "Data"))
+            ["Content:Root"] = Path.Combine(
+                Path.GetDirectoryName(typeof(LiveOpsApplication).Assembly.Location)!,
+                "Data")
         }).Build();
         var services = new ServiceCollection();
         services.AddLogging();

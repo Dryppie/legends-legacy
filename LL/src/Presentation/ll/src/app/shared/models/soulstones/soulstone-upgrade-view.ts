@@ -1,8 +1,6 @@
 export type SoulstoneUpgradeBranch =
   | 'EssenceArchive'
   | 'CombatProgression'
-  | 'Gathering'
-  | 'Crafting'
   | 'Dungeons'
   | 'AccountConvenience';
 

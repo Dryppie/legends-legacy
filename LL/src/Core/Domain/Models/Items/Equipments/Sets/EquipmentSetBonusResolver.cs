@@ -15,8 +15,8 @@ public static class EquipmentSetBonusResolver
 
         return equipment
             .DistinctBy(item => item.Id)
-            .Where(item => !string.IsNullOrWhiteSpace(item.EquipmentSetId))
-            .GroupBy(item => item.EquipmentSetId!, StringComparer.OrdinalIgnoreCase)
+            .Where(item => !string.IsNullOrWhiteSpace(item.ProgressionData?.EquipmentSetId))
+            .GroupBy(item => item.ProgressionData!.EquipmentSetId!, StringComparer.OrdinalIgnoreCase)
             .Select(group => Resolve(group.Key, group.ToArray(), definitionsById))
             .Where(state => state is not null)
             .Cast<EquipmentSetState>()

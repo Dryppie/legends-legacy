@@ -10,7 +10,13 @@ import { GameRealtimeStore } from '../../real-time/game-realtime/game-realtime-s
 import { CharacterStateService } from '../character/character-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { DungeonStateService } from './dungeon-state.service';
-import { DungeonService } from './dungeon.service';
+import {
+  DungeonActionOutcome,
+  DungeonRun,
+  DungeonRunStatus,
+  DungeonService,
+} from './dungeon.service';
+import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 
 describe('DungeonStateService dungeon actions', () => {
   it('uses the canonical rest action at a Rest Site', () => {
@@ -34,6 +40,7 @@ describe('DungeonStateService synchronization', () => {
       'getActiveDungeon',
       'getAvailableDungeons',
       'claimDungeonRewards',
+      'executeDungeonAction',
     ]);
     dungeonService.getActiveDungeon.and.returnValue(of(null));
     dungeonService.getAvailableDungeons.and.returnValue(
@@ -53,7 +60,12 @@ describe('DungeonStateService synchronization', () => {
       providers: [
         DungeonStateService,
         { provide: DungeonService, useValue: dungeonService },
-        { provide: CombatService, useValue: {} },
+        {
+          provide: CombatService,
+          useValue: jasmine.createSpyObj<CombatService>('CombatService', [
+            'startDungeonCombatSimulation',
+          ]),
+        },
         {
           provide: GameRealtimeEventRegistry,
           useValue: { reconnectCount: signal(0) },
@@ -84,6 +96,59 @@ describe('DungeonStateService synchronization', () => {
       jasmine.any(Function),
     );
   });
+
+  for (const status of [
+    DungeonRunStatus.Active,
+    DungeonRunStatus.Completed,
+    DungeonRunStatus.Failed,
+  ]) {
+    it(`applies ${status} battle results without opening combat when instant-skip is on`, () => {
+      const state = TestBed.inject(DungeonStateService);
+      const run = { id: 'run-1', status } as DungeonRun;
+      const combatSession = { combatResult: {} } as CombatSessionDto;
+      dungeonService.executeDungeonAction.and.returnValue(
+        of({
+          data: {
+            run,
+            hub: {
+              sigilFragments: 9,
+              sigilAssemblyEnabled: true,
+              sigilAssemblyCost: 3,
+              dungeons: [],
+            },
+            outcome: DungeonActionOutcome.CombatVictory,
+            combatSession,
+            message: 'Battle resolved',
+          },
+          domainVersions: { dungeons: 2 },
+        }),
+      );
+      state.setActiveDungeon({ id: 'run-1' } as DungeonRun);
+      expect(state.instantSkipBattles()).toBeFalse();
+      state.toggleInstantSkipBattles();
+
+      state.fight();
+
+      expect(dungeonService.executeDungeonAction).toHaveBeenCalledOnceWith(
+        'run-1',
+        { actionId: 'fight', payload: undefined },
+      );
+      expect(state.activeDungeon()).toBe(run);
+      expect(state.sigilFragments()).toBe(9);
+      expect(state.combatSession()).toBe(combatSession);
+      expect(state.message()).toBe('Battle resolved');
+      expect(state.loading()).toBeFalse();
+      const combat = TestBed.inject(CombatService);
+      expect(combat.startDungeonCombatSimulation).not.toHaveBeenCalled();
+
+      state.toggleInstantSkipBattles();
+      state.fight();
+
+      expect(combat.startDungeonCombatSimulation).toHaveBeenCalledOnceWith(
+        combatSession.combatResult,
+      );
+    });
+  }
 
   it('applies the versioned claim hub without a follow-up availability GET', () => {
     dungeonService.claimDungeonRewards.and.returnValue(

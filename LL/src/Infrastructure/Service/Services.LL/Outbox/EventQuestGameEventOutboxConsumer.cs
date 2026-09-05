@@ -23,8 +23,6 @@ public sealed class EventQuestGameEventOutboxConsumer(
             or GameEventTypes.EssenceFocusSet
             or GameEventTypes.FocusedCreatureEssenceReceived
             or GameEventTypes.EssenceAscended
-            or GameEventTypes.EquipmentCrafted
-            or GameEventTypes.EquipmentTempered
             or GameEventTypes.IdleCombatEncounterCompleted
             or GameEventTypes.CharacterCreated
             or GameEventTypes.CharacterLevelReached
@@ -66,8 +64,6 @@ public sealed class EventQuestGameEventOutboxConsumer(
             GameEventTypes.FocusedCreatureEssenceReceived => CreateFocusedEssenceTrigger(
                 Read<FocusedCreatureEssenceReceivedPayload>(message)),
             GameEventTypes.EssenceAscended => QuestTrigger.EssenceAscended(),
-            GameEventTypes.EquipmentCrafted => CreateEquipmentCraftedTrigger(Read<EquipmentCraftedPayload>(message)),
-            GameEventTypes.EquipmentTempered => CreateEquipmentTemperedTrigger(Read<EquipmentTemperedPayload>(message)),
             GameEventTypes.IdleCombatEncounterCompleted => CreateCombatTrigger(Read<IdleCombatEncounterCompletedPayload>(message)),
             GameEventTypes.CharacterCreated => QuestTrigger.CharacterLevelReached(1),
             GameEventTypes.CharacterLevelReached => QuestTrigger.CharacterLevelReached(Read<CharacterLevelReachedPayload>(message).Level),
@@ -91,23 +87,6 @@ public sealed class EventQuestGameEventOutboxConsumer(
         }
     }
 
-    private static QuestTrigger CreateEquipmentCraftedTrigger(EquipmentCraftedPayload payload) =>
-        QuestTrigger.EquipmentCrafted(
-            payload.CraftedItems.Select(x => x.ItemBaseId).ToList(),
-            payload.CraftedItems.Select(x => x.Tier).ToList(),
-            payload.CraftedItems.Select(x => x.BaseRecipeId).ToList(),
-            payload.CraftedItems.Select(x => x.Quality).ToList(),
-            payload.CraftedItems.Select(x => x.Potential).ToList());
-
-    private static QuestTrigger CreateEquipmentTemperedTrigger(EquipmentTemperedPayload payload) =>
-        QuestTrigger.EquipmentTempered(
-            payload.CompletedItems.Select(x => x.ItemBaseId).ToList(),
-            payload.CompletedItems.Select(x => x.Tier).ToList(),
-            payload.CompletedItems.Select(x => x.BaseRecipeId).ToList(),
-            payload.CompletedItems.Select(x => x.Quality).ToList(),
-            payload.CompletedItems.Select(x => x.Potential).ToList(),
-            payload.Summary.TotalActions);
-
     private static QuestTrigger CreateFocusedEssenceTrigger(FocusedCreatureEssenceReceivedPayload payload) =>
         QuestTrigger.FocusedCreatureEssenceReceived(payload.CreatureDefinitionId, payload.EssenceDefinitionId);
 
@@ -116,9 +95,7 @@ public sealed class EventQuestGameEventOutboxConsumer(
             payload.AreaId,
             payload.WonEncounter,
             Math.Max(1, payload.ActionCount),
-            payload.EquippedGatheringType,
-            payload.WinningEncounterCount,
-            payload.GatheredResourceCount);
+            payload.WinningEncounterCount);
 
     private T Read<T>(GameEventOutboxMessage message) =>
         JsonSerializer.Deserialize<T>(message.PayloadJson, jsonOptions)

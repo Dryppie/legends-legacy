@@ -176,7 +176,7 @@ public sealed partial class ProphecyLifecycleTests
         [
             Definition("daily.steady.only", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Combat),
             Definition("daily.focused.only", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Essence),
-            Definition("daily.ominous.only", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Gathering),
+            Definition("daily.ominous.only", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Treasure),
             Definition("weekly.greater", ProphecyScope.Weekly, ProphecySlotType.Greater, ProphecyCategory.Combat)
         ]);
         var overview = await fixture.Service.GetOverviewAsync(
@@ -261,7 +261,7 @@ public sealed partial class ProphecyLifecycleTests
         Definition("daily.steady.treasure", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Treasure),
         Definition("daily.focused", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Essence),
         Definition("daily.focused.dungeon", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Dungeon),
-        Definition("daily.ominous", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Gathering),
+        Definition("daily.ominous", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Treasure),
         Definition("daily.ominous.survival", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Survival),
         Definition("weekly.greater", ProphecyScope.Weekly, ProphecySlotType.Greater, ProphecyCategory.Combat)
     ];

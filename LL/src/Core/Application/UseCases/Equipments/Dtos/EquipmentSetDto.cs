@@ -1,6 +1,6 @@
-using Application.Interfaces.Services.LL.Professions;
 using AutoMapper;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Sets;
 
 namespace Application.UseCases.Equipments.Dtos;
@@ -43,15 +43,15 @@ public sealed class EquipmentSetBonusDto
 public sealed class EquipmentSetMetadataResolver
     : IValueResolver<EquipmentInstance, EquipmentInstanceDto, EquipmentSetDto?>
 {
-    private readonly ICraftingDefinitionProvider? _definitions;
+    private readonly EquipmentCatalog? _catalog;
 
     public EquipmentSetMetadataResolver()
     {
     }
 
-    public EquipmentSetMetadataResolver(ICraftingDefinitionProvider definitions)
+    public EquipmentSetMetadataResolver(EquipmentCatalog catalog)
     {
-        _definitions = definitions;
+        _catalog = catalog;
     }
 
     public EquipmentSetDto? Resolve(
@@ -60,10 +60,11 @@ public sealed class EquipmentSetMetadataResolver
         EquipmentSetDto? destinationMember,
         ResolutionContext context)
     {
-        if (_definitions is null || string.IsNullOrWhiteSpace(source.EquipmentSetId))
+        var equipmentSetId = source.ProgressionData?.EquipmentSetId;
+        if (_catalog is null || string.IsNullOrWhiteSpace(equipmentSetId))
             return null;
 
         return EquipmentSetDto.FromDefinition(
-            _definitions.GetEquipmentSet(source.EquipmentSetId));
+            _catalog.GetEquipmentSet(equipmentSetId));
     }
 }

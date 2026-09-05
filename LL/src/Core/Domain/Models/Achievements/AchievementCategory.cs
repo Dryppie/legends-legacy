@@ -6,8 +6,6 @@ public enum AchievementCategory
     Combat = 1,
     Essences = 2,
     Dungeons = 3,
-    Crafting = 4,
-    Gathering = 5,
     Colosseum = 6,
     WorldTower = 7,
     Guild = 8,

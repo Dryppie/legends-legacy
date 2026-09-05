@@ -4,8 +4,6 @@ describe('equipmentSourceLabel compatibility', () => {
   it('shows readable labels for stored equipment reward sources', () => {
     expect(equipmentSourceLabel('model-e:starter')).toBe('Starter equipment');
     expect(equipmentSourceLabel('model-e:protected-dungeon')).toBe('Protected dungeon reward');
-    expect(equipmentSourceLabel('model-e:plain-recovery')).toBe('Equipment recovery');
-    expect(equipmentSourceLabel('model-e:baseline-recovery')).toBe('Starter equipment recovery');
     expect(equipmentSourceLabel('equipment:dungeon-completion')).toBe('Dungeon completion');
   });
 

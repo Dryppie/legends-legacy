@@ -202,14 +202,6 @@
           "quantity": 1
         }
       ]
-    },
-    {
-      "scope": "Weekly",
-      "category": "Crafting",
-      "difficulty": "Uncommon",
-      "reward": {
-        "items": []
-      }
     }
   ]
 }

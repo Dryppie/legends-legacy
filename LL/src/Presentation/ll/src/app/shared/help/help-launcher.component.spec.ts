@@ -24,10 +24,10 @@ describe('HelpLauncherComponent', () => {
       'open',
     ]);
     router = {
-      url: '/game/professions/crafting',
+      url: '/game/character/inventory',
       routerState: {
         snapshot: {
-          root: { data: { guidePageId: 'crafting' }, firstChild: null },
+          root: { data: { guidePageId: 'inventory' }, firstChild: null },
         },
       },
     };
@@ -46,7 +46,7 @@ describe('HelpLauncherComponent', () => {
 
   it('renders the inline guide control and opens the requested guide', () => {
     component.presentation = 'inline';
-    component.pageId = 'crafting';
+    component.pageId = 'inventory';
     fixture.detectChanges();
 
     const button: HTMLButtonElement = fixture.nativeElement.querySelector(
@@ -63,7 +63,7 @@ describe('HelpLauncherComponent', () => {
 
     button.click();
 
-    expect(overlay.open).toHaveBeenCalledOnceWith('crafting');
+    expect(overlay.open).toHaveBeenCalledOnceWith('inventory');
   });
 
   it('resolves the guide from route metadata when no page is specified', () => {
@@ -75,6 +75,6 @@ describe('HelpLauncherComponent', () => {
     );
     button.click();
 
-    expect(overlay.open).toHaveBeenCalledOnceWith('crafting');
+    expect(overlay.open).toHaveBeenCalledOnceWith('inventory');
   });
 });

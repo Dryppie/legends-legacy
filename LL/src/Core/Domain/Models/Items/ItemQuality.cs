@@ -6,5 +6,5 @@ public enum ItemQuality
     Standard,
     Fine,
     Exceptional,
-    Masterwork
+    Masterpiece
 }

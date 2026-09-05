@@ -23,13 +23,6 @@ public enum AchievementRequirementType
     DungeonCompletedWithoutDefeat = 18,
     DungeonCompletedWithoutRetreat = 19,
     DungeonTrapsTriggered = 20,
-    ItemsCrafted = 21,
-    ItemsTempered = 22,
-    MasterpiecesCrafted = 23,
-    BlueprintsUnlocked = 24,
-    SetItemsCrafted = 25,
-    HighQualityItemCraftedBelowPotential = 26,
-    CursedCraftingOutcomes = 27,
     ColosseumBattlesCompleted = 28,
     ColosseumBattlesWon = 29,
     DefeatColosseumOpponentRatingAbove = 30,
@@ -45,13 +38,11 @@ public enum AchievementRequirementType
     SoulstoneUpgradesPurchased = 40,
     AllSoulstoneUpgradesMaxed = 41,
     DungeonMasteryLevelReached = 42,
-    CraftingMasteryLevelReached = 43,
     AchievementsUnlocked = 44,
     NonHiddenAchievementsCompleted = 45,
     TitlesUnlocked = 46,
     ColosseumTournamentsCompleted = 47,
     ColosseumTournamentsWon = 48,
     ChampionMarketPurchases = 49,
-    DungeonCompletedWithoutWeapon = 50,
-    UniqueItemVariantsCrafted = 51
+    DungeonCompletedWithoutWeapon = 50
 }

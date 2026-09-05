@@ -3,8 +3,6 @@ export type AchievementCategory =
   | 'Combat'
   | 'Essences'
   | 'Dungeons'
-  | 'Crafting'
-  | 'Gathering'
   | 'Colosseum'
   | 'WorldTower'
   | 'Guild'

@@ -10,9 +10,5 @@ public class EquipmentBaseConfiguration : ItemBaseConfiguration, IEntityTypeConf
         b.HasMany(e => e.AttributeModifiers)
          .WithOne()
          .HasForeignKey(m => m.ItemBaseId);
-
-        b.HasMany(e => e.ToolBonuses)
-            .WithOne(x => x.EquipmentBase)
-            .HasForeignKey(x => x.EquipmentBaseId);
     }
 }

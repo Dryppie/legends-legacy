@@ -32,7 +32,7 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
             RewardBreakdown = new CombatRewardBreakdown
             {
                 PowerItems = SummarizeItems(outcome.PowerRewards),
-                CraftingItems = SummarizeItems(outcome.CraftingRewards),
+                MiscellaneousItems = SummarizeItems(outcome.MiscellaneousRewards),
                 EssenceItems = SummarizeItems(outcome.EssenceRewards),
                 DungeonAccessItems = SummarizeItems(outcome.DungeonAccessRewards)
             }

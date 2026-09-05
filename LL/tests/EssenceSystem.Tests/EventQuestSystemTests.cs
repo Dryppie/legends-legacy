@@ -54,76 +54,6 @@ public sealed partial class EventQuestSystemTests
     }
 
     [Fact]
-    public async Task Gathered_resources_advance_event_by_item_quantity_instead_of_action_count()
-    {
-        await using var db = CreateDb();
-        var definition = CreateActiveDefinition(requiredAmount: 100_000);
-        definition.Objectives =
-        [
-            new QuestObjectiveDefinition
-            {
-                Key = "resources-gathered",
-                Description = "Gather resources.",
-                Type = "ResourceGathered",
-                RequiredAmount = 100_000
-            }
-        ];
-        var service = CreateService(db, definition, new RecordingPublisher());
-        var characterId = Guid.NewGuid();
-        CompleteTutorial(db, characterId);
-        await db.SaveChangesAsync();
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.CombatCompleted(
-                "region_01_area_01",
-                true,
-                actionCount: 20,
-                equippedGatheringType: "Mining",
-                gatheredResourceCount: 73),
-            Guid.NewGuid(),
-            "IdleCombatEncounterCompleted",
-            CancellationToken.None);
-
-        var state = Assert.Single((await service.GetJournalAsync(characterId, CancellationToken.None)).Events);
-        Assert.Equal(73, Assert.Single(state.Objectives).CurrentAmount);
-        Assert.Equal(73, state.MyContribution);
-    }
-
-    [Fact]
-    public async Task Tempering_action_batch_advances_global_and_personal_progress_by_action_count()
-    {
-        await using var db = CreateDb();
-        var definition = CreateActiveDefinition(requiredAmount: 100_000);
-        definition.Objectives =
-        [
-            new QuestObjectiveDefinition
-            {
-                Key = "tempering-actions",
-                Description = "Complete tempering actions.",
-                Type = "TemperingActionCompleted",
-                RequiredAmount = 100_000
-            }
-        ];
-        var service = CreateService(db, definition, new RecordingPublisher());
-        var characterId = Guid.NewGuid();
-        CompleteTutorial(db, characterId);
-        await db.SaveChangesAsync();
-
-        await service.ProcessAsync(
-            characterId,
-            QuestTrigger.EquipmentTempered([], [], [], [], [], actionCount: 500),
-            Guid.NewGuid(),
-            "EquipmentTempered",
-            CancellationToken.None);
-
-        var state = Assert.Single((await service.GetJournalAsync(characterId, CancellationToken.None)).Events);
-        Assert.Equal(500, Assert.Single(state.Objectives).CurrentAmount);
-        Assert.Equal(500, state.MyContribution);
-        Assert.True(state.PersonalMilestones[0].IsUnlocked);
-    }
-
-    [Fact]
     public async Task Qualifying_outbox_event_advances_global_and_personal_progress_once()
     {
         await using var db = CreateDb();
@@ -636,10 +566,6 @@ public sealed partial class EventQuestSystemTests
             CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyDictionary<string, string>>(
                 new Dictionary<string, string>());
-
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(
-            string itemBaseId,
-            CancellationToken cancellationToken) => Task.FromResult<EquipmentBase?>(null);
 
         public Task AddMissingItemBasesAsync(
             IReadOnlyCollection<ItemBase> itemBases,

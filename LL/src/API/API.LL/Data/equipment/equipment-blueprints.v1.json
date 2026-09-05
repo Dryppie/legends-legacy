@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "cindersPerTier": 100,
+  "dropChance": 0.25,
+  "guaranteeCompletions": 4,
+  "areaVariantChance": 0.15,
+  "dungeonVariantChance": 0.5,
+  "blueprints": [
+    {
+      "styleId": "blueprint_fury",
+      "name": "Fury",
+      "itemId": "item.blueprint_fury"
+    },
+    {
+      "styleId": "blueprint_arcane",
+      "name": "Arcane",
+      "itemId": "item.blueprint_arcane"
+    },
+    {
+      "styleId": "blueprint_execution",
+      "name": "Execution",
+      "itemId": "item.blueprint_execution"
+    },
+    {
+      "styleId": "blueprint_aegis",
+      "name": "Aegis",
+      "itemId": "item.blueprint_aegis"
+    },
+    {
+      "styleId": "blueprint_warden",
+      "name": "Warden",
+      "itemId": "item.blueprint_warden"
+    },
+    {
+      "styleId": "blueprint_endurance",
+      "name": "Endurance",
+      "itemId": "item.blueprint_endurance"
+    },
+    {
+      "styleId": "blueprint_phoenix",
+      "name": "Phoenix",
+      "itemId": "item.blueprint_phoenix"
+    },
+    {
+      "styleId": "blueprint_spirit",
+      "name": "Spirit",
+      "itemId": "item.blueprint_spirit"
+    },
+    {
+      "styleId": "blueprint_primal",
+      "name": "Primal",
+      "itemId": "item.blueprint_primal"
+    },
+    {
+      "styleId": "blueprint_venom",
+      "name": "Venom",
+      "itemId": "item.blueprint_venom"
+    },
+    {
+      "styleId": "blueprint_hive",
+      "name": "Hive",
+      "itemId": "item.blueprint_hive"
+    },
+    {
+      "styleId": "blueprint_raidforged",
+      "name": "Raidforged",
+      "itemId": "item.blueprint_raidforged"
+    },
+    {
+      "styleId": "blueprint_gravebound",
+      "name": "Gravebound",
+      "itemId": "item.blueprint_gravebound"
+    }
+  ],
+  "sources": [
+    {
+      "familyId": "goblin_mines",
+      "name": "Goblin Mines",
+      "region": 1,
+      "selectionItemId": "item.blueprint_choice.goblin_mines",
+      "styleIds": [
+        "blueprint_fury",
+        "blueprint_phoenix"
+      ]
+    },
+    {
+      "familyId": "forgotten_catacombs",
+      "name": "Forgotten Catacombs",
+      "region": 1,
+      "selectionItemId": "item.blueprint_choice.forgotten_catacombs",
+      "styleIds": [
+        "blueprint_arcane",
+        "blueprint_endurance",
+        "blueprint_gravebound"
+      ]
+    },
+    {
+      "familyId": "tangled_cave",
+      "name": "Tangled Cave",
+      "region": 2,
+      "selectionItemId": "item.blueprint_choice.tangled_cave",
+      "styleIds": [
+        "blueprint_execution",
+        "blueprint_venom",
+        "blueprint_hive",
+        "blueprint_raidforged",
+        "blueprint_fury",
+        "blueprint_phoenix"
+      ]
+    },
+    {
+      "familyId": "great_tree",
+      "name": "Great Tree",
+      "region": 2,
+      "selectionItemId": "item.blueprint_choice.great_tree",
+      "styleIds": [
+        "blueprint_spirit",
+        "blueprint_warden",
+        "blueprint_primal",
+        "blueprint_aegis",
+        "blueprint_arcane",
+        "blueprint_endurance",
+        "blueprint_gravebound"
+      ]
+    }
+  ]
+}

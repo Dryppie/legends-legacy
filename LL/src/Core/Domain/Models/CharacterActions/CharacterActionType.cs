@@ -2,7 +2,5 @@
 public enum CharacterActionType
 {
     Idle,
-    Combat,
-    Gathering,
-    Crafting
+    Combat
 }

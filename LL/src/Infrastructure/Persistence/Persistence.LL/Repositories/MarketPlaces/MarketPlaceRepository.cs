@@ -100,15 +100,10 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     {
         var marketPlaceListings = await EligibleListings()
             .Include(mpl => mpl.ItemInstance)
-                .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
-            .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).InstanceModifiers)
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
-            .Include(mpl => mpl.ItemInstance)
-                .ThenInclude(ii => ii.ItemBase)
-                    .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Where(x => x.ExpiresAt > DateTimeOffset.UtcNow)
             .ToListAsync(cancellationToken);
 
@@ -369,15 +364,10 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         await LockMarketplaceRowAsync("MarketPlaceListings", listingId, cancellationToken);
         return await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
-                .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
-            .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).InstanceModifiers)
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
-            .Include(mpl => mpl.ItemInstance)
-                .ThenInclude(ii => ii.ItemBase)
-                    .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .FirstOrDefaultAsync(mpl => mpl.Id.Equals(listingId), cancellationToken);
     }
 

@@ -29,6 +29,18 @@ export interface QuestState {
   rewards: QuestRewardState[];
 }
 
+export function isQuestReadyToTurnIn(
+  quest: QuestState | null | undefined,
+): boolean {
+  return (
+    !!quest &&
+    quest.status === QuestStatus.Active &&
+    (!quest.choice || !!quest.choice.selectedOptionKey) &&
+    quest.objectives.length > 0 &&
+    quest.objectives.every((objective) => objective.isCompleted)
+  );
+}
+
 export interface QuestChoice {
   selectionTitle: string;
   selectionSummary: string;
@@ -103,13 +115,8 @@ export const ONBOARDING_QUEST_CATEGORY = 'Tutorial';
 export const TRAINING_DAY_QUEST_ID = 'quest.onboarding.training_day';
 export const SOUL_ARCHIVE_QUEST_ID = 'quest.onboarding.soul_archive';
 export const FIRST_WEAPON_QUEST_ID = 'quest.onboarding.first_weapon';
-export const TOOLS_OF_THE_TRADE_QUEST_ID = 'quest.onboarding.tools_of_trade';
 export const INTO_LUMO_RUINS_QUEST_ID = 'quest.region01.into_lumo_ruins';
 export const HEART_OF_THE_HOLLOW_QUEST_ID = 'quest.shenic.heart_of_the_hollow';
 export const TRAINING_GROUNDS_AREA_ID = 'tutorial_area_training_grounds';
 export const LUMO_RUINS_AREA_ID = 'region_01_area_01';
-export const ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS: ReadonlySet<string> =
-  new Set(['shortsword', 'dagger', 'hatchet', 'mace', 'wand']);
-export const ONBOARDING_GATHERING_TOOL_ITEM_BASE_IDS: ReadonlySet<string> =
-  new Set(['basic_pickaxe', 'basic_hatchet', 'basic_skinning_knife']);
 export const ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID = 'essence.goblin';

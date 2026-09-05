@@ -20,6 +20,19 @@ export class QuestService {
     return this.api.get('Quest');
   }
 
+  turnIn(questId: string): Observable<VersionedMutationResult<QuestJournal>> {
+    return this.api
+      .postVersioned<
+        QuestJournal | ApiResponse<QuestJournal>
+      >(`Quest/${encodeURIComponent(questId)}/turn-in`, {}, { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES })
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: this.unwrapResponse<QuestJournal>(response.data),
+        })),
+      );
+  }
+
   getAreaAccess(): Observable<CombatAreaAccess[]> {
     return this.api.get('Quest/area-access');
   }
@@ -29,11 +42,9 @@ export class QuestService {
     optionKey: string,
   ): Observable<VersionedMutationResult<QuestJournal>> {
     return this.api
-      .postVersioned<QuestJournal | ApiResponse<QuestJournal>>(
-        `Quest/${encodeURIComponent(questId)}/choice`,
-        { optionKey },
-        { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES },
-      )
+      .postVersioned<
+        QuestJournal | ApiResponse<QuestJournal>
+      >(`Quest/${encodeURIComponent(questId)}/choice`, { optionKey }, { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES })
       .pipe(
         map((response) => ({
           ...response,
@@ -44,11 +55,9 @@ export class QuestService {
 
   acknowledgeWelcome(): Observable<VersionedMutationResult<QuestJournal>> {
     return this.api
-      .postVersioned<QuestJournal | ApiResponse<QuestJournal>>(
-        'Quest/welcome/acknowledge',
-        {},
-        { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES },
-      )
+      .postVersioned<
+        QuestJournal | ApiResponse<QuestJournal>
+      >('Quest/welcome/acknowledge', {}, { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES })
       .pipe(
         map((response) => ({
           ...response,
@@ -57,13 +66,13 @@ export class QuestService {
       );
   }
 
-  pin(questId: string | null): Observable<VersionedMutationResult<QuestJournal>> {
+  pin(
+    questId: string | null,
+  ): Observable<VersionedMutationResult<QuestJournal>> {
     return this.api
-      .putVersioned<QuestJournal | ApiResponse<QuestJournal>>(
-        'Quest/pinned',
-        { questId },
-        { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES },
-      )
+      .putVersioned<
+        QuestJournal | ApiResponse<QuestJournal>
+      >('Quest/pinned', { questId }, { stateSyncScopesHandledByResponse: QUEST_MUTATION_HANDLED_SCOPES })
       .pipe(
         map((response) => ({
           ...response,

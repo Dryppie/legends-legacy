@@ -1,5 +1,4 @@
 ﻿using Domain.Models.Entities.Characters;
-using Domain.Models.Professions;
 
 namespace Services.LL.Interfaces;
 public interface ILevelingService

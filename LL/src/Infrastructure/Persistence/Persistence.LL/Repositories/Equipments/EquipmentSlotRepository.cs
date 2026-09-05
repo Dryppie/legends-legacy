@@ -4,7 +4,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.Equipments.Progression;
-using Domain.Models.Professions.Crafting.V2;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Equipments;
@@ -23,16 +22,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.InstanceModifiers)
             .Include(es => es.EquipmentInstance)
-                .ThenInclude(ei => ei.ToolAffixes)
-            .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.GuildVaultItem)
                     .ThenInclude(x => x!.Guild)
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.ItemBase)
                     .ThenInclude(eb => (eb as EquipmentBase).AttributeModifiers)
-            .Include(es => es.EquipmentInstance)
-                .ThenInclude(ei => ei.ItemBase)
-                    .ThenInclude(eb => (eb as EquipmentBase).ToolBonuses)
             .Where(es => es.EntityId.Equals(entityId))
             .ToListAsync(cancellationToken);
 
@@ -45,11 +39,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ToolAffixes)
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -109,18 +99,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ToolAffixes)
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
                         .ThenInclude(ii => ii.ItemBase)
-            .Include(c => c.Inventory)
-                .ThenInclude(i => i.InventoryItems)
-                    .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
             .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
 
         if (character == null)
@@ -161,9 +144,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             else if (progression.State.Ownership.OwnerId != entityId)
                 return EquipmentEquipResult.Fail("That equipment is not personally owned by this character.");
         }
-        var isTool = equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool;
         var requiredLevel = EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(equipmentInstance.Tier);
-        if (!isTool && character.Level < requiredLevel)
+        if (character.Level < requiredLevel)
         {
             return EquipmentEquipResult.Fail($"Character level {requiredLevel} is required to equip this item.");
         }
@@ -184,14 +166,6 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         InventoryItem inventoryItem, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.EquipmentBase;
-
-        if (slotType == EquipmentSlotType.Tool && equipmentBase.EquipmentType != EquipmentType.Tool)
-            return EquipmentEquipResult.Fail("Only gathering tools can be equipped in the tool slot.");
-
-        if (equipmentBase.EquipmentType == EquipmentType.Tool &&
-            slotType is not null &&
-            slotType != EquipmentSlotType.Tool)
-            return EquipmentEquipResult.Fail("Gathering tools can only be equipped in the tool slot.");
 
         // Equip logic based on EquipmentType
         switch (equipmentBase.EquipmentType)
@@ -288,7 +262,6 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         EquipmentType.Relic => EquipmentSlotType.Relic,
                         EquipmentType.Necklace => EquipmentSlotType.Necklace,
                         EquipmentType.Ring => EquipmentSlotType.Ring,
-                        EquipmentType.Tool => EquipmentSlotType.Tool,
                         _ => throw new ArgumentOutOfRangeException(nameof(equipmentBase.EquipmentType), "Unsupported equipment type for armor or relic.")
                     };
                     var slot = GetSlot(character, equipmentSlotType);

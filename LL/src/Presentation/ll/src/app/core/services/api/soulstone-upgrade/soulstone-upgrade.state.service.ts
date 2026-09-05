@@ -292,8 +292,6 @@ export class SoulstoneUpgradeStateService {
 const branchOrder: SoulstoneUpgradeBranch[] = [
   'EssenceArchive',
   'CombatProgression',
-  'Gathering',
-  'Crafting',
   'Dungeons',
   'AccountConvenience',
 ];
@@ -301,8 +299,6 @@ const branchOrder: SoulstoneUpgradeBranch[] = [
 const branchTitles: Record<SoulstoneUpgradeBranch, string> = {
   EssenceArchive: 'Essence & Archive',
   CombatProgression: 'Combat Progression',
-  Gathering: 'Gathering',
-  Crafting: 'Crafting',
   Dungeons: 'Dungeons',
   AccountConvenience: 'Account Convenience',
 };

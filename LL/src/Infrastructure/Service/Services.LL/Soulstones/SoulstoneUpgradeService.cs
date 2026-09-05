@@ -240,12 +240,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             SoulstoneUpgradeEffectKind.FocusedMonsterEssenceDropRateRelativeBps => $"+{percent}% focused monster Essence drop rate",
             SoulstoneUpgradeEffectKind.CombatExperienceGainBps => $"+{percent}% combat EXP",
             SoulstoneUpgradeEffectKind.IdleCombatDefeatExperienceRetentionBps => $"Retain {percent}% idle defeat EXP",
-            SoulstoneUpgradeEffectKind.GatheringYieldBps => $"+{percent}% gathered material yield",
-            SoulstoneUpgradeEffectKind.GatheringExperienceGainBps => $"+{percent}% gathering EXP",
-            SoulstoneUpgradeEffectKind.GatheringRareDropChanceRelativeBps => $"+{percent}% rare gathering chance",
-            SoulstoneUpgradeEffectKind.CraftingExperienceGainBps => $"+{percent}% crafting EXP",
-            SoulstoneUpgradeEffectKind.TemperingNegativeOutcomeReductionBps => $"-{percent} percentage points negative tempering chance",
-            SoulstoneUpgradeEffectKind.BlueprintProgressionGainBps => $"+{percent}% blueprint progression",
             SoulstoneUpgradeEffectKind.DungeonSigilDropRateRelativeBps => $"+{percent}% dungeon sigil chance",
             SoulstoneUpgradeEffectKind.DungeonRewardRetentionBps => $"+{percent}% retained Rest Site rewards",
             _ => $"+{value.ToString(CultureInfo.InvariantCulture)}"

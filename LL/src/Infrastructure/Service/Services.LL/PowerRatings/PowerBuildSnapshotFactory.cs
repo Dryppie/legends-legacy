@@ -7,6 +7,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
+using Domain.Models.Items.Equipments.Progression;
 using Services.LL.Interfaces;
 
 namespace Services.LL.PowerRatings;
@@ -76,7 +77,7 @@ public sealed class PowerBuildSnapshotFactory
             {
                 var loadout = _essenceLoadouts.Resolve(character.Id, [essence]);
                 return new CombatRatingModifierSource(
-                    Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.MinimumTier,
+                    EquipmentStatBudgetCatalog.MinimumTier,
                     loadout.AttributeModifiers);
             })
             .ToList();
@@ -123,10 +124,10 @@ public sealed class PowerBuildSnapshotFactory
                 .Append(':').Append(item.Tier)
                 .Append(':').Append(item.Quality)
                 .Append(':').Append(item.Rarity)
-                .Append(':').Append(item.Potential)
-                .Append(':').Append(item.MaxPotential)
-                .Append(':').Append(item.TemperingProgress)
-                .Append(':').Append(item.IsMasterpiece);
+                .Append(':').Append(item.ProgressionData?.State.Rank)
+                .Append(':').Append(item.ProgressionData?.State.ActiveStyleId)
+                .Append(':').Append(item.ProgressionData?.State.BalanceVersion)
+                .Append(':').Append(item.ProgressionData?.AttributeRollMultiplier);
 
             foreach (var modifier in item.AttributeModifiers
                          .OrderBy(x => x.AttributeType)

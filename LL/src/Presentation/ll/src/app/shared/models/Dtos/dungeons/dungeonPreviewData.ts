@@ -12,23 +12,6 @@ export interface DungeonPreviewReward extends ItemInstance {
   noDropChancePercent?: number | null;
 }
 
-export interface DungeonGatheringLootPreview extends ItemInstance {
-  itemId: string;
-  minQuantity: number;
-  maxQuantity: number;
-  dropChancePercent: number;
-  isRare: boolean;
-}
-
-export interface DungeonGatheringNodePreview {
-  id: string;
-  name: string;
-  type: string;
-  levelRequirement?: number | null;
-  procChance: number;
-  loot: DungeonGatheringLootPreview[];
-}
-
 export interface DungeonRecord {
   hasCleared: boolean;
   firstClearedAt?: string | null;

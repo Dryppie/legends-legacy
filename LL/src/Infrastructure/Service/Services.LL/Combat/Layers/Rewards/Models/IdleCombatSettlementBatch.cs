@@ -10,7 +10,6 @@ public sealed record IdleCombatSettlementBatch(
     DateTimeOffset ProcessedUntil,
     string AreaId,
     string AreaName,
-    string? EquippedGatheringType,
     IReadOnlyList<InventoryItem> Loot,
     int Cinders,
     int Soulstones,

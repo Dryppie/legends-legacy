@@ -20,10 +20,7 @@ public sealed record ProphecyProgressEvent(
     ProphecyProgressKind Kind,
     int Amount = 1,
     string? CreatureDefinitionId = null,
-    int? EnemyCount = null,
-    string? Profession = null,
-    string? ResourceId = null,
-    int? PotentialSpent = null);
+    int? EnemyCount = null);
 
 public enum ProphecyProgressKind
 {
@@ -34,8 +31,5 @@ public enum ProphecyProgressKind
     DungeonCompleted = 5,
     EssenceXpGained = 7,
     EssenceAbsorbed = 8,
-    ResourceGathered = 9,
-    ItemTempered = 10,
-    PotentialSpent = 11,
     TreasureProgress = 12
 }

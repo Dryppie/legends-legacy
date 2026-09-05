@@ -1,10 +1,10 @@
 # LegendsLegacy Equipment, Gathering, Crafting, and Tempering design review
 
-> Historical record, superseded 3 September 2026. The implemented crafting/gathering retirement and the later equipment Forge have both been removed from the supported player path. Forge, Scrap, Blueprint, and upgrade proposals below are retained only as decision history. Use the [current contract](equipment-specification.md), [Forge removal](equipment-forge-removal.md), and [cleanup record](equipment-post-alpha-cleanup.md).
+> Historical record, superseded 5 September 2026. Crafting, gathering, reusable Blueprints, and the equipment Forge have been removed from the supported player path. The later Reinforcement and consumable Blueprint Variant systems are separate current features; Forge, Scrap, and crafting proposals below are retained only as decision history. Use the [current contract](equipment-specification.md), [Forge removal](equipment-forge-removal.md), and [cleanup record](equipment-post-alpha-cleanup.md).
 
 **Date:** 2 September 2026. **Status:** design recommendation; no implementation authorized by this document.
 
-**Current decision:** equipment comes from authored grants and drops. Rank/style mutation, learned styles, salvage, Scrap, Blueprint rewards, and the Forge UI/API/persistence are absent. The analysis below predates that decision.
+**Current decision:** equipment comes from authored grants and combat drops. Reinforcement advances rank, Dismantle returns Parts, and consumable Blueprint Variants replace compatible styles. Learned styles, Tempered Scrap, crafting, and the Forge UI/API/persistence remain absent. The analysis below predates that decision.
 
 ## 1. Executive Summary
 
@@ -101,7 +101,7 @@ A composed design supplies a name, base stat profile, Blueprint bonus profile, c
 | ----------------- | ------------------------------------------------------------------------------------------------------------- |
 | Base/behavior     | Slot, armor role, weapon configuration, basic-attack timing/damage characteristics, initial stat distribution |
 | Tier              | Shared equipment-budget growth and character-level equip requirement                                          |
-| Quality           | Crude, Standard, Fine, Exceptional, Masterwork; multiplies starting stats and starting Potential              |
+| Quality           | Crude, Standard, Fine, Exceptional, Masterpiece; multiplies starting stats and starting Potential             |
 | Rarity            | Every newly crafted item starts Common; Tempering can increase rarity and grant stat improvements             |
 | Potential         | Finite attempt resource set at creation; not equivalent to item power or a chosen upgrade plan                |
 | Recipe mastery    | Improves future Quality probabilities and Potential for that recipe                                           |

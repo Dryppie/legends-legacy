@@ -95,7 +95,6 @@ public sealed class EquipmentDungeonConsumerTests
         public Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken ct) => throw new NotSupportedException();
         public Task<IReadOnlyList<string>> SearchCharacterNamesAsync(string prefix, Guid id, int limit, CancellationToken ct) => throw new NotSupportedException();
         public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(CancellationToken ct) => throw new NotSupportedException();
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string id, CancellationToken ct) => throw new NotSupportedException();
         public Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> items, CancellationToken ct) => throw new NotSupportedException();
     }
 }

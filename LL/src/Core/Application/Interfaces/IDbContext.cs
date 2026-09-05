@@ -24,8 +24,6 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Outbox;
-using Domain.Models.Professions;
-using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
@@ -84,13 +82,9 @@ public interface IDbContext
     DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses { get; }
     DbSet<QuestEventLedger> QuestEventLedgers { get; }
     DbSet<Domain.Models.Items.Equipments.Progression.StarterEquipmentGrant> StarterEquipmentGrants { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionProgress> EquipmentProtectionProgress { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.EquipmentProtectionReceipt> EquipmentProtectionReceipts { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.BaselineEquipmentRecoveryReceipt> BaselineEquipmentRecoveryReceipts { get; }
     DbSet<Domain.Models.Items.Equipments.Progression.PlainEquipmentEntitlement> PlainEquipmentEntitlements { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.PlainEquipmentRecoveryReceipt> PlainEquipmentRecoveryReceipts { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.CombatAcquisitionProgress> CombatAcquisitionProgress { get; }
-    DbSet<Domain.Models.Items.Equipments.Progression.CombatAcquisitionSelectionReceipt> CombatAcquisitionSelectionReceipts { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.EquipmentUpgradeReceipt> EquipmentUpgradeReceipts { get; }
+    DbSet<Domain.Models.Items.Equipments.Progression.EquipmentBlueprintProgress> EquipmentBlueprintProgress { get; }
     DbSet<EventQuestInstance> EventQuestInstances { get; }
     DbSet<EventQuestObjectiveProgress> EventQuestObjectiveProgresses { get; }
     DbSet<EventQuestCharacterContribution> EventQuestCharacterContributions { get; }

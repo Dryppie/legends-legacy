@@ -254,8 +254,6 @@ public sealed class QuestEncounterServiceTests
             Guid requestedCharacterId,
             IReadOnlyCollection<string> itemBaseIds,
             int? tier,
-            bool mustBeCrafted,
-            bool toolSlotOnly,
             CancellationToken cancellationToken) => throw new NotSupportedException();
 
         public Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(

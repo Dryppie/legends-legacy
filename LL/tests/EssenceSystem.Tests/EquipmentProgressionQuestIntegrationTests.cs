@@ -22,19 +22,21 @@ public sealed partial class QuestSystemTests
     public void Equipment_quest_catalog_preserves_area_tokens_and_core_rewards_without_scrap()
     {
         var definitions = EquipmentDefinitions();
-        Assert.Equal(29, definitions.GetAll().Count);
-        Assert.Equal(500, Assert.Single(definitions.Get(QuestConstants.SoulArchive).Rewards).Quantity);
-        Assert.Equal("Cinders", Assert.Single(definitions.Get(QuestConstants.SoulArchive).Rewards).Type);
+        Assert.Equal(28, definitions.GetAll().Count);
+        Assert.Contains(definitions.Get(QuestConstants.SoulArchive).Rewards,
+            x => x.Type == "Cinders" && x.Quantity == 500);
+        Assert.Contains(definitions.Get(QuestConstants.SoulArchive).Rewards,
+            x => x.Type == "Item" && x.ItemBaseId == "item.arms_chest" && x.Quantity == 1);
         Assert.Empty(definitions.Get(QuestConstants.FirstWeapon).Rewards);
         foreach (var quest in definitions.GetAll().Where(x => x.Chain?.Id == "quest.chain.shenic" && x.Version == 4))
         {
             Assert.DoesNotContain(quest.Rewards, x => new[] { "ore", "wood", "rawhide", "soul_dust" }.Contains(x.ItemBaseId));
         }
-        Assert.Contains(definitions.Get(QuestConstants.TrialOfLumo).Rewards, x => x.ItemBaseId == "sigil_goblin_mines" && x.Quantity == 1);
+        Assert.Contains(definitions.Get(QuestConstants.BetweenDayAndNight).Rewards, x => x.ItemBaseId == "sigil_goblin_mines" && x.Quantity == 1);
         Assert.Contains(definitions.Get(QuestConstants.CrystalCurrents).Rewards, x => x.ItemBaseId == "sigil_forgotten_catacombs" && x.Quantity == 1);
         var adaptation = definitions.Get(QuestConstants.RestlessDead);
         Assert.Equal("Sequential", adaptation.ObjectiveMode);
-        Assert.Equal("ModelEPlainTargetEquipped", adaptation.Objectives[0].Type);
+        Assert.Equal("ModelEAreaDropEquipped", adaptation.Objectives[0].Type);
     }
 
     [Fact]
@@ -58,6 +60,9 @@ public sealed partial class QuestSystemTests
             currencyRewards: new QuestEquipmentRewardRepository(db), equipmentProgressionEquipment: new QuestEquipmentSupport());
         for (var i = 0; i < 2; i++)
             await service.ProcessAsync(id, QuestTrigger.EquipmentChanged(), null, GameEventTypes.EquipmentChanged, CancellationToken.None);
+        Assert.Null(soul.RewardsGrantedAt);
+        await service.TurnInAsync(id, soul.QuestId, default);
+        await service.TurnInAsync(id, soul.QuestId, default);
         await db.SaveChangesAsync();
         Assert.Equal(507, (await db.Characters.SingleAsync()).Cinders);
         var ledger = await db.EconomyLedger.SingleAsync();
@@ -68,7 +73,7 @@ public sealed partial class QuestSystemTests
     }
 
     [Fact]
-    public async Task EquipmentProgression_first_weapon_awards_accessories_once_when_the_kit_is_equipped()
+    public async Task EquipmentProgression_first_weapon_unlocks_into_lumo_when_the_weapon_is_equipped()
     {
         var id = Guid.NewGuid();
         var definitions = EquipmentDefinitions();
@@ -78,33 +83,21 @@ public sealed partial class QuestSystemTests
         repository.Progresses.Add(CreateActiveProgress(id, definitions.Get(QuestConstants.FirstWeapon), true));
         var equipment = new QuestEquipmentSupport();
         var service = new QuestService(repository, definitions, new RecordingItemBaseRepository(), new RecordingInventoryItemFactory(), new RecordingLootRewardWriter(), TimeProvider.System,
-            equipmentProgressionEquipment: equipment, starterClaims: equipment);
+            equipmentProgressionEquipment: equipment);
         await service.GetJournalAsync(id, CancellationToken.None);
-        Assert.Equal(0, equipment.Claims);
         await service.ProcessAsync(id, QuestTrigger.EquipmentChanged(), null, GameEventTypes.EquipmentChanged, CancellationToken.None);
-        Assert.Equal(0, equipment.Claims);
         equipment.Equipped = true;
         var result = await service.ProcessAsync(id, QuestTrigger.EquipmentChanged(), null, GameEventTypes.EquipmentChanged, CancellationToken.None);
         Assert.Empty(result.Loot);
-        Assert.Contains(result.Journal.Quests, x => x.QuestId == QuestConstants.ToolsOfTheTrade && x.Version == 2 && x.Title == "Ready for the Road");
-        await service.ProcessAsync(id, QuestTrigger.EquipmentChanged(), null, GameEventTypes.EquipmentChanged, CancellationToken.None);
-        Assert.Equal(1, equipment.Claims);
-        Assert.Equal(QuestStatus.Completed, repository.Progresses.Single(x => x.QuestId == QuestConstants.ToolsOfTheTrade).Status);
+        Assert.DoesNotContain(result.Journal.Quests, x => x.QuestId == QuestConstants.IntoLumoRuins);
+        var journal = await service.TurnInAsync(id, QuestConstants.FirstWeapon, default);
+        Assert.Contains(journal.Quests, x => x.QuestId == QuestConstants.IntoLumoRuins && x.Version == 2);
+        Assert.Equal(QuestStatus.Completed, repository.Progresses.Single(x => x.QuestId == QuestConstants.FirstWeapon).Status);
     }
 
-    private sealed class QuestEquipmentSupport : IEquipmentQuestSupport, IStarterEquipmentService
+    private sealed class QuestEquipmentSupport : IEquipmentQuestSupport
     {
         public bool Equipped { get; set; }
-        public int Claims { get; private set; }
         public Task<bool> IsEquippedAsync(Guid id, string objective, string? kind, CancellationToken ct) => Task.FromResult(Equipped);
-        public Task<StarterEquipmentClaimResult> ClaimAsync(Guid id, StarterEquipmentGrantKind kind, IReadOnlyList<string> ids, CancellationToken ct)
-        {
-            Assert.Equal(StarterEquipmentGrantKind.ReadyForRoad, kind);
-            Assert.Empty(ids);
-            Claims++;
-            return Task.FromResult(new StarterEquipmentClaimResult(null, null));
-        }
-        public Task<EquipmentAccess> GetAccessAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
-        public IReadOnlyList<StarterEquipmentOption> GetOptions() => throw new NotSupportedException();
     }
 }

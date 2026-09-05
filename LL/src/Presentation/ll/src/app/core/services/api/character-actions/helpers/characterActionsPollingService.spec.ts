@@ -18,7 +18,7 @@ describe('CharacterActionsPollingService', () => {
     overrides: Partial<CharacterActionDto> = {},
   ): CharacterActionDto {
     return {
-      characterActionType: CharacterActionType.Crafting,
+      characterActionType: CharacterActionType.Combat,
       lootTableId: '',
       updatedAt: new Date(now - 60_000),
       nextResolutionAtUtc: new Date(now + 2_500),
@@ -30,7 +30,7 @@ describe('CharacterActionsPollingService', () => {
     };
   }
 
-  it('schedules crafting from the server boundary rather than a client duration', fakeAsync(() => {
+  it('schedules an action from the server boundary rather than a client duration', fakeAsync(() => {
     const service = createService();
     const fetch = jasmine.createSpy('fetch').and.returnValue(of(null));
 

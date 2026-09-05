@@ -1,4 +1,3 @@
-using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
@@ -6,8 +5,6 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Professions;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Rewards;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -86,11 +83,6 @@ public sealed class OfflineCombatRewardBulkLoadingTests
         }
 
         public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(
-            string itemBaseId,
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 

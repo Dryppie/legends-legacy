@@ -21,14 +21,11 @@ public sealed class QuestGameEventOutboxConsumer(
 
     public bool CanHandle(string eventType) =>
         eventType is GameEventTypes.EquipmentChanged
-            or GameEventTypes.PlainEquipmentTargetSecured
             or GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
             or GameEventTypes.EssenceFocusSet
             or GameEventTypes.FocusedCreatureEssenceReceived
             or GameEventTypes.EssenceAscended
-            or GameEventTypes.EquipmentCrafted
-            or GameEventTypes.EquipmentTempered
             or GameEventTypes.IdleCombatEncounterCompleted
             or GameEventTypes.CharacterCreated
             or GameEventTypes.CharacterLevelReached
@@ -51,7 +48,6 @@ public sealed class QuestGameEventOutboxConsumer(
         var trigger = message.EventType switch
         {
             GameEventTypes.EquipmentChanged => QuestTrigger.EquipmentChanged(),
-            GameEventTypes.PlainEquipmentTargetSecured => new QuestTrigger(EquipmentKeys.PlainTargetTrigger),
             GameEventTypes.EssenceAbsorbed => QuestTrigger.EssenceAbsorbed(
                 Read<EssenceAbsorbedPayload>(message).EssenceDefinitionId),
             GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(
@@ -60,10 +56,6 @@ public sealed class QuestGameEventOutboxConsumer(
             GameEventTypes.FocusedCreatureEssenceReceived => CreateFocusedEssenceTrigger(
                 Read<FocusedCreatureEssenceReceivedPayload>(message)),
             GameEventTypes.EssenceAscended => QuestTrigger.EssenceAscended(),
-            GameEventTypes.EquipmentCrafted => CreateEquipmentCraftedTrigger(
-                Read<EquipmentCraftedPayload>(message)),
-            GameEventTypes.EquipmentTempered => CreateEquipmentTemperedTrigger(
-                Read<EquipmentTemperedPayload>(message)),
             GameEventTypes.IdleCombatEncounterCompleted => CreateCombatTrigger(
                 Read<IdleCombatEncounterCompletedPayload>(message)),
             GameEventTypes.CharacterCreated => QuestTrigger.CharacterLevelReached(1),
@@ -114,35 +106,18 @@ public sealed class QuestGameEventOutboxConsumer(
         _changedCharacterScopes = scopes;
     }
 
-    private static QuestTrigger CreateEquipmentCraftedTrigger(EquipmentCraftedPayload payload) =>
-        QuestTrigger.EquipmentCrafted(
-            payload.CraftedItems.Select(x => x.ItemBaseId).ToList(),
-            payload.CraftedItems.Select(x => x.Tier).ToList(),
-            payload.CraftedItems.Select(x => x.BaseRecipeId).ToList(),
-            payload.CraftedItems.Select(x => x.Quality).ToList(),
-            payload.CraftedItems.Select(x => x.Potential).ToList());
-
     private static QuestTrigger CreateFocusedEssenceTrigger(
         FocusedCreatureEssenceReceivedPayload payload) =>
         QuestTrigger.FocusedCreatureEssenceReceived(
             payload.CreatureDefinitionId,
             payload.EssenceDefinitionId);
 
-    private static QuestTrigger CreateEquipmentTemperedTrigger(EquipmentTemperedPayload payload) =>
-        QuestTrigger.EquipmentTempered(
-            payload.CompletedItems.Select(x => x.ItemBaseId).ToList(),
-            payload.CompletedItems.Select(x => x.Tier).ToList(),
-            payload.CompletedItems.Select(x => x.BaseRecipeId).ToList(),
-            payload.CompletedItems.Select(x => x.Quality).ToList(),
-            payload.CompletedItems.Select(x => x.Potential).ToList(),
-            payload.Summary.TotalActions);
-
     private static QuestTrigger CreateCombatTrigger(IdleCombatEncounterCompletedPayload payload) =>
         QuestTrigger.CombatCompleted(
             payload.AreaId,
             payload.WonEncounter,
             Math.Max(1, payload.ActionCount),
-            payload.EquippedGatheringType);
+            payload.WinningEncounterCount);
 
     private T Read<T>(GameEventOutboxMessage message) =>
         JsonSerializer.Deserialize<T>(message.PayloadJson, jsonOptions)
