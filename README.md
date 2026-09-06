@@ -9,8 +9,6 @@
 - [Historical implementation review](docs/design/equipment-implementation-review.md)
 - [Current naming and storage contracts](docs/engineering/equipment-naming-and-compatibility.md)
 - [Meran / Tier 2 implementation and transition](docs/design/equipment-region-two-progression.md)
-- [Meran PvE balance report](docs/design/equipment-meran-pve-balance-report.md)
-- [Equipment reference builds](docs/content-balancing/equipment-reference-builds.md)
 
 Equipment now comes from starter grants, combat drops, dungeon rewards, recovery, and other directly authored rewards. Crafting, gathering, tempering, salvaging, Blueprints, and the equipment Forge have been removed. Equipment keeps its authored tier, rank, native style, stats, set identity, and ownership; players currently cannot mutate those properties. Equipment upgrades and quest-specific gear selection will be designed later. The API applies pending migrations on startup.
 
