@@ -11,7 +11,8 @@ public sealed class EquipmentData
     [JsonConstructor]
     public EquipmentData(EquipmentStateSnapshot state, string itemBaseId, string displayName,
         EquipmentRarity rarity, EquipmentType equipmentType, EquipmentBehaviorDefinition behavior,
-        IReadOnlyDictionary<AttributeType, float> stats, string? equipmentSetId)
+        IReadOnlyDictionary<AttributeType, float> stats, string? equipmentSetId,
+        IReadOnlyDictionary<AttributeType, float>? baseStats = null)
     {
         EquipmentState = EquipmentState.Restore(state);
         State = EquipmentState.ToSnapshot();
@@ -34,6 +35,11 @@ public sealed class EquipmentData
         EquipmentType = equipmentType;
         Behavior = behavior;
         Stats = stats.ToFrozenDictionary();
+        if (baseStats is not null && baseStats.Any(x =>
+                !EquipmentStatBudgetCatalog.IsKnown(x.Key) || !float.IsFinite(x.Value) || x.Value < 0
+                || x.Value > stats.GetValueOrDefault(x.Key)))
+            throw new InvalidOperationException("Invalid frozen equipment base stats.");
+        BaseStats = baseStats?.ToFrozenDictionary();
         EquipmentSetId = equipmentSetId is null ? null : EquipmentValidation.Id(equipmentSetId);
     }
 
@@ -48,22 +54,67 @@ public sealed class EquipmentData
     public EquipmentBehaviorDefinition Behavior { get; }
     public IReadOnlyDictionary<AttributeType, float> Stats { get; }
     public string? EquipmentSetId { get; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyDictionary<AttributeType, float>? BaseStats { get; }
 
     public static EquipmentData Create(EquipmentState state, EquipmentEvaluator evaluator)
     {
         var evaluated = evaluator.Evaluate(state);
         return new(state.ToSnapshot(), evaluated.Archetype.ItemBaseId, evaluator.GetDisplayName(state),
             evaluated.Definition.Rarity, evaluated.Archetype.EquipmentType, evaluated.Archetype.Behavior,
-            evaluated.Stats, evaluated.EquipmentSetId);
+            evaluated.Stats, evaluated.EquipmentSetId,
+            state.AdditiveVariantBonus ? evaluator.Evaluate(state.DefinitionId, state.Tier, state.Rank,
+                null, state.Quality, state.AttributeRollMultiplier).Stats : null);
+    }
+
+    /// <summary>Replaces only the variant contribution, retaining the frozen base across switches.</summary>
+    public EquipmentData ApplyVariant(EquipmentEvaluator evaluator, string styleId)
+    {
+        var nextState = EquipmentState.ApplyVariant(evaluator, styleId);
+        var baseline = evaluator.Evaluate(State.DefinitionId, State.Tier, State.Rank,
+            null, Quality, AttributeRollMultiplier);
+        var previous = BaseStats is null ? evaluator.Evaluate(State.DefinitionId, State.Tier, State.Rank,
+            State.ActiveStyleId, Quality, AttributeRollMultiplier, State.AdditiveVariantBonus) : null;
+        var next = evaluator.Evaluate(nextState.DefinitionId, nextState.Tier, nextState.Rank,
+            styleId, Quality, AttributeRollMultiplier);
+
+        // Older descriptors contain totals only. Reconstruct once using the available
+        // allocation; never replace their entire stat roll with a current evaluation.
+        var baseStats = BaseStats ?? Stats.Keys.Union(baseline.Stats.Keys).ToDictionary(
+            attribute => attribute,
+            attribute => (float)AttributeValueQuantizer.Quantize(attribute, Math.Max(0d,
+                (double)Stats.GetValueOrDefault(attribute)
+                - previous!.Stats.GetValueOrDefault(attribute) + baseline.Stats.GetValueOrDefault(attribute))))
+            .Where(stat => stat.Value > 0).ToDictionary(stat => stat.Key, stat => stat.Value);
+        var stats = baseStats.Keys.Union(next.Stats.Keys).ToDictionary(attribute => attribute, attribute =>
+        {
+            var baseValue = baseStats.GetValueOrDefault(attribute);
+            var bonus = Math.Max(0d, (double)next.Stats.GetValueOrDefault(attribute)
+                - baseline.Stats.GetValueOrDefault(attribute));
+            return bonus == 0 ? baseValue : (float)Math.Max(baseValue, Math.Min(
+                AttributeValueQuantizer.Quantize(attribute, baseValue + bonus),
+                EquipmentStatBudgetCatalog.Get(attribute).PerItemHardCap));
+        }).Where(stat => stat.Value > 0).ToDictionary(stat => stat.Key, stat => stat.Value);
+        return new(nextState.ToSnapshot(), ItemBaseId, evaluator.GetDisplayName(nextState),
+            Rarity, EquipmentType, Behavior, stats, next.EquipmentSetId, baseStats);
     }
 
     public EquipmentData BindForPersonalUse() => new(
         EquipmentState.BindForPersonalUse().ToSnapshot(), ItemBaseId, DisplayName, Rarity,
-        EquipmentType, Behavior, Stats, EquipmentSetId);
+        EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats);
 
     public EquipmentData TransferToCharacter(Guid expectedOwnerId, Guid recipientId) => new(
         EquipmentState.TransferToCharacter(expectedOwnerId, recipientId).ToSnapshot(), ItemBaseId, DisplayName, Rarity,
-        EquipmentType, Behavior, Stats, EquipmentSetId);
+        EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats);
+
+    internal bool MatchesEvaluation(EquipmentData evaluated) =>
+        State == evaluated.State && ItemBaseId == evaluated.ItemBaseId
+        && DisplayName == evaluated.DisplayName && Rarity == evaluated.Rarity
+        && EquipmentType == evaluated.EquipmentType && EquipmentSetId == evaluated.EquipmentSetId
+        && JsonSerializer.Serialize(Behavior) == JsonSerializer.Serialize(evaluated.Behavior)
+        && Stats.OrderBy(x => x.Key).SequenceEqual(evaluated.Stats.OrderBy(x => x.Key))
+        && (BaseStats is null || evaluated.BaseStats is not null
+            && BaseStats.OrderBy(x => x.Key).SequenceEqual(evaluated.BaseStats.OrderBy(x => x.Key)));
 
     /// <summary>
     /// Advances a frozen descriptor whose original authored content is no longer
@@ -107,7 +158,10 @@ public sealed class EquipmentData
             EquipmentType,
             Behavior,
             nextStats,
-            EquipmentSetId);
+            EquipmentSetId,
+            BaseStats?.ToDictionary(stat => stat.Key, stat => Math.Min(
+                (float)AttributeValueQuantizer.Quantize(stat.Key, stat.Value * scale),
+                nextStats.GetValueOrDefault(stat.Key))));
     }
 
     public EquipmentData DonateToGuild(Guid expectedOwnerId, Guid guildId)
@@ -115,7 +169,7 @@ public sealed class EquipmentData
         if (State.Ownership.OwnerId != expectedOwnerId)
             throw new InvalidOperationException("This equipment is not owned by the donor.");
         return new(EquipmentState.DonateToGuild(guildId).ToSnapshot(), ItemBaseId, DisplayName, Rarity,
-            EquipmentType, Behavior, Stats, EquipmentSetId);
+            EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats);
     }
 
     public string Serialize() => JsonSerializer.Serialize(this);

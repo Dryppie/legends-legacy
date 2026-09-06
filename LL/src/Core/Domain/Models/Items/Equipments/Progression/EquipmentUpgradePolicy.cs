@@ -68,11 +68,8 @@ public sealed class EquipmentUpgradePolicy(
                 blueprintItemId = blueprint.ItemId;
                 availableBlueprints = context.BlueprintStacks?.Where(x => x.ItemInstance.ItemBaseId == blueprintItemId)
                     .Sum(x => (long)x.Quantity) ?? 0;
-                var evaluated = EquipmentData.Create(before.EquipmentState, catalog.Evaluator);
-                if (evaluated.Serialize() != before.Serialize())
-                    throw new InvalidOperationException("This equipment needs its original content version before conversion.");
                 cinderCost = checked(blueprints!.CindersPerTier * before.State.Tier);
-                after = EquipmentData.Create(before.EquipmentState.ApplyVariant(catalog.Evaluator, blueprint.StyleId), catalog.Evaluator);
+                after = before.ApplyVariant(catalog.Evaluator, blueprint.StyleId);
                 if (availableBlueprints < 1)
                     throw new InvalidOperationException("You need one matching blueprint.");
             }
@@ -88,7 +85,7 @@ public sealed class EquipmentUpgradePolicy(
                 var tierPrices = prices.ForTier(before.State.Tier);
                 partsCost = tierPrices.RankPartCosts[before.State.Rank];
                 cinderCost = tierPrices.RankCinderCosts[before.State.Rank];
-                after = evaluated.Serialize() == before.Serialize()
+                after = before.MatchesEvaluation(evaluated)
                     ? EquipmentData.Create(before.EquipmentState.Reinforce(catalog.Evaluator), catalog.Evaluator)
                     : before.ReinforceFrozen(catalog.Evaluator.Balance);
             }

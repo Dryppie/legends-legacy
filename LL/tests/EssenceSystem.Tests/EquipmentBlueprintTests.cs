@@ -62,6 +62,11 @@ public sealed class EquipmentBlueprintTests
                 Assert.All(baseline.Stats, stat => Assert.True(variant.Stats.GetValueOrDefault(stat.Key) >= stat.Value,
                     $"{definition.Id}/{style.Id}/{tier}/{rank}: {stat.Key} decreased"));
                 Assert.Equal(baseline.TargetBudget * 1.15, variant.TargetBudget, 6);
+                var state = EquipmentState.Award(Guid.NewGuid(), equipment.Evaluator, definition.Id, tier, rank,
+                    new(EquipmentAwardKind.RandomDiscovery, "test", "test"),
+                    new(EquipmentOwnershipKind.UnboundPersonal, Guid.NewGuid()), ItemQuality.Masterpiece, 1.05);
+                var converted = EquipmentData.Create(state, equipment.Evaluator).ApplyVariant(equipment.Evaluator, style.Id);
+                Assert.Equal(variant.Stats.OrderBy(x => x.Key), converted.Stats.OrderBy(x => x.Key));
             }
         }
     }
@@ -97,6 +102,74 @@ public sealed class EquipmentBlueprintTests
         Assert.False(roundTrip.State.AdditiveVariantBonus);
         Assert.False(legacy.Reinforce(equipment.Evaluator).AdditiveVariantBonus);
         Assert.True(legacy.ApplyVariant(equipment.Evaluator, "blueprint_arcane").AdditiveVariantBonus);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Dropped_frozen_variant_can_be_replaced_repeatedly_without_rerolling_or_stacking(bool additive)
+    {
+        var equipment = Equipment();
+        var state = EquipmentState.Restore(Award(equipment).ToSnapshot() with
+        {
+            ActiveStyleId = "blueprint_fury", NativeStyleId = "blueprint_fury",
+            AdditiveVariantBonus = additive
+        });
+        var original = EquipmentData.Create(state, equipment.Evaluator);
+        var stats = original.Stats.ToDictionary(x => x.Key, x => x.Value);
+        // Simulate a persisted descriptor authored before a base-stat content change.
+        stats[AttributeType.MaxHealth] = stats.GetValueOrDefault(AttributeType.MaxHealth) + 123;
+        var frozen = EquipmentData.Deserialize(new EquipmentData(original.State, original.ItemBaseId,
+            original.DisplayName, original.Rarity, original.EquipmentType, original.Behavior,
+            stats, original.EquipmentSetId).Serialize());
+        var instance = new EquipmentInstance { Id = state.Id, ItemBaseId = frozen.ItemBaseId };
+        instance.ApplyProgressionData(frozen);
+        var context = new EquipmentUpgradeContext(new Character { Id = state.Ownership.OwnerId, Cinders = 1000 },
+            new InventoryItem { Quantity = 1 }, instance, false, null, [],
+            [new InventoryItem { Quantity = 1, ItemInstance = new ItemInstance { ItemBaseId = "item.blueprint_arcane" } }]);
+        var policy = new EquipmentUpgradePolicy(equipment,
+            JsonEquipmentUpgradePrices.Load(Path.Combine(Root, "equipment-upgrades.v1.json")), Blueprints(equipment));
+        var quote = policy.Quote(context, new(EquipmentUpgradeOperationKind.ApplyVariant, state.Id,
+            BlueprintStyleId: "blueprint_arcane"), Guid.NewGuid(), DateTimeOffset.UtcNow);
+        Assert.True(quote.CanExecute, quote.UnavailableReason);
+        var converted = EquipmentData.Deserialize(quote.After!.Serialize());
+        var baseline = equipment.Evaluator.Evaluate(state.DefinitionId, state.Tier, state.Rank,
+            null, state.Quality, state.AttributeRollMultiplier);
+        Assert.Equal(baseline.Stats.GetValueOrDefault(AttributeType.MaxHealth) + 123,
+            converted.BaseStats![AttributeType.MaxHealth]);
+        Assert.Equal("set_arcane", converted.EquipmentSetId);
+        Assert.Equal(state.ToSnapshot() with { ActiveStyleId = "blueprint_arcane", AdditiveVariantBonus = true }, converted.State);
+        Assert.Equal(frozen.Rarity, converted.Rarity);
+        Assert.Equal(JsonSerializer.Serialize(frozen.Behavior), JsonSerializer.Serialize(converted.Behavior));
+        for (var i = 0; i < 5; i++)
+        {
+            var switched = converted.ApplyVariant(equipment.Evaluator, "blueprint_fury");
+            converted = EquipmentData.Deserialize(switched.Serialize()).ApplyVariant(equipment.Evaluator, "blueprint_arcane");
+            Assert.Equal(quote.After.Stats.OrderBy(x => x.Key), converted.Stats.OrderBy(x => x.Key));
+        }
+        Assert.Equal(frozen.Serialize(), instance.ProgressionData!.Serialize());
+    }
+
+    [Fact]
+    public void Recorded_base_survives_content_changes_ownership_and_frozen_reinforcement()
+    {
+        var equipment = Equipment();
+        var original = EquipmentData.Create(Award(equipment).ApplyVariant(equipment.Evaluator, "blueprint_fury"), equipment.Evaluator);
+        var stats = original.Stats.ToDictionary(x => x.Key, x => x.Value);
+        var baseStats = original.BaseStats!.ToDictionary(x => x.Key, x => x.Value);
+        stats[AttributeType.MaxHealth] = stats.GetValueOrDefault(AttributeType.MaxHealth) + 123;
+        baseStats[AttributeType.MaxHealth] = baseStats.GetValueOrDefault(AttributeType.MaxHealth) + 123;
+        var frozen = new EquipmentData(original.State, original.ItemBaseId, original.DisplayName, original.Rarity,
+            original.EquipmentType, original.Behavior, stats, original.EquipmentSetId, baseStats);
+        var transferred = frozen.TransferToCharacter(frozen.State.Ownership.OwnerId, Guid.NewGuid());
+        Assert.Equal(baseStats.OrderBy(x => x.Key), transferred.BaseStats!.OrderBy(x => x.Key));
+        var bound = transferred.BindForPersonalUse();
+        var reinforced = EquipmentData.Deserialize(bound.ReinforceFrozen(equipment.Evaluator.Balance).Serialize());
+        var converted = reinforced.ApplyVariant(equipment.Evaluator, "blueprint_arcane");
+        Assert.Equal(reinforced.BaseStats!.OrderBy(x => x.Key), converted.BaseStats!.OrderBy(x => x.Key));
+        Assert.Equal(reinforced.State.Ownership, converted.State.Ownership);
+        Assert.Equal(reinforced.State.Rank, converted.State.Rank);
+        Assert.All(converted.BaseStats!, stat => Assert.True(converted.Stats.GetValueOrDefault(stat.Key) >= stat.Value));
     }
 
     [Fact]

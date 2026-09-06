@@ -32,6 +32,11 @@
   display: none;
 }
 
+.inventory-inspector > .ll-scrollbar {
+  // Keep text wrapping stable when the details start or stop overflowing.
+  scrollbar-gutter: stable;
+}
+
 .inventory-search-header,
 .inventory-collection-switch-header {
   display: none;
