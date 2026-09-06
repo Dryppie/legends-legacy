@@ -195,62 +195,6 @@ export interface AbilityBalanceEssenceResult {
   classification: string;
 }
 
-export interface AbilityBalanceAuditRequest {
-  teamSize: number;
-  essencesPerParticipant: number;
-  candidatePoolSize: number;
-  screeningBattleCount: number;
-  finalistCount: number;
-  finalistBattleCount: number;
-  validationBattleCount: number;
-  randomSeeds: number[];
-  equipmentTier: number;
-  equipmentRarity: string;
-  equipmentProfile: string;
-  useCanonicalRoles?: boolean;
-}
-
-export interface AbilityBalanceAuditHistoryEntry {
-  id: string;
-  request: AbilityBalanceAuditRequest;
-  report: AbilityBalanceAuditReport;
-  completedAtUtc: string;
-}
-
-export interface AbilityBalanceAuditReport {
-  contentHash: string;
-  screeningBattlesRun: number;
-  validationBattlesRun: number;
-  finalistBattlesRun: number;
-  totalBattlesRun: number;
-  candidateTeamsTested: number;
-  finalistTeamCount: number;
-  equipmentTier: number;
-  equipmentRarity: string;
-  equipmentProfile: string;
-  participantAttributes: Record<string, number>;
-  participantAttributesByRole?: Record<string, Record<string, number>> | null;
-  essenceResults: AbilityBalanceEssenceResult[];
-  finalistEssenceResults: AbilityBalanceEssenceResult[];
-  validationResults: AbilityBalanceValidationResult[];
-  finalists: AbilityBalanceCombinationResult[];
-  randomSeeds: number[];
-  finalistMatchups: AbilityBalanceMatchupResult[];
-}
-
-export interface AbilityBalanceValidationResult {
-  essenceId: string;
-  displayName: string;
-  replacementEssenceId: string;
-  replacementDisplayName: string;
-  battles: number;
-  originalScore: number;
-  replacementScore: number;
-  scoreDelta: number;
-  contextCount?: number;
-  replacementCount?: number;
-}
-
 export interface AbilityBalanceCombinationResult {
   signature: string;
   displayName: string;

@@ -13,13 +13,6 @@ namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
-    private readonly IAbilityBalanceAuditService _balanceAudits;
-
-    public DiagnosticsController(IAbilityBalanceAuditService balanceAudits)
-    {
-        _balanceAudits = balanceAudits;
-    }
-
     [HttpGet("ability-catalog")]
     public async Task<ActionResult<AbilityCatalogDiagnosticReport>> GetAbilityCatalogDiagnostics() =>
         await Mediator.Send(new GetAbilityCatalogDiagnosticsQuery());
@@ -45,9 +38,4 @@ public class DiagnosticsController : BaseController
         [FromBody] AbilityBalanceSimulationRequest request) =>
         await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
 
-    [HttpPost("ability-balance-audit")]
-    public ActionResult<AbilityBalanceAuditReport> RunAbilityBalanceAudit(
-        [FromBody] AbilityBalanceAuditRequest request,
-        CancellationToken cancellationToken) =>
-        Ok(_balanceAudits.Run(request, cancellationToken));
 }

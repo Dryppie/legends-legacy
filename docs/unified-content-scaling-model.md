@@ -350,9 +350,3 @@ Dungeon tiers are anchored to positions 10, 20, and 30. Their content-pressure m
 Released World Tower Floors 1–10 map to progression positions 1–10. Participant scaling is separate from the Floor curve: Health scales sublinearly with participant count, offense scales mildly, and durability scales more slowly. Existing boss-specific differences are retained as explicit tuning values instead of being hidden in the Floor baseline.
 
 These coefficients are an initial deterministic calibration. They should be adjusted from combat telemetry—especially win rate, encounter duration, and damage intake—without changing the model's structure.
-
-## 9. Balance Calibration Ownership
-
-The former Essence progression matrix, generated player snapshots, authored-encounter calibration, and repeatable calibration report tooling were retired during P0 of the automated balance-system replacement.
-
-The production scaling rules above remain authoritative for live content. New offline balance analysis must be implemented through the architecture described in `docs/content-balancing/legendslegacy-automated-balance-system-implementation-plan.md`; production encounters must not adapt dynamically to a player's equipped Essences.

@@ -60,7 +60,7 @@ Controllers, MediatR handlers, EF configurations, AutoMapper resolvers, hosted s
 - `PickRandomAbilities` and `PickSpecificAbility` are no-ops.
 - `GetEssenceComboKey` returns an empty combination.
 - No frontend, build script, test, or documentation invokes the endpoints.
-- Current diagnostics use `AbilityBalanceSimulator`, `AbilityBalanceAuditService`, and the dashboard diagnostics API. The separate calibration runners and `tools/BalanceCalibration` were retired by the automated balance-system P0 cleanup.
+- Current diagnostics use the manual AbilityBalanceSimulator and the dashboard diagnostics API.
 
 **Recommended next step:** Confirm the endpoints have no manual or external consumers, then remove controller → commands → interface → DI registration → service as one chain.
 

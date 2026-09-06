@@ -93,7 +93,7 @@ A equipment progression buyer cannot purchase legacy equipment through a direct 
 
 ### 8. Equipment reference builds implemented; whole-loop evidence remains pending
 
-[EquipmentReferenceBuildFactory](../../LL/src/Infrastructure/Service/Services.LL/PowerRatings/EquipmentReferenceBuildFactory.cs) now creates detached canonical rank/style loadouts. The explicit [reference command](../content-balancing/equipment-reference-builds.md) expands twelve Tier-1 fixtures across ranks 0–5, records exact descriptors and Combat Rating, and executes 72 deterministic production-combat checks. Native, replaced and cleared styles, shield/two-handed/dual-wield hands and snapshot equivalence are covered. The existing CanonicalEquipmentBuildFactory, legacy gear packages and optimizer/calibration policies retain their legacy meaning.
+[EquipmentReferenceBuildFactory](../../LL/src/Infrastructure/Service/Services.LL/PowerRatings/EquipmentReferenceBuildFactory.cs) now creates detached canonical rank/style loadouts.
 
 **Impact:** passing existing power/balance tests does not certify the new rank/style economy or intended readiness thresholds. The implemented reference command exercises a fixed synthetic matchup. Run integrated combat/economy checks and migrate calibration policies once source and entry integration is complete. The offline equipment progression proposal analysis is useful input, not certification of live gameplay. Specification: ME-EQP-03, ME-INT-02, AC-11, RM-17.
 

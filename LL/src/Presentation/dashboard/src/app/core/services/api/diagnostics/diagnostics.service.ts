@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
 import {
-  AbilityBalanceAuditReport,
-  AbilityBalanceAuditRequest,
   AbilityBalanceSimulationReport,
   AbilityBalanceSimulationRequest,
   AbilityCatalogBehaviorDiagnosticReport,
@@ -38,12 +36,6 @@ export class DiagnosticsService {
     request: AbilityBalanceSimulationRequest,
   ): Observable<AbilityBalanceSimulationReport> {
     return this.apiService.post('diagnostics/ability-balance-simulation', request);
-  }
-
-  public runAbilityBalanceAudit(
-    request: AbilityBalanceAuditRequest,
-  ): Observable<AbilityBalanceAuditReport> {
-    return this.apiService.post('diagnostics/ability-balance-audit', request);
   }
 
 }

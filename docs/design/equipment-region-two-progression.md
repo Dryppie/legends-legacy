@@ -12,4 +12,4 @@ Meran gear keeps its awarded rarity, rank, and style for deterministic evaluatio
 
 The transition and combat reports remain useful as historical balance evidence for the authored gear states they evaluated. Their Scrap-income and Forge-pacing projections are obsolete.
 
-See [equipment contract](equipment-specification.md), [implementation status](equipment-implementation-status.md), and [Meran PvE report](equipment-meran-pve-balance-report.md).
+See [equipment contract](equipment-specification.md) and [implementation status](equipment-implementation-status.md).

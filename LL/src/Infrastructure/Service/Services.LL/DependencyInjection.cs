@@ -411,7 +411,6 @@ public static class DependencyInjection
                 sp.GetRequiredService<IOptions<ThreatAndTankingOptions>>().Value));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
         services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
-        services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),
