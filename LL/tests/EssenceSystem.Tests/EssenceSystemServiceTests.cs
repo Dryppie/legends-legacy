@@ -1,4 +1,11 @@
 using Application.Interfaces.Outbox;
+using Application.Common.Mappings;
+using Application.Interfaces.Services.LL.CharacterActions;
+using Application.UseCases.Essences.Commands;
+using Application.UseCases.Essences.Commands.SetEssenceFocus;
+using AutoMapper;
+using Domain.Models.CharacterActions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Outbox;
@@ -1072,6 +1079,24 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Theory]
+    [InlineData(25, 55, 0)]
+    [InlineData(50, 60, 20)]
+    public async Task SpendDust_bulk_upgrade_stops_at_owned_dust_or_the_next_ascension(int owned, int expectedLevel, int remaining)
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var essenceId = await AddPlayerEssenceAsync(db, characterId, level: 30);
+        db.PlayerEssences.Single(x => x.Id == essenceId).AscensionTier = 2;
+        await AddInventoryQuantityAsync(db, characterId, "soul_dust", owned);
+        var result = await CreateService(db).SpendEssenceDustAsync(characterId, essenceId, 30, default);
+        await db.SaveChangesAsync();
+        Assert.True(result.Succeeded);
+        Assert.Equal(expectedLevel, db.PlayerEssences.Single(x => x.Id == essenceId).Level);
+        Assert.Equal(expectedLevel - 30, result.DustSpent);
+        Assert.Equal(remaining, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+    }
+
+    [Theory]
     [InlineData(0)]
     [InlineData(5_000)]
     public async Task SpendDust_respects_tier_cap_and_only_spends_applied_dust(int currentXp)
@@ -1187,7 +1212,7 @@ public sealed class EssenceSystemServiceTests
         Assert.False(failed.Dropped);
         Assert.Equal(CreatureResonanceConstants.GainPerFailedEligibleKill, failed.ResonanceValue);
         Assert.True(dropped.Dropped);
-        Assert.Equal(0.5 + CreatureResonanceConstants.DropChanceBonusPerPoint, dropped.EffectiveDropChance);
+        Assert.Equal(0.5 * (1 + CreatureResonanceConstants.RelativeDropChanceBonusPerPoint), dropped.EffectiveDropChance);
         Assert.Equal(0, dropped.ResonanceValue);
         Assert.Equal(0, db.CreatureResonances.Single().ResonanceValue);
     }
@@ -1235,11 +1260,11 @@ public sealed class EssenceSystemServiceTests
         Assert.False(finalProgressionRoll.Dropped);
         Assert.Equal(CreatureResonanceConstants.FailedEligibleKillsToMaximumBonus, finalProgressionRoll.ResonanceValue);
         Assert.Equal(
-            0.5 + CreatureResonanceConstants.MaximumDropChanceBonus - CreatureResonanceConstants.DropChanceBonusPerPoint,
+            0.5 * (1 + CreatureResonanceConstants.MaximumRelativeDropChanceBonus - CreatureResonanceConstants.RelativeDropChanceBonusPerPoint),
             finalProgressionRoll.EffectiveDropChance,
             precision: 12);
         Assert.False(cappedRoll.Dropped);
-        Assert.Equal(0.5 + CreatureResonanceConstants.MaximumDropChanceBonus, cappedRoll.EffectiveDropChance, precision: 12);
+        Assert.Equal(0.505, cappedRoll.EffectiveDropChance, precision: 12);
     }
 
     [Fact]
@@ -1291,8 +1316,49 @@ public sealed class EssenceSystemServiceTests
                 ResonanceCapMultiplier: 10));
 
         Assert.False(result.Dropped);
-        Assert.Equal(0.5 + (CreatureResonanceConstants.MaximumDropChanceBonus * 10), result.EffectiveDropChance, precision: 12);
+        Assert.Equal(0.55, result.EffectiveDropChance, precision: 12);
         Assert.Equal(startingResonance + 1_000, result.ResonanceValue);
+    }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1_000, false)]
+    [InlineData(12_000, false)]
+    [InlineData(20_000, false)]
+    [InlineData(1_000, true)]
+    [InlineData(120_000, true)]
+    public async Task Reducing_base_chance_scales_the_entire_resonance_boost(double resonance, bool isBoss)
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var original = CreateLootTable("monster.test", "essence.test");
+        original.BaseDropChance = 0.0001;
+        var reduced = CreateLootTable("monster.other", "essence.other");
+        reduced.BaseDropChance = 0.00001;
+        foreach (var table in new[] { original, reduced })
+        {
+            db.CreatureResonances.Add(new CreatureResonance
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                CreatureId = table.CreatureId,
+                ResonanceValue = resonance
+            });
+        }
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new QueueRandomProvider(0.99, 0.99),
+            creatureEssenceLootTables: new StaticCreatureEssenceLootTableRepository([original, reduced]));
+        var modifiers = isBoss
+            ? new EssenceDropRollModifiers(DropChanceMultiplier: 10, PityProgressionMultiplier: 1_000, ResonanceCapMultiplier: 10)
+            : new EssenceDropRollModifiers();
+
+        var originalRoll = await service.RollMonsterEssenceDropAsync(characterId, original.CreatureId, true, CancellationToken.None, modifiers);
+        var reducedRoll = await service.RollMonsterEssenceDropAsync(characterId, reduced.CreatureId, true, CancellationToken.None, modifiers);
+
+        Assert.False(originalRoll.Dropped);
+        Assert.False(reducedRoll.Dropped);
+        Assert.Equal(originalRoll.EffectiveDropChance / 10, reducedRoll.EffectiveDropChance, precision: 12);
+        Assert.Equal(originalRoll.ResonanceValue, reducedRoll.ResonanceValue);
     }
 
     [Fact]
@@ -1302,7 +1368,8 @@ public sealed class EssenceSystemServiceTests
         var characterId = await SeedCharacterAndInventoryAsync(db);
         var service = CreateService(
             db,
-            new QueueRandomProvider(0.6, 0.6),
+            new QueueRandomProvider(0.02, 0.99, 0.02),
+            creatureEssenceLootTables: LowChanceLootTables(0.01),
             bonusService: new StaticBonusService(new Dictionary<BonusKind, double>
             {
                 [BonusKind.FocusedMonsterEssenceDropRateRelativeBps] = 5000
@@ -1313,9 +1380,9 @@ public sealed class EssenceSystemServiceTests
         var unfocused = await service.RollMonsterEssenceDropAsync(characterId, "monster.other", true, CancellationToken.None);
 
         Assert.True(focused.Dropped);
-        Assert.Equal(0.75, focused.EffectiveDropChance);
+        Assert.Equal(0.045, focused.EffectiveDropChance, 10);
         Assert.False(unfocused.Dropped);
-        Assert.Equal(0.5, unfocused.EffectiveDropChance);
+        Assert.Equal(0.01, unfocused.EffectiveDropChance);
     }
 
     [Fact]
@@ -1453,6 +1520,7 @@ public sealed class EssenceSystemServiceTests
         var service = CreateService(
             db,
             new QueueRandomProvider(0.99, 0.99, 0.99),
+            creatureEssenceLootTables: LowChanceLootTables(),
             bonusService: bonusService,
             creatureArchiveService: creatureArchiveService);
 
@@ -1485,6 +1553,7 @@ public sealed class EssenceSystemServiceTests
         var service = CreateService(
             db,
             new QueueRandomProvider(0.99, 0.99, 0.99, 0.99, 0.99, 0.99),
+            creatureEssenceLootTables: LowChanceLootTables(),
             bonusService: bonusService,
             creatureArchiveService: creatureArchiveService);
         Creature[] defeatedCreatures =
@@ -1513,6 +1582,115 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal(0, creatureArchiveService.FocusLookupCount);
         Assert.Equal(1, creatureArchiveService.FocusIdLookupCount);
         Assert.Equal(2, db.CreatureResonances.Local.Count);
+    }
+
+    [Fact]
+    public async Task Focus_triples_base_chance_without_upgrades_and_preserves_relative_resonance()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        db.CreatureResonances.Add(new CreatureResonance
+        {
+            Id = Guid.NewGuid(), CharacterId = characterId, CreatureId = "monster.test",
+            ResonanceValue = 12_000
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db, creatureEssenceLootTables: LowChanceLootTables(),
+            creatureArchiveService: new StaticCreatureArchiveService("monster.test"));
+
+        var focused = await service.RollMonsterEssenceDropAsync(characterId, "monster.test", true, CancellationToken.None);
+        var other = await service.RollMonsterEssenceDropAsync(characterId, "monster.other", true, CancellationToken.None);
+
+        Assert.Equal(0.000303, focused.EffectiveDropChance, 12);
+        Assert.Equal(0.0001, other.EffectiveDropChance, 12);
+    }
+
+    [Theory]
+    [InlineData(1, 10_001)]
+    [InlineData(2, 20_001)]
+    [InlineData(3, 30_001)]
+    public async Task Focused_defeats_do_not_guarantee_an_essence_at_any_tier(int tier, int defeats)
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        db.ItemBases.Add(new EssenceItemBase
+        {
+            Id = "item.essence.test", Name = "Test Essence", ItemType = ItemType.Essence,
+            EssenceDefinitionId = "essence.test"
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db, creatureEssenceLootTables: LowChanceLootTables(),
+            creatureArchiveService: new StaticCreatureArchiveService("monster.test"));
+        var creature = new Creature { Name = "Test", Tier = tier };
+
+        var drops = await service.RollEssenceDropsAsync(characterId,
+            Enumerable.Repeat(creature, defeats).ToArray(), true, CancellationToken.None);
+
+        Assert.Empty(drops);
+        Assert.Equal(defeats, Assert.Single(db.CreatureResonances.Local).ResonanceValue);
+    }
+
+    [Fact]
+    public async Task Focused_dungeon_boss_combines_chance_and_resonance_multipliers()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var service = CreateService(db, creatureEssenceLootTables: LowChanceLootTables(),
+            creatureArchiveService: new StaticCreatureArchiveService("monster.test"));
+        var result = await service.RollMonsterEssenceDropAsync(characterId, "monster.test", true,
+            CancellationToken.None, new EssenceDropRollModifiers(10, 1000, 10));
+
+        Assert.False(result.Dropped);
+        Assert.Equal(0.003, result.EffectiveDropChance, 12);
+        var resonance = Assert.Single(db.CreatureResonances.Local);
+        Assert.Equal(1000, resonance.ResonanceValue);
+    }
+
+    private static ICreatureEssenceLootTableRepository LowChanceLootTables(double chance = 0.0001)
+    {
+        var tables = new[] { CreateLootTable("monster.test", "essence.test"), CreateLootTable("monster.other", "essence.other") };
+        foreach (var table in tables) table.BaseDropChance = chance;
+        return new StaticCreatureEssenceLootTableRepository(tables);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Focus_change_settles_old_combat_and_waits_if_more_work_is_due(bool moreDue)
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var actions = new FocusChangeActionService(new CharacterAction { HasMoreDueWork = moreDue });
+        var archive = new StaticCreatureArchiveService("monster.test")
+        {
+            OnSetFocus = () => Assert.True(actions.Resolved)
+        };
+        var mapper = new MapperConfiguration(configuration => configuration.AddMaps(typeof(MappingProfile).Assembly),
+            NullLoggerFactory.Instance).CreateMapper();
+        var responses = new EssenceMutationResponseFactory(mapper, CreateService(db), archive, null!, null!);
+        var handler = new SetEssenceFocusCommandHandler(archive, responses, actions);
+
+        var response = await handler.Handle(new SetEssenceFocusCommand(characterId, "monster.other"), CancellationToken.None);
+
+        Assert.True(actions.Resolved);
+        Assert.Equal(!moreDue, response.Succeeded);
+        Assert.Equal(moreDue ? 0 : 1, archive.SetFocusCount);
+    }
+
+    private sealed class FocusChangeActionService(CharacterAction result) : ICharacterActionService
+    {
+        public bool Resolved { get; private set; }
+        public Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+        {
+            Resolved = true;
+            return Task.FromResult<CharacterAction?>(result);
+        }
+        public Task<CharacterAction?> PeekCharacterActionAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+        public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction action, DateTimeOffset now, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+        public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
     }
 
     private static LLDbContext CreateDb()
@@ -1828,6 +2006,8 @@ public sealed class EssenceSystemServiceTests
 
     private sealed class StaticCreatureArchiveService(string focusedCreatureId) : ICreatureArchiveService
     {
+        public Action? OnSetFocus { get; init; }
+        public int SetFocusCount { get; private set; }
         public int FocusLookupCount { get; private set; }
         public int FocusIdLookupCount { get; private set; }
 
@@ -1844,8 +2024,12 @@ public sealed class EssenceSystemServiceTests
         public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(new EssenceCodex([]));
 
-        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
-            Task.FromResult(new CreatureArchive([], true, null, null));
+        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken)
+        {
+            OnSetFocus?.Invoke();
+            SetFocusCount++;
+            return Task.FromResult(new CreatureArchive([], true, null, null));
+        }
 
         public Task<string?> GetEssenceFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken)
         {

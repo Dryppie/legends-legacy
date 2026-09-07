@@ -1,3 +1,9 @@
+using Application.UseCases.Equipments.Queries.GetEquipmentLoadouts;
+using Application.UseCases.Equipments.Commands.SaveEquipmentLoadout;
+using Application.UseCases.Equipments.Commands.DeleteEquipmentLoadout;
+using Application.UseCases.Equipments.Commands.SetEquipmentLoadoutActivities;
+using Application.UseCases.Equipments.Commands.ApplyEquipmentLoadout;
+using Domain.Models.Essences;
 using Application.UseCases.Equipments.Commands.EquipEquipment;
 using Application.UseCases.Equipments.Commands.UnequipEquipment;
 using Application.UseCases.Equipments.Dtos;
@@ -16,6 +22,29 @@ using Domain.Models.Items.Equipments.Progression;
 namespace API.LL.Controllers.V1;
 public class EquipmentController : BaseController
 {
+    public sealed record SaveEquipmentLoadoutRequest(Guid? Id, string Name);
+    public sealed record EquipmentLoadoutActivitiesRequest(IReadOnlyList<EssenceCombatActivity> Activities);
+
+    [HttpGet("loadouts")]
+    public async Task<ActionResult<List<EquipmentLoadoutDto>>> GetLoadouts() =>
+        await Mediator.Send(new GetEquipmentLoadoutsQuery(CurrentCharacterGuid));
+
+    [HttpPost("loadouts")]
+    public async Task<ActionResult<Response<bool>>> SaveLoadout(SaveEquipmentLoadoutRequest request) =>
+        await Mediator.Send(new SaveEquipmentLoadoutCommand(CurrentCharacterGuid, request.Id, request.Name));
+
+    [HttpDelete("loadouts/{id:guid}")]
+    public async Task<ActionResult<Response<bool>>> DeleteLoadout(Guid id) =>
+        await Mediator.Send(new DeleteEquipmentLoadoutCommand(CurrentCharacterGuid, id));
+
+    [HttpPost("loadouts/{id:guid}/apply")]
+    public async Task<ActionResult<Response<bool>>> ApplyLoadout(Guid id) =>
+        await Mediator.Send(new ApplyEquipmentLoadoutCommand(CurrentCharacterGuid, id));
+
+    [HttpPut("loadouts/{id:guid}/activities")]
+    public async Task<ActionResult<Response<bool>>> SetLoadoutActivities(Guid id, EquipmentLoadoutActivitiesRequest request) =>
+        await Mediator.Send(new SetEquipmentLoadoutActivitiesCommand(CurrentCharacterGuid, id, request.Activities));
+
     public record EquipEquipmentRequestDto(string EquipmentItemId, EquipmentSlotType? SlotType);
     public sealed record EquipmentUpgradePreviewRequestDto(
         EquipmentUpgradeOperationKind Kind,

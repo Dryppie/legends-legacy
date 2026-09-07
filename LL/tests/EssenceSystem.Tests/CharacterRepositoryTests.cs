@@ -55,11 +55,11 @@ public sealed class CharacterRepositoryTests
     }
 
     [Fact]
-    public async Task GetSigilFragmentsAsync_returns_only_the_character_balance()
+    public async Task GetSigilFragmentsAsync_returns_only_the_characters_inventory_fragments()
     {
         await using var db = CreateDb();
         var character = AddCharacter(db, "Sigil Holder");
-        character.SigilFragments = 37;
+        SigilFragmentTestItems.Seed(db, character.Id, 37);
         await db.SaveChangesAsync();
         var repository = new CharacterRepository(db);
 

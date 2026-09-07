@@ -359,6 +359,7 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IDungeonRouteService, DungeonRouteService>();
         services.AddScoped<IEntityService, EntityService>();
+        services.AddScoped<IEquipmentLoadoutService, EquipmentLoadoutService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
         services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
         services.AddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(contentRootPath,

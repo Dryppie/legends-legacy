@@ -67,6 +67,22 @@ public sealed partial class GuildShopServiceTests
         Assert.All(overview.Items, item => Assert.True(item.CanPurchase));
     }
 
+    [Fact]
+    public async Task Fragment_purchase_grants_a_bound_inventory_stack()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
+        var characterId = SeedGuild(db, now);
+        SigilFragmentTestItems.Seed(db, characterId, 5);
+        await db.SaveChangesAsync();
+        var result = await CreateService(db).PurchaseAsync(characterId, "common.sigil_fragment_case", now, default);
+        await db.SaveChangesAsync();
+        var stack = Assert.Single(await db.InventoryItems.Include(x => x.ItemInstance).ThenInclude(x => x.ItemBase).ToListAsync());
+        Assert.Equal(15, stack.Quantity);
+        Assert.True(stack.ItemInstance.ItemBase.IsBound);
+        Assert.Equal(300, (await db.Characters.SingleAsync()).GuildFavor);
+    }
+
     private static LLDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

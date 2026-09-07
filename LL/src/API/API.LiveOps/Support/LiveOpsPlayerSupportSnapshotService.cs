@@ -266,7 +266,7 @@ public sealed partial class LiveOpsPlayerSupportSnapshotService(
                 x.Cinders,
                 x.Soulstones,
                 x.FateEcho,
-                x.SigilFragments,
+                database.InventoryItems.Where(item => item.InventoryId == x.Id && item.ItemInstance.ItemBaseId == Domain.Models.Items.SigilFragmentItem.ItemBaseId).Sum(item => (long)item.Quantity),
                 x.GuildFavor,
                 x.TowerTokens))
             .SingleAsync(cancellationToken);

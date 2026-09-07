@@ -27,6 +27,8 @@ public interface ITournamentGroundsRepository
     ValueTask<TEntity?> FindAsync<TEntity>(object?[] keyValues, CancellationToken cancellationToken)
         where TEntity : class;
 
+    Task<IReadOnlyList<Domain.Models.Inventories.InventoryItem>> GrantSigilFragmentsAsync(Guid characterId, int amount, CancellationToken cancellationToken);
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     Task<ITournamentGroundsTransaction> BeginTransactionIfNeededAsync(CancellationToken cancellationToken);
     Task ExecuteTournamentAdvisoryLockAsync(long lockId, CancellationToken cancellationToken);

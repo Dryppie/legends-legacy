@@ -137,7 +137,8 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal("Hero", leaderboardEntry.CharacterName);
         Assert.Equal(now, leaderboardEntry.LastClearedAt);
         Assert.Equal(120, mastery.Experience);
-        Assert.Equal(8, mastery.BenefitLevels.Count);
+        Assert.Equal(10, mastery.BenefitLevels.Count);
+        Assert.Equal(15, mastery.Benefits.EquipmentDropChanceBonusPercentagePoints);
         Assert.Equal(1, mastery.Benefits.AdditionalVisibilityRows);
         Assert.Equal(2, requirement.OwnedAmount);
         Assert.Equal("Drops throughout Shenic.", requirement.Description);

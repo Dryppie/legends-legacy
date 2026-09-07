@@ -17,6 +17,14 @@ public sealed class EquipmentBlueprintRepository(IDbContext db) : IEquipmentBlue
         return progress;
     }
 
-    public async Task<IReadOnlyList<EquipmentBlueprintProgress>> GetProgressAsync(Guid characterId, CancellationToken ct) =>
-        await db.EquipmentBlueprintProgress.AsNoTracking().Where(x => x.CharacterId == characterId).ToListAsync(ct);
+    public async Task<IReadOnlyList<EquipmentBlueprintProgress>> GetProgressAsync(Guid characterId, CancellationToken ct)
+    {
+        var persisted = await db.EquipmentBlueprintProgress.AsNoTracking()
+            .Where(x => x.CharacterId == characterId).ToListAsync(ct);
+        // State synchronization can request a preview before this completion is saved.
+        var current = persisted.ToDictionary(x => x.FamilyId, StringComparer.Ordinal);
+        foreach (var progress in db.EquipmentBlueprintProgress.Local.Where(x => x.CharacterId == characterId))
+            current[progress.FamilyId] = progress;
+        return current.Values.ToArray();
+    }
 }

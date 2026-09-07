@@ -1,3 +1,6 @@
+using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Mastery;
+
 namespace Domain.Models.Items.Equipments.Progression;
 
 public sealed record CombatAcquisitionArea(string AreaId);
@@ -65,7 +68,8 @@ public sealed record EquipmentRarityWeights(
                 return rarity;
         }
 
-        return EquipmentRarity.Legacy;
+        // Rounding at the upper boundary must not award an excluded rarity.
+        return Entries().Last(entry => entry.Weight > 0).Rarity;
     }
 
     public IReadOnlyList<(EquipmentRarity Rarity, double Weight)> Entries() =>
@@ -95,13 +99,49 @@ public sealed record EquipmentDropProfile(
     public EquipmentQualityWeights Qualities { get; init; } = new(0d, 0.35d, 0.45d, 0.16d, 0.04d);
 }
 
+public sealed record DungeonEquipmentRarityWeights(
+    EquipmentRarityWeights Novice,
+    EquipmentRarityWeights Veteran,
+    EquipmentRarityWeights Champion)
+{
+    public EquipmentRarityWeights ForGrade(DungeonGrade grade) => grade switch
+    {
+        DungeonGrade.GradeI => Novice,
+        DungeonGrade.GradeII => Veteran,
+        DungeonGrade.GradeIII => Champion,
+        _ => throw new ArgumentOutOfRangeException(nameof(grade), grade, "Unknown dungeon difficulty.")
+    };
+
+    public void Validate()
+    {
+        foreach (var grade in Enum.GetValues<DungeonGrade>())
+        {
+            var weights = ForGrade(grade)
+                ?? throw new ArgumentException($"Missing equipment rarity weights for {grade}.");
+            weights.Validate();
+        }
+    }
+}
+
+public sealed record DungeonEquipmentDropProfile(
+    double DropChance,
+    int Rank,
+    DungeonEquipmentRarityWeights Rarities)
+{
+    public EquipmentQualityWeights Qualities { get; init; } = new(0d, 0.35d, 0.45d, 0.16d, 0.04d);
+
+    public double DropChanceAtMastery(int level) => Math.Clamp(
+        DropChance + DungeonMasteryBenefits.Resolve(level).EquipmentDropChanceBonusPercentagePoints / 100d,
+        0d, 1d);
+}
+
 public sealed record CombatAcquisitionRules(
     string Version,
     string PoolId,
     int Region,
     int EquipmentTier,
     EquipmentDropProfile AreaEquipment,
-    EquipmentDropProfile DungeonEquipment,
+    DungeonEquipmentDropProfile DungeonEquipment,
     double SigilDropChance,
     IReadOnlyList<CombatAcquisitionArea> Areas,
     IReadOnlyList<CombatAcquisitionSigil> Sigils,
@@ -181,6 +221,12 @@ public sealed class CombatAcquisitionCatalog
         DropDefinitions(rarity).Where(x => x.NativeStyleId is null).ToArray();
 
     private static bool ValidProfile(EquipmentDropProfile profile) => profile is not null
+        && double.IsFinite(profile.DropChance) && profile.DropChance is > 0 and <= 1
+        && profile.Rank is >= 0 and <= EquipmentBalance.MaximumRank
+        && profile.Rarities is not null
+        && profile.Qualities is not null;
+
+    private static bool ValidProfile(DungeonEquipmentDropProfile profile) => profile is not null
         && double.IsFinite(profile.DropChance) && profile.DropChance is > 0 and <= 1
         && profile.Rank is >= 0 and <= EquipmentBalance.MaximumRank
         && profile.Rarities is not null

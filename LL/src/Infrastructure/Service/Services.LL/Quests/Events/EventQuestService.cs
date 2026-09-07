@@ -666,7 +666,9 @@ public sealed class EventQuestService(
             "DungeonRunStarted" when trigger.Type == "DungeonRunStarted" => 1,
             "DungeonRunCompleted" when
                 trigger.Type == "DungeonRunCompleted" &&
-                Matches(filters.DungeonDefinitionId, trigger.DungeonDefinitionId) => 1,
+                Matches(filters.DungeonDefinitionId, trigger.DungeonDefinitionId) &&
+                Matches(filters.DungeonFamilyId, trigger.DungeonDefinitionId is null ? null :
+                    Domain.Models.Dungeons.Definitions.DungeonDefinitionIdentity.GetFamilyId(trigger.DungeonDefinitionId)) => 1,
             "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
             _ => 0
         };

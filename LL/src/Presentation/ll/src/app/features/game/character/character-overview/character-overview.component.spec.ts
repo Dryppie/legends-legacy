@@ -108,7 +108,6 @@ function createCharacter(): CharacterDto {
     cinders: 0,
     soulstones: 0,
     fateEcho: 0,
-    sigilFragments: 0,
     guildFavor: 0,
     arenaRating: 0,
   };

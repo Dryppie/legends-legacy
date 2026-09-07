@@ -66,21 +66,6 @@
       ]
     },
     {
-      "id": "daily.combat.wins",
-      "title": "Victory Will Become Habit",
-      "flavorText": "Let the day learn the shape of your triumph.",
-      "objectiveText": "Win {target} qualifying encounters.",
-      "scope": "Daily",
-      "category": "Combat",
-      "difficulty": "Common",
-      "objectiveType": "WinEncounters",
-      "rewardProfileId": "Daily.Common",
-      "weight": 90,
-      "allowedSlots": [
-        "Steady"
-      ]
-    },
-    {
       "id": "daily.dungeon.rooms",
       "title": "The Deep Will Pay Tribute",
       "flavorText": "A sealed door will open, and something beneath the earth will remember your name.",
@@ -100,7 +85,7 @@
       "id": "daily.dungeon.complete",
       "title": "You Will Return from Darkness Carrying Proof",
       "flavorText": "The underworld does not give gifts freely. Take one anyway.",
-      "objectiveText": "Complete {target} dungeon.",
+      "objectiveText": "Complete {target} dungeons.",
       "scope": "Daily",
       "category": "Dungeon",
       "difficulty": "Rare",
@@ -156,21 +141,6 @@
       "allowedSlots": [
         "Steady",
         "Focused"
-      ]
-    },
-    {
-      "id": "daily.survival.recover",
-      "title": "Blood Will Teach What Victory Cannot",
-      "flavorText": "The Oracle does not fear your defeat. She fears you learning nothing from it.",
-      "objectiveText": "After a meaningful defeat, win {target} qualifying encounters.",
-      "scope": "Daily",
-      "category": "Survival",
-      "difficulty": "Rare",
-      "objectiveType": "MeaningfulDefeatThenWins",
-      "rewardProfileId": "Daily.Rare",
-      "weight": 65,
-      "allowedSlots": [
-        "Ominous"
       ]
     },
     {

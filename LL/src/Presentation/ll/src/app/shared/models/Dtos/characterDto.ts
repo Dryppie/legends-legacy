@@ -11,7 +11,6 @@ export interface CharacterDto {
   cinders: number;
   soulstones: number;
   fateEcho: number;
-  sigilFragments: number;
   guildFavor: number;
   arenaRating: number;
   equippedTitle?: EquippedTitleDto | null;

@@ -26,7 +26,6 @@ public sealed class PersistentRangeConstraintTests
                 "Cinders",
                 "Soulstones",
                 "FateEcho",
-                "SigilFragments",
                 "GuildFavor",
                 "TowerTokens",
                 "RaidTrophies"

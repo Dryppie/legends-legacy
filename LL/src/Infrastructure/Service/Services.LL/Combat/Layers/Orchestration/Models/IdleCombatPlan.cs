@@ -14,4 +14,5 @@ public sealed record IdleCombatPlan(
     int PlannedEncounterCount)
 {
     public bool CaptureFinalEncounterLog { get; init; } = true;
+    public IReadOnlyList<AreaCreature>? SpawnCreatures { get; init; }
 }

@@ -59,7 +59,6 @@
           </span>
         </div>
 
-
         <div class="ll-stat-card px-3 py-2">
           <span class="ll-stat-label"> Clears </span>
           <span class="ml-2 font-serif text-lg text-white">
@@ -126,13 +125,21 @@
         <div class="mt-3 min-h-40 backdrop-blur-sm">
           <!-- REWARDS TAB -->
           <div *ngIf="selectedTab() === 'rewards'" class="h-full">
+            @let equipmentReward = selectedEquipmentReward();
+            @let equipmentGuaranteed =
+              equipmentReward && rewardChancePercent(equipmentReward) >= 100;
             <div
-              *ngIf="selectedRewardSections().length; else noRewardsListed"
+              *ngIf="
+                selectedRewardSections().length || equipmentReward;
+                else noRewardsListed
+              "
               class="reward-cards-layout"
             >
               <ng-container *ngIf="selectedRunRewards() as runRewards">
+                @let rewardCount =
+                  runRewards.length + (equipmentReward ? 1 : 0);
                 <article
-                  *ngIf="runRewards.length"
+                  *ngIf="rewardCount"
                   class="reward-card ll-card min-w-0 overflow-hidden"
                 >
                   <header
@@ -150,13 +157,16 @@
                         Repeatable
                       </span>
                       <span class="ll-item-chip tabular-nums">
-                        {{ runRewards.length }}
-                        {{ runRewards.length === 1 ? "item" : "items" }}
+                        {{ rewardCount }}
+                        {{ rewardCount === 1 ? "item" : "items" }}
                       </span>
                     </div>
                   </header>
 
                   <div class="px-4 pb-4">
+                    <p *ngIf="selectedBlueprintRewardNotice() as notice" class="mt-3 text-xs leading-5 text-zinc-300">
+                      {{ notice }}
+                    </p>
                     <div
                       class="reward-table-grid reward-table-heading border-b border-white/10 py-2"
                     >
@@ -166,7 +176,10 @@
                     </div>
 
                     <section
-                      *ngIf="guaranteedRewards(runRewards).length"
+                      *ngIf="
+                        guaranteedRewards(runRewards).length ||
+                        equipmentGuaranteed
+                      "
                       class="reward-section"
                     >
                       <div class="reward-section-title">
@@ -175,6 +188,15 @@
                         ></span>
                         <span>Guaranteed</span>
                       </div>
+
+                      <ng-container *ngIf="equipmentGuaranteed">
+                        <ng-container
+                          *ngTemplateOutlet="
+                            equipmentRewardRow;
+                            context: { $implicit: equipmentReward }
+                          "
+                        ></ng-container>
+                      </ng-container>
 
                       <div
                         *ngFor="
@@ -208,7 +230,10 @@
                     </section>
 
                     <section
-                      *ngIf="chanceRewards(runRewards).length"
+                      *ngIf="
+                        chanceRewards(runRewards).length ||
+                        (equipmentReward && !equipmentGuaranteed)
+                      "
                       class="reward-section"
                     >
                       <div class="reward-section-title">
@@ -217,6 +242,17 @@
                         ></span>
                         <span>Chance Drops</span>
                       </div>
+
+                      <ng-container
+                        *ngIf="equipmentReward && !equipmentGuaranteed"
+                      >
+                        <ng-container
+                          *ngTemplateOutlet="
+                            equipmentRewardRow;
+                            context: { $implicit: equipmentReward }
+                          "
+                        ></ng-container>
+                      </ng-container>
 
                       <div
                         *ngFor="
@@ -300,6 +336,10 @@
             <div class="grid gap-3">
               <article class="ll-card min-w-0 px-3 py-3">
                 <div class="ll-eyebrow">Dungeon Mastery</div>
+                <p class="mt-1 text-xs text-secondary">
+                  XP and benefits are shared across Novice, Veteran, and
+                  Champion.
+                </p>
                 <div class="mt-2 flex items-end justify-between gap-3">
                   <div>
                     <div class="font-serif text-3xl text-white">
@@ -334,6 +374,25 @@
                     {{ selectedMasteryLevel() }} / 10 unlocked
                   </span>
                 </div>
+
+                <p
+                  *ngIf="
+                    selectedPreviewData().equipmentDropChancePercent != null
+                  "
+                  class="mt-3 text-sm text-white"
+                >
+                  Equipment per clear:
+                  <span class="text-primary"
+                    >{{
+                      selectedPreviewData().equipmentDropChancePercent
+                        | number: "1.0-2"
+                    }}%</span
+                  >
+                  <span class="mt-1 block text-xs text-secondary">
+                    50% base, +5 percentage points per mastery level, up to
+                    100%. Uses mastery when the run starts.
+                  </span>
+                </p>
 
                 <div class="mt-3 grid gap-2 sm:grid-cols-2">
                   <div
@@ -535,8 +594,34 @@
   </div>
 </div>
 
+<ng-template #equipmentRewardRow let-reward>
+  <div class="reward-table-grid reward-row" data-testid="equipment-reward">
+    <div class="min-w-0 text-sm text-white">Equipment</div>
+    <span class="reward-quantity text-right text-sm tabular-nums text-white"
+      >1</span
+    >
+    <div class="reward-chance">
+      <div class="reward-chance-track">
+        <span
+          class="reward-chance-fill bg-primary/70"
+          [style.width.%]="rewardChanceBarWidth(reward)"
+        ></span>
+      </div>
+      <span class="w-11 shrink-0 text-right text-xs tabular-nums text-primary">
+        {{ rewardChanceValueLabel(reward) }}
+      </span>
+    </div>
+    <p class="col-span-3 pb-1 text-xs text-zinc-400">
+      Includes Mastery Lv. {{ selectedMasteryLevel() }} · One random piece per drop
+    </p>
+  </div>
+</ng-template>
+
 <ng-template #masteryTooltip let-mastery let-xpLabel="xpLabel">
   <span class="ll-eyebrow block text-xs">Mastery XP</span>
+  <span class="mt-1 block text-zinc-400"
+    >Shared across all three difficulties.</span
+  >
   <span class="mt-1 block font-serif text-sm text-primary">
     {{ xpLabel }}
   </span>

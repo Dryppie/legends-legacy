@@ -9,6 +9,9 @@ namespace Persistence.LL.Repositories.Colosseum;
 
 public sealed class TournamentGroundsRepository(LLDbContext context) : ITournamentGroundsRepository
 {
+    public Task<IReadOnlyList<Domain.Models.Inventories.InventoryItem>> GrantSigilFragmentsAsync(Guid characterId, int amount, CancellationToken cancellationToken) =>
+        Persistence.LL.Repositories.Inventories.SigilFragmentRewards.GrantAsync(context, characterId, amount, Domain.Models.Items.ItemAcquisitionSources.TournamentReward, cancellationToken);
+
     public IQueryable<TournamentDefinition> Definitions => context.TournamentDefinitions;
     public IQueryable<TournamentInstance> Tournaments => context.ArenaTournaments;
     public IQueryable<TournamentTeam> Teams => context.TournamentTeams;

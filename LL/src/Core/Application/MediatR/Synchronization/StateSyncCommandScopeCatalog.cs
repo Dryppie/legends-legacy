@@ -224,6 +224,12 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Equipments.Commands.UnequipEquipment.UnequipEquipmentCommand));
         Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Character], [],
             refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Equipments.Commands.SaveEquipmentLoadout.SaveEquipmentLoadoutCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.DeleteEquipmentLoadout.DeleteEquipmentLoadoutCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.SetEquipmentLoadoutActivities.SetEquipmentLoadoutActivitiesCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentLoadout.ApplyEquipmentLoadoutCommand));
+        Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Character], [],
+            refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Equipments.Commands.ReinforceEquipment.ReinforceEquipmentCommand),
             typeof(global::Application.UseCases.Equipments.Commands.DismantleEquipment.DismantleEquipmentCommand),
             typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentVariant.ApplyEquipmentVariantCommand));
@@ -249,7 +255,15 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterOverview: false,
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Essences.Commands.FavoriteEssence.FavoriteEssenceCommand),
-            typeof(global::Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities.SetEssenceLoadoutAutoUseActivitiesCommand),
+            typeof(global::Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities.SetEssenceLoadoutAutoUseActivitiesCommand));
+
+        RegisterAuthoritativeResponse(
+            profiles,
+            [StateSyncScopes.Essences, StateSyncScopes.Inventory],
+            [],
+            [StateSyncScopes.Essences],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
 
         RegisterAuthoritativeResponse(
@@ -395,8 +409,13 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterOverview: false,
             refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Inventories.Commands.MarkInventoryItemSeen.MarkInventoryItemSeenCommand),
-            typeof(global::Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate.OpenCatalystSelectionCrateCommand),
             typeof(global::Application.UseCases.Inventories.Commands.TransferInventoryItem.TransferInventoryItemCommand));
+
+        RegisterAuthoritativeResponse(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Quests], [],
+            [StateSyncScopes.Inventory],
+            refreshCharacterOverview: false,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate.OpenCatalystSelectionCrateCommand));
 
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment], [],
             [StateSyncScopes.Inventory],

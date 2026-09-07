@@ -93,10 +93,10 @@ public class CharacterRepository : ICharacterRepository
     }
 
     public async Task<long?> GetSigilFragmentsAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _context.Characters
-            .AsNoTracking()
-            .Where(character => character.Id == characterId)
-            .Select(character => (long?)character.SigilFragments)
+        await _context.Characters.Where(character => character.Id == characterId)
+            .Select(character => (long?)_context.InventoryItems
+                .Where(item => item.InventoryId == character.Id && item.ItemInstance.ItemBaseId == Domain.Models.Items.SigilFragmentItem.ItemBaseId)
+                .Sum(item => (long)item.Quantity))
             .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)

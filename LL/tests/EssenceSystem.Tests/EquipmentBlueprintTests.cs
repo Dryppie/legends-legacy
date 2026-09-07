@@ -38,8 +38,7 @@ public sealed class EquipmentBlueprintTests
     public void Legacy_blueprint_selection_boxes_award_current_consumable_blueprints()
     {
         var container = SelectionContainerCatalog.Find(
-            LegacyBlueprintSelectionBoxCatalog.ItemBaseId,
-            Blueprints(Equipment()));
+            LegacyBlueprintSelectionBoxCatalog.ItemBaseId);
 
         Assert.NotNull(container);
         Assert.Equal(11, container.Options.Count);
@@ -225,24 +224,56 @@ public sealed class EquipmentBlueprintTests
     }
 
     [Fact]
-    public void Every_blueprint_source_has_a_choice_container_and_every_blueprint_has_a_source()
+    public void Dungeon_blueprints_have_direct_pools_and_retired_content_is_removed()
     {
         var equipment = Equipment();
         var catalog = Blueprints(equipment);
+        var expected = new Dictionary<string, string[]>
+        {
+            ["goblin_mines"] = ["blueprint_fury", "blueprint_phoenix"],
+            ["forgotten_catacombs"] = ["blueprint_arcane", "blueprint_endurance"],
+            ["tangled_cave"] = ["blueprint_execution"],
+            ["great_tree"] = ["blueprint_spirit"]
+        };
         foreach (var source in catalog.Sources)
         {
-            var container = SelectionContainerCatalog.Find(source.SelectionItemId, catalog);
-            Assert.NotNull(container);
-            Assert.Equal(source.StyleIds.Order(), container.Options.Select(x => x.Id).Order());
-            Assert.All(container.Options, x => Assert.Equal(1, x.Quantity));
+            Assert.Equal(expected[source.FamilyId].Order(), catalog.DropsFor(source).Select(x => x.StyleId).Order());
+            Assert.Null(SelectionContainerCatalog.Find($"item.blueprint_choice.{source.FamilyId}"));
         }
+        Assert.Equal(11, equipment.Styles.Count);
         Assert.All(equipment.Styles, style => Assert.NotNull(catalog.Find(style.Id)));
+        using var items = JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            TestContentPaths.FindApiRoot(), "Data", "items", "items.json")));
+        var itemIds = items.RootElement.EnumerateArray().Select(x => x.GetProperty("id").GetString()!).ToArray();
+        Assert.DoesNotContain(itemIds, id => id.StartsWith("item.blueprint_choice."));
+        foreach (var style in new[] { "blueprint_gravebound", "blueprint_raidforged" })
+        {
+            Assert.Null(catalog.Find(style));
+            Assert.DoesNotContain(equipment.Styles, candidate => candidate.Id == style);
+            Assert.DoesNotContain($"item.{style}", itemIds);
+        }
     }
 
     private static EquipmentState Award(StarterEquipmentCatalog equipment) => EquipmentState.Award(
         Guid.NewGuid(), equipment.Evaluator, "plain.shortsword", 1, 2,
         new(EquipmentAwardKind.RandomDiscovery, "test", "test"),
         new(EquipmentOwnershipKind.UnboundPersonal, Guid.NewGuid()), ItemQuality.Exceptional, 1.023);
+
+    [Fact]
+    public async Task Progress_preview_includes_unsaved_completions_and_resets()
+    {
+        await using var db = new LLDbContext(new DbContextOptionsBuilder<LLDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        var repository = new EquipmentBlueprintRepository(db);
+        var characterId = Guid.NewGuid();
+        var progress = await repository.LoadForCompletionAsync(characterId, "tangled_cave", default);
+        progress.Misses = 3;
+        Assert.Equal(3, Assert.Single(await repository.GetProgressAsync(characterId, default)).Misses);
+        await db.SaveChangesAsync();
+        progress.Misses = 0;
+        Assert.Equal(0, Assert.Single(await repository.GetProgressAsync(characterId, default)).Misses);
+        Assert.Empty(await repository.GetProgressAsync(Guid.NewGuid(), default));
+    }
 
     [Fact]
     public async Task Conversion_persists_stats_payment_and_receipt_and_retry_cannot_charge_twice()

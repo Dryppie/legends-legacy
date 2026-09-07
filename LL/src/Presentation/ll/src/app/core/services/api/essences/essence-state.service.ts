@@ -546,8 +546,12 @@ export class EssenceStateService {
     this._selectedInventoryItemId.set(inventoryItem.itemInstance.id);
   }
 
-  spendDust(essence: PlayerEssenceDto): void {
+  spendDust(essence: PlayerEssenceDto, max = false): void {
     if (this._spendingDust()) return;
+    const amount = max
+      ? Math.max(0, Math.min(this.archive()?.essenceDust ?? 0, essence.levelCap - essence.level))
+      : 1;
+    if (amount === 0) return;
 
     const resetVersion = this.resetVersion;
     const mutationVersion = ++this.dustMutationVersion;
@@ -555,7 +559,7 @@ export class EssenceStateService {
     this._error.set(null);
 
     this.essencesService
-      .spendDust(essence.id, 1)
+      .spendDust(essence.id, amount)
       .pipe(
         finalize(() => {
           if (mutationVersion === this.dustMutationVersion) {

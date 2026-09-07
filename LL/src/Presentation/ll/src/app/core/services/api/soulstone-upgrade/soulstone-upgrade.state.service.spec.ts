@@ -83,7 +83,6 @@ function createCharacter(soulstones: number): CharacterDto {
     cinders: 0,
     soulstones,
     fateEcho: 0,
-    sigilFragments: 0,
     guildFavor: 0,
     arenaRating: 0,
   };

@@ -238,8 +238,8 @@ public class GuildShopService : IGuildShopService
                 character.FateEcho += reward.Amount;
                 return [];
             case GuildShopRewardType.SigilFragments:
-                character.SigilFragments += reward.Amount;
-                return [];
+                return await ApplyItemRewardAsync(character.Id,
+                    reward with { Type = GuildShopRewardType.Item, Key = SigilFragmentItem.ItemBaseId }, cancellationToken);
             case GuildShopRewardType.Item:
                 return await ApplyItemRewardAsync(character.Id, reward, cancellationToken);
             case GuildShopRewardType.Title:

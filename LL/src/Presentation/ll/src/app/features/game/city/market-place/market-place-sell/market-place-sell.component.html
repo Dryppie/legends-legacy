@@ -9,6 +9,16 @@
       <span class="ll-eyebrow"> {{ filteredItems.length }} available </span>
     </div>
 
+    <div *ngIf="showEquipmentSort" class="mb-3 flex flex-wrap items-center gap-2">
+      <label class="text-sm text-zinc-300" for="sell-equipment-sort">Sort</label>
+      <select id="sell-equipment-sort" class="rounded border border-light_gray bg-black/40 text-white"
+        [value]="equipmentSort" (change)="equipmentSort = $any($event.target).value">
+        <option *ngFor="let sort of equipmentSortOptions" [value]="sort">{{ sort }}</option>
+      </select>
+      <button type="button" class="ll-button" (click)="equipmentSortDirection = equipmentSortDirection === 'asc' ? 'desc' : 'asc'">
+        {{ equipmentSortDirection === 'asc' ? 'Ascending' : 'Descending' }}
+      </button>
+    </div>
     <div *ngIf="!selectedItemType()" class="ll-toolbar rounded-b-none">
       <app-filter-tabs
         [tabs]="tabLabels"

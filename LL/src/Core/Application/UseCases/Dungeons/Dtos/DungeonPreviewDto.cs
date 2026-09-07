@@ -39,6 +39,7 @@ public sealed class DungeonPreviewDto
     public DungeonTier DungeonTier { get; set; }
     public DungeonRecordDto Record { get; set; } = new();
     public DungeonMasteryDto Mastery { get; set; } = new();
+    public double? EquipmentDropChancePercent { get; set; }
     public List<DungeonPreviewRewardDto> Rewards { get; set; } = [];
 }
 
@@ -46,7 +47,7 @@ public sealed class DungeonMasteryDto : IMapFrom<DungeonMasterySnapshot>
 {
     public long Experience { get; set; }
     public int Level { get; set; }
-    public int? ExperienceRequiredForNextLevel { get; set; }
+    public int? ExperienceRequiredForNextLevel { get; set; } = DungeonMasteryProgression.GetExperienceRequiredForNextLevel(0);
     public int CompletionCount { get; set; }
     public DungeonMasteryBenefitSummaryDto Benefits { get; set; } = DungeonMasteryBenefitSummaryDto.FromLevel(0);
     public List<DungeonMasteryBenefitLevelDto> BenefitLevels { get; set; } =
@@ -64,6 +65,7 @@ public sealed class DungeonMasteryBenefitSummaryDto
     public int RestSiteVigorBonus { get; set; }
     public int CombatVigorCostReduction { get; set; }
     public int CompletionCurrencyBonusPercent { get; set; }
+    public int EquipmentDropChanceBonusPercentagePoints { get; set; }
 
     public static DungeonMasteryBenefitSummaryDto FromLevel(int level)
     {
@@ -73,7 +75,8 @@ public sealed class DungeonMasteryBenefitSummaryDto
             AdditionalVisibilityRows = benefits.AdditionalVisibilityRows,
             RestSiteVigorBonus = benefits.RestSiteVigorBonus,
             CombatVigorCostReduction = benefits.CombatVigorCostReduction,
-            CompletionCurrencyBonusPercent = benefits.CompletionCurrencyBonusPercent
+            CompletionCurrencyBonusPercent = benefits.CompletionCurrencyBonusPercent,
+            EquipmentDropChanceBonusPercentagePoints = benefits.EquipmentDropChanceBonusPercentagePoints
         };
     }
 }
@@ -126,4 +129,3 @@ public sealed class DungeonEntryRequirementDto : IMapFrom<DungeonEntryRequiremen
     public void Mapping(Profile profile) =>
         profile.CreateMap<DungeonEntryRequirementResult, DungeonEntryRequirementDto>();
 }
-

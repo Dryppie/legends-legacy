@@ -14,20 +14,17 @@ public sealed class SelectionCrateService : ISelectionCrateService
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IStarterEquipmentService? _starterEquipment;
-    private readonly EquipmentBlueprintCatalog? _blueprints;
 
     public SelectionCrateService(
         IInventoryService inventory,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
-        IStarterEquipmentService? starterEquipment = null,
-        EquipmentBlueprintCatalog? blueprints = null)
+        IStarterEquipmentService? starterEquipment = null)
     {
         _inventory = inventory;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _starterEquipment = starterEquipment;
-        _blueprints = blueprints;
     }
 
     public async Task<SelectionCrateOpenResult> OpenSelectionContainerAsync(
@@ -45,7 +42,7 @@ public sealed class SelectionCrateService : ISelectionCrateService
             return Fail("The selection container was not found in your inventory.");
         }
 
-        var definition = SelectionContainerCatalog.Find(container.ItemInstance.ItemBaseId, _blueprints);
+        var definition = SelectionContainerCatalog.Find(container.ItemInstance.ItemBaseId);
         if (definition is null)
         {
             return Fail("This item is not a selection container.");

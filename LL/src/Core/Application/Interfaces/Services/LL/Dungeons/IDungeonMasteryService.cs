@@ -29,6 +29,9 @@ public sealed record DungeonMasteryAwardResult(
     bool AlreadyAwarded)
 {
     public int LevelsGained => Math.Max(0, Level - PreviousLevel);
+    public bool MaxLevelRewardPreviouslyClaimed { get; init; }
+    public bool UnlocksMaxLevelReward => !AlreadyAwarded && !MaxLevelRewardPreviouslyClaimed &&
+        PreviousLevel < DungeonMasteryBenefits.MaxLevel && Level >= DungeonMasteryBenefits.MaxLevel;
 }
 
 public sealed record DungeonMasterySnapshot(

@@ -23,8 +23,41 @@ import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
 import { QuestObjectiveState } from '../../../../shared/models/quest';
 import { InventoryComponent } from './inventory.component';
+import { EquipmentLoadoutService } from '../../../../core/services/api/equipment/equipment-loadout.service';
 
 describe('InventoryComponent', () => {
+  it('clears the old equipped-item inspection when switching loadouts', () => {
+    const selectedId = signal<string | null>('starter');
+    const component = createComponent(
+      inventoryState([]),
+      undefined,
+      undefined,
+      undefined,
+      { selectedId } as unknown as EquipmentLoadoutService,
+    );
+    TestBed.flushEffects();
+    const item = inventoryEquipment(
+      'weapon',
+      EquipmentType.OneHanded,
+      ItemQuality.Standard,
+      1,
+    );
+    component.selectEquipmentSlot({
+      id: 'main-hand',
+      iconPath: '',
+      equipmentSlotType: EquipmentSlotType.MainHand,
+      equipmentInstance: item.itemInstance as EquipmentInstance,
+    });
+    expect(component.selectedItem()).not.toBeNull();
+
+    selectedId.set('dungeon');
+    TestBed.flushEffects();
+
+    expect(component.selectedItem()).toBeNull();
+    expect(component.selectedEquipmentSlot()).toBeNull();
+    expect(component.selectedSlotEquipment()).toBeNull();
+  });
+
   it('reuses the cached inventory snapshot when the page opens', () => {
     const state = inventoryState([]);
     const component = createComponent(state);
@@ -242,6 +275,7 @@ function createComponent(
   objective = signal<QuestObjectiveState | undefined>(undefined),
   modal?: ModalService,
   equipmentApi?: EquipmentService,
+  loadoutState?: EquipmentLoadoutService,
 ): InventoryComponent {
   return TestBed.runInInjectionContext(
     () =>
@@ -256,6 +290,7 @@ function createComponent(
         undefined,
         undefined,
         equipmentApi,
+        loadoutState,
       ),
   );
 }
@@ -263,6 +298,7 @@ function createComponent(
 function inventoryState(items: InventoryItem[]): InventoryStateService {
   return {
     load: jasmine.createSpy('load'),
+    isFavorite: () => false,
     items: signal(items).asReadonly(),
     equipment: signal(items).asReadonly(),
   } as unknown as InventoryStateService;

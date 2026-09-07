@@ -1,3 +1,4 @@
+using Domain.Models.Items.Equipments.Loadouts;
 using Application.Common.Interfaces;
 using Domain.Models.Achievements;
 using Domain.Models.Administration;
@@ -578,6 +579,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public DbSet<EssenceItemBase> EssenceItems => Set<EssenceItemBase>();
     public DbSet<PlayerEssence> PlayerEssences => Set<PlayerEssence>();
+    public DbSet<EquipmentLoadout> EquipmentLoadouts => Set<EquipmentLoadout>();
+    public DbSet<EquipmentLoadoutSlot> EquipmentLoadoutSlots => Set<EquipmentLoadoutSlot>();
     public DbSet<EssenceLoadout> EssenceLoadouts => Set<EssenceLoadout>();
     public DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots => Set<EssenceLoadoutSlot>();
     public DbSet<CreatureResonance> CreatureResonances => Set<CreatureResonance>();

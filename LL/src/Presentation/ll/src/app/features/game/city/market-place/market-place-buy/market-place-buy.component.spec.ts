@@ -236,9 +236,14 @@ describe('equipment marketplace', () => {
     sell.category = 'equipment';
     expect(sell.filteredItems.map((item) => item.itemInstance.id)).toEqual([
       'item-fury',
+      'item-legacy',
       'item-plain',
       'item-second-fury',
-      'item-legacy',
+    ]);
+    sell.equipmentSort = 'Rank';
+    sell.equipmentSortDirection = 'asc';
+    expect(sell.filteredItems.map(item => item.itemInstance.id)).toEqual([
+      'item-legacy', 'item-plain', 'item-second-fury', 'item-fury',
     ]);
     sell.selectItem(items[4]);
     expect(sell.pendingItem()).toBeNull();

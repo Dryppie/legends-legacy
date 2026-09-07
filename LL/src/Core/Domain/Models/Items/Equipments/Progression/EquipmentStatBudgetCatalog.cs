@@ -9,6 +9,9 @@ public static class EquipmentStatBudgetCatalog
     public const int LegacyBalanceVersion = 15;
     public const int MinimumTier = 1;
 
+    private const double TypedMitigationCostPerPoint = 0.9d;
+    private const double TypedMitigationHalfCapNormalizedRating = 55d;
+
     // Source-compatible only. V16 never uses this value to clamp progression.
     public const int MaximumTier = int.MaxValue;
 
@@ -17,8 +20,8 @@ public static class EquipmentStatBudgetCatalog
         {
             [AttributeType.Power] = Flat(22.5d),
             [AttributeType.MaxHealth] = Flat(0.185d),
-            [AttributeType.Armor] = Rating(0.9d, AttributeCombatRules.TypedMitigationCapPercent, 55d),
-            [AttributeType.Resistance] = Rating(0.75d, AttributeCombatRules.TypedMitigationCapPercent, 80d),
+            [AttributeType.Armor] = TypedMitigationRating(),
+            [AttributeType.Resistance] = TypedMitigationRating(),
             [AttributeType.CritChance] = Percentage(6d, AttributeCombatRules.CritChanceCapPercent),
             [AttributeType.CritDamage] = Percentage(2.2d, AttributeCombatRules.CritDamageBonusCapPercent),
             [AttributeType.ArmorPenetration] = Percentage(3.5d, AttributeCombatRules.TypedPenetrationCapPercent),
@@ -158,6 +161,10 @@ public static class EquipmentStatBudgetCatalog
 
     private static EquipmentStatBudgetDefinition Flat(double costPerPoint) =>
         new(costPerPoint, float.MaxValue, EquipmentStatScalingKind.Flat, 0f, 0d);
+
+    private static EquipmentStatBudgetDefinition TypedMitigationRating() =>
+        Rating(TypedMitigationCostPerPoint, AttributeCombatRules.TypedMitigationCapPercent,
+            TypedMitigationHalfCapNormalizedRating);
 
     private static EquipmentStatBudgetDefinition Rating(
         double costPerPoint,

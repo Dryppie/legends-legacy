@@ -1,3 +1,5 @@
+using Domain.Models.Items.Equipments.Slots;
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Combat;
 using Domain.Components.Attributes;
@@ -22,6 +24,7 @@ public class CombatSetupService : ICombatSetupService
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly ICreatureAbilityDefinitionProvider? _creatureAbilities;
     private readonly EquipmentCatalog? _equipmentCatalog;
+    private readonly IEquipmentLoadoutService? _equipmentLoadouts;
 
     public CombatSetupService(
         ICreatureScaler creatureScaler,
@@ -29,7 +32,8 @@ public class CombatSetupService : ICombatSetupService
         IEssenceDefinitionRepository essenceDefinitions,
         ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         ICreatureAbilityDefinitionProvider? creatureAbilities = null,
-        EquipmentCatalog? equipmentCatalog = null)
+        EquipmentCatalog? equipmentCatalog = null,
+        IEquipmentLoadoutService? equipmentLoadouts = null)
     {
         _creatureScaler = creatureScaler;
         _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
@@ -37,6 +41,7 @@ public class CombatSetupService : ICombatSetupService
         _creatureEssenceLootTables = creatureEssenceLootTables;
         _creatureAbilities = creatureAbilities;
         _equipmentCatalog = equipmentCatalog;
+        _equipmentLoadouts = equipmentLoadouts;
     }
 
     public List<CombatEntity> CreatePlayerCombatEntities(List<Entity> entities)
@@ -121,6 +126,13 @@ public class CombatSetupService : ICombatSetupService
     {
         foreach (var entity in entities)
         {
+            if (entity.IsPlayerCharacter && !entity.HasEquipmentSnapshot && _equipmentLoadouts is not null &&
+                await _equipmentLoadouts.ResolveAsync(entity.OriginalId, activity, CancellationToken.None) is { } slots)
+            {
+                entity.Equipment = slots.Where(x => x.EquipmentInstance is not null).Select(x => x.EquipmentInstance!).DistinctBy(x => x.Id).ToList();
+                entity.MainHandEquipment = slots.FirstOrDefault(x => x.EquipmentSlotType == EquipmentSlotType.MainHand)?.EquipmentInstance;
+                entity.OffHandEquipment = slots.FirstOrDefault(x => x.EquipmentSlotType == EquipmentSlotType.OffHand)?.EquipmentInstance;
+            }
             var essenceLoadout = await ResolveEssenceLoadoutForCombatEntityAsync(entity, activity);
             entity.EquippedEssences = [.. essenceLoadout.EquippedEssences];
             entity.HasEquippedEssenceSnapshot = entity.EquippedEssences.Count > 0;

@@ -144,14 +144,6 @@ public static class SelectionContainerCatalog
             .Append(LegacyBlueprintSelectionBoxCatalog.Definition)
             .ToDictionary(definition => definition.ItemBaseId, StringComparer.OrdinalIgnoreCase);
 
-    public static SelectionContainerDefinition? Find(string itemBaseId,
-        Domain.Models.Items.Equipments.Progression.EquipmentBlueprintCatalog? blueprints = null)
-    {
-        if (Definitions.TryGetValue(itemBaseId, out var definition)) return definition;
-        var source = blueprints?.Sources.SingleOrDefault(x => x.SelectionItemId == itemBaseId);
-        return source is null ? null : new(source.SelectionItemId, $"{source.Name} Blueprint Choice", "Blueprint",
-            source.StyleIds.Select(id => blueprints!.Find(id)!).Select(x =>
-                new SelectionContainerOptionDefinition(x.StyleId, $"Blueprint: {x.Name}", x.ItemId, 1)).ToArray());
-    }
-
+    public static SelectionContainerDefinition? Find(string itemBaseId) =>
+        Definitions.GetValueOrDefault(itemBaseId);
 }

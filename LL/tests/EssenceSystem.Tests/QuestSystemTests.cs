@@ -198,8 +198,11 @@ public sealed partial class QuestSystemTests
                 CancellationToken.None));
     }
 
-    [Fact]
-    public async Task Area_token_quest_progresses_without_preselection_and_filters_the_milestone_dungeon()
+    [Theory]
+    [InlineData("goblin_mines")]
+    [InlineData("goblin_mines_ii")]
+    [InlineData("goblin_mines_iii")]
+    public async Task Area_token_quest_progresses_without_preselection_and_accepts_any_milestone_dungeon_difficulty(string dungeonId)
     {
         var characterId = Guid.NewGuid();
         var definitions = CreateDefinitions();
@@ -230,6 +233,7 @@ public sealed partial class QuestSystemTests
             candidate.QuestId == definition.Id);
         Assert.Null(quest.Choice);
         Assert.Equal("The Roots Remember", quest.Title);
+        Assert.Equal("Complete Goblin Mines and defeat its boss", definition.Objectives.Single(x => x.Key == "break_the_goblin_gate").Description);
         Assert.Contains(quest.Rewards, reward =>
             reward.ItemBaseId == "item.essence_token.old_forest");
 
@@ -246,7 +250,7 @@ public sealed partial class QuestSystemTests
 
         await service.ProcessAsync(
             characterId,
-            QuestTrigger.DungeonRunCompleted("goblin_mines"),
+            QuestTrigger.DungeonRunCompleted(dungeonId),
             null,
             "test",
             CancellationToken.None);

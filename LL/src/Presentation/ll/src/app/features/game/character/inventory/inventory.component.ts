@@ -1,3 +1,4 @@
+import { EquipmentLoadoutsComponent } from '../../../../shared/components/equipment-loadouts/equipment-loadouts.component';
 import { itemDescription } from '../../../../shared/utils/inventory/item-description';
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
@@ -6,6 +7,7 @@ import {
   effect,
   OnInit,
   signal,
+  untracked,
 } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -23,7 +25,6 @@ import {
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
-import { ItemQuality } from '../../../../shared/models/enums/itemQuality';
 import { marketplaceStyleLabel } from '../../../../shared/utils/market-place/marketplace-equipment';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
@@ -36,6 +37,7 @@ import { QuestStateService } from '../../../../core/services/api/quest/quest-sta
 import { EquipmentDisplayComponent } from '../../../../shared/components/equipment/equipment-display/equipment-display.component';
 import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 import { EquipmentStateService } from '../../../../core/services/api/equipment/equipment-state.service';
+import { EquipmentLoadoutService } from '../../../../core/services/api/equipment/equipment-loadout.service';
 import {
   EquipmentSlot,
   EquipmentSlotType,
@@ -72,7 +74,7 @@ type StockCategory =
   | 'Entrance Keys'
   | 'Catalysts';
 type InventorySort = 'Name' | 'Tier' | 'Rarity' | 'Quality' | 'Rank' | 'Gear Power';
-type EquipmentInventorySort = 'Name' | 'Quality' | 'Rank' | 'Style' | 'Gear Power';
+import { EquipmentInventorySort, sortInventoryItems } from '../../../../shared/utils/equipment/inventory-sort';
 type SortDirection = 'asc' | 'desc';
 
 @Component({
@@ -85,6 +87,7 @@ type SortDirection = 'asc' | 'desc';
     FilterTabsComponent,
     DefaultHeaderComponent,
     EquipmentOverviewComponent,
+    EquipmentLoadoutsComponent,
     EquipmentDisplayComponent,
     FormsModule,
     ItemComponent,
@@ -141,8 +144,10 @@ export class InventoryComponent implements OnInit {
       value: rarity,
     }));
 
-  inventorySort: EquipmentInventorySort = 'Gear Power';
-  inventorySortDirection: SortDirection = 'desc';
+  get inventorySort(): EquipmentInventorySort { return this.state.equipmentSort ?? 'Gear Power'; }
+  set inventorySort(value: EquipmentInventorySort) { this.state.equipmentSort = value; }
+  get inventorySortDirection(): SortDirection { return this.state.equipmentSortDirection ?? 'desc'; }
+  set inventorySortDirection(value: SortDirection) { this.state.equipmentSortDirection = value; }
   stockSort: InventorySort = 'Name';
   get rankColumnSort(): EquipmentInventorySort { return 'Rank'; }
   get styleColumnSort(): EquipmentInventorySort { return 'Style'; }
@@ -164,13 +169,7 @@ export class InventoryComponent implements OnInit {
     [Rarity.Legendary]: 5,
     [Rarity.Legacy]: 6,
   };
-  readonly QUALITY_ORDER: Record<ItemQuality, number> = {
-    [ItemQuality.Crude]: 0,
-    [ItemQuality.Standard]: 1,
-    [ItemQuality.Fine]: 2,
-    [ItemQuality.Exceptional]: 3,
-    [ItemQuality.Masterpiece]: 4,
-  };
+
 
   constructor(
     public state: InventoryStateService,
@@ -181,7 +180,15 @@ export class InventoryComponent implements OnInit {
     private readonly guildState?: GuildStateService,
     private readonly characterState?: CharacterStateService,
     private readonly equipmentApi?: EquipmentService,
+    private readonly equipmentLoadoutState?: EquipmentLoadoutService,
   ) {
+    if (this.equipmentLoadoutState) {
+      effect(() => {
+        this.equipmentLoadoutState!.selectedId();
+        untracked(() => this.clearEquipmentSlotFilter());
+      });
+    }
+
     effect(() => {
       const objectiveType = this.questState.pinnedOnboardingObjective()?.type;
       if (objectiveType === 'EquipmentEquipped') {
@@ -929,52 +936,7 @@ export class InventoryComponent implements OnInit {
     sort: InventorySort | EquipmentInventorySort = this.inventorySort,
     direction: SortDirection = sort === 'Name' ? 'asc' : 'desc',
   ): InventoryItem[] {
-    return [...items].sort((a, b) => {
-      const aEquipment = this.equipmentInstance(a);
-      const bEquipment = this.equipmentInstance(b);
-      let difference = 0;
-
-      switch (sort) {
-        case 'Name':
-          difference = this.itemDisplayName(a).localeCompare(
-            this.itemDisplayName(b),
-          );
-          break;
-        case 'Tier':
-          difference = (aEquipment?.tier ?? 0) - (bEquipment?.tier ?? 0);
-          break;
-        case 'Rarity':
-          difference =
-            this.RARITY_ORDER[
-              aEquipment?.rarity ?? a.itemInstance.itemBase.rarity
-            ] -
-            this.RARITY_ORDER[
-              bEquipment?.rarity ?? b.itemInstance.itemBase.rarity
-            ];
-          break;
-        case 'Quality':
-          difference =
-            (aEquipment ? this.QUALITY_ORDER[aEquipment.quality] : -1) -
-            (bEquipment ? this.QUALITY_ORDER[bEquipment.quality] : -1);
-          break;
-        case 'Rank':
-          difference = (aEquipment?.progression?.rank ?? -1) - (bEquipment?.progression?.rank ?? -1);
-          break;
-        case 'Style':
-          difference = this.equipmentStyleLabel(aEquipment?.progression?.activeStyleId)
-            .localeCompare(this.equipmentStyleLabel(bEquipment?.progression?.activeStyleId));
-          break;
-        case 'Gear Power':
-          difference =
-            (aEquipment?.itemBudget ?? 0) - (bEquipment?.itemBudget ?? 0);
-          break;
-      }
-
-      return (
-        (direction === 'asc' ? difference : -difference) ||
-        this.itemDisplayName(a).localeCompare(this.itemDisplayName(b))
-      );
-    });
+    return sortInventoryItems(items, sort, direction);
   }
 
   itemDisplayName(item: InventoryItem): string {

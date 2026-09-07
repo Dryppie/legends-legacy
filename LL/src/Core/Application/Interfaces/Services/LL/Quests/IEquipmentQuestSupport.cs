@@ -4,6 +4,7 @@ namespace Application.Interfaces.Services.LL.Quests;
 
 public interface IEquipmentQuestSupport
 {
+    Task<bool> HasStarterClaimAsync(Guid characterId, string? starterKind, CancellationToken ct);
     Task<bool> IsEquippedAsync(Guid characterId, string objectiveType, string? starterKind, CancellationToken ct);
 }
 

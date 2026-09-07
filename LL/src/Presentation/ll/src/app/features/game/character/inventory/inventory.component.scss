@@ -15,7 +15,9 @@
   min-height: 0;
   flex: 1;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--ll-space-3);
+  gap: 0;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-md);
   overflow: hidden;
 }
 
@@ -26,10 +28,18 @@
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .inventory-inspector {
   display: none;
+}
+
+.inventory-loadouts {
+  grid-column: 1 / -1;
+  min-width: 0;
 }
 
 .inventory-inspector > .ll-scrollbar {
@@ -433,6 +443,16 @@
 
   .inventory-workspace:has(.inventory-equipment-rail) {
     grid-template-columns: 18rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .inventory-equipment-rail {
+    border-right: 1px solid var(--ll-color-border);
+  }
+
+  .inventory-loadouts {
+    max-height: 18rem;
+    overflow-y: auto;
   }
 
   .stock-workspace {
@@ -468,6 +488,7 @@
 
   .inventory-inspector {
     display: flex;
+    border-left: 1px solid var(--ll-color-border);
   }
 
   .inventory-inspector-close {
@@ -481,7 +502,28 @@
 
 @container (max-width: 47.999rem) {
   .inventory-workspace:has(.inventory-equipment-rail) {
-    grid-template-rows: auto minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .inventory-equipment-rail,
+  .inventory-loadouts {
+    flex: none;
+  }
+
+  .inventory-catalog {
+    min-height: 24rem;
+    flex: 1 0 24rem;
+    border-top: 1px solid var(--ll-color-border);
+  }
+
+  .inventory-workspace:has(.inventory-inspector-open) {
+    overflow: hidden;
+  }
+
+  .inventory-workspace:has(.inventory-inspector-open) > :not(.inventory-inspector) {
+    display: none;
   }
 
   .inventory-equipment-rail .inventory-pane-note {

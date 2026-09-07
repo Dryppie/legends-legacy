@@ -307,13 +307,22 @@ public sealed class StateSyncCommandScopeCatalogTests
     [InlineData(typeof(global::Application.UseCases.Essences.Commands.DeleteEssenceLoadout.DeleteEssenceLoadoutCommand))]
     [InlineData(typeof(global::Application.UseCases.Essences.Commands.SaveEssenceLoadout.SaveEssenceLoadoutCommand))]
     [InlineData(typeof(global::Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities.SetEssenceLoadoutAutoUseActivitiesCommand))]
-    [InlineData(typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand))]
     public void RemainingEssenceStateMutationsOwnTheirSnapshot(Type commandType)
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
         Assert.Equal([StateSyncScopes.Essences], profile.CharacterScopes);
         Assert.Equal([StateSyncScopes.Essences], profile.CharacterResponseSemantics.Keys);
+    }
+
+    [Fact]
+    public void Focus_change_refreshes_inventory_after_settling_elapsed_combat()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(
+            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
+        Assert.Equal([StateSyncScopes.Essences, StateSyncScopes.Inventory], profile.CharacterScopes);
+        Assert.Equal([StateSyncScopes.Essences], profile.CharacterResponseSemantics.Keys);
+        Assert.True(profile.RefreshCharacterSummaryWhenChanged);
     }
 
     [Theory]
@@ -375,6 +384,17 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.Equal(
             StateSyncResponseSemantics.OrderedDelta,
             encounter.CharacterResponseSemantics[StateSyncScopes.Inventory]);
+    }
+
+    [Fact]
+    public void Opening_a_selection_chest_refreshes_quest_progress_and_returns_inventory_state()
+    {
+        var profile = StateSyncCommandScopeCatalog.GetProfile(
+            typeof(global::Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate.OpenCatalystSelectionCrateCommand));
+
+        Assert.Contains(StateSyncScopes.Quests, profile.CharacterScopes);
+        Assert.DoesNotContain(StateSyncScopes.Quests, profile.CharacterResponseSemantics.Keys);
+        Assert.Contains(StateSyncScopes.Inventory, profile.CharacterResponseSemantics.Keys);
     }
 
     [Fact]

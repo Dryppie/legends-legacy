@@ -828,7 +828,6 @@ public sealed class ProphecyService : IProphecyService
 
             character.Cinders += reward.Cinders;
             character.Soulstones += reward.Soulstones;
-            character.SigilFragments += reward.SigilFragments;
             character.FateEcho += reward.FateEcho;
 
             if (reward.CharacterExperience > 0)
@@ -953,16 +952,17 @@ public sealed class ProphecyService : IProphecyService
         reward.Cinders > 0 ||
         reward.Soulstones > 0 ||
         reward.CharacterExperience > 0 ||
-        reward.SigilFragments > 0 ||
         reward.FateEcho > 0;
 
     private static bool HasInventoryReward(ProphecyRewardSnapshot reward) =>
+        reward.SigilFragments > 0 ||
         !string.IsNullOrWhiteSpace(reward.CacheItemId) ||
         reward.Items.Any(x => x.Quantity > 0 && !string.IsNullOrWhiteSpace(x.ItemId));
 
     private static Dictionary<string, int> CollectInventoryRewardQuantities(ProphecyRewardSnapshot reward)
     {
         var grants = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (reward.SigilFragments > 0) grants[SigilFragmentItem.ItemBaseId] = reward.SigilFragments;
 
         if (!string.IsNullOrWhiteSpace(reward.CacheItemId))
         {

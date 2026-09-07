@@ -7,7 +7,7 @@
     { "scope": "Daily", "objectiveType": "CompleteDungeons", "values": { "common": 1, "uncommon": 2, "rare": 3, "epic": 4 } },
     { "scope": "Daily", "objectiveType": "GainEssenceXp", "values": { "common": 10000, "uncommon": 20000, "rare": 30000, "epic": 40000 } },
     { "scope": "Daily", "objectiveType": "AbsorbEssence", "values": { "common": 1, "uncommon": 1, "rare": 1, "epic": 1 } },
-    { "scope": "Daily", "objectiveType": "TreasureProgress", "values": { "common": 1, "uncommon": 2, "rare": 3, "epic": 4 } },
+    { "scope": "Daily", "objectiveType": "TreasureProgress", "values": { "common": 1, "uncommon": 4, "rare": 3, "epic": 4 } },
     { "scope": "Daily", "objectiveType": "MeaningfulDefeatThenWins", "values": { "common": 300, "uncommon": 600, "rare": 900, "epic": 1200 } },
 
     { "scope": "Weekly", "objectiveType": "KillCreatures", "values": { "common": 23250, "uncommon": 35000, "rare": 46500, "epic": 58000 } },

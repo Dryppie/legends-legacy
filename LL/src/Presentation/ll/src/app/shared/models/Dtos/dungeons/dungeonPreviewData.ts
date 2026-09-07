@@ -33,6 +33,7 @@ export interface DungeonMasteryBenefitSummary {
   restSiteVigorBonus: number;
   combatVigorCostReduction: number;
   completionCurrencyBonusPercent: number;
+  equipmentDropChanceBonusPercentagePoints: number;
 }
 
 export interface DungeonMasteryBenefitLevel {
@@ -76,6 +77,7 @@ export interface DungeonPreviewData {
   roomsRange?: [number, number];
   record?: DungeonRecord;
   mastery?: DungeonMastery;
+  equipmentDropChancePercent?: number | null;
   rewards: DungeonPreviewReward[];
   unlockedDifficulties: DungeonDifficulty[];
   difficultyVariants?: Partial<Record<DungeonDifficulty, DungeonPreviewData>>;

@@ -102,7 +102,7 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
         var encounterId = StableRandom.Guid(identity);
         var monsterCount = _spawningService.HowManyMonstersToSpawn(plan.Area.SpawnProbabilities, random);
         var selectedCreatures = _spawningService.WhatAreaCreaturesToSpawn(
-            plan.Area.Creatures.OrderBy(x => x.CreatureId).ToList(),
+            (plan.SpawnCreatures ?? plan.Area.Creatures.ToList()).OrderBy(x => x.CreatureId).ToList(),
             monsterCount,
             random);
 

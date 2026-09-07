@@ -18,8 +18,8 @@
         "role": "Heavy"
       },
       "statWeights": {
-        "Armor": 0.35,
-        "MaxHealth": 0.35,
+        "MaxHealth": 0.4,
+        "Armor": 0.3,
         "Resistance": 0.3
       }
     },
@@ -37,10 +37,10 @@
         "role": "Medium"
       },
       "statWeights": {
-        "Armor": 0.25,
+        "Power": 0.35,
         "MaxHealth": 0.25,
-        "CritChance": 0.25,
-        "CritDamage": 0.25
+        "Armor": 0.2,
+        "Resistance": 0.2
       }
     },
     {
@@ -57,30 +57,10 @@
         "role": "Light"
       },
       "statWeights": {
-        "MaxHealth": 0.25,
-        "HealthRegeneration": 0.25,
-        "DodgeChance": 0.25,
-        "AttackSpeed": 0.25
-      }
-    },
-    {
-      "id": "plain.cloth_cowl",
-      "itemBaseId": "cloth_cowl",
-      "name": "Cloth Cowl",
-      "equipmentType": "Head",
-      "behavior": {
-        "handedness": "",
-        "attackCategory": "",
-        "rangeCategory": "",
-        "basicAttackIntervalMultiplier": 1,
-        "basicAttackDamageMultiplier": 1,
-        "role": "Cloth"
-      },
-      "statWeights": {
-        "Resistance": 0.25,
-        "HealthRegeneration": 0.25,
-        "HealingPowerPercent": 0.25,
-        "Cooldown": 0.25
+        "Power": 0.7,
+        "MaxHealth": 0.1,
+        "Armor": 0.1,
+        "Resistance": 0.1
       }
     },
     {
@@ -97,8 +77,8 @@
         "role": "Heavy"
       },
       "statWeights": {
-        "Armor": 0.35,
-        "MaxHealth": 0.35,
+        "MaxHealth": 0.4,
+        "Armor": 0.3,
         "Resistance": 0.3
       }
     },
@@ -116,10 +96,10 @@
         "role": "Medium"
       },
       "statWeights": {
-        "Armor": 0.25,
+        "Power": 0.35,
         "MaxHealth": 0.25,
-        "CritChance": 0.25,
-        "CritDamage": 0.25
+        "Armor": 0.2,
+        "Resistance": 0.2
       }
     },
     {
@@ -136,30 +116,10 @@
         "role": "Light"
       },
       "statWeights": {
-        "MaxHealth": 0.25,
-        "HealthRegeneration": 0.25,
-        "DodgeChance": 0.25,
-        "AttackSpeed": 0.25
-      }
-    },
-    {
-      "id": "plain.cloth_robe",
-      "itemBaseId": "cloth_robe",
-      "name": "Cloth Robe",
-      "equipmentType": "Chest",
-      "behavior": {
-        "handedness": "",
-        "attackCategory": "",
-        "rangeCategory": "",
-        "basicAttackIntervalMultiplier": 1,
-        "basicAttackDamageMultiplier": 1,
-        "role": "Cloth"
-      },
-      "statWeights": {
-        "Resistance": 0.25,
-        "HealthRegeneration": 0.25,
-        "HealingPowerPercent": 0.25,
-        "Cooldown": 0.25
+        "Power": 0.7,
+        "MaxHealth": 0.1,
+        "Armor": 0.1,
+        "Resistance": 0.1
       }
     },
     {
@@ -176,8 +136,8 @@
         "role": "Heavy"
       },
       "statWeights": {
-        "Armor": 0.35,
-        "MaxHealth": 0.35,
+        "MaxHealth": 0.4,
+        "Armor": 0.3,
         "Resistance": 0.3
       }
     },
@@ -195,10 +155,10 @@
         "role": "Medium"
       },
       "statWeights": {
-        "Armor": 0.25,
+        "Power": 0.35,
         "MaxHealth": 0.25,
-        "CritChance": 0.25,
-        "CritDamage": 0.25
+        "Armor": 0.2,
+        "Resistance": 0.2
       }
     },
     {
@@ -215,30 +175,10 @@
         "role": "Light"
       },
       "statWeights": {
-        "MaxHealth": 0.25,
-        "HealthRegeneration": 0.25,
-        "DodgeChance": 0.25,
-        "AttackSpeed": 0.25
-      }
-    },
-    {
-      "id": "plain.cloth_pants",
-      "itemBaseId": "cloth_pants",
-      "name": "Cloth Pants",
-      "equipmentType": "Legs",
-      "behavior": {
-        "handedness": "",
-        "attackCategory": "",
-        "rangeCategory": "",
-        "basicAttackIntervalMultiplier": 1,
-        "basicAttackDamageMultiplier": 1,
-        "role": "Cloth"
-      },
-      "statWeights": {
-        "Resistance": 0.25,
-        "HealthRegeneration": 0.25,
-        "HealingPowerPercent": 0.25,
-        "Cooldown": 0.25
+        "Power": 0.7,
+        "MaxHealth": 0.1,
+        "Armor": 0.1,
+        "Resistance": 0.1
       }
     },
     {

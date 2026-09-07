@@ -101,6 +101,7 @@ public sealed partial class EventQuestSystemTests
             new() { Key = "fragments", Type = "SigilFragments", Quantity = 5 }];
         var id = Guid.NewGuid();
         db.Characters.Add(new Character { Id = id, Name = "Event hero" });
+        SigilFragmentTestItems.Seed(db, id);
         CompleteTutorial(db, id);
         await db.SaveChangesAsync();
         var writer = new RecordingLootRewardWriter();
@@ -110,7 +111,7 @@ public sealed partial class EventQuestSystemTests
         Assert.Contains(preview.Rewards, x => x.ItemBaseId == "item.monster_core.lesser" && x.Quantity == 2);
         await service.ClaimAsync(id, definition.Id, default);
         Assert.Equal(2, Assert.Single(writer.Items).Quantity);
-        Assert.Equal(5, (await db.Characters.SingleAsync()).SigilFragments);
+        Assert.Equal(5, await db.InventoryItems.Where(x => x.InventoryId == id && x.ItemInstance.ItemBaseId == "sigil_fragment").SumAsync(x => x.Quantity));
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.ClaimAsync(id, definition.Id, default));
         Assert.Single(writer.Items);
     }

@@ -42,15 +42,19 @@ public sealed class EquipmentAcquisitionService(
                 ?? throw new InvalidOperationException("Blueprint persistence is required.")).LoadForCompletionAsync(
                     run.CharacterId, source.FamilyId, ct);
             if (progress.Complete(run.Id, new Random(StableRandom.Seed([.. identity, "blueprint"])).NextDouble(), blueprints!))
+            {
+                var drops = blueprints!.DropsFor(source);
+                var blueprint = drops[new Random(StableRandom.Seed([.. identity, "blueprint-type"])).Next(drops.Count)];
                 await runs.AddPendingRewardAsync(run, new RunReward
                 {
                     Id = StableRandom.Guid([.. identity, "blueprint"]),
-                    ItemId = source.SelectionItemId,
-                    Name = $"{source.Name} Blueprint Choice",
+                    ItemId = blueprint.ItemId,
+                    Name = $"Blueprint: {blueprint.Name}",
                     ItemType = ItemType.Resource,
                     Quantity = 1,
                     Source = "equipment-blueprint"
                 }, ct);
+            }
             run.State ??= new DungeonRunState();
             run.State.EquipmentBlueprintProcessed = true;
         }
@@ -58,10 +62,10 @@ public sealed class EquipmentAcquisitionService(
             return;
 
         var random = new Random(StableRandom.Seed(identity));
-        if (random.NextDouble() >= rules.DungeonEquipment.DropChance)
+        if (random.NextDouble() >= rules.DungeonEquipment.DropChanceAtMastery(run.State?.MasteryLevelAtStart ?? 0))
             return;
 
-        var rarity = rules.DungeonEquipment.Rarities.Roll(random.NextDouble());
+        var rarity = rules.DungeonEquipment.Rarities.ForGrade(dungeon.Grade).Roll(random.NextDouble());
         var definitions = blueprints is null ? catalog.DropDefinitions(rarity) : catalog.BaseDropDefinitions(rarity);
         var definition = definitions[random.Next(definitions.Count)];
         var quality = rules.DungeonEquipment.Qualities.Roll(random.NextDouble());

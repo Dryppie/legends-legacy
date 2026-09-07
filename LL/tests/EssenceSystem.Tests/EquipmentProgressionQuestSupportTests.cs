@@ -1,10 +1,36 @@
 using Domain.Models.Items.Equipments.Progression;
+using Microsoft.EntityFrameworkCore;
+using Persistence.LL;
+using Persistence.LL.Repositories.Equipments;
 using Services.LL.Items;
+using Services.LL.Quests;
 
 namespace EssenceSystem.Tests;
 
 public sealed class EquipmentProgressionQuestSupportTests
 {
+    [Fact]
+    public async Task Starter_chest_objective_uses_the_saved_claim_without_requiring_equipped_items()
+    {
+        await using var db = new LLDbContext(new DbContextOptionsBuilder<LLDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        var characterId = Guid.NewGuid();
+        var starters = new StarterEquipmentRepository(db);
+        var support = new EquipmentQuestSupport(null!, starters, null!);
+        Assert.False(await support.HasStarterClaimAsync(characterId, "FirstWeapon", default));
+
+        starters.AddGrant(new StarterEquipmentGrant(characterId, StarterEquipmentGrantKind.FirstWeapon,
+            [Award(characterId, EquipmentAwardKind.QuestReward, EquipmentOwnershipKind.BoundPersonal, 0)],
+            DateTimeOffset.UtcNow));
+        Assert.True(await support.HasStarterClaimAsync(characterId, "FirstWeapon", default));
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.True(await support.HasStarterClaimAsync(characterId, "FirstWeapon", default));
+        Assert.False(await support.HasStarterClaimAsync(Guid.NewGuid(), "FirstWeapon", default));
+        Assert.False(await support.HasStarterClaimAsync(characterId, "ReadyForRoad", default));
+    }
+
     [Fact]
     public void Ordinary_regional_drops_establish_equipment_quest_credit()
     {

@@ -108,9 +108,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             await _achievementService.RecordDungeonMasteryLevelReachedAsync(run.CharacterId, masteryAward.Level, cancellationToken);
         }
 
-        if (!masteryAward.AlreadyAwarded &&
-            masteryAward.PreviousLevel < DungeonMasteryBenefits.MaxLevel &&
-            masteryAward.Level >= DungeonMasteryBenefits.MaxLevel)
+        if (masteryAward.UnlocksMaxLevelReward)
         {
             treasureProgress += await AddRewardRollResultAsync(
                 run.Id, run.CharacterId,

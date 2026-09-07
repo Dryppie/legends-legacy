@@ -4,6 +4,7 @@ using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Rewards;
 using Services.LL.Dungeons;
 using Microsoft.Extensions.Configuration;
@@ -127,6 +128,57 @@ public sealed class DungeonPreviewRewardServiceTests
         Assert.Equal(expectedMin, reward.MinQuantity);
         Assert.Equal(expectedMax, reward.MaxQuantity);
         Assert.Equal(100d, reward.DropChancePercent);
+    }
+
+    [Theory]
+    [InlineData(0, 25, 4)]
+    [InlineData(2, 25, 2)]
+    [InlineData(3, 100, 1)]
+    public async Task Blueprints_preview_the_actual_pool_and_current_guarantee_for_every_difficulty(
+        int misses, double totalChance, int remaining)
+    {
+        var services = new ServiceCollection();
+        services.AddServices(new ConfigurationBuilder().Build(), TestContentPaths.FindApiRoot());
+        using var provider = services.BuildServiceProvider();
+        var catalog = provider.GetRequiredService<EquipmentBlueprintCatalog>();
+        var progress = new BlueprintProgressRepository(catalog, misses);
+        var items = new CountingItemBaseRepository();
+        var service = new DungeonPreviewRewardService(items,
+            provider.GetRequiredService<IRewardTableDefinitionProvider>(), catalog, progress);
+        var dungeons = provider.GetRequiredService<IDungeonDefinitions>().GetAll();
+
+        var previews = await service.GetPossibleCompletionRewardsAsync(dungeons, default, Guid.NewGuid());
+
+        Assert.Equal(1, items.QueryCount);
+        Assert.Equal(1, progress.QueryCount);
+        foreach (var dungeon in dungeons)
+        {
+            var expected = catalog.DropsFor(catalog.FindSource(dungeon.SigilItemId)!);
+            var rewards = previews[dungeon.Id].Where(x => x.Category == "Blueprints").ToArray();
+            Assert.Equal(expected.Select(x => x.ItemId).Order(), rewards.Select(x => x.ItemBase.Id).Order());
+            Assert.Equal(totalChance, rewards.Sum(x => x.DropChancePercent));
+            Assert.All(rewards, reward =>
+            {
+                Assert.Equal(totalChance / expected.Count, reward.DropChancePercent);
+                Assert.Equal(1, reward.MinQuantity);
+                Assert.Equal(1, reward.MaxQuantity);
+                Assert.Equal(totalChance < 100 || expected.Count > 1, reward.CanDropNothing);
+                Assert.Contains(remaining == 1 ? "guaranteed on this clear" : $"within {remaining} clears", reward.Source);
+            });
+        }
+    }
+
+    private sealed class BlueprintProgressRepository(EquipmentBlueprintCatalog catalog, int misses) : IEquipmentBlueprintRepository
+    {
+        public int QueryCount { get; private set; }
+        public Task<IReadOnlyList<EquipmentBlueprintProgress>> GetProgressAsync(Guid characterId, CancellationToken ct)
+        {
+            QueryCount++;
+            return Task.FromResult<IReadOnlyList<EquipmentBlueprintProgress>>(catalog.Sources.Select(source =>
+                new EquipmentBlueprintProgress { CharacterId = characterId, FamilyId = source.FamilyId, Misses = misses }).ToArray());
+        }
+        public Task<EquipmentBlueprintProgress> LoadForCompletionAsync(Guid characterId, string familyId, CancellationToken ct) =>
+            throw new NotSupportedException();
     }
 
     private sealed class CountingItemBaseRepository : IItemBaseRepository

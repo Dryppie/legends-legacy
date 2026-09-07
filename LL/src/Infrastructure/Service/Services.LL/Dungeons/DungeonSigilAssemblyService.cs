@@ -77,9 +77,7 @@ public sealed class DungeonSigilAssemblyService(
         }
 
         var fragmentCost = (long)settings.FragmentCost * quantity;
-        var remainingFragments = character.SigilFragments < fragmentCost
-            ? null
-            : await repository.TrySpendFragmentsAsync(characterId, fragmentCost, cancellationToken);
+        var remainingFragments = await repository.TrySpendFragmentsAsync(characterId, fragmentCost, cancellationToken);
         if (remainingFragments is null)
         {
             return DungeonSigilAssemblyOperationResult.Fail(

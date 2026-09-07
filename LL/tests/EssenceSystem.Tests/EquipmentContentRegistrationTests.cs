@@ -40,7 +40,7 @@ public sealed class EquipmentContentRegistrationTests
         foreach (var pool in ordinary.Pools)
         {
             Assert.NotEmpty(pool.Areas);
-            Assert.Equal(31, equipment.GetOptions(pool.EquipmentTier).Count);
+            Assert.Equal(28, equipment.GetOptions(pool.EquipmentTier).Count);
             foreach (var sigil in pool.Sigils)
             {
                 var dungeon = dungeons.GetByKey(sigil.FamilyId);
@@ -48,6 +48,6 @@ public sealed class EquipmentContentRegistrationTests
             }
         }
         Assert.All(Enum.GetValues<EquipmentRarity>(), rarity =>
-            Assert.True(ordinary.DropDefinitions(rarity).Count >= 31));
+            Assert.True(ordinary.DropDefinitions(rarity).Count >= 28));
     }
 }

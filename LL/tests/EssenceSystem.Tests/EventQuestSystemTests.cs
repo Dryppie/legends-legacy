@@ -350,6 +350,7 @@ public sealed partial class EventQuestSystemTests
             Name = "SigilTester",
             NormalizedName = "SIGILTESTER"
         });
+        SigilFragmentTestItems.Seed(db, characterId);
         CompleteTutorial(db, characterId);
         await db.SaveChangesAsync();
 
@@ -362,10 +363,10 @@ public sealed partial class EventQuestSystemTests
 
         await service.ClaimAsync(characterId, definition.Id, CancellationToken.None);
 
-        Assert.Equal(20, (await db.Characters.SingleAsync(x => x.Id == characterId)).SigilFragments);
+        Assert.Equal(20, await db.InventoryItems.Where(x => x.InventoryId == characterId && x.ItemInstance.ItemBaseId == "sigil_fragment").SumAsync(x => x.Quantity));
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.ClaimAsync(characterId, definition.Id, CancellationToken.None));
-        Assert.Equal(20, (await db.Characters.SingleAsync(x => x.Id == characterId)).SigilFragments);
+        Assert.Equal(20, await db.InventoryItems.Where(x => x.InventoryId == characterId && x.ItemInstance.ItemBaseId == "sigil_fragment").SumAsync(x => x.Quantity));
     }
 
     [Fact]

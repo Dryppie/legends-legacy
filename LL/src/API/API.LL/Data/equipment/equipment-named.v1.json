@@ -24,12 +24,6 @@
     "nativeStyleId": "blueprint_fury"
   },
   {
-    "id": "model_e.r1.goblin_mines.cloth_robe.blueprint_phoenix",
-    "name": "Phoenix Cloth Robe",
-    "archetypeId": "plain.cloth_robe",
-    "nativeStyleId": "blueprint_phoenix"
-  },
-  {
     "id": "model_e.r1.goblin_mines.heavy_breastplate.blueprint_phoenix",
     "name": "Phoenix Heavy Breastplate",
     "archetypeId": "plain.heavy_breastplate",
@@ -147,12 +141,6 @@
     "id": "named.great_tree.spirit_staff",
     "name": "Heartwood Staff",
     "archetypeId": "plain.staff",
-    "nativeStyleId": "blueprint_spirit"
-  },
-  {
-    "id": "named.great_tree.spirit_robe",
-    "name": "Canopy Spirit Robe",
-    "archetypeId": "plain.cloth_robe",
     "nativeStyleId": "blueprint_spirit"
   },
   {

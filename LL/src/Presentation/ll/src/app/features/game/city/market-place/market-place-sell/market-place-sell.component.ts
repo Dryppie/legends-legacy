@@ -1,3 +1,4 @@
+import { equipmentInventorySortOptions, sortInventoryItems, EquipmentInventorySort, SortDirection } from '../../../../../shared/utils/equipment/inventory-sort';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -360,6 +361,13 @@ export class MarketPlaceSellComponent implements OnInit {
     this.activeTab = tabLabel;
   }
 
+  readonly equipmentSortOptions = equipmentInventorySortOptions;
+  get showEquipmentSort(): boolean { return this.selectedItemType() === ItemType.Equipment || this.activeTab === 'Equipment'; }
+  get equipmentSort(): EquipmentInventorySort { return this.inventoryState.equipmentSort ?? 'Gear Power'; }
+  set equipmentSort(value: EquipmentInventorySort) { this.inventoryState.equipmentSort = value; }
+  get equipmentSortDirection(): SortDirection { return this.inventoryState.equipmentSortDirection ?? 'desc'; }
+  set equipmentSortDirection(value: SortDirection) { this.inventoryState.equipmentSortDirection = value; }
+
   get filteredItems(): InventoryItem[] {
     let items: InventoryItem[];
 
@@ -381,12 +389,15 @@ export class MarketPlaceSellComponent implements OnInit {
         break;
     }
 
-    return items.filter(
+    const filtered = items.filter(
       (item) =>
         isMarketplaceTradableItemBase(item.itemInstance.itemBase) &&
         !marketplaceItemIsBound(item.itemInstance) &&
         this.matchesSelectedCategory(item.itemInstance.itemBase),
     );
+    return this.showEquipmentSort
+      ? sortInventoryItems(filtered, this.equipmentSort, this.equipmentSortDirection)
+      : filtered;
   }
 
   private itemsForActiveTab(): InventoryItem[] {

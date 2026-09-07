@@ -1,9 +1,29 @@
 using Domain.Models.Regions.Areas;
+using Domain.Models.Essences;
 
 namespace Services.LL.Spawnings;
 
 public static class WeightedSpawnSelector
 {
+    public static IReadOnlyList<AreaCreature> ApplyEssenceFocus(
+        IReadOnlyList<AreaCreature> creatures, IReadOnlySet<Guid> focusedCreatureIds)
+    {
+        var total = creatures.Sum(creature => (double)creature.WeightedSpawnRate);
+        var focused = creatures.Where(creature => focusedCreatureIds.Contains(creature.CreatureId))
+            .Sum(creature => (double)creature.WeightedSpawnRate);
+        if (total <= 0 || focused <= 0 || focused >= total) return creatures;
+
+        var boosted = Math.Min(total, focused * EssenceFocusRules.SpawnChanceMultiplier);
+        var otherMultiplier = (total - boosted) / (total - focused);
+        return creatures.Select(creature => new AreaCreature
+        {
+            AreaId = creature.AreaId,
+            CreatureId = creature.CreatureId,
+            WeightedSpawnRate = (float)(creature.WeightedSpawnRate *
+                (focusedCreatureIds.Contains(creature.CreatureId) ? boosted / focused : otherMultiplier))
+        }).ToArray();
+    }
+
     public static int SelectCreatureCount(
         IReadOnlyList<float> probabilities,
         Random random)

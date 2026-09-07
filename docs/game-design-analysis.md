@@ -183,7 +183,7 @@ The item loop is mostly complete. The design gap is not capability but player mo
 
 ### 4.5 Essence Loop
 
-Essences are acquired as unbound essence items from monster drops. `EssenceSystemService.RollMonsterEssenceDropAsync` uses base drop chance plus resonance bonus from failed eligible kills. Absorbing an unbound essence creates a `PlayerEssence` in the Soul Archive; duplicates are blocked. Unbound essences can also be dismantled into soul dust.
+Essences are acquired as unbound essence items from monster drops. `EssenceSystemService.RollMonsterEssenceDropAsync` applies a relative resonance bonus from failed eligible kills to the base drop chance. Absorbing an unbound essence creates a `PlayerEssence` in the Soul Archive; duplicates are blocked. Unbound essences can also be dismantled into soul dust.
 
 Progression:
 

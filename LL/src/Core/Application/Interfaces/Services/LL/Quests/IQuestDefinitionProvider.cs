@@ -78,6 +78,7 @@ public sealed class QuestObjectiveFilterDefinition
     public string? StarterEquipmentKind { get; set; }
     public string? AreaId { get; set; }
     public string? DungeonDefinitionId { get; set; }
+    public string? DungeonFamilyId { get; set; }
     public bool? RequiresVictory { get; set; }
     public string? EssenceDefinitionId { get; set; }
     public string? EssenceDefinitionFromChoiceQuestId { get; set; }

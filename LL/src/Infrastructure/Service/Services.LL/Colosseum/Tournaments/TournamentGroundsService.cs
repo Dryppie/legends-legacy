@@ -1385,12 +1385,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var cinders = rewards.Sum(r => r.Cinders);
         var soulstones = rewards.Sum(r => r.Soulstones);
         var sigilFragments = rewards.Sum(r => r.SigilFragments);
-        IReadOnlyList<Domain.Models.Inventories.InventoryItem> inventoryRewards = [];
+        var inventoryRewards = await _tournaments.GrantSigilFragmentsAsync(characterId, sigilFragments, cancellationToken);
 
         character.ArenaProfile.Glory += glory;
         character.Cinders += cinders;
         character.Soulstones += soulstones;
-        character.SigilFragments += sigilFragments;
 
         foreach (var reward in rewards)
         {

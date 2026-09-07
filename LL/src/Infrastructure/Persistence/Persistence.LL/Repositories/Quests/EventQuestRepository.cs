@@ -120,8 +120,8 @@ public sealed class EventQuestRepository(IDbContext context) : IEventQuestReposi
         int amount,
         CancellationToken cancellationToken)
     {
-        var character = await context.Characters.SingleAsync(x => x.Id == characterId, cancellationToken);
-        character.SigilFragments += amount;
+        await Persistence.LL.Repositories.Inventories.SigilFragmentRewards.GrantAsync(
+            context, characterId, amount, Domain.Models.Items.ItemAcquisitionSources.EventQuestReward, cancellationToken);
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken) => context.SaveChangesAsync(cancellationToken);

@@ -2,6 +2,10 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Resolution.Idle;
 using Services.LL.Combat;
+using Application.Interfaces.Services.LL.Essences;
+using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
+using Services.LL.Spawnings;
 
 namespace Services.LL.Combat.Layers.Orchestration.Idle;
 
@@ -9,13 +13,16 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
 {
     private readonly IIdleCombatPlanner _planner;
     private readonly IIdleCombatResolutionSessionFactory _resolutionSessionFactory;
+    private readonly ICreatureArchiveService? _creatureArchive;
 
     public IdleCombatOrchestrator(
         IIdleCombatPlanner planner,
-        IIdleCombatResolutionSessionFactory resolutionSessionFactory)
+        IIdleCombatResolutionSessionFactory resolutionSessionFactory,
+        ICreatureArchiveService? creatureArchive = null)
     {
         _planner = planner;
         _resolutionSessionFactory = resolutionSessionFactory;
+        _creatureArchive = creatureArchive;
     }
 
     public CombatMode Mode => CombatMode.Idle;
@@ -49,6 +56,20 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
         var resolutionSession = await _resolutionSessionFactory.CreateAsync(
             plan,
             cancellationToken);
+
+        var focusedCreature = _creatureArchive is null ? null
+            : await _creatureArchive.GetEssenceFocusCreatureIdAsync(plan.CharacterId, cancellationToken);
+        if (focusedCreature is not null)
+        {
+            var focusedIds = resolutionSession.SourceEntitiesById.Values.OfType<Creature>()
+                .Where(creature => CreatureEssenceSource.GetMonsterDefinitionId(creature)
+                    .Equals(focusedCreature, StringComparison.OrdinalIgnoreCase))
+                .Select(creature => creature.Id).ToHashSet();
+            plan = plan with
+            {
+                SpawnCreatures = WeightedSpawnSelector.ApplyEssenceFocus(plan.Area.Creatures.ToList(), focusedIds)
+            };
+        }
 
         var simulationStartedAt = IdleCombatTelemetry.Start();
         var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);

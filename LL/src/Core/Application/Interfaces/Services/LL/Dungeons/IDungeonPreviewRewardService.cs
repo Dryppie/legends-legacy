@@ -10,5 +10,6 @@ public interface IDungeonPreviewRewardService
 
     Task<IReadOnlyDictionary<string, IReadOnlyList<DungeonPreviewReward>>> GetPossibleCompletionRewardsAsync(
         IReadOnlyCollection<DungeonDefinition> dungeons,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        Guid? characterId = null);
 }

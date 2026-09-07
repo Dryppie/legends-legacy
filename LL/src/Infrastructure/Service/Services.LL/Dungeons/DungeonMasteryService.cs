@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
@@ -9,19 +10,6 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
 {
     private const int BossDefeatExperience = 50;
     private const int MiniBossDefeatExperience = 25;
-    private static readonly int[] LevelThresholds =
-    [
-        100,
-        250,
-        500,
-        900,
-        1400,
-        2100,
-        3000,
-        4200,
-        5600,
-        7500
-    ];
 
     private readonly ICharacterDungeonMasteryRepository _masteries;
 
@@ -30,39 +18,19 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
         _masteries = masteries;
     }
 
-    public int CalculateLevel(long experience)
-    {
-        var level = 0;
-        foreach (var threshold in LevelThresholds)
-        {
-            if (experience < threshold)
-            {
-                break;
-            }
+    public int CalculateLevel(long experience) => DungeonMasteryProgression.CalculateLevel(experience);
 
-            level++;
-        }
-
-        return Math.Clamp(level, 0, DungeonMasteryBenefits.MaxLevel);
-    }
-
-    public int? GetExperienceRequiredForNextLevel(int level)
-    {
-        if (level < 0)
-        {
-            level = 0;
-        }
-
-        return level >= DungeonMasteryBenefits.MaxLevel ? null : LevelThresholds[level];
-    }
+    public int? GetExperienceRequiredForNextLevel(int level) =>
+        DungeonMasteryProgression.GetExperienceRequiredForNextLevel(level);
 
     public async Task<DungeonMasteryAwardResult> AwardCompletionAsync(
         DungeonRun run,
         CancellationToken cancellationToken)
     {
+        var familyId = DungeonDefinitionIdentity.GetFamilyId(run.DungeonDefinitionId);
         var mastery = await _masteries.GetAsync(
             run.CharacterId,
-            run.DungeonDefinitionId,
+            familyId,
             cancellationToken);
 
         if (mastery is null)
@@ -71,7 +39,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             mastery = new CharacterDungeonMastery
             {
                 CharacterId = run.CharacterId,
-                DungeonDefinitionId = run.DungeonDefinitionId,
+                DungeonDefinitionId = familyId,
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -79,7 +47,8 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             await _masteries.AddAsync(mastery, cancellationToken);
         }
 
-        if (mastery.LastAwardedRunId == run.Id)
+        // The run receipt remains valid after another difficulty updates the shared row.
+        if (mastery.LastAwardedRunId == run.Id || run.State?.MasteryAwardReasons.Count > 0)
         {
             return new DungeonMasteryAwardResult(
                 mastery.DungeonDefinitionId,
@@ -93,11 +62,13 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
         }
 
         var previousLevel = mastery.Level;
+        var rewardPreviouslyClaimed = mastery.MaxLevelRewardClaimed;
         var reasons = CalculateCompletionExperienceReasons(run);
         var experienceAwarded = reasons.Sum(x => x.Experience);
 
         mastery.Experience += experienceAwarded;
         mastery.Level = CalculateLevel(mastery.Experience);
+        mastery.MaxLevelRewardClaimed |= mastery.Level >= DungeonMasteryBenefits.MaxLevel;
         mastery.CompletionCount++;
         mastery.LastAwardedRunId = run.Id;
         mastery.UpdatedAt = DateTimeOffset.UtcNow;
@@ -112,7 +83,10 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             mastery.Level,
             mastery.CompletionCount,
             reasons,
-            AlreadyAwarded: false);
+            AlreadyAwarded: false)
+        {
+            MaxLevelRewardPreviouslyClaimed = rewardPreviouslyClaimed
+        };
     }
 
     public async Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
@@ -127,12 +101,16 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
 
         var masteries = await _masteries.GetForCharacterAsync(
             characterId,
-            dungeonDefinitionIds,
+            dungeonDefinitionIds.Select(DungeonDefinitionIdentity.GetFamilyId)
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
             cancellationToken);
 
-        return masteries.ToDictionary(
-            x => x.DungeonDefinitionId,
-            MapSnapshot,
+        var byFamily = masteries.ToDictionary(x => x.DungeonDefinitionId, StringComparer.OrdinalIgnoreCase);
+        return dungeonDefinitionIds.Distinct(StringComparer.OrdinalIgnoreCase).ToDictionary(
+            id => id,
+            id => byFamily.TryGetValue(DungeonDefinitionIdentity.GetFamilyId(id), out var mastery)
+                ? MapSnapshot(mastery) with { DungeonDefinitionId = id }
+                : new DungeonMasterySnapshot(id, 0, 0, GetExperienceRequiredForNextLevel(0), 0),
             StringComparer.OrdinalIgnoreCase);
     }
 

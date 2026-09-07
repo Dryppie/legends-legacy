@@ -33,7 +33,7 @@ public sealed class EquipmentUpgradeService(
             .Select(x => new EquipmentBlueprintOption(x.StyleId, x.Name, x.ItemId,
                 context.BlueprintStacks?.Where(stack => stack.ItemInstance.ItemBaseId == x.ItemId).Sum(stack => (long)stack.Quantity) ?? 0,
                 state.ActiveStyleId == x.StyleId,
-                blueprints.Sources.Where(source => source.StyleIds.Contains(x.StyleId)).Select(source =>
+                blueprints.Sources.Where(source => source.BlueprintStyleIds.Contains(x.StyleId)).Select(source =>
                     new EquipmentBlueprintSourceProgress(source.Name, source.Region,
                         Math.Max(1, blueprints.GuaranteeCompletions - (progress.SingleOrDefault(p => p.FamilyId == source.FamilyId)?.Misses ?? 0)))).ToArray()))
             .OrderBy(x => x.Name).ToArray();

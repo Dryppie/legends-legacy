@@ -70,7 +70,7 @@
           <section
             *ngIf="
               activeTab() === QuestStatus.Active &&
-              (visibleEvents().length || eventQuestState.loading())
+              visibleEvents().length > 0
             "
             class="mb-3"
           >
@@ -78,13 +78,6 @@
               class="mb-2 px-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary"
             >
               ● Server-wide
-            </div>
-
-            <div
-              *ngIf="eventQuestState.loading() && !eventQuestState.loaded()"
-              class="ll-state mb-2 px-3 py-2 text-xs"
-            >
-              Loading server event...
             </div>
 
             <button

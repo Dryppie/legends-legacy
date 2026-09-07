@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -27,6 +27,8 @@ interface RewardGroup {
   title: string;
   rewards: DungeonPreviewReward[];
 }
+
+type RewardChancePreview = Pick<DungeonPreviewReward, 'dropChancePercent'>;
 
 interface EntryRequirementPreview {
   itemId: string;
@@ -46,6 +48,7 @@ type DungeonDetailTab = 'rewards' | 'mastery';
 @Component({
   selector: 'app-dungeon-card',
   imports: [
+    DecimalPipe,
     NgIf,
     NgFor,
     NgClass,
@@ -487,6 +490,17 @@ export class DungeonCardComponent implements OnChanges {
     );
   }
 
+  selectedEquipmentReward(): RewardChancePreview | null {
+    const chance = this.selectedPreviewData().equipmentDropChancePercent;
+    return chance != null && Number.isFinite(chance) && chance > 0
+      ? { dropChancePercent: chance }
+      : null;
+  }
+
+  selectedBlueprintRewardNotice(): string | null {
+    return this.selectedRunRewards().find(reward => reward.category === 'Blueprints')?.source ?? null;
+  }
+
   selectedFirstClearRewards(): DungeonPreviewReward[] {
     return (
       this.selectedRewardSections().find(
@@ -534,15 +548,15 @@ export class DungeonCardComponent implements OnChanges {
     return `${this.formatDropChance(chance)} drop`;
   }
 
-  rewardChancePercent(reward: DungeonPreviewReward): number {
+  rewardChancePercent(reward: RewardChancePreview): number {
     return Math.max(0, Math.min(100, reward.dropChancePercent ?? 100));
   }
 
-  rewardChanceValueLabel(reward: DungeonPreviewReward): string {
+  rewardChanceValueLabel(reward: RewardChancePreview): string {
     return this.formatDropChance(this.rewardChancePercent(reward));
   }
 
-  rewardChanceBarWidth(reward: DungeonPreviewReward): number {
+  rewardChanceBarWidth(reward: RewardChancePreview): number {
     return Math.sqrt(this.rewardChancePercent(reward) / 100) * 100;
   }
 
@@ -583,6 +597,12 @@ export class DungeonCardComponent implements OnChanges {
     if (!benefits) return [];
 
     const bonuses: MasteryBonusDisplay[] = [];
+    if (benefits.equipmentDropChanceBonusPercentagePoints > 0) {
+      bonuses.push({
+        id: 'equipment-drop',
+        label: `+${benefits.equipmentDropChanceBonusPercentagePoints} percentage points to equipment drop chance`,
+      });
+    }
     if (benefits.additionalVisibilityRows > 0) {
       const rows = benefits.additionalVisibilityRows;
       bonuses.push({

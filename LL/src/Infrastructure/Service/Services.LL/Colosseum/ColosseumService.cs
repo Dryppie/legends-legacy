@@ -442,7 +442,11 @@ public class ColosseumService : IColosseumService
         var sigilFragmentsGranted = item.SigilFragmentsGranted * quantity;
         character.Cinders += cindersGranted;
         character.Soulstones += soulstonesGranted;
-        character.SigilFragments += sigilFragmentsGranted;
+        if (sigilFragmentsGranted > 0)
+        {
+            var fragmentBases = await _itemBaseRepository.GetItemBasesByIdsAsync([SigilFragmentItem.ItemBaseId], cancellationToken);
+            rewardInventoryItems.Add(_inventoryItemFactory.Create(fragmentBases[SigilFragmentItem.ItemBaseId], sigilFragmentsGranted, characterId));
+        }
 
         if (rewardInventoryItems.Count > 0)
         {

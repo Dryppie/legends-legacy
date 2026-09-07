@@ -10,6 +10,8 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Progression;
+using Services.LL.Items;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EssenceSystem.Tests;
@@ -25,7 +27,10 @@ public sealed class EquipmentDungeonConsumerTests
     {
         var data = new HubData(modern, level);
         var mapper = new MapperConfiguration(options => options.AddProfile<MappingProfile>(), NullLoggerFactory.Instance).CreateMapper();
-        var hub = new DungeonHubFactory(data, data, data, data, data, data, data, mapper);
+        var content = FindEquipmentContent();
+        var equipment = JsonStarterEquipmentCatalog.Load(Path.Combine(content, "equipment-starters.v1.json"));
+        var catalog = JsonStarterEquipmentCatalog.LoadOrdinary(equipment, Path.Combine(content, "equipment-ordinary.v1.json"));
+        var hub = new DungeonHubFactory(data, data, data, data, data, data, data, mapper, catalog);
 
         var first = Assert.Single((await hub.CreateAsync(Guid.NewGuid(), CancellationToken.None)).Dungeons);
         var second = Assert.Single((await hub.CreateAsync(Guid.NewGuid(), CancellationToken.None)).Dungeons);
@@ -33,13 +38,26 @@ public sealed class EquipmentDungeonConsumerTests
         Assert.Equal(level, first.Mastery.Level);
         Assert.Equal(level == 0 ? 0 : 900, first.Mastery.Experience);
         Assert.Equal(level == 0 ? 0 : 12, first.Mastery.CompletionCount);
-        Assert.Equal(8, first.Mastery.BenefitLevels.Count);
+        Assert.Equal(10, first.Mastery.BenefitLevels.Count);
+        Assert.Equal(50 + level * 5, first.EquipmentDropChancePercent);
+        Assert.Equal(level * 5, first.Mastery.Benefits.EquipmentDropChanceBonusPercentagePoints);
+        if (level == 0) Assert.Equal(1000, first.Mastery.ExperienceRequiredForNextLevel);
         Assert.Equal(false, first.Mastery.BenefitLevels.Any(benefit => benefit.Id == "dungeon_forager_i"));
         Assert.Equal(level == 0 ? 0 : 2, first.Mastery.Benefits.AdditionalVisibilityRows);
         Assert.Equal(level == 0 ? 0 : 4, first.Mastery.Benefits.RestSiteVigorBonus);
         Assert.Equal(level == 0 ? 0 : 10, first.Mastery.Benefits.CompletionCurrencyBonusPercent);
         Assert.Equal(first.Mastery.BenefitLevels.Select(x => x.Id), second.Mastery.BenefitLevels.Select(x => x.Id));
         Assert.True(first.CanEnter);
+    }
+
+    private static string FindEquipmentContent()
+    {
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory != null; directory = directory.Parent)
+        {
+            var path = Path.Combine(directory.FullName, "LL/src/API/API.LL/Data/equipment");
+            if (Directory.Exists(path)) return path;
+        }
+        throw new DirectoryNotFoundException();
     }
 
     // This fixture permits preview reads only. Every gameplay mutation throws.
@@ -49,7 +67,7 @@ public sealed class EquipmentDungeonConsumerTests
     {
         private readonly DungeonDefinition dungeon = new()
         {
-            Id = "test_novice", Name = "Test (Novice)", SigilItemId = "",
+            Id = "test_novice", Name = "Test (Novice)", SigilItemId = "", Region = 1,
         };
         public int PolicyReads { get; private set; }
         public DungeonDefinition GetByKey(string key) => dungeon;
@@ -65,7 +83,7 @@ public sealed class EquipmentDungeonConsumerTests
                 new Dictionary<string, DungeonMasterySnapshot> { [dungeon.Id] = new(dungeon.Id, 900, level, 1200, 12) });
         public Task<IReadOnlyDictionary<string, DungeonPreviewAccess>> EvaluateForPreviewAsync(Guid id, IReadOnlyCollection<DungeonDefinition> dungeons, IReadOnlyDictionary<string, int> overrides, CancellationToken ct) =>
             Task.FromResult<IReadOnlyDictionary<string, DungeonPreviewAccess>>(new Dictionary<string, DungeonPreviewAccess> { [dungeon.Id] = new(new(true, [], []), null) });
-        public Task<IReadOnlyDictionary<string, IReadOnlyList<DungeonPreviewReward>>> GetPossibleCompletionRewardsAsync(IReadOnlyCollection<DungeonDefinition> dungeons, CancellationToken ct) =>
+        public Task<IReadOnlyDictionary<string, IReadOnlyList<DungeonPreviewReward>>> GetPossibleCompletionRewardsAsync(IReadOnlyCollection<DungeonDefinition> dungeons, CancellationToken ct, Guid? characterId = null) =>
             Task.FromResult<IReadOnlyDictionary<string, IReadOnlyList<DungeonPreviewReward>>>(new Dictionary<string, IReadOnlyList<DungeonPreviewReward>> { [dungeon.Id] = [] });
         public Task<IReadOnlyDictionary<string, ItemBase>> GetItemBasesByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken ct) =>
             Task.FromResult<IReadOnlyDictionary<string, ItemBase>>(new Dictionary<string, ItemBase> { ["ore"] = new() { Id = "ore", Name = "Ore" } });

@@ -29,13 +29,14 @@ public sealed class DungeonMasteryBenefitsTests
         Assert.Equal(restBonus, benefits.RestSiteVigorBonus);
         Assert.Equal(vigorReduction, benefits.CombatVigorCostReduction);
         Assert.Equal(currencyBonus, benefits.CompletionCurrencyBonusPercent);
+        Assert.Equal(level * 5, benefits.EquipmentDropChanceBonusPercentagePoints);
     }
 
     [Fact]
     public void Definitions_cover_current_mastery_benefits_once()
     {
         Assert.Equal(
-            new[] { 1, 2, 4, 5, 6, 7, 9, 10 },
+            Enumerable.Range(1, 10),
             DungeonMasteryBenefits.Definitions.Select(benefit => benefit.Level));
         Assert.Equal(
             DungeonMasteryBenefits.Definitions.Count,

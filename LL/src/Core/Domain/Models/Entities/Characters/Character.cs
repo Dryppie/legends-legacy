@@ -24,7 +24,6 @@ public class Character : Entity
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
     public long FateEcho { get; set; } = 0;
-    public long SigilFragments { get; set; } = 0;
     public long GuildFavor { get; set; } = 0;
     public long TowerTokens { get; set; } = 0;
     public long RaidTrophies { get; set; } = 0;

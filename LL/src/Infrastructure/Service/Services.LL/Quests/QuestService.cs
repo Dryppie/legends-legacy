@@ -37,8 +37,12 @@ public sealed class QuestService(
         var progress = progresses.FirstOrDefault(x =>
             x.QuestId.Equals(questId, StringComparison.OrdinalIgnoreCase))
             ?? throw new ArgumentException("Quest was not found.");
+        var repaired = await ReconcileStarterClaimProgressAsync(progresses, cancellationToken);
         if (progress.Status == QuestStatus.Completed)
+        {
+            if (repaired) await repository.SaveChangesAsync(cancellationToken);
             return await MapJournalAsync(progresses, cancellationToken);
+        }
 
         var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
         if (progress.Status != QuestStatus.Active ||
@@ -178,6 +182,7 @@ public sealed class QuestService(
             }
         }
 
+        await ReconcileStarterClaimProgressAsync(progresses, cancellationToken);
         var now = timeProvider.GetUtcNow();
         foreach (var progress in progresses)
         {
@@ -451,7 +456,56 @@ public sealed class QuestService(
             changed = true;
         }
 
+        changed |= await ReconcileStarterClaimProgressAsync(progresses, cancellationToken);
+        return changed;
+    }
 
+    private async Task<bool> ReconcileStarterClaimProgressAsync(
+        IReadOnlyCollection<CharacterQuestProgress> progresses,
+        CancellationToken cancellationToken)
+    {
+        var changed = false;
+        var now = timeProvider.GetUtcNow();
+        foreach (var progress in progresses)
+        {
+            var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+            foreach (var objective in definition.Objectives.Where(x => x.Type == EquipmentKeys.StarterClaimObjective))
+            {
+                var saved = progress.Objectives.SingleOrDefault(x => x.ObjectiveKey == objective.Key);
+                if (saved?.CompletedAt is not null) continue;
+
+                // Older First Weapon saves only tracked equipping. Preserve that credit when adding the chest step.
+                var claimed = progress.Status == QuestStatus.Completed || definition.Objectives.Any(x =>
+                    x.Type == EquipmentKeys.StarterLoadoutObjective &&
+                    x.Filters.StarterEquipmentKind == objective.Filters.StarterEquipmentKind &&
+                    progress.Objectives.Any(p => p.ObjectiveKey == x.Key && p.CompletedAt.HasValue));
+                if (!claimed && equipmentProgressionEquipment is not null)
+                    claimed = await equipmentProgressionEquipment.HasStarterClaimAsync(
+                        progress.CharacterId, objective.Filters.StarterEquipmentKind, cancellationToken);
+
+                if (saved is not null && !claimed) continue;
+                if (saved is null)
+                {
+                    saved = new CharacterQuestObjectiveProgress
+                    {
+                        CharacterId = progress.CharacterId,
+                        QuestId = progress.QuestId,
+                        ObjectiveKey = objective.Key,
+                        RequiredAmount = objective.RequiredAmount
+                    };
+                    progress.Objectives.Add(saved);
+                }
+                if (claimed)
+                {
+                    saved.CurrentAmount = saved.RequiredAmount;
+                    saved.CompletedAt = progress.CompletedAt ?? now;
+                }
+                saved.UpdatedAt = now;
+                progress.UpdatedAt = now;
+                progress.RowVersion++;
+                changed = true;
+            }
+        }
         return changed;
     }
 
@@ -585,6 +639,9 @@ public sealed class QuestService(
             cancellationToken);
         return objective.Type switch
         {
+            EquipmentKeys.StarterClaimObjective =>
+                await (equipmentProgressionEquipment ?? throw new InvalidOperationException("Equipment quest support is required."))
+                    .HasStarterClaimAsync(characterId, filters.StarterEquipmentKind, cancellationToken) ? 1 : 0,
             EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.AreaDropObjective =>
                 await (equipmentProgressionEquipment ?? throw new InvalidOperationException("Equipment quest support is required."))
                     .IsEquippedAsync(characterId, objective.Type, filters.StarterEquipmentKind, cancellationToken) ? 1 : 0,
@@ -636,7 +693,9 @@ public sealed class QuestService(
 
             "DungeonRunCompleted" when
                 trigger.Type == "DungeonRunCompleted" &&
-                Matches(filters.DungeonDefinitionId, trigger.DungeonDefinitionId) => 1,
+                Matches(filters.DungeonDefinitionId, trigger.DungeonDefinitionId) &&
+                Matches(filters.DungeonFamilyId, trigger.DungeonDefinitionId is null ? null :
+                    Domain.Models.Dungeons.Definitions.DungeonDefinitionIdentity.GetFamilyId(trigger.DungeonDefinitionId)) => 1,
 
             "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
 

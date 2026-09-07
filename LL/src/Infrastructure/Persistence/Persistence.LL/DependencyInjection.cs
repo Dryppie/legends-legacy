@@ -106,6 +106,7 @@ public static class DependencyInjection
 
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEconomyLedgerRepository, EconomyLedgerRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Loadouts.IEquipmentLoadoutRepository, EquipmentLoadoutRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentUpgradeRepository, EquipmentUpgradeRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentBlueprintRepository, EquipmentBlueprintRepository>();

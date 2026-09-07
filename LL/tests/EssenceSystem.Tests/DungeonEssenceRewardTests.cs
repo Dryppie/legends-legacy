@@ -79,12 +79,14 @@ public sealed class DungeonEssenceRewardTests
     [InlineData(1, 10, 10, false, 0)]
     [InlineData(1, 9, 10, true, 0)]
     [InlineData(1, 8, 9, false, 0)]
+    [InlineData(1, 9, 10, false, 0, true)]
     public async Task Dungeon_completion_awards_fixed_soulstones_only_when_level_ten_is_first_reached(
         int dungeonTier,
         int previousLevel,
         int awardedLevel,
         bool alreadyAwarded,
-        int expectedMasterySoulstones)
+        int expectedMasterySoulstones,
+        bool previouslyClaimed = false)
     {
         await using var db = CreateDb();
         var run = new DungeonRun
@@ -109,7 +111,7 @@ public sealed class DungeonEssenceRewardTests
             rewardRoller,
             new CapturingDungeonPendingRewardWriter(),
             new InventoryItemFactory(),
-            new FixedDungeonMasteryService(previousLevel, awardedLevel, alreadyAwarded),
+            new FixedDungeonMasteryService(previousLevel, awardedLevel, alreadyAwarded, previouslyClaimed),
             new RecordingPublisher());
 
         await applier.ApplyAsync(run, CancellationToken.None);
@@ -400,7 +402,8 @@ public sealed class DungeonEssenceRewardTests
     private sealed class FixedDungeonMasteryService(
         int previousLevel,
         int level,
-        bool alreadyAwarded) : IDungeonMasteryService
+        bool alreadyAwarded,
+        bool previouslyClaimed = false) : IDungeonMasteryService
     {
         public int CalculateLevel(long experience) => level;
         public int? GetExperienceRequiredForNextLevel(int currentLevel) => null;
@@ -416,7 +419,7 @@ public sealed class DungeonEssenceRewardTests
                 level,
                 0,
                 [],
-                alreadyAwarded));
+                alreadyAwarded) { MaxLevelRewardPreviouslyClaimed = previouslyClaimed });
 
         public Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
             Guid characterId,

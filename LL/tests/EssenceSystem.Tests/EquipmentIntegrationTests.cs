@@ -75,7 +75,7 @@ public sealed class EquipmentIntegrationTests
     {
         var mapper = new MapperConfiguration(config => config.AddProfile<MappingProfile>(), NullLoggerFactory.Instance).CreateMapper();
         var catalog = Catalog();
-        Assert.Equal(31, mapper.Map<List<StarterEquipmentOptionDto>>(catalog.Options).Count);
+        Assert.Equal(28, mapper.Map<List<StarterEquipmentOptionDto>>(catalog.Options).Count);
         var equipment = Instance(EquipmentData.Create(Award(catalog, Guid.NewGuid()), catalog.Evaluator));
         var dto = mapper.Map<EquipmentInstanceDto>(equipment);
         Assert.True(dto.IsBound);

@@ -161,14 +161,23 @@ Evolution modifiers are data-driven and should enhance the original role rather 
 Each eligible failed kill increases `MonsterResonance`. The next drop roll uses:
 
 ```text
-baseDropChance + min(maxResonanceBonus, resonanceValue * dropChanceBonusPerResonance)
+baseDropChance * (1 + min(maxRelativeResonanceBonus, resonanceValue * relativeBonusPerResonance))
 ```
 
-On drop, resonance resets. Resonance is capped and does not guarantee drops unless a definition explicitly configures a 100% effective chance.
+The base chance is currently 0.01%. The resonance bonus is a fraction of that base chance, capped at +1% after 12,000 failed eligible kills without progression bonuses. At the cap, the normal chance is 0.0101% (1.01x base). Changing the base chance scales the whole resonance curve proportionally at the same resonance value. Existing stored resonance points remain valid. On drop, resonance resets. The bonus is capped and does not guarantee drops unless the resulting effective chance reaches 100%.
 
-The featured creature in a dungeon MiniBoss or Boss encounter uses encounter-specific Essence tuning: 10x effective drop chance, 1000x resonance gain after a failed eligible roll, and 10x the normal maximum resonance drop-chance bonus. Supporting monsters in the same room use standard Essence tuning, as do ordinary and idle combat. MiniBoss and Boss encounter compositions author the featured creature first.
+The featured creature in a dungeon MiniBoss or Boss encounter uses encounter-specific Essence tuning: 10x effective drop chance, 1000x resonance gain after a failed eligible roll, and 10x the normal maximum relative resonance bonus. Without other bonuses, its chance starts at 0.1% and caps at 0.11%. Supporting monsters in the same room use standard Essence tuning, as do ordinary and idle combat. MiniBoss and Boss encounter compositions author the featured creature first.
 
 ## Combat Integration
+
+### Essence Focus
+
+- A focused creature has **3x its base Essence chance** before relative resonance, global/focused upgrades, and encounter multipliers. At the current 0.01% base this starts at **0.03%**, or **0.3%** for a featured dungeon miniboss/boss before other bonuses.
+- Focused Essence drops remain chance-based at every defeat count. Focus adds no guaranteed drop or separate defeat counter; the existing relative resonance bonus still applies and resets on a drop.
+- Focus multiplies the creature's normalized area spawn probability by **1.2**, capped at 100% (20% becomes 24%). Other creatures retain their relative proportions. Encounter size, cadence, areas that do not contain the creature, and authored dungeon rosters are unchanged.
+- Pending idle combat resolves under the previous focus before a focus change. The existing eight-hour focus cooldown still applies.
+
+Essence Focus requires no database migration or content configuration changes.
 
 Combat setup asks the Essence bonus provider for active loadout modifiers and applies only those modifiers to combat attributes.
 

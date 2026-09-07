@@ -1,5 +1,14 @@
 [
   {
+    "id": "sigil_fragment",
+    "name": "Sigil Fragments",
+    "description": "Fragments used to assemble dungeon entrance sigils.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "stackable": true,
+    "isBound": true
+  },
+  {
     "id": "item.blueprint_fury",
     "name": "Blueprint: Fury",
     "description": "Consumed with 100 Cinders per equipment tier to apply Fury to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
@@ -109,67 +118,6 @@
     "equipmentType": "Head",
     "attributeModifiers": []
   },
-  {
-    "id": "item.blueprint_raidforged",
-    "name": "Blueprint: Raidforged",
-    "description": "Consumed with 100 Cinders per equipment tier to apply Raidforged to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "isBound": false,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "item.blueprint_gravebound",
-    "name": "Blueprint: Gravebound",
-    "description": "Consumed with 100 Cinders per equipment tier to apply Gravebound to compatible equipment. Preserves base attributes, quality, rarity and reinforcement. Replaces the previous variant. Use from an equipment item's upgrade panel.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "isBound": false,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "item.blueprint_choice.goblin_mines",
-    "name": "Goblin Mines Blueprint Choice",
-    "description": "Choose one consumable blueprint from Goblin Mines. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "isBound": false,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "item.blueprint_choice.forgotten_catacombs",
-    "name": "Forgotten Catacombs Blueprint Choice",
-    "description": "Choose one consumable blueprint from Forgotten Catacombs. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "isBound": false,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "item.blueprint_choice.tangled_cave",
-    "name": "Tangled Cave Blueprint Choice",
-    "description": "Choose one consumable blueprint from Tangled Cave. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "isBound": false,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  },
-  {
-    "id": "item.blueprint_choice.great_tree",
-    "name": "Great Tree Blueprint Choice",
-    "description": "Choose one consumable blueprint from Great Tree. Awarded independently of equipment: 25% chance, guaranteed by the fourth completion without a blueprint.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "isBound": false,
-    "equipmentType": "Head",
-    "attributeModifiers": []
-  }
-,
   {
     "id": "reinforcement_parts",
     "name": "Reinforcement Parts",
@@ -602,90 +550,6 @@
       },
       {
         "id": "cde903ec-458c-45dd-964e-89f9a57729ba",
-        "attributeType": "Power",
-        "amount": 30,
-        "modifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "id": "cloth_cowl",
-    "name": "Cloth Cowl",
-    "description": "",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [
-      {
-        "id": "bec165bc-6b16-44ce-853f-bfe817ea1bf3",
-        "attributeType": "Resistance",
-        "amount": 2,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "71927bb6-8eca-470c-9555-280f719c0030",
-        "attributeType": "MaxHealth",
-        "amount": 50,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "bf451731-ce47-4236-b037-13b2becdd394",
-        "attributeType": "Power",
-        "amount": 30,
-        "modifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "id": "cloth_robe",
-    "name": "Cloth Robe",
-    "description": "",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Chest",
-    "attributeModifiers": [
-      {
-        "id": "04eba557-a382-421b-86ec-89c441cdbe8a",
-        "attributeType": "Resistance",
-        "amount": 2,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "7c4ce5ab-ecbb-41b4-a95d-decb22cb93cb",
-        "attributeType": "MaxHealth",
-        "amount": 50,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "dbbc8a25-955b-402c-989e-f99340b2dc91",
-        "attributeType": "Power",
-        "amount": 30,
-        "modifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "id": "cloth_pants",
-    "name": "Cloth Pants",
-    "description": "",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Legs",
-    "attributeModifiers": [
-      {
-        "id": "219fd7ad-10fe-436b-9035-5ce891388e84",
-        "attributeType": "Resistance",
-        "amount": 2,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "6a7aef21-d059-4be3-b207-a921a976bec3",
-        "attributeType": "MaxHealth",
-        "amount": 50,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "6a82f6c7-10c8-40e6-b342-1d33a255aecd",
         "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"

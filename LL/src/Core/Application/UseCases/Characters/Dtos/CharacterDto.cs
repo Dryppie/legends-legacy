@@ -15,7 +15,6 @@ public class CharacterDto : IMapFrom<Character>
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
     public long FateEcho { get; set; } = 0;
-    public long SigilFragments { get; set; } = 0;
     public int ArenaRating { get; set; }
     public EquippedTitleDto? EquippedTitle { get; set; }
 

@@ -1755,6 +1755,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("MaxLevelRewardClaimed")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -2100,7 +2103,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable("Entities", t =>
                         {
-                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"SigilFragments\" IS NOT NULL AND \"SigilFragments\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
+                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
                         });
 
                     b.HasDiscriminator<int>("EntityType");
@@ -2875,6 +2878,59 @@ namespace Persistence.LL.Migrations
                         {
                             t.HasCheckConstraint("CK_InventoryItems_Quantity_Positive", "\"Quantity\" > 0");
                         });
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Loadouts.EquipmentLoadout", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AutoUseActivities")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("EquipmentLoadouts");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Loadouts.EquipmentLoadoutSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("EquipmentInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EquipmentLoadoutId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SlotType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentInstanceId");
+
+                    b.HasIndex("EquipmentLoadoutId", "SlotType")
+                        .IsUnique();
+
+                    b.ToTable("EquipmentLoadoutSlots");
                 });
 
             modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.EquipmentBlueprintProgress", b =>
@@ -5632,9 +5688,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("bigint")
                         .HasDefaultValue(0L);
 
-                    b.Property<long>("SigilFragments")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("Soulstones")
                         .HasColumnType("bigint");
 
@@ -5654,7 +5707,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable(t =>
                         {
-                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"SigilFragments\" IS NOT NULL AND \"SigilFragments\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
+                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
                         });
 
                     b.HasDiscriminator().HasValue(1);
@@ -5684,7 +5737,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable(t =>
                         {
-                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"SigilFragments\" IS NOT NULL AND \"SigilFragments\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
+                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
                         });
 
                     b.HasDiscriminator().HasValue(3);
@@ -5696,7 +5749,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable(t =>
                         {
-                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"SigilFragments\" IS NOT NULL AND \"SigilFragments\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
+                            t.HasCheckConstraint("CK_Entities_CharacterCurrencyBalances_NonNegative", "\"EntityType\" <> 1 OR (\"Cinders\" IS NOT NULL AND \"Cinders\" >= 0 AND \"Soulstones\" IS NOT NULL AND \"Soulstones\" >= 0 AND \"FateEcho\" IS NOT NULL AND \"FateEcho\" >= 0 AND \"GuildFavor\" IS NOT NULL AND \"GuildFavor\" >= 0 AND \"TowerTokens\" IS NOT NULL AND \"TowerTokens\" >= 0 AND \"RaidTrophies\" IS NOT NULL AND \"RaidTrophies\" >= 0)");
                         });
 
                     b.HasDiscriminator().HasValue(2);
@@ -6330,6 +6383,31 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstance");
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Loadouts.EquipmentLoadout", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Loadouts.EquipmentLoadoutSlot", b =>
+                {
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
+                        .WithMany()
+                        .HasForeignKey("EquipmentInstanceId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Models.Items.Equipments.Loadouts.EquipmentLoadout", null)
+                        .WithMany("Slots")
+                        .HasForeignKey("EquipmentLoadoutId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EquipmentInstance");
+                });
+
             modelBuilder.Entity("Domain.Models.Items.Equipments.Progression.EquipmentBlueprintProgress", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", null)
@@ -6936,6 +7014,11 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
                 {
                     b.Navigation("InventoryItems");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Loadouts.EquipmentLoadout", b =>
+                {
+                    b.Navigation("Slots");
                 });
 
             modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>

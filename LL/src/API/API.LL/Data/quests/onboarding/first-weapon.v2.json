@@ -21,10 +21,23 @@
       "filters": {
         "starterEquipmentKind": "FirstWeapon"
       },
+      "type": "ModelEStarterEquipmentClaimed",
+      "requiredAmount": 1,
+      "key": "open_arms_chest",
+      "description": "Open your Arms Chest and choose a one-handed weapon."
+    },
+    {
+      "presentation": {
+        "actionLabel": "Open Inventory",
+        "destinationRoute": "/game/character/inventory"
+      },
+      "filters": {
+        "starterEquipmentKind": "FirstWeapon"
+      },
       "type": "ModelEStarterLoadoutEquipped",
       "requiredAmount": 1,
       "key": "equip_starter_loadout",
-      "description": "Open your Arms Chest and equip the one-handed weapon you choose."
+      "description": "Equip the one-handed weapon you chose from the Arms Chest."
     }
   ],
   "rewards": []

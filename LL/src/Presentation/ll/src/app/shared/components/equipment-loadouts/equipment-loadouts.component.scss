@@ -1,0 +1,175 @@
+:host {
+  display: block;
+  min-width: 0;
+  container: equipment-loadouts / inline-size;
+}
+
+.equipment-loadouts {
+  padding: 0.7rem 1rem 0.8rem;
+  border: 0;
+  border-top: 1px solid var(--ll-color-border-strong);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.loadout-toolbar,
+.loadout-tabs,
+.loadout-actions,
+.auto-use-row,
+.auto-use-options,
+.loadout-confirmation {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.loadout-toolbar {
+  gap: 0.75rem;
+}
+.loadout-title {
+  flex: none;
+}
+
+.loadout-tabs {
+  flex: 1;
+  gap: 0.35rem;
+  overflow-x: auto;
+}
+
+.loadout-choice,
+.auto-use-option {
+  flex: none;
+  border: 1px solid rgba(249, 220, 160, 0.18);
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  white-space: nowrap;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.loadout-choice {
+  min-height: 2rem;
+  max-width: 14rem;
+  overflow: hidden;
+  padding: 0.35rem 0.65rem;
+  font-family: var(--ll-font-display);
+  text-overflow: ellipsis;
+}
+
+.loadout-choice:hover:not(:disabled),
+.loadout-choice-active,
+.auto-use-option:hover:not(:disabled),
+.auto-use-option-active {
+  border-color: rgba(249, 220, 160, 0.65);
+  background: rgba(249, 220, 160, 0.1);
+  color: var(--ll-color-primary);
+}
+
+.loadout-choice:focus-visible,
+.auto-use-option:focus-visible {
+  outline: 1px solid var(--ll-color-primary);
+  outline-offset: -3px;
+}
+
+.loadout-choice:disabled,
+.auto-use-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.loadout-new {
+  border-style: dashed;
+}
+.loadout-actions {
+  gap: 0.35rem;
+}
+.loadout-actions > button {
+  white-space: nowrap;
+}
+.loadout-name-field input {
+  width: 8.5rem;
+}
+
+.auto-use-row {
+  gap: 0.65rem;
+  margin-top: 0.55rem;
+}
+
+.auto-use-label {
+  font-size: var(--ll-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  flex: none;
+  color: var(--ll-color-primary);
+}
+
+.auto-use-options {
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.auto-use-option {
+  padding: 0.25rem 0.55rem;
+}
+
+.auto-use-owner {
+  margin-left: 0.25rem;
+  color: #d89368;
+}
+
+.auto-use-note {
+  flex: none;
+  color: rgba(249, 220, 160, 0.55);
+  font-size: var(--ll-text-xs);
+}
+
+.loadout-confirmation {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+}
+
+@container equipment-loadouts (max-width: 69.999rem) {
+  .loadout-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .loadout-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .loadout-name-field {
+    flex: 1;
+  }
+  .loadout-name-field input {
+    width: 100%;
+  }
+  .auto-use-row {
+    flex-wrap: wrap;
+  }
+  .auto-use-note {
+    width: 100%;
+  }
+}
+
+@container equipment-loadouts (max-width: 39.999rem) {
+  .equipment-loadouts {
+    padding: 0.75rem;
+  }
+  .loadout-title {
+    width: 100%;
+  }
+  .loadout-tabs {
+    flex-basis: 100%;
+  }
+  .auto-use-options {
+    flex-basis: 100%;
+  }
+}

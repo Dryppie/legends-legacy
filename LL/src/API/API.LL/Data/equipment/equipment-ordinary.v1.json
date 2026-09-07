@@ -5,16 +5,16 @@
     "region": 1,
     "equipmentTier": 1,
     "areaEquipment": {
-      "dropChance": 0.0003,
+      "dropChance": 0.0011574074074074073,
       "rank": 0,
       "rarities": {
-        "common": 0.7,
-        "uncommon": 0.2,
-        "rare": 0.07,
-        "epic": 0.02,
-        "unique": 0.008,
-        "legendary": 0.0018,
-        "legacy": 0.0002
+        "common": 0.85,
+        "uncommon": 0.12,
+        "rare": 0.03,
+        "epic": 0,
+        "unique": 0,
+        "legendary": 0,
+        "legacy": 0
       },
       "qualities": {
         "crude": 0.0,
@@ -25,16 +25,36 @@
       }
     },
     "dungeonEquipment": {
-      "dropChance": 0.2,
+      "dropChance": 0.5,
       "rank": 1,
       "rarities": {
-        "common": 0.4,
-        "uncommon": 0.3,
-        "rare": 0.18,
-        "epic": 0.08,
-        "unique": 0.03,
-        "legendary": 0.009,
-        "legacy": 0.001
+        "novice": {
+          "common": 0.0,
+          "uncommon": 0.84,
+          "rare": 0.14,
+          "epic": 0.02,
+          "unique": 0.0,
+          "legendary": 0.0,
+          "legacy": 0.0
+        },
+        "veteran": {
+          "common": 0.0,
+          "uncommon": 0.0,
+          "rare": 0.84,
+          "epic": 0.14,
+          "unique": 0.02,
+          "legendary": 0.0,
+          "legacy": 0.0
+        },
+        "champion": {
+          "common": 0.0,
+          "uncommon": 0.0,
+          "rare": 0.0,
+          "epic": 0.84,
+          "unique": 0.14,
+          "legendary": 0.02,
+          "legacy": 0.0
+        }
       },
       "qualities": {
         "crude": 0.0,
@@ -95,16 +115,16 @@
     "region": 2,
     "equipmentTier": 2,
     "areaEquipment": {
-      "dropChance": 0.0003,
+      "dropChance": 0.0011574074074074073,
       "rank": 0,
       "rarities": {
-        "common": 0.7,
-        "uncommon": 0.2,
-        "rare": 0.07,
-        "epic": 0.02,
-        "unique": 0.008,
-        "legendary": 0.0018,
-        "legacy": 0.0002
+        "common": 0.85,
+        "uncommon": 0.12,
+        "rare": 0.03,
+        "epic": 0,
+        "unique": 0,
+        "legendary": 0,
+        "legacy": 0
       },
       "qualities": {
         "crude": 0.0,
@@ -115,16 +135,36 @@
       }
     },
     "dungeonEquipment": {
-      "dropChance": 0.2,
+      "dropChance": 0.5,
       "rank": 1,
       "rarities": {
-        "common": 0.4,
-        "uncommon": 0.3,
-        "rare": 0.18,
-        "epic": 0.08,
-        "unique": 0.03,
-        "legendary": 0.009,
-        "legacy": 0.001
+        "novice": {
+          "common": 0.0,
+          "uncommon": 0.84,
+          "rare": 0.14,
+          "epic": 0.02,
+          "unique": 0.0,
+          "legendary": 0.0,
+          "legacy": 0.0
+        },
+        "veteran": {
+          "common": 0.0,
+          "uncommon": 0.0,
+          "rare": 0.84,
+          "epic": 0.14,
+          "unique": 0.02,
+          "legendary": 0.0,
+          "legacy": 0.0
+        },
+        "champion": {
+          "common": 0.0,
+          "uncommon": 0.0,
+          "rare": 0.0,
+          "epic": 0.84,
+          "unique": 0.14,
+          "legendary": 0.02,
+          "legacy": 0.0
+        }
       },
       "qualities": {
         "crude": 0.0,

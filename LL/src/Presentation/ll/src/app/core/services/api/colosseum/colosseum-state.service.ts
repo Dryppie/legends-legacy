@@ -531,8 +531,6 @@ export class ColosseumStateService {
         ...character,
         cinders: character.cinders + response.cindersGranted,
         soulstones: character.soulstones + response.soulstonesGranted,
-        sigilFragments:
-          character.sigilFragments + response.sigilFragmentsGranted,
       });
     }
   }

@@ -980,6 +980,7 @@ public sealed partial class TournamentGroundsServiceTests
         startingTournament.StartsAtUtc = Now.AddMinutes(-1);
         var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
 
+        SigilFragmentTestItems.Seed(db, character.Id);
         await db.TournamentRewardGrants.AddAsync(new TournamentRewardGrant
         {
             Id = Guid.NewGuid(),
@@ -1003,7 +1004,7 @@ public sealed partial class TournamentGroundsServiceTests
         Assert.Equal(45, character.ArenaProfile.Glory);
         Assert.Equal(250, character.Cinders);
         Assert.Equal(5, character.Soulstones);
-        Assert.Equal(10, character.SigilFragments);
+        Assert.Equal(10, await db.InventoryItems.Where(x => x.InventoryId == character.Id && x.ItemInstance.ItemBaseId == "sigil_fragment").SumAsync(x => x.Quantity));
         var reward = await db.TournamentRewardGrants.SingleAsync();
         Assert.Equal(TournamentRewardStatus.Claimed, reward.Status);
         Assert.Equal(Now, reward.ClaimedAtUtc);

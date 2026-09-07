@@ -37,6 +37,7 @@ public sealed class SnapshotCombatantBuilder(
                 .Select(x => x.ToPlayerEssence(request.Snapshot.CharacterId))
                 .ToList();
             combatant.HasEquippedEssenceSnapshot = true;
+            combatant.HasEquipmentSnapshot = true;
             combatant.Id = request.Slot.SlotId;
             combatant.OriginalId = request.Slot.SourceEntityId;
             participants.Add(new CombatRuntimeParticipant(request.Slot, source, combatant));

@@ -161,6 +161,34 @@ public sealed class IdleCombatPlannerTests
                 MaximumEncountersPerResolution = 100
             }));
 
+    [Fact]
+    public void Encounter_selection_uses_focused_spawn_probabilities_without_changing_encounter_size()
+    {
+        var now = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
+        var planner = new IdleCombatPlanner(new Services.LL.Spawnings.SpawningService(),
+            Options.Create(new IdleCombatProgressionOptions()));
+        var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(CreateCombatAction(now), now));
+        var focusedId = Guid.NewGuid();
+        plan.Area.Creatures =
+        [
+            new AreaCreature { CreatureId = focusedId, WeightedSpawnRate = 9 },
+            new AreaCreature { CreatureId = Guid.NewGuid(), WeightedSpawnRate = 1 }
+        ];
+        plan = plan with
+        {
+            SpawnCreatures = Services.LL.Spawnings.WeightedSpawnSelector.ApplyEssenceFocus(
+                plan.Area.Creatures.ToList(), new HashSet<Guid> { focusedId })
+        };
+
+        for (var index = 0; index < 20; index++)
+        {
+            var encounter = planner.CreateEncounterPlan(plan, index + 1, now.AddSeconds(index * 10));
+            var hostile = Assert.Single(encounter.Participants, slot => slot.Side == CombatSide.Hostile);
+            Assert.Equal(focusedId, hostile.SourceEntityId);
+        }
+        Assert.Equal(9, plan.Area.Creatures.First().WeightedSpawnRate);
+    }
+
     private static CharacterAction CreateCombatAction(DateTimeOffset nextEncounterAt)
     {
         var characterId = Guid.NewGuid();

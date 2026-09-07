@@ -1,6 +1,6 @@
 # Equipment system contract
 
-Updated: 5 September 2026.
+Updated: 7 September 2026.
 
 This document defines the supported equipment system after the removal of crafting, gathering, tempering, salvaging, and the equipment Forge.
 
@@ -18,6 +18,40 @@ Every equipment instance is a frozen, server-authored item. Its descriptor conta
 
 Reinforcement can increase rank. Consumable blueprints can apply or replace a compatible variant. Both operations require an exact server preview and transactional payment. Quality, rarity, tier and attribute rolls are preserved.
 
+## Armor archetypes and mitigation
+
+Head, Chest, and Legs each offer Heavy, Medium, and Light armor. Their base stat
+budget weights are identical across those slots:
+
+| Armor | Power | Max Health | Armor rating | Resistance rating |
+| --- | ---: | ---: | ---: | ---: |
+| Heavy | 0% | 40% | 30% | 30% |
+| Medium | 35% | 25% | 20% | 20% |
+| Light | 70% | 10% | 10% | 10% |
+
+Only these four attributes occur in base armor profiles. Heavy omits Power.
+Variant stat profiles and set bonuses remain additional contributions and may
+grant other attributes. Medium is the exact budget midpoint of Heavy and Light.
+
+Cloth bases, archetypes, named equipment, and variant compatibility entries are
+removed from active content. There are nine armor bases and 28 plain equipment
+options per released tier. Canonical Balanced builds use Medium; former Cloth
+reference builds use Light.
+
+Armor and Resistance share one rating conversion and budget cost. For either
+attribute, normalize the combined rating by the character's progression-tier
+scale, then calculate `reductionPercent = 80 * normalizedRating / (55 + normalizedRating)`.
+Both approach an 80% reduction cap and give 40% reduction at 55 normalized rating.
+Both cost 0.9 budget per raw rating point, so equal base budget weights buy equal
+physical and magical mitigation. Penetration continues to act in rating space.
+
+This update changes active content and runtime rating conversion; it does not
+rewrite existing frozen equipment descriptors or delete player-owned instances.
+Existing rating values use the shared mitigation curve at runtime. No database
+migration or environment setting is included. Deploy the updated API content and
+shared Domain assembly together; converting existing Cloth to Light and
+rebalancing old item rolls requires a separate data migration.
+
 ## Acquisition
 
 Supported sources are starter grants, random area drops, random dungeon drops, and explicitly authored rewards from other current systems. All grants must reference a valid equipment definition and must be evaluated by the canonical equipment evaluator before persistence.
@@ -30,7 +64,19 @@ Equipment quality has five values: Crude, Standard, Fine, Exceptional, and Maste
 
 Every randomly dropped equipment item also receives one frozen attribute-budget roll from 0.95 through 1.05. The same multiplier is applied to the item's whole stat budget before constrained attribute allocation, preserving the authored stat profile and hard caps. Quality and the roll are persisted with the item and are never rerolled by binding, transfer, or Reinforcement. Authored starter and administrative grants default to Standard and 1.00 unless explicitly specified.
 
-The current rarity weights are Common/Uncommon/Rare/Epic/Unique/Legendary/Legacy = 70%/20%/7%/2%/0.8%/0.18%/0.02% in areas and 40%/30%/18%/8%/3%/0.9%/0.1% in dungeons. These weights are data-driven regional content rather than hard-coded evaluator behavior.
+Areas drop Common / Uncommon / Rare equipment at conditional rarity weights of 85% / 12% / 3%; higher rarities have zero weight. The equipment chance is 1/864 per victorious encounter (approximately 0.1157407%). At the configured 10-second combat cadence, 24 hours of continuous victories provides 8,640 rolls and an expected 10 pieces: 8.5 Common, 1.2 Uncommon, and 0.3 Rare. Drops are random; losses and time spent outside area combat reduce this average.
+
+Dungeons have a 50% base equipment chance per completion, plus 5 percentage points per shared dungeon mastery level (100% at mastery 10). The roll uses mastery captured at run start. Mastery XP and levels are shared across Novice, Veteran, and Champion; mastery 10 requires 75,000 cumulative XP. See [shared dungeon mastery](../../LL/docs/shared-dungeon-mastery.md) for the curve and existing-progress migration. When equipment drops, the dungeon's difficulty selects its rarity distribution in every released region:
+
+| Difficulty | 84% | 14% | 2% |
+| --- | --- | --- | --- |
+| Novice (Grade I) | Uncommon | Rare | Epic |
+| Veteran (Grade II) | Rare | Epic | Unique |
+| Champion (Grade III) | Epic | Unique | Legendary |
+
+These are conditional rarity probabilities, not additional equipment drop rolls. Common and Legacy are excluded from dungeon equipment rolls. Tier, rank, quality, attribute-roll distribution, and variant odds are unchanged. Already awarded equipment and saved pending rewards retain their existing rarity.
+
+The regional `equipment-ordinary.v1.json` content defines the three distributions under `dungeonEquipment.rarities.novice`, `.veteran`, and `.champion`. All three must be present and valid. The area profiles define their rate and rarity weights under `areaEquipment`. Ship updated content with the API and frontend. These drop-rate, rarity, and reward-display changes need no new database migration or environment setting; shared mastery still requires the separate migration described above.
 
 Every released combat area may independently drop a random dungeon Sigil for its region at 1/4,320 per victorious encounter. Sigil drops do not require selecting a family or unlocking its dungeon first.
 
@@ -42,9 +88,18 @@ New equipment allocates its entire base budget first. A variant adds 15% of that
 
 One family blueprint plus 100 Cinders per equipment tier applies that variant with guaranteed success. It works across tiers and rarities on explicitly compatible archetypes, including already-styled items. One variant is active at a time; replacement removes the previous variant's contribution and set identity, with no refund. Applying the current variant is rejected. Conversion preserves ownership restrictions and all reinforcement investment. Dropped and converted variants with equal rarity, tier, quality, roll and rank have equal stats.
 
-Completed dungeons independently award a themed Blueprint Choice with a 25% chance. After three consecutive completions without one, the fourth guarantees a choice. Counters are per character and dungeon family, shared across that family's grades, and reset on award rather than container opening. Completion retries do not add progress or duplicate rewards. Failed or unfinished runs do not count. Players see sources and remaining completions in the equipment panel. Later-region pools also contain earlier variant families.
+Completed dungeons independently award one blueprint directly with a 25% chance. After three consecutive completions without one, the fourth guarantees a blueprint. Counters are per character and dungeon family, shared across that family's grades, and reset on award. Completion retries do not add progress or duplicate rewards. Failed or unfinished runs do not count. Dungeon Run Rewards lists each possible blueprint and its current chance, including the next-clear guarantee. Mastery increases equipment chance only.
 
-Blueprints and choice containers are stackable and tradable. Conversion is performed from the equipment panel with a stat preview, cost, set replacement notice and explicit confirmation. Prices, source families, and probabilities are authored in `equipment-blueprints.v1.json`.
+| Dungeon | Direct blueprint drops | Chance per blueprint before guarantee |
+| --- | --- | --- |
+| Goblin Mines | Fury or Phoenix | 12.5% each |
+| Forgotten Catacombs | Arcane or Endurance | 12.5% each |
+| Tangled Cave | Execution only | 25% |
+| Great Tree | Spirit only | 25% |
+
+Two-blueprint pools choose uniformly when a blueprint drops; they never award both. Blueprint drop pools (`blueprintStyleIds`) are separate from equipment variant pools (`styleIds`). Later-region equipment can still roll earlier variants. Gravebound and Raidforged blueprint/style definitions and consumables are retired. Other existing consumable blueprints remain usable.
+
+Blueprints are stackable and tradable. Conversion is performed from the equipment panel with a stat preview, cost, set replacement notice and explicit confirmation. Prices, source families, and probabilities are authored in `equipment-blueprints.v1.json`. The `DirectDungeonBlueprintDrops` migration converts old dungeon choice stacks and pending rewards, removes retired consumables, and refunds their unfilled Bazaar buy orders. Completed trade history is retained.
 
 Frozen items predating additive variants retain their recorded stats and allocation mode when loaded, transferred or reinforced. Applying a different variant explicitly switches them to additive evaluation. Existing items are not silently rewritten.
 

@@ -8,6 +8,7 @@ public static class EquipmentKeys
     public const string DungeonCompletionSource = "model-e:dungeon-completion";
     public const string AdministrationGrantIdentity = "model-e:admin-compensation";
     public const string StarterLoadoutObjective = "ModelEStarterLoadoutEquipped";
+    public const string StarterClaimObjective = "ModelEStarterEquipmentClaimed";
     public const string AreaDropObjective = "ModelEAreaDropEquipped";
     public const string TargetSelectionSettlementReason = "ModelEOrdinarySelectionSettlement";
     public const string ReferenceCharacterIdentity = "model-e-reference-character-v1";

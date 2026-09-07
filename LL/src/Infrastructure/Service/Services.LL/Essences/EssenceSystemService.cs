@@ -617,7 +617,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             resonanceByCreature[monsterId] = resonance;
         }
 
-        if (loadEssenceFocus && !_essenceFocusCache.ContainsKey(characterId))
+        if (!_essenceFocusCache.ContainsKey(characterId))
         {
             _essenceFocusCache[characterId] = _creatureArchiveService is null
                 ? null
@@ -668,30 +668,37 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }
         resonanceByCreature[monsterId] = resonance;
 
-        var maximumDropChanceBonus =
-            CreatureResonanceConstants.MaximumDropChanceBonus * modifiers.ResonanceCapMultiplier;
-        var bonus = Math.Min(
-            maximumDropChanceBonus,
-            resonance.ResonanceValue * CreatureResonanceConstants.DropChanceBonusPerPoint);
+        var maximumRelativeDropChanceBonus =
+            CreatureResonanceConstants.MaximumRelativeDropChanceBonus * modifiers.ResonanceCapMultiplier;
+        var relativeResonanceBonus = Math.Min(
+            maximumRelativeDropChanceBonus,
+            resonance.ResonanceValue * CreatureResonanceConstants.RelativeDropChanceBonusPerPoint);
+        var isFocused = await isEssenceFocusAsync(monsterId, cancellationToken);
         var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
-        if (factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0 &&
-            await isEssenceFocusAsync(monsterId, cancellationToken))
+        if (isFocused)
         {
             relativeDropRateBps += factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps);
         }
 
         var pityProgressionGainBps = factors.Get(BonusKind.EssencePityProgressionGainBps);
         var effective = Math.Clamp(
-            (lootTable.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps) *
+            (lootTable.BaseDropChance * (isFocused ? EssenceFocusRules.BaseDropChanceMultiplier : 1) *
+                (1 + relativeResonanceBonus)).ApplyPositiveBps(relativeDropRateBps) *
             modifiers.DropChanceMultiplier,
             0,
             1);
         var dropped = _random.NextDouble() < effective;
         var essenceDefinitionId = dropped ? RollEssenceDefinitionId(lootTable) : null;
-        if (dropped) resonance.ResonanceValue = 0;
-        else resonance.ResonanceValue +=
-            CreatureResonanceConstants.GainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps) *
-            modifiers.PityProgressionMultiplier;
+        if (dropped)
+        {
+            resonance.ResonanceValue = 0;
+        }
+        else
+        {
+            resonance.ResonanceValue +=
+                CreatureResonanceConstants.GainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps) *
+                modifiers.PityProgressionMultiplier;
+        }
 
         resonance.UpdatedAt = DateTimeOffset.UtcNow;
         return new(dropped, essenceDefinitionId, effective, resonance.ResonanceValue);

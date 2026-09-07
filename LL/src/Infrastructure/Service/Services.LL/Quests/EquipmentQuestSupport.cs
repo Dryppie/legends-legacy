@@ -6,6 +6,13 @@ namespace Services.LL.Quests;
 public sealed class EquipmentQuestSupport(IQuestEquipmentRewardRepository equipment, IStarterEquipmentRepository starters,
     IPlainEquipmentRepository plain) : IEquipmentQuestSupport
 {
+    public async Task<bool> HasStarterClaimAsync(Guid characterId, string? starterKind, CancellationToken ct)
+    {
+        if (!Enum.TryParse<StarterEquipmentGrantKind>(starterKind, out var kind) || !Enum.IsDefined(kind))
+            throw new InvalidOperationException("Unknown starter equipment grant kind.");
+        return await starters.GetGrantAsync(characterId, kind, ct) is not null;
+    }
+
     public async Task<bool> IsEquippedAsync(Guid characterId, string objectiveType, string? starterKind, CancellationToken ct)
     {
         var equipped = (await equipment.GetEquippedAsync(characterId, ct)).Where(x =>

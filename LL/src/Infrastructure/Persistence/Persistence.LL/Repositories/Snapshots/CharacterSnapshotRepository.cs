@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Items;
 using Application.Common.Interfaces;
 using Domain.Models.Essences;
 using Domain.Models.Snapshots;
@@ -8,10 +9,12 @@ namespace Persistence.LL.Repositories.Snapshots;
 public class CharacterSnapshotRepository : ICharacterSnapshotRepository
 {
     private readonly IDbContext _dbContext;
+    private readonly IEquipmentLoadoutService? _equipmentLoadouts;
 
-    public CharacterSnapshotRepository(IDbContext dbContext)
+    public CharacterSnapshotRepository(IDbContext dbContext, IEquipmentLoadoutService? equipmentLoadouts = null)
     {
         _dbContext = dbContext;
+        _equipmentLoadouts = equipmentLoadouts;
     }
 
     public Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct = default) =>
@@ -37,7 +40,8 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
         var baseAttrs = character.BaseAttributes
             .Select(a => new EntityAttributeSnapshot { CharacterSnapshotId = snapshotId, AttributeType = a.AttributeType, Value = a.Value });
 
-        var equipment = character.EquipmentSlots
+        var equipmentSlots = _equipmentLoadouts is null ? null : await _equipmentLoadouts.ResolveAsync(characterId, activity, ct);
+        var equipment = (equipmentSlots ?? character.EquipmentSlots)
             .Where(s => s.EquipmentInstanceId.HasValue && s.EquipmentInstance != null)
             .Select(s => EquipmentSnapshot.From(s.EquipmentSlotType, s.EquipmentInstance!))
             .OrderBy(e => e.Slot)

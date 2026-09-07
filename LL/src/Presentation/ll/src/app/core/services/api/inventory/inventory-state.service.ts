@@ -18,8 +18,12 @@ import { DomainVersionTracker } from '../../real-time/game-realtime/domain-versi
 import { BusinessGrantDeduper } from '../../real-time/game-realtime/realtime-deduplication';
 import { AuthService } from '../auth/auth.service';
 
+import { EquipmentInventorySort, SortDirection } from '../../../../shared/utils/equipment/inventory-sort';
+
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
+  equipmentSort: EquipmentInventorySort = 'Gear Power';
+  equipmentSortDirection: SortDirection = 'desc';
   /* ---------- writable signals ---------- */
   private readonly _items = signal<InventoryItem[]>([]);
   private readonly _equippedItemFavoriteState = signal<

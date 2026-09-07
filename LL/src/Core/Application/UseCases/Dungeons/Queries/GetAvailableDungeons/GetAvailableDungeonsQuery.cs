@@ -9,6 +9,7 @@ using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Rewards;
 using MediatR;
 
@@ -35,6 +36,7 @@ public sealed class DungeonHubFactory
     private readonly IDungeonMasteryService _mastery;
     private readonly IDungeonSigilAssemblySettingsProvider _sigilAssemblySettings;
     private readonly IMapper _mapper;
+    private readonly CombatAcquisitionCatalog _equipment;
 
     public DungeonHubFactory(
         IDungeonDefinitions dungeonDefinitions,
@@ -44,7 +46,8 @@ public sealed class DungeonHubFactory
         IDungeonRunService dungeonRuns,
         IDungeonMasteryService mastery,
         IDungeonSigilAssemblySettingsProvider sigilAssemblySettings,
-        IMapper mapper)
+        IMapper mapper,
+        CombatAcquisitionCatalog equipment)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonAccess = dungeonAccess;
@@ -54,6 +57,7 @@ public sealed class DungeonHubFactory
         _mastery = mastery;
         _sigilAssemblySettings = sigilAssemblySettings;
         _mapper = mapper;
+        _equipment = equipment;
     }
 
     public async Task<DungeonHubDto> CreateAsync(
@@ -96,7 +100,8 @@ public sealed class DungeonHubFactory
             cancellationToken);
         var rewardsByDungeon = await _previewRewards.GetPossibleCompletionRewardsAsync(
             dungeons,
-            cancellationToken);
+            cancellationToken,
+            characterId);
         var sigilSettings = _sigilAssemblySettings.GetSettings();
 
         foreach (var dungeon in dungeons)
@@ -132,6 +137,8 @@ public sealed class DungeonHubFactory
                 MaxRooms = dungeon.MaxRooms,
                 Record = MapRecord(record),
                 Mastery = mastery is null ? new DungeonMasteryDto() : _mapper.Map<DungeonMasteryDto>(mastery),
+                EquipmentDropChancePercent = _equipment.FindRegion(dungeon.Region)?.DungeonEquipment
+                    .DropChanceAtMastery(mastery?.Level ?? 0) * 100d,
                 Rewards = _mapper.Map<List<DungeonPreviewRewardDto>>(rewardsByDungeon[dungeon.Id]),
             });
         }

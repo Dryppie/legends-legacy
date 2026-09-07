@@ -1,6 +1,6 @@
 # Equipment implementation status
 
-Updated: 5 September 2026.
+Updated: 7 September 2026.
 
 The equipment drop rework is implemented for Shenic and Meran. The equipment Forge has been removed in full. Crafting, gathering, queued tempering, equipment salvaging, Tempered Scrap, reusable Blueprint rewards, and Alpha compatibility paths are also absent from the supported player flow.
 
@@ -9,14 +9,14 @@ The equipment drop rework is implemented for Shenic and Meran. The equipment For
 | Area | Status |
 | --- | --- |
 | Starter equipment | Implemented with authored choices and durable per-character grants. |
-| Ordinary combat drops | Implemented for every released Shenic and Meran combat area at 0.03% per victory, with any archetype, region tier, rank 0, seven rarity outcomes, five qualities, and a frozen ±5% attribute-budget roll. |
-| Dungeon equipment drops | Implemented at 20% per completion, with any archetype, region tier, rank 1, improved higher-rarity odds, the same quality distribution, and a frozen ±5% attribute-budget roll. |
+| Ordinary combat drops | Implemented for every released Shenic and Meran combat area at 1/864 (~0.11574%) per victory, averaging 10 pieces per 24 hours of continuous wins at the 10-second cadence, with any archetype, region tier, rank 0, Common/Uncommon/Rare at 85%/12%/3%, five qualities, and a frozen ±5% attribute-budget roll. |
+| Dungeon equipment drops | Implemented at 50% per completion plus 5 percentage points per shared mastery level (up to 100%), with any archetype, region tier, rank 1, the same quality distribution, and a frozen ±5% attribute-budget roll. Conditional rarity weights are 84%/14%/2%: Uncommon/Rare/Epic for Novice, Rare/Epic/Unique for Veteran, and Epic/Unique/Legendary for Champion. |
 | Regional Sigil drops | Implemented in every released combat area at 1/4,320 per victory, selecting uniformly among that region's dungeon families. |
 | Equipment recovery | Removed with the Forge-era recovery surface. |
 | Equipment evaluation | Implemented from authored item identity, tier, rarity, quality, rank, frozen attribute roll, native/active style, behavior, set, and stat weights. |
 | Ownership and transfer | Implemented for personal binding, unbound marketplace transfer, guild donation, and guild loans. |
 | Equipment upgrades | Reinforcement and dismantling use the equipment panel. Consumable blueprints apply or replace compatible variants through a transactional preview/confirmation flow. The old Forge and permanent style learning remain removed. |
-| Variant drops and rewards | Areas and dungeons explicitly roll base versus themed variant gear. Dungeon blueprint choices have an independent roll and a fourth-completion guarantee. The Soul Archive quest includes an introductory Fury blueprint. |
+| Variant drops and rewards | Areas and dungeons explicitly roll base versus themed variant gear. Dungeons directly award one named blueprint at 25%, guaranteed after three misses. Tangled Cave supplies Execution only; Great Tree supplies Spirit only. Run Rewards shows each blueprint and its current chance. Gravebound/Raidforged definitions are removed. The Soul Archive quest includes an introductory Fury blueprint. |
 | Player UI | Equipment panel includes held blueprints, source/guarantee progress, exact conversion stats, payment and set-replacement confirmation. Forge route/page and Scrap mode remain removed. |
 | LiveOps | Forge investment/style/salvage details removed from support snapshots. Further LiveOps work remains deferred. |
 

@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Rewards;
 
 namespace Services.LL.Dungeons;
@@ -11,13 +12,19 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
 {
     private readonly IItemBaseRepository _itemBases;
     private readonly IRewardTableDefinitionProvider _rewardTables;
+    private readonly EquipmentBlueprintCatalog? _blueprints;
+    private readonly IEquipmentBlueprintRepository? _blueprintProgress;
 
     public DungeonPreviewRewardService(
         IItemBaseRepository itemBases,
-        IRewardTableDefinitionProvider rewardTables)
+        IRewardTableDefinitionProvider rewardTables,
+        EquipmentBlueprintCatalog? blueprints = null,
+        IEquipmentBlueprintRepository? blueprintProgress = null)
     {
         _itemBases = itemBases;
         _rewardTables = rewardTables;
+        _blueprints = blueprints;
+        _blueprintProgress = blueprintProgress;
     }
 
     public async Task<IReadOnlyList<DungeonPreviewReward>> GetPossibleCompletionRewardsAsync(
@@ -32,7 +39,8 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
 
     public async Task<IReadOnlyDictionary<string, IReadOnlyList<DungeonPreviewReward>>> GetPossibleCompletionRewardsAsync(
         IReadOnlyCollection<DungeonDefinition> dungeons,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Guid? characterId = null)
     {
         if (dungeons.Count == 0)
         {
@@ -40,9 +48,14 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
                 StringComparer.OrdinalIgnoreCase);
         }
 
+        var progress = characterId.HasValue && _blueprints is not null
+            ? await (_blueprintProgress ?? throw new InvalidOperationException("Blueprint persistence is required."))
+                .GetProgressAsync(characterId.Value, cancellationToken)
+            : [];
+        var missesByFamily = progress.ToDictionary(x => x.FamilyId, x => x.Misses, StringComparer.Ordinal);
         var entriesByDungeon = dungeons.ToDictionary(
             dungeon => dungeon.Id,
-            BuildPreviewEntries,
+            dungeon => BuildPreviewEntries(dungeon, missesByFamily),
             StringComparer.OrdinalIgnoreCase);
         var itemIds = entriesByDungeon.Values
             .SelectMany(entries => entries)
@@ -57,7 +70,8 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
             StringComparer.OrdinalIgnoreCase);
     }
 
-    private List<DungeonPreviewRewardEntry> BuildPreviewEntries(DungeonDefinition dungeon)
+    private List<DungeonPreviewRewardEntry> BuildPreviewEntries(
+        DungeonDefinition dungeon, IReadOnlyDictionary<string, int> missesByFamily)
     {
         var rewards = new List<DungeonPreviewRewardEntry>();
 
@@ -79,6 +93,23 @@ public sealed class DungeonPreviewRewardService : IDungeonPreviewRewardService
 
         rewards.AddRange(MapMonsterCoreRewards(dungeon));
         rewards.AddRange(MapFirstCompletionRewards(dungeon));
+
+        var source = _blueprints?.FindSource(dungeon.SigilItemId);
+        if (source is not null)
+        {
+            var misses = missesByFamily.GetValueOrDefault(source.FamilyId);
+            var chance = _blueprints!.DropChanceAfterMisses(misses);
+            var drops = _blueprints.DropsFor(source);
+            var clearsUntilGuaranteed = Math.Max(1, _blueprints.GuaranteeCompletions - misses);
+            var notice = clearsUntilGuaranteed == 1
+                ? "A blueprint is guaranteed on this clear."
+                : $"Blueprint chance: {chance * 100:0.##}%. Guaranteed within {clearsUntilGuaranteed} clears.";
+            if (drops.Count > 1) notice += " One of the listed blueprints drops, chosen at random.";
+            foreach (var blueprint in drops)
+                rewards.Add(new DungeonPreviewRewardEntry(blueprint.ItemId, "Blueprints", notice,
+                    1, 1, chance * 100d / drops.Count,
+                    chance < 1 || drops.Count > 1, (1d - chance / drops.Count) * 100d));
+        }
 
         return rewards;
     }

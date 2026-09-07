@@ -1,0 +1,175 @@
+<section
+  class="ll-panel equipment-loadouts bg-texture bg-auto"
+  aria-label="Equipment loadouts"
+>
+  <div class="loadout-toolbar">
+    <div class="loadout-title">
+      <h2 class="ll-heading">Loadout</h2>
+      <p class="ll-copy whitespace-nowrap">
+        {{ state.loadouts().length }} / 3 saved
+      </p>
+    </div>
+
+    <div
+      class="loadout-tabs ll-scrollbar"
+      role="group"
+      aria-label="Saved equipment loadouts"
+    >
+      <button
+        *ngFor="let loadout of state.loadouts()"
+        type="button"
+        class="loadout-choice"
+        [class.loadout-choice-active]="selectedId() === loadout.id"
+        [attr.aria-pressed]="selectedId() === loadout.id"
+        [disabled]="state.busy() || state.unsavedChanges()"
+        [title]="'Equip ' + loadout.name"
+        (click)="select(loadout.id)"
+      >
+        {{ loadout.name }}
+      </button>
+      <button
+        type="button"
+        class="loadout-choice loadout-new"
+        [class.loadout-choice-active]="!selected()"
+        [attr.aria-pressed]="!selected()"
+        [disabled]="
+          state.busy() || state.unsavedChanges() || state.loadouts().length >= 3
+        "
+        [title]="
+          state.loadouts().length >= 3
+            ? 'All 3 loadouts are saved. Delete one to create another.'
+            : 'Save your currently equipped items as a new loadout'
+        "
+        (click)="newLoadout()"
+      >
+        + New
+      </button>
+    </div>
+
+    <div class="loadout-actions">
+      <label class="ll-field loadout-name-field">
+        <span class="sr-only">Equipment loadout name</span>
+        <input
+          class="ll-input ll-input-compact"
+          maxlength="80"
+          [(ngModel)]="name"
+          [disabled]="state.busy()"
+          placeholder="Loadout name"
+        />
+      </label>
+      <button
+        class="ll-button px-2 py-1 text-xs"
+        type="button"
+        [disabled]="!canSaveName()"
+        (click)="save()"
+      >
+        {{ selected() ? "Save name" : "Create loadout" }}
+      </button>
+      <button
+        class="ll-button px-2 py-1 text-xs"
+        type="button"
+        [disabled]="state.busy() || !selected()"
+        (click)="confirmDelete.set(true)"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <div class="auto-use-row">
+    <span class="auto-use-label">Auto-use for</span>
+    <div
+      class="auto-use-options"
+      role="group"
+      aria-label="Automatically equip for combat activities"
+    >
+      <button
+        *ngFor="let activity of activities"
+        type="button"
+        class="auto-use-option"
+        [class.auto-use-option-active]="
+          selected()?.autoUseActivities?.includes(activity.id)
+        "
+        [attr.aria-pressed]="
+          selected()?.autoUseActivities?.includes(activity.id) ?? false
+        "
+        [disabled]="state.busy() || !selected()"
+        [title]="
+          activityOwner(activity.id)
+            ? 'Currently assigned to ' +
+              activityOwner(activity.id) +
+              '. Select to reassign to this loadout.'
+            : 'Automatically equip this loadout for ' + activity.label
+        "
+        (click)="toggleActivity(activity.id)"
+      >
+        {{ activity.label }}
+        <span
+          *ngIf="activityOwner(activity.id)"
+          class="auto-use-owner"
+          aria-hidden="true"
+          >•</span
+        >
+      </button>
+    </div>
+    <span class="auto-use-note">{{
+      selected()
+        ? state.unsavedChanges()
+          ? "Equipment changes pending"
+          : "Equipment and activities saved automatically"
+        : "Create a loadout from your equipped items"
+    }}</span>
+  </div>
+
+  <div
+    *ngIf="state.unsavedChanges() && !state.pending()"
+    class="loadout-confirmation"
+    role="status"
+  >
+    <span class="text-red-400"
+      >Your equipment changed, but this loadout could not be saved. Retry before
+      switching loadouts.</span
+    >
+    <button
+      class="ll-button px-2 py-1 text-xs"
+      type="button"
+      [disabled]="state.busy()"
+      (click)="state.retrySave()"
+    >
+      Retry saving
+    </button>
+  </div>
+  <div
+    *ngIf="confirmDelete()"
+    class="loadout-confirmation"
+    role="group"
+    aria-label="Confirm loadout deletion"
+  >
+    <span
+      >Delete “{{ selected()?.name }}”? Your equipment stays in your
+      possession.</span
+    >
+    <button
+      class="ll-button border-red-400/50 px-2 py-1 text-xs text-red-400"
+      type="button"
+      [disabled]="state.busy()"
+      (click)="remove()"
+    >
+      Delete loadout
+    </button>
+    <button
+      class="ll-button px-2 py-1 text-xs"
+      type="button"
+      [disabled]="state.busy()"
+      (click)="confirmDelete.set(false)"
+    >
+      Cancel
+    </button>
+  </div>
+  <p *ngIf="state.pending()" class="mt-2 text-xs text-zinc-400" role="status">
+    Updating loadouts…
+  </p>
+  <p *ngIf="state.error()" class="mt-2 text-xs text-red-400" role="alert">
+    {{ state.error() }}
+  </p>
+</section>

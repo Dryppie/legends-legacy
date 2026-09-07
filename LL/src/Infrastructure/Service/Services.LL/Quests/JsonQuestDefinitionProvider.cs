@@ -19,6 +19,7 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "CompatibleEssenceLoadout",
         "EquipmentEquipped",
         EquipmentKeys.StarterLoadoutObjective,
+        EquipmentKeys.StarterClaimObjective,
         EquipmentKeys.AreaDropObjective,
         "CharacterLevelReached",
         "ColosseumBattleStarted",
@@ -137,10 +138,10 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                     $"Quest '{definition.Id}' has unsupported objective mode '{definition.ObjectiveMode}'.");
             }
 
-            foreach (var objective in definition.Objectives.Where(x => x.Type is EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.AreaDropObjective))
+            foreach (var objective in definition.Objectives.Where(x => x.Type is EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.StarterClaimObjective or EquipmentKeys.AreaDropObjective))
             {
                 if (objective.RequiredAmount != 1 ||
-                    objective.Type == EquipmentKeys.StarterLoadoutObjective &&
+                    (objective.Type is EquipmentKeys.StarterLoadoutObjective or EquipmentKeys.StarterClaimObjective) &&
                     objective.Filters.StarterEquipmentKind != "FirstWeapon")
                     throw new InvalidOperationException($"Quest '{definition.Id}' has an invalid Equipment progression objective.");
             }

@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, effect, untracked } from '@angular/core';
-import { finalize, Observable, of, tap } from 'rxjs';
+import { finalize, Observable, of, Subject, tap } from 'rxjs';
 import {
   EquipmentSlot,
   EquipmentSlotType,
@@ -18,11 +18,14 @@ export class EquipmentStateService {
   private readonly _equipmentSlots = signal<EquipmentSlot[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  readonly loadoutPending = signal(false);
+  private readonly equipmentChanges = new Subject<void>();
+  readonly equipmentChanges$ = this.equipmentChanges.asObservable();
   private resetVersion = 0;
   private loadEpoch = 0;
 
   readonly equipmentSlots = computed(() => this._equipmentSlots());
-  readonly loading = computed(() => this._loading());
+  readonly loading = computed(() => this._loading() || this.loadoutPending());
   readonly error = computed(() => this._error());
   readonly isEmpty = computed(() =>
     this._equipmentSlots().every((slot) => !slot.equipmentInstance),
@@ -41,17 +44,19 @@ export class EquipmentStateService {
     );
     this.load();
 
-    effect(
-      () => {
-        if (this.eventBus.logout()) {
-          untracked(() => this.reset());
-        }
-      },
-    );
+    effect(() => {
+      if (this.eventBus.logout()) {
+        untracked(() => this.reset());
+      }
+    });
   }
 
   load(force = false): void {
     this.synchronize(force).subscribe({ error: () => undefined });
+  }
+
+  refresh(): Observable<unknown> {
+    return this.synchronize(true);
   }
 
   private synchronize(force = false): Observable<unknown> {
@@ -94,6 +99,7 @@ export class EquipmentStateService {
     this.applySlots([]);
     this._loading.set(false);
     this._error.set(null);
+    this.loadoutPending.set(false);
   }
 
   setSlots(slots: EquipmentSlot[]): void {
@@ -120,32 +126,56 @@ export class EquipmentStateService {
     equipmentInstance: EquipmentInstance,
     slotType: EquipmentSlotType,
   ): void {
+    if (this.loading()) return;
+    const session = this.eventBus.logout();
     this._loading.set(true);
     this._error.set(null);
 
     this.equipmentService
       .equipEquipment(equipmentInstance, slotType)
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (session === this.eventBus.logout()) this._loading.set(false);
+        }),
+      )
       .subscribe({
-        next: (response) => this.applyEquipmentChange(response),
-        error: (err) =>
-          this._error.set(
-            err.errorMessage ?? err.message ?? 'Failed to equip item.',
-          ),
+        next: (response) => {
+          if (session !== this.eventBus.logout()) return;
+          this.applyEquipmentChange(response);
+          this.equipmentChanges.next();
+        },
+        error: (err) => {
+          if (session === this.eventBus.logout())
+            this._error.set(
+              err.errorMessage ?? err.message ?? 'Failed to equip item.',
+            );
+        },
       });
   }
 
   unequip(slotType: EquipmentSlotType): void {
+    if (this.loading()) return;
+    const session = this.eventBus.logout();
     this._loading.set(true);
     this._error.set(null);
 
     this.equipmentService
       .unequipEquipment(slotType)
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (session === this.eventBus.logout()) this._loading.set(false);
+        }),
+      )
       .subscribe({
-        next: (response) => this.applyEquipmentChange(response),
-        error: (err) =>
-          this._error.set(err.message ?? 'Failed to unequip item.'),
+        next: (response) => {
+          if (session !== this.eventBus.logout()) return;
+          this.applyEquipmentChange(response);
+          this.equipmentChanges.next();
+        },
+        error: (err) => {
+          if (session === this.eventBus.logout())
+            this._error.set(err.message ?? 'Failed to unequip item.');
+        },
       });
   }
 

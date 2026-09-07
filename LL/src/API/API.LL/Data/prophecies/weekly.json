@@ -80,11 +80,11 @@
       "id": "weekly.survival",
       "title": "The Oracle Saw You Fall. She Also Saw You Rise.",
       "flavorText": "The omen is not the fall. It is what follows.",
-      "objectiveText": "Register a meaningful defeat, then win {target} qualifying encounters this week.",
+      "objectiveText": "Win {target} qualifying encounters this week.",
       "scope": "Weekly",
       "category": "Survival",
       "difficulty": "Epic",
-      "objectiveType": "MeaningfulDefeatThenWins",
+      "objectiveType": "WinEncounters",
       "rewardProfileId": "Weekly.Epic",
       "weight": 45,
       "allowedSlots": [

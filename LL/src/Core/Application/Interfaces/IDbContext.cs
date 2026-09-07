@@ -1,3 +1,4 @@
+using Domain.Models.Items.Equipments.Loadouts;
 using Domain.Models.Attributes;
 using Domain.Models.Administration;
 using Domain.Models.Achievements;
@@ -97,6 +98,8 @@ public interface IDbContext
     DbSet<EquipmentSlot> EquipmentSlots { get; }
     DbSet<EssenceItemBase> EssenceItems { get; }
     DbSet<PlayerEssence> PlayerEssences { get; }
+    DbSet<EquipmentLoadout> EquipmentLoadouts { get; }
+    DbSet<EquipmentLoadoutSlot> EquipmentLoadoutSlots { get; }
     DbSet<EssenceLoadout> EssenceLoadouts { get; }
     DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots { get; }
     DbSet<CreatureResonance> CreatureResonances { get; }

@@ -60,16 +60,6 @@
       "styleId": "blueprint_hive",
       "name": "Hive",
       "itemId": "item.blueprint_hive"
-    },
-    {
-      "styleId": "blueprint_raidforged",
-      "name": "Raidforged",
-      "itemId": "item.blueprint_raidforged"
-    },
-    {
-      "styleId": "blueprint_gravebound",
-      "name": "Gravebound",
-      "itemId": "item.blueprint_gravebound"
     }
   ],
   "sources": [
@@ -77,8 +67,11 @@
       "familyId": "goblin_mines",
       "name": "Goblin Mines",
       "region": 1,
-      "selectionItemId": "item.blueprint_choice.goblin_mines",
       "styleIds": [
+        "blueprint_fury",
+        "blueprint_phoenix"
+      ],
+      "blueprintStyleIds": [
         "blueprint_fury",
         "blueprint_phoenix"
       ]
@@ -87,40 +80,44 @@
       "familyId": "forgotten_catacombs",
       "name": "Forgotten Catacombs",
       "region": 1,
-      "selectionItemId": "item.blueprint_choice.forgotten_catacombs",
       "styleIds": [
         "blueprint_arcane",
-        "blueprint_endurance",
-        "blueprint_gravebound"
+        "blueprint_endurance"
+      ],
+      "blueprintStyleIds": [
+        "blueprint_arcane",
+        "blueprint_endurance"
       ]
     },
     {
       "familyId": "tangled_cave",
       "name": "Tangled Cave",
       "region": 2,
-      "selectionItemId": "item.blueprint_choice.tangled_cave",
       "styleIds": [
         "blueprint_execution",
         "blueprint_venom",
         "blueprint_hive",
-        "blueprint_raidforged",
         "blueprint_fury",
         "blueprint_phoenix"
+      ],
+      "blueprintStyleIds": [
+        "blueprint_execution"
       ]
     },
     {
       "familyId": "great_tree",
       "name": "Great Tree",
       "region": 2,
-      "selectionItemId": "item.blueprint_choice.great_tree",
       "styleIds": [
         "blueprint_spirit",
         "blueprint_warden",
         "blueprint_primal",
         "blueprint_aegis",
         "blueprint_arcane",
-        "blueprint_endurance",
-        "blueprint_gravebound"
+        "blueprint_endurance"
+      ],
+      "blueprintStyleIds": [
+        "blueprint_spirit"
       ]
     }
   ]

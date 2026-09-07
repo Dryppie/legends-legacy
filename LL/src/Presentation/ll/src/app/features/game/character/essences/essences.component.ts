@@ -592,9 +592,13 @@ export class EssencesComponent implements OnInit {
     this.essenceState.favorite(essence);
   }
 
-  public spendDust(essence: PlayerEssenceDto): void {
+  public spendDust(essence: PlayerEssenceDto, max = false): void {
     if (!this.canSpendDust(essence)) return;
-    this.essenceState.spendDust(essence);
+    this.essenceState.spendDust(essence, max);
+  }
+
+  public maxDustLevels(essence: PlayerEssenceDto): number {
+    return Math.max(0, Math.min(this.essenceDustHeld(), essence.levelCap - essence.level));
   }
 
   public canSpendDust(essence: PlayerEssenceDto): boolean {

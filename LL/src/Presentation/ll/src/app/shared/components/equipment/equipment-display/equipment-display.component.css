@@ -46,7 +46,21 @@
 }
 
 .equipment-detail-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-top: 0.75rem;
+  font-size: var(--ll-text-xs);
+}
+
+.equipment-detail-row > :first-child {
+  min-width: 0;
+}
+
+.equipment-detail-row > :last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .equipment-inline-delta {

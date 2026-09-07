@@ -492,6 +492,20 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.canSaveDraft()).toBeFalse();
   });
 
+  for (const [dust, expected] of [[25, 25], [100, 30], [0, 0]]) {
+    it('caps Max upgrading with ' + dust + ' dust at available levels and balance', () => {
+      essences.getArchive.and.returnValue(of({ essences: [], essenceDust: dust }));
+      service.refresh(true);
+      const request = new Subject<VersionedMutationResult<EssenceMutationResponseDto>>();
+      essences.spendDust.and.returnValue(request.asObservable());
+      service.spendDust({ id: 'essence-1', level: 30, levelCap: 60 } as PlayerEssenceDto, true);
+      if (expected > 0) {
+        expect(essences.spendDust).toHaveBeenCalledOnceWith('essence-1', expected);
+        request.complete();
+      } else expect(essences.spendDust).not.toHaveBeenCalled();
+    });
+  }
+
   it('allows only one pending Essence Dust request', () => {
     const request = new Subject<
       VersionedMutationResult<EssenceMutationResponseDto>

@@ -421,7 +421,6 @@ export class AuthService {
       a.cinders === b.cinders &&
       a.soulstones === b.soulstones &&
       a.fateEcho === b.fateEcho &&
-      a.sigilFragments === b.sigilFragments &&
       a.guildFavor === b.guildFavor &&
       a.arenaRating === b.arenaRating &&
       this.isSameEquippedTitle(a.equippedTitle, b.equippedTitle)

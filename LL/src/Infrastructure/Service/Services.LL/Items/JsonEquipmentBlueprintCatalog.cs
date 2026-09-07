@@ -14,8 +14,8 @@ public static class JsonEquipmentBlueprintCatalog
         var root = Path.GetDirectoryName(Path.GetDirectoryName(path))!;
         using var items = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "items", "items.json")));
         var ids = items.RootElement.EnumerateArray().Select(x => x.GetProperty("id").GetString()).ToHashSet(StringComparer.Ordinal);
-        if (catalog.Blueprints.Select(x => x.ItemId).Concat(catalog.Sources.Select(x => x.SelectionItemId)).Any(x => !ids.Contains(x)))
-            throw new InvalidOperationException("A blueprint or choice container has no item definition.");
+        if (catalog.Blueprints.Select(x => x.ItemId).Any(x => !ids.Contains(x)))
+            throw new InvalidOperationException("A blueprint has no item definition.");
         using var dungeons = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "dungeons", "dungeons.json")));
         foreach (var source in catalog.Sources)
             if (!dungeons.RootElement.GetProperty("families").EnumerateArray().Any(x =>

@@ -204,16 +204,12 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         var build = services.Factory.CreateBuild(CanonicalPartyProfile.Balanced, rung);
         var projected = ProjectAttributes(build);
 
-        Assert.InRange(projected[AttributeType.Armor], 35f, 37f);
-        Assert.InRange(projected[AttributeType.Resistance], 31f, 33f);
-        Assert.InRange(
-            Math.Abs(projected[AttributeType.Armor] - projected[AttributeType.Resistance]),
-            0f,
-            5f);
+        Assert.InRange(projected[AttributeType.Armor], 0.01f, AttributeCombatRules.TypedMitigationCapPercent);
+        Assert.Equal(projected[AttributeType.Armor], projected[AttributeType.Resistance], precision: 3);
         Assert.Equal(
             [
-                "plain.cloth_cowl",
-                "plain.light_leggings",
+                "plain.medium_greaves",
+                "plain.medium_helm",
                 "plain.medium_mail"
             ],
             build.Equipment

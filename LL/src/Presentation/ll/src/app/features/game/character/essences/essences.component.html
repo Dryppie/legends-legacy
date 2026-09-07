@@ -523,6 +523,15 @@
               >
                 {{ dustActionLabel(essence) }}
               </button>
+              <button
+                type="button"
+                class="ll-button soul-action-button"
+                [disabled]="!canSpendDust(essence)"
+                [attr.title]="'Spend ' + maxDustLevels(essence) + ' dust for ' + maxDustLevels(essence) + ' levels'"
+                (click)="spendDust(essence, true)"
+              >
+                Max (+{{ maxDustLevels(essence) }})
+              </button>
             </footer>
           </div>
         </section>
@@ -897,18 +906,17 @@
                 else noEssenceFocus
               "
             >
-              {{ focusedCreature.name }} increases the value of focused monster
-              Essence drop bonuses.
+              {{ focusedCreature.name }} has 3× the base Essence drop chance and
+              appears 20% more often in its combat areas.
             </ng-container>
             <ng-template #noEssenceFocus>
               Select a recorded creature with a known Essence source.
             </ng-template>
           </p>
           <p class="mt-2 max-w-3xl text-xs text-zinc-500">
-            Focus marks one creature as your current Essence target. Bonuses
-            that mention focused monsters only affect Essence drops from this
-            creature. After choosing a target, you must wait 8 hours before
-            choosing a different one.
+            Focus triples the creature's base Essence drop chance before other
+            bonuses. Its area appearance chance increases by 20% of its usual
+            chance. You can change focus every 8 hours.
           </p>
           <p class="mt-2 text-xs text-primary">
             {{ essenceFocusStatusText() }}

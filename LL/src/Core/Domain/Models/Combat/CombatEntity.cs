@@ -35,6 +35,8 @@ public class CombatEntity
     public EquipmentInstance? OffHandEquipment { get; set; }
     public List<PlayerEssence> EquippedEssences { get; set; } = [];
     public bool HasEquippedEssenceSnapshot { get; set; }
+    public bool HasEquipmentSnapshot { get; set; }
+    public bool IsPlayerCharacter { get; set; }
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
@@ -46,6 +48,7 @@ public class CombatEntity
 
     public CombatEntity(Entity entity)
     {
+        IsPlayerCharacter = entity is Domain.Models.Entities.Characters.Character;
         OriginalId = entity.Id;
         Id = entity.Id.ToString();
         Name = entity.Name;

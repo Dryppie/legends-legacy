@@ -68,15 +68,15 @@ public sealed class CanonicalEquipmentBuildFactory
         new Dictionary<CanonicalPartyProfile, IReadOnlyDictionary<EquipmentType, string>>
         {
             [CanonicalPartyProfile.Balanced] = Archetypes(
-                "plain.medium_mail", "plain.greatsword", "plain.cloth_cowl", "plain.light_leggings"),
+                "plain.medium_mail", "plain.greatsword", "plain.medium_helm", "plain.medium_greaves"),
             [CanonicalPartyProfile.Offense] = Archetypes(
                 "plain.light_vest", "plain.gauntlets", "plain.light_hood", "plain.light_leggings"),
             [CanonicalPartyProfile.Sustain] = Archetypes(
-                "plain.cloth_robe", "plain.staff", "plain.cloth_cowl", "plain.cloth_pants"),
+                "plain.light_vest", "plain.staff", "plain.light_hood", "plain.light_leggings"),
             [CanonicalPartyProfile.Defensive] = Archetypes(
                 "plain.heavy_breastplate", "plain.maul", "plain.heavy_helm", "plain.heavy_legplates"),
             [CanonicalPartyProfile.Area] = Archetypes(
-                "plain.cloth_robe", "plain.staff", "plain.cloth_cowl", "plain.cloth_pants")
+                "plain.light_vest", "plain.staff", "plain.light_hood", "plain.light_leggings")
         };
 
     private static readonly IReadOnlyDictionary<CanonicalPartyProfile, string[]> ProfileEssenceIds =

@@ -1,4 +1,5 @@
 using Domain.Models.Combat;
+using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -6,6 +7,7 @@ using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Regions.Areas;
 using Application.Interfaces.Services.LL.Items;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Items;
@@ -22,20 +24,23 @@ public sealed class CombatAcquisitionTests
         var catalog = Catalog();
 
         Assert.Equal(2, catalog.Pools.Count);
-        Assert.Equal(31, catalog.DropDefinitions(EquipmentRarity.Common).Count);
+        Assert.Equal(28, catalog.DropDefinitions(EquipmentRarity.Common).Count);
         Assert.All(Enum.GetValues<EquipmentRarity>(), rarity =>
-            Assert.True(catalog.DropDefinitions(rarity).Count >= 31));
+            Assert.True(catalog.DropDefinitions(rarity).Count >= 28));
         Assert.Equal(catalog.Equipment.Evaluator.Definitions.Count,
             Enum.GetValues<EquipmentRarity>().Sum(rarity => catalog.DropDefinitions(rarity).Count));
         Assert.All(catalog.Pools, rules =>
         {
-            Assert.Equal(0.0003, rules.AreaEquipment.DropChance);
+            Assert.Equal(10d / 8640d, rules.AreaEquipment.DropChance, 15);
             Assert.Equal(0, rules.AreaEquipment.Rank);
-            Assert.Equal(0.2, rules.DungeonEquipment.DropChance);
+            Assert.Equal(0.5, rules.DungeonEquipment.DropChance);
             Assert.Equal(1, rules.DungeonEquipment.Rank);
             Assert.Equal(1d / 4320d, rules.SigilDropChance, 15);
             Assert.Equal(1d, rules.AreaEquipment.Rarities.Entries().Sum(x => x.Weight), 12);
-            Assert.Equal(1d, rules.DungeonEquipment.Rarities.Entries().Sum(x => x.Weight), 12);
+            Assert.All(Enum.GetValues<DungeonGrade>(), grade =>
+                Assert.Equal(1d, rules.DungeonEquipment.Rarities.ForGrade(grade).Entries().Sum(x => x.Weight), 12));
+            Assert.Equal(new[] { 0.85, 0.12, 0.03, 0, 0, 0, 0 },
+                rules.AreaEquipment.Rarities.Entries().Select(x => x.Weight));
             Assert.Equal(new[] { 0d, 0.35d, 0.45d, 0.16d, 0.04d },
                 rules.AreaEquipment.Qualities.Entries().Select(x => x.Weight));
             Assert.Equal(new[] { 0d, 0.35d, 0.45d, 0.16d, 0.04d },
@@ -44,9 +49,57 @@ public sealed class CombatAcquisitionTests
     }
 
     [Fact]
-    public async Task Every_victory_can_drop_any_legacy_item_at_the_regions_tier_and_area_rank()
+    public void Area_drop_rate_averages_ten_items_per_day_at_the_configured_combat_cadence()
     {
-        var fixture = Fixture.Create(areaChance: 1, areaRarity: EquipmentRarity.Legacy,
+        using var settings = JsonDocument.Parse(File.ReadAllText(
+            Path.Combine(ContentRoot(), "../../appsettings.json")),
+            new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+        var cadence = settings.RootElement.GetProperty("Combat").GetProperty("IdleProgression")
+            .GetProperty("EncounterCadenceSeconds").GetInt32();
+        var dailyVictories = TimeSpan.FromDays(1).TotalSeconds / cadence;
+
+        Assert.All(Catalog().Pools, rules => Assert.Equal(10d, dailyVictories * rules.AreaEquipment.DropChance, 12));
+    }
+
+    [Fact]
+    public void Area_rarity_rolls_are_common_uncommon_and_rare_at_85_12_and_3_percent()
+    {
+        foreach (var rules in Catalog().Pools)
+        {
+            var weights = rules.AreaEquipment.Rarities;
+            Assert.Equal(EquipmentRarity.Common, weights.Roll(0));
+            Assert.Equal(EquipmentRarity.Common, weights.Roll(Math.BitDecrement(0.85)));
+            Assert.Equal(EquipmentRarity.Uncommon, weights.Roll(0.85));
+            Assert.Equal(EquipmentRarity.Uncommon, weights.Roll(Math.BitDecrement(0.97)));
+            Assert.Equal(EquipmentRarity.Rare, weights.Roll(0.97));
+            Assert.Equal(EquipmentRarity.Rare, weights.Roll(Math.BitDecrement(1d)));
+        }
+    }
+
+    [Theory]
+    [InlineData("region_01_area_01")]
+    [InlineData("region_02_area_01")]
+    public async Task Area_rewards_cannot_roll_outside_the_configured_rarity_range(string areaId)
+    {
+        var fixture = Fixture.Create(Guid.Parse("70eb3747-fac5-4609-b391-e799434fbc4c"), areaChance: 1);
+        var result = await fixture.Processor.ProcessAsync(fixture.Facts(areaId, 1024), default);
+        var rarities = result.Equipment.Select(item =>
+            Assert.IsType<EquipmentInstance>(item.ItemInstance).ProgressionData!.Rarity).ToArray();
+
+        Assert.Equal(1024, rarities.Length);
+        Assert.All(rarities, rarity => Assert.Contains(rarity,
+            new[] { EquipmentRarity.Common, EquipmentRarity.Uncommon, EquipmentRarity.Rare }));
+        Assert.Equal(3, rarities.Distinct().Count());
+        Assert.Contains(result.Equipment, item =>
+            ((EquipmentInstance)item.ItemInstance).ProgressionData!.State.ActiveStyleId is not null);
+        Assert.Contains(result.Equipment, item =>
+            ((EquipmentInstance)item.ItemInstance).ProgressionData!.State.ActiveStyleId is null);
+    }
+
+    [Fact]
+    public async Task Area_victories_award_configured_rarity_quality_tier_and_rank()
+    {
+        var fixture = Fixture.Create(areaChance: 1, areaRarity: EquipmentRarity.Rare,
             areaQuality: ItemQuality.Masterpiece);
         var result = await fixture.Processor.ProcessAsync(fixture.Facts("region_02_area_04", 64), CancellationToken.None);
 
@@ -54,7 +107,7 @@ public sealed class CombatAcquisitionTests
         Assert.All(result.Equipment, item =>
         {
             var equipment = Assert.IsType<EquipmentInstance>(item.ItemInstance).ProgressionData!;
-            Assert.Equal(EquipmentRarity.Legacy, equipment.Rarity);
+            Assert.Equal(EquipmentRarity.Rare, equipment.Rarity);
             Assert.Equal(ItemQuality.Masterpiece, equipment.Quality);
             Assert.InRange(equipment.AttributeRollMultiplier, 0.95d, 1.05d);
             Assert.Equal(ItemQuality.Masterpiece, Assert.IsType<EquipmentInstance>(item.ItemInstance).Quality);
@@ -62,7 +115,6 @@ public sealed class CombatAcquisitionTests
             Assert.Equal(0, equipment.State.Rank);
             Assert.Equal(EquipmentAwardKind.RandomDiscovery, equipment.State.Provenance.Kind);
             Assert.Equal(EquipmentOwnershipKind.UnboundPersonal, equipment.State.Ownership.Kind);
-            Assert.Null(equipment.State.ActiveStyleId);
         });
         Assert.Equal(64, fixture.Entitlements.Awards.Count);
     }
@@ -116,6 +168,50 @@ public sealed class CombatAcquisitionTests
         Assert.Empty(fixture.Entitlements.Awards);
     }
 
+    [Theory]
+    [InlineData(DungeonGrade.GradeI, EquipmentRarity.Uncommon, EquipmentRarity.Rare, EquipmentRarity.Epic)]
+    [InlineData(DungeonGrade.GradeII, EquipmentRarity.Rare, EquipmentRarity.Epic, EquipmentRarity.Unique)]
+    [InlineData(DungeonGrade.GradeIII, EquipmentRarity.Epic, EquipmentRarity.Unique, EquipmentRarity.Legendary)]
+    public void Dungeon_rarity_ranges_and_roll_boundaries_match_each_difficulty_in_every_region(
+        DungeonGrade grade, EquipmentRarity first, EquipmentRarity second, EquipmentRarity third)
+    {
+        foreach (var rules in Catalog().Pools)
+        {
+            var weights = rules.DungeonEquipment.Rarities.ForGrade(grade);
+            Assert.Equal(new[] { (first, 0.84), (second, 0.14), (third, 0.02) },
+                weights.Entries().Where(entry => entry.Weight > 0));
+            Assert.Equal(first, weights.Roll(0));
+            Assert.Equal(first, weights.Roll(Math.BitDecrement(0.84)));
+            Assert.Equal(second, weights.Roll(0.84));
+            Assert.Equal(second, weights.Roll(Math.BitDecrement(0.98)));
+            Assert.Equal(third, weights.Roll(0.98));
+            Assert.Equal(third, weights.Roll(Math.BitDecrement(1d)));
+        }
+    }
+
+    [Fact]
+    public void Rarity_rounding_cannot_award_a_zero_weight_rarity()
+    {
+        var weights = new EquipmentRarityWeights(0, 0.84, 0.14, 0.019999999999, 0, 0, 0);
+        weights.Validate();
+        Assert.Equal(EquipmentRarity.Epic, weights.Roll(Math.BitDecrement(1d)));
+    }
+
+    [Fact]
+    public void Dungeon_rarity_content_must_define_every_difficulty()
+    {
+        var catalog = Catalog();
+        var pools = catalog.Pools.Select(rules => rules with
+        {
+            DungeonEquipment = rules.DungeonEquipment with
+            {
+                Rarities = rules.DungeonEquipment.Rarities with { Champion = null! }
+            }
+        });
+        Assert.Throws<ArgumentException>(() => new CombatAcquisitionCatalog(catalog.Equipment, pools));
+        Assert.Throws<ArgumentOutOfRangeException>(() => catalog.Pools[0].DungeonEquipment.Rarities.ForGrade((DungeonGrade)4));
+    }
+
     private static string ItemJson(InventoryItem item) =>
         Assert.IsType<EquipmentInstance>(item.ItemInstance).ProgressionData!.Serialize();
 
@@ -163,15 +259,17 @@ public sealed class CombatAcquisitionTests
                 });
 
             Entitlements = new EntitlementRepository();
+            var blueprints = JsonEquipmentBlueprintCatalog.Load(
+                Path.Combine(ContentRoot(), "equipment-blueprints.v1.json"), catalog.Equipment);
             Processor = new CombatAcquisitionRewardProcessor(catalog, new ItemBases(itemBases),
-                Options.Create(new EquipmentProgressionOptions { OrdinaryAcquisitionEnabled = enabled }), Entitlements);
+                Options.Create(new EquipmentProgressionOptions { OrdinaryAcquisitionEnabled = enabled }), Entitlements, blueprints);
         }
 
         public Guid CharacterId { get; }
         public CombatAcquisitionRewardProcessor Processor { get; }
         public EntitlementRepository Entitlements { get; }
 
-        public static Fixture Create(Guid? characterId = null, double areaChance = 0.0003,
+        public static Fixture Create(Guid? characterId = null, double? areaChance = null,
             EquipmentRarity? areaRarity = null, double sigilChance = 1d / 4320d, bool enabled = true,
             ItemQuality? areaQuality = null)
         {
@@ -180,7 +278,7 @@ public sealed class CombatAcquisitionTests
             {
                 AreaEquipment = rules.AreaEquipment with
                 {
-                    DropChance = areaChance,
+                    DropChance = areaChance ?? rules.AreaEquipment.DropChance,
                     Rarities = areaRarity.HasValue ? Only(areaRarity.Value) : rules.AreaEquipment.Rarities,
                     Qualities = areaQuality.HasValue ? Only(areaQuality.Value) : rules.AreaEquipment.Qualities
                 },
