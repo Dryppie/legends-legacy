@@ -166,19 +166,48 @@ public sealed class CharacterExperienceProgressionTests
         Assert.Equal(200, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.MaxHealth).Value);
     }
 
-    [Fact]
-    public void Dungeon_rewards_scale_by_tier_and_room_type_independently_from_creatures()
+    [Theory]
+    [InlineData(1, 1, RoomType.Combat, 1_000, 100)]
+    [InlineData(1, 2, RoomType.Combat, 1_400, 140)]
+    [InlineData(1, 3, RoomType.Combat, 1_960, 196)]
+    [InlineData(2, 1, RoomType.Combat, 2_200, 100)]
+    [InlineData(2, 2, RoomType.Combat, 3_080, 140)]
+    [InlineData(2, 3, RoomType.Combat, 4_312, 196)]
+    [InlineData(1, 2, RoomType.MiniBoss, 2_100, 210)]
+    [InlineData(2, 2, RoomType.MiniBoss, 4_620, 210)]
+    [InlineData(1, 3, RoomType.Boss, 4_900, 490)]
+    [InlineData(2, 3, RoomType.Boss, 10_780, 490)]
+    [InlineData(3, 1, RoomType.Combat, 4_840, 100)]
+    [InlineData(4, 3, RoomType.Boss, 52_175, 490)]
+    public void Dungeon_xp_scales_by_progression_tier_difficulty_and_room_while_cinders_ignore_progression_tier(
+        int progressionTier, int difficulty, RoomType roomType, int expectedExperience, int expectedCinders)
     {
         var provider = new JsonDungeonRewardBalanceProvider(
             CreateConfiguration(),
             FindApiRoot(),
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        Assert.Equal((2_500, 100), ToTuple(provider.GetEncounterReward(1, RoomType.Combat)));
-        Assert.Equal((5_250, 210), ToTuple(provider.GetEncounterReward(2, RoomType.MiniBoss)));
-        Assert.Equal((12_250, 490), ToTuple(provider.GetEncounterReward(3, RoomType.Boss)));
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
-            provider.GetEncounterReward(0, RoomType.Combat));
+        Assert.Equal((expectedExperience, expectedCinders),
+            ToTuple(provider.GetEncounterReward(progressionTier, difficulty, roomType)));
+    }
+
+    [Theory]
+    [InlineData(0, 1, "progressionTier")]
+    [InlineData(-1, 1, "progressionTier")]
+    [InlineData(1, 0, "difficulty")]
+    [InlineData(1, 4, "difficulty")]
+    public void Dungeon_rewards_reject_invalid_progression_tiers_and_difficulties(
+        int progressionTier, int difficulty, string parameterName)
+    {
+        var provider = new JsonDungeonRewardBalanceProvider(
+            CreateConfiguration(),
+            FindApiRoot(),
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        var error = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            provider.GetEncounterReward(progressionTier, difficulty, RoomType.Combat));
+
+        Assert.Equal(parameterName, error.ParamName);
     }
 
     private static (int Experience, int Cinders) ToTuple(

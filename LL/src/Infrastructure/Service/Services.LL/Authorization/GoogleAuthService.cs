@@ -1,6 +1,7 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.UseCases.Users;
 using Domain.Models.Users;
 
 namespace Services.LL.Authorization;
@@ -99,14 +100,10 @@ public sealed class GoogleAuthService : IGoogleAuthService
 
     private async Task<GoogleRegistration?> RegisterGoogleUserAsync(string email, CancellationToken cancellationToken)
     {
-        var baseUsername = CreateGoogleUsername(email);
-
         for (var attempt = 0; attempt < 10; attempt++)
         {
-            var suffix = attempt == 0 ? string.Empty : Random.Shared.Next(1000, 10000).ToString();
-            var maxBaseLength = 26 - suffix.Length;
-            var usernameBase = baseUsername[..Math.Min(baseUsername.Length, maxBaseLength)];
-            var characterName = $"{usernameBase}{suffix}";
+            // Public identity must never be derived from Google email or profile details.
+            var characterName = GuestCharacterNameGenerator.Generate();
 
             if (await _characterService.IsCharacterNameTakenAsync(characterName, null, cancellationToken))
             {
@@ -127,17 +124,6 @@ public sealed class GoogleAuthService : IGoogleAuthService
         }
 
         return null;
-    }
-
-    private static string CreateGoogleUsername(string email)
-    {
-        var prefix = email.Split('@')[0].Trim();
-        if (string.IsNullOrWhiteSpace(prefix))
-        {
-            prefix = "Player";
-        }
-
-        return prefix.Length <= 26 ? prefix : prefix[..26];
     }
 
     private readonly record struct GoogleRegistration(AppUser User, string CharacterName);

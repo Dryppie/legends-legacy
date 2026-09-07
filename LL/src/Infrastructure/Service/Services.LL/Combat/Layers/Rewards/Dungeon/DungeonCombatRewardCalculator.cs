@@ -50,7 +50,7 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
             cancellationToken);
 
         var combatExperienceGainBps = factors.Get(BonusKind.CombatExperienceGainBps);
-        var baseReward = _rewardBalance.GetEncounterReward(facts.DungeonTier, facts.RoomType);
+        var baseReward = _rewardBalance.GetEncounterReward(facts.ProgressionTier, facts.Difficulty, facts.RoomType);
 
         var encounterOutcomes = new List<DungeonEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();

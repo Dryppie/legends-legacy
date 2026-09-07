@@ -89,7 +89,11 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             ? null
             : _dungeonDefinitions.GetByKey(run.DungeonDefinitionId);
 
-        var monsterLootModifiers = dungeon?.MonsterLootModifiers ?? [];
+        if (dungeon is null)
+            throw new InvalidOperationException(
+                $"Dungeon definition for run '{context.DungeonRunId}' could not be resolved.");
+
+        var monsterLootModifiers = dungeon.MonsterLootModifiers;
         var room = run?.Rooms.FirstOrDefault(x =>
             x.RoomIndex == context.OrchestrationRequest.CurrentRoomIndex);
         var roomType = room?.Type ?? RoomType.Unknown;
@@ -105,8 +109,8 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             DungeonRunId: context.DungeonRunId,
             CharacterId: context.CharacterId,
             CurrentRoomIndex: context.OrchestrationRequest.CurrentRoomIndex,
-            DungeonTier: dungeon?.Tier ?? throw new InvalidOperationException(
-                $"Dungeon definition for run '{context.DungeonRunId}' could not be resolved."),
+            ProgressionTier: dungeon.Region,
+            Difficulty: dungeon.Tier,
             RoomType: roomType,
             FeaturedEssenceMonsterDefinitionId: featuredEssenceMonsterDefinitionId,
             MonsterLootModifiers: monsterLootModifiers,

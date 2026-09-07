@@ -22,18 +22,24 @@ public sealed class JsonDungeonRewardBalanceProvider : IDungeonRewardBalanceProv
         Validate(_settings);
     }
 
-    public DungeonEncounterReward GetEncounterReward(int dungeonTier, RoomType roomType)
+    public DungeonEncounterReward GetEncounterReward(int progressionTier, int difficulty, RoomType roomType)
     {
-        if (dungeonTier <= 0)
+        if (progressionTier <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(dungeonTier), "Dungeon tier must be greater than zero.");
+            throw new ArgumentOutOfRangeException(nameof(progressionTier), "Dungeon progression tier must be greater than zero.");
         }
 
-        var tierMultiplier = Pow(_settings.TierMultiplier, dungeonTier - 1);
+        if (difficulty is < 1 or > 3)
+        {
+            throw new ArgumentOutOfRangeException(nameof(difficulty), "Dungeon difficulty must be between 1 and 3.");
+        }
+
+        var difficultyMultiplier = Pow(_settings.DifficultyMultiplier, difficulty - 1);
+        var progressionMultiplier = Pow(_settings.ProgressionTierExperienceMultiplier, progressionTier - 1);
         var roomMultiplier = GetRoomMultiplier(roomType);
         return new DungeonEncounterReward(
-            Scale(_settings.BaseExperiencePerEncounter, tierMultiplier, roomMultiplier),
-            Scale(_settings.BaseCindersPerEncounter, tierMultiplier, roomMultiplier));
+            Scale(_settings.BaseExperiencePerEncounter, checked(difficultyMultiplier * progressionMultiplier), roomMultiplier),
+            Scale(_settings.BaseCindersPerEncounter, difficultyMultiplier, roomMultiplier));
     }
 
     private decimal GetRoomMultiplier(RoomType roomType)
@@ -55,9 +61,9 @@ public sealed class JsonDungeonRewardBalanceProvider : IDungeonRewardBalanceProv
         return result;
     }
 
-    private static int Scale(int baseValue, decimal tierMultiplier, decimal roomMultiplier)
+    private static int Scale(int baseValue, decimal rewardMultiplier, decimal roomMultiplier)
     {
-        var value = checked(baseValue * tierMultiplier * roomMultiplier);
+        var value = checked(baseValue * rewardMultiplier * roomMultiplier);
         if (value > int.MaxValue)
         {
             throw new OverflowException("Dungeon encounter reward exceeds the supported range.");
@@ -70,7 +76,8 @@ public sealed class JsonDungeonRewardBalanceProvider : IDungeonRewardBalanceProv
     {
         if (settings.BaseExperiencePerEncounter <= 0 ||
             settings.BaseCindersPerEncounter <= 0 ||
-            settings.TierMultiplier < 1 ||
+            settings.DifficultyMultiplier < 1 ||
+            settings.ProgressionTierExperienceMultiplier < 1 ||
             !settings.RoomMultipliers.TryGetValue(RoomType.Unknown.ToString(), out var fallback) ||
             fallback <= 0 ||
             settings.RoomMultipliers.Any(x => x.Value <= 0))
@@ -88,7 +95,8 @@ public sealed class JsonDungeonRewardBalanceProvider : IDungeonRewardBalanceProv
     {
         public int BaseExperiencePerEncounter { get; set; }
         public int BaseCindersPerEncounter { get; set; }
-        public decimal TierMultiplier { get; set; }
+        public decimal DifficultyMultiplier { get; set; }
+        public decimal ProgressionTierExperienceMultiplier { get; set; }
         public Dictionary<string, decimal> RoomMultipliers { get; set; } =
             new(StringComparer.OrdinalIgnoreCase);
     }

@@ -17,16 +17,22 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Rewards;
+using Domain.Models.Snapshots;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Persistence.LL;
 using Persistence.LL.Repositories.Items;
+using Services.LL.Combat.Layers.Orchestration.Dungeon;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Dungeons;
 using Services.LL.Inventories;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
+using System.Text.Json;
 
 namespace EssenceSystem.Tests;
 
@@ -251,7 +257,8 @@ public sealed class DungeonEssenceRewardTests
             DungeonRunId: Guid.NewGuid(),
             CharacterId: Guid.NewGuid(),
             CurrentRoomIndex: 1,
-            DungeonTier: 1,
+            ProgressionTier: 1,
+            Difficulty: 1,
             RoomType: roomType,
             FeaturedEssenceMonsterDefinitionId: "monster.specter",
             MonsterLootModifiers: new Dictionary<ItemType, double>(),
@@ -272,6 +279,60 @@ public sealed class DungeonEssenceRewardTests
             essenceResonance.Rolls,
             roll => roll.Modifiers is null);
         Assert.Equal(supportingMonster.Id, Assert.Single(standardRoll.Creatures).Id);
+    }
+
+    [Theory]
+    [InlineData(1, 3, RoomType.Combat, 2_156, 196)]
+    [InlineData(2, 1, RoomType.Combat, 2_420, 100)]
+    [InlineData(2, 3, RoomType.Boss, 11_858, 490)]
+    public async Task Dungeon_combat_uses_region_as_progression_tier_and_awards_bonus_xp_only_for_victories(
+        int region, int difficulty, RoomType roomType, int expectedExperience, int expectedCinders)
+    {
+        var run = new DungeonRun
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = Guid.NewGuid(),
+            DungeonDefinitionId = "test_dungeon",
+            Rooms = [new RoomInstance { RoomIndex = 1, Type = roomType }]
+        };
+        var definition = new DungeonDefinition
+        {
+            Id = run.DungeonDefinitionId,
+            Region = region,
+            Tier = difficulty
+        };
+        var request = new DungeonCombatOrchestrationRequest(
+            run.Id, run.CharacterId, new CharacterSnapshot(), 1, difficulty, region, []);
+        var details = new DungeonCombatOrchestrationDetails(run.Id, DungeonProgressionStatus.RoomCleared);
+        var context = new DungeonCombatOutcomeContext(request,
+            new CombatOrchestrationResult(Guid.NewGuid(), CombatMode.Dungeon, [], details), details);
+        // Metadata-only fact building does not need an entity lookup.
+        var builder = new DungeonCombatRewardFactBuilder(
+            null!, new EmptyDungeonRunRepository(run), new SingleDungeonDefinitions(definition));
+        var facts = await builder.BuildAsync(context, CancellationToken.None);
+
+        Assert.Equal(region, facts.ProgressionTier);
+        Assert.Equal(difficulty, facts.Difficulty);
+        Assert.Equal(roomType, facts.RoomType);
+
+        var victory = new DungeonEncounterRewardFacts(Guid.NewGuid(), BattleOutcome.Victory, [], [],
+            new CombatResult { Outcome = BattleOutcome.Victory });
+        var defeat = new DungeonEncounterRewardFacts(Guid.NewGuid(), BattleOutcome.Defeat, [], [],
+            new CombatResult { Outcome = BattleOutcome.Defeat });
+        var calculator = new DungeonCombatRewardCalculator(
+            new EmptyBonusService(combatExperienceGainBps: 1_000),
+            new EmptyLootService(),
+            new JsonDungeonRewardBalanceProvider(new ConfigurationBuilder().Build(),
+                TestContentPaths.FindApiRoot(), new JsonSerializerOptions(JsonSerializerDefaults.Web)),
+            new CapturingEssenceResonanceService());
+
+        var outcome = await calculator.CalculateAsync(facts with { Encounters = [victory, defeat] }, CancellationToken.None);
+
+        Assert.Equal(expectedExperience, outcome.TotalExperience);
+        Assert.Equal(expectedCinders, outcome.TotalCinders);
+        Assert.Equal(expectedExperience, outcome.EncounterOutcomes[0].ExperienceGained);
+        Assert.Equal(0, outcome.EncounterOutcomes[1].ExperienceGained);
+        Assert.Equal(0, outcome.EncounterOutcomes[1].CindersGained);
     }
 
     private static LLDbContext CreateDb()
@@ -443,14 +504,14 @@ public sealed class DungeonEssenceRewardTests
             Roll(table.Id, context);
     }
 
-    private sealed class EmptyBonusService : IBonusService
+    private sealed class EmptyBonusService(double combatExperienceGainBps = 0) : IBonusService
     {
         public ValueTask<IReadOnlyDictionary<BonusKind, double>> GetAggregatedAsync(
             Guid characterId,
             DateTimeOffset now,
             CancellationToken ct = default) =>
             ValueTask.FromResult<IReadOnlyDictionary<BonusKind, double>>(
-                new Dictionary<BonusKind, double>());
+                new Dictionary<BonusKind, double> { [BonusKind.CombatExperienceGainBps] = combatExperienceGainBps });
     }
 
     private sealed class EmptyLootService : ILootService
@@ -476,7 +537,7 @@ public sealed class DungeonEssenceRewardTests
 
     private sealed class EmptyDungeonRewardBalanceProvider : IDungeonRewardBalanceProvider
     {
-        public DungeonEncounterReward GetEncounterReward(int dungeonTier, RoomType roomType) => new(0, 0);
+        public DungeonEncounterReward GetEncounterReward(int progressionTier, int difficulty, RoomType roomType) => new(0, 0);
     }
 
     private sealed class CapturingEssenceResonanceService : IEssenceResonanceService

@@ -32,6 +32,13 @@ public static class GuestCharacterNameGenerator
         var animal = animals[Random.Shared.Next(animals.Length)];
         var suffix = suffixes[Random.Shared.Next(suffixes.Length)];
 
-        return $"{prefix}{animal}{suffix}_{Random.Shared.Next(1000, 9999)}";
+        var number = $"_{Random.Shared.Next(1000, 9999)}";
+        var name = $"{prefix}{animal}{suffix}";
+        if (name.Length + number.Length > AuthInputValidator.MaxCharacterNameLength)
+        {
+            name = $"{prefix}{animal}";
+        }
+
+        return $"{name}{number}";
     }
 }

@@ -1,8 +1,9 @@
 {
   "dungeonRewards": {
-    "baseExperiencePerEncounter": 2500,
+    "baseExperiencePerEncounter": 1000,
     "baseCindersPerEncounter": 100,
-    "tierMultiplier": 1.4,
+    "difficultyMultiplier": 1.4,
+    "progressionTierExperienceMultiplier": 2.2,
     "roomMultipliers": {
       "Unknown": 1.0,
       "Combat": 1.0,

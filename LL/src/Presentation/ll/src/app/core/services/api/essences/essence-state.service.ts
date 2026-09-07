@@ -84,6 +84,30 @@ export class EssenceStateService {
   readonly loadouts = computed(() => this._loadouts());
   readonly creatureArchive = computed(() => this._creatureArchive());
   readonly codex = computed(() => this._codex());
+  readonly codexBonusSummary = computed(() => {
+    const totals = new Map<string, number>();
+    for (const entry of this._codex()?.entries ?? []) {
+      if (entry.isUnlocked) {
+        totals.set(
+          entry.bonusKind,
+          (totals.get(entry.bonusKind) ?? 0) + entry.bonusValue,
+        );
+      }
+    }
+
+    return [
+      { kind: 'EssenceDropRateRelativeBps', label: 'Essence drop rate' },
+      {
+        kind: 'FocusedMonsterEssenceDropRateRelativeBps',
+        label: 'Extra drop rate against focused creatures',
+      },
+      { kind: 'EssenceExperienceGainBps', label: 'Essence EXP gained' },
+      { kind: 'EssencePityProgressionGainBps', label: 'Resonance gain' },
+    ].map((bonus) => ({
+      ...bonus,
+      percent: (totals.get(bonus.kind) ?? 0) / 100,
+    }));
+  });
   readonly focusedCreature = computed(
     () =>
       this._creatureArchive()?.creatures.find(

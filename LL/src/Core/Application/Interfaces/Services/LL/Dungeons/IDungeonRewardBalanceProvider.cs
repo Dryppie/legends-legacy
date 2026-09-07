@@ -4,7 +4,7 @@ namespace Application.Interfaces.Services.LL.Dungeons;
 
 public interface IDungeonRewardBalanceProvider
 {
-    DungeonEncounterReward GetEncounterReward(int dungeonTier, RoomType roomType);
+    DungeonEncounterReward GetEncounterReward(int progressionTier, int difficulty, RoomType roomType);
 }
 
 public sealed record DungeonEncounterReward(int Experience, int Cinders);

@@ -6,7 +6,7 @@ public sealed record ValidatedAuthRegistration(string CharacterName, string Emai
 
 public static class AuthInputValidator
 {
-    private const int MaxCharacterNameLength = 26;
+    public const int MaxCharacterNameLength = 26;
     private const int MinPasswordLength = 8;
 
     public static bool TryValidateRegistration(

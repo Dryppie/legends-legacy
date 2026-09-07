@@ -18,6 +18,7 @@ import { EssenceItemViewService } from './essence-item-view.service';
 import { EssenceStateService } from './essence-state.service';
 import { EssencesService } from './essences.service';
 import {
+  EssenceCodexEntryDto,
   EssenceLoadoutDto,
   EssenceMutationResponseDto,
   PlayerEssenceDto,
@@ -161,6 +162,54 @@ describe('EssenceStateService loadout drafts', () => {
 
     service = TestBed.inject(EssenceStateService);
     service.refresh();
+  });
+
+  it('keeps every Codex bonus visible at zero with no completed collections', () => {
+    expect(service.codexBonusSummary().map((bonus) => [bonus.kind, bonus.percent]))
+      .toEqual([
+        ['EssenceDropRateRelativeBps', 0],
+        ['FocusedMonsterEssenceDropRateRelativeBps', 0],
+        ['EssenceExperienceGainBps', 0],
+        ['EssencePityProgressionGainBps', 0],
+      ]);
+  });
+
+  it('totals only active Codex bonuses and updates after collection Ascensions', () => {
+    const collection = (
+      bonusKind: string, bonusValue: number, isUnlocked = true,
+    ): EssenceCodexEntryDto => ({
+      id: `collection-${bonusKind}-${bonusValue}`,
+      title: 'Collection', description: '', benefitText: '', category: '',
+      bonusKind, bonusValue, isUnlocked,
+      baseBonusValue: 50, bonusValuePerCollectionAscensionTier: 10,
+      collectionAscensionTier: 0, maxCollectionAscensionTier: 3,
+      current: isUnlocked ? 2 : 1, required: 2, essences: [],
+    });
+    const entries = [
+      collection('EssenceDropRateRelativeBps', 50),
+      collection('EssenceDropRateRelativeBps', 75),
+      collection('EssenceDropRateRelativeBps', 100, false),
+      collection('FocusedMonsterEssenceDropRateRelativeBps', 75),
+      collection('EssenceExperienceGainBps', 100),
+      collection('EssencePityProgressionGainBps', 50, false),
+    ];
+    essences.getCodex.and.returnValue(of({ entries }));
+    service.refresh();
+    expect(service.codexBonusSummary().map((bonus) => bonus.percent))
+      .toEqual([1.25, 0.75, 1, 0]);
+
+    essences.getCodex.and.returnValue(of({ entries: [
+      { ...entries[0], collectionAscensionTier: 3, bonusValue: 80 },
+      ...entries.slice(1),
+    ] }));
+    service.refresh();
+    expect(service.codexBonusSummary().map((bonus) => bonus.percent))
+      .toEqual([1.55, 0.75, 1, 0]);
+
+    essences.getCodex.and.returnValue(of({ entries: [] }));
+    service.refresh();
+    expect(service.codexBonusSummary().map((bonus) => bonus.percent))
+      .toEqual([0, 0, 0, 0]);
   });
 
   it('preserves a dirty loadout draft during a route-entry refresh', () => {

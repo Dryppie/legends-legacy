@@ -43,6 +43,7 @@ import {
   EquipmentSlotType,
 } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import {
+  findEquippedComparison,
   getAllowedEquipmentTypesForSlot,
   getEquipSlotOptions,
   getSlotTypeFromEquipmentType,
@@ -349,7 +350,6 @@ export class InventoryComponent implements OnInit {
   }
 
   selectEquipmentSlot(slot: EquipmentSlot): void {
-    this.mobileItemInspectorOpen.set(false);
     if (this.selectedEquipmentSlot() === slot.equipmentSlotType) {
       this.clearEquipmentSlotFilter();
       return;
@@ -362,6 +362,7 @@ export class InventoryComponent implements OnInit {
         ? this.inventoryItemForEquipment(slot.equipmentInstance)
         : null,
     );
+    this.mobileItemInspectorOpen.set(!!slot.equipmentInstance);
   }
 
   clearEquipmentSlotFilter(): void {
@@ -648,11 +649,17 @@ export class InventoryComponent implements OnInit {
   }
 
   comparisonEquipmentFor(item: InventoryItem): EquipmentInstance | null {
+    const equipment = this.equipmentInstance(item);
+    if (!equipment) return null;
+
     const selectedSlot = this.selectedEquipmentSlot();
     const equipped = selectedSlot
       ? (this.equipmentState?.getSlot(selectedSlot)?.equipmentInstance ??
         this.selectedSlotEquipment())
-      : this.selectedSlotEquipment();
+      : findEquippedComparison(
+          equipment,
+          this.equipmentState?.equipmentSlots() ?? [],
+        );
     return equipped && equipped.id !== item.itemInstance.id ? equipped : null;
   }
 
