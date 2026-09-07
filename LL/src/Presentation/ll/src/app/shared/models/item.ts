@@ -50,6 +50,7 @@ export interface ItemBase {
 }
 
 export interface SelectionCrateMetadata {
+  isRandom?: boolean;
   selectionLabel: string;
   options: SelectionCrateOption[];
 }

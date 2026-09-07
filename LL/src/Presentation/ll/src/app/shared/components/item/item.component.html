@@ -75,7 +75,7 @@
       <span *ngIf="rewardCategory" class="ll-item-chip ll-item-chip-accent">
         {{ rewardCategory }}
       </span>
-      <span *ngIf="rewardSource" class="ll-item-chip">
+      <span *ngIf="rewardSource && rewardCategory !== 'Blueprints'" class="ll-item-chip">
         {{ rewardSource }}
       </span>
     </div>

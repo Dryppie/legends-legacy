@@ -1,6 +1,6 @@
 # Server-wide event quests
 
-> Content update, 3 September 2026: only the expired Defense of Lumo example remains in Data/event-quests. The former crafting/tempering and gathering events were deleted; no schedule was extended. Descriptions of those events below are historical. Further LiveOps work is deferred. See the [current quest flow](../../LEGENDSLEGACY_QUEST_FLOW.md#4-scheduled-server-wide-event-quests).
+> Content update, 7 September 2026: The Great Treasure Hunt is enabled in content alongside the expired Defense of Lumo example. The former crafting/tempering and gathering events remain deleted. See the event schedule and rewards below.
 
 Server-wide event quests are scheduled, content-driven quests where every character in the current Legends Legacy database contributes toward shared objectives. The first implementation deliberately treats one deployed database as one game server. If realms are introduced later, add a `RealmId` to each event quest persistence key and audience.
 
@@ -18,6 +18,22 @@ Server-wide event quests are scheduled, content-driven quests where every charac
 - The quest journal shows active, upcoming, completed, and expired events in a focused Event tab, including the live top-three contributors, the current player's rank, shared progress, and personal milestones.
 
 ## Authoring an event
+
+### The Great Treasure Hunt — 7 September 2026
+
+- Definition: `Data/event-quests/the-great-treasure-hunt.2026-09-07.json`.
+- Contribution window: 7 September 00:00 through 14 September 00:00, Europe/Copenhagen (6 September 22:00 through 13 September 22:00 UTC; end exclusive).
+- Claim deadline: 21 September 00:00 Copenhagen (20 September 22:00 UTC).
+- Global target: find 1,000 equipment items. Equipment entering inventory from combat, dungeon rewards, and raid rewards counts; resources, Essences, trades, shops, compensation, quest rewards, and opened containers do not.
+- Community reward: one Uncommon Equipment Box after global completion, requiring at least one personal contribution.
+- Cumulative personal rewards: 5 items grants one box; 15 items grants 50 Soul Dust; 50 items grants 50 Sigil Fragments.
+- Each box opens through the existing inventory container flow and gives two random Uncommon equipment pieces, Tier 1, Standard quality, rank 0. Pieces are rolled independently and may have the same equipment type. Opening consumes one box.
+
+Equipment discoveries use a durable outbox event and the time the equipment entered inventory. Delayed delivery counts against that original time and is deduplicated. Existing inventory and discoveries made before this code is deployed are not backfilled. The event remains subject to the existing completed-tutorial requirement.
+
+The API and worker must receive the updated content and code, the item catalog must be seeded through the normal release process, and the frontend must be rebuilt for the random-box UI. No new database migration is required. No deployment or shared-database change was performed when authoring this event.
+
+### Definition format
 
 Create a uniquely named JSON file in `LL/src/API/API.LL/Data/event-quests`. Do not reuse an event ID for a later occurrence. Reusing an ID would make the new schedule refer to the old persisted instance and claims.
 

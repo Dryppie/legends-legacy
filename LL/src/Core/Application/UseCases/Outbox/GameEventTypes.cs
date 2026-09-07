@@ -4,6 +4,7 @@ public static class GameEventTypes
 {
     public const string EquipmentChanged = "equipment.changed";
     public const string EquipmentSecured = "equipment.model_e_secured";
+    public const string EquipmentFound = "equipment.found";
     public const string EssenceAbsorbed = "essence.absorbed";
     public const string EssenceLoadoutChanged = "essence.loadout_changed";
     public const string EssenceFocusSet = "essence.focus_set";

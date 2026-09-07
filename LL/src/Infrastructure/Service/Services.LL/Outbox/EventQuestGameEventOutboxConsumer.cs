@@ -18,7 +18,8 @@ public sealed class EventQuestGameEventOutboxConsumer(
     public string Consumer => GameEventOutboxConsumerNames.EventQuests;
 
     public bool CanHandle(string eventType) =>
-        eventType is GameEventTypes.EssenceAbsorbed
+        eventType is GameEventTypes.EquipmentFound
+            or GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
             or GameEventTypes.EssenceFocusSet
             or GameEventTypes.FocusedCreatureEssenceReceived
@@ -56,6 +57,8 @@ public sealed class EventQuestGameEventOutboxConsumer(
         }
         var trigger = message.EventType switch
         {
+            GameEventTypes.EquipmentFound => QuestTrigger.EquipmentFound(
+                Read<EquipmentFoundPayload>(message).Quantity, message.CreatedAt),
             GameEventTypes.EssenceAbsorbed => QuestTrigger.EssenceAbsorbed(
                 Read<EssenceAbsorbedPayload>(message).EssenceDefinitionId),
             GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(

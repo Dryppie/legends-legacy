@@ -1,0 +1,65 @@
+{
+  "id": "event.great_treasure_hunt.2026_09_07",
+  "version": 1,
+  "enabled": true,
+  "title": "The Great Treasure Hunt",
+  "summary": "Find equipment across the realm. Work together to discover 1,000 items and earn rewards for your own discoveries.",
+  "startsAtUtc": "2026-09-06T22:00:00Z",
+  "endsAtUtc": "2026-09-13T22:00:00Z",
+  "claimEndsAtUtc": "2026-09-20T22:00:00Z",
+  "minimumContribution": 1,
+  "sortOrder": 200,
+  "objectives": [
+    {
+      "key": "equipment-found",
+      "description": "Find a total of 1,000 equipment items from combat, dungeons, and raids.",
+      "type": "EquipmentFound",
+      "requiredAmount": 1000
+    }
+  ],
+  "rewards": [
+    {
+      "key": "equipment-box",
+      "type": "Item",
+      "itemBaseId": "item.uncommon_equipment_box",
+      "quantity": 1
+    }
+  ],
+  "personalMilestones": [
+    {
+      "key": "find-5-items",
+      "requiredContribution": 5,
+      "rewards": [
+        {
+          "key": "equipment-box",
+          "type": "Item",
+          "itemBaseId": "item.uncommon_equipment_box",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "find-15-items",
+      "requiredContribution": 15,
+      "rewards": [
+        {
+          "key": "soul-dust",
+          "type": "Item",
+          "itemBaseId": "soul_dust",
+          "quantity": 50
+        }
+      ]
+    },
+    {
+      "key": "find-50-items",
+      "requiredContribution": 50,
+      "rewards": [
+        {
+          "key": "sigil-fragments",
+          "type": "SigilFragments",
+          "quantity": 50
+        }
+      ]
+    }
+  ]
+}

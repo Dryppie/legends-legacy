@@ -10,7 +10,8 @@ public sealed record SelectionContainerDefinition(
     string ItemBaseId,
     string DisplayName,
     string SelectionLabel,
-    IReadOnlyList<SelectionContainerOptionDefinition> Options);
+    IReadOnlyList<SelectionContainerOptionDefinition> Options,
+    RandomEquipmentBoxReward? RandomEquipment = null);
 
 public static class LegacyBlueprintSelectionBoxCatalog
 {
@@ -142,6 +143,7 @@ public static class SelectionContainerCatalog
         ShenicEssenceTokenCatalog.Definitions
             .Append(TutorialArmsChestCatalog.Definition)
             .Append(LegacyBlueprintSelectionBoxCatalog.Definition)
+            .Append(RandomEquipmentBoxCatalog.Uncommon)
             .ToDictionary(definition => definition.ItemBaseId, StringComparer.OrdinalIgnoreCase);
 
     public static SelectionContainerDefinition? Find(string itemBaseId) =>

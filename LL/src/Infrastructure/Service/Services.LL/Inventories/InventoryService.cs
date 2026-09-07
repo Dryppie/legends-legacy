@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Outbox;
+using Application.UseCases.Outbox;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.MarketPlaces;
@@ -7,10 +9,12 @@ namespace Services.LL.Inventories;
 public class InventoryService : IInventoryService
 {
     private readonly IInventoryRepository _inventoryRepository;
+    private readonly IGameEventOutbox? _outbox;
 
-    public InventoryService(IInventoryRepository inventoryRepository)
+    public InventoryService(IInventoryRepository inventoryRepository, IGameEventOutbox? outbox = null)
     {
         _inventoryRepository = inventoryRepository;
+        _outbox = outbox;
     }
 
     public async Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -23,6 +27,7 @@ public class InventoryService : IInventoryService
         CancellationToken cancellationToken)
     {
         await _inventoryRepository.AddItemsToInventory(characterId, loot, acquisitionSource, cancellationToken);
+        await RecordEquipmentFoundAsync(characterId, loot, acquisitionSource, cancellationToken);
     }
 
     public async Task AddItemsToInventory(
@@ -38,6 +43,25 @@ public class InventoryService : IInventoryService
             acquisitionSource,
             correlationId,
             cancellationToken);
+        await RecordEquipmentFoundAsync(characterId, loot, acquisitionSource, cancellationToken);
+    }
+
+    private Task RecordEquipmentFoundAsync(
+        Guid characterId,
+        IReadOnlyCollection<InventoryItem> loot,
+        string acquisitionSource,
+        CancellationToken cancellationToken)
+    {
+        if (_outbox is null || acquisitionSource is not
+            (ItemAcquisitionSources.CombatReward or ItemAcquisitionSources.DungeonReward or ItemAcquisitionSources.RaidReward))
+            return Task.CompletedTask;
+
+        var quantity = loot.Where(item => item.ItemInstance.ItemBase.ItemType == ItemType.Equipment)
+            .Sum(item => Math.Max(0, item.Quantity));
+        return quantity > 0
+            ? _outbox.EnqueueAsync(GameEventTypes.EquipmentFound,
+                new EquipmentFoundPayload(characterId, quantity), characterId, null, cancellationToken)
+            : Task.CompletedTask;
     }
 
     public async Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken)

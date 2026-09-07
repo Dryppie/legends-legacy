@@ -7,6 +7,7 @@ namespace Application.UseCases.Items.Dtos;
 public sealed class SelectionCrateMetadataDto
 {
     public string SelectionLabel { get; init; } = string.Empty;
+    public bool IsRandom { get; init; }
     public IReadOnlyList<SelectionCrateOptionDto> Options { get; init; } = [];
 }
 
@@ -36,6 +37,7 @@ public sealed class SelectionCrateMetadataResolver
         new()
         {
             SelectionLabel = definition.SelectionLabel,
+            IsRandom = definition.RandomEquipment is not null,
             Options = definition.Options
                 .Select(option => new SelectionCrateOptionDto
                 {

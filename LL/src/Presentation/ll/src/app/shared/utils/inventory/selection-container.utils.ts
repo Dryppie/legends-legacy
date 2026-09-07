@@ -5,6 +5,7 @@ export function selectionContainerMetadata(item: ItemBase) {
 }
 
 export function initialSelectionContainerOptionId(item?: ItemBase): string {
+  if (item?.selectionCrate?.isRandom) return 'random';
   if (item?.id.startsWith('item.essence_token.')) return '';
   return item?.selectionCrate?.options[0]?.id ?? '';
 }

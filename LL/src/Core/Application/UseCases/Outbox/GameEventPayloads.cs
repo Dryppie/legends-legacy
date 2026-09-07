@@ -184,3 +184,5 @@ public sealed record InventoryItemsGrantedPayload(
     IReadOnlyList<InventoryItemDto> Items,
     string Source,
     string? Location);
+
+public sealed record EquipmentFoundPayload(Guid CharacterId, int Quantity);

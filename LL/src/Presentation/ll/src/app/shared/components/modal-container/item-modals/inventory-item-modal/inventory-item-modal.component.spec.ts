@@ -94,4 +94,24 @@ inventoryState
 
     expect(component.selectedCrateOptionId()).toBe('flame');
   });
+
+  it('opens random equipment boxes without choosing an item', () => {
+    component.inventoryItem.itemInstance.itemBase.id = 'item.uncommon_equipment_box';
+    component.inventoryItem.itemInstance.itemBase.selectionCrate = {
+      selectionLabel: 'Equipment', isRandom: true, options: [],
+    };
+    inventoryService.openSelectionContainer.and.returnValue(of({
+      data: {
+        consumedItemInstanceId: 'token-instance', grantId: 'box-grant',
+        rewards: [], inventoryItems: [],
+      },
+      domainVersions: { inventory: 1 },
+    }));
+
+    component.ngOnInit();
+    component.openSelectionCrate();
+
+    expect(inventoryService.openSelectionContainer).toHaveBeenCalledOnceWith('token-instance', 'random');
+    expect(inventoryState.applyVersionedInventory).toHaveBeenCalled();
+  });
 });

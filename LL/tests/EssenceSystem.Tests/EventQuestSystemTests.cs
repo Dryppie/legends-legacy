@@ -34,7 +34,7 @@ public sealed partial class EventQuestSystemTests
             apiRoot,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        Assert.Single(provider.GetAll());
+        Assert.Equal(2, provider.GetAll().Count);
         var definition = provider.Get("event.lumo_defense.example");
         Assert.Equal("event.lumo_defense.example", definition.Id);
         Assert.True(definition.Enabled);

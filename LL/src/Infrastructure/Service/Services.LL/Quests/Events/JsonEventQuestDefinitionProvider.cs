@@ -9,6 +9,7 @@ public sealed class JsonEventQuestDefinitionProvider : IEventQuestDefinitionProv
 {
     private static readonly HashSet<string> ObjectiveTypes =
     [
+        "EquipmentFound",
         "CombatEncounterCompleted",
         "EssenceAbsorbed",
         "EssenceFocusSet",

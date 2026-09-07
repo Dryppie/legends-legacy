@@ -802,6 +802,16 @@
     "attributeModifiers": []
   },
   {
+    "id": "item.uncommon_equipment_box",
+    "name": "Uncommon Equipment Box",
+    "description": "Open to receive 2 random Uncommon equipment pieces at Tier 1, with Standard quality and no reinforcement.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "stackable": true,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
     "id": "item.essence_token.lumo_ruins",
     "name": "Lumo Ruins - Essence Token",
     "description": "Use this token from your inventory to choose one of the five Essences found in Lumo Ruins.",

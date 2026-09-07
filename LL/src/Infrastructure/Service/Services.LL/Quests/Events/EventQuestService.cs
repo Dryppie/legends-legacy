@@ -74,6 +74,7 @@ public sealed class EventQuestService(
         var changed = RefreshStatuses(instances, now, announcements);
         var globallyChangedEventIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var personallyChangedEventIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var occurredAt = trigger.OccurredAt ?? now;
         var enabledIds = definitions.GetAll()
             .Where(x => x.Enabled)
             .Select(x => x.Id)
@@ -81,8 +82,8 @@ public sealed class EventQuestService(
 
         foreach (var instance in instances.Where(x =>
                      enabledIds.Contains(x.EventQuestId) &&
-                     now >= x.StartsAtUtc &&
-                     now <= x.EndsAtUtc))
+                     occurredAt >= x.StartsAtUtc &&
+                     occurredAt < x.EndsAtUtc))
         {
             var definition = definitions.Get(instance.EventQuestId, instance.DefinitionVersion);
             var contribution = instance.Contributions.SingleOrDefault(x => x.CharacterId == characterId);
@@ -651,6 +652,7 @@ public sealed class EventQuestService(
         var filters = objective.Filters;
         return objective.Type switch
         {
+            "EquipmentFound" when trigger.Type == "EquipmentFound" => Math.Max(0, trigger.ActionCount),
             "CombatEncounterCompleted" when trigger.Type == "CombatEncounterCompleted" &&
                 Matches(filters.AreaId, trigger.AreaId) => CountCombatEncounters(trigger, filters.RequiresVictory),
             "EssenceAbsorbed" when trigger.Type == "EssenceAbsorbed" &&

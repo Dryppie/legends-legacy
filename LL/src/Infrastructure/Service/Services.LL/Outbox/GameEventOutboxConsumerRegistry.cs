@@ -9,6 +9,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
         new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
         {
             [GameEventTypes.EquipmentChanged] = [GameEventOutboxConsumerNames.Quests],
+            [GameEventTypes.EquipmentFound] = [GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.EssenceAbsorbed] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.EssenceLoadoutChanged] =

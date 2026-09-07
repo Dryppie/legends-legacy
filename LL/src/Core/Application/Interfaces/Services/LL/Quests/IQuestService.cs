@@ -116,8 +116,12 @@ public sealed record QuestTrigger(
     int ActionCount = 1,
     bool HasCompatibleEssenceTrio = false,
     string? CreatureDefinitionId = null,
-    int? WinningEncounterCount = null)
+    int? WinningEncounterCount = null,
+    DateTimeOffset? OccurredAt = null)
 {
+    public static QuestTrigger EquipmentFound(int quantity, DateTimeOffset occurredAt) =>
+        new("EquipmentFound", ActionCount: quantity, OccurredAt: occurredAt);
+
     public static QuestTrigger CombatCompleted(
         string areaId,
         bool wonEncounter,

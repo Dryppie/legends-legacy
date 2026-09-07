@@ -4,6 +4,9 @@ using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.UseCases.Inventories.SelectionCrates;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Inventories;
+using Common.Randomness;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Inventories;
@@ -14,17 +17,20 @@ public sealed class SelectionCrateService : ISelectionCrateService
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IStarterEquipmentService? _starterEquipment;
+    private readonly CombatAcquisitionCatalog? _equipmentCatalog;
 
     public SelectionCrateService(
         IInventoryService inventory,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
-        IStarterEquipmentService? starterEquipment = null)
+        IStarterEquipmentService? starterEquipment = null,
+        CombatAcquisitionCatalog? equipmentCatalog = null)
     {
         _inventory = inventory;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _starterEquipment = starterEquipment;
+        _equipmentCatalog = equipmentCatalog;
     }
 
     public async Task<SelectionCrateOpenResult> OpenSelectionContainerAsync(
@@ -46,6 +52,13 @@ public sealed class SelectionCrateService : ISelectionCrateService
         if (definition is null)
         {
             return Fail("This item is not a selection container.");
+        }
+
+        if (definition.RandomEquipment is not null)
+        {
+            if (optionId != RandomEquipmentBoxCatalog.OpenOptionId)
+                return Fail("Open this box to receive its random equipment.");
+            return await OpenRandomEquipmentBoxAsync(characterId, container, definition, cancellationToken);
         }
 
         var option = definition.Options.FirstOrDefault(candidate =>
@@ -98,6 +111,65 @@ public sealed class SelectionCrateService : ISelectionCrateService
             cancellationToken);
 
         return new SelectionCrateOpenResult(true, null, rewards, definition.DisplayName);
+    }
+
+    private async Task<SelectionCrateOpenResult> OpenRandomEquipmentBoxAsync(
+        Guid characterId,
+        InventoryItem container,
+        SelectionContainerDefinition definition,
+        CancellationToken cancellationToken)
+    {
+        var catalog = _equipmentCatalog
+            ?? throw new InvalidOperationException("Equipment catalog is required to open an equipment box.");
+        var reward = definition.RandomEquipment!;
+        var candidates = catalog.BaseDropDefinitions(reward.Rarity);
+        if (candidates.Count == 0)
+            return Fail("The equipment in this box is currently unavailable.");
+
+        // Use a fresh opening identity even when more boxes are added to an existing stack.
+        var identity = new[] { definition.ItemBaseId, container.ItemInstanceId.ToString("N"),
+            Guid.NewGuid().ToString("N") };
+        var random = new Random(StableRandom.Seed(identity));
+        var descriptors = Enumerable.Range(0, reward.Quantity).Select(index => EquipmentData.Create(
+            EquipmentState.Award(
+                StableRandom.Guid([.. identity, index.ToString(System.Globalization.CultureInfo.InvariantCulture)]),
+                catalog.Equipment.Evaluator,
+                candidates[random.Next(candidates.Count)].Id,
+                reward.Tier,
+                reward.Rank,
+                new(EquipmentAwardKind.ProtectedReward, definition.ItemBaseId, string.Join(":", identity)),
+                new(EquipmentOwnershipKind.UnboundPersonal, characterId)),
+            catalog.Equipment.Evaluator)).ToArray();
+        var bases = await _itemBases.GetItemBasesByIdsAsync(
+            descriptors.Select(data => data.ItemBaseId).Distinct().ToArray(), cancellationToken);
+        if (descriptors.Any(data => !bases.TryGetValue(data.ItemBaseId, out var itemBase)
+            || itemBase is not EquipmentBase equipmentBase || itemBase.Stackable
+            || equipmentBase.EquipmentType != data.EquipmentType))
+            return Fail("The equipment in this box is currently unavailable.");
+
+        if (!await _inventory.TryConsumeInventoryItemAsync(characterId, container.ItemInstanceId, cancellationToken))
+            return Fail($"The {definition.DisplayName} could not be consumed.");
+
+        var items = descriptors.Select(data =>
+        {
+            var instance = new EquipmentInstance
+            {
+                Id = data.State.Id,
+                ItemBaseId = data.ItemBaseId,
+                ItemBase = bases[data.ItemBaseId]
+            };
+            instance.ApplyProgressionData(data);
+            return new InventoryItem
+            {
+                InventoryId = characterId,
+                ItemInstanceId = instance.Id,
+                ItemInstance = instance,
+                Quantity = 1
+            };
+        }).ToList();
+        await _inventory.AddItemsToInventory(
+            characterId, items, ItemAcquisitionSources.SelectionContainer, cancellationToken);
+        return new(true, null, items, definition.DisplayName);
     }
 
     private static SelectionCrateOpenResult Fail(string message) =>
