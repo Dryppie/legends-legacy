@@ -1,111 +1,111 @@
-# Character Paths
+# Combat Styles
 
 Game design proposal · 8 September 2026
 
-**Scope:** Two developed Paths, Bastion and Conduit, followed by three exploratory concepts. All Path mechanics described here are proposals. Numerical values are starting points for playtesting, not validated balance targets.
+**Scope:** Two developed Combat Styles, Bastion and Conduit, followed by three exploratory concepts. All Combat Style mechanics described here are proposals. Numerical values are starting points for playtesting, not validated balance targets.
 
-**Progression decision:** Each character levels each Path individually. Path levels and experience are not shared. The level cap, milestone schedule, rank bonuses, and upgrade values below are provisional expressions of that decision.
+**Progression decision:** Each character levels each Combat Style individually. Combat Style levels and experience are not shared. The level cap, milestone schedule, rank bonuses, and upgrade values below are provisional expressions of that decision.
 
 ## 1. The third character-building pillar
 
-Paths give a character a combat philosophy: a rule that changes how the player combines equipment and Essences.
+Combat Styles give a character a combat philosophy: a rule that changes how the player combines equipment and Essences.
 
 | Pillar    | Player question                   | Contribution to a build                                               |
 | --------- | --------------------------------- | --------------------------------------------------------------------- |
 | Equipment | What are my strengths?            | Attributes and the balance between offense, defense, and recovery.    |
 | Essences  | What tools do I have?             | Active abilities, passive abilities, and their individual identities. |
-| Path      | How do those tools work together? | A defining interaction, an opportunity, and a meaningful limitation.  |
+| Combat Style      | How do those tools work together? | A defining interaction, an opportunity, and a meaningful limitation.  |
 
-The promise is that two characters with the same equipment and Essences can pursue different strategies by choosing different Paths. A recovery-heavy loadout could turn healing into protection through Bastion, or concentrate its other abilities into a powerful healing cast through Conduit.
+The promise is that two characters with the same equipment and Essences can pursue different strategies by choosing different Combat Styles. A recovery-heavy loadout could turn healing into protection through Bastion, or concentrate its other abilities into a powerful healing cast through Conduit.
 
-The design succeeds when selecting a Path makes the player reconsider at least one equipment choice and one Essence choice.
+The design succeeds when selecting a Combat Style makes the player reconsider at least one equipment choice and one Essence choice.
 
 ### Design principles
 
-- **Identity immediately.** Selecting a Path activates its defining mechanic immediately. The interesting behavior is not an eventual reward at the end of a progression tree.
-- **Open combinations.** Paths do not impose weapon, armor, element, or Essence-family restrictions. Some combinations will naturally benefit more than others.
-- **A cost that changes decisions.** A Path's limitation should influence preparation, timing, or survival. Each Path explains that limitation as prominently as its benefit.
-- **Preparation suits idle combat.** The player chooses a build before combat. Every Path operates automatically during combat and while the player is offline.
-- **Essences retain ownership of abilities.** Paths transform or connect existing tools. Selecting a Path does not grant an additional active ability.
+- **Identity immediately.** Selecting a Combat Style activates its defining mechanic immediately. The interesting behavior is not an eventual reward at the end of a progression tree.
+- **Open combinations.** Combat Styles do not impose weapon, armor, element, or Essence-family restrictions. Some combinations will naturally benefit more than others.
+- **A cost that changes decisions.** A Combat Style's limitation should influence preparation, timing, or survival. Each Combat Style explains that limitation as prominently as its benefit.
+- **Preparation suits idle combat.** The player chooses a build before combat. Every Combat Style operates automatically during combat and while the player is offline.
+- **Essences retain ownership of abilities.** Combat Styles transform or connect existing tools. Selecting a Combat Style does not grant an additional active ability.
 - **Choices remain choices.** A player cannot eventually purchase every refinement and activate them together.
-- **Mastery belongs to the Path.** Playing an equipped Path develops that Path. Its full defining mechanic is available from level 1, and later bonuses preserve its central tradeoff.
-- **Readable causes and outcomes.** Players can see what the Path contributed and what its tradeoff cost them.
+- **Mastery belongs to the Combat Style.** Playing an equipped Combat Style develops that Combat Style. Its full defining mechanic is available from level 1, and later bonuses preserve its central tradeoff.
+- **Readable causes and outcomes.** Players can see what the Combat Style contributed and what its tradeoff cost them.
 
-Paths are the proposed third pillar in this document. Earlier Combat Style concepts are background design material; no separate Combat Style selection or talent web is required alongside Paths.
+Combat Styles form a single third pillar. This design supersedes the earlier eight-style and talent-web concepts; those historical proposals do not add another selection or progression system alongside this feature.
 
 ## 2. The player's choices
 
 ### Build structure
 
-A character equips **one Path**, initially in its **base form**. At Path level 3, the player can choose **one of its three refinements** or retain the base form. Refinements alter the defining mechanic and are mutually exclusive alternatives, not ranks. The base form remains a valid finished choice and benefits from levels and upgrades normally.
+A character equips **one Combat Style**, initially in its **base form**. At Combat Style level 3, the player can choose **one of its three refinements** or retain the base form. Refinements alter the defining mechanic and are mutually exclusive alternatives, not ranks. The base form remains a valid finished choice and benefits from levels and upgrades normally.
 
-Further levels grant modest automatic **core ranks** and up to **two upgrade slots**. Core ranks strengthen the Path's mechanic; upgrades provide smaller, situational adjustments. Neither grants another refinement or an additional active ability.
+Further levels grant modest automatic **core ranks** and up to **two upgrade slots**. Core ranks strengthen the Combat Style's mechanic; upgrades provide smaller, situational adjustments. Neither grants another refinement or an additional active ability.
 
-Some Paths need one additional choice specific to their mechanic. Conduit, for example, asks the player to designate a Focus Essence. This is a choice among already equipped Essences and does not add an Essence slot.
+Some Combat Styles need one additional choice specific to their mechanic. Conduit, for example, asks the player to designate a Focus Essence. This is a choice among already equipped Essences and does not add an Essence slot.
 
-Players can also leave the Path slot empty while learning or comparing builds. An empty slot applies no Path benefit or penalty.
+Players can also leave the Combat Style slot empty while learning or comparing builds. An empty slot applies no Combat Style benefit or penalty.
 
 ### Introduction
 
-Introduce Paths when the player has unlocked a third Essence slot and acquired at least three different Essences. At that point there is a real loadout to reshape, while the player is still discovering build identities.
+Introduce Combat Styles when the player has unlocked a third Essence slot and acquired at least three different Essences. At that point there is a real loadout to reshape, while the player is still discovering build identities.
 
-The introductory quest presents both developed Paths in a practice encounter with temporary example loadouts. It demonstrates a benefit and a failure case for each: Bastion preparing Barrier and recovering slowly after a breach; Conduit producing both a charged cast and an undercharged cast. Practice does not award or consume the example equipment or Essences.
+The introductory quest presents both developed Combat Styles in a practice encounter with temporary example loadouts. It demonstrates a benefit and a failure case for each: Bastion preparing Barrier and recovering slowly after a breach; Conduit producing both a charged cast and an undercharged cast. Practice does not award or consume the example equipment or Essences.
 
-Completing the introduction unlocks both Paths at **Path level 1 with zero Path XP**. Their core mechanics are immediately usable; refinements and upgrade slots follow each Path's own level milestones. The practice encounter is guided learning, with no required victory or preferred answer, and awards no Path XP. A player can finish it without being forced to adopt a Path.
+Completing the introduction unlocks both Combat Styles at **Combat Style level 1 with zero Combat Style XP**. Their core mechanics are immediately usable; refinements and upgrade slots follow each Combat Style's own level milestones. The practice encounter is guided learning, with no required victory or preferred answer, and awards no Combat Style XP. A player can finish it without being forced to adopt a Combat Style.
 
-Progression combines individual Path mastery with discovering combinations, obtaining better-suited equipment and Essences, and learning which configuration suits an encounter. Future Paths would expand available strategies rather than replace early Paths with stronger versions.
+Progression combines individual Combat Style mastery with discovering combinations, obtaining better-suited equipment and Essences, and learning which configuration suits an encounter. Future Combat Styles would expand available strategies rather than replace early Combat Styles with stronger versions.
 
 Conduit can function with the introductory three-slot loadout, but its base form needs a Focus Essence and three different contributors to reach maximum Charge. That higher ceiling becomes available naturally as the player gains another slot and a suitable Essence.
 
-### Individual Path levels and experience
+### Individual Combat Style levels and experience
 
-Each unlocked Path has its own permanent level, XP progress, and earned milestones. The initial proposed level range is **1–10**. A character can therefore have a level-10 Bastion and a level-1 Conduit. Selecting Conduit uses its own level; returning to Bastion restores access to everything already earned there.
+Each unlocked Combat Style has its own permanent level, XP progress, and earned milestones. The initial proposed level range is **1–10**. A character can therefore have a level-10 Bastion and a level-1 Conduit. Selecting Conduit uses its own level; returning to Bastion restores access to everything already earned there.
 
-- **Only the equipped Path earns Path XP.** Unequipped Paths gain no passive XP, and an empty Path slot earns none. There is no shared mastery pool, transferable XP, inherited level, or catch-up multiplier in this version.
-- **Use ordinary eligible combat rewards.** Grant 1 Path XP per point of the character's base combat XP reward, before character or Essence XP bonuses. Use the character's own reward share in group combat. Noncombat quest rewards and practice battles do not grant Path XP.
-- **Reward participation through the ordinary combat reward rules.** Path XP does not depend on healing performed, Barrier generated, Charge spent, ability count, or whether the Path's mechanic activated. A completed encounter that earns no base combat XP also earns no Path XP. Reaching the character-level cap does not suppress otherwise eligible base combat XP for Path progression.
-- **Online and offline combat use the same rules.** Experience belongs to the Path used for the rewarded encounter, even if the player has selected another Path before collecting its rewards.
+- **Only the equipped Combat Style earns Combat Style XP.** Unequipped Combat Styles gain no passive XP, and an empty Combat Style slot earns none. There is no shared mastery pool, transferable XP, inherited level, or catch-up multiplier in this version.
+- **Use ordinary eligible combat rewards.** Grant 1 Combat Style XP per point of the character's base combat XP reward, before character or Essence XP bonuses. Use the character's own reward share in group combat. Noncombat quest rewards and practice battles do not grant Combat Style XP.
+- **Reward participation through the ordinary combat reward rules.** Combat Style XP does not depend on healing performed, Barrier generated, Charge spent, ability count, or whether the Combat Style's mechanic activated. A completed encounter that earns no base combat XP also earns no Combat Style XP. Reaching the character-level cap does not suppress otherwise eligible base combat XP for Combat Style progression.
+- **Online and offline combat use the same rules.** Experience belongs to the Combat Style used for the rewarded encounter, even if the player has selected another Combat Style before collecting its rewards.
 - **Earned progress is permanent.** Defeat, switching, changing a refinement, and replacing upgrades do not remove XP or levels.
-- **Level 10 ends that Path's XP progression.** Excess XP is discarded rather than banked for another Path or another progression layer. A large reward can cross several levels, awarding every milestone reached.
+- **Level 10 ends that Combat Style's XP progression.** Excess XP is discarded rather than banked for another Combat Style or another progression layer. A large reward can cross several levels, awarding every milestone reached.
 
-Both developed Paths use the same XP requirement schedule initially, while keeping separate XP totals. Exact level thresholds and time to reach level 10 remain tuning questions. The first three levels should be accessible during a short period of ordinary progression-relevant combat, so a newly tried Path reaches its first specialization promptly.
+Both developed Combat Styles use the same XP requirement schedule initially, while keeping separate XP totals. Exact level thresholds and time to reach level 10 remain tuning questions. The first three levels should be accessible during a short period of ordinary progression-relevant combat, so a newly tried Combat Style reaches its first specialization promptly.
 
 ### Level milestones, core ranks, and upgrade slots
 
-| Path level | Newly earned benefit | Total core rank | Available upgrade slots |
+| Combat Style level | Newly earned benefit | Total core rank | Available upgrade slots |
 | ---: | --- | ---: | ---: |
 | 1 | Full core mechanic and base form. | 0 | 0 |
 | 2 | First core rank bonus. | 1 | 0 |
 | 3 | All three refinements become available; choose at most one. | 1 | 0 |
 | 4 | Second core rank bonus. | 2 | 0 |
-| 5 | First upgrade slot and access to the Path's three upgrade choices. | 2 | 1 |
+| 5 | First upgrade slot and access to the Combat Style's three upgrade choices. | 2 | 1 |
 | 6 | Third core rank bonus. | 3 | 1 |
 | 7 | Continue toward the second upgrade slot; no additional combat bonus. | 3 | 1 |
 | 8 | Fourth core rank bonus and second upgrade slot. | 4 | 2 |
 | 9 | Continue toward the final core rank; no additional combat bonus. | 4 | 2 |
-| 10 | Fifth core rank bonus; Path level cap reached. | 5 | 2 |
+| 10 | Fifth core rank bonus; Combat Style level cap reached. | 5 | 2 |
 
-Core ranks are automatic bonuses to the Path's defining mechanic. They are not another level track, do not require spending points, and do not grant general attributes such as Power or Max Health. Their exact effects are defined under each developed Path.
+Core ranks are automatic bonuses to the Combat Style's defining mechanic. They are not another level track, do not require spending points, and do not grant general attributes such as Power or Max Health. Their exact effects are defined under each developed Combat Style.
 
-Upgrade slots each hold one choice from that Path's upgrade menu. Each upgrade is a single fixed effect: no duplicate selections, separate upgrade levels, or additional upgrade ranks. All three choices become available at level 5, but only two can ever be equipped together. Slots may remain empty. Choices can be replaced freely at the same boundaries as other build changes.
+Upgrade slots each hold one choice from that Combat Style's upgrade menu. Each upgrade is a single fixed effect: no duplicate selections, separate upgrade levels, or additional upgrade ranks. All three choices become available at level 5, but only two can ever be equipped together. Slots may remain empty. Choices can be replaced freely at the same boundaries as other build changes.
 
-Refinements remain the major behavioral choice. Upgrades cannot purchase another refinement, remove a Path's core limitation, or increase the number of equipped Essences. There are no consumable Path items, rank-point purchases, or additional upgrade currency in this proposal.
+Refinements remain the major behavioral choice. Upgrades cannot purchase another refinement, remove a Combat Style's core limitation, or increase the number of equipped Essences. There are no consumable Combat Style items, rank-point purchases, or additional upgrade currency in this proposal.
 
 Unless explicitly labeled as ranked or upgraded, the combat formulas, refinement values, and worked examples below show **unranked values without upgrades**. They isolate the underlying mechanics; they do not imply that refinements are selectable at level 1. Actual previews include the core ranks already earned and the selected upgrades.
 
-### Changing and saving a Path
+### Changing and saving a Combat Style
 
-- Switching Paths, available refinements, upgrades, or a Focus Essence is free between encounters and has no cooldown. The selected Path always uses its own earned level and milestones.
-- A Path and its effective core rank, refinement, and upgrades are fixed for a committed activity: a single battle, an entire dungeon run, or a PvP match. The player reviews the choice before entering.
+- Switching Combat Styles, available refinements, upgrades, or a Focus Essence is free between encounters and has no cooldown. The selected Combat Style always uses its own earned level and milestones.
+- A Combat Style and its effective core rank, refinement, and upgrades are fixed for a committed activity: a single battle, an entire dungeon run, or a PvP match. The player reviews the choice before entering.
 - During ordinary idle combat, a changed configuration takes effect at the next encounter. Previously completed combat keeps the configuration under which it occurred.
-- A saved build remembers its equipment, Essences, Path, refinement, upgrades, and any Path-specific choice together. Loading a build uses that Path's current earned level and cannot roll back, duplicate, or transfer XP. Locked choices cannot be activated through a saved build.
-- Each Path remembers its last selected refinement, upgrades, and Focus where applicable. Switching back restores those choices when they are still valid.
+- A saved build remembers its equipment, Essences, Combat Style, refinement, upgrades, and any style-specific choice together. Loading a build uses that Combat Style's current earned level and cannot roll back, duplicate, or transfer XP. Locked choices cannot be activated through a saved build.
+- Each Combat Style remembers its last selected refinement, upgrades, and Focus where applicable. Switching back restores those choices when they are still valid.
 - If a saved Focus Essence is no longer equipped or eligible, the player chooses a replacement before starting combat with Conduit. The game identifies the missing choice; it does not silently select another Essence.
-- Path resources and encounter-generated protection follow encounter boundaries. Changing a Path never creates healing, resets ability cooldowns, or transfers stored resources into another encounter.
+- Combat Style resources and encounter-generated protection follow encounter boundaries. Changing a Combat Style never creates healing, resets ability cooldowns, or transfers stored resources into another encounter.
 
 Levels and milestones are earned when their XP is awarded. Newly earned core ranks take effect at the next boundary where the build may change; earning a level during a dungeon run does not alter that run's combat bonuses. A newly unlocked refinement or upgrade slot waits for the player's choice. Idle and offline combat continue with the existing selections and never pause or select an upgrade automatically.
 
-## 3. Path of the Bastion
+## 3. Combat Style: Bastion
 
 > **"Recovery becomes preparation. Build the protection you will need before the next blow lands."**
 
@@ -127,7 +127,7 @@ The advantage is the ability to save recovery for later damage. The cost is much
 
 ### What counts as self-generated healing
 
-Fortification applies to healing received by the Bastion from their own active and passive abilities, Health Regeneration, and Lifesteal. Healing supplied to the Bastion by their own summons also qualifies: a summon in the same build cannot bypass the Path's recovery tradeoff.
+Fortification applies to healing received by the Bastion from their own active and passive abilities, Health Regeneration, and Lifesteal. Healing supplied to the Bastion by their own summons also qualifies: a summon in the same build cannot bypass the Combat Style's recovery tradeoff.
 
 Healing received from another player or that player's summons remains ordinary healing. Healing the Bastion gives to another character or summon also remains ordinary healing.
 
@@ -203,7 +203,7 @@ Assume the Bastion has 1,000 Max Health, begins at full Health with no Barrier, 
 | Receive 250 damage | Lose the remaining 50 Barrier and then 200 Health. |    800 |       0 |
 | Self-heal for 200  | Restore 50 Health and gain 150 Barrier.            |    850 |     150 |
 
-The last row expresses the Path's limitation: the character has regained protection, but has not repaired most of the Health loss.
+The last row expresses the Combat Style's limitation: the character has regained protection, but has not repaired most of the Health loss.
 
 For comparison, with Rebuild, a character at 300 of 1,000 Health receiving the same 200-point self-heal reaches 500 Health and gains no converted Barrier. With Counterweight, a character holding 200 Barrier spends 100 on a qualifying cast, retains 100, and adds 100 damage before mitigation to its first direct hit.
 
@@ -229,13 +229,13 @@ These are patterns of Essence functions, not newly granted abilities or claims t
 
 ### What the player should see
 
-The Path card shows the conversion and its cost together: **"200 self-healing becomes 50 Health + 150 Barrier. Actual Health recovers more slowly."**
+The Combat Style card shows the conversion and its cost together: **"200 self-healing becomes 50 Health + 150 Barrier. Actual Health recovers more slowly."**
 
 That is the unranked illustration. The actual card shows Bastion's own level, XP to the next level, core rank, selected upgrades, and the resulting conversion. Conditional upgrade bonuses are identified as conditional rather than always included in the displayed amount. At level 10 without upgrades, the same illustration reads 50 Health + 165 Barrier.
 
 Affected ability previews show their Health and Barrier outputs. The combat summary separates Health restored, converted Barrier granted, converted Barrier absorbed, and protection lost to overflow. Counterweight additionally shows Barrier spent and damage contributed; Shelter shows who received protection. Values describing wasted healing distinguish a full Health bar from a full Barrier pool.
 
-## 4. Path of the Conduit
+## 4. Combat Style: Conduit
 
 > **"Every part of the build feeds one decisive expression of power."**
 
@@ -323,7 +323,7 @@ For example, a level-10 base-form Conduit spending 3 Charge uses 150% before upg
 
 ### Worked sequence: the base form
 
-Assume four equipped Essences: contributors A, B, and C, plus Focus F. F has a direct effect worth 200 before its Conduit multiplier. This is an illustrative sequence of normal casts, not a manual rotation added by the Path.
+Assume four equipped Essences: contributors A, B, and C, plus Focus F. F has a direct effect worth 200 before its Conduit multiplier. This is an illustrative sequence of normal casts, not a manual rotation added by the Combat Style.
 
 | Cast                                | Circuit outcome                       | Charge after cast | F's effect amount |
 | ----------------------------------- | ------------------------------------- | ----------------: | ----------------: |
@@ -336,7 +336,7 @@ Assume four equipped Essences: contributors A, B, and C, plus Focus F. F has a d
 | B                                   | B can contribute again in this cycle. |                 1 |                 — |
 | F                                   | Spend 1.                              |                 0 |               200 |
 
-The second Focus cast shows why the Path is more than an automatic upgrade. Selecting a fast Focus with slow contributors can reduce the value of the build's most important ability.
+The second Focus cast shows why the Combat Style is more than an automatic upgrade. Selecting a fast Focus with slow contributors can reduce the value of the build's most important ability.
 
 ### Example builds
 
@@ -359,47 +359,47 @@ The second Focus cast shows why the Path is more than an automatic upgrade. Sele
 
 ### What the player should see
 
-The Path card shows the selected Focus, maximum Charge, the current refinement's full effect curve, and the eligible components of the Focus ability.
+The Combat Style card shows the selected Focus, maximum Charge, the current refinement's full effect curve, and the eligible components of the Focus ability.
 
 It also shows Conduit's own level, XP to the next level, core rank, available upgrade slots, and selected upgrades. The effect curve includes earned ranks, and conditional upgrades show the exact Charge and Health requirements for their additional bonus. Switching from a higher-level Bastion does not imply a higher-level Conduit or reuse Bastion's rank bonuses.
 
 During combat, display Charge beside the Focus icon. Indicate which contributors have already charged the current cycle. The cast log identifies the Charge spent and the resulting effect multiplier, including casts below normal strength.
 
-The post-combat summary shows Focus casts at each Charge level and their average multiplier. Report the loss from undercharged casts as well as the additional output from charged casts. A summary that counts only the stronger casts would conceal the Path's central cost.
+The post-combat summary shows Focus casts at each Charge level and their average multiplier. Report the loss from undercharged casts as well as the additional output from charged casts. A summary that counts only the stronger casts would conceal the Combat Style's central cost.
 
-## 5. Three potential Paths
+## 5. Three potential Combat Styles
 
-These are concept seeds only. Their final mechanics, rank effects, upgrade menus, and balance are intentionally undecided. If developed, they follow the individual Path-level model above and begin at their own level 1 when unlocked. They are not part of the two developed Path designs above.
+These are concept seeds only. Their final mechanics, rank effects, upgrade menus, and balance are intentionally undecided. If developed, they follow the individual style-level model above and begin at their own level 1 when unlocked. They are not part of the two developed Combat Style designs above.
 
-| Potential Path | Fantasy and possible core mechanic                                                                                                                                                                                               | Build decision                                                                                                                       | Main design question                                                                                                                                                                                                 |
+| Potential Combat Style | Fantasy and possible core mechanic                                                                                                                                                                                               | Build decision                                                                                                                       | Main design question                                                                                                                                                                                                 |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Reaper**     | Turn your own lingering damage into an earlier kill. Qualifying direct Essence attacks could consume some remaining damage from your own Bleed, Burn, or Poison on their target and deliver part of it immediately.              | Balance applying lasting pressure against harvesting it early; choose how many direct attacks belong in the loadout.                 | Can the timing tradeoff remain useful in automatic combat without making damage-over-time universally stronger? Other players' conditions must remain theirs to use.                                                 |
-| **Shepherd**   | Bind your survival to one chosen summon. A bond could share protection or incoming damage between the character and that summon, while concentrating selected summon-related benefits on it. The Path itself supplies no summon. | Choose a reliable companion and build mutual survival, accepting dependence on keeping that companion present.                       | Does the bond change how the owner builds and survives, rather than simply make the strongest summon stronger? A broken bond must be survivable enough to allow recovery.                                            |
+| **Shepherd**   | Bind your survival to one chosen summon. A bond could share protection or incoming damage between the character and that summon, while concentrating selected summon-related benefits on it. The Combat Style itself supplies no summon. | Choose a reliable companion and build mutual survival, accepting dependence on keeping that companion present.                       | Does the bond change how the owner builds and survives, rather than simply make the strongest summon stronger? A broken bond must be survivable enough to allow recovery.                                            |
 | **Gambler**    | Trade dependable output for occasional exceptional moments. A controlled Fortune cycle could deliver weaker ordinary casts and intermittent amplified casts, with a visible limit on how long the weak period can last.          | Decide whether the build can survive uneven output and exploit a peak; damage and emergency recovery tolerate that risk differently. | Is the experience interesting beyond average damage calculations? Randomly failed survival checks must feel understandable, and repeatedly resetting encounters must not let players choose only favorable outcomes. |
 
 ## 6. Shared combat and activity expectations
 
 ### Encounters and persistent activities
 
-The same Path rules apply in idle combat, dungeons, bosses, and PvP. Charge begins empty in every new encounter. Barrier created by a previous encounter is cleared according to ordinary encounter rules. A new wave inside the same continuing battle does not reset Path state; a new dungeon room treated as a new encounter does.
+The same Combat Style rules apply in idle combat, dungeons, bosses, and PvP. Charge begins empty in every new encounter. Barrier created by a previous encounter is cleared according to ordinary encounter rules. A new wave inside the same continuing battle does not reset Combat Style state; a new dungeon room treated as a new encounter does.
 
-Paths do not change an activity's normal starting Health, recovery between encounters, ability readiness, victory conditions, or defeat consequences. A player cannot heal by toggling a Path, bank Charge on a harmless encounter, or carry an old Barrier reserve into a new one.
+Combat Styles do not change an activity's normal starting Health, recovery between encounters, ability readiness, victory conditions, or defeat consequences. A player cannot heal by toggling a Combat Style, bank Charge on a harmless encounter, or carry an old Barrier reserve into a new one.
 
-An equipped Path, its level, effective core rank, refinement, and upgrades are visible when players inspect a build. Conduit's chosen Focus is also visible. Opponents should be able to understand the strategy and progression strength they are fighting. PvP uses the equipped Path's earned progression; this proposal does not add automatic Path-level normalization.
+An equipped Combat Style, its level, effective core rank, refinement, and upgrades are visible when players inspect a build. Conduit's chosen Focus is also visible. Opponents should be able to understand the strategy and progression strength they are fighting. PvP uses the equipped Combat Style's earned progression; this proposal does not add automatic style-level normalization.
 
 ### Group play and summons
 
-Each character owns their own Path decision. Allies do not share Charge, and summoned combatants do not independently equip or inherit a Path. Specific owner-summon interactions exist only where the chosen Path explicitly describes them.
+Each character owns their own Combat Style decision. Allies do not share Charge, and summoned combatants do not independently equip or inherit a Combat Style. Specific owner-summon interactions exist only where the chosen Combat Style explicitly describes them.
 
 Bastion deliberately benefits from outside healing, and Shelter can support another player's character. These are team-building opportunities. They must be considered when assessing sustained group survival, rather than balancing Bastion solely around solo encounters.
 
 ### Balance intent
 
-The two Paths should excel in different circumstances, with useful reasons to retain their base forms and choose each refinement. Neither should be the default answer for every player, encounter, or loadout.
+The two Combat Styles should excel in different circumstances, with useful reasons to retain their base forms and choose each refinement. Neither should be the default answer for every player, encounter, or loadout.
 
-Compare Path strength at equal levels and with the same number of unlocked upgrade slots before attributing an advantage to the Path's identity. Separately assess the cost of switching from a mastered Path to an untrained one. Individual progression intentionally gives the practiced Path an advantage, but a new Path must remain useful through its full level-1 mechanic. If switching feels excessively punishing, first adjust the early XP thresholds or the size of rank bonuses; do not silently introduce shared levels or automatic catch-up.
+Compare Combat Style strength at equal levels and with the same number of unlocked upgrade slots before attributing an advantage to the Combat Style's identity. Separately assess the cost of switching from a mastered Combat Style to an untrained one. Individual progression intentionally gives the practiced Combat Style an advantage, but a new Combat Style must remain useful through its full level-1 mechanic. If switching feels excessively punishing, first adjust the early XP thresholds or the size of rank bonuses; do not silently introduce shared levels or automatic catch-up.
 
-Evaluate the whole build: damage, survival, consistency, time to clear, wasted output, and the value of the Essence slots used to enable the Path. A high peak or a large Barrier number is not sufficient evidence of a strong build.
+Evaluate the whole build: damage, survival, consistency, time to clear, wasted output, and the value of the Essence slots used to enable the Combat Style. A high peak or a large Barrier number is not sufficient evidence of a strong build.
 
 At introduction, Conduit must be useful with three slots. At higher slot counts, its Charge cap and contributor opportunity costs must keep extra slots from producing unlimited scaling. Bastion must have useful self-recovery at the same introduction point without requiring a rare or specialized Essence combination.
 
@@ -409,25 +409,25 @@ The identities and choice structure above are the proposed design. The following
 
 | Playtest                                                     | What it should establish                                                                                  |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Same equipment and Essences, switch only the Path            | Does the character's behavior change visibly, and can the player explain why?                             |
-| Rebuild the loadout around each Path afterward               | Does understanding the Path lead to meaningful equipment and Essence changes?                             |
-| Equal Path levels and upgrade-slot budgets | Does each Path remain competitive when progression advantages are controlled? |
+| Same equipment and Essences, switch only the Combat Style            | Does the character's behavior change visibly, and can the player explain why?                             |
+| Rebuild the loadout around each Combat Style afterward               | Does understanding the Combat Style lead to meaningful equipment and Essence changes?                             |
+| Equal Combat Style levels and upgrade-slot budgets | Does each Combat Style remain competitive when progression advantages are controlled? |
 | Switch from level-10 Bastion to level-1 Conduit and return | Is Conduit's core immediately useful, does its first specialization arrive promptly, and is Bastion's progress preserved? |
 | Earn levels during offline combat and a committed dungeon run | Are XP ownership and milestone rewards clear, with new combat bonuses applied only at the permitted boundary and no automatic build choices? |
 | Rank-zero values versus five core ranks and two upgrades | Do bonuses feel rewarding while Bastion still repairs Health slowly and Conduit still suffers from uncharged casts? |
-| Three-slot introductory builds and later wider builds        | Can both Paths work when unlocked, while later slots add options without overwhelming earlier builds?     |
-| Short encounters, long encounters, and dangerous openings    | Are the different preparation costs meaningful without making one Path unusable in ordinary play?         |
+| Three-slot introductory builds and later wider builds        | Can both Combat Styles work when unlocked, while later slots add options without overwhelming earlier builds?     |
+| Short encounters, long encounters, and dangerous openings    | Are the different preparation costs meaningful without making one Combat Style unusable in ordinary play?         |
 | Bastion under repeated burst damage                          | Is 25% Health restoration enough to recover between breaches, or does the base form become too punishing? |
 | Bastion with Rebuild, Counterweight, and Shelter             | Does each refinement change the build's purpose? Is the base form still attractive?                       |
 | Bastion with allies, summons, and strong healing suppression | Does the source distinction remain understandable, and can organized recovery create excessive stalling?  |
 | Conduit under ordinary automated cast order                  | Can the player predict preparation and payoff without editing a script or controlling casts manually?     |
 | Conduit with uneven cooldowns and mixed-effect Essences      | Are Focus eligibility, weak casts, and unmodified effects clear enough to support informed choices?       |
 | Conduit with each refinement                                 | Are there useful loadouts for the small circuit, long preparation, and repeat-cycle approaches?           |
-| Builds with no Path and builds with the wrong Path           | Are Paths a rewarding source of strategy while their opportunity costs remain real and visible?           |
+| Builds with no Combat Style and builds with the wrong Combat Style           | Are Combat Styles a rewarding source of strategy while their opportunity costs remain real and visible?           |
 | PvP and encounters with time limits                          | Do durable combinations remain beatable, and do burst combinations allow understandable counterplay?      |
 
-The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Counterweight's spending and damage amounts, and Conduit's zero-Charge penalty and Charge curves. Progression tuning covers the level-10 cap, XP thresholds, levels without a new combat benefit, time to the first refinement, core rank magnitudes, and the three upgrade choices for each developed Path. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Focus output for a stronger prepared cast.**
+The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Counterweight's spending and damage amounts, and Conduit's zero-Charge penalty and Charge curves. Progression tuning covers the level-10 cap, XP thresholds, levels without a new combat benefit, time to the first refinement, core rank magnitudes, and the three upgrade choices for each developed Combat Style. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Focus output for a stronger prepared cast.**
 
 ## Design references
 
-Existing terms follow the [combat lexicon](../combat-lexicon/README.md), especially [Barrier](../combat-lexicon/conditions/barrier.md), [Guard](../combat-lexicon/conditions/guard.md), [Wound](../combat-lexicon/conditions/wound.md), [Recovery](../combat-lexicon/conditions/recovery.md), [Regeneration](../combat-lexicon/conditions/regeneration.md), [Lifesteal](../combat-lexicon/conditions/lifesteal.md), and [damage categories](../combat-lexicon/damage-categories.md). These references establish the existing vocabulary; they do not indicate that Paths are currently implemented.
+Existing terms follow the [combat lexicon](../combat-lexicon/README.md), especially [Barrier](../combat-lexicon/conditions/barrier.md), [Guard](../combat-lexicon/conditions/guard.md), [Wound](../combat-lexicon/conditions/wound.md), [Recovery](../combat-lexicon/conditions/recovery.md), [Regeneration](../combat-lexicon/conditions/regeneration.md), [Lifesteal](../combat-lexicon/conditions/lifesteal.md), and [damage categories](../combat-lexicon/damage-categories.md). These references establish the existing vocabulary; they do not indicate that Combat Styles are currently implemented.

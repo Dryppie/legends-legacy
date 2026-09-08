@@ -33,6 +33,7 @@
     },
     "dungeonEquipment": {
       "dropChance": 0.5,
+      "miniBossDropChance": 0.25,
       "rank": 1,
       "rarities": {
         "novice": {
@@ -150,6 +151,7 @@
     },
     "dungeonEquipment": {
       "dropChance": 0.5,
+      "miniBossDropChance": 0.25,
       "rank": 1,
       "rarities": {
         "novice": {

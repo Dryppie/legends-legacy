@@ -21,6 +21,7 @@ public static class Program
                 Console.WriteLine("BalanceHarness compare --baseline <manifest.json> --run <suite-directory> --output <new-directory>");
                 Console.WriteLine("BalanceHarness evaluate --run <suite-directory> --output <new-directory> [--goals <json>] [--baseline <manifest.json>]");
                 Console.WriteLine("BalanceHarness investigate-entry --output <new-directory> [--samples <1-100>] [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness investigate-pressure --output <new-directory> [--samples <1-100>] [--content-root <API.LL-directory>]");
                 return 0;
             }
             var command = args[0];
@@ -39,6 +40,7 @@ public static class Program
                 "compare" => new[] { "--baseline", "--run", "--output" },
                 "evaluate" => new[] { "--run", "--output", "--goals", "--baseline" },
                 "investigate-entry" => new[] { "--output", "--samples", "--content-root" },
+                "investigate-pressure" => new[] { "--output", "--samples", "--content-root" },
                 _ => throw new ArgumentException($"Unknown command '{command}'.")
             };
             var options = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -53,6 +55,14 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "investigate-pressure")
+            {
+                var result = await BloodGrovePressureExperiment.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Path.Combine(AppContext.BaseDirectory, "Fixtures"), Required(options, "--output"),
+                    int.Parse(options.GetValueOrDefault("--samples") ?? "100", CultureInfo.InvariantCulture), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"{result.Status}; {result.ValidBattles} valid battles. Confirmation: {result.Confirmation.GateStatus}. {result.Disposition}");
+                return 0;
+            }
             if (command == "investigate-entry")
             {
                 var result = await BloodGroveEntryExperiment.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),

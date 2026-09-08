@@ -128,6 +128,7 @@ public sealed record DungeonEquipmentDropProfile(
     int Rank,
     DungeonEquipmentRarityWeights Rarities)
 {
+    public double MiniBossDropChance { get; init; }
     public EquipmentQualityWeights Qualities { get; init; } = new(0.125d, 0.5d, 0.25d, 0.1d, 0.025d);
 
     public double DropChanceAtMastery(int level) => Math.Clamp(
@@ -231,6 +232,7 @@ public sealed class CombatAcquisitionCatalog
 
     private static bool ValidProfile(DungeonEquipmentDropProfile profile) => profile is not null
         && double.IsFinite(profile.DropChance) && profile.DropChance is > 0 and <= 1
+        && double.IsFinite(profile.MiniBossDropChance) && profile.MiniBossDropChance is >= 0 and <= 1
         && profile.Rank is >= 0 and <= EquipmentBalance.MaximumRank
         && profile.Rarities is not null
         && profile.Qualities is not null;

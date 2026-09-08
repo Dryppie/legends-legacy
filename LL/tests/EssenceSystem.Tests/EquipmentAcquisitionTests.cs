@@ -5,6 +5,7 @@ using Common.Randomness;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Inventories;
@@ -18,6 +19,68 @@ namespace EssenceSystem.Tests;
 
 public sealed class EquipmentAcquisitionTests
 {
+    [Theory]
+    [InlineData("forgotten_catacombs", 1)]
+    [InlineData("tangled_cave", 2)]
+    public async Task Miniboss_equipment_uses_configured_chance_and_retries_do_not_reroll(string dungeonId, int tier)
+    {
+        var catalog = Catalog(0.5);
+        Assert.All(catalog.Pools, pool => Assert.Equal(0.25, pool.DungeonEquipment.MiniBossDropChance));
+        var repository = new Runs();
+        var service = new EquipmentAcquisitionService(catalog, new Dungeons(), repository,
+            Options.Create(new EquipmentProgressionOptions { ProtectedAcquisitionEnabled = true }));
+        for (var seed = 0; seed < 1000; seed++)
+        {
+            var run = Run(dungeonId);
+            run.Id = StableRandom.Guid(["miniboss-equipment-rate", seed.ToString()]);
+            run.Status = DungeonRunStatus.Active;
+            run.Rooms = [new() { RoomIndex = 3, Type = RoomType.MiniBoss, Status = RoomInstanceStatus.Completed }];
+            await service.CompleteMiniBossAsync(run, 3, default);
+            var first = run.PendingRewards.Select(reward => reward.Id).ToArray();
+            await service.CompleteMiniBossAsync(run, 3, default);
+            Assert.Equal(first, run.PendingRewards.Select(reward => reward.Id));
+            Assert.InRange(run.PendingRewards.Count, 0, 1);
+        }
+
+        Assert.InRange(repository.Rewards.Count, 200, 300);
+        Assert.All(repository.Rewards, reward =>
+        {
+            Assert.Equal("dungeon-miniboss", reward.Source);
+            Assert.Equal(1, reward.Quantity);
+            Assert.Equal(ItemType.Equipment, reward.ItemType);
+            Assert.NotNull(reward.ProgressionData);
+            Assert.Equal(tier, reward.ProgressionData.State.Tier);
+            Assert.Contains(reward.ProgressionData.Rarity,
+                new[] { EquipmentRarity.Uncommon, EquipmentRarity.Rare, EquipmentRarity.Epic });
+        });
+    }
+
+    [Theory]
+    [InlineData(RoomType.Combat, RoomInstanceStatus.Completed, DungeonRunStatus.Active, true)]
+    [InlineData(RoomType.Boss, RoomInstanceStatus.Completed, DungeonRunStatus.Active, true)]
+    [InlineData(RoomType.MiniBoss, RoomInstanceStatus.Pending, DungeonRunStatus.Active, true)]
+    [InlineData(RoomType.MiniBoss, RoomInstanceStatus.Completed, DungeonRunStatus.Failed, true)]
+    [InlineData(RoomType.MiniBoss, RoomInstanceStatus.Completed, DungeonRunStatus.Active, false)]
+    public async Task Miniboss_equipment_requires_an_eligible_completed_room(
+        RoomType type, RoomInstanceStatus roomStatus, DungeonRunStatus status, bool enabled)
+    {
+        var source = Catalog(0.5);
+        var catalog = new CombatAcquisitionCatalog(source.Equipment, source.Pools.Select(rules => rules with
+        {
+            DungeonEquipment = rules.DungeonEquipment with { MiniBossDropChance = 1 }
+        }));
+        var repository = new Runs();
+        var service = new EquipmentAcquisitionService(catalog, new Dungeons(), repository,
+            Options.Create(new EquipmentProgressionOptions { ProtectedAcquisitionEnabled = enabled }));
+        var run = Run("forgotten_catacombs");
+        run.Status = status;
+        run.Rooms = [new() { RoomIndex = 3, Type = type, Status = roomStatus }];
+
+        await service.CompleteMiniBossAsync(run, 3, default);
+
+        Assert.Empty(repository.Rewards);
+    }
+
     [Theory]
     [InlineData("goblin_mines")]
     [InlineData("forgotten_catacombs")]

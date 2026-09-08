@@ -23,6 +23,52 @@ namespace EssenceSystem.Tests;
 public sealed class DungeonRunHardeningTests
 {
     [Theory]
+    [InlineData(100, 1)]
+    [InlineData(1, 0)]
+    public async Task Miniboss_victory_awards_pending_equipment_only_when_vigor_remains(int vigor, int expectedRolls)
+    {
+        var run = CreateTreasuryRun(false, vigor);
+        run.Rooms[1].Type = RoomType.MiniBoss;
+        run.Rooms[1].EncounterIds = ["skeleton"];
+        var acquisition = new MiniBossAcquisition();
+        var service = new DungeonRunService(
+            new FixedDungeonRunRepository(run), new FixedCharacterSnapshotRepository(run.CharacterId),
+            new StubCombatOrchestrationCoordinator(), new VictoryCombatOutcomeCoordinator(),
+            null!, null!, new StubDungeonCompletionRewardApplier(), new FixedDungeonDefinitions(run.DungeonDefinitionId),
+            null!, new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), null!, acquisition);
+
+        await service.ExecuteActionAsync(run.CharacterId, run.Id, "fight", null, default);
+        await service.ExecuteActionAsync(run.CharacterId, run.Id, "fight", null, default);
+
+        Assert.Equal(expectedRolls, acquisition.Rolls);
+        Assert.Equal(expectedRolls, run.PendingRewards.Count);
+        if (expectedRolls > 0)
+        {
+            await service.ExecuteActionAsync(run.CharacterId, run.Id, "retreat", null, default);
+            Assert.Equal(DungeonRunStatus.Retreated, run.Status);
+            Assert.Equal(1, run.State.SecuredLoot.Items["equipment.test"]);
+        }
+        else
+        {
+            Assert.Equal(DungeonRunStatus.Failed, run.Status);
+        }
+    }
+
+    private sealed class MiniBossAcquisition : IEquipmentAcquisitionService
+    {
+        public int Rolls { get; private set; }
+        public Task CompleteMiniBossAsync(DungeonRun run, int roomIndex, CancellationToken ct)
+        {
+            Assert.Equal(RoomInstanceStatus.Completed, run.Rooms.Single(room => room.RoomIndex == roomIndex).Status);
+            Rolls++;
+            run.PendingRewards.Add(new RunReward { ItemId = "equipment.test", Name = "Test equipment", Quantity = 1 });
+            return Task.CompletedTask;
+        }
+        public Task CompleteAsync(DungeonRun run, bool firstCompletion, CancellationToken ct) => throw new NotSupportedException();
+        public RunReward RollTreasuryReward(DungeonRun run, int roomIndex) => throw new NotSupportedException();
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Treasury_costs_exact_vigor_awards_once_and_can_be_secured_by_retreat(bool chooseRoute)
@@ -121,6 +167,7 @@ public sealed class DungeonRunHardeningTests
 
     private sealed class TreasuryAcquisition : IEquipmentAcquisitionService
     {
+        public Task CompleteMiniBossAsync(DungeonRun run, int roomIndex, CancellationToken ct) => throw new NotSupportedException();
         public int Rolls { get; private set; }
         public Task CompleteAsync(DungeonRun run, bool firstCompletion, CancellationToken ct) => throw new NotSupportedException();
         public RunReward RollTreasuryReward(DungeonRun run, int roomIndex)

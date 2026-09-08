@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Items;
 using Common.Randomness;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Progression;
 using Microsoft.Extensions.Options;
@@ -68,6 +69,38 @@ public sealed class EquipmentAcquisitionService(
 
         await runs.AddPendingRewardAsync(run,
             RollEquipmentReward(run, dungeon, rules, identity, random, EquipmentKeys.DungeonCompletionSource), ct);
+    }
+
+    public async Task CompleteMiniBossAsync(DungeonRun run, int roomIndex, CancellationToken ct)
+    {
+        if (!options.Value.ProtectedAcquisitionEnabled || run.Status != DungeonRunStatus.Active
+            || !run.Rooms.Any(room => room.RoomIndex == roomIndex
+                && room.Type == RoomType.MiniBoss && room.Status == RoomInstanceStatus.Completed))
+            return;
+
+        var dungeon = dungeons.GetByKey(run.DungeonDefinitionId);
+        var rules = catalog.FindRegion(dungeon.Region);
+        if (rules is null || rules.EquipmentTier != dungeon.Region)
+            return;
+
+        const string source = "dungeon-miniboss";
+        var identity = new[]
+        {
+            source, run.CharacterId.ToString("N"), run.Id.ToString("N"),
+            run.Seed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            roomIndex.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        };
+        var rewardId = StableRandom.Guid(identity);
+        if (run.PendingRewards.Any(reward => reward.Id == rewardId))
+            return;
+
+        // A retry uses the same roll, including when the first attempt awarded nothing.
+        var random = new Random(StableRandom.Seed(identity));
+        if (random.NextDouble() >= rules.DungeonEquipment.MiniBossDropChance)
+            return;
+
+        await runs.AddPendingRewardAsync(run,
+            RollEquipmentReward(run, dungeon, rules, identity, random, source), ct);
     }
 
     public RunReward RollTreasuryReward(DungeonRun run, int roomIndex)

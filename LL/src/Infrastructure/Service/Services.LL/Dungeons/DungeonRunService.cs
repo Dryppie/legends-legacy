@@ -401,6 +401,8 @@ public sealed class DungeonRunService : IDungeonRunService
             }
             else
             {
+                if (room.Type == RoomType.MiniBoss && _equipmentAcquisition is not null)
+                    await _equipmentAcquisition.CompleteMiniBossAsync(run, room.RoomIndex, ct);
                 MoveToNextRoom(run);
                 await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);

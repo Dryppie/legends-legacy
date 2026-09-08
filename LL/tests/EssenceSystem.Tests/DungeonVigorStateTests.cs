@@ -13,6 +13,36 @@ namespace EssenceSystem.Tests;
 public sealed class DungeonVigorStateTests
 {
     [Theory]
+    [InlineData("forgotten_catacombs", 100, 17)]
+    [InlineData("forgotten_catacombs", 0, 31)]
+    [InlineData("tangled_cave", 100, 18)]
+    [InlineData("tangled_cave", 0, 32)]
+    [InlineData("great_tree", 100, 18)]
+    [InlineData("great_tree", 0, 32)]
+    public void Miniboss_forecast_and_battle_use_increased_authored_costs(string dungeonId, int health, int expectedToll)
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        options.Converters.Add(new JsonStringEnumConverter());
+        var provider = new JsonDungeonDelveDefinitionProvider(new ConfigurationBuilder().Build(), FindApiRoot(), options);
+        var authored = Assert.Single(provider.GetForDungeon(dungeonId).Nodes, node => node.RoomType == RoomType.MiniBoss);
+        var run = CreateBranchingRun();
+        var room = run.Rooms.Single(room => room.RoomIndex == 1);
+        room.Type = RoomType.MiniBoss;
+        var node = run.State.MapNodes.Single(node => node.RoomIndex == 1);
+        node.VigorCostMin = authored.VigorCostMin;
+        node.VigorCostMax = authored.VigorCostMax;
+        var route = new DungeonRouteService().GenerateRouteOptions(run).Single(route => route.RoomIndex == 1);
+        Assert.Equal(expectedToll, health == 100 ? route.VigorCostMin : route.VigorCostMax);
+
+        var applied = new DungeonVigorService().ApplyCombatToll(run, room, new CombatResult
+        {
+            PlayerTeam = [new SimpleCombatEntity { Id = "hero", Name = "Hero", MaxHealth = 100, Health = health }]
+        });
+
+        Assert.Equal(-expectedToll, applied);
+    }
+
+    [Theory]
     [InlineData("test_dungeon", 100, "Steady")]
     [InlineData("test_dungeon", 41, "Steady")]
     [InlineData("test_dungeon", 40, "Strained")]
