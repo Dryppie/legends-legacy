@@ -52,6 +52,9 @@ export class QuestStateService {
       (quest) => quest.status === QuestStatus.Completed,
     ),
   );
+  readonly readyToTurnInCount = computed(
+    () => this._journal().quests.filter(isQuestReadyToTurnIn).length,
+  );
   readonly pinnedQuest = computed(() => {
     const journal = this._journal();
     return (

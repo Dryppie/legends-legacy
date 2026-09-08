@@ -9,7 +9,6 @@ import {
   isWorldSystemMessage,
   parseChannelCommand,
   parseWireCommand,
-  splitCurrentPlayerMentions,
   startsNewChatDay,
 } from './chat.component';
 import {
@@ -32,6 +31,7 @@ describe('ChatComponent message submission', () => {
       draft: 'Hello world',
       sendError: '',
       isSending: false,
+      mentions: { close: () => undefined },
       activeChannel: {
         type: ChatChannelType.General,
         contextKey: 'general',
@@ -70,6 +70,7 @@ describe('ChatComponent message submission', () => {
       draft: '/raid Form up at the gate',
       sendError: '',
       isSending: false,
+      mentions: { close: () => undefined },
       activeChannel,
       raidId: () => 'raid-run-id',
       guild: () => null,
@@ -94,6 +95,7 @@ describe('ChatComponent message submission', () => {
       draft: '/raid Form up at the gate',
       sendError: '',
       isSending: false,
+      mentions: { close: () => undefined },
       activeChannel: {
         type: ChatChannelType.General,
         contextKey: 'general',
@@ -323,44 +325,6 @@ describe('parseWireCommand', () => {
 
   it('does not intercept ordinary chat messages', () => {
     expect(parseWireCommand('Selling ore')).toEqual({ isWire: false });
-  });
-});
-
-describe('splitCurrentPlayerMentions', () => {
-  it('marks an exact mention of the current player case-insensitively', () => {
-    expect(
-      splitCurrentPlayerMentions('Hey @ember knight, ready?', 'Ember Knight'),
-    ).toEqual([
-      { text: 'Hey ', isCurrentPlayerMention: false },
-      { text: '@ember knight', isCurrentPlayerMention: true },
-      { text: ', ready?', isCurrentPlayerMention: false },
-    ]);
-  });
-
-  it('does not mark a mention intended for another player', () => {
-    expect(splitCurrentPlayerMentions('Hey @Ember', 'Ash')).toEqual([
-      { text: 'Hey @Ember', isCurrentPlayerMention: false },
-    ]);
-  });
-
-  it('does not treat a longer name or an email fragment as a mention', () => {
-    expect(
-      splitCurrentPlayerMentions('@EmberKnight ember@Ember.test', 'Ember'),
-    ).toEqual([
-      {
-        text: '@EmberKnight ember@Ember.test',
-        isCurrentPlayerMention: false,
-      },
-    ]);
-  });
-
-  it('marks every exact mention in the same message', () => {
-    expect(splitCurrentPlayerMentions('@Ember and @Ember!', 'Ember')).toEqual([
-      { text: '@Ember', isCurrentPlayerMention: true },
-      { text: ' and ', isCurrentPlayerMention: false },
-      { text: '@Ember', isCurrentPlayerMention: true },
-      { text: '!', isCurrentPlayerMention: false },
-    ]);
   });
 });
 

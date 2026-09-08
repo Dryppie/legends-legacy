@@ -81,7 +81,7 @@ public sealed class DungeonRunFactory
         };
         run.State.RunId = run.Id;
 
-        var layout = CreateDungeonLayout(delve, dungeon.RestSiteCount, layoutRandom);
+        var layout = CreateDungeonLayout(delve, dungeon, layoutRandom);
         run.Rooms = layout.Rooms;
         run.State.MapNodes = layout.Nodes;
         run.State.TraversedRoomIndexes = layout.Nodes.Count == 0 ? [] : [layout.Nodes[0].RoomIndex];
@@ -92,57 +92,112 @@ public sealed class DungeonRunFactory
 
     private static DungeonLayout CreateDungeonLayout(
         DungeonDelveDefinition delve,
-        int restSiteCount,
+        DungeonDefinition dungeon,
         Random random)
     {
-        var selectedDefinitions = SelectEncounterNodes(delve.Nodes, random);
-        var nodes = selectedDefinitions.Select((definition, index) => new DungeonMapNode
+        var rows = ResizeEncounterRows(delve, dungeon, random);
+        var selectedDefinitions = rows.SelectMany((row, depth) =>
+            SelectEncounterNodes(row, random).Select(definition => (Definition: definition, Depth: depth)))
+            .ToList();
+        var nodes = selectedDefinitions.Select((entry, index) => new DungeonMapNode
         {
-            Id = definition.Id,
-            DisplayName = definition.DisplayName,
+            Id = $"{entry.Definition.Id}-depth-{entry.Depth}",
+            DisplayName = entry.Definition.DisplayName,
             RoomIndex = index,
-            Depth = definition.Depth,
-            Lane = definition.Lane,
-            Section = definition.Section,
-            Forecast = definition.Forecast,
-            VigorCostMin = definition.VigorCostMin,
-            VigorCostMax = definition.VigorCostMax,
+            Depth = entry.Depth,
+            Lane = entry.Definition.Lane,
+            Section = entry.Definition.Section,
+            Forecast = entry.Definition.Forecast,
+            VigorCostMin = entry.Definition.VigorCostMin,
+            VigorCostMax = entry.Definition.VigorCostMax,
             NextRoomIndexes = []
         }).ToList();
-        var rooms = selectedDefinitions.Select((definition, index) => new RoomInstance
+        var rooms = selectedDefinitions.Select((entry, index) => new RoomInstance
         {
             RoomIndex = index,
-            Type = definition.RoomType,
+            Type = entry.Definition.RoomType,
             Status = RoomInstanceStatus.Pending
         }).ToList();
 
-        ConfigureRestSiteChoices(nodes, rooms, restSiteCount, random);
+        ConfigureRestSiteChoices(nodes, rooms, dungeon.RestSiteCount, random);
         RandomizeLayout(nodes, rooms, random);
         return new DungeonLayout(rooms, nodes);
     }
 
     private sealed record DungeonLayout(List<RoomInstance> Rooms, List<DungeonMapNode> Nodes);
 
+    private static List<List<DungeonDelveNodeDefinition>> ResizeEncounterRows(
+        DungeonDelveDefinition delve,
+        DungeonDefinition dungeon,
+        Random random)
+    {
+        if (dungeon.MinRooms <= 0 || dungeon.MaxRooms < dungeon.MinRooms)
+        {
+            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has an invalid room-count range.");
+        }
+
+        var rows = delve.Nodes
+            .GroupBy(node => node.Depth)
+            .OrderBy(row => row.Key)
+            .Select(row => row.ToList())
+            .ToList();
+        var combatRows = rows.Where(IsCombatRow).ToList();
+
+        // Length counts one room per depth, including Entrance and Boss, not alternative branches.
+        var targetCount = (int)random.NextInt64(dungeon.MinRooms, (long)dungeon.MaxRooms + 1);
+        while (rows.Count > targetCount)
+        {
+            // Keep at least one combat row in each stretch between authored special rooms.
+            var removableIndexes = Enumerable.Range(0, rows.Count)
+                .Where(index => IsCombatRow(rows[index]) &&
+                    ((index > 0 && IsSameCombatStretch(rows[index - 1], rows[index])) ||
+                     (index + 1 < rows.Count && IsSameCombatStretch(rows[index], rows[index + 1]))))
+                .ToList();
+            if (removableIndexes.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Dungeon '{dungeon.Id}' cannot fit {targetCount} rooms without removing required layout rooms.");
+            }
+
+            rows.RemoveAt(removableIndexes[random.Next(removableIndexes.Count)]);
+        }
+
+        while (rows.Count < targetCount)
+        {
+            if (combatRows.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Dungeon '{dungeon.Id}' cannot reach {targetCount} rooms without combat row templates.");
+            }
+
+            var template = combatRows[random.Next(combatRows.Count)];
+            rows.Insert(rows.LastIndexOf(template) + 1, template);
+        }
+
+        return rows;
+    }
+
+    private static bool IsCombatRow(List<DungeonDelveNodeDefinition> row) =>
+        row.All(node => node.RoomType == RoomType.Combat);
+
+    private static bool IsSameCombatStretch(
+        List<DungeonDelveNodeDefinition> first,
+        List<DungeonDelveNodeDefinition> second) =>
+        IsCombatRow(first) && IsCombatRow(second) && first[0].Section == second[0].Section;
+
     private static List<DungeonDelveNodeDefinition> SelectEncounterNodes(
         IReadOnlyList<DungeonDelveNodeDefinition> definitions,
         Random random)
     {
-        var selected = new HashSet<DungeonDelveNodeDefinition>();
-
-        foreach (var row in definitions.GroupBy(node => node.Depth))
+        if (definitions.Count <= 1 || definitions.Any(node => node.RoomType != RoomType.Combat))
         {
-            var candidates = row.ToList();
-            if (candidates.Count <= 1 || candidates.Any(node => node.RoomType != RoomType.Combat))
-            {
-                selected.UnionWith(candidates);
-                continue;
-            }
-
-            var targetCount = RollEncounterRowWidth(candidates.Count, random);
-            Shuffle(candidates, random);
-            selected.UnionWith(candidates.Take(targetCount));
+            return definitions.ToList();
         }
 
+        var candidates = definitions.ToList();
+        var targetCount = RollEncounterRowWidth(candidates.Count, random);
+        Shuffle(candidates, random);
+        var selected = candidates.Take(targetCount).ToHashSet();
         return definitions.Where(selected.Contains).ToList();
     }
 

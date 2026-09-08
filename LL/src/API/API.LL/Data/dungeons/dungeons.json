@@ -47,7 +47,7 @@
           "difficulty": 1,
           "enemyStrengthMultiplier": 1,
           "minRooms": 10,
-          "maxRooms": 12,
+          "maxRooms": 13,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -65,7 +65,7 @@
           "difficulty": 2,
           "enemyStrengthMultiplier": 1,
           "minRooms": 11,
-          "maxRooms": 13,
+          "maxRooms": 14,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -83,7 +83,7 @@
           "difficulty": 3,
           "enemyStrengthMultiplier": 1,
           "minRooms": 12,
-          "maxRooms": 14,
+          "maxRooms": 15,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -184,7 +184,7 @@
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.05,
           "minRooms": 11,
-          "maxRooms": 13,
+          "maxRooms": 14,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -202,7 +202,7 @@
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.02,
           "minRooms": 12,
-          "maxRooms": 14,
+          "maxRooms": 15,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -220,7 +220,7 @@
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.04,
           "minRooms": 13,
-          "maxRooms": 15,
+          "maxRooms": 16,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -288,7 +288,7 @@
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.5,
           "minRooms": 11,
-          "maxRooms": 13,
+          "maxRooms": 14,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -306,7 +306,7 @@
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.25,
           "minRooms": 12,
-          "maxRooms": 14,
+          "maxRooms": 15,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -324,7 +324,7 @@
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.1,
           "minRooms": 13,
-          "maxRooms": 15,
+          "maxRooms": 16,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -393,7 +393,7 @@
           "difficulty": 1,
           "enemyStrengthMultiplier": 1.25,
           "minRooms": 11,
-          "maxRooms": 13,
+          "maxRooms": 14,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -411,7 +411,7 @@
           "difficulty": 2,
           "enemyStrengthMultiplier": 1.1,
           "minRooms": 12,
-          "maxRooms": 14,
+          "maxRooms": 15,
           "rewardTable": {
             "firstClearRewards": [
               {
@@ -429,7 +429,7 @@
           "difficulty": 3,
           "enemyStrengthMultiplier": 1.2,
           "minRooms": 13,
-          "maxRooms": 15,
+          "maxRooms": 16,
           "rewardTable": {
             "firstClearRewards": [
               {

@@ -391,6 +391,10 @@ export class QuestJournalPageComponent
 
   readonly isReadyToTurnIn = isQuestReadyToTurnIn;
 
+  isEntryReadyToTurnIn(entry: QuestJournalEntry): boolean {
+    return entry.quests.some(isQuestReadyToTurnIn);
+  }
+
   isObjectiveAvailable(
     quest: QuestState,
     objective: QuestObjectiveState,

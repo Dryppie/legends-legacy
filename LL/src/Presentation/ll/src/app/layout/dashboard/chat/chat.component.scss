@@ -1,0 +1,15 @@
+.chat-mention {
+  border-radius: 3px;
+  background: rgb(88 101 242 / 30%);
+  padding: 0 3px;
+  color: #c9d2ff;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+// Keep the recipient highlight visible over channel and hover backgrounds.
+.chat-mentioned-message,
+.chat-mentioned-message:hover {
+  border-left-color: #89a3ff;
+  background-color: rgb(88 101 242 / 16%);
+}

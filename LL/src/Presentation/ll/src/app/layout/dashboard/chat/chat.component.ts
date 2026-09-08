@@ -33,6 +33,14 @@ import { CharacterService } from '../../../core/services/api/character/character
 import { ItemComponent } from '../../../shared/components/item/item.component';
 import { environment } from '../../../../environments/environment';
 import { LocalDatePipe } from '../../../shared/pipes/local-date/local-date.pipe';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { ChatMentionSuggestionsService } from './chat-mention-suggestions.service';
+import {
+  ChatTextSegment,
+  findDraftMention,
+  insertChatMention,
+  splitChatMentions,
+} from './chat-mentions';
 
 export interface WireCommand {
   recipientName: string;
@@ -56,72 +64,6 @@ export type ChannelCommandParseResult =
       command: ChannelCommand | null;
     };
 
-export interface ChatTextSegment {
-  text: string;
-  isCurrentPlayerMention: boolean;
-}
-
-const MENTION_DELIMITER_PATTERN = /[\s.,!?;:()[\]{}"']/u;
-
-/**
- * Splits a chat body without creating HTML so Angular can render mentions safely.
- * Only the current player's exact name is marked as a mention on their client.
- */
-export function splitCurrentPlayerMentions(
-  body: string,
-  playerName: string | null | undefined,
-): ChatTextSegment[] {
-  const trimmedPlayerName = playerName?.trim();
-  if (!trimmedPlayerName) {
-    return [{ text: body, isCurrentPlayerMention: false }];
-  }
-
-  const escapedPlayerName = trimmedPlayerName.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    '\\$&',
-  );
-  const mentionPattern = new RegExp(`@${escapedPlayerName}`, 'giu');
-  const segments: ChatTextSegment[] = [];
-  let bodyCursor = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = mentionPattern.exec(body)) !== null) {
-    const mentionStart = match.index;
-    const mentionEnd = mentionPattern.lastIndex;
-    const previousCharacter = mentionStart > 0 ? body[mentionStart - 1] : null;
-    const nextCharacter = mentionEnd < body.length ? body[mentionEnd] : null;
-    const hasValidStart =
-      previousCharacter === null ||
-      MENTION_DELIMITER_PATTERN.test(previousCharacter);
-    const hasValidEnd =
-      nextCharacter === null || MENTION_DELIMITER_PATTERN.test(nextCharacter);
-
-    if (!hasValidStart || !hasValidEnd) continue;
-
-    if (mentionStart > bodyCursor) {
-      segments.push({
-        text: body.slice(bodyCursor, mentionStart),
-        isCurrentPlayerMention: false,
-      });
-    }
-
-    segments.push({
-      text: body.slice(mentionStart, mentionEnd),
-      isCurrentPlayerMention: true,
-    });
-    bodyCursor = mentionEnd;
-  }
-
-  if (bodyCursor < body.length || segments.length === 0) {
-    segments.push({
-      text: body.slice(bodyCursor),
-      isCurrentPlayerMention: false,
-    });
-  }
-
-  return segments;
-}
-
 @Pipe({
   name: 'chatMentionSegments',
   standalone: true,
@@ -132,7 +74,7 @@ export class ChatMentionSegmentsPipe implements PipeTransform {
     body: string,
     playerName: string | null | undefined,
   ): ChatTextSegment[] {
-    return splitCurrentPlayerMentions(body, playerName);
+    return splitChatMentions(body, playerName);
   }
 }
 
@@ -276,10 +218,31 @@ function localChatDateKey(value: Date | string): string {
     ItemComponent,
     RouterLink,
     ChatMentionSegmentsPipe,
+    OverlayModule,
   ],
   templateUrl: './chat.component.html',
+  styleUrl: './chat.component.scss',
+  providers: [ChatMentionSuggestionsService],
 })
 export class ChatComponent implements OnInit, OnDestroy {
+  private static nextMentionListId = 0;
+  readonly mentionListId = `chat-mentions-${ChatComponent.nextMentionListId++}`;
+  readonly mentionPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+  ];
   @Input() collapsible = false;
   @Input() collapsed = false;
   @Input() drawer = false;
@@ -427,6 +390,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly characterService: CharacterService,
     private readonly authService: AuthService,
     private readonly router: Router,
+    readonly mentions: ChatMentionSuggestionsService,
   ) {
     this.guild = this.guildState.guild;
     this.raidId = this.raidService.activeRaidChatId;
@@ -490,6 +454,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           type: ChatChannelType.Whisper,
           contextKey: 'whisper',
         };
+        this.mentions.close();
         this.draft = `/w ${targetName} `;
         if (this.canWriteChat) {
           this.focusChatInput();
@@ -733,16 +698,107 @@ export class ChatComponent implements OnInit, OnDestroy {
     return index;
   }
 
-  onDraftChange(): void {
+  isMentionedByOtherPlayer(message: ChatMessageDto): boolean {
+    return (
+      message.senderId !== this.characterId() &&
+      message.channelType !== ChatChannelType.System &&
+      !message.isSystemGenerated &&
+      splitChatMentions(message.body, this.characterName()).some(
+        (segment) => segment.isCurrentPlayerMention,
+      )
+    );
+  }
+
+  updateMentionSearch(input: HTMLInputElement): void {
+    this.mentions.update(
+      this.canWriteChat && input.selectionStart === input.selectionEnd
+        ? findDraftMention(
+            this.draft,
+            input.selectionStart ?? this.draft.length,
+          )
+        : null,
+    );
+  }
+
+  onComposerKeyup(event: KeyboardEvent, input: HTMLInputElement): void {
+    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+      this.updateMentionSearch(input);
+    }
+  }
+
+  onComposerKeydown(event: KeyboardEvent): void {
+    if (event.isComposing || event.keyCode === 229) return;
+    if (this.mentions.active()) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        this.mentions.close();
+        return;
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.mentions.moveSelection(event.key === 'ArrowDown' ? 1 : -1);
+        this.scrollActiveMentionIntoView();
+        return;
+      }
+      if (event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey)) {
+        const name = this.mentions.names()[this.mentions.selectedIndex()];
+        // Enter must never send a half-written tag while its picker is open.
+        if (name || event.key === 'Enter') {
+          event.preventDefault();
+          if (name) this.selectMention(name);
+          return;
+        }
+      }
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      void this.send();
+    }
+  }
+
+  private scrollActiveMentionIntoView(): void {
+    setTimeout(() => {
+      this.chatInput?.nativeElement.ownerDocument
+        .getElementById(
+          `${this.mentionListId}-${this.mentions.selectedIndex()}`,
+        )
+        ?.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  selectMention(name: string): void {
+    const mention = this.mentions.active();
+    if (!mention || !this.canWriteChat) return;
+    const result = insertChatMention(this.draft, mention, name);
+    if (!result) {
+      this.sendError =
+        'That mention would exceed the 200-character message limit.';
+      return;
+    }
+    this.draft = result.draft;
+    this.sendError = '';
+    this.mentions.close();
+    const input = this.chatInput?.nativeElement;
+    if (input) {
+      input.value = this.draft;
+      input.focus();
+      input.setSelectionRange(result.caret, result.caret);
+    }
+  }
+
+  onDraftChange(input: HTMLInputElement): void {
     this.sendError = '';
     if (!this.canWriteChat) {
       this.draft = '';
+      this.mentions.close();
       return;
     }
 
     if (this.draft.length > 200) {
       this.draft = this.draft.slice(0, 200);
     }
+    this.updateMentionSearch(input);
   }
 
   private focusChatInput(): void {
@@ -773,6 +829,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     let { type, contextKey } = this.activeChannel;
     let messageBody = body;
     this.isSending = true;
+    this.mentions.close();
 
     try {
       const wire = parseWireCommand(body);

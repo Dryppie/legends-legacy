@@ -189,7 +189,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return (
       this.getNotificationCount(itemId) +
       (itemId === 'essences' && this.essenceState.essenceFocusReady() ? 1 : 0) +
-      (itemId === 'guild' ? this.guildState.claimableDailyOrderCount() : 0)
+      (itemId === 'guild' ? this.guildState.claimableDailyOrderCount() : 0) +
+      (itemId === 'quests' ? this.questState.readyToTurnInCount() : 0)
     );
   }
 

@@ -6,6 +6,10 @@ using Domain.Models.Dungeons.Runs;
 using Domain.Models.Snapshots;
 using Services.LL.Dungeons;
 using Services.LL.Interfaces;
+using Services.LL.JsonDefinitions.Dungeons;
+using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EssenceSystem.Tests;
 
@@ -14,12 +18,94 @@ public sealed class DungeonRunFactoryLayoutTests
     [Fact]
     public async Task Same_seed_reproduces_the_same_layout()
     {
-        var factory = CreateFactory();
+        var factory = CreateFactory(minRooms: 8, maxRooms: 16);
 
         var first = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
         var second = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
 
         Assert.Equal(LayoutSignature(first), LayoutSignature(second));
+        Assert.Equal(LayoutSignature(first), LayoutSignature(factory.CreateForSimulation("layout_test", 73)));
+    }
+
+    [Fact]
+    public async Task Room_range_controls_route_length_and_includes_both_endpoints()
+    {
+        var factory = CreateFactory(minRooms: 8, maxRooms: 16);
+        var observedLengths = new HashSet<int>();
+
+        for (var seed = 0; seed < 200; seed++)
+        {
+            var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", seed, CancellationToken.None);
+            var routeLength = AssertRouteLength(run);
+            Assert.InRange(routeLength, 8, 16);
+            observedLengths.Add(routeLength);
+            Assert.Single(run.Rooms, room => room.Type == RoomType.Entrance);
+            Assert.Single(run.Rooms, room => room.Type == RoomType.MiniBoss);
+            Assert.Equal(2, run.Rooms.Count(room => room.Type == RoomType.RestSite));
+        }
+
+        Assert.Equal(Enumerable.Range(8, 9), observedLengths.Order());
+    }
+
+    [Fact]
+    public void Every_catalog_difficulty_generates_the_advertised_route_lengths()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "src", "API", "API.LL", "Data")))
+            directory = directory.Parent;
+        Assert.NotNull(directory);
+        var contentRoot = Path.Combine(directory.FullName, "src", "API", "API.LL");
+        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        options.Converters.Add(new JsonStringEnumConverter());
+        var catalog = JsonSerializer.Deserialize<DungeonCatalogDocument>(
+            File.ReadAllText(Path.Combine(contentRoot, "Data", "dungeons", "dungeons.json")), options)!;
+        var dungeons = new DungeonDefinitionMaterializer(new DungeonCatalogValidator()).Materialize(catalog);
+        var delves = new JsonDungeonDelveDefinitionProvider(new ConfigurationBuilder().Build(), contentRoot, options);
+        var originalDefinitions = JsonSerializer.Serialize(delves.GetAll(), options);
+
+        foreach (var dungeon in dungeons)
+        {
+            var factory = new DungeonRunFactory(new StaticDungeonDefinitions(dungeon), new StaticSnapshotService(), delves);
+            var observedLengths = new HashSet<int>();
+            var authoredMinibossCount = delves.GetForDungeon(dungeon.Id).Nodes.Count(node => node.RoomType == RoomType.MiniBoss);
+
+            for (var seed = 0; seed < 100; seed++)
+            {
+                var run = factory.CreateForSimulation(dungeon.Id, seed);
+                var routeLength = AssertRouteLength(run);
+                Assert.InRange(routeLength, dungeon.MinRooms, dungeon.MaxRooms);
+                observedLengths.Add(routeLength);
+                Assert.Equal(dungeon.RestSiteCount, run.Rooms.Count(room => room.Type == RoomType.RestSite));
+                Assert.Equal(authoredMinibossCount, run.Rooms.Count(room => room.Type == RoomType.MiniBoss));
+                Assert.Equal(run.State.MapNodes.Count, Traverse([0], index => run.State.MapNodes[index].NextRoomIndexes).Count);
+            }
+
+            Assert.Equal(Enumerable.Range(dungeon.MinRooms, dungeon.MaxRooms - dungeon.MinRooms + 1), observedLengths.Order());
+        }
+
+        Assert.Equal(originalDefinitions, JsonSerializer.Serialize(delves.GetAll(), options));
+    }
+
+    [Theory]
+    [InlineData(0, 9)]
+    [InlineData(10, 9)]
+    public void Invalid_room_ranges_are_rejected(int minRooms, int maxRooms)
+    {
+        var factory = CreateFactory(minRooms: minRooms, maxRooms: maxRooms);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => factory.CreateForSimulation("layout_test", 0));
+
+        Assert.Contains("invalid room-count range", exception.Message);
+    }
+
+    [Fact]
+    public void A_range_too_short_for_required_rooms_is_rejected_instead_of_exceeding_the_preview()
+    {
+        var factory = CreateFactory(minRooms: 7, maxRooms: 7);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => factory.CreateForSimulation("layout_test", 0));
+
+        Assert.Contains("without removing required layout rooms", exception.Message);
     }
 
     [Fact]
@@ -57,15 +143,19 @@ public sealed class DungeonRunFactoryLayoutTests
         Assert.True(routeSignatures.Count >= 8);
     }
 
-    [Fact]
-    public async Task Generated_layouts_remain_reachable_and_advance_one_depth_at_a_time()
+    [Theory]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(16)]
+    public async Task Generated_layouts_remain_reachable_and_advance_one_depth_at_a_time(int roomCount)
     {
-        var factory = CreateFactory();
+        var factory = CreateFactory(minRooms: roomCount, maxRooms: roomCount);
 
         for (var seed = 0; seed < 100; seed++)
         {
             var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", seed, CancellationToken.None);
             var nodes = run.State.MapNodes;
+            Assert.Equal(roomCount, AssertRouteLength(run));
             var byIndex = nodes.ToDictionary(node => node.RoomIndex);
             var rows = nodes
                 .GroupBy(node => node.Depth)
@@ -233,6 +323,8 @@ public sealed class DungeonRunFactoryLayoutTests
         {
             Id = "boss_composition_test",
             Name = "Boss Composition Test",
+            MinRooms = 2,
+            MaxRooms = 2,
             Rooms =
             [
                 new RoomDefinition
@@ -292,6 +384,8 @@ public sealed class DungeonRunFactoryLayoutTests
             Id = "small_pool_test",
             Name = "Small Pool Test",
             RestSiteCount = 2,
+            MinRooms = 9,
+            MaxRooms = 9,
             Rooms =
             [
                 new RoomDefinition
@@ -325,13 +419,15 @@ public sealed class DungeonRunFactoryLayoutTests
             room => Assert.Equal(["only-enemy"], room.EncounterIds));
     }
 
-    private static DungeonRunFactory CreateFactory(int restSiteCount = 2)
+    private static DungeonRunFactory CreateFactory(int restSiteCount = 2, int minRooms = 9, int maxRooms = 9)
     {
         var dungeon = new DungeonDefinition
         {
             Id = "layout_test",
             Name = "Layout Test",
             RestSiteCount = restSiteCount,
+            MinRooms = minRooms,
+            MaxRooms = maxRooms,
             Rooms =
             [
                 new RoomDefinition
@@ -406,7 +502,29 @@ public sealed class DungeonRunFactoryLayoutTests
     private static string LayoutSignature(DungeonRun run) => string.Join(
         "|",
         run.State.MapNodes.Select(node =>
-            $"{node.RoomIndex}:{node.Lane}>{string.Join(",", node.NextRoomIndexes)}"));
+            $"{node.Id}:{node.RoomIndex}:{node.Depth}:{node.Lane}:{node.Section}:{run.Rooms[node.RoomIndex].Type}>{string.Join(",", node.NextRoomIndexes)}"));
+
+    private static int AssertRouteLength(DungeonRun run)
+    {
+        var nodes = run.State.MapNodes;
+        Assert.Equal(nodes.Count, nodes.Select(node => node.Id).Distinct().Count());
+        var entrance = Assert.Single(nodes, node => run.Rooms[node.RoomIndex].Type == RoomType.Entrance);
+        var boss = Assert.Single(nodes, node => run.Rooms[node.RoomIndex].Type == RoomType.Boss);
+        Assert.Equal(0, entrance.Depth);
+        var lengths = new Dictionary<int, int> { [boss.RoomIndex] = 1 };
+        Assert.Empty(boss.NextRoomIndexes);
+
+        foreach (var node in nodes.Where(node => node != boss).OrderByDescending(node => node.Depth))
+        {
+            Assert.NotEmpty(node.NextRoomIndexes);
+            Assert.All(node.NextRoomIndexes, index => Assert.Equal(node.Depth + 1, nodes[index].Depth));
+            var remainingLength = Assert.Single(node.NextRoomIndexes.Select(index => lengths[index]).Distinct());
+            lengths[node.RoomIndex] = remainingLength + 1;
+        }
+
+        Assert.Equal(nodes.Select(node => node.Depth).Distinct().Count(), lengths[entrance.RoomIndex]);
+        return lengths[entrance.RoomIndex];
+    }
 
     private static HashSet<int> Traverse(
         IEnumerable<int> starts,

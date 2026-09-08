@@ -38,7 +38,7 @@ These decisions are already made and should not be reopened accidentally.
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Run subdivisions     | Call them **Sections**, never Legs.                                                                                                               |
 | Section count        | Dungeons can have different numbers of Sections. Three is not a universal rule.                                                                   |
-| Section shape        | A Section contains one to three encounter rows, followed by an authored transition slot that may become a Rest-versus-Combat choice.             |
+| Section shape        | Authored Sections contain one to three encounter rows followed by a transition slot. Generated runs resize combat stretches to match the difficulty's room range while preserving special rooms and transition slots. |
 | Recovery nodes       | Use **Rest Sites**, never Wardstones or checkpoints.                                                                                              |
 | Rest effect          | A Rest Site restores **15 Vigor**.                                                                                                                |
 | Playable room scope  | Authored dungeons may contain only Entrance, Combat, MiniBoss, Rest Site, and Boss rooms. Hazard, Cache, Event, Elite, and Omen Site types have been removed. |
@@ -47,13 +47,13 @@ These decisions are already made and should not be reopened accidentally.
 | Rewards at risk      | Call them **Pending Loot**, never Pack, Run Loot, Unbanked Loot, or Unsecured Loot.                                                               |
 | Route selection      | Players select an available route by clicking or tapping its map node. Do not restore the large choice overlay.                                   |
 | Route automation     | The server must never automatically pick a branch.                                                                                                |
-| Layout variation     | Each run uses its seed to select configured Rest Site slots, shuffle lanes, and regenerate safe adjacent-row connections. Sections, Depths, and Boss placement remain authored. |
+| Layout variation     | Each run rolls an inclusive route length from the difficulty's `minRooms`–`maxRooms`, resizes combat rows, selects configured Rest Site slots, shuffles lanes, and regenerates adjacent-row connections. Section order and special rooms remain authored; Depths are regenerated. |
 | Map progression      | The map automatically scrolls as the run advances.                                                                                                |
 | Node visibility      | Cleared nodes, the current node, and available choices are opaque. Unreached nodes remain subdued.                                                |
 | Node colors          | Revealed nodes use the same semantic colors as the map legend.                                                                                    |
 | Vigor color          | Low Vigor is red; high Vigor is green.                                                                                                            |
 | Threshold UI         | Show the current Vigor threshold by default. Reveal all thresholds through hover, focus, or an explicit help/expand control.                      |
-| Progress language    | Use authored **Depth X of Y** for graph position and **Section X of Y** for Section progress. Do not mix graph nodes with depths.                 |
+| Progress language    | Use generated **Depth X of Y** for graph position and **Section X of Y** for Section progress. Do not mix graph nodes with depths.                 |
 | Legacy compatibility | There is no production dungeon data. Do not preserve or translate legacy dungeon runs, checkpoint state, old JSON field names, or old enum names. |
 
 ### Terms that must not return
@@ -216,11 +216,13 @@ flowchart LR
     P --> N
 ```
 
-Sections may contain one, two, or three encounter rows. Rows do not need to contain the maximum number of nodes.
+Authored Sections may contain one, two, or three encounter rows. Generated runs may repeat or remove combat-only rows to meet the configured route length. Rows do not need to contain the maximum number of nodes.
 
 ### Seeded runtime variation
 
 When a run is created:
+
+The run seed first rolls a route length between the selected difficulty's `minRooms` and `maxRooms`, inclusive. This counts the Entrance, one chosen room per Depth, and the Boss. Combat-only rows are removed or repeated within their authored stretches; every stretch retains at least one combat row, and Entrance, MiniBoss, Rest Site slots, and Boss remain in order. Repeated rows get independent branch rolls and unique node IDs. An impossible range fails instead of silently producing a length outside the preview. The shared authored definitions are never changed.
 
 1. Combat-only rows use their authored nodes as a candidate pool. Two-node rows resolve to one node 20% of the time and two nodes 80% of the time; rows with three candidates resolve to one, two, or three nodes with 15%, 55%, and 30% weights respectively.
 2. The family-level `restSiteCount` selects that many authored Rest Site slots using the run seed.
@@ -237,9 +239,11 @@ The run seed fully determines this result. Generated `MapNodes` are persisted, s
 
 - `Depth` is a horizontal graph column.
 - Multiple nodes can share one Depth.
-- `TotalRooms` in the run DTO currently represents distinct authored Depths when a graph exists.
+- `TotalRooms` in the run DTO represents distinct generated Depths when a graph exists, matching the length rolled from the preview range.
 - Global navigation and the dungeon header should report `Depth X of Y`.
 - The sidebar can separately report the number of cleared rooms.
+
+The September 2026 length update keeps all catalog minima and increases each maximum by one. Goblin Mines I/II/III use 10–13, 11–14, and 12–15 rooms; Forgotten Catacombs, Tangled Cave, and The Great Tree use 11–14, 12–15, and 13–16. Ship the updated backend and `Data/dungeons/dungeons.json` together. Only newly created runs use the new lengths; persisted layouts are retained. No database migration is needed.
 
 ---
 

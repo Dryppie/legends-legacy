@@ -28,7 +28,8 @@
 
         <p
           *ngIf="latestMobileMessage as message; else emptyMobileChat"
-          class="min-w-0 flex-1 truncate text-[var(--ll-text-xs)]"
+          class="min-w-0 flex-1 truncate border-l-2 border-transparent pl-1 text-[var(--ll-text-xs)]"
+          [class.chat-mentioned-message]="isMentionedByOtherPlayer(message)"
         >
           <strong class="text-primary">{{ message.senderName }}:</strong>
           <span class="text-[var(--ll-color-text)]">
@@ -88,6 +89,7 @@
           </div>
           <article
             class="rounded-sm border-l-2 border-l-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-soft)] px-2 py-1.5"
+            [class.chat-mentioned-message]="isMentionedByOtherPlayer(message)"
           >
             <div class="flex min-w-0 items-baseline gap-1.5 text-xs">
               <time class="shrink-0 text-[var(--ll-color-text-subtle)]">
@@ -119,15 +121,39 @@
       <div class="flex items-center gap-2">
         <input
           #chatInput
+          cdkOverlayOrigin
+          #mentionOrigin="cdkOverlayOrigin"
+          role="combobox"
+          aria-label="Chat message"
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          autocomplete="off"
+          [attr.aria-expanded]="!!mentions.active()"
+          [attr.aria-controls]="mentions.active() ? mentionListId : null"
+          [attr.aria-activedescendant]="
+            mentions.active() && mentions.selectedIndex() >= 0
+              ? mentionListId + '-' + mentions.selectedIndex()
+              : null
+          "
           type="text"
           [placeholder]="chatPlaceholder"
           class="ll-input h-8 min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
           [(ngModel)]="draft"
-          (ngModelChange)="onDraftChange()"
-          (keydown.enter)="send()"
+          (ngModelChange)="onDraftChange(chatInput)"
+          (keydown)="onComposerKeydown($event)"
+          (keyup)="onComposerKeyup($event, chatInput)"
+          (click)="updateMentionSearch(chatInput)"
+          (focus)="updateMentionSearch(chatInput)"
+          (blur)="mentions.close()"
           maxlength="200"
           [disabled]="!canWriteChat"
         />
+        <ng-container
+          *ngTemplateOutlet="
+            mentionPicker;
+            context: { $implicit: mentionOrigin, input: chatInput }
+          "
+        ></ng-container>
         <app-regular-button
           class="shrink-0"
           (pressed)="send()"
@@ -135,6 +161,10 @@
           [disabled]="!canWriteChat || !draft.trim() || isSending"
         />
       </div>
+
+      <p *ngIf="sendError" class="pt-1 text-xs text-[var(--ll-color-danger)]">
+        {{ sendError }}
+      </p>
 
       <nav
         *ngIf="mobileDockExpanded"
@@ -310,6 +340,7 @@
             <article
               class="group rounded-sm border-l-2 bg-[var(--ll-color-surface-soft)] px-2 py-1.5 transition-colors hover:bg-[var(--ll-color-primary-soft)]"
               [ngClass]="messageRowClasses(m)"
+              [class.chat-mentioned-message]="isMentionedByOtherPlayer(m)"
               [attr.role]="m.targetUrl ? 'link' : null"
               [attr.tabindex]="m.targetUrl ? 0 : null"
               [class.cursor-pointer]="!!m.targetUrl"
@@ -468,15 +499,39 @@
         <div class="flex gap-2">
           <input
             #chatInput
+            cdkOverlayOrigin
+            #mentionOrigin="cdkOverlayOrigin"
+            role="combobox"
+            aria-label="Chat message"
+            aria-autocomplete="list"
+            aria-haspopup="listbox"
+            autocomplete="off"
+            [attr.aria-expanded]="!!mentions.active()"
+            [attr.aria-controls]="mentions.active() ? mentionListId : null"
+            [attr.aria-activedescendant]="
+              mentions.active() && mentions.selectedIndex() >= 0
+                ? mentionListId + '-' + mentions.selectedIndex()
+                : null
+            "
             type="text"
             [placeholder]="chatPlaceholder"
             class="ll-input min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
             [(ngModel)]="draft"
-            (ngModelChange)="onDraftChange()"
-            (keydown.enter)="send()"
+            (ngModelChange)="onDraftChange(chatInput)"
+            (keydown)="onComposerKeydown($event)"
+            (keyup)="onComposerKeyup($event, chatInput)"
+            (click)="updateMentionSearch(chatInput)"
+            (focus)="updateMentionSearch(chatInput)"
+            (blur)="mentions.close()"
             maxlength="200"
             [disabled]="!canWriteChat"
           />
+          <ng-container
+            *ngTemplateOutlet="
+              mentionPicker;
+              context: { $implicit: mentionOrigin, input: chatInput }
+            "
+          ></ng-container>
           <app-regular-button
             class="shrink-0"
             (pressed)="send()"
@@ -612,13 +667,77 @@
   </ng-template>
 </ng-template>
 
+<ng-template #mentionPicker let-origin let-input="input">
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="origin"
+    [cdkConnectedOverlayOpen]="!!mentions.active()"
+    [cdkConnectedOverlayPositions]="mentionPositions"
+    [cdkConnectedOverlayPush]="true"
+    [cdkConnectedOverlayViewportMargin]="8"
+    (overlayOutsideClick)="mentions.close()"
+  >
+    <div
+      class="max-h-[min(14rem,calc(100dvh-1rem))] max-w-[calc(100vw-1rem)] overflow-y-auto rounded border border-light_gray bg-texture p-1 text-xs text-white shadow-xl shadow-black/60"
+      [style.width.px]="input.offsetWidth"
+      (pointerdown)="$event.preventDefault()"
+    >
+      <div class="px-2 py-1 text-primary">Mention a player</div>
+      <div
+        [id]="mentionListId"
+        role="listbox"
+        aria-label="Player suggestions"
+        [attr.aria-busy]="mentions.loading()"
+      >
+        <button
+          *ngFor="let name of mentions.names(); index as i"
+          type="button"
+          role="option"
+          tabindex="-1"
+          class="ll-dropdown-option block w-full break-words rounded px-2 py-2 text-left"
+          [class.ll-dropdown-option-hovered]="mentions.selectedIndex() === i"
+          [id]="mentionListId + '-' + i"
+          [attr.aria-selected]="mentions.selectedIndex() === i"
+          (mouseenter)="mentions.selectedIndex.set(i)"
+          (click)="selectMention(name)"
+        >
+          {{ "@" + name }}
+        </button>
+      </div>
+      <div class="px-2 py-1 text-zinc-400" role="status" aria-live="polite">
+        <ng-container
+          *ngIf="
+            (mentions.active()?.query?.trim()?.length ?? 0) < 2;
+            else searchStatus
+          "
+          >Type at least 2 characters to find a player.</ng-container
+        >
+        <ng-template #searchStatus>
+          <ng-container *ngIf="mentions.loading(); else searchResult"
+            >Searching players...</ng-container
+          >
+          <ng-template #searchResult>
+            {{
+              mentions.error()
+                ? "Unable to search players. Try typing again."
+                : mentions.names().length
+                  ? "↑↓ to browse · Enter or Tab to select · Esc to dismiss"
+                  : "No players found."
+            }}
+          </ng-template>
+        </ng-template>
+      </div>
+    </div>
+  </ng-template>
+</ng-template>
+
 <ng-template #messageBody let-body>
   <span
     *ngFor="
       let segment of body | chatMentionSegments: characterName();
       trackBy: trackMentionSegment
     "
-    [ngClass]="{ 'text-[#89a3ff]': segment.isCurrentPlayerMention }"
+    [class.chat-mention]="segment.isMention"
     >{{ segment.text }}</span
   >
 </ng-template>

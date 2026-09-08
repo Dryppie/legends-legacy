@@ -10,6 +10,7 @@
     class="absolute z-20"
     [ngClass]="compact ? 'right-1 top-1' : 'right-2.5 top-2'"
     [count]="notificationCount"
+    [label]="item.id === 'quests' ? 'Quests ready to turn in' : 'Pending activity'"
   ></app-notification-indicator>
 
   <span
