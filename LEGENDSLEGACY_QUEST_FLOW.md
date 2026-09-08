@@ -1,21 +1,20 @@
 # LegendsLegacy — Quest Flow Guide
 
-Updated 3 September 2026. Covers the current catalog of **29 regular quests and one expired example event quest**. Equipment drops, starter grants and the Forge are the supported equipment path; crafting and gathering quests have been removed.
+Updated 4 September 2026. Covers the current catalog of **28 regular quests and one expired example event quest**. Equipment drops and the tutorial Arms Chest are the supported early equipment path; crafting, gathering and Forge quests have been removed.
 
 ## Equipment progression in the quest chain
 
 | Milestone | Current behavior |
 | --- | --- |
-| The Soul Archive v3 | Absorb the First Hunt Essence, then equip any Essence; receive 500 Cinders. |
-| First Weapon v2 | Choose and equip the full starter hands/armor kit in Equipment & Forge. Completion awards 10 Scrap and grants a band, amulet and vial. |
-| Ready for the Road v2 | Equip those accessories. The internal quest ID remains quest.onboarding.tools_of_trade. |
+| The Soul Archive v3 | Absorb the First Hunt Essence, then equip any Essence; receive 500 Cinders and one Arms Chest. |
+| First Weapon v2 | Open the Arms Chest, choose one of five one-handed weapons, and equip it. |
 | Into the Ruins v2 | Win the introductory Lumo encounter. |
 | All ten Shenic quests v4 | Award two Scrap and an area Essence Token; other authored rewards remain. |
-| Trial of Lumo / Crystal Currents v4 | Also grant the first Goblin Mines / Forgotten Catacombs sigil. |
-| The Restless Dead v4 | Equip an archetype earned through a plain target, win five Moonlit Graves encounters and reach level 20. |
+| Between Day and Night / Crystal Currents v4 | Also grant the first Goblin Mines / Forgotten Catacombs sigil. |
+| The Restless Dead v4 | Equip an archetype earned as a Shenic area drop, win five Moonlit Graves encounters and reach level 20. |
 | Blood Grove Veteran v2 | Win 25 Blood Grove encounters; receive two Scrap. |
 
-Missing entitled starter and earned plain-target equipment can be recovered in Equipment & Forge at rank 0, plain and bound. Recovery grants no extra resources or quest rewards. Forge investment is optional during onboarding.
+The Arms Chest is the only tutorial equipment grant. Later equipment is found through area and dungeon drops; the retired recovery flow grants no replacements.
 
 The removed quests are Arms of Choice, Armor and Adornment, Made by Your Own Hand, Tempered Resolve, A Crafter's Signature, Exceptional Work, and Stone, Timber, and Hide. Their definitions and superseded quest versions are gone. The [quest-progress cleanup migration](LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260903121634_RemoveRetiredAlphaQuestProgress.cs) deletes saved progress absent from the frozen current catalog, including its objectives. Retained current versions keep their progress; removed versions can restart through normal availability. Rebuild and restart the local API to apply pending migrations. See [cleanup details](docs/design/equipment-post-alpha-cleanup.md) for verification and database limitations.
 
@@ -29,17 +28,16 @@ The removed quests are Arms of Choice, Armor and Adornment, Made by Your Own Han
 
 ## 1. Tutorial — the starting chain
 
-All five quests have a minimum level of 1. Do them in order:
+All four quests have a minimum level of 1. Do them in order:
 
-**Your First Hunt → The Soul Archive → First Weapon → Ready for the Road → Into the Ruins**
+**Your First Hunt → The Soul Archive → First Weapon → Into the Ruins**
 
 | Quest | Starts after | Where / task | Follow-up |
 |---|---|---|---|
 | Your First Hunt | New character; introductory welcome | Quests: choose Goblin Warrior, Hollow Stag, or Skeleton. Training Area: defeat your chosen creature. | The Soul Archive |
-| The Soul Archive | Your First Hunt | Essences: absorb the First Hunt Essence, then equip any Essence in a loadout. | First Weapon |
-| First Weapon | The Soul Archive | Equipment & Forge: choose hands and armor, then equip the full starter kit. | Ready for the Road |
-| Ready for the Road | First Weapon | Inventory: equip the granted band, amulet and vial. | Into the Ruins |
-| Into the Ruins | Ready for the Road | Lumo Ruins: win 1 encounter. | Trial of Lumo and the side-quest branches below |
+| The Soul Archive | Your First Hunt | Essences: absorb the First Hunt Essence, then equip any Essence in a loadout; receive an Arms Chest. | First Weapon |
+| First Weapon | The Soul Archive | Inventory: open the Arms Chest, choose a Shortsword, Dagger, Hatchet, Mace, or Wand, then equip it. | Into the Ruins |
+| Into the Ruins | First Weapon | Lumo Ruins: win 1 encounter. | Trial of Lumo and the side-quest branches below |
 
 The first quest is displayed as **Choose Your First Hunt** before choosing, then **Hunt the [chosen creature]**. These are names for the same quest, not three different chains.
 
@@ -58,24 +56,26 @@ Each row follows the previous row, starting after **Into the Ruins**. Every ques
 | Quest | Starts after / level | Where / task | Follow-up |
 |---|---|---|---|
 | Trial of Lumo | Into the Ruins; Lv1 | Lumo Ruins: win 4 encounters and reach Lv5. | Blood in the Grove; A Name in Shenic |
-| Blood in the Grove | Trial of Lumo; Lv5 | Blood Grove: win 4 encounters; clear Goblin Mines I; reach Lv10. | Crystal Currents; Blood Grove Veteran |
+| Blood in the Grove | Trial of Lumo; Lv5 | Blood Grove: win 4 encounters and reach Lv10. | Crystal Currents; Blood Grove Veteran |
 
 ### Chapter II — Resonant Paths
 
 | Quest | Starts after / level | Where / task | Follow-up |
 |---|---|---|---|
 | Crystal Currents | Blood in the Grove; Lv10 | Crystal Creek: win 5 encounters and reach Lv15. | The Restless Dead |
-| The Restless Dead | Crystal Currents; Lv15 | Earn a plain target through Shenic combat and equip that archetype; win 5 encounters in Moonlit Graves; reach Lv20. | Between Day and Night |
+| The Restless Dead | Crystal Currents; Lv15 | Find equipment through Shenic combat and equip that archetype; win 5 encounters in Moonlit Graves; reach Lv20. | Between Day and Night |
 
 ### Chapter III — Heart of Shenic
 
 | Quest | Starts after / level | Where / task | Follow-up |
 |---|---|---|---|
-| Between Day and Night | The Restless Dead; Lv20 | Twilight Clearing: win 5 encounters and reach Lv25. | The Roots Remember |
-| The Roots Remember | Between Day and Night; Lv25 | Old Forest: win 6 encounters and reach Lv30. | Heart of the Hollow |
+| Between Day and Night | The Restless Dead; Lv20 | Twilight Clearing: win 5 encounters and reach Lv25; receive a Goblin Sigil. | The Roots Remember |
+| The Roots Remember | Between Day and Night; Lv25 | Old Forest: win 6 encounters; clear Goblin Mines I; reach Lv30. | Heart of the Hollow |
 | Heart of the Hollow | The Roots Remember; Lv30 | Win 6 encounters in Thornroot Hollow, **then** clear Forgotten Catacombs I. | Ash Beneath the Earth at Lv35 |
 
 **Heart of the Hollow** is the level-30 milestone used by the focused Beta journey. It is not the end of all authored quests. The next campaign quest waits for **Lv35**; there is no separate campaign quest for levels 31–34.
+
+The Goblin Sigil is awarded by the level-20 area's quest, Between Day and Night, on completion at level 25. The following quest, The Roots Remember, requires Goblin Mines I. Current v4 saves retain their progress: journal refresh removes the old Blood Grove gate objective and adds it to existing Roots quests, treating it as fulfilled for already completed Roots quests. Previously granted sigils are retained; completed reward grants are not replayed. This correction needs the updated backend and quest catalog, with no new migration or configuration setting.
 
 ### Beyond the Focused Beta — later Shenic
 

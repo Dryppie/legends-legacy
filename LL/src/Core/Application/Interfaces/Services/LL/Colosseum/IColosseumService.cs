@@ -19,7 +19,13 @@ public sealed record StartArenaBattleResult(
     int DailyFirstWinBonus,
     int DefenderGloryEarned,
     int AttackStreakBefore,
-    int AttackStreakAfter);
+    int AttackStreakAfter,
+    ColosseumPlaybackResult? Playback = null);
+
+public sealed record ColosseumPlaybackResult(
+    CombatExecutionWithCheckpoints Execution,
+    int TicksPerSecond,
+    int TicksPerFrame);
 
 public sealed record ChampionMarketPurchaseResult(
     ChampionMarketItem Item,

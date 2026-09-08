@@ -22,6 +22,31 @@ import { ColosseumStateService } from './colosseum-state.service';
 import { ColosseumService } from './colosseum.service';
 
 describe('ColosseumStateService', () => {
+  it('starts Arena playback with the response frames and skips without closing the match', () => {
+    const response = createBattleResponse(20, 1000);
+    response.playback = {
+      schemaVersion: 3,
+      ticksPerSecond: 10,
+      ticksPerFrame: 10,
+      totalTicks: 20,
+      entities: [],
+      abilities: [],
+      frames: [],
+    };
+    const { service, combatService } = setupStateService({
+      response,
+      market: createMarket(129),
+    });
+
+    service.startArenaBattle('opponent-id');
+    expect(
+      combatService.startColosseumMatchSimulation,
+    ).toHaveBeenCalledOnceWith(response.battle, response.playback);
+
+    service.skipArenaPlayback();
+    expect(combatService.finishColosseumPlayback).toHaveBeenCalledTimes(1);
+  });
+
   it('derives market affordability immediately after earning Glory', () => {
     const market = createMarket(129);
     const response = createBattleResponse(20, 1000);
@@ -246,6 +271,7 @@ function setupStateService(options: {
   service: ColosseumStateService;
   colosseumApi: jasmine.SpyObj<ColosseumService>;
   stateSync: jasmine.SpyObj<StateSyncCoordinator>;
+  combatService: jasmine.SpyObj<CombatService>;
 } {
   const colosseumApi = jasmine.createSpyObj<ColosseumService>(
     'ColosseumService',
@@ -300,6 +326,7 @@ function setupStateService(options: {
   );
   const combatService = jasmine.createSpyObj<CombatService>('CombatService', [
     'startColosseumMatchSimulation',
+    'finishColosseumPlayback',
   ]);
   const currentCharacter = signal(
     options.arenaRating == null
@@ -365,5 +392,6 @@ function setupStateService(options: {
     service: TestBed.inject(ColosseumStateService),
     colosseumApi,
     stateSync,
+    combatService,
   };
 }

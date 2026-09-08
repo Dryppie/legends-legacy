@@ -10,7 +10,7 @@ Requirements below are the objectives that must be completed, not the prerequisi
 
 - [x] **Your First Hunt** — choose Goblin Warrior, Hollow Stag, or Skeleton, then defeat the chosen creature in the Training Area.
 - [x] **The Soul Archive** — absorb the chosen First Hunt Essence, then equip any Essence in a loadout. Existing ownership and loadouts count automatically; completion grants an Arms Chest.
-- [x] **First Weapon** — open the Arms Chest, choose one of five one-handed weapons, and equip it.
+- [x] **First Weapon** — two sequential objectives: open the Arms Chest and choose one of five one-handed weapons, then equip the chosen weapon. Existing chest claims count automatically.
 - [x] **Into the Ruins** — win one encounter in Lumo Ruins.
 
 ### Shenic Campaign

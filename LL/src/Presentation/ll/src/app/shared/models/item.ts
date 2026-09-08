@@ -59,6 +59,7 @@ export interface SelectionCrateOption {
   id: string;
   name: string;
   quantity: number;
+  essence?: EssenceDefinitionDto | null;
 }
 
 export interface EquipmentSetMetadata {

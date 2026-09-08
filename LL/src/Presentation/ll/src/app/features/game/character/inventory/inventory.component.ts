@@ -50,6 +50,7 @@ import {
 } from '../../../../shared/utils/equipment/equipment.utils';
 import { MARKETPLACE_CATALYST_ITEM_IDS } from '../../../../shared/utils/market-place/market-place-category.utils';
 import { InventoryTransferComponent } from '../../../../shared/components/inventory-transfer/inventory-transfer.component';
+import { EssencePreviewComponent } from '../../../../shared/components/essences/essence-preview/essence-preview.component';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 import {
@@ -94,6 +95,7 @@ type SortDirection = 'asc' | 'desc';
     ItemComponent,
     DropdownComponent,
     InventoryTransferComponent,
+    EssencePreviewComponent,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',

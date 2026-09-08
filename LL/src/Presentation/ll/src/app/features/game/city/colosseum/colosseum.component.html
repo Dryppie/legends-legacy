@@ -8,7 +8,15 @@
     class="flex h-full w-full"
     [battleType]="battleType"
     (skipBattle)="skipBattle()"
-  ></app-combat>
+  >
+    <app-mini-button
+      combat-header-actions
+      *ngIf="!combatStateService.getCombatOutcome(battleType)()"
+      text="Skip"
+      [width]="'72px'"
+      (click)="state.skipArenaPlayback()"
+    ></app-mini-button>
+  </app-combat>
 </ng-container>
 <ng-template #showInactiveCombat>
   <ng-container

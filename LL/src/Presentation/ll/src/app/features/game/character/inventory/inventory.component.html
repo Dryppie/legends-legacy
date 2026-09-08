@@ -814,21 +814,26 @@
             </p>
 
             <div class="selection-container-options mt-3">
-              <button
+              <app-essence-preview
                 *ngFor="let option of container.options"
-                type="button"
-                class="selection-container-option"
-                [class.selection-container-option-active]="
-                  selectedContainerOptionId() === option.id
-                "
-                [attr.aria-pressed]="selectedContainerOptionId() === option.id"
-                (click)="selectContainerOption(option)"
+                [definition]="option.essence"
+                originClass="relative block"
               >
-                <span>{{ option.name }}</span>
-                <strong class="tabular-nums text-primary">
-                  ×{{ option.quantity | number: "1.0-0" }}
-                </strong>
-              </button>
+                <button
+                  type="button"
+                  class="selection-container-option"
+                  [class.selection-container-option-active]="
+                    selectedContainerOptionId() === option.id
+                  "
+                  [attr.aria-pressed]="selectedContainerOptionId() === option.id"
+                  (click)="selectContainerOption(option)"
+                >
+                  <span>{{ option.name }}</span>
+                  <strong class="tabular-nums text-primary">
+                    ×{{ option.quantity | number: "1.0-0" }}
+                  </strong>
+                </button>
+              </app-essence-preview>
             </div>
 
             <div class="ll-state mt-3">

@@ -22,6 +22,7 @@ import {
   selectionContainerMetadata,
 } from '../../../../utils/inventory/selection-container.utils';
 import { InventoryTransferComponent } from '../../../inventory-transfer/inventory-transfer.component';
+import { EssencePreviewComponent } from '../../../essences/essence-preview/essence-preview.component';
 
 @Component({
   selector: 'app-inventory-item-modal',
@@ -30,6 +31,7 @@ import { InventoryTransferComponent } from '../../../inventory-transfer/inventor
     NgIf,
     ItemComponent,
     InventoryTransferComponent,
+    EssencePreviewComponent,
   ],
   templateUrl: './inventory-item-modal.component.html',
 })

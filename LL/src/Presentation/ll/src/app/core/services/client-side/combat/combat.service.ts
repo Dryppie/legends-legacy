@@ -1,5 +1,5 @@
-import { effect, Injectable, untracked } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { effect, Injectable, OnDestroy, untracked } from '@angular/core';
+import { interval, Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { EventBusService } from '../event-bus/event-bus.service';
@@ -10,13 +10,18 @@ import {
 } from '../../../../shared/models/Dtos/combatResultDto';
 import { LevelingService } from '../leveling/leveling.service';
 import { TowerCombatFrame } from '../../api/world-tower/world-tower.service';
-import { TournamentCombatFrame } from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
+import {
+  TournamentCombatFrame,
+  TournamentPlaybackBundle,
+} from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
+import { colosseumFrameAtTick } from './colosseum-playback';
 
 @Injectable({
   providedIn: 'root',
 })
-export class CombatService {
+export class CombatService implements OnDestroy {
   private combatEndSubscriptions = new Map<BattleType, Subscription>();
+  private colosseumPlaybackResult: CombatResultDto | null = null;
 
   constructor(
     private combatStateService: CombatStateService,
@@ -37,6 +42,9 @@ export class CombatService {
   }
 
   clearCurrentCombat(type: BattleType) {
+    this.combatEndSubscriptions.get(type)?.unsubscribe();
+    this.combatEndSubscriptions.delete(type);
+    if (type === BattleType.Colosseum) this.colosseumPlaybackResult = null;
     this.combatStateService.resetCombatState(type);
   }
 
@@ -50,14 +58,60 @@ export class CombatService {
     this.simulateFight(combatResult);
   }
 
-  startColosseumMatchSimulation(combatResult: CombatResultDto): void {
+  startColosseumMatchSimulation(
+    combatResult: CombatResultDto,
+    playback?: TournamentPlaybackBundle | null,
+  ): void {
     if (!combatResult) return;
 
     combatResult.battleType = BattleType.Colosseum;
     this.clearCurrentCombat(combatResult.battleType);
     this.combatStateService.setCombatActive(combatResult.battleType, true);
 
-    this.simulateFight(combatResult);
+    if (
+      !playback?.frames.length ||
+      playback.totalTicks <= 0 ||
+      playback.ticksPerSecond <= 0
+    ) {
+      this.simulateFight(combatResult);
+      return;
+    }
+
+    this.colosseumPlaybackResult = combatResult;
+    this.applyPlaybackFrame(
+      BattleType.Colosseum,
+      colosseumFrameAtTick(playback, 0),
+      false,
+    );
+    const startedAt = Date.now();
+    let lastSequence = playback.frames[0].sequence;
+    this.combatEndSubscriptions.set(
+      BattleType.Colosseum,
+      interval(250).subscribe(() => {
+        const tick = Math.floor(
+          ((Date.now() - startedAt) / 1000) * playback.ticksPerSecond,
+        );
+        if (tick >= playback.totalTicks) {
+          this.finishColosseumPlayback();
+          return;
+        }
+        const frame = colosseumFrameAtTick(playback, tick);
+        if (frame.sequence === lastSequence) return;
+        lastSequence = frame.sequence;
+        this.applyPlaybackFrame(BattleType.Colosseum, frame, false);
+      }),
+    );
+  }
+
+  finishColosseumPlayback(): void {
+    const result = this.colosseumPlaybackResult;
+    if (!result) return;
+
+    this.combatEndSubscriptions.get(BattleType.Colosseum)?.unsubscribe();
+    this.combatEndSubscriptions.delete(BattleType.Colosseum);
+    this.colosseumPlaybackResult = null;
+    // Preserve the full server summary, including stats omitted by compact frames.
+    this.simulateFight(result);
   }
 
   startTowerBattleSummary(combatResult: CombatResultDto): void {
@@ -179,6 +233,8 @@ export class CombatService {
 
     if (!this.combatStateService.getIsCombatActive(type)()) return;
 
+    this.finishColosseumPlayback();
+
     const combatResult = this.combatStateService.getCombatResult(type)();
     if (!combatResult) return;
 
@@ -270,14 +326,19 @@ export class CombatService {
 
   /** stop & forget a particular fight (e.g. UI tab closed) */
   stop(battleType: BattleType) {
-    this.combatEndSubscriptions.get(battleType)?.unsubscribe();
-    this.combatEndSubscriptions.delete(battleType);
-    this.combatStateService.resetCombatState(battleType);
+    this.clearCurrentCombat(battleType);
   }
 
   handleLogout() {
     this.combatEndSubscriptions.forEach((sub) => sub.unsubscribe());
     this.combatEndSubscriptions.clear();
     this.clearCurrentCombat(BattleType.IdleCombat);
+    this.clearCurrentCombat(BattleType.Colosseum);
+  }
+
+  ngOnDestroy(): void {
+    this.combatEndSubscriptions.forEach((sub) => sub.unsubscribe());
+    this.combatEndSubscriptions.clear();
+    this.colosseumPlaybackResult = null;
   }
 }

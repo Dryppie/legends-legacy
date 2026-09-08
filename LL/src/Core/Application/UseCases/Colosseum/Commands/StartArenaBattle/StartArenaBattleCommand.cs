@@ -96,7 +96,8 @@ public class StartArenaBattleCommandHandler : IRequestHandler<StartArenaBattleCo
                     result.AttackStreakBefore,
                     result.AttackStreakAfter,
                     0),
-                result.Opponent));
+                result.Opponent,
+                result.Playback));
         response.State = await _responses.CreateAsync(
             request.CharacterId,
             cancellationToken,

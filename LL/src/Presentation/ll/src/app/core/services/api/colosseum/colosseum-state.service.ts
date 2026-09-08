@@ -364,6 +364,10 @@ export class ColosseumStateService {
     this.colosseumService.skipColosseumMatch();
   }
 
+  skipArenaPlayback(): void {
+    this.combatService.finishColosseumPlayback();
+  }
+
   private applyStartBattleResponse(
     result: VersionedMutationResult<StartArenaBattleResponse>,
   ): void {
@@ -389,7 +393,10 @@ export class ColosseumStateService {
         );
         this.applyTicketStatus(response.arenaTicketStatus);
         this.syncNotificationCount(state.status);
-        this.combatService.startColosseumMatchSimulation(response.battle);
+        this.combatService.startColosseumMatchSimulation(
+          response.battle,
+          response.playback,
+        );
       })
     ) {
       return;

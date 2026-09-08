@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Colosseum;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 
@@ -14,7 +15,8 @@ public sealed record StartArenaBattleResponseModel(
     ArenaRatingChangeModel DefenderRating,
     ArenaRankChangeModel AttackerRank,
     ArenaStreakChangeModel Streak,
-    ArenaOpponentPreview Opponent);
+    ArenaOpponentPreview Opponent,
+    ColosseumPlaybackResult? Playback = null);
 
 public sealed record StartArenaBattleRequestModel(Guid OpponentId);
 

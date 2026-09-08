@@ -1,4 +1,5 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TournamentPlaybackBundle } from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import {
   BattleOutcome,
@@ -49,6 +50,102 @@ describe('CombatService', () => {
     expect(state.getIsCombatActive(BattleType.IdleCombat)()).toBeTrue();
     expect(state.getCombatResult(BattleType.IdleCombat)()).toBe(idleResult);
   });
+
+  it('plays Arena frames before leaving the complete server summary open', fakeAsync(() => {
+    const result = combatResult(BattleType.Colosseum);
+    service.startColosseumMatchSimulation(result, arenaPlayback());
+
+    expect(state.getCombatOutcome(BattleType.Colosseum)()).toBeNull();
+    expect(state.getEnemyCharacters(BattleType.Colosseum)()[0].health).toBe(
+      100,
+    );
+    tick(1000);
+    expect(state.getEnemyCharacters(BattleType.Colosseum)()[0].health).toBe(60);
+    expect(state.getCombatResult(BattleType.Colosseum)()?.duration).toBe(10);
+    expect(state.getEntityStats(BattleType.Colosseum)()[0].damageDone).toBe(40);
+    expect(state.getCombatOutcome(BattleType.Colosseum)()).toBeNull();
+
+    tick(1000);
+    expect(state.getCombatResult(BattleType.Colosseum)()).toBe(result);
+    expect(state.getEntityStats(BattleType.Colosseum)()).toBe(
+      result.entityStats,
+    );
+    expect(state.getCombatOutcome(BattleType.Colosseum)()).toBe(result.outcome);
+    expect(state.getIsCombatActive(BattleType.Colosseum)()).toBeTrue();
+  }));
+
+  for (const outcome of [
+    BattleOutcome.Victory,
+    BattleOutcome.Defeat,
+    BattleOutcome.Draw,
+  ]) {
+    it(`skips Arena playback to the ${outcome} summary, then closes it separately`, fakeAsync(() => {
+      const result = { ...combatResult(BattleType.Colosseum), outcome };
+      const emit = spyOn(eventBus, 'emit');
+      service.startColosseumMatchSimulation(result, arenaPlayback());
+      tick(1000);
+
+      service.finishColosseumPlayback();
+      tick(3000);
+      expect(state.getCombatResult(BattleType.Colosseum)()).toBe(result);
+      expect(state.getCombatOutcome(BattleType.Colosseum)()).toBe(outcome);
+      expect(state.getIsCombatActive(BattleType.Colosseum)()).toBeTrue();
+      expect(emit).not.toHaveBeenCalled();
+
+      service.skipCurrentColosseum();
+      expect(state.getIsCombatActive(BattleType.Colosseum)()).toBeFalse();
+      expect(state.getCombatResult(BattleType.Colosseum)()).toBeNull();
+      expect(emit).toHaveBeenCalledOnceWith('colosseum-combat-finished', {
+        outcome,
+      });
+    }));
+  }
+
+  it('allows closing during Arena playback without reopening or reporting a provisional draw', fakeAsync(() => {
+    const emit = spyOn(eventBus, 'emit');
+    service.startColosseumMatchSimulation(
+      combatResult(BattleType.Colosseum),
+      arenaPlayback(),
+    );
+    service.skipCurrentColosseum();
+    tick(3000);
+
+    expect(state.getIsCombatActive(BattleType.Colosseum)()).toBeFalse();
+    expect(emit).toHaveBeenCalledOnceWith('colosseum-combat-finished', {
+      outcome: BattleOutcome.Victory,
+    });
+  }));
+
+  it('cancels Arena playback when another Colosseum match replaces it', fakeAsync(() => {
+    service.startColosseumMatchSimulation(
+      combatResult(BattleType.Colosseum),
+      arenaPlayback(),
+    );
+    const replacement = {
+      ...combatResult(BattleType.Colosseum),
+      outcome: BattleOutcome.Defeat,
+    };
+    service.startColosseumMatchSimulation(replacement);
+    tick(3000);
+
+    expect(state.getCombatResult(BattleType.Colosseum)()).toBe(replacement);
+    expect(state.getCombatOutcome(BattleType.Colosseum)()).toBe(
+      BattleOutcome.Defeat,
+    );
+  }));
+
+  it('cancels Arena playback on logout', fakeAsync(() => {
+    service.startColosseumMatchSimulation(
+      combatResult(BattleType.Colosseum),
+      arenaPlayback(),
+    );
+    eventBus.emitLogout();
+    TestBed.flushEffects();
+    tick(3000);
+
+    expect(state.getIsCombatActive(BattleType.Colosseum)()).toBeFalse();
+    expect(state.getCombatResult(BattleType.Colosseum)()).toBeNull();
+  }));
 
   it('does not clear a new idle encounter after an earlier logout', () => {
     eventBus.emitLogout();
@@ -193,5 +290,49 @@ function combatant(id: string) {
     maxHealth: 10,
     barrier: 0,
     level: 1,
+  };
+}
+
+function arenaPlayback(): TournamentPlaybackBundle {
+  return {
+    schemaVersion: 3,
+    ticksPerSecond: 10,
+    ticksPerFrame: 10,
+    totalTicks: 20,
+    entities: ['player', 'enemy'].map((id, index) => ({
+      ...combatant(id),
+      index,
+      isFriendly: index === 0,
+      maxHealth: 100,
+    })),
+    abilities: [],
+    frames: [0, 10, 20].map((tick, sequence) => ({
+      sequence,
+      tick,
+      isKeyframe: sequence !== 1,
+      entityStates: [
+        { entityIndex: 0, health: 100, barrier: 0 },
+        {
+          entityIndex: 1,
+          health: sequence === 0 ? 100 : sequence === 1 ? 60 : 0,
+          barrier: 0,
+        },
+      ],
+      entityTotals: [
+        {
+          entityIndex: 0,
+          damageDone: sequence === 1 ? 40 : 0,
+          damageTaken: 0,
+          healingDone: 0,
+          healingReceived: 0,
+          healthRegenerated: 0,
+          barrierGenerated: 0,
+          damageBlocked: 0,
+        },
+      ],
+      abilityTotals: [],
+      isFinal: sequence === 2,
+      outcome: sequence === 2 ? BattleOutcome.Victory : null,
+    })),
   };
 }

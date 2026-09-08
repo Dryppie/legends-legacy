@@ -2,6 +2,7 @@ using Application.Common.Mappings;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Colosseum.Models;
+using Application.UseCases.Colosseum.Tournaments;
 using Application.UseCases.Leaderboards.Dtos;
 using AutoMapper;
 using Domain.Models.Colosseum;
@@ -13,6 +14,7 @@ public sealed class StartArenaBattleResponseDto : IMapFrom<StartArenaBattleRespo
     public Guid BattleId { get; set; }
     public required CombatResultDto Battle { get; init; }
     public required CombatResultDto Combat { get; init; }
+    public TournamentPlaybackBundleDto? Playback { get; init; }
     public required ArenaBattleOutcomeDto Outcome { get; init; }
     public required ArenaTicketStatusDto ArenaTicketStatus { get; init; }
     public required ArenaRewardDto Rewards { get; init; }

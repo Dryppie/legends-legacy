@@ -12,6 +12,7 @@ using Domain.Models.Leaderboards;
 using Domain.Models.Snapshots;
 using Domain.Models.Essences;
 using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Engine;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -128,8 +129,10 @@ public class ColosseumService : IColosseumService
             [friendlyParticipant],
             [hostileParticipant]);
 
-        var combatResult = await _combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
-        combatResult = _combatEncounterResultFactory.Create(runtime, combatResult).CombatResult;
+        var execution = await _combatEngineExecutor.ExecuteCompactPlaybackAsync(
+            runtime, FastCombatEngine.TicksPerSecond, cancellationToken);
+        var combatResult = _combatEncounterResultFactory.Create(runtime, execution.Result).CombatResult;
+        execution = execution with { Result = combatResult };
 
         var attackerArena = attacker.ArenaProfile;
         var defenderArena = defender.ArenaProfile;
@@ -195,7 +198,9 @@ public class ColosseumService : IColosseumService
             firstWinBonus,
             0,
             streakBefore,
-            attackerArena.CurrentAttackWinStreak);
+            attackerArena.CurrentAttackWinStreak,
+            new ColosseumPlaybackResult(
+                execution, FastCombatEngine.TicksPerSecond, FastCombatEngine.TicksPerSecond));
     }
 
     private ColosseumRatingResult ApplyRatings(Character attacker, Character defender, BattleOutcome outcome)

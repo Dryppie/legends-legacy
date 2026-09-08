@@ -1,4 +1,5 @@
 import { CombatResultDto } from '../combatResultDto';
+import { TournamentPlaybackBundle } from './tournamentGrounds';
 import { CharacterDto } from '../characterDto';
 import { LeaderboardEntry } from '../leaderboard/leaderboardEntry';
 import { ArenaOpponentPreview } from './arenaOpponentPreview';
@@ -44,6 +45,7 @@ export interface StartArenaBattleResponse {
   battleId: string;
   battle: CombatResultDto;
   combat: CombatResultDto;
+  playback?: TournamentPlaybackBundle | null;
   outcome: ArenaBattleOutcome;
   arenaTicketStatus: ArenaTicketStatus;
   rewards: ArenaReward;
