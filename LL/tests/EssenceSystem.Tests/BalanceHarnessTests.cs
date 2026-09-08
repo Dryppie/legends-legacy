@@ -36,8 +36,20 @@ public sealed class BalanceHarnessTests
     [InlineData(17, 1, 2, "idle-first-hunt.json", 1)]
     [InlineData(1337, 2, 4, "idle-first-hunt.json", 0)]
     [InlineData(17, 2, 5, "idle-first-hunt.json", 1)]
+    [InlineData(1337, 1, 0, "idle-first-hunt.json", 0, 10, 1)]
+    [InlineData(17, 1, 1, "idle-first-hunt.json", 1, 10, 5)]
+    [InlineData(1337, 1, 2, "idle-first-hunt.json", 1, 10, 1)]
+    [InlineData(17, 1, 3, "idle-first-hunt.json", 0, 10, 5)]
+    [InlineData(1337, 1, 4, "idle-first-hunt.json", 0, 10, 1)]
+    [InlineData(17, 1, 5, "idle-first-hunt.json", 1, 10, 5)]
+    [InlineData(1337, 1, 0, "idle-first-hunt.json", 0, 1, 0, "plain.heavy_helm", true)]
+    [InlineData(17, 1, 1, "idle-first-hunt.json", 1, 1, 0, "plain.light_hood", true)]
+    [InlineData(1337, 1, 2, "idle-first-hunt.json", 1, 1, 0, "plain.heavy_breastplate", true)]
+    [InlineData(17, 1, 3, "idle-first-hunt.json", 0, 1, 0, "plain.light_vest", true)]
+    [InlineData(1337, 1, 4, "idle-first-hunt.json", 0, 1, 0, "plain.heavy_legplates", true)]
+    [InlineData(17, 1, 5, "idle-first-hunt.json", 1, 1, 0, "plain.light_leggings", true)]
     public async Task Harness_matches_independent_production_idle_preparation_and_resolution(int seed, int stageIndex, int buildIndex,
-        string suiteName, int encounterIndex)
+        string suiteName, int encounterIndex, int essenceLevel = 1, int rank = 0, string? armorId = null, bool fury = false)
     {
         var (content, input) = Create(seed);
         if (stageIndex >= 0)
@@ -45,9 +57,19 @@ public sealed class BalanceHarnessTests
             var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(Path.GetDirectoryName(ScenarioPath)!, suiteName));
             var stage = suite.Stages[stageIndex];
             var build = stage.Builds[buildIndex];
+            if (rank != 0) build = build with { Rank = rank };
+            if (armorId is not null)
+            {
+                var option = content.Equipment.Options.Single(o => o.DefinitionId == armorId);
+                var slot = Enum.Parse<EquipmentSlotType>(option.EquipmentType.ToString());
+                build = build with { Equipment = [build.Equipment.Single(e => e.Slot == EquipmentSlotType.MainHand) with
+                    { ActiveStyleId = fury ? BloodGroveEntryExperiment.FuryStyle : null, UseNativeStyle = false },
+                    new(slot, armorId, UseNativeStyle: false)] };
+            }
             var encounter = stage.Encounters[encounterIndex];
             input = content.CreateInput(new IdleScenario(suite.SchemaVersion, "profile-parity", build.Id, stage.AreaId,
-                encounter.CreatureId, suite.StartsAt, stage.Assumptions, build, encounter.AdditionalCreatureIds), seed,
+                encounter.CreatureId, suite.StartsAt, stage.Assumptions, build, encounter.AdditionalCreatureIds,
+                essenceLevel == 1 ? null : build.EssenceIds.ToDictionary(id => id, _ => essenceLevel)), seed,
                 input.ThreatAndTanking, input.EncounterCadenceSeconds);
         }
         var actual = await new IdleBattleRunner(content).RunAsync(input);
@@ -73,6 +95,7 @@ public sealed class BalanceHarnessTests
                 EquipmentInstance = weapon, EquipmentInstanceId = weapon.Id
             });
         }
+        foreach (var essence in referenceEssences) essence.Level = essenceLevel;
         var world = HarnessJson.Read<JsonElement>(Path.Combine(ApiRoot, "Data", "world", "creatures.json"));
         var area = HarnessJson.Read<JsonElement>(Path.Combine(ApiRoot, "Data", "world", "regions.json"))
             .GetProperty("regions").EnumerateArray().SelectMany(x => x.GetProperty("areas").EnumerateArray())

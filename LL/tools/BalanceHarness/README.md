@@ -55,6 +55,30 @@ The suite has 36 cells, 3,600 battles by default, or 108 with `--samples 3`. Use
 
 Schema 2 scenarios and encounter definitions retain `creatureId` for the first enemy and may append one or two `additionalCreatureIds`, in order. The input archives matching `additionalCreatures` snapshots. Every occurrence receives an independent combat slot/state, including duplicate species. All members must belong to the selected area and the count must be possible there. Changes to count, order or IDs make a cell non-comparable; changed frozen companion coefficients are reported as resolved-input changes. Schema 1 remains single-enemy and its hashes stay unchanged because unused extension fields are omitted. Replay retains its original binary/runtime checks.
 
+## Investigate training and reinforcement
+
+The [Blood Grove review](../../../Balance%20Harness/Blood-Grove-Progression-Review.md) checks actual progression costs and reports a fixed 14,400-battle experiment. All six starter builds still lost both pairings at ranks 0, 1 and 5 on both seed sets. Unascended Essence training from level 1 to 10 changed no combat summaries; ability growth occurs at Ascension. These are conditional progression probes, not approved player budgets or balance targets.
+
+```powershell
+./build/investigate-blood-grove.ps1 -OutputDirectory TestResults/balance/blood-grove-001
+```
+
+The script writes its fixed plan before execution, generates six recipes from the Blood Grove stage, runs 100 samples per cell on seeds 1337 and 7331, and retains per-cell evidence plus detailed replays. Add `-NoBuild` after building or `-SamplesPerCell 2` for a small workflow smoke. It requires a new output directory and does not run goal evaluation or promote a gameplay baseline.
+
+Schema-2 stages and single scenarios optionally accept `"essenceLevels": { "essence.goblin_warrior": 10 }`. Keys must name selected Essences (across the stage's builds for a stage map); omitted selections stay level 1. Values must be unascended levels 1–10. Ascension/evolution recipes are outside this extension. Training maps participate in fixture/scenario identity and are checked against frozen snapshots. Absent maps are omitted from JSON, preserving both existing cohorts' hashes. Different progression recipes remain incompatible with ordinary regression comparison, even when their combat outcomes match.
+
+## Investigate attainable Blood Grove equipment
+
+```powershell
+dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release -- investigate-entry --output TestResults/balance/blood-grove-entry-001
+```
+
+This fixed experiment crosses six First Hunt builds with all nine possible Armor Chest items and plain/Fury weapons: 216 cells, 100 samples each, on discovery seed 1337 and confirmation seed 940031 (43,200 battles). `--samples 1` runs the full matrix with a small sample budget. Each build retains one weapon and one armor item; Fury spends one guaranteed Blueprint and 100 of the 500 starting Cinders. The Lumo Token is retained.
+
+The command derives the production chest candidate list, records the resource ledger and stopping rule before execution, verifies both archived suites, reports paired substitutions, and saves 24 predeclared detailed replays. It rejects reused output directories, incomplete runs, changed content/execution between seed sets and mismatched paired schedules. It does not change regression-comparison compatibility, promote a baseline or approve goals. No new fixture schema is needed; existing style/slot support supplies the builds.
+
+The [entry review](../../../Balance%20Harness/Blood-Grove-Entry-Review.md) records zero wins in every tested cell on both seed sets, survival differences and selected replay diagnostics. Existing fixtures/goals remain unchanged. This is a local investigation; CI continues to run correctness tests and the two small cohort smoke workflows.
+
 ## Accept a baseline and compare changes
 
 After reviewing a complete run, explicitly record it as a reference with a written reason:
@@ -213,6 +237,8 @@ Small production seams make the file-only composition possible:
 `BalanceHarnessGoalTests` covers inclusive and one-sided bounds, zero-win numerical endpoints, small samples, fixture/policy validation, draft versus reviewed enforcement, distinct exit codes, missing/incompatible baseline evidence and immutable evaluation artifacts.
 
 `BalanceHarnessFirstHuntTests` covers the authored starter choices, legal quest-reward budgets, 36-cell/180-check contract, independent duplicate enemies, group validation, archived group replay/comparison/evaluation and unchanged legacy hashes. Production parity cases also cover duplicate and mixed enemy groups with the actual First Hunt Essences.
+
+`BalanceHarnessProgressionTests` verifies training recipes and frozen progression. `BalanceHarnessEntryTests` verifies the armor/style matrix, production Forge-quote equivalence, reward budgets, complete experiment/replay evidence, paired schedules, output preservation and cancellation. The current harness filter covers 76 passing tests across seven classes.
 
 Run relevant backend verification through the repository script:
 

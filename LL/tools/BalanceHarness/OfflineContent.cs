@@ -73,6 +73,10 @@ public sealed class OfflineContent
         else if (scenario.Build is null && scenario.CharacterProfile == CanonicalEquipmentBuildFactory.TutorialStarterBuildId)
             character = FixtureCharacter.From(CreateStarter());
         else throw new InvalidDataException("Unknown character profile or mismatched build ID.");
+        ValidateEssenceLevels(scenario.SchemaVersion, scenario.EssenceLevels, scenario.Build?.EssenceIds ?? []);
+        if (scenario.EssenceLevels is { } levels)
+            character = character with { Essences = character.Essences.Select(e => e with
+                { Level = levels.GetValueOrDefault(e.DefinitionId, e.Level) }).ToArray() };
         var areas = HarnessJson.Read<JsonElement>(Path.Combine(_root, "Data", "world", "regions.json"))
             .GetProperty("regions").EnumerateArray().SelectMany(x => x.GetProperty("areas").EnumerateArray());
         var area = areas.SingleOrDefault(x => x.GetProperty("id").GetString() == scenario.AreaId);
@@ -146,6 +150,12 @@ public sealed class OfflineContent
     public static void ValidateEncounter(IdleBattleInput input)
     {
         ValidateCreatureSelection(input.Scenario);
+        ValidateEssenceLevels(input.SchemaVersion, input.Scenario.EssenceLevels, input.Scenario.Build?.EssenceIds ?? []);
+        if (input.Scenario.EssenceLevels is { } levels
+            && (!input.Character.Essences.Select(e => e.DefinitionId).SequenceEqual(input.Scenario.Build!.EssenceIds)
+                || input.Character.Essences.Any(e => e.Level != levels.GetValueOrDefault(e.DefinitionId, 1)
+                    || e.AscensionTier != 0 || e.IsEvolved)))
+            throw new InvalidDataException("Frozen Essences do not match the unascended training recipe.");
         if (input.SchemaVersion != input.Scenario.SchemaVersion
             || (input.SchemaVersion == 1 && input.AdditionalCreatures is not null)
             || (input.AdditionalCreatures?.Count ?? 0) != (input.Scenario.AdditionalCreatureIds?.Count ?? 0))
@@ -166,6 +176,18 @@ public sealed class OfflineContent
             || scenario.AdditionalCreatureIds?.Count is 0 or > 2
             || scenario.CreatureIds.Any(id => id == Guid.Empty))
             throw new InvalidDataException("Version 1 requires one creature; version 2 supports an ordered group of one to three creatures.");
+    }
+
+    // Training is a harness recipe extension; shared reference factories retain their
+    // level-1 contract. Acquisition time and resource spending are not simulated.
+    public static void ValidateEssenceLevels(int schemaVersion, IReadOnlyDictionary<string, int>? levels,
+        IEnumerable<string> selectedEssenceIds)
+    {
+        if (levels is null) return;
+        var selected = selectedEssenceIds.ToHashSet(StringComparer.Ordinal);
+        if (schemaVersion != 2 || levels.Count == 0 || levels.Any(e => !selected.Contains(e.Key)
+                || e.Value < 1 || e.Value > EssenceProgressionConstants.GetLevelCap(0)))
+            throw new InvalidDataException("Essence levels require schema 2, selected definition IDs and unascended levels 1–10.");
     }
 
     private sealed class SelectedEssenceResolver(

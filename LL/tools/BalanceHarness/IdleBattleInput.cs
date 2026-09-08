@@ -18,7 +18,9 @@ public sealed record IdleScenario(
     Guid CreatureId, DateTimeOffset StartsAt, IReadOnlyList<string> Assumptions,
     EquipmentReferenceBuildDefinition? Build = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    IReadOnlyList<Guid>? AdditionalCreatureIds = null)
+    IReadOnlyList<Guid>? AdditionalCreatureIds = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyDictionary<string, int>? EssenceLevels = null)
 {
     [JsonIgnore]
     public IReadOnlyList<Guid> CreatureIds => [CreatureId, .. AdditionalCreatureIds ?? []];

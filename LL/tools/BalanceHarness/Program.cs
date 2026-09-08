@@ -20,6 +20,7 @@ public static class Program
                 Console.WriteLine("BalanceHarness baseline accept --run <suite-directory> --output <new-manifest.json> --reason <text>");
                 Console.WriteLine("BalanceHarness compare --baseline <manifest.json> --run <suite-directory> --output <new-directory>");
                 Console.WriteLine("BalanceHarness evaluate --run <suite-directory> --output <new-directory> [--goals <json>] [--baseline <manifest.json>]");
+                Console.WriteLine("BalanceHarness investigate-entry --output <new-directory> [--samples <1-100>] [--content-root <API.LL-directory>]");
                 return 0;
             }
             var command = args[0];
@@ -37,6 +38,7 @@ public static class Program
                 "baseline" => new[] { "--run", "--output", "--reason" },
                 "compare" => new[] { "--baseline", "--run", "--output" },
                 "evaluate" => new[] { "--run", "--output", "--goals", "--baseline" },
+                "investigate-entry" => new[] { "--output", "--samples", "--content-root" },
                 _ => throw new ArgumentException($"Unknown command '{command}'.")
             };
             var options = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -51,6 +53,14 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "investigate-entry")
+            {
+                var result = await BloodGroveEntryExperiment.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Path.Combine(AppContext.BaseDirectory, "Fixtures", "idle-first-hunt.json"), Required(options, "--output"),
+                    int.Parse(options.GetValueOrDefault("--samples") ?? "100", CultureInfo.InvariantCulture), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"{result.Status}; advisory only. {result.ValidBattles} valid battles. Summary: {Path.GetFullPath(Path.Combine(options["--output"], "summary.md"))}");
+                return 0;
+            }
             if (command == "evaluate")
             {
                 var goals = options.GetValueOrDefault("--goals") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures", "idle-goals.json");

@@ -11,7 +11,9 @@ public sealed record IdleSuiteDefinition(int SchemaVersion, string Id, string De
     int SamplesPerCell, DateTimeOffset StartsAt, IReadOnlyList<IdleProgressionStage> Stages);
 public sealed record IdleProgressionStage(string Id, string Name, string AreaId,
     IReadOnlyList<string> Assumptions, IReadOnlyList<EquipmentReferenceBuildDefinition> Builds,
-    IReadOnlyList<IdleBenchmarkEncounter> Encounters);
+    IReadOnlyList<IdleBenchmarkEncounter> Encounters,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyDictionary<string, int>? EssenceLevels = null);
 public sealed record IdleBenchmarkEncounter(string Id, string Label, Guid CreatureId,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<Guid>? AdditionalCreatureIds = null);
@@ -42,6 +44,8 @@ public static class IdleSuite
                 throw new InvalidDataException($"Stage '{stage.Id}' needs builds, encounters and acquisition assumptions.");
             UniqueIds(stage.Builds.Select(x => x.Id));
             UniqueIds(stage.Encounters.Select(x => x.Id));
+            OfflineContent.ValidateEssenceLevels(suite.SchemaVersion, stage.EssenceLevels,
+                stage.Builds.SelectMany(b => b.EssenceIds));
             foreach (var build in stage.Builds)
             foreach (var encounter in stage.Encounters)
             {
@@ -55,7 +59,11 @@ public static class IdleSuite
                 if (trials.Select(x => x.Seed).Distinct().Count() != trials.Length)
                     throw new InvalidDataException($"Seed collision in '{id}'; choose another master seed.");
                 var scenario = new IdleScenario(suite.SchemaVersion, id, build.Id, stage.AreaId, encounter.CreatureId,
-                    suite.StartsAt, stage.Assumptions, build, encounter.AdditionalCreatureIds);
+                    suite.StartsAt, stage.Assumptions, build, encounter.AdditionalCreatureIds,
+                    stage.EssenceLevels is null ? null : stage.EssenceLevels
+                        .Where(e => build.EssenceIds.Contains(e.Key, StringComparer.Ordinal))
+                        .ToDictionary(e => e.Key, e => e.Value, StringComparer.Ordinal));
+                if (scenario.EssenceLevels?.Count == 0) scenario = scenario with { EssenceLevels = null };
                 cells.Add(new(id, stage.Name, build.Id, encounter.Label,
                     content.CreateInput(scenario, trials[0].Seed, threat, cadence), trials));
             }

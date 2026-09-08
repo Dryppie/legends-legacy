@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Domain.Models.Entities.Characters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Persistence.LL;
@@ -8,6 +9,39 @@ namespace EssenceSystem.Tests;
 
 public sealed class GuildQueryTests
 {
+    [Fact]
+    public async Task Guild_invite_by_name_lookup_compiles_without_multiple_collection_warnings()
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>()
+            .UseNpgsql("Host=localhost;Database=query_compilation_only;Username=unused")
+            .ConfigureWarnings(warnings =>
+                warnings.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
+            .AddInterceptors(new StopBeforeDatabaseConnection())
+            .Options;
+        await using var context = new LLDbContext(options);
+
+        await Assert.ThrowsAsync<QueryCompiledException>(() => new GuildRepository(context)
+            .InviteCharacterByNameAsync(Guid.NewGuid(), Guid.NewGuid(), "Invitee", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Guild_application_lookup_compiles_without_multiple_collection_warnings()
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>()
+            .UseNpgsql("Host=localhost;Database=query_compilation_only;Username=unused")
+            .ConfigureWarnings(warnings =>
+                warnings.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
+            .AddInterceptors(new StopBeforeDatabaseConnection())
+            .Options;
+        await using var context = new LLDbContext(options);
+        var character = new Character { Id = Guid.NewGuid(), Name = "Applicant" };
+        // Satisfy FindAsync locally so the interceptor checks the subsequent guild query.
+        context.Characters.Attach(character);
+
+        await Assert.ThrowsAsync<QueryCompiledException>(() => new GuildRepository(context)
+            .ApplyToGuildAsync(character.Id, Guid.NewGuid(), CancellationToken.None));
+    }
+
     [Fact]
     public async Task Guild_list_compiles_without_multiple_collection_warnings()
     {

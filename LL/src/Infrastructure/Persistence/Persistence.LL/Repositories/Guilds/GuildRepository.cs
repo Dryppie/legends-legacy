@@ -140,6 +140,7 @@ public class GuildRepository : IGuildRepository
         }
 
         var guild = await _context.Guilds
+            .AsSplitQuery()
             .Include(g => g.Members)
             .Include(g => g.Invites)
             .Include(g => g.Buildings)
@@ -159,6 +160,7 @@ public class GuildRepository : IGuildRepository
     public async Task<bool> InviteCharacterByNameAsync(Guid currentCharacterId, Guid guildId, string invitedCharacterName, CancellationToken cancellationToken)
     {
         var guild = await _context.Guilds
+            .AsSplitQuery()
             .Include(g => g.Members)
             .Include(g => g.Invites)
             .Include(g => g.Buildings)
@@ -199,8 +201,6 @@ public class GuildRepository : IGuildRepository
         if (character == null) return false;
 
         var guild = await _context.Guilds
-            .Include(g => g.Members)
-            .Include(g => g.Invites)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
 
         if (guild == null) return false;
