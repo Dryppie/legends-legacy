@@ -17,11 +17,11 @@
         "legacy": 0
       },
       "qualities": {
-        "crude": 0.0,
-        "standard": 0.35,
-        "fine": 0.45,
-        "exceptional": 0.16,
-        "masterpiece": 0.04
+        "crude": 0.125,
+        "standard": 0.5,
+        "fine": 0.25,
+        "exceptional": 0.1,
+        "masterpiece": 0.025
       }
     },
     "dungeonEquipment": {
@@ -57,11 +57,11 @@
         }
       },
       "qualities": {
-        "crude": 0.0,
-        "standard": 0.35,
-        "fine": 0.45,
-        "exceptional": 0.16,
-        "masterpiece": 0.04
+        "crude": 0.125,
+        "standard": 0.5,
+        "fine": 0.25,
+        "exceptional": 0.1,
+        "masterpiece": 0.025
       }
     },
     "sigilDropChance": 0.0002314814814814815,
@@ -127,11 +127,11 @@
         "legacy": 0
       },
       "qualities": {
-        "crude": 0.0,
-        "standard": 0.35,
-        "fine": 0.45,
-        "exceptional": 0.16,
-        "masterpiece": 0.04
+        "crude": 0.125,
+        "standard": 0.5,
+        "fine": 0.25,
+        "exceptional": 0.1,
+        "masterpiece": 0.025
       }
     },
     "dungeonEquipment": {
@@ -167,11 +167,11 @@
         }
       },
       "qualities": {
-        "crude": 0.0,
-        "standard": 0.35,
-        "fine": 0.45,
-        "exceptional": 0.16,
-        "masterpiece": 0.04
+        "crude": 0.125,
+        "standard": 0.5,
+        "fine": 0.25,
+        "exceptional": 0.1,
+        "masterpiece": 0.025
       }
     },
     "sigilDropChance": 0.0002314814814814815,

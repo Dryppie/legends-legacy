@@ -41,9 +41,9 @@ public sealed class CombatAcquisitionTests
                 Assert.Equal(1d, rules.DungeonEquipment.Rarities.ForGrade(grade).Entries().Sum(x => x.Weight), 12));
             Assert.Equal(new[] { 0.85, 0.12, 0.03, 0, 0, 0, 0 },
                 rules.AreaEquipment.Rarities.Entries().Select(x => x.Weight));
-            Assert.Equal(new[] { 0d, 0.35d, 0.45d, 0.16d, 0.04d },
+            Assert.Equal(new[] { 0.125d, 0.5d, 0.25d, 0.1d, 0.025d },
                 rules.AreaEquipment.Qualities.Entries().Select(x => x.Weight));
-            Assert.Equal(new[] { 0d, 0.35d, 0.45d, 0.16d, 0.04d },
+            Assert.Equal(new[] { 0.125d, 0.5d, 0.25d, 0.1d, 0.025d },
                 rules.DungeonEquipment.Qualities.Entries().Select(x => x.Weight));
         });
     }

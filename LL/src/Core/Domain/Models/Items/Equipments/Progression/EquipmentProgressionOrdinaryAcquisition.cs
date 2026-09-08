@@ -96,7 +96,7 @@ public sealed record EquipmentDropProfile(
     int Rank,
     EquipmentRarityWeights Rarities)
 {
-    public EquipmentQualityWeights Qualities { get; init; } = new(0d, 0.35d, 0.45d, 0.16d, 0.04d);
+    public EquipmentQualityWeights Qualities { get; init; } = new(0.125d, 0.5d, 0.25d, 0.1d, 0.025d);
 }
 
 public sealed record DungeonEquipmentRarityWeights(
@@ -128,7 +128,7 @@ public sealed record DungeonEquipmentDropProfile(
     int Rank,
     DungeonEquipmentRarityWeights Rarities)
 {
-    public EquipmentQualityWeights Qualities { get; init; } = new(0d, 0.35d, 0.45d, 0.16d, 0.04d);
+    public EquipmentQualityWeights Qualities { get; init; } = new(0.125d, 0.5d, 0.25d, 0.1d, 0.025d);
 
     public double DropChanceAtMastery(int level) => Math.Clamp(
         DropChance + DungeonMasteryBenefits.Resolve(level).EquipmentDropChanceBonusPercentagePoints / 100d,
