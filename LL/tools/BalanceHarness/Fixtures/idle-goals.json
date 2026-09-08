@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "id": "idle-goals-v1",
+  "suiteId": "idle-reference-v1",
+  "fixtureHash": "2cc0ebb584544ec70637a77ca43c43f090445d12411ddd560a54d5694b30d4ad",
+  "metricsVersion": "idle-scorecard-v1",
+  "description": "Unreviewed experience proposals for the fixed early idle reference builds. Every goal is Draft. The numerical targets describe proposed reliability, challenge and pacing; current observed results do not establish their correctness.",
+  "requiredCells": [
+    "starter.mace.ordinary",
+    "starter.mace.challenge",
+    "starter.shortsword.ordinary",
+    "starter.shortsword.challenge",
+    "early.balanced.ordinary",
+    "early.balanced.challenge",
+    "early.offense.ordinary",
+    "early.offense.challenge",
+    "second-slot.balanced.ordinary",
+    "second-slot.balanced.challenge",
+    "second-slot.sustain.ordinary",
+    "second-slot.sustain.challenge"
+  ],
+  "goals": [
+    {
+      "enforcement": "Draft",
+      "minimumSamples": 100,
+      "id": "ordinary-reliability",
+      "metric": "ClearRate",
+      "unit": "percent",
+      "role": "Primary",
+      "cells": [
+        "starter.mace.ordinary",
+        "starter.shortsword.ordinary",
+        "early.balanced.ordinary",
+        "early.offense.ordinary",
+        "second-slot.balanced.ordinary",
+        "second-slot.sustain.ordinary"
+      ],
+      "minimum": 90,
+      "rationale": "Proposal: ordinary idle enemies should be reliably clearable by the stated entry build. Review the ownership assumptions before enforcing this minimum."
+    },
+    {
+      "enforcement": "Draft",
+      "minimumSamples": 100,
+      "id": "challenge-readiness",
+      "metric": "ClearRate",
+      "unit": "percent",
+      "role": "Primary",
+      "cells": [
+        "starter.mace.challenge",
+        "starter.shortsword.challenge",
+        "early.balanced.challenge",
+        "early.offense.challenge",
+        "second-slot.balanced.challenge",
+        "second-slot.sustain.challenge"
+      ],
+      "minimum": 60,
+      "maximum": 90,
+      "rationale": "Proposal: challenge encounters should usually be beatable while retaining a meaningful chance of failure. Both bounds need review, including whether these enemies should share this intended difficulty."
+    },
+    {
+      "enforcement": "Draft",
+      "minimumSamples": 30,
+      "id": "winning-pace",
+      "metric": "WinDurationMean",
+      "unit": "seconds",
+      "role": "Guardrail",
+      "cells": [
+        "starter.mace.ordinary",
+        "starter.mace.challenge",
+        "starter.shortsword.ordinary",
+        "starter.shortsword.challenge",
+        "early.balanced.ordinary",
+        "early.balanced.challenge",
+        "early.offense.ordinary",
+        "early.offense.challenge",
+        "second-slot.balanced.ordinary",
+        "second-slot.balanced.challenge",
+        "second-slot.sustain.ordinary",
+        "second-slot.sustain.challenge"
+      ],
+      "maximum": 60,
+      "rationale": "Proposal: a successful fixed idle fight should average no more than one minute. Winning duration is conditional on success and must be considered alongside the primary clear-rate goal."
+    },
+    {
+      "enforcement": "Draft",
+      "minimumSamples": 100,
+      "id": "clear-rate-movement",
+      "metric": "ClearRateChange",
+      "unit": "percentage points",
+      "role": "Guardrail",
+      "cells": [
+        "starter.mace.ordinary",
+        "starter.mace.challenge",
+        "starter.shortsword.ordinary",
+        "starter.shortsword.challenge",
+        "early.balanced.ordinary",
+        "early.balanced.challenge",
+        "early.offense.ordinary",
+        "early.offense.challenge",
+        "second-slot.balanced.ordinary",
+        "second-slot.balanced.challenge",
+        "second-slot.sustain.ordinary",
+        "second-slot.sustain.challenge"
+      ],
+      "minimum": -5,
+      "rationale": "Proposal: a drop exceeding five percentage points warrants review against an explicitly accepted reference. This is an absolute percentage-point tolerance, not five percent relative."
+    },
+    {
+      "enforcement": "Draft",
+      "minimumSamples": 30,
+      "id": "winning-pace-movement",
+      "metric": "SharedWinDurationChange",
+      "unit": "seconds",
+      "role": "Guardrail",
+      "cells": [
+        "starter.mace.ordinary",
+        "starter.mace.challenge",
+        "starter.shortsword.ordinary",
+        "starter.shortsword.challenge",
+        "early.balanced.ordinary",
+        "early.balanced.challenge",
+        "early.offense.ordinary",
+        "early.offense.challenge",
+        "second-slot.balanced.ordinary",
+        "second-slot.balanced.challenge",
+        "second-slot.sustain.ordinary",
+        "second-slot.sustain.challenge"
+      ],
+      "maximum": 5,
+      "rationale": "Proposal: an increase exceeding five seconds on seeds won in both runs warrants review. Newly won or lost fights affect the primary clear-rate goal."
+    },
+    {
+      "enforcement": "Draft",
+      "minimumSamples": 30,
+      "id": "health-movement",
+      "metric": "RemainingHealthChange",
+      "unit": "percentage points",
+      "role": "Diagnostic",
+      "cells": [
+        "starter.mace.ordinary",
+        "starter.mace.challenge",
+        "starter.shortsword.ordinary",
+        "starter.shortsword.challenge",
+        "early.balanced.ordinary",
+        "early.balanced.challenge",
+        "early.offense.ordinary",
+        "early.offense.challenge",
+        "second-slot.balanced.ordinary",
+        "second-slot.balanced.challenge",
+        "second-slot.sustain.ordinary",
+        "second-slot.sustain.challenge"
+      ],
+      "minimum": -10,
+      "rationale": "Investigate a decrease exceeding ten percentage points of remaining health. This diagnostic describes a possible survivability tradeoff and cannot enforce a gate."
+    }
+  ]
+}

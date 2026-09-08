@@ -16,6 +16,7 @@ public interface IGuildRepository
     Task<bool> ApproveApplicationAsync(Guid guildId, Guid applicationCharacterId, CancellationToken cancellationToken);
     Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Guild?> GetGuildForShopAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<Guild?> GetGuildForBuildingsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken);
     Task<bool> KickMemberAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken);
     Task<bool> UpdateRolePermissionsAsync(Guid guildId, GuildRolePermission permissions, CancellationToken cancellationToken);

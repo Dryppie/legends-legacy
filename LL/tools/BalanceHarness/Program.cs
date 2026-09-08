@@ -19,6 +19,7 @@ public static class Program
                 Console.WriteLine("BalanceHarness replay --run <directory> [--battle <suite-battle-id>] [--detailed]");
                 Console.WriteLine("BalanceHarness baseline accept --run <suite-directory> --output <new-manifest.json> --reason <text>");
                 Console.WriteLine("BalanceHarness compare --baseline <manifest.json> --run <suite-directory> --output <new-directory>");
+                Console.WriteLine("BalanceHarness evaluate --run <suite-directory> --output <new-directory> [--goals <json>] [--baseline <manifest.json>]");
                 return 0;
             }
             var command = args[0];
@@ -35,6 +36,7 @@ public static class Program
                 "replay" => new[] { "--run", "--battle", "--detailed" },
                 "baseline" => new[] { "--run", "--output", "--reason" },
                 "compare" => new[] { "--baseline", "--run", "--output" },
+                "evaluate" => new[] { "--run", "--output", "--goals", "--baseline" },
                 _ => throw new ArgumentException($"Unknown command '{command}'.")
             };
             var options = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -49,6 +51,15 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "evaluate")
+            {
+                var goals = options.GetValueOrDefault("--goals") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures", "idle-goals.json");
+                var evaluation = GoalEvaluationBundle.Create(goals, Required(options, "--run"),
+                    options.GetValueOrDefault("--baseline"), Required(options, "--output"), cancellation.Token);
+                Console.WriteLine($"Assessment: {evaluation.Assessment}; enforcement: {evaluation.GateStatus}; exit code: {evaluation.ExitCode}.");
+                Console.WriteLine($"Evaluation: {Path.GetFullPath(Path.Combine(options["--output"], "evaluation.md"))}");
+                return evaluation.ExitCode;
+            }
             if (command == "baseline")
             {
                 BaselineManifest.Accept(Required(options, "--run"), Required(options, "--output"),

@@ -288,8 +288,10 @@ public sealed partial class EventQuestSystemTests
         Assert.False(state.PersonalMilestones[1].IsUnlocked);
     }
 
-    [Fact]
-    public async Task Claim_all_grants_each_unlocked_milestone_only_once()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Milestone_claim_grants_each_unlocked_reward_only_once(bool claimAll)
     {
         await using var db = CreateDb();
         var definition = CreateActiveDefinition(requiredAmount: 1);
@@ -312,10 +314,8 @@ public sealed partial class EventQuestSystemTests
             "IdleCombatEncounterCompleted",
             CancellationToken.None);
 
-        var journal = await service.ClaimAllMilestonesAsync(
-            characterId,
-            definition.Id,
-            CancellationToken.None);
+        db.ChangeTracker.Clear();
+        var journal = await ClaimAsync();
 
         var milestones = Assert.Single(journal.Events).PersonalMilestones;
         Assert.True(milestones[0].IsClaimed);
@@ -324,8 +324,19 @@ public sealed partial class EventQuestSystemTests
         Assert.Equal("ore", writer.Items[0].ItemInstance.ItemBaseId);
         Assert.Equal("event-quest-reward", writer.Source);
         Assert.Null(writer.Location);
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.ClaimAllMilestonesAsync(characterId, definition.Id, CancellationToken.None));
+        var claim = Assert.Single(await db.EventQuestMilestoneClaims.ToListAsync());
+        Assert.Equal(characterId, claim.CharacterId);
+        Assert.Equal(definition.Id, claim.EventQuestId);
+        Assert.Equal("two-actions", claim.MilestoneKey);
+
+        db.ChangeTracker.Clear();
+        await Assert.ThrowsAsync<InvalidOperationException>(ClaimAsync);
+        Assert.Single(writer.Items);
+        Assert.Single(await db.EventQuestMilestoneClaims.ToListAsync());
+
+        Task<EventQuestJournal> ClaimAsync() => claimAll
+            ? service.ClaimAllMilestonesAsync(characterId, definition.Id, CancellationToken.None)
+            : service.ClaimMilestoneAsync(characterId, definition.Id, "two-actions", CancellationToken.None);
     }
 
     [Fact]

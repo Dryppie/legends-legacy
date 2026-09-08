@@ -15,6 +15,7 @@ public sealed class EventQuestRepository(IDbContext context) : IEventQuestReposi
             .Include(x => x.Contributions.Where(contribution => contribution.CharacterId == characterId))
             .Include(x => x.RewardClaims.Where(claim => claim.CharacterId == characterId))
             .Include(x => x.MilestoneClaims.Where(claim => claim.CharacterId == characterId))
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
     public Task<EventQuestInstance?> GetAsync(
@@ -26,6 +27,7 @@ public sealed class EventQuestRepository(IDbContext context) : IEventQuestReposi
             .Include(x => x.Contributions.Where(contribution => contribution.CharacterId == characterId))
             .Include(x => x.RewardClaims.Where(claim => claim.CharacterId == characterId))
             .Include(x => x.MilestoneClaims.Where(claim => claim.CharacterId == characterId))
+            .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.EventQuestId == eventQuestId, cancellationToken);
 
     public async Task<EventQuestContributionStanding> GetContributionStandingAsync(

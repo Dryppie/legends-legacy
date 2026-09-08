@@ -3,6 +3,7 @@ using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Persistence.LL.Repositories.Guilds;
 using Services.LL.Guilds;
 
 namespace EssenceSystem.Tests;
@@ -15,7 +16,7 @@ public sealed partial class GuildBuildingServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildBuildingService(db);
+        var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, DateTimeOffset.UtcNow, CancellationToken.None);
 
@@ -38,7 +39,7 @@ public sealed partial class GuildBuildingServiceTests
             Level = 1
         });
         await db.SaveChangesAsync();
-        var service = new GuildBuildingService(db);
+        var service = CreateService(db);
 
         var missionBoardResult = await service.ConstructAsync(
             characterId,
@@ -89,7 +90,7 @@ public sealed partial class GuildBuildingServiceTests
         };
         db.GuildBuildings.Add(missionBoard);
         await db.SaveChangesAsync();
-        var service = new GuildBuildingService(db);
+        var service = CreateService(db);
 
         var result = await service.UpgradeAsync(characterId, missionBoard.Id, now, CancellationToken.None);
         await db.SaveChangesAsync();
@@ -108,7 +109,8 @@ public sealed partial class GuildBuildingServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildBuildingService(db);
+        db.ChangeTracker.Clear();
+        var service = CreateService(db);
         var now = new DateTimeOffset(2026, 8, 13, 12, 0, 0, TimeSpan.Zero);
 
         var result = await service.SetCurrentTargetAsync(
@@ -121,12 +123,17 @@ public sealed partial class GuildBuildingServiceTests
         Assert.True(result.Succeeded);
         Assert.Equal(GuildBuildingType.MissionBoard, result.Value!.CurrentTarget!.Type);
         Assert.Equal(1, result.Value.CurrentTarget.TargetLevel);
+        db.ChangeTracker.Clear();
         var guild = await db.Guilds.SingleAsync();
         Assert.Equal(GuildBuildingType.MissionBoard, guild.CurrentBuildingTargetType);
         Assert.Equal(1, guild.CurrentBuildingTargetLevel);
         Assert.Contains(result.Value.ActivityLogs, x =>
             x.Type == GuildActivityLogType.BuildingTargetSet &&
             x.Message == "Mission Board level 1 set as the current target.");
+        Assert.True(await db.GuildActivityLogs.AnyAsync(x =>
+            x.GuildId == guild.Id &&
+            x.Type == GuildActivityLogType.BuildingTargetSet &&
+            x.CharacterId == characterId));
     }
 
     [Fact]
@@ -138,7 +145,8 @@ public sealed partial class GuildBuildingServiceTests
         var member = await db.Set<GuildMember>().SingleAsync();
         member.Role = GuildRole.Member;
         await db.SaveChangesAsync();
-        var service = new GuildBuildingService(db);
+        db.ChangeTracker.Clear();
+        var service = CreateService(db);
 
         var result = await service.SetCurrentTargetAsync(
             characterId,
@@ -151,6 +159,9 @@ public sealed partial class GuildBuildingServiceTests
             "Only guild leaders and officers can set the current building target.",
             result.Error);
     }
+
+    private static GuildBuildingService CreateService(LLDbContext context) =>
+        new(context, new GuildRepository(context));
 
     private static LLDbContext CreateDbContext()
     {

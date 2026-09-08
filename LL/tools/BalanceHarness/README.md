@@ -1,6 +1,16 @@
-# Balance Harness: idle reference suite
+# Balance Harness: idle balance workflow
 
-An offline .NET console tool that runs real idle combat through production preparation and execution. The reference suite has 12 cells: three progression checkpoints × two builds × two encounters, with 100 fixed seeds per cell (1,200 battles). It produces advisory Markdown/JSON scorecards and a replayable record for every battle.
+An offline .NET console tool for measuring progression difficulty and explaining the effect of combat code or content changes. It runs real idle combat through production preparation and execution. The reference suite has 12 cells: three progression checkpoints × two builds × two encounters, with 100 fixed seeds per cell (1,200 battles). It saves replayable battles, produces Markdown/JSON scorecards, compares accepted references and evaluates versioned goals.
+
+The current workflow is:
+
+1. Run the reference suite and review its assumptions, completeness and scorecard.
+2. Accept a complete run as a comparison baseline with a written reason.
+3. Run a candidate with matching fixtures, sample count and seeds after a code/content change.
+4. Compare the runs and evaluate the candidate against the draft goals.
+5. Inspect failed or inconclusive checks and replay selected battles before deciding on a gameplay or policy change.
+
+All shipped goals remain draft. An accepted baseline records a reference state; approving the desired player experience is a separate design decision. See the [development plan](../../../Balance%20Harness/Balance-Harness-Plan-With-Benchmarking.md) for milestones and remaining work.
 
 ## Run the suite
 
@@ -66,6 +76,56 @@ All changes are candidate minus baseline. Clear-rate uncertainty combines two 97
 
 Exit code **0** means a complete advisory comparison, regardless of the measured direction. **2** means an incomplete/non-comparable comparison or invalid evidence; well-formed partial runs retain a report, while corrupt/missing evidence writes `failure.json`. Cancellation returns **130**. There is no automatic promotion, default baseline replacement, resume or CI balance gate.
 
+## Evaluate balance goals
+
+The [versioned goals file](Fixtures/idle-goals.json) defines six **draft proposals**, expanded into 60 checks across all 12 cells. It proposes 90% minimum clears for ordinary enemies, a 60–90% challenge clear-rate band, a 60-second mean winning duration limit, and tolerances for baseline movement. These are proposed experience goals, not values established by the observed results. Every shipped goal is `Draft`; no balance gate is enabled by default.
+
+```powershell
+dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- evaluate --run TestResults/balance/idle-candidate-001 --baseline TestResults/balance/baselines/idle-v1.json --output TestResults/balance/idle-evaluation-001
+```
+
+Use `--goals <json>` for another policy. `--baseline` is required whenever the selected goals include change metrics; it can be omitted for an absolute-only policy. The evaluator reads verified saved evidence, recomputes any requested baseline comparison, and writes a new directory containing `goals.json`, `evaluation.json`, `evaluation.md`, and the comparison JSON/Markdown when supplied. It preserves the input archives and baseline. The report pins the exact goals hash, evaluator/metrics versions, fixture contract and run fingerprints.
+
+Supported metrics and required units:
+
+| Metric | Unit | Eligible observations |
+| --- | --- | --- |
+| `ClearRate` | `percent` | Wins / all valid attempts; 95% Wilson interval |
+| `WinDurationMean` | `seconds` | Duration of victories only |
+| `RemainingHealthMean` | `percent` | Final health fraction × 100, including defeats |
+| `ClearRateChange` | `percentage points` | Paired gained/lost wins against the baseline |
+| `SharedWinDurationChange` | `seconds` | Duration difference only for seeds won in both runs |
+| `RemainingHealthChange` | `percentage points` | Health difference over all paired attempts |
+
+Each goal declares its exact cells, metric/unit, primary/guardrail/diagnostic role, draft/enforced status, minimum eligible sample count, rationale and at least one inclusive `minimum`/`maximum` bound. The file lists all `requiredCells`; each needs a primary goal. Unknown fields, invalid bounds/units, duplicate goals/cells or missing primary coverage are rejected. The declaration permits up to 1,000 goals and 100,000 expanded checks.
+
+The `fixtureHash` pins normalized suite recipes, assumptions, encounter selections and starting conditions. Sample count and enumeration order are excluded so a smoke sample is still the same cohort. Code/content coefficient changes can be evaluated under the same recipes. Added/removed cells or a changed cohort are invalid until reviewed; the report provides the actual fixture hash to support an intentional policy update. Changing that hash is a review decision, not an automatic fix.
+
+A three-sample smoke run checks execution, but does not meet the default goals' sample minimums. Its paired comparison also needs a baseline with the same three trials per cell: comparing it with a 100-sample reference is incompatible, even though both have the same fixture hash. Use smoke runs for workflow verification and a predeclared reference sample budget for policy review.
+
+| Check result | Meaning |
+| --- | --- |
+| `Pass` | The whole interval is inside the inclusive bounds and the sample minimum is met |
+| `Fail` | The whole interval is outside a disallowed boundary |
+| `Inconclusive` | An interval overlaps a boundary, sample count is too small, or uncertainty is unavailable |
+| `Invalid` | Required cells/evidence are missing, simulations are incomplete, or the comparison/cohort is incompatible |
+
+Duration/health means share the comparison's normal-approximation policy: at least 30 nonconstant eligible samples are needed for an interval. A stricter per-goal `minimumSamples` still applies. No victories/shared victories give an inconclusive conditional-duration result. Constant observed differences are not assumed to establish zero population uncertainty. Intervals are evaluated per check without a correction across goals/cells; review this limitation before enforcing many goals. Duration must always be interpreted beside clear rate.
+
+The report separates **assessment** (all findings, including drafts) from **enforcement** (reviewed primary/guardrail checks). A draft failure or inconclusive result remains advisory. To enforce a goal after review, explicitly change that goal to `Enforced` and provide a nonempty `reviewReason`; diagnostics cannot be enforced. Mixed policies show both draft and enforced counts, and an enforcement pass applies only to the latter. The CLI never edits the policy or promotes a baseline.
+
+Evaluation exit codes:
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Valid advisory evaluation, or all enforced checks pass |
+| `1` | At least one enforced check fails |
+| `2` | Invalid configuration/evidence/coverage, even when all goals are draft |
+| `3` | No enforced failure, but at least one enforced check is inconclusive |
+| `130` | Evaluation cancelled |
+
+Invalid takes precedence over fail, which takes precedence over inconclusive. Malformed/corrupt input writes `failure.json`; valid archives with policy/cohort/evidence issues retain an `evaluation.json`/Markdown report marked invalid. Current `suite`/`compare` exit behavior is unchanged. CI smoke execution and reviewed gameplay enforcement remain a separate integration step.
+
 ## Run a single fight
 
 From the repository root:
@@ -81,6 +141,8 @@ The single-fight default remains the tutorial starter mace/Goblin essence agains
 
 ## Saved artifacts
 
+Single-fight and suite runs contain:
+
 | Artifact | Contents |
 | --- | --- |
 | `suite-input.json` | Suite recipe, assumptions, materialized cell inputs, explicit rules/settings, versioned seed schedule and every battle ID/seed |
@@ -91,6 +153,16 @@ The single-fight default remains the tutorial starter mace/Goblin essence agains
 | `battles.jsonl` | Compact outcome/error index, flushed as each battle completes |
 | `scorecard.json`, `scorecard.md` | Suite completeness, per-cell metrics, assumptions and replay examples |
 | `failure.json` | Preflight, cancellation or bundle failure details when execution cannot complete normally |
+
+Later workflow commands create separate artifacts:
+
+| Command | Artifacts |
+| --- | --- |
+| `baseline accept` | The requested manifest JSON, pointing to the retained suite bundle and pinning its accepted evidence |
+| `compare` | `comparison.json` and `comparison.md` with compatibility, paired changes, uncertainty and battle examples |
+| `evaluate` | Frozen `goals.json`, `evaluation.json` and `evaluation.md`; also `comparison.json`/`comparison.md` when a baseline is supplied |
+
+These commands require a new output file or directory and preserve their source bundles. Corrupt or missing comparison/evaluation evidence produces `failure.json` in the new output directory; an invalid report is never a passing balance result.
 
 `TestResults/` is already ignored by Git. Only the required non-secret combat settings are selected from `appsettings.json`; the settings file itself, account data, connection strings, and credentials are not copied. Environment-specific setting overrides are not applied.
 
@@ -110,6 +182,8 @@ Small production seams make the file-only composition possible:
 
 `BalanceHarnessTests` rebuilds equivalent sources independently, then uses `IdleCombatResolutionSessionFactory` and the normal executor path to compare preparation, outcomes, duration, terminal state and statistics for multiple seeds and progression builds, including armor and two-handed/multiple-essence cases. It also checks repeated/concurrent execution, compact versus detailed logging, replay integrity, invalid inputs, and sensitivity to incorrect opening cooldowns. `BalanceHarnessSuiteTests` covers matrix expansion, paired seeds, legal partial gear, statistical calculations, victory/defeat replay and partial cancellation artifacts. `BalanceHarnessComparisonTests` checks baseline immutability, archived-build comparison, known paired statistics, win-duration selection, incompatible/partial runs, corrupted evidence, and an actual enemy-offense change applied only to temporary content.
 
+`BalanceHarnessGoalTests` covers inclusive and one-sided bounds, zero-win numerical endpoints, small samples, fixture/policy validation, draft versus reviewed enforcement, distinct exit codes, missing/incompatible baseline evidence and immutable evaluation artifacts.
+
 Run relevant backend verification through the repository script:
 
 ```powershell
@@ -122,6 +196,6 @@ Shared combat/preparation changes also warrant the full `./build/run-tests.ps1` 
 
 Each trial resolves a fresh single fight. The suite conditions on specific spawns; it does not estimate an area's overall win rate. It excludes spawn-distribution sampling, offline time progression, rewards, account persistence, and multi-encounter carryover. Runs execute sequentially with a fresh executor and mutable combat state per battle. Elapsed wall time is recorded but is not a controlled performance benchmark.
 
-Explicit baseline acceptance and advisory paired comparison are available. Win-rate/pacing targets, practical regression thresholds, balance pass/fail gates and rankings remain future work. Review the cohort/ownership assumptions and desired clear-rate/pacing bands before enforcing them. A completed suite establishes reproducible measurements, not balance acceptance.
+Explicit baseline acceptance, paired comparison and goal evaluation are available. Draft goals cover reliability, challenge, pacing and practical baseline movement; optional enforcement uses reviewed primary/guardrail goals. Gameplay review, CI integration, additional content adapters and rankings remain future work. A completed suite establishes reproducible measurements, not balance acceptance.
 
 No database, running API, hosted workers, migrations, deployment, or production configuration changes are required. The tool adds a `Microsoft.Extensions.Configuration` dependency matching the existing backend's 10.0.5 version.

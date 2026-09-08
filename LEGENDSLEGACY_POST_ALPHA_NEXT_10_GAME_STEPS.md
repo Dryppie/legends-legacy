@@ -2,7 +2,7 @@
 
 This assessment treats the repository as evidence of the game a player could experience on 31 August 2026. The original assessment remains the design baseline; the dated progress ledger below records implementation completed afterward.
 
-## Beta Preparation Progress — Updated 3 September 2026
+## Beta Preparation Progress — Updated 8 September 2026
 
 ### Current sequence status
 
@@ -17,7 +17,13 @@ This assessment treats the repository as evidence of the game a player could exp
 | 7 | Supporting backend work added; integration pending | Quest completion has durable personal system-chat feedback. Equipment progression adds starter/dungeon rewards, recovery and ordinary-combat equipment/Scrap/repeat-sigil income; versioned quest grants are implemented; the integrated reward cadence still needs player validation. |
 | 8 | Equipment loop and Alpha cleanup implemented; wider content/balance pending | Content-earned equipment, deterministic Forge investment and reusable styles replace the gathering/crafting project. Profession actions, queues, old content and compatibility adapters are removed. Later-region coverage and integrated player/balance acceptance remain. |
 | 9 | Not started | Beta-scoped daily intentions remain outstanding. |
-| 10 | Not started | Slice certification, instrumentation, and the pre-Beta feature freeze remain outstanding. |
+| 10 | Supporting idle tooling implemented; certification pending | Reproducible idle runs, accepted baseline comparisons and draft goal evaluation are available. The full Beta matrix, reviewed targets, CI integration, player observation and feature freeze remain outstanding. |
+
+### Balance tooling update — 8 September 2026
+
+The [Balance Harness](LL/tools/BalanceHarness/README.md) now runs production idle combat offline across 12 fixed cells at levels 1, 5 and 10, with 100 seeds per cell. It saves replayable evidence, produces scorecards, accepts explicit comparison baselines, compares compatible candidates and evaluates six versioned draft goals across 60 checks. Reports distinguish pass, fail, inconclusive and invalid findings; all shipped balance goals remain advisory.
+
+The next harness work is to review the fixture ownership assumptions, encounter difficulty targets, pacing and movement tolerances, then add a small CI workflow with deliberate enforcement choices. The [delivery plan](Balance%20Harness/Balance-Harness-Plan-With-Benchmarking.md) records that sequence. This supports Step 10, but does not yet certify the four Beta build directions, the level-1-to-30 journey, dungeon carryover or acquisition pacing. Human journey validation and the wider chapter/build roadmap remain necessary.
 
 ### Equipment update — 3 September 2026
 
@@ -27,7 +33,7 @@ Shenic / Tier 1 and Meran / Tier 2 acquisition, starter and earned-target recove
 
 The five equipment capabilities default to enabled. Two cleanup migrations remove obsolete storage and saved quest progress; the latter fixes journals requesting deleted crafting quests or removed quest versions. The API applies pending migrations on startup. The task has not applied them to the game database or deployed anything. See the [cleanup record](docs/design/equipment-post-alpha-cleanup.md) for exact changes and the [status ledger](docs/design/equipment-implementation-status.md) for verification.
 
-The [Meran expansion](docs/design/equipment-region-two-progression.md) adds source, pricing, style and recovery coverage plus tier-transition checks. The first [actual-encounter and Forge pacing assessment](docs/design/equipment-meran-pve-balance-report.md) is complete, including a Tangled Cave III adjustment. Next equipment work is complete dungeon-run acceptance, broader Essence/counter-build progression and authenticated selection/equipment/Forge/reward claiming with reloads. Alpha conversion and compensation are no longer prerequisites. Raid redesign and further LiveOps work remain deferred. Earlier chapter acceptance does not certify the new equipment loop; the ten-step chapter/build roadmap remains the wider Beta plan.
+The [Meran expansion](docs/design/equipment-region-two-progression.md) adds source, pricing, style and recovery coverage plus tier-transition checks. Next equipment work is complete dungeon-run acceptance, broader Essence/counter-build progression and authenticated selection/equipment/Forge/reward claiming with reloads. Alpha conversion and compensation are no longer prerequisites. Raid redesign and further LiveOps work remain deferred. Earlier chapter acceptance does not certify the new equipment loop; the ten-step chapter/build roadmap remains the wider Beta plan.
 
 ### Step 1 implementation record
 
@@ -706,7 +712,7 @@ The game has sophisticated automated balance tooling, but existing reports expli
 
 #### Evidence From the Game
 
-`docs/content-balancing/milestone-11-essence-meta-analysis.md` reports no >=80% mandatory Essence but four underused Essences and sparse pair warnings; its singleton side-alternation result gives every Essence a 0.5 rate and cannot support PvP conclusions. `docs/content-balancing/region-1-scaling-validation.md` and elite certification reports document unstable/review outcomes and missing curated player evidence. The repository contains no Alpha survey or analytics export.
+The repository contains no Alpha survey or analytics export.
 
 #### Why This Must Happen Before Beta
 

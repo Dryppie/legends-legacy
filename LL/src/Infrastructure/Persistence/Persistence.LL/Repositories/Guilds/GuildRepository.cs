@@ -69,6 +69,7 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Owner)
             .Include(g => g.Members)
             .Include(g => g.Buildings)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
     public async Task<bool> LeaveGuildAsync(Guid characterId, CancellationToken cancellationToken)
@@ -289,6 +290,15 @@ public class GuildRepository : IGuildRepository
     public Task<Guild?> GetGuildForShopAsync(Guid characterId, CancellationToken cancellationToken) =>
         _context.Guilds
             .Include(g => g.Buildings)
+            .FirstOrDefaultAsync(g => g.Members.Any(member => member.CharacterId == characterId), cancellationToken);
+
+    public Task<Guild?> GetGuildForBuildingsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        _context.Guilds
+            .Include(g => g.Members)
+            .Include(g => g.Resources)
+            .Include(g => g.Buildings)
+            .Include(g => g.ActivityLogs)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(g => g.Members.Any(member => member.CharacterId == characterId), cancellationToken);
 
     public async Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken)

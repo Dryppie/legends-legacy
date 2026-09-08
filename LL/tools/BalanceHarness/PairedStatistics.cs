@@ -21,19 +21,10 @@ public static class PairedStatistics
 
     public static PairedEstimate Mean(IEnumerable<double> differences, string unit)
     {
-        var values = differences.ToArray();
-        if (values.Any(x => !double.IsFinite(x))) throw new InvalidDataException("Non-finite paired difference.");
+        var estimate = SampleStatistics.Mean(differences);
         const string method = "Paired mean normal approximation (95%, minimum 30 pairs)";
-        if (values.Length == 0) return new(0, unit, null, null, null, method, "No eligible pairs.");
-        var mean = values.Average();
-        if (values.Length < 30)
-            return new(values.Length, unit, mean, null, null, method, "Fewer than 30 eligible pairs.");
-        var sumSquares = values.Sum(x => (x - mean) * (x - mean));
-        if (values.All(x => x == values[0]))
-            return new(values.Length, unit, mean, null, null, method, "Constant observed differences; sampling uncertainty is unavailable.");
-        var margin = 1.959963984540054 * Math.Sqrt(sumSquares / (values.Length - 1) / values.Length);
-        return new(values.Length, unit, mean, mean - margin, mean + margin, method,
-            "Exploratory approximation; skewed distributions may require more samples.");
+        return new(estimate.Count, unit, estimate.Mean, estimate.Lower, estimate.Upper, method,
+            estimate.Note?.Replace("samples", "pairs").Replace("values", "differences"));
     }
 
     private static (double Lower, double Upper) Wilson975(int count, int samples)

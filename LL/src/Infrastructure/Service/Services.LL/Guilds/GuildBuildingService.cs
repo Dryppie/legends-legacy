@@ -4,24 +4,25 @@ using Application.Interfaces.Services.LL.Guilds;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
-using Microsoft.EntityFrameworkCore;
 
 namespace Services.LL.Guilds;
 
 public class GuildBuildingService : IGuildBuildingService
 {
     private readonly IDbContext _context;
+    private readonly IGuildRepository _guildRepository;
     private readonly IReadOnlyList<GuildBuildingDefinition> _definitions;
     private readonly IReadOnlyDictionary<GuildBuildingType, GuildBuildingDefinition> _definitionMap;
 
-    public GuildBuildingService(IDbContext context)
-        : this(context, new DefaultGuildContentProvider())
+    public GuildBuildingService(IDbContext context, IGuildRepository guildRepository)
+        : this(context, new DefaultGuildContentProvider(), guildRepository)
     {
     }
 
-    public GuildBuildingService(IDbContext context, IGuildContentProvider content)
+    public GuildBuildingService(IDbContext context, IGuildContentProvider content, IGuildRepository guildRepository)
     {
         _context = context;
+        _guildRepository = guildRepository;
         _definitions = content.Buildings;
         _definitionMap = _definitions.ToDictionary(x => x.Type);
     }
@@ -171,13 +172,8 @@ public class GuildBuildingService : IGuildBuildingService
         return GuildOperationResult<GuildBuildingOverviewDto>.Success(BuildOverview(guild, characterId));
     }
 
-    private async Task<Guild?> LoadGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _context.Guilds
-            .Include(x => x.Members)
-            .Include(x => x.Resources)
-            .Include(x => x.Buildings)
-            .Include(x => x.ActivityLogs)
-            .FirstOrDefaultAsync(x => x.Members.Select(m => m.CharacterId).Contains(characterId), cancellationToken);
+    private Task<Guild?> LoadGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
+        _guildRepository.GetGuildForBuildingsAsync(characterId, cancellationToken);
 
     private void EnsureGuildHall(Guild guild, DateTimeOffset now)
     {
