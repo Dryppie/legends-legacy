@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Items;
 using Domain.Helpers.Constants;
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Combat;
@@ -35,6 +36,7 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly IDungeonRouteService _routes;
     private readonly IGuildMissionService _guildMissionService;
     private readonly IDungeonMasteryService _mastery;
+    private readonly IEquipmentAcquisitionService? _equipmentAcquisition;
 
     public DungeonRunService(
         IDungeonRunRepository dungeonRuns,
@@ -49,7 +51,8 @@ public sealed class DungeonRunService : IDungeonRunService
         IDungeonVigorService vigor,
         IDungeonRouteService routes,
         IGuildMissionService guildMissionService,
-        IDungeonMasteryService mastery)
+        IDungeonMasteryService mastery,
+        IEquipmentAcquisitionService? equipmentAcquisition = null)
     {
         _dungeonRuns = dungeonRuns;
         _characterSnapshots = characterSnapshots;
@@ -64,6 +67,7 @@ public sealed class DungeonRunService : IDungeonRunService
         _routes = routes;
         _guildMissionService = guildMissionService;
         _mastery = mastery;
+        _equipmentAcquisition = equipmentAcquisition;
     }
 
     public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
@@ -260,6 +264,11 @@ public sealed class DungeonRunService : IDungeonRunService
             case RoomType.RestSite:
                 return await ExecuteRestSiteRoomAction(run, room, actionId, ct);
 
+            case RoomType.Treasury:
+                return actionId.Equals(DungeonActionConstants.OpenTreasury, StringComparison.OrdinalIgnoreCase)
+                    ? await ExecuteTreasuryRoomAction(run, room, ct)
+                    : null;
+
             default:
                 return null;
         }
@@ -277,6 +286,44 @@ public sealed class DungeonRunService : IDungeonRunService
                     $"Action '{actionId}' is not valid for room type '{room.Type}'.");
         }
     }
+
+    private async Task<ExecuteDungeonActionResult> ExecuteTreasuryRoomAction(
+        DungeonRun run, RoomInstance room, CancellationToken ct)
+    {
+        var cost = GetTreasuryCost(run, room.RoomIndex);
+        if (run.State.Vigor <= cost)
+            return TreasuryUnaffordable(run, cost);
+
+        var reward = (_equipmentAcquisition
+            ?? throw new InvalidOperationException("Treasury equipment acquisition is required."))
+            .RollTreasuryReward(run, room.RoomIndex);
+        if (run.PendingRewards.Any(existing => existing.Id == reward.Id))
+            throw new InvalidOperationException("This Treasury has already awarded its treasure.");
+        await _dungeonRuns.AddPendingRewardAsync(run, reward, ct);
+        _vigor.SpendTreasuryVigor(run, room, cost);
+        CompleteRoom(run, room);
+        MoveToNextRoom(run);
+        await RecordDungeonProgressContributionAsync(run, room, ct);
+        run.State.LastConsequence = $"Treasury opened: spent {cost} Vigor. {reward.Name} added to Pending Loot.";
+        return new ExecuteDungeonActionResult
+        {
+            Run = run, Outcome = DungeonActionOutcome.TreasuryOpened, Message = run.State.LastConsequence
+        };
+    }
+
+    private static int GetTreasuryCost(DungeonRun run, int roomIndex)
+    {
+        var node = run.State.MapNodes.Single(node => node.RoomIndex == roomIndex);
+        if (node.VigorCostMin is < 1 or >= 100 || node.VigorCostMin != node.VigorCostMax)
+            throw new InvalidOperationException("Treasury Vigor cost is invalid.");
+        return node.VigorCostMin;
+    }
+
+    private static ExecuteDungeonActionResult TreasuryUnaffordable(DungeonRun run, int cost) => new()
+    {
+        Run = run, Outcome = DungeonActionOutcome.None,
+        Message = $"Opening this Treasury costs {cost} Vigor and must leave at least 1 Vigor."
+    };
 
     private async Task<ExecuteDungeonActionResult?> ExecuteRestSiteRoomAction(
         DungeonRun run,
@@ -390,6 +437,14 @@ public sealed class DungeonRunService : IDungeonRunService
             return null;
         }
 
+        var selectedRoute = run.State.CurrentRouteOptions.FirstOrDefault(route =>
+            route.Id.Equals(routeOptionId, StringComparison.OrdinalIgnoreCase));
+        if (selectedRoute?.RoomType == RoomType.Treasury)
+        {
+            var cost = GetTreasuryCost(run, selectedRoute.RoomIndex);
+            if (run.State.Vigor <= cost)
+                return TreasuryUnaffordable(run, cost);
+        }
         var route = ChooseRoute(run, routeOptionId);
         var room = GetCurrentRoom(run);
         if (room.Type is RoomType.Combat or RoomType.MiniBoss or RoomType.Boss)
@@ -406,6 +461,9 @@ public sealed class DungeonRunService : IDungeonRunService
         {
             return await ExecuteRestSiteRoomAction(run, room, DungeonActionConstants.Rest, ct);
         }
+
+        if (room.Type == RoomType.Treasury)
+            return await ExecuteTreasuryRoomAction(run, room, ct);
 
         return new ExecuteDungeonActionResult
         {

@@ -324,6 +324,7 @@
                 <div
                   class="dungeon-map"
                   [class.dungeon-map--vertical]="isVerticalMap()"
+                  [style.--dungeon-node-width.px]="graphNodeWidth()"
                   [style.width.px]="graphWidth()"
                   [style.height.px]="graphHeight()"
                 >
@@ -358,6 +359,7 @@
                     [style.top.px]="node.y"
                     [disabled]="!isMapNodeActionable(node) || loading()"
                     [attr.aria-label]="mapNodeAriaLabel(node)"
+                    [attr.title]="mapNodeTitle(node)"
                     (click)="chooseMapNode(node)"
                   >
                     <span class="dungeon-node__circle">
@@ -388,6 +390,23 @@
                       *ngIf="node.room?.type === 'RestSite'"
                     >
                       Rest · +{{ restSiteRecovery() }} Vigor
+                    </span>
+                    <span
+                      class="dungeon-node__route-cost"
+                      *ngIf="node.room?.type === 'Treasury'"
+                    >
+                      {{ node.vigorCostMin }} Vigor
+                    </span>
+                    <span
+                      class="dungeon-node__route-cost"
+                      *ngIf="node.room?.type === 'Treasury'"
+                    >
+                      {{
+                        (activeDungeon()?.state?.vigor ?? 0) <=
+                        node.vigorCostMin
+                          ? "Needs more Vigor"
+                          : "Guaranteed loot"
+                      }}
                     </span>
                     <span
                       class="dungeon-node__route-cost"
@@ -428,6 +447,9 @@
                 <span class="legend-combat">⚔ Combat</span>
                 <span class="legend-miniboss">☠ Miniboss</span>
                 <span class="legend-rest">♥ Rest Site</span>
+                <span class="legend-treasury"
+                  >◇ Treasury: blueprint or equipment</span
+                >
                 <span class="legend-boss">♛ Boss</span>
               </footer>
             </section>

@@ -48,19 +48,22 @@ public sealed class DungeonRouteService : IDungeonRouteService
                 {
                     var node = run.State.MapNodes.First(candidate => candidate.RoomIndex == room.RoomIndex);
                     var isBoss = room.Type == RoomType.Boss;
+                    var isTreasury = room.Type == RoomType.Treasury;
                     var scaledVigorCostMin = isBoss
                         ? 0
+                        : isTreasury ? node.VigorCostMin
                         : Math.Max(
                             0,
                             DungeonVigorService.ScaleCombatToll(node.VigorCostMin) - vigorReduction);
                     var scaledVigorCostMax = isBoss
                         ? 0
+                        : isTreasury ? node.VigorCostMax
                         : Math.Max(
                             0,
                             DungeonVigorService.ScaleCombatToll(node.VigorCostMax) - vigorReduction);
                     var vigorCostMin = scaledVigorCostMin;
                     var vigorCostMax = scaledVigorCostMax;
-                    if (!isBoss && widenForecast)
+                    if (!isBoss && !isTreasury && widenForecast)
                     {
                         vigorCostMin = Math.Max(0, scaledVigorCostMin - 2);
                         vigorCostMax = Math.Min(35, scaledVigorCostMax + 2);

@@ -1,14 +1,18 @@
 {
   "title": "Dungeons Guide",
-  "lastReviewed": "2026-08-06",
+  "lastReviewed": "2026-09-08",
   "sections": [
     {
       "heading": "Expeditions and routes",
-      "body": "A dungeon run generates a map of connected rooms. Complete the current room, then choose from the available route options. The map marks traversed rooms, your current position, and routes that can be selected next."
+      "body": "A dungeon run generates a map with up to four rooms at each depth. Choose one available room to advance. The route length is rolled within the dungeon preview's room range, including the entrance and boss."
     },
     {
       "heading": "Vigor and decisions",
       "body": "Vigor represents the condition of your expedition and can change as rooms resolve. Room previews and decision text describe known consequences, while forecasts communicate uncertainty. Reaching a failed state ends the expedition."
+    },
+    {
+      "heading": "Treasuries",
+      "body": "Each dungeon offers an optional Treasury alongside combat routes. Opening it costs the Vigor shown on its node and guarantees one blueprint or equipment item from that dungeon. You must have enough Vigor to pay the cost and keep at least 1 Vigor. Treasury rewards join Pending Loot: complete the dungeon or retreat to secure them."
     },
     {
       "heading": "Pending Loot",

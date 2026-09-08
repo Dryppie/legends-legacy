@@ -354,6 +354,14 @@
   margin-inline: auto;
 }
 
+.dungeon-map--vertical .dungeon-node {
+  width: var(--dungeon-node-width, 7.5rem);
+}
+
+.dungeon-map--vertical .dungeon-node__route {
+  width: 100%;
+}
+
 .dungeon-map-panel.dungeon-map-panel--vertical {
   min-height: 0;
   flex: none;
@@ -414,6 +422,15 @@
 .dungeon-node[data-room-type="RestSite"] {
   --dungeon-node-color: var(--ll-color-success);
   --dungeon-node-soft: var(--ll-color-success-soft);
+}
+
+.dungeon-node[data-room-type="Treasury"] {
+  --dungeon-node-color: var(--ll-color-warning);
+  --dungeon-node-soft: var(--ll-color-warning-soft);
+}
+
+.legend-treasury {
+  color: var(--ll-color-warning);
 }
 
 .dungeon-node__circle {

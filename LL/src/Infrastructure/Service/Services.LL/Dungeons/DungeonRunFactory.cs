@@ -120,6 +120,7 @@ public sealed class DungeonRunFactory
         }).ToList();
 
         ConfigureRestSiteChoices(nodes, rooms, dungeon.RestSiteCount, random);
+        ConfigureTreasuryChoices(nodes, rooms, dungeon, random);
         RandomizeLayout(nodes, rooms, random);
         return new DungeonLayout(rooms, nodes);
     }
@@ -217,8 +218,9 @@ public sealed class DungeonRunFactory
         return roll switch
         {
             < 0.075d => 1,
-            < 0.70d => 2,
-            _ => Math.Min(3, maximumWidth)
+            < 0.475d => 2,
+            < 0.80d => 3,
+            _ => Math.Min(4, maximumWidth)
         };
     }
 
@@ -238,6 +240,54 @@ public sealed class DungeonRunFactory
             throw new InvalidOperationException(
                 $"Dungeon '{dungeon.Id}' requests {dungeon.RestSiteCount} Rest Sites, " +
                 $"but delve '{delve.Id}' only provides {availableSlots} Rest Site slots.");
+        }
+    }
+
+    private static void ConfigureTreasuryChoices(
+        List<DungeonMapNode> nodes,
+        List<RoomInstance> rooms,
+        DungeonDefinition dungeon,
+        Random random)
+    {
+        if (dungeon.TreasuryCount == 0) return;
+        if (dungeon.TreasuryCount < 0 || dungeon.TreasuryVigorCost is < 1 or >= 100)
+            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has invalid Treasury settings.");
+
+        var rows = nodes.GroupBy(node => node.Depth)
+            .Where(row => row.Key > 1 && row.All(node => rooms[node.RoomIndex].Type == RoomType.Combat))
+            .Select(row => row.ToList()).ToList();
+        if (rows.Count < dungeon.TreasuryCount)
+            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has too few combat rows for its Treasuries.");
+        Shuffle(rows, random);
+
+        foreach (var row in rows.Take(dungeon.TreasuryCount))
+        {
+            DungeonMapNode treasury;
+            if (row.Count == 4)
+            {
+                treasury = row[random.Next(row.Count)];
+                rooms[treasury.RoomIndex].Type = RoomType.Treasury;
+            }
+            else
+            {
+                treasury = new DungeonMapNode
+                {
+                    RoomIndex = rooms.Count,
+                    Depth = row[0].Depth,
+                    Section = row[0].Section
+                };
+                nodes.Add(treasury);
+                rooms.Add(new RoomInstance { RoomIndex = treasury.RoomIndex, Type = RoomType.Treasury });
+                row.Add(treasury);
+            }
+
+            treasury.Id = $"treasury-depth-{treasury.Depth}";
+            treasury.DisplayName = "Sealed Treasury";
+            treasury.Forecast = "Spend Vigor for one guaranteed dungeon blueprint or equipment item. Added to Pending Loot.";
+            treasury.VigorCostMin = treasury.VigorCostMax = dungeon.TreasuryVigorCost;
+            Shuffle(row, random);
+            for (var index = 0; index < row.Count; index++)
+                row[index].Lane = index;
         }
     }
 
@@ -381,7 +431,7 @@ public sealed class DungeonRunFactory
         Random random)
     {
         if (sourceRow.Concat(targetRow).Any(node =>
-                rooms[node.RoomIndex].Type == RoomType.RestSite))
+                rooms[node.RoomIndex].Type is RoomType.RestSite or RoomType.Treasury))
         {
             var targetIndexes = targetRow
                 .OrderBy(node => node.Lane)
@@ -472,7 +522,7 @@ public sealed class DungeonRunFactory
     {
         foreach (var room in rooms)
         {
-            if (room.Type == RoomType.RestSite)
+            if (room.Type is RoomType.RestSite or RoomType.Treasury)
                 continue;
 
             if (room.Type == RoomType.Entrance)

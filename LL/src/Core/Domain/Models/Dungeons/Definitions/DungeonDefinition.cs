@@ -25,6 +25,8 @@ public sealed class DungeonDefinition
     public List<string> TierRewardTableIds { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
     public int RestSiteCount { get; set; }
+    public int TreasuryCount { get; set; }
+    public int TreasuryVigorCost { get; set; }
     // Inclusive route length from Entrance through Boss, excluding unchosen branches.
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }

@@ -7,5 +7,6 @@ public enum RoomType
     MiniBoss = 3,
     RestSite = 4,
     Boss = 5,
-    Entrance = 6
+    Entrance = 6,
+    Treasury = 7
 }

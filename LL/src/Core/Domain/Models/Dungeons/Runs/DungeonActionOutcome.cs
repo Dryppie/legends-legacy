@@ -9,5 +9,6 @@ public enum DungeonActionOutcome
     RestSiteResolved = 4,
     RunRetreated = 5,
     RunCompleted = 6,
-    RunFailed = 7
+    RunFailed = 7,
+    TreasuryOpened = 9
 }

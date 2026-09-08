@@ -16,6 +16,8 @@
         "Essence": 25
       },
       "restSiteCount": 2,
+      "treasuryCount": 1,
+      "treasuryVigorCost": 18,
       "roomTemplates": [
         {
           "id": "combat.1",
@@ -112,6 +114,8 @@
         "Essence": 15
       },
       "restSiteCount": 1,
+      "treasuryCount": 1,
+      "treasuryVigorCost": 18,
       "roomTemplates": [
         {
           "id": "combat.1",
@@ -247,6 +251,8 @@
         }
       ],
       "restSiteCount": 1,
+      "treasuryCount": 1,
+      "treasuryVigorCost": 18,
       "roomTemplates": [
         {
           "id": "combat.1",
@@ -351,6 +357,8 @@
         }
       ],
       "restSiteCount": 1,
+      "treasuryCount": 1,
+      "treasuryVigorCost": 18,
       "roomTemplates": [
         {
           "id": "combat.1",

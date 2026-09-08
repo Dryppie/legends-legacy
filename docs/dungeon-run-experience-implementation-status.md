@@ -170,7 +170,7 @@ Retreat during a server-side combat resolution is not required. Once combat has 
 - There is no backtracking.
 - Every authored node must be reachable from the Entrance.
 - Every non-terminal node must be able to reach the Boss.
-- An individual node can connect to no more than three following nodes.
+- An individual node can connect to no more than four following nodes.
 - Routes must reconverge; branches do not create independent dungeon endings.
 
 ### One Section
@@ -178,9 +178,9 @@ Retreat during a server-side combat resolution is not required. Once combat has 
 A Section is authored using this grammar:
 
 1. The Entrance or previous Section transition feeds the Section.
-2. The first encounter row contains one to three nodes.
-3. A second encounter row may contain one to three nodes.
-4. A third encounter row may contain one to three nodes.
+2. The first encounter row contains one to four nodes.
+3. A second encounter row may contain one to four nodes.
+4. A third encounter row may contain one to four nodes.
 5. The Section ends at an authored transition slot.
 6. When that slot is activated by the dungeon's `restSiteCount`, it becomes a Rest-versus-Combat row whose paths reconverge immediately afterward.
 7. The Rest route restores 15 Vigor and grants no combat rewards; the Combat route risks Vigor for another encounter's rewards.
@@ -224,16 +224,28 @@ When a run is created:
 
 The run seed first rolls a route length between the selected difficulty's `minRooms` and `maxRooms`, inclusive. This counts the Entrance, one chosen room per Depth, and the Boss. Combat-only rows are removed or repeated within their authored stretches; every stretch retains at least one combat row, and Entrance, MiniBoss, Rest Site slots, and Boss remain in order. Repeated rows get independent branch rolls and unique node IDs. An impossible range fails instead of silently producing a length outside the preview. The shared authored definitions are never changed.
 
-1. Combat-only rows use their authored nodes as a candidate pool. Two-node rows resolve to one node 20% of the time and two nodes 80% of the time; rows with three candidates resolve to one, two, or three nodes with 15%, 55%, and 30% weights respectively.
+1. Combat-only rows use their authored nodes as a candidate pool. Two-node rows resolve to one node 10% of the time and two nodes 90% of the time. Larger pools roll widths of one, two, three, or four with 7.5%, 40%, 32.5%, and 20% weights, capped by the authored candidate count.
 2. The family-level `restSiteCount` selects that many authored Rest Site slots using the run seed.
 3. Each selected slot keeps its Rest Site and gains a Combat sibling; each unselected slot becomes Combat-only.
 4. Encounter nodes within each multi-node Depth row are shuffled among that row's authored lane values.
 5. Connections are cleared and regenerated between each pair of adjacent Depth rows.
 6. Every route entering a Rest-versus-Combat row can select either option, and both options expose the same following row.
 7. Other multi-node rows guarantee at least one exit per source and one entrance per target, with controlled extra connections.
-8. Generated connections never skip a Depth, backtrack, exceed three exits, create an unreachable node, or create a node that cannot reach the Boss.
+8. Generated connections never skip a Depth, backtrack, exceed four exits, create an unreachable node, or create a node that cannot reach the Boss.
 
 The run seed fully determines this result. Generated `MapNodes` are persisted, so refresh and resume retain the exact same layout.
+
+### Treasury rooms and four-node rows
+
+Dungeon rows and connections support up to four nodes. The first combat row in each delve has four authored candidates; the seed still chooses its actual width. The map centers each row and accommodates four nodes on desktop and mobile.
+
+The family settings `treasuryCount` and `treasuryVigorCost` currently offer one Treasury per run for 18 Vigor. A Treasury is added beside combat choices after the first encounter depth, replacing a combat node only when the chosen row is already four wide. Every incoming route can choose the Treasury or combat, and those choices rejoin the same next row. This does not increase the route length or remove bosses, minibosses, or active Rest Sites.
+
+Clicking a Treasury opens it immediately. The server checks its saved cost before moving the player or awarding loot; payment must leave at least 1 Vigor. Combat toll scaling, mastery discounts, and uncertain combat forecasts do not modify this fixed cost.
+
+Opening guarantees exactly one reward: a 50% blueprint roll from that dungeon's blueprint pool, otherwise an equipment item using its region tier, difficulty rarity weights, rank, quality, and a compatible dungeon style. The reward is deterministic for the run and room, is stored in Pending Loot, and does not advance or reset completion blueprint pity. Repeated actions cannot charge or award it again. Retreat and completion preserve frozen equipment stats; failure loses the reward.
+
+Deploy the backend, both dungeon JSON files, and frontend together. Existing runs keep their stored layouts; new runs receive Treasuries and the expanded layouts. No EF migration is needed.
 
 ### Depth versus room count
 
@@ -249,7 +261,7 @@ The September 2026 length update keeps all catalog minima and increases each max
 
 ## 6. Encounter Taxonomy
 
-The engine supports only Entrance, Combat, MiniBoss, Rest Site, and Boss. Removed room types have no enum values, runtime branches, DTO contracts, icons, or authored data.
+The engine supports Entrance, Combat, MiniBoss, Rest Site, Treasury, and Boss. Treasuries are added during run generation. Removed room types have no enum values, runtime branches, DTO contracts, icons, or authored data.
 
 | Room type  | Intended purpose                                                                          | Current implementation                                                             |
 | ---------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |

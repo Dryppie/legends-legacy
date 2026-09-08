@@ -45,6 +45,8 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 CompletionRewardTableIds = difficulty.CompletionRewardTableIds.ToList(),
                 MonsterLootModifiers = family.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value),
                 RestSiteCount = family.RestSiteCount,
+                TreasuryCount = family.TreasuryCount,
+                TreasuryVigorCost = family.TreasuryVigorCost,
                 MinRooms = difficulty.MinRooms,
                 MaxRooms = difficulty.MaxRooms,
                 Rooms = family.RoomTemplates.Select(MaterializeRoom).ToList()

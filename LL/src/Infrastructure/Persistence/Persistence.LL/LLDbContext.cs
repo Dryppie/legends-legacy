@@ -54,6 +54,7 @@ namespace Persistence.LL;
 public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(options), IDbContext
 {
     private long _saveChangesVersion;
+    private readonly List<InventoryQuantityChange> _savedInventoryQuantityChanges = [];
 
     public Task<TowerRally?> GetWorldTowerRallyWithSnapshotsAsync(
         Guid rallyId,
@@ -80,9 +81,58 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
         EnforceAppendOnlyRiskEvidence();
+        var inventoryChanges = await ReadPendingInventoryQuantityChangesAsync(cancellationToken);
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
+        _savedInventoryQuantityChanges.AddRange(inventoryChanges);
         _saveChangesVersion++;
         return affectedRows;
+    }
+
+    public async Task<IReadOnlyList<InventoryQuantityChange>> GetInventoryQuantityChangesAsync(CancellationToken cancellationToken)
+    {
+        var pending = await ReadPendingInventoryQuantityChangesAsync(cancellationToken);
+        return _savedInventoryQuantityChanges.Concat(pending)
+            .GroupBy(change => (change.CharacterId, change.ItemBaseId))
+            .Select(group => new InventoryQuantityChange(
+                group.Key.CharacterId, group.Key.ItemBaseId, group.Sum(change => change.QuantityDelta)))
+            .Where(change => change.QuantityDelta != 0)
+            .ToArray();
+    }
+
+    private async Task<IReadOnlyList<InventoryQuantityChange>> ReadPendingInventoryQuantityChangesAsync(CancellationToken cancellationToken)
+    {
+        // ChangeTracker includes deleted rows, which DbSet.Local deliberately omits.
+        var changes = ChangeTracker.Entries<InventoryItem>()
+            .Select(entry => new
+            {
+                Item = entry.Entity,
+                Delta = entry.State switch
+                {
+                    EntityState.Added => (long)entry.Entity.Quantity,
+                    EntityState.Deleted => -(long)entry.Property(item => item.Quantity).OriginalValue,
+                    EntityState.Modified => (long)entry.Entity.Quantity - entry.Property(item => item.Quantity).OriginalValue,
+                    _ => 0L
+                }
+            })
+            .Where(change => change.Delta != 0)
+            .ToArray();
+        if (changes.Length == 0) return [];
+
+        var missingInstanceIds = changes
+            .Where(change => change.Item.ItemInstance is null)
+            .Select(change => change.Item.ItemInstanceId)
+            .Distinct()
+            .ToArray();
+        var itemBaseIds = missingInstanceIds.Length == 0
+            ? new Dictionary<Guid, string>()
+            : await ItemInstances.AsNoTracking()
+                .Where(instance => missingInstanceIds.Contains(instance.Id))
+                .ToDictionaryAsync(instance => instance.Id, instance => instance.ItemBaseId, cancellationToken);
+
+        return changes.Select(change => new InventoryQuantityChange(
+            change.Item.InventoryId,
+            change.Item.ItemInstance?.ItemBaseId ?? itemBaseIds[change.Item.ItemInstanceId],
+            change.Delta)).ToArray();
     }
 
     private void EnforceAppendOnlyAdminActions()
@@ -143,13 +193,19 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         => Entry(entity);
 
     public void ClearTrackedEntities()
-        => ChangeTracker.Clear();
+    {
+        ChangeTracker.Clear();
+        _savedInventoryQuantityChanges.Clear();
+    }
 
     public IExecutionStrategy CreateExecutionStrategy()
         => Database.CreateExecutionStrategy();
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
-        => Database.BeginTransactionAsync(ct);
+    {
+        _savedInventoryQuantityChanges.Clear();
+        return Database.BeginTransactionAsync(ct);
+    }
 
     public async Task<T> ExecuteWithCharacterLockAsync<T>(
         Guid characterId,
@@ -170,7 +226,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         var strategy = Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
-            await using var transaction = await Database.BeginTransactionAsync(ct);
+            await using var transaction = await BeginTransactionAsync(ct);
             try
             {
                 await AcquireCharacterCommandLockAsync(characterId, ct);
@@ -445,7 +501,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         Func<Task<Guid[]>> fallbackQuery,
         CancellationToken ct)
     {
-        await using var transaction = await Database.BeginTransactionAsync(ct);
+        await using var transaction = await BeginTransactionAsync(ct);
         var ids = Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL"
             ? await Database.SqlQueryRaw<Guid>(sql, parameters).ToArrayAsync(ct)
             : await fallbackQuery();

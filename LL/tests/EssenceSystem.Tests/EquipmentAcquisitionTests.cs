@@ -1,18 +1,126 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Items;
 using Common.Randomness;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Inventories;
+using Domain.Models.MarketPlaces;
 using Domain.Models.Items.Equipments.Progression;
 using Microsoft.Extensions.Options;
 using Services.LL.Items;
+using Services.LL.Combat.Layers.Rewards.Dungeon;
 
 namespace EssenceSystem.Tests;
 
 public sealed class EquipmentAcquisitionTests
 {
+    [Theory]
+    [InlineData("goblin_mines")]
+    [InlineData("forgotten_catacombs")]
+    [InlineData("tangled_cave")]
+    [InlineData("great_tree")]
+    public void Treasury_always_rolls_one_blueprint_or_styled_equipment_from_its_dungeon(string dungeonId)
+    {
+        var equipment = Catalog(double.Epsilon);
+        var blueprints = JsonEquipmentBlueprintCatalog.Load(Path.Combine(ContentRoot(), "equipment-blueprints.v1.json"), equipment.Equipment);
+        var source = blueprints.FindSource($"sigil_{dungeonId}")!;
+        foreach (var grade in Enum.GetValues<DungeonGrade>())
+        {
+            var service = new EquipmentAcquisitionService(equipment, new Dungeons(grade), new Runs(),
+                Options.Create(new EquipmentProgressionOptions()), blueprints);
+            var observedTypes = new HashSet<ItemType>();
+            for (var seed = 0; seed < 64; seed++)
+            {
+                var run = Run(dungeonId);
+                run.Status = DungeonRunStatus.Active;
+                run.Seed = seed;
+                var reward = service.RollTreasuryReward(run, 7);
+                var replay = service.RollTreasuryReward(run, 7);
+                observedTypes.Add(reward.ItemType);
+                Assert.Equal(1, reward.Quantity);
+                Assert.Equal(reward.Id, replay.Id);
+                Assert.Equal(reward.ItemId, replay.ItemId);
+                Assert.Equal(reward.ProgressionData?.Serialize(), replay.ProgressionData?.Serialize());
+                Assert.NotEqual(reward.Id, service.RollTreasuryReward(run, 8).Id);
+                Assert.False(run.State.EquipmentBlueprintProcessed);
+                if (reward.ProgressionData is { } data)
+                {
+                    Assert.Equal(ItemType.Equipment, reward.ItemType);
+                    Assert.Contains(data.State.ActiveStyleId, source.StyleIds);
+                    Assert.Equal(source.Region, data.State.Tier);
+                    Assert.Equal(run.CharacterId, data.State.Ownership.OwnerId);
+                }
+                else
+                {
+                    Assert.Contains(reward.ItemId, blueprints.DropsFor(source).Select(blueprint => blueprint.ItemId));
+                }
+            }
+            Assert.Contains(ItemType.Equipment, observedTypes);
+            Assert.Contains(ItemType.Resource, observedTypes);
+        }
+    }
+
+    [Theory]
+    [InlineData(DungeonRunStatus.Completed)]
+    [InlineData(DungeonRunStatus.Retreated)]
+    public async Task Treasury_equipment_is_claimed_once_with_its_original_stats(DungeonRunStatus status)
+    {
+        var equipment = Catalog(double.Epsilon);
+        var blueprints = JsonEquipmentBlueprintCatalog.Load(Path.Combine(ContentRoot(), "equipment-blueprints.v1.json"), equipment.Equipment);
+        var service = new EquipmentAcquisitionService(equipment, new Dungeons(), new Runs(),
+            Options.Create(new EquipmentProgressionOptions()), blueprints);
+        var run = Run("goblin_mines");
+        var reward = Enumerable.Range(0, 100).Select(index => service.RollTreasuryReward(run, index))
+            .First(candidate => candidate.ProgressionData is not null);
+        run.Status = status;
+        run.PendingRewards.Add(reward);
+        run.State.SecuredLoot.Items[reward.ItemId] = 1;
+        var itemBase = new EquipmentBase
+        {
+            Id = reward.ItemId, Name = reward.Name, EquipmentType = reward.ProgressionData!.EquipmentType
+        };
+        var inventory = new TreasuryInventory();
+        // Generic item creation must not run for frozen equipment.
+        var claimer = new DungeonRunRewardClaimer(null!, null!, new TreasuryItemBases(itemBase), null!, inventory);
+
+        var claimed = await claimer.ClaimAsync(run, default);
+
+        var instance = Assert.IsType<EquipmentInstance>(Assert.Single(claimed).ItemInstance);
+        Assert.Equal(reward.Id, instance.Id);
+        Assert.Equal(reward.ProgressionData.Serialize(), instance.ProgressionData!.Serialize());
+        Assert.Single(inventory.Items);
+        Assert.Equal(1, run.State.SecuredLoot.Items[reward.ItemId]);
+    }
+
+    private sealed class TreasuryItemBases(ItemBase item) : IItemBaseRepository
+    {
+        public Task<IReadOnlyDictionary<string, ItemBase>> GetItemBasesByIdsAsync(IReadOnlyCollection<string> ids, CancellationToken ct) =>
+            Task.FromResult<IReadOnlyDictionary<string, ItemBase>>(new Dictionary<string, ItemBase> { [item.Id] = item });
+        public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> items, CancellationToken ct) => throw new NotSupportedException();
+    }
+
+    private sealed class TreasuryInventory : IInventoryService
+    {
+        public List<InventoryItem> Items { get; } = [];
+        public Task AddItemsToInventory(Guid id, List<InventoryItem> loot, string source, CancellationToken ct)
+        { Items.AddRange(loot); return Task.CompletedTask; }
+        public Task<Inventory?> GetInventoryByIdAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
+        public Task CreateInventoryAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> TryConsumeInventoryItemAsync(Guid id, Guid item, CancellationToken ct) => throw new NotSupportedException();
+        public Task<InventoryItem?> GetInventoryItemAsync(Guid id, Guid item, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> MarkItemSeenAsync(Guid id, Guid item, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> SetItemFavoriteAsync(Guid id, Guid item, bool favorite, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid id, MarketPlaceListing listing, CancellationToken ct) => throw new NotSupportedException();
+        public Task<InventoryItem?> AddItemInstanceBackToInventory(Guid id, ItemInstance item, CancellationToken ct) => throw new NotSupportedException();
+        public Task AddItemToInventoryFromMarketPlace(Guid id, InventoryItem item, CancellationToken ct) => throw new NotSupportedException();
+        public Task<InventoryTransferResult> TransferItemAsync(Guid sender, Guid recipient, Guid item, int quantity, CancellationToken ct) => throw new NotSupportedException();
+    }
+
     [Theory]
     [InlineData(-1, 0.50)]
     [InlineData(0, 0.50)]

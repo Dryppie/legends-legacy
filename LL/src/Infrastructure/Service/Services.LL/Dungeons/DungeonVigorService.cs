@@ -47,6 +47,13 @@ public sealed class DungeonVigorService : IDungeonVigorService
             Math.Max(0, toll) * CombatTollMultiplier,
             MidpointRounding.AwayFromZero);
 
+    public int SpendTreasuryVigor(DungeonRun run, RoomInstance room, int cost)
+    {
+        if (room.Type != RoomType.Treasury || cost <= 0 || run.State.Vigor <= cost)
+            throw new InvalidOperationException("Opening a Treasury must leave at least 1 Vigor.");
+        return Apply(run, room, -cost, "Treasury opened");
+    }
+
     public int RecoverAtRestSite(DungeonRun run, RoomInstance room)
     {
         var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State.MasteryLevelAtStart);

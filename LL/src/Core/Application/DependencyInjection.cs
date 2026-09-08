@@ -1,4 +1,5 @@
 using Application.MediatR.Behaviors;
+using Application.MediatR.Synchronization;
 using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Essences.Commands;
 using Application.UseCases.MarketPlaces;
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddTransient<EssenceMutationResponseFactory>();
         services.AddTransient<ColosseumStateResponseFactory>();
         services.AddTransient<MarketplaceChangePublisher>();
+        services.AddScoped<DungeonInventoryStateSync>();
 
         return services;
     }

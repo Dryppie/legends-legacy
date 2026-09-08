@@ -1,6 +1,7 @@
 using Application.Interfaces.Outbox;
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.MediatR.Synchronization;
 using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Outbox;
@@ -158,6 +159,15 @@ public sealed class GameEventOutboxWorker(
                 if (delivery.Message.EventType != GameEventTypes.RealtimeDeliveryRequested
                     && consumerChangedState)
                 {
+                    var dungeonInventorySync = scope.ServiceProvider.GetRequiredService<DungeonInventoryStateSync>();
+                    foreach (var characterId in await dungeonInventorySync.GetAffectedCharacterIdsAsync(cancellationToken))
+                    {
+                        await stateSync.InvalidateCharacterScopeAsync(
+                            characterId,
+                            StateSyncScopes.Dungeons,
+                            $"Outbox:{delivery.Message.EventType}",
+                            cancellationToken);
+                    }
                     if (delivery.Message.CharacterId.HasValue)
                     {
                         var characterScopes = consumer is IReportsGameEventOutboxStateSyncScopes reporter

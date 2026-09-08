@@ -498,14 +498,14 @@ public sealed class DungeonVigorStateTests
     }
 
     [Fact]
-    public void Delve_provider_rejects_more_than_three_nodes_in_a_section_row()
+    public void Delve_provider_rejects_more_than_four_nodes_in_a_section_row()
     {
-        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 4, secondRowCount: 1);
+        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 5, secondRowCount: 1);
 
         var exception = Assert.Throws<InvalidOperationException>(() =>
             WithTemporaryDelveCatalog(definition, _ => { }));
 
-        Assert.Contains("at most three", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("at most four", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

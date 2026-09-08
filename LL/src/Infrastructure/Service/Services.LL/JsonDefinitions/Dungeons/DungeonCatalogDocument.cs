@@ -25,6 +25,8 @@ public sealed class DungeonFamilyDefinition
     public List<DungeonEntryCost> EntryCosts { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
     public int RestSiteCount { get; set; } = -1;
+    public int TreasuryCount { get; set; }
+    public int TreasuryVigorCost { get; set; }
     public List<DungeonRoomTemplateDefinition> RoomTemplates { get; set; } = [];
     public List<DungeonDifficultyDefinition> Difficulties { get; set; } = [];
 }

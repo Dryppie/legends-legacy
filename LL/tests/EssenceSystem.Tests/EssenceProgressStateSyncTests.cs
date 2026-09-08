@@ -95,7 +95,8 @@ public sealed class EssenceProgressStateSyncTests
 
     private static TransactionBehavior<ResolveCharacterActionCommand, Response<CharacterActionDto?>> CreateBehavior(
         LLDbContext db, StateSyncService sync) => new(db, sync,
-        NullLogger<TransactionBehavior<ResolveCharacterActionCommand, Response<CharacterActionDto?>>>.Instance);
+        NullLogger<TransactionBehavior<ResolveCharacterActionCommand, Response<CharacterActionDto?>>>.Instance,
+        DungeonInventoryStateSyncTests.CreateSync(db));
 
     private static LLDbContext CreateDb() => new(new DbContextOptionsBuilder<LLDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())

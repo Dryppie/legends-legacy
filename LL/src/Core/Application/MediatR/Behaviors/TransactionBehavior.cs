@@ -20,15 +20,18 @@ public sealed class TransactionBehavior<TRequest, TResponse>
 {
     private readonly IDbContext _db;
     private readonly IStateSyncService _stateSync;
+    private readonly DungeonInventoryStateSync _dungeonInventorySync;
     private readonly ILogger<TransactionBehavior<TRequest, TResponse>> _logger;
 
     public TransactionBehavior(IDbContext db,
         IStateSyncService stateSync,
-        ILogger<TransactionBehavior<TRequest, TResponse>> logger)
+        ILogger<TransactionBehavior<TRequest, TResponse>> logger,
+        DungeonInventoryStateSync dungeonInventorySync)
     {
         _db = db;
         _stateSync = stateSync;
         _logger = logger;
+        _dungeonInventorySync = dungeonInventorySync;
     }
 
     public async Task<TResponse> Handle(
@@ -147,6 +150,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         var revisionWriteCount = 0L;
         var responseHandledRevisionWriteCount = 0L;
         var scopeProfile = StateSyncCommandScopeCatalog.GetProfile(typeof(TRequest));
+        var dungeonInventoryCharacterIds = await _dungeonInventorySync.GetAffectedCharacterIdsAsync(cancellationToken);
         var affectedCharacterIds = _db.GameEventOutboxMessages.Local
             .Where(message =>
                 message.CharacterId.HasValue &&
@@ -188,9 +192,11 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             }
         }
 
+        affectedCharacterIds.UnionWith(dungeonInventoryCharacterIds);
         foreach (var affectedCharacterId in affectedCharacterIds.Order())
         {
             var characterScopes = GetCharacterScopes(affectedCharacterId, scopeProfile)
+                .Concat(dungeonInventoryCharacterIds.Contains(affectedCharacterId) ? [StateSyncScopes.Dungeons] : [])
                 .Distinct(StringComparer.Ordinal)
                 .ToArray();
             var responseHandledScopes = primaryCharacterId == affectedCharacterId

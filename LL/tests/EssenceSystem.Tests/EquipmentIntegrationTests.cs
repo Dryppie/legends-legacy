@@ -227,7 +227,8 @@ public sealed class EquipmentIntegrationTests
             await using var db = new LLDbContext(options);
             var handler = new ClaimStarterEquipmentCommandHandler(Service(db, new RepositoryRewardWriter(db)), mapper);
             var pipeline = new TransactionBehavior<ClaimStarterEquipmentCommand, Response<StarterEquipmentGrantDto>>(
-                db, new NoopStateSync(), NullLogger<TransactionBehavior<ClaimStarterEquipmentCommand, Response<StarterEquipmentGrantDto>>>.Instance);
+                db, new NoopStateSync(), NullLogger<TransactionBehavior<ClaimStarterEquipmentCommand, Response<StarterEquipmentGrantDto>>>.Instance,
+                DungeonInventoryStateSyncTests.CreateSync(db));
             return await pipeline.Handle(request, ct => handler.Handle(request, ct), CancellationToken.None);
         }
         await Task.WhenAll(Claim(), Claim());

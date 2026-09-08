@@ -200,7 +200,18 @@ export class DungeonPageComponent {
   readonly graphHeight = computed(() =>
     this.isVerticalMap()
       ? Math.max(560, (this.totalDepths() - 1) * 140 + 180)
-      : 470,
+      : Math.max(470, this.maximumRowWidth() * 104 + 150),
+  );
+
+  readonly maximumRowWidth = computed(() => {
+    const widths = new Map<number, number>();
+    for (const node of this.mapNodes())
+      widths.set(node.depth, (widths.get(node.depth) ?? 0) + 1);
+    return Math.max(1, ...widths.values());
+  });
+
+  readonly graphNodeWidth = computed(() =>
+    Math.min(120, (this.graphWidth() - 16) / this.maximumRowWidth()),
   );
 
   readonly graphNodes = computed<DungeonGraphNode[]>(() => {
@@ -210,17 +221,28 @@ export class DungeonPageComponent {
 
     const vertical = this.isVerticalMap();
     const width = this.graphWidth();
-    const laneSpacing = Math.min(92, (width - 150) / 2);
-
-    return this.mapNodes().map((node) => ({
-      ...node,
-      x: vertical ? width / 2 + node.lane * laneSpacing : 70 + node.depth * 154,
-      y: vertical
-        ? this.graphHeight() - 75 - node.depth * 140
-        : this.graphHeight() / 2 + node.lane * 104,
-      room: run.rooms.find((room) => room.index === node.roomIndex) ?? null,
-      route: routes.find((route) => route.roomIndex === node.roomIndex) ?? null,
-    }));
+    return this.mapNodes().map((node) => {
+      const row = this.mapNodes()
+        .filter((candidate) => candidate.depth === node.depth)
+        .sort((left, right) => left.lane - right.lane);
+      const lane =
+        row.findIndex((candidate) => candidate.roomIndex === node.roomIndex) -
+        (row.length - 1) / 2;
+      const laneSpacing = Math.min(
+        92,
+        (width - 80) / Math.max(1, row.length - 1),
+      );
+      return {
+        ...node,
+        x: vertical ? width / 2 + lane * laneSpacing : 70 + node.depth * 154,
+        y: vertical
+          ? this.graphHeight() - 75 - node.depth * 140
+          : this.graphHeight() / 2 + lane * 104,
+        room: run.rooms.find((room) => room.index === node.roomIndex) ?? null,
+        route:
+          routes.find((route) => route.roomIndex === node.roomIndex) ?? null,
+      };
+    });
   });
 
   @HostListener('window:resize')
@@ -384,7 +406,7 @@ export class DungeonPageComponent {
     if (run.status === 'Failed')
       return 'Pending Loot was lost. Leave this run to begin another expedition.';
     if (this.routeOptions().length)
-      return 'Choose the next combat route and compare its expected Vigor toll.';
+      return 'Choose your next room and compare its rewards and Vigor cost.';
     if (!room) return 'Preparing the next room.';
 
     switch (room.type) {
@@ -396,6 +418,8 @@ export class DungeonPageComponent {
         return 'Defeat the dungeon boss to complete the expedition.';
       case 'RestSite':
         return `Rest here to recover ${this.restSiteRecovery()} Vigor before moving deeper.`;
+      case 'Treasury':
+        return 'Spend Vigor to receive one guaranteed dungeon blueprint or equipment item in Pending Loot.';
       default:
         return 'Resolve this room to continue.';
     }
@@ -558,7 +582,7 @@ export class DungeonPageComponent {
   }
 
   chooseMapNode(node: DungeonGraphNode): void {
-    if (this.loading()) return;
+    if (this.loading() || !this.isMapNodeActionable(node)) return;
 
     if (node.route) {
       this.dungeonState.chooseRoute(node.route.id);
@@ -575,6 +599,9 @@ export class DungeonPageComponent {
         break;
       case 'RestSite':
         this.dungeonState.restAtSite();
+        break;
+      case 'Treasury':
+        this.dungeonState.openTreasury();
         break;
     }
   }
@@ -660,6 +687,11 @@ export class DungeonPageComponent {
   }
 
   isMapNodeActionable(node: DungeonGraphNode): boolean {
+    if (
+      node.room?.type === 'Treasury' &&
+      (this.activeDungeon()?.state?.vigor ?? 0) <= node.vigorCostMin
+    )
+      return false;
     return !!node.route || this.isCurrentRoomActionNode(node);
   }
 
@@ -682,6 +714,9 @@ export class DungeonPageComponent {
   }
 
   mapNodeAriaLabel(node: DungeonGraphNode): string {
+    if (node.room?.type === 'Treasury') {
+      return `Open ${node.displayName} for ${node.vigorCostMin} Vigor: guaranteed dungeon blueprint or equipment. Must leave at least 1 Vigor.`;
+    }
     if (node.room?.type === 'RestSite') {
       return `Rest at ${node.displayName} and recover ${this.restSiteRecovery()} Vigor`;
     }
@@ -698,6 +733,7 @@ export class DungeonPageComponent {
   }
 
   mapNodeTitle(node: DungeonGraphNode): string | null {
+    if (node.room?.type === 'Treasury') return this.mapNodeAriaLabel(node);
     if (node.room?.type === 'RestSite') {
       return `${node.displayName} · Rest · +${this.restSiteRecovery()} Vigor`;
     }
@@ -758,7 +794,8 @@ export class DungeonPageComponent {
       type === 'Combat' ||
       type === 'MiniBoss' ||
       type === 'Boss' ||
-      type === 'RestSite'
+      type === 'RestSite' ||
+      type === 'Treasury'
     );
   }
 

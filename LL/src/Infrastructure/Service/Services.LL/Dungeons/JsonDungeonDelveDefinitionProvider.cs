@@ -73,8 +73,8 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                     "Only Entrance, Combat, MiniBoss, RestSite, and Boss rooms are currently supported.");
             }
 
-            if (definition.Nodes.Any(node => node.NextRoomIndexes.Count > 3))
-                throw new InvalidOperationException($"Delve '{definition.Id}' nodes may branch to at most three other nodes.");
+            if (definition.Nodes.Any(node => node.NextRoomIndexes.Count > 4))
+                throw new InvalidOperationException($"Delve '{definition.Id}' nodes may branch to at most four other nodes.");
             if (definition.Nodes
                 .SelectMany((node, index) => node.NextRoomIndexes.Select(next => (index, next)))
                 .Any(edge => edge.next <= edge.index))
@@ -103,10 +103,10 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 $"Delve '{definition.Id}' must use consecutive Depths beginning at zero.");
         }
 
-        if (rows.Any(row => row.Count() is < 1 or > 3))
+        if (rows.Any(row => row.Count() is < 1 or > 4))
         {
             throw new InvalidOperationException(
-                $"Delve '{definition.Id}' Depth rows may contain at most three nodes.");
+                $"Delve '{definition.Id}' Depth rows may contain at most four nodes.");
         }
 
         if (rows.Any(row => row.Select(node => node.Lane).Distinct().Count() != row.Count()))
@@ -190,10 +190,10 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                     $"Delve '{definition.Id}' Section {section} must contain one to three encounter rows before its Rest Site.");
             }
 
-            if (rows.Any(row => row.Count is < 1 or > 3))
+            if (rows.Any(row => row.Count is < 1 or > 4))
             {
                 throw new InvalidOperationException(
-                    $"Delve '{definition.Id}' Section {section} encounter rows may contain at most three nodes.");
+                    $"Delve '{definition.Id}' Section {section} encounter rows may contain at most four nodes.");
             }
 
             var expectedDepth = anchor.Node.Depth + 1;
@@ -216,7 +216,7 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
             }
 
             var firstRowIndexes = rows[0].Select(entry => entry.Index).ToHashSet();
-            if (anchor.Node.NextRoomIndexes.Count is < 1 or > 3 ||
+            if (anchor.Node.NextRoomIndexes.Count is < 1 or > 4 ||
                 !anchor.Node.NextRoomIndexes.ToHashSet().SetEquals(firstRowIndexes))
             {
                 throw new InvalidOperationException(
@@ -233,7 +233,7 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
 
                 foreach (var entry in row)
                 {
-                    if (entry.Node.NextRoomIndexes.Count is < 1 or > 3 ||
+                    if (entry.Node.NextRoomIndexes.Count is < 1 or > 4 ||
                         entry.Node.NextRoomIndexes.Any(target => !allowedTargets.Contains(target)))
                     {
                         throw new InvalidOperationException(

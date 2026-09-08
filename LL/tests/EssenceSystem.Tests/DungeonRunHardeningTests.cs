@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
@@ -21,6 +22,114 @@ namespace EssenceSystem.Tests;
 
 public sealed class DungeonRunHardeningTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Treasury_costs_exact_vigor_awards_once_and_can_be_secured_by_retreat(bool chooseRoute)
+    {
+        var run = CreateTreasuryRun(chooseRoute, 19);
+        var acquisition = new TreasuryAcquisition();
+        var service = TreasuryService(run, acquisition);
+        var action = chooseRoute ? "choose_route" : "open_treasury";
+        var payload = chooseRoute ? new { routeOptionId = "treasury-route" } : null;
+
+        var result = await service.ExecuteActionAsync(run.CharacterId, run.Id, action, payload, default);
+        Assert.Equal(DungeonActionOutcome.TreasuryOpened, result!.Outcome);
+        Assert.Equal(1, run.State.Vigor);
+        Assert.Equal(-18, Assert.Single(run.State.VigorHistory).Amount);
+        Assert.Equal(RoomInstanceStatus.Completed, run.Rooms[1].Status);
+        Assert.Single(run.PendingRewards);
+        Assert.Equal(1, acquisition.Rolls);
+
+        await service.ExecuteActionAsync(run.CharacterId, run.Id, "open_treasury", null, default);
+        Assert.Single(run.PendingRewards);
+        Assert.Equal(1, acquisition.Rolls);
+        Assert.Equal(1, run.State.Vigor);
+
+        await service.ExecuteActionAsync(run.CharacterId, run.Id, "retreat", null, default);
+        Assert.Equal(DungeonRunStatus.Retreated, run.Status);
+        Assert.Equal(1, run.State.SecuredLoot.Items["item.blueprint_fury"]);
+    }
+
+    [Theory]
+    [InlineData(false, 18)]
+    [InlineData(true, 18)]
+    [InlineData(true, 10)]
+    public async Task Unaffordable_treasury_does_not_move_the_player_or_award_loot(bool chooseRoute, int vigor)
+    {
+        var run = CreateTreasuryRun(chooseRoute, vigor);
+        var acquisition = new TreasuryAcquisition();
+        var service = TreasuryService(run, acquisition);
+        var originalIndex = run.CurrentRoomIndex;
+
+        var result = await service.ExecuteActionAsync(run.CharacterId, run.Id,
+            chooseRoute ? "choose_route" : "open_treasury",
+            chooseRoute ? new { routeOptionId = "TREASURY-ROUTE" } : null, default);
+
+        Assert.Equal(DungeonActionOutcome.None, result!.Outcome);
+        Assert.Equal(originalIndex, run.CurrentRoomIndex);
+        Assert.Equal(vigor, run.State.Vigor);
+        Assert.Empty(run.PendingRewards);
+        Assert.Empty(run.State.VigorHistory);
+        Assert.Equal(0, acquisition.Rolls);
+        Assert.Equal(RoomInstanceStatus.Pending, run.Rooms[1].Status);
+        if (chooseRoute) Assert.NotEmpty(run.State.CurrentRouteOptions);
+    }
+
+    [Fact]
+    public void Treasury_forecasts_ignore_combat_scaling_and_mastery_discounts()
+    {
+        var run = CreateTreasuryRun(true, 20);
+        run.State.MasteryLevelAtStart = 10;
+        run.State.VigorState = "Exhausted";
+        var route = Assert.Single(new DungeonRouteService().GenerateRouteOptions(run));
+        Assert.Equal(18, route.VigorCostMin);
+        Assert.Equal(18, route.VigorCostMax);
+    }
+
+    private static DungeonRun CreateTreasuryRun(bool chooseRoute, int vigor)
+    {
+        var run = CreateCompletedRun();
+        run.Status = DungeonRunStatus.Active;
+        run.CompletedAt = null;
+        run.CurrentRoomIndex = chooseRoute ? 0 : 1;
+        run.Rooms =
+        [
+            new() { RoomIndex = 0, Type = RoomType.Entrance, Status = RoomInstanceStatus.Completed },
+            new() { RoomIndex = 1, Type = RoomType.Treasury },
+            new() { RoomIndex = 2, Type = RoomType.Boss }
+        ];
+        run.State = new DungeonRunState
+        {
+            Vigor = vigor, ExpiresAt = DateTimeOffset.UtcNow.AddHours(1),
+            MapNodes =
+            [
+                new() { Id = "entrance", RoomIndex = 0, Depth = 0, Section = 1, NextRoomIndexes = [1] },
+                new() { Id = "treasury", RoomIndex = 1, Depth = 1, Section = 1, VigorCostMin = 18, VigorCostMax = 18, NextRoomIndexes = [2] },
+                new() { Id = "boss", RoomIndex = 2, Depth = 2, Section = 1 }
+            ],
+            CurrentRouteOptions = chooseRoute
+                ? [new() { Id = "treasury-route", RoomIndex = 1, RoomType = RoomType.Treasury }]
+                : []
+        };
+        return run;
+    }
+
+    private static DungeonRunService TreasuryService(DungeonRun run, IEquipmentAcquisitionService acquisition) =>
+        new(new FixedDungeonRunRepository(run), null!, null!, null!, null!, null!, null!, null!, null!,
+            new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), null!, acquisition);
+
+    private sealed class TreasuryAcquisition : IEquipmentAcquisitionService
+    {
+        public int Rolls { get; private set; }
+        public Task CompleteAsync(DungeonRun run, bool firstCompletion, CancellationToken ct) => throw new NotSupportedException();
+        public RunReward RollTreasuryReward(DungeonRun run, int roomIndex)
+        {
+            Rolls++;
+            return new RunReward { ItemId = "item.blueprint_fury", Name = "Blueprint: Fury", Quantity = 1 };
+        }
+    }
+
     [Fact]
     public void Model_allows_only_one_run_per_character_and_tracks_concurrency()
     {
@@ -307,8 +416,11 @@ public sealed class DungeonRunHardeningTests
         public Task<bool> AddPendingRewardAsync(
             DungeonRun dungeonRun,
             RunReward reward,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
+            CancellationToken cancellationToken)
+        {
+            dungeonRun.PendingRewards.Add(reward);
+            return Task.FromResult(true);
+        }
 
         public Task<bool> HasActiveDungeonRunAsync(Guid characterId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();

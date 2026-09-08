@@ -63,6 +63,7 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
 
         if (outcome is DungeonActionOutcome.CombatVictory
             or DungeonActionOutcome.RestSiteResolved
+            or DungeonActionOutcome.TreasuryOpened
             or DungeonActionOutcome.RunCompleted)
         {
             progressEvents.Add(new ProphecyProgressEvent(

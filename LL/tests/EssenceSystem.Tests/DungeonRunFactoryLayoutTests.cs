@@ -67,6 +67,7 @@ public sealed class DungeonRunFactoryLayoutTests
         {
             var factory = new DungeonRunFactory(new StaticDungeonDefinitions(dungeon), new StaticSnapshotService(), delves);
             var observedLengths = new HashSet<int>();
+            var observedWidths = new HashSet<int>();
             var authoredMinibossCount = delves.GetForDungeon(dungeon.Id).Nodes.Count(node => node.RoomType == RoomType.MiniBoss);
 
             for (var seed = 0; seed < 100; seed++)
@@ -75,12 +76,26 @@ public sealed class DungeonRunFactoryLayoutTests
                 var routeLength = AssertRouteLength(run);
                 Assert.InRange(routeLength, dungeon.MinRooms, dungeon.MaxRooms);
                 observedLengths.Add(routeLength);
+                var rows = run.State.MapNodes.GroupBy(node => node.Depth).ToList();
+                Assert.All(rows, row => Assert.InRange(row.Count(), 1, 4));
+                observedWidths.UnionWith(rows.Select(row => row.Count()));
+                var treasury = Assert.Single(run.Rooms, room => room.Type == RoomType.Treasury);
+                var treasuryNode = run.State.MapNodes.Single(node => node.RoomIndex == treasury.RoomIndex);
+                Assert.Equal(18, treasuryNode.VigorCostMin);
+                Assert.Equal(18, treasuryNode.VigorCostMax);
+                Assert.Empty(treasury.EncounterIds);
+                var alternatives = rows.Single(row => row.Key == treasuryNode.Depth).ToList();
+                Assert.Contains(alternatives, node => run.Rooms[node.RoomIndex].Type == RoomType.Combat);
+                Assert.All(run.State.MapNodes.Where(node => node.Depth == treasuryNode.Depth - 1),
+                    node => Assert.Contains(treasury.RoomIndex, node.NextRoomIndexes));
+                Assert.All(alternatives, node => Assert.Equal(treasuryNode.NextRoomIndexes, node.NextRoomIndexes));
                 Assert.Equal(dungeon.RestSiteCount, run.Rooms.Count(room => room.Type == RoomType.RestSite));
                 Assert.Equal(authoredMinibossCount, run.Rooms.Count(room => room.Type == RoomType.MiniBoss));
                 Assert.Equal(run.State.MapNodes.Count, Traverse([0], index => run.State.MapNodes[index].NextRoomIndexes).Count);
             }
 
             Assert.Equal(Enumerable.Range(dungeon.MinRooms, dungeon.MaxRooms - dungeon.MinRooms + 1), observedLengths.Order());
+            Assert.Contains(4, observedWidths);
         }
 
         Assert.Equal(originalDefinitions, JsonSerializer.Serialize(delves.GetAll(), options));
@@ -164,7 +179,7 @@ public sealed class DungeonRunFactoryLayoutTests
 
             Assert.All(rows, row =>
             {
-                Assert.InRange(row.Count(), 1, 3);
+                Assert.InRange(row.Count(), 1, 4);
                 Assert.Equal(row.Count(), row.Select(node => node.Lane).Distinct().Count());
             });
             Assert.Equal(run.Rooms.Count, nodes.Count);
@@ -180,7 +195,7 @@ public sealed class DungeonRunFactoryLayoutTests
 
                 Assert.All(sourceRow, source =>
                 {
-                    Assert.InRange(source.NextRoomIndexes.Count, 1, 3);
+                    Assert.InRange(source.NextRoomIndexes.Count, 1, 4);
                     Assert.All(
                         source.NextRoomIndexes,
                         target => Assert.Contains(target, targetIndexes));
@@ -240,6 +255,7 @@ public sealed class DungeonRunFactoryLayoutTests
         Assert.True(observedWidths.GetValueOrDefault(1) <= totalRows * 0.12d);
         Assert.True(observedWidths.GetValueOrDefault(1) * 2 < observedWidths.GetValueOrDefault(2));
         Assert.True(observedWidths.GetValueOrDefault(3) > 0);
+        Assert.True(observedWidths.GetValueOrDefault(4) > 0);
     }
 
     [Fact]
@@ -467,6 +483,7 @@ public sealed class DungeonRunFactoryLayoutTests
             Node("combat-3", RoomType.Combat, 2, -1, 1, [7]),
             Node("combat-4", RoomType.Combat, 2, 0, 1, [8]),
             Node("combat-5", RoomType.Combat, 2, 1, 1, [9]),
+            Node("combat-extra", RoomType.Combat, 2, 2, 1, [9]),
             Node("combat-6", RoomType.Combat, 3, -1, 1, [10]),
             Node("combat-7", RoomType.Combat, 3, 0, 1, [10]),
             Node("combat-8", RoomType.Combat, 3, 1, 1, [10]),

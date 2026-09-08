@@ -106,6 +106,7 @@ public static class DependencyInjection
         IConfiguration config)
     {
         services.AddLiveOpsAdministrationServices(config);
+        AddDungeonCatalogReader(services, config, AppContext.BaseDirectory);
         // The standalone operator host needs the same equipment rules as the game.
         services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
         services.TryAddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(AppContext.BaseDirectory,
@@ -714,7 +715,19 @@ public static class DependencyInjection
             return opts;
         });
 
-        services.AddSingleton(sp =>
+        AddDungeonCatalogReader(services, config, contentRootPath);
+
+        // 3) Provider used by your domain/services (stable seam for future DB migration)
+        services.AddSingleton<DungeonCatalogValidator>();
+        services.AddSingleton<DungeonDefinitionMaterializer>();
+        services.AddSingleton<IDungeonDefinitionValidator, DungeonDefinitionValidator>();
+        services.AddSingleton<IDungeonDefinitions, JsonDungeonDefinitions>();
+    }
+
+    private static void AddDungeonCatalogReader(IServiceCollection services, IConfiguration config, string contentRootPath)
+    {
+        services.TryAddSingleton<IDungeonInventoryItemCatalog, JsonDungeonInventoryItemCatalog>();
+        services.TryAddSingleton(sp =>
         {
             var jsonOptions = sp.GetRequiredService<JsonSerializerOptions>();
             var contentRoot = config["Content:Root"] ?? "Data";
@@ -726,10 +739,5 @@ public static class DependencyInjection
             );
         });
 
-        // 3) Provider used by your domain/services (stable seam for future DB migration)
-        services.AddSingleton<DungeonCatalogValidator>();
-        services.AddSingleton<DungeonDefinitionMaterializer>();
-        services.AddSingleton<IDungeonDefinitionValidator, DungeonDefinitionValidator>();
-        services.AddSingleton<IDungeonDefinitions, JsonDungeonDefinitions>();
     }
 }

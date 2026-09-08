@@ -36,7 +36,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
     {
         var rewardState = GetClaimableRewards(run);
-        var equipmentProgressionRewards = run.Status == DungeonRunStatus.Completed
+        var equipmentProgressionRewards = run.Status is DungeonRunStatus.Completed or DungeonRunStatus.Retreated
             ? run.PendingRewards.Where(x => x.ProgressionData != null).ToArray() : [];
         var frozenBases = await _itemBases.GetItemBasesByIdsAsync(equipmentProgressionRewards.Select(x => x.ItemId).Distinct().ToArray(), cancellationToken);
         if (equipmentProgressionRewards.Any(x => x.Quantity != 1 || x.ProgressionData!.ItemBaseId != x.ItemId
@@ -112,7 +112,16 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     {
         if (run.Status == DungeonRunStatus.Retreated && HasLoot(run.State?.SecuredLoot))
         {
-            return run.State!.SecuredLoot;
+            var secured = run.State!.SecuredLoot;
+            var items = new Dictionary<string, int>(secured.Items, StringComparer.OrdinalIgnoreCase);
+            // Frozen equipment is restored separately, with the exact stats awarded in the Treasury.
+            foreach (var reward in run.PendingRewards.Where(reward => reward.ProgressionData is not null))
+                items[reward.ItemId] = Math.Max(0, items.GetValueOrDefault(reward.ItemId) - reward.Quantity);
+            return new DungeonLootBag
+            {
+                Experience = secured.Experience, Cinders = secured.Cinders,
+                Soulstones = secured.Soulstones, Items = items
+            };
         }
 
         return new DungeonLootBag

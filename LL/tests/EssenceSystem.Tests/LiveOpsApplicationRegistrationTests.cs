@@ -1,6 +1,7 @@
 using API.LiveOps.Hosting;
 using Application.MediatR.Behaviors;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Administration;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.WebSockets;
@@ -103,6 +104,18 @@ public sealed class LiveOpsApplicationRegistrationTests
         AssertSingleRegistration<IAccountTemporalCorrelationService>(services, ServiceLifetime.Scoped);
         AssertSingleRegistration<IChatModerationGateway>(services, ServiceLifetime.Scoped);
         AssertSingleRegistration<TimeProvider>(services, ServiceLifetime.Singleton);
+    }
+
+    [Fact]
+    public void Standalone_LiveOps_loads_the_shared_dungeon_inventory_catalog()
+    {
+        var services = new ServiceCollection();
+        services.AddLiveOpsServices(new ConfigurationBuilder().Build());
+        using var provider = services.BuildServiceProvider();
+        var catalog = provider.GetRequiredService<IDungeonInventoryItemCatalog>();
+        Assert.True(catalog.AffectsDungeonAvailability("sigil_goblin_mines"));
+        Assert.True(catalog.AffectsDungeonAvailability(SigilFragmentItem.ItemBaseId));
+        Assert.False(catalog.AffectsDungeonAvailability("iron_ore"));
     }
 
     [Theory]

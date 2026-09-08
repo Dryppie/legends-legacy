@@ -63,6 +63,9 @@ public sealed class DungeonCatalogValidator
         if (family.RestSiteCount < 0)
             errors.Add($"{familyLabel}: restSiteCount must be specified and cannot be negative.");
 
+        if (family.TreasuryCount < 0 || (family.TreasuryCount > 0 && family.TreasuryVigorCost is < 1 or >= 100))
+            errors.Add($"{familyLabel}: treasuryCount must be nonnegative and enabled Treasuries require a vigor cost between 1 and 99.");
+
         if (family.RequiredTowerFloor is <= 0)
             errors.Add($"{familyLabel}: requiredTowerFloor must be greater than zero when specified.");
 

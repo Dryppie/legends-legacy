@@ -27,6 +27,7 @@ describe('DungeonPageComponent', () => {
         'chooseRoute',
         'fight',
         'restAtSite',
+        'openTreasury',
         'retreat',
         'claimDungeonRewards',
         'dismissFailedDungeonRun',
@@ -73,6 +74,66 @@ describe('DungeonPageComponent', () => {
     expect(dungeonState.restAtSite).toHaveBeenCalledOnceWith();
     expect(dungeonState.chooseRoute).not.toHaveBeenCalled();
   });
+
+  for (const vigor of [18, 19]) {
+    it(`opens a Treasury only when its 18 Vigor cost leaves Vigor remaining: ${vigor}`, () => {
+      const run = createRun(RoomType.Treasury);
+      run.state.vigor = vigor;
+      run.state.mapNodes[0].vigorCostMin = 18;
+      run.state.mapNodes[0].vigorCostMax = 18;
+      activeDungeon.set(run);
+      const component = TestBed.runInInjectionContext(
+        () => new DungeonPageComponent(),
+      );
+      const node = component.graphNodes()[0];
+      expect(component.isMapNodeActionable(node)).toBe(vigor > 18);
+      expect(component.mapNodeAriaLabel(node)).toContain('18 Vigor');
+      expect(component.mapNodeTitle(node)).toContain(
+        'guaranteed dungeon blueprint or equipment',
+      );
+      expect(component.mapNodeVigorForecast(node)).toBeNull();
+      component.chooseMapNode(node);
+      expect(dungeonState.openTreasury.calls.count()).toBe(vigor > 18 ? 1 : 0);
+      expect(dungeonState.fight).not.toHaveBeenCalled();
+    });
+  }
+
+  for (const viewport of [280, 320, 390, 1280]) {
+    it(`keeps four nodes centered and separated at viewport ${viewport}`, () => {
+      const run = createRun(RoomType.Combat);
+      const original = run.state.mapNodes[0];
+      run.state.mapNodes = [-1, 0, 1, 2].map((lane, index) => ({
+        ...original,
+        id: `node-${index}`,
+        roomIndex: index,
+        lane,
+      }));
+      run.rooms = run.state.mapNodes.map((node) => ({
+        ...run.rooms[0],
+        id: node.id,
+        index: node.roomIndex,
+      }));
+      activeDungeon.set(run);
+      const component = TestBed.runInInjectionContext(
+        () => new DungeonPageComponent(),
+      );
+      component.viewportWidth.set(viewport);
+      const nodes = component.graphNodes();
+      const positions = nodes.map((node) => (viewport < 640 ? node.x : node.y));
+      const extent =
+        viewport < 640 ? component.graphWidth() : component.graphHeight();
+      expect(positions[0]).toBeGreaterThanOrEqual(26);
+      expect(positions[3]).toBeLessThanOrEqual(
+        extent - (viewport < 640 ? 26 : 80),
+      );
+      expect((positions[0] + positions[3]) / 2).toBeCloseTo(extent / 2);
+      for (let index = 1; index < positions.length; index++) {
+        expect(positions[index] - positions[index - 1]).toBeGreaterThanOrEqual(
+          52,
+        );
+      }
+    });
+  }
 
   for (const roomType of [RoomType.Combat, RoomType.MiniBoss, RoomType.Boss]) {
     it(`begins combat when the current ${roomType} node is clicked`, () => {

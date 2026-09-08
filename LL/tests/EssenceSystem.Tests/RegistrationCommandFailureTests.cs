@@ -116,7 +116,8 @@ public sealed class RegistrationCommandFailureTests
         var behavior = new TransactionBehavior<RegisterCommand, Response<Tokens>>(
             db,
             null!,
-            NullLogger<TransactionBehavior<RegisterCommand, Response<Tokens>>>.Instance);
+            NullLogger<TransactionBehavior<RegisterCommand, Response<Tokens>>>.Instance,
+            DungeonInventoryStateSyncTests.CreateSync(db));
         var user = AppUser.Register("Hero", "hero@example.test", "hash");
         var expected = new InvalidOperationException("Token issuance failed.");
 

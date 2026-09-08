@@ -19,7 +19,9 @@
   </ng-container>
 
   <ng-container *ngSwitchCase="'MiniBoss'">
-    <path d="M8 14.5c-1.2-.8-2-2.2-2-3.9C6 7.5 8.7 5 12 5s6 2.5 6 5.6c0 1.7-.8 3.1-2 3.9" />
+    <path
+      d="M8 14.5c-1.2-.8-2-2.2-2-3.9C6 7.5 8.7 5 12 5s6 2.5 6 5.6c0 1.7-.8 3.1-2 3.9"
+    />
     <path d="M9 18h6" />
     <path d="M10 14v4" />
     <path d="M14 14v4" />
@@ -42,6 +44,13 @@
   <ng-container *ngSwitchCase="'Entrance'">
     <path d="M5 20V9l7-5 7 5v11" />
     <path d="M9 20v-7h6v7" />
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'Treasury'">
+    <path d="M4 10V8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+    <path d="M4 10h16v10H4z" />
+    <path d="M9 10V4m6 6V4M4 14h6m4 0h6" />
+    <rect x="10" y="12" width="4" height="5" rx="1" />
   </ng-container>
 
   <ng-container *ngSwitchDefault>

@@ -24,6 +24,7 @@ export enum RoomType {
   Boss = 'Boss',
   RestSite = 'RestSite',
   Entrance = 'Entrance',
+  Treasury = 'Treasury',
 }
 
 export enum RoomInstanceStatus {
@@ -202,6 +203,7 @@ export enum DungeonActionOutcome {
   RunRetreated = 5,
   RunCompleted = 6,
   RunFailed = 7,
+  TreasuryOpened = 9,
 }
 
 @Injectable({

@@ -202,6 +202,9 @@ public interface IDbContext
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
+    // Net quantity changes in the current unit of work, including intermediate saves.
+    Task<IReadOnlyList<InventoryQuantityChange>> GetInventoryQuantityChangesAsync(CancellationToken cancellationToken);
+
     /// <summary>
     /// Execute raw sql. Never use string interpolation to embed values as this can cause sql injection
     /// Instead parse extra args as sqlParams
