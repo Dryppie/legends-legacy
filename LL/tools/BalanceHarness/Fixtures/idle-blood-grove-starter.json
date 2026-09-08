@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 2,
+  "id": "idle-blood-grove-starter-v1",
+  "description": "User-selected Blood Grove starter reference: Goblin Warrior, one-handed Shortsword and Heavy Breastplate at character level 5. Fixed reward-box outcome and two ordered encounter pairs; numerical difficulty goals remain unapproved.",
+  "samplesPerCell": 100,
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "stages": [
+    {
+      "id": "blood-grove",
+      "name": "Selected starter / Blood Grove level 5",
+      "areaId": "region_01_area_02",
+      "assumptions": [
+        "The selected starter is Goblin Warrior with a Sword and Heavy Chest. Sword maps to the one-handed Shortsword (plain.shortsword); Heavy Chest maps to Heavy Breastplate (plain.heavy_breastplate).",
+        "Character level 5; Into the Ruins and Trial of Lumo completed. Retain the First Hunt Essence and First Weapon. Access and quest completion are assumed, not a simulated acquisition journey.",
+        "Exactly one weapon and one Armor Chest item, common Standard tier 1 rank 0 with attribute-roll multiplier 1.0. Heavy Breastplate is the selected benchmark condition, not a guaranteed or player-selectable random-box outcome.",
+        "Goblin Warrior remains level 1, Ascension tier 0 and unevolved in the single unlocked Essence slot. The Lumo Token, one Fury Blueprint and 500 starter Cinders remain unspent. No shield, additional equipment, Forge investment, styles, persistent bonuses or temporary buffs.",
+        "Fix Raven + Raven and Raven + Blood Zombie in the authored order. These two-enemy cases are regression probes, not an area-wide spawn sample or a requirement that every Essence win every encounter. Starter identity is selected; entry preparation and numerical difficulty targets remain subject to gameplay review."
+      ],
+      "builds": [
+        {
+          "id": "goblin-warrior-sword-heavy-chest",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "ravens",
+          "label": "Raven + Raven / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000039",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000039"
+          ]
+        },
+        {
+          "id": "raven-zombie",
+          "label": "Raven + Blood Zombie / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000039",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000047"
+          ]
+        }
+      ]
+    }
+  ]
+}

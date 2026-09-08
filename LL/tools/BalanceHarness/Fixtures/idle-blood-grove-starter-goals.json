@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "idle-blood-grove-starter-goals-v1",
+  "suiteId": "idle-blood-grove-starter-v1",
+  "fixtureHash": "e820b30cf1bdd8763c4ea8c9fdbf138a870611bdfebe728f71454bb348e8a87f",
+  "metricsVersion": "idle-scorecard-v1",
+  "description": "Reviewed initial working target for the selected level-5 Goblin Warrior, one-handed Shortsword and Heavy Breastplate reference: aim near 70% clear rate, with an inclusive 65-75% band for each fixed Blood Grove pairing. This policy applies only when explicitly selected for evaluation; other cohort policies and CI configuration are unchanged.",
+  "requiredCells": [
+    "blood-grove.goblin-warrior-sword-heavy-chest.ravens",
+    "blood-grove.goblin-warrior-sword-heavy-chest.raven-zombie"
+  ],
+  "goals": [
+    {
+      "id": "blood-grove-starter-clear-rate",
+      "metric": "ClearRate",
+      "unit": "percent",
+      "role": "Primary",
+      "enforcement": "Enforced",
+      "cells": [
+        "blood-grove.goblin-warrior-sword-heavy-chest.ravens",
+        "blood-grove.goblin-warrior-sword-heavy-chest.raven-zombie"
+      ],
+      "minimumSamples": 100,
+      "minimum": 65,
+      "maximum": 75,
+      "rationale": "Aim near 70% for this exact starter recipe in each selected encounter, rather than maximizing victories. The existing pointwise 95% Wilson interval must lie wholly inside 65-75% to pass; boundary overlap remains inconclusive. At least 100 trials permit diagnosis of large misses, but near-target confirmation needs a larger predeclared sample budget. These fixed pairs are not an area-wide spawn estimate or a requirement for every Essence.",
+      "reviewReason": "On 8 September 2026 the user approved approximately 70% clear rate for the selected Blood Grove starter and explicitly chose: Aim near 70% (use 65-75% as an initial working band). This approves the scoped working band, not a passing current build, unrelated pacing goals or a hosted CI gate."
+    }
+  ]
+}

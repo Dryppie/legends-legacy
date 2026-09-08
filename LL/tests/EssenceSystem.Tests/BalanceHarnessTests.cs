@@ -48,6 +48,8 @@ public sealed class BalanceHarnessTests
     [InlineData(17, 1, 3, "idle-first-hunt.json", 0, 1, 0, "plain.light_vest", true)]
     [InlineData(1337, 1, 4, "idle-first-hunt.json", 0, 1, 0, "plain.heavy_legplates", true)]
     [InlineData(17, 1, 5, "idle-first-hunt.json", 1, 1, 0, "plain.light_leggings", true)]
+    [InlineData(1337, 0, 0, "idle-blood-grove-starter.json", 0)]
+    [InlineData(17, 0, 0, "idle-blood-grove-starter.json", 1)]
     public async Task Harness_matches_independent_production_idle_preparation_and_resolution(int seed, int stageIndex, int buildIndex,
         string suiteName, int encounterIndex, int essenceLevel = 1, int rank = 0, string? armorId = null, bool fury = false)
     {

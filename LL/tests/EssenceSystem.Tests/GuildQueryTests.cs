@@ -10,6 +10,22 @@ namespace EssenceSystem.Tests;
 public sealed class GuildQueryTests
 {
     [Fact]
+    public async Task Guild_member_lookup_compiles_without_multiple_collection_warnings()
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>()
+            .UseNpgsql("Host=localhost;Database=query_compilation_only;Username=unused")
+            .ConfigureWarnings(warnings =>
+                warnings.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
+            .AddInterceptors(new StopBeforeDatabaseConnection())
+            .Options;
+        await using var context = new LLDbContext(options);
+
+        // SubscribeToGuild uses this lookup; compile it without opening a database connection.
+        await Assert.ThrowsAsync<QueryCompiledException>(() => new GuildRepository(context)
+            .GetGuildForMemberAsync(Guid.NewGuid(), CancellationToken.None));
+    }
+
+    [Fact]
     public async Task Guild_invite_by_name_lookup_compiles_without_multiple_collection_warnings()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

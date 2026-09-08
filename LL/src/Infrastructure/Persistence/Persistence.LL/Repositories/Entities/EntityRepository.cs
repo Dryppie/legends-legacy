@@ -24,6 +24,7 @@ public class EntityRepository : IEntityRepository
     public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
     {
         var entities = await _context.Entities
+            .AsSplitQuery()
             .CombatReady()
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync(cancellationToken);

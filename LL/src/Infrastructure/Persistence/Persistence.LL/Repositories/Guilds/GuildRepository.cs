@@ -241,6 +241,7 @@ public class GuildRepository : IGuildRepository
     {
         await _context.AcquireCharacterCommandLockAsync(characterId, cancellationToken);
         var guild = await _context.Guilds
+            .AsSplitQuery()
             .Include(g => g.Members)
             .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
@@ -281,6 +282,7 @@ public class GuildRepository : IGuildRepository
 
     public async Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.Guilds
+            .AsSplitQuery()
             .Include(g => g.Members)
             .Include(g => g.Resources)
             .Include(g => g.Buildings)

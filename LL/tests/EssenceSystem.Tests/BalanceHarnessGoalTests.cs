@@ -68,6 +68,40 @@ public sealed class BalanceHarnessGoalTests
     }
 
     [Fact]
+    public void Blood_grove_starter_policy_pins_its_recipe_and_preserves_near_target_uncertainty()
+    {
+        var goals = BalanceGoals.Read(FixturePath("idle-blood-grove-starter-goals.json"));
+        var suite = HarnessJson.Read<IdleSuiteDefinition>(FixturePath("idle-blood-grove-starter.json"));
+        Assert.Equal(suite.Id, goals.SuiteId);
+        Assert.Equal(BalanceGoals.FixtureContractHash(suite), goals.FixtureHash);
+        Assert.Equal(2, goals.RequiredCells.Count);
+        Assert.Equal(suite.Stages.SelectMany(s => s.Builds.SelectMany(b => s.Encounters
+            .Select(e => $"{s.Id}.{b.Id}.{e.Id}"))).Order(), goals.RequiredCells.Order());
+        Assert.False(goals.RequiresBaseline);
+        var goal = Assert.Single(goals.Goals);
+        Assert.Equal(goals.RequiredCells.Order(), goal.Cells.Order());
+        Assert.Equal(GoalMetric.ClearRate, goal.Metric);
+        Assert.Equal(GoalRole.Primary, goal.Role);
+        Assert.Equal(GoalEnforcement.Enforced, goal.Enforcement);
+        Assert.False(string.IsNullOrWhiteSpace(goal.ReviewReason));
+        Assert.Equal(65d, goal.Minimum);
+        Assert.Equal(75d, goal.Maximum);
+        Assert.Equal(100, goal.MinimumSamples);
+        foreach (var (wins, trials, expected) in new[]
+        {
+            (0, 100, GoalOutcome.Fail), (70, 100, GoalOutcome.Inconclusive),
+            (700, 1000, GoalOutcome.Pass), (100, 100, GoalOutcome.Fail),
+            (7, 10, GoalOutcome.Inconclusive)
+        })
+        {
+            var rate = SuiteScorecard.Wilson(wins, trials)!;
+            var measurement = new GoalMeasurement(trials, rate.Rate * 100, rate.Lower * 100,
+                rate.Upper * 100, "Wilson (95%)");
+            Assert.Equal(expected, GoalEvaluator.Assess(measurement, goal.Minimum, goal.Maximum, goal.MinimumSamples).Outcome);
+        }
+    }
+
+    [Fact]
     public void Goal_validation_rejects_unknown_fields_bad_units_bounds_coverage_and_unreviewed_enforcement()
     {
         var goals = BalanceGoals.Read(FixturePath("idle-goals.json"));

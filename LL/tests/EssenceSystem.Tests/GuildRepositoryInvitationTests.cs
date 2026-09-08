@@ -12,6 +12,50 @@ public sealed class GuildRepositoryInvitationTests
     [Theory]
     [InlineData(false, 1, false)]
     [InlineData(true, 1, false)]
+    [InlineData(false, 2, false)]
+    [InlineData(true, 2, false)]
+    [InlineData(false, 2, true)]
+    [InlineData(true, 2, true)]
+    public async Task Joining_RespectsCapacityAndExistingMembership_AndCleansUpInvitations(
+        bool acceptInvite, int hallLevel, bool alreadyMember)
+    {
+        await using var db = CreateDbContext();
+        var (_, guildId, existingMember) = SeedGuilds(db);
+        var applicant = alreadyMember ? existingMember : CreateCharacter("Joining Character");
+        if (!alreadyMember) db.Characters.Add(applicant);
+        var guild = db.Guilds.Local.Single(x => x.Id == guildId);
+        guild.MaxMembers = 0;
+        guild.Buildings.Add(new GuildBuilding
+        {
+            GuildId = guildId, Type = GuildBuildingType.GuildHall, Level = hallLevel
+        });
+        db.GuildInvites.AddRange(
+            new GuildInvite { GuildId = guildId, CharacterId = applicant.Id, IsInvite = acceptInvite },
+            new GuildInvite
+            {
+                GuildId = db.Guilds.Local.Single(x => x.Id != guildId).Id,
+                CharacterId = applicant.Id, IsInvite = !acceptInvite
+            });
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var repository = new GuildRepository(db);
+        var joined = acceptInvite
+            ? await repository.AcceptInviteAsync(applicant.Id, guildId, CancellationToken.None)
+            : await repository.ApproveApplicationAsync(guildId, applicant.Id, CancellationToken.None);
+        var expected = hallLevel == 2 && !alreadyMember;
+        Assert.Equal(expected, joined);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.Equal(expected, await db.GuildMembers.AnyAsync(x => x.CharacterId == applicant.Id && x.GuildId == guildId));
+        Assert.Equal(expected ? 0 : 2, await db.GuildInvites.CountAsync(x => x.CharacterId == applicant.Id));
+        Assert.Equal(expected || alreadyMember ? 1 : 0, await db.GuildMembers.CountAsync(x => x.CharacterId == applicant.Id));
+    }
+
+    [Theory]
+    [InlineData(false, 1, false)]
+    [InlineData(true, 1, false)]
     [InlineData(false, 2, true)]
     [InlineData(true, 2, true)]
     public async Task Invite_RespectsGuildHallCapacity_AfterReload(bool byName, int hallLevel, bool expected)

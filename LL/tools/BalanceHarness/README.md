@@ -67,6 +67,22 @@ The script writes its fixed plan before execution, generates six recipes from th
 
 Schema-2 stages and single scenarios optionally accept `"essenceLevels": { "essence.goblin_warrior": 10 }`. Keys must name selected Essences (across the stage's builds for a stage map); omitted selections stay level 1. Values must be unascended levels 1–10. Ascension/evolution recipes are outside this extension. Training maps participate in fixture/scenario identity and are checked against frozen snapshots. Absent maps are omitted from JSON, preserving both existing cohorts' hashes. Different progression recipes remain incompatible with ordinary regression comparison, even when their combat outcomes match.
 
+## Selected Blood Grove starter reference
+
+[idle-blood-grove-starter.json](Fixtures/idle-blood-grove-starter.json) pins the user-selected Goblin Warrior + Sword + Heavy Chest build for Blood Grove. Sword maps to the one-handed Shortsword and Heavy Chest to Heavy Breastplate. Character level is 5; the one Essence stays level 1, unascended and unevolved. Both items are common, Standard, tier 1, rank 0 with baseline rolls and no Fury. The exact chest is a fixed possible reward outcome. This two-cell suite preserves the earlier cohorts and uses the existing command:
+
+```powershell
+dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- suite --suite LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter.json --seed 1337 --output TestResults/balance/blood-grove-starter-001
+```
+
+The [starter reference review](../../../Balance%20Harness/Blood-Grove-Starter-Reference.md) records the recipe, fixed 400-battle discovery/confirmation measurement and two selected replays. Both encounters produced 0/100 wins on both seed sets. The user subsequently approved a **70% aim with an initial 65–75% band for each encounter**. [idle-blood-grove-starter-goals.json](Fixtures/idle-blood-grove-starter-goals.json) carries this reviewed goal and pins the unchanged recipe. Its pre-policy fixture wording remains historical; the goals file records current approval. A viable gameplay baseline remains open.
+
+```powershell
+dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- evaluate --goals LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter-goals.json --run TestResults/balance/blood-grove-starter-reference/confirmation --output TestResults/balance/blood-grove-starter-evaluation-001
+```
+
+This absolute-only policy needs no baseline argument. It enforces the working band when explicitly selected: current saved results return two failed checks and exit 1; overlapping confidence intervals return 3. At least 100 trials are required, but 70/100 remains inconclusive because its 95% Wilson interval crosses the band. A predeclared 1,000-trial confirmation budget per encounter can resolve a result near 70%; select fresh reserved seeds before tuning. CI continues to smoke-test the two existing draft cohorts, while harness tests cover this selected recipe and policy. Do not pass the enforced policy to the advisory smoke script.
+
 ## Investigate attainable Blood Grove equipment
 
 ```powershell
@@ -116,7 +132,7 @@ Exit code **0** means a complete advisory comparison, regardless of the measured
 
 ## Evaluate balance goals
 
-The [versioned goals file](Fixtures/idle-goals.json) defines six **draft proposals**, expanded into 60 checks across all 12 cells. It proposes 90% minimum clears for ordinary enemies, a 60–90% challenge clear-rate band, a 60-second mean winning duration limit, and tolerances for baseline movement. These are proposed experience goals, not values established by the observed results. Every shipped goal is `Draft`; no balance gate is enabled by default.
+The [default goals file](Fixtures/idle-goals.json) defines six **draft proposals**, expanded into 60 checks across all 12 cells. It proposes 90% minimum clears for ordinary enemies, a 60–90% challenge clear-rate band, a 60-second mean winning duration limit, and tolerances for baseline movement. These are proposed experience goals, not values established by the observed results. The default and First Hunt policies remain `Draft`; the separately selected Blood Grove starter policy has a reviewed 65–75% enforced band. No balance gate is enabled by default or added to hosted CI.
 
 ```powershell
 dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- evaluate --run TestResults/balance/idle-candidate-001 --baseline TestResults/balance/baselines/idle-v1.json --output TestResults/balance/idle-evaluation-001
@@ -238,7 +254,7 @@ Small production seams make the file-only composition possible:
 
 `BalanceHarnessFirstHuntTests` covers the authored starter choices, legal quest-reward budgets, 36-cell/180-check contract, independent duplicate enemies, group validation, archived group replay/comparison/evaluation and unchanged legacy hashes. Production parity cases also cover duplicate and mixed enemy groups with the actual First Hunt Essences.
 
-`BalanceHarnessProgressionTests` verifies training recipes and frozen progression. `BalanceHarnessEntryTests` verifies the armor/style matrix, production Forge-quote equivalence, reward budgets, complete experiment/replay evidence, paired schedules, output preservation and cancellation. The current harness filter covers 76 passing tests across seven classes.
+`BalanceHarnessProgressionTests` verifies training recipes and frozen progression. `BalanceHarnessEntryTests` verifies the armor/style matrix, production Forge-quote equivalence, reward budgets, complete experiment/replay evidence, paired schedules, output preservation and cancellation. Two additional `BalanceHarnessTests` parity cases cover the selected Goblin Warrior/Shortsword/Heavy Breastplate reference against both Blood Grove pairs. `BalanceHarnessGoalTests` also pins its reviewed policy and checks uncertainty inside and outside the working band. The current harness filter covers 79 passing tests across seven classes.
 
 Run relevant backend verification through the repository script:
 
@@ -252,6 +268,6 @@ Shared combat/preparation changes also warrant the full `./build/run-tests.ps1` 
 
 Each trial resolves a fresh single fight. The suite conditions on specific spawns; it does not estimate an area's overall win rate. It excludes spawn-distribution sampling, offline time progression, rewards, account persistence, and multi-encounter carryover. Runs execute sequentially with a fresh executor and mutable combat state per battle. Elapsed wall time is recorded but is not a controlled performance benchmark.
 
-Explicit baseline acceptance, paired comparison, goal evaluation and advisory CI configuration for both cohorts are available. The First Hunt cohort improves starter/reward/encounter coverage; fixed reward outcomes and untrained builds still require review. Gameplay-target approval, first hosted CI validation, broader progression coverage, additional content adapters and rankings remain open. A completed suite establishes reproducible measurements, not balance acceptance.
+Explicit baseline acceptance, paired comparison, goal evaluation and advisory CI configuration for both original cohorts are available. The First Hunt cohort improves starter/reward/encounter coverage. The selected Blood Grove starter now has a reviewed working clear-rate band; other numerical goals remain draft. A viable starter baseline, first hosted CI validation, broader progression coverage, additional content adapters and rankings remain open. A completed suite establishes reproducible measurements, not balance acceptance.
 
 No database, running API, hosted workers, migrations, deployment, or production configuration changes are required. The tool adds a `Microsoft.Extensions.Configuration` dependency matching the existing backend's 10.0.5 version.

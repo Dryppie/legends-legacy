@@ -8,11 +8,11 @@ Game design proposal · 8 September 2026
 
 Paths give a character a combat philosophy: a rule that changes how the player combines equipment and Essences.
 
-| Pillar | Player question | Contribution to a build |
-| --- | --- | --- |
-| Equipment | What are my strengths? | Attributes and the balance between offense, defense, and recovery. |
-| Essences | What tools do I have? | Active abilities, passive abilities, and their individual identities. |
-| Path | How do those tools work together? | A defining interaction, an opportunity, and a meaningful limitation. |
+| Pillar    | Player question                   | Contribution to a build                                               |
+| --------- | --------------------------------- | --------------------------------------------------------------------- |
+| Equipment | What are my strengths?            | Attributes and the balance between offense, defense, and recovery.    |
+| Essences  | What tools do I have?             | Active abilities, passive abilities, and their individual identities. |
+| Path      | How do those tools work together? | A defining interaction, an opportunity, and a meaningful limitation.  |
 
 The promise is that two characters with the same equipment and Essences can pursue different strategies by choosing different Paths. A recovery-heavy loadout could turn healing into protection through Bastion, or concentrate its other abilities into a powerful healing cast through Conduit.
 
@@ -115,11 +115,11 @@ The player should not need a Battle Plan system to make the central mechanic fun
 
 ### Refinements: choose one, or remain in the base form
 
-| Refinement | Change to Fortification | New decision and tradeoff |
-| --- | --- | --- |
-| **Rebuild** | A self-heal that begins at or below 35% Health restores its entire normal amount as Health and grants no converted Barrier. Above that threshold, use the normal 25% / 75% split. | Gain an emergency recovery route, but stop preparing Barrier during that recovery. |
+| Refinement        | Change to Fortification                                                                                                                                                                                                                                              | New decision and tradeoff                                                                               |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Rebuild**       | A self-heal that begins at or below 35% Health restores its entire normal amount as Health and grants no converted Barrier. Above that threshold, use the normal 25% / 75% split.                                                                                    | Gain an emergency recovery route, but stop preparing Barrier during that recovery.                      |
 | **Counterweight** | When activating an Essence with an immediate direct enemy-damage component while holding at least 20% of Max Health as Barrier, spend Barrier equal to 10% of Max Health. Add the amount spent as damage to the cast's first direct attack attempt against an enemy. | Spend a defensive reserve to accelerate the fight, accepting a weaker position against the next attack. |
-| **Shelter** | Divide Fortification's Barrier portion equally between yourself and the other living ally with the lowest Health percentage. The Health portion still restores only your Health. | Protect another combatant by giving up half of your own newly generated protection. |
+| **Shelter**       | Divide Fortification's Barrier portion equally between yourself and the other living ally with the lowest Health percentage. The Health portion still restores only your Health.                                                                                     | Protect another combatant by giving up half of your own newly generated protection.                     |
 
 **Rebuild details.** Evaluate the threshold once, at the beginning of each healing event. One large heal can carry the character above 35% Health without being divided midway. At exactly 35%, Rebuild applies. Any amount above full Health is lost rather than converted into Barrier. Incoming healing modifiers apply normally.
 
@@ -133,13 +133,13 @@ The base form suits builds that depend on uninterrupted Barrier generation and l
 
 Assume the Bastion has 1,000 Max Health, begins at full Health with no Barrier, and uses a self-heal worth 200. Incoming damage below is already reduced by defenses.
 
-| Moment | Outcome | Health | Barrier |
-| --- | --- | ---: | ---: |
-| Encounter begins | No protection is banked from earlier battles. | 1,000 | 0 |
-| Self-heal for 200 | The 50 Health portion is unused; gain 150 Barrier. | 1,000 | 150 |
-| Receive 100 damage | Barrier absorbs the entire hit. | 1,000 | 50 |
-| Receive 250 damage | Lose the remaining 50 Barrier and then 200 Health. | 800 | 0 |
-| Self-heal for 200 | Restore 50 Health and gain 150 Barrier. | 850 | 150 |
+| Moment             | Outcome                                            | Health | Barrier |
+| ------------------ | -------------------------------------------------- | -----: | ------: |
+| Encounter begins   | No protection is banked from earlier battles.      |  1,000 |       0 |
+| Self-heal for 200  | The 50 Health portion is unused; gain 150 Barrier. |  1,000 |     150 |
+| Receive 100 damage | Barrier absorbs the entire hit.                    |  1,000 |      50 |
+| Receive 250 damage | Lose the remaining 50 Barrier and then 200 Health. |    800 |       0 |
+| Self-heal for 200  | Restore 50 Health and gain 150 Barrier.            |    850 |     150 |
 
 The last row expresses the Path's limitation: the character has regained protection, but has not repaired most of the Health loss.
 
@@ -197,11 +197,11 @@ Choose one eligible Focus Essence before combat. Begin each encounter with **0 C
 The Focus Essence's eligible effect amounts are multiplied by **80% + 20 percentage points per Charge spent**.
 
 | Charge spent | Focus effect amount | Example: an otherwise 200-point effect |
-| ---: | ---: | ---: |
-| 0 | 80% | 160 |
-| 1 | 100% | 200 |
-| 2 | 120% | 240 |
-| 3 | 140% | 280 |
+| -----------: | ------------------: | -------------------------------------: |
+|            0 |                 80% |                                    160 |
+|            1 |                100% |                                    200 |
+|            2 |                120% |                                    240 |
+|            3 |                140% |                                    280 |
 
 The cost is an underpowered Focus cast when the build has not prepared enough Charge. Contributors retain their ordinary effects; there is no blanket penalty on the rest of the loadout.
 
@@ -229,11 +229,11 @@ Conduit uses ordinary automated casting and cooldowns. It does not delay the Foc
 
 ### Refinements: choose one, or remain in the base form
 
-| Refinement | Exact rule change | New decision and tradeoff |
-| --- | --- | --- |
-| **Short Circuit** | Every normal active cast by another Essence can grant Charge, even if that contributor already contributed in the cycle. Maximum Charge falls to 2; keep the normal 80% + 20 points per Charge formula. | A frequently casting partner can prepare the Focus, but its maximum effect amount falls to 120%. |
-| **Deep Reservoir** | Maximum Charge rises to 4, with four different contributors required. Replace the Focus formula with 60% + 25 points per Charge. | Earn a 160% ceiling through a broader, slower setup, while underprepared Focus casts become substantially weaker. |
-| **Relay** | Keep a maximum of 3 and the distinct-contributor rule. Use 80% + 15 points per Charge. After a Focus cast spends at least 2 Charge, return 1 Charge to the new cycle when that cast resolves, up to the cap. | Accept a lower peak in exchange for a head start on later cycles. |
+| Refinement         | Exact rule change                                                                                                                                                                                            | New decision and tradeoff                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| **Short Circuit**  | Every normal active cast by another Essence can grant Charge, even if that contributor already contributed in the cycle. Maximum Charge falls to 2; keep the normal 80% + 20 points per Charge formula.      | A frequently casting partner can prepare the Focus, but its maximum effect amount falls to 120%.                  |
+| **Deep Reservoir** | Maximum Charge rises to 4, with four different contributors required. Replace the Focus formula with 60% + 25 points per Charge.                                                                             | Earn a 160% ceiling through a broader, slower setup, while underprepared Focus casts become substantially weaker. |
+| **Relay**          | Keep a maximum of 3 and the distinct-contributor rule. Use 80% + 15 points per Charge. After a Focus cast spends at least 2 Charge, return 1 Charge to the new cycle when that cast resolves, up to the cap. | Accept a lower peak in exchange for a head start on later cycles.                                                 |
 
 **Short Circuit details.** The same contributor can grant Charge on successive normal casts, but one cast still grants at most one Charge regardless of its hits or triggered copies. The Focus never charges itself.
 
@@ -245,16 +245,16 @@ Conduit uses ordinary automated casting and cooldowns. It does not delay the Foc
 
 Assume four equipped Essences: contributors A, B, and C, plus Focus F. F has a direct effect worth 200 before its Conduit multiplier. This is an illustrative sequence of normal casts, not a manual rotation added by the Path.
 
-| Cast | Circuit outcome | Charge after cast | F's effect amount |
-| --- | --- | ---: | ---: |
-| A | A contributes to this cycle. | 1 | — |
-| B | B contributes to this cycle. | 2 | — |
-| A again | A has already contributed. | 2 | — |
-| C | C contributes; Charge is full. | 3 | — |
-| F | Spend 3; begin a new cycle. | 0 | 280 |
-| F again, before another contributor | Spend 0; begin another cycle. | 0 | 160 |
-| B | B can contribute again in this cycle. | 1 | — |
-| F | Spend 1. | 0 | 200 |
+| Cast                                | Circuit outcome                       | Charge after cast | F's effect amount |
+| ----------------------------------- | ------------------------------------- | ----------------: | ----------------: |
+| A                                   | A contributes to this cycle.          |                 1 |                 — |
+| B                                   | B contributes to this cycle.          |                 2 |                 — |
+| A again                             | A has already contributed.            |                 2 |                 — |
+| C                                   | C contributes; Charge is full.        |                 3 |                 — |
+| F                                   | Spend 3; begin a new cycle.           |                 0 |               280 |
+| F again, before another contributor | Spend 0; begin another cycle.         |                 0 |               160 |
+| B                                   | B can contribute again in this cycle. |                 1 |                 — |
+| F                                   | Spend 1.                              |                 0 |               200 |
 
 The second Focus cast shows why the Path is more than an automatic upgrade. Selecting a fast Focus with slow contributors can reduce the value of the build's most important ability.
 
@@ -289,11 +289,11 @@ The post-combat summary shows Focus casts at each Charge level and their average
 
 These are concept seeds only. Their final rules, numerical values, refinements, progression, and balance are intentionally undecided. They are not part of the two developed Path designs above.
 
-| Potential Path | Fantasy and possible core mechanic | Build decision | Main design question |
-| --- | --- | --- | --- |
-| **Reaper** | Turn your own lingering damage into an earlier kill. Qualifying direct Essence attacks could consume some remaining damage from your own Bleed, Burn, or Poison on their target and deliver part of it immediately. | Balance applying lasting pressure against harvesting it early; choose how many direct attacks belong in the loadout. | Can the timing tradeoff remain useful in automatic combat without making damage-over-time universally stronger? Other players' conditions must remain theirs to use. |
-| **Shepherd** | Bind your survival to one chosen summon. A bond could share protection or incoming damage between the character and that summon, while concentrating selected summon-related benefits on it. The Path itself supplies no summon. | Choose a reliable companion and build mutual survival, accepting dependence on keeping that companion present. | Does the bond change how the owner builds and survives, rather than simply make the strongest summon stronger? A broken bond must be survivable enough to allow recovery. |
-| **Gambler** | Trade dependable output for occasional exceptional moments. A controlled Fortune cycle could deliver weaker ordinary casts and intermittent amplified casts, with a visible limit on how long the weak period can last. | Decide whether the build can survive uneven output and exploit a peak; damage and emergency recovery tolerate that risk differently. | Is the experience interesting beyond average damage calculations? Randomly failed survival checks must feel understandable, and repeatedly resetting encounters must not let players choose only favorable outcomes. |
+| Potential Path | Fantasy and possible core mechanic                                                                                                                                                                                               | Build decision                                                                                                                       | Main design question                                                                                                                                                                                                 |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Reaper**     | Turn your own lingering damage into an earlier kill. Qualifying direct Essence attacks could consume some remaining damage from your own Bleed, Burn, or Poison on their target and deliver part of it immediately.              | Balance applying lasting pressure against harvesting it early; choose how many direct attacks belong in the loadout.                 | Can the timing tradeoff remain useful in automatic combat without making damage-over-time universally stronger? Other players' conditions must remain theirs to use.                                                 |
+| **Shepherd**   | Bind your survival to one chosen summon. A bond could share protection or incoming damage between the character and that summon, while concentrating selected summon-related benefits on it. The Path itself supplies no summon. | Choose a reliable companion and build mutual survival, accepting dependence on keeping that companion present.                       | Does the bond change how the owner builds and survives, rather than simply make the strongest summon stronger? A broken bond must be survivable enough to allow recovery.                                            |
+| **Gambler**    | Trade dependable output for occasional exceptional moments. A controlled Fortune cycle could deliver weaker ordinary casts and intermittent amplified casts, with a visible limit on how long the weak period can last.          | Decide whether the build can survive uneven output and exploit a peak; damage and emergency recovery tolerate that risk differently. | Is the experience interesting beyond average damage calculations? Randomly failed survival checks must feel understandable, and repeatedly resetting encounters must not let players choose only favorable outcomes. |
 
 ## 6. Shared combat and activity expectations
 
@@ -323,20 +323,20 @@ At introduction, Conduit must be useful with three slots. At higher slot counts,
 
 The identities and choice structure above are the proposed design. The following playtests determine whether their numerical expressions need to change.
 
-| Playtest | What it should establish |
-| --- | --- |
-| Same equipment and Essences, switch only the Path | Does the character's behavior change visibly, and can the player explain why? |
-| Rebuild the loadout around each Path afterward | Does understanding the Path lead to meaningful equipment and Essence changes? |
-| Three-slot introductory builds and later wider builds | Can both Paths work when unlocked, while later slots add options without overwhelming earlier builds? |
-| Short encounters, long encounters, and dangerous openings | Are the different preparation costs meaningful without making one Path unusable in ordinary play? |
-| Bastion under repeated burst damage | Is 25% Health restoration enough to recover between breaches, or does the base form become too punishing? |
-| Bastion with Rebuild, Counterweight, and Shelter | Does each refinement change the build's purpose? Is the base form still attractive? |
-| Bastion with allies, summons, and strong healing suppression | Does the source distinction remain understandable, and can organized recovery create excessive stalling? |
-| Conduit under ordinary automated cast order | Can the player predict preparation and payoff without editing a script or controlling casts manually? |
-| Conduit with uneven cooldowns and mixed-effect Essences | Are Focus eligibility, weak casts, and unmodified effects clear enough to support informed choices? |
-| Conduit with each refinement | Are there useful loadouts for the small circuit, long preparation, and repeat-cycle approaches? |
-| Builds with no Path and builds with the wrong Path | Are Paths a rewarding source of strategy while their opportunity costs remain real and visible? |
-| PvP and encounters with time limits | Do durable combinations remain beatable, and do burst combinations allow understandable counterplay? |
+| Playtest                                                     | What it should establish                                                                                  |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Same equipment and Essences, switch only the Path            | Does the character's behavior change visibly, and can the player explain why?                             |
+| Rebuild the loadout around each Path afterward               | Does understanding the Path lead to meaningful equipment and Essence changes?                             |
+| Three-slot introductory builds and later wider builds        | Can both Paths work when unlocked, while later slots add options without overwhelming earlier builds?     |
+| Short encounters, long encounters, and dangerous openings    | Are the different preparation costs meaningful without making one Path unusable in ordinary play?         |
+| Bastion under repeated burst damage                          | Is 25% Health restoration enough to recover between breaches, or does the base form become too punishing? |
+| Bastion with Rebuild, Counterweight, and Shelter             | Does each refinement change the build's purpose? Is the base form still attractive?                       |
+| Bastion with allies, summons, and strong healing suppression | Does the source distinction remain understandable, and can organized recovery create excessive stalling?  |
+| Conduit under ordinary automated cast order                  | Can the player predict preparation and payoff without editing a script or controlling casts manually?     |
+| Conduit with uneven cooldowns and mixed-effect Essences      | Are Focus eligibility, weak casts, and unmodified effects clear enough to support informed choices?       |
+| Conduit with each refinement                                 | Are there useful loadouts for the small circuit, long preparation, and repeat-cycle approaches?           |
+| Builds with no Path and builds with the wrong Path           | Are Paths a rewarding source of strategy while their opportunity costs remain real and visible?           |
+| PvP and encounters with time limits                          | Do durable combinations remain beatable, and do burst combinations allow understandable counterplay?      |
 
 The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Counterweight's spending and damage amounts, and Conduit's zero-Charge penalty and Charge curves. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Focus output for a stronger prepared cast.**
 
