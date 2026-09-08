@@ -13,6 +13,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Persistence.LL.Repositories.Regions;
 using Services.LL.Essences;
 
 namespace EssenceSystem.Tests;
@@ -509,6 +510,7 @@ public sealed class CreatureArchiveServiceTests
             lootTables,
             CreateCodexCollectionService(db, definitions, lootTables),
             new FakeDungeonDefinitions(),
+            new RegionRepository(db),
             outbox);
     }
 

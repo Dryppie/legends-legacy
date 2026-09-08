@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Routing;
 
 namespace API.LL.Common;
@@ -64,12 +65,16 @@ public sealed class RequestLoggingMiddleware
                     ? LogLevel.Information
                     : LogLevel.Debug;
 
-        var route = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText
+        // Exception handling clears the endpoint but retains the original in its feature.
+        var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+        var endpoint = exceptionFeature?.Endpoint ?? context.GetEndpoint();
+        var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText
             ?? "(unmatched)";
 
         _logger.Log(
             level,
             RequestCompleted,
+            exceptionFeature?.Error,
             "HTTP {HttpMethod} {HttpRoute} responded {HttpStatusCode} in {DurationMs} ms.",
             context.Request.Method,
             route,

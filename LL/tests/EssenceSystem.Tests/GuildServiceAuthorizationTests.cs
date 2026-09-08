@@ -304,6 +304,9 @@ public sealed class GuildServiceAuthorizationTests
         public Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<Guild?>(null);
 
+        public Task<Guild?> GetGuildForShopAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<Guild?>(null);
+
         public Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken) =>
             Task.FromResult(true);
 

@@ -15,7 +15,7 @@ public class GetCharacterIdByNameQueryHandler : IRequestHandler<GetCharacterIdBy
     public async Task<Response<Guid?>> Handle(GetCharacterIdByNameQuery request, CancellationToken cancellationToken)
     {
         var characterId = await _characterService.GetCharacterIdByNameAsync(request.Name, cancellationToken);
-        return characterId != Guid.Empty
+        return characterId.HasValue && characterId.Value != Guid.Empty
             ? Response<Guid?>.Success(characterId.Value)
             : Response<Guid?>.Fail("Character not found.");
     }

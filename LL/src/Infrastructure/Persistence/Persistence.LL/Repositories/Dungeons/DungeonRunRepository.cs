@@ -42,6 +42,7 @@ public class DungeonRunRepository : IDungeonRunRepository
         return await _context.DungeonRuns
             .Include(x => x.Rooms.OrderBy(r => r.RoomIndex))
             .Include(x => x.PendingRewards)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.CharacterId.Equals(characterId), cancellationToken);
     }
 
@@ -50,6 +51,7 @@ public class DungeonRunRepository : IDungeonRunRepository
         return await _context.DungeonRuns
              .Include(x => x.Rooms.OrderBy(r => r.RoomIndex))
              .Include(x => x.PendingRewards)
+             .AsSplitQuery()
              .FirstOrDefaultAsync(x => x.Id.Equals(dungeonId), cancellationToken);
     }
 

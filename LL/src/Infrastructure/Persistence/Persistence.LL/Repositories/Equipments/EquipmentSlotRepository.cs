@@ -19,6 +19,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     public async Task<List<EquipmentSlot>> GetEquipmentSlotsByEntityIdAsync(Guid entityId, CancellationToken cancellationToken)
     {
         var equipmentList = await _context.EquipmentSlots
+            .AsSplitQuery()
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.InstanceModifiers)
             .Include(es => es.EquipmentInstance)

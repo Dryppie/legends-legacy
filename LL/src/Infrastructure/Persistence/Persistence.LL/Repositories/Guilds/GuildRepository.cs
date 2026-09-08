@@ -286,6 +286,11 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.RolePermissions)
             .FirstOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
+    public Task<Guild?> GetGuildForShopAsync(Guid characterId, CancellationToken cancellationToken) =>
+        _context.Guilds
+            .Include(g => g.Buildings)
+            .FirstOrDefaultAsync(g => g.Members.Any(member => member.CharacterId == characterId), cancellationToken);
+
     public async Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken)
     {
         var member = await _context.GuildMembers

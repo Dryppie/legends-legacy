@@ -24,6 +24,7 @@ public sealed class GuildVaultRepository(IDbContext context) : IGuildVaultReposi
         context.InventoryItems
             .Include(x => x.ItemInstance).ThenInclude(x => x.ItemBase).ThenInclude(x => (x as EquipmentBase)!.AttributeModifiers)
             .Include(x => (x.ItemInstance as EquipmentInstance)!.InstanceModifiers)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.InventoryId == characterId && x.ItemInstanceId == equipmentId, ct);
 
     public Task<bool> IsEquippedAsync(Guid equipmentId, CancellationToken ct) =>
@@ -42,6 +43,7 @@ public sealed class GuildVaultRepository(IDbContext context) : IGuildVaultReposi
         return await context.GuildVaultItems
             .Include(x => x.EquipmentInstance).ThenInclude(x => x.ItemBase).ThenInclude(x => (x as EquipmentBase)!.AttributeModifiers)
             .Include(x => x.EquipmentInstance).ThenInclude(x => x.InstanceModifiers)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == vaultItemId, ct);
     }
 

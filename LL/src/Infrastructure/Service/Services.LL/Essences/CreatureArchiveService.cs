@@ -8,6 +8,7 @@ using Domain.Models.Dungeons.Definitions.Encounters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Regions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Services.LL.Essences;
@@ -17,6 +18,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
     private static readonly TimeSpan EssenceFocusCooldown = TimeSpan.FromHours(8);
 
     private readonly IDbContext _dbContext;
+    private readonly IRegionRepository _regions;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IEssenceCodexCollectionService _codexCollections;
@@ -29,9 +31,11 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         IEssenceCodexCollectionService codexCollections,
         IDungeonDefinitions dungeonDefinitions,
+        IRegionRepository regions,
         IGameEventOutbox? outbox = null)
     {
         _dbContext = dbContext;
+        _regions = regions;
         _essenceDefinitions = essenceDefinitions;
         _creatureEssenceLootTables = creatureEssenceLootTables;
         _codexCollections = codexCollections;
@@ -195,11 +199,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
     private async Task<IReadOnlyDictionary<string, IReadOnlyList<CreatureArchiveLocation>>> GetCreatureLocationsAsync(
         CancellationToken cancellationToken)
     {
-        var regions = await _dbContext.Regions
-            .AsNoTracking()
-            .Include(region => region.Areas)
-            .ThenInclude(area => area.Creatures)
-            .ToListAsync(cancellationToken);
+        var regions = await _regions.GetAllWithAreaCreaturesAsync(cancellationToken);
         var creatureNamesById = await _dbContext.Creatures
             .AsNoTracking()
             .ToDictionaryAsync(creature => creature.Id, creature => creature.Name, cancellationToken);

@@ -1,16 +1,73 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using API.LL.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace EssenceSystem.Tests;
 
 public sealed class RequestLoggingMiddlewareTests
 {
+    [Theory]
+    [InlineData("/api/v{version:apiVersion}/Character/ResolveName")]
+    [InlineData(null)]
+    public async Task Handled_exception_logs_original_route_and_exception(string? route)
+    {
+        var logger = new CapturingLogger<RequestLoggingMiddleware>();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddMetrics();
+        services.AddProblemDetails();
+        services.AddSingleton(new DiagnosticListener("RequestLoggingTests"));
+        services.AddSingleton(CreateConfiguration());
+        services.AddSingleton<ILogger<RequestLoggingMiddleware>>(logger);
+        await using var provider = services.BuildServiceProvider();
+        var app = new ApplicationBuilder(provider);
+        app.UseMiddleware<RequestLoggingMiddleware>();
+        app.UseExceptionHandler();
+        var failure = new InvalidOperationException("Nullable object must have a value.");
+        app.Run(context =>
+        {
+            if (route is not null)
+            {
+                context.SetEndpoint(new RouteEndpoint(
+                    _ => Task.CompletedTask,
+                    RoutePatternFactory.Parse(route),
+                    0,
+                    EndpointMetadataCollection.Empty,
+                    "test endpoint"));
+            }
+            throw failure;
+        });
+        var context = new DefaultHttpContext { RequestServices = provider };
+        context.Request.Method = HttpMethods.Get;
+        context.Request.Path = "/api/v1/Character/resolveName";
+        context.Request.QueryString = new QueryString("?name=private-character-name");
+        context.Request.Headers.Authorization = "Bearer private-token";
+        context.Request.Headers.Cookie = "session=private-cookie";
+        context.Response.Body = new MemoryStream();
+
+        await app.Build()(context);
+
+        Assert.Equal(StatusCodes.Status500InternalServerError, context.Response.StatusCode);
+        Assert.Null(context.GetEndpoint());
+        Assert.Same(failure, context.Features.Get<IExceptionHandlerFeature>()?.Error);
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Error, entry.Level);
+        Assert.Equal(1000, entry.EventId.Id);
+        Assert.Equal(route ?? "(unmatched)", entry.Properties["HttpRoute"]);
+        Assert.Equal(HttpMethods.Get, entry.Properties["HttpMethod"]);
+        Assert.Equal(StatusCodes.Status500InternalServerError, entry.Properties["HttpStatusCode"]);
+        Assert.Same(failure, entry.Exception);
+        Assert.DoesNotContain("private-", logger.CapturedText(), StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(StatusCodes.Status200OK, LogLevel.Debug)]
     [InlineData(StatusCodes.Status401Unauthorized, LogLevel.Information)]
@@ -38,7 +95,10 @@ public sealed class RequestLoggingMiddlewareTests
 
         await middleware.InvokeAsync(context);
 
-        Assert.Equal(expectedLevel, Assert.Single(logger.Entries).Level);
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(expectedLevel, entry.Level);
+        Assert.Equal("/api/v1/test", entry.Properties["HttpRoute"]);
+        Assert.Null(entry.Exception);
     }
 
     [Fact]
@@ -229,7 +289,7 @@ public sealed class RequestLoggingMiddlewareTests
             Exception? exception,
             Func<TState, Exception?, string> formatter)
         {
-            Entries.Add(new LogEntry(logLevel, eventId, formatter(state, exception), ToDictionary(state)));
+            Entries.Add(new LogEntry(logLevel, eventId, formatter(state, exception), exception, ToDictionary(state)));
         }
 
         public string CapturedText() => string.Join(
@@ -259,5 +319,6 @@ public sealed class RequestLoggingMiddlewareTests
         LogLevel Level,
         EventId EventId,
         string Message,
+        Exception? Exception,
         IReadOnlyDictionary<string, object?> Properties);
 }

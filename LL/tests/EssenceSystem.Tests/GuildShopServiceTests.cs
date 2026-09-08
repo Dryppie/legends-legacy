@@ -8,6 +8,7 @@ using Domain.Models.Inventories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL;
+using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
 using Services.LL.Guilds;
 using Services.LL.Inventories;
@@ -51,20 +52,49 @@ public sealed partial class GuildShopServiceTests
         }
     }
 
-    [Fact]
-    public async Task Market_office_level_unlocks_stock_without_weekly_contribution()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(4)]
+    public async Task Market_office_level_unlocks_stock_without_weekly_contribution(int marketOfficeLevel)
     {
         await using var db = CreateDbContext();
         var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
-        var characterId = SeedGuild(db, now, marketOfficeLevel: 4);
+        SeedGuild(db, now, marketOfficeLevel: 4);
+        var characterId = SeedGuild(db, now, marketOfficeLevel);
         await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
         var service = CreateService(db);
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
         Assert.Empty(await db.GuildMemberContributionPeriods.ToListAsync());
         Assert.Equal(4, overview!.Items.Count);
-        Assert.All(overview.Items, item => Assert.True(item.CanPurchase));
+        Assert.All(overview.Items, item => Assert.Equal(
+            item.RequiredMarketOfficeLevel <= marketOfficeLevel,
+            item.CanPurchase));
+    }
+
+    [Fact]
+    public async Task Shop_overview_and_purchase_reject_a_character_without_membership()
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 7, 31, 12, 0, 0, TimeSpan.Zero);
+        var characterId = SeedGuild(db, now);
+        await db.SaveChangesAsync();
+        db.GuildMembers.Remove(await db.GuildMembers.SingleAsync());
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var service = CreateService(db);
+
+        Assert.Null(await service.GetOverviewAsync(characterId, now, CancellationToken.None));
+        var purchase = await service.PurchaseAsync(
+            characterId, "common.sigil_fragment_case", now, CancellationToken.None);
+
+        Assert.False(purchase.Succeeded);
+        Assert.Equal("You are not in a guild.", purchase.Error);
+        Assert.Equal(500, (await db.Characters.SingleAsync()).GuildFavor);
+        Assert.Empty(db.GuildShopPurchases.Local);
+        Assert.Empty(db.GuildActivityLogs.Local);
     }
 
     [Fact]
@@ -97,7 +127,8 @@ public sealed partial class GuildShopServiceTests
             db,
             new DefaultGuildContentProvider(),
             new InventoryItemFactory(),
-            new InventoryService(new InventoryRepository(db)));
+            new InventoryService(new InventoryRepository(db)),
+            new GuildRepository(db));
 
     private static Guid SeedGuild(LLDbContext db, DateTimeOffset now, int marketOfficeLevel = 4)
     {

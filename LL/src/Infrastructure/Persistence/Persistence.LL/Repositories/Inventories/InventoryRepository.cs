@@ -21,6 +21,7 @@ public class InventoryRepository : IInventoryRepository
     public async Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var inventory = await _context.Inventories
+            .AsSplitQuery()
             .Include(i => i.InventoryItems)
                 .ThenInclude(ii => ii.ItemInstance)
                     .ThenInclude(ii => ii.ItemBase)

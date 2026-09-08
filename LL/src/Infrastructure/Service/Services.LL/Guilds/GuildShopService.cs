@@ -17,6 +17,7 @@ namespace Services.LL.Guilds;
 public class GuildShopService : IGuildShopService
 {
     private readonly IDbContext _context;
+    private readonly IGuildRepository _guildRepository;
     private readonly IInventoryService _inventory;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IReadOnlyList<GuildShopItemDefinition> _items;
@@ -25,9 +26,11 @@ public class GuildShopService : IGuildShopService
         IDbContext context,
         IGuildContentProvider content,
         IInventoryItemFactory inventoryItemFactory,
-        IInventoryService inventory)
+        IInventoryService inventory,
+        IGuildRepository guildRepository)
     {
         _context = context;
+        _guildRepository = guildRepository;
         _inventoryItemFactory = inventoryItemFactory;
         _inventory = inventory;
         _items = content.ShopItems;
@@ -105,14 +108,8 @@ public class GuildShopService : IGuildShopService
 
     private async Task<ShopState?> LoadStateAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var guild = await _context.Guilds
-            .Include(x => x.Members)
-            .Include(x => x.Buildings)
-            .FirstOrDefaultAsync(x => x.Members.Select(m => m.CharacterId).Contains(characterId), cancellationToken);
+        var guild = await _guildRepository.GetGuildForShopAsync(characterId, cancellationToken);
         if (guild is null) return null;
-
-        var member = guild.Members.FirstOrDefault(x => x.CharacterId == characterId);
-        if (member is null) return null;
 
         var character = await _context.Characters.FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
         if (character is null) return null;

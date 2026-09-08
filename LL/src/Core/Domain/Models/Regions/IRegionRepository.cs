@@ -7,4 +7,5 @@ public interface IRegionRepository
     /// <param name="regionId"></param>
     /// <returns></returns>
     Task<Region> GetRegionByIdAsync(int regionId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Region>> GetAllWithAreaCreaturesAsync(CancellationToken cancellationToken);
 }
