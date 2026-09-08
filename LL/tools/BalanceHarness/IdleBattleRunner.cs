@@ -16,16 +16,18 @@ public sealed class IdleBattleRunner(OfflineContent content)
         cancellationToken.ThrowIfCancellationRequested();
         content.Validate(input);
         var character = input.Character.Materialize(content.Equipment);
-        var creature = OfflineContent.ReadCreature(input);
+        var creatures = OfflineContent.ReadCreatures(input);
         var area = OfflineContent.ReadArea(input);
         var setup = content.CreateSetup(character, input.Character.MaterializeEssences());
         var pipeline = new CombatPreparationPipeline(setup);
         var plan = CreatePlan(input);
-        var participants = await pipeline.PrepareAsync(CombatContentType.Idle,
-        [
-            new(plan.FriendlyParticipants.Single(), new LiveCombatantPreparationSource(character)),
-            new(plan.HostileParticipants.Single(), new LiveCombatantPreparationSource(creature, area))
-        ], cancellationToken);
+        var requests = new List<CombatantPreparationRequest>
+        {
+            new(plan.FriendlyParticipants.Single(), new LiveCombatantPreparationSource(character))
+        };
+        requests.AddRange(plan.HostileParticipants.Select((slot, index) =>
+            new CombatantPreparationRequest(slot, new LiveCombatantPreparationSource(creatures[index], area))));
+        var participants = await pipeline.PrepareAsync(CombatContentType.Idle, requests, cancellationToken);
         return new(plan, participants.Where(x => x.Slot.Side == CombatSide.Friendly).ToArray(),
             participants.Where(x => x.Slot.Side == CombatSide.Hostile).ToArray());
     }
@@ -49,7 +51,8 @@ public sealed class IdleBattleRunner(OfflineContent content)
             input.Rules.RandomSeed.ToString(System.Globalization.CultureInfo.InvariantCulture)),
         CombatMode.Idle, 1, input.Scenario.StartsAt,
         [new("friendly-1", input.Character.Id, CombatSide.Friendly),
-         new("hostile-1", input.Scenario.CreatureId, CombatSide.Hostile)],
+         .. input.Scenario.CreatureIds.Select((id, index) =>
+             new CombatParticipantSlot(FormattableString.Invariant($"hostile-{index + 1}"), id, CombatSide.Hostile))],
         new IdleEncounterSourceContext(input.Character.Id, OfflineContent.ReadArea(input),
             TimeSpan.FromSeconds(input.EncounterCadenceSeconds)))
     {

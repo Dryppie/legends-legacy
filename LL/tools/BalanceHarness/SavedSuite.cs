@@ -20,15 +20,16 @@ public sealed record SavedSuite(string Directory, SuiteRunInput Input, RunManife
         var input = HarnessJson.Read<SuiteRunInput>(Path.Combine(directory, "suite-input.json"));
         var manifest = HarnessJson.Read<RunManifest>(Path.Combine(directory, "manifest.json"));
         RunBundle.VerifySnapshot(directory, manifest, HarnessJson.Hash(input), cancellationToken);
-        if (input.SchemaVersion != 1 || input.Definition.SchemaVersion != 1
+        if (input.SchemaVersion is not (1 or 2) || input.Definition.SchemaVersion != input.SchemaVersion
             || input.SeedScheduleVersion != IdleSuite.SeedScheduleVersion
             || input.Cells.Count is < 1 or > 1000 || input.Cells.Sum(c => (long)c.Trials.Count) > 100000
             || input.Cells.Select(c => c.Id).Distinct(StringComparer.Ordinal).Count() != input.Cells.Count)
             throw new InvalidDataException("Unsupported or invalid saved suite.");
         foreach (var cell in input.Cells)
         {
+            OfflineContent.ValidateEncounter(cell.Input);
             if (!Regex.IsMatch(cell.Id, "^[a-z0-9][a-z0-9.-]{0,193}$", RegexOptions.CultureInvariant)
-                || cell.Input.SchemaVersion != 1 || cell.Input.Scenario.SchemaVersion != 1
+                || cell.Input.SchemaVersion != input.SchemaVersion
                 || cell.Input.Scenario.Id != cell.Id || cell.Trials.Count is < 1 or > 10000
                 || cell.Input.Area.GetProperty("id").GetString() != cell.Input.Scenario.AreaId
                 || cell.Input.Creature.GetProperty("id").GetGuid() != cell.Input.Scenario.CreatureId

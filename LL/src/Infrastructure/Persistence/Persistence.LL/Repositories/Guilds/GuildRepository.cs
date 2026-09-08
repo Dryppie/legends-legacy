@@ -292,6 +292,14 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Members.Any(member => member.CharacterId == characterId), cancellationToken);
 
+    public Task<Guild?> GetGuildForMissionsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        _context.Guilds
+            .AsSplitQuery()
+            .Include(g => g.Members)
+            .Include(g => g.Resources)
+            .Include(g => g.Buildings)
+            .FirstOrDefaultAsync(g => g.Members.Any(member => member.CharacterId == characterId), cancellationToken);
+
     public Task<Guild?> GetGuildForBuildingsAsync(Guid characterId, CancellationToken cancellationToken) =>
         _context.Guilds
             .Include(g => g.Members)

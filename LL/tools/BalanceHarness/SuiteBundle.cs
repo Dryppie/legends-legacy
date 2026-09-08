@@ -89,7 +89,8 @@ public static class SuiteBundle
         var input = HarnessJson.Read<SuiteRunInput>(Path.Combine(runDirectory, "suite-input.json"));
         var manifest = HarnessJson.Read<RunManifest>(Path.Combine(runDirectory, "manifest.json"));
         RunBundle.Verify(runDirectory, manifest, HarnessJson.Hash(input), cancellationToken);
-        if (input.SchemaVersion != 1 || input.SeedScheduleVersion != IdleSuite.SeedScheduleVersion)
+        if (input.SchemaVersion is not (1 or 2) || input.Definition.SchemaVersion != input.SchemaVersion
+            || input.SeedScheduleVersion != IdleSuite.SeedScheduleVersion)
             throw new InvalidDataException("Unsupported suite input or seed schedule.");
         var matches = input.Cells.SelectMany(c => c.Trials.Where(t => t.BattleId == battleId).Select(t => (Cell: c, Trial: t))).ToArray();
         if (matches.Length != 1) throw new InvalidDataException($"Unknown or duplicate battle ID '{battleId}'.");

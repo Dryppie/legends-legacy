@@ -1,6 +1,6 @@
 # Balance Harness Plan
 
-Status: offline idle execution, the 12-cell reference suite, explicit baseline acceptance, paired comparisons and versioned goal evaluation are implemented in [BalanceHarness](../LL/tools/BalanceHarness/README.md). All initial targets remain draft. Gameplay review, CI integration, broader content coverage, analysis and tuning remain proposed work.
+Status: offline idle execution, the original 12-cell controls, a separate 36-cell [First Hunt cohort](First-Hunt-Cohort.md), explicit baseline acceptance, paired comparisons, versioned goals and advisory CI configuration are implemented in [BalanceHarness](../LL/tools/BalanceHarness/README.md). The new cohort covers all three authored starter Essences, quest-reward equipment counts and fixed two-enemy later encounters. All goals remain draft: training/Forge states and exact reward outcomes still need gameplay review. Gameplay-target approval, first hosted CI validation, broader content coverage, analysis and tuning remain open.
 
 Target: offline balance tooling for the primary game service in `LL/`. This work does not require an API endpoint, Angular UI, chat-service changes, infrastructure changes, or a deployed service.
 
@@ -12,7 +12,7 @@ The harness should answer three questions:
 
 The first useful deliverable is a reproducible report for a small set of real encounters. Build search, a universal essence score, and automatic tuning should follow only after that report is trustworthy.
 
-The implementation covers single-fight execution, three progression stages (levels 1, 5 and 10), two builds and two fixed encounters per stage, 100 paired encounter seeds per build, saved content/inputs, individual battle replay, Markdown/JSON scorecards and parity tests against the normal idle-session path. Complete suites can be explicitly accepted as comparison baselines, compared with compatible candidates and evaluated against six draft goals expanded into 60 checks. See the tool README for exact commands and limits; the sections below distinguish implemented idle support from the wider design.
+The implementation covers individual encounters with one to three fixed enemies, three progression stages (levels 1, 5 and 10), paired encounter seeds, saved content/inputs, battle replay, scorecards and parity tests against the normal idle-session path. The original controls have 12 cells/60 draft checks; the First Hunt cohort has 36 cells/180 draft checks. Complete suites can be explicitly accepted as comparison baselines and evaluated against their matching policies. See the tool README for exact commands and limits; the sections below distinguish implemented idle support from the wider design.
 
 ## 1. Existing Building Blocks and Gaps
 
@@ -97,6 +97,8 @@ Use three balance suites with different purposes:
 The implemented [idle reference fixture](../LL/tools/BalanceHarness/Fixtures/idle-reference.json) contains **12 fixed idle cells**: levels 1, 5 and 10 × two legal builds × two real encounters. It uses 100 distinct seeds per cell, or 1,200 battles total. Alternative builds share encounter seeds for paired comparisons. Lumo Ruins, Blood Grove and Crystal Creek cover initial weapon ownership, the next area entry and the second essence-slot unlock. These are fixed-spawn measurements, not area-wide spawn-distribution estimates.
 
 This is an initial sampling budget, not a claim that 100 seeds can prove narrow win-rate differences. The suite reports per-cell 95% Wilson clear-rate intervals, separate win/non-win duration distributions, remaining health and completeness. It remains advisory until the written ownership hypotheses, targets and sampling are suitable. A `--samples 3` override provides a 36-battle smoke run with the same fixtures.
+
+The separate [First Hunt fixture](../LL/tools/BalanceHarness/Fixtures/idle-first-hunt.json) has 36 cells and 3,600 battles by default, or 108 battles at three samples per cell. It crosses the three actual First Hunt Essence choices with mace/wand, uses quest-reward equipment counts and fixes duplicate/mixed two-enemy encounters at levels 5 and 10. Random box outcomes are explicit conditions, and Essences remain untrained. It improves cohort coverage without silently replacing the original controls or claiming an area-wide spawn estimate.
 
 Performance benchmarking is a separate track:
 
@@ -362,7 +364,7 @@ Baseline promotion must be an explicit local developer action after reviewing th
 
 The implemented `baseline accept` command validates a complete saved suite and writes a new manifest with its reason, metrics version, relative bundle location, accepted summary and evidence fingerprint. `compare` validates both archives without requiring their old binaries, compares matching complete cells, lists added/removed/incompatible/incomplete cells, and emits advisory JSON/Markdown. Changed code/content is allowed and shown; changed fixture selections, rules, seeds or runtime/platform are excluded. Replay retains strict executable identity checks.
 
-Clear-rate changes use paired gained/lost wins with a conservative approximate 95% interval from Bonferroni-adjusted Wilson intervals. Duration changes use only seeds won in both runs; health uses all matched attempts. Continuous mean intervals are exploratory normal approximations with at least 30 nonconstant paired differences. Versioned goals now express draft targets and practical change thresholds; gameplay review, multiple-testing policy and CI integration remain future work.
+Clear-rate changes use paired gained/lost wins with a conservative approximate 95% interval from Bonferroni-adjusted Wilson intervals. Duration changes use only seeds won in both runs; health uses all matched attempts. Continuous mean intervals are exploratory normal approximations with at least 30 nonconstant paired differences. Versioned goals express draft targets and practical change thresholds. An advisory CI workflow verifies execution and evidence; gameplay-target approval and a multiple-testing policy remain open after the initial cohort review.
 
 When an intentional engine fix changes results, preserve the old report, explain the behavior change, and review targets independently. Rebaselining should not hide an unexplained parity defect.
 
@@ -423,7 +425,7 @@ The current CLI supports the following workflow. Use the [tool README](../LL/too
 | `compare` | Write an advisory paired comparison against an accepted baseline |
 | `evaluate` | Evaluate a saved suite against versioned goals and, for change metrics, a compatible baseline |
 
-Preflight validation is part of run creation; there is no standalone `validate` command or named `smoke` suite selector. Resume, a convenience wrapper, CI integration and broader content commands remain proposed.
+Preflight validation is part of run creation; there is no standalone `validate` command or named `smoke` suite selector. [smoke-balance.ps1](../build/smoke-balance.ps1) now wraps two identical suites, disposable repeatability evidence, comparison, replay and draft evaluation for local/CI verification. Resume and broader content commands remain proposed.
 
 Evaluation returns distinct exit statuses for valid advisory/passing enforcement (0), enforced balance failure (1), invalid evidence/configuration/coverage (2), and enforced inconclusive checks (3). Cancellation returns 130. Draft findings remain advisory, and successful execution does not certify unimplemented content types.
 
@@ -436,10 +438,11 @@ Keep the first implementation small enough for a solo developer to maintain.
 | Location | Responsibility and status |
 | --- | --- |
 | `LL/tools/BalanceHarness/` | Implemented console entry point, offline composition, execution, metrics, baseline comparison, goal evaluation and reports |
-| `LL/tools/BalanceHarness/Fixtures/` | Implemented starter scenario, idle reference suite and draft goals; reviewed baseline manifests can be versioned separately when accepted |
+| `LL/tools/BalanceHarness/Fixtures/` | Implemented starter control, original idle reference and First Hunt suites, each with its own draft goals; reviewed baseline manifests can be versioned separately when accepted |
 | Existing `Services.LL` combat/content code | Shared preparation, execution, rules, and minimal reusable seams needed by real content adapters |
 | `LL/tests/EssenceSystem.Tests/` | Implemented harness correctness, parity, determinism, comparison and goal-evaluation tests |
-| Proposed `build/run-balance.ps1` | Optional convenience entry point around the existing CLI |
+| `build/smoke-balance.ps1` | Implemented local/CI workflow verification using a disposable same-revision reference; no gameplay baseline promotion |
+| `.github/workflows/balance-harness.yml` | Implemented PR/manual harness tests and advisory smoke configuration, job summary and seven-day evidence retention; hosted execution pending |
 | Ignored `TestResults/balance/` | Current local output convention for summaries, battle records, snapshots, replay bundles and baseline/evaluation artifacts |
 
 The tool may reference Core and Infrastructure. Core must not depend on the tool, API, Infrastructure, or Presentation. Keep harness-only schemas and scoring policies in the tool until a second genuine consumer requires shared contracts.
@@ -453,7 +456,7 @@ Do not build separate libraries/services for every conceptual box in the origina
 | Phase | Deliverable | Complete when |
 | --- | --- | --- |
 | 0 — Trustworthy execution | Offline composition, one real idle encounter, explicit rules, parity fixture | Equivalent gameplay and harness inputs produce matching outcomes/state; repeated seeds and logging modes preserve results; no running API/shared database is needed. |
-| 1 — Useful vertical slice | Twelve idle cells, fixed fixtures/seeds, compact battle records, Markdown/JSON report | Every battle is identifiable and replayable; errors/cancellation are visible; a local change produces an explainable report. |
+| 1 — Useful vertical slice | Twelve control cells plus 36 First Hunt cells, fixed fixtures/seeds, compact records and Markdown/JSON reports | Every battle is identifiable and replayable; errors/cancellation are visible; a local change produces an explainable report. |
 | 2 — Regression workflow | Targets, baseline manifests, paired comparisons, sample/uncertainty rules, small CI suite | A deliberate behavior/fixture perturbation is detected by the appropriate check; unchanged inputs are stable; incompatible comparisons and inconclusive results cannot pass silently. |
 | 3 — Content coverage | Tower first, then boss, dungeon, and PvP adapters in separate increments | Each adapter has setup/execution/outcome parity tests and representative progression/mechanic cases; multi-party Tower and content-specific timeout/recovery rules are covered. |
 | 4 — Build/essence investigation | Legal substitutions, bounded generation, attribution where supported, synergy analysis | Findings include matched controls and reserved-seed confirmation; different viable builds and role tradeoffs can be inspected. |
@@ -461,14 +464,14 @@ Do not build separate libraries/services for every conceptual box in the origina
 
 Do not block phases 0–2 on a general build optimizer, complete telemetry attribution, UI work, economy simulation, or support for all content. These early phases should already answer whether representative idle progression changed.
 
-Phases 0 and 1 are implemented for fixed idle encounters, including victory/defeat replay, legal partial equipment, paired seeds, scorecards and visible cancellation. Phase 2 includes explicit baseline acceptance, compatible paired comparisons, versioned draft goals, practical movement thresholds and pass/fail/inconclusive/invalid evaluation with optional reviewed enforcement. Its remaining work is gameplay review of the proposed policy and a small CI suite. Do not derive approved targets automatically from the initial observed results.
+Phases 0 and 1 are implemented for fixed idle encounters, including group combat, victory/defeat replay, legal partial equipment, paired seeds, scorecards and visible cancellation. Phase 2 includes explicit baselines, compatible paired comparisons, draft goals and distinct evaluation outcomes with optional reviewed enforcement. Both cohorts have advisory CI configuration and local smoke/reference verification. The First Hunt extension addresses starter choices and enemy counts; measured training/Forge states, reward outcomes and gameplay-target approval remain open. The first hosted CI run also needs observation. Do not derive approved targets automatically from observed results.
 
 ### Next work to complete Phase 2
 
-1. Review each checkpoint's ownership assumptions and ordinary/challenge encounter selection against the intended progression journey. Record deliberate exceptions or revise the fixture contract where needed.
-2. Review the six proposals in [idle-goals.json](../LL/tools/BalanceHarness/Fixtures/idle-goals.json): ordinary reliability, challenge difficulty, winning pace, clear-rate movement, shared-win duration movement and diagnostic health movement. Record the experience each bound protects, its eligible sample budget and the per-check uncertainty limitations.
-3. Run a fixed-budget reference and compatible candidate, inspect failed/inconclusive checks and replay representative battles. Any changed cohort needs an intentionally reviewed policy hash and a matching reference; a small smoke run cannot substitute for the required evidence.
-4. Add a small CI workflow for execution, artifact integrity and advisory reporting, with explicit retention and runtime budgets. Enable gameplay enforcement only for reviewed primary/guardrail goals with a written `reviewReason`; retain separate outcomes for invalid and inconclusive evidence.
+1. Review the [First Hunt results](First-Hunt-Cohort.md): all tested untrained level-5 builds lost both Blood Grove pairings. Establish plausible Essence training and Forge states, then run controlled variations before deciding whether the gap belongs in progression or enemy tuning.
+2. Review the new cohort's draft minimum-clear and pacing proposals against the intended experience. Its reference evaluation has 63 pass, 26 fail and 91 inconclusive checks, with no invalid evidence. Preserve the old controls and keep reward-box conditions explicit.
+3. Give any changed progression recipe a reviewed policy hash and compatible reference, then confirm with predeclared sample budgets/reserved seeds. The 36-cell cohort and its own versioned goals are already implemented; their numerical values remain proposals.
+4. Observe the first hosted CI run and adjust operational budgets if needed. CI now smoke-tests both cohorts using three samples per cell, two identical runs each, disposable repeatability references and seven-day retention. Gameplay enforcement remains a separate decision using reviewed primary/guardrail goals with a written `reviewReason`.
 
 This is policy review and workflow integration. Full dungeon runs, Tower, PvP, the complete Beta build matrix, acquisition pacing and automatic tuning still need their own coverage and validation.
 
@@ -480,7 +483,7 @@ When implementing, run backend tests through the repository entry point:
 ./build/run-tests.ps1 -Filter 'FullyQualifiedName~BalanceHarness|FullyQualifiedName~CombatPreparationPipelineTests|FullyQualifiedName~CanonicalEquipmentBuildFactoryTests|FullyQualifiedName~EquipmentHandRuleTests|FullyQualifiedName~CompactCombatTelemetryTests|FullyQualifiedName~FastCombatEngineOutcomeTests|FullyQualifiedName~AbilityBalanceSimulatorRegressionTests'
 ```
 
-The filter includes all four harness test classes. Add affected content-specific tests for each new adapter. Use the complete `./build/run-tests.ps1` suite when a change affects shared combat/preparation behavior.
+The filter includes all five harness test classes. Add affected content-specific tests for each new adapter. Use the complete `./build/run-tests.ps1` suite when a change affects shared combat/preparation behavior.
 
 Meaningful new verification should cover:
 
@@ -493,7 +496,7 @@ Meaningful new verification should cover:
 - Cancellation and bounded execution produce partial artifacts without a false passing status.
 - Performance budgets on representative content without treating noisy timings as gameplay failures.
 
-`BalanceHarnessTests` covers idle-path parity across progression builds, repeatability, logging-mode independence, replay integrity and invalid/cancelled execution. `BalanceHarnessSuiteTests` covers the 12-cell/1,200-battle schedule, paired/reordered seeds, legal partial and two-handed loadouts, Wilson intervals/distributions, individual win/loss replay and partial cancellation reporting. `BalanceHarnessComparisonTests` covers accepted-evidence integrity, paired statistics, changed/unchanged content, incompatible experiments, incomplete runs and old-build comparison. `BalanceHarnessGoalTests` covers interval boundaries, zero-win roundoff, small samples, cohort/policy validation, draft/reviewed enforcement, exit statuses and saved evaluation artifacts. CI integration, other-adapter and controlled performance checks remain future work. Available commands and current coverage are documented in the tool README.
+`BalanceHarnessTests` covers idle-path parity across progression builds and duplicate/mixed enemy groups, repeatability, logging-mode independence, replay integrity and invalid/cancelled execution. `BalanceHarnessSuiteTests` covers the original schedule, paired/reordered seeds, partial/two-handed loadouts, statistics and cancellation. `BalanceHarnessComparisonTests` covers accepted-evidence integrity, paired statistics, content changes, incompatible/incomplete runs and historical comparison. `BalanceHarnessGoalTests` covers interval boundaries, small samples, policy validation and enforcement outcomes. `BalanceHarnessFirstHuntTests` covers the 36-cell/180-check contract, authored starter choices, reward budgets, independent duplicates, group validation/replay/comparison and legacy hash compatibility. All 57 harness tests and both local smoke workflows passed; two 3,600-battle First Hunt runs also matched. See the cohort report for evidence and limits. Hosted CI, other-adapter and controlled performance checks remain open.
 
 ## 22. Decisions to Set Before Enforcing Balance Gates
 
@@ -503,14 +506,14 @@ The following are design choices still to be established from intended gameplay:
 2. Are the fixture's stated gear/essence ownership assumptions attainable at each point, and what acquisition budget should become authoritative?
 3. Which clear-rate and pacing bands describe the desired experience, with what practical change tolerances?
 4. Which Tower scouting states and alternative party compositions should be considered ordinary?
-5. What local/CI runtime and artifact-retention budgets are acceptable after the first measurement?
+5. Are the initial 15-minute CI job limit, three-minute smoke limit and seven-day artifact retention suitable after hosted measurement?
 6. Which measurements are worth adding to telemetry for the first useful essence analysis?
 
 These decisions can be recorded incrementally while using the implemented runner and advisory evaluator. They prevent treating initial numerical proposals as established balance requirements.
 
 ## Source Map
 
-Repository references used to ground this plan. The idle tool, reference suite, baseline workflow and goal evaluator exist; policy review, CI/orchestration-script and analysis features described as proposed remain future work.
+Repository references used to ground this plan. The idle tool, reference suite, baseline workflow, goal evaluator, initial policy review and advisory smoke/CI configuration exist. Reviewed player-cohort enforcement, first hosted CI validation and broader analysis remain future work.
 
 - [Ability simulator](../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/AbilityBalanceSimulator.cs) and [request/report contract](../LL/src/Core/Application/Interfaces/Services/LL/Essences/IAbilityBalanceSimulator.cs).
 - [Combat engine options](../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.cs), [executor](../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/CombatEngineExecutor.cs), and [ruleset contract](../LL/src/Infrastructure/Service/Services.LL/Interfaces/Combat/Resolution/ICombatEngineExecutor.cs).

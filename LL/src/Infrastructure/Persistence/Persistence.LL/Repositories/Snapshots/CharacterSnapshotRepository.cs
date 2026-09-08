@@ -28,6 +28,7 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
         var snapshotId = Guid.NewGuid();
         var character = await _dbContext.Characters
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(c => c.BaseAttributes)
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
@@ -76,6 +77,7 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
     {
         return await _dbContext.CharacterSnapshots
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(x => x.BaseAttributes)
             .Include(x => x.Equipment)
                 .ThenInclude(x => x.InstanceModifiers)
@@ -87,6 +89,7 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
     {
         return await _dbContext.CharacterSnapshots
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(x => x.BaseAttributes)
             .Include(x => x.Equipment)
                 .ThenInclude(x => x.InstanceModifiers)

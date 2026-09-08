@@ -1,6 +1,6 @@
 # Balance Harness: idle balance workflow
 
-An offline .NET console tool for measuring progression difficulty and explaining the effect of combat code or content changes. It runs real idle combat through production preparation and execution. The reference suite has 12 cells: three progression checkpoints × two builds × two encounters, with 100 fixed seeds per cell (1,200 battles). It saves replayable battles, produces Markdown/JSON scorecards, compares accepted references and evaluates versioned goals.
+An offline .NET console tool for measuring progression difficulty and explaining the effect of combat code or content changes. It runs real idle combat through production preparation and execution. The original control suite has 12 cells (1,200 battles); the separate First Hunt cohort has 36 cells (3,600 battles), including two-enemy encounters. It saves replayable battles, produces Markdown/JSON scorecards, compares accepted references and evaluates versioned goals.
 
 The current workflow is:
 
@@ -31,6 +31,8 @@ For a quick 36-battle smoke run, use a new output directory and add `--samples 3
 
 All gear is tier 1, rank 0, standard quality, with baseline attribute rolls and no active styles. All selected essences are level 1, unascended and unevolved. Two-handed weapons occupy both hands. These are explicit ownership hypotheses; drop rates, acquisition time, quest completion, and essence training are not simulated. Builds within a stage use equal equipment counts, not a claimed equal power budget. The fixture retains the full assumptions in each run. “Challenge” is an encounter-selection hypothesis, not a guaranteed difficulty ordering.
 
+The [8 September policy review](../../../Balance%20Harness/Idle-Policy-Review.md) found that Goblin is not one of the current First Hunt choices, later equipment ownership is unverified, and Blood Grove/Crystal Creek normally spawn two enemies. Keep this fixture as a fixed control; it does not certify an immediate post-tutorial build or ordinary area difficulty. The separate First Hunt cohort below addresses those selections while leaving training and exact reward outcomes as explicit assumptions. All numerical goals remain draft.
+
 Seeds are derived by `StableRandom.Seed` from `idle-suite-seeds-v1`, the master seed, stage ID, encounter ID and zero-based trial index. Alternative builds share the same encounter seeds. Reordering cells or changing combat coefficients preserves the schedule. Changing stable stage/encounter IDs changes it. Results across builds are paired observations and must not be pooled as independent samples.
 
 The scorecard reports wins/losses/draws, valid sample sizes, a 95% Wilson clear-rate interval, separate win/non-win durations, final player health and tick-limit draws. JSON includes mean, median and interpolated p90 distributions; p90 is unavailable below ten observations. Missing samples remain unavailable rather than becoming zero. Invalid, cancelled and unexecuted battles are counted separately and cannot produce a complete suite. No balance pass/fail policy is applied.
@@ -40,6 +42,18 @@ Select a battle ID from `scorecard.md` or `battles.jsonl` to reproduce it with a
 ```powershell
 dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- replay --run TestResults/balance/idle-reference-001 --battle starter.mace.ordinary.0001 --detailed > TestResults/balance/starter-replay.json
 ```
+
+## First Hunt cohort and enemy groups
+
+[idle-first-hunt.json](Fixtures/idle-first-hunt.json) crosses Goblin Warrior, Hollow Stag and Skeleton with mace/wand choices at levels 1, 5 and 10. It uses one enemy at level 1 and fixed duplicate/mixed pairs at levels 5 and 10. Equipment follows quest-reward counts: one weapon, then one Armor Chest item, then one Jewelry Chest item. Medium Mail and Amulet are fixed possible box outcomes, not guaranteed selections. All Essences remain untrained at level 1; level 10 adds a Goblin selected through the earlier Lumo Token. See the [cohort review and measured results](../../../Balance%20Harness/First-Hunt-Cohort.md).
+
+```powershell
+dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- suite --suite LL/tools/BalanceHarness/Fixtures/idle-first-hunt.json --output TestResults/balance/first-hunt-001 --seed 1337
+```
+
+The suite has 36 cells, 3,600 battles by default, or 108 with `--samples 3`. Use [idle-first-hunt-goals.json](Fixtures/idle-first-hunt-goals.json) with `evaluate --goals`; it expands six draft goals into 180 checks. These entry goals have no upper clear-rate ceiling. A baseline must come from this same cohort and use matching sample counts/seeds. Neither its targets nor baselines are interchangeable with the original controls.
+
+Schema 2 scenarios and encounter definitions retain `creatureId` for the first enemy and may append one or two `additionalCreatureIds`, in order. The input archives matching `additionalCreatures` snapshots. Every occurrence receives an independent combat slot/state, including duplicate species. All members must belong to the selected area and the count must be possible there. Changes to count, order or IDs make a cell non-comparable; changed frozen companion coefficients are reported as resolved-input changes. Schema 1 remains single-enemy and its hashes stay unchanged because unused extension fields are omitted. Replay retains its original binary/runtime checks.
 
 ## Accept a baseline and compare changes
 
@@ -124,7 +138,21 @@ Evaluation exit codes:
 | `3` | No enforced failure, but at least one enforced check is inconclusive |
 | `130` | Evaluation cancelled |
 
-Invalid takes precedence over fail, which takes precedence over inconclusive. Malformed/corrupt input writes `failure.json`; valid archives with policy/cohort/evidence issues retain an `evaluation.json`/Markdown report marked invalid. Current `suite`/`compare` exit behavior is unchanged. CI smoke execution and reviewed gameplay enforcement remain a separate integration step.
+Invalid takes precedence over fail, which takes precedence over inconclusive. Malformed/corrupt input writes `failure.json`; valid archives with policy/cohort/evidence issues retain an `evaluation.json`/Markdown report marked invalid. Current `suite`/`compare` exit behavior is unchanged. The CI smoke workflow below verifies advisory execution; reviewed gameplay enforcement remains a separate decision.
+
+## Verify the workflow locally and in CI
+
+From the repository root:
+
+```powershell
+./build/smoke-balance.ps1 -OutputDirectory TestResults/balance/smoke-001
+```
+
+Add `-NoBuild` after building the tool or backend test project. The script runs the reference fixture twice with three samples per cell, creates a disposable same-revision repeatability manifest, checks a complete comparison with zero changed evidence/gameplay, replays a battle with detailed logging, and evaluates all 60 draft checks. It requires a new output directory and writes `summary.md` plus both complete bundles, comparison/evaluation reports and `replay.json`. It does not replace a reviewed baseline or compare with another Git revision.
+
+`-SamplesPerCell 100` runs the same workflow at reference size; `-Seed` and `-Configuration` are also supported. Choose another cohort with `-SuitePath` and its matching `-GoalsPath`. The default control smoke has 72 total battles and 60 inconclusive checks; the First Hunt smoke has 216 total battles and 180 inconclusive checks. Goal sample minimums are preserved. Group cohorts preferentially replay a multi-enemy cell. Draft failures or inconclusive findings do not fail the workflow; execution, integrity, repeatability and replay failures do. The script refuses a policy containing enforced goals so a later promotion cannot silently turn this small advisory sample into a gameplay gate.
+
+[The GitHub Actions workflow](../../../.github/workflows/balance-harness.yml) runs the harness tests through `build/run-tests.ps1` and then smoke workflows for both cohorts on relevant backend/tool pull requests or manual dispatch. It publishes job summaries and retains both cohorts' evidence/test results for seven days, including partial artifacts on failure. The job timeout is 15 minutes, with three minutes for each smoke step. Local smoke/reference validation has passed; the first hosted execution remains to be observed after push. Gameplay targets and branch-protection requirements are not enabled by this change.
 
 ## Run a single fight
 
@@ -135,7 +163,7 @@ dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configurati
 dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- replay --run TestResults/balance/starter-001
 ```
 
-The single-fight default remains the tutorial starter mace/Goblin essence against a Goblin in Lumo Ruins. Each run requires a new output directory. Add `--detailed` to `run` or `replay` to capture the event log; suites capture compact telemetry and enable detail on replay. Replay writes JSON to stdout and its completion message to stderr. Complete suites and completed single fights (including defeats/draws) return exit code 0. Invalid inputs, execution errors, incomplete suites or replay mismatches return 2; cancellation returns 130.
+The single-fight default remains the level-1 mace/Goblin control against a Goblin in Lumo Ruins. Its `tutorial-starter` profile name is historical; Goblin is not a current First Hunt reward choice. Each run requires a new output directory. Add `--detailed` to `run` or `replay` to capture the event log; suites capture compact telemetry and enable detail on replay. Replay writes JSON to stdout and its completion message to stderr. Complete suites and completed single fights (including defeats/draws) return exit code 0. Invalid inputs, execution errors, incomplete suites or replay mismatches return 2; cancellation returns 130.
 
 `run` also accepts `--content-root <API.LL-directory>` and `--scenario <json>`. The default content root is discovered relative to the built tool. A scenario may use `tutorial-starter` or an explicit `build` matching its `characterProfile` ID. Build recipes use `EquipmentReferenceBuildDefinition`; the shared factory enforces equipment types, hand rules, tier eligibility, essence slots and distinct monster families. The fixed creature must belong to the area and the character must meet its level requirement.
 
@@ -184,6 +212,8 @@ Small production seams make the file-only composition possible:
 
 `BalanceHarnessGoalTests` covers inclusive and one-sided bounds, zero-win numerical endpoints, small samples, fixture/policy validation, draft versus reviewed enforcement, distinct exit codes, missing/incompatible baseline evidence and immutable evaluation artifacts.
 
+`BalanceHarnessFirstHuntTests` covers the authored starter choices, legal quest-reward budgets, 36-cell/180-check contract, independent duplicate enemies, group validation, archived group replay/comparison/evaluation and unchanged legacy hashes. Production parity cases also cover duplicate and mixed enemy groups with the actual First Hunt Essences.
+
 Run relevant backend verification through the repository script:
 
 ```powershell
@@ -196,6 +226,6 @@ Shared combat/preparation changes also warrant the full `./build/run-tests.ps1` 
 
 Each trial resolves a fresh single fight. The suite conditions on specific spawns; it does not estimate an area's overall win rate. It excludes spawn-distribution sampling, offline time progression, rewards, account persistence, and multi-encounter carryover. Runs execute sequentially with a fresh executor and mutable combat state per battle. Elapsed wall time is recorded but is not a controlled performance benchmark.
 
-Explicit baseline acceptance, paired comparison and goal evaluation are available. Draft goals cover reliability, challenge, pacing and practical baseline movement; optional enforcement uses reviewed primary/guardrail goals. Gameplay review, CI integration, additional content adapters and rankings remain future work. A completed suite establishes reproducible measurements, not balance acceptance.
+Explicit baseline acceptance, paired comparison, goal evaluation and advisory CI configuration for both cohorts are available. The First Hunt cohort improves starter/reward/encounter coverage; fixed reward outcomes and untrained builds still require review. Gameplay-target approval, first hosted CI validation, broader progression coverage, additional content adapters and rankings remain open. A completed suite establishes reproducible measurements, not balance acceptance.
 
 No database, running API, hosted workers, migrations, deployment, or production configuration changes are required. The tool adds a `Microsoft.Extensions.Configuration` dependency matching the existing backend's 10.0.5 version.

@@ -99,6 +99,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     public async Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync(CancellationToken cancellationToken)
     {
         var marketPlaceListings = await EligibleListings()
+            .AsSplitQuery()
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).InstanceModifiers)
             .Include(mpl => mpl.ItemInstance)
@@ -363,6 +364,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     {
         await LockMarketplaceRowAsync("MarketPlaceListings", listingId, cancellationToken);
         return await _dbContext.MarketPlaceListings
+            .AsSplitQuery()
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).InstanceModifiers)
             .Include(mpl => mpl.ItemInstance)

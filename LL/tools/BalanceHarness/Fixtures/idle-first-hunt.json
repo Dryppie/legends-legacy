@@ -1,0 +1,517 @@
+{
+  "schemaVersion": 2,
+  "id": "idle-first-hunt-v1",
+  "description": "Advisory First Hunt reward cohort: three authored starter essences crossed with mace and wand, quest-sourced equipment with fixed box outcomes, and two-enemy area-entry encounters at levels 5 and 10. The original idle-reference-v1 controls remain separate.",
+  "samplesPerCell": 100,
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "stages": [
+    {
+      "id": "first-hunt",
+      "name": "First Hunt reward / level 1",
+      "areaId": "region_01_area_01",
+      "assumptions": [
+        "First Hunt and Soul Archive completed; choose Goblin Warrior, Hollow Stag or Skeleton from the current onboarding contract, then claim and equip a mace or wand from First Weapon.",
+        "One guaranteed common standard tier-1 rank-0 starter weapon, with baseline rolls. No armor or jewelry before Into the Ruins is completed.",
+        "All essences remain level 1, unascended and unevolved. No active styles, Forge investment, persistent bonuses or temporary buffs. This fixes an untrained reward loadout, not a measured time-to-level journey.",
+        "Single Goblin and Goblin Warrior cases condition on selected spawns. They are not an area-wide victory-rate estimate."
+      ],
+      "builds": [
+        {
+          "id": "goblin-warrior-mace",
+          "characterLevel": 1,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "goblin-warrior-wand",
+          "characterLevel": 1,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "hollow-stag-mace",
+          "characterLevel": 1,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.hollow_stag"
+          ]
+        },
+        {
+          "id": "hollow-stag-wand",
+          "characterLevel": 1,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.hollow_stag"
+          ]
+        },
+        {
+          "id": "skeleton-mace",
+          "characterLevel": 1,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.skeleton"
+          ]
+        },
+        {
+          "id": "skeleton-wand",
+          "characterLevel": 1,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.skeleton"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "goblin",
+          "label": "Goblin / first area",
+          "creatureId": "00000000-0000-0000-0000-000000000001"
+        },
+        {
+          "id": "goblin-warrior",
+          "label": "Goblin Warrior / first area",
+          "creatureId": "00000000-0000-0000-0000-000000000002"
+        }
+      ]
+    },
+    {
+      "id": "blood-grove",
+      "name": "Quest reward entry / level 5",
+      "areaId": "region_01_area_02",
+      "assumptions": [
+        "Into the Ruins and Trial of Lumo completed; Blood Grove access is assumed at level 5. Retain the guaranteed First Weapon and selected First Hunt essence.",
+        "Condition the Into the Ruins Armor Chest on one common standard tier-1 rank-0 Medium Mail. The reward count is guaranteed; this exact random armor outcome is not. No regional equipment drops are assumed.",
+        "Retain the First Hunt essence at level 1 and leave the Lumo Essence Token choice unequipped until the second slot. No Forge investment, active styles, jewelry, persistent bonuses or temporary buffs.",
+        "Blood Grove spawns two enemies with probability 96.9%. Fix Raven + Raven and Raven + Blood Zombie in the authored order to cover duplicate and mixed pairs, not the entire spawn distribution."
+      ],
+      "builds": [
+        {
+          "id": "goblin-warrior-mace",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "goblin-warrior-wand",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "hollow-stag-mace",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.hollow_stag"
+          ]
+        },
+        {
+          "id": "hollow-stag-wand",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.hollow_stag"
+          ]
+        },
+        {
+          "id": "skeleton-mace",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.skeleton"
+          ]
+        },
+        {
+          "id": "skeleton-wand",
+          "characterLevel": 5,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.skeleton"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "ravens",
+          "label": "Raven + Raven / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000039",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000039"
+          ]
+        },
+        {
+          "id": "raven-zombie",
+          "label": "Raven + Blood Zombie / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000039",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000047"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crystal-creek",
+      "name": "Second slot and quest rewards / level 10",
+      "areaId": "region_01_area_03",
+      "assumptions": [
+        "Blood in the Grove completed; Crystal Creek and the second essence slot are accessible at level 10. Retain First Weapon and the fixed Medium Mail Armor Chest result.",
+        "Condition the Blood in the Grove Jewelry Chest on one common standard tier-1 rank-0 Amulet. This exact random result is not guaranteed. Total budget is three quest-sourced items; no regional drops or full armor set are assumed.",
+        "Choose Goblin using the earlier guaranteed Lumo Ruins Essence Token and equip it second after the First Hunt essence. The Blood Grove token is retained unused; this is one legal second-slot choice, not all possible pairs.",
+        "All essences remain level 1, unascended and unevolved. No Forge investment, active styles, persistent bonuses or temporary buffs; acquisition time and training are not modeled.",
+        "Crystal Creek spawns two enemies with probability 96.9%. Fix Blue Slime + Blue Slime and Blue Slime + Frost Imp in the authored order; no area-wide spawn average or journey carryover is claimed."
+      ],
+      "builds": [
+        {
+          "id": "goblin-warrior-mace",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "goblin-warrior-wand",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "hollow-stag-mace",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.hollow_stag",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "hollow-stag-wand",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.hollow_stag",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "skeleton-mace",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.skeleton",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "skeleton-wand",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.wand",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.skeleton",
+            "essence.goblin"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "blue-slimes",
+          "label": "Blue Slime + Blue Slime / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000009",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000009"
+          ]
+        },
+        {
+          "id": "slime-imp",
+          "label": "Blue Slime + Frost Imp / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000009",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      ]
+    }
+  ]
+}

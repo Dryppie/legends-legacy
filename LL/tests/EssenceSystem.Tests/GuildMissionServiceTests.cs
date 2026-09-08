@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL;
+using Persistence.LL.Repositories.Guilds;
 using Services.LL.Guilds;
 
 namespace EssenceSystem.Tests;
@@ -76,7 +77,7 @@ public sealed partial class GuildMissionServiceTests
             Contributions = { contribution }
         });
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
 
         var beforePlatinum = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
         var finalAction = await service.RecordContributionAsync(
@@ -132,7 +133,7 @@ public sealed partial class GuildMissionServiceTests
             RewardClaimDeadline = new DateTimeOffset(2026, 7, 6, 0, 0, 0, TimeSpan.Zero)
         });
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
@@ -145,7 +146,7 @@ public sealed partial class GuildMissionServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
 
         var overview = await service.GetOverviewAsync(characterId, new DateTimeOffset(2026, 6, 22, 1, 0, 0, TimeSpan.Zero), CancellationToken.None);
 
@@ -193,7 +194,7 @@ public sealed partial class GuildMissionServiceTests
         }
 
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
@@ -208,7 +209,7 @@ public sealed partial class GuildMissionServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
 
         await service.RecordContributionAsync(
@@ -248,7 +249,7 @@ public sealed partial class GuildMissionServiceTests
         var now = new DateTimeOffset(2026, 6, 24, 12, 0, 0, TimeSpan.Zero);
         db.Guilds.Local.Single().CreatedAt = now;
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
@@ -289,7 +290,7 @@ public sealed partial class GuildMissionServiceTests
             RewardClaimDeadline = new DateTimeOffset(2026, 7, 6, 0, 0, 0, TimeSpan.Zero)
         });
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
 
         var overview = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
@@ -304,7 +305,7 @@ public sealed partial class GuildMissionServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
 
         var initial = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
@@ -348,7 +349,7 @@ public sealed partial class GuildMissionServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
 
         await service.GetOverviewAsync(characterId, now, CancellationToken.None);
@@ -386,6 +387,7 @@ public sealed partial class GuildMissionServiceTests
         var service = new GuildMissionService(
             db,
             new DefaultGuildContentProvider(),
+            new GuildRepository(db),
             outbox: outbox);
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
 
@@ -415,7 +417,7 @@ public sealed partial class GuildMissionServiceTests
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
         await db.SaveChangesAsync();
-        var service = new GuildMissionService(db);
+        var service = new GuildMissionService(db, new GuildRepository(db));
         var now = new DateTimeOffset(2026, 6, 23, 2, 0, 0, TimeSpan.Zero);
 
         await service.GetOverviewAsync(characterId, now, CancellationToken.None);

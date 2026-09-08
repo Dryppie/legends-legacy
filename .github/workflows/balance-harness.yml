@@ -1,0 +1,72 @@
+name: Balance harness
+
+on:
+  pull_request:
+    paths:
+      - 'LL/src/Core/**'
+      - 'LL/src/Infrastructure/**'
+      - 'LL/src/API/**'
+      - 'LL/src/Worker/**'
+      - 'LL/tools/BalanceHarness/**'
+      - 'LL/tests/EssenceSystem.Tests/**'
+      - 'LL/LegendsLegacy.sln'
+      - '**/Directory.Build.*'
+      - '**/Directory.Packages.props'
+      - '**/NuGet.Config'
+      - '**/nuget.config'
+      - '**/global.json'
+      - 'build/run-tests.ps1'
+      - 'build/smoke-balance.ps1'
+      - '.github/workflows/balance-harness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: balance-harness-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Idle workflow / advisory balance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Verify harness correctness and parity
+        shell: pwsh
+        run: ./build/run-tests.ps1 -Filter 'FullyQualifiedName~BalanceHarness'
+
+      - name: Run repeatability, replay and draft evaluation smoke
+        timeout-minutes: 3
+        shell: pwsh
+        run: ./build/smoke-balance.ps1 -NoBuild -SamplesPerCell 3 -OutputDirectory TestResults/balance/ci-smoke
+
+      - name: Verify First Hunt cohort and group replay
+        timeout-minutes: 3
+        shell: pwsh
+        run: >-
+          ./build/smoke-balance.ps1 -NoBuild -SamplesPerCell 3
+          -SuitePath LL/tools/BalanceHarness/Fixtures/idle-first-hunt.json
+          -GoalsPath LL/tools/BalanceHarness/Fixtures/idle-first-hunt-goals.json
+          -OutputDirectory TestResults/balance/ci-first-hunt
+
+      - name: Upload harness evidence and test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: balance-harness-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            TestResults/balance/ci-smoke
+            TestResults/balance/ci-first-hunt
+            TestResults/tests

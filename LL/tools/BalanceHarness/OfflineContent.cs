@@ -64,8 +64,9 @@ public sealed class OfflineContent
     public IdleBattleInput CreateInput(IdleScenario scenario, int seed,
         ThreatAndTankingOptions threat, double cadenceSeconds)
     {
-        if (scenario.SchemaVersion != 1 || string.IsNullOrWhiteSpace(scenario.Id))
-            throw new InvalidDataException("Expected a named version-1 idle scenario.");
+        if (scenario.SchemaVersion is not (1 or 2) || string.IsNullOrWhiteSpace(scenario.Id))
+            throw new InvalidDataException("Expected a named version-1 or version-2 idle scenario.");
+        ValidateCreatureSelection(scenario);
         FixtureCharacter character;
         if (scenario.Build is not null && scenario.CharacterProfile == scenario.Build.Id)
             character = FixtureCharacter.From(CreateBuild(scenario.Build));
@@ -78,14 +79,13 @@ public sealed class OfflineContent
         if (area.ValueKind == JsonValueKind.Undefined)
             throw new InvalidDataException($"Unknown area '{scenario.AreaId}'.");
         var creatures = HarnessJson.Read<JsonElement>(Path.Combine(_root, "Data", "world", "creatures.json"))
-            .GetProperty("creatures").EnumerateArray();
-        var creature = creatures.SingleOrDefault(x => x.GetProperty("id").GetGuid() == scenario.CreatureId);
-        if (creature.ValueKind == JsonValueKind.Undefined)
-            throw new InvalidDataException($"Unknown creature '{scenario.CreatureId}'.");
-        var input = new IdleBattleInput(1, scenario, character, area, creature,
+            .GetProperty("creatures").EnumerateArray().ToDictionary(x => x.GetProperty("id").GetGuid());
+        JsonElement ResolveCreature(Guid id) => creatures.TryGetValue(id, out var value) ? value
+            : throw new InvalidDataException($"Unknown creature '{id}'.");
+        var input = new IdleBattleInput(scenario.SchemaVersion, scenario, character, area, ResolveCreature(scenario.CreatureId),
             new(seed, MaxTicks: 6000, StartActiveAbilitiesOnCooldown: true,
                 BasicAttackIntervalTicks: 30, CaptureEventLog: false, CaptureCompactTelemetry: true),
-            threat, cadenceSeconds);
+            threat, cadenceSeconds, scenario.AdditionalCreatureIds?.Select(ResolveCreature).ToArray());
         Validate(input);
         return input;
     }
@@ -96,18 +96,11 @@ public sealed class OfflineContent
 
     public void Validate(IdleBattleInput input)
     {
-        if (input.SchemaVersion != 1 || input.Scenario.SchemaVersion != 1)
-            throw new InvalidDataException("Unsupported battle input version.");
+        ValidateEncounter(input);
         if (input.Character.Id == Guid.Empty || input.Character.Level is < 1 or > 100
             || input.Character.BaseAttributes.Count == 0
             || input.Character.BaseAttributes.Values.Any(x => !float.IsFinite(x) || x < 0))
             throw new InvalidDataException("Invalid character identity, level, or base attributes.");
-        var area = ReadArea(input);
-        var creature = ReadCreature(input);
-        if (area.Id != input.Scenario.AreaId || creature.Id != input.Scenario.CreatureId
-            || !area.Creatures.Any(x => x.CreatureId == creature.Id)
-            || input.Character.Level < area.LevelRequirement)
-            throw new InvalidDataException("The fixed creature/character is not eligible for this area.");
         if (input.Rules with { RandomSeed = 0, CaptureEventLog = false }
                 != new Services.LL.Interfaces.Combat.Resolution.CombatRuleset(0, MaxTicks: 6000, CaptureEventLog: false)
             || HarnessJson.Hash(input.ThreatAndTanking) != HarnessJson.Hash(_threat)
@@ -144,6 +137,36 @@ public sealed class OfflineContent
 
     public static Creature ReadCreature(IdleBattleInput input) => input.Creature.Deserialize<Creature>(HarnessJson.Options)
         ?? throw new InvalidDataException("Missing creature.");
+
+    public static IReadOnlyList<Creature> ReadCreatures(IdleBattleInput input) =>
+        new[] { input.Creature }.Concat(input.AdditionalCreatures ?? []).Select(snapshot =>
+            snapshot.Deserialize<Creature>(HarnessJson.Options) ?? throw new InvalidDataException("Missing creature.")).ToArray();
+
+    // Pure snapshot validation is also used when reading historical comparisons.
+    public static void ValidateEncounter(IdleBattleInput input)
+    {
+        ValidateCreatureSelection(input.Scenario);
+        if (input.SchemaVersion != input.Scenario.SchemaVersion
+            || (input.SchemaVersion == 1 && input.AdditionalCreatures is not null)
+            || (input.AdditionalCreatures?.Count ?? 0) != (input.Scenario.AdditionalCreatureIds?.Count ?? 0))
+            throw new InvalidDataException("Unsupported battle input version or mismatched creature snapshots.");
+        var area = ReadArea(input);
+        var creatures = ReadCreatures(input);
+        if (area.Id != input.Scenario.AreaId || input.Character.Level < area.LevelRequirement
+            || !creatures.Select(c => c.Id).SequenceEqual(input.Scenario.CreatureIds)
+            || creatures.Any(c => !area.Creatures.Any(a => a.CreatureId == c.Id))
+            || creatures.Count > area.SpawnProbabilities.Count || area.SpawnProbabilities[creatures.Count - 1] <= 0)
+            throw new InvalidDataException("The fixed creature group/character is not eligible for this area.");
+    }
+
+    private static void ValidateCreatureSelection(IdleScenario scenario)
+    {
+        if (scenario.SchemaVersion is not (1 or 2)
+            || (scenario.SchemaVersion == 1 && scenario.AdditionalCreatureIds is not null)
+            || scenario.AdditionalCreatureIds?.Count is 0 or > 2
+            || scenario.CreatureIds.Any(id => id == Guid.Empty))
+            throw new InvalidDataException("Version 1 requires one creature; version 2 supports an ordered group of one to three creatures.");
+    }
 
     private sealed class SelectedEssenceResolver(
         IEssenceDefinitionRepository definitions, Guid? characterId = null,

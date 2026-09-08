@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
@@ -15,7 +16,13 @@ namespace BalanceHarness;
 public sealed record IdleScenario(
     int SchemaVersion, string Id, string CharacterProfile, string AreaId,
     Guid CreatureId, DateTimeOffset StartsAt, IReadOnlyList<string> Assumptions,
-    EquipmentReferenceBuildDefinition? Build = null);
+    EquipmentReferenceBuildDefinition? Build = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<Guid>? AdditionalCreatureIds = null)
+{
+    [JsonIgnore]
+    public IReadOnlyList<Guid> CreatureIds => [CreatureId, .. AdditionalCreatureIds ?? []];
+}
 
 public sealed record FixtureEquipment(EquipmentSlotType Slot, EquipmentData Data);
 public sealed record FixtureEssence(string DefinitionId, int Level, int AscensionTier, bool IsEvolved);
@@ -89,7 +96,9 @@ public sealed record FixtureCharacter(
 public sealed record IdleBattleInput(
     int SchemaVersion, IdleScenario Scenario, FixtureCharacter Character,
     JsonElement Area, JsonElement Creature, CombatRuleset Rules,
-    ThreatAndTankingOptions ThreatAndTanking, double EncounterCadenceSeconds);
+    ThreatAndTankingOptions ThreatAndTanking, double EncounterCadenceSeconds,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<JsonElement>? AdditionalCreatures = null);
 
 public sealed record BattleSummary(
     BattleOutcome EngineOutcome, BattleOutcome ContentOutcome, string TerminationReason,

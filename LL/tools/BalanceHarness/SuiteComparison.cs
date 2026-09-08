@@ -106,6 +106,7 @@ public static class SuiteComparison
                 && beforeRate != afterRate) problems.Add("Tick-rate units changed.");
             Changed("Resolved input", id + " / character", HarnessJson.Hash(before.Input.Character), HarnessJson.Hash(after.Input.Character));
             Changed("Resolved input", id + " / creature", HarnessJson.Hash(before.Input.Creature), HarnessJson.Hash(after.Input.Creature));
+            Changed("Resolved input", id + " / additional creatures", HarnessJson.Hash(before.Input.AdditionalCreatures), HarnessJson.Hash(after.Input.AdditionalCreatures));
             Changed("Resolved input", id + " / area", HarnessJson.Hash(before.Input.Area), HarnessJson.Hash(after.Input.Area));
             Changed("Combat settings", id + " / threat", HarnessJson.Hash(before.Input.ThreatAndTanking), HarnessJson.Hash(after.Input.ThreatAndTanking));
             if (problems.Count > 0)

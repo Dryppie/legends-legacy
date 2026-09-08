@@ -4,6 +4,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   signal,
@@ -12,7 +13,15 @@ import {
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Guild } from '../../../../../../shared/models/Dtos/guild/guild';
 import { CharacterService } from '../../../../../../core/services/api/character/character.service';
-import { Subscription } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  of,
+  Subject,
+  Subscription,
+  switchMap,
+  timer,
+} from 'rxjs';
 import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole';
 import { FormsModule } from '@angular/forms';
 import { GuildMember } from '../../../../../../shared/models/Dtos/guild/guildMember';
@@ -38,7 +47,7 @@ import { DialogFocusDirective } from '../../../../../../shared/directives/dialog
   ],
   templateUrl: './guild-info.component.html',
 })
-export class GuildInfoComponent implements OnInit, OnChanges {
+export class GuildInfoComponent implements OnInit, OnChanges, OnDestroy {
   @Input() guild!: Guild;
   @Output() inviteEvent = new EventEmitter<string>();
   @Output() leaveEvent = new EventEmitter<void>();
@@ -56,6 +65,12 @@ export class GuildInfoComponent implements OnInit, OnChanges {
 
   showModal = false;
   inviteName = '';
+  readonly inviteSuggestions = signal<string[]>([]);
+  readonly inviteSearchLoading = signal(false);
+  readonly inviteSearchError = signal(false);
+  readonly inviteSuggestionsOpen = signal(false);
+  readonly activeInviteSuggestion = signal(-1);
+  private readonly inviteSearch = new Subject<string>();
 
   showConfirmModal = false;
   confirmAction: 'leave' | 'disband' | 'kick' | null = null;
@@ -73,7 +88,40 @@ export class GuildInfoComponent implements OnInit, OnChanges {
   constructor(
     private characterService: CharacterService,
     private state: GuildStateService,
-  ) {}
+  ) {
+    this.subscriptions.add(
+      this.inviteSearch
+        .pipe(
+          switchMap((query) => {
+            this.inviteSuggestions.set([]);
+            this.activeInviteSuggestion.set(-1);
+            this.inviteSearchError.set(false);
+            this.inviteSearchLoading.set(query.length >= 2);
+            if (query.length < 2) return EMPTY;
+
+            return timer(200).pipe(
+              switchMap(() =>
+                this.characterService.suggestCharacterNames(query),
+              ),
+              catchError(() => {
+                this.inviteSearchError.set(true);
+                return of([] as string[]);
+              }),
+            );
+          }),
+        )
+        .subscribe((names) => {
+          this.inviteSearchLoading.set(false);
+          this.inviteSuggestions.set(names);
+          this.activeInviteSuggestion.set(names.length ? 0 : -1);
+        }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.inviteSearch.complete();
+  }
 
   ngOnInit(): void {
     this.sortGuildMembers();
@@ -103,7 +151,7 @@ export class GuildInfoComponent implements OnInit, OnChanges {
 
   invite() {
     if (this.inviteName.trim()) {
-      this.inviteEvent.emit(this.inviteName);
+      this.inviteEvent.emit(this.inviteName.trim());
 
       this.closeModal();
     }
@@ -116,6 +164,53 @@ export class GuildInfoComponent implements OnInit, OnChanges {
   closeModal() {
     this.showModal = false;
     this.inviteName = '';
+    this.closeInviteSuggestions();
+  }
+
+  onInviteNameChange(value: string): void {
+    this.inviteName = value;
+    this.openInviteSuggestions();
+  }
+
+  openInviteSuggestions(): void {
+    const query = this.inviteName.trim();
+    this.inviteSuggestionsOpen.set(query.length >= 2);
+    this.inviteSearch.next(query);
+  }
+
+  closeInviteSuggestions(): void {
+    this.inviteSuggestionsOpen.set(false);
+    this.inviteSearch.next('');
+  }
+
+  selectInviteSuggestion(name: string): void {
+    this.inviteName = name;
+    this.closeInviteSuggestions();
+  }
+
+  handleInviteKeydown(event: KeyboardEvent): void {
+    if (!this.inviteSuggestionsOpen()) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.closeInviteSuggestions();
+      return;
+    }
+
+    const names = this.inviteSuggestions();
+    if (!names.length) return;
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const direction = event.key === 'ArrowDown' ? 1 : -1;
+      this.activeInviteSuggestion.update(
+        (index) => (index + direction + names.length) % names.length,
+      );
+    } else if (event.key === 'Enter' && this.activeInviteSuggestion() >= 0) {
+      event.preventDefault();
+      this.selectInviteSuggestion(names[this.activeInviteSuggestion()]);
+    }
   }
 
   openApplicationsModal() {

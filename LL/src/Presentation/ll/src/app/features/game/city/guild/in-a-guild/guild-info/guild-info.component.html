@@ -204,18 +204,81 @@
     <h3 id="invite-character-title" class="ll-heading mb-4">
       Invite Character
     </h3>
-    <label class="ll-field mb-4">
-      <span class="ll-label">Character name</span>
+    <div class="ll-field relative mb-4">
+      <label for="guild-invite-name" class="ll-label">Character name</label>
       <input
+        id="guild-invite-name"
         type="text"
-        [(ngModel)]="inviteName"
-        placeholder="Enter character name"
+        [ngModel]="inviteName"
+        (ngModelChange)="onInviteNameChange($event)"
+        (focus)="openInviteSuggestions()"
+        (blur)="closeInviteSuggestions()"
+        (keydown)="handleInviteKeydown($event)"
+        placeholder="Search character by name..."
         class="ll-input w-full"
+        autocomplete="off"
+        maxlength="80"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="guild-invite-suggestions"
+        [attr.aria-expanded]="inviteSuggestionsOpen()"
+        [attr.aria-activedescendant]="
+          activeInviteSuggestion() >= 0
+            ? 'guild-invite-suggestion-' + activeInviteSuggestion()
+            : null
+        "
       />
-    </label>
+      <div
+        *ngIf="inviteSuggestionsOpen()"
+        id="guild-invite-suggestions"
+        role="listbox"
+        class="absolute left-0 right-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded border border-light_gray bg-texture p-1 shadow-xl shadow-black/60"
+      >
+        <div
+          *ngIf="inviteSearchLoading()"
+          role="status"
+          class="px-3 py-2 text-xs text-zinc-400"
+        >
+          Finding players...
+        </div>
+        <button
+          *ngFor="let suggestion of inviteSuggestions(); index as i"
+          type="button"
+          tabindex="-1"
+          role="option"
+          [id]="'guild-invite-suggestion-' + i"
+          [attr.aria-selected]="activeInviteSuggestion() === i"
+          class="ll-dropdown-option block w-full rounded px-3 py-2 text-left text-sm transition-colors"
+          [class.ll-dropdown-option-hovered]="activeInviteSuggestion() === i"
+          (mouseenter)="activeInviteSuggestion.set(i)"
+          (mousedown)="$event.preventDefault()"
+          (click)="selectInviteSuggestion(suggestion)"
+        >
+          {{ suggestion }}
+        </button>
+        <div
+          *ngIf="inviteSearchError()"
+          role="status"
+          class="px-3 py-2 text-xs text-zinc-400"
+        >
+          Could not find players. Try again or enter the full character name.
+        </div>
+        <div
+          *ngIf="
+            !inviteSearchLoading() &&
+            !inviteSearchError() &&
+            inviteSuggestions().length === 0
+          "
+          role="status"
+          class="px-3 py-2 text-xs text-zinc-400"
+        >
+          No matching players
+        </div>
+      </div>
+    </div>
     <div class="flex justify-end gap-2">
       <app-regular-button (pressed)="closeModal()"> Cancel </app-regular-button>
-      <app-regular-button (pressed)="invite()">
+      <app-regular-button (pressed)="invite()" [disabled]="!inviteName.trim()">
         Send Invite
       </app-regular-button>
     </div>

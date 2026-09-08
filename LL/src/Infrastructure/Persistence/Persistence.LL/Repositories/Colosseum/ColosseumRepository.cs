@@ -159,6 +159,7 @@ public class ColosseumRepository : IColosseumRepository
     public async Task<ArenaDefenseSnapshot?> GetArenaDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _context.ArenaDefenseSnapshots
+            .AsSplitQuery()
             .Include(x => x.CharacterSnapshot)
                 .ThenInclude(x => x.BaseAttributes)
             .Include(x => x.CharacterSnapshot)

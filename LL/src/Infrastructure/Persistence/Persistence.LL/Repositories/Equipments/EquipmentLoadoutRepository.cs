@@ -10,6 +10,7 @@ public sealed class EquipmentLoadoutRepository(IDbContext context) : IEquipmentL
 {
     public Task<List<EquipmentLoadout>> GetAsync(Guid characterId, CancellationToken ct) =>
         context.EquipmentLoadouts
+            .AsSplitQuery()
             .Include(x => x.Slots).ThenInclude(x => x.EquipmentInstance).ThenInclude(x => x!.ItemBase)
             .Include(x => x.Slots).ThenInclude(x => x.EquipmentInstance).ThenInclude(x => x!.InstanceModifiers)
             .Where(x => x.CharacterId == characterId).OrderBy(x => x.Name).ThenBy(x => x.Id).ToListAsync(ct);

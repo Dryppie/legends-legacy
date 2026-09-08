@@ -38,6 +38,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     {
         await LockGuildLoansAsync(entityId, null, cancellationToken);
         var character = await _context.Characters
+            .AsSplitQuery()
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
@@ -98,6 +99,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         await LockGuildLoansAsync(entityId, equipmentId, cancellationToken);
         // Include all equipped items, and all items from inventory
         var character = await _context.Characters
+            .AsSplitQuery()
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)

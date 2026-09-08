@@ -22,24 +22,32 @@ public sealed class BalanceHarnessTests
         "..", "..", "..", "tools", "BalanceHarness", "Fixtures", "idle-starter.json"));
 
     [Theory]
-    [InlineData(1, -1, 0)]
-    [InlineData(17, -1, 0)]
-    [InlineData(1337, -1, 0)]
-    [InlineData(-12345, -1, 0)]
-    [InlineData(1337, 0, 1)]
-    [InlineData(17, 1, 0)]
-    [InlineData(1337, 2, 0)]
-    [InlineData(17, 2, 1)]
-    public async Task Harness_matches_independent_production_idle_preparation_and_resolution(int seed, int stageIndex, int buildIndex)
+    [InlineData(1, -1, 0, "idle-reference.json", 0)]
+    [InlineData(17, -1, 0, "idle-reference.json", 0)]
+    [InlineData(1337, -1, 0, "idle-reference.json", 0)]
+    [InlineData(-12345, -1, 0, "idle-reference.json", 0)]
+    [InlineData(1337, 0, 1, "idle-reference.json", 0)]
+    [InlineData(17, 1, 0, "idle-reference.json", 0)]
+    [InlineData(1337, 2, 0, "idle-reference.json", 0)]
+    [InlineData(17, 2, 1, "idle-reference.json", 0)]
+    [InlineData(1337, 0, 0, "idle-first-hunt.json", 0)]
+    [InlineData(17, 0, 3, "idle-first-hunt.json", 1)]
+    [InlineData(1337, 1, 0, "idle-first-hunt.json", 0)]
+    [InlineData(17, 1, 2, "idle-first-hunt.json", 1)]
+    [InlineData(1337, 2, 4, "idle-first-hunt.json", 0)]
+    [InlineData(17, 2, 5, "idle-first-hunt.json", 1)]
+    public async Task Harness_matches_independent_production_idle_preparation_and_resolution(int seed, int stageIndex, int buildIndex,
+        string suiteName, int encounterIndex)
     {
         var (content, input) = Create(seed);
         if (stageIndex >= 0)
         {
-            var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(Path.GetDirectoryName(ScenarioPath)!, "idle-reference.json"));
+            var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(Path.GetDirectoryName(ScenarioPath)!, suiteName));
             var stage = suite.Stages[stageIndex];
             var build = stage.Builds[buildIndex];
-            input = content.CreateInput(new IdleScenario(1, "profile-parity", build.Id, stage.AreaId,
-                stage.Encounters[0].CreatureId, suite.StartsAt, stage.Assumptions, build), seed,
+            var encounter = stage.Encounters[encounterIndex];
+            input = content.CreateInput(new IdleScenario(suite.SchemaVersion, "profile-parity", build.Id, stage.AreaId,
+                encounter.CreatureId, suite.StartsAt, stage.Assumptions, build, encounter.AdditionalCreatureIds), seed,
                 input.ThreatAndTanking, input.EncounterCadenceSeconds);
         }
         var actual = await new IdleBattleRunner(content).RunAsync(input);
@@ -88,6 +96,7 @@ public sealed class BalanceHarnessTests
         Assert.Equal(HarnessJson.Hash(BattleSummary.From(result.CombatResult, 6000)), HarnessJson.Hash(actual.Summary));
         Assert.True(actual.Summary.DurationTicks > 0);
         Assert.NotEmpty(actual.Summary.Statistics.SelectMany(x => x.Abilities));
+        Assert.Equal(input.Scenario.CreatureIds.Count, actual.PreparedParticipants.GetArrayLength() - 1);
     }
 
     [Fact]

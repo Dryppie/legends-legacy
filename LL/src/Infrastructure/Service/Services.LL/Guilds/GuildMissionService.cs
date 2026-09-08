@@ -19,6 +19,7 @@ public class GuildMissionService : IGuildMissionService
     private const int WeeklyMissionOptionCount = 3;
 
     private readonly IDbContext _context;
+    private readonly IGuildRepository _guildRepository;
     private readonly IReadOnlyList<GuildMissionDefinition> _weeklyDefinitions;
     private readonly IReadOnlyList<GuildMissionDefinition> _dailyDefinitions;
     private readonly IReadOnlyDictionary<Guid, GuildMissionDefinition> _allDefinitions;
@@ -26,19 +27,21 @@ public class GuildMissionService : IGuildMissionService
     private readonly IGameEventOutbox? _outbox;
     private readonly IAccountRestrictionIndex? _accountRestrictions;
 
-    public GuildMissionService(IDbContext context)
-        : this(context, new DefaultGuildContentProvider(), null, null, null)
+    public GuildMissionService(IDbContext context, IGuildRepository guildRepository)
+        : this(context, new DefaultGuildContentProvider(), guildRepository, null, null, null)
     {
     }
 
     public GuildMissionService(
         IDbContext context,
         IGuildContentProvider content,
+        IGuildRepository guildRepository,
         IAchievementService? achievementService = null,
         IGameEventOutbox? outbox = null,
         IAccountRestrictionIndex? accountRestrictions = null)
     {
         _context = context;
+        _guildRepository = guildRepository;
         _weeklyDefinitions = content.WeeklyMissions;
         _dailyDefinitions = content.DailyOrders;
         _allDefinitions = _weeklyDefinitions.Concat(_dailyDefinitions).ToDictionary(x => x.Id);
@@ -68,7 +71,7 @@ public class GuildMissionService : IGuildMissionService
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
+            var overview = await BuildOverviewAsync(guild, characterId, now, cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return overview;
         });
@@ -104,7 +107,7 @@ public class GuildMissionService : IGuildMissionService
 
         SelectOption(guild, option, characterId, now);
         await _context.SaveChangesAsync(cancellationToken);
-        var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
+        var overview = await BuildOverviewAsync(guild, characterId, now, cancellationToken);
         return GuildOperationResult<GuildMissionOverviewDto>.Success(overview);
     }
 
@@ -148,7 +151,7 @@ public class GuildMissionService : IGuildMissionService
             await _achievementService.RecordGuildProgressAsync(characterId, 0, false, orderReward.Supplies, cancellationToken);
         }
 
-        var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
+        var overview = await BuildOverviewAsync(guild, characterId, now, cancellationToken);
         return GuildOperationResult<GuildMissionOverviewDto>.Success(overview);
     }
 
@@ -198,7 +201,7 @@ public class GuildMissionService : IGuildMissionService
             await _achievementService.RecordGuildProgressAsync(characterId, 0, false, rewards.Supplies, cancellationToken);
         }
 
-        var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
+        var overview = await BuildOverviewAsync(guild, characterId, now, cancellationToken);
         return GuildOperationResult<GuildMissionOverviewDto>.Success(overview);
     }
 
@@ -300,11 +303,7 @@ public class GuildMissionService : IGuildMissionService
     }
 
     private async Task<Guild?> LoadGuildForCharacterAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _context.Guilds
-            .Include(x => x.Members)
-            .Include(x => x.Resources)
-            .Include(x => x.Buildings)
-            .FirstOrDefaultAsync(x => x.Members.Select(m => m.CharacterId).Contains(characterId), cancellationToken);
+        await _guildRepository.GetGuildForMissionsAsync(characterId, cancellationToken);
 
     private async Task EnsureCurrentStateAsync(Guild guild, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
     {
@@ -582,12 +581,9 @@ public class GuildMissionService : IGuildMissionService
         period.LastContributedAt = now;
     }
 
-    private async Task<GuildMissionOverviewDto> BuildOverviewAsync(Guid guildId, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<GuildMissionOverviewDto> BuildOverviewAsync(Guild guild, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var guild = await _context.Guilds
-            .Include(x => x.Members)
-            .Include(x => x.Buildings)
-            .FirstAsync(x => x.Id == guildId, cancellationToken);
+        var guildId = guild.Id;
         var week = GetWeek(now);
         var dailyKey = GetDailyKey(now);
 

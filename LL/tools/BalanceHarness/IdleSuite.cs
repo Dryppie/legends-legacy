@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Common.Randomness;
 using Services.LL.Combat.Engine;
@@ -11,7 +12,9 @@ public sealed record IdleSuiteDefinition(int SchemaVersion, string Id, string De
 public sealed record IdleProgressionStage(string Id, string Name, string AreaId,
     IReadOnlyList<string> Assumptions, IReadOnlyList<EquipmentReferenceBuildDefinition> Builds,
     IReadOnlyList<IdleBenchmarkEncounter> Encounters);
-public sealed record IdleBenchmarkEncounter(string Id, string Label, Guid CreatureId);
+public sealed record IdleBenchmarkEncounter(string Id, string Label, Guid CreatureId,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<Guid>? AdditionalCreatureIds = null);
 public sealed record SuiteTrial(string BattleId, int Index, int Seed);
 public sealed record SuiteCell(string Id, string Stage, string Build, string Encounter,
     IdleBattleInput Input, IReadOnlyList<SuiteTrial> Trials);
@@ -25,8 +28,8 @@ public static class IdleSuite
     public static SuiteRunInput Resolve(IdleSuiteDefinition suite, OfflineContent content,
         ThreatAndTankingOptions threat, double cadence, int masterSeed)
     {
-        if (suite.SchemaVersion != 1 || suite.SamplesPerCell is < 1 or > 10000 || suite.Stages.Count == 0)
-            throw new InvalidDataException("Suite requires version 1, stages and 1–10,000 samples per cell.");
+        if (suite.SchemaVersion is not (1 or 2) || suite.SamplesPerCell is < 1 or > 10000 || suite.Stages.Count == 0)
+            throw new InvalidDataException("Suite requires version 1 or 2, stages and 1–10,000 samples per cell.");
         ValidateId(suite.Id);
         UniqueIds(suite.Stages.Select(x => x.Id));
         var cellCount = suite.Stages.Sum(stage => (long)stage.Builds.Count * stage.Encounters.Count);
@@ -51,13 +54,13 @@ public static class IdleSuite
                         stage.Id, encounter.Id, index.ToString(CultureInfo.InvariantCulture)))).ToArray();
                 if (trials.Select(x => x.Seed).Distinct().Count() != trials.Length)
                     throw new InvalidDataException($"Seed collision in '{id}'; choose another master seed.");
-                var scenario = new IdleScenario(1, id, build.Id, stage.AreaId, encounter.CreatureId,
-                    suite.StartsAt, stage.Assumptions, build);
+                var scenario = new IdleScenario(suite.SchemaVersion, id, build.Id, stage.AreaId, encounter.CreatureId,
+                    suite.StartsAt, stage.Assumptions, build, encounter.AdditionalCreatureIds);
                 cells.Add(new(id, stage.Name, build.Id, encounter.Label,
                     content.CreateInput(scenario, trials[0].Seed, threat, cadence), trials));
             }
         }
-        return new(1, SeedScheduleVersion, masterSeed, suite, cells);
+        return new(suite.SchemaVersion, SeedScheduleVersion, masterSeed, suite, cells);
     }
 
     public static IdleBattleInput BattleInput(SuiteCell cell, SuiteTrial trial) =>
