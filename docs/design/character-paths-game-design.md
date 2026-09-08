@@ -4,6 +4,8 @@ Game design proposal · 8 September 2026
 
 **Scope:** Two developed Paths, Bastion and Conduit, followed by three exploratory concepts. All Path mechanics described here are proposals. Numerical values are starting points for playtesting, not validated balance targets.
 
+**Progression decision:** Each character levels each Path individually. Path levels and experience are not shared. The level cap, milestone schedule, rank bonuses, and upgrade values below are provisional expressions of that decision.
+
 ## 1. The third character-building pillar
 
 Paths give a character a combat philosophy: a rule that changes how the player combines equipment and Essences.
@@ -26,6 +28,7 @@ The design succeeds when selecting a Path makes the player reconsider at least o
 - **Preparation suits idle combat.** The player chooses a build before combat. Every Path operates automatically during combat and while the player is offline.
 - **Essences retain ownership of abilities.** Paths transform or connect existing tools. Selecting a Path does not grant an additional active ability.
 - **Choices remain choices.** A player cannot eventually purchase every refinement and activate them together.
+- **Mastery belongs to the Path.** Playing an equipped Path develops that Path. Its full defining mechanic is available from level 1, and later bonuses preserve its central tradeoff.
 - **Readable causes and outcomes.** Players can see what the Path contributed and what its tradeoff cost them.
 
 Paths are the proposed third pillar in this document. Earlier Combat Style concepts are background design material; no separate Combat Style selection or talent web is required alongside Paths.
@@ -34,32 +37,73 @@ Paths are the proposed third pillar in this document. Earlier Combat Style conce
 
 ### Build structure
 
-A character equips **one Path** and chooses **one of its three refinements**, or keeps its **base form**. Refinements alter the defining mechanic and are mutually exclusive alternatives, not ranks. The base form remains a valid finished choice.
+A character equips **one Path**, initially in its **base form**. At Path level 3, the player can choose **one of its three refinements** or retain the base form. Refinements alter the defining mechanic and are mutually exclusive alternatives, not ranks. The base form remains a valid finished choice and benefits from levels and upgrades normally.
+
+Further levels grant modest automatic **core ranks** and up to **two upgrade slots**. Core ranks strengthen the Path's mechanic; upgrades provide smaller, situational adjustments. Neither grants another refinement or an additional active ability.
 
 Some Paths need one additional choice specific to their mechanic. Conduit, for example, asks the player to designate a Focus Essence. This is a choice among already equipped Essences and does not add an Essence slot.
 
 Players can also leave the Path slot empty while learning or comparing builds. An empty slot applies no Path benefit or penalty.
 
-### Introduction and progression
+### Introduction
 
 Introduce Paths when the player has unlocked a third Essence slot and acquired at least three different Essences. At that point there is a real loadout to reshape, while the player is still discovering build identities.
 
 The introductory quest presents both developed Paths in a practice encounter with temporary example loadouts. It demonstrates a benefit and a failure case for each: Bastion preparing Barrier and recovering slowly after a breach; Conduit producing both a charged cast and an undercharged cast. Practice does not award or consume the example equipment or Essences.
 
-Completing the introduction unlocks both Paths and all their refinements. The practice encounter is guided learning, with no required victory or preferred answer. A player can finish it without being forced to adopt a Path.
+Completing the introduction unlocks both Paths at **Path level 1 with zero Path XP**. Their core mechanics are immediately usable; refinements and upgrade slots follow each Path's own level milestones. The practice encounter is guided learning, with no required victory or preferred answer, and awards no Path XP. A player can finish it without being forced to adopt a Path.
 
-There are no Path levels, consumable Path items, rank bonuses, or additional upgrade currency in this proposal. Progression comes from discovering combinations, obtaining better-suited equipment and Essences, and learning which configuration suits an encounter. Future Paths would expand available strategies rather than replace early Paths with stronger versions.
+Progression combines individual Path mastery with discovering combinations, obtaining better-suited equipment and Essences, and learning which configuration suits an encounter. Future Paths would expand available strategies rather than replace early Paths with stronger versions.
 
 Conduit can function with the introductory three-slot loadout, but its base form needs a Focus Essence and three different contributors to reach maximum Charge. That higher ceiling becomes available naturally as the player gains another slot and a suitable Essence.
 
+### Individual Path levels and experience
+
+Each unlocked Path has its own permanent level, XP progress, and earned milestones. The initial proposed level range is **1–10**. A character can therefore have a level-10 Bastion and a level-1 Conduit. Selecting Conduit uses its own level; returning to Bastion restores access to everything already earned there.
+
+- **Only the equipped Path earns Path XP.** Unequipped Paths gain no passive XP, and an empty Path slot earns none. There is no shared mastery pool, transferable XP, inherited level, or catch-up multiplier in this version.
+- **Use ordinary eligible combat rewards.** Grant 1 Path XP per point of the character's base combat XP reward, before character or Essence XP bonuses. Use the character's own reward share in group combat. Noncombat quest rewards and practice battles do not grant Path XP.
+- **Reward participation through the ordinary combat reward rules.** Path XP does not depend on healing performed, Barrier generated, Charge spent, ability count, or whether the Path's mechanic activated. A completed encounter that earns no base combat XP also earns no Path XP. Reaching the character-level cap does not suppress otherwise eligible base combat XP for Path progression.
+- **Online and offline combat use the same rules.** Experience belongs to the Path used for the rewarded encounter, even if the player has selected another Path before collecting its rewards.
+- **Earned progress is permanent.** Defeat, switching, changing a refinement, and replacing upgrades do not remove XP or levels.
+- **Level 10 ends that Path's XP progression.** Excess XP is discarded rather than banked for another Path or another progression layer. A large reward can cross several levels, awarding every milestone reached.
+
+Both developed Paths use the same XP requirement schedule initially, while keeping separate XP totals. Exact level thresholds and time to reach level 10 remain tuning questions. The first three levels should be accessible during a short period of ordinary progression-relevant combat, so a newly tried Path reaches its first specialization promptly.
+
+### Level milestones, core ranks, and upgrade slots
+
+| Path level | Newly earned benefit | Total core rank | Available upgrade slots |
+| ---: | --- | ---: | ---: |
+| 1 | Full core mechanic and base form. | 0 | 0 |
+| 2 | First core rank bonus. | 1 | 0 |
+| 3 | All three refinements become available; choose at most one. | 1 | 0 |
+| 4 | Second core rank bonus. | 2 | 0 |
+| 5 | First upgrade slot and access to the Path's three upgrade choices. | 2 | 1 |
+| 6 | Third core rank bonus. | 3 | 1 |
+| 7 | Continue toward the second upgrade slot; no additional combat bonus. | 3 | 1 |
+| 8 | Fourth core rank bonus and second upgrade slot. | 4 | 2 |
+| 9 | Continue toward the final core rank; no additional combat bonus. | 4 | 2 |
+| 10 | Fifth core rank bonus; Path level cap reached. | 5 | 2 |
+
+Core ranks are automatic bonuses to the Path's defining mechanic. They are not another level track, do not require spending points, and do not grant general attributes such as Power or Max Health. Their exact effects are defined under each developed Path.
+
+Upgrade slots each hold one choice from that Path's upgrade menu. Each upgrade is a single fixed effect: no duplicate selections, separate upgrade levels, or additional upgrade ranks. All three choices become available at level 5, but only two can ever be equipped together. Slots may remain empty. Choices can be replaced freely at the same boundaries as other build changes.
+
+Refinements remain the major behavioral choice. Upgrades cannot purchase another refinement, remove a Path's core limitation, or increase the number of equipped Essences. There are no consumable Path items, rank-point purchases, or additional upgrade currency in this proposal.
+
+Unless explicitly labeled as ranked or upgraded, the combat formulas, refinement values, and worked examples below show **unranked values without upgrades**. They isolate the underlying mechanics; they do not imply that refinements are selectable at level 1. Actual previews include the core ranks already earned and the selected upgrades.
+
 ### Changing and saving a Path
 
-- Switching Paths, refinements, or a Focus Essence is free between encounters and has no cooldown.
-- A Path is fixed for a committed activity: a single battle, an entire dungeon run, or a PvP match. The player reviews the choice before entering.
+- Switching Paths, available refinements, upgrades, or a Focus Essence is free between encounters and has no cooldown. The selected Path always uses its own earned level and milestones.
+- A Path and its effective core rank, refinement, and upgrades are fixed for a committed activity: a single battle, an entire dungeon run, or a PvP match. The player reviews the choice before entering.
 - During ordinary idle combat, a changed configuration takes effect at the next encounter. Previously completed combat keeps the configuration under which it occurred.
-- A saved build remembers its equipment, Essences, Path, refinement, and any Path-specific choice together.
+- A saved build remembers its equipment, Essences, Path, refinement, upgrades, and any Path-specific choice together. Loading a build uses that Path's current earned level and cannot roll back, duplicate, or transfer XP. Locked choices cannot be activated through a saved build.
+- Each Path remembers its last selected refinement, upgrades, and Focus where applicable. Switching back restores those choices when they are still valid.
 - If a saved Focus Essence is no longer equipped or eligible, the player chooses a replacement before starting combat with Conduit. The game identifies the missing choice; it does not silently select another Essence.
 - Path resources and encounter-generated protection follow encounter boundaries. Changing a Path never creates healing, resets ability cooldowns, or transfers stored resources into another encounter.
+
+Levels and milestones are earned when their XP is awarded. Newly earned core ranks take effect at the next boundary where the build may change; earning a level during a dungeon run does not alter that run's combat bonuses. A newly unlocked refinement or upgrade slot waits for the player's choice. Idle and offline combat continue with the existing selections and never pause or select an upgrade automatically.
 
 ## 3. Path of the Bastion
 
@@ -79,7 +123,7 @@ Bastion supports a durable solo fighter, a protector accompanying summons or all
 
 For example, a self-heal worth 200 normally instead restores up to 50 Health and grants up to 150 Barrier. At full Health, the 50 Health portion is lost but the Barrier can still be gained.
 
-The advantage is the ability to save recovery for later damage. The cost is much slower repair of actual Health loss. The conversion does not increase the combined amount of Health and Barrier produced.
+The advantage is the ability to save recovery for later damage. The cost is much slower repair of actual Health loss. The unranked conversion does not increase the combined amount of Health and Barrier produced; later core ranks and selected upgrades can add a modest bonus without restoring ordinary self-healing.
 
 ### What counts as self-generated healing
 
@@ -129,6 +173,24 @@ The base form suits builds that depend on uninterrupted Barrier generation and l
 
 **Shelter details.** Your own summons and allied players are eligible recipients; enemies and yourself are not. Compare current Health percentages before distributing Barrier, using normal party order for a tie. Choose one recipient for the entire healing event. If there is no other living ally, keep the whole Barrier portion yourself. Each recipient's own cap applies separately; rejected protection is lost rather than redirected. Shared Barrier is a Barrier grant, never a new heal or a second Fortification conversion.
 
+### Bastion core ranks and upgrades
+
+Each core rank grants **2% more converted Barrier**, relative to the Barrier portion Fortification would otherwise produce. Five ranks give a total **10% bonus to that portion**. The ordinary Health portion remains 25% of the original healing amount.
+
+At level 10, with five core ranks and no upgrades, a 200-point self-heal produces **50 Health and 165 Barrier** instead of 50 Health and 150 Barrier. Wound and other healing modifiers still apply before conversion. Natural Barrier grants, the shared Barrier cap, and Counterweight's spending threshold and damage conversion are unchanged.
+
+Rebuild receives no Barrier bonus when it replaces conversion with full Health restoration. Shelter divides the converted Barrier after the rank bonus, then applies each recipient's cap separately.
+
+| Upgrade | Effect | Build preference |
+| --- | --- | --- |
+| **Prepared Wall** | Gain an additional 10% of Fortification's unranked Barrier portion when beginning the healing event at or above 80% Health. | Prepare protection while relatively healthy. |
+| **Hold the Breach** | Gain an additional 10% of Fortification's unranked Barrier portion when beginning the healing event with zero Barrier. | Reestablish protection after the reserve is exhausted. |
+| **Measured Recovery** | Increase only Fortification's divided Health portion by 20%, changing it from 25% to 30% of the original healing amount. The Barrier portion is unchanged. | Recover somewhat more Health while retaining the conversion tradeoff. |
+
+Evaluate upgrade conditions once, before that healing event restores Health or grants Barrier. Rank bonuses and the two conditional Barrier bonuses add relative to the same unranked Barrier portion: at five ranks, both conditions together produce `75% × (1 + 10% + 10% + 10%)` of the original healing amount as Barrier. A 200-point heal in that case produces up to 50 Health and 195 Barrier.
+
+These upgrades affect only Fortification output. With Shelter, apply the bonuses once before dividing the Barrier. With Rebuild below its threshold, the event uses full ordinary healing instead, so none of these upgrades increases that event's output. Measured Recovery does not amplify outside healing, Lifesteal before conversion, or the full heal granted by Rebuild. All overflow and reaction restrictions still apply.
+
 ### Worked encounter: the base form
 
 Assume the Bastion has 1,000 Max Health, begins at full Health with no Barrier, and uses a self-heal worth 200. Incoming damage below is already reduced by defenses.
@@ -168,6 +230,8 @@ These are patterns of Essence functions, not newly granted abilities or claims t
 ### What the player should see
 
 The Path card shows the conversion and its cost together: **"200 self-healing becomes 50 Health + 150 Barrier. Actual Health recovers more slowly."**
+
+That is the unranked illustration. The actual card shows Bastion's own level, XP to the next level, core rank, selected upgrades, and the resulting conversion. Conditional upgrade bonuses are identified as conditional rather than always included in the displayed amount. At level 10 without upgrades, the same illustration reads 50 Health + 165 Barrier.
 
 Affected ability previews show their Health and Barrier outputs. The combat summary separates Health restored, converted Barrier granted, converted Barrier absorbed, and protection lost to overflow. Counterweight additionally shows Barrier spent and damage contributed; Shelter shows who received protection. Values describing wasted healing distinguish a full Health bar from a full Barrier pool.
 
@@ -241,6 +305,22 @@ Conduit uses ordinary automated casting and cooldowns. It does not delay the Foc
 
 **Relay details.** Effect amounts at 0, 1, 2, and 3 Charge are 80%, 95%, 110%, and 125%. The returned Charge is added to any Charge already earned in the new cycle, up to the cap of 3; it does not replace Charge earned while the Focus cast was resolving. All contributor eligibility resets normally. Spending only that single returned Charge provides no further return, so an idle Focus cannot sustain its own cycle. A miss still returns the Charge if at least two Charge were spent. The return does not carry past the end of the encounter.
 
+### Conduit core ranks and upgrades
+
+Each core rank adds **2 percentage points** to the Focus effect multiplier when the cast spends **at least 1 Charge**. Five ranks add 10 points once to the cast's eligible effect amounts, regardless of how many Charge were spent. Apply this after the selected refinement's formula. A zero-Charge cast receives no rank bonus: it still produces only 80% of its ordinary effect amount, or 60% with Deep Reservoir.
+
+At level 10 without upgrades, the base form's effect amounts at 0, 1, 2, and 3 Charge are **80%, 110%, 130%, and 150%**. Fully charged ceilings become 130% for Short Circuit, 170% for Deep Reservoir, and 135% for Relay. Charge caps, contributor requirements, and Relay's return are unchanged.
+
+| Upgrade | Effect | Build preference |
+| --- | --- | --- |
+| **Full Circuit** | Add 5 percentage points to eligible Focus effect amounts when spending the selected refinement's maximum Charge, or 3 in the base form. | Reliably complete preparation before the payoff. |
+| **Partial Flow** | Add 5 percentage points to eligible Focus effect amounts when spending exactly 1 Charge. | Support useful smaller payoffs when the full circuit is rarely ready. |
+| **Emergency Channel** | When beginning a Focus cast at or below 35% Health and spending at least 1 Charge, add 5 percentage points to its eligible direct healing and Barrier components targeting yourself. Direct damage components receive no bonus from this upgrade. | Improve personal recovery under pressure without strengthening an uncharged emergency cast. |
+
+Upgrade bonuses add to the multiplier after the refinement formula and core rank bonus. They are percentage-point additions, not successive multipliers. Full Circuit and Partial Flow cannot apply together with any of the developed Charge caps. Emergency Channel can combine with either, but only for the eligible healing and Barrier components that target the Conduit themselves; healing or protecting an ally does not receive its bonus.
+
+For example, a level-10 base-form Conduit spending 3 Charge uses 150% before upgrades. Full Circuit raises that to 155%. If Emergency Channel also qualifies, direct self-healing and self-Barrier components use 160%, while direct damage and effects on other targets remain at 155%. No upgrade changes a zero-Charge cast, grants starting Charge, alters cast order, or creates extra casts.
+
 ### Worked sequence: the base form
 
 Assume four equipped Essences: contributors A, B, and C, plus Focus F. F has a direct effect worth 200 before its Conduit multiplier. This is an illustrative sequence of normal casts, not a manual rotation added by the Path.
@@ -281,13 +361,15 @@ The second Focus cast shows why the Path is more than an automatic upgrade. Sele
 
 The Path card shows the selected Focus, maximum Charge, the current refinement's full effect curve, and the eligible components of the Focus ability.
 
+It also shows Conduit's own level, XP to the next level, core rank, available upgrade slots, and selected upgrades. The effect curve includes earned ranks, and conditional upgrades show the exact Charge and Health requirements for their additional bonus. Switching from a higher-level Bastion does not imply a higher-level Conduit or reuse Bastion's rank bonuses.
+
 During combat, display Charge beside the Focus icon. Indicate which contributors have already charged the current cycle. The cast log identifies the Charge spent and the resulting effect multiplier, including casts below normal strength.
 
 The post-combat summary shows Focus casts at each Charge level and their average multiplier. Report the loss from undercharged casts as well as the additional output from charged casts. A summary that counts only the stronger casts would conceal the Path's central cost.
 
 ## 5. Three potential Paths
 
-These are concept seeds only. Their final rules, numerical values, refinements, progression, and balance are intentionally undecided. They are not part of the two developed Path designs above.
+These are concept seeds only. Their final mechanics, rank effects, upgrade menus, and balance are intentionally undecided. If developed, they follow the individual Path-level model above and begin at their own level 1 when unlocked. They are not part of the two developed Path designs above.
 
 | Potential Path | Fantasy and possible core mechanic                                                                                                                                                                                               | Build decision                                                                                                                       | Main design question                                                                                                                                                                                                 |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -303,7 +385,7 @@ The same Path rules apply in idle combat, dungeons, bosses, and PvP. Charge begi
 
 Paths do not change an activity's normal starting Health, recovery between encounters, ability readiness, victory conditions, or defeat consequences. A player cannot heal by toggling a Path, bank Charge on a harmless encounter, or carry an old Barrier reserve into a new one.
 
-An equipped Path and refinement are visible when players inspect a build. Conduit's chosen Focus is also visible. Opponents should be able to understand the strategy they are fighting.
+An equipped Path, its level, effective core rank, refinement, and upgrades are visible when players inspect a build. Conduit's chosen Focus is also visible. Opponents should be able to understand the strategy and progression strength they are fighting. PvP uses the equipped Path's earned progression; this proposal does not add automatic Path-level normalization.
 
 ### Group play and summons
 
@@ -314,6 +396,8 @@ Bastion deliberately benefits from outside healing, and Shelter can support anot
 ### Balance intent
 
 The two Paths should excel in different circumstances, with useful reasons to retain their base forms and choose each refinement. Neither should be the default answer for every player, encounter, or loadout.
+
+Compare Path strength at equal levels and with the same number of unlocked upgrade slots before attributing an advantage to the Path's identity. Separately assess the cost of switching from a mastered Path to an untrained one. Individual progression intentionally gives the practiced Path an advantage, but a new Path must remain useful through its full level-1 mechanic. If switching feels excessively punishing, first adjust the early XP thresholds or the size of rank bonuses; do not silently introduce shared levels or automatic catch-up.
 
 Evaluate the whole build: damage, survival, consistency, time to clear, wasted output, and the value of the Essence slots used to enable the Path. A high peak or a large Barrier number is not sufficient evidence of a strong build.
 
@@ -327,6 +411,10 @@ The identities and choice structure above are the proposed design. The following
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
 | Same equipment and Essences, switch only the Path            | Does the character's behavior change visibly, and can the player explain why?                             |
 | Rebuild the loadout around each Path afterward               | Does understanding the Path lead to meaningful equipment and Essence changes?                             |
+| Equal Path levels and upgrade-slot budgets | Does each Path remain competitive when progression advantages are controlled? |
+| Switch from level-10 Bastion to level-1 Conduit and return | Is Conduit's core immediately useful, does its first specialization arrive promptly, and is Bastion's progress preserved? |
+| Earn levels during offline combat and a committed dungeon run | Are XP ownership and milestone rewards clear, with new combat bonuses applied only at the permitted boundary and no automatic build choices? |
+| Rank-zero values versus five core ranks and two upgrades | Do bonuses feel rewarding while Bastion still repairs Health slowly and Conduit still suffers from uncharged casts? |
 | Three-slot introductory builds and later wider builds        | Can both Paths work when unlocked, while later slots add options without overwhelming earlier builds?     |
 | Short encounters, long encounters, and dangerous openings    | Are the different preparation costs meaningful without making one Path unusable in ordinary play?         |
 | Bastion under repeated burst damage                          | Is 25% Health restoration enough to recover between breaches, or does the base form become too punishing? |
@@ -338,7 +426,7 @@ The identities and choice structure above are the proposed design. The following
 | Builds with no Path and builds with the wrong Path           | Are Paths a rewarding source of strategy while their opportunity costs remain real and visible?           |
 | PvP and encounters with time limits                          | Do durable combinations remain beatable, and do burst combinations allow understandable counterplay?      |
 
-The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Counterweight's spending and damage amounts, and Conduit's zero-Charge penalty and Charge curves. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Focus output for a stronger prepared cast.**
+The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Counterweight's spending and damage amounts, and Conduit's zero-Charge penalty and Charge curves. Progression tuning covers the level-10 cap, XP thresholds, levels without a new combat benefit, time to the first refinement, core rank magnitudes, and the three upgrade choices for each developed Path. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Focus output for a stronger prepared cast.**
 
 ## Design references
 
