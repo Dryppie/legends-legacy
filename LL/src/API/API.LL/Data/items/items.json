@@ -802,6 +802,28 @@
     "attributeModifiers": []
   },
   {
+    "id": "item.armor_chest",
+    "name": "Armor Chest",
+    "description": "Open to receive 1 random Common armor piece at Tier 1, with Standard quality and no reinforcement.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "stackable": true,
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.jewelry_chest",
+    "name": "Jewelry Chest",
+    "description": "Open to receive 1 random Common jewelry piece at Tier 1, with Standard quality and no reinforcement.",
+    "itemType": "Resource",
+    "rarity": "Common",
+    "stackable": true,
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
     "id": "item.uncommon_equipment_box",
     "name": "Uncommon Equipment Box",
     "description": "Open to receive 2 random Uncommon equipment pieces at Tier 1, with Standard quality and no reinforcement.",

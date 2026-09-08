@@ -31,6 +31,7 @@ public sealed class CombatAcquisitionTests
             Enum.GetValues<EquipmentRarity>().Sum(rarity => catalog.DropDefinitions(rarity).Count));
         Assert.All(catalog.Pools, rules =>
         {
+            Assert.Equal(new EquipmentSelectionWeights(0.4, 0.35, 0.25, 0.6, 0.4), rules.SelectionWeights);
             Assert.Equal(10d / 8640d, rules.AreaEquipment.DropChance, 15);
             Assert.Equal(0, rules.AreaEquipment.Rank);
             Assert.Equal(0.5, rules.DungeonEquipment.DropChance);
@@ -212,6 +213,40 @@ public sealed class CombatAcquisitionTests
         Assert.Throws<ArgumentOutOfRangeException>(() => catalog.Pools[0].DungeonEquipment.Rarities.ForGrade((DungeonGrade)4));
     }
 
+    [Fact]
+    public void Regional_content_rejects_missing_or_invalid_equipment_selection_weights()
+    {
+        var catalog = Catalog();
+        Assert.Throws<ArgumentException>(() => new CombatAcquisitionCatalog(catalog.Equipment,
+            catalog.Pools.Select(rules => rules with { SelectionWeights = null! })));
+        Assert.Throws<ArgumentException>(() => new CombatAcquisitionCatalog(catalog.Equipment,
+            catalog.Pools.Select(rules => rules with { SelectionWeights = rules.SelectionWeights with { Weapons = 0.9 } })));
+    }
+
+    [Theory]
+    [InlineData(1, 0, 0, 1, 0)]
+    [InlineData(1, 0, 0, 0, 1)]
+    [InlineData(0, 1, 0, 0.6, 0.4)]
+    [InlineData(0, 0, 1, 0.6, 0.4)]
+    public async Task Area_drops_honor_configured_category_and_handedness_weights(
+        double weapons, double armor, double jewelry, double oneHanded, double twoHanded)
+    {
+        var fixture = Fixture.Create(Guid.Parse("70eb3747-fac5-4609-b391-e799434fbc4c"), areaChance: 1,
+            selectionWeights: new(weapons, armor, jewelry, oneHanded, twoHanded));
+        var result = await fixture.Processor.ProcessAsync(fixture.Facts("region_01_area_01", 64), default);
+        var expectedTypes = armor > 0 ? new[] { EquipmentType.Head, EquipmentType.Chest, EquipmentType.Legs }
+            : jewelry > 0 ? [EquipmentType.Ring, EquipmentType.Necklace, EquipmentType.Relic]
+            : oneHanded > 0 ? [EquipmentType.OneHanded, EquipmentType.OffHand]
+            : [EquipmentType.TwoHanded];
+
+        Assert.Equal(64, result.Equipment.Count);
+        Assert.All(result.Equipment, item => Assert.Contains(
+            Assert.IsType<EquipmentInstance>(item.ItemInstance).ProgressionData!.EquipmentType, expectedTypes));
+        if (weapons > 0 && oneHanded > 0)
+            Assert.Contains(result.Equipment, item =>
+                ((EquipmentInstance)item.ItemInstance).ProgressionData!.EquipmentType == EquipmentType.OffHand);
+    }
+
     private static string ItemJson(InventoryItem item) =>
         Assert.IsType<EquipmentInstance>(item.ItemInstance).ProgressionData!.Serialize();
 
@@ -271,11 +306,12 @@ public sealed class CombatAcquisitionTests
 
         public static Fixture Create(Guid? characterId = null, double? areaChance = null,
             EquipmentRarity? areaRarity = null, double sigilChance = 1d / 4320d, bool enabled = true,
-            ItemQuality? areaQuality = null)
+            ItemQuality? areaQuality = null, EquipmentSelectionWeights? selectionWeights = null)
         {
             var source = Catalog();
             var pools = source.Pools.Select(rules => rules with
             {
+                SelectionWeights = selectionWeights ?? rules.SelectionWeights,
                 AreaEquipment = rules.AreaEquipment with
                 {
                     DropChance = areaChance ?? rules.AreaEquipment.DropChance,

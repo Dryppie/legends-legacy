@@ -349,6 +349,54 @@ public sealed class EquipmentAcquisitionTests
         }
     }
 
+    [Theory]
+    [InlineData(1, 0, 0, 1, 0)]
+    [InlineData(1, 0, 0, 0, 1)]
+    [InlineData(0, 1, 0, 0.6, 0.4)]
+    [InlineData(0, 0, 1, 0.6, 0.4)]
+    public async Task Dungeon_completion_and_treasury_honor_configured_category_and_handedness_weights(
+        double weapons, double armor, double jewelry, double oneHanded, double twoHanded)
+    {
+        var source = Catalog(1);
+        var catalog = new CombatAcquisitionCatalog(source.Equipment, source.Pools.Select(rules => rules with
+        {
+            SelectionWeights = new(weapons, armor, jewelry, oneHanded, twoHanded)
+        }));
+        var authored = JsonEquipmentBlueprintCatalog.Load(Path.Combine(ContentRoot(), "equipment-blueprints.v1.json"), catalog.Equipment);
+        var blueprints = new EquipmentBlueprintCatalog
+        {
+            Blueprints = authored.Blueprints, Sources = authored.Sources, DropChance = 0, GuaranteeCompletions = int.MaxValue
+        };
+        var repository = new Runs();
+        var service = new EquipmentAcquisitionService(catalog, new Dungeons(), repository,
+            Options.Create(new EquipmentProgressionOptions { ProtectedAcquisitionEnabled = true }),
+            blueprints, new BlueprintProgressRepository());
+        var treasuryEquipment = new List<EquipmentData>();
+        for (var index = 0; index < 64; index++)
+        {
+            // Catacombs styles cover off-hands as well as the other equipment types.
+            var run = Run("forgotten_catacombs");
+            run.Id = StableRandom.Guid(["equipment-category-weights", index.ToString()]);
+            await service.CompleteAsync(run, false, default);
+            var treasury = service.RollTreasuryReward(run, 7);
+            if (treasury.ProgressionData is { } data) treasuryEquipment.Add(data);
+        }
+
+        var expectedTypes = armor > 0 ? new[] { EquipmentType.Head, EquipmentType.Chest, EquipmentType.Legs }
+            : jewelry > 0 ? [EquipmentType.Ring, EquipmentType.Necklace, EquipmentType.Relic]
+            : oneHanded > 0 ? [EquipmentType.OneHanded, EquipmentType.OffHand]
+            : [EquipmentType.TwoHanded];
+        Assert.Equal(64, repository.Rewards.Count);
+        Assert.NotEmpty(treasuryEquipment);
+        Assert.All(repository.Rewards, reward => Assert.Contains(reward.ProgressionData!.EquipmentType, expectedTypes));
+        Assert.All(treasuryEquipment, equipment => Assert.Contains(equipment.EquipmentType, expectedTypes));
+        if (weapons > 0 && oneHanded > 0)
+        {
+            Assert.Contains(repository.Rewards, reward => reward.ProgressionData!.EquipmentType == EquipmentType.OffHand);
+            Assert.Contains(treasuryEquipment, equipment => equipment.EquipmentType == EquipmentType.OffHand);
+        }
+    }
+
     private sealed class BlueprintProgressRepository : IEquipmentBlueprintRepository
     {
         public EquipmentBlueprintProgress Progress { get; } = new();

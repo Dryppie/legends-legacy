@@ -122,8 +122,11 @@ public sealed class SelectionCrateService : ISelectionCrateService
         var catalog = _equipmentCatalog
             ?? throw new InvalidOperationException("Equipment catalog is required to open an equipment box.");
         var reward = definition.RandomEquipment!;
-        var candidates = catalog.BaseDropDefinitions(reward.Rarity);
-        if (candidates.Count == 0)
+        var candidates = catalog.BaseDropDefinitions(reward.Rarity)
+            .Where(candidate => reward.EquipmentTypes is null || reward.EquipmentTypes.Contains(
+                catalog.Equipment.Evaluator.GetArchetype(candidate.ArchetypeId).EquipmentType))
+            .ToArray();
+        if (candidates.Length == 0)
             return Fail("The equipment in this box is currently unavailable.");
 
         // Use a fresh opening identity even when more boxes are added to an existing stack.
@@ -134,7 +137,7 @@ public sealed class SelectionCrateService : ISelectionCrateService
             EquipmentState.Award(
                 StableRandom.Guid([.. identity, index.ToString(System.Globalization.CultureInfo.InvariantCulture)]),
                 catalog.Equipment.Evaluator,
-                candidates[random.Next(candidates.Count)].Id,
+                candidates[random.Next(candidates.Length)].Id,
                 reward.Tier,
                 reward.Rank,
                 new(EquipmentAwardKind.ProtectedReward, definition.ItemBaseId, string.Join(":", identity)),

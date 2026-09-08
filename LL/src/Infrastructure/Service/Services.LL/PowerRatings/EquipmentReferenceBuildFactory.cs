@@ -34,7 +34,7 @@ public sealed class EquipmentReferenceBuildFactory(
     IEssenceDefinitionRepository essenceDefinitions,
     IEssenceCombatLoadoutResolver essenceLoadouts)
 {
-    public EquipmentReferenceBuild Create(EquipmentReferenceBuildDefinition definition)
+    public EquipmentReferenceBuild Create(EquipmentReferenceBuildDefinition definition, bool requireCompleteLoadout = true)
     {
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentException.ThrowIfNullOrWhiteSpace(definition.Id);
@@ -45,8 +45,8 @@ public sealed class EquipmentReferenceBuildFactory(
         if (definition.CharacterLevel < EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(definition.Tier))
             throw new ArgumentException("The reference level cannot equip this tier.", nameof(definition));
         var selections = definition.Equipment.OrderBy(x => x.Slot).ToArray();
-        if (selections.Length is < 7 or > 8 || selections.Select(x => x.Slot).Distinct().Count() != selections.Length)
-            throw new ArgumentException("Reference builds require a complete loadout with distinct slots.", nameof(definition));
+        if (selections.Length is < 1 or > 8 || selections.Select(x => x.Slot).Distinct().Count() != selections.Length)
+            throw new ArgumentException("Reference builds require one to eight distinct equipment slots.", nameof(definition));
         var essenceIds = definition.EssenceIds.ToArray();
         if (essenceIds.Length > EssenceSlotProgression.GetUnlockedSlotCount(definition.CharacterLevel))
             throw new ArgumentException("The reference level has not unlocked enough Essence slots.", nameof(definition));
@@ -91,6 +91,8 @@ public sealed class EquipmentReferenceBuildFactory(
             });
             return item;
         }).ToArray();
+        ValidateEquipmentSlots(selections.Zip(equipment, (selection, item) =>
+            (selection.Slot, item.ProgressionData!.EquipmentType)).ToArray(), requireCompleteLoadout);
         var main = character.EquipmentSlots.SingleOrDefault(x => x.EquipmentSlotType == EquipmentSlotType.MainHand)
             ?? throw new ArgumentException("Reference builds require a main-hand weapon.", nameof(definition));
         if (main.EquipmentInstance!.ProgressionData!.EquipmentType == EquipmentType.TwoHanded)
@@ -103,7 +105,7 @@ public sealed class EquipmentReferenceBuildFactory(
                 EquipmentInstanceId = main.EquipmentInstanceId, EquipmentInstance = main.EquipmentInstance
             });
         }
-        if (character.EquipmentSlots.Count != 8)
+        if (requireCompleteLoadout && character.EquipmentSlots.Count != 8)
             throw new ArgumentException("Reference builds require all eight combat slots.", nameof(definition));
         var essences = essenceContent.Select((content, index) => new PlayerEssence
         {
@@ -116,6 +118,23 @@ public sealed class EquipmentReferenceBuildFactory(
         return new(definition, character, Array.AsReadOnly(equipment), Array.AsReadOnly(essences),
             CombatRatingCalculator.Calculate(character.BaseAttributes, equipment, sources, character.Level),
             catalog.Evaluator.Balance.Version);
+    }
+
+    public static void ValidateEquipmentSlots(
+        IReadOnlyList<(EquipmentSlotType Slot, EquipmentType Type)> slots, bool requireCompleteLoadout = true)
+    {
+        if (slots.Count is < 1 or > 8 || slots.Select(x => x.Slot).Distinct().Count() != slots.Count)
+            throw new ArgumentException("Equipment slots must be distinct.", nameof(slots));
+        if (slots.Any(x => !MatchesSlot(x.Slot, x.Type)))
+            throw new ArgumentException("Equipment does not fit its selected slot.", nameof(slots));
+        var main = slots.SingleOrDefault(x => x.Slot == EquipmentSlotType.MainHand);
+        if (!slots.Any(x => x.Slot == EquipmentSlotType.MainHand))
+            throw new ArgumentException("Reference builds require a main-hand weapon.", nameof(slots));
+        var twoHanded = main.Type == EquipmentType.TwoHanded;
+        if (twoHanded && slots.Any(x => x.Slot == EquipmentSlotType.OffHand))
+            throw new ArgumentException("A two-handed weapon occupies both hands.", nameof(slots));
+        if (requireCompleteLoadout && slots.Count + (twoHanded ? 1 : 0) != 8)
+            throw new ArgumentException("Reference builds require all eight combat slots.", nameof(slots));
     }
 
     private static bool MatchesSlot(EquipmentSlotType slot, EquipmentType type) => slot switch

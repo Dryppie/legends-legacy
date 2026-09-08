@@ -20,6 +20,7 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Persistence.LL;
 using Services.LL;
 using Services.LL.Administration;
 
@@ -70,6 +71,46 @@ public sealed class LiveOpsApplicationRegistrationTests
             .ToArray();
 
         Assert.Equal([typeof(TransactionBehavior<,>)], applicationBehaviors);
+    }
+
+    [Fact]
+    public void Standalone_LiveOps_can_resolve_administration_handlers_and_pipelines()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:LegendsLegacyDB"] =
+                    "Host=localhost;Database=legends_legacy_test;Username=postgres",
+                ["Database:TimeoutInSeconds"] = "30"
+            })
+            .Build();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddPersistence(configuration);
+        services.AddRepositories();
+        services.AddLiveOpsApplication();
+        services.AddLiveOpsServices(configuration);
+
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions
+        {
+            ValidateScopes = true
+        });
+        using var scope = provider.CreateScope();
+
+        var handlers = services.Where(descriptor =>
+            descriptor.ServiceType.IsGenericType &&
+            descriptor.ServiceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>));
+        Assert.NotEmpty(handlers);
+        foreach (var handler in handlers)
+        {
+            Assert.NotNull(scope.ServiceProvider.GetRequiredService(handler.ServiceType));
+
+            var requestTypes = handler.ServiceType.GetGenericArguments();
+            var pipelineType = typeof(IPipelineBehavior<,>).MakeGenericType(requestTypes);
+            var transactionType = typeof(TransactionBehavior<,>).MakeGenericType(requestTypes);
+            Assert.Contains(scope.ServiceProvider.GetServices(pipelineType),
+                behavior => behavior?.GetType() == transactionType);
+        }
     }
 
     [Fact]

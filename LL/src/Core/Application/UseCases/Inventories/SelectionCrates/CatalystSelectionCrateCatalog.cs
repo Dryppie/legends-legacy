@@ -144,6 +144,8 @@ public static class SelectionContainerCatalog
             .Append(TutorialArmsChestCatalog.Definition)
             .Append(LegacyBlueprintSelectionBoxCatalog.Definition)
             .Append(RandomEquipmentBoxCatalog.Uncommon)
+            .Append(RandomEquipmentBoxCatalog.ArmorChest)
+            .Append(RandomEquipmentBoxCatalog.JewelryChest)
             .ToDictionary(definition => definition.ItemBaseId, StringComparer.OrdinalIgnoreCase);
 
     public static SelectionContainerDefinition? Find(string itemBaseId) =>

@@ -1,6 +1,6 @@
 # Equipment system contract
 
-Updated: 7 September 2026.
+Updated: 8 September 2026.
 
 This document defines the supported equipment system after the removal of crafting, gathering, tempering, salvaging, and the equipment Forge.
 
@@ -57,6 +57,23 @@ rebalancing old item rolls requires a separate data migration.
 Supported sources are starter grants, random area drops, random dungeon drops, and explicitly authored rewards from other current systems. All grants must reference a valid equipment definition and must be evaluated by the canonical equipment evaluator before persistence.
 
 Equipment rarity and base archetype are rolled before variant identity. Areas award rank 0 equipment with a 15% chance of a compatible regional variant. Dungeons award rank 1 equipment with a 50% chance of a compatible variant from that dungeon family's blueprint pool. These are conditional on an equipment drop; existing equipment drop chances and rarity/quality odds remain separate. Both sources award unbound equipment. Catalog growth cannot change the explicit base-versus-variant roll.
+
+After rarity, area and dungeon equipment drops select a category: 40% Weapons,
+35% Armor (Head, Chest, Legs), and 25% Jewelry (Ring, Necklace, Relic). Weapons then
+select 60% OneHanded/OffHand or 40% TwoHanded, followed by a uniform item selection
+within that group. This gives overall shares of 24% OneHanded/OffHand, 16%
+TwoHanded, 35% Armor, and 25% Jewelry, independent of the number of designs in
+each group. Off-hand shields, wards, and grimoires share the one-handed pool.
+
+Both regional pools author these probabilities under `selectionWeights` in
+`equipment-ordinary.v1.json`; category weights and handedness weights must each
+be finite, non-negative, and total one. Dungeon treasury equipment uses the same
+selector after filtering to its compatible styles. If a restricted source lacks
+a category or handedness, its weight is redistributed proportionally among the
+eligible groups at that stage; a missing handedness does not reduce the overall
+weapon allocation. Ship the API content and backend together. No database
+migration or environment setting is required, and frozen items and saved pending
+rewards retain their descriptors.
 
 Equipment rarity has seven values: Common, Uncommon, Rare, Epic, Unique, Legendary, and Legacy. It multiplies the base stat budget independently from rank. The multipliers are 1.0, 1.1, 1.3, 1.6, 2.0, 2.5, and 3.0 respectively; each rank still adds four percent of the rarity-adjusted budget.
 

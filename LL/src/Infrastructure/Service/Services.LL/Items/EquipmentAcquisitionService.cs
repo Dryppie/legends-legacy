@@ -115,7 +115,7 @@ public sealed class EquipmentAcquisitionService(
         }
         if (definitions.Count == 0)
             throw new InvalidOperationException($"No compatible {rarity} equipment for dungeon '{dungeon.Id}'.");
-        var definition = definitions[random.Next(definitions.Count)];
+        var definition = rules.SelectionWeights.Roll(definitions, catalog.Equipment.Evaluator, random);
         var quality = rules.DungeonEquipment.Qualities.Roll(random.NextDouble());
         var attributeRollMultiplier = 0.95d + random.NextDouble() * 0.10d;
         var state = EquipmentState.Award(

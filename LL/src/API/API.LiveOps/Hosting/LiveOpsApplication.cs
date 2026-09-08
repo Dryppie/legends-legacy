@@ -1,5 +1,6 @@
 using Application.Common.Mappings;
 using Application.MediatR.Behaviors;
+using Application.MediatR.Synchronization;
 using Application.UseCases.Administration;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -20,6 +21,7 @@ public static class LiveOpsApplication
             configuration.RegisterServicesFromAssembly(typeof(LiveOpsApplication).Assembly);
             configuration.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
+        services.AddScoped<DungeonInventoryStateSync>();
 
         // Supplying the Application assembly registers not only its profiles, but also
         // the value resolvers and converters used by nested inventory-item mappings.

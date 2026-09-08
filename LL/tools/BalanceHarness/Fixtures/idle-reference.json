@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "idle-reference-v1",
+  "description": "Advisory early progression: level 1 Lumo Ruins, level 5 Blood Grove, level 10 Crystal Creek and the second essence slot. Each cell fixes a single spawn; challenge labels are hypotheses, not difficulty guarantees.",
+  "samplesPerCell": 100,
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "stages": [
+    {
+      "id": "starter",
+      "name": "Starter / level 1",
+      "areaId": "region_01_area_01",
+      "assumptions": [
+        "First Weapon completed; either weapon is a legal one-handed Arms Chest choice.",
+        "One common standard tier-1 rank-0 weapon, Goblin essence at level 1, no ascension or evolution.",
+        "No armor, accessories, styles, persistent bonuses or temporary buffs. Fresh single-spawn encounters."
+      ],
+      "builds": [
+        { "id": "mace", "characterLevel": 1, "tier": 1, "rank": 0, "quality": "Standard", "attributeRollMultiplier": 1,
+          "equipment": [{ "slot": "MainHand", "definitionId": "plain.mace", "useNativeStyle": false }],
+          "essenceIds": ["essence.goblin"] },
+        { "id": "shortsword", "characterLevel": 1, "tier": 1, "rank": 0, "quality": "Standard", "attributeRollMultiplier": 1,
+          "equipment": [{ "slot": "MainHand", "definitionId": "plain.shortsword", "useNativeStyle": false }],
+          "essenceIds": ["essence.goblin"] }
+      ],
+      "encounters": [
+        { "id": "ordinary", "label": "Goblin / ordinary", "creatureId": "00000000-0000-0000-0000-000000000001" },
+        { "id": "challenge", "label": "Goblin Warrior / challenge", "creatureId": "00000000-0000-0000-0000-000000000002" }
+      ]
+    },
+    {
+      "id": "early",
+      "name": "Blood Grove entry / level 5",
+      "areaId": "region_01_area_02",
+      "assumptions": [
+        "Trial of Lumo completed; Blood Grove is accessible. One additional chest piece acquired through ordinary regional equipment drops/rewards.",
+        "Both builds budget two common standard tier-1 rank-0 items. Time to acquire specific items is not simulated; this is an explicit ownership hypothesis.",
+        "Retain the initial level-1 Goblin essence as a conservative control. No ascension, evolution, accessories, styles or temporary buffs. Fresh single-spawn encounters."
+      ],
+      "builds": [
+        { "id": "balanced", "characterLevel": 5, "tier": 1, "rank": 0, "quality": "Standard", "attributeRollMultiplier": 1,
+          "equipment": [
+            { "slot": "MainHand", "definitionId": "plain.mace", "useNativeStyle": false },
+            { "slot": "Chest", "definitionId": "plain.medium_mail", "useNativeStyle": false }
+          ], "essenceIds": ["essence.goblin"] },
+        { "id": "offense", "characterLevel": 5, "tier": 1, "rank": 0, "quality": "Standard", "attributeRollMultiplier": 1,
+          "equipment": [
+            { "slot": "MainHand", "definitionId": "plain.dagger", "useNativeStyle": false },
+            { "slot": "Chest", "definitionId": "plain.light_vest", "useNativeStyle": false }
+          ], "essenceIds": ["essence.goblin"] }
+      ],
+      "encounters": [
+        { "id": "ordinary", "label": "Raven / ordinary", "creatureId": "00000000-0000-0000-0000-000000000039" },
+        { "id": "challenge", "label": "Blood Zombie / challenge", "creatureId": "00000000-0000-0000-0000-000000000047" }
+      ]
+    },
+    {
+      "id": "second-slot",
+      "name": "Crystal Creek entry / level 10",
+      "areaId": "region_01_area_03",
+      "assumptions": [
+        "Blood in the Grove completed; Crystal Creek is accessible and the second essence slot has unlocked.",
+        "Both builds budget four common standard tier-1 rank-0 items: a two-handed weapon plus head, chest and legs. Acquisition time is not modeled; accessories remain absent.",
+        "Goblin Warrior and Vampire Bat essences come from already accessible Lumo Ruins/Blood Grove. All essences remain level 1, unascended and unevolved to isolate slot/composition changes.",
+        "No styles, persistent bonuses or temporary buffs. Fresh single-spawn encounters; equal item count does not imply equal combat power."
+      ],
+      "builds": [
+        { "id": "balanced", "characterLevel": 10, "tier": 1, "rank": 0, "quality": "Standard", "attributeRollMultiplier": 1,
+          "equipment": [
+            { "slot": "MainHand", "definitionId": "plain.greatsword", "useNativeStyle": false },
+            { "slot": "Head", "definitionId": "plain.medium_helm", "useNativeStyle": false },
+            { "slot": "Chest", "definitionId": "plain.medium_mail", "useNativeStyle": false },
+            { "slot": "Legs", "definitionId": "plain.medium_greaves", "useNativeStyle": false }
+          ], "essenceIds": ["essence.goblin", "essence.goblin_warrior"] },
+        { "id": "sustain", "characterLevel": 10, "tier": 1, "rank": 0, "quality": "Standard", "attributeRollMultiplier": 1,
+          "equipment": [
+            { "slot": "MainHand", "definitionId": "plain.staff", "useNativeStyle": false },
+            { "slot": "Head", "definitionId": "plain.light_hood", "useNativeStyle": false },
+            { "slot": "Chest", "definitionId": "plain.light_vest", "useNativeStyle": false },
+            { "slot": "Legs", "definitionId": "plain.light_leggings", "useNativeStyle": false }
+          ], "essenceIds": ["essence.goblin", "essence.vampire_bat"] }
+      ],
+      "encounters": [
+        { "id": "ordinary", "label": "Blue Slime / ordinary", "creatureId": "00000000-0000-0000-0000-000000000009" },
+        { "id": "challenge", "label": "Frost Imp / challenge", "creatureId": "00000000-0000-0000-0000-000000000006" }
+      ]
+    }
+  ]
+}

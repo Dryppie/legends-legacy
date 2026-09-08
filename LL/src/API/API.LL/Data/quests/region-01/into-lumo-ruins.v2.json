@@ -30,5 +30,12 @@
       }
     }
   ],
-  "rewards": []
+  "rewards": [
+    {
+      "key": "armor_chest",
+      "type": "Item",
+      "itemBaseId": "item.armor_chest",
+      "quantity": 1
+    }
+  ]
 }

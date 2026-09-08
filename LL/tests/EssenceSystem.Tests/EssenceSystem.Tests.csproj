@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\tools\BalanceHarness\BalanceHarness.csproj" />
     <ProjectReference Include="..\..\src\Core\Application\Application.csproj" />
     <ProjectReference Include="..\..\src\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Persistence\Persistence.LL\Persistence.LL.csproj" />

@@ -145,7 +145,8 @@ public sealed record CombatAcquisitionRules(
     double SigilDropChance,
     IReadOnlyList<CombatAcquisitionArea> Areas,
     IReadOnlyList<CombatAcquisitionSigil> Sigils,
-    string RegionName);
+    string RegionName,
+    EquipmentSelectionWeights SelectionWeights);
 
 public sealed class CombatAcquisitionCatalog
 {
@@ -172,12 +173,14 @@ public sealed class CombatAcquisitionCatalog
             EquipmentValidation.Id(rules.RegionName);
             if (rules.Region < 1 || rules.EquipmentTier < 1 || rules.Areas.Count == 0 || rules.Sigils.Count == 0
                 || !ValidProfile(rules.AreaEquipment) || !ValidProfile(rules.DungeonEquipment)
+                || rules.SelectionWeights is null
                 || !double.IsFinite(rules.SigilDropChance) || rules.SigilDropChance is <= 0 or > 1
                 || rules.Areas.Select(x => x.AreaId).Distinct(StringComparer.Ordinal).Count() != rules.Areas.Count
                 || rules.Sigils.Select(x => x.FamilyId).Distinct(StringComparer.Ordinal).Count() != rules.Sigils.Count
                 || rules.Sigils.Select(x => x.ItemBaseId).Distinct(StringComparer.Ordinal).Count() != rules.Sigils.Count)
                 throw new ArgumentException("Invalid equipment drop rules.");
 
+            rules.SelectionWeights.Validate();
             rules.AreaEquipment.Rarities.Validate();
             rules.DungeonEquipment.Rarities.Validate();
             rules.AreaEquipment.Qualities.Validate();

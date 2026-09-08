@@ -536,26 +536,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return Resolve(characterId, equippedEssences);
     }
 
-    public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences)
-    {
-        var essences = equippedEssences.ToList();
-        var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var essence in essences)
-        {
-            var definition = _definitions.GetById(essence.EssenceDefinitionId);
-            if (definition is null) continue;
-
-            foreach (var tag in GetEssenceTags(definition, essence))
-                tags.Add(tag);
-        }
-
-        return new EssenceCombatLoadout(
-            characterId,
-            essences,
-            [],
-            tags);
-    }
+    public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences) =>
+        EssenceCombatLoadoutFactory.Create(_definitions, characterId, equippedEssences);
 
     public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(
         Guid characterId,
@@ -969,9 +951,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         inventoryItem.Quantity -= quantity;
         if (inventoryItem.Quantity <= 0) _inventory.RemoveInventoryItem(inventoryItem);
     }
-
-    private static IEnumerable<string> GetEssenceTags(EssenceDefinition definition, PlayerEssence essence) =>
-        definition.Tags.Concat(essence.IsEvolved ? definition.Evolution.AddsTags : []);
 
     private static EssenceOperationResult Ok(string message) => new(true, message);
     private static EssenceOperationResult Fail(string message) => new(false, message);

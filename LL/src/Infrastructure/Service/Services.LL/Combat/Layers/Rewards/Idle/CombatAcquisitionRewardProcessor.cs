@@ -46,7 +46,7 @@ public sealed class CombatAcquisitionRewardProcessor(
             {
                 var rarity = rules.AreaEquipment.Rarities.Roll(equipmentRandom.NextDouble());
                 var definitions = blueprints is null ? catalog.DropDefinitions(rarity) : catalog.BaseDropDefinitions(rarity);
-                var definition = definitions[equipmentRandom.Next(definitions.Count)];
+                var definition = rules.SelectionWeights.Roll(definitions, catalog.Equipment.Evaluator, equipmentRandom);
                 var quality = rules.AreaEquipment.Qualities.Roll(equipmentRandom.NextDouble());
                 var attributeRollMultiplier = 0.95d + equipmentRandom.NextDouble() * 0.10d;
                 var state = EquipmentState.Award(

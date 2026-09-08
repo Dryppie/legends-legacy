@@ -4,6 +4,13 @@
     "poolId": "model_e.r1.regional.tier1.v1",
     "region": 1,
     "equipmentTier": 1,
+    "selectionWeights": {
+      "weapons": 0.4,
+      "armor": 0.35,
+      "jewelry": 0.25,
+      "oneHanded": 0.6,
+      "twoHanded": 0.4
+    },
     "areaEquipment": {
       "dropChance": 0.0011574074074074073,
       "rank": 0,
@@ -114,6 +121,13 @@
     "poolId": "model_e.r2.regional.tier2.v1",
     "region": 2,
     "equipmentTier": 2,
+    "selectionWeights": {
+      "weapons": 0.4,
+      "armor": 0.35,
+      "jewelry": 0.25,
+      "oneHanded": 0.6,
+      "twoHanded": 0.4
+    },
     "areaEquipment": {
       "dropChance": 0.0011574074074074073,
       "rank": 0,

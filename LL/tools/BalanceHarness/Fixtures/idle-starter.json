@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "idle-starter-lumo-goblin-v1",
+  "characterProfile": "tutorial-starter",
+  "areaId": "region_01_area_01",
+  "creatureId": "00000000-0000-0000-0000-000000000001",
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "assumptions": [
+    "Level 1, one tier-1 common standard mace, one level-1 unascended Goblin essence.",
+    "The First Weapon quest is complete, so Lumo Ruins is accessible.",
+    "A single Goblin spawn is fixed; this case does not sample the area's spawn distribution.",
+    "Fresh encounter state with production opening cooldowns; rewards and progression are excluded."
+  ]
+}

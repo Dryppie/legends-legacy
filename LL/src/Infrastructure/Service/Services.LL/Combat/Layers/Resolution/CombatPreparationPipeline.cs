@@ -10,10 +10,13 @@ using Services.LL.Interfaces.Combat.Resolution;
 namespace Services.LL.Combat.Layers.Resolution;
 
 public sealed class CombatPreparationPipeline(
-    ISnapshotCombatantBuilder snapshotCombatants,
+    ISnapshotCombatantBuilder? snapshotCombatants,
     ICombatSetupService combatSetup) : ICombatPreparationPipeline
 {
     public const int SchemaVersion = 1;
+
+    /// <summary>Preparation for detached live entities without snapshot persistence.</summary>
+    public CombatPreparationPipeline(ICombatSetupService combatSetup) : this(null, combatSetup) { }
 
     public async Task<IReadOnlyList<CombatRuntimeParticipant>> PrepareAsync(
         CombatContentType contentType,
@@ -33,6 +36,8 @@ public sealed class CombatPreparationPipeline(
 
         if (snapshotRequests.Length > 0)
         {
+            if (snapshotCombatants is null)
+                throw new InvalidOperationException("Snapshot preparation requires a snapshot combatant builder.");
             var builtSnapshots = await snapshotCombatants.BuildAsync(
                 snapshotRequests.Select(x => new SnapshotCombatantRequest(
                     ((SnapshotCombatantPreparationSource)x.Request.Source).Snapshot,

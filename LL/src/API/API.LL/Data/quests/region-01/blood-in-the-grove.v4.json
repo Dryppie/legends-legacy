@@ -50,6 +50,12 @@
   ],
   "rewards": [
     {
+      "key": "jewelry_chest",
+      "type": "Item",
+      "itemBaseId": "item.jewelry_chest",
+      "quantity": 1
+    },
+    {
       "key": "blood_grove_essence_token",
       "type": "Item",
       "itemBaseId": "item.essence_token.blood_grove",
