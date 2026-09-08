@@ -1,0 +1,13 @@
+.chat-mention {
+  border-radius: 3px;
+  background: rgb(88 101 242 / 30%);
+  padding: 0 3px;
+  color: #c9d2ff;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.chat-mention:hover {
+  background: rgb(88 101 242 / 50%);
+}

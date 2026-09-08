@@ -172,6 +172,7 @@ export class RegionComponent implements OnInit, OnDestroy {
       this.selectedRegionBoss = false;
       this.regionBossPlaybackActive = false;
       this.questState.loadAreaAccess();
+      this.dungeonState.loadAvailableDungeons();
       this.getRegionDetails(this.regionId);
       this.loadRaidBosses();
     });

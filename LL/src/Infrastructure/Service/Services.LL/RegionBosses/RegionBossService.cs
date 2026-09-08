@@ -12,16 +12,19 @@ using Application.WebSockets.Contracts;
 using Domain.Models.Essences;
 using Domain.Models.RegionBosses;
 using Domain.Models.Quests;
+using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Services.LL.Interfaces;
+using Services.LL.WorldTower;
 
 namespace Services.LL.RegionBosses;
 
 public sealed class RegionBossService(
     IDbContext db,
     IRegionBossDefinitionProvider definitions,
+    IWorldTowerProgressRepository towerProgress,
     IPowerRatingService powerRatings,
     ICharacterSnapshotService snapshots,
     IRegionBossCombatResolver combatResolver,
@@ -31,6 +34,7 @@ public sealed class RegionBossService(
     TimeProvider timeProvider,
     JsonSerializerOptions jsonOptions,
     IOptions<RegionBossOptions> options,
+    IOptions<WorldTowerOptions> worldTowerOptions,
     ILogger<RegionBossService> logger) : IRegionBossService
 {
     private const int MaximumDevelopmentSignups = 95;
@@ -317,6 +321,9 @@ public sealed class RegionBossService(
         var now = timeProvider.GetUtcNow();
         foreach (var definition in definitions.GetAll())
         {
+            if (!await IsWorldUnlockedAsync(definition, cancellationToken))
+                continue;
+
             var latestEvent = await db.RegionBossEvents
                 .Where(x => x.RegionBossDefinitionId == definition.Id
                     && x.Status != RegionBossEventStatus.Cancelled)
@@ -425,6 +432,23 @@ public sealed class RegionBossService(
             if (item is null)
                 return;
             var now = timeProvider.GetUtcNow();
+            // Events scheduled before the unlock check was introduced must not
+            // open signups or announce an encounter while the world is locked.
+            if (item.Status is RegionBossEventStatus.Scheduled or RegionBossEventStatus.SignupOpen
+                && !await IsWorldUnlockedAsync(ReadDefinition(item), cancellationToken))
+            {
+                item.Status = RegionBossEventStatus.Cancelled;
+                item.CancelledAtUtc = now;
+                item.CancellationReason =
+                    $"World Tower floor {ReadDefinition(item).RequiredTowerFloor} must be cleared first.";
+                item.UpdatedAtUtc = now;
+                item.RowVersion++;
+                await QueueUpdateAsync(item, "Progressed", new Audience.World(), cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return;
+            }
+
             var initialStatus = item.Status;
             if (item.Status == RegionBossEventStatus.Scheduled && now >= item.SignupStartsAtUtc)
             {
@@ -811,10 +835,7 @@ public sealed class RegionBossService(
             eligibleCharacterIds.IntersectWith(completedQuestCharacterIds);
         }
 
-        if (definition.RequiredTowerFloor.HasValue
-            && !await db.TowerFloorProgresses.AsNoTracking().AnyAsync(
-                x => x.FloorNumber >= definition.RequiredTowerFloor.Value && x.IsCleared,
-                cancellationToken))
+        if (!await IsWorldUnlockedAsync(definition, cancellationToken))
         {
             eligibleCharacterIds.Clear();
         }
@@ -834,11 +855,7 @@ public sealed class RegionBossService(
         CancellationToken cancellationToken)
     {
         var definition = ReadDefinition(item);
-        if (definition.RequiredTowerFloor.HasValue
-            && !await db.TowerFloorProgresses.AsNoTracking().AnyAsync(
-                progress => progress.FloorNumber >= definition.RequiredTowerFloor.Value
-                    && progress.IsCleared,
-                cancellationToken))
+        if (!await IsWorldUnlockedAsync(definition, cancellationToken))
         {
             return;
         }
@@ -1081,15 +1098,19 @@ public sealed class RegionBossService(
         {
             return $"Quest '{definition.RequiredCompletedQuestId}' must be completed first.";
         }
-        if (definition.RequiredTowerFloor.HasValue
-            && !await db.TowerFloorProgresses.AsNoTracking().AnyAsync(
-                x => x.FloorNumber >= definition.RequiredTowerFloor.Value && x.IsCleared,
-                cancellationToken))
+        if (!await IsWorldUnlockedAsync(definition, cancellationToken))
         {
-            return $"World Tower floor {definition.RequiredTowerFloor.Value} must be cleared first.";
+            return $"World Tower floor {definition.RequiredTowerFloor} must be cleared first.";
         }
         return null;
     }
+
+    private async Task<bool> IsWorldUnlockedAsync(
+        RegionBossDefinition definition,
+        CancellationToken cancellationToken) =>
+        !definition.RequiredTowerFloor.HasValue
+        || await towerProgress.HasClearedFloorAsync(
+            worldTowerOptions.Value.ServerId, definition.RequiredTowerFloor.Value, cancellationToken);
 
     private static DateTimeOffset NextOccurrence(
         DateTimeOffset anchor,

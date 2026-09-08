@@ -9,12 +9,35 @@ import {
   isWorldSystemMessage,
   parseChannelCommand,
   parseWireCommand,
+  parseWhisperCommand,
   startsNewChatDay,
 } from './chat.component';
 import {
   ChatChannelType,
   ChatMessageDto,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
+
+describe('parseWhisperCommand', () => {
+  it('preserves the full target name and message for plain and quoted recipients', () => {
+    expect(parseWhisperCommand('/w Ember Hello there')).toEqual({
+      name: 'Ember',
+      body: 'Hello there',
+    });
+    expect(parseWhisperCommand('/w "Ember Knight" Hello there')).toEqual({
+      name: 'Ember Knight',
+      body: 'Hello there',
+    });
+    expect(parseWhisperCommand('/w "A\\"B" Hi')).toEqual({
+      name: 'A"B',
+      body: 'Hi',
+    });
+  });
+  it('does not send malformed or incomplete whisper commands to a partial name', () => {
+    expect(parseWhisperCommand('/w "Ember Knight Hi')).toBeNull();
+    expect(parseWhisperCommand('/w "Ember Knight" ')).toBeNull();
+    expect(parseWhisperCommand('/w Ember')).toBeNull();
+  });
+});
 
 describe('ChatComponent message submission', () => {
   it('ignores repeated sends while the current message is still in flight', async () => {

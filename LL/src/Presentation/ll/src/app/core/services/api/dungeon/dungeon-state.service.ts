@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
   DungeonActionOutcome,
@@ -22,6 +22,7 @@ import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-c
 import { DomainVersionTracker } from '../../real-time/game-realtime/domain-version-tracker.service';
 import { VersionedMutationResult } from '../api.service';
 import { GameRealtimeStore } from '../../real-time/game-realtime/game-realtime-store.service';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 @Injectable({
   providedIn: 'root',
@@ -70,6 +71,35 @@ export class DungeonStateService {
   ) {
     this.stateSync.register('dungeons', 'dungeons', () => this.synchronize());
     this.refresh();
+
+    let previousQuantities = this.inventoryQuantities(this.inventoryState.items());
+    effect(() => {
+      const quantities = this.inventoryQuantities(this.inventoryState.items());
+      // Loot updates inventory independently of the dungeon cache. Only entry
+      // items need a new availability check; keep progression rules on the server.
+      const entryItemsChanged = untracked(this._dungeons).some((dungeon) =>
+        dungeon.entryRequirements?.some((requirement) => {
+          const owned = quantities.get(requirement.itemId) ?? 0;
+          return (
+            owned !== (previousQuantities.get(requirement.itemId) ?? 0) &&
+            owned !== requirement.ownedAmount
+          );
+        }),
+      );
+      previousQuantities = quantities;
+      if (entryItemsChanged) {
+        untracked(() => this.loadAvailableDungeons());
+      }
+    });
+  }
+
+  private inventoryQuantities(items: InventoryItem[]): Map<string, number> {
+    const quantities = new Map<string, number>();
+    for (const item of items) {
+      const itemId = item.itemInstance.itemBase.id;
+      quantities.set(itemId, (quantities.get(itemId) ?? 0) + item.quantity);
+    }
+    return quantities;
   }
 
   refresh(): void {

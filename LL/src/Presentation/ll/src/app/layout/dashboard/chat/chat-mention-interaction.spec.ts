@@ -6,8 +6,8 @@ import {
   tick,
 } from '@angular/core/testing';
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { provideRouter } from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { of, Subject, throwError } from 'rxjs';
 import { ChatComponent } from './chat.component';
 import {
   ChatChannelType,
@@ -26,10 +26,26 @@ describe('Chat mention interaction', () => {
   let fixture: ComponentFixture<ChatComponent>;
   let overlay: HTMLElement;
   let sendPublic: jasmine.Spy;
+  let sendWhisper: jasmine.Spy;
+  let resolveName: jasmine.Spy;
 
   beforeEach(() => {
     const userInfo = { isRegisteredUser: true };
     sendPublic = jasmine.createSpy('sendPublic').and.resolveTo();
+    sendWhisper = jasmine.createSpy('sendWhisperToName').and.resolveTo();
+    const whisperDraft = new Subject<string>();
+    const playerIds: Record<string, string> = {
+      ash: 'me',
+      ember: 'ember-id',
+      'ember knight': 'knight-id',
+    };
+    resolveName = jasmine
+      .createSpy('resolveCharacterIdByName')
+      .and.callFake((name: string) =>
+        playerIds[name.toLowerCase()]
+          ? of(playerIds[name.toLowerCase()])
+          : throwError(() => new Error('not found')),
+      );
     TestBed.configureTestingModule({
       imports: [ChatComponent],
       providers: [
@@ -38,7 +54,9 @@ describe('Chat mention interaction', () => {
           provide: ChatService,
           useValue: {
             messages$: of([]),
-            whisperDraftTarget$: new Subject<string>(),
+            whisperDraftTarget$: whisperDraft,
+            prepareWhisperToName: (name: string) => whisperDraft.next(name),
+            sendWhisperToName: sendWhisper,
             onlinePlayerCount: signal(2),
             sendPublic,
           },
@@ -47,6 +65,7 @@ describe('Chat mention interaction', () => {
           provide: CharacterService,
           useValue: {
             suggestCharacterNames: () => of(['Ember', 'Ember Knight']),
+            resolveCharacterIdByName: resolveName,
           },
         },
         {
@@ -198,6 +217,7 @@ describe('Chat mention interaction', () => {
         message('5', 'other', '<img src=x onerror=alert(1)> @"Ember Knight"'),
       ];
       fixture.detectChanges();
+      fixture.detectChanges();
       const rows = fixture.nativeElement.querySelectorAll(
         'article',
       ) as NodeListOf<HTMLElement>;
@@ -216,4 +236,103 @@ describe('Chat mention interaction', () => {
       expect(rows[4].textContent).toContain('<img src=x onerror=alert(1)>');
     });
   }
+
+  for (const mobile of [false, true]) {
+    it(`opens a tagged player's profile and prepares a whisper in ${mobile ? 'mobile' : 'desktop'} chat`, fakeAsync(() => {
+      fixture.componentRef.setInput('mobileDock', mobile);
+      fixture.componentRef.setInput('mobileDockExpanded', mobile);
+      fixture.detectChanges();
+      fixture.componentInstance.messages = [
+        {
+          id: 'menu',
+          senderId: 'other',
+          senderName: 'Other',
+          body: '@"Ember Knight"',
+          channelType: ChatChannelType.General,
+          contextKey: 'general',
+          sentAt: new Date(),
+          targetUrl: '/should-not-navigate',
+        },
+      ];
+      const router = TestBed.inject(Router);
+      const navigate = spyOn(router, 'navigate').and.resolveTo(true);
+      const navigateByUrl = spyOn(router, 'navigateByUrl').and.resolveTo(true);
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+      const trigger = fixture.nativeElement.querySelector(
+        'app-chat-mention [role="button"]',
+      ) as HTMLElement;
+      trigger.click();
+      fixture.detectChanges();
+      const profile = Array.from(overlay.querySelectorAll('button')).find(
+        (button) => button.textContent?.trim() === 'Open Profile',
+      )!;
+      profile.click();
+      expect(navigate).toHaveBeenCalledOnceWith(
+        ['/game/character/character-overview'],
+        { queryParams: { characterName: 'Ember Knight' } },
+      );
+      expect(overlay.querySelector('[role="dialog"]')).toBeNull();
+
+      trigger.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Enter',
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      fixture.detectChanges();
+      const whisper = Array.from(overlay.querySelectorAll('button')).find(
+        (button) => button.textContent?.trim() === 'Whisper',
+      )!;
+      whisper.click();
+      tick();
+      fixture.detectChanges();
+      expect(navigateByUrl).not.toHaveBeenCalled();
+      expect(overlay.querySelector('[role="dialog"]')).toBeNull();
+      expect(fixture.componentInstance.draft).toBe('/w "Ember Knight" ');
+      expect(sendWhisper).not.toHaveBeenCalled();
+      const input = typeDraft('/w "Ember Knight" Hello there');
+      key(input, 'Enter');
+      tick();
+      expect(sendWhisper).toHaveBeenCalledOnceWith(
+        'Ember Knight',
+        'Hello there',
+      );
+    }));
+  }
+
+  it('keeps unverified and nonexistent mentions as exact plain text, including quoted names', fakeAsync(() => {
+    const response = new Subject<string>();
+    resolveName.and.returnValue(response);
+    fixture.detectChanges();
+    fixture.componentInstance.messages = [
+      {
+        id: 'unknown',
+        senderId: 'other',
+        senderName: 'Other',
+        body: '@blablabla @"Nobody Here"',
+        channelType: ChatChannelType.General,
+        contextKey: 'general',
+        sentAt: new Date(),
+      },
+    ];
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.chat-mention')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('article').textContent,
+    ).toContain('@blablabla @"Nobody Here"');
+    response.error(new Error('not found'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.chat-mention')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('app-chat-mention [role="button"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('.chat-mentioned-message'),
+    ).toBeNull();
+  }));
 });

@@ -28,6 +28,7 @@ using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
+using Domain.Models.WorldTower;
 using Application.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -58,6 +59,7 @@ using Persistence.LL.Repositories.Regions.Areas;
 using Persistence.LL.Repositories.Snapshots;
 using Persistence.LL.Repositories.Soulstones;
 using Persistence.LL.Repositories.Users;
+using Persistence.LL.Repositories.WorldTower;
 
 namespace Persistence.LL;
 public static class DependencyInjection
@@ -125,6 +127,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxRepository, GameEventOutboxRepository>();
 
         services.AddScoped<IRegionRepository, RegionRepository>();
+        services.AddScoped<IWorldTowerProgressRepository, WorldTowerProgressRepository>();
 
         services.AddScoped<IProphecyRepository, ProphecyRepository>();
         services.AddScoped<IQuestRepository, QuestRepository>();

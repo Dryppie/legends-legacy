@@ -9,6 +9,7 @@ using Domain.Models.CharacterActions;
 using Domain.Models.Entities.Characters;
 using Domain.Models.RegionBosses;
 using Domain.Models.Users;
+using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
@@ -16,14 +17,129 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
 using Persistence.LL.Repositories.Snapshots;
+using Persistence.LL.Repositories.WorldTower;
 using Services.LL.Interfaces;
 using Services.LL.RegionBosses;
 using Services.LL.Snapshots;
+using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
 public sealed class RegionBossDevelopmentTests
 {
+    [Theory]
+    [InlineData(null, false, "default")]
+    [InlineData(9, true, "default")]
+    [InlineData(10, false, "default")]
+    [InlineData(11, false, "default")]
+    [InlineData(10, true, "another-server")]
+    public async Task Automatic_schedule_waits_for_the_required_world_tower_clear(
+        int? floor, bool isCleared, string serverId)
+    {
+        await using var db = CreateDbContext();
+        if (floor.HasValue)
+        {
+            db.TowerFloorProgresses.Add(new TowerFloorProgress
+            {
+                ServerId = serverId,
+                FloorNumber = floor.Value,
+                IsCleared = isCleared
+            });
+            await db.SaveChangesAsync();
+        }
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, now, developmentToolsEnabled: false, outbox, requiredTowerFloor: 10);
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+        var later = CreateService(db, now.AddHours(9), developmentToolsEnabled: false, outbox, requiredTowerFloor: 10);
+        await later.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        Assert.Empty(await db.RegionBossEvents.ToArrayAsync());
+        Assert.Empty(outbox.Announcements);
+    }
+
+    [Theory]
+    [InlineData(10)]
+    [InlineData(11)]
+    public async Task World_tower_clear_enables_scheduling_and_announcements(int clearedFloor)
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, now, developmentToolsEnabled: false, outbox, requiredTowerFloor: 10);
+        await service.EnsureScheduledEventsAsync(CancellationToken.None);
+        Assert.Empty(await db.RegionBossEvents.ToArrayAsync());
+
+        var unlockedAt = now.AddDays(1);
+        db.TowerFloorProgresses.Add(new TowerFloorProgress
+        {
+            ServerId = "default",
+            FloorNumber = clearedFloor,
+            IsCleared = true,
+            ClearedAt = unlockedAt
+        });
+        await db.SaveChangesAsync();
+        service = CreateService(db, unlockedAt, developmentToolsEnabled: false, outbox, requiredTowerFloor: 10);
+        await service.EnsureScheduledEventsAsync(CancellationToken.None);
+        await service.EnsureScheduledEventsAsync(CancellationToken.None);
+
+        var item = Assert.Single(await db.RegionBossEvents.AsNoTracking().ToArrayAsync());
+        Assert.InRange(item.EncounterStartsAtUtc, unlockedAt.AddHours(4), unlockedAt.AddHours(8));
+        Assert.Equal(item.EncounterStartsAtUtc.AddMinutes(-10), item.SignupStartsAtUtc);
+        Assert.Empty(outbox.Announcements);
+
+        service = CreateService(db, item.SignupStartsAtUtc, developmentToolsEnabled: false, outbox, requiredTowerFloor: 10);
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var opened = Assert.Single(await db.RegionBossEvents.AsNoTracking().ToArrayAsync());
+        Assert.Equal(RegionBossEventStatus.SignupOpen, opened.Status);
+        Assert.Equal(item.Id, Assert.Single(outbox.Announcements).RegionBossEventId);
+    }
+
+    [Theory]
+    [InlineData(RegionBossEventStatus.Scheduled, 10)]
+    [InlineData(RegionBossEventStatus.Scheduled, 0)]
+    [InlineData(RegionBossEventStatus.SignupOpen, 10)]
+    [InlineData(RegionBossEventStatus.SignupOpen, 0)]
+    public async Task Locked_legacy_events_are_cancelled_without_announcements_or_combat(
+        RegionBossEventStatus status,
+        int minutesUntilEncounter)
+    {
+        await using var db = CreateDbContext();
+        var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
+        var definition = new FixedDefinitionProvider(requiredTowerFloor: 10).GetAll().Single();
+        var item = CreateEvent(definition, now.AddMinutes(minutesUntilEncounter), status);
+        db.RegionBossEvents.Add(item);
+        await db.SaveChangesAsync();
+        var outbox = new RecordingGameEventOutbox();
+        var resolver = new CountingCombatResolver();
+        var service = CreateService(db, now, developmentToolsEnabled: false, outbox,
+            combatResolver: resolver, requiredTowerFloor: 10);
+
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+        await service.ProgressEventsAsync("test-worker", CancellationToken.None);
+
+        var cancelled = Assert.Single(await db.RegionBossEvents.AsNoTracking().ToArrayAsync());
+        Assert.Equal(RegionBossEventStatus.Cancelled, cancelled.Status);
+        Assert.Equal(now, cancelled.CancelledAtUtc);
+        Assert.Equal("World Tower floor 10 must be cleared first.", cancelled.CancellationReason);
+        Assert.Equal(1, cancelled.RowVersion);
+        Assert.Empty(outbox.Announcements);
+        Assert.Empty(await db.RegionBossSignups.ToArrayAsync());
+        Assert.Empty(await db.RegionBossRuns.ToArrayAsync());
+        Assert.Equal(0, resolver.InvocationCount);
+
+        db.TowerFloorProgresses.Add(new TowerFloorProgress { ServerId = "default", FloorNumber = 10, IsCleared = true });
+        await db.SaveChangesAsync();
+        await service.EnsureScheduledEventsAsync(CancellationToken.None);
+
+        var next = Assert.Single(await db.RegionBossEvents.AsNoTracking()
+            .Where(x => x.Status == RegionBossEventStatus.Scheduled).ToArrayAsync());
+        Assert.InRange(next.EncounterStartsAtUtc, now.AddHours(4), now.AddHours(8));
+    }
+
     [Fact]
     public async Task Automatic_schedule_keeps_region_boss_encounters_four_to_eight_hours_apart()
     {
@@ -760,10 +876,12 @@ public sealed class RegionBossDevelopmentTests
         IRegionBossPlaybackBundleBuilder? playbackBundles = null,
         IGameRealtimeBroadcaster? realtime = null,
         int maximumRunResolutionsPerEvent = 25,
-        ILogger<RegionBossService>? logger = null) =>
+        ILogger<RegionBossService>? logger = null,
+        int? requiredTowerFloor = null) =>
         new(
             db,
-            new FixedDefinitionProvider(),
+            new FixedDefinitionProvider(requiredTowerFloor),
+            new WorldTowerProgressRepository(db),
             new FixedPowerRatingService(now),
             new CharacterSnapshotService(new CharacterSnapshotRepository(db)),
             combatResolver!,
@@ -777,6 +895,7 @@ public sealed class RegionBossDevelopmentTests
                 DevelopmentToolsEnabled = developmentToolsEnabled,
                 MaximumRunResolutionsPerEvent = maximumRunResolutionsPerEvent
             }),
+            Options.Create(new WorldTowerOptions()),
             logger ?? NullLogger<RegionBossService>.Instance);
 
     private static RegionBossEvent CreateEvent(
@@ -960,9 +1079,9 @@ public sealed class RegionBossDevelopmentTests
         return character;
     }
 
-    private sealed class FixedDefinitionProvider : IRegionBossDefinitionProvider
+    private sealed class FixedDefinitionProvider(int? requiredTowerFloor = null) : IRegionBossDefinitionProvider
     {
-        private static readonly RegionBossDefinition Definition = new()
+        private readonly RegionBossDefinition Definition = new()
         {
             Id = "test-region-boss",
             Name = "Test Region Boss",
@@ -970,6 +1089,7 @@ public sealed class RegionBossDevelopmentTests
             RegionId = 1,
             CreatureId = Guid.NewGuid(),
             LevelRequirement = 20,
+            RequiredTowerFloor = requiredTowerFloor,
             RewardBrackets =
             [
                 new RegionBossRewardBracketDefinition

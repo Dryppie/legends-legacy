@@ -35,9 +35,11 @@ import { environment } from '../../../../environments/environment';
 import { LocalDatePipe } from '../../../shared/pipes/local-date/local-date.pipe';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { ChatMentionSuggestionsService } from './chat-mention-suggestions.service';
+import { ChatMentionComponent } from './chat-mention.component';
 import {
   ChatTextSegment,
   findDraftMention,
+  formatChatMention,
   insertChatMention,
   splitChatMentions,
 } from './chat-mentions';
@@ -75,6 +77,25 @@ export class ChatMentionSegmentsPipe implements PipeTransform {
     playerName: string | null | undefined,
   ): ChatTextSegment[] {
     return splitChatMentions(body, playerName);
+  }
+}
+
+export function parseWhisperCommand(
+  body: string,
+): { name: string; body: string } | null {
+  const match = /^\/w\s+("(?:[^"\\]|\\.)*"|[^"\s]\S*)\s+(.+)$/isu.exec(
+    body.trim(),
+  );
+  if (!match) return null;
+  try {
+    const name: string = match[1].startsWith('"')
+      ? JSON.parse(match[1])
+      : match[1];
+    return name.trim() && match[2].trim()
+      ? { name, body: match[2].trim() }
+      : null;
+  } catch {
+    return null;
   }
 }
 
@@ -218,6 +239,7 @@ function localChatDateKey(value: Date | string): string {
     ItemComponent,
     RouterLink,
     ChatMentionSegmentsPipe,
+    ChatMentionComponent,
     OverlayModule,
   ],
   templateUrl: './chat.component.html',
@@ -455,7 +477,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           contextKey: 'whisper',
         };
         this.mentions.close();
-        this.draft = `/w ${targetName} `;
+        this.draft = `/w ${formatChatMention(targetName).slice(1)} `;
         if (this.canWriteChat) {
           this.focusChatInput();
         }
@@ -859,15 +881,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
 
       if (body.startsWith('/w ')) {
-        const parts = body.split(' ');
-        if (parts.length < 3) return; // Invalid
-
-        const targetName = parts[1];
-        const messageBody = body
-          .slice(body.indexOf(targetName) + targetName.length)
-          .trim();
-
-        await this.chat.sendWhisperToName(targetName, messageBody);
+        const whisper = parseWhisperCommand(body);
+        if (!whisper) {
+          this.sendError = 'Usage: /w Name Message';
+          return;
+        }
+        await this.chat.sendWhisperToName(whisper.name, whisper.body);
         this.draft = '';
         return;
       }

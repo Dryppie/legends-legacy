@@ -732,13 +732,17 @@
 </ng-template>
 
 <ng-template #messageBody let-body>
-  <span
+  <ng-container
     *ngFor="
       let segment of body | chatMentionSegments: characterName();
       trackBy: trackMentionSegment
     "
-    [class.chat-mention]="segment.isMention"
-    >{{ segment.text }}</span
+    ><app-chat-mention
+      *ngIf="segment.mentionName as name; else plainSegment"
+      [name]="name"
+      [rawText]="segment.rawText ?? segment.text"
+    ></app-chat-mention
+    ><ng-template #plainSegment>{{ segment.text }}</ng-template></ng-container
   >
 </ng-template>
 

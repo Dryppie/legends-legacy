@@ -1,6 +1,6 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { GameRealtimeEventRegistry } from '../../real-time/game-realtime/game-realtime-event-registry.service';
@@ -17,6 +17,8 @@ import {
   DungeonService,
 } from './dungeon.service';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
+import { DungeonHubData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 describe('DungeonStateService dungeon actions', () => {
   it('uses the canonical rest action at a Rest Site', () => {
@@ -34,8 +36,10 @@ describe('DungeonStateService dungeon actions', () => {
 describe('DungeonStateService synchronization', () => {
   let dungeonService: jasmine.SpyObj<DungeonService>;
   let stateSync: jasmine.SpyObj<StateSyncCoordinator>;
+  let inventoryItems: WritableSignal<InventoryItem[]>;
 
   beforeEach(() => {
+    inventoryItems = signal<InventoryItem[]>([]);
     dungeonService = jasmine.createSpyObj<DungeonService>('DungeonService', [
       'getActiveDungeon',
       'getAvailableDungeons',
@@ -72,7 +76,10 @@ describe('DungeonStateService synchronization', () => {
         },
         {
           provide: InventoryStateService,
-          useValue: { applyVersionedInventory: jasmine.createSpy() },
+          useValue: {
+            items: inventoryItems.asReadonly(),
+            applyVersionedInventory: jasmine.createSpy(),
+          },
         },
         {
           provide: CharacterStateService,
@@ -95,6 +102,123 @@ describe('DungeonStateService synchronization', () => {
       'dungeons-inventory',
       jasmine.any(Function),
     );
+  });
+
+  function sigilStack(quantity: number): InventoryItem {
+    return {
+      id: 'sigil-stack',
+      quantity,
+      itemInstance: {
+        id: 'sigil-instance',
+        itemBase: { id: 'sigil_goblin_mines' },
+      },
+    } as InventoryItem;
+  }
+
+  function dungeonHub(
+    ownedAmount: number,
+    canEnter = ownedAmount > 0,
+  ): DungeonHubData {
+    return {
+      sigilFragments: 0,
+      sigilAssemblyEnabled: false,
+      sigilAssemblyCost: 0,
+      dungeons: [
+        {
+          id: 'goblin_mines',
+          region: 1,
+          number: 1,
+          title: 'Goblin Mines',
+          lore: '',
+          rewards: [],
+          unlockedDifficulties: [],
+          sigilItemId: 'sigil_goblin_mines',
+          canEnter,
+          entryRequirements: [
+            {
+              itemId: 'sigil_goblin_mines',
+              name: 'Goblin Sigil',
+              requiredAmount: 1,
+              ownedAmount,
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  it('updates Sigil counts and entry availability after loot and removal without opening a dungeon', () => {
+    dungeonService.getAvailableDungeons.and.returnValue(of(dungeonHub(0)));
+    const state = TestBed.inject(DungeonStateService);
+    TestBed.flushEffects();
+    dungeonService.getAvailableDungeons.calls.reset();
+    dungeonService.getActiveDungeon.calls.reset();
+
+    dungeonService.getAvailableDungeons.and.returnValue(of(dungeonHub(1)));
+    inventoryItems.set([sigilStack(1)]);
+    TestBed.flushEffects();
+
+    expect(state.dungeons()[0].entryRequirements?.[0].ownedAmount).toBe(1);
+    expect(state.dungeons()[0].canEnter).toBeTrue();
+    expect(dungeonService.getAvailableDungeons).toHaveBeenCalledTimes(1);
+    expect(dungeonService.getActiveDungeon).not.toHaveBeenCalled();
+
+    dungeonService.getAvailableDungeons.and.returnValue(of(dungeonHub(0)));
+    inventoryItems.set([]);
+    TestBed.flushEffects();
+
+    expect(state.dungeons()[0].entryRequirements?.[0].ownedAmount).toBe(0);
+    expect(state.dungeons()[0].canEnter).toBeFalse();
+    expect(dungeonService.getAvailableDungeons).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores unrelated loot, unchanged totals, and entry counts already applied by a mutation', () => {
+    inventoryItems.set([sigilStack(2)]);
+    dungeonService.getAvailableDungeons.and.returnValue(of(dungeonHub(2)));
+    const state = TestBed.inject(DungeonStateService);
+    TestBed.flushEffects();
+    dungeonService.getAvailableDungeons.calls.reset();
+
+    const resource = {
+      ...sigilStack(10),
+      itemInstance: {
+        id: 'resource-instance',
+        itemBase: { id: 'iron_ore' },
+      },
+    } as InventoryItem;
+    inventoryItems.set([
+      sigilStack(1),
+      { ...sigilStack(1), id: 'second-stack' },
+      resource,
+    ]);
+    TestBed.flushEffects();
+    expect(dungeonService.getAvailableDungeons).not.toHaveBeenCalled();
+
+    state.setDungeons(dungeonHub(1).dungeons);
+    inventoryItems.set([sigilStack(1), resource]);
+    TestBed.flushEffects();
+    expect(dungeonService.getAvailableDungeons).not.toHaveBeenCalled();
+  });
+
+  it('keeps the latest Sigil count and server entry restrictions when an older map refresh finishes late', () => {
+    dungeonService.getAvailableDungeons.and.returnValue(of(dungeonHub(0)));
+    const state = TestBed.inject(DungeonStateService);
+    TestBed.flushEffects();
+    const oldRefresh = new Subject<DungeonHubData>();
+    dungeonService.getAvailableDungeons.and.returnValue(oldRefresh);
+    state.loadAvailableDungeons();
+
+    // Owning a Sigil does not bypass the server's other entry requirements.
+    dungeonService.getAvailableDungeons.and.returnValue(
+      of(dungeonHub(1, false)),
+    );
+    inventoryItems.set([sigilStack(1)]);
+    TestBed.flushEffects();
+    oldRefresh.next(dungeonHub(0));
+    oldRefresh.complete();
+
+    expect(state.dungeons()[0].entryRequirements?.[0].ownedAmount).toBe(1);
+    expect(state.dungeons()[0].canEnter).toBeFalse();
   });
 
   for (const status of [

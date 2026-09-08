@@ -1,17 +1,26 @@
 <app-popover
+  #playerMenu
   [template]="actionsTpl"
   trigger="click"
   originClass="relative inline-block"
 >
-  <span>{{ displayName }}</span>
+  <span [class.chat-mention]="mention">{{ displayName }}</span>
 </app-popover>
 
 <ng-template #actionsTpl>
   <div class="flex flex-col gap-2 p-1">
-    <button type="button" class="ll-button text-left" (click)="onViewProfile()">
-      View Profile
+    <button
+      type="button"
+      class="ll-button text-left"
+      (click)="playerMenu.close(); onViewProfile()"
+    >
+      {{ mention ? "Open Profile" : "View Profile" }}
     </button>
-    <button type="button" class="ll-button text-left" (click)="onWhisper()">
+    <button
+      type="button"
+      class="ll-button text-left"
+      (click)="playerMenu.close(); onWhisper()"
+    >
       Whisper
     </button>
   </div>

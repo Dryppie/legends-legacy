@@ -2,6 +2,8 @@ export interface ChatTextSegment {
   text: string;
   isMention: boolean;
   isCurrentPlayerMention: boolean;
+  mentionName?: string;
+  rawText?: string;
 }
 
 export interface DraftMention {
@@ -80,6 +82,8 @@ export function splitChatMentions(
       text: `@${name}`,
       isMention: true,
       isCurrentPlayerMention: name.toLowerCase() === currentName,
+      mentionName: name,
+      rawText: body.slice(start, end),
     });
     cursor = end;
     start = end - 1;

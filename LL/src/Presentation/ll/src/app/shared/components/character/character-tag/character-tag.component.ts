@@ -7,11 +7,13 @@ import { ChatService } from '../../../../core/services/ll-chat/chat-service/chat
   selector: 'app-character-tag',
   imports: [PopoverComponent],
   templateUrl: './character-tag.component.html',
+  styleUrl: './character-tag.component.scss',
 })
 export class CharacterTagComponent {
   @Input() id!: string;
   @Input() name!: string;
   @Input() titleDisplayName?: string | null;
+  @Input() mention = false;
 
   isMenuOpen = false;
 
@@ -21,6 +23,7 @@ export class CharacterTagComponent {
   ) {}
 
   get displayName(): string {
+    if (this.mention) return `@${this.name}`;
     const titleDisplayName = this.titleDisplayName?.trim();
     return titleDisplayName || this.name;
   }
