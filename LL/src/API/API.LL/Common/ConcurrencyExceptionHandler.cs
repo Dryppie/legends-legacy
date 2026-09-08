@@ -30,11 +30,13 @@ public sealed class ConcurrencyExceptionHandler(
             return false;
         }
 
-        var route = (httpContext.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText
+        var endpoint = httpContext.Features.Get<IExceptionHandlerFeature>()?.Endpoint
+            ?? httpContext.GetEndpoint();
+        var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText
             ?? "(unmatched)";
         logger.LogWarning(
             exception,
-            "A concurrent update prevented duplicate command processing for {HttpRoute}.",
+            "A database write conflict prevented command processing for {HttpRoute}.",
             route);
 
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;

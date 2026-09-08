@@ -295,7 +295,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     private static EquipmentSlot? GetSlot(Character character, EquipmentSlotType slotType) =>
         character.EquipmentSlots.FirstOrDefault(s => s.EquipmentSlotType == slotType);
 
-    private static void UnequipSlotAsync(EquipmentSlot slot, Inventory inventory)
+    private void UnequipSlotAsync(EquipmentSlot slot, Inventory inventory)
     {
         if (slot.EquipmentInstanceId is null)
             return;
@@ -310,7 +310,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         slot.EquipmentInstance = null;
     }
 
-    private static void UnequipHandSlots(
+    private void UnequipHandSlots(
         EquipmentSlot mainHand,
         EquipmentSlot offHand,
         Inventory inventory)
@@ -330,14 +330,14 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         offHand.EquipmentInstance = null;
     }
 
-    private static void AddItemToInventory(Inventory inventory, EquipmentInstance item)
+    private void AddItemToInventory(Inventory inventory, EquipmentInstance item)
     {
         if (inventory.InventoryItems.Any(inventoryItem => inventoryItem.ItemInstanceId == item.Id))
         {
             return;
         }
 
-        inventory.InventoryItems.Add(new InventoryItem
+        var inventoryItem = new InventoryItem
         {
             InventoryId = inventory.CharacterId,
             ItemInstanceId = item.Id,
@@ -345,6 +345,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             Quantity = 1,
             SeenAtUtc = DateTimeOffset.UtcNow,
             IsFavorite = item.IsFavorite
-        });
+        };
+        // A loadout can re-equip this item before SaveChanges. Track the row as
+        // Added now so removing it cancels the insert instead of deleting a row
+        // that has never existed in the database.
+        inventory.InventoryItems.Add(inventoryItem);
+        _context.InventoryItems.Add(inventoryItem);
     }
 }

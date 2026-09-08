@@ -1,6 +1,10 @@
 using API.LL.Common;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 
@@ -8,6 +12,29 @@ namespace EssenceSystem.Tests;
 
 public sealed class ConcurrencyExceptionHandlerTests
 {
+    [Fact]
+    public async Task Conflict_logs_original_route_after_exception_middleware_clears_endpoint()
+    {
+        var logger = new CapturingLogger();
+        var handler = new ConcurrencyExceptionHandler(logger);
+        var context = new DefaultHttpContext();
+        context.Response.Body = new MemoryStream();
+        var exception = new DbUpdateConcurrencyException("conflict");
+        const string route = "api/v1/equipment/loadouts/{id:guid}/apply";
+        context.Features.Set<IExceptionHandlerFeature>(new ExceptionHandlerFeature
+        {
+            Error = exception,
+            Endpoint = new RouteEndpoint(_ => Task.CompletedTask,
+                RoutePatternFactory.Parse(route), 0, EndpointMetadataCollection.Empty, "ApplyLoadout")
+        });
+
+        Assert.True(await handler.TryHandleAsync(context, exception, CancellationToken.None));
+
+        Assert.Equal(route, logger.Properties["HttpRoute"]);
+        Assert.DoesNotContain("duplicate command", logger.Message);
+        Assert.Same(exception, logger.Exception);
+    }
+
     [Fact]
     public async Task Character_action_conflict_returns_recoverable_problem_details()
     {
@@ -43,5 +70,20 @@ public sealed class ConcurrencyExceptionHandlerTests
         Assert.Equal(
             body.RootElement.GetProperty("detail").GetString(),
             body.RootElement.GetProperty("message").GetString());
+    }
+    private sealed class CapturingLogger : ILogger<ConcurrencyExceptionHandler>
+    {
+        public Dictionary<string, object?> Properties { get; private set; } = [];
+        public string Message { get; private set; } = string.Empty;
+        public Exception? Exception { get; private set; }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+            Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            Properties = ((IEnumerable<KeyValuePair<string, object?>>)state!).ToDictionary();
+            Message = formatter(state, exception);
+            Exception = exception;
+        }
     }
 }

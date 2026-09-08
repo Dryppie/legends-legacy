@@ -18,6 +18,40 @@ namespace EssenceSystem.Tests;
 
 public sealed class EquipmentLoadoutTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Applying_current_loadout_does_not_delete_an_unpersisted_inventory_row(bool useTwoHanded)
+    {
+        await using var db = CreateDb();
+        var (character, twoHanded, sword, _) = await Seed(db);
+        var equipment = new EquipmentSlotRepository(db);
+        var service = Service(db);
+        var item = useTwoHanded ? twoHanded : sword;
+        item.IsFavorite = true;
+        (await db.InventoryItems.SingleAsync(x => x.ItemInstanceId == item.Id)).IsFavorite = true;
+        Assert.True((await equipment.EquipEquipmentAsync(character.Id, item.Id, EquipmentSlotType.MainHand, default)).Succeeded);
+        await db.SaveChangesAsync();
+        Assert.True((await service.SaveAsync(character.Id, null, "Current", default)).Succeeded);
+        await db.SaveChangesAsync();
+        var loadoutId = (await db.EquipmentLoadouts.SingleAsync()).Id;
+        var expectedSlots = await db.EquipmentSlots.OrderBy(x => x.EquipmentSlotType)
+            .Select(x => x.EquipmentInstanceId).ToListAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.True((await service.ApplyAsync(character.Id, loadoutId, default)).Succeeded);
+        Assert.DoesNotContain(db.ChangeTracker.Entries<InventoryItem>(), entry =>
+            entry.Entity.ItemInstanceId == item.Id && entry.State == EntityState.Deleted);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        Assert.Equal(expectedSlots, await db.EquipmentSlots.OrderBy(x => x.EquipmentSlotType)
+            .Select(x => x.EquipmentInstanceId).ToListAsync());
+        Assert.False(await db.InventoryItems.AnyAsync(x => x.ItemInstanceId == item.Id));
+        Assert.Equal(2, await db.InventoryItems.CountAsync());
+        Assert.True((await db.ItemInstances.OfType<EquipmentInstance>().SingleAsync(x => x.Id == item.Id)).IsFavorite);
+    }
+
     [Fact]
     public async Task Switching_restores_two_handed_slots_and_returns_each_displaced_item_once()
     {
@@ -35,6 +69,8 @@ public sealed class EquipmentLoadoutTests
         Assert.True((await equipment.EquipEquipmentAsync(character.Id, shield.Id, EquipmentSlotType.OffHand, default)).Succeeded);
         await db.SaveChangesAsync();
         Assert.True((await service.ApplyAsync(character.Id, loadout.Id, default)).Succeeded);
+        Assert.Equal(2, character.Inventory.InventoryItems.Count);
+        Assert.Equal(2, character.Inventory.InventoryItems.Select(x => x.ItemInstanceId).Distinct().Count());
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
         var slots = await equipment.GetEquipmentSlotsByEntityIdAsync(character.Id, default);
