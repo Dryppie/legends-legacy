@@ -26,7 +26,7 @@ public static class SuiteBundle
             var input = IdleSuite.Resolve(definition, content, threat, cadence, masterSeed);
             HarnessJson.WriteNew(Path.Combine(output, "suite-input.json"), input);
             HarnessJson.WriteNew(Path.Combine(output, "manifest.json"),
-                new RunManifest(1, HarnessJson.Hash(input), hashes, ExecutionIdentity.Current()));
+                new RunManifest(ContentSnapshotContract.CurrentVersion, HarnessJson.Hash(input), hashes, ExecutionIdentity.Current()));
             Directory.CreateDirectory(Path.Combine(output, "battles"));
             var observations = new List<BattleObservation>();
             var cancelled = false;

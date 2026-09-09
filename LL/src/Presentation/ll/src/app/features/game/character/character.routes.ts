@@ -38,6 +38,14 @@ export const CHARACTER_ROUTES: Routes = [
         data: { guidePageId: GUIDE_PAGE_IDS.essences },
       },
       {
+        path: 'combat-styles',
+        loadComponent: () =>
+          import('./combat-styles/combat-styles.component').then(
+            (m) => m.CombatStylesComponent,
+          ),
+        data: { guidePageId: GUIDE_PAGE_IDS.combatStyles },
+      },
+      {
         path: 'achievements',
         component: AchievementsComponent,
         data: { guideDisabled: true },

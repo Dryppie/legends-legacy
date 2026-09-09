@@ -62,6 +62,7 @@ public static class StateSyncCommandScopeCatalog
         "Application.UseCases.Achievements.",
         "Application.UseCases.CharacterActions.",
         "Application.UseCases.Colosseum.",
+        "Application.UseCases.CombatStyles.",
         "Application.UseCases.Dungeons.",
         "Application.UseCases.Equipments.",
         "Application.UseCases.Essences.",
@@ -80,6 +81,10 @@ public static class StateSyncCommandScopeCatalog
     private static IReadOnlyDictionary<Type, StateSyncCommandScopeProfile> BuildProfiles()
     {
         var profiles = new Dictionary<Type, StateSyncCommandScopeProfile>();
+        RegisterAuthoritativeResponse(profiles, [StateSyncScopes.CombatStyles], [], [StateSyncScopes.CombatStyles],
+            refreshCharacterOverview: true,
+            refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.CombatStyles.Commands.SelectCombatStyle.SelectCombatStyleCommand));
 
         Register(
             profiles,

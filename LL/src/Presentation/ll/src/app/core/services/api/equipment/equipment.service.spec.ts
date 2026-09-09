@@ -5,13 +5,30 @@ import { ApiService } from '../api.service';
 import { EquipmentService, EquipmentUpgradeQuote } from './equipment.service';
 
 describe('EquipmentService', () => {
-  it('applies the exact variant from the reviewed quote', () => {
+  it('reinforces with only the item and operation IDs', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', ['post']);
-    api.post.and.returnValue(of({ outcome: {}, freshQuote: null }));
+    api.post.and.returnValue(of({ outcome: {} }));
+    const service = new EquipmentService(api);
+
+    service
+      .reinforce({
+        operationId: 'reinforce-1',
+        request: { itemInstanceId: 'sword-1' },
+      } as EquipmentUpgradeQuote)
+      .subscribe();
+
+    expect(api.post).toHaveBeenCalledOnceWith('equipment/upgrade/reinforce', {
+      operationId: 'reinforce-1',
+      itemInstanceId: 'sword-1',
+    });
+  });
+
+  it('applies the selected variant without a quote token', () => {
+    const api = jasmine.createSpyObj<ApiService>('ApiService', ['post']);
+    api.post.and.returnValue(of({ outcome: {} }));
     const service = new EquipmentService(api);
     const quote = {
       operationId: 'conversion-1',
-      token: 'reviewed-state',
       request: {
         kind: 'ApplyVariant',
         itemInstanceId: 'sword-1',
@@ -24,7 +41,6 @@ describe('EquipmentService', () => {
       operationId: 'conversion-1',
       itemInstanceId: 'sword-1',
       blueprintStyleId: 'blueprint_fury',
-      quoteToken: 'reviewed-state',
     });
   });
   it('marks authoritative equipment mutation scopes as handled', () => {
@@ -54,13 +70,12 @@ describe('EquipmentService', () => {
     );
   });
 
-  it('executes dismantling from the exact confirmed quote', () => {
+  it('sends favorite confirmation and an operation ID without a quote token', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', ['post']);
-    api.post.and.returnValue(of({ outcome: {}, freshQuote: null }));
+    api.post.and.returnValue(of({ outcome: {} }));
     const service = new EquipmentService(api);
     const quote = {
       operationId: 'operation-1',
-      token: 'quoted-state',
       request: {
         kind: 'Dismantle',
         itemInstanceId: 'equipment-1',
@@ -74,7 +89,6 @@ describe('EquipmentService', () => {
       operationId: 'operation-1',
       itemInstanceId: 'equipment-1',
       allowFavoriteDismantle: true,
-      quoteToken: 'quoted-state',
     });
   });
 });

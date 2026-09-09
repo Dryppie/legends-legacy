@@ -63,7 +63,8 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
                     Outcome: record.Resolution.Outcome,
                     HostileSourceEntityIds: hostileIds,
                     HostileCreatures: hostileCreatures,
-                    CombatResult: record.Resolution.CombatResult);
+                    CombatResult: record.Resolution.CombatResult)
+                { CombatStyleExperience = record.Resolution.CombatStyleExperience };
             })
             .ToArray();
 

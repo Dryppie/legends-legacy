@@ -26,17 +26,17 @@ interface MarketPlaceFilterTab {
 export class MarketPlaceFilterComponent {
   readonly tabs: readonly MarketPlaceFilterTab[] = [
     {
-      id: 'resources',
-      label: 'Resources',
+      id: 'monster-cores',
+      label: 'Monster Cores',
       itemType: ItemType.Resource,
-      defaultSubcategory: 'Ore',
-      subOptions: ['Ore', 'Wood', 'Hide'],
+      defaultSubcategory: 'Monster Cores',
+      subOptions: [],
     },
     {
-      id: 'catalysts',
-      label: 'Catalysts',
+      id: 'blueprints',
+      label: 'Blueprints',
       itemType: ItemType.Resource,
-      defaultSubcategory: 'Catalysts',
+      defaultSubcategory: 'Blueprints',
       subOptions: [],
     },
     {
@@ -55,8 +55,8 @@ export class MarketPlaceFilterComponent {
     },
   ];
 
-  readonly selectedTabId = signal<MarketCategoryId>('resources');
-  readonly selectedSubCategory = signal<string | null>('Ore');
+  readonly selectedTabId = signal<MarketCategoryId>('monster-cores');
+  readonly selectedSubCategory = signal<string | null>('Monster Cores');
 
   @Output() readonly categoryChanged =
     new EventEmitter<MarketCategorySelection>();

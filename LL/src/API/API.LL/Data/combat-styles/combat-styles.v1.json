@@ -1,0 +1,243 @@
+{
+  "contentVersion": "combat-styles.v4",
+  "xpRequirements": [
+    36900,
+    232225,
+    613475,
+    1180825,
+    1934100,
+    2873400,
+    3998725,
+    5309975,
+    6807325,
+    8490600
+  ],
+  "styles": [
+    {
+      "id": "bastion",
+      "name": "Bastion",
+      "kind": "Bastion",
+      "openingTechnique": {
+        "name": "Entrenched",
+        "description": "Begin each battle with Barrier equal to 5% of Max Health."
+      },
+      "milestoneTuning": {
+        "openingBarrierFraction": 0.05,
+        "preparedWallEmptyBarrier": true,
+        "holdTheBreachHealthBonus": 0.2,
+        "measuredRecoveryOverhealBarrierFraction": 1
+      },
+      "description": "All healing received restores 25% as Health and converts 75% into Barrier.",
+      "tuning": {
+        "healthFraction": 0.25,
+        "barrierFraction": 0.75,
+        "barrierPerMasteryLevel": 0.01,
+        "rebuildHealthThreshold": 0.35,
+        "reprisalAbsorbedDamageFraction": 0.25,
+        "reprisalMaxHealthCapFraction": 0.1,
+        "shelterOwnerShare": 0.5,
+        "preparedWallHealthThreshold": 0.8,
+        "preparedWallBarrierBonus": 0.1,
+        "holdTheBreachBarrierBonus": 0.1,
+        "measuredRecoveryHealthBonus": 0.2,
+        "chargeCap": 3,
+        "distinctContributors": true,
+        "focusBaseMultiplier": 0.8,
+        "focusPerCharge": 0.2,
+        "focusPerMasteryLevel": 0.01,
+        "relayMinimumSpent": 0,
+        "relayChargeReturn": 0,
+        "fullCircuitBonus": 0.05,
+        "partialFlowBonus": 0.05,
+        "emergencyChannelHealthThreshold": 0.35,
+        "emergencyChannelBonus": 0.05
+      },
+      "refinements": [
+        {
+          "id": "rebuild",
+          "name": "Rebuild",
+          "description": "Healing received below 35% Health restores its full amount directly as Health instead of converting part of it into barrier."
+        },
+        {
+          "id": "reprisal",
+          "name": "Reprisal",
+          "description": "Store 25% of enemy damage absorbed by your Barrier, up to 10% of Max Health. Your next damaging Essence adds the stored amount to its first direct enemy attack attempt."
+        },
+        {
+          "id": "shelter",
+          "name": "Shelter",
+          "description": "Split converted Barrier equally with the ally with the lowest health percentage; retain it all when alone."
+        }
+      ],
+      "upgrades": [
+        {
+          "id": "prepared-wall",
+          "name": "Prepared Wall",
+          "masteryDescription": "You also gain this bonus when you have no Barrier.",
+          "description": "When you receive healing at 80% Health or higher, Fortification grants extra Barrier equal to 7.5% of the heal."
+        },
+        {
+          "id": "hold-the-breach",
+          "name": "Hold the Breach",
+          "masteryDescription": "That heal also restores 20% more Health.",
+          "description": "When you receive healing while having no Barrier, Fortification grants extra Barrier equal to 7.5% of the heal."
+        },
+        {
+          "id": "measured-recovery",
+          "name": "Measured Recovery",
+          "masteryDescription": "Any overhealing is converted into Barrier.",
+          "description": "Fortification’s normal healing split restores 30% as Health, up from 25%."
+        }
+      ]
+    },
+    {
+      "id": "conduit",
+      "name": "Conduit",
+      "kind": "Conduit",
+      "openingTechnique": {
+        "name": "Primed Circuit",
+        "description": "Begin each battle with 1 Charge."
+      },
+      "milestoneTuning": {
+        "openingCharge": 1,
+        "fullCircuitMinimumCharge": 2,
+        "partialFlowMaximumCharge": 2,
+        "emergencyChannelHealthThreshold": 1
+      },
+      "description": "Choose an equipped Essence as your Focus. In the base form, each of your other Essences builds 1 Charge when it casts, once between Focus casts, up to 3 Charge. Your Focus spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.",
+      "tuning": {
+        "healthFraction": 0.25,
+        "barrierFraction": 0.75,
+        "barrierPerMasteryLevel": 0.01,
+        "rebuildHealthThreshold": 0.35,
+        "reprisalAbsorbedDamageFraction": 0.25,
+        "reprisalMaxHealthCapFraction": 0.1,
+        "shelterOwnerShare": 0.5,
+        "preparedWallHealthThreshold": 0.8,
+        "preparedWallBarrierBonus": 0.1,
+        "holdTheBreachBarrierBonus": 0.1,
+        "measuredRecoveryHealthBonus": 0.2,
+        "chargeCap": 3,
+        "distinctContributors": true,
+        "focusBaseMultiplier": 0.8,
+        "focusPerCharge": 0.2,
+        "focusPerMasteryLevel": 0.01,
+        "relayMinimumSpent": 0,
+        "relayChargeReturn": 0,
+        "fullCircuitBonus": 0.05,
+        "partialFlowBonus": 0.05,
+        "emergencyChannelHealthThreshold": 0.35,
+        "emergencyChannelBonus": 0.05
+      },
+      "refinements": [
+        {
+          "id": "short-circuit",
+          "name": "Short Circuit",
+          "description": "Your other Essences build 1 Charge every time they cast, even if the same Essence casts again. Store up to 2 Charge.",
+          "tuning": {
+            "healthFraction": 0.25,
+            "barrierFraction": 0.75,
+            "barrierPerMasteryLevel": 0.01,
+            "rebuildHealthThreshold": 0.35,
+            "reprisalAbsorbedDamageFraction": 0.25,
+            "reprisalMaxHealthCapFraction": 0.1,
+            "shelterOwnerShare": 0.5,
+            "preparedWallHealthThreshold": 0.8,
+            "preparedWallBarrierBonus": 0.1,
+            "holdTheBreachBarrierBonus": 0.1,
+            "measuredRecoveryHealthBonus": 0.2,
+            "chargeCap": 2,
+            "distinctContributors": false,
+            "focusBaseMultiplier": 0.8,
+            "focusPerCharge": 0.2,
+            "focusPerMasteryLevel": 0.01,
+            "relayMinimumSpent": 0,
+            "relayChargeReturn": 0,
+            "fullCircuitBonus": 0.05,
+            "partialFlowBonus": 0.05,
+            "emergencyChannelHealthThreshold": 0.35,
+            "emergencyChannelBonus": 0.05
+          }
+        },
+        {
+          "id": "deep-reservoir",
+          "name": "Deep Reservoir",
+          "description": "Store up to 4 Charge, with each of your other Essences building 1 Charge between Focus casts. Your Focus's immediate damage, healing and Barrier start at 60% of normal strength and gain a +25% flat increase per Charge spent.",
+          "tuning": {
+            "healthFraction": 0.25,
+            "barrierFraction": 0.75,
+            "barrierPerMasteryLevel": 0.01,
+            "rebuildHealthThreshold": 0.35,
+            "reprisalAbsorbedDamageFraction": 0.25,
+            "reprisalMaxHealthCapFraction": 0.1,
+            "shelterOwnerShare": 0.5,
+            "preparedWallHealthThreshold": 0.8,
+            "preparedWallBarrierBonus": 0.1,
+            "holdTheBreachBarrierBonus": 0.1,
+            "measuredRecoveryHealthBonus": 0.2,
+            "chargeCap": 4,
+            "distinctContributors": true,
+            "focusBaseMultiplier": 0.6,
+            "focusPerCharge": 0.25,
+            "focusPerMasteryLevel": 0.01,
+            "relayMinimumSpent": 0,
+            "relayChargeReturn": 0,
+            "fullCircuitBonus": 0.05,
+            "partialFlowBonus": 0.05,
+            "emergencyChannelHealthThreshold": 0.35,
+            "emergencyChannelBonus": 0.05
+          }
+        },
+        {
+          "id": "relay",
+          "name": "Relay",
+          "description": "After your Focus spends 2 or more Charge, regain 1 Charge for its next cast. Its immediate damage, healing and Barrier start at 80% of normal strength and gain a +15% flat increase per Charge spent.",
+          "tuning": {
+            "healthFraction": 0.25,
+            "barrierFraction": 0.75,
+            "barrierPerMasteryLevel": 0.01,
+            "rebuildHealthThreshold": 0.35,
+            "reprisalAbsorbedDamageFraction": 0.25,
+            "reprisalMaxHealthCapFraction": 0.1,
+            "shelterOwnerShare": 0.5,
+            "preparedWallHealthThreshold": 0.8,
+            "preparedWallBarrierBonus": 0.1,
+            "holdTheBreachBarrierBonus": 0.1,
+            "measuredRecoveryHealthBonus": 0.2,
+            "chargeCap": 3,
+            "distinctContributors": true,
+            "focusBaseMultiplier": 0.8,
+            "focusPerCharge": 0.15,
+            "focusPerMasteryLevel": 0.01,
+            "relayMinimumSpent": 2,
+            "relayChargeReturn": 1,
+            "fullCircuitBonus": 0.05,
+            "partialFlowBonus": 0.05,
+            "emergencyChannelHealthThreshold": 0.35,
+            "emergencyChannelBonus": 0.05
+          }
+        }
+      ],
+      "upgrades": [
+        {
+          "id": "full-circuit",
+          "name": "Full Circuit",
+          "masteryDescription": "This bonus now works whenever you spend 2 or more Charge.",
+          "description": "Spending maximum Charge adds a flat +5% to your Focus’s immediate damage, healing and Barrier."
+        },
+        {
+          "id": "partial-flow",
+          "name": "Partial Flow",
+          "masteryDescription": "This bonus now works with either 1 or 2 Charge.",
+          "description": "Spending exactly 1 Charge adds a flat +5% to your Focus’s immediate damage, healing and Barrier."
+        },
+        {
+          "id": "emergency-channel",
+          "name": "Emergency Channel",
+          "masteryDescription": "You gain this bonus at any Health, as long as your Focus spends at least 1 Charge.",
+          "description": "When your Focus spends Charge at 35% Health or lower, add a flat +5% to the healing and Barrier it gives you immediately."
+        }
+      ]
+    }
+  ]
+}

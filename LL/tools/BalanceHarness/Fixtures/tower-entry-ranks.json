@@ -1,0 +1,1190 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-entry-ranks-v1",
+  "startsAt": "2000-01-01T01:00:00+01:00",
+  "samplesPerCell": 20,
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "profiles": [
+    {
+      "id": "rank-0-guardian",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-0 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-0-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "rank-0-restorer",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-0 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-0-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "rank-0-striker",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-0 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-0-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-0-controller",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-0 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-0-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-1-guardian",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-1 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-1-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "rank-1-restorer",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-1 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-1-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "rank-1-striker",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-1 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-1-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-1-controller",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-1 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-1-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-2-guardian",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-2 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-2-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "rank-2-restorer",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-2 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-2-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "rank-2-striker",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-2 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-2-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-2-controller",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-2 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-2-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-3-guardian",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-3 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-3-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "rank-3-restorer",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-3 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-3-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "rank-3-striker",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-3 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-3-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "rank-3-controller",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-3 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "build": {
+        "id": "rank-3-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-guardian",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-restorer",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-striker",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-controller",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    }
+  ],
+  "parties": [
+    {
+      "id": "rank-0",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-0 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "cellProfiles": [
+        "rank-0-guardian",
+        "rank-0-restorer",
+        "rank-0-striker",
+        "rank-0-striker",
+        "rank-0-controller"
+      ]
+    },
+    {
+      "id": "rank-1",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-1 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "cellProfiles": [
+        "rank-1-guardian",
+        "rank-1-restorer",
+        "rank-1-striker",
+        "rank-1-striker",
+        "rank-1-controller"
+      ]
+    },
+    {
+      "id": "rank-2",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-2 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "cellProfiles": [
+        "rank-2-guardian",
+        "rank-2-restorer",
+        "rank-2-striker",
+        "rank-2-striker",
+        "rank-2-controller"
+      ]
+    },
+    {
+      "id": "rank-3",
+      "assumptions": "Floor-1 four-Essence investigation: level 30, seven Standard tier-1 rank-3 items. Only reinforcement rank changes against rank-0; the same four level-1 unascended, unevolved Essences, baseline rolls and role cell are retained. Ownership and reinforcement costs are conditional, not an approved acquisition budget. No styles, scouting or contributions; no numerical clear-rate target.",
+      "cellProfiles": [
+        "rank-3-guardian",
+        "rank-3-restorer",
+        "rank-3-striker",
+        "rank-3-striker",
+        "rank-3-controller"
+      ]
+    },
+    {
+      "id": "floor-10-6",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved. Fixed Guardian, Restorer, two Strikers and Controller cell fills RequiredSlots. Run all floors for context; only floor 10 is this party's stated anchor. No scouting or contributions.",
+      "cellProfiles": [
+        "floor-10-6-guardian",
+        "floor-10-6-restorer",
+        "floor-10-6-striker",
+        "floor-10-6-striker",
+        "floor-10-6-controller"
+      ]
+    }
+  ]
+}

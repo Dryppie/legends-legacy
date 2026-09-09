@@ -1,6 +1,7 @@
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
@@ -37,6 +38,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly ICreatureArchiveService? _creatureArchiveService;
     private readonly IPublisher? _publisher;
     private readonly IGameEventOutbox _outbox;
+    private readonly ICombatStyleMutationBoundary? _buildBoundary;
     private readonly Dictionary<Guid, string?> _essenceFocusCache = [];
     private readonly Dictionary<Guid, Dictionary<string, CreatureResonance>> _resonanceCache = [];
     private readonly Dictionary<string, ItemBase> _essenceItemBaseCache = new(StringComparer.OrdinalIgnoreCase);
@@ -56,7 +58,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IGameEventOutbox outbox,
         IPublisher? publisher = null,
         IBonusService? bonusService = null,
-        ICreatureArchiveService? creatureArchiveService = null)
+        ICreatureArchiveService? creatureArchiveService = null,
+        ICombatStyleMutationBoundary? buildBoundary = null)
     {
         _essences = essences;
         _inventory = inventory;
@@ -72,6 +75,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _creatureArchiveService = creatureArchiveService;
         _publisher = publisher;
         _outbox = outbox;
+        _buildBoundary = buildBoundary;
     }
 
     public async Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken)
@@ -310,6 +314,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (request.Id.HasValue)
             loadout = await _essences.GetLoadoutAsync(characterId, request.Id.Value, cancellationToken);
 
+        if (_buildBoundary is not null && await _buildBoundary.PrepareMutationAsync(characterId, cancellationToken) is { } blocked)
+            return LoadoutSaveFailed(blocked);
+
         if (loadout is null)
         {
             var count = await _essences.CountLoadoutsAsync(characterId, cancellationToken);
@@ -371,6 +378,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var loadouts = await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken);
         var selected = loadouts.FirstOrDefault(loadout => loadout.Id == loadoutId);
         if (selected is null) return Fail("Essence loadout not found.");
+
+        if (_buildBoundary is not null && await _buildBoundary.PrepareMutationAsync(characterId, cancellationToken) is { } blocked)
+            return Fail(blocked);
 
         foreach (var loadout in loadouts)
         {
@@ -444,6 +454,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     {
         var loadout = await _essences.GetLoadoutAsync(characterId, loadoutId, cancellationToken);
         if (loadout is null) return Fail("Essence loadout not found.");
+        if (_buildBoundary is not null && await _buildBoundary.PrepareMutationAsync(characterId, cancellationToken) is { } blocked)
+            return Fail(blocked);
         _essences.RemoveLoadout(loadout);
         return Ok("Essence loadout deleted.");
     }

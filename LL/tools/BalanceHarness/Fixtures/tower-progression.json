@@ -1,0 +1,748 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-progression-v1",
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "samplesPerCell": 20,
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "profiles": [
+    {
+      "id": "early-guardian",
+      "assumptions": "Conditional early progression preset: character level 20, seven items filling eight slots, Standard tier 1 rank 0, baseline rolls, no styles. 3 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "early-guardian",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "early-restorer",
+      "assumptions": "Conditional early progression preset: character level 20, seven items filling eight slots, Standard tier 1 rank 0, baseline rolls, no styles. 3 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "early-restorer",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman"
+        ]
+      }
+    },
+    {
+      "id": "early-striker",
+      "assumptions": "Conditional early progression preset: character level 20, seven items filling eight slots, Standard tier 1 rank 0, baseline rolls, no styles. 3 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "early-striker",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie"
+        ]
+      }
+    },
+    {
+      "id": "early-controller",
+      "assumptions": "Conditional early progression preset: character level 20, seven items filling eight slots, Standard tier 1 rank 0, baseline rolls, no styles. 3 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "early-controller",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin"
+        ]
+      }
+    },
+    {
+      "id": "mid-guardian",
+      "assumptions": "Conditional mid progression preset: character level 50, seven items filling eight slots, Standard tier 2 rank 3, baseline rolls, no styles. 6 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "mid-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "mid-restorer",
+      "assumptions": "Conditional mid progression preset: character level 50, seven items filling eight slots, Standard tier 2 rank 3, baseline rolls, no styles. 6 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "mid-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "mid-striker",
+      "assumptions": "Conditional mid progression preset: character level 50, seven items filling eight slots, Standard tier 2 rank 3, baseline rolls, no styles. 6 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "mid-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "mid-controller",
+      "assumptions": "Conditional mid progression preset: character level 50, seven items filling eight slots, Standard tier 2 rank 3, baseline rolls, no styles. 6 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "mid-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "late-guardian",
+      "assumptions": "Conditional late progression preset: character level 90, seven items filling eight slots, Standard tier 2 rank 5, baseline rolls, no styles. 10 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "late-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian",
+          "essence.thornback_boar"
+        ]
+      }
+    },
+    {
+      "id": "late-restorer",
+      "assumptions": "Conditional late progression preset: character level 90, seven items filling eight slots, Standard tier 2 rank 5, baseline rolls, no styles. 10 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "late-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman",
+          "essence.elder_treant"
+        ]
+      }
+    },
+    {
+      "id": "late-striker",
+      "assumptions": "Conditional late progression preset: character level 90, seven items filling eight slots, Standard tier 2 rank 5, baseline rolls, no styles. 10 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "late-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy",
+          "essence.wind_harpy"
+        ]
+      }
+    },
+    {
+      "id": "late-controller",
+      "assumptions": "Conditional late progression preset: character level 90, seven items filling eight slots, Standard tier 2 rank 5, baseline rolls, no styles. 10 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets.",
+      "build": {
+        "id": "late-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy",
+          "essence.wandering_ghost"
+        ]
+      }
+    }
+  ],
+  "parties": [
+    {
+      "id": "early",
+      "assumptions": "Conditional early progression preset: character level 20, seven items filling eight slots, Standard tier 1 rank 0, baseline rolls, no styles. 3 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets. One Guardian, one Restorer, two Strikers and one Controller per five-person cell, repeated to fill each floor. Fresh full health, no scouting or contributions.",
+      "cellProfiles": [
+        "early-guardian",
+        "early-restorer",
+        "early-striker",
+        "early-striker",
+        "early-controller"
+      ]
+    },
+    {
+      "id": "mid",
+      "assumptions": "Conditional mid progression preset: character level 50, seven items filling eight slots, Standard tier 2 rank 3, baseline rolls, no styles. 6 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets. One Guardian, one Restorer, two Strikers and one Controller per five-person cell, repeated to fill each floor. Fresh full health, no scouting or contributions.",
+      "cellProfiles": [
+        "mid-guardian",
+        "mid-restorer",
+        "mid-striker",
+        "mid-striker",
+        "mid-controller"
+      ]
+    },
+    {
+      "id": "late",
+      "assumptions": "Conditional late progression preset: character level 90, seven items filling eight slots, Standard tier 2 rank 5, baseline rolls, no styles. 10 selected level-1 unascended, unevolved Essences. Equipment and Essence ownership, reinforcement materials and access are assumed; acquisition time and ascension are not simulated. Early/mid/late are benchmark labels, not approved player progression or floor targets. One Guardian, one Restorer, two Strikers and one Controller per five-person cell, repeated to fill each floor. Fresh full health, no scouting or contributions.",
+      "cellProfiles": [
+        "late-guardian",
+        "late-restorer",
+        "late-striker",
+        "late-striker",
+        "late-controller"
+      ]
+    }
+  ]
+}

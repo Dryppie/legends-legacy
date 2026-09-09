@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "baseCatalog": "tower-curve.json",
+  "baseParty": "balanced",
+  "discoverySeed": 20260911,
+  "confirmationSeed": 20260912,
+  "discoverySamples": 8,
+  "confirmationSamples": 30,
+  "swaps": [
+    {
+      "role": "guardian",
+      "remove": "essence.hobgoblin",
+      "add": "essence.horned_wolf",
+      "rationale": "Guardian: Horned Wolf replaces Hobgoblin to test ally-dependent armor and physical-defense reduction while retaining Transparent Slime and Brown Slime protection. Trades Vulnerable synergy for a different defensive/debuff package."
+    },
+    {
+      "role": "restorer",
+      "remove": "essence.goblin_shaman",
+      "add": "essence.pack_howler",
+      "rationale": "Restorer: Pack Howler replaces Goblin Shaman to test living-ally Power scaling for the retained Power-based heals, plus coordinated party basic attacks. Trades Recovery and a heal-over-time ability for party damage and scaling."
+    },
+    {
+      "role": "striker",
+      "remove": "essence.pixie",
+      "add": "essence.dire_wolf",
+      "rationale": "Both Strikers: Dire Wolf replaces Pixie to test physical Bleed damage and outnumbering-dependent critical chance with the same gauntlets, trading magical area damage and critical-damage buildup."
+    },
+    {
+      "role": "controller",
+      "remove": "essence.giant_bat",
+      "add": "essence.wood_nymph",
+      "rationale": "Controller: Wood Nymph replaces Giant Bat to add Cover, a Power-scaled barrier and personal Renewal/Ward while retaining Enchanted Fairy control and Frost Imp Chill. Tests protection alongside the party's existing control."
+    }
+  ]
+}

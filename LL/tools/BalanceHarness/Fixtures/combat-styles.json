@@ -1,0 +1,1002 @@
+{
+  "schemaVersion": 2,
+  "id": "combat-styles-v2",
+  "description": "Combat Style controls, Opening Technique thresholds, and Upgrade Mastery comparisons. Advisory correctness and balance evidence; acquisition time and reward progression are excluded.",
+  "samplesPerCell": 20,
+  "startsAt": "2000-01-01T01:00:00+01:00",
+  "stages": [
+    {
+      "id": "slots-3",
+      "name": "3 equipped Essences",
+      "areaId": "region_01_area_03",
+      "assumptions": [
+        "Both Combat Styles are available. Compared builds differ only by Combat Style, individual level, and the explicit upgrades and mastery in their recipes.",
+        "Two tier-1 rank-0 standard items and unascended level-1 Essences are assumed owned. Equipment style fields retain their separate meaning.",
+        "Paired fixed seeds, normal opening cooldowns, and fresh encounter state. The two spawns test different damage/control pressure; this is not a comprehensive balance acceptance.",
+        "Conduit fast-Focus variants designate Vampire Bat to expose undercharged openings. The paired spawn adds longer pressure while retaining the same area rules.",
+        "Opening pairs compare mastery levels 6 and 7; upgrade mastery pairs compare levels 8 and 9 with the same equipped upgrade. Each higher-level build also gains the next automatic mastery bonus."
+      ],
+      "builds": [
+        {
+          "id": "control",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "bastion-1",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "bastion-10",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-1",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-10",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-fast-1",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-fast-10",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "bastion-opening-6",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "bastion-opening-7",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "bastion-mastery-8",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "bastion-mastery-9",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-opening-6",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-opening-7",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-mastery-8",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        },
+        {
+          "id": "conduit-mastery-9",
+          "characterLevel": 20,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "frost-imp",
+          "label": "Frost Imp",
+          "creatureId": "00000000-0000-0000-0000-000000000006"
+        },
+        {
+          "id": "crystal-wisp",
+          "label": "Crystal Wisp",
+          "creatureId": "00000000-0000-0000-0000-000000000028"
+        },
+        {
+          "id": "paired-pressure",
+          "label": "Frost Imp and Crystal Wisp",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000028"
+          ],
+          "creatureId": "00000000-0000-0000-0000-000000000006"
+        }
+      ],
+      "combatStyles": {
+        "bastion-1": {
+          "id": "bastion",
+          "level": 1
+        },
+        "bastion-10": {
+          "id": "bastion",
+          "level": 10
+        },
+        "conduit-1": {
+          "id": "conduit",
+          "level": 1,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-10": {
+          "id": "conduit",
+          "level": 10,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-fast-1": {
+          "id": "conduit",
+          "focusEssenceDefinitionId": "essence.vampire_bat",
+          "level": 1
+        },
+        "conduit-fast-10": {
+          "id": "conduit",
+          "focusEssenceDefinitionId": "essence.vampire_bat",
+          "level": 10
+        },
+        "bastion-opening-6": {
+          "id": "bastion",
+          "level": 6
+        },
+        "bastion-opening-7": {
+          "id": "bastion",
+          "level": 7
+        },
+        "bastion-mastery-8": {
+          "id": "bastion",
+          "level": 8,
+          "upgradeIds": [
+            "measured-recovery"
+          ]
+        },
+        "bastion-mastery-9": {
+          "id": "bastion",
+          "level": 9,
+          "upgradeIds": [
+            "measured-recovery"
+          ],
+          "masteredUpgradeId": "measured-recovery"
+        },
+        "conduit-opening-6": {
+          "id": "conduit",
+          "level": 6,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-opening-7": {
+          "id": "conduit",
+          "level": 7,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-mastery-8": {
+          "id": "conduit",
+          "level": 8,
+          "focusEssenceDefinitionId": "essence.goblin_warrior",
+          "upgradeIds": [
+            "full-circuit"
+          ]
+        },
+        "conduit-mastery-9": {
+          "id": "conduit",
+          "level": 9,
+          "focusEssenceDefinitionId": "essence.goblin_warrior",
+          "upgradeIds": [
+            "full-circuit"
+          ],
+          "masteredUpgradeId": "full-circuit"
+        }
+      }
+    },
+    {
+      "id": "slots-4",
+      "name": "4 equipped Essences",
+      "areaId": "region_01_area_03",
+      "assumptions": [
+        "Both Combat Styles are available. Compared builds differ only by Combat Style, individual level, and the explicit upgrades and mastery in their recipes.",
+        "Two tier-1 rank-0 standard items and unascended level-1 Essences are assumed owned. Equipment style fields retain their separate meaning.",
+        "Paired fixed seeds, normal opening cooldowns, and fresh encounter state. The two spawns test different damage/control pressure; this is not a comprehensive balance acceptance.",
+        "Conduit fast-Focus variants designate Vampire Bat to expose undercharged openings. The paired spawn adds longer pressure while retaining the same area rules.",
+        "Opening pairs compare mastery levels 6 and 7; upgrade mastery pairs compare levels 8 and 9 with the same equipped upgrade. Each higher-level build also gains the next automatic mastery bonus."
+      ],
+      "builds": [
+        {
+          "id": "control",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "bastion-1",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "bastion-10",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-1",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-10",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-fast-1",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-fast-10",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "bastion-opening-6",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "bastion-opening-7",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "bastion-mastery-8",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "bastion-mastery-9",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-opening-6",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-opening-7",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-mastery-8",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        },
+        {
+          "id": "conduit-mastery-9",
+          "characterLevel": 30,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.mace",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.medium_mail",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin",
+            "essence.goblin_warrior",
+            "essence.vampire_bat",
+            "essence.raven"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "frost-imp",
+          "label": "Frost Imp",
+          "creatureId": "00000000-0000-0000-0000-000000000006"
+        },
+        {
+          "id": "crystal-wisp",
+          "label": "Crystal Wisp",
+          "creatureId": "00000000-0000-0000-0000-000000000028"
+        },
+        {
+          "id": "paired-pressure",
+          "label": "Frost Imp and Crystal Wisp",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000028"
+          ],
+          "creatureId": "00000000-0000-0000-0000-000000000006"
+        }
+      ],
+      "combatStyles": {
+        "bastion-1": {
+          "id": "bastion",
+          "level": 1
+        },
+        "bastion-10": {
+          "id": "bastion",
+          "level": 10
+        },
+        "conduit-1": {
+          "id": "conduit",
+          "level": 1,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-10": {
+          "id": "conduit",
+          "level": 10,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-fast-1": {
+          "id": "conduit",
+          "focusEssenceDefinitionId": "essence.vampire_bat",
+          "level": 1
+        },
+        "conduit-fast-10": {
+          "id": "conduit",
+          "focusEssenceDefinitionId": "essence.vampire_bat",
+          "level": 10
+        },
+        "bastion-opening-6": {
+          "id": "bastion",
+          "level": 6
+        },
+        "bastion-opening-7": {
+          "id": "bastion",
+          "level": 7
+        },
+        "bastion-mastery-8": {
+          "id": "bastion",
+          "level": 8,
+          "upgradeIds": [
+            "measured-recovery"
+          ]
+        },
+        "bastion-mastery-9": {
+          "id": "bastion",
+          "level": 9,
+          "upgradeIds": [
+            "measured-recovery"
+          ],
+          "masteredUpgradeId": "measured-recovery"
+        },
+        "conduit-opening-6": {
+          "id": "conduit",
+          "level": 6,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-opening-7": {
+          "id": "conduit",
+          "level": 7,
+          "focusEssenceDefinitionId": "essence.goblin_warrior"
+        },
+        "conduit-mastery-8": {
+          "id": "conduit",
+          "level": 8,
+          "focusEssenceDefinitionId": "essence.goblin_warrior",
+          "upgradeIds": [
+            "full-circuit"
+          ]
+        },
+        "conduit-mastery-9": {
+          "id": "conduit",
+          "level": 9,
+          "focusEssenceDefinitionId": "essence.goblin_warrior",
+          "upgradeIds": [
+            "full-circuit"
+          ],
+          "masteredUpgradeId": "full-circuit"
+        }
+      }
+    }
+  ]
+}

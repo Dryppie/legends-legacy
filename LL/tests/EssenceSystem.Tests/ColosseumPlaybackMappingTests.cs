@@ -4,6 +4,7 @@ using Application.UseCases.Colosseum.Tournaments;
 using AutoMapper;
 using Domain.Models.Combat;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Text.Json;
 
 namespace EssenceSystem.Tests;
 
@@ -19,7 +20,8 @@ public sealed class ColosseumPlaybackMappingTests
         var damaged = Entity(60);
         var final = Entity(0);
         var execution = new CombatExecutionWithCheckpoints(
-            new CombatResult { Duration = 30, Outcome = outcome },
+            new CombatResult { Duration = 30, Outcome = outcome,
+                CombatStyles = [new() { EntityId = "hero", CombatStyleId = "bastion", HealingConverted = 75 }] },
             [
                 new CombatCheckpoint(0, 0, [initial], [], [], [], false),
                 new CombatCheckpoint(1, 10, [damaged], [], [Stats(40)], [], false),
@@ -50,6 +52,9 @@ public sealed class ColosseumPlaybackMappingTests
         Assert.Equal(outcome, bundle.Frames[^1].Outcome);
         Assert.Equal(0, Assert.Single(bundle.Frames[^1].EntityStates).Health);
         Assert.Equal(100, Assert.Single(bundle.Frames[^1].EntityTotals).DamageTaken);
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(bundle, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        Assert.All(json.RootElement.GetProperty("frames").EnumerateArray(),
+            frame => Assert.False(frame.TryGetProperty("combatStyles", out _)));
     }
 
     private static SimpleCombatEntity Entity(int health) => new()

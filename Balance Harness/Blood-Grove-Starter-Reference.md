@@ -1,6 +1,6 @@
 # Blood Grove starter reference — 8 September 2026
 
-The selected Blood Grove starter is **Goblin Warrior + Sword + Heavy Chest**, with an approved initial clear-rate target of **approximately 70%, using a 65–75% working band** for each selected encounter. Other Essence combinations remain diagnostic. The [fixture](../LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter.json) and [scoped goal policy](../LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter-goals.json) use the existing suite, replay and evaluation commands.
+The selected Blood Grove starter is **Goblin Warrior + Sword + Heavy Chest**, with a preferred clear-rate aim of **approximately 70% and a revised 50–90% accepted band** for each selected encounter. The [band revision](Blood-Grove-Band-Review.md) supersedes the initial 65–75% policy described in the historical results below. Other Essence combinations remain diagnostic. The [fixture](../LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter.json) and [scoped goal policy](../LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter-goals.json) use the existing suite, replay and evaluation commands.
 
 ## Recipe
 
@@ -61,20 +61,34 @@ The initial measurement established the selected build's starting point. The sub
 
 No production combat, reward, configuration, database migration or deployment changes were made. The full backend suite, the standalone cohort smoke scripts and hosted CI were not rerun for this fixture-only increment.
 
-## Approved working target and evaluation — 8 September 2026
+## Initial 65–75% target and historical evaluation — 8 September 2026
 
 The user approved an aim near **70%**, explicitly choosing an initial **65–75% band** rather than a minimum to exceed. The policy applies separately to Raven + Raven and Raven + Blood Zombie for the exact level-5 recipe above. Do not average the two encounters to hide a weak or overly easy case. This remains a fixed-encounter target, not an area-wide clear-rate claim. Pacing, health and other builds have no newly approved goals.
 
-`idle-blood-grove-starter-goals-v1` contains one reviewed, enforced primary goal expanded into two checks. It pins fixture contract `e820b30cf1bdd8763c4ea8c9fdbf138a870611bdfebe728f71454bb348e8a87f`, uses inclusive 65/75 percent bounds and a minimum of 100 valid trials per cell. Its `reviewReason` records the user decision. Explicit evaluation returns exit 1 for a clear miss and 3 for inconclusive evidence. Existing default policies and hosted CI remain advisory and unchanged.
+The historical [v1 policy](../LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter-goals-v1.json) contains one reviewed, enforced primary goal expanded into two checks. It pins fixture contract `e820b30cf1bdd8763c4ea8c9fdbf138a870611bdfebe728f71454bb348e8a87f`, uses inclusive 65/75 percent bounds and a minimum of 100 valid trials per cell. Its `reviewReason` records the initial user decision. Explicit evaluation returns exit 1 for a clear miss and 3 for inconclusive evidence. Existing default policies and hosted CI remain advisory and unchanged.
 
 The evaluator requires the entire pointwise 95% Wilson interval to lie within the band. Thus 70/100 is **inconclusive**, 700/1,000 **passes**, and both 0/100 and 100/100 **fail**. These are statistical examples, not additional battle results. The 100-trial minimum supports diagnosing large misses; near-target confirmation needs a larger predeclared budget. Use 1,000 trials per encounter as the next confirmation planning budget and reserve fresh seeds before tuning. Do not extend samples repeatedly until a candidate passes. Intervals retain their per-check coverage, without simultaneous correction across the two encounters.
 
 ```powershell
-dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- evaluate --goals LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter-goals.json --run TestResults/balance/blood-grove-starter-reference/confirmation --output TestResults/balance/blood-grove-starter-evaluation-001
+dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- evaluate --goals LL/tools/BalanceHarness/Fixtures/idle-blood-grove-starter-goals-v1.json --run TestResults/balance/blood-grove-starter-reference/confirmation --output TestResults/balance/blood-grove-starter-evaluation-001
 ```
 
 Both existing saved runs were evaluated without rerunning combat or changing their archives. Each produced **two failed checks, zero invalid checks, and the expected balance-failure exit code 1**. Each observed clear rate is 0%, with a 95% interval of approximately 0–3.7%, wholly below the 65% lower bound. Complete verified evaluation bundles are retained locally under `TestResults/balance/blood-grove-starter-reference/target-70-discovery` and `target-70-confirmation`.
 
 The policy increment's Release build passed with four warnings and no errors; **79 harness tests passed** through the repository runner. Added coverage pins the policy to its exact recipe/cells and verifies below-target failure, near-target uncertainty, adequately sampled success, above-target failure and insufficient samples. Production balance, rewards, database migrations, deployment and CI configuration are unchanged. Full backend tests, standalone smoke scripts and hosted CI were not run for this policy change.
 
-Next, run a bounded tuning experiment toward this working band while keeping the selected recipe fixed. Inspect the effect of one candidate adjustment at a time, verify unaffected controls, and confirm the selected candidate on fresh reserved seeds before accepting a viable regression baseline.
+The first [bounded tuning experiment](Blood-Grove-Pressure-Review.md) is complete. It tested 23 legal values of the regional post-tutorial offense bonus across 18,200 battles, with the recipe and policy fixed. The selected bonus 0.2 confirmed at 88.4% Raven-pair and 78.6% mixed-pair clears, both above the working band. All 16 Lumo control cells stayed identical, but six early Shenic areas changed. Four selected replays matched; no production value or viable baseline was promoted. That increment reached 83 passing harness tests.
+
+The separate [fine sweep](Blood-Grove-Fine-Pressure-Review.md) then completed 24,600 battles on 11 values from 0.30 through 0.20. Bonus 0.21 confirmed at 88.5% Raven-pair clears (Fail under v1) and 74.1% mixed-pair clears (Inconclusive under v1). The discovery jump between 0.22 and 0.21 aligns with integer Raven damage thresholds. All 16 Lumo cells stayed identical; the same six areas changed and four replays matched. That increment reached 85 passing tests and recommended a second tuning parameter under the initial band.
+
+## Revised 50–90% band
+
+The user subsequently widened the accepted band to **50–90%**, retaining the 70% aim and this exact recipe. [Policy v2 and the saved-run re-evaluation](Blood-Grove-Band-Review.md) now supersede the earlier next-step recommendation. Both 0.21 point estimates fit the revised band; the mixed-pair check passes and the Raven-pair check remains inconclusive because its interval reaches 90.33%. Review the candidate and its wider area effects before choosing production scope. No extra combat samples, production change or viable-baseline promotion accompanied the policy revision.
+
+## Blood Grove-only implementation and fresh confirmation
+
+The user subsequently authorized making the 0.21 candidate local to Blood Grove and confirming it on the current engine. The [local validation report](Blood-Grove-Local-Validation.md) records version-12 content with Blood Grove offense 2.421, unchanged scaling in the other 13 areas and an explicit transition ceiling into unchanged Crystal Creek. The recipe and v2 policy are unchanged.
+
+The fixed 21,600-battle validation includes 3,000 fresh trials per encounter for both original and candidate content. The original still records zero wins. The local candidate records **2,679/3,000 Raven wins (89.30%, interval 88.14–90.36%, Inconclusive)** and **2,302/3,000 mixed wins (76.73%, interval 75.19–78.21%, Pass)**. All 32 control cells outside Blood Grove stay identical and all four fixed replays match. All 2,066 backend tests pass. No viable baseline was accepted because the Raven interval overlaps 90%; the fixed run is closed without sample extension. Next, playtest this recipe and the larger Blood Grove-to-Crystal Creek transition. No deployment or database change was made.
+
+The subsequent [level-10 checkpoint and handoff comparison](Crystal-Creek-Starter-Handoff.md) retains the sword/heavy chest and adds an Amulet plus Goblin in the second slot. Its fresh 16,000-battle investigation demonstrates a conditional Crystal Creek path (99.4% / 100% primary confirmation clears) and identifies second-slot preparation and pacing as the next human review. It leaves this level-5 recipe, policy and statistical assessment unchanged.

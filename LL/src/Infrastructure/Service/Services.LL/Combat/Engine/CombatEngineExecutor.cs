@@ -398,6 +398,12 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 cacheStableEssenceAbilities)
             .ToList();
         var behavior = ResolveBasicAttackBehavior(combatant);
+        var essenceOrigins = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        foreach (var essence in combatant.EquippedEssences)
+        {
+            foreach (var abilityId in GetAbilityIdsForEssence(essence.EssenceDefinitionId, catalog))
+                essenceOrigins.TryAdd(abilityId, essence.Id);
+        }
 
         return new RuntimeCombatant(
             combatant.Id,
@@ -415,7 +421,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             partyNumber: partyNumber,
             staggerDefinition: combatant.StaggerDefinition,
             staggerParticipantCount: combatant.StaggerParticipantCount,
-            level: combatant.Level);
+            level: combatant.Level,
+            combatStyle: combatant.CombatStyle,
+            essenceOrigins: essenceOrigins);
     }
 
     private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)
@@ -614,12 +622,20 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         AbilitySpec spec,
         PlayerEssence essence,
         AbilityCatalog catalog)
-    {
-        if (!essence.IsEvolved || _essenceDefinitions is null)
-            return spec;
+        => ApplyEvolutionModifiers(spec, essence, _essenceDefinitions?.GetById(essence.EssenceDefinitionId), catalog);
 
-        var definition = _essenceDefinitions.GetById(essence.EssenceDefinitionId);
-        if (definition is null)
+    public static AbilitySpec PrepareEssenceAbility(
+        AbilitySpec spec, PlayerEssence essence, EssenceDefinition? definition, AbilityCatalog catalog) =>
+        EssenceAbilityProgressionScaler.Apply(
+            ApplyEvolutionModifiers(spec, essence, definition, catalog), essence.AscensionTier);
+
+    private static AbilitySpec ApplyEvolutionModifiers(
+        AbilitySpec spec,
+        PlayerEssence essence,
+        EssenceDefinition? definition,
+        AbilityCatalog catalog)
+    {
+        if (!essence.IsEvolved || definition is null)
             return spec;
 
         var modifiers = SelectEvolutionModifiers(spec, definition);

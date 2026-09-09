@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-floor-1-starter-party-v1",
+  "floorNumber": 1,
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "preparationState": "uncleared-no-contributions",
+  "assumptions": [
+    "Five distinct level-10 characters, each with Shortsword, Heavy Breastplate and Amulet: conditional starter-reward ownership, not a representative Tower cohort or optimized role roster.",
+    "Tier 1 rank 0 Standard equipment with baseline rolls, no equipment or Combat Styles. Goblin Warrior and Goblin occupy the two unlocked Essence slots; each is level 1, unascended and unevolved.",
+    "Party slots 1 through 5 are PartyNumber 1. Full prepared health, default resources, no persistent or temporary player bonuses; active abilities start on cooldown.",
+    "Floor 1 is uncleared, with no weapon, ward, weak-point or research contributions. All three preparation modifiers are zero; acquisition, access quest completion and rally waiting are assumed.",
+    "Seeds are a fixed 20-trial validation schedule declared before execution. Wins and duration are descriptive; no starter win-rate policy, baseline promotion or Tower difficulty target."
+  ],
+  "seeds": [
+    1337,
+    17,
+    -12345,
+    0,
+    918101,
+    918102,
+    918103,
+    918104,
+    918105,
+    918106,
+    918107,
+    918108,
+    918109,
+    918110,
+    918111,
+    918112,
+    918113,
+    918114,
+    918115,
+    918116
+  ],
+  "party": [
+    {
+      "partySlot": 1,
+      "build": {
+        "id": "tower-floor-1-member-1",
+        "characterLevel": 10,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.shortsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin"
+        ]
+      }
+    },
+    {
+      "partySlot": 2,
+      "build": {
+        "id": "tower-floor-1-member-2",
+        "characterLevel": 10,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.shortsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin"
+        ]
+      }
+    },
+    {
+      "partySlot": 3,
+      "build": {
+        "id": "tower-floor-1-member-3",
+        "characterLevel": 10,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.shortsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin"
+        ]
+      }
+    },
+    {
+      "partySlot": 4,
+      "build": {
+        "id": "tower-floor-1-member-4",
+        "characterLevel": 10,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.shortsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin"
+        ]
+      }
+    },
+    {
+      "partySlot": 5,
+      "build": {
+        "id": "tower-floor-1-member-5",
+        "characterLevel": 10,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.shortsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin"
+        ]
+      }
+    }
+  ]
+}

@@ -2,6 +2,7 @@ export const GUIDE_PAGE_IDS = {
   characterOverview: 'character-overview',
   inventory: 'inventory',
   essences: 'essences',
+  combatStyles: 'combat-styles',
   soulstones: 'soulstones',
   combat: 'combat',
   world: 'world',

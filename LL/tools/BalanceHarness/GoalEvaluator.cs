@@ -25,9 +25,11 @@ public static class GoalEvaluator
         var wrongCohort = goals.SuiteId != run.Input.Definition.Id || goals.FixtureHash != fixtureHash;
         if (wrongCohort) issues.Add($"Suite or fixture contract differs from the goals. Run fixture hash: {fixtureHash}. Review the cohort before updating goals.");
         var required = goals.RequiredCells.ToHashSet(StringComparer.Ordinal);
+        var diagnostic = (goals.DiagnosticCells ?? []).ToHashSet(StringComparer.Ordinal);
         var actual = run.Input.Cells.Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
         foreach (var id in required.Except(actual).Order(StringComparer.Ordinal)) issues.Add($"Required cell missing: {id}.");
-        foreach (var id in actual.Except(required).Order(StringComparer.Ordinal)) issues.Add($"Cell has no declared goal coverage: {id}.");
+        foreach (var id in diagnostic.Except(actual).Order(StringComparer.Ordinal)) issues.Add($"Diagnostic cell missing: {id}.");
+        foreach (var id in actual.Except(required.Union(diagnostic)).Order(StringComparer.Ordinal)) issues.Add($"Cell has no declared goal coverage: {id}.");
         if (run.Scorecard.Status != "Complete") issues.Add($"Run status is {run.Scorecard.Status}; incomplete evidence cannot pass evaluation.");
         var wrongComparison = comparison is not null && (comparison.SchemaVersion != 1
             || comparison.ComparisonVersion != SuiteComparison.Version || comparison.CandidateArtifactHash != run.ArtifactHash);

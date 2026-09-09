@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Items;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Common.Interfaces;
 using Domain.Models.Essences;
 using Domain.Models.Snapshots;
@@ -10,11 +11,14 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
 {
     private readonly IDbContext _dbContext;
     private readonly IEquipmentLoadoutService? _equipmentLoadouts;
+    private readonly ICombatStyleService? _combatStyles;
 
-    public CharacterSnapshotRepository(IDbContext dbContext, IEquipmentLoadoutService? equipmentLoadouts = null)
+    public CharacterSnapshotRepository(IDbContext dbContext, IEquipmentLoadoutService? equipmentLoadouts = null,
+        ICombatStyleService? combatStyles = null)
     {
         _dbContext = dbContext;
         _equipmentLoadouts = equipmentLoadouts;
+        _combatStyles = combatStyles;
     }
 
     public Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct = default) =>
@@ -65,7 +69,10 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
             Level = character.Level,
             BaseAttributes = [.. baseAttrs],
             Equipment = equipment,
-            EquippedEssences = equippedEssences
+            EquippedEssences = equippedEssences,
+            CombatStyle = _combatStyles is null ? null : await _combatStyles.ResolveAsync(
+                characterId, activity, ct,
+                equippedEssences.Select(x => x.ToPlayerEssence(characterId)).ToArray())
         };
 
         _dbContext.CharacterSnapshots.Add(snapshot);

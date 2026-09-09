@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { EquipmentUpgradePanelComponent } from './equipment-upgrade-panel.component';
 import {
   EquipmentService,
@@ -19,6 +19,7 @@ describe('Equipment blueprint panel', () => {
       'previewUpgrade',
       'getBlueprints',
       'applyVariant',
+      'reinforce',
     ]);
     TestBed.configureTestingModule({
       imports: [EquipmentUpgradePanelComponent],
@@ -66,13 +67,67 @@ describe('Equipment blueprint panel', () => {
     api.previewUpgrade.and.returnValues(oldPreview, currentPreview);
     panel.selectBlueprint('fury');
     panel.selectBlueprint('arcane');
-    oldPreview.next({ token: 'old' } as EquipmentUpgradeQuote);
+    oldPreview.next({ operationId: 'old' } as EquipmentUpgradeQuote);
     expect(panel.variantQuote).toBeNull();
-    currentPreview.next({ token: 'current' } as EquipmentUpgradeQuote);
-    expect(panel.variantQuote?.token).toBe('current');
+    currentPreview.next({ operationId: 'current' } as EquipmentUpgradeQuote);
+    expect(panel.variantQuote?.operationId).toBe('current');
     panel.selectBlueprint('');
     expect(panel.variantQuote).toBeNull();
     expect(panel.variantLoading).toBeFalse();
+  });
+
+  it('keeps the operation ID when retrying a conversion after a failed response', () => {
+    const quote = {
+      operationId: 'original-operation',
+      canExecute: true,
+      request: { kind: 'ApplyVariant', blueprintStyleId: 'fury' },
+    } as EquipmentUpgradeQuote;
+    api.previewUpgrade.and.returnValues(
+      of(quote),
+      of({} as EquipmentUpgradeQuote),
+      of({ ...quote, operationId: 'refreshed-preview' }),
+    );
+    api.applyVariant.and.returnValues(
+      throwError(() => ({ errorMessage: 'Connection interrupted.' })),
+      new Subject(),
+    );
+    panel.selectBlueprint('fury');
+    panel.applyVariant();
+
+    expect(panel.error).toBe('Connection interrupted.');
+    expect(panel.variantQuote?.operationId).toBe('original-operation');
+    panel.applyVariant();
+    expect(
+      api.applyVariant.calls.allArgs().map(([value]) => value.operationId),
+    ).toEqual(['original-operation', 'original-operation']);
+  });
+
+  it('refreshes reinforcement affordability after rejection without changing the operation ID', () => {
+    const quote = {
+      operationId: 'reinforce-operation',
+      canExecute: true,
+      request: { kind: 'Reinforce', itemInstanceId: 'sword' },
+    } as EquipmentUpgradeQuote;
+    panel.reinforceQuote = quote;
+    api.reinforce.and.returnValue(
+      throwError(() => ({ errorMessage: 'Not enough Cinders.' })),
+    );
+    api.previewUpgrade.and.returnValue(
+      of({
+        ...quote,
+        operationId: 'refreshed-preview',
+        canExecute: false,
+        unavailableReason: 'Not enough Cinders.',
+      }),
+    );
+
+    panel.reinforce();
+
+    expect(panel.error).toBe('Not enough Cinders.');
+    expect(panel.reinforceQuote?.canExecute).toBeFalse();
+    expect(panel.reinforceQuote?.operationId).toBe('reinforce-operation');
+    panel.reinforce();
+    expect(api.reinforce).toHaveBeenCalledTimes(1);
   });
 
   it('maps blueprint choices into the shared dropdown options', () => {

@@ -104,7 +104,10 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
             TotalCinders: totalCinders,
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
-            EncounterOutcomes: encounterOutcomes);
+            EncounterOutcomes: encounterOutcomes)
+        {
+            EligibleBaseExperience = (long)baseReward.Experience * facts.Encounters.Count(x => x.IsVictory)
+        };
     }
 
     private async Task<IReadOnlyList<InventoryItem>> RollEssenceDropsAsync(

@@ -12,6 +12,7 @@ public static class StateSyncScopes
     public const string EventQuests = "event-quests";
     public const string Achievements = "achievements";
     public const string Essences = "essences";
+    public const string CombatStyles = "combat-styles";
     public const string Soulstones = "soulstones";
     public const string Dungeons = "dungeons";
     public const string Prophecies = "prophecies";
@@ -40,6 +41,7 @@ public static class StateSyncScopes
         EventQuests,
         Achievements,
         Essences,
+        CombatStyles,
         Soulstones,
         Dungeons,
         Prophecies,

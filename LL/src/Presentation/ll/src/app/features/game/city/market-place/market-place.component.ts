@@ -40,10 +40,10 @@ export class MarketPlaceComponent implements OnInit {
   readonly mode = signal<MarketPlaceMode>('browse');
   readonly mobileDetailOpen = signal(false);
   readonly selectedMarket = signal<MarketCategorySelection>({
-    id: 'resources',
-    label: 'Resources',
+    id: 'monster-cores',
+    label: 'Monster Cores',
     itemType: ItemType.Resource,
-    subcategory: 'Ore',
+    subcategory: 'Monster Cores',
   });
   userInfo: UserInfoDto | null = null;
   userInfoLoaded = false;

@@ -43,6 +43,8 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
   getMarketplaceResourceSortRank,
+  isMarketplaceMonsterCore,
+  isMarketplaceBlueprint,
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
 import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
@@ -92,7 +94,7 @@ type MarketTicketSide = 'buy' | 'sell';
 export class MarketPlaceCommodityComponent implements OnInit {
   private readonly _itemType = signal<ItemType>(ItemType.Resource);
   private readonly _subcategory = signal<string | null>(null);
-  private readonly _category = signal<MarketCategoryId>('resources');
+  private readonly _category = signal<MarketCategoryId>('monster-cores');
 
   @Input({ required: true })
   set itemType(value: ItemType) {
@@ -330,8 +332,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly catalogueTitle = computed(() => {
     switch (this._category()) {
-      case 'catalysts':
-        return 'Catalyst catalogue';
+      case 'monster-cores':
+        return 'Monster Core catalogue';
+      case 'blueprints':
+        return 'Blueprint catalogue';
       case 'essences':
         return 'Essence catalogue';
       default:
@@ -341,8 +345,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly catalogueHeading = computed(() => {
     switch (this._category()) {
-      case 'catalysts':
-        return 'Catalysts';
+      case 'monster-cores':
+        return 'Monster Cores';
+      case 'blueprints':
+        return 'Blueprints';
       case 'essences':
         return 'Essences';
       default:
@@ -1001,6 +1007,8 @@ export class MarketPlaceCommodityComponent implements OnInit {
     return (
       base.itemType === this._itemType() &&
       base.stackable &&
+      (this._category() !== 'monster-cores' || isMarketplaceMonsterCore(base)) &&
+      (this._category() !== 'blueprints' || isMarketplaceBlueprint(base)) &&
       (!subcategory ||
         matchesMarketplaceResourceSubcategory(base, normalizedSubcategory) ||
         name === normalizedSubcategory)

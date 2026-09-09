@@ -11,7 +11,7 @@ import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { EssenceItem, ItemBase } from '../../../../../shared/models/item';
 import { MarketPlaceCommodityComponent } from './market-place-commodity.component';
 
-describe('MarketPlaceCommodityComponent absorbed Essences', () => {
+describe('MarketPlaceCommodityComponent', () => {
   const absorbed = essenceBase('venomous_snake');
   const unabsorbed = essenceBase('viper');
   const archive = signal<unknown>({ essences: [], essenceDust: 0 });
@@ -99,25 +99,41 @@ describe('MarketPlaceCommodityComponent absorbed Essences', () => {
     const component = createComponent();
     component.setCatalogStatus('unabsorbed');
 
-    component.category = 'resources';
+    component.category = 'monster-cores';
 
     expect(component.catalogStatus()).toBe('all');
   });
 
-  it('shows tier two materials in their resource family', () => {
+  it('shows only Monster Cores even when no subcategory is supplied', () => {
     const component = createComponent([
+      resourceBase('item.monster_core.primal', 'Primal Monster Core'),
+      resourceBase('item.monster_core.greater', 'Greater Monster Core'),
+      resourceBase('item.monster_core.lesser', 'Lesser Monster Core'),
       resourceBase('ore', 'Ore'),
-      resourceBase('copper_ore', 'Copper Ore'),
-      resourceBase('bloodwood', 'Bloodwood'),
-      resourceBase('thick_hide', 'Thick Hide'),
+      resourceBase('venom_gland', 'Venom Gland'),
+      resourceBase('item.evolution_catalyst.cunning', 'Cunning Evolution Catalyst'),
+      absorbed,
     ]);
     component.itemType = ItemType.Resource;
-    component.category = 'resources';
-    component.subcategory = 'Ore';
+    component.category = 'monster-cores';
 
     expect(
       component.commodities().map((commodity) => commodity.base.id),
-    ).toEqual(['ore', 'copper_ore']);
+    ).toEqual([
+      'item.monster_core.greater',
+      'item.monster_core.lesser',
+      'item.monster_core.primal',
+    ]);
+    expect(component.catalogueHeading()).toBe('Monster Cores');
+
+    component.subcategory = 'Monster Cores';
+    expect(
+      component.commodities().map((commodity) => commodity.base.id),
+    ).toEqual([
+      'item.monster_core.lesser',
+      'item.monster_core.greater',
+      'item.monster_core.primal',
+    ]);
   });
 
   it('loads the Soul Archive once when it has not been fetched yet', () => {
@@ -126,6 +142,31 @@ describe('MarketPlaceCommodityComponent absorbed Essences', () => {
     TestBed.flushEffects();
 
     expect(refreshArchive).toHaveBeenCalledTimes(1);
+  });
+
+  it('browses Blueprints separately from cores, catalysts, and equipment', () => {
+    const component = createComponent([
+      resourceBase('item.blueprint_fury', 'Blueprint: Fury'),
+      resourceBase('item.blueprint_arcane', 'Blueprint: Arcane'),
+      resourceBase('item.monster_core.lesser', 'Lesser Monster Core'),
+      resourceBase('item.evolution_catalyst.cunning', 'Cunning Catalyst'),
+      resourceBase('ore', 'Ore'),
+      { ...resourceBase('item.blueprint_equipment', 'Equipment'), itemType: ItemType.Equipment },
+    ]);
+    component.itemType = ItemType.Resource;
+    component.category = 'blueprints';
+
+    const expectedIds = ['item.blueprint_arcane', 'item.blueprint_fury'];
+    expect(component.commodities().map((entry) => entry.base.id)).toEqual(expectedIds);
+    expect(component.catalogueHeading()).toBe('Blueprints');
+    component.subcategory = 'Blueprints';
+    expect(component.commodities().map((entry) => entry.base.id)).toEqual(expectedIds);
+
+    component.category = 'monster-cores';
+    component.subcategory = 'Monster Cores';
+    expect(component.commodities().map((entry) => entry.base.id)).toEqual([
+      'item.monster_core.lesser',
+    ]);
   });
 
   it('does not refetch the Soul Archive when it is already loaded', () => {

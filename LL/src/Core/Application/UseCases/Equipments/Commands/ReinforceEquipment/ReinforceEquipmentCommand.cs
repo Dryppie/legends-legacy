@@ -11,8 +11,7 @@ namespace Application.UseCases.Equipments.Commands.ReinforceEquipment;
 public sealed record ReinforceEquipmentCommand(
     Guid CharacterId,
     Guid OperationId,
-    Guid ItemInstanceId,
-    string QuoteToken) : ICommand<Response<EquipmentUpgradeMutationDto>>;
+    Guid ItemInstanceId) : ICommand<Response<EquipmentUpgradeMutationDto>>;
 
 public sealed class ReinforceEquipmentCommandHandler(
     IEquipmentUpgradeService service,
@@ -28,6 +27,5 @@ public sealed class ReinforceEquipmentCommandHandler(
             new EquipmentUpgradeRequest(
                 EquipmentUpgradeOperationKind.Reinforce,
                 request.ItemInstanceId),
-            request.QuoteToken,
             cancellationToken), mapper);
 }

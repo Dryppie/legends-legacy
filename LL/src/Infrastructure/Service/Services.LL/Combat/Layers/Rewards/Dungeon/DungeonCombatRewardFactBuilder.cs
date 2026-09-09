@@ -115,7 +115,10 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             FeaturedEssenceMonsterDefinitionId: featuredEssenceMonsterDefinitionId,
             MonsterLootModifiers: monsterLootModifiers,
             PlayerEntityIds: [.. context.PlayerEntityIds],
-            Encounters: encounterFacts);
+            Encounters: encounterFacts)
+        {
+            CapturedCombatStyleId = context.OrchestrationRequest.CharacterSnapshot.CombatStyle?.CombatStyleId
+        };
     }
 
 }

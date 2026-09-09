@@ -40,6 +40,25 @@ export function isMarketplaceTradableItemBase(base: ItemBase): boolean {
   return base.isBound !== true;
 }
 
+export const MARKETPLACE_MONSTER_CORE_ITEM_IDS: readonly string[] = [
+  'item.monster_core.lesser',
+  'item.monster_core.greater',
+  'item.monster_core.primal',
+];
+
+export function isMarketplaceMonsterCore(base: ItemBase): boolean {
+  return (
+    base.itemType === ItemType.Resource &&
+    MARKETPLACE_MONSTER_CORE_ITEM_IDS.includes(base.id)
+  );
+}
+
+export function isMarketplaceBlueprint(base: ItemBase): boolean {
+  return (
+    base.itemType === ItemType.Resource && base.id.startsWith('item.blueprint_')
+  );
+}
+
 export function matchesMarketplaceResourceSubcategory(
   base: ItemBase,
   subcategory: string | null | undefined,
@@ -49,6 +68,10 @@ export function matchesMarketplaceResourceSubcategory(
 
   const normalized = subcategory.toLowerCase();
   switch (normalized) {
+    case 'monster cores':
+      return isMarketplaceMonsterCore(base);
+    case 'blueprints':
+      return isMarketplaceBlueprint(base);
     case 'all resources':
       return true;
     case 'catalysts':
@@ -70,9 +93,11 @@ export function getMarketplaceResourceSortRank(
 
   const normalized = subcategory.toLowerCase();
   const familyIds =
-    normalized === 'catalysts'
-      ? [...MARKETPLACE_CATALYST_ITEM_IDS]
-      : MARKETPLACE_RESOURCE_FAMILY_ITEM_IDS.get(normalized);
+    normalized === 'monster cores'
+      ? MARKETPLACE_MONSTER_CORE_ITEM_IDS
+      : normalized === 'catalysts'
+        ? [...MARKETPLACE_CATALYST_ITEM_IDS]
+        : MARKETPLACE_RESOURCE_FAMILY_ITEM_IDS.get(normalized);
   const index = familyIds?.indexOf(base.id) ?? -1;
 
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;

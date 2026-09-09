@@ -1731,6 +1731,75 @@ namespace Persistence.LL.Migrations
                     b.ToTable("TournamentTeamInvites");
                 });
 
+            modelBuilder.Entity("Domain.Models.CombatStyles.CharacterCombatStyle", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CombatStyleId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<long>("CurrentXp")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("FocusPlayerEssenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("MasteredUpgradeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("RefinementId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.PrimitiveCollection<string[]>("UpgradeIds")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.HasKey("CharacterId", "CombatStyleId");
+
+                    b.ToTable("CharacterCombatStyles", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CharacterCombatStyles_Progression", "\"Level\" BETWEEN 0 AND 10 AND \"CurrentXp\" >= 0 AND (\"Level\" < 10 OR \"CurrentXp\" = 0)");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.CharacterCombatStyleSelection", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CombatStyleId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid?>("FocusPlayerEssenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MasteredUpgradeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("RefinementId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.PrimitiveCollection<string[]>("UpgradeIds")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.HasKey("CharacterId");
+
+                    b.ToTable("CharacterCombatStyleSelections");
+                });
+
             modelBuilder.Entity("Domain.Models.Dungeons.Mastery.CharacterDungeonMastery", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -4799,6 +4868,9 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CombatStyle")
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("ImagePath")
                         .IsRequired()
                         .HasColumnType("text");
@@ -6118,6 +6190,28 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.CharacterCombatStyle", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.CharacterCombatStyleSelection", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonRun", b =>

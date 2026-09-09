@@ -195,8 +195,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public void ClearTrackedEntities()
     {
         ChangeTracker.Clear();
+        TrackingGeneration++;
         _savedInventoryQuantityChanges.Clear();
     }
+
+    public long TrackingGeneration { get; private set; }
 
     public IExecutionStrategy CreateExecutionStrategy()
         => Database.CreateExecutionStrategy();
@@ -635,6 +638,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public DbSet<EssenceItemBase> EssenceItems => Set<EssenceItemBase>();
     public DbSet<PlayerEssence> PlayerEssences => Set<PlayerEssence>();
+    public DbSet<Domain.Models.CombatStyles.CharacterCombatStyle> CharacterCombatStyles => Set<Domain.Models.CombatStyles.CharacterCombatStyle>();
+    public DbSet<Domain.Models.CombatStyles.CharacterCombatStyleSelection> CharacterCombatStyleSelections => Set<Domain.Models.CombatStyles.CharacterCombatStyleSelection>();
     public DbSet<EquipmentLoadout> EquipmentLoadouts => Set<EquipmentLoadout>();
     public DbSet<EquipmentLoadoutSlot> EquipmentLoadoutSlots => Set<EquipmentLoadoutSlot>();
     public DbSet<EssenceLoadout> EssenceLoadouts => Set<EssenceLoadout>();

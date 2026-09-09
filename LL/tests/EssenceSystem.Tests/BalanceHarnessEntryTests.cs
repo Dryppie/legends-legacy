@@ -48,7 +48,7 @@ public sealed class BalanceHarnessEntryTests
             var quote = policy.Quote(new(plain.Character, null, weapon, true, null, [],
                 [new InventoryItem { ItemInstanceId = blueprint.Id, ItemInstance = blueprint, Quantity = 1 }]),
                 new(EquipmentUpgradeOperationKind.ApplyVariant, weapon.Id, BlueprintStyleId: BloodGroveEntryExperiment.FuryStyle),
-                Guid.NewGuid(), DateTimeOffset.UnixEpoch);
+                Guid.NewGuid());
             Assert.True(quote.CanExecute, quote.UnavailableReason);
             Assert.Equal(budget.CindersSpent, quote.CinderCost);
             Assert.Equal(0, quote.PartsCost);

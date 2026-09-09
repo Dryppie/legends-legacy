@@ -32,6 +32,7 @@ import { PresenceIndicatorComponent } from '../../../../shared/components/charac
 import { EssenceLoadoutDto } from '../../../../shared/models/essence-system';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import { buildPlayerJourneyGuidance } from '../../../../core/services/client-side/player-journey/player-journey';
+import { CombatStyleOverviewComponent } from '../combat-styles/combat-style-overview.component';
 
 export function estimateEssenceThreatPerSecond(
   loadout: EssenceLoadoutDto | null | undefined,
@@ -65,6 +66,7 @@ export function estimateEssenceThreatPerSecond(
     EssencePreviewComponent,
     PresenceIndicatorComponent,
     OverlayModule,
+    CombatStyleOverviewComponent,
   ],
   templateUrl: './character-overview.component.html',
   styleUrl: './character-overview.component.scss',

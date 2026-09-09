@@ -12,8 +12,7 @@ public sealed record DismantleEquipmentCommand(
     Guid CharacterId,
     Guid OperationId,
     Guid ItemInstanceId,
-    bool AllowFavoriteDismantle,
-    string QuoteToken) : ICommand<Response<EquipmentUpgradeMutationDto>>;
+    bool AllowFavoriteDismantle) : ICommand<Response<EquipmentUpgradeMutationDto>>;
 
 public sealed class DismantleEquipmentCommandHandler(
     IEquipmentUpgradeService service,
@@ -30,6 +29,5 @@ public sealed class DismantleEquipmentCommandHandler(
                 EquipmentUpgradeOperationKind.Dismantle,
                 request.ItemInstanceId,
                 request.AllowFavoriteDismantle),
-            request.QuoteToken,
             cancellationToken), mapper);
 }

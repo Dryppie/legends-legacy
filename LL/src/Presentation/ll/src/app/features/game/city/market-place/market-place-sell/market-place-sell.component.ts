@@ -40,8 +40,8 @@ import {
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
   isMarketplaceTradableItemBase,
-  MARKETPLACE_CATALYST_ITEM_IDS,
-  matchesMarketplaceResourceSubcategory,
+  isMarketplaceMonsterCore,
+  isMarketplaceBlueprint,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
 import { aggregateAttributes } from '../../../../../shared/utils/attributes/attribute-order.utils';
 
@@ -62,7 +62,7 @@ import { aggregateAttributes } from '../../../../../shared/utils/attributes/attr
 export class MarketPlaceSellComponent implements OnInit {
   readonly myListings = signal<MarketPlaceListing[]>([]);
   readonly selectedItemType = signal<ItemType | null>(null);
-  readonly selectedCategory = signal<MarketCategoryId>('resources');
+  readonly selectedCategory = signal<MarketCategoryId>('monster-cores');
   readonly selectedSubcategory = signal<string | null>(null);
 
   readonly pendingItem = signal<InventoryItem | null>(null);
@@ -344,8 +344,13 @@ export class MarketPlaceSellComponent implements OnInit {
       items: [],
     },
     {
-      id: 'resources',
-      label: 'Resources',
+      id: 'monster-cores',
+      label: 'Monster Cores',
+      items: [],
+    },
+    {
+      id: 'blueprints',
+      label: 'Blueprints',
       items: [],
     },
     {
@@ -408,8 +413,15 @@ export class MarketPlaceSellComponent implements OnInit {
       case 'Equipment':
         return this.inventoryState.equipment();
 
-      case 'Resources':
-        return this.inventoryState.materials();
+      case 'Monster Cores':
+        return this.inventoryState.materials().filter((item) =>
+          isMarketplaceMonsterCore(item.itemInstance.itemBase),
+        );
+
+      case 'Blueprints':
+        return this.inventoryState.materials().filter((item) =>
+          isMarketplaceBlueprint(item.itemInstance.itemBase),
+        );
 
       case 'Essences':
         return this.inventoryState.essences();
@@ -424,7 +436,8 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   get inventoryTitle(): string {
-    if (this.selectedCategory() === 'catalysts') return 'Catalysts';
+    if (this.selectedCategory() === 'monster-cores') return 'Monster Cores';
+    if (this.selectedCategory() === 'blueprints') return 'Blueprints';
 
     switch (this.selectedItemType()) {
       case ItemType.Equipment:
@@ -439,15 +452,12 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   private matchesSelectedCategory(base: ItemBase): boolean {
-    if (this.selectedCategory() === 'catalysts') {
-      return MARKETPLACE_CATALYST_ITEM_IDS.has(base.id);
+    if (this.selectedCategory() === 'monster-cores') {
+      return isMarketplaceMonsterCore(base);
     }
 
-    if (this.selectedCategory() === 'resources') {
-      return matchesMarketplaceResourceSubcategory(
-        base,
-        this.selectedSubcategory(),
-      );
+    if (this.selectedCategory() === 'blueprints') {
+      return isMarketplaceBlueprint(base);
     }
 
     return true;

@@ -265,10 +265,12 @@
             </article>
           </div>
 
-          <div class="overview-profile-progress">
-          </div>
+          <div class="overview-profile-progress"></div>
         </section>
 
+        @if (!isViewingSearchResult()) {
+          <app-combat-style-overview />
+        }
         <section class="attribute-panel ll-panel mt-4 min-w-0 overflow-hidden">
           <header class="overview-section-heading">
             <div>

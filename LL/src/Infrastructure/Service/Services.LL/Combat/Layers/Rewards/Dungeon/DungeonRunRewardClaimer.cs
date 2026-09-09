@@ -8,6 +8,7 @@ using Domain.Models.Items.Equipments;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
+using Application.Interfaces.Services.LL.CombatStyles;
 
 namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 
@@ -18,24 +19,34 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IInventoryService _inventoryService;
+    private readonly ICombatStyleService? _combatStyles;
 
     public DungeonRunRewardClaimer(
         IExperienceRewardWriter experienceWriter,
         ICurrencyRewardWriter currencyWriter,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        ICombatStyleService? combatStyles = null)
     {
         _experienceWriter = experienceWriter;
         _currencyWriter = currencyWriter;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _inventoryService = inventoryService;
+        _combatStyles = combatStyles;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
     {
         var rewardState = GetClaimableRewards(run);
+        if (run.RewardsClaimedAt is not null || run.Status == DungeonRunStatus.RewardsClaimed) return [];
+        if (_combatStyles is not null && !run.State.CombatStyleExperienceClaimed && rewardState.CombatStyleBaseExperience > 0)
+        {
+            await _combatStyles.GrantCapturedCombatXpAsync(run.CharacterId, run.State.CapturedCombatStyleId,
+                rewardState.CombatStyleBaseExperience, cancellationToken);
+            run.State.CombatStyleExperienceClaimed = true;
+        }
         var equipmentProgressionRewards = run.Status is DungeonRunStatus.Completed or DungeonRunStatus.Retreated
             ? run.PendingRewards.Where(x => x.ProgressionData != null).ToArray() : [];
         var frozenBases = await _itemBases.GetItemBasesByIdsAsync(equipmentProgressionRewards.Select(x => x.ItemId).Distinct().ToArray(), cancellationToken);
@@ -120,6 +131,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             return new DungeonLootBag
             {
                 Experience = secured.Experience, Cinders = secured.Cinders,
+                CombatStyleBaseExperience = secured.CombatStyleBaseExperience,
                 Soulstones = secured.Soulstones, Items = items
             };
         }
@@ -127,6 +139,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
         return new DungeonLootBag
         {
             Experience = run.PendingExperience,
+            CombatStyleBaseExperience = run.State?.PendingCombatStyleBaseExperience ?? 0,
             Cinders = run.PendingCinders,
             Soulstones = run.PendingSoulstones,
             Items = run.PendingRewards

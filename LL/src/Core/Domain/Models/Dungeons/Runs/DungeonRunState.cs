@@ -11,6 +11,9 @@ public sealed class DungeonRunState
     public bool StartedWithoutWeapon { get; set; }
     public DungeonLootBag SecuredLoot { get; set; } = new();
     public DungeonLootBag PendingLoot { get; set; } = new();
+    public string? CapturedCombatStyleId { get; set; }
+    public long PendingCombatStyleBaseExperience { get; set; }
+    public bool CombatStyleExperienceClaimed { get; set; }
     public List<DungeonMapNode> MapNodes { get; set; } = [];
     public List<int> TraversedRoomIndexes { get; set; } = [];
     public List<DungeonRouteOption> CurrentRouteOptions { get; set; } = [];
@@ -72,6 +75,7 @@ public sealed class DungeonFailureAnalysis
 public sealed class DungeonLootBag
 {
     public int Experience { get; set; }
+    public long CombatStyleBaseExperience { get; set; }
     public int Cinders { get; set; }
     public int Soulstones { get; set; }
     public Dictionary<string, int> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);

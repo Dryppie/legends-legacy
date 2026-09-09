@@ -43,7 +43,7 @@ jobs:
 
       - name: Verify harness correctness and parity
         shell: pwsh
-        run: ./build/run-tests.ps1 -Filter 'FullyQualifiedName~BalanceHarness'
+        run: ./build/run-tests.ps1 -Filter 'FullyQualifiedName~BalanceHarness|FullyQualifiedName~CombatStyleHarness'
 
       - name: Run repeatability, replay and draft evaluation smoke
         timeout-minutes: 3

@@ -1,0 +1,497 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-anchors-v1",
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "samplesPerCell": 20,
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "profiles": [
+    {
+      "id": "entry-4-guardian",
+      "assumptions": "User progression anchor: floor 1 should be approachable at about 4 equipped Essence slots per character. Model uses the first unlock level 30. Gear assumption: seven Standard tier-1 rank-0 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "entry-4-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "entry-4-restorer",
+      "assumptions": "User progression anchor: floor 1 should be approachable at about 4 equipped Essence slots per character. Model uses the first unlock level 30. Gear assumption: seven Standard tier-1 rank-0 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "entry-4-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "entry-4-striker",
+      "assumptions": "User progression anchor: floor 1 should be approachable at about 4 equipped Essence slots per character. Model uses the first unlock level 30. Gear assumption: seven Standard tier-1 rank-0 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "entry-4-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "entry-4-controller",
+      "assumptions": "User progression anchor: floor 1 should be approachable at about 4 equipped Essence slots per character. Model uses the first unlock level 30. Gear assumption: seven Standard tier-1 rank-0 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "entry-4-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-guardian",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-restorer",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-striker",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "floor-10-6-controller",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved.",
+      "build": {
+        "id": "floor-10-6-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    }
+  ],
+  "parties": [
+    {
+      "id": "entry-4",
+      "assumptions": "User progression anchor: floor 1 should be approachable at about 4 equipped Essence slots per character. Model uses the first unlock level 30. Gear assumption: seven Standard tier-1 rank-0 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved. Fixed Guardian, Restorer, two Strikers and Controller cell fills RequiredSlots. Run all floors for context; only floor 1 is this party's stated anchor. No scouting or contributions.",
+      "cellProfiles": [
+        "entry-4-guardian",
+        "entry-4-restorer",
+        "entry-4-striker",
+        "entry-4-striker",
+        "entry-4-controller"
+      ]
+    },
+    {
+      "id": "floor-10-6",
+      "assumptions": "User progression anchor: floor 10 should be approachable at about 6 equipped Essence slots per character. Model uses the first unlock level 50. Gear assumption: seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended, unevolved Essences. Gear and access are conditional assumptions, not user-approved acquisition budgets; no numerical clear-rate target is approved. Fixed Guardian, Restorer, two Strikers and Controller cell fills RequiredSlots. Run all floors for context; only floor 10 is this party's stated anchor. No scouting or contributions.",
+      "cellProfiles": [
+        "floor-10-6-guardian",
+        "floor-10-6-restorer",
+        "floor-10-6-striker",
+        "floor-10-6-striker",
+        "floor-10-6-controller"
+      ]
+    }
+  ]
+}

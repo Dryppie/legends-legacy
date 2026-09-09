@@ -53,7 +53,7 @@ public sealed class CreatureScalerTests
         Assert.Equal(1.105, campaignStart.DefenseMultiplier, 5);
         Assert.Equal(1.105, campaignStart.ResistanceMultiplier, 5);
         Assert.Equal(2.29, bloodGrove.HealthMultiplier, 5);
-        Assert.Equal(4.511, bloodGrove.OffenseMultiplier, 5);
+        Assert.Equal(2.421, bloodGrove.OffenseMultiplier, 5);
         Assert.Equal(1.491, bloodGrove.DefenseMultiplier, 5);
         Assert.Equal(1.491, bloodGrove.ResistanceMultiplier, 5);
         Assert.Equal(2.31754451, regionOneMid.HealthMultiplier, 5);

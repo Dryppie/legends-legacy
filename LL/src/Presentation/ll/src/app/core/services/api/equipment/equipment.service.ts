@@ -59,8 +59,6 @@ export interface EquipmentUpgradeRequest {
 export interface EquipmentUpgradeQuote {
   operationId: string;
   request: EquipmentUpgradeRequest;
-  token: string;
-  expiresAtUtc: string;
   canExecute: boolean;
   unavailableReason: string | null;
   before: EquipmentProgressionItem | null;
@@ -90,7 +88,6 @@ export interface EquipmentUpgradeOutcome {
 
 export interface EquipmentUpgradeMutation {
   outcome: EquipmentUpgradeOutcome | null;
-  freshQuote: EquipmentUpgradeQuote | null;
 }
 
 @Injectable({
@@ -134,7 +131,6 @@ export class EquipmentService {
     return this.apiService.post('equipment/upgrade/reinforce', {
       operationId: quote.operationId,
       itemInstanceId: quote.request.itemInstanceId,
-      quoteToken: quote.token,
     });
   }
 
@@ -151,7 +147,6 @@ export class EquipmentService {
       operationId: quote.operationId,
       itemInstanceId: quote.request.itemInstanceId,
       blueprintStyleId: quote.request.blueprintStyleId,
-      quoteToken: quote.token,
     });
   }
 
@@ -162,7 +157,6 @@ export class EquipmentService {
       operationId: quote.operationId,
       itemInstanceId: quote.request.itemInstanceId,
       allowFavoriteDismantle: quote.request.allowFavoriteDismantle,
-      quoteToken: quote.token,
     });
   }
 

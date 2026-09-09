@@ -114,6 +114,8 @@ public static class DependencyInjection
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentBlueprintRepository, EquipmentBlueprintRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IStarterEquipmentRepository, StarterEquipmentRepository>();
         services.AddScoped<IEssenceRepository, EssenceRepository>();
+        services.AddScoped<Domain.Models.CombatStyles.ICombatStyleRepository, Persistence.LL.Repositories.CombatStyles.CombatStyleRepository>();
+        services.AddScoped<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleActivityRepository, Persistence.LL.Repositories.CombatStyles.CombatStyleActivityRepository>();
 
         services.AddScoped<Domain.Models.Guilds.IGuildVaultRepository, Persistence.LL.Repositories.Guilds.GuildVaultRepository>();
         services.AddScoped<IGuildRepository, GuildRepository>();

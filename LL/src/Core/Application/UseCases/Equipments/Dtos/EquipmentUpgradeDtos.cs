@@ -9,8 +9,6 @@ public sealed class EquipmentUpgradeQuoteDto : IMapFrom<EquipmentUpgradeQuote>
 {
     public Guid OperationId { get; set; }
     public EquipmentUpgradeRequest Request { get; set; } = null!;
-    public string Token { get; set; } = string.Empty;
-    public DateTimeOffset ExpiresAtUtc { get; set; }
     public bool CanExecute { get; set; }
     public string? UnavailableReason { get; set; }
     public EquipmentProgressionItemDto? Before { get; set; }
@@ -49,7 +47,6 @@ public sealed class EquipmentUpgradeOutcomeDto : IMapFrom<EquipmentUpgradeOutcom
 public sealed class EquipmentUpgradeMutationDto : IMapFrom<EquipmentUpgradeResult>
 {
     public EquipmentUpgradeOutcomeDto? Outcome { get; set; }
-    public EquipmentUpgradeQuoteDto? FreshQuote { get; set; }
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<EquipmentUpgradeResult, EquipmentUpgradeMutationDto>();
@@ -60,10 +57,6 @@ public sealed class EquipmentUpgradeMutationDto : IMapFrom<EquipmentUpgradeResul
     {
         IsSuccess = result.Outcome is not null,
         Data = mapper.Map<EquipmentUpgradeMutationDto>(result),
-        ErrorMessage = result.Error ?? string.Empty,
-        IsConflict = result.FreshQuote is not null,
-        ErrorCode = result.FreshQuote is not null
-            ? "equipment_upgrade_quote_changed"
-            : Response<EquipmentUpgradeMutationDto>.DefaultErrorCode
+        ErrorMessage = result.Error ?? string.Empty
     };
 }

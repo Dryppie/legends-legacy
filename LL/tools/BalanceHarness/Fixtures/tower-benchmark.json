@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-reference-v1",
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "samplesPerCell": 20,
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "profiles": [
+    {
+      "id": "starter",
+      "assumptions": "Level 10 conditional starter rewards: three items and Goblin Warrior plus Goblin. Ownership and access are assumed; rank 0, Standard tier 1, baseline rolls, no styles, level-1 unascended Essences.",
+      "build": {
+        "id": "tower-floor-1-member-1",
+        "characterLevel": 10,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.shortsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin"
+        ]
+      }
+    },
+    {
+      "id": "guardian",
+      "assumptions": "Level 20 equipment-complete reference budget: seven items filling eight slots with a two-handed weapon; Standard tier 1 rank 0, baseline rolls, no styles. Three selected level-1 unascended Essences follow existing canonical role suggestions. Ownership is conditional, not an acquisition-time or intended-floor audience claim.",
+      "build": {
+        "id": "guardian",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "restorer",
+      "assumptions": "Level 20 equipment-complete reference budget: seven items filling eight slots with a two-handed weapon; Standard tier 1 rank 0, baseline rolls, no styles. Three selected level-1 unascended Essences follow existing canonical role suggestions. Ownership is conditional, not an acquisition-time or intended-floor audience claim.",
+      "build": {
+        "id": "restorer",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman"
+        ]
+      }
+    },
+    {
+      "id": "striker",
+      "assumptions": "Level 20 equipment-complete reference budget: seven items filling eight slots with a two-handed weapon; Standard tier 1 rank 0, baseline rolls, no styles. Three selected level-1 unascended Essences follow existing canonical role suggestions. Ownership is conditional, not an acquisition-time or intended-floor audience claim.",
+      "build": {
+        "id": "striker",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie"
+        ]
+      }
+    },
+    {
+      "id": "controller",
+      "assumptions": "Level 20 equipment-complete reference budget: seven items filling eight slots with a two-handed weapon; Standard tier 1 rank 0, baseline rolls, no styles. Three selected level-1 unascended Essences follow existing canonical role suggestions. Ownership is conditional, not an acquisition-time or intended-floor audience claim.",
+      "build": {
+        "id": "controller",
+        "characterLevel": 20,
+        "tier": 1,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin"
+        ]
+      }
+    }
+  ],
+  "parties": [
+    {
+      "id": "starter",
+      "assumptions": "Five copies of the conditional level-10 starter profile per cell; repeat the cell for larger floors. No scouting or contributions.",
+      "cellProfiles": [
+        "starter",
+        "starter",
+        "starter",
+        "starter",
+        "starter"
+      ]
+    },
+    {
+      "id": "mixed",
+      "assumptions": "Level-20 Guardian, Restorer, two Strikers and Controller per five-character cell. Role labels are benchmark conventions, not player classes or guaranteed performance. Repeat the cell for larger floors. No scouting or contributions.",
+      "cellProfiles": [
+        "guardian",
+        "restorer",
+        "striker",
+        "striker",
+        "controller"
+      ]
+    }
+  ]
+}

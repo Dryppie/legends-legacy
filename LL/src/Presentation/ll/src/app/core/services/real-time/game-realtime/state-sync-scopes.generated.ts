@@ -12,6 +12,7 @@ export const stateSyncScopes = [
   'event-quests',
   'achievements',
   'essences',
+  'combat-styles',
   'soulstones',
   'dungeons',
   'prophecies',

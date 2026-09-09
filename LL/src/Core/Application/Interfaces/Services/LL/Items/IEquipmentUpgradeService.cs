@@ -14,6 +14,5 @@ public interface IEquipmentUpgradeService
         Guid characterId,
         Guid operationId,
         EquipmentUpgradeRequest request,
-        string expectedQuote,
         CancellationToken cancellationToken);
 }

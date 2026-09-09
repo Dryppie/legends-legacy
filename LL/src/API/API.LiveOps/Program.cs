@@ -58,6 +58,7 @@ builder.Services.AddRateLimiter(options =>
                 AutoReplenishment = true
             }));
 });
+builder.Services.AddLiveOpsDataProtection(config, builder.Environment);
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-XSRF-TOKEN";

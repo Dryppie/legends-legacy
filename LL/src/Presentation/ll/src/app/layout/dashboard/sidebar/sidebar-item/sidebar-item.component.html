@@ -30,7 +30,7 @@
     <app-feature-icon
       class="scale-[1.4]"
       [decorated]="false"
-      [image]="item.icon"
+      [image]="isActive && item.activeIcon ? item.activeIcon : item.icon"
     ></app-feature-icon>
   </div>
   <div

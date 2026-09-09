@@ -1,12 +1,14 @@
 using Application.Interfaces.Services.LL.Items;
 using Domain.Models.Essences;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Loadouts;
 using Domain.Models.Items.Equipments.Slots;
 
 namespace Services.LL.Items;
 
-public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository repository, IEquipmentSlotRepository equipment) : IEquipmentLoadoutService
+public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository repository, IEquipmentSlotRepository equipment,
+    ICombatStyleMutationBoundary? buildBoundary = null) : IEquipmentLoadoutService
 {
     public Task<List<EquipmentLoadout>> GetAsync(Guid characterId, CancellationToken ct) => repository.GetAsync(characterId, ct);
 
@@ -24,6 +26,8 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
         var available = await repository.GetAvailableItemIdsAsync(characterId, ct);
         if (slots.Any(x => x.EquipmentInstanceId.HasValue && !available.Contains(x.EquipmentInstanceId.Value)))
             return EquipmentEquipResult.Fail("Some equipped items are no longer available.");
+        if (buildBoundary is not null && await buildBoundary.PrepareMutationAsync(characterId, ct) is { } blocked)
+            return EquipmentEquipResult.Fail(blocked);
         if (loadout is null)
         {
             loadout = new() { Id = Guid.NewGuid(), CharacterId = characterId, CreatedAt = DateTimeOffset.UtcNow };
@@ -38,6 +42,8 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
     {
         var loadout = (await repository.GetAsync(characterId, ct)).SingleOrDefault(x => x.Id == id);
         if (loadout is null) return EquipmentEquipResult.Fail("Equipment loadout not found.");
+        if (buildBoundary is not null && await buildBoundary.PrepareMutationAsync(characterId, ct) is { } blocked)
+            return EquipmentEquipResult.Fail(blocked);
         repository.Remove(loadout);
         return EquipmentEquipResult.Success();
     }
@@ -47,6 +53,8 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
         if (activities.Any(x => !EssenceLoadoutSelection.IsValidSingleActivity(x))) return EquipmentEquipResult.Fail("Unsupported combat activity.");
         var loadouts = await repository.GetAsync(characterId, ct);
         if (loadouts.All(x => x.Id != id)) return EquipmentEquipResult.Fail("Equipment loadout not found.");
+        if (buildBoundary is not null && await buildBoundary.PrepareMutationAsync(characterId, ct) is { } blocked)
+            return EquipmentEquipResult.Fail(blocked);
         var mask = activities.Aggregate(EssenceCombatActivity.None, (a, b) => a | b);
         foreach (var loadout in loadouts)
             loadout.AutoUseActivities = loadout.Id == id ? mask : loadout.AutoUseActivities & ~mask;
@@ -70,6 +78,8 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
         var loadout = (await repository.GetAsync(characterId, ct)).SingleOrDefault(x => x.Id == id);
         if (loadout is null) return EquipmentEquipResult.Fail("Equipment loadout not found.");
         if (!await IsAvailableAsync(loadout, ct)) return EquipmentEquipResult.Fail("Some saved equipment is no longer available. Update this loadout before equipping it.");
+        if (buildBoundary is not null && await buildBoundary.PrepareMutationAsync(characterId, ct) is { } blocked)
+            return EquipmentEquipResult.Fail(blocked);
         var current = await equipment.GetEquipmentSlotsByEntityIdAsync(characterId, ct);
         foreach (var slot in current.Where(x => x.EquipmentInstanceId.HasValue).ToList())
             if (slot.EquipmentInstanceId.HasValue)

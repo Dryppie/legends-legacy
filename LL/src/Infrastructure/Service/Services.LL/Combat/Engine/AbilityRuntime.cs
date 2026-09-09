@@ -3,6 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
+using Domain.Models.CombatStyles;
 
 namespace Services.LL.Combat.Engine;
 
@@ -184,13 +185,15 @@ public sealed class RuntimeAbility
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<string>> _effectTargets = new(StringComparer.OrdinalIgnoreCase);
 
-    public RuntimeAbility(CompiledAbility definition)
+    public RuntimeAbility(CompiledAbility definition, Guid? originPlayerEssenceId = null)
     {
         Definition = definition;
+        OriginPlayerEssenceId = originPlayerEssenceId;
         RemainingCooldownTicks = 0;
     }
 
     public CompiledAbility Definition { get; }
+    public Guid? OriginPlayerEssenceId { get; }
     public int RemainingCooldownTicks { get; private set; }
     public bool IsReady => RemainingCooldownTicks <= 0;
 
@@ -773,7 +776,9 @@ public sealed class RuntimeCombatant
         int? partyNumber = null,
         BossStaggerDefinition? staggerDefinition = null,
         int staggerParticipantCount = 1,
-        int level = 1)
+        int level = 1,
+        CombatStyleSnapshot? combatStyle = null,
+        IReadOnlyDictionary<string, Guid>? essenceOrigins = null)
     {
         Id = id;
         Name = name;
@@ -785,7 +790,9 @@ public sealed class RuntimeCombatant
         InitialAttributes = new Dictionary<AttributeType, float>(Attributes);
         Health = GetAttribute(AttributeType.MaxHealth);
         Tags = new HashSet<string>(tags ?? [], StringComparer.OrdinalIgnoreCase);
-        Abilities = abilities.Select(x => new RuntimeAbility(x)).ToList();
+        Abilities = abilities.Select(x => new RuntimeAbility(x,
+            essenceOrigins is not null && essenceOrigins.TryGetValue(x.Id, out var origin) ? origin : null)).ToList();
+        CombatStyle = isSummoned ? null : combatStyle;
         ImagePath = imagePath;
         IsSummoned = isSummoned;
         ThreatMultiplier = Math.Max(0, threatMultiplier);
@@ -815,6 +822,7 @@ public sealed class RuntimeCombatant
     public IReadOnlyDictionary<AttributeType, float> InitialAttributes { get; }
     public HashSet<string> Tags { get; }
     public List<RuntimeAbility> Abilities { get; }
+    public CombatStyleSnapshot? CombatStyle { get; }
     public List<RuntimeStatus> Statuses { get; } = [];
     public List<RuntimeCondition> Conditions { get; } = [];
     public List<RuntimeEffect> ActiveEffects { get; } = [];

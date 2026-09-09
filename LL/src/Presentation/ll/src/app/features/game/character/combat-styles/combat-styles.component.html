@@ -1,0 +1,963 @@
+<div class="style-page">
+  <header class="style-header">
+    <app-default-header
+      section="Character"
+      title="Combat Styles"
+      icon="sidebar/character/combat-styles"
+      guidePageId="combat-styles"
+      [wrap]="true"
+    >
+      <div header-summary class="header-stats text-xs">
+        @if (state.selected(); as entry) {
+          <div class="level-stat flex flex-wrap items-center gap-2">
+            <span class="ll-eyebrow">Mastery</span>
+            <strong class="text-base text-primary">{{ entry.level }}</strong>
+            <progress
+              class="level-progress h-1 w-24 accent-primary"
+              [value]="entry.level >= 10 ? 1 : entry.currentXp"
+              [max]="entry.level >= 10 ? 1 : entry.xpRequired"
+              [attr.aria-label]="entry.definition.name + ' experience'"
+            ></progress>
+            <span class="ll-text-muted tabular-nums">
+              {{
+                entry.level >= 10
+                  ? "Mastered"
+                  : (entry.currentXp | number) +
+                    " / " +
+                    (entry.xpRequired | number)
+              }}
+            </span>
+          </div>
+          @if (masteryBenefit(); as benefit) {
+            <div
+              class="mastery-bonus-stat flex items-center gap-2"
+              [title]="benefit.perLevel"
+            >
+              <span class="ll-eyebrow">Mastery bonus</span>
+              <span class="tabular-nums text-primary">{{ benefit.bonus }}</span>
+            </div>
+          }
+          <div class="flex items-center gap-2">
+            <span class="ll-eyebrow">Slots</span>
+            <span class="ll-copy"
+              >{{ entry.upgradeSlots
+              }}<span class="slot-total"> of 2</span> open</span
+            >
+          </div>
+        }
+      </div>
+    </app-default-header>
+    <div
+      class="style-status mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
+    >
+      @if (equippedStyleName(); as name) {
+        <p class="equipped-style-status flex items-center gap-2" role="status">
+          <span class="ll-eyebrow">Equipped</span>
+          <strong class="text-primary">{{ name }}</strong>
+        </p>
+      }
+      @if (state.edited() && !previewOnly()) {
+        <span class="text-primary" role="status">Unsaved changes</span>
+      }
+    </div>
+    <div class="style-selector mt-4">
+      <app-navigation-tabs
+        class="style-tabs block"
+        [tabs]="styleTabs()"
+        [activeKey]="state.draft().combatStyleId ?? 'empty-slot'"
+        ariaLabel="Combat Style preview"
+        data-tour="combat-style-list"
+        (tabSelected)="selectStyleTab($event)"
+      />
+      @if (state.data(); as data) {
+        <div class="battle-notice" [class.preview-notice]="previewOnly()">
+          <div class="battle-notice-copy" role="status">
+            <span class="battle-notice-icon" aria-hidden="true">{{
+              previewOnly() ? "ⓘ" : "✓"
+            }}</span>
+            <span class="battle-notice-label">{{
+              previewOnly()
+                ? "Preview only"
+                : data.selection.combatStyleId
+                  ? "In battle"
+                  : "Empty slot"
+            }}</span>
+            <p>
+              @if (previewOnly()) {
+                @if (state.selected(); as entry) {
+                  <strong
+                    >{{ entry.definition.name }} is not your selected Combat
+                    Style.</strong
+                  >
+                  @if (data.selection.combatStyleId) {
+                    {{ equippedStyleName() }} stays in battle until you equip
+                    this.
+                  } @else {
+                    Your slot stays empty until you equip this.
+                  }
+                } @else {
+                  <strong>Your slot is still occupied.</strong>
+                  {{ equippedStyleName() }} stays in battle until you unequip
+                  it.
+                }
+              } @else if (data.selection.combatStyleId) {
+                <strong>{{ equippedStyleName() }} is in your slot.</strong>
+                @if (state.edited()) {
+                  Save to apply your configuration changes.
+                } @else {
+                  This style is used in every battle.
+                }
+              } @else {
+                No Combat Style is equipped. Choose a style to preview it.
+              }
+            </p>
+          </div>
+          <div class="battle-actions" data-tour="combat-style-save">
+            <app-regular-button
+              text="Discard"
+              [disabled]="!state.edited() || state.busy()"
+              (pressed)="state.resetDraft()"
+            />
+            <app-regular-button
+              [class.battle-action]="previewOnly()"
+              [text]="
+                previewOnly()
+                  ? battleActionLabel()
+                  : state.busy()
+                    ? 'Saving…'
+                    : 'Save'
+              "
+              [disabled]="!state.canSave()"
+              (pressed)="state.save()"
+            />
+          </div>
+        </div>
+      }
+    </div>
+  </header>
+
+  <div class="style-scroll">
+    <div class="style-content">
+      @if (state.error()) {
+        <p role="alert" class="ll-state ll-state-danger">{{ state.error() }}</p>
+        @if (!state.data()) {
+          <app-regular-button
+            text="Retry"
+            [disabled]="state.loading()"
+            (pressed)="state.refresh()"
+          />
+        }
+      }
+      @if (state.message()) {
+        <p role="status" class="ll-state ll-state-success">
+          {{ state.message() }}
+        </p>
+      }
+      @if (state.loading() && !state.data()) {
+        <p class="ll-state ll-state-muted">Loading Combat Styles…</p>
+      }
+
+      @if (state.data(); as data) {
+        @if (state.selected(); as entry) {
+          <div class="overview-grid">
+            <section
+              class="ll-panel style-panel"
+              aria-labelledby="style-mechanic-heading"
+              [attr.aria-busy]="state.previewing()"
+              data-tour="combat-style-preview"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="ll-eyebrow">Core mechanic</p>
+                <span class="ll-text-muted text-xs"
+                  >Mastery {{ entry.level }}</span
+                >
+              </div>
+              <h2 id="style-mechanic-heading" class="ll-heading mt-2 text-2xl">
+                {{ mechanicName() }}
+              </h2>
+              <p class="ll-copy mt-3 text-sm leading-relaxed">
+                {{ entry.definition.description }}
+              </p>
+              @if (selectedRefinement(); as refinement) {
+                <p class="mt-2 text-xs text-primary">
+                  {{ refinement.name }} · {{ refinement.description }}
+                </p>
+              }
+
+              @if (entry.definition.id === "conduit") {
+                <div
+                  class="mt-4 block text-sm text-primary"
+                  data-tour="combat-style-focus"
+                  role="group"
+                  aria-labelledby="combat-style-focus-label"
+                >
+                  <p id="combat-style-focus-label">Focus Essence</p>
+                  <app-dropdown
+                    class="mt-2 block w-full"
+                    appearance="field"
+                    label="Choose your Focus Essence"
+                    [value]="state.draft().focusPlayerEssenceId"
+                    [options]="focusOptions()"
+                    [selectedValue]="state.draft().focusPlayerEssenceId"
+                    [disabled]="state.busy()"
+                    (selection)="selectFocus($event.main)"
+                  ></app-dropdown>
+                </div>
+                <p class="ll-text-muted mt-2 text-xs">
+                  Choose an equipped Essence that deals direct damage, heals or
+                  grants Barrier when it casts. Keep it equipped in every
+                  Essence loadout you use for battle.
+                </p>
+                @if (state.focusInvalid()) {
+                  <p role="alert" class="ll-text-warning mt-2 text-xs">
+                    @if (state.draft().focusPlayerEssenceId) {
+                      Your selected Essence can’t be used as a Focus. Choose
+                      another from your equipped Essences.
+                    } @else {
+                      Choose a Focus Essence before taking Conduit into battle.
+                    }
+                  </p>
+                }
+              }
+
+              @if (state.previewing()) {
+                <p role="status" class="sr-only">
+                  Updating Combat Style preview…
+                </p>
+              }
+              @if (state.previewError()) {
+                <p role="alert" class="ll-text-warning mt-4 text-sm">
+                  {{ state.previewError() }}
+                </p>
+              }
+              @if (state.preview()?.validationIssue) {
+                <p role="alert" class="ll-text-warning mt-4 text-sm">
+                  {{ state.preview()?.validationIssue }}
+                </p>
+              }
+              @if (previewFacts()[0]; as fact) {
+                <div class="ll-card mechanic-example mt-4 p-4">
+                  <div class="example-input">
+                    <p class="ll-eyebrow">Example input</p>
+                    <p class="mt-2 font-mono text-lg font-semibold text-white">
+                      {{ fact.label }}
+                    </p>
+                  </div>
+                  <span class="example-arrow text-primary" aria-hidden="true"
+                    >→</span
+                  >
+                  <div class="example-output">
+                    <p class="ll-eyebrow">At your current mastery</p>
+                    <p
+                      class="mt-2 font-mono text-lg font-semibold leading-snug text-primary"
+                    >
+                      {{ fact.value }}
+                    </p>
+                    @if (fact.condition) {
+                      <p class="ll-text-muted mt-2 text-xs">
+                        {{ fact.condition }}
+                      </p>
+                    }
+                  </div>
+                </div>
+                @for (detail of previewFacts().slice(1); track detail.label) {
+                  <div
+                    class="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-xs"
+                  >
+                    <span class="ll-copy">{{ detail.label }}</span>
+                    <strong class="text-primary">{{ detail.value }}</strong>
+                    @if (detail.condition) {
+                      <p class="ll-text-muted w-full">{{ detail.condition }}</p>
+                    }
+                  </div>
+                }
+              }
+              @if (entry.definition.openingTechnique; as opening) {
+                <div
+                  class="opening-technique mt-4 border-t border-[color:var(--ll-color-border)] pt-4"
+                  [class.ll-text-muted]="entry.level < 7"
+                >
+                  <div
+                    class="flex flex-wrap items-baseline justify-between gap-2"
+                  >
+                    <p class="ll-eyebrow">Opening Technique</p>
+                    <span
+                      class="text-xs"
+                      [class.text-primary]="entry.level >= 7"
+                    >
+                      {{
+                        entry.level >= 7
+                          ? "Unlocked at level 7"
+                          : "Unlocks at level 7"
+                      }}
+                    </span>
+                  </div>
+                  <h3 class="mt-2 text-lg text-primary">{{ opening.name }}</h3>
+                  <p class="ll-copy mt-1 text-xs leading-relaxed">
+                    {{ opening.description }}
+                  </p>
+                </div>
+              }
+            </section>
+
+            <section
+              class="ll-panel style-panel milestone-panel flex flex-col"
+              aria-labelledby="style-milestones-heading"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 id="style-milestones-heading" class="ll-eyebrow">
+                  Milestones
+                </h2>
+                <p class="ll-text-muted font-mono text-xs">
+                  {{ entry.level }} / 10{{
+                    entry.level >= 10 ? " · mastered" : ""
+                  }}
+                </p>
+              </div>
+              <ol
+                class="milestone-track"
+                aria-label="Combat Style level milestones"
+              >
+                @for (milestone of milestones; track milestone.level) {
+                  <li
+                    class="milestone-step"
+                    [class.milestone-complete]="milestone.level <= entry.level"
+                    [class.milestone-unlock]="milestone.kind === 'unlock'"
+                    [attr.aria-current]="
+                      milestone.level === entry.level ? 'step' : null
+                    "
+                  >
+                    <span class="milestone-node" aria-hidden="true">
+                      <span class="milestone-dot"></span>
+                    </span>
+                    <span class="font-mono text-xs">{{ milestone.level }}</span>
+                    <span class="sr-only">: {{ milestone.label }}</span>
+                  </li>
+                }
+              </ol>
+              <div class="milestone-summary text-xs">
+                <dl>
+                  <div>
+                    <dt>0</dt>
+                    <dd class="ll-copy">Full mechanic</dd>
+                  </div>
+                  <div>
+                    <dt>3</dt>
+                    <dd class="ll-copy">Refinements</dd>
+                  </div>
+                  <div>
+                    <dt>5</dt>
+                    <dd class="ll-copy">Upgrade slot 1</dd>
+                  </div>
+                  <div>
+                    <dt>7</dt>
+                    <dd class="ll-copy">Opening Technique</dd>
+                  </div>
+                </dl>
+                <dl>
+                  <div>
+                    <dt>8</dt>
+                    <dd class="ll-copy">Upgrade slot 2</dd>
+                  </div>
+                  <div>
+                    <dt>9</dt>
+                    <dd class="ll-copy">Upgrade Mastery</dd>
+                  </div>
+                  <div>
+                    <dt>1–10</dt>
+                    <dd>Mastery bonus every level</dd>
+                  </div>
+                </dl>
+              </div>
+              @if (masteryBenefit(); as benefit) {
+                <div
+                  class="milestone-mastery-benefit space-y-2 border-t border-[color:var(--ll-color-border)] pt-4 text-xs leading-relaxed"
+                  role="group"
+                  aria-label="Mastery bonus"
+                >
+                  <p class="ll-eyebrow">Mastery bonus</p>
+                  <p class="ll-copy">{{ benefit.perLevel }}</p>
+                  <p class="font-semibold text-primary">
+                    {{ benefit.current }}
+                  </p>
+                  <p class="ll-text-muted">{{ benefit.example }}</p>
+                  @if (benefit.next) {
+                    <p class="ll-copy">
+                      <span class="ll-eyebrow mr-2">Next level</span
+                      >{{ benefit.next }}
+                    </p>
+                  }
+                </div>
+              }
+            </section>
+          </div>
+
+          <div data-tour="combat-style-configuration">
+            <div class="desktop-configuration space-y-6">
+              <ng-container
+                *ngTemplateOutlet="
+                  refinementOptions;
+                  context: { mobile: false }
+                "
+              />
+              <ng-container *ngTemplateOutlet="upgradeOptions" />
+            </div>
+            <div class="mobile-configuration">
+              <section aria-labelledby="mobile-refinement-heading">
+                <div class="mobile-section-heading">
+                  <span class="ll-badge ll-badge-accent" aria-hidden="true"
+                    >1</span
+                  >
+                  <h2
+                    id="mobile-refinement-heading"
+                    class="text-lg text-primary"
+                  >
+                    Refinement
+                  </h2>
+                  <span class="ll-text-muted text-xs">{{
+                    entry.level < 3
+                      ? "Unlocks at level 3"
+                      : "Unlocked at level 3 · 1 of " +
+                        (entry.definition.refinements.length + 1) +
+                        " chosen"
+                  }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="ll-card mobile-summary"
+                  aria-haspopup="dialog"
+                  [disabled]="entry.level < 3 || state.busy()"
+                  (click)="openRefinements(refinementDialog)"
+                >
+                  <span>
+                    <span class="block font-serif text-lg text-primary">{{
+                      selectedRefinement()?.name ?? "Base form"
+                    }}</span>
+                    <span class="ll-copy mt-1 block text-xs">{{
+                      selectedRefinement()?.description ??
+                        "Keeps the core mechanic with your mastery bonus"
+                    }}</span>
+                  </span>
+                  <span class="ll-badge ll-badge-accent">{{
+                    refinementStatus(state.draft().refinementId)
+                  }}</span>
+                </button>
+              </section>
+              <section aria-labelledby="mobile-upgrades-heading">
+                <div class="mobile-section-heading">
+                  <span class="ll-badge ll-badge-accent" aria-hidden="true"
+                    >2</span
+                  >
+                  <h2 id="mobile-upgrades-heading" class="text-lg text-primary">
+                    Upgrades
+                  </h2>
+                  <span class="ll-text-muted text-xs"
+                    >Slots unlock at levels {{ upgradeSlots[0] }} and
+                    {{ upgradeSlots[1] }} · {{ entry.upgradeSlots }} slots
+                    open</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="ll-card mobile-summary"
+                  aria-haspopup="dialog"
+                  [disabled]="state.busy()"
+                  (click)="upgradeDialog.showModal()"
+                >
+                  <span class="ll-copy text-sm"
+                    >{{ state.draft().upgradeIds.length }} of
+                    {{ entry.upgradeSlots }} equipped
+                    <span class="ll-text-muted mt-1 block text-xs"
+                      >Upgrade Mastery ·
+                      {{ entry.level < 9 ? "Unlocks" : "Unlocked" }} at level
+                      9</span
+                    >
+                    <span class="mt-1 block text-xs text-primary">{{
+                      masteredUpgrade()
+                        ? masteredUpgrade()!.name + " empowered"
+                        : entry.level >= 9
+                          ? "Choose one upgrade to empower"
+                          : "Reach level 9 to empower an equipped upgrade"
+                    }}</span></span
+                  >
+                  <span class="text-xs text-primary"
+                    >Choose <span aria-hidden="true">→</span></span
+                  >
+                </button>
+              </section>
+            </div>
+          </div>
+
+          <ng-template #refinementOptions let-mobile="mobile">
+            <fieldset [disabled]="entry.level < 3 || state.busy()">
+              <legend class="mb-4 w-full">
+                <span class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span
+                    class="rounded bg-primary/10 px-1.5 font-mono text-xs text-primary"
+                    aria-hidden="true"
+                    >1</span
+                  >
+                  <span class="font-serif text-xl text-primary"
+                    >Refinement</span
+                  >
+                  <span class="ll-text-muted text-xs"
+                    >{{ entry.level < 3 ? "Unlocks" : "Unlocked" }} at level 3.
+                    Choose one or keep the base form. Mutually exclusive
+                    alternatives.</span
+                  >
+                </span>
+              </legend>
+              <div class="refinement-grid">
+                <label
+                  class="ll-card choice-card style-choice"
+                  [class.ll-card-accent]="
+                    !(mobile ? refinementChoice() : state.draft().refinementId)
+                  "
+                >
+                  <input
+                    class="sr-only"
+                    type="radio"
+                    [name]="
+                      mobile ? 'mobile-style-refinement' : 'style-refinement'
+                    "
+                    [checked]="
+                      !(mobile
+                        ? refinementChoice()
+                        : state.draft().refinementId)
+                    "
+                    (change)="chooseRefinement(null, mobile)"
+                  />
+                  @if (
+                    !(mobile ? refinementChoice() : state.draft().refinementId)
+                  ) {
+                    <span
+                      class="ll-badge ll-badge-accent choice-badge rounded"
+                      >{{ refinementStatus(null) }}</span
+                    >
+                  }
+                  <span class="font-serif text-lg text-primary">Base form</span>
+                  <span class="ll-copy mt-2 text-xs leading-relaxed">{{
+                    entry.definition.description
+                  }}</span>
+                </label>
+                @for (
+                  refinement of entry.definition.refinements;
+                  track refinement.id
+                ) {
+                  <label
+                    class="ll-card choice-card style-choice"
+                    [class.ll-card-accent]="
+                      (mobile
+                        ? refinementChoice()
+                        : state.draft().refinementId) === refinement.id
+                    "
+                  >
+                    <input
+                      class="sr-only"
+                      type="radio"
+                      [name]="
+                        mobile ? 'mobile-style-refinement' : 'style-refinement'
+                      "
+                      [checked]="
+                        (mobile
+                          ? refinementChoice()
+                          : state.draft().refinementId) === refinement.id
+                      "
+                      (change)="chooseRefinement(refinement.id, mobile)"
+                    />
+                    @if (
+                      (mobile
+                        ? refinementChoice()
+                        : state.draft().refinementId) === refinement.id
+                    ) {
+                      <span
+                        class="ll-badge ll-badge-accent choice-badge rounded"
+                        >{{ refinementStatus(refinement.id) }}</span
+                      >
+                    }
+                    <span class="font-serif text-lg text-primary">{{
+                      refinement.name
+                    }}</span>
+                    <span class="ll-copy mt-2 text-xs leading-relaxed">{{
+                      refinement.description
+                    }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          </ng-template>
+          <ng-template #upgradeOptions let-mobile="mobile">
+            <fieldset [disabled]="state.busy()">
+              <legend class="mb-4 w-full">
+                <span class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span
+                    class="rounded bg-primary/10 px-1.5 font-mono text-xs text-primary"
+                    aria-hidden="true"
+                    >2</span
+                  >
+                  <span class="font-serif text-xl text-primary">Upgrades</span>
+                  <span class="ll-text-muted text-xs"
+                    >{{ entry.upgradeSlots }} of 2 slots open ·
+                    {{ state.draft().upgradeIds.length }} selected. Each upgrade
+                    can be equipped once.</span
+                  >
+                </span>
+              </legend>
+              <p class="ll-text-muted mb-4 text-xs leading-relaxed">
+                Unlock your first slot at Mastery 5 and the second slot at
+                Mastery 8.
+              </p>
+              @if (entry.definition.id === "bastion") {
+                <p class="ll-text-muted mb-4 text-xs leading-relaxed">
+                  Barrier bonuses apply when Fortification converts healing.
+                </p>
+              }
+              <div class="upgrade-grid">
+                <div class="upgrade-slots space-y-3">
+                  @for (
+                    unlockLevel of upgradeSlots;
+                    track unlockLevel;
+                    let index = $index
+                  ) {
+                    <div
+                      class="ll-card p-4"
+                      [class.ll-card-accent]="!!upgradeForSlot(index)"
+                      [class.border-dashed]="index >= entry.upgradeSlots"
+                    >
+                      <p class="ll-eyebrow">
+                        Slot {{ index + 1 }} ·
+                        {{
+                          index < entry.upgradeSlots
+                            ? "Open · Unlocked"
+                            : "Unlocks"
+                        }}
+                        at level {{ unlockLevel }}
+                      </p>
+                      @if (upgradeForSlot(index); as upgrade) {
+                        <div
+                          class="mt-2 flex items-start justify-between gap-3"
+                        >
+                          <div>
+                            <h3 class="text-lg text-primary">
+                              {{ upgrade.name }}
+                            </h3>
+                            @if (
+                              state.draft().masteredUpgradeId === upgrade.id
+                            ) {
+                              <span class="ll-badge ll-badge-accent mt-1"
+                                >Empowered</span
+                              >
+                            }
+                            <p
+                              class="slot-description ll-copy mt-2 text-xs leading-relaxed"
+                            >
+                              {{ upgrade.description }}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            class="ll-text-muted text-xs underline hover:text-primary disabled:opacity-40"
+                            [attr.aria-label]="'Remove ' + upgrade.name"
+                            (click)="state.toggleUpgrade(upgrade.id)"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      } @else {
+                        <p
+                          class="mt-2 font-serif text-lg"
+                          [class.text-primary]="index < entry.upgradeSlots"
+                          [class.ll-text-muted]="index >= entry.upgradeSlots"
+                        >
+                          {{
+                            index < entry.upgradeSlots
+                              ? "Choose an upgrade"
+                              : "Locked slot"
+                          }}
+                        </p>
+                        <p class="slot-description ll-text-muted mt-2 text-xs">
+                          {{
+                            index < entry.upgradeSlots
+                              ? "Select an available upgrade from the list. This slot may stay empty."
+                              : "Reach level " +
+                                unlockLevel +
+                                " with " +
+                                entry.definition.name +
+                                " to open this slot."
+                          }}
+                        </p>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="upgrade-choice-list">
+                  @for (
+                    upgrade of entry.definition.upgrades;
+                    track upgrade.id
+                  ) {
+                    <label
+                      class="ll-card style-choice upgrade-option p-4"
+                      [class.ll-card-accent]="
+                        state.draft().upgradeIds.includes(upgrade.id)
+                      "
+                    >
+                      <input
+                        class="sr-only"
+                        type="checkbox"
+                        [checked]="
+                          state.draft().upgradeIds.includes(upgrade.id)
+                        "
+                        [disabled]="
+                          !state.draft().upgradeIds.includes(upgrade.id) &&
+                          state.draft().upgradeIds.length >= entry.upgradeSlots
+                        "
+                        (change)="state.toggleUpgrade(upgrade.id)"
+                      />
+                      <span
+                        class="upgrade-option-name font-serif text-base text-primary"
+                        >{{ upgrade.name }}</span
+                      >
+                      <span
+                        class="upgrade-option-description ll-copy text-xs leading-relaxed"
+                        >{{ upgrade.description }}</span
+                      >
+                      <span
+                        class="upgrade-option-status text-xs text-primary"
+                        [class.invisible]="
+                          !state.draft().upgradeIds.includes(upgrade.id)
+                        "
+                        [attr.aria-hidden]="
+                          !state.draft().upgradeIds.includes(upgrade.id)
+                        "
+                        >{{
+                          mobile &&
+                          state.draft().upgradeIds.includes(upgrade.id)
+                            ? "Slot " +
+                              (state.draft().upgradeIds.indexOf(upgrade.id) + 1)
+                            : "Selected"
+                        }}</span
+                      >
+                    </label>
+                  }
+                </div>
+              </div>
+            </fieldset>
+            <fieldset
+              class="mastery-options mt-5 border-t border-[color:var(--ll-color-border)] pt-4"
+              [disabled]="state.busy() || entry.level < 9"
+            >
+              <legend class="pr-3 font-serif text-lg text-primary">
+                Upgrade Mastery
+              </legend>
+              <div
+                class="mb-3 flex flex-wrap items-center justify-between gap-2"
+              >
+                <p class="ll-text-muted text-xs">
+                  At Mastery 9, choose one of your equipped upgrades to gain its
+                  additional mastery effect.
+                </p>
+                @if (state.draft().masteredUpgradeId) {
+                  <button
+                    type="button"
+                    class="text-xs text-primary underline disabled:opacity-40"
+                    (click)="state.changeMastery(null)"
+                  >
+                    Clear mastery
+                  </button>
+                }
+              </div>
+              <div class="mastery-grid">
+                @for (upgrade of entry.definition.upgrades; track upgrade.id) {
+                  <label
+                    class="ll-card style-choice flex min-w-0 flex-col gap-2 p-3"
+                    [class.ll-card-accent]="
+                      state.draft().masteredUpgradeId === upgrade.id
+                    "
+                  >
+                    <input
+                      class="sr-only"
+                      type="radio"
+                      [name]="
+                        mobile ? 'mobile-upgrade-mastery' : 'upgrade-mastery'
+                      "
+                      [value]="upgrade.id"
+                      [checked]="state.draft().masteredUpgradeId === upgrade.id"
+                      [disabled]="
+                        !state.draft().upgradeIds.includes(upgrade.id)
+                      "
+                      (change)="state.changeMastery(upgrade.id)"
+                    />
+                    <span
+                      class="flex flex-wrap items-center justify-between gap-2"
+                    >
+                      <span class="font-serif text-base text-primary">{{
+                        upgrade.name
+                      }}</span>
+                      <span
+                        class="text-xs"
+                        [class.text-primary]="
+                          state.draft().masteredUpgradeId === upgrade.id
+                        "
+                        >{{
+                          state.draft().masteredUpgradeId === upgrade.id
+                            ? "Empowered"
+                            : state.draft().upgradeIds.includes(upgrade.id)
+                              ? "Equipped"
+                              : "Equip to empower"
+                        }}</span
+                      >
+                    </span>
+                    <span class="ll-copy text-xs leading-relaxed">{{
+                      upgrade.masteryDescription
+                    }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          </ng-template>
+
+          <dialog
+            #refinementDialog
+            class="mobile-editor refinement-sheet bg-texture"
+            aria-labelledby="refinement-dialog-title"
+          >
+            <div class="sheet-handle" aria-hidden="true"></div>
+            <header class="editor-header">
+              <h2 id="refinement-dialog-title" class="text-xl text-primary">
+                Refinement
+              </h2>
+              <button
+                type="button"
+                class="editor-close ll-text-muted"
+                aria-label="Close refinement choices"
+                (click)="refinementDialog.close()"
+              >
+                ×
+              </button>
+            </header>
+            <div class="editor-scroll">
+              <p class="ll-text-muted mb-4 text-xs leading-relaxed">
+                Mutually exclusive alternatives. Keeping the base form is a
+                valid choice.
+              </p>
+              <ng-container
+                *ngTemplateOutlet="refinementOptions; context: { mobile: true }"
+              />
+            </div>
+            <footer class="editor-footer">
+              <app-regular-button
+                [fullWidth]="true"
+                [disabled]="state.busy() || entry.level < 3"
+                [text]="
+                  refinementChoice() ? 'Use refinement' : 'Keep base form'
+                "
+                (pressed)="applyRefinement(refinementDialog)"
+              />
+            </footer>
+          </dialog>
+
+          <dialog
+            #upgradeDialog
+            class="mobile-editor upgrade-screen bg-texture"
+            aria-labelledby="upgrade-dialog-title"
+          >
+            <header class="editor-header">
+              <button
+                type="button"
+                class="editor-close text-primary"
+                aria-label="Back to Combat Styles"
+                (click)="upgradeDialog.close()"
+              >
+                ‹
+              </button>
+              <div class="flex-1">
+                <p class="ll-eyebrow">{{ entry.definition.name }} · Step 2</p>
+                <h2 id="upgrade-dialog-title" class="text-xl text-primary">
+                  Upgrades
+                </h2>
+              </div>
+              <span class="ll-text-muted text-xs"
+                >{{ entry.upgradeSlots }} slots open</span
+              >
+            </header>
+            <div class="editor-scroll">
+              <ng-container
+                *ngTemplateOutlet="upgradeOptions; context: { mobile: true }"
+              />
+              @if (state.error()) {
+                <p role="alert" class="ll-state ll-state-danger mt-3">
+                  {{ state.error() }}
+                </p>
+              }
+              @if (state.message()) {
+                <p role="status" class="ll-state ll-state-success mt-3">
+                  {{ state.message() }}
+                </p>
+              }
+              @if (state.previewError() || state.preview()?.validationIssue) {
+                <p role="alert" class="ll-state ll-state-warning mt-3">
+                  {{ state.previewError() || state.preview()?.validationIssue }}
+                </p>
+              }
+            </div>
+            <footer class="editor-footer upgrade-actions">
+              <app-regular-button
+                text="Clear"
+                [disabled]="state.busy() || !state.draft().upgradeIds.length"
+                (pressed)="clearUpgrades()"
+              />
+              <app-regular-button
+                [fullWidth]="true"
+                [text]="
+                  previewOnly()
+                    ? battleActionLabel()
+                    : state.busy()
+                      ? 'Saving…'
+                      : 'Save Combat Style'
+                "
+                [disabled]="!state.canSave()"
+                (pressed)="state.save()"
+              />
+            </footer>
+          </dialog>
+        } @else {
+          <section class="ll-panel style-panel">
+            <p class="ll-eyebrow">Empty slot</p>
+            <h2 class="mt-2 text-xl text-primary">
+              Your build, without a Combat Style
+            </h2>
+            <p class="ll-copy mt-3 text-sm">
+              Choose a Combat Style to apply its mechanic to every battle. Save
+              this choice, or choose a style above to explore its mechanic.
+            </p>
+            @if (state.previewing()) {
+              <p role="status" class="sr-only">
+                Updating Combat Style preview…
+              </p>
+            }
+            @if (state.previewError()) {
+              <p role="alert" class="ll-text-warning mt-4 text-sm">
+                {{ state.previewError() }}
+              </p>
+            }
+            @if (state.preview()?.validationIssue) {
+              <p role="alert" class="ll-text-warning mt-4 text-sm">
+                {{ state.preview()?.validationIssue }}
+              </p>
+            }
+            <div
+              class="ll-text-muted mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs"
+            >
+              @for (entry of data.styles; track entry.definition.id) {
+                <span
+                  >{{ entry.definition.name }} · Level
+                  {{ entry.level }} preserved</span
+                >
+              }
+            </div>
+          </section>
+        }
+      }
+    </div>
+  </div>
+</div>

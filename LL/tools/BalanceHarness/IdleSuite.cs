@@ -13,7 +13,9 @@ public sealed record IdleProgressionStage(string Id, string Name, string AreaId,
     IReadOnlyList<string> Assumptions, IReadOnlyList<EquipmentReferenceBuildDefinition> Builds,
     IReadOnlyList<IdleBenchmarkEncounter> Encounters,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    IReadOnlyDictionary<string, int>? EssenceLevels = null);
+    IReadOnlyDictionary<string, int>? EssenceLevels = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyDictionary<string, FixtureCombatStyle>? CombatStyles = null);
 public sealed record IdleBenchmarkEncounter(string Id, string Label, Guid CreatureId,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<Guid>? AdditionalCreatureIds = null);
@@ -44,6 +46,8 @@ public static class IdleSuite
                 throw new InvalidDataException($"Stage '{stage.Id}' needs builds, encounters and acquisition assumptions.");
             UniqueIds(stage.Builds.Select(x => x.Id));
             UniqueIds(stage.Encounters.Select(x => x.Id));
+            if (stage.CombatStyles?.Keys.Any(id => !stage.Builds.Any(build => build.Id == id)) == true)
+                throw new InvalidDataException("Combat Style selections must refer to a build in the same stage.");
             OfflineContent.ValidateEssenceLevels(suite.SchemaVersion, stage.EssenceLevels,
                 stage.Builds.SelectMany(b => b.EssenceIds));
             foreach (var build in stage.Builds)
@@ -64,6 +68,8 @@ public static class IdleSuite
                         .Where(e => build.EssenceIds.Contains(e.Key, StringComparer.Ordinal))
                         .ToDictionary(e => e.Key, e => e.Value, StringComparer.Ordinal));
                 if (scenario.EssenceLevels?.Count == 0) scenario = scenario with { EssenceLevels = null };
+                if (stage.CombatStyles?.TryGetValue(build.Id, out var style) == true)
+                    scenario = scenario with { CombatStyle = style };
                 cells.Add(new(id, stage.Name, build.Id, encounter.Label,
                     content.CreateInput(scenario, trials[0].Seed, threat, cadence), trials));
             }

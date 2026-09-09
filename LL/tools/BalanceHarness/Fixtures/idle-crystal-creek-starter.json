@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 2,
+  "id": "idle-crystal-creek-starter-v1",
+  "description": "Level-10 Goblin Warrior/Shortsword/Heavy Breastplate handoff from Blood Grove to Crystal Creek: fixed reward and Fury preparation steps, advisory only; no approved level-10 difficulty target.",
+  "samplesPerCell": 500,
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "stages": [
+    {
+      "id": "handoff-blood-grove",
+      "name": "Blood Grove return / level 10",
+      "areaId": "region_01_area_02",
+      "assumptions": [
+        "Character level 10 after four Blood Grove victories and completion/claim of Blood in the Grove. Access, acquisition and elapsed leveling time are assumed, not simulated.",
+        "Retain the selected Shortsword and Heavy Breastplate. All equipment is common Standard tier 1 rank 0 with baseline rolls. Heavy Breastplate and Amulet are fixed possible chest outcomes, not guaranteed item selections.",
+        "level-only retains the original two items and Goblin Warrior. jewelry adds one Amulet from the Jewelry Chest. quest-rewards adds Goblin using the earlier Lumo Token in the second Essence slot unlocked at level 10.",
+        "fury adds blueprint_fury to the Shortsword using the one guaranteed Fury Blueprint and 100 of the 500 starter Cinders. This is an equipment style; no build uses a Combat Style.",
+        "All Essences remain level 1, Ascension tier 0 and unevolved. The Blood Grove Token is retained. No reinforcement, random drops, extra equipment, persistent bonuses or temporary buffs.",
+        "The quest-rewards build is the primary conditional checkpoint; other builds isolate preparation steps. Neither a best-build selection nor a claim that every Essence should win.",
+        "These fixed ordered pairs are not whole-area spawn samples. Comparisons between areas are descriptive; paired changes apply only to builds facing the same encounter. The existing level-5 target does not apply to these level-10 cells."
+      ],
+      "builds": [
+        {
+          "id": "level-only",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "jewelry",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "quest-rewards",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "fury",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false,
+              "activeStyleId": "blueprint_fury"
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior",
+            "essence.goblin"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "ravens",
+          "label": "Raven + Raven / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000039",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000039"
+          ]
+        },
+        {
+          "id": "raven-zombie",
+          "label": "Raven + Blood Zombie / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000039",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000047"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "handoff-crystal-creek",
+      "name": "Crystal Creek entry / level 10",
+      "areaId": "region_01_area_03",
+      "assumptions": [
+        "Character level 10 after four Blood Grove victories and completion/claim of Blood in the Grove. Access, acquisition and elapsed leveling time are assumed, not simulated.",
+        "Retain the selected Shortsword and Heavy Breastplate. All equipment is common Standard tier 1 rank 0 with baseline rolls. Heavy Breastplate and Amulet are fixed possible chest outcomes, not guaranteed item selections.",
+        "level-only retains the original two items and Goblin Warrior. jewelry adds one Amulet from the Jewelry Chest. quest-rewards adds Goblin using the earlier Lumo Token in the second Essence slot unlocked at level 10.",
+        "fury adds blueprint_fury to the Shortsword using the one guaranteed Fury Blueprint and 100 of the 500 starter Cinders. This is an equipment style; no build uses a Combat Style.",
+        "All Essences remain level 1, Ascension tier 0 and unevolved. The Blood Grove Token is retained. No reinforcement, random drops, extra equipment, persistent bonuses or temporary buffs.",
+        "The quest-rewards build is the primary conditional checkpoint; other builds isolate preparation steps. Neither a best-build selection nor a claim that every Essence should win.",
+        "These fixed ordered pairs are not whole-area spawn samples. Comparisons between areas are descriptive; paired changes apply only to builds facing the same encounter. The existing level-5 target does not apply to these level-10 cells."
+      ],
+      "builds": [
+        {
+          "id": "level-only",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "jewelry",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior"
+          ]
+        },
+        {
+          "id": "quest-rewards",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior",
+            "essence.goblin"
+          ]
+        },
+        {
+          "id": "fury",
+          "characterLevel": 10,
+          "tier": 1,
+          "rank": 0,
+          "quality": "Standard",
+          "attributeRollMultiplier": 1,
+          "equipment": [
+            {
+              "slot": "MainHand",
+              "definitionId": "plain.shortsword",
+              "useNativeStyle": false,
+              "activeStyleId": "blueprint_fury"
+            },
+            {
+              "slot": "Chest",
+              "definitionId": "plain.heavy_breastplate",
+              "useNativeStyle": false
+            },
+            {
+              "slot": "Necklace",
+              "definitionId": "plain.amulet",
+              "useNativeStyle": false
+            }
+          ],
+          "essenceIds": [
+            "essence.goblin_warrior",
+            "essence.goblin"
+          ]
+        }
+      ],
+      "encounters": [
+        {
+          "id": "blue-slimes",
+          "label": "Blue Slime + Blue Slime / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000009",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000009"
+          ]
+        },
+        {
+          "id": "slime-imp",
+          "label": "Blue Slime + Frost Imp / two enemies",
+          "creatureId": "00000000-0000-0000-0000-000000000009",
+          "additionalCreatureIds": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      ]
+    }
+  ]
+}

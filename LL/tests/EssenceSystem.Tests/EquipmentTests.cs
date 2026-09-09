@@ -253,8 +253,7 @@ public sealed class EquipmentTests
             .Quote(
                 context,
                 new EquipmentUpgradeRequest(EquipmentUpgradeOperationKind.Reinforce, state.Id),
-                Guid.NewGuid(),
-                DateTimeOffset.UtcNow);
+                Guid.NewGuid());
 
         Assert.True(quote.CanExecute, quote.UnavailableReason);
         Assert.NotNull(quote.Before);

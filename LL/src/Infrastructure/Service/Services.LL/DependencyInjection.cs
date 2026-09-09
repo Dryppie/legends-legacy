@@ -403,6 +403,11 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionRepository>()));
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
+        services.AddSingleton<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleCatalogProvider>(_ =>
+            new Services.LL.CombatStyles.JsonCombatStyleCatalogProvider(Path.Combine(contentRootPath,
+                config["Content:Root"] ?? "Data", "combat-styles", "combat-styles.v1.json")));
+        services.AddScoped<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleService, Services.LL.CombatStyles.CombatStyleService>();
+        services.AddScoped<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleMutationBoundary, Services.LL.CombatStyles.CombatStyleMutationBoundary>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
         services.AddSingleton<IAbilityCatalogProvider>(sp =>

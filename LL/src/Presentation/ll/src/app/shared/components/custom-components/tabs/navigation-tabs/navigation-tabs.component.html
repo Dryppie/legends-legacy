@@ -28,7 +28,12 @@
     (click)="select(tab)"
     (keydown)="onTabKeydown($event, index)"
   >
-    {{ tab.label }}
+    <span>{{ tab.label }}</span>
+    <span
+      *ngIf="tab.statusLabel"
+      class="navigation-tab-status ml-2 inline-flex rounded border border-primary bg-[var(--ll-color-bg-deep)] px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase leading-none text-primary"
+      >{{ tab.statusLabel }}</span
+    >
     <app-notification-indicator
       *ngIf="tab.badgeCount"
       class="absolute right-1 top-1"

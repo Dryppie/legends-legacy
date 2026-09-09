@@ -32,7 +32,7 @@ public sealed record FastCombatEngineOptions(
     CombatHostileFuryOptions? HostileFury = null,
     bool CaptureCompactTelemetry = true);
 
-public sealed class FastCombatEngine
+public sealed partial class FastCombatEngine
 {
     public const int TicksPerSecond = 10;
     internal const double CombatMagnitudeVariance = 0.2d;
@@ -214,6 +214,8 @@ public sealed class FastCombatEngine
             ? new CombatStatsAccumulator(_captureCompactTelemetry)
             : null;
         _checkpointStats = checkpointStats;
+        for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
+            ApplyCombatStyleOpening(combatants[combatantIndex]);
         if (_captureCompactTelemetry)
             TrackCompactTelemetry(combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
@@ -344,6 +346,7 @@ public sealed class FastCombatEngine
             Duration = _currentTick,
             Outcome = DetermineOutcome(combatants),
             EntityStats = [.. entityStats],
+            CombatStyles = CreateCombatStyleSummaries(),
             CompactTelemetry = _captureCompactTelemetry
                 ? CreateCompactTelemetry(combatants)
                 : new CompactCombatTelemetry()
@@ -352,6 +355,7 @@ public sealed class FastCombatEngine
 
     private void InitializeEncounterCombatant(RuntimeCombatant combatant)
     {
+        InitializeCombatStyle(combatant);
         RegisterListeners(combatant);
         _basicAttackProgress[combatant] = 0;
         _healthRegenerationProgress[combatant] = 0;
@@ -390,6 +394,8 @@ public sealed class FastCombatEngine
                     throw new InvalidOperationException("Hostile reinforcement waves can contain only hostile combatants.");
                 InitializeEncounterCombatant(combatant);
                 combatants.Add(combatant);
+                if (publishCombatStart)
+                    ApplyCombatStyleOpening(combatant);
             }
 
             if (publishCombatStart)
@@ -607,6 +613,9 @@ public sealed class FastCombatEngine
     {
         for (var abilityIndex = 0; abilityIndex < actor.Abilities.Count; abilityIndex++)
         {
+            if (actor.CombatStyle is not null
+                && (!actor.IsAlive || IsActionBlocked(actor) || IsActiveAbilityBlocked(actor)))
+                break;
             var ability = actor.Abilities[abilityIndex];
             if (ability.Definition.Kind != AbilitySpecKind.Active || !ability.IsReady)
                 continue;
@@ -619,13 +628,20 @@ public sealed class FastCombatEngine
             }
 
             var additionalCooldownTicks = PayAbilityCosts(actor, ability.Definition, combatants);
+            // Costs can publish nested reactions. Only a surviving, unblocked action becomes a cast.
+            if (actor.CombatStyle is not null
+                && (!actor.IsAlive || IsActionBlocked(actor) || IsActiveAbilityBlocked(actor)))
+                continue;
+            var styleCast = BeginCombatStyleCast(actor, ability);
             ability.StartCooldown(
                 actor.GetAttribute(AttributeType.Cooldown),
                 additionalCooldownTicks);
             GenerateAbilityThreat(actor, ability.Definition);
             Log(actor, null, ability.Definition.Name, EventType.AbilityUse, 0, $"{actor.Name} used {ability.Definition.Name}");
             var primaryTarget = SelectActiveAbilityPrimaryTarget(ability, actor, combatants);
-            Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, primaryTarget, ability.Definition.Id), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, primaryTarget, ability.Definition.Id,
+                StyleCast: styleCast), combatants);
+            CompleteCombatStyleCast(styleCast);
         }
     }
 
@@ -912,6 +928,7 @@ public sealed class FastCombatEngine
                         var target = targetBuffer[targetIndex];
                         if (target.IsAlive
                             && EffectCanResolve(effect, actor, combatants)
+                            && IsCombatStyleRecoveryUseful(effect, actor, target, combatants, combatEvent)
                             && ConditionsPass(
                                 effect.Conditions,
                                 actor,
@@ -1129,7 +1146,9 @@ public sealed class FastCombatEngine
                                     combatEvent,
                                     combatants,
                                     effectUsage,
-                                    countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
+                                    countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive,
+                                    styleCast: ReferenceEquals(combatEvent.StyleCast?.Ability, ability)
+                                        ? combatEvent.StyleCast : null);
                             }
                             finally
                             {
@@ -1276,10 +1295,12 @@ public sealed class FastCombatEngine
         EffectUsageTracker effectUsage,
         string? statsSourceOverride = null,
         bool countStatsActivation = false,
-        double durationMultiplier = 1d)
+        double durationMultiplier = 1d,
+        CombatStyleCastContext? styleCast = null)
     {
         var activationCounted = false;
         var executionContext = CreateEffectExecutionContext();
+        executionContext.StyleCast = styleCast;
         for (var effectIndex = 0; effectIndex < trigger.Effects.Count; effectIndex++)
         {
             var effect = trigger.Effects[effectIndex];
@@ -1607,6 +1628,8 @@ public sealed class FastCombatEngine
                 var damageType = effect.InheritEventDamageType
                     ? combatEvent?.DamageType ?? effect.DamageType
                     : effect.DamageType;
+                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
+                var styleDamageBonus = TakeCombatStyleDamageBonus(executionContext?.StyleCast, effect, source, target);
                 var healthDamage = ApplyDamage(
                     source,
                     target,
@@ -1618,11 +1641,14 @@ public sealed class FastCombatEngine
                     effect.Id,
                     statsSource,
                     countStatsActivation,
-                    delivery);
+                    delivery,
+                    styleDamageBonus: styleDamageBonus.Amount,
+                    styleDamageBonusKind: styleDamageBonus.Kind);
                 if (delivery == DamageDelivery.Direct)
                     ApplyLifeSteal(effect, source, target, healthDamage, combatants, statsSource);
                 break;
             case AbilityEffectOperation.Heal:
+                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
                 RestoreHealth(
                     source,
                     target,
@@ -1635,6 +1661,7 @@ public sealed class FastCombatEngine
                     countStatsActivation);
                 break;
             case AbilityEffectOperation.GrantBarrier:
+                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
                 var grantedBarrier = CanCrit(effect, AbilityEffectOperation.GrantBarrier)
                                      && RollCriticalStrike(source, effect.CritChanceBonus)
                     ? ApplyCriticalMultiplier(source, value)
@@ -1660,6 +1687,7 @@ public sealed class FastCombatEngine
                     countStatsActivation);
                 break;
             case AbilityEffectOperation.RestoreResource:
+                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
                 if (effect.Resource == AbilityResourceType.Cooldown)
                 {
                     target.ReduceAbilityCooldowns(value);
@@ -1976,9 +2004,11 @@ public sealed class FastCombatEngine
         float armorPenetrationBonus = 0,
         bool skipSourceDamageModifier = false,
         RuntimeCombatant? redirectedFrom = null,
-        bool canConsumeGuard = true)
+        bool canConsumeGuard = true,
+        int styleDamageBonus = 0,
+        CombatStyleDamageBonusKind styleDamageBonusKind = CombatStyleDamageBonusKind.Counterweight)
     {
-        if (!target.IsAlive || damage <= 0)
+        if (!target.IsAlive || damage + styleDamageBonus <= 0)
             return 0;
 
         var redirectedIncomingDamage = delivery == DamageDelivery.Redirected ? damage : 0;
@@ -2002,8 +2032,8 @@ public sealed class FastCombatEngine
                     $"{source.Name} missed {target.Name}.",
                     statsSource,
                     countStatsActivation,
-                    incomingRawDamage: damage,
-                    avoidedDamage: damage,
+                    incomingRawDamage: damage + styleDamageBonus,
+                    avoidedDamage: damage + styleDamageBonus,
                     countsAsTargetedAttack: true);
                 PublishIfObserved(AbilityTriggerEvent.OnDodge, target, source, null, combatants);
                 return 0;
@@ -2030,6 +2060,12 @@ public sealed class FastCombatEngine
             vulnerableDamage = ApplyVulnerable(criticalDamage);
         }
         var vulnerableAmplified = Math.Max(0, vulnerableDamage - criticalDamage);
+        // One attack attempt and one mitigation path. The added component does not crit,
+        // consume another Vulnerable charge, or become eligible damage for Lifesteal/procs.
+        styleDamageBonus = Math.Max(0, (int)Math.Round(styleDamageBonus
+            * Math.Max(0, 1 + target.GetDamageTakenPercent(damageType, source) / 100f)));
+        vulnerableDamage += styleDamageBonus;
+        var styleDamageFraction = vulnerableDamage > 0 ? styleDamageBonus / (double)vulnerableDamage : 0;
         var typedDamage = ApplyTypedDefense(
             source,
             target,
@@ -2079,10 +2115,11 @@ public sealed class FastCombatEngine
             guardedDamage = Math.Max(0, guardedDamage - damageRedirectedAway);
             if (damageRedirectedAway > 0)
             {
+                var redirectedStyleDamage = (int)Math.Round(damageRedirectedAway * styleDamageFraction);
                 ApplyDamage(
                     source,
                     cover.Guardian,
-                    damageRedirectedAway,
+                    damageRedirectedAway - redirectedStyleDamage,
                     attackType,
                     damageType,
                     effect,
@@ -2092,12 +2129,16 @@ public sealed class FastCombatEngine
                     delivery: DamageDelivery.Redirected,
                     armorPenetrationBonus: armorPenetrationBonus,
                     skipSourceDamageModifier: true,
-                    redirectedFrom: target);
+                    redirectedFrom: target,
+                    styleDamageBonus: redirectedStyleDamage,
+                    styleDamageBonusKind: styleDamageBonusKind);
             }
         }
         var damageAmplified = vulnerableAmplified + Math.Max(0, reducedDamage - blockedDamage);
         var barrierBefore = target.Barrier;
         var barrierConsumption = target.ConsumeBarrierWithSources(guardedDamage);
+        // Count the recipient's total once, independently of who supplied each Barrier contribution.
+        RecordReprisalBarrierAbsorbed(source, target, barrierConsumption.Total);
         var barrierAbsorbed = (int)barrierConsumption.Total;
         if (barrierAbsorbed > 0)
         {
@@ -2105,6 +2146,9 @@ public sealed class FastCombatEngine
             {
                 var barrierSource = contribution.Source ?? target;
                 var contributionAmount = Math.Max(0, (int)Math.Round(contribution.Amount));
+                if (contribution.EffectId == FortificationEffectId
+                    && _combatStyles.TryGetValue(barrierSource, out var barrierStyle))
+                    barrierStyle.ConvertedBarrierAbsorbed += contribution.Amount;
                 Log(
                     barrierSource,
                     target,
@@ -2178,7 +2222,7 @@ public sealed class FastCombatEngine
             statsSource,
             countStatsActivation,
             barrierAbsorbed,
-            criticalDamage,
+            criticalDamage + styleDamageBonus,
             avoidedDamage: 0,
             typedMitigationPrevented,
             physicalMitigationPrevented,
@@ -2194,6 +2238,19 @@ public sealed class FastCombatEngine
         var abilityId = sourceName.Equals("Basic Attack", StringComparison.Ordinal)
             ? "basic_attack"
             : effect?.Id;
+        if (styleDamageBonus > 0)
+        {
+            var bonusHealthDamage = Math.Min(healthDamage, (int)Math.Round(healthDamage * styleDamageFraction));
+            if (_combatStyles.TryGetValue(source, out var damageStyle))
+            {
+                var bonusDamage = (healthDamage + barrierAbsorbed) * styleDamageFraction;
+                if (styleDamageBonusKind == CombatStyleDamageBonusKind.Reprisal)
+                    damageStyle.ReprisalDamage += bonusDamage;
+                else
+                    damageStyle.CounterweightDamage += bonusDamage;
+            }
+            healthDamage -= bonusHealthDamage;
+        }
         if (healthDamage > 0)
         {
             PublishIfObserved(
@@ -2261,7 +2318,9 @@ public sealed class FastCombatEngine
             && !ReferenceEquals(source, target)
             && source.IsAlive)
         {
-            ResolveThorns(target, source, guardedDamage, combatants);
+            ResolveThorns(target, source,
+                styleDamageBonus == 0 ? guardedDamage : (int)Math.Round(guardedDamage * (1 - styleDamageFraction)),
+                combatants);
         }
 
         if (!target.IsAlive)
@@ -2671,9 +2730,7 @@ public sealed class FastCombatEngine
             modifiedValue = ApplyCriticalMultiplier(source, modifiedValue);
 
         modifiedValue = ApplyHealingReceivedModifier(target, modifiedValue);
-        var before = target.Health;
-        target.AdjustHealth(modifiedValue);
-        var restored = Math.Max(0, (int)Math.Round(target.Health - before));
+        var restored = Math.Max(0, (int)Math.Round(ApplyCombatStyleRecovery(target, modifiedValue, combatants)));
         Log(
             source,
             target,
@@ -4088,16 +4145,16 @@ public sealed class FastCombatEngine
             _healthRegenerationPulses[combatant] =
                 _healthRegenerationPulses.GetValueOrDefault(combatant) + 1;
 
-            if (combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth))
+            if (combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth)
+                && !IsBastionSelfRecovery(combatant, combatant))
             {
                 _healthRegenerationOverhealed[combatant] =
                     _healthRegenerationOverhealed.GetValueOrDefault(combatant) + potential;
                 continue;
             }
 
-            var healthBefore = combatant.Health;
-            combatant.AdjustHealth(regeneration);
-            var restored = Math.Max(0, (int)Math.Round(combatant.Health - healthBefore));
+            var restored = Math.Max(0, (int)Math.Round(
+                ApplyCombatStyleRecovery(combatant, regeneration, combatants)));
             _healthRegenerationOverhealed[combatant] =
                 _healthRegenerationOverhealed.GetValueOrDefault(combatant)
                 + Math.Max(0, potential - restored);
@@ -5076,7 +5133,10 @@ public sealed class FastCombatEngine
 
         return effect.HealingScalingAttribute is not null
                && effect.HealingScalingCoefficient > 0
-               && source.Health < source.GetAttribute(AttributeType.MaxHealth);
+               && (source.Health < source.GetAttribute(AttributeType.MaxHealth)
+                   || IsBastionSelfRecovery(source, source) && IsModifiedRecoveryUseful(source, source,
+                       ApplyHealingReceivedModifier(source, (float)(GetEffectiveAttribute(source, effect.HealingScalingAttribute.Value)
+                           * effect.HealingScalingCoefficient)), combatants));
     }
 
     private static bool HasReachedSummonCap(
@@ -6003,7 +6063,8 @@ public sealed class FastCombatEngine
         DamageType DamageType = DamageType.None,
         AttackType AttackType = AttackType.None,
         bool WasCritical = false,
-        bool WasDirectHit = false);
+        bool WasDirectHit = false,
+        CombatStyleCastContext? StyleCast = null);
 
     private sealed class ThreatGenerationTelemetry
     {
@@ -6013,6 +6074,7 @@ public sealed class FastCombatEngine
 
     private sealed class EffectExecutionContext
     {
+        public CombatStyleCastContext? StyleCast { get; set; }
         private readonly long _activationSequence;
         private Dictionary<string, int>? _generatedHealingByEffect;
         private Dictionary<string, string>? _summonGroupInstances;

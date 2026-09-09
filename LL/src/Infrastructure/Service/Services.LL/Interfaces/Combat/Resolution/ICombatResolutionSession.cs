@@ -8,6 +8,11 @@ public interface ICombatResolutionSession
 {
     IReadOnlyDictionary<Guid, Entity> SourceEntitiesById { get; }
 
+    IReadOnlyDictionary<Guid, Domain.Models.CombatStyles.CombatStyleSnapshot> CapturedCombatStyles =>
+        new Dictionary<Guid, Domain.Models.CombatStyles.CombatStyleSnapshot>();
+
+    void AdvanceCombatStyle(Guid characterId, int level) { }
+
     Task<CombatEncounterResolutionResult> ResolveAsync(
         CombatEncounterPlan encounterPlan,
         CancellationToken cancellationToken);

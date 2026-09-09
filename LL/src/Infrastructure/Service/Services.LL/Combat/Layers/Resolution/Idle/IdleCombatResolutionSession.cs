@@ -22,6 +22,16 @@ public sealed class IdleCombatResolutionSession : ICombatResolutionSession
 
     public IReadOnlyDictionary<Guid, Entity> SourceEntitiesById => Catalog.SourceEntitiesById;
 
+    public IReadOnlyDictionary<Guid, Domain.Models.CombatStyles.CombatStyleSnapshot> CapturedCombatStyles =>
+        Catalog.FriendlyTemplatesBySourceEntityId.Where(x => x.Value.CombatStyle is not null)
+            .ToDictionary(x => x.Key, x => x.Value.CombatStyle!);
+
+    public void AdvanceCombatStyle(Guid characterId, int level)
+    {
+        if (Catalog.FriendlyTemplatesBySourceEntityId.TryGetValue(characterId, out var template) && template.CombatStyle is { } style)
+            template.CombatStyle = style with { Level = level };
+    }
+
     public async Task<CombatEncounterResolutionResult> ResolveAsync(
         CombatEncounterPlan encounterPlan,
         CancellationToken cancellationToken)

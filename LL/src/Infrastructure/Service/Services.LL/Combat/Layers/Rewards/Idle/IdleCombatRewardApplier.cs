@@ -44,11 +44,35 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
     {
         if (outcome.TotalExperience > 0)
         {
-            await _experienceWriter.AddSplitExperienceAsync(
-                facts.PlayerEntityIds,
-                outcome.TotalExperience,
-                EssenceCombatActivity.IdleCombat,
-                cancellationToken);
+            var recipients = facts.PlayerEntityIds.Distinct().ToArray();
+            if (recipients.Length <= 1)
+            {
+                await _experienceWriter.AddSplitExperienceAsync(
+                    facts.PlayerEntityIds,
+                    outcome.TotalExperience,
+                    EssenceCombatActivity.IdleCombat,
+                    cancellationToken);
+            }
+            else
+            {
+                var shares = new int[recipients.Length];
+                // Split each encounter before batching, so offline and online rewards
+                // give the same recipients the remainders. Persist each recipient once.
+                foreach (var encounter in outcome.EncounterOutcomes)
+                {
+                    var baseShare = encounter.ExperienceGained / recipients.Length;
+                    var remainder = encounter.ExperienceGained % recipients.Length;
+                    for (var index = 0; index < recipients.Length; index++)
+                        shares[index] = checked(shares[index] + baseShare + (index < remainder ? 1 : 0));
+                }
+
+                for (var index = 0; index < recipients.Length; index++)
+                {
+                    if (shares[index] <= 0) continue;
+                    await _experienceWriter.AddSplitExperienceAsync(
+                        [recipients[index]], shares[index], EssenceCombatActivity.IdleCombat, cancellationToken);
+                }
+            }
         }
 
         // Guild missions are evaluated at the original checkpoint timestamp. Keep

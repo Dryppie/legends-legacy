@@ -68,10 +68,11 @@ public sealed class BalanceHarnessGoalTests
     }
 
     [Fact]
-    public void Blood_grove_starter_policy_pins_its_recipe_and_preserves_near_target_uncertainty()
+    public void Blood_grove_starter_policy_pins_its_recipe_and_preserves_boundary_uncertainty()
     {
         var goals = BalanceGoals.Read(FixturePath("idle-blood-grove-starter-goals.json"));
         var suite = HarnessJson.Read<IdleSuiteDefinition>(FixturePath("idle-blood-grove-starter.json"));
+        Assert.Equal("idle-blood-grove-starter-goals-v2", goals.Id);
         Assert.Equal(suite.Id, goals.SuiteId);
         Assert.Equal(BalanceGoals.FixtureContractHash(suite), goals.FixtureHash);
         Assert.Equal(2, goals.RequiredCells.Count);
@@ -84,13 +85,17 @@ public sealed class BalanceHarnessGoalTests
         Assert.Equal(GoalRole.Primary, goal.Role);
         Assert.Equal(GoalEnforcement.Enforced, goal.Enforcement);
         Assert.False(string.IsNullOrWhiteSpace(goal.ReviewReason));
-        Assert.Equal(65d, goal.Minimum);
-        Assert.Equal(75d, goal.Maximum);
+        Assert.Equal(50d, goal.Minimum);
+        Assert.Equal(90d, goal.Maximum);
         Assert.Equal(100, goal.MinimumSamples);
         foreach (var (wins, trials, expected) in new[]
         {
-            (0, 100, GoalOutcome.Fail), (70, 100, GoalOutcome.Inconclusive),
+            (0, 100, GoalOutcome.Fail), (70, 100, GoalOutcome.Pass),
             (700, 1000, GoalOutcome.Pass), (100, 100, GoalOutcome.Fail),
+            (50, 100, GoalOutcome.Inconclusive), (90, 100, GoalOutcome.Inconclusive),
+            (741, 1000, GoalOutcome.Pass), (885, 1000, GoalOutcome.Inconclusive),
+            (786, 1000, GoalOutcome.Pass), (884, 1000, GoalOutcome.Inconclusive),
+            (950, 1000, GoalOutcome.Fail),
             (7, 10, GoalOutcome.Inconclusive)
         })
         {
@@ -98,6 +103,50 @@ public sealed class BalanceHarnessGoalTests
             var measurement = new GoalMeasurement(trials, rate.Rate * 100, rate.Lower * 100,
                 rate.Upper * 100, "Wilson (95%)");
             Assert.Equal(expected, GoalEvaluator.Assess(measurement, goal.Minimum, goal.Maximum, goal.MinimumSamples).Outcome);
+        }
+    }
+
+    [Fact]
+    public async Task Declared_diagnostics_preserve_strict_coverage_without_inventing_targets()
+    {
+        using var workspace = new Workspace();
+        var suite = HarnessJson.Read<IdleSuiteDefinition>(FixturePath("idle-reference.json"));
+        Workspace.Write(workspace.SuitePath, suite with { Stages = [suite.Stages[0]] });
+        var run = await workspace.Run(3);
+        var goals = GoalsFor(run);
+        Assert.DoesNotContain("diagnosticCells", JsonSerializer.Serialize(goals, HarnessJson.Options));
+        var first = goals.RequiredCells[0];
+        var scoped = goals with { RequiredCells = [first], Goals = [goals.Goals[0] with { Cells = [first] }],
+            DiagnosticCells = goals.RequiredCells.Skip(1).ToArray() };
+        Assert.Empty(GoalEvaluator.Evaluate(scoped, run).Issues);
+        Assert.Single(GoalEvaluator.Evaluate(scoped, run).Checks);
+        Assert.Equal(2, GoalEvaluator.Evaluate(scoped with { DiagnosticCells = null }, run).ExitCode);
+        Assert.Equal(2, GoalEvaluator.Evaluate(scoped with { DiagnosticCells = ["missing"] }, run).ExitCode);
+        Assert.Throws<InvalidDataException>(() => (scoped with { DiagnosticCells = [first] }).Validate());
+        Assert.Throws<InvalidDataException>(() => (scoped with { DiagnosticCells = ["repeat", "repeat"] }).Validate());
+    }
+
+    [Fact]
+    public void Crystal_Creek_policy_enforces_only_primary_wins_and_rejects_saved_overshoot()
+    {
+        var goals = BalanceGoals.Read(FixturePath("idle-crystal-creek-starter-goals.json"));
+        var suite = HarnessJson.Read<IdleSuiteDefinition>(FixturePath("idle-crystal-creek-starter.json"));
+        Assert.Equal(BalanceGoals.FixtureContractHash(suite), goals.FixtureHash);
+        Assert.Equal(14, goals.DiagnosticCells!.Count);
+        var cells = suite.Stages.SelectMany(s => s.Builds.SelectMany(b => s.Encounters.Select(e => $"{s.Id}.{b.Id}.{e.Id}")));
+        Assert.Equal(cells.Order(), goals.RequiredCells.Concat(goals.DiagnosticCells).Order());
+        var goal = Assert.Single(goals.Goals);
+        Assert.Equal(GoalMetric.ClearRate, goal.Metric);
+        Assert.Equal(GoalEnforcement.Enforced, goal.Enforcement);
+        Assert.Equal(50, goal.Minimum);
+        Assert.Equal(90, goal.Maximum);
+        Assert.Equal(100, goal.MinimumSamples);
+        Assert.All(goal.Cells, c => Assert.StartsWith("handoff-crystal-creek.quest-rewards.", c));
+        foreach (var wins in new[] { 496, 497, 500 })
+        {
+            var rate = SuiteScorecard.Wilson(wins, 500)!;
+            Assert.Equal(GoalOutcome.Fail, GoalEvaluator.Assess(new(500, rate.Rate * 100,
+                rate.Lower * 100, rate.Upper * 100, "Wilson"), goal.Minimum, goal.Maximum, goal.MinimumSamples).Outcome);
         }
     }
 

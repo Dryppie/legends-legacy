@@ -6,6 +6,14 @@ using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Services.LL.Spawnings;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.CombatStyles;
+using Application.Interfaces.Services.LL.Regions;
+using Domain.Models.Bonuses;
+using Domain.Models.Combat;
+using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Extensions;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Combat.Layers.Orchestration.Idle;
 
@@ -14,15 +22,24 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
     private readonly IIdleCombatPlanner _planner;
     private readonly IIdleCombatResolutionSessionFactory _resolutionSessionFactory;
     private readonly ICreatureArchiveService? _creatureArchive;
+    private readonly ICombatStyleService? _combatStyles;
+    private readonly IBonusService? _bonuses;
+    private readonly IAreaExperienceBalanceProvider? _experienceBalance;
 
     public IdleCombatOrchestrator(
         IIdleCombatPlanner planner,
         IIdleCombatResolutionSessionFactory resolutionSessionFactory,
-        ICreatureArchiveService? creatureArchive = null)
+        ICreatureArchiveService? creatureArchive = null,
+        ICombatStyleService? combatStyles = null,
+        IBonusService? bonuses = null,
+        IAreaExperienceBalanceProvider? experienceBalance = null)
     {
         _planner = planner;
         _resolutionSessionFactory = resolutionSessionFactory;
         _creatureArchive = creatureArchive;
+        _combatStyles = combatStyles;
+        _bonuses = bonuses;
+        _experienceBalance = experienceBalance;
     }
 
     public CombatMode Mode => CombatMode.Idle;
@@ -71,6 +88,13 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
             };
         }
 
+        var capturedStyles = resolutionSession.CapturedCombatStyles;
+        var styleProgressionEnabled = capturedStyles.Count > 0 && _combatStyles is not null && _bonuses is not null && _experienceBalance is not null;
+        var defeatRetention = styleProgressionEnabled
+            ? (await _bonuses!.GetAggregatedAsync(plan.CharacterId, plan.RequestedTo, cancellationToken))
+                .Get(BonusKind.IdleCombatDefeatExperienceRetentionBps)
+            : 0;
+
         var simulationStartedAt = IdleCombatTelemetry.Start();
         var allocatedBefore = GC.GetTotalAllocatedBytes(precise: false);
 
@@ -80,6 +104,26 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
 
             var encounterPlan = _planner.CreateEncounterPlan(plan, sequence, cursor);
             var resolution = await resolutionSession.ResolveAsync(encounterPlan, cancellationToken);
+
+            if (styleProgressionEnabled)
+            {
+                var baseXp = _experienceBalance!.CalculateEncounterExperience(plan.Area.Id, encounterPlan.HostileParticipants.Count);
+                var eligibleXp = resolution.Outcome == BattleOutcome.Victory ? baseXp : baseXp.TakeBpsPortion(defeatRetention);
+                var recipients = plan.PlayerEntityIds.Distinct().ToArray();
+                var awards = new List<CombatStyleExperienceAward>();
+                for (var index = 0; index < recipients.Length; index++)
+                {
+                    var recipient = recipients[index];
+                    if (!capturedStyles.TryGetValue(recipient, out var captured)) continue;
+                    var share = eligibleXp / recipients.Length + (index < eligibleXp % recipients.Length ? 1 : 0);
+                    // The action cursor, character lock, and tracked progression commit in the same transaction.
+                    // Advance templates only after this fight so offline batches match successive online encounters.
+                    var grant = await _combatStyles!.GrantCapturedCombatXpAsync(recipient, captured.CombatStyleId, share, cancellationToken);
+                    if (grant.LevelsGained > 0) resolutionSession.AdvanceCombatStyle(recipient, grant.Level);
+                    awards.Add(new(recipient, captured.CombatStyleId, share, grant.XpGained, grant.Level));
+                }
+                resolution = resolution with { CombatStyleExperience = awards };
+            }
 
             records.Add(new CombatEncounterRecord(encounterPlan, resolution));
 

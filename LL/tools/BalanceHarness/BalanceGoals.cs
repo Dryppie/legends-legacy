@@ -14,7 +14,8 @@ public sealed record BalanceGoal(string Id, GoalMetric Metric, string Unit, Goal
     double? Minimum = null, double? Maximum = null, string? ReviewReason = null);
 
 public sealed record BalanceGoals(int SchemaVersion, string Id, string SuiteId, string FixtureHash,
-    string MetricsVersion, string Description, IReadOnlyList<string> RequiredCells, IReadOnlyList<BalanceGoal> Goals)
+    string MetricsVersion, string Description, IReadOnlyList<string> RequiredCells, IReadOnlyList<BalanceGoal> Goals,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<string>? DiagnosticCells = null)
 {
     [JsonIgnore]
     public bool RequiresBaseline => Goals.Any(g => IsChange(g.Metric));
@@ -49,6 +50,11 @@ public sealed record BalanceGoals(int SchemaVersion, string Id, string SuiteId, 
             throw new InvalidDataException("Goals require schema 1, named suite/description, fixture hash, supported metrics and distinct required cells.");
         var ids = new HashSet<string>(StringComparer.Ordinal);
         var required = RequiredCells.ToHashSet(StringComparer.Ordinal);
+        if (DiagnosticCells is { } diagnostics && (diagnostics.Count > 1000
+            || diagnostics.Any(string.IsNullOrWhiteSpace)
+            || diagnostics.Distinct(StringComparer.Ordinal).Count() != diagnostics.Count
+            || diagnostics.Any(required.Contains)))
+            throw new InvalidDataException("Diagnostic cells must be distinct, named and separate from required goal cells.");
         long checks = 0;
         foreach (var goal in Goals)
         {

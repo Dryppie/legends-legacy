@@ -46,20 +46,18 @@ public sealed class EquipmentUpgradeService(
         _policy.Quote(
             await repository.LoadAsync(characterId, request.ItemInstanceId, false, cancellationToken),
             request,
-            Guid.NewGuid(),
-            timeProvider.GetUtcNow());
+            Guid.NewGuid());
 
     public async Task<EquipmentUpgradeResult> ExecuteAsync(
         Guid characterId,
         Guid operationId,
         EquipmentUpgradeRequest request,
-        string expectedQuote,
         CancellationToken cancellationToken)
     {
-        if (operationId == Guid.Empty || characterId == Guid.Empty || string.IsNullOrWhiteSpace(expectedQuote))
-            return new(null, "A current upgrade quote and operation ID are required.");
+        if (operationId == Guid.Empty || characterId == Guid.Empty)
+            return new(null, "A character and operation ID are required.");
 
-        var requestFingerprint = EquipmentUpgradePolicy.Fingerprint(new { request, expectedQuote });
+        var requestFingerprint = EquipmentUpgradePolicy.Fingerprint(request);
         var existing = await repository.GetReceiptAsync(characterId, operationId, cancellationToken);
         if (existing is not null)
             return existing.RequestFingerprint == requestFingerprint
@@ -81,10 +79,8 @@ public sealed class EquipmentUpgradeService(
                 : new(null, "This operation ID has already been used for a different request.");
 
         var quote = CreateQuote(context, request, operationId);
-        if (quote.Token != expectedQuote)
-            return new(null, "The upgrade quote changed or expired. Review the fresh quote.", quote);
         if (!quote.CanExecute)
-            return new(null, quote.UnavailableReason, quote);
+            return new(null, quote.UnavailableReason);
 
         if (context!.IsEquipped && request.Kind != EquipmentUpgradeOperationKind.Dismantle)
         {
@@ -110,12 +106,8 @@ public sealed class EquipmentUpgradeService(
                     true,
                     cancellationToken);
                 quote = CreateQuote(context, request, operationId);
-                if (quote.Token != expectedQuote)
-                    return new(null,
-                        "Equipment or balances changed while resolving combat. Review the fresh quote.",
-                        quote);
                 if (!quote.CanExecute)
-                    return new(null, quote.UnavailableReason, quote);
+                    return new(null, quote.UnavailableReason);
             }
         }
 
@@ -158,5 +150,5 @@ public sealed class EquipmentUpgradeService(
         EquipmentUpgradeContext? context,
         EquipmentUpgradeRequest request,
         Guid operationId) =>
-        _policy.Quote(context, request, operationId, timeProvider.GetUtcNow());
+        _policy.Quote(context, request, operationId);
 }

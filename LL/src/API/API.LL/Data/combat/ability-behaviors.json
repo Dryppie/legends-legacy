@@ -2221,5 +2221,24 @@
     "expectedLogs": [
       { "source": "effect.creature.serath.the_living_scale.doubt_damage_taken", "eventType": "Debuff", "minCount": 1 }
     ]
+  },
+  {
+    "id": "behavior.creature.blue_slime.protective_slime.balance_creek.grants_barrier",
+    "abilityId": "ability.creature.blue_slime.protective_slime.balance_creek",
+    "friendlyAbilityIds": ["ability.creature.blue_slime.protective_slime.balance_creek"],
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.blue_slime.protective_slime.barrier.balance_creek", "eventType": "RestoreBarrier", "minCount": 1, "minMagnitude": 1 }
+    ]
+  },
+  {
+    "id": "behavior.creature.frost_imp.ice_needle.balance_creek.deals_damage",
+    "abilityId": "ability.creature.frost_imp.ice_needle.balance_creek",
+    "friendlyAbilityIds": ["ability.creature.frost_imp.ice_needle.balance_creek"],
+    "hostileHealth": 10000,
+    "maxTicks": 1,
+    "expectedLogs": [
+      { "source": "effect.creature.frost_imp.ice_needle.damage.balance_creek", "eventType": "Damage", "minCount": 1, "minMagnitude": 1 }
+    ]
   }
 ]

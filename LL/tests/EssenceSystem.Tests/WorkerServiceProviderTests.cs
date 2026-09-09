@@ -24,6 +24,8 @@ public sealed class WorkerServiceProviderTests
         using var host = builder.Build();
         using var scope = host.Services.CreateScope();
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IBackgroundJobExecutionService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleMutationBoundary>());
         Assert.NotNull(host.Services.GetRequiredService<ISchedulerFactory>());
         Assert.Contains(
             host.Services.GetServices<IHostedService>(),

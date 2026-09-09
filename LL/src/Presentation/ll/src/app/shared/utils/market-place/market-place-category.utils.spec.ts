@@ -7,6 +7,39 @@ import {
 } from './market-place-category.utils';
 
 describe('marketplace category matching', () => {
+  it('limits Monster Cores to the three core tiers, excluding legacy materials and catalysts', () => {
+    for (const tier of ['lesser', 'greater', 'primal']) {
+      expect(
+        matchesMarketplaceResourceSubcategory(
+          resource(`item.monster_core.${tier}`),
+          'Monster Cores',
+        ),
+      ).toBeTrue();
+    }
+
+    for (const id of [
+      'ore',
+      'bloodwood',
+      'venom_gland',
+      'item.evolution_catalyst.cunning',
+    ]) {
+      expect(
+        matchesMarketplaceResourceSubcategory(resource(id), 'Monster Cores'),
+      ).toBeFalse();
+    }
+  });
+
+  it('sorts Monster Cores from lesser through primal', () => {
+    expect(
+      ['lesser', 'greater', 'primal'].map((tier) =>
+        getMarketplaceResourceSortRank(
+          resource(`item.monster_core.${tier}`),
+          'Monster Cores',
+        ),
+      ),
+    ).toEqual([0, 1, 2]);
+  });
+
   it('matches only resources from the selected family', () => {
     expect(
       matchesMarketplaceResourceSubcategory(resource('ore'), 'Ore'),

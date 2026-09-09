@@ -1,0 +1,1728 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-essence-slots-v1",
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "samplesPerCell": 20,
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "profiles": [
+    {
+      "id": "essences-4-guardian",
+      "assumptions": "4 equipped Essences per character, leaving 6 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-4-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "essences-4-restorer",
+      "assumptions": "4 equipped Essences per character, leaving 6 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-4-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "essences-4-striker",
+      "assumptions": "4 equipped Essences per character, leaving 6 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-4-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "essences-4-controller",
+      "assumptions": "4 equipped Essences per character, leaving 6 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-4-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "essences-5-guardian",
+      "assumptions": "5 equipped Essences per character, leaving 5 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-5-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle"
+        ]
+      }
+    },
+    {
+      "id": "essences-5-restorer",
+      "assumptions": "5 equipped Essences per character, leaving 5 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-5-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling"
+        ]
+      }
+    },
+    {
+      "id": "essences-5-striker",
+      "assumptions": "5 equipped Essences per character, leaving 5 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-5-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad"
+        ]
+      }
+    },
+    {
+      "id": "essences-5-controller",
+      "assumptions": "5 equipped Essences per character, leaving 5 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-5-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag"
+        ]
+      }
+    },
+    {
+      "id": "essences-6-guardian",
+      "assumptions": "6 equipped Essences per character, leaving 4 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-6-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "essences-6-restorer",
+      "assumptions": "6 equipped Essences per character, leaving 4 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-6-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "essences-6-striker",
+      "assumptions": "6 equipped Essences per character, leaving 4 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-6-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "essences-6-controller",
+      "assumptions": "6 equipped Essences per character, leaving 4 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-6-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "essences-7-guardian",
+      "assumptions": "7 equipped Essences per character, leaving 3 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-7-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel"
+        ]
+      }
+    },
+    {
+      "id": "essences-7-restorer",
+      "assumptions": "7 equipped Essences per character, leaving 3 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-7-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp"
+        ]
+      }
+    },
+    {
+      "id": "essences-7-striker",
+      "assumptions": "7 equipped Essences per character, leaving 3 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-7-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake"
+        ]
+      }
+    },
+    {
+      "id": "essences-7-controller",
+      "assumptions": "7 equipped Essences per character, leaving 3 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-7-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-guardian",
+      "assumptions": "8 equipped Essences per character, leaving 2 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-8-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-restorer",
+      "assumptions": "8 equipped Essences per character, leaving 2 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-8-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-striker",
+      "assumptions": "8 equipped Essences per character, leaving 2 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-8-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-controller",
+      "assumptions": "8 equipped Essences per character, leaving 2 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-8-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-9-guardian",
+      "assumptions": "9 equipped Essences per character, leaving 1 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-9-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian"
+        ]
+      }
+    },
+    {
+      "id": "essences-9-restorer",
+      "assumptions": "9 equipped Essences per character, leaving 1 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-9-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman"
+        ]
+      }
+    },
+    {
+      "id": "essences-9-striker",
+      "assumptions": "9 equipped Essences per character, leaving 1 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-9-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-9-controller",
+      "assumptions": "9 equipped Essences per character, leaving 1 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-9-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-guardian",
+      "assumptions": "10 equipped Essences per character, leaving 0 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-10-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian",
+          "essence.thornback_boar"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-restorer",
+      "assumptions": "10 equipped Essences per character, leaving 0 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-10-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman",
+          "essence.elder_treant"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-striker",
+      "assumptions": "10 equipped Essences per character, leaving 0 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-10-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy",
+          "essence.wind_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-controller",
+      "assumptions": "10 equipped Essences per character, leaving 0 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target.",
+      "build": {
+        "id": "essences-10-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy",
+          "essence.wandering_ghost"
+        ]
+      }
+    }
+  ],
+  "parties": [
+    {
+      "id": "essences-4",
+      "assumptions": "4 equipped Essences per character, leaving 6 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-4-guardian",
+        "essences-4-restorer",
+        "essences-4-striker",
+        "essences-4-striker",
+        "essences-4-controller"
+      ]
+    },
+    {
+      "id": "essences-5",
+      "assumptions": "5 equipped Essences per character, leaving 5 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-5-guardian",
+        "essences-5-restorer",
+        "essences-5-striker",
+        "essences-5-striker",
+        "essences-5-controller"
+      ]
+    },
+    {
+      "id": "essences-6",
+      "assumptions": "6 equipped Essences per character, leaving 4 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-6-guardian",
+        "essences-6-restorer",
+        "essences-6-striker",
+        "essences-6-striker",
+        "essences-6-controller"
+      ]
+    },
+    {
+      "id": "essences-7",
+      "assumptions": "7 equipped Essences per character, leaving 3 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-7-guardian",
+        "essences-7-restorer",
+        "essences-7-striker",
+        "essences-7-striker",
+        "essences-7-controller"
+      ]
+    },
+    {
+      "id": "essences-8",
+      "assumptions": "8 equipped Essences per character, leaving 2 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-8-guardian",
+        "essences-8-restorer",
+        "essences-8-striker",
+        "essences-8-striker",
+        "essences-8-controller"
+      ]
+    },
+    {
+      "id": "essences-9",
+      "assumptions": "9 equipped Essences per character, leaving 1 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-9-guardian",
+        "essences-9-restorer",
+        "essences-9-striker",
+        "essences-9-striker",
+        "essences-9-controller"
+      ]
+    },
+    {
+      "id": "essences-10",
+      "assumptions": "10 equipped Essences per character, leaving 0 of ten unlocked slots empty. Fixed level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles. Level-1 unascended and unevolved Essences extend the same pinned role lists. Only the selected Essence loadout changes between adjacent counts. Ownership, materials and access assumed; no acquisition model, scouting, contributions or approved Tower target. Guardian, Restorer, two Strikers and Controller repeat to fill the production floor's RequiredSlots.",
+      "cellProfiles": [
+        "essences-10-guardian",
+        "essences-10-restorer",
+        "essences-10-striker",
+        "essences-10-striker",
+        "essences-10-controller"
+      ]
+    }
+  ]
+}

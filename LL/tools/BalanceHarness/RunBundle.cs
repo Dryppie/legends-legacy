@@ -42,7 +42,7 @@ public static class RunBundle
             var input = content.CreateInput(scenario, seed, threat, cadence);
             HarnessJson.WriteNew(Path.Combine(output, "input.json"), input);
             HarnessJson.WriteNew(Path.Combine(output, "manifest.json"),
-                new RunManifest(1, HarnessJson.Hash(input), hashes, ExecutionIdentity.Current()));
+                new RunManifest(ContentSnapshotContract.CurrentVersion, HarnessJson.Hash(input), hashes, ExecutionIdentity.Current()));
             var report = await new IdleBattleRunner(content).RunAsync(input, detailed, cancellationToken);
             HarnessJson.WriteNew(Path.Combine(output, "result.json"), report);
             return report;
@@ -111,13 +111,11 @@ public static class RunBundle
     internal static void VerifySnapshot(string runDirectory, RunManifest manifest, string inputHash,
         CancellationToken cancellationToken)
     {
-        if (manifest.SchemaVersion != 1 || inputHash != manifest.InputHash)
+        if (inputHash != manifest.InputHash)
             throw new InvalidDataException("Unsupported or modified run inputs.");
-        if (!manifest.ContentHashes.Keys.Order(StringComparer.Ordinal)
-            .SequenceEqual(OfflineContent.Files.Order(StringComparer.Ordinal)))
-            throw new InvalidDataException("Unexpected content snapshot files.");
+        var files = ContentSnapshotContract.Resolve(manifest);
         // Only allowlisted paths are read, even when the manifest came from elsewhere.
-        foreach (var relative in OfflineContent.Files)
+        foreach (var relative in files)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (HarnessJson.FileHash(Path.Combine(runDirectory, "content", "Data", relative))

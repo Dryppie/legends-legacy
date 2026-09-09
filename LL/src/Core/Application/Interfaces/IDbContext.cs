@@ -98,6 +98,8 @@ public interface IDbContext
     DbSet<EquipmentSlot> EquipmentSlots { get; }
     DbSet<EssenceItemBase> EssenceItems { get; }
     DbSet<PlayerEssence> PlayerEssences { get; }
+    DbSet<Domain.Models.CombatStyles.CharacterCombatStyle> CharacterCombatStyles { get; }
+    DbSet<Domain.Models.CombatStyles.CharacterCombatStyleSelection> CharacterCombatStyleSelections { get; }
     DbSet<EquipmentLoadout> EquipmentLoadouts { get; }
     DbSet<EquipmentLoadoutSlot> EquipmentLoadoutSlots { get; }
     DbSet<EssenceLoadout> EssenceLoadouts { get; }
@@ -225,6 +227,7 @@ public interface IDbContext
     /// transaction can reload concurrency-protected state from the database.
     /// </summary>
     void ClearTrackedEntities();
+    long TrackingGeneration => 0;
 
     IExecutionStrategy CreateExecutionStrategy();
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);

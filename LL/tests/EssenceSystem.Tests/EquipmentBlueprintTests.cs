@@ -129,7 +129,7 @@ public sealed class EquipmentBlueprintTests
         var policy = new EquipmentUpgradePolicy(equipment,
             JsonEquipmentUpgradePrices.Load(Path.Combine(Root, "equipment-upgrades.v1.json")), Blueprints(equipment));
         var quote = policy.Quote(context, new(EquipmentUpgradeOperationKind.ApplyVariant, state.Id,
-            BlueprintStyleId: "blueprint_arcane"), Guid.NewGuid(), DateTimeOffset.UtcNow);
+            BlueprintStyleId: "blueprint_arcane"), Guid.NewGuid());
         Assert.True(quote.CanExecute, quote.UnavailableReason);
         var converted = EquipmentData.Deserialize(quote.After!.Serialize());
         var baseline = equipment.Evaluator.Evaluate(state.DefinitionId, state.Tier, state.Rank,
@@ -190,7 +190,7 @@ public sealed class EquipmentBlueprintTests
     }
 
     [Fact]
-    public void Conversion_quote_checks_ownership_payment_compatibility_and_fingerprints_blueprint_balance()
+    public void Conversion_preview_checks_ownership_payment_compatibility_and_blueprint_balance()
     {
         var equipment = Equipment();
         var catalog = Blueprints(equipment);
@@ -204,23 +204,22 @@ public sealed class EquipmentBlueprintTests
         var policy = new EquipmentUpgradePolicy(equipment, prices, catalog);
         var request = new EquipmentUpgradeRequest(EquipmentUpgradeOperationKind.ApplyVariant, state.Id, BlueprintStyleId: "blueprint_fury");
         var operation = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
-        var quote = policy.Quote(context, request, operation, now);
+        var quote = policy.Quote(context, request, operation);
         Assert.True(quote.CanExecute, quote.UnavailableReason);
         Assert.Equal(100, quote.CinderCost);
         Assert.Equal("Fury Shortsword", quote.After!.DisplayName);
         Assert.Equal(0, quote.PartsCost);
         Assert.Equal("set_fury", quote.After.EquipmentSetId);
         stack.Quantity = 0;
-        var missing = policy.Quote(context, request, operation, now);
+        var missing = policy.Quote(context, request, operation);
         Assert.False(missing.CanExecute);
-        Assert.NotEqual(quote.Token, missing.Token);
+        Assert.Equal("You need one matching blueprint.", missing.UnavailableReason);
         stack.Quantity = 1;
         context.Character.Cinders = 99;
-        Assert.False(policy.Quote(context, request, operation, now).CanExecute);
+        Assert.False(policy.Quote(context, request, operation).CanExecute);
         context.Character.Cinders = 1000;
-        Assert.False(policy.Quote(context with { UnavailableReason = "Listed item" }, request, operation, now).CanExecute);
-        Assert.False(policy.Quote(context, request with { BlueprintStyleId = "blueprint_warden" }, operation, now).CanExecute);
+        Assert.False(policy.Quote(context with { UnavailableReason = "Listed item" }, request, operation).CanExecute);
+        Assert.False(policy.Quote(context, request with { BlueprintStyleId = "blueprint_warden" }, operation).CanExecute);
     }
 
     [Fact]
@@ -301,10 +300,10 @@ public sealed class EquipmentBlueprintTests
         var request = new EquipmentUpgradeRequest(EquipmentUpgradeOperationKind.ApplyVariant, instance.Id, BlueprintStyleId: "blueprint_fury");
         var quote = await service.PreviewAsync(character.Id, request, default);
         Assert.True(quote.CanExecute, quote.UnavailableReason);
-        var result = await service.ExecuteAsync(character.Id, quote.OperationId, request, quote.Token, default);
+        var result = await service.ExecuteAsync(character.Id, quote.OperationId, request, default);
         Assert.NotNull(result.Outcome);
         await db.SaveChangesAsync();
-        var retry = await service.ExecuteAsync(character.Id, quote.OperationId, request, quote.Token, default);
+        var retry = await service.ExecuteAsync(character.Id, quote.OperationId, request, default);
         Assert.Equal(result.Outcome, retry.Outcome);
         Assert.Equal(900, character.Cinders);
         Assert.Equal(1, (await db.InventoryItems.SingleAsync(x => x.ItemInstanceId == blueprintInstance.Id)).Quantity);
@@ -313,7 +312,7 @@ public sealed class EquipmentBlueprintTests
         Assert.Single(await db.EquipmentUpgradeReceipts.ToListAsync());
         Assert.Equal(2, await db.EconomyLedger.CountAsync());
         var reused = await service.ExecuteAsync(character.Id, quote.OperationId,
-            request with { BlueprintStyleId = "blueprint_arcane" }, quote.Token, default);
+            request with { BlueprintStyleId = "blueprint_arcane" }, default);
         Assert.Null(reused.Outcome);
         Assert.Equal(900, character.Cinders);
     }

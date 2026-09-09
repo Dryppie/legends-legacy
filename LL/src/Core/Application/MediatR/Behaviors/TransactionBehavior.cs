@@ -161,6 +161,11 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         {
             affectedCharacterIds.Add(primaryCharacterId.Value);
         }
+        foreach (var style in _db.CharacterCombatStyles.Local.Where(style =>
+                     _db.GetEntry(style).State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
+        {
+            affectedCharacterIds.Add(style.CharacterId);
+        }
         foreach (var member in _db.GuildMembers.Local.Where(member =>
                      _db.GetEntry(member).State is EntityState.Added
                          or EntityState.Modified
@@ -493,6 +498,10 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         {
             yield return StateSyncScopes.Essences;
         }
+
+        if (_db.CharacterCombatStyles.Local.Any(style => style.CharacterId == characterId
+                && _db.GetEntry(style).State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
+            yield return StateSyncScopes.CombatStyles;
 
         if (profile.InventoryWhenChanged)
         {

@@ -1,0 +1,19 @@
+{{- if not .Values.dataProtection.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ll-liveops.dataProtectionClaimName" . }}
+  labels:
+    {{- include "ll-liveops.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    {{- toYaml .Values.dataProtection.accessModes | nindent 4 }}
+  {{- if ne .Values.dataProtection.storageClass nil }}
+  storageClassName: {{ .Values.dataProtection.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.dataProtection.size | quote }}
+{{- end }}

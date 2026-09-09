@@ -29,6 +29,13 @@ public sealed class DungeonPendingRewardWriter : IDungeonPendingRewardWriter
         }
 
         run.PendingExperience += outcome.TotalExperience;
+        if (facts.CapturedCombatStyleId is { } styleId)
+        {
+            if (run.State.CapturedCombatStyleId is { } previous && previous != styleId)
+                throw new InvalidOperationException("A dungeon run cannot change its captured Combat Style.");
+            run.State.CapturedCombatStyleId = styleId;
+            run.State.PendingCombatStyleBaseExperience += outcome.EligibleBaseExperience;
+        }
         run.PendingCinders += outcome.TotalCinders;
         run.PendingSoulstones += outcome.TotalSoulstones;
 

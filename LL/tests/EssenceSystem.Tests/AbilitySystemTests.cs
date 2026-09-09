@@ -4193,12 +4193,26 @@ public sealed class AbilitySystemTests
         Assert.All(allAbilityIds, profile =>
             Assert.Equal(profile.MonsterId is "monster.hobgoblin" or "monster.spider_queen" or "monster.elder_treant" ? 3 : 2, profile.AbilityIds.Count));
         Assert.Equal(157, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(232, catalog.AbilitiesById.Count);
+        var creatureVariants = new Dictionary<string, string>
+        {
+            ["ability.creature.blue_slime.protective_slime.balance_creek"] = "ability.creature.blue_slime.protective_slime",
+            ["ability.creature.frost_imp.ice_needle.balance_creek"] = "ability.creature.frost_imp.ice_needle"
+        };
+        Assert.Equal(234, catalog.AbilitiesById.Count);
+        Assert.All(creatureVariants.Keys, id => Assert.Contains(id, allAbilityIds.SelectMany(x => x.AbilityIds)));
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
         {
             var ability = Assert.IsType<AbilitySpec>(catalog.AbilitiesById.GetValueOrDefault(abilityId));
-            Assert.StartsWith("essence.", ability.OwningEssenceId, StringComparison.Ordinal);
+            if (creatureVariants.TryGetValue(abilityId, out var originalId))
+            {
+                Assert.Null(ability.OwningEssenceId);
+                var original = catalog.AbilitiesById[originalId];
+                Assert.StartsWith("essence.", original.OwningEssenceId, StringComparison.Ordinal);
+                Assert.Contains(originalId, catalog.AbilityIdsByOwningEssence[original.OwningEssenceId!]);
+                Assert.DoesNotContain(abilityId, catalog.AbilityIdsByOwningEssence[original.OwningEssenceId!]);
+            }
+            else Assert.StartsWith("essence.", ability.OwningEssenceId, StringComparison.Ordinal);
             Assert.StartsWith("ability.creature.", ability.Id, StringComparison.Ordinal);
         });
     }

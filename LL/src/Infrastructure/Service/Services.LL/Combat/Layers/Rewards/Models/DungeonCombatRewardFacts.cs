@@ -15,6 +15,7 @@ public sealed record DungeonCombatRewardFacts(
     IReadOnlyList<Guid> PlayerEntityIds,
     IReadOnlyList<DungeonEncounterRewardFacts> Encounters)
 {
+    public string? CapturedCombatStyleId { get; init; }
     public DungeonEncounterRewardFacts? LastEncounter =>
         Encounters.Count == 0 ? null : Encounters[^1];
 }

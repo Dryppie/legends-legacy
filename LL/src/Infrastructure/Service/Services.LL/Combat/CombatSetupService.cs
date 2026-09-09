@@ -2,6 +2,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Combat;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
@@ -25,6 +26,7 @@ public class CombatSetupService : ICombatSetupService
     private readonly ICreatureAbilityDefinitionProvider? _creatureAbilities;
     private readonly EquipmentCatalog? _equipmentCatalog;
     private readonly IEquipmentLoadoutService? _equipmentLoadouts;
+    private readonly ICombatStyleService? _combatStyles;
 
     public CombatSetupService(
         ICreatureScaler creatureScaler,
@@ -33,7 +35,8 @@ public class CombatSetupService : ICombatSetupService
         ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         ICreatureAbilityDefinitionProvider? creatureAbilities = null,
         EquipmentCatalog? equipmentCatalog = null,
-        IEquipmentLoadoutService? equipmentLoadouts = null)
+        IEquipmentLoadoutService? equipmentLoadouts = null,
+        ICombatStyleService? combatStyles = null)
     {
         _creatureScaler = creatureScaler;
         _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
@@ -42,6 +45,7 @@ public class CombatSetupService : ICombatSetupService
         _creatureAbilities = creatureAbilities;
         _equipmentCatalog = equipmentCatalog;
         _equipmentLoadouts = equipmentLoadouts;
+        _combatStyles = combatStyles;
     }
 
     public List<CombatEntity> CreatePlayerCombatEntities(List<Entity> entities)
@@ -136,6 +140,9 @@ public class CombatSetupService : ICombatSetupService
             var essenceLoadout = await ResolveEssenceLoadoutForCombatEntityAsync(entity, activity);
             entity.EquippedEssences = [.. essenceLoadout.EquippedEssences];
             entity.HasEquippedEssenceSnapshot = entity.EquippedEssences.Count > 0;
+            if (entity.IsPlayerCharacter && !entity.HasCombatStyleSnapshot && _combatStyles is not null)
+                entity.CombatStyle = await _combatStyles.ResolveAsync(
+                    entity.OriginalId, activity, CancellationToken.None, entity.EquippedEssences);
 
             foreach (var modifier in essenceLoadout.AttributeModifiers)
             {

@@ -966,10 +966,18 @@ export class InventoryComponent implements OnInit {
     this.resetContainerAction();
   }
 
-  private loadSelectedDismantleQuote(item: InventoryItem): void {
+  private loadSelectedDismantleQuote(
+    item: InventoryItem,
+    resetError = true,
+  ): void {
+    const previous = this.selectedDismantleQuote();
+    const operationId =
+      previous?.request.itemInstanceId === item.itemInstance.id
+        ? previous.operationId
+        : undefined;
     this.selectedDismantleQuote.set(null);
     this.selectedDismantleConfirmation.set(false);
-    this.selectedDismantleError.set(null);
+    if (resetError) this.selectedDismantleError.set(null);
     if (!this.equipmentApi || !this.canDismantleEquipment(item)) {
       this.selectedDismantleLoading.set(false);
       return;
@@ -979,15 +987,19 @@ export class InventoryComponent implements OnInit {
     this.selectedDismantleLoading.set(true);
     this.equipmentApi
       .previewUpgrade(itemInstanceId, 'Dismantle')
-      .pipe(finalize(() => {
-        if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
-          this.selectedDismantleLoading.set(false);
-        }
-      }))
+      .pipe(
+        finalize(() => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.selectedDismantleLoading.set(false);
+          }
+        }),
+      )
       .subscribe({
         next: (quote) => {
           if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
-            this.selectedDismantleQuote.set(quote);
+            this.selectedDismantleQuote.set(
+              operationId ? { ...quote, operationId } : quote,
+            );
           }
         },
         error: (error) => {
@@ -1035,22 +1047,21 @@ export class InventoryComponent implements OnInit {
     const itemInstanceId = item.itemInstance.id;
     this.selectedDismantleLoading.set(true);
     this.selectedDismantleError.set(null);
-    this.equipmentApi!
-      .dismantle(quote)
-      .pipe(finalize(() => {
-        if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
-          this.selectedDismantleLoading.set(false);
-        }
-      }))
+    this.equipmentApi!.dismantle(quote)
+      .pipe(
+        finalize(() => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.selectedDismantleLoading.set(false);
+          }
+        }),
+      )
       .subscribe({
         next: (result) => {
           if (this.selectedItem()?.itemInstance.id !== itemInstanceId) return;
           if (!result.outcome) {
-            this.selectedDismantleQuote.set(result.freshQuote);
             this.selectedDismantleConfirmation.set(false);
             this.selectedDismantleError.set(
-              result.freshQuote?.unavailableReason ??
-                'The item changed. Review the dismantle action again.',
+              'The item could not be dismantled.',
             );
             return;
           }
@@ -1064,6 +1075,7 @@ export class InventoryComponent implements OnInit {
             this.selectedDismantleError.set(
               this.equipmentUpgradeError(error, 'Dismantling failed.'),
             );
+            this.loadSelectedDismantleQuote(item, false);
           }
         },
       });

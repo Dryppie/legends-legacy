@@ -3539,7 +3539,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     e.CurrentXp,
                     e.AscensionTier,
                     e.IsEvolved))
-                .ToList());
+                .ToList(),
+            snapshot.CombatStyle);
 
         return JsonSerializer.Serialize(payload, new JsonSerializerOptions
         {
@@ -3770,7 +3771,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset CreatedAtUtc,
         IReadOnlyList<TournamentSnapshotAttribute> BaseAttributes,
         IReadOnlyList<TournamentSnapshotEquipment> Equipment,
-        IReadOnlyList<TournamentSnapshotEssence> EquippedEssences);
+        IReadOnlyList<TournamentSnapshotEssence> EquippedEssences,
+        Domain.Models.CombatStyles.CombatStyleSnapshot? CombatStyle = null);
 
     private sealed record TournamentSnapshotAttribute(
         string AttributeType,

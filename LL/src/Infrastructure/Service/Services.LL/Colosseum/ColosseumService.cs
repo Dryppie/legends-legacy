@@ -603,6 +603,8 @@ public class ColosseumService : IColosseumService
                     $"{string.Join(",", x.InstanceModifiers.OrderBy(m => m.AttributeType).Select(m => $"{m.AttributeType}:{m.Amount}:{m.ModifierType}"))}"))
                 .Concat(snapshot.EquippedEssences.OrderBy(x => x.SlotIndex).Select(x => $"s:{x.SlotIndex}:{x.EssenceDefinitionId}:{x.AscensionTier}:{x.IsEvolved}")));
 
+        if (snapshot.CombatStyle is not null)
+            payload += "|combat-style:" + System.Text.Json.JsonSerializer.Serialize(snapshot.CombatStyle);
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(payload));
         return Convert.ToHexString(bytes);
     }

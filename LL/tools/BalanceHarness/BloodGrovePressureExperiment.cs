@@ -8,12 +8,14 @@ using Services.LL.Regions;
 namespace BalanceHarness;
 
 public sealed record PressureCandidate(string Id, double Bonus);
+public enum PressureSweep { Coarse, Fine }
 public sealed record PressurePlan(int SchemaVersion, string ProfileId, string Field,
     IReadOnlyList<PressureCandidate> Candidates, IReadOnlyDictionary<string, string> RejectedCandidates,
     int Samples, int ConfirmationSamples, int DiscoverySeed, int ConfirmationSeed, int PlannedBattles,
     string FixtureHash, string GoalsHash, string SettingsHash,
     IReadOnlyDictionary<string, string> ContentHashes, IReadOnlyDictionary<string, string> FixtureFileHashes,
-    string SelectionRule, string StoppingRule, string ReplaySelection);
+    string SelectionRule, string StoppingRule, string ReplaySelection,
+    string ExperimentId, int DiscoverySamples, IReadOnlyList<int> ExcludedMasterSeeds);
 public sealed record PressureFinding(PressureCandidate Candidate, IReadOnlyList<CellScorecard> Cells,
     double MaximumDeviation, double MeanDeviation, string ArtifactHash);
 public sealed record PressureAreaEffect(string AreaId, double BeforeOffense, double AfterOffense,
@@ -30,55 +32,75 @@ public static class BloodGrovePressureExperiment
     public const string BalancePath = "progression/region-combat-balance.json";
     public const string ProfileId = "gated-region-one-v1";
     public const string StarterFixture = "idle-blood-grove-starter.json";
-    public const string GoalFixture = "idle-blood-grove-starter-goals.json";
+    // These completed protocols keep their original policy; evaluate saved runs with the current policy separately.
+    public const string GoalFixture = "idle-blood-grove-starter-goals-v1.json";
     private static readonly string[] ControlFixtures = ["idle-reference.json", "idle-first-hunt.json"];
     private static readonly string[] Fixtures = [StarterFixture, GoalFixture, .. ControlFixtures];
     private const double OriginalBonus = 2.3;
 
-    public static PressurePlan CreatePlan(string apiRoot, string fixtureRoot, int samples)
+    public static PressurePlan CreatePlan(string apiRoot, string fixtureRoot, int samples, PressureSweep sweep = PressureSweep.Coarse)
     {
-        if (samples is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(samples), "Use 1–100 discovery/control samples; confirmation uses ten times that count.");
+        if (samples is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(samples), "Use 1–100 base samples; fine discovery uses five times and confirmation ten times that count.");
+        if (!Enum.IsDefined(sweep)) throw new ArgumentOutOfRangeException(nameof(sweep));
+        var fine = sweep == PressureSweep.Fine;
         var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(fixtureRoot, StarterFixture));
         var goals = BalanceGoals.Read(Path.Combine(fixtureRoot, GoalFixture));
         var goal = goals.Goals.Single();
         var fixtureHash = BalanceGoals.FixtureContractHash(suite);
         if (suite.Id != "idle-blood-grove-starter-v1" || fixtureHash != goals.FixtureHash
+            || goals.Id != "idle-blood-grove-starter-goals-v1"
             || goal.Metric != GoalMetric.ClearRate || goal.Minimum != 65 || goal.Maximum != 75
             || goal.Enforcement != GoalEnforcement.Enforced || goals.RequiredCells.Count != 2)
             throw new InvalidDataException("Review the changed starter recipe/policy before this fixed experiment.");
         var catalog = HarnessJson.Read<RegionCombatBalanceCatalog>(Path.Combine(apiRoot, "Data", BalancePath));
+        if (catalog.AreaOverrides is { Count: > 0 })
+            throw new InvalidDataException("Historical pressure protocols require content without area overrides; use the retained original-content control.");
         if (catalog.Profiles.Single(p => p.Id == ProfileId).OffenseCurve.PostTutorialBonus != OriginalBonus)
             throw new InvalidDataException("The source offense bonus changed; review the search bounds and control.");
         var candidates = new List<PressureCandidate>();
         var rejected = new Dictionary<string, string>();
         // Validate the entire declared grid before any battle. Never relax production validation.
-        for (var tenth = 23; tenth >= 0; tenth--)
+        for (var hundredth = fine ? 30 : 230; hundredth >= (fine ? 20 : 0); hundredth -= fine ? 1 : 10)
         {
-            var candidate = new PressureCandidate($"bonus-{tenth * 10:D3}", tenth / 10d);
+            var candidate = new PressureCandidate($"bonus-{hundredth:D3}", hundredth / 100d);
             try { _ = new RegionCreatureScalingProvider(WithBonus(catalog, candidate.Bonus)); candidates.Add(candidate); }
             catch (InvalidOperationException exception) { rejected.Add(candidate.Id, exception.Message); }
         }
-        if (candidates.Count < 2 || candidates[0].Bonus != OriginalBonus)
-            throw new InvalidDataException("The control and at least one legal substitution are required.");
+        if (candidates.Count < 2 || (!fine && candidates[0].Bonus != OriginalBonus) || (fine && rejected.Count != 0))
+            throw new InvalidDataException("The declared grid is no longer valid; review the experiment.");
         var (threat, cadence) = RunBundle.ReadCombatSettings(apiRoot);
         var content = new OfflineContent(apiRoot, threat);
-        var discovery = IdleSuite.Resolve(suite with { SamplesPerCell = samples }, content, threat, cadence, 1337);
+        var discoverySamples = samples * (fine ? 5 : 1);
+        var discoverySeed = fine ? (samples == 100 ? 418091 : 418093) : 1337;
+        var discovery = IdleSuite.Resolve(suite with { SamplesPerCell = discoverySamples }, content, threat, cadence, discoverySeed);
         // Small workflow checks use a separate set so they never consume the full run's reserved seeds.
-        var confirmationSeed = samples == 100 ? 318091 : 318092;
+        var confirmationSeed = fine ? (samples == 100 ? 418092 : 418094) : (samples == 100 ? 318091 : 318092);
         var confirmation = IdleSuite.Resolve(suite with { SamplesPerCell = samples * 10 }, content, threat, cadence, confirmationSeed);
         if (discovery.Cells.Count != 2) throw new InvalidDataException("Expected two starter cells.");
         RequireDisjoint(discovery, confirmation);
+        // Check actual derived battle seeds, including prior investigations and the other fine-run mode.
+        // Resolving a schedule does not execute combat or reveal reserved outcomes.
+        int[] excludedSeeds = fine
+            ? [1337, 7331, 940031, 620903, 318091, 318092, samples == 100 ? 418093 : 418091, samples == 100 ? 418094 : 418092]
+            : [];
+        foreach (var seed in excludedSeeds)
+        {
+            var excluded = IdleSuite.Resolve(suite with { SamplesPerCell = 1000 }, content, threat, cadence, seed);
+            RequireDisjoint(excluded, discovery);
+            RequireDisjoint(excluded, confirmation);
+        }
         var controls = ControlFixtures.Sum(file => IdleSuite.Resolve(
             HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(fixtureRoot, file)) with { SamplesPerCell = samples },
             content, threat, cadence, confirmationSeed).Cells.Count);
-        return new(1, ProfileId, "offenseCurve.postTutorialBonus", candidates, rejected, samples, samples * 10,
-            1337, confirmationSeed, samples * (2 * candidates.Count + 40 + 2 * controls), fixtureHash, HarnessJson.Hash(goals),
+        return new(2, ProfileId, "offenseCurve.postTutorialBonus", candidates, rejected, samples, samples * 10,
+            discoverySeed, confirmationSeed, 2 * candidates.Count * discoverySamples + samples * (40 + 2 * controls), fixtureHash, HarnessJson.Hash(goals),
             HarnessJson.Hash(new { threat, cadence }),
             OfflineContent.Files.ToDictionary(p => p, p => HarnessJson.FileHash(Path.Combine(apiRoot, "Data", p))),
             Fixtures.ToDictionary(p => p, p => HarnessJson.FileHash(Path.Combine(fixtureRoot, p))),
             "After all discovery runs, minimize the worst per-encounter absolute distance from 70%; break ties by mean distance, then the largest bonus (least change). Freeze the selection before reading confirmation outcomes, even if no candidate is near the band.",
             "Run every legal preflight candidate once on discovery; then the original and selected candidate on reserved confirmation seeds and both complete control suites. No refinement, replacement selection or sample extension after outcomes. A complete investigation may fail the gameplay target. No production promotion.",
-            "Confirmation trial index 0 for both encounters, for original and selected candidate: four detailed replays, independent of outcomes.");
+            "Confirmation trial index 0 for both encounters, for original and selected candidate: four detailed replays, independent of outcomes.",
+            fine ? "blood-grove-pressure-fine-v1" : "blood-grove-pressure-v1", discoverySamples, excludedSeeds);
     }
 
     public static RegionCombatBalanceCatalog WithBonus(RegionCombatBalanceCatalog source, double bonus) => source with
@@ -117,12 +139,12 @@ public static class BloodGrovePressureExperiment
         .OrderBy(f => f.MaximumDeviation).ThenBy(f => f.MeanDeviation).ThenByDescending(f => f.Candidate.Bonus).First();
 
     public static async Task<PressureReport> RunAsync(string apiRoot, string fixtureRoot, string outputDirectory,
-        int samples, CancellationToken token, Action<string>? progress = null)
+        int samples, CancellationToken token, Action<string>? progress = null, PressureSweep sweep = PressureSweep.Coarse)
     {
         var output = Path.GetFullPath(outputDirectory);
         if (Path.Exists(output)) throw new IOException($"Output already exists: {output}");
         token.ThrowIfCancellationRequested();
-        var plan = CreatePlan(apiRoot, fixtureRoot, samples);
+        var plan = CreatePlan(apiRoot, fixtureRoot, samples, sweep);
         Directory.CreateDirectory(output);
         try
         {
@@ -169,7 +191,7 @@ public static class BloodGrovePressureExperiment
                 var root = candidate.Bonus == OriginalBonus ? source : Path.Combine(output, "candidates", candidate.Id);
                 if (root != source) CreateContentCopy(source, root, candidate.Bonus, token);
                 roots.Add(candidate.Id, root);
-                var saved = await Run(root, StarterFixture, "discovery/" + candidate.Id, plan.DiscoverySeed, samples);
+                var saved = await Run(root, StarterFixture, "discovery/" + candidate.Id, plan.DiscoverySeed, plan.DiscoverySamples);
                 discoveryInput ??= saved.Input;
                 var deviations = saved.Scorecard.Cells.Select(c => Math.Abs(c.ClearRate!.Rate * 100 - 70)).ToArray();
                 findings.Add(new(candidate, saved.Scorecard.Cells, deviations.Max(), deviations.Average(), saved.ArtifactHash));
@@ -270,13 +292,14 @@ public static class BloodGrovePressureExperiment
     private static string Markdown(PressurePlan plan, PressureReport report)
     {
         static string N(double? value) => value?.ToString("0.0", CultureInfo.InvariantCulture) ?? "—";
+        static string Bonus(double value) => value.ToString("0.00", CultureInfo.InvariantCulture);
         var text = new StringBuilder("# Blood Grove regional offense experiment\n\n");
         text.AppendLine($"{report.Status}: {report.ValidBattles}/{plan.PlannedBattles} valid battles. {report.Disposition}\n");
-        text.AppendLine($"Selected bonus: {N(report.Selected.Candidate.Bonus)} (original 2.3). Selection used discovery only; confirmation gate: **{report.Confirmation.GateStatus}**.\n");
+        text.AppendLine($"Experiment: {plan.ExperimentId}. Selected bonus: {Bonus(report.Selected.Candidate.Bonus)} (original 2.3). Selection used discovery only; confirmation gate: **{report.Confirmation.GateStatus}**.\n");
         text.AppendLine("| Discovery bonus | Encounter | Wins / trials | Clear % [95% Wilson] |\n| --- | --- | --- | --- |");
         foreach (var finding in report.Discovery)
         foreach (var cell in finding.Cells)
-            text.AppendLine($"| {N(finding.Candidate.Bonus)} | {cell.Encounter} | {cell.Wins}/{cell.Valid} | {N(cell.ClearRate!.Rate * 100)} [{N(cell.ClearRate.Lower * 100)}, {N(cell.ClearRate.Upper * 100)}] |");
+            text.AppendLine($"| {Bonus(finding.Candidate.Bonus)} | {cell.Encounter} | {cell.Wins}/{cell.Valid} | {N(cell.ClearRate!.Rate * 100)} [{N(cell.ClearRate.Lower * 100)}, {N(cell.ClearRate.Upper * 100)}] |");
         text.AppendLine("\n| Confirmation encounter | Original wins | Candidate wins | Candidate clear % [95% Wilson] | Paired change pp |\n| --- | --- | --- | --- | --- |");
         foreach (var cell in report.StarterComparison.Cells)
             text.AppendLine($"| {cell.Candidate!.Encounter} | {cell.Baseline!.Wins}/{cell.Baseline.Valid} | {cell.Candidate.Wins}/{cell.Candidate.Valid} | {N(cell.Candidate.ClearRate!.Rate * 100)} [{N(cell.Candidate.ClearRate.Lower * 100)}, {N(cell.Candidate.ClearRate.Upper * 100)}] | {N(cell.ClearRateChange!.MeanChange)} |");

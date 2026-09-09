@@ -15,6 +15,8 @@ public class CombatResult
     public List<CombatLogItem> EventLog { get; set; } = [];
     public List<EntityStats> EntityStats { get; set; } = [];
     public CompactCombatTelemetry CompactTelemetry { get; set; } = new();
+    [JsonIgnore]
+    public IReadOnlyList<CombatStyleCombatSummary> CombatStyles { get; set; } = [];
     public BattleOutcome Outcome
     {
         get => ContentOutcome;

@@ -7,6 +7,62 @@ namespace EssenceSystem.Tests;
 
 public sealed class BalanceHarnessComparisonTests
 {
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    public async Task Archived_catalog_versions_can_be_read_and_compared_without_old_execution(int version, bool legacy)
+    {
+        using var workspace = new Workspace();
+        var run = await workspace.Run("archive");
+        Assert.Equal(2, run.Manifest.SchemaVersion);
+        var hashes = run.Manifest.ContentHashes.ToDictionary();
+        const string styles = "combat-styles/combat-styles.v1.json";
+        if (legacy)
+        {
+            hashes.Remove(styles);
+            File.Delete(Path.Combine(run.Directory, "content", "Data", styles));
+        }
+        Workspace.Write(Path.Combine(run.Directory, "manifest.json"), run.Manifest with
+        {
+            SchemaVersion = version, ContentHashes = hashes,
+            Execution = run.Manifest.Execution with { Runtime = "Archived runtime" }
+        });
+        var archived = SavedSuite.Read(run.Directory);
+        Assert.Equal(legacy ? 14 : 15, archived.Manifest.ContentHashes.Count);
+        var baseline = Path.Combine(workspace.Path, "baseline.json");
+        BaselineManifest.Accept(run.Directory, baseline, "Archive compatibility test only.");
+        var comparison = SuiteComparison.Create(baseline, run.Directory, Path.Combine(workspace.Path, "comparison"));
+        Assert.Equal("Complete", comparison.Status);
+        Assert.All(comparison.Cells, c => Assert.Equal(0, c.GameplayChanges));
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() => SuiteBundle.ReplayAsync(
+            run.Directory, run.Input.Cells[0].Trials[0].BattleId, false, CancellationToken.None));
+        Assert.Contains("original assemblies", exception.Message);
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("extra")]
+    [InlineData("path")]
+    [InlineData("unknown-version")]
+    [InlineData("version-2-legacy")]
+    public async Task Archive_allowlists_reject_undeclared_sets_and_unsafe_paths(string corruption)
+    {
+        using var workspace = new Workspace();
+        var run = await workspace.Run("archive");
+        var hashes = run.Manifest.ContentHashes.ToDictionary();
+        switch (corruption)
+        {
+            case "missing": hashes.Remove("items/items.json"); break;
+            case "extra": hashes.Add("extra.json", new('a', 64)); break;
+            case "path": hashes.Add("../../outside.json", new('a', 64)); break;
+            case "version-2-legacy": hashes.Remove("combat-styles/combat-styles.v1.json"); break;
+        }
+        Workspace.Write(Path.Combine(run.Directory, "manifest.json"), run.Manifest with
+            { ContentHashes = hashes, SchemaVersion = corruption == "unknown-version" ? 99 : 2 });
+        Assert.Throws<InvalidDataException>(() => SavedSuite.Read(run.Directory));
+    }
+
     [Fact]
     public void Paired_intervals_preserve_direction_and_do_not_claim_certainty_from_identical_samples()
     {
@@ -266,6 +322,10 @@ public sealed class BalanceHarnessComparisonTests
             var balance = JsonNode.Parse(File.ReadAllText(balancePath))!;
             foreach (var profile in balance["profiles"]!.AsArray())
                 profile!["offenseCurve"]!["baseMultiplier"] = profile["offenseCurve"]!["baseMultiplier"]!.GetValue<double>() * 4;
+            // Keep authored local offense values consistent with this stronger-enemy test overlay.
+            foreach (var areaOverride in balance["areaOverrides"]?.AsArray() ?? [])
+                if (areaOverride?["offenseMultiplier"] is { } offense)
+                    areaOverride["offenseMultiplier"] = offense.GetValue<double>() * 4;
             File.WriteAllText(balancePath, balance.ToJsonString());
             return root;
         }

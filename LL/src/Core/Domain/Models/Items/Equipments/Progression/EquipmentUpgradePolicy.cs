@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Domain.Models.Items.Equipments.Progression;
 
-/// <summary>Calculates an exact, side-effect-free equipment upgrade quote.</summary>
+/// <summary>Calculates current equipment upgrade costs and eligibility without side effects.</summary>
 public sealed class EquipmentUpgradePolicy(
     EquipmentCatalog catalog,
     EquipmentUpgradePrices prices,
@@ -13,11 +13,8 @@ public sealed class EquipmentUpgradePolicy(
     public EquipmentUpgradeQuote Quote(
         EquipmentUpgradeContext? context,
         EquipmentUpgradeRequest request,
-        Guid operationId,
-        DateTimeOffset now)
+        Guid operationId)
     {
-        var expires = DateTimeOffset.FromUnixTimeSeconds(
-            (now.ToUnixTimeSeconds() / 300 + 1) * 300);
         var before = context?.Equipment?.ProgressionData;
         EquipmentData? after = null;
         long partsCost = 0;
@@ -102,33 +99,9 @@ public sealed class EquipmentUpgradePolicy(
 
         var availableParts = context?.PartStacks.Sum(stack => (long)stack.Quantity) ?? 0;
         var availableCinders = context?.Character.Cinders ?? 0;
-        var token = Fingerprint(new
-        {
-            characterId = context?.Character.Id,
-            operationId,
-            request,
-            expires,
-            before = before?.Serialize(),
-            after = after?.Serialize(),
-            itemVersion = context?.Equipment?.Version ?? 0,
-            prices.Version,
-            partsCost,
-            cinderCost,
-            partsReturned,
-            availableParts,
-            availableCinders,
-            blueprintItemId,
-            availableBlueprints,
-            blueprintVersion = blueprints?.Version,
-            equipped = context?.IsEquipped,
-            favorite = context?.InventoryItem?.IsFavorite ?? context?.Equipment?.IsFavorite
-        });
-
         return new EquipmentUpgradeQuote(
             operationId,
             request,
-            token,
-            expires,
             error is null,
             error,
             before,

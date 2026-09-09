@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "fallbackProfileId": "content-foundation-v1",
   "foundation": {
     "areasPerRegion": 10,
@@ -136,6 +136,18 @@
       "critChanceCap": 45.0,
       "critDamageCap": 200.0,
       "maximumStepIncrease": 0.20
+    }
+  ],
+  "areaOverrides": [
+    {
+      "areaId": "region_01_area_02",
+      "reason": "Blood Grove Goblin Warrior/Shortsword/Heavy Breastplate starter: local equivalent of offense bonus 0.21, evaluated against the reviewed 50-90% band. Other areas retain the regional curve.",
+      "offenseMultiplier": 2.421
+    },
+    {
+      "areaId": "region_01_area_03",
+      "reason": "Retain Crystal Creek's original offense 4.511 after the Blood Grove-only reduction to 2.421; explicitly allow the resulting 86.33% entry increase without changing creature stats.",
+      "maximumOffenseStepIncrease": 0.87
     }
   ],
   "regions": [

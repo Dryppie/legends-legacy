@@ -17,4 +17,5 @@ export class DefaultHeaderComponent {
   @Input() section: string = '';
   @Input() guidePageId?: GuidePageId;
   @Input() showGuide = true;
+  @Input() wrap = false;
 }

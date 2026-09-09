@@ -52,16 +52,14 @@ public class EquipmentController : BaseController
         bool AllowFavoriteDismantle = false,
         string? BlueprintStyleId = null);
     public sealed record ApplyEquipmentVariantRequestDto(Guid OperationId, Guid ItemInstanceId,
-        string BlueprintStyleId, string QuoteToken);
+        string BlueprintStyleId);
     public sealed record ReinforceEquipmentRequestDto(
         Guid OperationId,
-        Guid ItemInstanceId,
-        string QuoteToken);
+        Guid ItemInstanceId);
     public sealed record DismantleEquipmentRequestDto(
         Guid OperationId,
         Guid ItemInstanceId,
-        bool AllowFavoriteDismantle,
-        string QuoteToken);
+        bool AllowFavoriteDismantle);
     [HttpGet]
     public async Task<ActionResult<List<EquipmentSlotDto>>> Get() =>
         await Mediator.Send(new GetMyEquipmentQuery(CurrentCharacterGuid));
@@ -103,7 +101,7 @@ public class EquipmentController : BaseController
     public async Task<ActionResult<Response<EquipmentUpgradeMutationDto>>> ApplyVariant(
         [FromBody] ApplyEquipmentVariantRequestDto request, CancellationToken ct) =>
         await Mediator.Send(new ApplyEquipmentVariantCommand(CurrentCharacterGuid, request.OperationId,
-            request.ItemInstanceId, request.BlueprintStyleId, request.QuoteToken), ct);
+            request.ItemInstanceId, request.BlueprintStyleId), ct);
 
     [HttpPost("upgrade/reinforce")]
     public async Task<ActionResult<Response<EquipmentUpgradeMutationDto>>> Reinforce(
@@ -112,8 +110,7 @@ public class EquipmentController : BaseController
         await Mediator.Send(new ReinforceEquipmentCommand(
             CurrentCharacterGuid,
             request.OperationId,
-            request.ItemInstanceId,
-            request.QuoteToken), cancellationToken);
+            request.ItemInstanceId), cancellationToken);
 
     [HttpPost("upgrade/dismantle")]
     public async Task<ActionResult<Response<EquipmentUpgradeMutationDto>>> Dismantle(
@@ -123,6 +120,5 @@ public class EquipmentController : BaseController
             CurrentCharacterGuid,
             request.OperationId,
             request.ItemInstanceId,
-            request.AllowFavoriteDismantle,
-            request.QuoteToken), cancellationToken);
+            request.AllowFavoriteDismantle), cancellationToken);
 }

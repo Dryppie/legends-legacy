@@ -12,6 +12,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     private readonly RegionCombatBalanceCatalog _catalog;
     private readonly IReadOnlyDictionary<string, RegionCombatBalanceProfile> _profiles;
     private readonly IReadOnlyDictionary<string, AreaPlacement> _areas;
+    private readonly IReadOnlyDictionary<string, RegionCombatAreaOverride> _areaOverrides;
 
     public RegionCreatureScalingProvider(
         IConfiguration configuration,
@@ -25,6 +26,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     {
         _catalog = catalog;
         Validate(catalog);
+        _areaOverrides = (catalog.AreaOverrides ?? []).ToDictionary(x => x.AreaId, StringComparer.OrdinalIgnoreCase);
         _profiles = catalog.Profiles.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         _areas = catalog.Regions
             .SelectMany(region => region.AreaIds.Select((areaId, index) => new AreaPlacement(
@@ -49,13 +51,13 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
 
         if (_areas.TryGetValue(area.Id, out var placement))
         {
-            return CreateScaling(
+            return ApplyAreaOverride(CreateScaling(
                 _profiles[placement.ProfileId],
                 placement.RegionKey,
                 placement.GlobalStep,
                 placement.RegionStep,
                 placement.GlobalStep - 1,
-                placement.RecommendedCombatRating);
+                placement.RecommendedCombatRating), _areaOverrides.GetValueOrDefault(area.Id));
         }
 
         var fallback = _profiles[_catalog.FallbackProfileId];
@@ -75,6 +77,9 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             new CombatProgressionFoundation(10, 1, 1),
             [CreateLegacyProfile()],
             []));
+
+    private static CreatureScalingProfile ApplyAreaOverride(CreatureScalingProfile scaling, RegionCombatAreaOverride? areaOverride) =>
+        areaOverride?.OffenseMultiplier is { } offense ? scaling with { OffenseMultiplier = offense } : scaling;
 
     private CreatureScalingProfile CreateScaling(
         RegionCombatBalanceProfile profile,
@@ -216,7 +221,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 region.EndingCombatRating,
                 region.AreaIds,
                 region.DefaultBuildIds)).ToArray(),
-            document.FallbackProfileId);
+            document.FallbackProfileId,
+            document.AreaOverrides);
     }
 
     private static RegionCombatBalanceProfile MapProfile(ProfileDocument profile) => new(
@@ -321,6 +327,21 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             }
         }
 
+        var overrides = new Dictionary<string, RegionCombatAreaOverride>(StringComparer.OrdinalIgnoreCase);
+        foreach (var areaOverride in catalog.AreaOverrides ?? [])
+        {
+            if (string.IsNullOrWhiteSpace(areaOverride.AreaId)
+                || !catalog.Regions.Any(r => r.AreaIds.Contains(areaOverride.AreaId, StringComparer.OrdinalIgnoreCase))
+                || !overrides.TryAdd(areaOverride.AreaId, areaOverride)
+                || string.IsNullOrWhiteSpace(areaOverride.Reason)
+                || (areaOverride.OffenseMultiplier is null && areaOverride.MaximumOffenseStepIncrease is null)
+                || (areaOverride.OffenseMultiplier is { } offense && (!double.IsFinite(offense) || offense <= 0))
+                || (areaOverride.MaximumOffenseStepIncrease is { } step && (!double.IsFinite(step) || step < 0))
+                || (areaOverride.MaximumOffenseStepIncrease.HasValue
+                    && catalog.Regions.Any(r => r.AreaIds[0].Equals(areaOverride.AreaId, StringComparison.OrdinalIgnoreCase))))
+                throw new InvalidOperationException($"Area combat override '{areaOverride.AreaId}' is invalid.");
+        }
+
         foreach (var region in catalog.Regions)
         {
             var profile = catalog.Profiles.Single(x =>
@@ -328,7 +349,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             CreatureScalingProfile? previous = null;
             for (var index = 0; index < region.AreaIds.Count; index++)
             {
-                var current = CreateScaling(
+                var areaOverride = overrides.GetValueOrDefault(region.AreaIds[index]);
+                var current = ApplyAreaOverride(CreateScaling(
                     profile,
                     region.RegionKey,
                     region.StartingGlobalStep + index,
@@ -338,14 +360,15 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                         region.StartingCombatRating,
                         region.EndingCombatRating,
                         index,
-                        region.AreaIds.Count));
+                        region.AreaIds.Count)), areaOverride);
                 if (previous is not null)
                 {
                     var maximumStepIncrease = index == 1
                         ? profile.MaximumFirstStepIncrease ?? profile.MaximumStepIncrease
                         : profile.MaximumStepIncrease;
                     ValidateStepIncrease(region.RegionKey, "health", previous.HealthMultiplier, current.HealthMultiplier, maximumStepIncrease);
-                    ValidateStepIncrease(region.RegionKey, "offense", previous.OffenseMultiplier, current.OffenseMultiplier, maximumStepIncrease);
+                    ValidateStepIncrease(region.RegionKey, "offense", previous.OffenseMultiplier, current.OffenseMultiplier,
+                        areaOverride?.MaximumOffenseStepIncrease ?? maximumStepIncrease);
                     ValidateStepIncrease(region.RegionKey, "defense", previous.DefenseMultiplier, current.DefenseMultiplier, maximumStepIncrease);
                     ValidateStepIncrease(region.RegionKey, "resistance", previous.ResistanceMultiplier, current.ResistanceMultiplier, maximumStepIncrease);
                 }
@@ -466,6 +489,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public FoundationDocument Foundation { get; set; } = new();
         public List<ProfileDocument> Profiles { get; set; } = [];
         public List<RegionDocument> Regions { get; set; } = [];
+        public List<RegionCombatAreaOverride>? AreaOverrides { get; set; }
     }
 
     private sealed class FoundationDocument

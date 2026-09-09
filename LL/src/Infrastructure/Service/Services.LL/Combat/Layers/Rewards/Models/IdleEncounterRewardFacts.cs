@@ -12,5 +12,6 @@ public sealed record IdleEncounterRewardFacts(
     IReadOnlyList<Creature> HostileCreatures,
     CombatResult CombatResult)
 {
+    public IReadOnlyList<Services.LL.Combat.Layers.Resolution.Models.CombatStyleExperienceAward> CombatStyleExperience { get; init; } = [];
     public bool IsVictory => Outcome == BattleOutcome.Victory;
 }

@@ -50,10 +50,24 @@ public sealed class BalanceHarnessTests
     [InlineData(17, 1, 5, "idle-first-hunt.json", 1, 1, 0, "plain.light_leggings", true)]
     [InlineData(1337, 0, 0, "idle-blood-grove-starter.json", 0)]
     [InlineData(17, 0, 0, "idle-blood-grove-starter.json", 1)]
+    [InlineData(1337, 1, 2, "idle-crystal-creek-starter.json", 0)]
+    [InlineData(17, 1, 2, "idle-crystal-creek-starter.json", 1)]
+    [InlineData(1337, 1, 3, "idle-crystal-creek-starter.json", 0)]
+    [InlineData(17, 1, 3, "idle-crystal-creek-starter.json", 1)]
+    [InlineData(718093, 1, 2, "idle-crystal-creek-starter.json", 0, 1, 0, null, false, true)]
+    [InlineData(718094, 1, 2, "idle-crystal-creek-starter.json", 1, 1, 0, null, false, true)]
     public async Task Harness_matches_independent_production_idle_preparation_and_resolution(int seed, int stageIndex, int buildIndex,
-        string suiteName, int encounterIndex, int essenceLevel = 1, int rank = 0, string? armorId = null, bool fury = false)
+        string suiteName, int encounterIndex, int essenceLevel = 1, int rank = 0, string? armorId = null, bool fury = false, bool creekPressure = false)
     {
         var (content, input) = Create(seed);
+        using var temporaryContent = creekPressure ? new TemporaryDirectory() : null;
+        var contentRoot = ApiRoot;
+        if (temporaryContent is not null)
+        {
+            contentRoot = Path.Combine(temporaryContent.Path, "content");
+            CrystalCreekPressureExperiment.CreateContentCopy(ApiRoot, contentRoot, new("parity", 0.56, 9.6));
+            content = new OfflineContent(contentRoot, input.ThreatAndTanking);
+        }
         if (stageIndex >= 0)
         {
             var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(Path.GetDirectoryName(ScenarioPath)!, suiteName));
@@ -98,8 +112,8 @@ public sealed class BalanceHarnessTests
             });
         }
         foreach (var essence in referenceEssences) essence.Level = essenceLevel;
-        var world = HarnessJson.Read<JsonElement>(Path.Combine(ApiRoot, "Data", "world", "creatures.json"));
-        var area = HarnessJson.Read<JsonElement>(Path.Combine(ApiRoot, "Data", "world", "regions.json"))
+        var world = HarnessJson.Read<JsonElement>(Path.Combine(contentRoot, "Data", "world", "creatures.json"));
+        var area = HarnessJson.Read<JsonElement>(Path.Combine(contentRoot, "Data", "world", "regions.json"))
             .GetProperty("regions").EnumerateArray().SelectMany(x => x.GetProperty("areas").EnumerateArray())
             .Single(x => x.GetProperty("id").GetString() == input.Scenario.AreaId)
             .Deserialize<Domain.Models.Regions.Areas.Area>(HarnessJson.Options)!;

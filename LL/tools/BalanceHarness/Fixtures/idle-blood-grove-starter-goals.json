@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "idle-blood-grove-starter-goals-v1",
+  "id": "idle-blood-grove-starter-goals-v2",
   "suiteId": "idle-blood-grove-starter-v1",
   "fixtureHash": "e820b30cf1bdd8763c4ea8c9fdbf138a870611bdfebe728f71454bb348e8a87f",
   "metricsVersion": "idle-scorecard-v1",
-  "description": "Reviewed initial working target for the selected level-5 Goblin Warrior, one-handed Shortsword and Heavy Breastplate reference: aim near 70% clear rate, with an inclusive 65-75% band for each fixed Blood Grove pairing. This policy applies only when explicitly selected for evaluation; other cohort policies and CI configuration are unchanged.",
+  "description": "Reviewed revised target for the selected level-5 Goblin Warrior, one-handed Shortsword and Heavy Breastplate reference: aim near 70% clear rate, with an inclusive 50-90% band for each fixed Blood Grove pairing. This policy supersedes the initial 65-75% band and applies only when explicitly selected for evaluation; other cohort policies and CI configuration are unchanged.",
   "requiredCells": [
     "blood-grove.goblin-warrior-sword-heavy-chest.ravens",
     "blood-grove.goblin-warrior-sword-heavy-chest.raven-zombie"
@@ -21,10 +21,10 @@
         "blood-grove.goblin-warrior-sword-heavy-chest.raven-zombie"
       ],
       "minimumSamples": 100,
-      "minimum": 65,
-      "maximum": 75,
-      "rationale": "Aim near 70% for this exact starter recipe in each selected encounter, rather than maximizing victories. The existing pointwise 95% Wilson interval must lie wholly inside 65-75% to pass; boundary overlap remains inconclusive. At least 100 trials permit diagnosis of large misses, but near-target confirmation needs a larger predeclared sample budget. These fixed pairs are not an area-wide spawn estimate or a requirement for every Essence.",
-      "reviewReason": "On 8 September 2026 the user approved approximately 70% clear rate for the selected Blood Grove starter and explicitly chose: Aim near 70% (use 65-75% as an initial working band). This approves the scoped working band, not a passing current build, unrelated pacing goals or a hosted CI gate."
+      "minimum": 50,
+      "maximum": 90,
+      "rationale": "Aim near 70% for this exact starter recipe in each selected encounter, with an accepted 50-90% band. The existing pointwise 95% Wilson interval must lie wholly inside the band to pass; boundary overlap remains inconclusive. At least 100 valid trials are required. Any further confirmation uses a separately declared budget and fresh seeds, without extending completed experiments until they pass. These fixed pairs are not an area-wide spawn estimate or a requirement for every Essence.",
+      "reviewReason": "On 8 September 2026, after reviewing the coarse and fine pressure experiments, the user explicitly requested: Let's use a 50-90% win-rate band. This replaces the initial 65-75% band while retaining the earlier 70% aim, exact starter recipe and existing confidence-interval rule. This approves the revised scoped policy, not a production balance change, viable-baseline promotion, unrelated pacing goals or a hosted CI gate."
     }
   ]
 }

@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Combat;
+using Domain.Models.CombatStyles;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -15,6 +16,39 @@ namespace EssenceSystem.Tests;
 
 public sealed class IdleCombatResolutionSessionFactoryTests
 {
+    [Theory]
+    [InlineData(CombatStyleIds.Bastion, 0, 1)]
+    [InlineData(CombatStyleIds.Bastion, 2, 3)]
+    [InlineData(CombatStyleIds.Conduit, 8, 9)]
+    public void Idle_mastery_advancement_updates_the_next_encounter_bonus_without_changing_captured_rules(
+        string styleId, int previousLevel, int nextLevel)
+    {
+        var catalog = CombatStyleFoundationTests.LoadCatalog();
+        var definition = catalog.Styles.Single(style => style.Id == styleId);
+        var character = new Character { Id = Guid.NewGuid(), Name = "Player" };
+        var captured = CombatStyleRules.Snapshot(catalog, definition,
+            new CharacterCombatStyle { Level = previousLevel }, new(styleId, null, [], null), null);
+        var template = new CombatEntity(character) { CombatStyle = captured };
+        var session = new IdleCombatResolutionSession(new UnusedCombatEngineExecutor(), new UnusedCombatEncounterResultFactory())
+        {
+            Catalog = new IdleCombatTemplateCatalog(
+                new Dictionary<Guid, Entity> { [character.Id] = character },
+                new Dictionary<Guid, CombatEntity> { [character.Id] = template },
+                new Dictionary<Guid, CombatEntity>())
+        };
+
+        session.AdvanceCombatStyle(character.Id, nextLevel);
+
+        var next = session.CapturedCombatStyles[character.Id];
+        Assert.Equal(nextLevel, next.Level);
+        Assert.Equal(nextLevel * .01, next.BarrierMasteryBonus, 6);
+        Assert.Equal(nextLevel * .01, next.FocusMasteryBonus, 6);
+        Assert.Equal(previousLevel, captured.Level);
+        Assert.Equal(previousLevel * .01, captured.BarrierMasteryBonus, 6);
+        Assert.Equal(previousLevel * .01, captured.FocusMasteryBonus, 6);
+        Assert.Same(captured.Tuning, next.Tuning);
+    }
+
     [Fact]
     public async Task Reuses_hostile_sources_and_templates_across_semantic_batches()
     {

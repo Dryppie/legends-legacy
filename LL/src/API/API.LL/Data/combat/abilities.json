@@ -5,11 +5,16 @@
     "name": "Shadow Strike",
     "description": "The shadow image lashes out with a quick shadow attack.",
     "cooldownTicks": 25,
-    "tags": [ "Magical", "Summon" ],
+    "tags": [
+      "Magical",
+      "Summon"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.shadow_image.shadow_strike.damage" ]
+        "effectIds": [
+          "effect.shadow_image.shadow_strike.damage"
+        ]
       }
     ],
     "effects": [
@@ -31,7 +36,11 @@
     "name": "Bloodthirsty Fangs",
     "description": "Deal 110% Physical Damage to the target and heal for 50% of damage dealt.",
     "cooldownTicks": 80,
-    "tags": [ "Physical", "Melee", "Lifesteal" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Lifesteal"
+    ],
     "effects": [
       {
         "id": "effect.creature.vampire_bat.bloodthirsty_fangs.damage",
@@ -53,15 +62,22 @@
     "name": "Erratic Flight",
     "description": "Gain 5% Dodge while below 20% Health.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.vampire_bat.erratic_flight.dodge" ]
+        "effectIds": [
+          "effect.creature.vampire_bat.erratic_flight.dodge"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.vampire_bat.erratic_flight.dodge" ],
+        "effectIds": [
+          "effect.creature.vampire_bat.erratic_flight.dodge"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -95,7 +111,10 @@
     "name": "Piercing Peck",
     "description": "Strike a random enemy for 150% Physical Damage.",
     "cooldownTicks": 90,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.raven.piercing_peck.damage",
@@ -116,7 +135,10 @@
     "name": "Bad Omen",
     "description": "At combat start, apply Vulnerable(2) to all enemies.",
     "cooldownTicks": 0,
-    "tags": [ "Debuff", "Area" ],
+    "tags": [
+      "Debuff",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.raven.bad_omen.vulnerable",
@@ -135,7 +157,11 @@
     "name": "Toxic Fangs",
     "description": "Deal 100% Physical Damage and apply Poison(15).",
     "cooldownTicks": 110,
-    "tags": [ "Physical", "Melee", "Poison" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Poison"
+    ],
     "effects": [
       {
         "id": "effect.creature.venomous_snake.toxic_fangs.damage",
@@ -164,7 +190,10 @@
     "name": "Venom-Coated Strikes",
     "description": "Basic attacks have a 12% chance to apply Poison(10).",
     "cooldownTicks": 0,
-    "tags": [ "Poison", "Basic Attack" ],
+    "tags": [
+      "Poison",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
@@ -192,7 +221,11 @@
     "name": "Withering Petals",
     "description": "Deal 90% Magical Damage to a random enemy and apply Weaken.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Ranged", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.nightshade_blossom.withering_petals.damage",
@@ -221,11 +254,16 @@
     "name": "Midnight Bloom",
     "description": "Every {triggerCooldown}, heal yourself for 50% Power.",
     "cooldownTicks": 0,
-    "tags": [ "Healing", "Periodic" ],
+    "tags": [
+      "Healing",
+      "Periodic"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [ "effect.creature.nightshade_blossom.midnight_bloom.heal" ],
+        "effectIds": [
+          "effect.creature.nightshade_blossom.midnight_bloom.heal"
+        ],
         "internalCooldownTicks": 120,
         "initialDelayTicks": 120
       }
@@ -248,7 +286,11 @@
     "name": "Rending Bite",
     "description": "Deal 90% Physical Damage to a random enemy and apply Bleed(20).",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "effects": [
       {
         "id": "effect.creature.blood_zombie.rending_bite.damage",
@@ -277,15 +319,22 @@
     "name": "Clotted Flesh",
     "description": "Take 10% less Physical Damage while above 50% Health.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.blood_zombie.clotted_flesh.defense" ]
+        "effectIds": [
+          "effect.creature.blood_zombie.clotted_flesh.defense"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.blood_zombie.clotted_flesh.defense" ],
+        "effectIds": [
+          "effect.creature.blood_zombie.clotted_flesh.defense"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -319,7 +368,9 @@
     "name": "Soothing Glow",
     "description": "Heal the lowest-health ally for 80% Power.",
     "cooldownTicks": 80,
-    "tags": [ "Healing" ],
+    "tags": [
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.lumo_wisp.soothing_glow.heal",
@@ -338,7 +389,10 @@
     "name": "Lumo Barrier",
     "description": "At combat start, gain Barrier equal to {scaling} Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Barrier", "Defensive" ],
+    "tags": [
+      "Barrier",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.lumo_wisp.lumo_barrier.barrier",
@@ -357,7 +411,10 @@
     "name": "Targeting Beam",
     "description": "Deal 160% Magical Damage to a random enemy.",
     "cooldownTicks": 100,
-    "tags": [ "Magical", "Ranged" ],
+    "tags": [
+      "Magical",
+      "Ranged"
+    ],
     "effects": [
       {
         "id": "effect.creature.lumo_sentinel.targeting_beam.damage",
@@ -378,7 +435,10 @@
     "name": "Cracked Core",
     "description": "Gain {scaling} Magical Defense above 66% Health; lose {scaling2} Magical Defense below 33% Health.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
@@ -444,7 +504,11 @@
     "name": "Shiv Jab",
     "description": "Deal 100% Physical Damage to a random enemy and apply Bleed(10).",
     "cooldownTicks": 90,
-    "tags": [ "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "effects": [
       {
         "id": "effect.creature.goblin.shiv_jab.damage",
@@ -473,11 +537,16 @@
     "name": "Gobber Trapper",
     "description": "The first time you dodge, apply Bleed(70) to the attacker.",
     "cooldownTicks": 0,
-    "tags": [ "Bleed", "Retaliation" ],
+    "tags": [
+      "Bleed",
+      "Retaliation"
+    ],
     "triggers": [
       {
         "event": "OnDodge",
-        "effectIds": [ "effect.creature.goblin.gobber_trapper.bleed" ]
+        "effectIds": [
+          "effect.creature.goblin.gobber_trapper.bleed"
+        ]
       }
     ],
     "effects": [
@@ -496,10 +565,14 @@
   {
     "id": "ability.creature.goblin_archer.snipers_strike",
     "kind": "Active",
-    "name": "Sniper's Strike",
-    "description": "Deal 135% Physical Damage with +50% Critical Chance.",
+    "name": "Sniper\u0027s Strike",
+    "description": "Deal 135% Physical Damage with \u002B50% Critical Chance.",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Ranged", "Critical" ],
+    "tags": [
+      "Physical",
+      "Ranged",
+      "Critical"
+    ],
     "effects": [
       {
         "id": "effect.creature.goblin_archer.snipers_strike.damage",
@@ -521,11 +594,16 @@
     "name": "Poisoned Arrows",
     "description": "Ranged attacks have a 10% chance to apply Poison(10).",
     "cooldownTicks": 0,
-    "tags": [ "Ranged", "Poison" ],
+    "tags": [
+      "Ranged",
+      "Poison"
+    ],
     "triggers": [
       {
         "event": "OnRangedAttack",
-        "effectIds": [ "effect.creature.goblin_archer.poisoned_arrows.poison" ]
+        "effectIds": [
+          "effect.creature.goblin_archer.poisoned_arrows.poison"
+        ]
       }
     ],
     "effects": [
@@ -547,7 +625,11 @@
     "name": "Raging Cleave",
     "description": "Deal 150% Physical Damage to two enemies.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee", "Area" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.goblin_warrior.raging_cleave.damage",
@@ -568,11 +650,16 @@
     "name": "Relentless",
     "description": "Every third Basic Attack deals 30% increased damage.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Basic Attack" ],
+    "tags": [
+      "Buff",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [ "effect.creature.goblin_warrior.relentless.damage" ],
+        "effectIds": [
+          "effect.creature.goblin_warrior.relentless.damage"
+        ],
         "everyNthOccurrence": 3
       }
     ],
@@ -593,7 +680,10 @@
     "name": "Weak Rejuvenation",
     "description": "Heal the lowest-health ally for 50% Power every 4 seconds for 20 seconds.",
     "cooldownTicks": 170,
-    "tags": [ "Healing", "Periodic" ],
+    "tags": [
+      "Healing",
+      "Periodic"
+    ],
     "effects": [
       {
         "id": "effect.creature.goblin_shaman.weak_rejuvenation.heal",
@@ -614,11 +704,17 @@
     "name": "Spirit Link",
     "description": "After 15 seconds, apply Recovery(20) to all allies.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Healing", "Area" ],
+    "tags": [
+      "Buff",
+      "Healing",
+      "Area"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [ "effect.creature.goblin_shaman.spirit_link.recovery" ],
+        "effectIds": [
+          "effect.creature.goblin_shaman.spirit_link.recovery"
+        ],
         "internalCooldownTicks": 100000,
         "initialDelayTicks": 150
       }
@@ -642,7 +738,11 @@
     "name": "Intimidating Slam",
     "description": "Deal 145% Physical Damage and apply Vulnerable(1).",
     "cooldownTicks": 160,
-    "tags": [ "Physical", "Melee", "Debuff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.hobgoblin.intimidating_slam.damage",
@@ -671,7 +771,12 @@
     "name": "Brutal Charge",
     "description": "Gain Unstoppable(3), deal 150% Physical Damage, and Stun(1) if the target is below 30% Health.",
     "cooldownTicks": 180,
-    "tags": [ "Physical", "Melee", "Control", "Buff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Control",
+      "Buff"
+    ],
     "effects": [
       {
         "id": "effect.creature.hobgoblin.brutal_charge.unstoppable",
@@ -716,7 +821,10 @@
     "name": "Threatening Presence",
     "description": "At combat start, take 10% less damage from Vulnerable enemies.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.hobgoblin.threatening_presence.vulnerable",
@@ -735,7 +843,10 @@
     "name": "Ice Needle",
     "description": "Deal 160% Magical Damage to a random enemy.",
     "cooldownTicks": 100,
-    "tags": [ "Magical", "Ranged" ],
+    "tags": [
+      "Magical",
+      "Ranged"
+    ],
     "effects": [
       {
         "id": "effect.creature.frost_imp.ice_needle.damage",
@@ -756,11 +867,16 @@
     "name": "Cold Touch",
     "description": "Basic Attacks apply Chill(1).",
     "cooldownTicks": 0,
-    "tags": [ "Debuff", "Basic Attack" ],
+    "tags": [
+      "Debuff",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [ "effect.creature.frost_imp.cold_touch.chill" ]
+        "effectIds": [
+          "effect.creature.frost_imp.cold_touch.chill"
+        ]
       }
     ],
     "effects": [
@@ -781,7 +897,10 @@
     "name": "Prismatic Shard",
     "description": "Deal 50-250% Magical Damage to a random enemy.",
     "cooldownTicks": 110,
-    "tags": [ "Magical", "Ranged" ],
+    "tags": [
+      "Magical",
+      "Ranged"
+    ],
     "effects": [
       {
         "id": "effect.creature.crystal_wisp.prismatic_shard.damage",
@@ -803,7 +922,10 @@
     "name": "Captured Light",
     "description": "Increase all healing received by 8%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Healing" ],
+    "tags": [
+      "Buff",
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.crystal_wisp.captured_light.healing",
@@ -821,7 +943,11 @@
     "name": "Sweet Water",
     "description": "Heal all allies for 70% Power every 2 seconds for 6 seconds.",
     "cooldownTicks": 140,
-    "tags": [ "Healing", "Area", "Periodic" ],
+    "tags": [
+      "Healing",
+      "Area",
+      "Periodic"
+    ],
     "effects": [
       {
         "id": "effect.creature.blue_slime.sweet_water.heal",
@@ -842,7 +968,10 @@
     "name": "Protective Slime",
     "description": "At combat start, grant all allies Barrier equal to {scaling} of your Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Barrier", "Area" ],
+    "tags": [
+      "Barrier",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.blue_slime.protective_slime.barrier",
@@ -862,7 +991,10 @@
     "description": "Generate 100 threat and gain Guard(5).",
     "cooldownTicks": 120,
     "threatValue": 100,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.transparent_slime.transparent_engulf.guard",
@@ -881,11 +1013,16 @@
     "name": "Reconstitute",
     "description": "The first time you fall below 80% Health, heal 15% Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Healing", "Defensive" ],
+    "tags": [
+      "Healing",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.transparent_slime.reconstitute.heal" ],
+        "effectIds": [
+          "effect.creature.transparent_slime.reconstitute.heal"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -918,7 +1055,11 @@
     "description": "Deal 150% Physical Damage, shed 100 threat, and gain Stealth(2).",
     "cooldownTicks": 140,
     "threatValue": -100,
-    "tags": [ "Physical", "Melee", "Buff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Buff"
+    ],
     "effects": [
       {
         "id": "effect.creature.moss_lizard.moss_camouflage.damage",
@@ -947,11 +1088,16 @@
     "name": "Lost Tail",
     "description": "The first time you fall below 40% Health, increase Health Regeneration rate by 250% for 14 seconds.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Healing" ],
+    "tags": [
+      "Buff",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.moss_lizard.lost_tail.regeneration" ],
+        "effectIds": [
+          "effect.creature.moss_lizard.lost_tail.regeneration"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -983,7 +1129,9 @@
     "name": "Shadow Image",
     "description": "Summon a shadow illusion with 1 Max Health.",
     "cooldownTicks": 120,
-    "tags": [ "Summon" ],
+    "tags": [
+      "Summon"
+    ],
     "effects": [
       {
         "id": "effect.creature.shadow_imp.shadow_image.summon",
@@ -1001,7 +1149,10 @@
     "name": "Shadowy Presence",
     "description": "Increase Dodge by 2%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.shadow_imp.shadowy_presence.dodge",
@@ -1020,7 +1171,10 @@
     "name": "Gravebound Pounce",
     "description": "Deal 160% Physical Damage to the lowest-health enemy.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.grave_hound.gravebound_pounce.damage",
@@ -1041,7 +1195,10 @@
     "name": "Graveyard Howl",
     "description": "At combat start, apply Slow to all enemies.",
     "cooldownTicks": 0,
-    "tags": [ "Debuff", "Area" ],
+    "tags": [
+      "Debuff",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.grave_hound.graveyard_howl.slow",
@@ -1060,7 +1217,11 @@
     "name": "Soul Drain",
     "description": "Deal 110% Magical Damage and heal for 50% of damage dealt.",
     "cooldownTicks": 90,
-    "tags": [ "Magical", "Ranged", "Lifesteal" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Lifesteal"
+    ],
     "effects": [
       {
         "id": "effect.creature.lost_soul.soul_drain.damage",
@@ -1082,7 +1243,9 @@
     "name": "Soul Lantern",
     "description": "At combat start, apply Vulnerable(5) to a random enemy.",
     "cooldownTicks": 0,
-    "tags": [ "Debuff" ],
+    "tags": [
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.lost_soul.soul_lantern.vulnerable",
@@ -1101,7 +1264,11 @@
     "name": "Mourning Flash",
     "description": "Deal 120% Magical Damage to a random enemy and apply Slow.",
     "cooldownTicks": 110,
-    "tags": [ "Magical", "Ranged", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.grave_wisp.mourning_flash.damage",
@@ -1130,11 +1297,16 @@
     "name": "Pale Flame",
     "description": "Magical hits deal an additional {eventScaling} Shadow Damage.",
     "cooldownTicks": 0,
-    "tags": [ "Magical", "Buff" ],
+    "tags": [
+      "Magical",
+      "Buff"
+    ],
     "triggers": [
       {
         "event": "OnHit",
-        "effectIds": [ "effect.creature.grave_wisp.pale_flame.damage" ],
+        "effectIds": [
+          "effect.creature.grave_wisp.pale_flame.damage"
+        ],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -1151,7 +1323,9 @@
         "target": "EventTarget",
         "eventMagnitudeCoefficient": 0.05,
         "damageType": "Shadow",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ],
@@ -1163,7 +1337,10 @@
     "name": "Bone Smash",
     "description": "Deal 150% Physical Damage.",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.skeleton.bone_smash.damage",
@@ -1184,7 +1361,10 @@
     "name": "Calcium",
     "description": "At combat start, gain Guard(4).",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.skeleton.calcium.guard",
@@ -1203,7 +1383,11 @@
     "name": "Pixie Burst",
     "description": "Deal 80% Magical Damage to all enemies.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Ranged", "Area" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.pixie.pixie_burst.damage",
@@ -1224,11 +1408,15 @@
     "name": "Resonant Chime",
     "description": "Whenever you use an ability, gain 1% Critical Damage.",
     "cooldownTicks": 0,
-    "tags": [ "Buff" ],
+    "tags": [
+      "Buff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.creature.pixie.resonant_chime.crit_damage" ]
+        "effectIds": [
+          "effect.creature.pixie.resonant_chime.crit_damage"
+        ]
       }
     ],
     "effects": [
@@ -1249,7 +1437,11 @@
     "name": "Bramble Shield",
     "description": "Grant the highest-Max-Health ally Thorns(5), 50% Cover for 8 seconds, and Barrier equal to {scaling} Power.",
     "cooldownTicks": 160,
-    "tags": [ "Barrier", "Buff", "Retaliation" ],
+    "tags": [
+      "Barrier",
+      "Buff",
+      "Retaliation"
+    ],
     "effects": [
       {
         "id": "effect.creature.wood_nymph.bramble_shield.cover",
@@ -1282,10 +1474,13 @@
   {
     "id": "ability.creature.wood_nymph.natures_protection",
     "kind": "Passive",
-    "name": "Nature's Protection",
+    "name": "Nature\u0027s Protection",
     "description": "At combat start, gain Renewal(15) and Ward(2).",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.wood_nymph.natures_protection.renewal",
@@ -1312,7 +1507,11 @@
     "name": "Unstable Colors",
     "description": "Each ally has an 80% chance to gain Empower; otherwise they gain Weaken.",
     "cooldownTicks": 180,
-    "tags": [ "Buff", "Debuff", "Area" ],
+    "tags": [
+      "Buff",
+      "Debuff",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.rainbow_slime.unstable_colors.condition",
@@ -1333,11 +1532,16 @@
     "name": "Colorful Shield",
     "description": "Whenever you use an ability, grant Barrier equal to {scaling} Power to the highest-Max-Health ally.",
     "cooldownTicks": 0,
-    "tags": [ "Barrier", "Buff" ],
+    "tags": [
+      "Barrier",
+      "Buff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.creature.rainbow_slime.colorful_shield.barrier" ]
+        "effectIds": [
+          "effect.creature.rainbow_slime.colorful_shield.barrier"
+        ]
       }
     ],
     "effects": [
@@ -1355,10 +1559,14 @@
   {
     "id": "ability.creature.enchanted_fairy.faes_corrosion",
     "kind": "Active",
-    "name": "Fae's Corrosion",
+    "name": "Fae\u0027s Corrosion",
     "description": "Deal 140% Magical Damage to a random enemy and apply Corrosion(6).",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Ranged", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.enchanted_fairy.faes_corrosion.damage",
@@ -1384,14 +1592,19 @@
   {
     "id": "ability.creature.enchanted_fairy.faes_charm",
     "kind": "Passive",
-    "name": "Fae's Charm",
+    "name": "Fae\u0027s Charm",
     "description": "Every {triggerCooldown}, each enemy has an 80% chance to receive Stun(3).",
     "cooldownTicks": 0,
-    "tags": [ "Control", "Area" ],
+    "tags": [
+      "Control",
+      "Area"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [ "effect.creature.enchanted_fairy.faes_charm.stun" ],
+        "effectIds": [
+          "effect.creature.enchanted_fairy.faes_charm.stun"
+        ],
         "internalCooldownTicks": 200,
         "initialDelayTicks": 200
       }
@@ -1416,7 +1629,11 @@
     "name": "A Doomed Illusion",
     "description": "Deal 75% Magical Damage and apply Doom(300) to a random enemy.",
     "cooldownTicks": 140,
-    "tags": [ "Magical", "Ranged", "Doom" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Doom"
+    ],
     "effects": [
       {
         "id": "effect.creature.illusion_fox.a_doomed_illusion.damage",
@@ -1445,11 +1662,16 @@
     "name": "Foxfire Wisp",
     "description": "Every {triggerCooldown} gain a Foxfire stack, up to 3. When attacked, consume one to deal 35% Magical Damage per stack.",
     "cooldownTicks": 0,
-    "tags": [ "Magical", "Retaliation" ],
+    "tags": [
+      "Magical",
+      "Retaliation"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [ "effect.creature.illusion_fox.foxfire_wisp.stack" ],
+        "effectIds": [
+          "effect.creature.illusion_fox.foxfire_wisp.stack"
+        ],
         "internalCooldownTicks": 50,
         "initialDelayTicks": 50
       }
@@ -1472,7 +1694,10 @@
     "name": "Thorned Rush",
     "description": "Deal 180% Physical Damage plus {conditionScaling} per Thorns stack.",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.thornback_boar.thorned_rush.damage",
@@ -1495,7 +1720,11 @@
     "name": "Bristling Hide",
     "description": "At combat start, gain Thorns(10) for 30 seconds.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Retaliation", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Retaliation",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.thornback_boar.bristling_hide.thorns",
@@ -1515,7 +1744,11 @@
     "name": "Echoing Antlers",
     "description": "Deal 125% Magical Damage and apply Weaken.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Melee", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Melee",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.hollow_stag.echoing_antlers.damage",
@@ -1544,11 +1777,16 @@
     "name": "Hollow Core",
     "description": "For every 20% Health lost, gain 1% Damage Reduction for the rest of combat. Max 4%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.hollow_stag.hollow_core.80" ],
+        "effectIds": [
+          "effect.creature.hollow_stag.hollow_core.80"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -1562,7 +1800,9 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.hollow_stag.hollow_core.60" ],
+        "effectIds": [
+          "effect.creature.hollow_stag.hollow_core.60"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -1576,7 +1816,9 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.hollow_stag.hollow_core.40" ],
+        "effectIds": [
+          "effect.creature.hollow_stag.hollow_core.40"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -1590,7 +1832,9 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.hollow_stag.hollow_core.20" ],
+        "effectIds": [
+          "effect.creature.hollow_stag.hollow_core.20"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -1649,7 +1893,9 @@
     "name": "Sprouting Surge",
     "description": "Heal yourself for 300% Power.",
     "cooldownTicks": 160,
-    "tags": [ "Healing" ],
+    "tags": [
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.treant_sapling.sprouting_surge.heal",
@@ -1668,7 +1914,10 @@
     "name": "Nurturing Roots",
     "description": "Increase all healing received by 15%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Healing" ],
+    "tags": [
+      "Buff",
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.treant_sapling.nurturing_roots.healing",
@@ -1684,9 +1933,13 @@
     "id": "ability.creature.glade_panther.ambush_strike",
     "kind": "Active",
     "name": "Ambush Strike",
-    "description": "Deal 125% Physical Damage with +20% Critical Chance.",
+    "description": "Deal 125% Physical Damage with \u002B20% Critical Chance.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee", "Critical" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Critical"
+    ],
     "effects": [
       {
         "id": "effect.creature.glade_panther.ambush_strike.damage",
@@ -1708,7 +1961,9 @@
     "name": "Razor Claws",
     "description": "Increase Critical Damage by 15%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff" ],
+    "tags": [
+      "Buff"
+    ],
     "effects": [
       {
         "id": "effect.creature.glade_panther.razor_claws.crit_damage",
@@ -1727,7 +1982,9 @@
     "name": "Rejuvenation",
     "description": "Heal the lowest-health ally for 120% Power.",
     "cooldownTicks": 110,
-    "tags": [ "Healing" ],
+    "tags": [
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.forest_spirit.rejuvenation.heal",
@@ -1746,11 +2003,16 @@
     "name": "Spirit Bloom",
     "description": "Every third heal you apply restores an additional 30% Power to its target.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Healing" ],
+    "tags": [
+      "Buff",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnHeal",
-        "effectIds": [ "effect.creature.forest_spirit.spirit_bloom.heal" ],
+        "effectIds": [
+          "effect.creature.forest_spirit.spirit_bloom.heal"
+        ],
         "everyNthOccurrence": 3
       }
     ],
@@ -1772,7 +2034,11 @@
     "name": "Rotburst",
     "description": "Deal 140% Physical Damage and apply Decay(15).",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Melee", "Debuff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.rotroot_shambler.rotburst.damage",
@@ -1801,7 +2067,11 @@
     "name": "Decaying Husk",
     "description": "The first time you fall below 50% Health, apply Poison(30) and Decay(20) to all enemies.",
     "cooldownTicks": 0,
-    "tags": [ "Poison", "Debuff", "Area" ],
+    "tags": [
+      "Poison",
+      "Debuff",
+      "Area"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
@@ -1850,7 +2120,10 @@
     "name": "Skittering Strike",
     "description": "Deal 120% Physical Damage.",
     "cooldownTicks": 75,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.spider.skittering_strike.damage",
@@ -1871,7 +2144,9 @@
     "name": "Spider Eyes",
     "description": "Increase Critical Chance by 2%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff" ],
+    "tags": [
+      "Buff"
+    ],
     "effects": [
       {
         "id": "effect.creature.spider.spider_eyes.crit",
@@ -1890,7 +2165,10 @@
     "name": "Spider Crash",
     "description": "Deal 190% Physical Damage to the target and 80% Physical Damage to yourself.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.giant_spider.spider_crash.target",
@@ -1920,7 +2198,10 @@
     "name": "Thickened Carapace",
     "description": "Increase Physical Armor by {scaling}.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.giant_spider.thickened_carapace.armor",
@@ -1940,7 +2221,12 @@
     "name": "Venom Web",
     "description": "Deal 60% Magical Damage and apply Poison(16) and Slow.",
     "cooldownTicks": 90,
-    "tags": [ "Magical", "Ranged", "Poison", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Poison",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.venomous_spiderling.venom_web.damage",
@@ -1977,7 +2263,10 @@
     "name": "Toxic Opportunity",
     "description": "Basic Attacks against Slowed enemies apply Poison(4).",
     "cooldownTicks": 0,
-    "tags": [ "Poison", "Basic Attack" ],
+    "tags": [
+      "Poison",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
@@ -2011,7 +2300,11 @@
     "name": "Blackjaw Bite",
     "description": "Deal 160% Physical Damage, or 220% if the target is below 40% Health.",
     "cooldownTicks": 110,
-    "tags": [ "Physical", "Melee", "Execute" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Execute"
+    ],
     "effects": [
       {
         "id": "effect.creature.blackjaw_spider.blackjaw_bite.normal",
@@ -2056,7 +2349,10 @@
     "name": "Powerful Mandibles",
     "description": "Every eighth Basic Attack has 50% Armor Penetration.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Basic Attack" ],
+    "tags": [
+      "Buff",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
@@ -2083,7 +2379,11 @@
     "name": "Firebomb Toss",
     "description": "Deal 120% Magical Damage and apply Burn(20).",
     "cooldownTicks": 110,
-    "tags": [ "Magical", "Ranged", "Burn" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Burn"
+    ],
     "effects": [
       {
         "id": "effect.creature.flame_imp.firebomb_toss.damage",
@@ -2112,11 +2412,16 @@
     "name": "Impish Flame",
     "description": "Whenever you apply Burn, there is a 20% chance to apply Mark for 15 seconds.",
     "cooldownTicks": 0,
-    "tags": [ "Burn", "Control" ],
+    "tags": [
+      "Burn",
+      "Control"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.creature.flame_imp.impish_flame.mark" ],
+        "effectIds": [
+          "effect.creature.flame_imp.impish_flame.mark"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -2145,7 +2450,11 @@
     "name": "Scorching Tail",
     "description": "Deal 140% Physical Damage and 100% additional damage if the target is Burning.",
     "cooldownTicks": 100,
-    "tags": [ "Physical", "Melee", "Burn" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Burn"
+    ],
     "effects": [
       {
         "id": "effect.creature.smolder_rat.scorching_tail.damage",
@@ -2164,7 +2473,9 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 1.0,
         "damageType": "Physical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "conditions": [
           {
             "type": "HasCondition",
@@ -2183,7 +2494,11 @@
     "name": "Heat Resistance",
     "description": "Take 15% less Burn Damage.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive", "Burn" ],
+    "tags": [
+      "Buff",
+      "Defensive",
+      "Burn"
+    ],
     "effects": [
       {
         "id": "effect.creature.smolder_rat.heat_resistance.damage",
@@ -2202,7 +2517,12 @@
     "name": "Burning Mandibles",
     "description": "Deal 90% Physical Damage and apply Burn(12) and Bleed(12).",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee", "Burn", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Burn",
+      "Bleed"
+    ],
     "effects": [
       {
         "id": "effect.creature.cinder_beetle.burning_mandibles.damage",
@@ -2239,11 +2559,17 @@
     "name": "Molten Shell",
     "description": "When critically hit, deal 100% Magical Damage to the attacker. Can trigger three times.",
     "cooldownTicks": 0,
-    "tags": [ "Magical", "Retaliation", "Critical" ],
+    "tags": [
+      "Magical",
+      "Retaliation",
+      "Critical"
+    ],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.creature.cinder_beetle.molten_shell.damage" ],
+        "effectIds": [
+          "effect.creature.cinder_beetle.molten_shell.damage"
+        ],
         "conditions": [
           {
             "type": "EventWasCritical",
@@ -2261,7 +2587,9 @@
         "scalingCoefficient": 1.0,
         "uses": 3,
         "damageType": "Magical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ],
@@ -2273,7 +2601,11 @@
     "name": "Ignite Core",
     "description": "For 10 seconds, deal 18% Magical Damage each second to all enemies.",
     "cooldownTicks": 180,
-    "tags": [ "Magical", "Area", "Damage Over Time" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Damage Over Time"
+    ],
     "effects": [
       {
         "id": "effect.creature.red_slime.ignite_core.damage",
@@ -2295,11 +2627,15 @@
     "name": "Recharging Core",
     "description": "Every {triggerCooldown}, gain 5% Critical Damage, up to 40%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff" ],
+    "tags": [
+      "Buff"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [ "effect.creature.red_slime.recharging_core.crit_damage" ],
+        "effectIds": [
+          "effect.creature.red_slime.recharging_core.crit_damage"
+        ],
         "internalCooldownTicks": 120,
         "initialDelayTicks": 120
       }
@@ -2323,7 +2659,11 @@
     "name": "Drag Beneath",
     "description": "Deal 160% Physical Damage and apply Stun(2).",
     "cooldownTicks": 150,
-    "tags": [ "Physical", "Melee", "Control" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Control"
+    ],
     "effects": [
       {
         "id": "effect.creature.giant_worm.drag_beneath.damage",
@@ -2353,7 +2693,11 @@
     "name": "Erupting Ambush",
     "description": "At combat start, deal 180% Physical Damage to the lowest-health enemy and apply Bleed(8).",
     "cooldownTicks": 0,
-    "tags": [ "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "effects": [
       {
         "id": "effect.creature.giant_worm.erupting_ambush.damage",
@@ -2382,7 +2726,11 @@
     "name": "Infestation",
     "description": "Deal 125% Physical Damage and apply Wound(7).",
     "cooldownTicks": 110,
-    "tags": [ "Physical", "Melee", "Debuff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.bog_mite.infestation.damage",
@@ -2411,11 +2759,17 @@
     "name": "Blood Feeders",
     "description": "Lifesteal for {eventScaling} of damage dealt to Poisoned targets.",
     "cooldownTicks": 0,
-    "tags": [ "Healing", "Lifesteal", "Poison" ],
+    "tags": [
+      "Healing",
+      "Lifesteal",
+      "Poison"
+    ],
     "triggers": [
       {
         "event": "OnHit",
-        "effectIds": [ "effect.creature.bog_mite.blood_feeders.heal" ]
+        "effectIds": [
+          "effect.creature.bog_mite.blood_feeders.heal"
+        ]
       }
     ],
     "effects": [
@@ -2442,7 +2796,12 @@
     "name": "Acid Splash",
     "description": "Deal 60% Magical Damage and apply Poison(15) to all enemies.",
     "cooldownTicks": 200,
-    "tags": [ "Magical", "Ranged", "Poison", "Area" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Poison",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.green_slime.acid_splash.damage",
@@ -2471,11 +2830,18 @@
     "name": "Corrosive Ooze",
     "description": "When damaged by a Physical melee attack, apply Poison(3) to the attacker.",
     "cooldownTicks": 0,
-    "tags": [ "Physical", "Melee", "Poison", "Retaliation" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Poison",
+      "Retaliation"
+    ],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.creature.green_slime.corrosive_ooze.poison" ],
+        "effectIds": [
+          "effect.creature.green_slime.corrosive_ooze.poison"
+        ],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -2508,7 +2874,10 @@
     "name": "Tail Wrap",
     "description": "Deal 210% Physical Damage.",
     "cooldownTicks": 150,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.large_rat.tail_wrap.damage",
@@ -2529,7 +2898,10 @@
     "name": "Big",
     "description": "Increase Max Health by {scaling}.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.large_rat.big.health",
@@ -2549,7 +2921,11 @@
     "name": "Piercing Fangs",
     "description": "Deal 90% Physical Damage and another 90% if the target is Poisoned.",
     "cooldownTicks": 90,
-    "tags": [ "Physical", "Melee", "Poison" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Poison"
+    ],
     "effects": [
       {
         "id": "effect.creature.viper.piercing_fangs.damage",
@@ -2568,7 +2944,9 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.9,
         "damageType": "Physical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "conditions": [
           {
             "type": "HasCondition",
@@ -2587,7 +2965,10 @@
     "name": "Potent Toxins",
     "description": "Increase Poison Damage dealt by 7%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Poison" ],
+    "tags": [
+      "Buff",
+      "Poison"
+    ],
     "effects": [
       {
         "id": "effect.creature.viper.potent_toxins.damage",
@@ -2606,7 +2987,11 @@
     "name": "Toxic Bite",
     "description": "Deal 70% Physical Damage and apply Poison(20), with a 5% chance to also apply Toxic Blood.",
     "cooldownTicks": 75,
-    "tags": [ "Physical", "Melee", "Poison" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Poison"
+    ],
     "effects": [
       {
         "id": "effect.creature.poisonous_rat.toxic_bite.damage",
@@ -2644,7 +3029,11 @@
     "name": "Resistant Hide",
     "description": "Take 12% less Poison Damage.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive", "Poison" ],
+    "tags": [
+      "Buff",
+      "Defensive",
+      "Poison"
+    ],
     "effects": [
       {
         "id": "effect.creature.poisonous_rat.resistant_hide.damage",
@@ -2663,7 +3052,11 @@
     "name": "Putrid Belch",
     "description": "Deal 80% Magical Damage and apply Decay(14).",
     "cooldownTicks": 100,
-    "tags": [ "Magical", "Ranged", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.rotfly_toad.putrid_belch.damage",
@@ -2692,11 +3085,15 @@
     "name": "Rotfly Host",
     "description": "When an enemy with Decay dies, heal 8% Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Healing" ],
+    "tags": [
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnEnemyDeath",
-        "effectIds": [ "effect.creature.rotfly_toad.rotfly_host.heal" ],
+        "effectIds": [
+          "effect.creature.rotfly_toad.rotfly_host.heal"
+        ],
         "conditions": [
           {
             "type": "HasCondition",
@@ -2724,7 +3121,10 @@
     "name": "Absorb Impact",
     "description": "Gain Guard(5).",
     "cooldownTicks": 120,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.brown_slime.absorb_impact.guard",
@@ -2743,11 +3143,16 @@
     "name": "Layered Mud",
     "description": "When hit by a Basic Attack, gain 1 Armor for {duration}, up to 30 applications.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Defensive" ],
+    "tags": [
+      "Buff",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnAttacked",
-        "effectIds": [ "effect.creature.brown_slime.layered_mud.armor" ],
+        "effectIds": [
+          "effect.creature.brown_slime.layered_mud.armor"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -2777,7 +3182,11 @@
     "name": "Sonic Screech",
     "description": "Deal 135% Magical Damage and apply Slow.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Ranged", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.cave_bat.sonic_screech.damage",
@@ -2806,7 +3215,9 @@
     "name": "Echolocation",
     "description": "Increase Crit Chance by 5%.",
     "cooldownTicks": 0,
-    "tags": [ "Buff" ],
+    "tags": [
+      "Buff"
+    ],
     "effects": [
       {
         "id": "effect.creature.cave_bat.echolocation.crit_chance",
@@ -2825,7 +3236,11 @@
     "name": "Echoing Screech",
     "description": "Deal 90% Magical Damage to all enemies.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Ranged", "Area" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.giant_bat.echoing_screech.damage",
@@ -2846,11 +3261,17 @@
     "name": "Resonant Cry",
     "description": "Every fourth Basic Attack deals 30% Magical Damage to all enemies.",
     "cooldownTicks": 0,
-    "tags": [ "Magical", "Area", "Basic Attack" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [ "effect.creature.giant_bat.resonant_cry.damage" ],
+        "effectIds": [
+          "effect.creature.giant_bat.resonant_cry.damage"
+        ],
         "everyNthOccurrence": 4
       }
     ],
@@ -2862,7 +3283,9 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.3,
         "damageType": "Magical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ],
@@ -2874,7 +3297,11 @@
     "name": "Necrotic Slash",
     "description": "Deal 150% Physical Damage and apply Decay(8).",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Melee", "Debuff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.undead.necrotic_slash.damage",
@@ -2903,11 +3330,16 @@
     "name": "Corpse Explosion",
     "description": "When killed by a direct hit, deal 350% Magical Damage to the attacker.",
     "cooldownTicks": 0,
-    "tags": [ "Magical", "Retaliation" ],
+    "tags": [
+      "Magical",
+      "Retaliation"
+    ],
     "triggers": [
       {
         "event": "OnDeath",
-        "effectIds": [ "effect.creature.undead.corpse_explosion.damage" ],
+        "effectIds": [
+          "effect.creature.undead.corpse_explosion.damage"
+        ],
         "conditions": [
           {
             "type": "EventWasDirectHit",
@@ -2928,7 +3360,9 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 3.5,
         "damageType": "Magical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ],
@@ -2940,7 +3374,10 @@
     "name": "Gatehammer",
     "description": "Strike the target for 230% Physical Damage.",
     "cooldownTicks": 80,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.garran.gatehammer.damage",
@@ -2960,7 +3397,10 @@
     "name": "Slam the Gates",
     "description": "Bring two spectral gates crashing together, dealing 150% Magical Damage to all enemies.",
     "cooldownTicks": 140,
-    "tags": [ "Magical", "Area" ],
+    "tags": [
+      "Magical",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.garran.slam_the_gates.damage",
@@ -2977,10 +3417,14 @@
   {
     "id": "ability.creature.garran.gatekeepers_toll",
     "kind": "Active",
-    "name": "Gatekeeper’s Toll",
+    "name": "Gatekeeper\u2019s Toll",
     "description": "Absorb 15% Power from a random target for the rest of combat.",
     "cooldownTicks": 180,
-    "tags": [ "Debuff", "Power", "Permanent" ],
+    "tags": [
+      "Debuff",
+      "Power",
+      "Permanent"
+    ],
     "effects": [
       {
         "id": "effect.creature.garran.gatekeepers_toll.transfer",
@@ -2998,11 +3442,17 @@
     "name": "The First Gate",
     "description": "Begin combat with 3 Gate Seals. Each seal grants 15% Armor and Resistance. A Seal shatters whenever Garran loses 25% of his maximum Health.",
     "cooldownTicks": 0,
-    "tags": [ "Defensive", "Status.Stack", "HealthThreshold" ],
+    "tags": [
+      "Defensive",
+      "Status.Stack",
+      "HealthThreshold"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.garran.the_first_gate.apply_seals" ]
+        "effectIds": [
+          "effect.creature.garran.the_first_gate.apply_seals"
+        ]
       },
       {
         "event": "OnHealthChanged",
@@ -3175,7 +3625,11 @@
     "name": "Rending Dive",
     "description": "Dive upon the enemy with the lowest Health percentage, dealing 160% Physical Damage and applying Bleed(12).",
     "cooldownTicks": 100,
-    "tags": [ "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "effects": [
       {
         "id": "effect.creature.velka.rending_dive.damage",
@@ -3203,7 +3657,11 @@
     "name": "Crimson Gale",
     "description": "Beat her wings violently, dealing 65% Physical Damage to all enemies and applying Bleed(10).",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Area", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Area",
+      "Bleed"
+    ],
     "effects": [
       {
         "id": "effect.creature.velka.crimson_gale.damage",
@@ -3231,7 +3689,12 @@
     "name": "Feast on Wounds",
     "description": "Consume up to three Bleed stacks from all enemies. Each consumed stack deals 20% Physical Damage to its target and heals Velka for 0.5% Max Health, capped at 4%.",
     "cooldownTicks": 210,
-    "tags": [ "Physical", "Area", "Bleed", "Healing" ],
+    "tags": [
+      "Physical",
+      "Area",
+      "Bleed",
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.velka.feast_on_wounds.consume",
@@ -3263,11 +3726,16 @@
     "name": "Scent of Weakness",
     "description": "While any enemy is below 30% Health, Velka gains Haste.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Haste" ],
+    "tags": [
+      "Buff",
+      "Haste"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.velka.scent_of_weakness.apply" ],
+        "effectIds": [
+          "effect.creature.velka.scent_of_weakness.apply"
+        ],
         "conditions": [
           {
             "type": "AnyEnemyHealthBelowPercent",
@@ -3278,7 +3746,9 @@
       {
         "event": "OnInterval",
         "internalCooldownTicks": 50,
-        "effectIds": [ "effect.creature.velka.scent_of_weakness.apply" ],
+        "effectIds": [
+          "effect.creature.velka.scent_of_weakness.apply"
+        ],
         "conditions": [
           {
             "type": "AnyEnemyHealthBelowPercent",
@@ -3288,7 +3758,9 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.velka.scent_of_weakness.apply" ],
+        "effectIds": [
+          "effect.creature.velka.scent_of_weakness.apply"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsEnemy"
@@ -3301,7 +3773,9 @@
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.velka.scent_of_weakness.remove" ],
+        "effectIds": [
+          "effect.creature.velka.scent_of_weakness.remove"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsEnemy"
@@ -3337,7 +3811,12 @@
     "name": "Mirror Lance",
     "description": "Strike the enemy with the highest Health for 200% Physical Damage, then fire a mirrored lance at the enemy with the lowest Health for 100% Magical Damage.",
     "cooldownTicks": 140,
-    "tags": [ "Physical", "Magical", "Melee", "Ranged" ],
+    "tags": [
+      "Physical",
+      "Magical",
+      "Melee",
+      "Ranged"
+    ],
     "effects": [
       {
         "id": "effect.creature.vaelor.mirror_lance.physical",
@@ -3385,7 +3864,11 @@
     "name": "Hall of Shards",
     "description": "Deal 50% Magical Damage to all enemies, followed by 50% Physical Damage to all enemies.",
     "cooldownTicks": 160,
-    "tags": [ "Physical", "Magical", "Area" ],
+    "tags": [
+      "Physical",
+      "Magical",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.vaelor.hall_of_shards.magical",
@@ -3433,7 +3916,11 @@
     "name": "Reflective Mirrorplate",
     "description": "For 5 seconds, reflect 100% of all direct damage received back at the attacker.",
     "cooldownTicks": 220,
-    "tags": [ "Buff", "Retaliation", "Reflection" ],
+    "tags": [
+      "Buff",
+      "Retaliation",
+      "Reflection"
+    ],
     "effects": [
       {
         "id": "effect.creature.vaelor.reflective_mirrorplate.reflect",
@@ -3450,13 +3937,20 @@
     "id": "ability.creature.vaelor.mirrorbound",
     "kind": "Passive",
     "name": "Mirrorbound",
-    "description": "Physical Damage received increases the Magical Damage of Vaelor's next damaging ability by 1%; Magical Damage received instead increases its Physical Damage by 1%. Each bonus stacks to 30% and resets when consumed.",
+    "description": "Physical Damage received increases the Magical Damage of Vaelor\u0027s next damaging ability by 1%; Magical Damage received instead increases its Physical Damage by 1%. Each bonus stacks to 30% and resets when consumed.",
     "cooldownTicks": 0,
-    "tags": [ "Buff", "Physical", "Magical", "Reactive" ],
+    "tags": [
+      "Buff",
+      "Physical",
+      "Magical",
+      "Reactive"
+    ],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.creature.vaelor.mirrorbound.magical_charge" ],
+        "effectIds": [
+          "effect.creature.vaelor.mirrorbound.magical_charge"
+        ],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -3466,7 +3960,9 @@
       },
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.creature.vaelor.mirrorbound.physical_charge" ],
+        "effectIds": [
+          "effect.creature.vaelor.mirrorbound.physical_charge"
+        ],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -3500,7 +3996,11 @@
     "name": "Venomous Bite",
     "description": "Apply Poison(10) to a random enemy.",
     "cooldownTicks": 100,
-    "tags": [ "Poison", "Summon", "Debuff" ],
+    "tags": [
+      "Poison",
+      "Summon",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.summon.morrowmaw_broodling.venomous_bite.poison",
@@ -3518,7 +4018,11 @@
     "name": "Hatch the Brood",
     "description": "Summon one Broodling for every living enemy.",
     "cooldownTicks": 180,
-    "tags": [ "Summon", "Broodling", "Area" ],
+    "tags": [
+      "Summon",
+      "Broodling",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.morrowmaw.hatch_the_brood.summon",
@@ -3535,7 +4039,11 @@
     "name": "Spore Eruption",
     "description": "Deal 55% Magical Damage to all enemies.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Area", "Spore" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Spore"
+    ],
     "effects": [
       {
         "id": "effect.creature.morrowmaw.spore_eruption.damage",
@@ -3555,7 +4063,11 @@
     "name": "Devour the Weak",
     "description": "Consume the living Broodling with the lowest Health, healing Morrowmaw for 4% Max Health.",
     "cooldownTicks": 200,
-    "tags": [ "Summon", "Healing", "Broodling" ],
+    "tags": [
+      "Summon",
+      "Healing",
+      "Broodling"
+    ],
     "effects": [
       {
         "id": "effect.creature.morrowmaw.devour_the_weak.consume",
@@ -3574,7 +4086,12 @@
     "name": "Broodmother",
     "description": "Each living Broodling grants Morrowmaw 6% Damage Reduction and 5% increased Attack Speed.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Summon", "Defensive", "AttackSpeed" ],
+    "tags": [
+      "Passive",
+      "Summon",
+      "Defensive",
+      "AttackSpeed"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
@@ -3618,7 +4135,11 @@
     "name": "Crushing Verdict",
     "description": "Strike the enemy with the highest Max Health for 260% Physical Damage and apply Vulnerability(2).",
     "cooldownTicks": 140,
-    "tags": [ "Physical", "Melee", "Vulnerability" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Vulnerability"
+    ],
     "effects": [
       {
         "id": "effect.creature.kharad.crushing_verdict.damage",
@@ -3646,7 +4167,11 @@
     "name": "Raise the Twin Pillars",
     "description": "Summon an Iron Pillar and an Aether Pillar for 12 seconds. Surviving Pillars grant Resonance; destroying both removes one Resonance.",
     "cooldownTicks": 220,
-    "tags": [ "Summon", "Pillar", "Resonance" ],
+    "tags": [
+      "Summon",
+      "Pillar",
+      "Resonance"
+    ],
     "effects": [
       {
         "id": "effect.creature.kharad.raise_the_twin_pillars.iron",
@@ -3674,7 +4199,12 @@
     "name": "Seal of Ascension",
     "description": "Gain Barrier equal to 5% Max Health for 10 seconds and deal 50% Magical Damage to all enemies every 2 seconds while it holds.",
     "cooldownTicks": 160,
-    "tags": [ "Magical", "Area", "Barrier", "Resonance" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Barrier",
+      "Resonance"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
@@ -3715,7 +4245,11 @@
     "name": "Keystone Resonance",
     "description": "Each Resonance grants 7% Power, 5% Attack Speed, and 3% Damage Reduction. At 5 stacks, Resonance can no longer be removed.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Buff", "Resonance" ],
+    "tags": [
+      "Passive",
+      "Buff",
+      "Resonance"
+    ],
     "triggers": [
       {
         "event": "OnSummonGroupResolved",
@@ -3912,7 +4446,11 @@
     "name": "Ashen Toll",
     "description": "Ring the funeral bell, dealing 30% Magical Damage to all enemies and applying 1 Cinder.",
     "cooldownTicks": 60,
-    "tags": [ "Magical", "Area", "Cinder" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Cinder"
+    ],
     "effects": [
       {
         "id": "effect.creature.orsenn.ashen_toll.damage",
@@ -3940,7 +4478,12 @@
     "name": "Funeral Brand",
     "description": "Apply 2 Cinder to the enemy with the highest Health, then apply Doom(500).",
     "cooldownTicks": 150,
-    "tags": [ "Magical", "Cinder", "Doom", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Cinder",
+      "Doom",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.orsenn.funeral_brand.cinder",
@@ -3966,7 +4509,11 @@
     "name": "Cremation",
     "description": "Deal 45% Magical Damage to all enemies, increased by 25% for every Cinder on the target. Afterwards, remove all Cinder.",
     "cooldownTicks": 450,
-    "tags": [ "Magical", "Area", "Cinder" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Cinder"
+    ],
     "effects": [
       {
         "id": "effect.creature.orsenn.cremation.damage",
@@ -3996,7 +4543,11 @@
     "name": "Cinderbound",
     "description": "Each Cinder increases damage received from Orsenn by 6%. At 6 stacks, the enemy combusts, taking Magical Damage equal to 15% of Max Health, and all Cinder is removed.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Cinder", "Magical" ],
+    "tags": [
+      "Passive",
+      "Cinder",
+      "Magical"
+    ],
     "effects": []
   },
   {
@@ -4005,7 +4556,12 @@
     "name": "Ninefold Strike",
     "description": "Strike the target for 100% Physical Damage, then strike once more for 20% Physical Damage for each surviving Ninefold Copy.",
     "cooldownTicks": 80,
-    "tags": [ "Physical", "Melee", "MultiHit", "NinefoldCopy" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "MultiHit",
+      "NinefoldCopy"
+    ],
     "effects": [
       {
         "id": "effect.creature.ni.ninefold_strike.main",
@@ -4036,7 +4592,12 @@
     "name": "Ninth Seal",
     "description": "Place one Seal for each surviving Ninefold Copy, then deal 20% Magical Damage per Seal to all enemies in one combined hit.",
     "cooldownTicks": 160,
-    "tags": [ "Magical", "Area", "NinefoldCopy", "Seal" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "NinefoldCopy",
+      "Seal"
+    ],
     "effects": [
       {
         "id": "effect.creature.ni.ninth_seal.damage",
@@ -4058,7 +4619,11 @@
     "name": "One Among Nine",
     "description": "Swap Health with the surviving Ninefold Copy that has the highest current Health, but only when that copy is healthier than Ni.",
     "cooldownTicks": 200,
-    "tags": [ "HealthSwap", "NinefoldCopy", "Defensive" ],
+    "tags": [
+      "HealthSwap",
+      "NinefoldCopy",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.ni.one_among_nine.swap",
@@ -4073,17 +4638,26 @@
     "id": "ability.creature.ni.ninefold",
     "kind": "Passive",
     "name": "Ninefold",
-    "description": "At combat start, summon 9 inert copies with 10% of Ni's Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
+    "description": "At combat start, summon 9 inert copies with 10% of Ni\u0027s Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Summon", "NinefoldCopy", "Power" ],
+    "tags": [
+      "Passive",
+      "Summon",
+      "NinefoldCopy",
+      "Power"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.ni.ninefold.summon" ]
+        "effectIds": [
+          "effect.creature.ni.ninefold.summon"
+        ]
       },
       {
         "event": "OnSummonChanged",
-        "effectIds": [ "effect.creature.ni.ninefold.power" ],
+        "effectIds": [
+          "effect.creature.ni.ninefold.power"
+        ],
         "conditions": [
           {
             "type": "HasTag",
@@ -4123,7 +4697,11 @@
     "name": "Insect Jar",
     "description": "Summon three Venomspawn, up to five active. Each summon that would exceed the cap is devoured instead, healing Kodoku for 3% Max Health.",
     "cooldownTicks": 150,
-    "tags": [ "Summon", "Venomspawn", "Healing" ],
+    "tags": [
+      "Summon",
+      "Venomspawn",
+      "Healing"
+    ],
     "effects": [
       {
         "id": "effect.creature.kodoku.insect_jar.summon",
@@ -4143,7 +4721,10 @@
     "name": "Thousand Poisons",
     "description": "Apply Poison(200) to the enemy with the lowest current Health.",
     "cooldownTicks": 100,
-    "tags": [ "Poison", "Debuff" ],
+    "tags": [
+      "Poison",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.kodoku.thousand_poisons.poison",
@@ -4159,9 +4740,14 @@
     "id": "ability.creature.kodoku.withering_miasma",
     "kind": "Active",
     "name": "Withering Miasma",
-    "description": "Reduce all enemies' healing received and Health Regeneration by 80% for 15 seconds.",
+    "description": "Reduce all enemies\u0027 healing received and Health Regeneration by 80% for 15 seconds.",
     "cooldownTicks": 150,
-    "tags": [ "Area", "Debuff", "HealingReduction", "RegenerationReduction" ],
+    "tags": [
+      "Area",
+      "Debuff",
+      "HealingReduction",
+      "RegenerationReduction"
+    ],
     "effects": [
       {
         "id": "effect.creature.kodoku.withering_miasma.healing",
@@ -4184,14 +4770,22 @@
   {
     "id": "ability.creature.kodoku.survivors_struggle",
     "kind": "Passive",
-    "name": "Survivor's Struggle",
+    "name": "Survivor\u0027s Struggle",
     "description": "At combat start, summon five Venomspawn. Whenever one dies, every surviving Venomspawn permanently gains 25% Attack Speed and 25% of its initial Power.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Summon", "Venomspawn", "Power", "AttackSpeed" ],
+    "tags": [
+      "Passive",
+      "Summon",
+      "Venomspawn",
+      "Power",
+      "AttackSpeed"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.kodoku.survivors_struggle.summon" ]
+        "effectIds": [
+          "effect.creature.kodoku.survivors_struggle.summon"
+        ]
       },
       {
         "event": "OnSummonChanged",
@@ -4248,7 +4842,11 @@
     "name": "Springtide",
     "description": "Deal 100% Magical Damage plus {statusScaling} per stack of Abundance to all enemies.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Area", "Abundance" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Abundance"
+    ],
     "effects": [
       {
         "id": "effect.creature.eydis.springtide.damage",
@@ -4271,7 +4869,11 @@
     "name": "Ancient Heartwood",
     "description": "Increase Defense and Resistance by 50% for {duration}.",
     "cooldownTicks": 200,
-    "tags": [ "Defensive", "Transformation", "Nature" ],
+    "tags": [
+      "Defensive",
+      "Transformation",
+      "Nature"
+    ],
     "effects": [
       {
         "id": "effect.creature.eydis.ancient_heartwood.defense",
@@ -4301,7 +4903,12 @@
     "name": "Tranquil Waters",
     "description": "Apply Slow and Weaken to all enemies.",
     "cooldownTicks": 150,
-    "tags": [ "Area", "Control", "Slow", "Weaken" ],
+    "tags": [
+      "Area",
+      "Control",
+      "Slow",
+      "Weaken"
+    ],
     "effects": [
       {
         "id": "effect.creature.eydis.tranquil_waters.slow",
@@ -4327,7 +4934,12 @@
     "name": "Endless Spring",
     "description": "Every 10 seconds, gain 1 Abundance, then heal for {statusScaling} of Max Health per Abundance stack.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Healing", "Abundance", "Periodic" ],
+    "tags": [
+      "Passive",
+      "Healing",
+      "Abundance",
+      "Periodic"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
@@ -4366,7 +4978,13 @@
     "name": "Bloodbath",
     "description": "Swing wildly at all enemies 5 times, dealing 40% Physical Damage with each strike. Heal for 20% of the damage dealt.",
     "cooldownTicks": 150,
-    "tags": [ "Physical", "Melee", "Area", "Lifesteal", "MultiHit" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Area",
+      "Lifesteal",
+      "MultiHit"
+    ],
     "effects": [
       {
         "id": "effect.creature.mad_king.bloodbath.damage",
@@ -4385,10 +5003,14 @@
   {
     "id": "ability.creature.mad_king.kings_cleaver",
     "kind": "Active",
-    "name": "King’s Cleaver",
+    "name": "King\u2019s Cleaver",
     "description": "Strike the enemy with the highest Health for 300% Physical Damage. If the target is above 50% Health, deal 600% Physical Damage instead.",
     "cooldownTicks": 100,
-    "tags": [ "Physical", "Melee", "Execute" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Execute"
+    ],
     "effects": [
       {
         "id": "effect.creature.mad_king.kings_cleaver.above_half_bonus",
@@ -4425,7 +5047,11 @@
     "name": "Unrestrained",
     "description": "Increase all damage dealt and received by 40% for 10 seconds.",
     "cooldownTicks": 180,
-    "tags": [ "Buff", "Berserk", "RiskReward" ],
+    "tags": [
+      "Buff",
+      "Berserk",
+      "RiskReward"
+    ],
     "effects": [
       {
         "id": "effect.creature.mad_king.unrestrained.damage_dealt",
@@ -4453,15 +5079,23 @@
     "name": "Bloodlust",
     "description": "For every 10% of maximum Health missing, gain 5% Lifesteal.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Lifesteal", "MissingHealth" ],
+    "tags": [
+      "Passive",
+      "Lifesteal",
+      "MissingHealth"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.mad_king.bloodlust.lifesteal" ]
+        "effectIds": [
+          "effect.creature.mad_king.bloodlust.lifesteal"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.mad_king.bloodlust.lifesteal" ],
+        "effectIds": [
+          "effect.creature.mad_king.bloodlust.lifesteal"
+        ],
         "conditions": [
           {
             "type": "EventSourceIsSelf"
@@ -4487,7 +5121,10 @@
     "name": "Rallying Cry",
     "description": "Apply Empower to a random ally.",
     "cooldownTicks": 140,
-    "tags": [ "Buff", "Power" ],
+    "tags": [
+      "Buff",
+      "Power"
+    ],
     "effects": [
       {
         "id": "effect.creature.gnoll_pack_leader.rallying_cry.empower",
@@ -4506,12 +5143,21 @@
     "name": "Savage Leader",
     "description": "Gain {scaling} of initial Power whenever an ally dies, up to 4 times.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Power" ],
+    "tags": [
+      "Passive",
+      "Power"
+    ],
     "triggers": [
       {
         "event": "OnDeath",
-        "effectIds": [ "effect.creature.gnoll_pack_leader.savage_leader.power" ],
-        "conditions": [ { "type": "EventSourceIsAlly" } ]
+        "effectIds": [
+          "effect.creature.gnoll_pack_leader.savage_leader.power"
+        ],
+        "conditions": [
+          {
+            "type": "EventSourceIsAlly"
+          }
+        ]
       }
     ],
     "effects": [
@@ -4533,7 +5179,11 @@
     "name": "Loot and Slash",
     "description": "Deal 130% Physical Melee damage to three enemies.",
     "cooldownTicks": 180,
-    "tags": [ "Physical", "Melee", "Area" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.gnoll_raider.loot_and_slash.damage",
@@ -4554,7 +5204,13 @@
     "name": "Pillage the Weak",
     "description": "The first time any enemy falls below 40% Health, gain Empower and Haste.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Buff", "Empower", "Haste", "HealthThreshold" ],
+    "tags": [
+      "Passive",
+      "Buff",
+      "Empower",
+      "Haste",
+      "HealthThreshold"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
@@ -4563,7 +5219,9 @@
           "effect.creature.gnoll_raider.pillage_the_weak.haste"
         ],
         "conditions": [
-          { "type": "EventSourceIsEnemy" },
+          {
+            "type": "EventSourceIsEnemy"
+          },
           {
             "type": "AnyEnemyHealthBelowPercent",
             "value": 40
@@ -4599,13 +5257,19 @@
     "name": "Warding Pulse",
     "description": "Every 4 seconds, grant all allies Barrier equal to 20% Power.",
     "cooldownTicks": 0,
-    "tags": [ "Summon", "Barrier", "Periodic" ],
+    "tags": [
+      "Summon",
+      "Barrier",
+      "Periodic"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
         "internalCooldownTicks": 40,
         "initialDelayTicks": 40,
-        "effectIds": [ "effect.summon.totemic_ward.warding_pulse.barrier" ]
+        "effectIds": [
+          "effect.summon.totemic_ward.warding_pulse.barrier"
+        ]
       }
     ],
     "effects": [
@@ -4625,7 +5289,11 @@
     "name": "Totemic Ward",
     "description": "Summon a Totemic Ward for 12 seconds with {summonHealth} Health and {summonPower} Power. Every 4 seconds, it grants all allies Barrier equal to 20% of its Power.",
     "cooldownTicks": 180,
-    "tags": [ "Summon", "Barrier", "Support" ],
+    "tags": [
+      "Summon",
+      "Barrier",
+      "Support"
+    ],
     "effects": [
       {
         "id": "effect.creature.gnoll_shaman.totemic_ward.summon",
@@ -4644,11 +5312,16 @@
     "name": "Hex of Weakness",
     "description": "At the start of combat, apply Weaken to two random enemies.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Debuff" ],
+    "tags": [
+      "Passive",
+      "Debuff"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.gnoll_shaman.hex_of_weakness.weaken" ]
+        "effectIds": [
+          "effect.creature.gnoll_shaman.hex_of_weakness.weaken"
+        ]
       }
     ],
     "effects": [
@@ -4669,7 +5342,10 @@
     "name": "Coordinated Assault",
     "description": "Deal 180% Physical Damage, increased by 15% for each living non-summoned ally.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "effects": [
       {
         "id": "effect.creature.kobold_skirmisher.coordinated_assault.damage",
@@ -4691,7 +5367,10 @@
     "name": "Trap Mastery",
     "description": "Non-combat passive reserved for dungeon trap detection; no gameplay effect is currently implemented.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "NonCombat" ],
+    "tags": [
+      "Passive",
+      "NonCombat"
+    ],
     "triggers": [],
     "effects": [],
     "owningEssenceId": "essence.kobold_skirmisher"
@@ -4702,7 +5381,11 @@
     "name": "Chain Lightning",
     "description": "Deal 110% Magical Damage to up to three enemies; each subsequent hit deals 20% less damage.",
     "cooldownTicks": 130,
-    "tags": [ "Magical", "Ranged", "Area" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.kobold_sorcerer.chain_lightning.damage",
@@ -4724,21 +5407,31 @@
     "name": "Focused Energy",
     "description": "Every {triggerCooldown}, gain 2% of initial Power. Being hit resets all stacks.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Power", "Periodic" ],
+    "tags": [
+      "Passive",
+      "Power",
+      "Periodic"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
         "internalCooldownTicks": 30,
         "initialDelayTicks": 30,
-        "effectIds": [ "effect.creature.kobold_sorcerer.focused_energy.gain" ]
+        "effectIds": [
+          "effect.creature.kobold_sorcerer.focused_energy.gain"
+        ]
       },
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.creature.kobold_sorcerer.focused_energy.reset" ]
+        "effectIds": [
+          "effect.creature.kobold_sorcerer.focused_energy.reset"
+        ]
       },
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.creature.kobold_sorcerer.focused_energy.power" ],
+        "effectIds": [
+          "effect.creature.kobold_sorcerer.focused_energy.power"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -4748,7 +5441,9 @@
       },
       {
         "event": "OnStatusChanged",
-        "effectIds": [ "effect.creature.kobold_sorcerer.focused_energy.power" ],
+        "effectIds": [
+          "effect.creature.kobold_sorcerer.focused_energy.power"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -4758,7 +5453,9 @@
       },
       {
         "event": "OnStatusRemoved",
-        "effectIds": [ "effect.creature.kobold_sorcerer.focused_energy.power" ],
+        "effectIds": [
+          "effect.creature.kobold_sorcerer.focused_energy.power"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -4801,7 +5498,11 @@
     "name": "Feral Pounce",
     "description": "Deal 150% Physical Damage and apply Stun(3).",
     "cooldownTicks": 150,
-    "tags": [ "Physical", "Melee", "Control" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Control"
+    ],
     "effects": [
       {
         "id": "effect.creature.feral_ghoul.feral_pounce.damage",
@@ -4831,11 +5532,17 @@
     "name": "Shredding Claws",
     "description": "Melee attacks have a 27% chance to apply Bleed(4).",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Bleed", "Melee" ],
+    "tags": [
+      "Passive",
+      "Bleed",
+      "Melee"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttack",
-        "effectIds": [ "effect.creature.feral_ghoul.shredding_claws.bleed" ]
+        "effectIds": [
+          "effect.creature.feral_ghoul.shredding_claws.bleed"
+        ]
       }
     ],
     "effects": [
@@ -4857,7 +5564,12 @@
     "name": "Plague Swipe",
     "description": "Deal 130% Physical Damage to two enemies and apply Poison(15).",
     "cooldownTicks": 140,
-    "tags": [ "Physical", "Melee", "Poison", "Area" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Poison",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.plague_ghoul.plague_swipe.damage",
@@ -4886,11 +5598,17 @@
     "name": "Pestilent Touch",
     "description": "Melee attacks have a 27% chance to apply Poison(4).",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Poison", "Melee" ],
+    "tags": [
+      "Passive",
+      "Poison",
+      "Melee"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttack",
-        "effectIds": [ "effect.creature.plague_ghoul.pestilent_touch.poison" ]
+        "effectIds": [
+          "effect.creature.plague_ghoul.pestilent_touch.poison"
+        ]
       }
     ],
     "effects": [
@@ -4912,7 +5630,11 @@
     "name": "Draining Claws",
     "description": "Deal 200% Physical Melee damage and apply Weaken.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee", "Debuff" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Debuff"
+    ],
     "effects": [
       {
         "id": "effect.creature.ravenous_ghoul.draining_claws.damage",
@@ -4941,12 +5663,21 @@
     "name": "Vile Feast",
     "description": "The first time an ally dies, heal 40% of Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Healing" ],
+    "tags": [
+      "Passive",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnDeath",
-        "effectIds": [ "effect.creature.ravenous_ghoul.vile_feast.heal" ],
-        "conditions": [ { "type": "EventSourceIsAlly" } ]
+        "effectIds": [
+          "effect.creature.ravenous_ghoul.vile_feast.heal"
+        ],
+        "conditions": [
+          {
+            "type": "EventSourceIsAlly"
+          }
+        ]
       }
     ],
     "effects": [
@@ -4968,7 +5699,11 @@
     "name": "Taste of Blood",
     "description": "Deal 175% Physical Damage. If the target is Bleeding, heal for 75% of damage dealt.",
     "cooldownTicks": 140,
-    "tags": [ "Physical", "Melee", "Lifesteal" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Lifesteal"
+    ],
     "effects": [
       {
         "id": "effect.creature.vampire_fledgeling.taste_of_blood.damage",
@@ -4991,11 +5726,16 @@
     "name": "Fresh Hunger",
     "description": "The first ability used against each enemy deals {eventScaling} additional damage.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Burst" ],
+    "tags": [
+      "Passive",
+      "Burst"
+    ],
     "triggers": [
       {
         "event": "OnHit",
-        "effectIds": [ "effect.creature.vampire_fledgeling.fresh_hunger.damage" ],
+        "effectIds": [
+          "effect.creature.vampire_fledgeling.fresh_hunger.damage"
+        ],
         "conditions": [
           {
             "type": "EventIdIsNot",
@@ -5015,7 +5755,9 @@
         "damageType": "None",
         "inheritEventDamageType": true,
         "critEligibility": "Disallowed",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ],
@@ -5027,7 +5769,11 @@
     "name": "Spectral Passage",
     "description": "Deal 150% Magical Damage and apply Chill(3).",
     "cooldownTicks": 140,
-    "tags": [ "Magical", "Melee", "Chill" ],
+    "tags": [
+      "Magical",
+      "Melee",
+      "Chill"
+    ],
     "effects": [
       {
         "id": "effect.creature.wandering_ghost.spectral_passage.damage",
@@ -5056,12 +5802,21 @@
     "name": "Restless Spirit",
     "description": "Whenever an enemy dies, deal 120% Magical Damage to another enemy.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Magical" ],
+    "tags": [
+      "Passive",
+      "Magical"
+    ],
     "triggers": [
       {
         "event": "OnDeath",
-        "effectIds": [ "effect.creature.wandering_ghost.restless_spirit.damage" ],
-        "conditions": [ { "type": "EventSourceIsEnemy" } ]
+        "effectIds": [
+          "effect.creature.wandering_ghost.restless_spirit.damage"
+        ],
+        "conditions": [
+          {
+            "type": "EventSourceIsEnemy"
+          }
+        ]
       }
     ],
     "effects": [
@@ -5081,10 +5836,14 @@
   {
     "id": "ability.creature.web_weaver_spider.weavers_grasp",
     "kind": "Active",
-    "name": "Weaver's Grasp",
+    "name": "Weaver\u0027s Grasp",
     "description": "Deal 80% Physical Damage. If the target is Slowed, deal another 80% Physical Damage.",
     "cooldownTicks": 90,
-    "tags": [ "Physical", "Melee", "Slow" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Slow"
+    ],
     "effects": [
       {
         "id": "effect.creature.web_weaver_spider.weavers_grasp.damage",
@@ -5104,7 +5863,9 @@
         "scalingCoefficient": 0.8,
         "attackType": "Melee",
         "damageType": "Physical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "conditions": [
           {
             "type": "HasCondition",
@@ -5123,15 +5884,24 @@
     "name": "Web Walker",
     "description": "Gain Haste while any enemy is Slowed.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Buff", "Haste", "Slow" ],
+    "tags": [
+      "Passive",
+      "Buff",
+      "Haste",
+      "Slow"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.web_weaver_spider.web_walker.apply" ]
+        "effectIds": [
+          "effect.creature.web_weaver_spider.web_walker.apply"
+        ]
       },
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.creature.web_weaver_spider.web_walker.apply" ],
+        "effectIds": [
+          "effect.creature.web_weaver_spider.web_walker.apply"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5141,7 +5911,9 @@
       },
       {
         "event": "OnStatusExpired",
-        "effectIds": [ "effect.creature.web_weaver_spider.web_walker.remove" ],
+        "effectIds": [
+          "effect.creature.web_weaver_spider.web_walker.remove"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5151,7 +5923,9 @@
       },
       {
         "event": "OnStatusRemoved",
-        "effectIds": [ "effect.creature.web_weaver_spider.web_walker.remove" ],
+        "effectIds": [
+          "effect.creature.web_weaver_spider.web_walker.remove"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5161,7 +5935,9 @@
       },
       {
         "event": "OnStatusCleansed",
-        "effectIds": [ "effect.creature.web_weaver_spider.web_walker.remove" ],
+        "effectIds": [
+          "effect.creature.web_weaver_spider.web_walker.remove"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5171,7 +5947,9 @@
       },
       {
         "event": "OnStatusDispelled",
-        "effectIds": [ "effect.creature.web_weaver_spider.web_walker.remove" ],
+        "effectIds": [
+          "effect.creature.web_weaver_spider.web_walker.remove"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5217,7 +5995,13 @@
     "name": "Webbed Domain",
     "description": "Spread webs across the battlefield. Gain Haste, and apply Slow to all enemies.",
     "cooldownTicks": 160,
-    "tags": [ "Buff", "Debuff", "Haste", "Slow", "Area" ],
+    "tags": [
+      "Buff",
+      "Debuff",
+      "Haste",
+      "Slow",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.spider_queen.webbed_domain.haste",
@@ -5244,7 +6028,11 @@
     "name": "Royal Venom",
     "description": "For 8 seconds, your Basic Attacks apply Poison(20).",
     "cooldownTicks": 150,
-    "tags": [ "Buff", "Poison", "Basic Attack" ],
+    "tags": [
+      "Buff",
+      "Poison",
+      "Basic Attack"
+    ],
     "effects": [
       {
         "id": "effect.creature.spider_queen.royal_venom.apply",
@@ -5263,7 +6051,12 @@
     "name": "Royal Cocoon",
     "description": "After dropping below 40% Max Health for the first time, become Stunned for 8 seconds, then heal 30% of Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Healing", "Stun", "HealthThreshold" ],
+    "tags": [
+      "Passive",
+      "Healing",
+      "Stun",
+      "HealthThreshold"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
@@ -5284,7 +6077,9 @@
       },
       {
         "event": "OnStatusExpired",
-        "effectIds": [ "effect.creature.spider_queen.royal_cocoon.heal" ],
+        "effectIds": [
+          "effect.creature.spider_queen.royal_cocoon.heal"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5331,7 +6126,11 @@
     "name": "Timber Slam",
     "description": "Slam the ground with immense force, dealing 250% Physical Damage to all enemies.",
     "cooldownTicks": 240,
-    "tags": [ "Physical", "Melee", "Area" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.bark_golem.timber_slam.damage",
@@ -5352,7 +6151,13 @@
     "name": "Barkskin",
     "description": "Increase Physical Defense by {scaling}, but take 100% more Burn damage.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Buff", "Defensive", "Burn", "RiskReward" ],
+    "tags": [
+      "Passive",
+      "Buff",
+      "Defensive",
+      "Burn",
+      "RiskReward"
+    ],
     "effects": [
       {
         "id": "effect.creature.bark_golem.barkskin.armor",
@@ -5380,7 +6185,11 @@
     "name": "Rootbound Shield",
     "description": "Plant yourself firmly in the ground, and gain Barrier equal to {scaling} Power.",
     "cooldownTicks": 180,
-    "tags": [ "Barrier", "Buff", "Defensive" ],
+    "tags": [
+      "Barrier",
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.treant_guardian.rootbound_shield.barrier",
@@ -5399,7 +6208,12 @@
     "name": "Forest Vitality",
     "description": "Every {triggerCooldown}, increase Health Regeneration by 2%.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Healing", "Regeneration", "Periodic" ],
+    "tags": [
+      "Passive",
+      "Healing",
+      "Regeneration",
+      "Periodic"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
@@ -5427,15 +6241,24 @@
     "name": "Ancient Sap",
     "description": "Cover the target in enchanted sap. Apply Doom(380), and when Doom triggers, apply Weaken to the target.",
     "cooldownTicks": 180,
-    "tags": [ "Magical", "Doom", "Weaken", "Debuff" ],
+    "tags": [
+      "Magical",
+      "Doom",
+      "Weaken",
+      "Debuff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.creature.elder_treant.ancient_sap.doom" ]
+        "effectIds": [
+          "effect.creature.elder_treant.ancient_sap.doom"
+        ]
       },
       {
         "event": "OnStatusExpired",
-        "effectIds": [ "effect.creature.elder_treant.ancient_sap.weaken" ],
+        "effectIds": [
+          "effect.creature.elder_treant.ancient_sap.weaken"
+        ],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -5473,7 +6296,12 @@
     "name": "Thornstorm",
     "description": "Conjure a storm of enchanted thorns, dealing 70% Magical Damage and 70% Physical Damage to all enemies.",
     "cooldownTicks": 100,
-    "tags": [ "Magical", "Physical", "Ranged", "Area" ],
+    "tags": [
+      "Magical",
+      "Physical",
+      "Ranged",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.elder_treant.thornstorm.magical_damage",
@@ -5504,12 +6332,19 @@
     "name": "Ancient Essence",
     "description": "Whenever you deal Magical Damage, restore 0.5% Max Health. Can occur once every {triggerCooldown}.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Healing", "Magical", "Trigger.OnDamageDealt" ],
+    "tags": [
+      "Passive",
+      "Healing",
+      "Magical",
+      "Trigger.OnDamageDealt"
+    ],
     "triggers": [
       {
         "event": "OnDamageDealt",
         "internalCooldownTicks": 30,
-        "effectIds": [ "effect.creature.elder_treant.ancient_essence.heal" ],
+        "effectIds": [
+          "effect.creature.elder_treant.ancient_essence.heal"
+        ],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -5536,17 +6371,30 @@
     "name": "Unbound Fury",
     "description": "Direct critical hits grant Fury for 5 seconds, up to five stacks. Each stack increases Power by 2%.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Fury", "Critical", "Status.Stack" ],
+    "tags": [
+      "Set",
+      "Fury",
+      "Critical",
+      "Status.Stack"
+    ],
     "triggers": [
       {
         "event": "OnHit",
         "internalCooldownTicks": 5,
         "conditions": [
-          { "type": "EventWasDirectHit" },
-          { "type": "EventWasCritical" },
-          { "type": "EventSourceIsSelf" }
+          {
+            "type": "EventWasDirectHit"
+          },
+          {
+            "type": "EventWasCritical"
+          },
+          {
+            "type": "EventSourceIsSelf"
+          }
         ],
-        "effectIds": [ "effect.set.fury.unbound_fury.gain" ]
+        "effectIds": [
+          "effect.set.fury.unbound_fury.gain"
+        ]
       },
       {
         "event": "OnStatusApplied",
@@ -5556,7 +6404,9 @@
             "statusId": "status.set.fury"
           }
         ],
-        "effectIds": [ "effect.set.fury.unbound_fury.power" ]
+        "effectIds": [
+          "effect.set.fury.unbound_fury.power"
+        ]
       },
       {
         "event": "OnStatusChanged",
@@ -5566,7 +6416,9 @@
             "statusId": "status.set.fury"
           }
         ],
-        "effectIds": [ "effect.set.fury.unbound_fury.power" ]
+        "effectIds": [
+          "effect.set.fury.unbound_fury.power"
+        ]
       },
       {
         "event": "OnStatusRemoved",
@@ -5576,7 +6428,9 @@
             "statusId": "status.set.fury"
           }
         ],
-        "effectIds": [ "effect.set.fury.unbound_fury.power" ]
+        "effectIds": [
+          "effect.set.fury.unbound_fury.power"
+        ]
       },
       {
         "event": "OnStatusExpired",
@@ -5586,7 +6440,9 @@
             "statusId": "status.set.fury"
           }
         ],
-        "effectIds": [ "effect.set.fury.unbound_fury.power" ]
+        "effectIds": [
+          "effect.set.fury.unbound_fury.power"
+        ]
       }
     ],
     "effects": [
@@ -5613,14 +6469,21 @@
     "id": "ability.set.arcane.arcane_surge",
     "kind": "Passive",
     "name": "Arcane Surge",
-    "description": "Every third active ability grants +15% Power for 6 seconds. Does not stack.",
+    "description": "Every third active ability grants \u002B15% Power for 6 seconds. Does not stack.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Arcane", "Power", "Buff" ],
+    "tags": [
+      "Set",
+      "Arcane",
+      "Power",
+      "Buff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
         "everyNthOccurrence": 3,
-        "effectIds": [ "effect.set.arcane.arcane_surge.power" ]
+        "effectIds": [
+          "effect.set.arcane.arcane_surge.power"
+        ]
       }
     ],
     "effects": [
@@ -5643,7 +6506,12 @@
     "name": "No Escape",
     "description": "Deal 18% more damage to enemies at or below 30% Health.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Execution", "Finisher", "Damage" ],
+    "tags": [
+      "Set",
+      "Execution",
+      "Finisher",
+      "Damage"
+    ],
     "effects": [
       {
         "id": "effect.set.execution.no_escape.damage",
@@ -5661,7 +6529,12 @@
     "name": "Raised Aegis",
     "description": "At combat start, gain a barrier equal to 10% of Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Aegis", "Barrier", "Defensive" ],
+    "tags": [
+      "Set",
+      "Aegis",
+      "Barrier",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.set.aegis.raised_aegis.barrier",
@@ -5680,31 +6553,48 @@
     "name": "Behind the Shield",
     "description": "Take 10% less damage while any barrier remains.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Aegis", "Barrier", "Defensive" ],
+    "tags": [
+      "Set",
+      "Aegis",
+      "Barrier",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.set.aegis.behind_the_shield.mitigation" ]
+        "effectIds": [
+          "effect.set.aegis.behind_the_shield.mitigation"
+        ]
       },
       {
         "event": "OnBarrierApplied",
-        "effectIds": [ "effect.set.aegis.behind_the_shield.mitigation" ]
+        "effectIds": [
+          "effect.set.aegis.behind_the_shield.mitigation"
+        ]
       },
       {
         "event": "OnBarrierAbsorbed",
-        "effectIds": [ "effect.set.aegis.behind_the_shield.mitigation" ]
+        "effectIds": [
+          "effect.set.aegis.behind_the_shield.mitigation"
+        ]
       },
       {
         "event": "OnBarrierBroken",
-        "effectIds": [ "effect.set.aegis.behind_the_shield.mitigation" ]
+        "effectIds": [
+          "effect.set.aegis.behind_the_shield.mitigation"
+        ]
       },
       {
         "event": "OnBarrierContributionBroken",
-        "effectIds": [ "effect.set.aegis.behind_the_shield.mitigation" ]
+        "effectIds": [
+          "effect.set.aegis.behind_the_shield.mitigation"
+        ]
       },
       {
         "event": "OnBarrierExpired",
-        "effectIds": [ "effect.set.aegis.behind_the_shield.mitigation" ]
+        "effectIds": [
+          "effect.set.aegis.behind_the_shield.mitigation"
+        ]
       }
     ],
     "effects": [
@@ -5728,16 +6618,23 @@
   {
     "id": "ability.set.warden.wardens_refuge",
     "kind": "Passive",
-    "name": "Warden's Refuge",
+    "name": "Warden\u0027s Refuge",
     "description": "Falling to 40% Health grants Renewal and 15% damage reduction for 8 seconds.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Warden", "Recovery", "Defensive" ],
+    "tags": [
+      "Set",
+      "Warden",
+      "Recovery",
+      "Defensive"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
         "internalCooldownTicks": 300,
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
@@ -5777,16 +6674,29 @@
     "name": "Rising Flame",
     "description": "Receive 15% more healing while below 50% Health.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Phoenix", "Healing", "Recovery" ],
+    "tags": [
+      "Set",
+      "Phoenix",
+      "Healing",
+      "Recovery"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.set.phoenix.rising_flame.healing" ]
+        "effectIds": [
+          "effect.set.phoenix.rising_flame.healing"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "conditions": [ { "type": "EventSourceIsSelf" } ],
-        "effectIds": [ "effect.set.phoenix.rising_flame.healing" ]
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ],
+        "effectIds": [
+          "effect.set.phoenix.rising_flame.healing"
+        ]
       }
     ],
     "effects": [
@@ -5813,12 +6723,19 @@
     "name": "Rebirth",
     "description": "Once per combat, falling to 20% Health restores 25% Max Health and grants Renewal for 8 seconds.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Phoenix", "Healing", "Recovery" ],
+    "tags": [
+      "Set",
+      "Phoenix",
+      "Healing",
+      "Recovery"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
@@ -5859,16 +6776,28 @@
     "name": "Sheltering Spirit",
     "description": "Directly healing another ally grants them a barrier equal to 5% of their Max Health.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Spirit", "Healing", "Barrier", "Support" ],
+    "tags": [
+      "Set",
+      "Spirit",
+      "Healing",
+      "Barrier",
+      "Support"
+    ],
     "triggers": [
       {
         "event": "OnHeal",
         "internalCooldownTicks": 40,
         "conditions": [
-          { "type": "EventSourceIsSelf" },
-          { "type": "EventTargetIsAlly" }
+          {
+            "type": "EventSourceIsSelf"
+          },
+          {
+            "type": "EventTargetIsAlly"
+          }
         ],
-        "effectIds": [ "effect.set.spirit.sheltering_spirit.barrier" ]
+        "effectIds": [
+          "effect.set.spirit.sheltering_spirit.barrier"
+        ]
       }
     ],
     "effects": [
@@ -5888,17 +6817,26 @@
     "id": "ability.set.primal.strength_of_the_pack",
     "kind": "Passive",
     "name": "Strength of the Pack",
-    "description": "Gain +5% Power for every living summon, up to three.",
+    "description": "Gain \u002B5% Power for every living summon, up to three.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Primal", "Summon", "Power" ],
+    "tags": [
+      "Set",
+      "Primal",
+      "Summon",
+      "Power"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.set.primal.strength_of_the_pack.power" ]
+        "effectIds": [
+          "effect.set.primal.strength_of_the_pack.power"
+        ]
       },
       {
         "event": "OnSummonChanged",
-        "effectIds": [ "effect.set.primal.strength_of_the_pack.power" ]
+        "effectIds": [
+          "effect.set.primal.strength_of_the_pack.power"
+        ]
       }
     ],
     "effects": [
@@ -5920,12 +6858,23 @@
     "name": "Venomous Assault",
     "description": "Basic Attack applies Poison(5).",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Venom", "Poison", "Basic Attack" ],
+    "tags": [
+      "Set",
+      "Venom",
+      "Poison",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "conditions": [ { "type": "EventSourceIsSelf" } ],
-        "effectIds": [ "effect.set.venom.venomous_assault.poison" ]
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ],
+        "effectIds": [
+          "effect.set.venom.venomous_assault.poison"
+        ]
       }
     ],
     "effects": [
@@ -5943,14 +6892,22 @@
     "id": "ability.set.hive.brood_cycle",
     "kind": "Passive",
     "name": "Brood Cycle",
-    "description": "Every fifth Basic Attack grants +15% Attack Speed for 6 seconds. Does not stack.",
+    "description": "Every fifth Basic Attack grants \u002B15% Attack Speed for 6 seconds. Does not stack.",
     "cooldownTicks": 0,
-    "tags": [ "Set", "Hive", "Attack Speed", "Basic Attack", "Buff" ],
+    "tags": [
+      "Set",
+      "Hive",
+      "Attack Speed",
+      "Basic Attack",
+      "Buff"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
         "everyNthOccurrence": 5,
-        "effectIds": [ "effect.set.hive.brood_cycle.attack_speed" ]
+        "effectIds": [
+          "effect.set.hive.brood_cycle.attack_speed"
+        ]
       }
     ],
     "effects": [
@@ -5972,7 +6929,12 @@
     "name": "Crimson Dive",
     "description": "Deal 175% Physical Damage to the enemy with the lowest Health and apply Bleed(20).",
     "cooldownTicks": 160,
-    "tags": [ "Physical", "Melee", "Bleed", "Execute" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed",
+      "Execute"
+    ],
     "effects": [
       {
         "id": "effect.creature.blood_harpy.crimson_dive.damage",
@@ -6001,12 +6963,23 @@
     "name": "Rupturing Talons",
     "description": "Melee attacks against Bleeding targets apply Bleed(3).",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Passive",
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttack",
-        "conditions": [ { "type": "EventSourceIsSelf" } ],
-        "effectIds": [ "effect.creature.blood_harpy.rupturing_talons.bleed" ]
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.blood_harpy.rupturing_talons.bleed"
+        ]
       }
     ],
     "effects": [
@@ -6034,7 +7007,11 @@
     "name": "Fire Claws",
     "description": "Deal 50% Physical Damage and apply Burn(50) to the target.",
     "cooldownTicks": 150,
-    "tags": [ "Physical", "Melee", "Burn" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Burn"
+    ],
     "effects": [
       {
         "id": "effect.creature.flame_harpy.fire_claws.damage",
@@ -6063,13 +7040,20 @@
     "name": "Fiery Shriek",
     "description": "Every {triggerCooldown}, release a fiery screech that applies Burn(16) to a random enemy.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Burn", "Periodic", "Ranged" ],
+    "tags": [
+      "Passive",
+      "Burn",
+      "Periodic",
+      "Ranged"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
         "internalCooldownTicks": 80,
         "initialDelayTicks": 80,
-        "effectIds": [ "effect.creature.flame_harpy.fiery_shriek.burn" ]
+        "effectIds": [
+          "effect.creature.flame_harpy.fiery_shriek.burn"
+        ]
       }
     ],
     "effects": [
@@ -6090,7 +7074,12 @@
     "name": "Chilling Gust",
     "description": "Deal 140% Magical Damage and apply Chill(1) to all enemies.",
     "cooldownTicks": 170,
-    "tags": [ "Magical", "Ranged", "Area", "Chill" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area",
+      "Chill"
+    ],
     "effects": [
       {
         "id": "effect.creature.ice_harpy.chilling_gust.damage",
@@ -6119,15 +7108,26 @@
     "name": "Chilling Precision",
     "description": "Direct hits deal an additional {conditionScaling} Magical Damage for every stack of Chill on the target.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Magical", "Chill", "Direct Hit" ],
+    "tags": [
+      "Passive",
+      "Magical",
+      "Chill",
+      "Direct Hit"
+    ],
     "triggers": [
       {
         "event": "OnHit",
         "conditions": [
-          { "type": "EventWasDirectHit" },
-          { "type": "EventSourceIsSelf" }
+          {
+            "type": "EventWasDirectHit"
+          },
+          {
+            "type": "EventSourceIsSelf"
+          }
         ],
-        "effectIds": [ "effect.creature.ice_harpy.chilling_precision.damage" ]
+        "effectIds": [
+          "effect.creature.ice_harpy.chilling_precision.damage"
+        ]
       }
     ],
     "effects": [
@@ -6140,7 +7140,9 @@
         "conditionScalingCoefficient": 0.004,
         "attackType": "None",
         "damageType": "Magical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "conditions": [
           {
             "type": "HasCondition",
@@ -6159,7 +7161,11 @@
     "name": "Shadow Dive",
     "description": "Deal 190% Magical Damage to the target and gain Stealth for 3 seconds.",
     "cooldownTicks": 140,
-    "tags": [ "Magical", "Melee", "Stealth" ],
+    "tags": [
+      "Magical",
+      "Melee",
+      "Stealth"
+    ],
     "effects": [
       {
         "id": "effect.creature.shadow_harpy.shadow_dive.damage",
@@ -6188,7 +7194,11 @@
     "name": "Midnight Shroud",
     "description": "Increase Dodge Chance by 3%.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Buff", "Defensive" ],
+    "tags": [
+      "Passive",
+      "Buff",
+      "Defensive"
+    ],
     "effects": [
       {
         "id": "effect.creature.shadow_harpy.midnight_shroud.dodge",
@@ -6207,7 +7217,11 @@
     "name": "Gale Slash",
     "description": "Deal 200% Physical Damage to all enemies.",
     "cooldownTicks": 180,
-    "tags": [ "Physical", "Melee", "Area" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Area"
+    ],
     "effects": [
       {
         "id": "effect.creature.wind_harpy.gale_slash.damage",
@@ -6228,12 +7242,23 @@
     "name": "Sharp Feathers",
     "description": "Basic attacks have a 15% chance to release sharp feathers at the target, dealing an additional 15% Physical Damage.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Physical", "Ranged", "Basic Attack" ],
+    "tags": [
+      "Passive",
+      "Physical",
+      "Ranged",
+      "Basic Attack"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "conditions": [ { "type": "EventSourceIsSelf" } ],
-        "effectIds": [ "effect.creature.wind_harpy.sharp_feathers.damage" ]
+        "conditions": [
+          {
+            "type": "EventSourceIsSelf"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.wind_harpy.sharp_feathers.damage"
+        ]
       }
     ],
     "effects": [
@@ -6246,7 +7271,9 @@
         "chancePercent": 15,
         "attackType": "Ranged",
         "damageType": "Physical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ],
@@ -6258,7 +7285,12 @@
     "name": "Black Annotation",
     "description": "Erase one removable buff from every enemy. Gain 1 Ink for each buff erased.",
     "cooldownTicks": 80,
-    "tags": [ "Magical", "Area", "Dispel", "Ink" ],
+    "tags": [
+      "Magical",
+      "Area",
+      "Dispel",
+      "Ink"
+    ],
     "effects": [
       {
         "id": "effect.creature.serevin.black_annotation.dispel",
@@ -6275,7 +7307,11 @@
     "name": "Redacted",
     "description": "Deal 250% Magical Damage to a random enemy and Silence them for 15 seconds.",
     "cooldownTicks": 150,
-    "tags": [ "Magical", "Ranged", "Silence" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Silence"
+    ],
     "effects": [
       {
         "id": "effect.creature.serevin.redacted.damage",
@@ -6303,7 +7339,12 @@
     "name": "Spilling Ink",
     "description": "Deal 50% Magical Damage per Ink to two random enemies, then consume all Ink.",
     "cooldownTicks": 170,
-    "tags": [ "Magical", "Ranged", "MultiTarget", "Ink" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "MultiTarget",
+      "Ink"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
@@ -6347,12 +7388,23 @@
     "name": "Unwritten Law",
     "description": "Each Ink grants 5% Power but reduces Armor and Resistance by 2%. Black Annotation grants Ink for each buff erased. Being Staggered halves Ink, rounded down.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Ink", "RiskReward", "Stagger" ],
+    "tags": [
+      "Passive",
+      "Ink",
+      "RiskReward",
+      "Stagger"
+    ],
     "triggers": [
       {
         "event": "OnStatusDispelled",
-        "conditions": [ { "type": "EventInstigatorIsSelf" } ],
-        "effectIds": [ "effect.creature.serevin.unwritten_law.gain_ink" ]
+        "conditions": [
+          {
+            "type": "EventInstigatorIsSelf"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.serevin.unwritten_law.gain_ink"
+        ]
       },
       {
         "event": "OnStatusApplied",
@@ -6398,7 +7450,9 @@
       },
       {
         "event": "OnStaggerBroken",
-        "effectIds": [ "effect.creature.serevin.unwritten_law.halve_ink" ]
+        "effectIds": [
+          "effect.creature.serevin.unwritten_law.halve_ink"
+        ]
       }
     ],
     "effects": [
@@ -6453,7 +7507,11 @@
     "name": "Chainbound Bolt",
     "description": "Deal 220% Magical Damage to the current target.",
     "cooldownTicks": 90,
-    "tags": [ "Magical", "Ranged", "Lightning" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Lightning"
+    ],
     "effects": [
       {
         "id": "effect.creature.volgrin.chainbound_bolt.damage",
@@ -6473,22 +7531,34 @@
     "name": "Shackled Arc",
     "description": "Deal 110% Magical Damage and apply Chill(1) to two random enemies.",
     "cooldownTicks": 140,
-    "tags": [ "Magical", "Ranged", "MultiTarget", "Lightning", "Chill" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "MultiTarget",
+      "Lightning",
+      "Chill"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.creature.volgrin.shackled_arc.damage" ]
+        "effectIds": [
+          "effect.creature.volgrin.shackled_arc.damage"
+        ]
       },
       {
         "event": "OnDamageDealt",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "EventIdIs",
             "statusId": "effect.creature.volgrin.shackled_arc.damage"
           }
         ],
-        "effectIds": [ "effect.creature.volgrin.shackled_arc.chill" ]
+        "effectIds": [
+          "effect.creature.volgrin.shackled_arc.chill"
+        ]
       }
     ],
     "effects": [
@@ -6518,7 +7588,13 @@
     "name": "Rattling Sky",
     "description": "Deal 75% Magical Damage to all enemies, plus 35% for each Broken Chain.",
     "cooldownTicks": 180,
-    "tags": [ "Magical", "Ranged", "Area", "Lightning", "BrokenChain" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area",
+      "Lightning",
+      "BrokenChain"
+    ],
     "effects": [
       {
         "id": "effect.creature.volgrin.rattling_sky.damage",
@@ -6560,7 +7636,9 @@
       {
         "event": "OnHealthChanged",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
@@ -6577,7 +7655,9 @@
       {
         "event": "OnHealthChanged",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
@@ -6594,7 +7674,9 @@
       {
         "event": "OnHealthChanged",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "HealthAtOrBelowPercent",
             "subject": "Source",
@@ -6611,7 +7693,9 @@
       {
         "event": "OnBasicAttack",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "StatusStacksAtLeast",
             "subject": "Source",
@@ -6619,7 +7703,9 @@
             "value": 3
           }
         ],
-        "effectIds": [ "effect.creature.volgrin.the_three_chains.final_thunder" ]
+        "effectIds": [
+          "effect.creature.volgrin.the_three_chains.final_thunder"
+        ]
       }
     ],
     "effects": [
@@ -6764,7 +7850,9 @@
         "scalingCoefficient": 0.35,
         "attackType": "Ranged",
         "damageType": "Magical",
-        "tags": [ "Damage.Secondary" ],
+        "tags": [
+          "Damage.Secondary"
+        ],
         "procCoefficient": 1
       }
     ]
@@ -6775,7 +7863,13 @@
     "name": "Drowned Constellation",
     "description": "Deal 100% Magical Damage to all enemies. During High Tide, each target also gains 1 Soaked.",
     "cooldownTicks": 110,
-    "tags": [ "Magical", "Ranged", "Area", "Tide", "Soaked" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area",
+      "Tide",
+      "Soaked"
+    ],
     "effects": [
       {
         "id": "effect.creature.nhalia.drowned_constellation.damage",
@@ -6795,7 +7889,13 @@
     "name": "Moonfall",
     "description": "Deal 240% Magical Damage, plus 20% for each Soaked, to the enemy with the most Soaked. Ignores Taunt.",
     "cooldownTicks": 140,
-    "tags": [ "Magical", "Ranged", "SingleTarget", "Tide", "Soaked" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "SingleTarget",
+      "Tide",
+      "Soaked"
+    ],
     "effects": [
       {
         "id": "effect.creature.nhalia.moonfall.damage",
@@ -6819,11 +7919,20 @@
     "name": "Turning of the Dead Moon",
     "description": "Begin in High Tide and alternate tides every 20 seconds. High Tide grants 50% initial Armor and makes damaging attacks apply Soaked. Low Tide grants 50% initial Resistance and detonates every Soaked for 40% Magical Damage.",
     "cooldownTicks": 200,
-    "tags": [ "Magical", "Ranged", "Area", "Tide", "Soaked", "Stance" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Area",
+      "Tide",
+      "Soaked",
+      "Stance"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.nhalia.turning.apply_high_tide" ]
+        "effectIds": [
+          "effect.creature.nhalia.turning.apply_high_tide"
+        ]
       },
       {
         "event": "OnAbilityUsed",
@@ -6834,20 +7943,28 @@
             "statusId": "ability.creature.nhalia.turning_of_the_dead_moon"
           }
         ],
-        "effectIds": [ "effect.creature.nhalia.turning.toggle_tide" ]
+        "effectIds": [
+          "effect.creature.nhalia.turning.toggle_tide"
+        ]
       },
       {
         "event": "OnDamageDealt",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
-          { "type": "EventWasDirectHit" },
+          {
+            "type": "EventSourceIsSelf"
+          },
+          {
+            "type": "EventWasDirectHit"
+          },
           {
             "type": "HasStatus",
             "subject": "Source",
             "statusId": "status.nhalia.high_tide"
           }
         ],
-        "effectIds": [ "effect.creature.nhalia.turning.apply_soaked" ]
+        "effectIds": [
+          "effect.creature.nhalia.turning.apply_soaked"
+        ]
       },
       {
         "event": "OnStatusApplied",
@@ -6857,7 +7974,9 @@
             "statusId": "status.nhalia.high_tide"
           }
         ],
-        "effectIds": [ "effect.creature.nhalia.turning.high_tide_armor" ]
+        "effectIds": [
+          "effect.creature.nhalia.turning.high_tide_armor"
+        ]
       },
       {
         "event": "OnStatusRemoved",
@@ -6867,7 +7986,9 @@
             "statusId": "status.nhalia.high_tide"
           }
         ],
-        "effectIds": [ "effect.creature.nhalia.turning.high_tide_armor" ]
+        "effectIds": [
+          "effect.creature.nhalia.turning.high_tide_armor"
+        ]
       },
       {
         "event": "OnStatusApplied",
@@ -6890,7 +8011,9 @@
             "statusId": "status.nhalia.low_tide"
           }
         ],
-        "effectIds": [ "effect.creature.nhalia.turning.low_tide_resistance" ]
+        "effectIds": [
+          "effect.creature.nhalia.turning.low_tide_resistance"
+        ]
       }
     ],
     "effects": [
@@ -6956,11 +8079,18 @@
     "name": "Gravitational Undertow",
     "description": "Whenever an enemy receives effective healing, Nhalia heals for 20% of the amount restored.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Healing", "Tide", "AntiSustain" ],
+    "tags": [
+      "Passive",
+      "Healing",
+      "Tide",
+      "AntiSustain"
+    ],
     "triggers": [
       {
         "event": "OnEnemyHealed",
-        "effectIds": [ "effect.creature.nhalia.gravitational_undertow.heal" ]
+        "effectIds": [
+          "effect.creature.nhalia.gravitational_undertow.heal"
+        ]
       }
     ],
     "effects": [
@@ -6980,7 +8110,13 @@
     "name": "Meteor Hammer",
     "description": "Deal 210% Physical Damage to the current target, plus 35% for each Shattered Plate.",
     "cooldownTicks": 100,
-    "tags": [ "Physical", "Melee", "SingleTarget", "StarIron", "ShatteredPlate" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "SingleTarget",
+      "StarIron",
+      "ShatteredPlate"
+    ],
     "effects": [
       {
         "id": "effect.creature.caldris.meteor_hammer.damage",
@@ -7003,7 +8139,12 @@
     "name": "Blackstar Quake",
     "description": "Deal 100% Physical Damage to all enemies.",
     "cooldownTicks": 160,
-    "tags": [ "Physical", "Melee", "Area", "StarIron" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Area",
+      "StarIron"
+    ],
     "effects": [
       {
         "id": "effect.creature.caldris.blackstar_quake.damage",
@@ -7023,7 +8164,11 @@
     "name": "Reforge",
     "description": "Restore one shattered Star-Iron Plate and remove one corresponding offensive stack. Staggering Caldris resets this cooldown.",
     "cooldownTicks": 200,
-    "tags": [ "Defense", "StarIron", "Reforge" ],
+    "tags": [
+      "Defense",
+      "StarIron",
+      "Reforge"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
@@ -7065,11 +8210,19 @@
     "name": "The Unlit Forge",
     "description": "Begin combat with 4 Star-Iron Plates, each granting 8% Damage Reduction. Staggering shatters one plate and resets Reforge. Each Shattered Plate grants 10% Power and 8 Attack Speed.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Stagger", "StarIron", "RiskReward", "Reforge" ],
+    "tags": [
+      "Passive",
+      "Stagger",
+      "StarIron",
+      "RiskReward",
+      "Reforge"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.caldris.the_unlit_forge.initial_plates" ]
+        "effectIds": [
+          "effect.creature.caldris.the_unlit_forge.initial_plates"
+        ]
       },
       {
         "event": "OnStatusApplied",
@@ -7222,7 +8375,10 @@
     "name": "Alpha Fangs",
     "description": "Bite the target, dealing 240% Physical Damage.",
     "cooldownTicks": 170,
-    "tags": [ "Physical", "Melee" ],
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
     "owningEssenceId": "essence.alpha_wolf",
     "effects": [
       {
@@ -7243,7 +8399,11 @@
     "name": "Ruthless Instinct",
     "description": "Increase Critical Damage by 18% while you outnumber the opposing pack.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Physical", "Pack" ],
+    "tags": [
+      "Passive",
+      "Physical",
+      "Pack"
+    ],
     "owningEssenceId": "essence.alpha_wolf",
     "triggers": [
       {
@@ -7267,7 +8427,11 @@
         "baseValue": 18,
         "attribute": "CritDamage",
         "maintainWhileConditionsMet": true,
-        "conditions": [ { "type": "OutnumbersEnemies" } ],
+        "conditions": [
+          {
+            "type": "OutnumbersEnemies"
+          }
+        ],
         "procCoefficient": 1
       }
     ]
@@ -7278,7 +8442,11 @@
     "name": "Dire Fangs",
     "description": "Bite the target, dealing 110% Physical Damage and applying 10 Bleed.",
     "cooldownTicks": 100,
-    "tags": [ "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "owningEssenceId": "essence.dire_wolf",
     "effects": [
       {
@@ -7307,16 +8475,24 @@
     "name": "Hunting Instinct",
     "description": "Increase Critical Chance by 6% while you outnumber the opposing pack.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Physical", "Pack" ],
+    "tags": [
+      "Passive",
+      "Physical",
+      "Pack"
+    ],
     "owningEssenceId": "essence.dire_wolf",
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.dire_wolf.hunting_instinct.crit_chance" ]
+        "effectIds": [
+          "effect.creature.dire_wolf.hunting_instinct.crit_chance"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.dire_wolf.hunting_instinct.crit_chance" ]
+        "effectIds": [
+          "effect.creature.dire_wolf.hunting_instinct.crit_chance"
+        ]
       }
     ],
     "effects": [
@@ -7327,7 +8503,11 @@
         "baseValue": 6,
         "attribute": "CritChance",
         "maintainWhileConditionsMet": true,
-        "conditions": [ { "type": "OutnumbersEnemies" } ],
+        "conditions": [
+          {
+            "type": "OutnumbersEnemies"
+          }
+        ],
         "procCoefficient": 1
       }
     ]
@@ -7336,9 +8516,13 @@
     "id": "ability.creature.horned_wolf.piercing_horn",
     "kind": "Active",
     "name": "Piercing Horn",
-    "description": "Deal 165% Physical Damage and reduce the target's Physical Defense by {scaling2} for {duration}.",
+    "description": "Deal 165% Physical Damage and reduce the target\u0027s Physical Defense by {scaling2} for {duration}.",
     "cooldownTicks": 130,
-    "tags": [ "Physical", "Melee", "DefenseBreak" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "DefenseBreak"
+    ],
     "owningEssenceId": "essence.horned_wolf",
     "effects": [
       {
@@ -7370,16 +8554,24 @@
     "name": "Protective Instinct",
     "description": "While at least one non-summoned ally is alive, increase Armor Rating by 8%.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Defensive", "Pack" ],
+    "tags": [
+      "Passive",
+      "Defensive",
+      "Pack"
+    ],
     "owningEssenceId": "essence.horned_wolf",
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.horned_wolf.protective_instinct.armor" ]
+        "effectIds": [
+          "effect.creature.horned_wolf.protective_instinct.armor"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.horned_wolf.protective_instinct.armor" ]
+        "effectIds": [
+          "effect.creature.horned_wolf.protective_instinct.armor"
+        ]
       }
     ],
     "effects": [
@@ -7400,7 +8592,11 @@
     "name": "Bloodfang Bite",
     "description": "Bite the target for 60% Physical Damage, then deal an additional 200% Physical Damage if it is Bleeding.",
     "cooldownTicks": 120,
-    "tags": [ "Physical", "Melee", "Bleed" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Bleed"
+    ],
     "owningEssenceId": "essence.bloodfang_wolf",
     "effects": [
       {
@@ -7438,7 +8634,11 @@
     "name": "Cruel Precision",
     "description": "Increase Critical Damage by 18% against Bleeding targets.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Physical", "Bleed" ],
+    "tags": [
+      "Passive",
+      "Physical",
+      "Bleed"
+    ],
     "owningEssenceId": "essence.bloodfang_wolf",
     "effects": [
       {
@@ -7457,7 +8657,12 @@
     "name": "Coordinated Attack",
     "description": "You and your non-summoned allies immediately perform a basic attack.",
     "cooldownTicks": 150,
-    "tags": [ "Physical", "Melee", "Support", "Pack" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "Support",
+      "Pack"
+    ],
     "owningEssenceId": "essence.pack_howler",
     "effects": [
       {
@@ -7474,16 +8679,24 @@
     "name": "Strength of the Pack",
     "description": "Increase Power by 6% for each living ally, up to 18%.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Physical", "Pack" ],
+    "tags": [
+      "Passive",
+      "Physical",
+      "Pack"
+    ],
     "owningEssenceId": "essence.pack_howler",
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.creature.pack_howler.strength_of_the_pack.power" ]
+        "effectIds": [
+          "effect.creature.pack_howler.strength_of_the_pack.power"
+        ]
       },
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.creature.pack_howler.strength_of_the_pack.power" ]
+        "effectIds": [
+          "effect.creature.pack_howler.strength_of_the_pack.power"
+        ]
       }
     ],
     "effects": [
@@ -7504,7 +8717,12 @@
     "name": "Weight of Flesh",
     "description": "Deal 220% Physical Damage to the living non-summoned enemy with the highest current Health percentage. Ignores Taunt; ties are random.",
     "cooldownTicks": 100,
-    "tags": [ "Physical", "Melee", "SingleTarget", "LivingScale" ],
+    "tags": [
+      "Physical",
+      "Melee",
+      "SingleTarget",
+      "LivingScale"
+    ],
     "effects": [
       {
         "id": "effect.creature.serath.weight_of_flesh.damage",
@@ -7528,22 +8746,34 @@
     "name": "Weight of Spirit",
     "description": "Deal 190% Magical Damage to the living non-summoned enemy with the lowest current Health percentage and apply Wound(8). Ignores Taunt; ties are random.",
     "cooldownTicks": 120,
-    "tags": [ "Magical", "Ranged", "SingleTarget", "Wound", "LivingScale" ],
+    "tags": [
+      "Magical",
+      "Ranged",
+      "SingleTarget",
+      "Wound",
+      "LivingScale"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.creature.serath.weight_of_spirit.damage" ]
+        "effectIds": [
+          "effect.creature.serath.weight_of_spirit.damage"
+        ]
       },
       {
         "event": "OnDamageDealt",
         "conditions": [
-          { "type": "EventSourceIsSelf" },
+          {
+            "type": "EventSourceIsSelf"
+          },
           {
             "type": "EventIdIs",
             "statusId": "effect.creature.serath.weight_of_spirit.damage"
           }
         ],
-        "effectIds": [ "effect.creature.serath.weight_of_spirit.wound" ]
+        "effectIds": [
+          "effect.creature.serath.weight_of_spirit.wound"
+        ]
       }
     ],
     "effects": [
@@ -7577,7 +8807,14 @@
     "name": "Sixfold Sentence",
     "description": "Deal 55% Physical Damage to three random enemies, then deal 55% Magical Damage to three independently selected random enemies.",
     "cooldownTicks": 170,
-    "tags": [ "Physical", "Magical", "Melee", "Ranged", "MultiTarget", "LivingScale" ],
+    "tags": [
+      "Physical",
+      "Magical",
+      "Melee",
+      "Ranged",
+      "MultiTarget",
+      "LivingScale"
+    ],
     "effects": [
       {
         "id": "effect.creature.serath.sixfold_sentence.physical_damage",
@@ -7607,7 +8844,13 @@
     "name": "The Living Scale",
     "description": "Beginning 10 seconds into combat and every 15 seconds thereafter, compare the highest and lowest Health percentages among living non-summoned enemies. A spread of 12 percentage points or less gives Serath Doubt and 15% increased damage taken; a wider spread gives Conviction, 15% Power, and 15 Attack Speed. With fewer than two eligible enemies, Serath gains Conviction.",
     "cooldownTicks": 0,
-    "tags": [ "Passive", "Interval", "LivingScale", "RiskReward", "Warden" ],
+    "tags": [
+      "Passive",
+      "Interval",
+      "LivingScale",
+      "RiskReward",
+      "Warden"
+    ],
     "triggers": [
       {
         "event": "OnInterval",
@@ -7710,6 +8953,50 @@
         "statusId": "status.serath.conviction",
         "attribute": "AttackSpeed",
         "baseValue": 15,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.blue_slime.protective_slime.balance_creek",
+    "kind": "Passive",
+    "name": "Protective Slime",
+    "description": "At combat start, grant all allies Barrier equal to {scaling} of your Max Health.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Barrier",
+      "Area"
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.blue_slime.protective_slime.barrier.balance_creek",
+        "operation": "GrantBarrier",
+        "target": "AllAllies",
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.44,
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.frost_imp.ice_needle.balance_creek",
+    "kind": "Active",
+    "name": "Ice Needle",
+    "description": "Deal 170% Magical Damage to a random enemy.",
+    "cooldownTicks": 100,
+    "tags": [
+      "Magical",
+      "Ranged"
+    ],
+    "effects": [
+      {
+        "id": "effect.creature.frost_imp.ice_needle.damage.balance_creek",
+        "operation": "Damage",
+        "target": "RandomEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.7,
+        "attackType": "Ranged",
+        "damageType": "Magical",
         "procCoefficient": 1
       }
     ]

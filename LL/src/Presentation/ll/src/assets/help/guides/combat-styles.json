@@ -1,0 +1,46 @@
+{
+  "title": "Combat Styles Guide",
+  "lastReviewed": "2026-09-09",
+  "sections": [
+    {
+      "heading": "Your third build choice",
+      "body": "Equipment supplies attributes, Essences supply abilities, and a Combat Style changes how those abilities work together. Choose one Combat Style for every battle, or leave the slot empty. Bastion and Conduit are available immediately at Mastery 0."
+    },
+    {
+      "heading": "Bastion: prepare protection",
+      "body": "Healing you receive from any source during combat restores 25% as Health and converts 75% to Barrier before missing-Health limits. This includes healing from your abilities, other characters and summons, as well as regeneration and Lifesteal. Converted Barrier uses the ordinary cap."
+    },
+    {
+      "heading": "Bastion refinement: Reprisal",
+      "body": "At mastery level 3, choose Reprisal to store 25% of enemy damage actually absorbed by your Barrier as bonus damage, capped at 10% of Max Health. Your Barrier can come from any source. The next normally cast damaging Essence uses the stored amount once on its first direct enemy attack attempt, without spending Barrier. With 1,000 Max Health, absorbing 200 enemy damage stores 50 bonus damage toward a cap of 100."
+    },
+    {
+      "heading": "Conduit: prepare your Focus",
+      "body": "Choose your Focus from equipped Essences that deal direct damage, heal or grant Barrier when they cast. Keep it equipped in every Essence loadout you use for battle. Your other Essences build Charge through their regular casts, and your Focus spends that Charge to strengthen its immediate damage, healing and Barrier. In the base form, each different Essence can add 1 Charge before the Focus casts, up to 3 Charge. The Focus starts at 80% of normal strength and adds a flat +20% per Charge spent, reaching 140% at 3 Charge before mastery and upgrade bonuses. Choose your Focus before taking Conduit into battle."
+    },
+    {
+      "heading": "Individual mastery",
+      "body": "Each Combat Style levels independently from Mastery 0 to 10. Each mastery level costs the combined XP requirements of ten combat levels: Mastery 1 uses levels 1–10, Mastery 2 uses 11–20, and so on through Mastery 10 using 91–100. The style used in an eligible rewarded encounter earns XP, at one point per base combat XP before bonuses. Switching preserves every style's progress and saved choices. Earned XP is permanent, and progression reaches its maximum at level 10."
+    },
+    {
+      "heading": "Mastery bonuses and choices",
+      "body": "Every mastery level improves your style. Bastion adds 1% of the base converted Barrier per level, reaching +10% at mastery 10. Each Conduit mastery level adds a flat +1% to your Focus's damage, healing and Barrier when it spends at least 1 Charge, reaching a +10% flat increase at mastery 10. The mastery bonus applies once per cast, regardless of how much Charge is spent. At level 3 choose one refinement or keep the base form. Unlock your first slot at Mastery 5 and the second slot at Mastery 8. All three upgrades become available at Mastery 5. Equip up to two different upgrades as your slots unlock. Barrier bonuses apply when Fortification converts healing. These choices are free."
+    },
+    {
+      "heading": "Reading percentage bonuses",
+      "body": "A flat increase adds directly to the displayed percentage: 101% + 5% = 106%. A multiplicative bonus scales an amount: +20% (×1.2) turns 50 Health recovery into 60. Bastion's Barrier upgrades labeled +7.5% flat increase add 7.5% of the heal as extra Barrier, before sharing."
+    },
+    {
+      "heading": "Opening Technique at level 7",
+      "body": "Your style automatically gains an Opening Technique at level 7. Bastion's Entrenched begins each battle with Barrier equal to 5% of maximum Health. Conduit's Primed Circuit begins each battle with 1 Charge. Every refinement, including the base form, receives its style's opening. No selection or upgrade slot is needed."
+    },
+    {
+      "heading": "Upgrade Mastery at level 9",
+      "body": "At Mastery 9, choose one of your equipped upgrades to gain its additional mastery effect. Each upgrade shows its mastery benefit in the Upgrades section. The empowered upgrade keeps its existing slot; mastery does not add a third slot. Change or clear mastery freely, then Save. Removing the empowered upgrade also clears mastery, and each style remembers its own saved choice."
+    },
+    {
+      "heading": "Saving your Combat Style",
+      "body": "Save applies your chosen style, refinement, upgrades, Upgrade Mastery, and Focus to future battles. Discard restores your saved choices. Equipment and Essence loadouts are managed separately. Changes apply at the next permitted encounter boundary; an already committed dungeon run or match keeps its captured choices and mastery until it ends. Offline combat continues as you gain levels; choose newly available upgrades here."
+    }
+  ]
+}

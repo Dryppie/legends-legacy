@@ -17,15 +17,16 @@ export interface NavigationTab {
   disabled?: boolean;
   badgeCount?: number;
   badgeLabel?: string;
+  statusLabel?: string;
 }
 
 export type NavigationTabsAppearance = 'primary' | 'compact';
 
 @Component({
-    selector: 'app-navigation-tabs',
-    imports: [NgClass, NgFor, NgIf, NotificationIndicatorComponent],
-    templateUrl: './navigation-tabs.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-navigation-tabs',
+  imports: [NgClass, NgFor, NgIf, NotificationIndicatorComponent],
+  templateUrl: './navigation-tabs.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavigationTabsComponent {
   @Input() tabs: readonly NavigationTab[] = [];
@@ -87,6 +88,9 @@ export class NavigationTabsComponent {
   }
 
   private toKebabCase(value: string): string {
-    return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
   }
 }

@@ -14,6 +14,10 @@ public sealed record CombatEncounterResolutionResult(
     IReadOnlyList<SimpleCombatEntity> HostilePostState)
 {
     public required CombatContentType ContentType { get; init; }
+    public IReadOnlyList<CombatStyleExperienceAward> CombatStyleExperience { get; init; } = [];
     public BattleOutcome EngineOutcome => CombatResult.EngineOutcome;
     public BattleOutcome ContentOutcome => CombatResult.ContentOutcome;
 }
+
+public sealed record CombatStyleExperienceAward(Guid CharacterId, string CapturedCombatStyleId,
+    long EligibleBaseExperience, long ExperienceGranted, int Level);

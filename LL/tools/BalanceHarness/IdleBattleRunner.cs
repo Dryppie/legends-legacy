@@ -28,6 +28,11 @@ public sealed class IdleBattleRunner(OfflineContent content)
         requests.AddRange(plan.HostileParticipants.Select((slot, index) =>
             new CombatantPreparationRequest(slot, new LiveCombatantPreparationSource(creatures[index], area))));
         var participants = await pipeline.PrepareAsync(CombatContentType.Idle, requests, cancellationToken);
+        foreach (var participant in participants.Where(x => x.Slot.Side == CombatSide.Friendly))
+        {
+            participant.Combatant.CombatStyle = input.Character.CombatStyle;
+            participant.Combatant.HasCombatStyleSnapshot = true;
+        }
         return new(plan, participants.Where(x => x.Slot.Side == CombatSide.Friendly).ToArray(),
             participants.Where(x => x.Slot.Side == CombatSide.Hostile).ToArray());
     }
@@ -63,8 +68,10 @@ public sealed class IdleBattleRunner(OfflineContent content)
 
     public static JsonElement DescribeParticipants(CombatEncounterRuntime runtime) =>
         JsonSerializer.SerializeToElement(runtime.FriendlyParticipants.Concat(runtime.AllHostileParticipants)
-            .Select(x => new
+            .Select(x =>
             {
+                var description = JsonSerializer.SerializeToNode(new
+                {
                 x.Slot, x.Combatant.Name, x.Combatant.Level, x.Combatant.SourceMonsterId,
                 BaseAttributes = x.Combatant.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value),
                 x.Combatant.CombatAttributes,
@@ -76,6 +83,10 @@ public sealed class IdleBattleRunner(OfflineContent content)
                 Equipment = x.Combatant.Equipment.OrderBy(e => e.Id).Select(e => e.ProgressionData).ToArray(),
                 Essences = x.Combatant.EquippedEssences.Select(e => new
                     { e.EssenceDefinitionId, e.Level, e.AscensionTier, e.IsEvolved }).ToArray(),
-                x.Combatant.TemporaryAbilityModifiers
+                    x.Combatant.TemporaryAbilityModifiers
+                }, HarnessJson.Options)!.AsObject();
+                if (x.Combatant.CombatStyle is { } style)
+                    description.Add("combatStyle", JsonSerializer.SerializeToNode(style, HarnessJson.Options));
+                return description;
             }).ToArray(), HarnessJson.Options);
 }

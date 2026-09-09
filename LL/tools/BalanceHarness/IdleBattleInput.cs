@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using Domain.Models.CombatStyles;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
@@ -20,7 +21,9 @@ public sealed record IdleScenario(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<Guid>? AdditionalCreatureIds = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    IReadOnlyDictionary<string, int>? EssenceLevels = null)
+    IReadOnlyDictionary<string, int>? EssenceLevels = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    FixtureCombatStyle? CombatStyle = null)
 {
     [JsonIgnore]
     public IReadOnlyList<Guid> CreatureIds => [CreatureId, .. AdditionalCreatureIds ?? []];
@@ -28,10 +31,15 @@ public sealed record IdleScenario(
 
 public sealed record FixtureEquipment(EquipmentSlotType Slot, EquipmentData Data);
 public sealed record FixtureEssence(string DefinitionId, int Level, int AscensionTier, bool IsEvolved);
+public sealed record FixtureCombatStyle(string Id, int Level = 0, string? RefinementId = null,
+    IReadOnlyList<string>? UpgradeIds = null, string? FocusEssenceDefinitionId = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MasteredUpgradeId = null);
 
 public sealed record FixtureCharacter(
     Guid Id, string Name, int Level, IReadOnlyDictionary<AttributeType, float> BaseAttributes,
-    IReadOnlyList<FixtureEquipment> Equipment, IReadOnlyList<FixtureEssence> Essences)
+    IReadOnlyList<FixtureEquipment> Equipment, IReadOnlyList<FixtureEssence> Essences,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    CombatStyleSnapshot? CombatStyle = null)
 {
     public static FixtureCharacter From(CanonicalEquipmentBuild build) => new(
         build.Character.Id, build.Character.Name, build.Character.Level,
@@ -106,7 +114,9 @@ public sealed record BattleSummary(
     BattleOutcome EngineOutcome, BattleOutcome ContentOutcome, string TerminationReason,
     int DurationTicks, double DurationSeconds, IReadOnlyList<SimpleCombatEntity> Friendly,
     IReadOnlyList<SimpleCombatEntity> Hostile, IReadOnlyList<EntityStats> Statistics,
-    CompactCombatTelemetry Telemetry)
+    CompactCombatTelemetry Telemetry,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<CombatStyleCombatSummary>? CombatStyles = null)
 {
     public static BattleSummary From(CombatResult result, int maxTicks) => new(
         result.EngineOutcome, result.ContentOutcome,
@@ -117,7 +127,7 @@ public sealed record BattleSummary(
         result.EntityStats.Select(x => x with
         {
             Abilities = x.Abilities.Select(a => a with { Definition = null }).ToList()
-        }).ToArray(), result.CompactTelemetry);
+        }).ToArray(), result.CompactTelemetry, result.CombatStyles.Count > 0 ? result.CombatStyles : null);
 }
 
 public sealed record BattleReport(

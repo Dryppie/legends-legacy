@@ -17,6 +17,11 @@
 {{- end }}
 {{- end }}
 
+{{/* Stable claim name, also usable for an externally managed claim. */}}
+{{- define "ll-liveops.dataProtectionClaimName" -}}
+{{- default (printf "%s-data-protection" (include "ll-liveops.fullname" . | trunc 47 | trimSuffix "-")) .Values.dataProtection.existingClaim -}}
+{{- end }}
+
 {{/* Common labels. */}}
 {{- define "ll-liveops.labels" -}}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}

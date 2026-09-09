@@ -27,6 +27,15 @@ public sealed class SnapshotCombatantBuilder(
             .Where(x => itemBaseIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+        return BuildFromItemBases(requests, itemBases, combatSetup);
+    }
+
+    /// <summary>Shared snapshot rehydration for persisted and file-only combat inputs.</summary>
+    public static IReadOnlyList<CombatRuntimeParticipant> BuildFromItemBases(
+        IReadOnlyList<SnapshotCombatantRequest> requests,
+        IReadOnlyDictionary<string, Domain.Models.Items.ItemBase> itemBases,
+        ICombatSetupService combatSetup)
+    {
         var participants = new List<CombatRuntimeParticipant>(requests.Count);
         foreach (var request in requests)
         {
@@ -38,6 +47,8 @@ public sealed class SnapshotCombatantBuilder(
                 .ToList();
             combatant.HasEquippedEssenceSnapshot = true;
             combatant.HasEquipmentSnapshot = true;
+            combatant.CombatStyle = request.Snapshot.CombatStyle;
+            combatant.HasCombatStyleSnapshot = true;
             combatant.Id = request.Slot.SlotId;
             combatant.OriginalId = request.Slot.SourceEntityId;
             participants.Add(new CombatRuntimeParticipant(request.Slot, source, combatant));

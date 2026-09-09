@@ -1,8 +1,8 @@
 import { ItemType } from './enums/itemType';
 
 export type MarketCategoryId =
-  | 'resources'
-  | 'catalysts'
+  | 'monster-cores'
+  | 'blueprints'
   | 'equipment'
   | 'essences';
 

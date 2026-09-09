@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "idle-crystal-creek-starter-goals-v1",
+  "suiteId": "idle-crystal-creek-starter-v1",
+  "fixtureHash": "63a44203a7c787d7f0627205a56dd7ff91775bc17a9873bfa38e671d536e41ec",
+  "metricsVersion": "idle-scorecard-v1",
+  "description": "Reviewed 50-90% win-rate band for the level-10 Goblin Warrior, Shortsword, Heavy Breastplate, Amulet and Goblin second-slot build in each fixed Crystal Creek pairing. Duration has no acceptance target. The other fourteen preparation/return cells remain declared diagnostics.",
+  "requiredCells": [
+    "handoff-crystal-creek.quest-rewards.blue-slimes",
+    "handoff-crystal-creek.quest-rewards.slime-imp"
+  ],
+  "diagnosticCells": [
+    "handoff-blood-grove.level-only.ravens",
+    "handoff-blood-grove.level-only.raven-zombie",
+    "handoff-blood-grove.jewelry.ravens",
+    "handoff-blood-grove.jewelry.raven-zombie",
+    "handoff-blood-grove.quest-rewards.ravens",
+    "handoff-blood-grove.quest-rewards.raven-zombie",
+    "handoff-blood-grove.fury.ravens",
+    "handoff-blood-grove.fury.raven-zombie",
+    "handoff-crystal-creek.level-only.blue-slimes",
+    "handoff-crystal-creek.level-only.slime-imp",
+    "handoff-crystal-creek.jewelry.blue-slimes",
+    "handoff-crystal-creek.jewelry.slime-imp",
+    "handoff-crystal-creek.fury.blue-slimes",
+    "handoff-crystal-creek.fury.slime-imp"
+  ],
+  "goals": [
+    {
+      "id": "crystal-creek-starter-clear-rate",
+      "metric": "ClearRate",
+      "unit": "percent",
+      "role": "Primary",
+      "enforcement": "Enforced",
+      "cells": [
+        "handoff-crystal-creek.quest-rewards.blue-slimes",
+        "handoff-crystal-creek.quest-rewards.slime-imp"
+      ],
+      "minimumSamples": 100,
+      "minimum": 50,
+      "maximum": 90,
+      "rationale": "Each fixed Crystal Creek pairing must have its pointwise 95% Wilson interval wholly inside the inclusive 50-90% band; overlap remains Inconclusive. At least 100 valid trials are required. These conditional fixed-reward encounters are not an area-wide spawn estimate. Duration, optional Fury and alternative preparations do not gate this policy. Completed reference/confirmation runs are evaluated separately without adding samples or changing fixtures.",
+      "reviewReason": "On 8 September 2026 the user explicitly requested the 50-90% win band for this level-10 Amulet/Goblin checkpoint and said duration does not matter. This approves this scoped policy, not a balance change, passing baseline, duration gate or hosted gameplay gate."
+    }
+  ]
+}

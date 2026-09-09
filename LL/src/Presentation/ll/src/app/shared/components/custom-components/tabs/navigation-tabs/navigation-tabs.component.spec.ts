@@ -64,4 +64,33 @@ describe('NavigationTabsComponent', () => {
     expect(buttons[0].dataset['tour']).toBe('example-tab-first');
     expect(buttons[2].dataset['tour']).toBe('example-tab-last');
   });
+
+  it('shows optional status independently of the tab being viewed', () => {
+    expect(
+      fixture.nativeElement.querySelector('.navigation-tab-status'),
+    ).toBeNull();
+    fixture.componentRef.setInput(
+      'tabs',
+      tabs.map((tab) => ({
+        ...tab,
+        statusLabel: tab.key === 'first' ? 'Equipped' : undefined,
+      })),
+    );
+    fixture.componentRef.setInput('activeKey', 'last');
+    fixture.detectChanges();
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
+    const badge = buttons[0].querySelector('.navigation-tab-status')!;
+    expect(badge.textContent?.trim()).toBe('Equipped');
+    expect(buttons[0].getAttribute('aria-selected')).toBe('false');
+    expect(buttons[2].getAttribute('aria-selected')).toBe('true');
+    expect(buttons[2].querySelector('.navigation-tab-status')).toBeNull();
+    const selected: string[] = [];
+    fixture.componentInstance.tabSelected.subscribe((key) =>
+      selected.push(key),
+    );
+    buttons[0].click();
+    expect(selected).toEqual(['first']);
+  });
 });

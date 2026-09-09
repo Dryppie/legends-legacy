@@ -71,6 +71,7 @@ builder.Services.AddProblemDetails(options =>
 });
 builder.Services.AddExceptionHandler<DatabaseConflictExceptionHandler>();
 builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
+builder.Services.AddExceptionHandler<CombatStyleConfigurationExceptionHandler>();
 
 var signalR = builder.Services.AddSignalR()
     .AddJsonProtocol(options =>

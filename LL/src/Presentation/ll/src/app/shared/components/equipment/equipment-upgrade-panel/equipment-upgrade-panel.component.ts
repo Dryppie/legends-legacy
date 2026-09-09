@@ -97,6 +97,10 @@ export class EquipmentUpgradePanelComponent implements OnInit {
 
   selectBlueprint(styleId: string): void {
     if (this.mutating) return;
+    const operationId =
+      this.selectedBlueprint?.styleId === styleId
+        ? this.variantQuote?.operationId
+        : undefined;
     this.selectedBlueprint =
       this.blueprints.find((x) => x.styleId === styleId) ?? null;
     this.variantQuote = null;
@@ -110,7 +114,7 @@ export class EquipmentUpgradePanelComponent implements OnInit {
       .subscribe({
         next: (quote) => {
           if (this.selectedBlueprint?.styleId !== styleId) return;
-          this.variantQuote = quote;
+          this.variantQuote = operationId ? { ...quote, operationId } : quote;
           this.variantLoading = false;
         },
         error: () => {
@@ -193,6 +197,7 @@ export class EquipmentUpgradePanelComponent implements OnInit {
   }
 
   private loadQuotes(resetError = true): void {
+    const operationId = this.reinforceQuote?.operationId;
     this.loading = true;
     if (resetError) this.error = null;
     const reinforce = this.equipmentApi.previewUpgrade(
@@ -202,7 +207,7 @@ export class EquipmentUpgradePanelComponent implements OnInit {
 
     reinforce.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (quote) => {
-        this.reinforceQuote = quote;
+        this.reinforceQuote = operationId ? { ...quote, operationId } : quote;
         this.loading = false;
       },
       error: (error: unknown) => {
@@ -214,15 +219,7 @@ export class EquipmentUpgradePanelComponent implements OnInit {
 
   private finishMutation(result: EquipmentUpgradeMutation): void {
     if (!result.outcome) {
-      if (result.freshQuote?.request.kind === 'ApplyVariant')
-        this.variantQuote = result.freshQuote;
-      this.error =
-        result.freshQuote?.unavailableReason ??
-        'The equipment changed. Review the new quote.';
-      this.reinforceQuote =
-        result.freshQuote?.request.kind === 'Reinforce'
-          ? result.freshQuote
-          : this.reinforceQuote;
+      this.error = 'The equipment action could not be completed.';
       this.mutating = false;
       return;
     }

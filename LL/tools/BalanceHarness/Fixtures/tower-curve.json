@@ -1,0 +1,2005 @@
+{
+  "profiles": [
+    {
+      "id": "slots-4-guardian",
+      "assumptions": "Provisional all-floor progression budget: 4 Essences, level 30, Uncommon Standard tier-1 rank-1 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-4-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "id": "slots-4-restorer",
+      "assumptions": "Provisional all-floor progression budget: 4 Essences, level 30, Uncommon Standard tier-1 rank-1 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-4-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "id": "slots-4-striker",
+      "assumptions": "Provisional all-floor progression budget: 4 Essences, level 30, Uncommon Standard tier-1 rank-1 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-4-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "slots-4-controller",
+      "assumptions": "Provisional all-floor progression budget: 4 Essences, level 30, Uncommon Standard tier-1 rank-1 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-4-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "id": "slots-5-guardian",
+      "assumptions": "Provisional all-floor progression budget: 5 Essences, level 40, Uncommon Standard tier-1 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-5-guardian",
+        "characterLevel": 40,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle"
+        ]
+      }
+    },
+    {
+      "id": "slots-5-restorer",
+      "assumptions": "Provisional all-floor progression budget: 5 Essences, level 40, Uncommon Standard tier-1 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-5-restorer",
+        "characterLevel": 40,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling"
+        ]
+      }
+    },
+    {
+      "id": "slots-5-striker",
+      "assumptions": "Provisional all-floor progression budget: 5 Essences, level 40, Uncommon Standard tier-1 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-5-striker",
+        "characterLevel": 40,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad"
+        ]
+      }
+    },
+    {
+      "id": "slots-5-controller",
+      "assumptions": "Provisional all-floor progression budget: 5 Essences, level 40, Uncommon Standard tier-1 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-5-controller",
+        "characterLevel": 40,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag"
+        ]
+      }
+    },
+    {
+      "id": "slots-6-guardian",
+      "assumptions": "Provisional all-floor progression budget: 6 Essences, level 50, Uncommon Standard tier-2 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-6-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "slots-6-restorer",
+      "assumptions": "Provisional all-floor progression budget: 6 Essences, level 50, Uncommon Standard tier-2 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-6-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "slots-6-striker",
+      "assumptions": "Provisional all-floor progression budget: 6 Essences, level 50, Uncommon Standard tier-2 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-6-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "slots-6-controller",
+      "assumptions": "Provisional all-floor progression budget: 6 Essences, level 50, Uncommon Standard tier-2 rank-2 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-6-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 2,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "slots-7-guardian",
+      "assumptions": "Provisional all-floor progression budget: 7 Essences, level 60, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-7-guardian",
+        "characterLevel": 60,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel"
+        ]
+      }
+    },
+    {
+      "id": "slots-7-restorer",
+      "assumptions": "Provisional all-floor progression budget: 7 Essences, level 60, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-7-restorer",
+        "characterLevel": 60,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp"
+        ]
+      }
+    },
+    {
+      "id": "slots-7-striker",
+      "assumptions": "Provisional all-floor progression budget: 7 Essences, level 60, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-7-striker",
+        "characterLevel": 60,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake"
+        ]
+      }
+    },
+    {
+      "id": "slots-7-controller",
+      "assumptions": "Provisional all-floor progression budget: 7 Essences, level 60, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-7-controller",
+        "characterLevel": 60,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman"
+        ]
+      }
+    },
+    {
+      "id": "slots-8-guardian",
+      "assumptions": "Provisional all-floor progression budget: 8 Essences, level 70, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-8-guardian",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem"
+        ]
+      }
+    },
+    {
+      "id": "slots-8-restorer",
+      "assumptions": "Provisional all-floor progression budget: 8 Essences, level 70, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-8-restorer",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom"
+        ]
+      }
+    },
+    {
+      "id": "slots-8-striker",
+      "assumptions": "Provisional all-floor progression budget: 8 Essences, level 70, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-8-striker",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy"
+        ]
+      }
+    },
+    {
+      "id": "slots-8-controller",
+      "assumptions": "Provisional all-floor progression budget: 8 Essences, level 70, Uncommon Fine tier-2 rank-3 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-8-controller",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy"
+        ]
+      }
+    },
+    {
+      "id": "slots-9-guardian",
+      "assumptions": "Provisional all-floor progression budget: 9 Essences, level 80, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-9-guardian",
+        "characterLevel": 80,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian"
+        ]
+      }
+    },
+    {
+      "id": "slots-9-restorer",
+      "assumptions": "Provisional all-floor progression budget: 9 Essences, level 80, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-9-restorer",
+        "characterLevel": 80,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman"
+        ]
+      }
+    },
+    {
+      "id": "slots-9-striker",
+      "assumptions": "Provisional all-floor progression budget: 9 Essences, level 80, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-9-striker",
+        "characterLevel": 80,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy"
+        ]
+      }
+    },
+    {
+      "id": "slots-9-controller",
+      "assumptions": "Provisional all-floor progression budget: 9 Essences, level 80, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-9-controller",
+        "characterLevel": 80,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy"
+        ]
+      }
+    },
+    {
+      "id": "slots-10-guardian",
+      "assumptions": "Provisional all-floor progression budget: 10 Essences, level 90, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-10-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian",
+          "essence.thornback_boar"
+        ]
+      }
+    },
+    {
+      "id": "slots-10-restorer",
+      "assumptions": "Provisional all-floor progression budget: 10 Essences, level 90, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-10-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman",
+          "essence.elder_treant"
+        ]
+      }
+    },
+    {
+      "id": "slots-10-striker",
+      "assumptions": "Provisional all-floor progression budget: 10 Essences, level 90, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-10-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy",
+          "essence.wind_harpy"
+        ]
+      }
+    },
+    {
+      "id": "slots-10-controller",
+      "assumptions": "Provisional all-floor progression budget: 10 Essences, level 90, Uncommon Fine tier-2 rank-4 gear. Floor-1 four-slot/Uncommon/Standard-or-Fine/rank-1-or-2 budget and floor-10 six-slot target come from the user; other budgets and floor interpolation are hypotheses. Fixed level-1 unascended, unevolved Essences, baseline rolls, no styles/scouting/contributions. No numerical win-rate policy.",
+      "build": {
+        "id": "slots-10-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy",
+          "essence.wandering_ghost"
+        ]
+      }
+    }
+  ],
+  "startsAt": "2000-01-01T01:00:00+01:00",
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "schemaVersion": 2,
+  "samplesPerCell": 20,
+  "id": "tower-curve-v1",
+  "parties": [
+    {
+      "id": "balanced",
+      "assumptions": "Provisional floor progression with balanced composition: guardian, restorer, striker, striker, controller. Repeat the five-character cell to fill actual RequiredSlots. Each floor is a fresh fight, not a continuous climb. User anchors remain qualitative; no automatic target or baseline acceptance.",
+      "cellProfiles": [
+        "slots-4-guardian",
+        "slots-4-restorer",
+        "slots-4-striker",
+        "slots-4-striker",
+        "slots-4-controller"
+      ],
+      "floorCellProfiles": {
+        "1": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "2": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "3": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "4": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "5": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-striker",
+          "slots-5-controller"
+        ],
+        "6": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-striker",
+          "slots-5-controller"
+        ],
+        "7": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-striker",
+          "slots-5-controller"
+        ],
+        "8": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-striker",
+          "slots-6-controller"
+        ],
+        "9": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-striker",
+          "slots-6-controller"
+        ],
+        "10": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-striker",
+          "slots-6-controller"
+        ],
+        "11": [
+          "slots-7-guardian",
+          "slots-7-restorer",
+          "slots-7-striker",
+          "slots-7-striker",
+          "slots-7-controller"
+        ],
+        "12": [
+          "slots-8-guardian",
+          "slots-8-restorer",
+          "slots-8-striker",
+          "slots-8-striker",
+          "slots-8-controller"
+        ],
+        "13": [
+          "slots-9-guardian",
+          "slots-9-restorer",
+          "slots-9-striker",
+          "slots-9-striker",
+          "slots-9-controller"
+        ],
+        "14": [
+          "slots-10-guardian",
+          "slots-10-restorer",
+          "slots-10-striker",
+          "slots-10-striker",
+          "slots-10-controller"
+        ],
+        "15": [
+          "slots-10-guardian",
+          "slots-10-restorer",
+          "slots-10-striker",
+          "slots-10-striker",
+          "slots-10-controller"
+        ]
+      }
+    },
+    {
+      "id": "support",
+      "assumptions": "Provisional floor progression with support composition: guardian, restorer, restorer, striker, controller. Repeat the five-character cell to fill actual RequiredSlots. Each floor is a fresh fight, not a continuous climb. User anchors remain qualitative; no automatic target or baseline acceptance.",
+      "cellProfiles": [
+        "slots-4-guardian",
+        "slots-4-restorer",
+        "slots-4-restorer",
+        "slots-4-striker",
+        "slots-4-controller"
+      ],
+      "floorCellProfiles": {
+        "1": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "2": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "3": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "4": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-controller"
+        ],
+        "5": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-controller"
+        ],
+        "6": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-controller"
+        ],
+        "7": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-controller"
+        ],
+        "8": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-controller"
+        ],
+        "9": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-controller"
+        ],
+        "10": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-controller"
+        ],
+        "11": [
+          "slots-7-guardian",
+          "slots-7-restorer",
+          "slots-7-restorer",
+          "slots-7-striker",
+          "slots-7-controller"
+        ],
+        "12": [
+          "slots-8-guardian",
+          "slots-8-restorer",
+          "slots-8-restorer",
+          "slots-8-striker",
+          "slots-8-controller"
+        ],
+        "13": [
+          "slots-9-guardian",
+          "slots-9-restorer",
+          "slots-9-restorer",
+          "slots-9-striker",
+          "slots-9-controller"
+        ],
+        "14": [
+          "slots-10-guardian",
+          "slots-10-restorer",
+          "slots-10-restorer",
+          "slots-10-striker",
+          "slots-10-controller"
+        ],
+        "15": [
+          "slots-10-guardian",
+          "slots-10-restorer",
+          "slots-10-restorer",
+          "slots-10-striker",
+          "slots-10-controller"
+        ]
+      }
+    },
+    {
+      "id": "pressure",
+      "assumptions": "Provisional floor progression with pressure composition: guardian, restorer, striker, striker, striker. Repeat the five-character cell to fill actual RequiredSlots. Each floor is a fresh fight, not a continuous climb. User anchors remain qualitative; no automatic target or baseline acceptance.",
+      "cellProfiles": [
+        "slots-4-guardian",
+        "slots-4-restorer",
+        "slots-4-striker",
+        "slots-4-striker",
+        "slots-4-striker"
+      ],
+      "floorCellProfiles": {
+        "1": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-striker"
+        ],
+        "2": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-striker"
+        ],
+        "3": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-striker"
+        ],
+        "4": [
+          "slots-4-guardian",
+          "slots-4-restorer",
+          "slots-4-striker",
+          "slots-4-striker",
+          "slots-4-striker"
+        ],
+        "5": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-striker",
+          "slots-5-striker"
+        ],
+        "6": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-striker",
+          "slots-5-striker"
+        ],
+        "7": [
+          "slots-5-guardian",
+          "slots-5-restorer",
+          "slots-5-striker",
+          "slots-5-striker",
+          "slots-5-striker"
+        ],
+        "8": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-striker",
+          "slots-6-striker"
+        ],
+        "9": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-striker",
+          "slots-6-striker"
+        ],
+        "10": [
+          "slots-6-guardian",
+          "slots-6-restorer",
+          "slots-6-striker",
+          "slots-6-striker",
+          "slots-6-striker"
+        ],
+        "11": [
+          "slots-7-guardian",
+          "slots-7-restorer",
+          "slots-7-striker",
+          "slots-7-striker",
+          "slots-7-striker"
+        ],
+        "12": [
+          "slots-8-guardian",
+          "slots-8-restorer",
+          "slots-8-striker",
+          "slots-8-striker",
+          "slots-8-striker"
+        ],
+        "13": [
+          "slots-9-guardian",
+          "slots-9-restorer",
+          "slots-9-striker",
+          "slots-9-striker",
+          "slots-9-striker"
+        ],
+        "14": [
+          "slots-10-guardian",
+          "slots-10-restorer",
+          "slots-10-striker",
+          "slots-10-striker",
+          "slots-10-striker"
+        ],
+        "15": [
+          "slots-10-guardian",
+          "slots-10-restorer",
+          "slots-10-striker",
+          "slots-10-striker",
+          "slots-10-striker"
+        ]
+      }
+    }
+  ]
+}

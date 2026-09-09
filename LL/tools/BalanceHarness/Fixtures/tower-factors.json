@@ -1,0 +1,1979 @@
+{
+  "schemaVersion": 1,
+  "id": "tower-factors-v1",
+  "startsAt": "2000-01-01T00:00:00+00:00",
+  "samplesPerCell": 20,
+  "floors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "profiles": [
+    {
+      "id": "control-guardian",
+      "assumptions": "Mid-budget control; compare with none. Character level 50, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "control-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "control-restorer",
+      "assumptions": "Mid-budget control; compare with none. Character level 50, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "control-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "control-striker",
+      "assumptions": "Mid-budget control; compare with none. Character level 50, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "control-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "control-controller",
+      "assumptions": "Mid-budget control; compare with none. Character level 50, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "control-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "level-70-guardian",
+      "assumptions": "Character level only; compare with control. Character level 70, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-70-guardian",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "level-70-restorer",
+      "assumptions": "Character level only; compare with control. Character level 70, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-70-restorer",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "level-70-striker",
+      "assumptions": "Character level only; compare with control. Character level 70, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-70-striker",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "level-70-controller",
+      "assumptions": "Character level only; compare with control. Character level 70, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-70-controller",
+        "characterLevel": 70,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "level-90-guardian",
+      "assumptions": "Character level only; compare with control. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-90-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "level-90-restorer",
+      "assumptions": "Character level only; compare with control. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-90-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "level-90-striker",
+      "assumptions": "Character level only; compare with control. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-90-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "level-90-controller",
+      "assumptions": "Character level only; compare with control. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "level-90-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "rank-4-guardian",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-4 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-4-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "rank-4-restorer",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-4 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-4-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "rank-4-striker",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-4 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-4-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "rank-4-controller",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-4 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-4-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "rank-5-guardian",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-5-guardian",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime"
+        ]
+      }
+    },
+    {
+      "id": "rank-5-restorer",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-5-restorer",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph"
+        ]
+      }
+    },
+    {
+      "id": "rank-5-striker",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-5-striker",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat"
+        ]
+      }
+    },
+    {
+      "id": "rank-5-controller",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "rank-5-controller",
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-guardian",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 8 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-8-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-restorer",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 8 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-8-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-striker",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 8 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-8-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-8-controller",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 8 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-8-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-guardian",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-10-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian",
+          "essence.thornback_boar"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-restorer",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-10-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman",
+          "essence.elder_treant"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-striker",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-10-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy",
+          "essence.wind_harpy"
+        ]
+      }
+    },
+    {
+      "id": "essences-10-controller",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "essences-10-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy",
+          "essence.wandering_ghost"
+        ]
+      }
+    },
+    {
+      "id": "late-guardian",
+      "assumptions": "Equipment rank only; compare with essences-10. Character level 90, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "late-guardian",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin",
+          "essence.cinder_beetle",
+          "essence.red_slime",
+          "essence.lumo_sentinel",
+          "essence.bark_golem",
+          "essence.treant_guardian",
+          "essence.thornback_boar"
+        ]
+      }
+    },
+    {
+      "id": "late-restorer",
+      "assumptions": "Equipment rank only; compare with essences-10. Character level 90, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "late-restorer",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp",
+          "essence.treant_sapling",
+          "essence.wood_nymph",
+          "essence.crystal_wisp",
+          "essence.nightshade_blossom",
+          "essence.gnoll_shaman",
+          "essence.elder_treant"
+        ]
+      }
+    },
+    {
+      "id": "late-striker",
+      "assumptions": "Equipment rank only; compare with essences-10. Character level 90, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "late-striker",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat",
+          "essence.rotfly_toad",
+          "essence.poisonous_rat",
+          "essence.venomous_snake",
+          "essence.blood_harpy",
+          "essence.flame_harpy",
+          "essence.wind_harpy"
+        ]
+      }
+    },
+    {
+      "id": "late-controller",
+      "assumptions": "Equipment rank only; compare with essences-10. Character level 90, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions.",
+      "build": {
+        "id": "late-controller",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 5,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat",
+          "essence.hollow_stag",
+          "essence.rainbow_slime",
+          "essence.goblin_shaman",
+          "essence.shadow_harpy",
+          "essence.ice_harpy",
+          "essence.wandering_ghost"
+        ]
+      }
+    }
+  ],
+  "parties": [
+    {
+      "id": "control",
+      "assumptions": "Mid-budget control; compare with none. Character level 50, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "control-guardian",
+        "control-restorer",
+        "control-striker",
+        "control-striker",
+        "control-controller"
+      ]
+    },
+    {
+      "id": "level-70",
+      "assumptions": "Character level only; compare with control. Character level 70, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "level-70-guardian",
+        "level-70-restorer",
+        "level-70-striker",
+        "level-70-striker",
+        "level-70-controller"
+      ]
+    },
+    {
+      "id": "level-90",
+      "assumptions": "Character level only; compare with control. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "level-90-guardian",
+        "level-90-restorer",
+        "level-90-striker",
+        "level-90-striker",
+        "level-90-controller"
+      ]
+    },
+    {
+      "id": "rank-4",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-4 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "rank-4-guardian",
+        "rank-4-restorer",
+        "rank-4-striker",
+        "rank-4-striker",
+        "rank-4-controller"
+      ]
+    },
+    {
+      "id": "rank-5",
+      "assumptions": "Equipment rank only; compare with control. Character level 50, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 6 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "rank-5-guardian",
+        "rank-5-restorer",
+        "rank-5-striker",
+        "rank-5-striker",
+        "rank-5-controller"
+      ]
+    },
+    {
+      "id": "essences-8",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 8 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "essences-8-guardian",
+        "essences-8-restorer",
+        "essences-8-striker",
+        "essences-8-striker",
+        "essences-8-controller"
+      ]
+    },
+    {
+      "id": "essences-10",
+      "assumptions": "Essence loadout only; compare with level-90. Character level 90, seven Standard tier-2 rank-3 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "essences-10-guardian",
+        "essences-10-restorer",
+        "essences-10-striker",
+        "essences-10-striker",
+        "essences-10-controller"
+      ]
+    },
+    {
+      "id": "late",
+      "assumptions": "Equipment rank only; compare with essences-10. Character level 90, seven Standard tier-2 rank-5 items, baseline rolls, no styles; 10 level-1 unascended, unevolved Essences. Ownership, materials and access assumed. No approved floor target, acquisition simulation, scouting or contributions. Fixed Guardian, Restorer, two Strikers and Controller cell repeats to fill RequiredSlots. Essence lists extend the pinned canonical role suggestions.",
+      "cellProfiles": [
+        "late-guardian",
+        "late-restorer",
+        "late-striker",
+        "late-striker",
+        "late-controller"
+      ]
+    }
+  ]
+}

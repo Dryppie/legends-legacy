@@ -1,0 +1,29 @@
+[
+  {
+    "element": "[data-tour=combat-style-list]",
+    "title": "1. Choose your Combat Style",
+    "description": "Choose Bastion, Conduit, or an empty slot. Your selection applies to every battle, and each style keeps its own permanent level and XP.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=combat-style-preview]",
+    "title": "2. Read the core mechanic",
+    "description": "See the effect of your current mastery. Every level adds a bonus, and level 7 grants an automatic Opening Technique. Conduit's Focus selector is here; choose an eligible Essence and keep it equipped in every loadout you use for battle.",
+    "position": "left",
+    "showBack": true
+  },
+  {
+    "element": "[data-tour=combat-style-configuration]",
+    "title": "3. Refine your style",
+    "description": "Choose a refinement at level 3, then different upgrades in the slots earned at levels 5 and 8. At level 9, empower one equipped upgrade with Upgrade Mastery. The base form remains a valid choice.",
+    "position": "left",
+    "showBack": true
+  },
+  {
+    "element": "[data-tour=combat-style-save]",
+    "title": "4. Save your choices",
+    "description": "Save applies the configuration to future battles. Discard restores your saved choices. A committed battle keeps its captured style and mastery until it ends.",
+    "position": "bottom",
+    "showBack": true
+  }
+]

@@ -1,3 +1,9 @@
+{{- if and (gt (int .Values.replicaCount) 1) (not (has "ReadWriteMany" .Values.dataProtection.accessModes)) }}
+{{- fail "Multiple LiveOps replicas require dataProtection.accessModes to include ReadWriteMany and a shared writable claim." }}
+{{- end }}
+{{- if hasKey .Values.env "LiveOps__DataProtection__KeyRingPath" }}
+{{- fail "LiveOps__DataProtection__KeyRingPath is managed by the chart and must not be overridden in env." }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,6 +42,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: LiveOps__DataProtection__KeyRingPath
+              value: /home/app/.aspnet/DataProtection-Keys
             {{- if or .Values.publicBaseUrl .Values.probes.host }}
             - name: LiveOps__PublicBaseUrl
               value: {{ .Values.publicBaseUrl | default (printf "https://%s" .Values.probes.host) | quote }}
@@ -88,7 +96,8 @@ spec:
               mountPath: /tmp
       volumes:
         - name: data-protection
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: {{ include "ll-liveops.dataProtectionClaimName" . }}
         - name: temporary-files
           emptyDir: {}
       {{- with .Values.nodeSelector }}

@@ -37,7 +37,8 @@ public sealed class RegionBossPlaybackBundleBuilderTests
             10,
             RegionBossTerminationReason.TimeExpired,
             [],
-            new CombatResult { Duration = RegionBossRules.EncounterTicks },
+            new CombatResult { Duration = RegionBossRules.EncounterTicks,
+                CombatStyles = [new() { EntityId = "player-1", CombatStyleId = "bastion", HealingConverted = 75 }] },
             checkpoints);
         var builder = new RegionBossPlaybackBundleBuilder(
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
@@ -59,6 +60,8 @@ public sealed class RegionBossPlaybackBundleBuilderTests
         Assert.True(firstFrame.TryGetProperty("entityStates", out _));
         Assert.False(firstFrame.TryGetProperty("friendly", out _));
         Assert.True(root.GetProperty("frames")[frameCount - 1].GetProperty("isKeyframe").GetBoolean());
+        Assert.All(root.GetProperty("frames").EnumerateArray(),
+            frame => Assert.False(frame.TryGetProperty("combatStyles", out _)));
     }
 
     [Fact]

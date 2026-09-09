@@ -14,21 +14,15 @@ using Services.LL.Essences;
 using Services.LL.Items;
 using Services.LL.PowerRatings;
 using Services.LL.Regions;
+using Services.LL.CombatStyles;
+using Domain.Models.CombatStyles;
 
 namespace BalanceHarness;
 
 /// <summary>Explicit file-only composition. No application host or persisted accounts are loaded.</summary>
 public sealed class OfflineContent
 {
-    public static IReadOnlyList<string> Files { get; } = Array.AsReadOnly(new[]
-    {
-        "combat/abilities.json", "combat/statuses.json", "combat/summons.json",
-        "combat/creature-abilities.json", "essences/essences.json",
-        "world/creature-essence-loot-tables.json", "world/creatures.json", "world/regions.json",
-        "progression/region-combat-balance.json", "equipment/equipment-starters.v1.json",
-        "equipment/equipment-named.v1.json", "equipment/equipment-styles.v1.json",
-        "equipment/equipment-sets.v1.json", "items/items.json"
-    });
+    public static IReadOnlyList<string> Files => ContentSnapshotContract.CurrentFiles;
 
     private readonly string _root;
     private readonly IConfiguration _configuration = new ConfigurationBuilder().Build();
@@ -77,6 +71,8 @@ public sealed class OfflineContent
         if (scenario.EssenceLevels is { } levels)
             character = character with { Essences = character.Essences.Select(e => e with
                 { Level = levels.GetValueOrDefault(e.DefinitionId, e.Level) }).ToArray() };
+        if (scenario.CombatStyle is { } style)
+            character = character with { CombatStyle = FreezeCombatStyle(character, style) };
         var areas = HarnessJson.Read<JsonElement>(Path.Combine(_root, "Data", "world", "regions.json"))
             .GetProperty("regions").EnumerateArray().SelectMany(x => x.GetProperty("areas").EnumerateArray());
         var area = areas.SingleOrDefault(x => x.GetProperty("id").GetString() == scenario.AreaId);
@@ -128,6 +124,9 @@ public sealed class OfflineContent
             || input.Character.Equipment.Any(x => input.Character.Level
                 < EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(x.Data.State.Tier)))
             throw new InvalidDataException("Duplicate equipment instances or equipment tier above the character's level.");
+        var expectedStyle = input.Scenario.CombatStyle is { } recipe ? FreezeCombatStyle(input.Character, recipe) : null;
+        if (HarnessJson.Hash(expectedStyle) != HarnessJson.Hash(input.Character.CombatStyle))
+            throw new InvalidDataException("Frozen Combat Style configuration does not match its scenario recipe and content.");
     }
 
     public CombatSetupService CreateSetup(Character character, IReadOnlyList<PlayerEssence> essences) => new(
@@ -135,6 +134,33 @@ public sealed class OfflineContent
         Essences, _creatureEssences, _creatureAbilities, Equipment);
 
     public CombatEngineExecutor CreateExecutor() => new(_abilities, Essences, Equipment, Options.Create(_threat));
+
+    private CombatStyleSnapshot FreezeCombatStyle(FixtureCharacter character, FixtureCombatStyle recipe)
+    {
+        if (recipe.Level is < 0 or > 10)
+            throw new InvalidDataException("Combat Style fixture levels must be 0–10.");
+        var catalog = new JsonCombatStyleCatalogProvider(Path.Combine(_root, "Data", "combat-styles", "combat-styles.v1.json")).Catalog;
+        var definition = catalog.Styles.SingleOrDefault(x => x.Id == recipe.Id)
+            ?? throw new InvalidDataException($"Unknown Combat Style '{recipe.Id}'.");
+        var abilities = _abilities.GetCatalog();
+        var ownedEssences = character.MaterializeEssences();
+        var focusOptions = ownedEssences.Select(essence =>
+        {
+            var essenceDefinition = Essences.GetById(essence.EssenceDefinitionId)!;
+            var active = AbilityCompiler.CompileAbility(CombatEngineExecutor.PrepareEssenceAbility(
+                abilities.AbilitiesById[essenceDefinition.ActiveAbilityId], essence, essenceDefinition, abilities));
+            var eligible = FastCombatEngine.HasEligibleCombatStyleFocusComponent(active);
+            return new CombatStyleFocusOption(essence.Id, essence.EssenceDefinitionId, essence.EssenceDefinitionId,
+                active.Id, active.CooldownTicks, eligible, []);
+        }).ToArray();
+        var focus = focusOptions.SingleOrDefault(x => x.EssenceDefinitionId == recipe.FocusEssenceDefinitionId);
+        var selection = new CombatStyleSelectionRequest(recipe.Id, recipe.RefinementId,
+            recipe.UpgradeIds ?? [], focus?.PlayerEssenceId, MasteredUpgradeId: recipe.MasteredUpgradeId);
+        var owned = new CharacterCombatStyle { CharacterId = character.Id, CombatStyleId = recipe.Id, Level = recipe.Level };
+        var issue = CombatStyleRules.ValidateSelection(owned, definition, selection, focusOptions);
+        if (issue is not null) throw new InvalidDataException(issue);
+        return CombatStyleRules.Snapshot(catalog, definition, owned, selection, focus?.EssenceDefinitionId);
+    }
 
     public static Area ReadArea(IdleBattleInput input) => input.Area.Deserialize<Area>(HarnessJson.Options)
         ?? throw new InvalidDataException("Missing area.");

@@ -1,4 +1,5 @@
 using Domain.Models.Regions.Areas;
+using System.Text.Json.Serialization;
 
 namespace Application.Interfaces.Services.LL.Regions;
 
@@ -32,7 +33,15 @@ public sealed record RegionCombatBalanceCatalog(
     CombatProgressionFoundation Foundation,
     IReadOnlyList<RegionCombatBalanceProfile> Profiles,
     IReadOnlyList<RegionCombatBalanceRegion> Regions,
-    string FallbackProfileId = "unified-global-v1");
+    string FallbackProfileId = "unified-global-v1",
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<RegionCombatAreaOverride>? AreaOverrides = null);
+
+public sealed record RegionCombatAreaOverride(
+    string AreaId,
+    string Reason,
+    double? OffenseMultiplier = null,
+    double? MaximumOffenseStepIncrease = null);
 
 public sealed record CombatProgressionFoundation(
     int AreasPerRegion,

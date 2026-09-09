@@ -13,6 +13,15 @@ fullnameOverride: ""
 
 env: {}
 
+# Keys must survive pod replacement. Use a dedicated claim for each environment.
+dataProtection:
+  existingClaim: ""
+  size: 1Gi
+  # null uses the cluster default; "" selects no storage class.
+  storageClass: null
+  accessModes:
+    - ReadWriteOnce
+
 podAnnotations: {}
 podSecurityContext:
   fsGroup: 1654

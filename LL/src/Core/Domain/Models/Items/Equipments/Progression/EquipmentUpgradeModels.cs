@@ -75,8 +75,6 @@ public sealed record EquipmentUpgradeRequest(
 public sealed record EquipmentUpgradeQuote(
     Guid OperationId,
     EquipmentUpgradeRequest Request,
-    string Token,
-    DateTimeOffset ExpiresAtUtc,
     bool CanExecute,
     string? UnavailableReason,
     EquipmentData? Before,
@@ -113,8 +111,7 @@ public sealed class EquipmentUpgradeReceipt
 
 public sealed record EquipmentUpgradeResult(
     EquipmentUpgradeOutcome? Outcome,
-    string? Error,
-    EquipmentUpgradeQuote? FreshQuote = null);
+    string? Error);
 
 public sealed record EquipmentUpgradeContext(
     Character Character,

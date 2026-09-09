@@ -7,6 +7,7 @@ public sealed class CharacterSnapshot
     public string Name { get; init; } = default!;
     public string ImagePath { get; init; } = string.Empty;
     public int Level { get; init; }
+    public Domain.Models.CombatStyles.CombatStyleSnapshot? CombatStyle { get; init; }
 
     public ICollection<EntityAttributeSnapshot> BaseAttributes { get; init; } = [];
 

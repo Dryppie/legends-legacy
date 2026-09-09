@@ -588,6 +588,7 @@ public sealed class DungeonRunService : IDungeonRunService
         var bag = new DungeonLootBag
         {
             Experience = run.PendingExperience,
+            CombatStyleBaseExperience = run.State.PendingCombatStyleBaseExperience,
             Cinders = run.PendingCinders,
             Soulstones = run.PendingSoulstones
         };
@@ -634,6 +635,7 @@ public sealed class DungeonRunService : IDungeonRunService
             }
         };
         run.PendingExperience = 0;
+        run.State.PendingCombatStyleBaseExperience = 0;
         run.PendingCinders = 0;
         run.PendingSoulstones = 0;
         run.PendingRewards.Clear();

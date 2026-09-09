@@ -6,6 +6,7 @@ using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.CombatStyles;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Combat;
@@ -37,6 +38,8 @@ public class CombatEntity
     public bool HasEquippedEssenceSnapshot { get; set; }
     public bool HasEquipmentSnapshot { get; set; }
     public bool IsPlayerCharacter { get; set; }
+    public CombatStyleSnapshot? CombatStyle { get; set; }
+    public bool HasCombatStyleSnapshot { get; set; }
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
@@ -196,6 +199,10 @@ public class CombatEntity
         EquippedEssences = [.. entity.EquippedEssences];
         NativeAbilityIds = [.. entity.NativeAbilityIds];
         HasEquippedEssenceSnapshot = entity.HasEquippedEssenceSnapshot;
+        HasEquipmentSnapshot = entity.HasEquipmentSnapshot;
+        IsPlayerCharacter = entity.IsPlayerCharacter;
+        CombatStyle = entity.CombatStyle;
+        HasCombatStyleSnapshot = entity.HasCombatStyleSnapshot;
         Level = entity.Level;
         IsSummoned = entity.IsSummoned;
     }
