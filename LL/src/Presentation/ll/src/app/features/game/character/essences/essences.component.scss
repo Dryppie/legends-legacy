@@ -315,7 +315,7 @@
   color: var(--ll-color-danger);
 }
 
-.essence-focus-notification-highlight {
+.creature-focus-notification-highlight {
   border-color: rgba(249, 220, 160, 0.9);
   background: linear-gradient(90deg, rgba(249, 220, 160, 0.14), transparent 65%),
     rgba(0, 0, 0, 0.2);
@@ -686,6 +686,23 @@
 
 .soul-loadout-remove:hover {
   color: var(--ll-color-danger);
+}
+
+.soul-channeled-essence-badge {
+  margin-left: 0.35rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.soul-channel-essence {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 0.25rem;
+}
+
+.soul-channeled-essence-hint {
+  margin-top: 0.5rem;
+  overflow-wrap: anywhere;
 }
 
 .soul-loadout-save-pending {

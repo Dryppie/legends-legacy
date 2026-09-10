@@ -1628,7 +1628,7 @@ public sealed partial class FastCombatEngine
                 var damageType = effect.InheritEventDamageType
                     ? combatEvent?.DamageType ?? effect.DamageType
                     : effect.DamageType;
-                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
+                value = ApplyChanneledEssenceAmount(executionContext?.StyleCast, effect, source, target, value);
                 var styleDamageBonus = TakeCombatStyleDamageBonus(executionContext?.StyleCast, effect, source, target);
                 var healthDamage = ApplyDamage(
                     source,
@@ -1648,7 +1648,7 @@ public sealed partial class FastCombatEngine
                     ApplyLifeSteal(effect, source, target, healthDamage, combatants, statsSource);
                 break;
             case AbilityEffectOperation.Heal:
-                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
+                value = ApplyChanneledEssenceAmount(executionContext?.StyleCast, effect, source, target, value);
                 RestoreHealth(
                     source,
                     target,
@@ -1661,7 +1661,7 @@ public sealed partial class FastCombatEngine
                     countStatsActivation);
                 break;
             case AbilityEffectOperation.GrantBarrier:
-                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
+                value = ApplyChanneledEssenceAmount(executionContext?.StyleCast, effect, source, target, value);
                 var grantedBarrier = CanCrit(effect, AbilityEffectOperation.GrantBarrier)
                                      && RollCriticalStrike(source, effect.CritChanceBonus)
                     ? ApplyCriticalMultiplier(source, value)
@@ -1687,7 +1687,7 @@ public sealed partial class FastCombatEngine
                     countStatsActivation);
                 break;
             case AbilityEffectOperation.RestoreResource:
-                value = ApplyCombatStyleFocusAmount(executionContext?.StyleCast, effect, source, target, value);
+                value = ApplyChanneledEssenceAmount(executionContext?.StyleCast, effect, source, target, value);
                 if (effect.Resource == AbilityResourceType.Cooldown)
                 {
                     target.ReduceAbilityCooldowns(value);

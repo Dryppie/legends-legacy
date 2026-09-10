@@ -77,8 +77,8 @@ public sealed class CombatStyleDungeonRewardTests
             db.CharacterSnapshots.Add(new CharacterSnapshot { Id = id, Name = "Style", CharacterId = Guid.NewGuid(),
                 CombatStyle = new() { CombatStyleId = CombatStyleIds.Conduit, Kind = CombatStyleKind.Conduit,
                     ContentVersion = "frozen-test", Level = 8, CoreRank = 4, RefinementId = CombatStyleIds.DeepReservoir,
-                    UpgradeIds = [CombatStyleIds.FullCircuit], FocusPlayerEssenceId = Guid.NewGuid(),
-                    Tuning = new() { FocusBaseMultiplier = .6, FocusPerCharge = .25, ChargeCap = 4 } } });
+                    UpgradeIds = [CombatStyleIds.FullCircuit], ChanneledPlayerEssenceId = Guid.NewGuid(),
+                    Tuning = new() { ChanneledBaseMultiplier = .6, ChanneledPerCharge = .25, ChargeCap = 4 } } });
             db.CharacterSnapshots.Add(new CharacterSnapshot { Id = Guid.NewGuid(), Name = "Legacy", CharacterId = Guid.NewGuid() });
             await db.SaveChangesAsync();
         }
@@ -87,7 +87,7 @@ public sealed class CombatStyleDungeonRewardTests
         Assert.Equal(8, snapshot.CombatStyle!.Level);
         Assert.Equal("frozen-test", snapshot.CombatStyle.ContentVersion);
         Assert.Equal(4, snapshot.CombatStyle.Tuning.ChargeCap);
-        Assert.Equal(.25, snapshot.CombatStyle.Tuning.FocusPerCharge);
+        Assert.Equal(.25, snapshot.CombatStyle.Tuning.ChanneledPerCharge);
         Assert.Equal(CombatStyleIds.FullCircuit, Assert.Single(snapshot.CombatStyle.UpgradeIds));
         Assert.Null((await read.CharacterSnapshots.SingleAsync(x => x.Id != id)).CombatStyle);
     }

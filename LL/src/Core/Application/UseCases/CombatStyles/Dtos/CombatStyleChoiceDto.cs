@@ -3,5 +3,5 @@ using Domain.Models.Essences;
 
 namespace Application.UseCases.CombatStyles.Dtos;
 
-public sealed record CombatStyleChoiceDto(string Id, string Name, string Description, CombatStyleTuning? Tuning,
+public sealed record CombatStyleChoiceDto(string Id, string Name, string Description, CombatStyleTuningDto? Tuning,
     string MasteryDescription);

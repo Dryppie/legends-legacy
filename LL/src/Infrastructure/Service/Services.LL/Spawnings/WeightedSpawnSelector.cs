@@ -5,7 +5,7 @@ namespace Services.LL.Spawnings;
 
 public static class WeightedSpawnSelector
 {
-    public static IReadOnlyList<AreaCreature> ApplyEssenceFocus(
+    public static IReadOnlyList<AreaCreature> ApplyCreatureFocus(
         IReadOnlyList<AreaCreature> creatures, IReadOnlySet<Guid> focusedCreatureIds)
     {
         var total = creatures.Sum(creature => (double)creature.WeightedSpawnRate);
@@ -13,7 +13,7 @@ public static class WeightedSpawnSelector
             .Sum(creature => (double)creature.WeightedSpawnRate);
         if (total <= 0 || focused <= 0 || focused >= total) return creatures;
 
-        var boosted = Math.Min(total, focused * EssenceFocusRules.SpawnChanceMultiplier);
+        var boosted = Math.Min(total, focused * CreatureFocusRules.SpawnChanceMultiplier);
         var otherMultiplier = (total - boosted) / (total - focused);
         return creatures.Select(creature => new AreaCreature
         {

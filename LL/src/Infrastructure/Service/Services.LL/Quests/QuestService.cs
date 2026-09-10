@@ -663,7 +663,8 @@ public sealed class QuestService(
                         expectedEssenceDefinitionId,
                         cancellationToken) ? 1 : 0,
 
-            "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,
+            // Accept both authored names so active quests and historical triggers keep progressing.
+            "CreatureFocusSet" or "EssenceFocusSet" when trigger.Type is "CreatureFocusSet" or "EssenceFocusSet" => 1,
 
             "FocusedCreatureEssenceReceived" when
                 trigger.Type == "FocusedCreatureEssenceReceived" => 1,

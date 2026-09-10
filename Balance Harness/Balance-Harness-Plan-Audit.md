@@ -44,13 +44,13 @@ In this heavily modified checkout, an assembly hash identifies what ran but does
 
 ### 3. P2 — Combat Styles bypasses the normal resolution path without matching parity coverage
 
-**Evidence:** [OfflineContent.cs:140](../LL/tools/BalanceHarness/OfflineContent.cs#L140) constructs `CombatSetupService` without `ICombatStyleService`. `FreezeCombatStyle` separately constructs Focus options and style snapshots. [IdleBattleRunner.cs:31](../LL/tools/BalanceHarness/IdleBattleRunner.cs#L31) injects that snapshot after preparation and marks it captured.
+**Evidence:** [OfflineContent.cs:140](../LL/tools/BalanceHarness/OfflineContent.cs#L140) constructs `CombatSetupService` without `ICombatStyleService`. `FreezeCombatStyle` separately constructs Channeled Essence options and style snapshots. [IdleBattleRunner.cs:31](../LL/tools/BalanceHarness/IdleBattleRunner.cs#L31) injects that snapshot after preparation and marks it captured.
 
 The harness shares the compiler and `CombatStyleRules`, which is good. Nevertheless, [CombatStyleHarnessTests.cs:10](../LL/tests/EssenceSystem.Tests/CombatStyleHarnessTests.cs#L10) compares two runs through this same harness path; the other test covers validation/tampering. These tests do not compare against independently prepared normal idle combat using `CombatStyleService.ResolveAsync`. The broader `BalanceHarnessTests` parity matrix covers unstyled controls and equipment Fury, not the new Combat Styles selection path. Equipment Fury is a separate feature.
 
 No gameplay divergence was demonstrated here. The finding is a missing prerequisite for trusting the new fixture as gameplay evidence: the plan requires parity across setup as well as execution. In addition, the workflow's `FullyQualifiedName~BalanceHarness` filter does not include the class named `CombatStyleHarnessTests`.
 
-**Recommended correction:** extend independent normal-idle parity to Bastion and Conduit, Focus identity/order, representative refinements/upgrades, and progressed active abilities. Include that class in the harness CI filter. Keep style fixture results advisory until this is verified.
+**Recommended correction:** extend independent normal-idle parity to Bastion and Conduit, Channeled Essence identity/order, representative refinements/upgrades, and progressed active abilities. Include that class in the harness CI filter. Keep style fixture results advisory until this is verified.
 
 ### 4. P2 — Earlier multi-run investigations do not freeze the whole experiment identity
 

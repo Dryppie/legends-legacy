@@ -32,8 +32,13 @@ public sealed record IdleScenario(
 public sealed record FixtureEquipment(EquipmentSlotType Slot, EquipmentData Data);
 public sealed record FixtureEssence(string DefinitionId, int Level, int AscensionTier, bool IsEvolved);
 public sealed record FixtureCombatStyle(string Id, int Level = 0, string? RefinementId = null,
+    // Retired recipe field keeps its historical serialized name for frozen input hashes.
     IReadOnlyList<string>? UpgradeIds = null, string? FocusEssenceDefinitionId = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MasteredUpgradeId = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MasteredUpgradeId = null)
+{
+    [JsonIgnore]
+    public string? ChanneledEssenceDefinitionId { get => FocusEssenceDefinitionId; init => FocusEssenceDefinitionId = value; }
+}
 
 public sealed record FixtureCharacter(
     Guid Id, string Name, int Level, IReadOnlyDictionary<AttributeType, float> BaseAttributes,

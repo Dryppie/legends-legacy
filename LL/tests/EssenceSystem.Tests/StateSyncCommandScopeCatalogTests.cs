@@ -319,7 +319,7 @@ public sealed class StateSyncCommandScopeCatalogTests
     public void Focus_change_refreshes_inventory_after_settling_elapsed_combat()
     {
         var profile = StateSyncCommandScopeCatalog.GetProfile(
-            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
+            typeof(global::Application.UseCases.Essences.Commands.SetCreatureFocus.SetCreatureFocusCommand));
         Assert.Equal([StateSyncScopes.Essences, StateSyncScopes.Inventory], profile.CharacterScopes);
         Assert.Equal([StateSyncScopes.Essences], profile.CharacterResponseSemantics.Keys);
         Assert.True(profile.RefreshCharacterSummaryWhenChanged);

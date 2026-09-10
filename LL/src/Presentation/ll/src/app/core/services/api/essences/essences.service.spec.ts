@@ -3,6 +3,23 @@ import { ApiService } from '../../api/api.service';
 import { EssencesService } from './essences.service';
 
 describe('EssencesService', () => {
+  it('sets and clears Creature Focus through the renamed route without extra refreshes', () => {
+    const api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'postVersioned',
+    ]);
+    api.postVersioned.and.returnValue(of({ data: {}, domainVersions: {} }));
+    const service = new EssencesService(api);
+    for (const creatureId of ['creature-1', null]) {
+      service.setCreatureFocus(creatureId).subscribe();
+      expect(api.postVersioned.calls.mostRecent().args).toEqual([
+        'essence/creature-focus',
+        { creatureId },
+        { stateSyncScopesHandledByResponse: ['essences'] },
+      ]);
+    }
+    expect(api.postVersioned).toHaveBeenCalledTimes(2);
+  });
+
   it('marks Dust response scopes as handled without follow-up refreshes', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', [
       'postVersioned',

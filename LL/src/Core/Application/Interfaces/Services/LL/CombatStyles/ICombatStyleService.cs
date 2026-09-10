@@ -7,6 +7,12 @@ public interface ICombatStyleService
 {
     Task<CombatStyleOverview> GetOverviewAsync(Guid characterId, CancellationToken ct);
     Task<CombatStyleOverview> PreviewAsync(Guid characterId, CombatStyleSelectionRequest selection, CancellationToken ct);
+    /// <summary>
+    /// Captures the current global style for a new battle. Supplied Essences must contain only occupied
+    /// slots in ascending visible SlotIndex order; Conduit channels the first entry. When omitted,
+    /// the activity's Essence loadout is resolved, using the normal fallback for unassigned activities.
+    /// Existing committed snapshots retain their captured style and must not be resolved again.
+    /// </summary>
     Task<CombatStyleSnapshot?> ResolveAsync(Guid characterId, EssenceCombatActivity activity, CancellationToken ct,
         IReadOnlyList<PlayerEssence>? equippedEssences = null);
     Task<CombatStyleOperationResult> SelectAsync(Guid characterId, CombatStyleSelectionRequest selection, CancellationToken ct);

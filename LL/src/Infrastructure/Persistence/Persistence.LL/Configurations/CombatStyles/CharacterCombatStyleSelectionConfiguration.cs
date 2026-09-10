@@ -12,6 +12,8 @@ public sealed class CharacterCombatStyleSelectionConfiguration : IEntityTypeConf
         builder.Property(x => x.CombatStyleId).HasMaxLength(64);
         builder.Property(x => x.RefinementId).HasMaxLength(64);
         builder.Property(x => x.MasteredUpgradeId).HasMaxLength(64);
+        // The retired manual choice keeps its existing database column; current saves clear it.
+        builder.Property(x => x.ChanneledPlayerEssenceId).HasColumnName("FocusPlayerEssenceId");
         builder.Property(x => x.UpgradeIds).HasColumnType("text[]");
         builder.HasOne(x => x.Character).WithMany().HasForeignKey(x => x.CharacterId).OnDelete(DeleteBehavior.Cascade);
     }

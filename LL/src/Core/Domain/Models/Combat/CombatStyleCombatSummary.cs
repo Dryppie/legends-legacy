@@ -27,8 +27,18 @@ public sealed record CombatStyleCombatSummary
     public int ChargeSpent { get; init; }
     public int RelayChargeReturned { get; init; }
     public IReadOnlyList<Guid> Contributors { get; init; } = [];
+    // Legacy diagnostic JSON names keep historical harness report hashes stable.
     public IReadOnlyDictionary<int, int> FocusCastsByCharge { get; init; } = new Dictionary<int, int>();
     public double FocusMultiplierTotal { get; init; }
     public double FocusOutputAdded { get; init; }
     public double FocusOutputLost { get; init; }
+
+    [JsonIgnore]
+    public IReadOnlyDictionary<int, int> ChanneledCastsByCharge { get => FocusCastsByCharge; init => FocusCastsByCharge = value; }
+    [JsonIgnore]
+    public double ChanneledMultiplierTotal { get => FocusMultiplierTotal; init => FocusMultiplierTotal = value; }
+    [JsonIgnore]
+    public double ChanneledOutputAdded { get => FocusOutputAdded; init => FocusOutputAdded = value; }
+    [JsonIgnore]
+    public double ChanneledOutputLost { get => FocusOutputLost; init => FocusOutputLost = value; }
 }

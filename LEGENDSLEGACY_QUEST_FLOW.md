@@ -103,7 +103,7 @@ These branches run alongside the campaign. They do not need to be completed befo
 | An Adaptable Archive | A Second Soul; Lv5 | Essences: attune Goblin, then Lumo Wisp, then Lumo Sentinel. | None |
 | The Archive Deepens | A Second Soul | Essences: ascend an Essence. | None |
 | Resonant Pair | A Second Soul; Lv20 | Essences: equip **three** Essences sharing an ability tag other than Physical or Melee. | None |
-| Focused Pursuit | Into the Ruins | Creature Archive / combat: receive an Essence from the creature selected as your Essence Focus. | None |
+| Focused Pursuit | Into the Ruins | Creature Archive / combat: receive an Essence from the creature selected as your Creature Focus. | None |
 
 Despite its title, **Resonant Pair currently requires three Essences**, not two. **An Adaptable Archive** requires three named attunements in sequence, not a three-way reward choice.
 

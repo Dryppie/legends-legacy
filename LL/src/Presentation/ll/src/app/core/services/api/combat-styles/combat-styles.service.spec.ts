@@ -20,7 +20,6 @@ describe('Combat Style transport', () => {
       refinementId: null,
       upgradeIds: ['full-circuit'],
       masteredUpgradeId: 'full-circuit',
-      focusPlayerEssenceId: 'focus',
     };
     new CombatStylesService(api).select(request).subscribe();
     expect(api.putVersioned).toHaveBeenCalledOnceWith(
@@ -38,7 +37,6 @@ describe('Combat Style transport', () => {
       refinementId: null,
       upgradeIds: ['prepared-wall'],
       masteredUpgradeId: 'prepared-wall',
-      focusPlayerEssenceId: null,
     };
     new CombatStylesService(api).preview(request).subscribe();
     expect(api.post).toHaveBeenCalledOnceWith(

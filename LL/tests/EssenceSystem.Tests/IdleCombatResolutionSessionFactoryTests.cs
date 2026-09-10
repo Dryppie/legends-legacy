@@ -42,10 +42,10 @@ public sealed class IdleCombatResolutionSessionFactoryTests
         var next = session.CapturedCombatStyles[character.Id];
         Assert.Equal(nextLevel, next.Level);
         Assert.Equal(nextLevel * .01, next.BarrierMasteryBonus, 6);
-        Assert.Equal(nextLevel * .01, next.FocusMasteryBonus, 6);
+        Assert.Equal(nextLevel * .01, next.ChanneledMasteryBonus, 6);
         Assert.Equal(previousLevel, captured.Level);
         Assert.Equal(previousLevel * .01, captured.BarrierMasteryBonus, 6);
-        Assert.Equal(previousLevel * .01, captured.FocusMasteryBonus, 6);
+        Assert.Equal(previousLevel * .01, captured.ChanneledMasteryBonus, 6);
         Assert.Same(captured.Tuning, next.Tuning);
     }
 

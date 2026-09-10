@@ -19,6 +19,7 @@ import { EssenceStateService } from './essence-state.service';
 import { EssencesService } from './essences.service';
 import {
   EssenceCodexEntryDto,
+  CreatureArchiveEntryDto,
   EssenceLoadoutDto,
   EssenceMutationResponseDto,
   PlayerEssenceDto,
@@ -53,7 +54,7 @@ describe('EssenceStateService loadout drafts', () => {
         limit: 3,
         unlockedSlots: 1,
       },
-      creatureArchive: { creatures: [], canChangeEssenceFocus: true },
+      creatureArchive: { creatures: [], canChangeCreatureFocus: true },
       codex: { entries: [] },
       inventoryItems: [],
       equipmentSlots: [],
@@ -105,6 +106,7 @@ describe('EssenceStateService loadout drafts', () => {
       'updateLoadout',
       'spendDust',
       'dismantle',
+      'setCreatureFocus',
     ]);
     essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
     essences.getLoadouts.and.returnValue(
@@ -122,7 +124,7 @@ describe('EssenceStateService loadout drafts', () => {
       }),
     );
     essences.getCreatureArchive.and.returnValue(
-      of({ creatures: [], canChangeEssenceFocus: true }),
+      of({ creatures: [], canChangeCreatureFocus: true }),
     );
     essences.getCodex.and.returnValue(of({ entries: [] }));
 
@@ -172,6 +174,45 @@ describe('EssenceStateService loadout drafts', () => {
         ['EssenceExperienceGainBps', 0],
         ['EssencePityProgressionGainBps', 0],
       ]);
+  });
+
+  it('uses renamed Creature Focus timestamps for cooldowns, readiness and mutation responses', () => {
+    const creature = {
+      creatureId: 'creature-1', isCreatureFocus: false,
+      essences: [{ essenceDefinitionId: 'essence-1' }],
+    } as CreatureArchiveEntryDto;
+    essences.getCreatureArchive.and.returnValue(of({
+      creatures: [creature],
+      canChangeCreatureFocus: false,
+      creatureFocusAvailableAtUtc: new Date(Date.now() + 60_000).toISOString(),
+      creatureFocusSetAtUtc: new Date(Date.now() - 7 * 60 * 60_000).toISOString(),
+    }));
+    service.refresh();
+    expect(service.canChangeCreatureFocus()).toBeFalse();
+    expect(service.creatureFocusReady()).toBeFalse();
+    service.setCreatureFocus('creature-1');
+    expect(essences.setCreatureFocus).not.toHaveBeenCalled();
+    expect(service.error()).toContain('Creature Focus');
+    essences.getCreatureArchive.and.returnValue(of({
+      creatures: [creature], canChangeCreatureFocus: false,
+      creatureFocusAvailableAtUtc: new Date(Date.now() - 60_000).toISOString(),
+    }));
+    service.refresh();
+    expect(service.canChangeCreatureFocus()).toBeTrue();
+    expect(service.creatureFocusReady()).toBeTrue();
+    const updatedCreature = { ...creature, isCreatureFocus: true };
+    essences.setCreatureFocus.and.returnValue(of(versionedMutation({
+      creatureArchive: {
+        creatures: [updatedCreature], canChangeCreatureFocus: false,
+        creatureFocusAvailableAtUtc: new Date(Date.now() + 8 * 60 * 60_000).toISOString(),
+        creatureFocusSetAtUtc: new Date(Date.now()).toISOString(),
+      },
+    })));
+    service.setCreatureFocus('creature-1');
+    expect(essences.setCreatureFocus).toHaveBeenCalledOnceWith('creature-1');
+    expect(service.focusedCreature()?.creatureId).toBe('creature-1');
+    expect(service.canChangeCreatureFocus()).toBeFalse();
+    expect(service.creatureFocusReady()).toBeFalse();
   });
 
   it('totals only active Codex bonuses and updates after collection Ascensions', () => {
@@ -434,6 +475,124 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.canSaveDraft()).toBeFalse();
   });
 
+  function prepareConduitLoadouts() {
+    const archive = {
+      essences: [
+        { id: 'passive', isChanneledEssenceEligible: false },
+        { id: 'channeled-essence', isChanneledEssenceEligible: true },
+        { id: 'other', isChanneledEssenceEligible: true },
+        { id: 'unequipped', isChanneledEssenceEligible: true },
+      ] as PlayerEssenceDto[],
+      essenceDust: 0,
+    };
+    const loadouts = {
+      unlockedSlots: 5,
+      limit: 3,
+      loadouts: [
+        {
+          id: 'loadout-1', name: 'Default', autoUseActivities: [],
+          slots: [
+            { slotIndex: 1, playerEssenceId: 'passive' },
+            { slotIndex: 3, playerEssenceId: 'channeled-essence' },
+            { slotIndex: 4, playerEssenceId: 'other' },
+          ],
+        },
+        {
+          id: 'loadout-2', name: 'Dungeon', autoUseActivities: ['Dungeon'],
+          slots: [{ slotIndex: 2, playerEssenceId: 'other' }],
+        },
+      ] as EssenceLoadoutDto[],
+    };
+    essences.getArchive.and.returnValue(of(archive));
+    essences.getLoadouts.and.returnValue(of(loadouts));
+    service.refresh();
+    return { archive, loadouts };
+  }
+
+  it('finds the first occupied slot without skipping an ineligible Essence and follows the selected loadout', () => {
+    const { loadouts } = prepareConduitLoadouts();
+    expect(service.firstOccupiedDraftSlot()).toBe(1);
+    expect(service.draftSlots()[service.firstOccupiedDraftSlot()]).toBe('passive');
+    service.selectLoadout(loadouts.loadouts[1]);
+    expect(service.firstOccupiedDraftSlot()).toBe(2);
+    expect(service.draftSlots()[service.firstOccupiedDraftSlot()]).toBe('other');
+    service.newLoadout();
+    expect(service.firstOccupiedDraftSlot()).toBe(-1);
+    expect(service.draftSlots()).toEqual([null, null, null, null, null]);
+    expect(essences.updateLoadout).not.toHaveBeenCalled();
+  });
+
+  it('makes an equipped Essence the Channeled Essence with one atomic swap and uses the returned state', () => {
+    const { archive, loadouts } = prepareConduitLoadouts();
+    const response = new Subject<VersionedMutationResult<EssenceMutationResponseDto>>();
+    essences.updateLoadout.and.returnValue(response);
+    service.channelEssence('channeled-essence');
+    expect(service.draftSlots()).toEqual([null, 'channeled-essence', null, 'passive', 'other']);
+    expect(service.savingLoadout()).toBeTrue();
+    service.channelEssence('other');
+    const savedLoadout = {
+      ...loadouts.loadouts[0],
+      slots: [
+        { slotIndex: 1, playerEssenceId: 'channeled-essence' },
+        { slotIndex: 3, playerEssenceId: 'passive' },
+        { slotIndex: 4, playerEssenceId: 'other' },
+      ],
+    };
+    expect(essences.updateLoadout).toHaveBeenCalledOnceWith('loadout-1', {
+      id: 'loadout-1', name: 'Default', slots: savedLoadout.slots,
+    });
+    response.next(versionedMutation({
+      savedLoadout,
+      archive: { ...archive, essences: archive.essences.map((essence) =>
+        essence.id === 'other' ? { ...essence, isChanneledEssenceEligible: false } : essence,
+      ) },
+      loadouts: { ...loadouts, loadouts: [savedLoadout, loadouts.loadouts[1]] },
+    }));
+    expect(service.savingLoadout()).toBeFalse();
+    expect(service.hasDraftChanges()).toBeFalse();
+    expect(service.draftSlots()).toEqual([null, 'channeled-essence', null, 'passive', 'other']);
+    expect(service.canChannelEssence('other')).toBeFalse();
+    expect(essences.getArchive).toHaveBeenCalledTimes(2);
+    expect(essences.saveLoadout).not.toHaveBeenCalled();
+    service.selectLoadout(loadouts.loadouts[1]);
+    expect(service.draftSlots()).toEqual([null, null, 'other', null, null]);
+    service.selectLoadout(service.loadouts()!.loadouts[0]);
+    expect(service.draftSlots()[1]).toBe('channeled-essence');
+  });
+
+  it('restores every slot after a failed Channeled Essence swap while preserving an unsaved loadout name', () => {
+    prepareConduitLoadouts();
+    const response = new Subject<VersionedMutationResult<EssenceMutationResponseDto>>();
+    essences.updateLoadout.and.returnValue(response);
+    service.setDraftLoadoutName('New name');
+    service.channelEssence('channeled-essence');
+    expect(service.draftSlots()[1]).toBe('channeled-essence');
+    response.error(new Error('Loadout could not be saved.'));
+    expect(service.draftSlots()).toEqual([null, 'passive', null, 'channeled-essence', 'other']);
+    expect(service.firstOccupiedDraftSlot()).toBe(1);
+    expect(service.draftLoadoutName()).toBe('New name');
+    expect(service.canSaveDraft()).toBeTrue();
+    expect(service.savingLoadout()).toBeFalse();
+    expect(service.error()).toBe('Loadout could not be saved.');
+    expect(essences.updateLoadout).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not move an ineligible, absent, current or unequipped Channeled Essence', () => {
+    prepareConduitLoadouts();
+    for (const id of ['passive', 'missing', 'unequipped']) {
+      expect(service.canChannelEssence(id)).toBeFalse();
+      service.channelEssence(id);
+    }
+    service.setDraftSlot(1, 'channeled-essence');
+    expect(service.canChannelEssence('channeled-essence')).toBeFalse();
+    service.channelEssence('channeled-essence');
+    service.newLoadout();
+    service.channelEssence('other');
+    expect(service.draftSlots()).toEqual([null, null, null, null, null]);
+    expect(essences.updateLoadout).not.toHaveBeenCalled();
+    expect(essences.saveLoadout).not.toHaveBeenCalled();
+  });
+
   it('uses the returned Archive after re-saving the default loadout', () => {
     essences.updateLoadout.and.returnValue(
       of(
@@ -617,7 +776,7 @@ describe('EssenceStateService loadout drafts', () => {
           },
           creatureArchive: {
             creatures: [],
-            canChangeEssenceFocus: false,
+            canChangeCreatureFocus: false,
           },
         }),
       ),
@@ -628,7 +787,7 @@ describe('EssenceStateService loadout drafts', () => {
     expect(service.archive()?.essences[0].level).toBe(2);
     expect(service.archive()?.essenceDust).toBe(9);
     expect(service.loadouts()?.unlockedSlots).toBe(2);
-    expect(service.creatureArchive()?.canChangeEssenceFocus).toBeFalse();
+    expect(service.creatureArchive()?.canChangeCreatureFocus).toBeFalse();
     expect(
       TestBed.inject(InventoryStateService).applyVersionedInventory,
     ).toHaveBeenCalled();

@@ -142,24 +142,19 @@ public sealed class OfflineContent
         var catalog = new JsonCombatStyleCatalogProvider(Path.Combine(_root, "Data", "combat-styles", "combat-styles.v1.json")).Catalog;
         var definition = catalog.Styles.SingleOrDefault(x => x.Id == recipe.Id)
             ?? throw new InvalidDataException($"Unknown Combat Style '{recipe.Id}'.");
-        var abilities = _abilities.GetCatalog();
         var ownedEssences = character.MaterializeEssences();
-        var focusOptions = ownedEssences.Select(essence =>
-        {
-            var essenceDefinition = Essences.GetById(essence.EssenceDefinitionId)!;
-            var active = AbilityCompiler.CompileAbility(CombatEngineExecutor.PrepareEssenceAbility(
-                abilities.AbilitiesById[essenceDefinition.ActiveAbilityId], essence, essenceDefinition, abilities));
-            var eligible = FastCombatEngine.HasEligibleCombatStyleFocusComponent(active);
-            return new CombatStyleFocusOption(essence.Id, essence.EssenceDefinitionId, essence.EssenceDefinitionId,
-                active.Id, active.CooldownTicks, eligible, []);
-        }).ToArray();
-        var focus = focusOptions.SingleOrDefault(x => x.EssenceDefinitionId == recipe.FocusEssenceDefinitionId);
+        var channeledEssence = definition.Kind == CombatStyleKind.Conduit && ownedEssences.FirstOrDefault() is { } firstEssence
+            ? new ChanneledEssenceResolver(Essences, _abilities).Resolve(firstEssence) : null;
+        // Old recipes may assert a Channeled Essence identity, but cannot override visible slot order.
+        if (recipe.ChanneledEssenceDefinitionId is { } legacyChanneledEssence && legacyChanneledEssence != channeledEssence?.EssenceDefinitionId)
+            throw new InvalidDataException("Place the recipe's Channeled Essence first in essenceIds; Channeled Essence is derived from slot order.");
         var selection = new CombatStyleSelectionRequest(recipe.Id, recipe.RefinementId,
-            recipe.UpgradeIds ?? [], focus?.PlayerEssenceId, MasteredUpgradeId: recipe.MasteredUpgradeId);
+            recipe.UpgradeIds ?? [], null, MasteredUpgradeId: recipe.MasteredUpgradeId);
         var owned = new CharacterCombatStyle { CharacterId = character.Id, CombatStyleId = recipe.Id, Level = recipe.Level };
-        var issue = CombatStyleRules.ValidateSelection(owned, definition, selection, focusOptions);
+        var issue = CombatStyleRules.ValidateSelection(owned, definition, selection)
+            ?? (definition.Kind == CombatStyleKind.Conduit ? CombatStyleRules.ValidateChanneledEssence(channeledEssence) : null);
         if (issue is not null) throw new InvalidDataException(issue);
-        return CombatStyleRules.Snapshot(catalog, definition, owned, selection, focus?.EssenceDefinitionId);
+        return CombatStyleRules.Snapshot(catalog, definition, owned, selection, channeledEssence);
     }
 
     public static Area ReadArea(IdleBattleInput input) => input.Area.Deserialize<Area>(HarnessJson.Options)

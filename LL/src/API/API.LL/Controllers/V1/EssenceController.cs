@@ -5,7 +5,7 @@ using Application.UseCases.Essences.Commands.DismantleUnboundEssence;
 using Application.UseCases.Essences.Commands.EvolveEssence;
 using Application.UseCases.Essences.Commands.FavoriteEssence;
 using Application.UseCases.Essences.Commands.SaveEssenceLoadout;
-using Application.UseCases.Essences.Commands.SetEssenceFocus;
+using Application.UseCases.Essences.Commands.SetCreatureFocus;
 using Application.UseCases.Essences.Commands.SetEssenceLoadoutAutoUseActivities;
 using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.Essences.Dtos;
@@ -32,9 +32,10 @@ public class EssenceController : BaseController
     public async Task<ActionResult<EssenceCodexDto>> GetCodex() =>
         await Mediator.Send(new GetEssenceCodexQuery(CurrentCharacterGuid));
 
-    [HttpPost("creatures/focus")]
-    public async Task<ActionResult<EssenceStateResponseDto>> SetEssenceFocus([FromBody] SetEssenceFocusRequestDto request) =>
-        await Mediator.Send(new SetEssenceFocusCommand(CurrentCharacterGuid, request.CreatureId));
+    [HttpPost("creature-focus")]
+    [HttpPost("creatures/focus")] // Legacy route for clients opened before the Creature Focus rename.
+    public async Task<ActionResult<EssenceStateResponseDto>> SetCreatureFocus([FromBody] SetCreatureFocusRequestDto request) =>
+        await Mediator.Send(new SetCreatureFocusCommand(CurrentCharacterGuid, request.CreatureId));
 
     [HttpGet("loadouts")]
     public async Task<ActionResult<EssenceLoadoutsDto>> GetLoadouts() =>

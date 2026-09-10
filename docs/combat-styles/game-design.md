@@ -43,7 +43,7 @@ A character equips **one global Combat Style** for all battles, initially in its
 
 Every further level grants a modest automatic **mastery level bonus** and up to **two upgrade slots**. Level 7 grants an automatic **Opening Technique**, and level 9 unlocks **Upgrade Mastery** for one equipped upgrade. These benefits do not grant another refinement, active ability, or upgrade slot.
 
-Some Combat Styles need one additional choice. With Conduit, choose one equipped Essence as your Focus: the ability your other Essences will strengthen. This does not add an Essence slot.
+With Conduit, the first Essence in the loadout used for battle is your Channeled Essence: the ability your other Essences will strengthen. Empty slots are skipped. Arrange your Essences to choose the Channeled Essence; this does not add a separate selection or an Essence slot.
 
 Players can also leave the Combat Style slot empty while learning or comparing builds. An empty slot applies no Combat Style benefit or penalty.
 
@@ -55,7 +55,7 @@ Selecting a style remains optional. The page explains its mechanic, numerical ef
 
 Progression combines individual Combat Style mastery with discovering combinations, obtaining better-suited equipment and Essences, and learning which configuration suits an encounter. Future Combat Styles would expand available strategies rather than replace early Combat Styles with stronger versions.
 
-Conduit requires an equipped Focus Essence with direct damage, healing or Barrier. In the base form, three different other Essences can each add Charge before the Focus casts. Reaching the Charge cap without starting Charge therefore takes four equipped Essences in total, including the Focus. The style remains available with fewer Essences.
+Conduit requires an equipped Channeled Essence with direct damage, healing or Barrier. In the base form, three different other Essences can each add Charge before the Channeled Essence casts. Reaching the Charge cap without starting Charge therefore takes four equipped Essences in total, including the Channeled Essence. The style remains available with fewer Essences.
 
 ### Individual Combat Style levels and experience
 
@@ -75,7 +75,7 @@ Both implemented Combat Styles use the same XP requirements while keeping separa
 | Mastery level | Automatic level bonus | Additional unlock | Upgrade slots |
 | ---: | --- | --- | ---: |
 | 0 | Base mechanic; no level bonus | Full core and base form | 0 |
-| 1 | +1% of Bastion's base converted Barrier / +1% flat increase to Conduit's charged Focus | — | 0 |
+| 1 | +1% of Bastion's base converted Barrier / +1% flat increase to Conduit's charged Channeled Essence | — | 0 |
 | 2 | +2% / +2% flat increase | — | 0 |
 | 3 | +3% / +3% flat increase | Refinement selection | 0 |
 | 4 | +4% / +4% flat increase | — | 0 |
@@ -116,11 +116,11 @@ Mastery augments that upgrade's ordinary effect and occupies no additional slot.
 | Bastion | Measured Recovery | Any overhealing is converted into Barrier. |
 | Conduit | Full Circuit | This bonus now works whenever you spend 2 or more Charge. |
 | Conduit | Partial Flow | This bonus now works with either 1 or 2 Charge. |
-| Conduit | Emergency Channel | You gain this bonus at any Health, as long as your Focus spends at least 1 Charge. |
+| Conduit | Emergency Channel | You gain this bonus at any Health, as long as your Channeled Essence spends at least 1 Charge. |
 
 Prepared Wall grants its bonus once when either or both conditions are met. Hold the Breach multiplies the allocated Health portion after ordinary Measured Recovery, when both upgrades are equipped, and also applies to Rebuild's full Health heal. Measured Recovery converts 100% of the allocated Health healing above missing Health into additional Barrier after Health restoration; ordinary Barrier caps and Shelter distribution apply. Conduit's mastered upgrades keep the same bonuses and change when those bonuses apply.
 
-Mastery does not automatically select an upgrade or alter the Focus Essence. Numerical values are initial tuning and require balance playtesting. Existing committed battles keep their captured opening and mastery rules; newly earned milestones apply at the next permitted capture boundary.
+Mastery does not automatically select an upgrade or alter the Channeled Essence. Numerical values are initial tuning and require balance playtesting. Existing committed battles keep their captured opening and mastery rules; newly earned milestones apply at the next permitted capture boundary.
 
 Refinements remain the major behavioral choice. Upgrades cannot purchase another refinement, remove a Combat Style's core limitation, or increase the number of equipped Essences. There are no consumable Combat Style items, progression-point purchases, or additional upgrade currency in this proposal.
 
@@ -128,12 +128,12 @@ Unless explicitly labeled with a mastery level or upgrade, the combat formulas, 
 
 ### Changing and saving a Combat Style
 
-- Switching Combat Styles, available refinements, upgrades, or a Focus Essence is free between encounters and has no cooldown. The selected Combat Style always uses its own earned level and milestones.
+- Switching Combat Styles, available refinements, upgrades, or the Essence arrangement that determines Channeled Essence is free between encounters and has no cooldown. The selected Combat Style always uses its own earned level and milestones.
 - A Combat Style and its effective mastery level, refinement, and upgrades are fixed for a committed activity: a single battle, an entire dungeon run, or a PvP match. The player reviews the choice before entering.
 - During ordinary idle combat, a changed configuration takes effect at the next encounter. Previously completed combat keeps the configuration under which it occurred.
 - Saving updates one global Combat Style configuration for every battle type. Combat Styles do not provide combined saved builds or activity overrides. Existing equipment and Essence loadouts remain separate systems.
-- Each Combat Style remembers its last selected refinement, upgrades, mastered upgrade, and Focus where applicable. Switching back restores those choices when they are still valid.
-- If the chosen Focus Essence is no longer equipped or no longer has direct damage, healing or Barrier, the player chooses a replacement before starting combat with Conduit. The same global Focus must be present in the Essence loadout used for the battle. The game identifies the missing choice; it does not silently select another Essence.
+- Each Combat Style remembers its last selected refinement, upgrades, and mastered upgrade. Switching back restores those choices when they are still valid. Conduit's Channeled Essence always comes from the first occupied slot of the loadout used for that battle.
+- If the first Essence has no direct damage, healing or Barrier, place a suitable Essence first before starting combat with Conduit. An empty loadout also needs an Essence. The game explains the requirement and never silently skips an unsuitable first Essence. Each activity can use its own Essence loadout and Channeled Essence while the Combat Style stays global.
 - Combat Style resources and encounter-generated protection follow encounter boundaries. Changing a Combat Style never creates healing, resets ability cooldowns, or transfers stored resources into another encounter.
 
 Levels and milestones are earned when their XP is awarded. Newly earned mastery level bonuses and Opening Techniques take effect at the next boundary where the build may change; earning a level during a dungeon run does not alter that run's combat bonuses. Newly unlocked refinements, upgrade slots, and Upgrade Mastery wait for the player's choice. Idle and offline combat continue with the existing selections and never pause or select an upgrade or mastery automatically.
@@ -294,131 +294,131 @@ Affected ability previews show their Health and Barrier outputs. Selecting Repri
 
 ### Fantasy and identity
 
-Choose one equipped Essence as your **Focus**: the ability you want your other Essences to strengthen. **Charge** is the resource they build for it. When the Focus casts, it spends all stored Charge to strengthen the damage, healing and Barrier it delivers directly.
+The first Essence in your battle loadout is your **Channeled Essence**. **Charge** is the resource your other Essences build for it. When the Channeled Essence casts, it spends all stored Charge to strengthen the damage, healing and Barrier it delivers directly.
 
 Its central question is: **Which ability deserves the payoff, and can the rest of my loadout prepare it reliably?**
 
-The player chooses which Essence receives the bonus. Combat remains automatic: the other Essences build Charge through their normal casts, and only the chosen Focus spends it.
+The player chooses which Essence receives the bonus by placing it first in the loadout. Combat remains automatic: the other Essences build Charge through their normal casts, and only the Channeled Essence spends it.
 
-The Focus can be a damaging ability, a large heal, or a Barrier ability. The rest of the build still needs to work between Focus casts.
+The Channeled Essence can be a damaging ability, a large heal, or a Barrier ability. The rest of the build still needs to work between Channeled Essence casts.
 
 ### Core mechanic: Circuit
 
-Choose an equipped Focus Essence before combat. In the base form, hold up to **3 Charge**. Each new battle starts with **0 Charge**, or **1 Charge** once Primed Circuit unlocks at mastery level 7.
+The first occupied slot of the battle's Essence loadout supplies the Channeled Essence. In the base form, hold up to **3 Charge**. Each new battle starts with **0 Charge**, or **1 Charge** once Primed Circuit unlocks at mastery level 7.
 
 - Each other equipped Essence's normal active cast grants **1 Charge**.
-- Each of those Essences can add Charge only once before the Focus casts. Casting the same Essence again adds no more Charge; Short Circuit is the refinement that changes this rule.
-- Casting the Focus spends all stored Charge. Each of the other Essences can then add Charge again.
+- Each of those Essences can add Charge only once before the Channeled Essence casts. Casting the same Essence again adds no more Charge; Short Circuit is the refinement that changes this rule.
+- Casting the Channeled Essence spends all stored Charge. Each of the other Essences can then add Charge again.
 - Charge lasts until spent or the encounter ends. There is no time-based decay.
 
-Your Focus starts at **80% of its normal strength**. Each Charge adds **a flat +20%** to its direct damage, healing and Barrier: 1 Charge brings it to 100%, and 2 Charge brings it to 120%. Mastery levels and upgrades add their bonuses afterward.
+Your Channeled Essence starts at **80% of its normal strength**. Each Charge adds **a flat +20%** to its direct damage, healing and Barrier: 1 Charge brings it to 100%, and 2 Charge brings it to 120%. Mastery levels and upgrades add their bonuses afterward.
 
-| Charge spent | Focus strength | Example: a direct heal normally worth 200 |
+| Charge spent | Channeled Essence strength | Example: a direct heal normally worth 200 |
 | -----------: | ------------------: | -------------------------------------: |
 |            0 |                 80% |                                    160 |
 |            1 |                100% |                                    200 |
 |            2 |                120% |                                    240 |
 |            3 |                140% |                                    280 |
 
-With no Charge, the Focus uses 80% of its normal strength. Your other Essences keep their normal damage, healing and other effects while building Charge.
+With no Charge, the Channeled Essence uses 80% of its normal strength. Your other Essences keep their normal damage, healing and other effects while building Charge.
 
-### Choosing a Focus and what Charge changes
+### Choosing a Channeled Essence and what Charge changes
 
-A Focus must be an equipped Essence whose active ability deals direct damage, heals directly, or grants Barrier directly. The game checks its current ability, including its evolution, and shows which Essences can be selected and which parts of their abilities receive the bonus.
+A Channeled Essence must be an equipped Essence whose active ability deals direct damage, heals directly, or grants Barrier directly. The game checks its current ability, including its evolution. The Essence page identifies the first occupied slot with a Channeled Essence badge while Conduit is equipped and explains when that Essence is unsuitable. The Channel Essence action swaps an eligible equipped Essence into the first occupied position in one save without removing any other Essence.
 
 Charge strengthens those direct damage, healing and Barrier amounts across the normal cast's hits and targets. Each amount receives the bonus once. The cast keeps its normal number of hits and targets and its normal chances to trigger other effects.
 
-Charge does not change condition stacks or durations, damage or healing over time, control effects, summon count or attributes, cooldowns, or resource costs. An Essence that only applies conditions or summons allies can build Charge, but cannot be the Focus. If an ability combines those effects with direct damage, healing or Barrier, it can be the Focus; only those direct amounts change.
+Charge does not change condition stacks or durations, damage or healing over time, control effects, summon count or attributes, cooldowns, or resource costs. An Essence that only applies conditions or summons allies can build Charge, but cannot be the Channeled Essence. If an ability combines those effects with direct damage, healing or Barrier, it can be the Channeled Essence; only those direct amounts change.
 
-Healing based on damage dealt, such as Lifesteal, still uses the actual Health damage. A stronger hit can therefore heal more through Lifesteal, but that healing does not receive the Focus bonus again. The same rule applies to any healing calculated from damage the Focus already strengthened.
+Healing based on damage dealt, such as Lifesteal, still uses the actual Health damage. A stronger hit can therefore heal more through Lifesteal, but that healing does not receive the Channeled Essence bonus again. The same rule applies to any healing calculated from damage the Channeled Essence already strengthened.
 
-Passive abilities, basic attacks, summons' actions, and triggered copies or automatically repeated casts do not build or spend Charge or receive another Focus bonus. Secondary damage is also unchanged. An effect that copies damage or healing already calculated uses that amount once, without adding another Conduit bonus.
+Passive abilities, basic attacks, summons' actions, and triggered copies or automatically repeated casts do not build or spend Charge or receive another Channeled Essence bonus. Secondary damage is also unchanged. An effect that copies damage or healing already calculated uses that amount once, without adding another Conduit bonus.
 
 ### When Charge is gained and spent
 
 Charge is gained when another Essence's active ability begins a normal cast. One cast adds at most 1 Charge, however many hits, targets or effects it has. An action stopped before it becomes a cast adds nothing. Once the cast starts, it can add Charge even if its target later resists or dodges it.
 
-The Focus spends Charge when its cast begins. That amount determines the bonus for the whole cast, even if new Charge arrives before it finishes. A miss or a heal that restores no Health still spends Charge. An action stopped before it becomes a cast does not.
+The Channeled Essence spends Charge when its cast begins. That amount determines the bonus for the whole cast, even if new Charge arrives before it finishes. A miss or a heal that restores no Health still spends Charge. An action stopped before it becomes a cast does not.
 
-Once Charge is full, further casts cannot save extra Charge for later. After every Focus cast, including one with no Charge, each of the other Essences can add Charge again.
+Once Charge is full, further casts cannot save extra Charge for later. After every Channeled Essence cast, including one with no Charge, each of the other Essences can add Charge again.
 
-Essences cast automatically using their normal cooldowns. Choose the Focus by name from the regular dropdown, which shows your equipped Essences and allows those with a suitable active ability to be selected.
+Essences cast automatically using their normal cooldowns. Slot position determines the Channeled Essence, not a casting sequence. The Combat Styles page explains the first-Essence rule; there is no separate Channeled Essence dropdown. Channeled Essence is derived from each battle's actual loadout when that battle is prepared and stays captured for its normal lifetime.
 
 ### Refinements: choose one, or remain in the base form
 
 | Refinement | What changes | Build preference |
 | --- | --- | --- |
-| **Short Circuit** | Your other Essences build 1 Charge every time they cast, even if the same Essence casts again. Store up to 2 Charge. | One frequently casting Essence can fill Charge. The Focus keeps its 80% + 20% flat per Charge formula, reaching 120% before mastery levels and upgrades. |
-| **Deep Reservoir** | Store up to 4 Charge, with each of your other Essences building 1 Charge between Focus casts. Your Focus's immediate damage, healing and Barrier start at 60% of normal strength and gain a +25% flat increase per Charge spent. | Four different other Essences can build toward 160% strength before mastery levels and upgrades. |
-| **Relay** | After your Focus spends 2 or more Charge, regain 1 Charge for its next cast. Its immediate damage, healing and Barrier start at 80% of normal strength and gain a +15% flat increase per Charge spent. | Start building for the next Focus cast with 1 Charge already stored. Keep a cap of 3 and one Charge from each other Essence between Focus casts. |
+| **Short Circuit** | Your other Essences build 1 Charge every time they cast, even if the same Essence casts again. Store up to 2 Charge. | One frequently casting Essence can fill Charge. The Channeled Essence keeps its 80% + 20% flat per Charge formula, reaching 120% before mastery levels and upgrades. |
+| **Deep Reservoir** | Store up to 4 Charge, with each of your other Essences building 1 Charge between Channeled Essence casts. Your Channeled Essence's immediate damage, healing and Barrier start at 60% of normal strength and gain a +25% flat increase per Charge spent. | Four different other Essences can build toward 160% strength before mastery levels and upgrades. |
+| **Relay** | After your Channeled Essence spends 2 or more Charge, regain 1 Charge for its next cast. Its immediate damage, healing and Barrier start at 80% of normal strength and gain a +15% flat increase per Charge spent. | Start building for the next Channeled Essence cast with 1 Charge already stored. Keep a cap of 3 and one Charge from each other Essence between Channeled Essence casts. |
 
-**Short Circuit details.** The same other Essence can add Charge on successive normal casts. Each cast still adds at most 1 Charge, regardless of its hits or triggered copies. The Focus never adds Charge to itself.
+**Short Circuit details.** The same other Essence can add Charge on successive normal casts. Each cast still adds at most 1 Charge, regardless of its hits or triggered copies. The Channeled Essence never adds Charge to itself.
 
-**Deep Reservoir details.** Focus strength at 0, 1, 2, 3, and 4 Charge is 60%, 85%, 110%, 135%, and 160%. Building all 4 Charge from other Essence casts requires at least five equipped Essences in total, including the Focus. Show this requirement before the player selects the refinement; Primed Circuit supplies 1 starting Charge separately.
+**Deep Reservoir details.** Channeled Essence strength at 0, 1, 2, 3, and 4 Charge is 60%, 85%, 110%, 135%, and 160%. Building all 4 Charge from other Essence casts requires at least five equipped Essences in total, including the Channeled Essence. Show this requirement before the player selects the refinement; Primed Circuit supplies 1 starting Charge separately.
 
-**Relay details.** Focus strength at 0, 1, 2, and 3 Charge is 80%, 95%, 110%, and 125%. The returned Charge adds to any new Charge gained while the Focus was casting, up to the cap of 3. Each other Essence can add Charge again after the Focus begins its cast. Spending just the 1 returned Charge gives no further return, so the Focus still needs other Essences to build Charge. A miss still returns 1 Charge if at least 2 were spent. Stored Charge does not carry into a new battle.
+**Relay details.** Channeled Essence strength at 0, 1, 2, and 3 Charge is 80%, 95%, 110%, and 125%. The returned Charge adds to any new Charge gained while the Channeled Essence was casting, up to the cap of 3. Each other Essence can add Charge again after the Channeled Essence begins its cast. Spending just the 1 returned Charge gives no further return, so the Channeled Essence still needs other Essences to build Charge. A miss still returns 1 Charge if at least 2 were spent. Stored Charge does not carry into a new battle.
 
 ### Conduit mastery levels and upgrades
 
-Each mastery level adds **a flat +1%** to the Focus's direct damage, healing and Barrier when it spends **at least 1 Charge**. Level 1 gives a +1% flat increase and level 10 gives a +10% flat increase, applied once regardless of how much Charge was spent. Add this after the selected refinement's formula. With no Charge, the Focus receives no level bonus: it stays at 80% strength, or 60% with Deep Reservoir.
+Each mastery level adds **a flat +1%** to the Channeled Essence's direct damage, healing and Barrier when it spends **at least 1 Charge**. Level 1 gives a +1% flat increase and level 10 gives a +10% flat increase, applied once regardless of how much Charge was spent. Add this after the selected refinement's formula. With no Charge, the Channeled Essence receives no level bonus: it stays at 80% strength, or 60% with Deep Reservoir.
 
 At level 10 without upgrades, the base form's strength at 0, 1, 2, and 3 Charge is **80%, 110%, 130%, and 150%**. At maximum Charge, Short Circuit reaches 130%, Deep Reservoir 170%, and Relay 135%. Levels do not change how Essences build Charge, how much you can hold, or when Relay returns it.
 
 | Upgrade | Effect | Build preference |
 | --- | --- | --- |
-| **Full Circuit** | Spending maximum Charge adds a flat +5% to your Focus’s immediate damage, healing and Barrier. | Reliably complete preparation before the payoff. |
-| **Partial Flow** | Spending exactly 1 Charge adds a flat +5% to your Focus’s immediate damage, healing and Barrier. | Support useful smaller payoffs when the full circuit is rarely ready. |
-| **Emergency Channel** | When your Focus spends Charge at 35% Health or lower, add a flat +5% to the healing and Barrier it gives you immediately. | Improve personal recovery under pressure while spending at least 1 Charge. |
+| **Full Circuit** | Spending maximum Charge adds a flat +5% to your Channeled Essence’s immediate damage, healing and Barrier. | Reliably complete preparation before the payoff. |
+| **Partial Flow** | Spending exactly 1 Charge adds a flat +5% to your Channeled Essence’s immediate damage, healing and Barrier. | Support useful smaller payoffs when the full circuit is rarely ready. |
+| **Emergency Channel** | When your Channeled Essence spends Charge at 35% Health or lower, add a flat +5% to the healing and Barrier it gives you immediately. | Improve personal recovery under pressure while spending at least 1 Charge. |
 
-Maximum Charge means the selected refinement's cap, or 3 in the base form. Add upgrade bonuses after the form's strength and mastery level bonus. Full Circuit and Partial Flow normally require different amounts of Charge; mastering an upgrade can let both apply to the same cast. Emergency Channel checks your Health when the Focus starts casting. It can combine with either upgrade, but improves only direct healing and Barrier on you. It adds nothing to damage or healing and Barrier given to an ally.
+Maximum Charge means the selected refinement's cap, or 3 in the base form. Add upgrade bonuses after the form's strength and mastery level bonus. Full Circuit and Partial Flow normally require different amounts of Charge; mastering an upgrade can let both apply to the same cast. Emergency Channel checks your Health when the Channeled Essence starts casting. It can combine with either upgrade, but improves only direct healing and Barrier on you. It adds nothing to damage or healing and Barrier given to an ally.
 
 The core preview shows each result as a percentage **of normal strength**, and shows the **Charge limit** alongside a plain explanation of how your other Essences build Charge. Upgrade bonuses are labeled `+5% flat increase`. The displayed results for each Charge amount already include Full Circuit and Partial Flow when their conditions are met. Emergency Channel is shown separately because it applies only to direct healing and Barrier on you. Flat bonuses add directly: `150% + 5% flat = 155%`. A multiplier such as ×1.2 instead scales the amount it applies to.
 
-For example, a level-10 base-form Conduit spending 3 Charge uses 150% strength before upgrades. Full Circuit raises that to 155%. If Emergency Channel also applies, direct healing and Barrier on you use 160%, while damage and effects on other targets stay at 155%. These upgrades strengthen charged Focus casts without granting starting Charge, changing cooldowns, or making the ability cast again.
+For example, a level-10 base-form Conduit spending 3 Charge uses 150% strength before upgrades. Full Circuit raises that to 155%. If Emergency Channel also applies, direct healing and Barrier on you use 160%, while damage and effects on other targets stay at 155%. These upgrades strengthen charged Channeled Essence casts without granting starting Charge, changing cooldowns, or making the ability cast again.
 
 ### Worked sequence: the base form
 
-Assume four equipped Essences: A, B, C, and your Focus F. F has a direct heal normally worth 200. These are examples of automatic casts, not a manual casting order added by the style.
+Assume four equipped Essences: A, B, C, and your Channeled Essence F. F has a direct heal normally worth 200. These are examples of automatic casts, not a manual casting order added by the style.
 
 | Cast                                | What happens                          | Charge after cast | F's healing before other rules |
 | ----------------------------------- | ------------------------------------- | ----------------: | ----------------: |
 | A                                   | A adds 1 Charge.                      |                 1 |                 — |
 | B                                   | B adds 1 Charge.                      |                 2 |                 — |
-| A again                             | A already added Charge since the last Focus cast. |      2 |                 — |
+| A again                             | A already added Charge since the last Channeled Essence cast. |      2 |                 — |
 | C                                   | C adds 1 Charge; Charge is full.       |                 3 |                 — |
 | F                                   | Spend 3; other Essences can add Charge again. |          0 |               280 |
 | F again, before another Essence     | Spend 0.                              |                 0 |               160 |
 | B                                   | B can add Charge again.               |                 1 |                 — |
 | F                                   | Spend 1.                              |                 0 |               200 |
 
-The second Focus cast shows why the other Essences' cooldowns matter. If the Focus casts before they can build Charge, it uses less of its normal strength.
+The second Channeled Essence cast shows why the other Essences' cooldowns matter. If the Channeled Essence casts before they can build Charge, it uses less of its normal strength.
 
 ### Example builds
 
-**Storm Engine — base form.** Choose a strong direct damage ability as the Focus. Equip three other Essences that provide useful damage, defense or conditions and cast often enough to build Charge. Favor Power and the relevant offensive attributes while keeping enough defense to survive. Consider all four abilities' cooldowns together: making the Focus cast faster helps only if the other Essences can keep building Charge for it.
+**Storm Engine — base form.** Choose a strong direct damage ability as the Channeled Essence. Equip three other Essences that provide useful damage, defense or conditions and cast often enough to build Charge. Favor Power and the relevant offensive attributes while keeping enough defense to survive. Consider all four abilities' cooldowns together: making the Channeled Essence cast faster helps only if the other Essences can keep building Charge for it.
 
-**Pulsekeeper — Short Circuit.** Choose a direct healing or Barrier ability as the Focus, with one other Essence that casts frequently. That Essence can build both Charge through repeated normal casts, leaving room for other useful abilities. This suits a smaller set of Essences, with a lower maximum Focus strength. A Focus that casts early still spends whatever Charge is available.
+**Pulsekeeper — Short Circuit.** Choose a direct healing or Barrier ability as the Channeled Essence, with one other Essence that casts frequently. That Essence can build both Charge through repeated normal casts, leaving room for other useful abilities. This suits a smaller set of Essences, with a lower maximum Channeled Essence strength. A Channeled Essence that casts early still spends whatever Charge is available.
 
-**Grand Convergence — Deep Reservoir.** Choose a large direct damage Focus and four different Essences that remain useful while building Charge. Build enough defense to survive until the Focus is ready. Longer encounters give those Essences time to fill all 4 Charge; a build that needs the Focus immediately may get less from this refinement. Each supporting Essence should earn its place through its own ability as well as the Charge it adds.
+**Grand Convergence — Deep Reservoir.** Choose a large direct damage Channeled Essence and four different Essences that remain useful while building Charge. Build enough defense to survive until the Channeled Essence is ready. Longer encounters give those Essences time to fill all 4 Charge; a build that needs the Channeled Essence immediately may get less from this refinement. Each supporting Essence should earn its place through its own ability as well as the Charge it adds.
 
 ### Strengths, weaknesses, and counterplay
 
 - Rewards choosing one important ability and other Essences whose roles and cooldowns work well with it.
 - Lets utility Essences build Charge while continuing to perform their usual role.
-- Supports both offensive and recovery-focused play through the chosen Focus.
-- Can suffer in very short encounters or when the Focus becomes ready before other abilities have generated Charge.
+- Supports both offensive and recovery-focused play through the chosen Channeled Essence.
+- Can suffer in very short encounters or when the Channeled Essence becomes ready before other abilities have generated Charge.
 - Control effects can interrupt the casts that build Charge. Silence prevents active casts from building or spending Charge while it lasts.
-- Changes only the Focus's direct damage, healing and Barrier. The preview must explain which parts of an ability stay unchanged.
-- Choosing Essences only for Charge can leave the character without enough damage or protection between Focus casts.
+- Changes only the Channeled Essence's direct damage, healing and Barrier. The preview must explain which parts of an ability stay unchanged.
+- Choosing Essences only for Charge can leave the character without enough damage or protection between Channeled Essence casts.
 - Becomes a poor choice if it requires an unrelated manual casting system to be enjoyable. Its build decisions must work with ordinary automatic combat.
 
 ### What the player should see
 
-The Combat Style card shows the chosen Focus, maximum Charge, how strong the Focus is at each Charge amount, and which parts of its ability receive the bonus.
+The Combat Style card shows the chosen Channeled Essence, maximum Charge, how strong the Channeled Essence is at each Charge amount, and which parts of its ability receive the bonus.
 
 It also shows Conduit's own level, XP to the next level, level bonus, upgrade slots and selected upgrades. The strength shown at each Charge amount includes earned mastery level bonuses. Upgrade descriptions state how much Charge or Health their bonuses require. Switching from a higher-level Bastion does not raise Conduit's level or give it Bastion's bonuses.
 
-During combat, display Charge beside the Focus icon. Show which other Essences have already added Charge since the last Focus cast. The cast log states how much Charge the Focus spent and its resulting strength, including casts below normal strength.
+During combat, display Charge beside the Channeled Essence icon. Show which other Essences have already added Charge since the last Channeled Essence cast. The cast log states how much Charge the Channeled Essence spent and its resulting strength, including casts below normal strength.
 
 The post-combat summary has no separate Combat Style panel or Charge breakdown. The Combat Styles page shows numerical strength for each Charge amount, without negative callouts. Internal balance analysis can compare how much damage, healing and Barrier each Charge amount adds or removes.
 
@@ -440,7 +440,7 @@ The same Combat Style rules apply in idle combat, dungeons, bosses, and PvP. Eac
 
 Combat Styles do not change an activity's normal starting Health, recovery between encounters, ability readiness, victory conditions, or defeat consequences. A player cannot heal by toggling a Combat Style, bank Charge on a harmless encounter, or carry an old Barrier reserve into a new one.
 
-An equipped Combat Style, its level, effective mastery level, refinement, and upgrades are visible when players inspect a build. Conduit's chosen Focus is also visible. Opponents should be able to understand the strategy and progression strength they are fighting. PvP uses the equipped Combat Style's earned progression; this proposal does not add automatic style-level normalization.
+An equipped Combat Style, its level, effective mastery level, refinement, and upgrades are visible when players inspect a build. Conduit's chosen Channeled Essence is also visible. Opponents should be able to understand the strategy and progression strength they are fighting. PvP uses the equipped Combat Style's earned progression; this proposal does not add automatic style-level normalization.
 
 ### Group play and summons
 
@@ -456,7 +456,7 @@ Compare Combat Style strength at equal levels and with the same number of unlock
 
 Evaluate the whole build: damage, survival, consistency, time to clear, wasted output, and the value of the Essence slots used to enable the Combat Style. A high peak or a large Barrier number is not sufficient evidence of a strong build.
 
-Test Conduit with a few early Essences as well as builds that can fill Charge. As more Essence slots become available, the Charge cap and the need to choose useful abilities must keep Focus strength from growing without limit. Bastion should have useful self-recovery without requiring a rare or specialized Essence combination.
+Test Conduit with a few early Essences as well as builds that can fill Charge. As more Essence slots become available, the Charge cap and the need to choose useful abilities must keep Channeled Essence strength from growing without limit. Bastion should have useful self-recovery without requiring a rare or specialized Essence combination.
 
 ## 7. Design playtests and unresolved tuning
 
@@ -477,12 +477,12 @@ The identities and choice structure above are the proposed design. The following
 | Reprisal with self-generated and allied Barrier, rapid multi-hit Essences, and enemy damage over time | Does storage follow actual owned Barrier absorption, remain capped, and release only once per qualifying activation? |
 | Bastion with allies, summons, and strong healing suppression | Does the source distinction remain understandable, and can organized recovery create excessive stalling?  |
 | Conduit under ordinary automated ability activation          | Can the player predict preparation and payoff without editing a script or controlling casts manually?     |
-| Conduit with uneven cooldowns and mixed-effect Essences      | Are Focus eligibility, weak casts, and unmodified effects clear enough to support informed choices?       |
+| Conduit with uneven cooldowns and mixed-effect Essences      | Are Channeled Essence eligibility, weak casts, and unmodified effects clear enough to support informed choices?       |
 | Conduit with each refinement                                 | Are there useful loadouts for the small circuit, long preparation, and repeat-cycle approaches?           |
 | Builds with no Combat Style and builds with the wrong Combat Style           | Are Combat Styles a rewarding source of strategy while their opportunity costs remain real and visible?           |
 | PvP and encounters with time limits                          | Do durable combinations remain beatable, and do burst combinations allow understandable counterplay?      |
 
-The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Reprisal's storage rate and damage cap, and Conduit's zero-Charge penalty and Charge curves. Progression tuning covers the level-10 cap, XP thresholds, the benefit from every mastery level, time to the first refinement, per-level bonus magnitudes, and the three upgrade choices for each developed Combat Style. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Focus output for a stronger prepared cast.**
+The first tuning questions are Bastion's 25% / 75% split, Rebuild's threshold, Reprisal's storage rate and damage cap, and Conduit's zero-Charge penalty and Charge curves. Progression tuning covers the level-10 cap, XP thresholds, the benefit from every mastery level, time to the first refinement, per-level bonus magnitudes, and the three upgrade choices for each developed Combat Style. Adjust these while preserving the central decisions: **Bastion trades immediate repair for preparation; Conduit trades reliable Channeled Essence output for a stronger prepared cast.**
 
 ## Design references
 

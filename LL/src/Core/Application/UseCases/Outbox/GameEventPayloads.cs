@@ -1,4 +1,4 @@
-﻿using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Items;
 using Application.UseCases.Equipments.Dtos;
@@ -21,7 +21,7 @@ public sealed record EssenceLoadoutChangedPayload(
     int EquippedEssenceCount,
     bool HasCompatibleEssenceTrio = false);
 
-public sealed record EssenceFocusSetPayload(
+public sealed record CreatureFocusSetPayload(
     Guid CharacterId,
     string CreatureDefinitionId);
 

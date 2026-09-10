@@ -13,7 +13,8 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "EssenceAbsorbed",
         "EssenceOwned",
         "EssenceEquipped",
-        "EssenceFocusSet",
+        "CreatureFocusSet",
+        "EssenceFocusSet", // Historical quest definitions retain their authored trigger type.
         "FocusedCreatureEssenceReceived",
         "EssenceAscended",
         "CompatibleEssenceLoadout",

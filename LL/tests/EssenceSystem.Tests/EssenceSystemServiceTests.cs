@@ -2,11 +2,12 @@ using Application.Interfaces.Outbox;
 using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.UseCases.Essences.Commands;
-using Application.UseCases.Essences.Commands.SetEssenceFocus;
+using Application.UseCases.Essences.Commands.SetCreatureFocus;
 using AutoMapper;
 using Domain.Models.CharacterActions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Outbox;
 using Domain.Components.Attributes;
@@ -17,6 +18,7 @@ using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.CombatStyles;
 using Domain.Models.Damages;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -547,6 +549,45 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal(fallbackEssenceId, Assert.Single(fallback.EquippedEssences).Id);
     }
 
+    [Theory]
+    [InlineData(EssenceCombatActivity.None, false)]
+    [InlineData(EssenceCombatActivity.Dungeon, true)]
+    [InlineData(EssenceCombatActivity.Raid, false)]
+    public async Task Resolve_combat_loadout_orders_occupied_slots_for_the_selected_activity(
+        EssenceCombatActivity activity, bool assigned)
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 99);
+        var first = await AddPlayerEssenceAsync(db, characterId, "essence.test");
+        var second = await AddPlayerEssenceAsync(db, characterId, "essence.other");
+        db.EssenceLoadouts.AddRange(
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(), CharacterId = characterId, Name = "A Default",
+                Slots =
+                [
+                    new() { Id = Guid.NewGuid(), SlotIndex = 4, PlayerEssenceId = second },
+                    new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = first },
+                    new() { Id = Guid.NewGuid(), SlotIndex = 0 }
+                ]
+            },
+            new EssenceLoadout
+            {
+                Id = Guid.NewGuid(), CharacterId = characterId, Name = "Dungeon",
+                AutoUseActivities = EssenceCombatActivity.Dungeon,
+                Slots =
+                [
+                    new() { Id = Guid.NewGuid(), SlotIndex = 5, PlayerEssenceId = first },
+                    new() { Id = Guid.NewGuid(), SlotIndex = 2, PlayerEssenceId = second }
+                ]
+            });
+        await db.SaveChangesAsync();
+
+        var loadout = await CreateService(db).ResolveAsync(characterId, activity, CancellationToken.None);
+
+        Assert.Equal(assigned ? [second, first] : new[] { first, second }, loadout.EquippedEssences.Select(x => x.Id));
+    }
+
     [Fact]
     public async Task Set_auto_use_activities_moves_requested_activity_to_selected_loadout()
     {
@@ -615,6 +656,36 @@ public sealed class EssenceSystemServiceTests
             CancellationToken.None);
 
         Assert.Equal(raidEssenceId, Assert.Single(snapshot.EquippedEssences).PlayerEssenceId);
+    }
+
+    [Fact]
+    public async Task Character_snapshot_resolves_channeled_essence_from_occupied_slots_in_visible_order()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 99);
+        var first = await AddPlayerEssenceAsync(db, characterId, "essence.test");
+        var second = await AddPlayerEssenceAsync(db, characterId, "essence.other");
+        db.EssenceLoadouts.Add(new EssenceLoadout
+        {
+            Id = Guid.NewGuid(), CharacterId = characterId, Name = "Raid",
+            AutoUseActivities = EssenceCombatActivity.Raid,
+            Slots =
+            [
+                new() { Id = Guid.NewGuid(), SlotIndex = 4, PlayerEssenceId = second },
+                new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = first },
+                new() { Id = Guid.NewGuid(), SlotIndex = 0 }
+            ]
+        });
+        await db.SaveChangesAsync();
+        var styles = new RecordingChanneledEssenceCombatStyleService();
+        var repository = new CharacterSnapshotRepository(db, combatStyles: styles);
+
+        var snapshot = await repository.CreateAsync(characterId, EssenceCombatActivity.Raid, CancellationToken.None);
+
+        Assert.Equal(new[] { first, second }, styles.EssenceIds);
+        Assert.Equal(EssenceCombatActivity.Raid, styles.Activity);
+        Assert.Equal(new[] { 1, 4 }, snapshot.EquippedEssences.Select(x => x.SlotIndex));
+        Assert.Equal(first, snapshot.CombatStyle!.ChanneledPlayerEssenceId);
     }
 
     [Fact]
@@ -1566,7 +1637,7 @@ public sealed class EssenceSystemServiceTests
         await service.PrepareEssenceDropsAsync(
             characterId,
             defeatedCreatures,
-            loadEssenceFocus: true,
+            loadCreatureFocus: true,
             CancellationToken.None);
         await service.RollEssenceDropsAsync(
             characterId,
@@ -1668,9 +1739,9 @@ public sealed class EssenceSystemServiceTests
         var mapper = new MapperConfiguration(configuration => configuration.AddMaps(typeof(MappingProfile).Assembly),
             NullLoggerFactory.Instance).CreateMapper();
         var responses = new EssenceMutationResponseFactory(mapper, CreateService(db), archive, null!, null!);
-        var handler = new SetEssenceFocusCommandHandler(archive, responses, actions);
+        var handler = new SetCreatureFocusCommandHandler(archive, responses, actions);
 
-        var response = await handler.Handle(new SetEssenceFocusCommand(characterId, "monster.other"), CancellationToken.None);
+        var response = await handler.Handle(new SetCreatureFocusCommand(characterId, "monster.other"), CancellationToken.None);
 
         Assert.True(actions.Resolved);
         Assert.Equal(!moreDue, response.Succeeded);
@@ -1691,6 +1762,29 @@ public sealed class EssenceSystemServiceTests
             throw new NotSupportedException();
         public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
+    }
+
+    private sealed class RecordingChanneledEssenceCombatStyleService : ICombatStyleService
+    {
+        public IReadOnlyList<Guid> EssenceIds { get; private set; } = [];
+        public EssenceCombatActivity Activity { get; private set; }
+
+        public Task<CombatStyleSnapshot?> ResolveAsync(Guid characterId, EssenceCombatActivity activity,
+            CancellationToken ct, IReadOnlyList<PlayerEssence>? equippedEssences = null)
+        {
+            EssenceIds = equippedEssences!.Select(x => x.Id).ToArray();
+            Activity = activity;
+            return Task.FromResult<CombatStyleSnapshot?>(new()
+            {
+                CombatStyleId = CombatStyleIds.Conduit, Kind = CombatStyleKind.Conduit,
+                ChanneledPlayerEssenceId = EssenceIds[0]
+            });
+        }
+
+        public Task<CombatStyleOverview> GetOverviewAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
+        public Task<CombatStyleOverview> PreviewAsync(Guid id, CombatStyleSelectionRequest selection, CancellationToken ct) => throw new NotSupportedException();
+        public Task<CombatStyleOperationResult> SelectAsync(Guid id, CombatStyleSelectionRequest selection, CancellationToken ct) => throw new NotSupportedException();
+        public Task<CombatStyleXpGrantResult> GrantCapturedCombatXpAsync(Guid id, string? styleId, long xp, CancellationToken ct) => throw new NotSupportedException();
     }
 
     private static LLDbContext CreateDb()
@@ -2024,20 +2118,20 @@ public sealed class EssenceSystemServiceTests
         public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(new EssenceCodex([]));
 
-        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken)
+        public Task<CreatureArchive> SetCreatureFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken)
         {
             OnSetFocus?.Invoke();
             SetFocusCount++;
             return Task.FromResult(new CreatureArchive([], true, null, null));
         }
 
-        public Task<string?> GetEssenceFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken)
+        public Task<string?> GetCreatureFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken)
         {
             FocusIdLookupCount++;
             return Task.FromResult<string?>(focusedCreatureId);
         }
 
-        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
+        public Task<bool> IsCreatureFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
         {
             FocusLookupCount++;
             return Task.FromResult(creatureId.Equals(focusedCreatureId, StringComparison.OrdinalIgnoreCase));

@@ -45,9 +45,9 @@ Each successful essence drop resolves its item base separately. The possible
 essence item IDs are known from the eligible creatures' loot-table variants and
 can be loaded once before rolls are processed.
 
-### 5. Essence focus
+### 5. Creature Focus
 
-Essence focus was previously checked through one `SELECT EXISTS` call per
+Creature Focus was previously checked through one `SELECT EXISTS` call per
 encounter invocation. A request-scoped cache reduced this to one lookup per
 distinct creature type. Because a character can have only one focused creature,
 the stronger solution is one scalar query for the focused creature ID followed

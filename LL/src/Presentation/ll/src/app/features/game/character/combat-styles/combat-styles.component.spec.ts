@@ -1,4 +1,3 @@
-import { OverlayContainer } from '@angular/cdk/overlay';
 import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CombatStyleStateService } from '../../../../core/services/api/combat-styles/combat-style-state.service';
@@ -30,7 +29,7 @@ describe('Combat Style milestones', () => {
 });
 
 describe('Combat Styles global configuration page', () => {
-  async function createPage(focusId = 'focus', level = 0) {
+  async function createPage(level = 0) {
     const overview: CombatStyleOverview = {
       contentVersion: 'test',
       selection: {
@@ -38,26 +37,10 @@ describe('Combat Styles global configuration page', () => {
         refinementId: null,
         upgradeIds: [],
         masteredUpgradeId: null,
-        focusPlayerEssenceId: focusId,
       },
       effectiveStyle: null,
       validationIssue: null,
       previewFacts: [],
-      focusOptions: [
-        { playerEssenceId: 'focus', name: 'Ember Sprite', isEligible: true },
-        {
-          playerEssenceId: 'guardian',
-          name: 'Stone Guardian',
-          isEligible: true,
-        },
-        { playerEssenceId: 'mist', name: 'Mending Mist', isEligible: false },
-      ].map((option) => ({
-        ...option,
-        essenceDefinitionId: option.playerEssenceId + '-definition',
-        abilityId: option.playerEssenceId + '-ability',
-        cooldownTicks: 10,
-        eligibleEffectIds: option.isEligible ? ['damage'] : [],
-      })),
       styles: [
         {
           definition: {
@@ -65,13 +48,13 @@ describe('Combat Styles global configuration page', () => {
             name: 'Conduit',
             kind: 'Conduit',
             description:
-              'Choose an equipped Essence as your Focus. In the base form, each of your other Essences builds 1 Charge when it casts, once between Focus casts, up to 3 Charge. Your Focus spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.',
+              'The first Essence in your loadout is your Channeled Essence. In the base form, each of your other Essences builds 1 Charge when it casts, once between Channeled Essence casts, up to 3 Charge. Your Channeled Essence spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.',
             tuning: {
               barrierFraction: 0.75,
               barrierPerMasteryLevel: 0.01,
-              focusBaseMultiplier: 0.8,
-              focusPerCharge: 0.2,
-              focusPerMasteryLevel: 0.01,
+              channeledBaseMultiplier: 0.8,
+              channeledPerCharge: 0.2,
+              channeledPerMasteryLevel: 0.01,
             },
             openingTechnique: {
               name: 'Primed Circuit',
@@ -106,21 +89,12 @@ describe('Combat Styles global configuration page', () => {
           refinementId: null,
           upgradeIds: [],
           masteredUpgradeId: null,
-          focusPlayerEssenceId: focusId,
         },
       ],
     };
     const data = signal(overview);
     const draft = signal(overview.selection);
     const busy = signal(false);
-    const focusInvalid = computed(
-      () =>
-        !data().focusOptions.some(
-          (option) =>
-            option.playerEssenceId === draft().focusPlayerEssenceId &&
-            option.isEligible,
-        ),
-    );
     const state = {
       data,
       selected: computed(() => data().styles[0]),
@@ -131,8 +105,7 @@ describe('Combat Styles global configuration page', () => {
       previewing: signal(false),
       edited: signal(true),
       dirty: signal(false),
-      canSave: computed(() => !busy() && !focusInvalid()),
-      focusInvalid,
+      canSave: computed(() => !busy()),
       error: signal<string | null>(null),
       message: signal(null),
       previewError: signal(null),
@@ -140,14 +113,6 @@ describe('Combat Styles global configuration page', () => {
       save: jasmine.createSpy('save'),
       refresh: jasmine.createSpy('refresh'),
       refreshIfDirty: jasmine.createSpy('refreshIfDirty'),
-      changeFocus: jasmine
-        .createSpy('changeFocus')
-        .and.callFake((id: string | null) =>
-          draft.update((selection) => ({
-            ...selection,
-            focusPlayerEssenceId: id,
-          })),
-        ),
       chooseStyle: jasmine.createSpy('chooseStyle'),
       changeMastery: jasmine
         .createSpy('changeMastery')
@@ -186,15 +151,7 @@ describe('Combat Styles global configuration page', () => {
     const fixture = TestBed.createComponent(CombatStylesComponent);
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
-    const trigger = element.querySelector(
-      'app-dropdown button',
-    ) as HTMLButtonElement;
-    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
-    const findOption = (label: string) =>
-      Array.from(overlay.querySelectorAll<HTMLElement>('[role="option"]')).find(
-        (option) => option.querySelector('span')?.textContent?.trim() === label,
-      )!;
-    return { fixture, element, state, trigger, overlay, findOption };
+    return { fixture, element, state };
   }
 
   it('shows starting mastery and the full first combat XP block', async () => {
@@ -212,7 +169,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('uses the shared header, icon and navigation with the global save controls', async () => {
-    const { element, state, trigger } = await createPage();
+    const { element, state } = await createPage();
     expect(
       element.querySelector('.style-header')?.classList.contains('ll-panel'),
     ).toBeFalse();
@@ -239,12 +196,11 @@ describe('Combat Styles global configuration page', () => {
       element.querySelector(
         '[aria-labelledby="style-mechanic-heading"] app-dropdown',
       ),
-    ).not.toBeNull();
+    ).toBeNull();
     expect(
       element.querySelector('.overview-grid > .milestone-panel'),
     ).not.toBeNull();
     expect(element.querySelector('select')).toBeNull();
-    expect(trigger.textContent?.trim()).toBe('Ember Sprite');
     expect(element.querySelector('.battle-notice')?.textContent).toContain(
       'Conduit is in your slot.',
     );
@@ -268,8 +224,8 @@ describe('Combat Styles global configuration page', () => {
     expect(element.querySelector('fieldset')?.disabled).toBeTrue();
   });
 
-  it('requires a valid Focus before taking a previewed Conduit into battle', async () => {
-    const { fixture, element, state } = await createPage('missing');
+  it('allows taking Conduit into battle without a separately selected Channeled Essence', async () => {
+    const { fixture, element, state } = await createPage();
     state.data.update((data) => ({
       ...data,
       selection: { ...data.selection, combatStyleId: null },
@@ -282,38 +238,18 @@ describe('Combat Styles global configuration page', () => {
       'Your slot stays empty',
     );
     expect(action.textContent).toContain('Take Conduit into battle');
-    expect(action.disabled).toBeTrue();
-    action.click();
-    expect(state.save).not.toHaveBeenCalled();
-    state.changeFocus('focus');
-    fixture.detectChanges();
     expect(action.disabled).toBeFalse();
+    expect(element.querySelector('app-dropdown')).toBeNull();
+    expect(
+      element.querySelector('[data-tour="combat-style-channeled-essence"]')
+        ?.textContent,
+    ).toContain('The first Essence in your loadout is your Channeled Essence.');
     action.click();
     expect(state.save).toHaveBeenCalledOnceWith();
   });
 
-  it('selects an Essence through the shared menu and keeps ineligible choices disabled', async () => {
-    const { fixture, state, trigger, overlay, findOption } = await createPage();
-    trigger.click();
-    fixture.detectChanges();
-    expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    const ineligible = findOption('Mending Mist');
-    expect(ineligible.getAttribute('aria-disabled')).toBe('true');
-    expect(ineligible.getAttribute('tabindex')).toBe('-1');
-    ineligible.click();
-    fixture.detectChanges();
-    expect(state.changeFocus).not.toHaveBeenCalled();
-    findOption('Stone Guardian').dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
-    );
-    fixture.detectChanges();
-    expect(state.changeFocus).toHaveBeenCalledOnceWith('guardian');
-    expect(trigger.textContent?.trim()).toBe('Stone Guardian');
-    expect(overlay.querySelector('[role="listbox"]')).toBeNull();
-  });
-
   it('shows the automatic opening unlock and meaningful level seven and nine milestones', async () => {
-    const { fixture, element, state } = await createPage('focus', 6);
+    const { fixture, element, state } = await createPage(6);
     const opening = element.querySelector('.opening-technique')!;
     expect(opening.textContent).toContain('Primed Circuit');
     expect(opening.textContent).toContain('Begin every battle with 1 Charge.');
@@ -338,7 +274,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('improves Bastion every mastery level, including odd levels, through the unchanged maximum', async () => {
-    const { fixture, element, state } = await createPage('focus', 0);
+    const { fixture, element, state } = await createPage(0);
     state.data.update((data) => ({
       ...data,
       styles: data.styles.map((entry) => ({
@@ -415,20 +351,20 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('explains Conduit flat bonuses and recalculates them for the selected refinement', async () => {
-    const { fixture, element, state } = await createPage('focus', 3);
+    const { fixture, element, state } = await createPage(3);
     const footer = element.querySelector('[aria-label="Mastery bonus"]')!;
     expect(footer.textContent).toContain(
-      "Each mastery level adds a flat +1% to your Focus's damage, healing and Barrier when it spends at least 1 Charge.",
+      "Each mastery level adds a flat +1% to your Channeled Essence's damage, healing and Barrier when it spends at least 1 Charge.",
     );
     expect(footer.textContent).toContain('Mastery 3: +3% flat increase');
     expect(footer.textContent).toContain(
       '1 Charge: 100% → 103% of normal strength before upgrades.',
     );
     expect(footer.textContent).toContain(
-      'The mastery bonus applies once when your Focus spends at least 1 Charge.',
+      'The mastery bonus applies once when your Channeled Essence spends at least 1 Charge.',
     );
     expect(footer.textContent).toContain(
-      'Level 4: +4% flat increase to your Focus',
+      'Level 4: +4% flat increase to your Channeled Essence',
     );
     for (const level of [0, 1, 3, 7, 9, 10]) {
       state.data.update((data) => ({
@@ -445,7 +381,7 @@ describe('Combat Styles global configuration page', () => {
       expect(fixture.componentInstance.masteryBenefit()?.next).toBe(
         level === 10
           ? null
-          : `Level ${level + 1}: +${level + 1}% flat increase to your Focus`,
+          : `Level ${level + 1}: +${level + 1}% flat increase to your Channeled Essence`,
       );
     }
     state.data.update((data) => ({
@@ -459,9 +395,9 @@ describe('Combat Styles global configuration page', () => {
             ...refinement,
             tuning: {
               ...entry.definition.tuning!,
-              focusBaseMultiplier: 0.6,
-              focusPerCharge: 0.25,
-              focusPerMasteryLevel: 0.015,
+              channeledBaseMultiplier: 0.6,
+              channeledPerCharge: 0.25,
+              channeledPerMasteryLevel: 0.015,
             },
           })),
         },
@@ -478,7 +414,7 @@ describe('Combat Styles global configuration page', () => {
       '1 Charge: 85% → 89.5% of normal strength before upgrades.',
     );
     expect(footer.textContent).toContain(
-      'Level 4: +6% flat increase to your Focus',
+      'Level 4: +6% flat increase to your Channeled Essence',
     );
     state.draft.update((selection) => ({ ...selection, refinementId: null }));
     fixture.detectChanges();
@@ -488,7 +424,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('omits mastery explanations when authored tuning is unavailable', async () => {
-    const { fixture, element, state } = await createPage('focus', 10);
+    const { fixture, element, state } = await createPage(10);
     state.data.update((data) => ({
       ...data,
       styles: data.styles.map((entry) => ({
@@ -502,7 +438,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('empowers only equipped upgrades at level nine and allows changing or clearing the choice', async () => {
-    const { fixture, element, state } = await createPage('focus', 9);
+    const { fixture, element, state } = await createPage(9);
     const configuration = element.querySelector('.desktop-configuration')!;
     const upgrades = configuration.querySelectorAll<HTMLInputElement>(
       'input[type="checkbox"]',
@@ -540,7 +476,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('keeps Upgrade Mastery locked before level nine and blocks changes while saving', async () => {
-    const { fixture, element, state } = await createPage('focus', 8);
+    const { fixture, element, state } = await createPage(8);
     state.draft.update((selection) => ({
       ...selection,
       upgradeIds: ['upgrade-one'],
@@ -568,7 +504,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('keeps the current mechanic preview in place while an edited choice is being recalculated', async () => {
-    const { fixture, element, state } = await createPage('focus', 9);
+    const { fixture, element, state } = await createPage(9);
     state.preview.update((overview) => ({
       ...overview,
       previewFacts: [
@@ -613,7 +549,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('keeps the header and content scroll position stable when a mastery card focuses its hidden radio', async () => {
-    const { fixture, element, state } = await createPage('focus', 9);
+    const { fixture, element, state } = await createPage(9);
     state.draft.update((selection) => ({
       ...selection,
       upgradeIds: ['upgrade-one', 'upgrade-two'],
@@ -671,49 +607,8 @@ describe('Combat Styles global configuration page', () => {
     }
   });
 
-  it('requires an explicit replacement for a missing saved Focus', async () => {
-    const { fixture, element, state, trigger, findOption } =
-      await createPage('missing');
-    expect(trigger.textContent?.trim()).toBe('Choose your Focus Essence');
-    expect(element.textContent).toContain(
-      'Your selected Essence can’t be used as a Focus.',
-    );
-    expect(state.draft().focusPlayerEssenceId).toBe('missing');
-    expect(state.changeFocus).not.toHaveBeenCalled();
-    expect(state.canSave()).toBeFalse();
-    trigger.click();
-    fixture.detectChanges();
-    findOption('Ember Sprite').click();
-    fixture.detectChanges();
-    expect(state.changeFocus).toHaveBeenCalledOnceWith('focus');
-    expect(state.canSave()).toBeTrue();
-    expect(element.textContent).not.toContain(
-      'Your selected Essence can’t be used as a Focus.',
-    );
-  });
-
-  it('blocks Focus changes while saving, including choices from an already-open menu', async () => {
-    const { fixture, state, trigger, overlay, findOption } = await createPage();
-    state.busy.set(true);
-    fixture.detectChanges();
-    expect(trigger.disabled).toBeTrue();
-    trigger.click();
-    fixture.detectChanges();
-    expect(overlay.querySelector('[role="listbox"]')).toBeNull();
-    state.busy.set(false);
-    fixture.detectChanges();
-    trigger.click();
-    fixture.detectChanges();
-    state.busy.set(true);
-    fixture.detectChanges();
-    findOption('Stone Guardian').click();
-    fixture.detectChanges();
-    expect(state.changeFocus).not.toHaveBeenCalled();
-    expect(state.draft().focusPlayerEssenceId).toBe('focus');
-  });
-
   it('stages mobile refinement choices until confirmed and resets dismissed choices on reopening', async () => {
-    const { fixture, element, state } = await createPage('focus', 10);
+    const { fixture, element, state } = await createPage(10);
     const dialog =
       element.querySelector<HTMLDialogElement>('.refinement-sheet')!;
     const open = element.querySelector<HTMLButtonElement>('.mobile-summary')!;
@@ -756,7 +651,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('respects mobile upgrade capacity, clears choices and shows save failures inside the editor', async () => {
-    const { fixture, element, state } = await createPage('focus', 5);
+    const { fixture, element, state } = await createPage(5);
     const dialog = element.querySelector<HTMLDialogElement>('.upgrade-screen')!;
     element.querySelectorAll<HTMLButtonElement>('.mobile-summary')[1].click();
     fixture.detectChanges();
@@ -786,7 +681,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('keeps desktop upgrade descriptions and reserved status columns fixed when choices change', async () => {
-    const { fixture, element, state } = await createPage('focus', 10);
+    const { fixture, element, state } = await createPage(10);
     state.data.update((data) => ({
       ...data,
       styles: data.styles.map((entry) => ({
@@ -918,7 +813,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('keeps preview facts, tabs and the equip action readable on desktop and mobile', async () => {
-    const { fixture, element, state } = await createPage('focus', 9);
+    const { fixture, element, state } = await createPage(9);
     state.data.update((data) => ({
       ...data,
       selection: { ...data.selection, combatStyleId: 'bastion' },
@@ -943,19 +838,19 @@ describe('Combat Styles global configuration page', () => {
           label: 'Charge limit',
           value: '3 Charge',
           condition:
-            'Each of your other Essences builds 1 Charge when it casts, once between Focus casts.',
+            'Each of your other Essences builds 1 Charge when it casts, once between Channeled Essence casts.',
         },
         {
           label: 'Full Circuit',
           value: '+5% flat increase',
           condition:
-            'Gain this bonus when your Focus spends maximum Charge. Included in the Charge examples above.',
+            'Gain this bonus when your Channeled Essence spends maximum Charge. Included in the Charge examples above.',
         },
         {
           label: 'Emergency Channel',
           value: '+5% flat increase to healing and Barrier on yourself',
           condition:
-            'Gain this bonus to the healing and Barrier your Focus gives you immediately when it spends at least 1 Charge and you start the cast at 35% Health or lower.',
+            'Gain this bonus to the healing and Barrier your Channeled Essence gives you immediately when it spends at least 1 Charge and you start the cast at 35% Health or lower.',
         },
         {
           label: 'Prepared Wall',
@@ -1016,7 +911,9 @@ describe('Combat Styles global configuration page', () => {
         const mechanic = doc.querySelector<HTMLElement>(
           '[aria-labelledby="style-mechanic-heading"]',
         )!;
-        const detailValues = mechanic.querySelectorAll<HTMLElement>('strong');
+        const detailValues = mechanic.querySelectorAll<HTMLElement>(
+          '.mechanic-fact-value',
+        );
         expect(detailValues.length).toBe(6);
         for (const value of Array.from(detailValues)) {
           const row = value.parentElement!;
@@ -1036,11 +933,11 @@ describe('Combat Styles global configuration page', () => {
               .withContext(`${width}px preview content width`)
               .toBeLessThanOrEqual(part.clientWidth);
           }
-          const condition = row.querySelector('p')!;
+          const condition = row.querySelector('.mechanic-fact-condition')!;
           expect(condition.getBoundingClientRect().top).toBeGreaterThanOrEqual(
             Math.max(
               value.getBoundingClientRect().bottom,
-              row.querySelector('span')!.getBoundingClientRect().bottom,
+              row.querySelector('dt')!.getBoundingClientRect().bottom,
             ) - 1,
           );
         }
@@ -1061,7 +958,7 @@ describe('Combat Styles global configuration page', () => {
   });
 
   it('fits the overview, refinement sheet and two upgrade slots into narrow mobile viewports', async () => {
-    const { fixture, element, state } = await createPage('focus', 10);
+    const { fixture, element, state } = await createPage(10);
     state.data.update((data) => ({
       ...data,
       styles: [

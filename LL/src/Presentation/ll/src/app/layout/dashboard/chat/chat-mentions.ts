@@ -4,6 +4,7 @@ export interface ChatTextSegment {
   isCurrentPlayerMention: boolean;
   mentionName?: string;
   rawText?: string;
+  equipmentId?: string;
 }
 
 export interface DraftMention {
@@ -131,12 +132,13 @@ export function insertChatMention(
   mention: DraftMention,
   name: string,
   maxLength = 200,
+  measureLength: (value: string) => number = (value) => value.length,
 ): { draft: string; caret: number } | null {
   const token = formatChatMention(name);
   const suffix = draft.slice(mention.end);
   const separator = !suffix || !DELIMITER.test(suffix[0]) ? ' ' : '';
   const nextDraft = draft.slice(0, mention.start) + token + separator + suffix;
-  if (nextDraft.length > maxLength) return null;
+  if (measureLength(nextDraft) > maxLength) return null;
   return {
     draft: nextDraft,
     caret:

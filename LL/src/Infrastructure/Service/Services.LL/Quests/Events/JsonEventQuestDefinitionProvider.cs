@@ -12,7 +12,8 @@ public sealed class JsonEventQuestDefinitionProvider : IEventQuestDefinitionProv
         "EquipmentFound",
         "CombatEncounterCompleted",
         "EssenceAbsorbed",
-        "EssenceFocusSet",
+        "CreatureFocusSet",
+        "EssenceFocusSet", // Historical event-quest definitions retain their authored trigger type.
         "FocusedCreatureEssenceReceived",
         "EssenceAscended",
         "CompatibleEssenceLoadout",

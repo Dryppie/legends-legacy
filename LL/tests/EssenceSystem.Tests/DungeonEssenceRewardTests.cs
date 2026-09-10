@@ -547,7 +547,7 @@ public sealed class DungeonEssenceRewardTests
         public Task PrepareEssenceDropsAsync(
             Guid characterId,
             IReadOnlyList<Creature> defeatedCreatures,
-            bool loadEssenceFocus,
+            bool loadCreatureFocus,
             CancellationToken cancellationToken) => Task.CompletedTask;
 
         public Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(

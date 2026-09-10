@@ -121,7 +121,7 @@ The current Essence system is already one of the game’s strongest foundations:
 
 - 80 defined Essences
 - Active and passive abilities
-- Essence XP, levels, ascension, Dust, duplicate handling, and focus/pity
+- Essence XP, levels, ascension, Dust, duplicate handling, and Creature Focus/pity
 - Multiple combat-context loadouts
 - 19 Codex collections
 - Ability modifier infrastructure in the combat engine
@@ -145,7 +145,7 @@ Evidence:
 
 #### Current player loop
 
-`Hunt creature → obtain/focus Essence → gain Essence XP and duplicates → dismantle or invest Dust → ascend → equip in contextual loadout`
+`Hunt creature → obtain Essences using Creature Focus → gain Essence XP and duplicates → dismantle or invest Dust → ascend → equip in contextual loadout`
 
 #### Existing strengths
 
@@ -352,7 +352,7 @@ Soulstones are already awarded throughout that ecosystem. The reward funnel exis
 
 Essence evolution is the runner-up and should eventually receive major investment.
 
-It comes second because the base Essence system already has considerably more player decision-making than Soulstones: collection, focus, leveling priorities, active/passive pairings, and contextual loadouts.
+It comes second because the base Essence system already has considerably more player decision-making than Soulstones: collection, Creature Focus, leveling priorities, active/passive pairings, and contextual loadouts.
 
 Doing evolution properly also demands significant ability authoring and balance across 80 Essences. Soulstone Constellations can deliver broad strategic value with roughly ten keystones and a handful of reusable rule hooks.
 
@@ -418,7 +418,7 @@ Decision points occur at:
 
 - **Goal selection:** collection, difficult combat, material throughput, rare hunting, crafting ceiling, or dungeon security.
 - **Keystone commitment:** selecting one option excludes its sibling.
-- **Activity configuration:** area, creature focus, tool, crafting project, or dungeon route changes in response.
+- **Activity configuration:** area, Creature Focus, tool, crafting project, or dungeon route changes in response.
 - **Resource allocation:** Soulstones spent opening one branch delay another.
 - **Mastery:** players learn which circumstances make their trade-off valuable.
 - **Long-term identity:** the combination of branch choices remains different even after extensive progression.

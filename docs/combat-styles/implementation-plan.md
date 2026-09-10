@@ -14,8 +14,8 @@ The selected Combat Style is **global for every battle type**. There is no Comba
 
 - A character has one optional global selection. Leaving it empty disables style benefits and penalties for every new battle.
 - Both styles are available at level 0 without an introduction, character-level gate, or Essence-count gate.
-- Each style retains its own XP, level, refinement, upgrades, mastered upgrade, and Focus choice. Switching never copies progression between styles.
-- Level 0 provides the full core mechanic. Every mastery level adds 1% of the base converted Barrier for Bastion or a flat +1% to charged Focus effects for Conduit; level 10 retains +10% of base converted Barrier and a +10% flat increase to charged Focus strength. Flat bonuses add directly to the displayed percentage; a multiplier such as ×1.2 scales the amount it applies to. Zero-Charge Focus output is unchanged. Refinements unlock at level 3, upgrade slots at levels 5 and 8, Opening Technique at level 7, and Upgrade Mastery at level 9. There is no separate Core Rank system.
+- Each style retains its own XP, level, refinement, upgrades, and mastered upgrade. Conduit's Channeled Essence comes from the first occupied slot of the Essence loadout used for each battle. Switching never copies progression between styles.
+- Level 0 provides the full core mechanic. Every mastery level adds 1% of the base converted Barrier for Bastion or a flat +1% to charged Channeled Essence effects for Conduit; level 10 retains +10% of base converted Barrier and a +10% flat increase to charged Channeled Essence strength. Flat bonuses add directly to the displayed percentage; a multiplier such as ×1.2 scales the amount it applies to. Zero-Charge Channeled Essence output is unchanged. Refinements unlock at level 3, upgrade slots at levels 5 and 8, Opening Technique at level 7, and Upgrade Mastery at level 9. There is no separate Core Rank system.
 - Only the style captured for an eligible rewarded encounter receives XP. Noncombat quest XP does not train styles.
 - Selection changes are free but obey existing encounter/committed-run boundaries. They cannot rewrite completed combat, heal, reset cooldowns, or transfer Charge or Barrier between encounters.
 - Styles modify existing abilities without changing shared ability definitions or adding equipment attributes or Essence slots.
@@ -26,20 +26,24 @@ The selected Combat Style is **global for every battle type**. There is no Comba
 | --- | --- |
 | `CombatStyleDefinition` and versioned catalog | Authoritative descriptions, choices, tuning, and XP schedule. |
 | `CharacterCombatStyle` | Per-character, per-style level, XP, and remembered choices. Absence of a row represents the available level-0 base form. |
-| `CharacterCombatStyleSelection` | One row keyed only by `CharacterId`, containing the optional style ID, refinement, upgrades, and Focus. No activity field or override precedence. |
-| `CombatStyleSnapshot` | Immutable identity, content version, resolved tuning, mastery level, choices, and Focus captured for combat. |
+| `CharacterCombatStyleSelection` | One row keyed only by `CharacterId`, containing the optional style ID, refinement, upgrades, and mastered upgrade. No activity field or override precedence. Legacy stored Channeled Essence columns are ignored for current choices. |
+| `CombatStyleSnapshot` | Immutable identity, content version, resolved tuning, mastery level, choices, and Channeled Essence captured for combat. |
 
 Read-only overview and preview operations must not create progression rows. Selection and XP commands persist required progress inside the established character transaction. Repository caches follow tracking generations so clearing tracked entities cannot cause updates to stale objects.
 
 The selection repository exposes one nullable global selection. Combat setup must use that same row for idle combat, dungeons, raids, World Tower, arena, tournaments, and region bosses. There is no fallback to an old per-activity style.
 
-## Conduit Focus
+## Conduit Channeled Essence
 
-Conduit retains its required Focus Essence. The editor offers eligible equipped Essences from the existing default Essence loadout. Save and preview validate direct damage, healing, or Barrier eligibility through the same prepared abilities used in combat.
+Conduit automatically uses the first occupied slot in the Essence loadout selected for each battle. Select by `SlotIndex`, skipping only empty slots. Honor the existing per-activity Essence loadout assignment and archive-order fallback. For supplied captured Essences, use their already ordered slot sequence. The global Combat Style editor neither loads nor validates an arbitrary default Essence loadout; saving and numeric previews are independent of Channeled Essence eligibility.
 
-Focus options expose Essence identity, name, prepared ability details, and eligibility without a cast-order field. The Focus control uses the shared `app-dropdown` in field mode, matching the inventory and Essence pages. Option labels show Essence names without sequence numbers.
+A shared Channeled Essence resolver checks the same prepared current ability, including evolution, used in combat. Return `IsChanneledEssenceEligible` on owned Essence DTOs so the Essence page can identify unsuitable first slots without duplicating combat rules in the client. While Conduit is equipped, mark the first occupied slot with a Channeled Essence badge. Offer **Channel Essence** on another eligible equipped Essence: swap it with the first occupied slot, preserve every other Essence, save once through the existing loadout flow, and restore the saved arrangement on failure.
 
-At combat preparation, validate the global Focus against that battle's actual equipped Essences. An existing equipment or Essence activity assignment can change the tools in a battle but cannot select a different Combat Style. If the global Focus is absent or ineligible, provide an actionable configuration error; do not silently choose another Essence or bypass the style.
+At combat preparation, require the first Essence to have direct damage, healing, or Barrier on its active cast. Reject an empty or unsuitable first slot with a clear instruction to place a suitable Essence first; never skip to a later eligible Essence. Capture that Essence's owned identity and definition in the immutable battle snapshot. Existing committed snapshots retain their original Channeled Essence, even if it was selected under the old policy. Slot position does not introduce a casting sequence.
+
+Remove manual Channeled Essence fields from current API selection/entry contracts and remove the Channeled Essence options list and dropdown. Ignore stale client or persisted Channeled Essence IDs, clear legacy choice columns on normal authorized saves, and leave historical migrations and captured snapshot fields intact. No schema migration is needed. Catalog version `combat-styles.v5` introduced the first-slot policy; version `combat-styles.v6` names the mechanic Channeled Essence. All numeric tuning is unchanged.
+
+Use **Creature Focus** for the Creatures-tab feature and **Channeled Essence** for Conduit throughout current UI, API contracts, services, tests, and guides. The loadout badge reads **Channeled** and its action reads **Channel Essence**. Keep historical database column names, durable quest/event identities, and immutable battle JSON members as explicit compatibility boundaries. Current Conduit DTOs expose `channeled*` fields independently of historical snapshot serialization. Old captured content versions retain their original combat-log text for deterministic replay; new captures use the new name.
 
 ## Application and API
 
@@ -50,7 +54,7 @@ Keep the authenticated, character-scoped CQRS operations for:
 - Saving a global selection.
 - Awarding captured style XP through existing reward transactions.
 
-Selection requests contain `CombatStyleId`, `RefinementId`, `UpgradeIds`, `FocusPlayerEssenceId`, optional `MasteredUpgradeId`, and optional remembered-choice restoration. A non-null mastery requires the style's level to be at least 9 and the upgrade to be equipped. Overview and request contracts have no activity or introduction fields. Entries expose progression and choices without an unlock entitlement.
+Selection requests contain `CombatStyleId`, `RefinementId`, `UpgradeIds`, optional `MasteredUpgradeId`, and optional remembered-choice restoration. A non-null mastery requires the style's level to be at least 9 and the upgrade to be equipped. Overview and request contracts have no manual Channeled Essence, activity, or introduction fields. Entries expose progression and choices without an unlock entitlement.
 
 Definitions expose Opening Technique metadata, mastery descriptions on upgrades, and separately resolved milestone tuning. Capture this tuning and the chosen mastery in `CombatStyleSnapshot` so later catalog changes cannot alter committed battles. Fields absent from old snapshot JSON default to zero/false/null; old battles receive no new opening or mastery effects.
 
@@ -67,12 +71,12 @@ Existing committed snapshots remain immutable, including legacy snapshots with n
 Preserve the existing engine mechanics:
 
 - Bastion conversion of all combat healing received before missing-Health/cap limits, recipient-owned rules, reaction exclusions, all refinements, and conditional upgrades. Preserve existing healing target selection, priorities and authored cast conditions; Barrier does not influence targeting.
-- Conduit normal-cast provenance, contributor tracking, charge curves, Focus validation, and direct-component restrictions.
+- Conduit normal-cast provenance, contributor tracking, charge curves, Channeled Essence validation, and direct-component restrictions.
 - Encounter-local state, continuous-wave behavior, deterministic checkpoints, and internal balance diagnostics.
 
 At the beginning of each encounter, level-7 Bastion gains Barrier equal to 5% maximum Health and level-7 Conduit gains 1 Charge, with normal caps. Apply openings once before the first action, after checkpoint/stat tracking is initialized. New waves in a continuous battle do not reapply an existing combatant's opening, and summons do not inherit one. Barrier grants must not emit recursive Barrier-gain reactions.
 
-Implement all six mastery enhancements described in the game design with one equipped selection. Sample zero-Barrier/Health/Charge conditions before the affected cast or recovery, apply each bonus once, and retain Focus component restrictions and Shelter recipient caps. Use the same milestone tuning for previews and runtime. The offline harness accepts `MasteredUpgradeId`, freezes both additions, and rejects invalid or tampered recipes.
+Implement all six mastery enhancements described in the game design with one equipped selection. Sample zero-Barrier/Health/Charge conditions before the affected cast or recovery, apply each bonus once, and retain Channeled Essence component restrictions and Shelter recipient caps. Use the same milestone tuning for previews and runtime. The offline harness accepts `MasteredUpgradeId`, freezes both additions, and rejects invalid or tampered recipes.
 
 Idle style XP uses each recipient's outcome-eligible unbonused combat XP share. It advances between encounters, including offline batches. Dungeon rewards retain captured style identity and eligible base XP through pending, secured, and claimed rewards. Existing durable claim/settlement boundaries prevent duplicate training.
 
@@ -80,7 +84,7 @@ Modes that award no ordinary eligible combat XP do not invent a separate style r
 
 ## Reprisal replaces Counterweight
 
-Use content version `combat-styles.v4` and the current Bastion refinement ID `reprisal`. Retain Fortification's normal conversion and all existing progression, upgrade, Opening Technique, and Upgrade Mastery rules.
+Content version `combat-styles.v4` introduced the current Bastion refinement ID `reprisal`; versions v5 and v6 retain it. Retain Fortification's normal conversion and all existing progression, upgrade, Opening Technique, and Upgrade Mastery rules.
 
 Store 25% of actual enemy damage absorbed by the character's own Barrier, capped at 10% of Max Health. Barrier may come from any source; another combatant's absorption does not contribute. Reserve existing stored damage at the next normally cast damaging Essence's cast start; its first direct enemy attack attempt consumes it once, including a miss or dodge. New absorption during the cast remains banked for a later cast. Return an unused reservation if no eligible attack occurs, subject to the cap, and recheck the cap before release if Max Health has fallen. The contribution uses the attempt's damage type and target mitigation without further outgoing amplification, remains noncritical, and does not generate Lifesteal or extra damage-derived reactions. Reprisal never spends Barrier.
 
@@ -101,7 +105,7 @@ Preserve the approved layout and existing game design system:
 - Refinement cards and upgrade slots/options below.
 - Shared panels, cards, subtle borders, neutral copy, and accent selections used by the other character pages.
 
-Conduit's Focus control sits in its mechanic panel. Keep preview loading/errors, unsaved changes, and the help guide; the manual Page tour and Refresh buttons are removed. Level/XP invalidations refresh live, including updates arriving during an in-flight request, while preserving draft choices. The milestone timeline identifies Opening Technique at 7 and Upgrade Mastery at 9. Show the technique's current unlock state and one mastery selector tied to the equipped upgrades; removing its upgrade clears the draft mastery. The overview widget describes the globally selected style and provides a direct link to the editor.
+Conduit's mechanic panel explains that the first Essence in the battle loadout is the Channeled Essence. The separate dropdown is removed; loadout arrangement and its Channeled badge live on the Essence page. Keep preview loading/errors, unsaved changes, and the help guide; the manual Page tour and Refresh buttons are removed. Level/XP invalidations refresh live, including updates arriving during an in-flight request, while preserving draft choices. The milestone timeline identifies Opening Technique at 7 and Upgrade Mastery at 9. Show the technique's current unlock state and one mastery selector tied to the equipped upgrades; removing its upgrade clears the draft mastery. The overview widget describes the globally selected style and provides a direct link to the editor.
 
 Do not show a committed-battle warning in the editor or character overview. Overview and preview responses have no committed-activity/style display fields and perform no activity/snapshot lookups for such a banner. Existing server-side mutation checks and frozen battle snapshots still enforce their normal boundaries.
 
@@ -123,7 +127,7 @@ For Upgrade Mastery, add a separate forward migration with nullable `MasteredUpg
 
 ## Continuous mastery-level scaling
 
-Use catalog version `combat-styles.v4` for new captures, retaining the continuous mastery scaling introduced in v3. Author the per-level Barrier bonus for Bastion as 0.01 and the per-level charged Focus bonus for Conduit as 0.01. Apply the captured mastery level using the resolved tuning for the selected refinement, then add qualifying upgrade and Upgrade Mastery bonuses. Return level-based bonuses in previews and remove Core Rank counters, pips and unlock labels from current UI and API contracts.
+Use catalog version `combat-styles.v6` for new captures, retaining the continuous mastery scaling introduced in v3. Author the per-level Barrier bonus for Bastion as 0.01 and the per-level charged Channeled Essence bonus for Conduit as 0.01. Apply the captured mastery level using the resolved tuning for the selected refinement, then add qualifying upgrade and Upgrade Mastery bonuses. Return level-based bonuses in previews and remove Core Rank counters, pips and unlock labels from current UI and API contracts.
 
 Historical committed snapshots retain their original rank-scaled tuning through the compatibility fallback; replay must not silently retune them. New snapshots resolve level scaling from versioned content. This change requires no schema migration or earned-XP reset.
 
@@ -134,11 +138,12 @@ Verify every level from 0 through 10, especially formerly unchanged odd levels; 
 Run backend tests through `build/run-tests.ps1`. Verify:
 
 - Both styles preview and select at level 0 without any unlock state; reads do not persist training.
-- One global selection resolves identically across every battle activity; an empty selection disables styles globally.
-- Existing XP, remembered choices, milestone restrictions, Focus eligibility, and tracking-generation behavior remain correct.
+- One global style/refinement/upgrades selection applies across every battle activity; Conduit derives its Channeled Essence from each battle's first occupied Essence slot. An empty selection disables styles globally.
+- Unsorted stored slots and empty gaps resolve in visible slot order. Different activity assignments and captured loadouts can supply different Channeled Essence identities. An ineligible first Essence is not skipped, and stale client or stored Channeled Essence IDs cannot override the first slot.
+- Existing XP, remembered choices, milestone restrictions, Channeled Essence eligibility, and tracking-generation behavior remain correct.
 - Live preparation, snapshots, PvP participants, idle rewards, dungeon claims, and legacy replays preserve their boundaries.
 - Practice and combined-preset code, endpoints, registrations, DTOs, and current schema entities are absent.
 - The new migration retains only the intended former default row, preserves progression/snapshots, and matches the final EF model.
 - Level 6/7 opening gates, level 8/9 mastery gates, all six empowered effects, no double procs or repeated wave openings, legacy snapshot defaults, and mastery save/restore/clear behavior.
 
-Run focused frontend tests, generated state-scope checks, and the development build with npm. Inspect the global editor and its empty/error/Focus states when a compatible local backend/schema is available. Report separately when a live migration or authenticated integration check has not been performed.
+Run focused frontend tests, generated state-scope checks, and the development build with npm. Cover Channeled badges, unsuitable first slots, empty and holey loadouts, atomic Channel Essence swaps, loadout switching, and failed-save rollback. Inspect the global editor and Essence loadout controls when a compatible local backend/schema is available. Report separately when a live migration or authenticated integration check has not been performed.

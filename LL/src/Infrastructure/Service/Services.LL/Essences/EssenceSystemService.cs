@@ -39,7 +39,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IPublisher? _publisher;
     private readonly IGameEventOutbox _outbox;
     private readonly ICombatStyleMutationBoundary? _buildBoundary;
-    private readonly Dictionary<Guid, string?> _essenceFocusCache = [];
+    private readonly Dictionary<Guid, string?> _creatureFocusCache = [];
     private readonly Dictionary<Guid, Dictionary<string, CreatureResonance>> _resonanceCache = [];
     private readonly Dictionary<string, ItemBase> _essenceItemBaseCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _missingEssenceItemBaseIds = new(StringComparer.OrdinalIgnoreCase);
@@ -540,6 +540,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
             activity);
         var equippedEssences = loadout?.Slots
+            .OrderBy(x => x.SlotIndex)
             .Select(x => x.PlayerEssence)
             .Where(x => x is not null)
             .Cast<PlayerEssence>()
@@ -567,7 +568,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             monsterId,
             eligible,
             factors,
-            (candidateMonsterId, ct) => IsEssenceFocusAsync(characterId, candidateMonsterId, ct),
+            (candidateMonsterId, ct) => IsCreatureFocusAsync(characterId, candidateMonsterId, ct),
             cancellationToken,
             modifiers ?? new EssenceDropRollModifiers());
     }
@@ -575,7 +576,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     public async Task PrepareEssenceDropsAsync(
         Guid characterId,
         IReadOnlyList<Creature> defeatedCreatures,
-        bool loadEssenceFocus,
+        bool loadCreatureFocus,
         CancellationToken cancellationToken)
     {
         var monsterIds = defeatedCreatures
@@ -611,11 +612,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             resonanceByCreature[monsterId] = resonance;
         }
 
-        if (!_essenceFocusCache.ContainsKey(characterId))
+        if (!_creatureFocusCache.ContainsKey(characterId))
         {
-            _essenceFocusCache[characterId] = _creatureArchiveService is null
+            _creatureFocusCache[characterId] = _creatureArchiveService is null
                 ? null
-                : await _creatureArchiveService.GetEssenceFocusCreatureIdAsync(characterId, cancellationToken);
+                : await _creatureArchiveService.GetCreatureFocusCreatureIdAsync(characterId, cancellationToken);
         }
 
         var possibleItemBaseIds = monsterIds
@@ -642,7 +643,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         string monsterId,
         bool eligible,
         IReadOnlyDictionary<BonusKind, double> factors,
-        Func<string, CancellationToken, Task<bool>> isEssenceFocusAsync,
+        Func<string, CancellationToken, Task<bool>> isCreatureFocusAsync,
         CancellationToken cancellationToken,
         EssenceDropRollModifiers modifiers)
     {
@@ -667,7 +668,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var relativeResonanceBonus = Math.Min(
             maximumRelativeDropChanceBonus,
             resonance.ResonanceValue * CreatureResonanceConstants.RelativeDropChanceBonusPerPoint);
-        var isFocused = await isEssenceFocusAsync(monsterId, cancellationToken);
+        var isFocused = await isCreatureFocusAsync(monsterId, cancellationToken);
         var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
         if (isFocused)
         {
@@ -676,7 +677,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         var pityProgressionGainBps = factors.Get(BonusKind.EssencePityProgressionGainBps);
         var effective = Math.Clamp(
-            (lootTable.BaseDropChance * (isFocused ? EssenceFocusRules.BaseDropChanceMultiplier : 1) *
+            (lootTable.BaseDropChance * (isFocused ? CreatureFocusRules.BaseDropChanceMultiplier : 1) *
                 (1 + relativeResonanceBonus)).ApplyPositiveBps(relativeDropRateBps) *
             modifiers.DropChanceMultiplier,
             0,
@@ -779,7 +780,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
                 monsterId,
                 true,
                 factors,
-                (candidateMonsterId, ct) => IsEssenceFocusAsync(characterId, candidateMonsterId, ct),
+                (candidateMonsterId, ct) => IsCreatureFocusAsync(characterId, candidateMonsterId, ct),
                 cancellationToken,
                 rollModifiers);
             if (!roll.Dropped || string.IsNullOrWhiteSpace(roll.EssenceDefinitionId)) continue;
@@ -799,7 +800,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             }
 
             drops.Add(_inventoryItemFactory.Create(itemBase, 1, characterId));
-            if (await IsEssenceFocusAsync(characterId, monsterId, cancellationToken))
+            if (await IsCreatureFocusAsync(characterId, monsterId, cancellationToken))
             {
                 await _outbox.EnqueueAsync(
                     GameEventTypes.FocusedCreatureEssenceReceived,
@@ -816,7 +817,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return drops;
     }
 
-    private async Task<bool> IsEssenceFocusAsync(
+    private async Task<bool> IsCreatureFocusAsync(
         Guid characterId,
         string creatureId,
         CancellationToken cancellationToken)
@@ -826,12 +827,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             return false;
         }
 
-        if (!_essenceFocusCache.TryGetValue(characterId, out var focusedCreatureId))
+        if (!_creatureFocusCache.TryGetValue(characterId, out var focusedCreatureId))
         {
-            focusedCreatureId = await _creatureArchiveService.GetEssenceFocusCreatureIdAsync(
+            focusedCreatureId = await _creatureArchiveService.GetCreatureFocusCreatureIdAsync(
                 characterId,
                 cancellationToken);
-            _essenceFocusCache[characterId] = focusedCreatureId;
+            _creatureFocusCache[characterId] = focusedCreatureId;
         }
 
         return string.Equals(focusedCreatureId, creatureId, StringComparison.OrdinalIgnoreCase);

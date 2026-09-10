@@ -2,7 +2,7 @@
 
 Combat Styles define how a character's equipment and Essences work together. Equipment supplies attributes, Essences supply abilities, and the equipped Combat Style adds a defining combat interaction.
 
-This folder describes the two implemented styles and three developed design proposals. Current implemented rules and values were checked against the repository on 9 September 2026. Proposed mechanics and numerical values are starting points for playtesting.
+This folder describes the two implemented styles and three developed design proposals. Current implemented rules and values were checked against the repository on 10 September 2026. Proposed mechanics and numerical values are starting points for playtesting.
 
 Shared documentation lives in this folder. Individual Combat Style guides live in `styles/`.
 
@@ -21,7 +21,7 @@ Shared documentation lives in this folder. Individual Combat Style guides live i
 | Combat Style | Status | Identity |
 | --- | --- | --- |
 | [Bastion](styles/bastion.md) | Implemented | Turn all healing received into Health and Barrier; refine it for recovery, Reprisal damage, or ally protection. |
-| [Conduit](styles/conduit.md) | Implemented | Choose one Essence as your Focus; your other Essences build Charge to strengthen its casts. |
+| [Conduit](styles/conduit.md) | Implemented | The first Essence in your battle loadout is your Channeled Essence; your other Essences build Charge to strengthen its casts. |
 | [Reaper](styles/reaper.md) | Design proposal | Advance damage from your own lingering conditions through direct Essence attacks. |
 | [Shepherd](styles/shepherd.md) | Design proposal | Build mutual protection around a bond with one chosen summon. |
 | [Gambler](styles/gambler.md) | Design proposal | Draw bounded hands of Steady and Lucky outcomes for your Essence actives. |
@@ -36,7 +36,8 @@ Every style file covers its core mechanic, mastery level bonuses, refinements, u
 - Choose the bonuses that suit your Combat Style. Unlock your first slot at Mastery 5 and a second at Mastery 8. All three upgrade choices become available with the first slot; equip up to two different upgrades, and either slot may stay empty.
 - At level 7, the style's Opening Technique activates automatically once at the start of each battle, with any refinement or the base form.
 - At Mastery 9, choose one of your equipped upgrades to gain its additional mastery effect. The choice is optional and occupies its existing slot. Removing that upgrade clears its mastery selection.
-- Save applies the configuration. Discard restores the saved configuration. Each style remembers its own choices, including Conduit's Focus Essence.
+- Save applies the configuration. Discard restores the saved configuration. Each style remembers its refinement, upgrades, and Upgrade Mastery choice.
+- Conduit automatically channels the first occupied slot in the Essence loadout used for each battle. Arrange that loadout on the Essence page; **Channel Essence** swaps an eligible equipped Essence into the first occupied slot in one save. A **Channeled** badge identifies it while Conduit is equipped. **Creature Focus** is the separate creature-selection feature in the Creatures tab.
 
 Battle configurations use the saved style. Ordinary idle combat picks up changes at the next encounter; committed battles, dungeon runs, and matches retain their captured configuration until their normal boundary.
 
@@ -49,7 +50,7 @@ Only the Combat Style used for a rewarded encounter earns its eligible base comb
 | Mastery level | Automatic level bonus | Additional unlock | Upgrade slots |
 | ---: | --- | --- | ---: |
 | 0 | Base mechanic; no level bonus | Full core and base form | 0 |
-| 1 | +1% of Bastion's base converted Barrier / +1% flat increase to Conduit's charged Focus | — | 0 |
+| 1 | +1% of Bastion's base converted Barrier / +1% flat increase to Conduit's charged Channeled Essence | — | 0 |
 | 2 | +2% / +2% flat increase | — | 0 |
 | 3 | +3% / +3% flat increase | Refinement selection | 0 |
 | 4 | +4% / +4% flat increase | — | 0 |
@@ -60,7 +61,7 @@ Only the Combat Style used for a rewarded encounter earns its eligible base comb
 | 9 | +9% / +9% flat increase | Upgrade Mastery | 2 |
 | 10 | +10% / +10% flat increase | Maximum mastery level | 2 |
 
-Every mastery level from 1 through 10 automatically improves the core mechanic. Bastion adds 1% of its base converted Barrier per level; Conduit adds a flat +1% to charged Focus effects per level. Flat bonuses add directly to Focus strength: `100% + 1% flat = 101%`. Level 0 supplies the full base mechanic, and zero-Charge Conduit output stays unchanged. There is no separate Core Rank system or rank track. Refinements, upgrades and Upgrade Mastery remain player choices.
+Every mastery level from 1 through 10 automatically improves the core mechanic. Bastion adds 1% of its base converted Barrier per level; Conduit adds a flat +1% to charged Channeled Essence effects per level. Flat bonuses add directly to Channeled Essence strength: `100% + 1% flat = 101%`. Level 0 supplies the full base mechanic, and zero-Charge Conduit output stays unchanged. There is no separate Core Rank system or rank track. Refinements, upgrades and Upgrade Mastery remain player choices.
 
 Reaper, Shepherd and Gambler proposals use the same continuous progression: Reaper adds 1 point to Harvest per level; Shepherd adds 2 points of Bond protection; Gambler adds 1 point to the total Lucky payout per hand, split into 0.5 points per Lucky card for Safe Bet. Their level-10 totals are unchanged.
 
@@ -83,6 +84,6 @@ These are the catalog's requirements for each individual advancement, not cumula
 
 ## Documentation sources
 
-The implemented guides follow the [current content catalog](../../LL/src/API/API.LL/Data/combat-styles/combat-styles.v1.json), [progression rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleProgression.cs), [selection rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleRules.cs), and [combat implementation](../../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.CombatStyles.cs). The catalog currently declares content version `combat-styles.v4` despite its filename.
+The implemented guides follow the [current content catalog](../../LL/src/API/API.LL/Data/combat-styles/combat-styles.v1.json), [progression rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleProgression.cs), [selection rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleRules.cs), and [combat implementation](../../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.CombatStyles.cs). The catalog currently declares content version `combat-styles.v6` despite its filename. Version 6 introduces the Channeled Essence terminology without changing tuning or the first-slot rule introduced in version 5.
 
 The [game design](game-design.md) retains the original concepts and design rationale, updated for the level-0 starting point and bonuses at every mastery level. Historical verification records identify earlier rank-based behavior explicitly. Update these guides alongside future changes to the catalog or combat rules.

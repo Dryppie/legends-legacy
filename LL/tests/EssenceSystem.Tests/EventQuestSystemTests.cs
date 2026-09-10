@@ -95,6 +95,28 @@ public sealed partial class EventQuestSystemTests
         Assert.Single(publisher.Messages.OfType<EventQuestChanged>());
     }
 
+    [Theory]
+    [InlineData("EssenceFocusSet", "CreatureFocusSet")]
+    [InlineData("CreatureFocusSet", "EssenceFocusSet")]
+    public async Task Creature_focus_event_quests_accept_historical_and_current_trigger_names(string objectiveType, string triggerType)
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 2);
+        definition.Objectives[0].Type = objectiveType;
+        var service = CreateService(db, definition, new RecordingPublisher());
+        var characterId = Guid.NewGuid();
+        db.Characters.Add(new Character { Id = characterId, Name = "FocusTester", NormalizedName = "FOCUSTESTER" });
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(characterId, new QuestTrigger(triggerType), Guid.NewGuid(),
+            GameEventTypes.CreatureFocusSet, CancellationToken.None);
+
+        var state = Assert.Single((await service.GetJournalAsync(characterId, CancellationToken.None)).Events);
+        Assert.Equal(1, Assert.Single(state.Objectives).CurrentAmount);
+        Assert.Equal(1, state.MyContribution);
+    }
+
     [Fact]
     public async Task Starting_a_server_wide_event_announces_it_in_world_chat_once()
     {

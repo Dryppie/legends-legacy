@@ -9,9 +9,9 @@ export interface CombatStyleChoiceDefinition {
 export interface CombatStyleMasteryTuning {
   barrierFraction: number;
   barrierPerMasteryLevel: number;
-  focusBaseMultiplier: number;
-  focusPerCharge: number;
-  focusPerMasteryLevel: number;
+  channeledBaseMultiplier: number;
+  channeledPerCharge: number;
+  channeledPerMasteryLevel: number;
 }
 
 export interface CombatStyleUpgradeDefinition
@@ -39,7 +39,6 @@ export interface CombatStyleEntry {
   refinementId: string | null;
   upgradeIds: string[];
   masteredUpgradeId?: string | null;
-  focusPlayerEssenceId: string | null;
 }
 
 export interface CombatStyleSelectionRequest {
@@ -47,7 +46,6 @@ export interface CombatStyleSelectionRequest {
   refinementId: string | null;
   upgradeIds: string[];
   masteredUpgradeId?: string | null;
-  focusPlayerEssenceId: string | null;
   restoreRememberedChoices?: boolean;
 }
 
@@ -59,18 +57,8 @@ export interface CombatStyleSnapshot {
   refinementId: string | null;
   upgradeIds: string[];
   masteredUpgradeId?: string | null;
-  focusPlayerEssenceId: string | null;
-  focusEssenceDefinitionId: string | null;
-}
-
-export interface CombatStyleFocusOption {
-  playerEssenceId: string;
-  essenceDefinitionId: string;
-  name: string;
-  abilityId: string;
-  cooldownTicks: number;
-  isEligible: boolean;
-  eligibleEffectIds: string[];
+  channeledPlayerEssenceId: string | null;
+  channeledEssenceDefinitionId: string | null;
 }
 
 export interface CombatStylePreviewFact {
@@ -85,7 +73,6 @@ export interface CombatStyleOverview {
   selection: CombatStyleSelectionRequest;
   effectiveStyle: CombatStyleSnapshot | null;
   validationIssue: string | null;
-  focusOptions: CombatStyleFocusOption[];
   previewFacts?: CombatStylePreviewFact[];
 }
 

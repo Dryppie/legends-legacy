@@ -10,7 +10,7 @@ namespace EssenceSystem.Tests;
 
 public sealed class CombatStyleMilestoneEngineTests
 {
-    private static readonly Guid Focus = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid Channeled = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly CombatStyleMilestoneTuning Milestones = new()
     {
         OpeningBarrierFraction = .05,
@@ -70,9 +70,9 @@ public sealed class CombatStyleMilestoneEngineTests
     [Theory]
     [InlineData(6, 0, 160)]
     [InlineData(7, 1, 200)]
-    public void Primed_circuit_unlocks_at_seven_before_first_focus_cast(int level, int charge, int damage)
+    public void Primed_circuit_unlocks_at_seven_before_first_channeled_cast(int level, int charge, int damage)
     {
-        var (abilities, origins) = Circuit(0, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(0, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit() with { Level = level, MilestoneTuning = Milestones }, origins);
         var enemy = Enemy();
         var result = Run(actor, enemy);
@@ -81,7 +81,7 @@ public sealed class CombatStyleMilestoneEngineTests
         var summary = Assert.Single(result.CombatStyles);
         Assert.Equal(charge, summary.ChargeGenerated);
         Assert.Equal(charge, summary.ChargeSpent);
-        Assert.Equal(1, summary.FocusCastsByCharge[charge]);
+        Assert.Equal(1, summary.ChanneledCastsByCharge[charge]);
         if (level == 7)
             Assert.Equal("Primed Circuit", result.EventLog[0].Source);
     }
@@ -89,7 +89,7 @@ public sealed class CombatStyleMilestoneEngineTests
     [Fact]
     public void Opening_charge_is_capped_and_does_not_claim_a_contributor()
     {
-        var (abilities, origins) = Circuit(1, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(1, Ability("channeled", Damage(200)));
         var style = Conduit() with
         {
             Level = 7, Tuning = new() { ChargeCap = 2 },
@@ -98,7 +98,7 @@ public sealed class CombatStyleMilestoneEngineTests
         var summary = Assert.Single(Run(Actor(abilities, style, origins)).CombatStyles);
         Assert.Equal(2, summary.ChargeGenerated);
         Assert.Equal(2, summary.ChargeSpent);
-        Assert.Equal(1, summary.FocusCastsByCharge[2]);
+        Assert.Equal(1, summary.ChanneledCastsByCharge[2]);
         Assert.Empty(summary.Contributors);
     }
 
@@ -272,7 +272,7 @@ public sealed class CombatStyleMilestoneEngineTests
     [InlineData(9, "partial-flow", 3, 280)]
     public void Charge_upgrade_masteries_expand_conditions_without_stacking_their_bonus(int level, string upgrade, int charge, int damage)
     {
-        var (abilities, origins) = Circuit(charge, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(charge, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit(upgrade) with { Level = level }, origins);
         var enemy = Enemy();
         Run(actor, enemy);
@@ -285,12 +285,12 @@ public sealed class CombatStyleMilestoneEngineTests
     [InlineData(9, 0, 500, 160)]
     [InlineData(9, 1, 500, 210)]
     [InlineData(9, 3, 500, 290)]
-    public void Emergency_mastery_boosts_only_immediate_self_recovery_on_charged_focus(
+    public void Emergency_mastery_boosts_only_immediate_self_recovery_on_charged_channeled(
         int level, int charge, int health, int selfRecovery)
     {
         var healAlly = Heal(200); healAlly.Id = "ally-heal"; healAlly.Target = AbilityTargetSelector.AllAllies;
         var periodic = Heal(20); periodic.Id = "periodic"; periodic.DurationTicks = 10; periodic.IntervalTicks = 1;
-        var (abilities, origins) = Circuit(charge, Ability("focus", Damage(200), Heal(200), Barrier(200), healAlly, periodic));
+        var (abilities, origins) = Circuit(charge, Ability("channeled", Damage(200), Heal(200), Barrier(200), healAlly, periodic));
         abilities.Add(Passive("passive", AbilityTriggerEvent.OnAbilityUsed, Barrier(10)));
         var actor = Actor(abilities, Conduit(CombatStyleIds.EmergencyChannel) with { Level = level }, origins);
         actor.SetHealth(health);
@@ -310,15 +310,15 @@ public sealed class CombatStyleMilestoneEngineTests
         CombatStyleId = CombatStyleIds.Bastion, Kind = CombatStyleKind.Bastion, Level = 9,
         UpgradeIds = mastered is null ? [] : [mastered], MasteredUpgradeId = mastered,
         // Isolate milestone behavior from the separately tested automatic level bonus.
-        Tuning = new() { BarrierPerMasteryLevel = 0, FocusPerMasteryLevel = 0 },
+        Tuning = new() { BarrierPerMasteryLevel = 0, ChanneledPerMasteryLevel = 0 },
         MilestoneTuning = Milestones with { OpeningBarrierFraction = 0, OpeningCharge = 0 }
     };
 
     private static CombatStyleSnapshot Conduit(string? mastered = null) => new()
     {
         CombatStyleId = CombatStyleIds.Conduit, Kind = CombatStyleKind.Conduit, Level = 9,
-        FocusPlayerEssenceId = Focus, UpgradeIds = mastered is null ? [] : [mastered], MasteredUpgradeId = mastered,
-        Tuning = new() { BarrierPerMasteryLevel = 0, FocusPerMasteryLevel = 0 },
+        ChanneledPlayerEssenceId = Channeled, UpgradeIds = mastered is null ? [] : [mastered], MasteredUpgradeId = mastered,
+        Tuning = new() { BarrierPerMasteryLevel = 0, ChanneledPerMasteryLevel = 0 },
         MilestoneTuning = Milestones with { OpeningBarrierFraction = 0, OpeningCharge = 0 }
     };
 
@@ -355,7 +355,7 @@ public sealed class CombatStyleMilestoneEngineTests
     private static AbilityEffectSpec Damage(int value, AbilityTargetSelector target = AbilityTargetSelector.CurrentTarget) => new()
     { Id = "damage", Operation = AbilityEffectOperation.Damage, Target = target, BaseValue = value, CritEligibility = CritEligibility.Disallowed };
 
-    private static (List<CompiledAbility> Abilities, Dictionary<string, Guid> Origins) Circuit(int contributors, CompiledAbility focus)
+    private static (List<CompiledAbility> Abilities, Dictionary<string, Guid> Origins) Circuit(int contributors, CompiledAbility channeled)
     {
         var abilities = new List<CompiledAbility>();
         var origins = new Dictionary<string, Guid>();
@@ -366,8 +366,8 @@ public sealed class CombatStyleMilestoneEngineTests
             { Id = id, Operation = AbilityEffectOperation.ModifyThreat, Target = AbilityTargetSelector.Self, BaseValue = 1 }));
             origins.Add(id, Guid.NewGuid());
         }
-        abilities.Add(focus);
-        origins.Add(focus.Id, Focus);
+        abilities.Add(channeled);
+        origins.Add(channeled.Id, Channeled);
         return (abilities, origins);
     }
 }

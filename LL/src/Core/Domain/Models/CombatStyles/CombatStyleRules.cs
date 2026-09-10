@@ -11,17 +11,17 @@ public static class CombatStyleRules
     public static CombatStyleSelectionRequest NormalizeSelection(CombatStyleSelectionRequest selection)
     {
         var refinementId = CurrentRefinementId(selection.CombatStyleId, selection.RefinementId);
-        return refinementId == selection.RefinementId ? selection : selection with { RefinementId = refinementId };
+        return selection with { RefinementId = refinementId, ChanneledPlayerEssenceId = null };
     }
 
     public static string? ValidateSelection(CharacterCombatStyle? owned, CombatStyleDefinition? definition,
-        CombatStyleSelectionRequest selection, IReadOnlyList<CombatStyleFocusOption> focusOptions)
+        CombatStyleSelectionRequest selection)
     {
         selection = NormalizeSelection(selection);
         if (selection.CombatStyleId is null)
-            return selection.RefinementId is not null || selection.UpgradeIds.Count > 0 || selection.FocusPlayerEssenceId is not null
+            return selection.RefinementId is not null || selection.UpgradeIds.Count > 0
                 || selection.MasteredUpgradeId is not null
-                ? "An empty Combat Style cannot have a refinement, upgrades, mastery, or Focus." : null;
+                ? "An empty Combat Style cannot have a refinement, upgrades, or mastery." : null;
         if (definition is null) return "Choose an available Combat Style.";
         var level = owned?.Level ?? 0;
         if (selection.RefinementId is not null && (level < 3 || !definition.Refinements.Any(x => x.Id == selection.RefinementId)))
@@ -34,16 +34,15 @@ public static class CombatStyleRules
         if (selection.MasteredUpgradeId is not null
             && (level < CombatStyleProgression.UpgradeMasteryLevel || !selection.UpgradeIds.Contains(selection.MasteredUpgradeId, StringComparer.Ordinal)))
             return "Choose one equipped upgrade to master (unlocked at level 9).";
-        if (definition.Kind == CombatStyleKind.Conduit
-            && !focusOptions.Any(x => x.PlayerEssenceId == selection.FocusPlayerEssenceId && x.IsEligible))
-            return "Choose an equipped Essence that deals direct damage, heals or grants Barrier when it casts, then set it as your Focus before battle.";
-        if (definition.Kind != CombatStyleKind.Conduit && selection.FocusPlayerEssenceId is not null)
-            return "Only Conduit uses a Focus Essence.";
         return null;
     }
 
+    public static string? ValidateChanneledEssence(ChanneledEssenceOption? channeledEssence) => channeledEssence is { IsEligible: true }
+        ? null
+        : "Conduit requires an Essence that deals direct damage, heals, or grants Barrier when it casts in the first occupied Essence slot. Put one first before battle.";
+
     public static CombatStyleSnapshot Snapshot(CombatStyleCatalog catalog, CombatStyleDefinition definition,
-        CharacterCombatStyle owned, CombatStyleSelectionRequest selection, string? focusDefinitionId)
+        CharacterCombatStyle owned, CombatStyleSelectionRequest selection, ChanneledEssenceOption? channeledEssence = null)
     {
         selection = NormalizeSelection(selection);
         return new()
@@ -52,7 +51,8 @@ public static class CombatStyleRules
             Level = owned.Level,
             RefinementId = selection.RefinementId, UpgradeIds = selection.UpgradeIds.ToImmutableArray(),
             MasteredUpgradeId = selection.MasteredUpgradeId,
-            FocusPlayerEssenceId = selection.FocusPlayerEssenceId, FocusEssenceDefinitionId = focusDefinitionId,
+            ChanneledPlayerEssenceId = definition.Kind == CombatStyleKind.Conduit ? channeledEssence?.PlayerEssenceId : null,
+            ChanneledEssenceDefinitionId = definition.Kind == CombatStyleKind.Conduit ? channeledEssence?.EssenceDefinitionId : null,
             Tuning = definition.Refinements.FirstOrDefault(x => x.Id == selection.RefinementId)?.Tuning ?? definition.Tuning,
             MilestoneTuning = definition.MilestoneTuning
         };
@@ -82,10 +82,10 @@ public static class CombatStyleRules
             foreach (var tuning in definition.Refinements.Select(x => x.Tuning ?? definition.Tuning).Append(definition.Tuning))
             {
                 if (tuning.HealthFraction <= 0 || tuning.BarrierFraction <= 0 || Math.Abs(tuning.HealthFraction + tuning.BarrierFraction - 1) > .000001
-                    || tuning.ChargeCap is < 2 or > 4 || tuning.FocusBaseMultiplier <= 0 || tuning.FocusBaseMultiplier >= 1
-                    || tuning.FocusPerCharge <= 0
+                    || tuning.ChargeCap is < 2 or > 4 || tuning.ChanneledBaseMultiplier <= 0 || tuning.ChanneledBaseMultiplier >= 1
+                    || tuning.ChanneledPerCharge <= 0
                     || tuning.BarrierPerMasteryLevel is not { } barrierPerLevel || !double.IsFinite(barrierPerLevel) || barrierPerLevel < 0
-                    || tuning.FocusPerMasteryLevel is not { } focusPerLevel || !double.IsFinite(focusPerLevel) || focusPerLevel < 0
+                    || tuning.ChanneledPerMasteryLevel is not { } channeledPerLevel || !double.IsFinite(channeledPerLevel) || channeledPerLevel < 0
                     || tuning.RelayChargeReturn < 0 || tuning.RelayChargeReturn >= tuning.RelayMinimumSpent && tuning.RelayChargeReturn != 0)
                     throw new InvalidOperationException($"Invalid tuning for Combat Style {definition.Id}.");
                 if (bastion && (tuning.ReprisalAbsorbedDamageFraction is not { } absorbedFraction

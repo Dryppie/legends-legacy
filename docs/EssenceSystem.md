@@ -170,14 +170,14 @@ The featured creature in a dungeon MiniBoss or Boss encounter uses encounter-spe
 
 ## Combat Integration
 
-### Essence Focus
+### Creature Focus
 
 - A focused creature has **3x its base Essence chance** before relative resonance, global/focused upgrades, and encounter multipliers. At the current 0.01% base this starts at **0.03%**, or **0.3%** for a featured dungeon miniboss/boss before other bonuses.
-- Focused Essence drops remain chance-based at every defeat count. Focus adds no guaranteed drop or separate defeat counter; the existing relative resonance bonus still applies and resets on a drop.
-- Focus multiplies the creature's normalized area spawn probability by **1.2**, capped at 100% (20% becomes 24%). Other creatures retain their relative proportions. Encounter size, cadence, areas that do not contain the creature, and authored dungeon rosters are unchanged.
-- Pending idle combat resolves under the previous focus before a focus change. The existing eight-hour focus cooldown still applies.
+- Essence drops from your Creature Focus remain chance-based at every defeat count. Creature Focus adds no guaranteed drop or separate defeat counter; the existing relative resonance bonus still applies and resets on a drop.
+- Creature Focus multiplies the creature's normalized area spawn probability by **1.2**, capped at 100% (20% becomes 24%). Other creatures retain their relative proportions. Encounter size, cadence, areas that do not contain the creature, and authored dungeon rosters are unchanged.
+- Pending idle combat resolves under the previous Creature Focus before a change. The existing eight-hour Creature Focus cooldown still applies.
 
-Essence Focus requires no database migration or content configuration changes.
+Creature Focus requires no database migration or content configuration changes.
 
 Combat setup asks the Essence bonus provider for active loadout modifiers and applies only those modifiers to combat attributes.
 

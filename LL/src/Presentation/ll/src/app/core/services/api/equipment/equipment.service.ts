@@ -96,6 +96,10 @@ export interface EquipmentUpgradeMutation {
 export class EquipmentService {
   constructor(private apiService: ApiService) {}
 
+  public getLinkedEquipment(id: string): Observable<EquipmentInstance> {
+    return this.apiService.get(`equipment/linked/${id}`);
+  }
+
   public getEquipment(): Observable<EquipmentSlot[]> {
     return this.apiService.get('equipment').pipe();
   }

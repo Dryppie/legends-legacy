@@ -612,9 +612,11 @@ No database, running API, hosted workers, migrations, deployment, or production 
 
 ## Combat Styles
 
-An idle scenario may include `combatStyle` with `id`, individual `level` (1–10), optional `refinementId`, `upgradeIds`, and `focusEssenceDefinitionId`. A suite stage may set `combatStyles`, a map from its build IDs to those same selections. Omitting these fields preserves the no-style control. Existing equipment `activeStyleId` / `useNativeStyle` fields retain their equipment meaning.
+An idle scenario may include `combatStyle` with `id`, individual `level` (0–10), optional `refinementId`, `upgradeIds`, and `masteredUpgradeId`. Conduit channels the first Essence in the build's ordered `essenceIds`; put the desired Channeled Essence first. A legacy `focusEssenceDefinitionId` may only assert that same first Essence and cannot override it. A suite stage may set `combatStyles`, a map from its build IDs to those same selections. Omitting these fields preserves the no-style control. Existing equipment `activeStyleId` / `useNativeStyle` fields retain their equipment meaning.
 
-Selections use the shared content validator and actual progressed active abilities for Focus eligibility. Frozen character inputs contain the versioned effective Combat Style and deterministic owned Focus identity. Battle summaries retain `combatStyles` even with detailed logs disabled. Replays reject changed configuration or tuning that disagrees with the saved scenario/content.
+Selections use the shared content validator and actual progressed active abilities for Channeled Essence eligibility. Frozen character inputs contain the versioned effective Combat Style and deterministic owned Channeled Essence identity. Battle summaries retain `combatStyles` even with detailed logs disabled. Replays reject changed configuration or tuning that disagrees with the saved scenario/content.
+
+Current code uses `Channeled*` names. The immutable recipe, snapshot, tuning, and diagnostic JSON keep their historical `focus*` members and property order so existing reports retain their identity. Content version `combat-styles.v6` uses Channeled Essence in new combat logs; captured versions v1–v5 retain their original log wording for replay. This terminology change does not alter tuning or the first-slot rule.
 
 ```powershell
 dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- suite --suite LL/tools/BalanceHarness/Fixtures/combat-styles.json --samples 3 --seed 1337 --output TestResults/balance/combat-styles-new-run

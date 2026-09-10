@@ -68,7 +68,7 @@ Choose one refinement or keep the base form. Every hand contains five cards, and
 
 **High Stakes** concentrates more of the hand's output into its single Lucky cast. It retains the base form's eight-Steady bound. At mastery level 10, a 200-point effect produces **170 on Steady or 380 on Lucky**.
 
-**Counted Cards** replaces shuffling with a fixed repeating pattern. Every fifth draw is Lucky; there are four Steady draws between Lucky draws. The pattern controls Fortune outcomes while Essences continue using their normal automatic activation rules. It does not designate a Focus Essence.
+**Counted Cards** replaces shuffling with a fixed repeating pattern. Every fifth draw is Lucky; there are four Steady draws between Lucky draws. The pattern controls Fortune outcomes while Essences continue using their normal automatic activation rules. It does not designate a Channeled Essence.
 
 ## Upgrades — slots at levels 5 and 8
 
@@ -141,4 +141,4 @@ Playtest equally sized and differently sized effects, mixed damage/recovery abil
 
 ## Design references
 
-This expands the [original Gambler concept](../game-design.md#5-three-potential-combat-styles). It follows the existing [Conduit guide's effect boundaries](conduit.md#choosing-a-focus) for describing immediate Essence components and the normal [Barrier rules](../../combat-lexicon/conditions/barrier.md). Fortune, its cards, and the proposed rewards are new design, not existing game behavior.
+This expands the [original Gambler concept](../game-design.md#5-three-potential-combat-styles). It follows the existing [Conduit guide's effect boundaries](conduit.md#choosing-a-channeled-essence) for describing immediate Essence components and the normal [Barrier rules](../../combat-lexicon/conditions/barrier.md). Fortune, its cards, and the proposed rewards are new design, not existing game behavior.

@@ -9,9 +9,9 @@ public sealed record SoulArchive(
 
 public sealed record CreatureArchive(
     IReadOnlyList<CreatureArchiveEntry> Creatures,
-    bool CanChangeEssenceFocus,
-    DateTimeOffset? EssenceFocusAvailableAtUtc,
-    DateTimeOffset? EssenceFocusSetAtUtc);
+    bool CanChangeCreatureFocus,
+    DateTimeOffset? CreatureFocusAvailableAtUtc,
+    DateTimeOffset? CreatureFocusSetAtUtc);
 
 public sealed record CreatureArchiveEntry(
     string CreatureId,
@@ -19,10 +19,10 @@ public sealed record CreatureArchiveEntry(
     int KillCount,
     DateTimeOffset FirstDefeatedAtUtc,
     DateTimeOffset LastDefeatedAtUtc,
-    bool IsEssenceFocus,
-    DateTimeOffset? EssenceFocusSetAtUtc,
-    long EssenceFocusTotalDurationSeconds,
-    long CurrentEssenceFocusDurationSeconds,
+    bool IsCreatureFocus,
+    DateTimeOffset? CreatureFocusSetAtUtc,
+    long CreatureFocusTotalDurationSeconds,
+    long CurrentCreatureFocusDurationSeconds,
     IReadOnlyList<CreatureArchiveEssenceEntry> Essences,
     IReadOnlyList<CreatureArchiveLocation> Locations,
     IReadOnlyList<string> Tags);

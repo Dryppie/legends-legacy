@@ -12,5 +12,6 @@ public sealed class CharacterCombatStyle
     public string? RefinementId { get; set; }
     public string[] UpgradeIds { get; set; } = [];
     public string? MasteredUpgradeId { get; set; }
-    public Guid? FocusPlayerEssenceId { get; set; }
+    // Retained for persisted legacy rows; this is no longer a remembered Combat Style choice.
+    public Guid? ChanneledPlayerEssenceId { get; set; }
 }

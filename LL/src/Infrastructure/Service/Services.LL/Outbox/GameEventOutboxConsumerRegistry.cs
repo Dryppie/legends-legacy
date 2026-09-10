@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Outbox;
+using Application.Interfaces.Outbox;
 using Application.UseCases.Outbox;
 
 namespace Services.LL.Outbox;
@@ -14,7 +14,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.EssenceLoadoutChanged] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],
-            [GameEventTypes.EssenceFocusSet] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
+            [GameEventTypes.CreatureFocusSet] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.FocusedCreatureEssenceReceived] = [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.EssenceAscended] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements, GameEventOutboxConsumerNames.EventQuests],

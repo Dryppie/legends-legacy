@@ -20,11 +20,9 @@ export function styleOverview(id: string | null = null): CombatStyleOverview {
       refinementId: null,
       upgradeIds: [],
       masteredUpgradeId: null,
-      focusPlayerEssenceId: null,
     },
     effectiveStyle: null,
     validationIssue: null,
-    focusOptions: [],
     previewFacts: [],
     styles: ['bastion', 'conduit'].map((styleId, index) => ({
       definition: {
@@ -35,9 +33,9 @@ export function styleOverview(id: string | null = null): CombatStyleOverview {
         tuning: {
           barrierFraction: 0.75,
           barrierPerMasteryLevel: 0.01,
-          focusBaseMultiplier: 0.8,
-          focusPerCharge: 0.2,
-          focusPerMasteryLevel: 0.01,
+          channeledBaseMultiplier: 0.8,
+          channeledPerCharge: 0.2,
+          channeledPerMasteryLevel: 0.01,
         },
         openingTechnique: {
           name: index === 0 ? 'Entrenched' : 'Primed Circuit',
@@ -61,7 +59,6 @@ export function styleOverview(id: string | null = null): CombatStyleOverview {
       refinementId: null,
       upgradeIds: [],
       masteredUpgradeId: null,
-      focusPlayerEssenceId: null,
     })),
   };
 }
@@ -204,14 +201,18 @@ describe('CombatStyleStateService', () => {
     ]);
   });
 
-  it('keeps independent earned levels when switching and never repairs a missing Focus', () => {
+  it('keeps independent earned levels and allows Conduit without loadout data', () => {
     service.refresh();
     service.chooseStyle('conduit');
     expect(service.selected()?.level).toBe(1);
     expect(service.selected()?.currentXp).toBe(0);
-    expect(service.focusInvalid()).toBeTrue();
-    expect(service.canSave()).toBeFalse();
-    expect(service.draft().focusPlayerEssenceId).toBeNull();
+    expect(service.canSave()).toBeTrue();
+    expect(api.preview.calls.mostRecent().args[0]).toEqual({
+      combatStyleId: 'conduit',
+      refinementId: null,
+      upgradeIds: [],
+      masteredUpgradeId: null,
+    });
     service.chooseStyle('bastion');
     expect(service.selected()?.level).toBe(8);
     expect(service.selected()?.currentXp).toBe(500);
@@ -235,7 +236,6 @@ describe('CombatStyleStateService', () => {
       refinementId: null,
       upgradeIds: [],
       masteredUpgradeId: null,
-      focusPlayerEssenceId: null,
     });
     service.toggleUpgrade('prepared-wall');
     expect(service.draft().upgradeIds).toEqual([]);
@@ -265,18 +265,6 @@ describe('CombatStyleStateService', () => {
         name: entry.definition.id === 'bastion' ? 'Bastion' : 'Conduit',
       },
     }));
-    initial.styles[1].focusPlayerEssenceId = 'focus';
-    initial.focusOptions = [
-      {
-        playerEssenceId: 'focus',
-        essenceDefinitionId: 'focus-definition',
-        name: 'Focus Essence',
-        abilityId: 'focus-ability',
-        cooldownTicks: 10,
-        isEligible: true,
-        eligibleEffectIds: ['damage'],
-      },
-    ];
     api.get.and.returnValue(of(initial));
     api.preview.and.callFake((selection) => of({ ...initial, selection }));
     const failedSave = new Subject<
@@ -597,7 +585,7 @@ describe('CombatStyleStateService', () => {
     const displayed = service.preview();
     const registration = sync.register.calls
       .allArgs()
-      .find((args) => args[1] === 'combat-styles-essences')!;
+      .find((args) => args[1] === 'combat-styles')!;
     registration[2]({ targetRevision: 5 } as any);
     expect(service.preview()).toBe(displayed);
     expect(service.dirty()).toBeTrue();

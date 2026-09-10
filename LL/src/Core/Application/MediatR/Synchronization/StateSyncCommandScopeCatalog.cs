@@ -269,7 +269,7 @@ public static class StateSyncCommandScopeCatalog
             [StateSyncScopes.Essences],
             refreshCharacterOverview: false,
             refreshCharacterSummaryWhenChanged: true,
-            typeof(global::Application.UseCases.Essences.Commands.SetEssenceFocus.SetEssenceFocusCommand));
+            typeof(global::Application.UseCases.Essences.Commands.SetCreatureFocus.SetCreatureFocusCommand));
 
         RegisterAuthoritativeResponse(
             profiles,

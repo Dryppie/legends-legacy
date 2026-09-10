@@ -10,10 +10,10 @@
       "name": "3 equipped Essences",
       "areaId": "region_01_area_03",
       "assumptions": [
-        "Both Combat Styles are available. Compared builds differ only by Combat Style, individual level, and the explicit upgrades and mastery in their recipes.",
+        "Both Combat Styles are available. Compared builds differ by Combat Style, individual level, explicit upgrades and mastery, and Essence slot arrangement for the intended Channeled Essence.",
         "Two tier-1 rank-0 standard items and unascended level-1 Essences are assumed owned. Equipment style fields retain their separate meaning.",
         "Paired fixed seeds, normal opening cooldowns, and fresh encounter state. The two spawns test different damage/control pressure; this is not a comprehensive balance acceptance.",
-        "Conduit fast-Focus variants designate Vampire Bat to expose undercharged openings. The paired spawn adds longer pressure while retaining the same area rules.",
+        "Conduit fast Channeled Essence variants place Vampire Bat first to expose undercharged openings. The paired spawn adds longer pressure while retaining the same area rules.",
         "Opening pairs compare mastery levels 6 and 7; upgrade mastery pairs compare levels 8 and 9 with the same equipped upgrade. Each higher-level build also gains the next automatic mastery bonus."
       ],
       "builds": [
@@ -112,8 +112,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat"
           ]
         },
@@ -137,8 +137,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat"
           ]
         },
@@ -162,9 +162,9 @@
             }
           ],
           "essenceIds": [
+            "essence.vampire_bat",
             "essence.goblin",
-            "essence.goblin_warrior",
-            "essence.vampire_bat"
+            "essence.goblin_warrior"
           ]
         },
         {
@@ -187,9 +187,9 @@
             }
           ],
           "essenceIds": [
+            "essence.vampire_bat",
             "essence.goblin",
-            "essence.goblin_warrior",
-            "essence.vampire_bat"
+            "essence.goblin_warrior"
           ]
         },
         {
@@ -312,8 +312,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat"
           ]
         },
@@ -337,8 +337,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat"
           ]
         },
@@ -362,8 +362,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat"
           ]
         },
@@ -387,8 +387,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat"
           ]
         }
@@ -424,22 +424,18 @@
         },
         "conduit-1": {
           "id": "conduit",
-          "level": 1,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 1
         },
         "conduit-10": {
           "id": "conduit",
-          "level": 10,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 10
         },
         "conduit-fast-1": {
           "id": "conduit",
-          "focusEssenceDefinitionId": "essence.vampire_bat",
           "level": 1
         },
         "conduit-fast-10": {
           "id": "conduit",
-          "focusEssenceDefinitionId": "essence.vampire_bat",
           "level": 10
         },
         "bastion-opening-6": {
@@ -467,18 +463,15 @@
         },
         "conduit-opening-6": {
           "id": "conduit",
-          "level": 6,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 6
         },
         "conduit-opening-7": {
           "id": "conduit",
-          "level": 7,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 7
         },
         "conduit-mastery-8": {
           "id": "conduit",
           "level": 8,
-          "focusEssenceDefinitionId": "essence.goblin_warrior",
           "upgradeIds": [
             "full-circuit"
           ]
@@ -486,7 +479,6 @@
         "conduit-mastery-9": {
           "id": "conduit",
           "level": 9,
-          "focusEssenceDefinitionId": "essence.goblin_warrior",
           "upgradeIds": [
             "full-circuit"
           ],
@@ -499,10 +491,10 @@
       "name": "4 equipped Essences",
       "areaId": "region_01_area_03",
       "assumptions": [
-        "Both Combat Styles are available. Compared builds differ only by Combat Style, individual level, and the explicit upgrades and mastery in their recipes.",
+        "Both Combat Styles are available. Compared builds differ by Combat Style, individual level, explicit upgrades and mastery, and Essence slot arrangement for the intended Channeled Essence.",
         "Two tier-1 rank-0 standard items and unascended level-1 Essences are assumed owned. Equipment style fields retain their separate meaning.",
         "Paired fixed seeds, normal opening cooldowns, and fresh encounter state. The two spawns test different damage/control pressure; this is not a comprehensive balance acceptance.",
-        "Conduit fast-Focus variants designate Vampire Bat to expose undercharged openings. The paired spawn adds longer pressure while retaining the same area rules.",
+        "Conduit fast Channeled Essence variants place Vampire Bat first to expose undercharged openings. The paired spawn adds longer pressure while retaining the same area rules.",
         "Opening pairs compare mastery levels 6 and 7; upgrade mastery pairs compare levels 8 and 9 with the same equipped upgrade. Each higher-level build also gains the next automatic mastery bonus."
       ],
       "builds": [
@@ -604,8 +596,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat",
             "essence.raven"
           ]
@@ -630,8 +622,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat",
             "essence.raven"
           ]
@@ -656,9 +648,9 @@
             }
           ],
           "essenceIds": [
+            "essence.vampire_bat",
             "essence.goblin",
             "essence.goblin_warrior",
-            "essence.vampire_bat",
             "essence.raven"
           ]
         },
@@ -682,9 +674,9 @@
             }
           ],
           "essenceIds": [
+            "essence.vampire_bat",
             "essence.goblin",
             "essence.goblin_warrior",
-            "essence.vampire_bat",
             "essence.raven"
           ]
         },
@@ -812,8 +804,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat",
             "essence.raven"
           ]
@@ -838,8 +830,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat",
             "essence.raven"
           ]
@@ -864,8 +856,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat",
             "essence.raven"
           ]
@@ -890,8 +882,8 @@
             }
           ],
           "essenceIds": [
-            "essence.goblin",
             "essence.goblin_warrior",
+            "essence.goblin",
             "essence.vampire_bat",
             "essence.raven"
           ]
@@ -928,22 +920,18 @@
         },
         "conduit-1": {
           "id": "conduit",
-          "level": 1,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 1
         },
         "conduit-10": {
           "id": "conduit",
-          "level": 10,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 10
         },
         "conduit-fast-1": {
           "id": "conduit",
-          "focusEssenceDefinitionId": "essence.vampire_bat",
           "level": 1
         },
         "conduit-fast-10": {
           "id": "conduit",
-          "focusEssenceDefinitionId": "essence.vampire_bat",
           "level": 10
         },
         "bastion-opening-6": {
@@ -971,18 +959,15 @@
         },
         "conduit-opening-6": {
           "id": "conduit",
-          "level": 6,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 6
         },
         "conduit-opening-7": {
           "id": "conduit",
-          "level": 7,
-          "focusEssenceDefinitionId": "essence.goblin_warrior"
+          "level": 7
         },
         "conduit-mastery-8": {
           "id": "conduit",
           "level": 8,
-          "focusEssenceDefinitionId": "essence.goblin_warrior",
           "upgradeIds": [
             "full-circuit"
           ]
@@ -990,7 +975,6 @@
         "conduit-mastery-9": {
           "id": "conduit",
           "level": 9,
-          "focusEssenceDefinitionId": "essence.goblin_warrior",
           "upgradeIds": [
             "full-circuit"
           ],

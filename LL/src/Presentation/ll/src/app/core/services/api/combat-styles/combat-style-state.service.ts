@@ -16,7 +16,6 @@ const emptySelection = (): CombatStyleSelectionRequest => ({
   refinementId: null,
   upgradeIds: [],
   masteredUpgradeId: null,
-  focusPlayerEssenceId: null,
 });
 
 @Injectable({ providedIn: 'root' })
@@ -38,14 +37,6 @@ export class CombatStyleStateService {
         (entry) => entry.definition.id === this.draft().combatStyleId,
       ) ?? null,
   );
-  readonly focusInvalid = computed(() => {
-    if (this.draft().combatStyleId !== 'conduit') return false;
-    return !(this.preview() ?? this.data())?.focusOptions.some(
-      (option) =>
-        option.playerEssenceId === this.draft().focusPlayerEssenceId &&
-        option.isEligible,
-    );
-  });
   readonly masteryInvalid = computed(() => {
     const id = this.draft().masteredUpgradeId;
     if (!id) return false;
@@ -67,7 +58,6 @@ export class CombatStyleStateService {
       !this.previewError() &&
       this.preview() !== null &&
       !this.preview()?.validationIssue &&
-      !this.focusInvalid() &&
       !this.masteryInvalid(),
   );
   private epoch = 0;
@@ -93,18 +83,6 @@ export class CombatStyleStateService {
       },
       () => this.data() !== null,
     );
-    for (const scope of ['essences', 'equipment'] as const) {
-      sync.register(
-        scope,
-        `combat-styles-${scope}`,
-        () => {
-          this.invalidate();
-          return of(undefined);
-        },
-        () => this.data() !== null,
-        false,
-      );
-    }
     effect(() => {
       if (events.logout()) untracked(() => this.reset());
     });
@@ -172,15 +150,11 @@ export class CombatStyleStateService {
       refinementId: entry?.refinementId ?? null,
       upgradeIds: [...(entry?.upgradeIds ?? [])],
       masteredUpgradeId: entry?.masteredUpgradeId ?? null,
-      focusPlayerEssenceId: entry?.focusPlayerEssenceId ?? null,
     });
   }
 
   changeRefinement(refinementId: string | null) {
     this.changeDraft({ ...this.draft(), refinementId });
-  }
-  changeFocus(focusPlayerEssenceId: string | null) {
-    this.changeDraft({ ...this.draft(), focusPlayerEssenceId });
   }
 
   changeMastery(masteredUpgradeId: string | null) {
@@ -294,7 +268,6 @@ export class CombatStyleStateService {
     return (
       first.combatStyleId === second.combatStyleId &&
       first.refinementId === second.refinementId &&
-      first.focusPlayerEssenceId === second.focusPlayerEssenceId &&
       (first.masteredUpgradeId ?? null) ===
         (second.masteredUpgradeId ?? null) &&
       !!first.restoreRememberedChoices === !!second.restoreRememberedChoices &&

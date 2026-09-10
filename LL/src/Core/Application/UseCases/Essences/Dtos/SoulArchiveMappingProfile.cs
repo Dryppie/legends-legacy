@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.CombatStyles;
 using AutoMapper;
 using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
@@ -29,13 +30,16 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
 {
     private readonly IEssenceDefinitionRepository _definitions;
     private readonly IEssenceProgressionService _progression;
+    private readonly IChanneledEssenceResolver _channeledEssenceResolver;
 
     public PlayerEssenceArchiveEntryConverter(
         IEssenceDefinitionRepository definitions,
-        IEssenceProgressionService progression)
+        IEssenceProgressionService progression,
+        IChanneledEssenceResolver channeledEssenceResolver)
     {
         _definitions = definitions;
         _progression = progression;
+        _channeledEssenceResolver = channeledEssenceResolver;
     }
 
     public PlayerEssenceDto Convert(PlayerEssenceArchiveEntry source, PlayerEssenceDto destination, ResolutionContext context)
@@ -67,7 +71,8 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             [],
             MapAbility(definition.ActiveAbility, essence, context),
             MapAbility(definition.PassiveAbility, essence, context),
-            definition.Tags);
+            definition.Tags,
+            _channeledEssenceResolver.Resolve(essence).IsEligible);
     }
 
     private IEnumerable<string> GetMissingRequirements(PlayerEssence essence, EssenceDefinition definition)

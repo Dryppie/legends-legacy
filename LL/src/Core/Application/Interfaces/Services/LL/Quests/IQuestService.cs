@@ -140,7 +140,7 @@ public sealed record QuestTrigger(
     public static QuestTrigger EssenceLoadoutChanged(bool hasCompatibleEssenceTrio = false) =>
         new("EssenceLoadoutChanged", HasCompatibleEssenceTrio: hasCompatibleEssenceTrio);
 
-    public static QuestTrigger EssenceFocusSet() => new("EssenceFocusSet");
+    public static QuestTrigger CreatureFocusSet() => new("CreatureFocusSet");
 
     public static QuestTrigger FocusedCreatureEssenceReceived(
         string creatureDefinitionId,

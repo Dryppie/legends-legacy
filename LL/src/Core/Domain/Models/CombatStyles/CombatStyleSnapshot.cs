@@ -18,10 +18,17 @@ public sealed record CombatStyleSnapshot
     public string? RefinementId { get; init; }
     public ImmutableArray<string> UpgradeIds { get; init; } = [];
     public string? MasteredUpgradeId { get; init; }
+    // Legacy serialized names preserve both default PascalCase and web camelCase snapshot hashes.
+    // Current code uses the ignored Channeled aliases below; do not rename these wire members.
     public Guid? FocusPlayerEssenceId { get; init; }
     public string? FocusEssenceDefinitionId { get; init; }
     public CombatStyleTuning Tuning { get; init; } = new();
     public CombatStyleMilestoneTuning MilestoneTuning { get; init; } = new();
+
+    [JsonIgnore]
+    public Guid? ChanneledPlayerEssenceId { get => FocusPlayerEssenceId; init => FocusPlayerEssenceId = value; }
+    [JsonIgnore]
+    public string? ChanneledEssenceDefinitionId { get => FocusEssenceDefinitionId; init => FocusEssenceDefinitionId = value; }
 
     [JsonIgnore]
     public double BarrierMasteryBonus => Tuning.BarrierPerMasteryLevel is { } perLevel
@@ -29,9 +36,9 @@ public sealed record CombatStyleSnapshot
         : Tuning.BarrierPerCoreRank * CoreRank.GetValueOrDefault();
 
     [JsonIgnore]
-    public double FocusMasteryBonus => Tuning.FocusPerMasteryLevel is { } perLevel
+    public double ChanneledMasteryBonus => Tuning.ChanneledPerMasteryLevel is { } perLevel
         ? perLevel * Math.Clamp(Level, 0, CombatStyleProgression.MaximumLevel)
-        : Tuning.FocusPerCoreRank * CoreRank.GetValueOrDefault();
+        : Tuning.ChanneledPerCoreRank * CoreRank.GetValueOrDefault();
 
     public bool HasUpgrade(string id) => UpgradeIds.Contains(id, StringComparer.Ordinal);
     public bool HasMasteredUpgrade(string id) => Level >= CombatStyleProgression.UpgradeMasteryLevel
@@ -61,6 +68,8 @@ public sealed record CombatStyleTuning
     public double MeasuredRecoveryHealthBonus { get; init; } = .20;
     public int ChargeCap { get; init; } = 3;
     public bool DistinctContributors { get; init; } = true;
+    // Legacy wire members are shared by authored catalog JSON and immutable battle snapshots.
+    // Keep their original order and naming-policy behavior; current code and API DTOs use Channeled.
     public double FocusBaseMultiplier { get; init; } = .80;
     public double FocusPerCharge { get; init; } = .20;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -72,6 +81,15 @@ public sealed record CombatStyleTuning
     public double PartialFlowBonus { get; init; } = .05;
     public double EmergencyChannelHealthThreshold { get; init; } = .35;
     public double EmergencyChannelBonus { get; init; } = .05;
+
+    [JsonIgnore]
+    public double ChanneledBaseMultiplier { get => FocusBaseMultiplier; init => FocusBaseMultiplier = value; }
+    [JsonIgnore]
+    public double ChanneledPerCharge { get => FocusPerCharge; init => FocusPerCharge = value; }
+    [JsonIgnore]
+    public double? ChanneledPerMasteryLevel { get => FocusPerMasteryLevel; init => FocusPerMasteryLevel = value; }
+    [JsonIgnore]
+    public double ChanneledPerCoreRank { get => FocusPerCoreRank; init => FocusPerCoreRank = value; }
 }
 
 public static class CombatStyleIds

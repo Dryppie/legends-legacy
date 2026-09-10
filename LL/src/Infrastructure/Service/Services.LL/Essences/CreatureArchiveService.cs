@@ -15,7 +15,7 @@ namespace Services.LL.Essences;
 
 public sealed class CreatureArchiveService : ICreatureArchiveService
 {
-    private static readonly TimeSpan EssenceFocusCooldown = TimeSpan.FromHours(8);
+    private static readonly TimeSpan CreatureFocusCooldown = TimeSpan.FromHours(8);
 
     private readonly IDbContext _dbContext;
     private readonly IRegionRepository _regions;
@@ -136,9 +136,9 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         var absorbedIds = await GetAbsorbedEssenceDefinitionIdsAsync(characterId, cancellationToken);
         var locationsByCreatureId = await GetCreatureLocationsAsync(cancellationToken);
         var now = DateTimeOffset.UtcNow;
-        var lastFocusSetAt = GetLastEssenceFocusSetAt(entries);
-        var focusAvailableAt = GetEssenceFocusAvailableAt(lastFocusSetAt);
-        var canChangeFocus = CanChangeEssenceFocus(lastFocusSetAt, now);
+        var lastFocusSetAt = GetLastCreatureFocusSetAt(entries);
+        var focusAvailableAt = GetCreatureFocusAvailableAt(lastFocusSetAt);
+        var canChangeFocus = CanChangeCreatureFocus(lastFocusSetAt, now);
 
         var creatures = entries
             .Select(entry =>
@@ -159,10 +159,10 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                     entry.KillCount,
                     entry.FirstDefeatedAtUtc,
                     entry.LastDefeatedAtUtc,
-                    entry.IsEssenceFocus,
-                    entry.EssenceFocusSetAtUtc,
-                    GetTotalEssenceFocusDurationSeconds(entry, now),
-                    GetCurrentEssenceFocusDurationSeconds(entry, now),
+                    entry.IsCreatureFocus,
+                    entry.CreatureFocusSetAtUtc,
+                    GetTotalCreatureFocusDurationSeconds(entry, now),
+                    GetCurrentCreatureFocusDurationSeconds(entry, now),
                     definitions
                         .Select(definition => new CreatureArchiveEssenceEntry(
                             definition.Id,
@@ -275,7 +275,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         creatureLocations.Add(location);
     }
 
-    public async Task<CreatureArchive> SetEssenceFocusAsync(
+    public async Task<CreatureArchive> SetCreatureFocusAsync(
         Guid characterId,
         string? creatureId,
         CancellationToken cancellationToken)
@@ -296,36 +296,36 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             return await GetCreatureArchiveAsync(characterId, cancellationToken);
         }
 
-        if (focusedEntry.IsEssenceFocus)
+        if (focusedEntry.IsCreatureFocus)
         {
             return await GetCreatureArchiveAsync(characterId, cancellationToken);
         }
 
         var now = DateTimeOffset.UtcNow;
-        if (!CanChangeEssenceFocus(GetLastEssenceFocusSetAt(entries), now))
+        if (!CanChangeCreatureFocus(GetLastCreatureFocusSetAt(entries), now))
         {
             return await GetCreatureArchiveAsync(characterId, cancellationToken);
         }
 
         foreach (var entry in entries)
         {
-            if (entry.IsEssenceFocus)
+            if (entry.IsCreatureFocus)
             {
-                entry.EssenceFocusTotalDurationSeconds += GetCurrentEssenceFocusDurationSeconds(entry, now);
-                entry.EssenceFocusSetAtUtc = null;
+                entry.CreatureFocusTotalDurationSeconds += GetCurrentCreatureFocusDurationSeconds(entry, now);
+                entry.CreatureFocusSetAtUtc = null;
             }
 
-            entry.IsEssenceFocus = false;
+            entry.IsCreatureFocus = false;
         }
 
-        focusedEntry.IsEssenceFocus = true;
-        focusedEntry.EssenceFocusSetAtUtc = now;
+        focusedEntry.IsCreatureFocus = true;
+        focusedEntry.CreatureFocusSetAtUtc = now;
 
         if (_outbox is not null)
         {
             await _outbox.EnqueueAsync(
-                GameEventTypes.EssenceFocusSet,
-                new EssenceFocusSetPayload(characterId, focusedEntry.CreatureDefinitionId),
+                GameEventTypes.CreatureFocusSet,
+                new CreatureFocusSetPayload(characterId, focusedEntry.CreatureDefinitionId),
                 characterId,
                 null,
                 cancellationToken);
@@ -335,7 +335,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         return await GetCreatureArchiveAsync(characterId, cancellationToken);
     }
 
-    public async Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
+    public async Task<bool> IsCreatureFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(creatureId))
         {
@@ -346,16 +346,16 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             .AnyAsync(
                 x =>
                     x.CharacterId == characterId &&
-                    x.IsEssenceFocus &&
+                    x.IsCreatureFocus &&
                     x.CreatureDefinitionId == creatureId,
                 cancellationToken);
     }
 
-    public async Task<string?> GetEssenceFocusCreatureIdAsync(
+    public async Task<string?> GetCreatureFocusCreatureIdAsync(
         Guid characterId,
         CancellationToken cancellationToken) =>
         await _dbContext.CharacterCreatureArchiveEntries
-            .Where(x => x.CharacterId == characterId && x.IsEssenceFocus)
+            .Where(x => x.CharacterId == characterId && x.IsCreatureFocus)
             .Select(x => x.CreatureDefinitionId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -388,37 +388,37 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             .Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
     }
 
-    private static DateTimeOffset? GetLastEssenceFocusSetAt(IEnumerable<CharacterCreatureArchiveEntry> entries)
+    private static DateTimeOffset? GetLastCreatureFocusSetAt(IEnumerable<CharacterCreatureArchiveEntry> entries)
     {
         DateTimeOffset? lastFocusSetAt = null;
         foreach (var entry in entries)
         {
-            if (entry.EssenceFocusSetAtUtc is null)
+            if (entry.CreatureFocusSetAtUtc is null)
             {
                 continue;
             }
 
-            if (lastFocusSetAt is null || entry.EssenceFocusSetAtUtc.Value > lastFocusSetAt.Value)
+            if (lastFocusSetAt is null || entry.CreatureFocusSetAtUtc.Value > lastFocusSetAt.Value)
             {
-                lastFocusSetAt = entry.EssenceFocusSetAtUtc;
+                lastFocusSetAt = entry.CreatureFocusSetAtUtc;
             }
         }
 
         return lastFocusSetAt;
     }
 
-    private static DateTimeOffset? GetEssenceFocusAvailableAt(DateTimeOffset? lastFocusSetAt) =>
-        lastFocusSetAt?.Add(EssenceFocusCooldown);
+    private static DateTimeOffset? GetCreatureFocusAvailableAt(DateTimeOffset? lastFocusSetAt) =>
+        lastFocusSetAt?.Add(CreatureFocusCooldown);
 
-    private static bool CanChangeEssenceFocus(DateTimeOffset? lastFocusSetAt, DateTimeOffset now) =>
-        GetEssenceFocusAvailableAt(lastFocusSetAt) is not { } availableAt || availableAt <= now;
+    private static bool CanChangeCreatureFocus(DateTimeOffset? lastFocusSetAt, DateTimeOffset now) =>
+        GetCreatureFocusAvailableAt(lastFocusSetAt) is not { } availableAt || availableAt <= now;
 
-    private static long GetTotalEssenceFocusDurationSeconds(CharacterCreatureArchiveEntry entry, DateTimeOffset now) =>
-        entry.EssenceFocusTotalDurationSeconds + GetCurrentEssenceFocusDurationSeconds(entry, now);
+    private static long GetTotalCreatureFocusDurationSeconds(CharacterCreatureArchiveEntry entry, DateTimeOffset now) =>
+        entry.CreatureFocusTotalDurationSeconds + GetCurrentCreatureFocusDurationSeconds(entry, now);
 
-    private static long GetCurrentEssenceFocusDurationSeconds(CharacterCreatureArchiveEntry entry, DateTimeOffset now)
+    private static long GetCurrentCreatureFocusDurationSeconds(CharacterCreatureArchiveEntry entry, DateTimeOffset now)
     {
-        if (!entry.IsEssenceFocus || entry.EssenceFocusSetAtUtc is not { } focusSetAt)
+        if (!entry.IsCreatureFocus || entry.CreatureFocusSetAtUtc is not { } focusSetAt)
         {
             return 0;
         }

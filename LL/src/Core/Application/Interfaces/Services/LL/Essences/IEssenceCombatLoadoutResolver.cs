@@ -11,9 +11,11 @@ public interface IEssenceCombatLoadoutResolver
         EssenceCombatActivity activity,
         CancellationToken cancellationToken) =>
         ResolveAsync(characterId, cancellationToken);
+    /// <summary>Preserves the supplied order; callers must provide occupied Essences in ascending visible SlotIndex order.</summary>
     EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences);
 }
 
+/// <summary>EquippedEssences contains occupied slots in ascending visible SlotIndex order, with empty slots omitted.</summary>
 public sealed record EssenceCombatLoadout(
     Guid CharacterId,
     IReadOnlyList<PlayerEssence> EquippedEssences,

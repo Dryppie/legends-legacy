@@ -10,9 +10,9 @@ namespace EssenceSystem.Tests;
 
 public sealed class CombatStyleEngineTests
 {
-    private static readonly Guid Focus = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid Channeled = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly CombatStyleTuning CurrentTuning = new()
-    { BarrierPerMasteryLevel = .01, FocusPerMasteryLevel = .01 };
+    { BarrierPerMasteryLevel = .01, ChanneledPerMasteryLevel = .01 };
 
     [Theory]
     [InlineData(800, false, 850, 150)]
@@ -304,16 +304,16 @@ public sealed class CombatStyleEngineTests
     }
 
     [Fact]
-    public void Conduit_focus_scales_external_healing_once_before_recipient_fortification()
+    public void Conduit_channeled_scales_external_healing_once_before_recipient_fortification()
     {
         var bastion = Actor([], Bastion() with { Level = 10 }); bastion.SetHealth(500);
         var heal = Heal(200); heal.Target = AbilityTargetSelector.LowestHealthAlly;
-        var (abilities, origins) = Circuit(2, Ability("focus", heal));
+        var (abilities, origins) = Circuit(2, Ability("channeled", heal));
         var healer = Actor(abilities, Conduit() with { Level = 10 }, origins, id: "conduit-healer");
 
         var result = Run(bastion, allies: [healer]);
 
-        // Focus: 200 * (.80 + .40 + .10) = 260. Fortification then allocates 65 Health and 214.5 Barrier.
+        // Channeled: 200 * (.80 + .40 + .10) = 260. Fortification then allocates 65 Health and 214.5 Barrier.
         Assert.Equal(565, bastion.Health);
         Assert.Equal(214.5f, bastion.Barrier);
         Assert.Equal(260, result.CombatStyles.Single(x => x.EntityId == bastion.Id).HealingConverted);
@@ -342,7 +342,7 @@ public sealed class CombatStyleEngineTests
             Target = AbilityTargetSelector.Self, EventMagnitudeCoefficient = 1
         });
         var actor = Actor([Ability("hit", hit), onHit], Bastion(CombatStyleIds.Counterweight),
-            new Dictionary<string, Guid> { ["hit"] = Focus });
+            new Dictionary<string, Guid> { ["hit"] = Channeled });
         actor.SetHealth(500); actor.GrantBarrier(actor, 200);
         actor.AdjustAttribute(AttributeType.CritChance, 100);
         actor.AdjustAttribute(AttributeType.CritDamage, 100);
@@ -369,7 +369,7 @@ public sealed class CombatStyleEngineTests
         for (var seed = 0; seed < 100; seed++)
         {
             var actor = Actor([Ability("hit", first, second)], Bastion(CombatStyleIds.Counterweight),
-                new Dictionary<string, Guid> { ["hit"] = Focus }); actor.GrantBarrier(actor, 200);
+                new Dictionary<string, Guid> { ["hit"] = Channeled }); actor.GrantBarrier(actor, 200);
             var enemy = Enemy(); enemy.AdjustAttribute(AttributeType.DodgeChance, 100);
             var result = Run(actor, enemy, seed: seed);
             if (!result.EventLog.Any(x => x.EventType == EventType.Miss)) continue;
@@ -389,48 +389,65 @@ public sealed class CombatStyleEngineTests
     [InlineData("relay", 0, 160)] [InlineData("relay", 1, 190)] [InlineData("relay", 2, 220)] [InlineData("relay", 3, 250)]
     public void Conduit_refinement_curves_use_whole_cast_charge(string? refinement, int contributors, int damage)
     {
-        var (abilities, origins) = Circuit(contributors, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(contributors, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit(refinement), origins);
         var enemy = Enemy(); var result = Run(actor, enemy);
         Assert.Equal(damage, 10000 - enemy.Health);
-        Assert.Equal(1, Assert.Single(result.CombatStyles).FocusCastsByCharge[contributors]);
+        Assert.Equal(1, Assert.Single(result.CombatStyles).ChanneledCastsByCharge[contributors]);
         Assert.Equal(refinement == "relay" && contributors >= 2 ? 1 : 0, result.CombatStyles[0].Charge);
     }
 
     [Fact]
-    public void Repeated_contributors_charge_once_except_short_circuit_and_zero_focus_resets_cycle()
+    public void Channeled_essence_rename_preserves_old_replay_messages_and_combat_results()
+    {
+        foreach (var version in Enumerable.Range(1, 6).Select(value => $"combat-styles.v{value}").Append(string.Empty))
+        {
+            var (abilities, origins) = Circuit(1, Ability("channeled", Damage(200)));
+            var actor = Actor(abilities, Conduit() with { ContentVersion = version }, origins);
+            var enemy = Enemy();
+            var result = Run(actor, enemy);
+            var message = Assert.Single(result.EventLog, item => item.Source == "Circuit");
+            var expectedName = version is "combat-styles.v6" or "" ? "Channeled Essence" : "Focus";
+            Assert.Equal($"{actor.Name}'s {expectedName} spent 1 Charge for {1d:P0} effect amounts.", message.Details);
+            Assert.Equal(200, 10000 - enemy.Health);
+            Assert.Equal(1, result.CombatStyles[0].ChanneledCastsByCharge[1]);
+        }
+    }
+
+    [Fact]
+    public void Repeated_contributors_charge_once_except_short_circuit_and_zero_channeled_resets_cycle()
     {
         var a = Guid.NewGuid(); var b = Guid.NewGuid(); var c = Guid.NewGuid();
         var abilities = new[] { Contributor("a"), Contributor("b"), Contributor("a2"), Contributor("c"),
             Ability("f", Damage(200)), Ability("f2", Damage(200)), Contributor("b2"), Ability("f3", Damage(200)) };
         var origins = new Dictionary<string, Guid> { ["a"] = a, ["b"] = b, ["a2"] = a, ["c"] = c,
-            ["f"] = Focus, ["f2"] = Focus, ["b2"] = b, ["f3"] = Focus };
+            ["f"] = Channeled, ["f2"] = Channeled, ["b2"] = b, ["f3"] = Channeled };
         var result = Run(Actor(abilities, Conduit(), origins));
         var summary = Assert.Single(result.CombatStyles);
-        Assert.Equal(1, summary.FocusCastsByCharge[3]); Assert.Equal(1, summary.FocusCastsByCharge[0]);
-        Assert.Equal(1, summary.FocusCastsByCharge[1]); Assert.Equal(4, summary.ChargeGenerated);
+        Assert.Equal(1, summary.ChanneledCastsByCharge[3]); Assert.Equal(1, summary.ChanneledCastsByCharge[0]);
+        Assert.Equal(1, summary.ChanneledCastsByCharge[1]); Assert.Equal(4, summary.ChargeGenerated);
         var repeated = new[] { Contributor("a"), Contributor("a2"), Ability("f", Damage(200)) };
         Assert.Equal(1, Run(Actor(repeated, Conduit(), origins)).CombatStyles[0].ChargeSpent);
         Assert.Equal(2, Run(Actor(repeated, Conduit(CombatStyleIds.ShortCircuit), origins)).CombatStyles[0].ChargeSpent);
     }
 
     [Fact]
-    public void Focus_multiplier_applies_to_each_immediate_hit_but_not_periodic_or_passive_damage()
+    public void Channeled_multiplier_applies_to_each_immediate_hit_but_not_periodic_or_passive_damage()
     {
         var dot = Damage(20); dot.Id = "dot"; dot.DurationTicks = 10; dot.IntervalTicks = 1;
         var repeated = Damage(100); repeated.RepeatCount = 2;
-        var (abilities, origins) = Circuit(3, Ability("focus", repeated, dot));
+        var (abilities, origins) = Circuit(3, Ability("channeled", repeated, dot));
         abilities.Add(Passive("proc", AbilityTriggerEvent.OnAbilityUsed, Damage(10)));
         var enemy = Enemy(); var result = Run(Actor(abilities, Conduit(), origins), enemy);
         Assert.Equal(280 + 20 + 40, 10000 - enemy.Health);
         Assert.Equal(3, result.CombatStyles[0].ChargeSpent);
-        Assert.Equal(80, result.CombatStyles[0].FocusOutputAdded);
+        Assert.Equal(80, result.CombatStyles[0].ChanneledOutputAdded);
     }
 
     [Fact]
     public void Charged_damage_lifesteal_is_not_multiplied_twice()
     {
-        var (abilities, origins) = Circuit(3, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(3, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit(), origins); actor.SetHealth(200);
         actor.AdjustAttribute(AttributeType.LifeSteal, 100);
         Run(actor);
@@ -448,7 +465,7 @@ public sealed class CombatStyleEngineTests
             Level = 10,
             UpgradeIds = [charge == 1 ? CombatStyleIds.PartialFlow : CombatStyleIds.FullCircuit, CombatStyleIds.EmergencyChannel]
         };
-        var (abilities, origins) = Circuit(charge, Ability("focus", Damage(200), Barrier(200)));
+        var (abilities, origins) = Circuit(charge, Ability("channeled", Damage(200), Barrier(200)));
         var actor = Actor(abilities, style, origins); actor.SetHealth(health);
         var enemy = Enemy(); Run(actor, enemy);
         Assert.Equal(damage, 10000 - enemy.Health);
@@ -461,9 +478,9 @@ public sealed class CombatStyleEngineTests
     [InlineData(2, 204)]
     [InlineData(9, 218)]
     [InlineData(10, 220)]
-    public void Every_conduit_mastery_level_improves_a_charged_focus(int level, int damage)
+    public void Every_conduit_mastery_level_improves_a_charged_channeled(int level, int damage)
     {
-        var (abilities, origins) = Circuit(1, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(1, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit() with { Level = level }, origins);
         var enemy = Enemy();
         Run(actor, enemy);
@@ -482,7 +499,7 @@ public sealed class CombatStyleEngineTests
     public void Odd_level_conduit_bonus_preserves_refinement_curves_and_zero_charge_amounts(
         string? refinement, int charge, int damage)
     {
-        var (abilities, origins) = Circuit(charge, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(charge, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit(refinement) with { Level = 3 }, origins);
         var enemy = Enemy();
         Run(actor, enemy);
@@ -503,8 +520,8 @@ public sealed class CombatStyleEngineTests
         var oldConduit = JsonSerializer.Deserialize<CombatStyleSnapshot>("""
             {"CombatStyleId":"conduit","Kind":2,"ContentVersion":"combat-styles.v2","Level":9,"CoreRank":2,
              "Tuning":{"FocusPerCoreRank":0.03}}
-            """)! with { FocusPlayerEssenceId = Focus };
-        var (abilities, origins) = Circuit(1, Ability("focus", Damage(200)));
+            """)! with { ChanneledPlayerEssenceId = Channeled };
+        var (abilities, origins) = Circuit(1, Ability("channeled", Damage(200)));
         var conduit = Actor(abilities, oldConduit, origins);
         var enemy = Enemy();
         Run(conduit, enemy);
@@ -514,26 +531,26 @@ public sealed class CombatStyleEngineTests
     [Fact]
     public void Relay_cannot_renew_itself_and_passives_and_native_actives_cannot_charge()
     {
-        var (abilities, origins) = Circuit(2, Ability("focus", Damage(200)));
-        abilities.Add(Ability("focus2", Damage(200))); origins.Add("focus2", Focus);
+        var (abilities, origins) = Circuit(2, Ability("channeled", Damage(200)));
+        abilities.Add(Ability("channeled2", Damage(200))); origins.Add("channeled2", Channeled);
         abilities.Insert(0, Contributor("native"));
         var summary = Assert.Single(Run(Actor(abilities, Conduit(CombatStyleIds.Relay), origins)).CombatStyles);
-        Assert.Equal(1, summary.FocusCastsByCharge[2]); Assert.Equal(1, summary.FocusCastsByCharge[1]);
+        Assert.Equal(1, summary.ChanneledCastsByCharge[2]); Assert.Equal(1, summary.ChanneledCastsByCharge[1]);
         Assert.Equal(1, summary.RelayChargeReturned); Assert.Equal(0, summary.Charge);
     }
 
     [Fact]
     public void Blocked_casts_do_not_charge_but_missed_casts_do()
     {
-        var (abilities, origins) = Circuit(2, Ability("focus", Damage(200)));
+        var (abilities, origins) = Circuit(2, Ability("channeled", Damage(200)));
         var actor = Actor(abilities, Conduit(), origins); AddCondition(actor, StandardConditionType.Silence);
         var summary = Assert.Single(Run(actor).CombatStyles);
-        Assert.Equal(0, summary.ChargeGenerated); Assert.Empty(summary.FocusCastsByCharge);
+        Assert.Equal(0, summary.ChargeGenerated); Assert.Empty(summary.ChanneledCastsByCharge);
         var miss = Damage(20); miss.AttackType = AttackType.Melee;
         for (var seed = 0; seed < 100; seed++)
         {
-            var origins2 = new Dictionary<string, Guid> { ["miss"] = Guid.NewGuid(), ["focus"] = Focus };
-            var caster = Actor([Ability("miss", miss), Ability("focus", Damage(200))], Conduit(), origins2);
+            var origins2 = new Dictionary<string, Guid> { ["miss"] = Guid.NewGuid(), ["channeled"] = Channeled };
+            var caster = Actor([Ability("miss", miss), Ability("channeled", Damage(200))], Conduit(), origins2);
             var enemy = Enemy(); enemy.AdjustAttribute(AttributeType.DodgeChance, 100);
             var result = Run(caster, enemy, seed: seed);
             if (!result.EventLog.Any(x => x.EventType == EventType.Miss)) continue;
@@ -545,50 +562,50 @@ public sealed class CombatStyleEngineTests
     [Fact]
     public void Cached_compiled_ability_sharing_does_not_share_style_state_and_compact_summaries_survive()
     {
-        var focus = Ability("focus", Damage(200));
-        var origins = new Dictionary<string, Guid> { ["focus"] = Focus };
-        var weak = Actor([focus], Conduit(), origins, "weak");
-        var ordinary = Actor([focus], id: "ordinary");
+        var channeled = Ability("channeled", Damage(200));
+        var origins = new Dictionary<string, Guid> { ["channeled"] = Channeled };
+        var weak = Actor([channeled], Conduit(), origins, "weak");
+        var ordinary = Actor([channeled], id: "ordinary");
         var enemy = Enemy(); var result = Run(weak, enemy, [ordinary], captureLog: false);
         Assert.Equal(360, 10000 - enemy.Health);
-        Assert.Equal(200, focus.TriggersByEvent[AbilityTriggerEvent.OnAbilityUsed][0].Effects[0].BaseValue);
-        result.EntityStats.Clear(); Assert.Equal(40, Assert.Single(result.CombatStyles).FocusOutputLost);
+        Assert.Equal(200, channeled.TriggersByEvent[AbilityTriggerEvent.OnAbilityUsed][0].Effects[0].BaseValue);
+        result.EntityStats.Clear(); Assert.Equal(40, Assert.Single(result.CombatStyles).ChanneledOutputLost);
         Assert.Empty(result.EventLog);
     }
 
     [Fact]
     public void Normal_cost_reactions_are_isolated_and_emergency_threshold_is_sampled_after_costs()
     {
-        var focus = AbilityCompiler.CompileAbility(new AbilitySpec
+        var channeled = AbilityCompiler.CompileAbility(new AbilitySpec
         {
-            Id = "focus", Kind = AbilitySpecKind.Active, CooldownTicks = 1000,
+            Id = "channeled", Kind = AbilitySpecKind.Active, CooldownTicks = 1000,
             Costs = [new() { Resource = AbilityResourceType.Health, BaseValue = 50 }], Effects = [Barrier(200)]
         });
-        var (abilities, origins) = Circuit(3, focus);
+        var (abilities, origins) = Circuit(3, channeled);
         abilities.Add(Passive("cost-reaction", AbilityTriggerEvent.OnHealthChanged, Barrier(100)));
         var actor = Actor(abilities, Conduit() with { UpgradeIds = [CombatStyleIds.EmergencyChannel] }, origins);
         actor.SetHealth(400);
         Run(actor);
         Assert.Equal(350, actor.Health);
-        Assert.Equal(390, actor.Barrier); // Ordinary reaction 100; the normal Focus alone receives 145%.
+        Assert.Equal(390, actor.Barrier); // Ordinary reaction 100; the normal Channeled alone receives 145%.
     }
 
     [Fact]
-    public void Action_prevented_by_a_cost_reaction_keeps_charge_and_never_becomes_a_focus_cast()
+    public void Action_prevented_by_a_cost_reaction_keeps_charge_and_never_becomes_a_channeled_cast()
     {
-        var focus = AbilityCompiler.CompileAbility(new AbilitySpec
+        var channeled = AbilityCompiler.CompileAbility(new AbilitySpec
         {
-            Id = "focus", Kind = AbilitySpecKind.Active, CooldownTicks = 1000,
+            Id = "channeled", Kind = AbilitySpecKind.Active, CooldownTicks = 1000,
             Costs = [new() { Resource = AbilityResourceType.Health, BaseValue = 50 }], Effects = [Damage(200)]
         });
-        var (abilities, origins) = Circuit(3, focus);
+        var (abilities, origins) = Circuit(3, channeled);
         abilities.Add(Passive("cost-silence", AbilityTriggerEvent.OnHealthChanged, new()
         {
             Id = "silence", Operation = AbilityEffectOperation.ApplyCondition, Condition = StandardConditionType.Silence,
             Target = AbilityTargetSelector.Self, BaseValue = 1, DurationTicks = 100, GuaranteedConditionApplication = true
         }));
         var summary = Assert.Single(Run(Actor(abilities, Conduit(), origins)).CombatStyles);
-        Assert.Equal(3, summary.Charge); Assert.Empty(summary.FocusCastsByCharge);
+        Assert.Equal(3, summary.Charge); Assert.Empty(summary.ChanneledCastsByCharge);
     }
 
     [Fact]
@@ -596,7 +613,7 @@ public sealed class CombatStyleEngineTests
     {
         var areaHit = Damage(100); areaHit.Target = AbilityTargetSelector.AllEnemies;
         var actor = Actor([Ability("hit", areaHit)], Bastion(CombatStyleIds.Counterweight),
-            new Dictionary<string, Guid> { ["hit"] = Focus }); actor.GrantBarrier(actor, 200);
+            new Dictionary<string, Guid> { ["hit"] = Channeled }); actor.GrantBarrier(actor, 200);
         var first = Enemy();
         var second = new RuntimeCombatant("second", "second", CombatTeam.Hostile,
             new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 10000 }, [], canBasicAttack: false);
@@ -610,7 +627,7 @@ public sealed class CombatStyleEngineTests
             Costs = [new() { Resource = AbilityResourceType.Barrier, BaseValue = 60 }], Effects = [Damage(100)]
         });
         var constrained = Actor([paid], Bastion(CombatStyleIds.Counterweight),
-            new Dictionary<string, Guid> { ["hit"] = Focus }); constrained.GrantBarrier(constrained, 250);
+            new Dictionary<string, Guid> { ["hit"] = Channeled }); constrained.GrantBarrier(constrained, 250);
         var summary = Assert.Single(Run(constrained).CombatStyles);
         Assert.Equal(0, summary.CounterweightBarrierSpent); Assert.Equal(190, constrained.Barrier);
     }
@@ -649,12 +666,12 @@ public sealed class CombatStyleEngineTests
 
     private static CombatStyleSnapshot Conduit(string? refinement = null) => new()
     {
-        CombatStyleId = CombatStyleIds.Conduit, Kind = CombatStyleKind.Conduit, FocusPlayerEssenceId = Focus,
+        CombatStyleId = CombatStyleIds.Conduit, Kind = CombatStyleKind.Conduit, ChanneledPlayerEssenceId = Channeled,
         RefinementId = refinement, Tuning = refinement switch
         {
             CombatStyleIds.ShortCircuit => CurrentTuning with { ChargeCap = 2, DistinctContributors = false },
-            CombatStyleIds.DeepReservoir => CurrentTuning with { ChargeCap = 4, FocusBaseMultiplier = .6, FocusPerCharge = .25 },
-            CombatStyleIds.Relay => CurrentTuning with { FocusPerCharge = .15, RelayMinimumSpent = 2, RelayChargeReturn = 1 },
+            CombatStyleIds.DeepReservoir => CurrentTuning with { ChargeCap = 4, ChanneledBaseMultiplier = .6, ChanneledPerCharge = .25 },
+            CombatStyleIds.Relay => CurrentTuning with { ChanneledPerCharge = .15, RelayMinimumSpent = 2, RelayChargeReturn = 1 },
             _ => CurrentTuning
         }
     };
@@ -698,10 +715,10 @@ public sealed class CombatStyleEngineTests
     private static CompiledAbility Contributor(string id) => Ability(id, new AbilityEffectSpec
     { Id = id + ".effect", Operation = AbilityEffectOperation.ModifyThreat, Target = AbilityTargetSelector.Self, BaseValue = 1 });
 
-    private static (List<CompiledAbility> Abilities, Dictionary<string, Guid> Origins) Circuit(int contributors, CompiledAbility focus)
+    private static (List<CompiledAbility> Abilities, Dictionary<string, Guid> Origins) Circuit(int contributors, CompiledAbility channeled)
     {
         var abilities = new List<CompiledAbility>(); var origins = new Dictionary<string, Guid>();
         for (var i = 0; i < contributors; i++) { var id = "c" + i; abilities.Add(Contributor(id)); origins.Add(id, Guid.NewGuid()); }
-        abilities.Add(focus); origins.Add(focus.Id, Focus); return (abilities, origins);
+        abilities.Add(channeled); origins.Add(channeled.Id, Channeled); return (abilities, origins);
     }
 }

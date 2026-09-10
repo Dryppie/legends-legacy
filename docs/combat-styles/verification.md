@@ -8,7 +8,7 @@ Counterweight results below also describe the former refinement. Current content
 
 ## Runtime and activity coverage
 
-Bastion and Conduit run in the shared combat engine. Effective configuration is an immutable, versioned snapshot; encounter resources and cast bookkeeping live outside compiled ability definitions. Each normal Essence activation retains its owned Essence identity. Passive, summon, basic-attack, status and reaction execution cannot acquire a normal cast's Focus multiplier or contribution eligibility.
+Bastion and Conduit run in the shared combat engine. Effective configuration is an immutable, versioned snapshot; encounter resources and cast bookkeeping live outside compiled ability definitions. Each normal Essence activation retains its owned Essence identity. Passive, summon, basic-attack, status and reaction execution cannot acquire a normal cast's Channeled Essence multiplier or contribution eligibility.
 
 Direct healing, Lifesteal, recurring healing and regeneration converge after their normal modifiers and before missing-Health clamping. Regeneration keeps its separate scaling. Converted Barrier uses the existing capped pool, suppresses gain reactions and preserves absorption/break reactions. Counterweight adds a noncritical component to the first attack attempt and excludes that component from Lifesteal and damage-derived hit reactions.
 
@@ -32,7 +32,7 @@ The first sandboxed build could not read the user's NuGet configuration. The app
 
 ## Reproducible balance fixture
 
-The new [Combat Styles fixture](../../LL/tools/BalanceHarness/Fixtures/combat-styles.json) compares seven configurations with otherwise identical equipment and Essences: no style, Bastion at levels 1 and 10, Conduit at levels 1 and 10 with Goblin Warrior as Focus, and Conduit at levels 1 and 10 with faster Vampire Bat as Focus. It uses three or four equipped Essences and Frost Imp, Crystal Wisp, or their paired spawn. Styles use their base form without upgrades to isolate the automatic rank difference. Refinements and upgrades are covered by correctness tests; this fixture does not establish their relative balance.
+The new [Combat Styles fixture](../../LL/tools/BalanceHarness/Fixtures/combat-styles.json) compares seven configurations with otherwise identical equipment and Essences: no style, Bastion at levels 1 and 10, Conduit at levels 1 and 10 with Goblin Warrior as Channeled Essence, and Conduit at levels 1 and 10 with faster Vampire Bat as Channeled Essence. It uses three or four equipped Essences and Frost Imp, Crystal Wisp, or their paired spawn. Styles use their base form without upgrades to isolate the automatic rank difference. Refinements and upgrades are covered by correctness tests; this fixture does not establish their relative balance.
 
 ```powershell
 dotnet run --project LL/tools/BalanceHarness/BalanceHarness.csproj --configuration Release --no-build -- suite --suite LL/tools/BalanceHarness/Fixtures/combat-styles.json --samples 3 --seed 1337 --output TestResults/balance/combat-styles-smoke-003
@@ -47,19 +47,19 @@ For the paired Frost Imp / Crystal Wisp encounter:
 | 3 | No style | 29.0 s | 46.67% |
 | 3 | Bastion level 1 | 29.0 s | 45.95% |
 | 3 | Bastion level 10 | 29.0 s | 46.21% |
-| 3 | Conduit level 1, Goblin Warrior Focus | 28.2 s | 47.63% |
-| 3 | Conduit level 10, Goblin Warrior Focus | 27.1 s | 48.55% |
+| 3 | Conduit level 1, Goblin Warrior Channeled Essence | 28.2 s | 47.63% |
+| 3 | Conduit level 10, Goblin Warrior Channeled Essence | 27.1 s | 48.55% |
 | 4 | No style | 22.0 s | 72.36% |
 | 4 | Bastion level 1 | 22.0 s | 71.77% |
 | 4 | Bastion level 10 | 22.0 s | 71.93% |
-| 4 | Conduit level 1, Goblin Warrior Focus | 18.5 s | 75.63% |
-| 4 | Conduit level 10, Goblin Warrior Focus | 18.5 s | 75.63% |
+| 4 | Conduit level 1, Goblin Warrior Channeled Essence | 18.5 s | 75.63% |
+| 4 | Conduit level 10, Goblin Warrior Channeled Essence | 18.5 s | 75.63% |
 
 Bastion's total converted Barrier across the nine three-slot battles rose from **196.50** at level 1 to **216.15** at level 10, exactly the expected 10% rank increase. Actual converted Barrier absorbed rose from **171.00** to **188.10**. The lower final Health than the control reflects its recovery tradeoff; remaining Barrier and protection absorbed must also be considered when comparing survival.
 
-The slower Goblin Warrior Focus averaged **120% / 130%** effect amounts at style levels 1 / 10 with three equipped Essences, and **140% / 150%** with four. The faster Vampire Bat Focus produced **nine zero-Charge casts in each nine-battle configuration**. With three slots its 22 Focus casts averaged approximately **100.9% / 106.8%**; with four slots its 14 casts averaged **100.0% / 103.6%**. Both mastered and untrained variants retained the same opening losses: **38** raw eligible effect points across three-slot battles and **45** across four-slot battles. Rank bonuses did not erase the zero-Charge penalty.
+The slower Goblin Warrior Channeled Essence averaged **120% / 130%** effect amounts at style levels 1 / 10 with three equipped Essences, and **140% / 150%** with four. The faster Vampire Bat Channeled Essence produced **nine zero-Charge casts in each nine-battle configuration**. With three slots its 22 Channeled Essence casts averaged approximately **100.9% / 106.8%**; with four slots its 14 casts averaged **100.0% / 103.6%**. Both mastered and untrained variants retained the same opening losses: **38** raw eligible effect points across three-slot battles and **45** across four-slot battles. Rank bonuses did not erase the zero-Charge penalty.
 
-These samples show that individual mastery has an observable but modest effect in these builds, while Focus cadence can matter more than rank. They do not establish acceptable PvP strength, group sustain, hard-enemy clear rates, all refinement matchups, healing suppression or final tuning. No balance targets were accepted and no gameplay values were changed in response to these samples.
+These samples show that individual mastery has an observable but modest effect in these builds, while Channeled Essence cadence can matter more than rank. They do not establish acceptable PvP strength, group sustain, hard-enemy clear rates, all refinement matchups, healing suppression or final tuning. No balance targets were accepted and no gameplay values were changed in response to these samples.
 
 ## Provisional progression timing
 

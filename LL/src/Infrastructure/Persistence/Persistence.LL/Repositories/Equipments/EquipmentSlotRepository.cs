@@ -16,6 +16,15 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         _context = context;
     }
 
+    public Task<EquipmentInstance?> GetLinkedEquipmentAsync(Guid equipmentId, CancellationToken cancellationToken) =>
+        _context.ItemInstances.OfType<EquipmentInstance>()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(item => item.InstanceModifiers)
+            .Include(item => item.ItemBase)
+                .ThenInclude(item => ((EquipmentBase)item).AttributeModifiers)
+            .SingleOrDefaultAsync(item => item.Id == equipmentId, cancellationToken);
+
     public async Task<List<EquipmentSlot>> GetEquipmentSlotsByEntityIdAsync(Guid entityId, CancellationToken cancellationToken)
     {
         var equipmentList = await _context.EquipmentSlots

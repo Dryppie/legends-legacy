@@ -188,7 +188,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   getSidebarItemNotificationCount(itemId: string): number {
     return (
       this.getNotificationCount(itemId) +
-      (itemId === 'essences' && this.essenceState.essenceFocusReady() ? 1 : 0) +
+      (itemId === 'essences' && this.essenceState.creatureFocusReady()
+        ? 1
+        : 0) +
       (itemId === 'guild' ? this.guildState.claimableDailyOrderCount() : 0) +
       (itemId === 'quests' ? this.questState.readyToTurnInCount() : 0)
     );
@@ -204,7 +206,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.router.navigate(['/game/combat']);
       return;
     }
-
   }
 
   isQuestDestination(item: Tab): boolean {

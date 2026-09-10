@@ -75,7 +75,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
             cancellationToken);
 
         var focusedCreature = _creatureArchive is null ? null
-            : await _creatureArchive.GetEssenceFocusCreatureIdAsync(plan.CharacterId, cancellationToken);
+            : await _creatureArchive.GetCreatureFocusCreatureIdAsync(plan.CharacterId, cancellationToken);
         if (focusedCreature is not null)
         {
             var focusedIds = resolutionSession.SourceEntitiesById.Values.OfType<Creature>()
@@ -84,7 +84,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
                 .Select(creature => creature.Id).ToHashSet();
             plan = plan with
             {
-                SpawnCreatures = WeightedSpawnSelector.ApplyEssenceFocus(plan.Area.Creatures.ToList(), focusedIds)
+                SpawnCreatures = WeightedSpawnSelector.ApplyCreatureFocus(plan.Area.Creatures.ToList(), focusedIds)
             };
         }
 

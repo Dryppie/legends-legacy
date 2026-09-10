@@ -78,9 +78,9 @@ export interface SoulArchiveDto {
 
 export interface CreatureArchiveDto {
   creatures: CreatureArchiveEntryDto[];
-  canChangeEssenceFocus: boolean;
-  essenceFocusAvailableAtUtc?: string | null;
-  essenceFocusSetAtUtc?: string | null;
+  canChangeCreatureFocus: boolean;
+  creatureFocusAvailableAtUtc?: string | null;
+  creatureFocusSetAtUtc?: string | null;
 }
 
 export interface CreatureArchiveEntryDto {
@@ -89,10 +89,10 @@ export interface CreatureArchiveEntryDto {
   killCount: number;
   firstDefeatedAtUtc: string;
   lastDefeatedAtUtc: string;
-  isEssenceFocus: boolean;
-  essenceFocusSetAtUtc?: string | null;
-  essenceFocusTotalDurationSeconds: number;
-  currentEssenceFocusDurationSeconds: number;
+  isCreatureFocus: boolean;
+  creatureFocusSetAtUtc?: string | null;
+  creatureFocusTotalDurationSeconds: number;
+  currentCreatureFocusDurationSeconds: number;
   essences: CreatureArchiveEssenceEntryDto[];
   locations: CreatureArchiveLocationDto[];
   tags: string[];
@@ -156,6 +156,7 @@ export interface PlayerEssenceDto {
   ascensionTier: number;
   isEvolved: boolean;
   isFavorite: boolean;
+  isChanneledEssenceEligible: boolean;
   attunedSlot?: number | null;
   canAscend: boolean;
   canEvolve: boolean;

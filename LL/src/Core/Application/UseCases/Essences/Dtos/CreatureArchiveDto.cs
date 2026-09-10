@@ -6,9 +6,9 @@ namespace Application.UseCases.Essences.Dtos;
 
 public sealed record CreatureArchiveDto(
     IReadOnlyList<CreatureArchiveEntryDto> Creatures,
-    bool CanChangeEssenceFocus,
-    DateTimeOffset? EssenceFocusAvailableAtUtc,
-    DateTimeOffset? EssenceFocusSetAtUtc) : IMapFrom<CreatureArchive>
+    bool CanChangeCreatureFocus,
+    DateTimeOffset? CreatureFocusAvailableAtUtc,
+    DateTimeOffset? CreatureFocusSetAtUtc) : IMapFrom<CreatureArchive>
 {
     public CreatureArchiveDto()
         : this([], true, null, null)
@@ -27,10 +27,10 @@ public sealed record CreatureArchiveEntryDto(
     int KillCount,
     DateTimeOffset FirstDefeatedAtUtc,
     DateTimeOffset LastDefeatedAtUtc,
-    bool IsEssenceFocus,
-    DateTimeOffset? EssenceFocusSetAtUtc,
-    long EssenceFocusTotalDurationSeconds,
-    long CurrentEssenceFocusDurationSeconds,
+    bool IsCreatureFocus,
+    DateTimeOffset? CreatureFocusSetAtUtc,
+    long CreatureFocusTotalDurationSeconds,
+    long CurrentCreatureFocusDurationSeconds,
     IReadOnlyList<CreatureArchiveEssenceEntryDto> Essences,
     IReadOnlyList<CreatureArchiveLocationDto> Locations,
     IReadOnlyList<string> Tags) : IMapFrom<CreatureArchiveEntry>

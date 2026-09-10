@@ -36,12 +36,20 @@ import { LocalDatePipe } from '../../../shared/pipes/local-date/local-date.pipe'
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { ChatMentionSuggestionsService } from './chat-mention-suggestions.service';
 import { ChatMentionComponent } from './chat-mention.component';
+import { ChatEquipmentLinkComponent } from './chat-equipment-link.component';
+import { ChatComposerDirective } from './chat-composer.directive';
+import { ChatEquipmentLinkService } from '../../../core/services/client-side/chat-equipment-link/chat-equipment-link.service';
+import {
+  insertEquipmentLinkAtSelection,
+  chatMessageLength,
+  equipmentLinkRanges,
+  splitChatEquipmentLinks,
+} from '../../../shared/utils/chat/chat-equipment-links';
 import {
   ChatTextSegment,
   findDraftMention,
   formatChatMention,
   insertChatMention,
-  splitChatMentions,
 } from './chat-mentions';
 
 export interface WireCommand {
@@ -76,7 +84,7 @@ export class ChatMentionSegmentsPipe implements PipeTransform {
     body: string,
     playerName: string | null | undefined,
   ): ChatTextSegment[] {
-    return splitChatMentions(body, playerName);
+    return splitChatEquipmentLinks(body, playerName);
   }
 }
 
@@ -240,6 +248,8 @@ function localChatDateKey(value: Date | string): string {
     RouterLink,
     ChatMentionSegmentsPipe,
     ChatMentionComponent,
+    ChatEquipmentLinkComponent,
+    ChatComposerDirective,
     OverlayModule,
   ],
   templateUrl: './chat.component.html',
@@ -278,7 +288,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   @Output() drawerDragStart = new EventEmitter<PointerEvent>();
   @Output() drawerDragMove = new EventEmitter<PointerEvent>();
   @Output() drawerDragEnd = new EventEmitter<PointerEvent>();
-  @ViewChild('chatInput') chatInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('chatInput') chatInput?: ChatComposerDirective;
   @ViewChild('channelScroller')
   channelScroller?: ElementRef<HTMLElement>;
   ChatChannelType = ChatChannelType;
@@ -344,6 +354,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   messages: ChatMessageDto[] = [];
   draft = '';
+
+  get draftMessageLength(): number {
+    return chatMessageLength(this.draft);
+  }
   sendError = '';
   isSending = false;
   userInfo: UserInfoDto | null = null;
@@ -413,6 +427,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly router: Router,
     readonly mentions: ChatMentionSuggestionsService,
+    private readonly equipmentLinks: ChatEquipmentLinkService,
   ) {
     this.guild = this.guildState.guild;
     this.raidId = this.raidService.activeRaidChatId;
@@ -448,6 +463,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.sub.add(
+      this.equipmentLinks.draftRequests$.subscribe((token) =>
+        this.insertEquipmentLink(token),
+      ),
+    );
     this.sub.add(
       this.chat.messages$.subscribe((m) => {
         this.messages = m;
@@ -487,6 +507,46 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+  }
+
+  insertEquipmentLink(token: string): void {
+    if (this.collapsed) this.collapsedChange.emit(false);
+    if (this.mobileDock && !this.mobileDockExpanded) this.expand.emit();
+    if (!this.canWriteChat) {
+      this.sendError = this.isGuestAccount
+        ? 'Register your account before writing in chat.'
+        : 'Chat access is still loading. Try linking the piece again.';
+      return;
+    }
+    if (this.isSending) {
+      this.sendError =
+        'Wait for your message to send, then link the piece again.';
+      return;
+    }
+    const input = this.chatInput;
+    const hasCurrentDraft = input?.value === this.draft;
+    const next = insertEquipmentLinkAtSelection(
+      this.draft,
+      token,
+      hasCurrentDraft ? input.selectionStart : this.draft.length,
+      hasCurrentDraft ? input.selectionEnd : this.draft.length,
+    );
+    if (next === null) {
+      this.sendError =
+        'There is not enough room for this link. Shorten your message and try again (200 characters maximum).';
+      return;
+    }
+    if (this.activeChannel.type === ChatChannelType.System) {
+      this.activeChannel = {
+        type: ChatChannelType.General,
+        contextKey: 'general',
+      };
+    }
+    this.mentions.close();
+    input?.replaceValue(next.draft, next.caret);
+    this.draft = next.draft;
+    this.sendError = '';
+    this.focusChatInput(next.caret);
   }
 
   setChannel(type: ChatChannelType, contextKey: string): void {
@@ -716,8 +776,8 @@ export class ChatComponent implements OnInit, OnDestroy {
       : message.senderTitleDisplayName;
   }
 
-  trackMentionSegment(index: number): number {
-    return index;
+  trackMentionSegment(index: number, segment: ChatTextSegment): string {
+    return `${index}:${segment.equipmentId ?? segment.rawText ?? segment.text}`;
   }
 
   isMentionedByOtherPlayer(message: ChatMessageDto): boolean {
@@ -725,15 +785,21 @@ export class ChatComponent implements OnInit, OnDestroy {
       message.senderId !== this.characterId() &&
       message.channelType !== ChatChannelType.System &&
       !message.isSystemGenerated &&
-      splitChatMentions(message.body, this.characterName()).some(
+      splitChatEquipmentLinks(message.body, this.characterName()).some(
         (segment) => segment.isCurrentPlayerMention,
       )
     );
   }
 
-  updateMentionSearch(input: HTMLInputElement): void {
+  updateMentionSearch(input: ChatComposerDirective): void {
     this.mentions.update(
-      this.canWriteChat && input.selectionStart === input.selectionEnd
+      this.canWriteChat &&
+        input.selectionStart === input.selectionEnd &&
+        !equipmentLinkRanges(this.draft).some(
+          (link) =>
+            input.selectionStart > link.start &&
+            input.selectionStart <= link.end,
+        )
         ? findDraftMention(
             this.draft,
             input.selectionStart ?? this.draft.length,
@@ -742,7 +808,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     );
   }
 
-  onComposerKeyup(event: KeyboardEvent, input: HTMLInputElement): void {
+  onComposerKeyup(event: KeyboardEvent, input: ChatComposerDirective): void {
     if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
       this.updateMentionSearch(input);
     }
@@ -781,7 +847,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private scrollActiveMentionIntoView(): void {
     setTimeout(() => {
-      this.chatInput?.nativeElement.ownerDocument
+      this.chatInput?.ownerDocument
         .getElementById(
           `${this.mentionListId}-${this.mentions.selectedIndex()}`,
         )
@@ -792,7 +858,13 @@ export class ChatComponent implements OnInit, OnDestroy {
   selectMention(name: string): void {
     const mention = this.mentions.active();
     if (!mention || !this.canWriteChat) return;
-    const result = insertChatMention(this.draft, mention, name);
+    const result = insertChatMention(
+      this.draft,
+      mention,
+      name,
+      200,
+      chatMessageLength,
+    );
     if (!result) {
       this.sendError =
         'That mention would exceed the 200-character message limit.';
@@ -801,15 +873,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.draft = result.draft;
     this.sendError = '';
     this.mentions.close();
-    const input = this.chatInput?.nativeElement;
+    const input = this.chatInput;
     if (input) {
-      input.value = this.draft;
-      input.focus();
-      input.setSelectionRange(result.caret, result.caret);
+      input.replaceValue(this.draft, result.caret);
     }
   }
 
-  onDraftChange(input: HTMLInputElement): void {
+  onDraftChange(input: ChatComposerDirective): void {
     this.sendError = '';
     if (!this.canWriteChat) {
       this.draft = '';
@@ -817,19 +887,24 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.draft.length > 200) {
-      this.draft = this.draft.slice(0, 200);
+    if (chatMessageLength(this.draft) > 200) {
+      this.sendError = 'Shorten your message (200 characters maximum).';
+      this.mentions.close();
+      return;
     }
     this.updateMentionSearch(input);
   }
 
-  private focusChatInput(): void {
+  private focusChatInput(caret?: number): void {
     setTimeout(() => {
-      const input = this.chatInput?.nativeElement;
+      const input = this.chatInput;
       if (!input) return;
 
       input.focus();
-      input.setSelectionRange(input.value.length, input.value.length);
+      input.setSelectionRange(
+        caret ?? input.value.length,
+        caret ?? input.value.length,
+      );
     });
   }
 
@@ -845,6 +920,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (chatMessageLength(this.draft) > 200) {
+      this.sendError =
+        'Shorten your message to fit the linked piece (200 characters maximum).';
+      return;
+    }
     const body = this.draft.trim();
     if (!body || !isMessageAllowed(body)) return;
 
@@ -856,6 +936,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     try {
       const wire = parseWireCommand(body);
       if (wire.isWire) {
+        if (equipmentLinkRanges(body).length) {
+          this.sendError = 'Remove the linked piece before using /wire.';
+          return;
+        }
         if (!wire.command) {
           this.sendError = 'Usage: /wire Name Amount Cinders';
           return;

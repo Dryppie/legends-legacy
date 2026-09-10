@@ -21,6 +21,9 @@ import { RaidService } from '../../../core/services/api/raid/raid.service';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { ItemComponent } from '../../../shared/components/item/item.component';
+import { EquipmentService } from '../../../core/services/api/equipment/equipment.service';
+import { ChatEquipmentLinkService } from '../../../core/services/client-side/chat-equipment-link/chat-equipment-link.service';
+import { EquipmentInstance } from '../../../shared/models/item';
 
 describe('Chat mention interaction', () => {
   let fixture: ComponentFixture<ChatComponent>;
@@ -50,6 +53,12 @@ describe('Chat mention interaction', () => {
       imports: [ChatComponent],
       providers: [
         provideRouter([]),
+        {
+          provide: EquipmentService,
+          useValue: {
+            getLinkedEquipment: () => throwError(() => ({ status: 404 })),
+          },
+        },
         {
           provide: ChatService,
           useValue: {
@@ -95,19 +104,147 @@ describe('Chat mention interaction', () => {
 
   afterEach(() => fixture.destroy());
 
-  function typeDraft(body: string, caret = body.length): HTMLInputElement {
+  it('opens collapsed chat and sends the selected equipment with existing draft text', fakeAsync(() => {
     fixture.detectChanges();
-    const input = fixture.nativeElement.querySelector(
-      'input',
-    ) as HTMLInputElement;
-    input.value = body;
-    input.setSelectionRange(caret, caret);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.componentInstance.collapsed = true;
+    fixture.componentInstance.draft = '/trade Selling this';
+    const expand = spyOn(fixture.componentInstance.collapsedChange, 'emit');
+    TestBed.inject(ChatEquipmentLinkService).prepare({
+      id: '2b84eb39-110d-4b01-aacd-72caef024eba',
+      displayName: 'Phoenix Mace',
+    } as EquipmentInstance);
+    expect(expand).toHaveBeenCalledWith(false);
+    expect(fixture.componentInstance.draft).toBe(
+      '/trade Selling this [Phoenix Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)',
+    );
+    expect(sendPublic).not.toHaveBeenCalled();
+    fixture.componentInstance.collapsed = false;
     fixture.detectChanges();
-    return input;
+    expect(
+      fixture.nativeElement.querySelector(
+        '[appChatComposer] [contenteditable="false"]',
+      ),
+    ).not.toBeNull();
+    fixture.componentInstance.send();
+    tick();
+    expect(sendPublic).toHaveBeenCalledWith(
+      ChatChannelType.Trade,
+      'trade',
+      'Selling this [Phoenix Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)',
+    );
+
+    expect(fixture.componentInstance.draft).toBe('');
+  }));
+
+  it('deletes an inline piece as a unit and keeps an oversized draft intact', fakeAsync(() => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.insertEquipmentLink(
+      '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)',
+    );
+    fixture.detectChanges();
+    const editor = component.chatInput!;
+    editor.setSelectionRange(component.draft.length, component.draft.length);
+    key(editor.nativeElement, 'Backspace');
+    expect(component.draft).toBe('');
+    component.draft = 'x'.repeat(196);
+    component.insertEquipmentLink(
+      '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)',
+    );
+    expect(component.draft).toBe('x'.repeat(196));
+    expect(component.sendError).toContain('not enough room');
+    tick();
+  }));
+
+  it('sends a piece without prose and retains it when delivery fails', fakeAsync(() => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const token = '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)';
+    component.insertEquipmentLink(token);
+    sendPublic.and.rejectWith(new Error('Offline'));
+    component.send();
+    tick();
+    expect(component.draft).toBe(token);
+    sendPublic.and.resolveTo();
+    component.send();
+    tick();
+    expect(sendPublic).toHaveBeenCalledWith(
+      ChatChannelType.General,
+      'general',
+      token,
+    );
+    expect(component.draft).toBe('');
+  }));
+
+  function typeDraft(body: string, caret = body.length): HTMLElement {
+    fixture.detectChanges();
+    tick();
+    const editor = fixture.componentInstance.chatInput!;
+    editor.replaceValue(body, caret);
+    fixture.detectChanges();
+    return editor.nativeElement;
   }
 
-  function key(input: HTMLInputElement, value: string): void {
+  it('counts names when inserting multiple pieces, completing mentions, and sending a payload over 200 characters', fakeAsync(() => {
+    typeDraft('');
+    const component = fixture.componentInstance;
+    const token =
+      '[Arcane Crossbow](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)';
+    for (let i = 0; i < 4; i++) component.insertEquipmentLink(token);
+    tick();
+    fixture.detectChanges();
+    expect(component.draft).toBe(Array(4).fill(token).join(' '));
+    expect(component.draft.length).toBeGreaterThan(200);
+    expect(component.draftMessageLength).toBe(63);
+    const input = typeDraft(component.draft + ' @Em');
+    tick(200);
+    fixture.detectChanges();
+    key(input, 'Enter');
+    expect(component.draftMessageLength).toBe(71);
+    expect(
+      component.chatInput!.nativeElement.querySelectorAll('[data-chat-token]')
+        .length,
+    ).toBe(4);
+    key(input, 'Enter');
+    tick();
+    expect(sendPublic).toHaveBeenCalledOnceWith(
+      ChatChannelType.General,
+      'general',
+      Array(4).fill(token).join(' ') + ' @Ember',
+    );
+  }));
+
+  it('inserts several pieces at the saved caret and sends them in their text order', fakeAsync(() => {
+    typeDraft('/trade Selling today', 15);
+    const component = fixture.componentInstance;
+    const first = '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)';
+    const second = '[Axe](equipment:2b84eb39-110d-4b01-aacd-72caef024ebb)';
+    component.insertEquipmentLink(first);
+    component.insertEquipmentLink(second);
+    tick();
+    fixture.detectChanges();
+    expect(component.chatInput!.nativeElement.textContent).toBe(
+      '/trade Selling [Mace] [Axe] today',
+    );
+    expect(
+      fixture.nativeElement.querySelectorAll(
+        '[appChatComposer] [data-chat-token]',
+      ).length,
+    ).toBe(2);
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="Remove linked piece"]'),
+    ).toBeNull();
+    component.send();
+    tick();
+    expect(sendPublic).toHaveBeenCalledWith(
+      ChatChannelType.Trade,
+      'trade',
+      `Selling ${first} ${second} today`,
+    );
+    expect(component.draft).toBe('');
+  }));
+
+  function key(input: HTMLElement, value: string): void {
     input.dispatchEvent(
       new KeyboardEvent('keydown', {
         key: value,
@@ -130,7 +267,9 @@ describe('Chat mention interaction', () => {
     tick();
     key(input, 'Enter');
     expect(fixture.componentInstance.draft).toBe('Hi @"Ember Knight" ');
-    expect(input.selectionStart).toBe(input.value.length);
+    expect(fixture.componentInstance.chatInput!.selectionStart).toBe(
+      fixture.componentInstance.chatInput!.value.length,
+    );
     expect(sendPublic).not.toHaveBeenCalled();
     expect(overlay.querySelector('[role="listbox"]')).toBeNull();
     key(input, 'Enter');
@@ -160,7 +299,7 @@ describe('Chat mention interaction', () => {
     option.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.draft).toBe('Hi @Ember, ready?');
-    expect(input.selectionStart).toBe(9);
+    expect(fixture.componentInstance.chatInput!.selectionStart).toBe(9);
     expect(sendPublic).not.toHaveBeenCalled();
   }));
 

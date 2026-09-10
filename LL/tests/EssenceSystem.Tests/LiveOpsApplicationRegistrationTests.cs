@@ -192,6 +192,7 @@ public sealed class LiveOpsApplicationRegistrationTests
 
         Assert.NotNull(provider.GetRequiredService<IEssenceDefinitionRepository>());
         Assert.NotNull(provider.GetRequiredService<IEssenceProgressionService>());
+        Assert.NotNull(provider.GetRequiredService<Application.Interfaces.Services.LL.CombatStyles.IChanneledEssenceResolver>());
         Assert.NotNull(provider.GetRequiredService<EssenceLoadoutConverter>());
         Assert.NotNull(provider.GetRequiredService<PlayerEssenceArchiveEntryConverter>());
         Assert.NotNull(provider.GetRequiredService<CharacterOverviewConverter>());

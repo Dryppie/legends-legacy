@@ -176,7 +176,7 @@ public sealed class IdleCombatPlannerTests
         ];
         plan = plan with
         {
-            SpawnCreatures = Services.LL.Spawnings.WeightedSpawnSelector.ApplyEssenceFocus(
+            SpawnCreatures = Services.LL.Spawnings.WeightedSpawnSelector.ApplyCreatureFocus(
                 plan.Area.Creatures.ToList(), new HashSet<Guid> { focusedId })
         };
 

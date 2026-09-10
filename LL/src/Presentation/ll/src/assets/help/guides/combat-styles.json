@@ -15,8 +15,8 @@
       "body": "At mastery level 3, choose Reprisal to store 25% of enemy damage actually absorbed by your Barrier as bonus damage, capped at 10% of Max Health. Your Barrier can come from any source. The next normally cast damaging Essence uses the stored amount once on its first direct enemy attack attempt, without spending Barrier. With 1,000 Max Health, absorbing 200 enemy damage stores 50 bonus damage toward a cap of 100."
     },
     {
-      "heading": "Conduit: prepare your Focus",
-      "body": "Choose your Focus from equipped Essences that deal direct damage, heal or grant Barrier when they cast. Keep it equipped in every Essence loadout you use for battle. Your other Essences build Charge through their regular casts, and your Focus spends that Charge to strengthen its immediate damage, healing and Barrier. In the base form, each different Essence can add 1 Charge before the Focus casts, up to 3 Charge. The Focus starts at 80% of normal strength and adds a flat +20% per Charge spent, reaching 140% at 3 Charge before mastery and upgrade bonuses. Choose your Focus before taking Conduit into battle."
+      "heading": "Conduit: prepare your Channeled Essence",
+      "body": "Each battle uses the first occupied Essence slot in its loadout as your Channeled Essence; empty slots are skipped. Your other Essences build Charge through their regular casts, and your Channeled Essence spends that Charge to strengthen its immediate damage, healing and Barrier. In the base form, each different Essence can add 1 Charge before the Channeled Essence casts, up to 3 Charge. The Channeled Essence starts at 80% of normal strength and adds a flat +20% per Charge spent, reaching 140% at 3 Charge before mastery and upgrade bonuses. On the Essences page, use Channel Essence to swap an equipped Essence into the first occupied slot. A Channeled Essence needs direct damage, healing or Barrier for Conduit to strengthen; an ineligible first Essence is never silently replaced by another."
     },
     {
       "heading": "Individual mastery",
@@ -24,7 +24,7 @@
     },
     {
       "heading": "Mastery bonuses and choices",
-      "body": "Every mastery level improves your style. Bastion adds 1% of the base converted Barrier per level, reaching +10% at mastery 10. Each Conduit mastery level adds a flat +1% to your Focus's damage, healing and Barrier when it spends at least 1 Charge, reaching a +10% flat increase at mastery 10. The mastery bonus applies once per cast, regardless of how much Charge is spent. At level 3 choose one refinement or keep the base form. Unlock your first slot at Mastery 5 and the second slot at Mastery 8. All three upgrades become available at Mastery 5. Equip up to two different upgrades as your slots unlock. Barrier bonuses apply when Fortification converts healing. These choices are free."
+      "body": "Every mastery level improves your style. Bastion adds 1% of the base converted Barrier per level, reaching +10% at mastery 10. Each Conduit mastery level adds a flat +1% to your Channeled Essence's damage, healing and Barrier when it spends at least 1 Charge, reaching a +10% flat increase at mastery 10. The mastery bonus applies once per cast, regardless of how much Charge is spent. At level 3 choose one refinement or keep the base form. Unlock your first slot at Mastery 5 and the second slot at Mastery 8. All three upgrades become available at Mastery 5. Equip up to two different upgrades as your slots unlock. Barrier bonuses apply when Fortification converts healing. These choices are free."
     },
     {
       "heading": "Reading percentage bonuses",
@@ -40,7 +40,7 @@
     },
     {
       "heading": "Saving your Combat Style",
-      "body": "Save applies your chosen style, refinement, upgrades, Upgrade Mastery, and Focus to future battles. Discard restores your saved choices. Equipment and Essence loadouts are managed separately. Changes apply at the next permitted encounter boundary; an already committed dungeon run or match keeps its captured choices and mastery until it ends. Offline combat continues as you gain levels; choose newly available upgrades here."
+      "body": "Save applies your chosen style, refinement, upgrades, and Upgrade Mastery to future battles. Discard restores your saved choices. Equipment and Essence loadouts are managed separately. Changes apply at the next permitted encounter boundary; an already committed dungeon run or match keeps its captured choices and mastery until it ends. Offline combat continues as you gain levels; choose newly available upgrades here."
     }
   ]
 }

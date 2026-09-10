@@ -14,10 +14,6 @@ import {
   NavigationTabsComponent,
 } from '../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
-import {
-  DropdownComponent,
-  DropdownOption,
-} from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-combat-styles',
@@ -25,7 +21,6 @@ import {
   imports: [
     DecimalPipe,
     NgTemplateOutlet,
-    DropdownComponent,
     DefaultHeaderComponent,
     NavigationTabsComponent,
     RegularButtonComponent,
@@ -116,19 +111,6 @@ export class CombatStylesComponent {
   readonly previewFacts = computed(
     () => this.state.preview()?.previewFacts ?? [],
   );
-  readonly focusOptions = computed<DropdownOption<string | null>[]>(() => [
-    { label: 'Choose your Focus Essence', value: null },
-    ...((this.state.preview() ?? this.state.data())?.focusOptions ?? []).map(
-      (option) => ({
-        label: option.name,
-        value: option.playerEssenceId,
-        disabled: !option.isEligible,
-        detail: option.isEligible
-          ? undefined
-          : 'This Essence has no direct effect that Conduit can strengthen.',
-      }),
-    ),
-  ]);
   readonly selectedRefinement = computed(() =>
     this.state
       .selected()
@@ -158,17 +140,17 @@ export class CombatStylesComponent {
             : null,
       };
     }
-    const perLevel = tuning.focusPerMasteryLevel * 100;
+    const perLevel = tuning.channeledPerMasteryLevel * 100;
     const baseEffect =
-      (tuning.focusBaseMultiplier + tuning.focusPerCharge) * 100;
+      (tuning.channeledBaseMultiplier + tuning.channeledPerCharge) * 100;
     return {
-      perLevel: `Each mastery level adds a flat +${number(perLevel)}% to your Focus's damage, healing and Barrier when it spends at least 1 Charge.`,
+      perLevel: `Each mastery level adds a flat +${number(perLevel)}% to your Channeled Essence's damage, healing and Barrier when it spends at least 1 Charge.`,
       bonus: `+${number(perLevel * level)}% flat increase`,
-      current: `Mastery ${level}: +${number(perLevel * level)}% flat increase to your Focus`,
-      example: `1 Charge: ${number(baseEffect)}% → ${number(baseEffect + perLevel * level)}% of normal strength before upgrades. The mastery bonus applies once when your Focus spends at least 1 Charge.`,
+      current: `Mastery ${level}: +${number(perLevel * level)}% flat increase to your Channeled Essence`,
+      example: `1 Charge: ${number(baseEffect)}% → ${number(baseEffect + perLevel * level)}% of normal strength before upgrades. The mastery bonus applies once when your Channeled Essence spends at least 1 Charge.`,
       next:
         level < 10
-          ? `Level ${nextLevel}: +${number(perLevel * nextLevel)}% flat increase to your Focus`
+          ? `Level ${nextLevel}: +${number(perLevel * nextLevel)}% flat increase to your Channeled Essence`
           : null,
     };
   });
@@ -191,17 +173,6 @@ export class CombatStylesComponent {
     if (!this.styleTabs().some((tab) => tab.key === key && !tab.disabled))
       return;
     this.state.chooseStyle(key === 'empty-slot' ? null : key);
-  }
-
-  selectFocus(id: string | null) {
-    if (
-      this.state.busy() ||
-      !this.focusOptions().some(
-        (option) => option.value === id && !option.disabled,
-      )
-    )
-      return;
-    this.state.changeFocus(id);
   }
 
   refinementStatus(id: string | null): string {

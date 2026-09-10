@@ -19,6 +19,9 @@ public class EquipmentSlotService : IEquipmentSlotService
         _buildBoundary = buildBoundary;
     }
 
+    public Task<EquipmentInstance?> GetLinkedEquipmentAsync(Guid equipmentId, CancellationToken cancellationToken) =>
+        _equipmentSlotRepository.GetLinkedEquipmentAsync(equipmentId, cancellationToken);
+
     public async Task<List<EquipmentSlot>> GetEquipmentSlotsByEntityIdAsync(Guid entityId, CancellationToken cancellationToken) =>
         await _equipmentSlotRepository.GetEquipmentSlotsByEntityIdAsync(entityId, cancellationToken);
 

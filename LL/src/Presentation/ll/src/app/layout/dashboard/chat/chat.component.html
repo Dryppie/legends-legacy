@@ -119,8 +119,9 @@
 
     <div class="shrink-0 border-t border-[var(--ll-color-border)] px-3 py-2">
       <div class="flex items-center gap-2">
-        <input
-          #chatInput
+        <div
+          appChatComposer
+          #chatInput="chatComposer"
           cdkOverlayOrigin
           #mentionOrigin="cdkOverlayOrigin"
           role="combobox"
@@ -135,9 +136,9 @@
               ? mentionListId + '-' + mentions.selectedIndex()
               : null
           "
-          type="text"
-          [placeholder]="chatPlaceholder"
-          class="ll-input h-8 min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
+          aria-multiline="false"
+          [attr.data-placeholder]="chatPlaceholder"
+          class="ll-input chat-composer min-h-8 min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
           [(ngModel)]="draft"
           (ngModelChange)="onDraftChange(chatInput)"
           (keydown)="onComposerKeydown($event)"
@@ -145,9 +146,8 @@
           (click)="updateMentionSearch(chatInput)"
           (focus)="updateMentionSearch(chatInput)"
           (blur)="mentions.close()"
-          maxlength="200"
-          [disabled]="!canWriteChat"
-        />
+          [disabled]="!canWriteChat || isSending"
+        ></div>
         <ng-container
           *ngTemplateOutlet="
             mentionPicker;
@@ -491,14 +491,15 @@
         class="relative shrink-0 border-t border-[var(--ll-color-border)] bg-[var(--ll-color-surface-strong)] p-2"
       >
         <div
-          *ngIf="draft.length > 160"
+          *ngIf="draftMessageLength > 160"
           class="absolute -top-6 right-3 text-xs text-[var(--ll-color-danger)]"
         >
-          {{ draft.length }}/200
+          {{ draftMessageLength }}/200
         </div>
         <div class="flex gap-2">
-          <input
-            #chatInput
+          <div
+            appChatComposer
+            #chatInput="chatComposer"
             cdkOverlayOrigin
             #mentionOrigin="cdkOverlayOrigin"
             role="combobox"
@@ -513,9 +514,9 @@
                 ? mentionListId + '-' + mentions.selectedIndex()
                 : null
             "
-            type="text"
-            [placeholder]="chatPlaceholder"
-            class="ll-input min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
+            aria-multiline="false"
+            [attr.data-placeholder]="chatPlaceholder"
+            class="ll-input chat-composer min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
             [(ngModel)]="draft"
             (ngModelChange)="onDraftChange(chatInput)"
             (keydown)="onComposerKeydown($event)"
@@ -523,9 +524,8 @@
             (click)="updateMentionSearch(chatInput)"
             (focus)="updateMentionSearch(chatInput)"
             (blur)="mentions.close()"
-            maxlength="200"
-            [disabled]="!canWriteChat"
-          />
+            [disabled]="!canWriteChat || isSending"
+          ></div>
           <ng-container
             *ngTemplateOutlet="
               mentionPicker;
@@ -737,12 +737,19 @@
       let segment of body | chatMentionSegments: characterName();
       trackBy: trackMentionSegment
     "
-    ><app-chat-mention
-      *ngIf="segment.mentionName as name; else plainSegment"
-      [name]="name"
-      [rawText]="segment.rawText ?? segment.text"
-    ></app-chat-mention
-    ><ng-template #plainSegment>{{ segment.text }}</ng-template></ng-container
+    ><app-chat-equipment-link
+      *ngIf="segment.equipmentId as id; else mentionSegment"
+      [equipmentId]="id"
+      [name]="segment.text"
+    ></app-chat-equipment-link
+    ><ng-template #mentionSegment
+      ><app-chat-mention
+        *ngIf="segment.mentionName as name; else plainSegment"
+        [name]="name"
+        [rawText]="segment.rawText ?? segment.text"
+      ></app-chat-mention
+      ><ng-template #plainSegment>{{ segment.text }}</ng-template></ng-template
+    ></ng-container
   >
 </ng-template>
 

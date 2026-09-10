@@ -3,7 +3,7 @@ using Services.LL.Spawnings;
 
 namespace EssenceSystem.Tests;
 
-public sealed class EssenceFocusSpawnTests
+public sealed class CreatureFocusSpawnTests
 {
     [Fact]
     public void Focus_increases_normalized_probability_by_twenty_percent_without_mutating_area()
@@ -14,7 +14,7 @@ public sealed class EssenceFocusSpawnTests
             new() { AreaId = "area", CreatureId = Guid.NewGuid(), WeightedSpawnRate = 3 },
             new() { AreaId = "area", CreatureId = Guid.NewGuid(), WeightedSpawnRate = 5 }
         ];
-        var focused = WeightedSpawnSelector.ApplyEssenceFocus(creatures, new HashSet<Guid> { creatures[0].CreatureId });
+        var focused = WeightedSpawnSelector.ApplyCreatureFocus(creatures, new HashSet<Guid> { creatures[0].CreatureId });
 
         Assert.Equal(0.24, focused[0].WeightedSpawnRate / focused.Sum(x => x.WeightedSpawnRate), 6);
         Assert.Equal(3d / 5, focused[1].WeightedSpawnRate / focused[2].WeightedSpawnRate, 6);
@@ -35,7 +35,7 @@ public sealed class EssenceFocusSpawnTests
             new() { CreatureId = Guid.NewGuid(), WeightedSpawnRate = weight },
             new() { CreatureId = Guid.NewGuid(), WeightedSpawnRate = other }
         ];
-        var focused = WeightedSpawnSelector.ApplyEssenceFocus(creatures, new HashSet<Guid> { creatures[0].CreatureId });
+        var focused = WeightedSpawnSelector.ApplyCreatureFocus(creatures, new HashSet<Guid> { creatures[0].CreatureId });
         Assert.Equal(expected, focused[0].WeightedSpawnRate / focused.Sum(x => x.WeightedSpawnRate), 6);
     }
 
@@ -43,6 +43,6 @@ public sealed class EssenceFocusSpawnTests
     public void Focus_outside_an_area_leaves_its_spawn_table_unchanged()
     {
         AreaCreature[] creatures = [new() { CreatureId = Guid.NewGuid(), WeightedSpawnRate = 1 }];
-        Assert.Same(creatures, WeightedSpawnSelector.ApplyEssenceFocus(creatures, new HashSet<Guid> { Guid.NewGuid() }));
+        Assert.Same(creatures, WeightedSpawnSelector.ApplyCreatureFocus(creatures, new HashSet<Guid> { Guid.NewGuid() }));
     }
 }

@@ -27,7 +27,7 @@ The first content release is now represented in the JSON quest catalog:
 - `Stone, Timber, and Hide` is implemented as the first post-tutorial gathering
   quest. It counts Lumo Ruins actions separately for each equipped tool type.
 - `Focused Pursuit`, `The Arena Calls`, and `An Omen Fulfilled` introduce
-  Essence Focus, Colosseum, and daily Prophecy activities as side quests.
+  Creature Focus, Colosseum, and daily Prophecy activities as side quests.
 
 ## Implementation Labels
 
@@ -50,7 +50,7 @@ The current system supports:
 - crafting and equipping qualifying equipment;
 - equipping gathering tools;
 - counting area actions by equipped gathering-tool type;
-- setting Essence Focus for a known creature;
+- setting Creature Focus for a known creature;
 - starting a Colosseum battle;
 - completing a daily Prophecy;
 - reaching a character level;
@@ -157,7 +157,7 @@ reward IDs still need to be selected from live content before authoring JSON.
 | Tested Wanderer       | Character | Reach level 25                                         | 2 Advancement Stones    | Implemented |
 | Warden of Shenic      | Character | Finish the chain at level 45, then defend Duskmire     | 5 Advancement Stones    | Implemented |
 | Stone, Timber, and Hide | Gathering | Complete 10 Lumo Ruins actions with each tool type   | 12 Ore, Wood, and Hide each | Implemented |
-| Focused Pursuit        | Essences  | Set Essence Focus for one known creature               | 10 Soul Dust            | Implemented |
+| Focused Pursuit        | Essences  | Set Creature Focus for one known creature               | 10 Soul Dust            | Implemented |
 | The Arena Calls        | Colosseum | Start one Colosseum battle                              | 1 Advancement Stone     | Implemented |
 | An Omen Fulfilled      | Prophecies | Complete one daily Prophecy                            | 1 Advancement Stone     | Implemented |
 

@@ -21,7 +21,7 @@ public sealed class EventQuestGameEventOutboxConsumer(
         eventType is GameEventTypes.EquipmentFound
             or GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
-            or GameEventTypes.EssenceFocusSet
+            or GameEventTypes.CreatureFocusSet
             or GameEventTypes.FocusedCreatureEssenceReceived
             or GameEventTypes.EssenceAscended
             or GameEventTypes.IdleCombatEncounterCompleted
@@ -63,7 +63,7 @@ public sealed class EventQuestGameEventOutboxConsumer(
                 Read<EssenceAbsorbedPayload>(message).EssenceDefinitionId),
             GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(
                 Read<EssenceLoadoutChangedPayload>(message).HasCompatibleEssenceTrio),
-            GameEventTypes.EssenceFocusSet => QuestTrigger.EssenceFocusSet(),
+            GameEventTypes.CreatureFocusSet => QuestTrigger.CreatureFocusSet(),
             GameEventTypes.FocusedCreatureEssenceReceived => CreateFocusedEssenceTrigger(
                 Read<FocusedCreatureEssenceReceivedPayload>(message)),
             GameEventTypes.EssenceAscended => QuestTrigger.EssenceAscended(),

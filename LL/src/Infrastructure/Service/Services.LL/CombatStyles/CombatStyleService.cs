@@ -1,9 +1,7 @@
 using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Essences;
-using Domain.Models.Combat.Abilities;
 using Domain.Models.CombatStyles;
 using Domain.Models.Essences;
-using Services.LL.Combat.Engine;
 using System.Globalization;
 
 namespace Services.LL.CombatStyles;
@@ -11,9 +9,8 @@ namespace Services.LL.CombatStyles;
 public sealed class CombatStyleService(
     ICombatStyleRepository repository,
     ICombatStyleCatalogProvider catalogProvider,
-    IEssenceDefinitionRepository essenceDefinitions,
     IEssenceCombatLoadoutResolver loadouts,
-    IAbilityCatalogProvider abilities,
+    IChanneledEssenceResolver channeledEssenceResolver,
     ICombatStyleMutationBoundary boundary) : ICombatStyleService
 {
     private readonly Dictionary<Guid, IReadOnlyList<CharacterCombatStyle>> _owned = [];
@@ -66,7 +63,7 @@ public sealed class CombatStyleService(
     {
         var selected = await Selected(id, ct);
         return CombatStyleRules.NormalizeSelection(new(selected?.CombatStyleId, selected?.RefinementId,
-            selected?.UpgradeIds ?? [], selected?.FocusPlayerEssenceId, MasteredUpgradeId: selected?.MasteredUpgradeId));
+            selected?.UpgradeIds ?? [], selected?.ChanneledPlayerEssenceId, MasteredUpgradeId: selected?.MasteredUpgradeId));
     }
 
     public async Task<CombatStyleOverview> GetOverviewAsync(Guid characterId, CancellationToken ct) =>
@@ -78,14 +75,12 @@ public sealed class CombatStyleService(
     private async Task<CombatStyleOverview> BuildOverview(Guid characterId, CombatStyleSelectionRequest selection, CancellationToken ct)
     {
         var owned = await Available(characterId, ct);
-        var options = FocusOptions((await loadouts.ResolveAsync(characterId, EssenceCombatActivity.None, ct)).EquippedEssences);
         selection = RestoreChoices(selection, owned);
         var entry = owned.FirstOrDefault(x => x.CombatStyleId == selection.CombatStyleId);
         var definition = Catalog.Styles.FirstOrDefault(x => x.Id == selection.CombatStyleId);
-        var issue = CombatStyleRules.ValidateSelection(entry, definition, selection, options);
+        var issue = CombatStyleRules.ValidateSelection(entry, definition, selection);
         var snapshot = issue is null && definition is not null && entry is not null
-            ? CombatStyleRules.Snapshot(Catalog, definition, entry, selection,
-                options.FirstOrDefault(x => x.PlayerEssenceId == selection.FocusPlayerEssenceId)?.EssenceDefinitionId) : null;
+            ? CombatStyleRules.Snapshot(Catalog, definition, entry, selection) : null;
         var styles = Catalog.Styles.Select(def =>
         {
             var progress = owned.FirstOrDefault(x => x.CombatStyleId == def.Id);
@@ -93,9 +88,9 @@ public sealed class CombatStyleService(
                 CombatStyleProgression.XpRequired(progress?.Level ?? 0, Catalog.XpRequirements),
                 CombatStyleProgression.UpgradeSlots(progress?.Level ?? 0),
                 CombatStyleRules.CurrentRefinementId(def.Id, progress?.RefinementId),
-                progress?.UpgradeIds ?? [], progress?.FocusPlayerEssenceId, progress?.MasteredUpgradeId);
+                progress?.UpgradeIds ?? [], progress?.MasteredUpgradeId);
         }).ToArray();
-        return new(Catalog.ContentVersion, styles, selection, snapshot, issue, options, PreviewFacts(snapshot));
+        return new(Catalog.ContentVersion, styles, selection, snapshot, issue, PreviewFacts(snapshot));
     }
 
     public async Task<CombatStyleSnapshot?> ResolveAsync(Guid characterId, EssenceCombatActivity activity, CancellationToken ct,
@@ -106,12 +101,17 @@ public sealed class CombatStyleService(
         if (selection.CombatStyleId is null) return null;
         var owned = (await Available(characterId, ct)).FirstOrDefault(x => x.CombatStyleId == selection.CombatStyleId);
         var definition = Catalog.Styles.FirstOrDefault(x => x.Id == selection.CombatStyleId);
-        equippedEssences ??= (await loadouts.ResolveAsync(characterId, activity, ct)).EquippedEssences;
-        var options = FocusOptions(equippedEssences);
-        var issue = CombatStyleRules.ValidateSelection(owned, definition, selection, options);
+        var issue = CombatStyleRules.ValidateSelection(owned, definition, selection);
         if (issue is not null) throw new CombatStyleConfigurationException(issue);
-        return CombatStyleRules.Snapshot(Catalog, definition!, owned!, selection,
-            options.FirstOrDefault(x => x.PlayerEssenceId == selection.FocusPlayerEssenceId)?.EssenceDefinitionId);
+        ChanneledEssenceOption? channeledEssence = null;
+        if (definition!.Kind == CombatStyleKind.Conduit)
+        {
+            equippedEssences ??= (await loadouts.ResolveAsync(characterId, activity, ct)).EquippedEssences;
+            if (equippedEssences.FirstOrDefault() is { } first) channeledEssence = channeledEssenceResolver.Resolve(first);
+            if (CombatStyleRules.ValidateChanneledEssence(channeledEssence) is { } channeledEssenceIssue)
+                throw new CombatStyleConfigurationException(channeledEssenceIssue);
+        }
+        return CombatStyleRules.Snapshot(Catalog, definition, owned!, selection, channeledEssence);
     }
 
     public async Task<CombatStyleOperationResult> SelectAsync(Guid characterId, CombatStyleSelectionRequest selection, CancellationToken ct)
@@ -120,8 +120,7 @@ public sealed class CombatStyleService(
         selection = RestoreChoices(selection, owned);
         var progress = owned.FirstOrDefault(x => x.CombatStyleId == selection.CombatStyleId);
         var definition = Catalog.Styles.FirstOrDefault(x => x.Id == selection.CombatStyleId);
-        var options = FocusOptions((await loadouts.ResolveAsync(characterId, EssenceCombatActivity.None, ct)).EquippedEssences);
-        if (CombatStyleRules.ValidateSelection(progress, definition, selection, options) is { } issue)
+        if (CombatStyleRules.ValidateSelection(progress, definition, selection) is { } issue)
             return new(false, issue);
         if (await boundary.PrepareMutationAsync(characterId, ct) is { } blocked) return new(false, blocked);
         // Settlement can award XP or refresh tracked entities. Use the current tracked progress.
@@ -137,13 +136,13 @@ public sealed class CombatStyleService(
         row.RefinementId = selection.RefinementId;
         row.UpgradeIds = selection.UpgradeIds.ToArray();
         row.MasteredUpgradeId = selection.MasteredUpgradeId;
-        row.FocusPlayerEssenceId = selection.FocusPlayerEssenceId;
+        row.ChanneledPlayerEssenceId = null;
         if (progress is not null)
         {
             progress.RefinementId = selection.RefinementId;
             progress.UpgradeIds = selection.UpgradeIds.ToArray();
             progress.MasteredUpgradeId = selection.MasteredUpgradeId;
-            progress.FocusPlayerEssenceId = selection.FocusPlayerEssenceId;
+            progress.ChanneledPlayerEssenceId = null;
         }
         return new(true, "Combat Style saved.");
     }
@@ -158,31 +157,13 @@ public sealed class CombatStyleService(
         return CombatStyleProgression.Grant(style, eligibleBaseXp, Catalog.XpRequirements);
     }
 
-    private IReadOnlyList<CombatStyleFocusOption> FocusOptions(IReadOnlyList<PlayerEssence> equippedEssences)
-    {
-        var catalog = abilities.GetCatalog();
-        return equippedEssences.Select(essence =>
-        {
-            var definition = essenceDefinitions.GetById(essence.EssenceDefinitionId);
-            if (definition is null) return new CombatStyleFocusOption(essence.Id, essence.EssenceDefinitionId,
-                essence.EssenceDefinitionId, "", 0, false, []);
-            var prepared = CombatEngineExecutor.PrepareEssenceAbility(definition.ActiveAbility, essence, definition, catalog);
-            var compiled = AbilityCompiler.CompileAbility(prepared);
-            var effects = compiled.TriggersByEvent.TryGetValue(AbilityTriggerEvent.OnAbilityUsed, out var triggers)
-                ? triggers.SelectMany(x => x.Effects).Where(FastCombatEngine.IsImmediateFocusComponent).Select(x => x.Id).Distinct().ToArray()
-                : [];
-            return new CombatStyleFocusOption(essence.Id, essence.EssenceDefinitionId, definition.DisplayName,
-                prepared.Id, prepared.CooldownTicks, FastCombatEngine.HasEligibleCombatStyleFocusComponent(compiled), effects);
-        }).ToArray();
-    }
-
     private static CombatStyleSelectionRequest RestoreChoices(CombatStyleSelectionRequest request, IReadOnlyList<CharacterCombatStyle> owned)
     {
         if (request.RestoreRememberedChoices
             && owned.FirstOrDefault(x => x.CombatStyleId == request.CombatStyleId) is { } style)
             request = request with { RefinementId = style.RefinementId,
                 UpgradeIds = style.UpgradeIds.ToArray(), MasteredUpgradeId = style.MasteredUpgradeId,
-                FocusPlayerEssenceId = style.FocusPlayerEssenceId, RestoreRememberedChoices = false };
+                RestoreRememberedChoices = false };
         return CombatStyleRules.NormalizeSelection(request);
     }
 
@@ -248,10 +229,10 @@ public sealed class CombatStyleService(
         {
             for (var charge = 0; charge <= tuning.ChargeCap; charge++)
             {
-                var multiplier = tuning.FocusBaseMultiplier + charge * tuning.FocusPerCharge;
+                var multiplier = tuning.ChanneledBaseMultiplier + charge * tuning.ChanneledPerCharge;
                 if (charge > 0)
                 {
-                    multiplier += style.FocusMasteryBonus;
+                    multiplier += style.ChanneledMasteryBonus;
                     var fullCircuitMinimum = style.HasMasteredUpgrade(CombatStyleIds.FullCircuit) && milestones.FullCircuitMinimumCharge > 0
                         ? milestones.FullCircuitMinimumCharge : tuning.ChargeCap;
                     var partialFlowMaximum = style.HasMasteredUpgrade(CombatStyleIds.PartialFlow) && milestones.PartialFlowMaximumCharge > 0
@@ -262,20 +243,20 @@ public sealed class CombatStyleService(
                 facts.Add(new($"{charge} Charge", $"{Number(multiplier * 100)}% of normal strength"));
             }
             facts.Add(new("Charge limit", $"{tuning.ChargeCap} Charge", tuning.DistinctContributors
-                ? "Each of your other Essences builds 1 Charge when it casts, once between Focus casts."
+                ? "Each of your other Essences builds 1 Charge when it casts, once between Channeled Essence casts."
                 : "Your other Essences build 1 Charge every time they cast, even if the same Essence casts again."));
             if (style.HasUpgrade(CombatStyleIds.FullCircuit)) facts.Add(new("Full Circuit", AdditiveBonus(tuning.FullCircuitBonus),
                 style.HasMasteredUpgrade(CombatStyleIds.FullCircuit) && milestones.FullCircuitMinimumCharge > 0
-                    ? $"Gain this bonus when your Focus spends {milestones.FullCircuitMinimumCharge} or more Charge. Included in the Charge examples above."
-                    : "Gain this bonus when your Focus spends maximum Charge. Included in the Charge examples above."));
+                    ? $"Gain this bonus when your Channeled Essence spends {milestones.FullCircuitMinimumCharge} or more Charge. Included in the Charge examples above."
+                    : "Gain this bonus when your Channeled Essence spends maximum Charge. Included in the Charge examples above."));
             if (style.HasUpgrade(CombatStyleIds.PartialFlow)) facts.Add(new("Partial Flow", AdditiveBonus(tuning.PartialFlowBonus),
                 style.HasMasteredUpgrade(CombatStyleIds.PartialFlow) && milestones.PartialFlowMaximumCharge > 1
-                    ? $"Gain this bonus when your Focus spends 1 to {milestones.PartialFlowMaximumCharge} Charge. Included in the Charge examples above."
-                    : "Gain this bonus when your Focus spends exactly 1 Charge. Included in the Charge examples above."));
+                    ? $"Gain this bonus when your Channeled Essence spends 1 to {milestones.PartialFlowMaximumCharge} Charge. Included in the Charge examples above."
+                    : "Gain this bonus when your Channeled Essence spends exactly 1 Charge. Included in the Charge examples above."));
             if (style.HasUpgrade(CombatStyleIds.EmergencyChannel)) facts.Add(new("Emergency Channel", $"{AdditiveBonus(tuning.EmergencyChannelBonus)} to healing and Barrier on yourself",
                 style.HasMasteredUpgrade(CombatStyleIds.EmergencyChannel) && milestones.EmergencyChannelHealthThreshold >= 1
-                    ? "Gain this bonus to the healing and Barrier your Focus gives you immediately whenever it spends at least 1 Charge, at any Health."
-                    : "Gain this bonus to the healing and Barrier your Focus gives you immediately when it spends at least 1 Charge and you start the cast at 35% Health or lower."));
+                    ? "Gain this bonus to the healing and Barrier your Channeled Essence gives you immediately whenever it spends at least 1 Charge, at any Health."
+                    : "Gain this bonus to the healing and Barrier your Channeled Essence gives you immediately when it spends at least 1 Charge and you start the cast at 35% Health or lower."));
             if (style.Level >= CombatStyleProgression.OpeningTechniqueLevel && milestones.OpeningCharge > 0)
                 facts.Add(new("Opening Technique", $"{milestones.OpeningCharge} starting Charge", "Granted once at the start of combat."));
         }

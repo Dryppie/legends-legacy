@@ -20,4 +20,5 @@ public sealed record PlayerEssenceDto(
     IReadOnlyList<EssenceAttributeBonusDto> CurrentAttributeBonuses,
     EssenceAbilityDto ActiveAbility,
     EssenceAbilityDto PassiveAbility,
-    IReadOnlyList<string> Tags);
+    IReadOnlyList<string> Tags,
+    bool IsChanneledEssenceEligible);

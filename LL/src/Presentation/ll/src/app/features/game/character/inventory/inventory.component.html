@@ -469,6 +469,9 @@
           </div>
 
           <ng-container *ngIf="isEquipmentItem(item); else openItemAction">
+            <button type="button" class="ll-button mb-2 w-full" (click)="linkEquipmentInChat(item)">
+              Link in chat
+            </button>
             <button
               *ngIf="canManageEquipment(item)"
               type="button"

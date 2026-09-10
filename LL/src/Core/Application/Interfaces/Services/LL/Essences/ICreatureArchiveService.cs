@@ -28,9 +28,9 @@ public interface ICreatureArchiveService
 
     Task<CreatureArchive> GetCreatureArchiveAsync(Guid characterId, CancellationToken cancellationToken);
     Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken);
-    Task<string?> GetEssenceFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken);
+    Task<CreatureArchive> SetCreatureFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken);
+    Task<string?> GetCreatureFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<bool> IsCreatureFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken);
 }
 
 public sealed record CreatureDefeatBatch(

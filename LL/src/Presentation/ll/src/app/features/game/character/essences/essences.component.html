@@ -527,7 +527,13 @@
                 type="button"
                 class="ll-button soul-action-button"
                 [disabled]="!canSpendDust(essence)"
-                [attr.title]="'Spend ' + maxDustLevels(essence) + ' dust for ' + maxDustLevels(essence) + ' levels'"
+                [attr.title]="
+                  'Spend ' +
+                  maxDustLevels(essence) +
+                  ' dust for ' +
+                  maxDustLevels(essence) +
+                  ' levels'
+                "
                 (click)="spendDust(essence, true)"
               >
                 Max (+{{ maxDustLevels(essence) }})
@@ -760,6 +766,14 @@
             >
               <span class="soul-loadout-slot-index">
                 Slot {{ slotIndex + 1 }}
+                <span
+                  *ngIf="
+                    conduitEquipped() &&
+                    slotIndex === essenceState.firstOccupiedDraftSlot()
+                  "
+                  class="ll-badge ll-badge-accent soul-channeled-essence-badge"
+                  >Channeled</span
+                >
               </span>
               <ng-container
                 *ngIf="
@@ -791,6 +805,24 @@
                 >
                   Remove
                 </button>
+                <button
+                  *ngIf="
+                    conduitEquipped() &&
+                    slottedEssence.isChanneledEssenceEligible &&
+                    slotIndex !== essenceState.firstOccupiedDraftSlot()
+                  "
+                  type="button"
+                  class="ll-button soul-channel-essence px-2 py-1 text-xs"
+                  [disabled]="
+                    !essenceState.canChannelEssence(slottedEssence.id)
+                  "
+                  [attr.aria-label]="
+                    'Channel ' + slottedEssence.name + ' with Conduit'
+                  "
+                  (click)="channelEssence(slottedEssence)"
+                >
+                  Channel Essence
+                </button>
               </ng-container>
               <ng-template #emptyLoadoutSlot>
                 <span
@@ -801,6 +833,13 @@
               </ng-template>
             </div>
           </div>
+
+          <p
+            *ngIf="channeledEssenceHint() as channeledEssenceHintText"
+            class="ll-copy soul-channeled-essence-hint"
+          >
+            {{ channeledEssenceHintText }}
+          </p>
 
           <p class="soul-loadout-hint" *ngIf="loadoutSaveHint() as saveHint">
             {{ saveHint }}
@@ -892,34 +931,34 @@
     <div
       class="mb-4 rounded border border-light_gray/70 bg-black/20 p-3 text-sm transition-all duration-300"
       [ngClass]="{
-        'essence-focus-notification-highlight':
-          essenceState.highlightEssenceFocus(),
+        'creature-focus-notification-highlight':
+          essenceState.highlightCreatureFocus(),
       }"
     >
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 class="font-semibold text-primary">Essence Focus</h3>
+          <h3 class="font-semibold text-primary">Creature Focus</h3>
           <p class="mt-1 text-xs text-zinc-400">
             <ng-container
               *ngIf="
                 essenceState.focusedCreature() as focusedCreature;
-                else noEssenceFocus
+                else noCreatureFocus
               "
             >
               {{ focusedCreature.name }} has 3× the base Essence drop chance and
               appears 20% more often in its combat areas.
             </ng-container>
-            <ng-template #noEssenceFocus>
+            <ng-template #noCreatureFocus>
               Select a recorded creature with a known Essence source.
             </ng-template>
           </p>
           <p class="mt-2 max-w-3xl text-xs text-zinc-500">
-            Focus triples the creature's base Essence drop chance before other
-            bonuses. Its area appearance chance increases by 20% of its usual
-            chance. You can change focus every 8 hours.
+            Creature Focus triples the creature's base Essence drop chance
+            before other bonuses. Its area appearance chance increases by 20% of
+            its usual chance. You can change Creature Focus every 8 hours.
           </p>
           <p class="mt-2 text-xs text-primary">
-            {{ essenceFocusStatusText() }}
+            {{ creatureFocusStatusText() }}
           </p>
         </div>
       </div>
@@ -930,7 +969,7 @@
         *ngFor="let creature of filteredCreatures(); trackBy: trackCreature"
         class="ll-card p-3"
         [ngClass]="{
-          'border-primary bg-primary/10': creature.isEssenceFocus,
+          'border-primary bg-primary/10': creature.isCreatureFocus,
         }"
       >
         <div class="flex items-start justify-between gap-3">
@@ -946,10 +985,10 @@
             <span
               class="ll-badge rounded"
               [ngClass]="
-                creature.isEssenceFocus ? 'll-badge-accent' : 'll-badge-muted'
+                creature.isCreatureFocus ? 'll-badge-accent' : 'll-badge-muted'
               "
             >
-              {{ creature.isEssenceFocus ? "Focused" : "Not focused" }}
+              {{ creature.isCreatureFocus ? "Creature Focus" : "Not focused" }}
             </span>
           </div>
         </div>
@@ -968,18 +1007,18 @@
             </span>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <span>Total Focus</span>
+            <span>Total Creature Focus</span>
             <span class="text-zinc-300">
-              {{ totalFocusDurationLabel(creature) }}
+              {{ totalCreatureFocusDurationLabel(creature) }}
             </span>
           </div>
           <div
-            *ngIf="creature.isEssenceFocus"
+            *ngIf="creature.isCreatureFocus"
             class="flex items-center justify-between gap-3"
           >
-            <span>Current Focus</span>
+            <span>Current Creature Focus</span>
             <span class="text-primary">
-              {{ currentFocusDurationLabel(creature) }}
+              {{ currentCreatureFocusDurationLabel(creature) }}
             </span>
           </div>
         </div>
@@ -1051,10 +1090,12 @@
         <button
           type="button"
           class="ll-button mt-3 w-full"
-          [disabled]="!canSetEssenceFocus(creature)"
-          (click)="setEssenceFocus(creature)"
+          [disabled]="!canSetCreatureFocus(creature)"
+          (click)="setCreatureFocus(creature)"
         >
-          {{ creature.isEssenceFocus ? "Focused" : "Set Focus" }}
+          {{
+            creature.isCreatureFocus ? "Creature Focus" : "Set Creature Focus"
+          }}
         </button>
       </article>
     </div>
@@ -1089,9 +1130,8 @@
             <div class="min-w-0">
               <dt class="text-xs text-zinc-300">{{ bonus.label }}</dt>
               <dd class="mt-1 text-lg tabular-nums text-primary">
-                {{ bonus.percent > 0 ? "+" : "" }}{{
-                  bonus.percent | number: "1.0-2"
-                }}%
+                {{ bonus.percent > 0 ? "+" : ""
+                }}{{ bonus.percent | number: "1.0-2" }}%
               </dd>
             </div>
           }

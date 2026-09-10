@@ -32,7 +32,7 @@ Crafting, gathering and Potential-based tempering quests have been removed. Thes
 
 - [x] **A Second Soul** — own two distinct Essences in the Soul Archive; existing collections count.
 - [x] **An Adaptable Archive** — attune Goblin, Lumo Wisp, and Lumo Sentinel Essences in sequence.
-- [x] **Focused Pursuit** — receive an Essence drop from the creature currently set as your Essence Focus.
+- [x] **Focused Pursuit** — receive an Essence drop from the creature currently set as your Creature Focus.
 - [x] **The Arena Calls** — start one Colosseum battle; winning is not required.
 - [x] **An Omen Fulfilled** — complete one daily Prophecy.
 - [x] **Blood Grove Veteran** — win 25 encounters in Blood Grove.

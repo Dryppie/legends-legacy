@@ -11,13 +11,14 @@ public sealed class CharacterCombatStyleSelection
     public string? RefinementId { get; set; }
     public string[] UpgradeIds { get; set; } = [];
     public string? MasteredUpgradeId { get; set; }
-    public Guid? FocusPlayerEssenceId { get; set; }
+    // Retained for persisted legacy rows; current saves clear this and battles derive the Channeled Essence from slot order.
+    public Guid? ChanneledPlayerEssenceId { get; set; }
 }
 
 public sealed record CombatStyleSelectionRequest(
     string? CombatStyleId,
     string? RefinementId,
     IReadOnlyList<string> UpgradeIds,
-    Guid? FocusPlayerEssenceId,
+    Guid? ChanneledPlayerEssenceId = null,
     bool RestoreRememberedChoices = false,
     string? MasteredUpgradeId = null);

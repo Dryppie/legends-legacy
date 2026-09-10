@@ -9,7 +9,7 @@ public interface IEssenceResonanceService
     Task PrepareEssenceDropsAsync(
         Guid characterId,
         IReadOnlyList<Creature> defeatedCreatures,
-        bool loadEssenceFocus,
+        bool loadCreatureFocus,
         CancellationToken cancellationToken);
     Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(
         Guid characterId,

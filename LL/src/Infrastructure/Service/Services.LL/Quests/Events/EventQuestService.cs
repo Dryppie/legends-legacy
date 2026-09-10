@@ -657,7 +657,8 @@ public sealed class EventQuestService(
                 Matches(filters.AreaId, trigger.AreaId) => CountCombatEncounters(trigger, filters.RequiresVictory),
             "EssenceAbsorbed" when trigger.Type == "EssenceAbsorbed" &&
                 Matches(filters.EssenceDefinitionId, trigger.EssenceDefinitionId) => 1,
-            "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,
+            // Accept both authored names so active quests and historical triggers keep progressing.
+            "CreatureFocusSet" or "EssenceFocusSet" when trigger.Type is "CreatureFocusSet" or "EssenceFocusSet" => 1,
             "FocusedCreatureEssenceReceived" when trigger.Type == "FocusedCreatureEssenceReceived" => 1,
             "EssenceAscended" when trigger.Type == "EssenceAscended" => 1,
             "CompatibleEssenceLoadout" when trigger.Type == "EssenceLoadoutChanged" && trigger.HasCompatibleEssenceTrio => 1,

@@ -28,7 +28,7 @@ public sealed class CombatStyleFoundationTests
         var original = new CharacterCombatStyle { CharacterId = id, CombatStyleId = CombatStyleIds.Bastion };
         db.CharacterCombatStyles.Add(original);
         await db.SaveChangesAsync();
-        var service = new CombatStyleService(new CombatStyleRepository(db), new TestCatalog(), null!, null!, null!, null!);
+        var service = new CombatStyleService(new CombatStyleRepository(db), new TestCatalog(), null!, null!, null!);
         await service.GrantCapturedCombatXpAsync(id, CombatStyleIds.Bastion, 150, default);
         await db.SaveChangesAsync();
         db.ClearTrackedEntities();
@@ -71,11 +71,11 @@ public sealed class CombatStyleFoundationTests
             var snapshot = CombatStyleRules.Snapshot(catalog, definition,
                 new() { CombatStyleId = definition.Id, Level = level }, new(definition.Id, null, [], null), null);
             Assert.Equal(expected, snapshot.BarrierMasteryBonus, 8);
-            Assert.Equal(expected, snapshot.FocusMasteryBonus, 8);
+            Assert.Equal(expected, snapshot.ChanneledMasteryBonus, 8);
             var json = JsonSerializer.Serialize(snapshot);
             Assert.DoesNotContain("\"CoreRank\"", json);
             Assert.DoesNotContain("\"BarrierMasteryBonus\"", json);
-            Assert.DoesNotContain("\"FocusMasteryBonus\"", json);
+            Assert.DoesNotContain("\"ChanneledMasteryBonus\"", json);
         }
     }
 
@@ -124,11 +124,11 @@ public sealed class CombatStyleFoundationTests
         foreach (var tuning in new[]
         {
             definition.Tuning with { BarrierPerMasteryLevel = null },
-            definition.Tuning with { FocusPerMasteryLevel = null },
+            definition.Tuning with { ChanneledPerMasteryLevel = null },
             definition.Tuning with { BarrierPerMasteryLevel = double.NaN },
-            definition.Tuning with { FocusPerMasteryLevel = double.PositiveInfinity },
+            definition.Tuning with { ChanneledPerMasteryLevel = double.PositiveInfinity },
             definition.Tuning with { BarrierPerMasteryLevel = -.01 },
-            definition.Tuning with { FocusPerMasteryLevel = -.01 }
+            definition.Tuning with { ChanneledPerMasteryLevel = -.01 }
         })
             Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(catalog with
             {
@@ -144,15 +144,15 @@ public sealed class CombatStyleFoundationTests
              "Tuning":{"BarrierPerCoreRank":0.025,"FocusPerCoreRank":0.015}}
             """)!;
         Assert.Null(snapshot.Tuning.BarrierPerMasteryLevel);
-        Assert.Null(snapshot.Tuning.FocusPerMasteryLevel);
+        Assert.Null(snapshot.Tuning.ChanneledPerMasteryLevel);
         Assert.Equal(.075, snapshot.BarrierMasteryBonus, 8);
-        Assert.Equal(.045, snapshot.FocusMasteryBonus, 8);
+        Assert.Equal(.045, snapshot.ChanneledMasteryBonus, 8);
 
         var json = JsonSerializer.Serialize(snapshot);
         Assert.DoesNotContain("PerMasteryLevel", json);
         var restored = JsonSerializer.Deserialize<CombatStyleSnapshot>(json)!;
         Assert.Equal(snapshot.BarrierMasteryBonus, restored.BarrierMasteryBonus);
-        Assert.Equal(snapshot.FocusMasteryBonus, restored.FocusMasteryBonus);
+        Assert.Equal(snapshot.ChanneledMasteryBonus, restored.ChanneledMasteryBonus);
     }
 
     [Theory]
@@ -188,14 +188,14 @@ public sealed class CombatStyleFoundationTests
         var snapshot = new CombatStyleSnapshot
         {
             Level = 11, CoreRank = 5,
-            Tuning = new() { BarrierPerMasteryLevel = .007, FocusPerMasteryLevel = .009,
-                BarrierPerCoreRank = .50, FocusPerCoreRank = .50 }
+            Tuning = new() { BarrierPerMasteryLevel = .007, ChanneledPerMasteryLevel = .009,
+                BarrierPerCoreRank = .50, ChanneledPerCoreRank = .50 }
         };
         Assert.Equal(.07, snapshot.BarrierMasteryBonus, 8);
-        Assert.Equal(.09, snapshot.FocusMasteryBonus, 8);
-        var disabled = snapshot with { Tuning = snapshot.Tuning with { BarrierPerMasteryLevel = 0, FocusPerMasteryLevel = 0 } };
+        Assert.Equal(.09, snapshot.ChanneledMasteryBonus, 8);
+        var disabled = snapshot with { Tuning = snapshot.Tuning with { BarrierPerMasteryLevel = 0, ChanneledPerMasteryLevel = 0 } };
         Assert.Equal(0, disabled.BarrierMasteryBonus);
-        Assert.Equal(0, disabled.FocusMasteryBonus);
+        Assert.Equal(0, disabled.ChanneledMasteryBonus);
     }
 
     [Fact]
@@ -205,17 +205,17 @@ public sealed class CombatStyleFoundationTests
         var bastion = catalog.Styles.Single(x => x.Id == "bastion");
         var owned = new CharacterCombatStyle { CombatStyleId = "bastion" };
         CombatStyleSelectionRequest select = new("bastion", "rebuild", [], null);
-        Assert.NotNull(CombatStyleRules.ValidateSelection(null, bastion, select, []));
-        Assert.NotNull(CombatStyleRules.ValidateSelection(owned, bastion, select, []));
+        Assert.NotNull(CombatStyleRules.ValidateSelection(null, bastion, select));
+        Assert.NotNull(CombatStyleRules.ValidateSelection(owned, bastion, select));
         owned.Level = 3;
-        Assert.Null(CombatStyleRules.ValidateSelection(owned, bastion, select, []));
+        Assert.Null(CombatStyleRules.ValidateSelection(owned, bastion, select));
         owned.Level = 10;
         Assert.NotNull(CombatStyleRules.ValidateSelection(owned, bastion,
-            select with { UpgradeIds = ["prepared-wall", "prepared-wall"] }, []));
+            select with { UpgradeIds = ["prepared-wall", "prepared-wall"] }));
         Assert.NotNull(CombatStyleRules.ValidateSelection(owned, bastion,
-            select with { UpgradeIds = ["full-circuit"] }, []));
+            select with { UpgradeIds = ["full-circuit"] }));
         Assert.Null(CombatStyleRules.ValidateSelection(owned, bastion,
-            select with { UpgradeIds = ["prepared-wall", "hold-the-breach"] }, []));
+            select with { UpgradeIds = ["prepared-wall", "hold-the-breach"] }));
     }
 
     [Theory]
@@ -231,7 +231,7 @@ public sealed class CombatStyleFoundationTests
         var owned = new CharacterCombatStyle { CombatStyleId = definition.Id, Level = level };
         var selection = new CombatStyleSelectionRequest(definition.Id, null, [CombatStyleIds.PreparedWall], null,
             MasteredUpgradeId: mastery);
-        Assert.Equal(valid, CombatStyleRules.ValidateSelection(owned, definition, selection, []) is null);
+        Assert.Equal(valid, CombatStyleRules.ValidateSelection(owned, definition, selection) is null);
         var snapshot = CombatStyleRules.Snapshot(LoadCatalog(), definition, owned, selection, null);
         Assert.Equal(valid && mastery is not null, snapshot.HasMasteredUpgrade(CombatStyleIds.PreparedWall));
     }
@@ -240,7 +240,7 @@ public sealed class CombatStyleFoundationTests
     public void Empty_style_cannot_hold_a_mastery_choice()
     {
         Assert.NotNull(CombatStyleRules.ValidateSelection(null, null,
-            new(null, null, [], null, MasteredUpgradeId: CombatStyleIds.PreparedWall), []));
+            new(null, null, [], null, MasteredUpgradeId: CombatStyleIds.PreparedWall)));
     }
 
     [Fact]
@@ -258,7 +258,8 @@ public sealed class CombatStyleFoundationTests
         var snapshot = CombatStyleRules.Snapshot(catalog, definition,
             new() { CombatStyleId = definition.Id, Level = 9 },
             new(definition.Id, CombatStyleIds.DeepReservoir, [CombatStyleIds.FullCircuit], Guid.NewGuid(),
-                MasteredUpgradeId: CombatStyleIds.FullCircuit), "essence.focus");
+                MasteredUpgradeId: CombatStyleIds.FullCircuit),
+            new(Guid.NewGuid(), "essence.channeled", "Channeled", "ability.channeled", 10, true, ["heal"]));
         Assert.Equal(4, snapshot.Tuning.ChargeCap);
         Assert.Equal(1, snapshot.MilestoneTuning.OpeningCharge);
         Assert.Equal(2, snapshot.MilestoneTuning.FullCircuitMinimumCharge);
@@ -290,16 +291,18 @@ public sealed class CombatStyleFoundationTests
     }
 
     [Fact]
-    public void Missing_or_ineligible_focus_is_not_silently_replaced()
+    public void Conduit_global_choices_are_valid_independently_of_battle_channeled_eligibility()
     {
         var conduit = LoadCatalog().Styles.Single(x => x.Id == "conduit");
         var owned = new CharacterCombatStyle { CombatStyleId = "conduit" };
-        var focusId = Guid.NewGuid();
-        CombatStyleSelectionRequest selection = new("conduit", null, [], focusId);
-        CombatStyleFocusOption option = new(focusId, "essence.test", "Test", "ability.test", 10, false, []);
-        Assert.NotNull(CombatStyleRules.ValidateSelection(owned, conduit, selection, []));
-        Assert.NotNull(CombatStyleRules.ValidateSelection(owned, conduit, selection, [option]));
-        Assert.Null(CombatStyleRules.ValidateSelection(owned, conduit, selection, [option with { IsEligible = true }]));
+        var channeledId = Guid.NewGuid();
+        CombatStyleSelectionRequest selection = new("conduit", null, [], channeledId);
+        ChanneledEssenceOption option = new(channeledId, "essence.test", "Test", "ability.test", 10, false, []);
+        Assert.Null(CombatStyleRules.ValidateSelection(owned, conduit, selection));
+        Assert.Null(CombatStyleRules.NormalizeSelection(selection).ChanneledPlayerEssenceId);
+        Assert.NotNull(CombatStyleRules.ValidateChanneledEssence(null));
+        Assert.NotNull(CombatStyleRules.ValidateChanneledEssence(option));
+        Assert.Null(CombatStyleRules.ValidateChanneledEssence(option with { IsEligible = true }));
     }
 
     [Fact]
@@ -308,16 +311,18 @@ public sealed class CombatStyleFoundationTests
         var catalog = LoadCatalog();
         var owned = new CharacterCombatStyle { CombatStyleId = "conduit", Level = 8 };
         var upgrades = new List<string> { "full-circuit" };
+        var channeled = new ChanneledEssenceOption(Guid.NewGuid(), "essence.channeled", "Channeled", "ability.channeled", 10, true, ["heal"]);
         var snapshot = CombatStyleRules.Snapshot(catalog, catalog.Styles.Single(x => x.Id == "conduit"), owned,
-            new("conduit", "deep-reservoir", upgrades, Guid.NewGuid()), "essence.focus");
+            new("conduit", "deep-reservoir", upgrades, Guid.NewGuid()), channeled);
         owned.Level = 10;
         upgrades.Clear();
         Assert.Equal(8, snapshot.Level);
-        Assert.Equal(.08, snapshot.FocusMasteryBonus, 8);
+        Assert.Equal(.08, snapshot.ChanneledMasteryBonus, 8);
         Assert.Equal(4, snapshot.Tuning.ChargeCap);
-        Assert.Equal(.6, snapshot.Tuning.FocusBaseMultiplier);
+        Assert.Equal(.6, snapshot.Tuning.ChanneledBaseMultiplier);
         Assert.True(snapshot.HasUpgrade("full-circuit"));
-        Assert.Equal("essence.focus", snapshot.FocusEssenceDefinitionId);
+        Assert.Equal("essence.channeled", snapshot.ChanneledEssenceDefinitionId);
+        Assert.Equal(channeled.PlayerEssenceId, snapshot.ChanneledPlayerEssenceId);
     }
 
     [Fact]
@@ -326,7 +331,7 @@ public sealed class CombatStyleFoundationTests
         var repository = new TestRepository();
         repository.Styles.Add(new() { CombatStyleId = "bastion" });
         repository.Styles.Add(new() { CombatStyleId = "conduit" });
-        var service = new CombatStyleService(repository, new TestCatalog(), null!, null!, null!, null!);
+        var service = new CombatStyleService(repository, new TestCatalog(), null!, null!, null!);
         await service.GrantCapturedCombatXpAsync(Guid.Empty, "bastion", 150, default);
         await service.GrantCapturedCombatXpAsync(Guid.Empty, "bastion", 150, default);
         await service.GrantCapturedCombatXpAsync(Guid.Empty, null, 9000, default);
@@ -347,29 +352,51 @@ public sealed class CombatStyleFoundationTests
         var mastered = mapper.Map<CombatStyleSelectionRequest>(new CombatStyleSelectionDto(
             CombatStyleIds.Bastion, UpgradeIds: [CombatStyleIds.PreparedWall], MasteredUpgradeId: CombatStyleIds.PreparedWall));
         Assert.Equal(CombatStyleIds.PreparedWall, mastered.MasteredUpgradeId);
+        var legacyInput = JsonSerializer.Deserialize<CombatStyleSelectionDto>(
+            $$"""{"combatStyleId":"conduit","focusPlayerEssenceId":"{{Guid.NewGuid()}}"}""",
+            new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        var normalized = mapper.Map<CombatStyleSelectionRequest>(legacyInput);
+        Assert.Equal(CombatStyleIds.Conduit, normalized.CombatStyleId);
+        Assert.Null(normalized.ChanneledPlayerEssenceId);
     }
 
     [Fact]
-    public async Task Overview_contract_keeps_focus_eligibility_and_effect_amounts_without_retired_display_fields()
+    public async Task Overview_contract_keeps_numeric_previews_without_a_separate_channeled_selection()
     {
-        var focus = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.focus" };
-        var service = CreateService(new TestRepository(), new TestLoadouts([focus]));
-        var preview = await service.PreviewAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], focus.Id), default);
+        var channeled = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var service = CreateService(new TestRepository(), new TestLoadouts([channeled]));
+        var preview = await service.PreviewAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], channeled.Id), default);
         var mapper = new MapperConfiguration(cfg => cfg.AddProfile<CombatStyleMappingProfile>(),
             Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance).CreateMapper();
         var dto = mapper.Map<CombatStyleOverviewDto>(preview);
 
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
-        var option = json.RootElement.GetProperty("focusOptions")[0];
-        Assert.False(option.TryGetProperty("castOrder", out _));
-        Assert.Equal(focus.Id, option.GetProperty("playerEssenceId").GetGuid());
-        Assert.True(option.GetProperty("isEligible").GetBoolean());
-        Assert.Equal(10, option.GetProperty("cooldownTicks").GetInt32());
+        Assert.False(json.RootElement.TryGetProperty("focusOptions", out _));
+        Assert.False(json.RootElement.GetProperty("selection").TryGetProperty("focusPlayerEssenceId", out _));
         Assert.All(json.RootElement.GetProperty("styles").EnumerateArray(),
-            style => Assert.False(style.GetProperty("definition").TryGetProperty("tradeoff", out _)));
+            style =>
+            {
+                Assert.False(style.TryGetProperty("focusPlayerEssenceId", out _));
+                Assert.False(style.GetProperty("definition").TryGetProperty("tradeoff", out _));
+            });
         Assert.Equal("80% of normal strength", dto.PreviewFacts[0].Value);
         Assert.Null(dto.PreviewFacts[0].Condition);
-        Assert.Equal(.8, preview.EffectiveStyle!.Tuning.FocusBaseMultiplier);
+        Assert.Equal(.8, preview.EffectiveStyle!.Tuning.ChanneledBaseMultiplier);
+        var effective = json.RootElement.GetProperty("effectiveStyle");
+        Assert.True(effective.TryGetProperty("channeledPlayerEssenceId", out _));
+        Assert.True(effective.TryGetProperty("channeledEssenceDefinitionId", out _));
+        Assert.False(effective.TryGetProperty("focusPlayerEssenceId", out _));
+        var tuning = effective.GetProperty("tuning");
+        Assert.Equal(.8, tuning.GetProperty("channeledBaseMultiplier").GetDouble());
+        Assert.Equal(.2, tuning.GetProperty("channeledPerCharge").GetDouble());
+        Assert.Equal(.01, tuning.GetProperty("channeledPerMasteryLevel").GetDouble());
+        Assert.False(tuning.TryGetProperty("focusBaseMultiplier", out _));
+        Assert.All(json.RootElement.GetProperty("styles").EnumerateArray(), style =>
+        {
+            var definition = style.GetProperty("definition");
+            Assert.True(definition.GetProperty("tuning").TryGetProperty("channeledBaseMultiplier", out _));
+            Assert.False(definition.GetProperty("tuning").TryGetProperty("focusBaseMultiplier", out _));
+        });
     }
 
     [Fact]
@@ -386,7 +413,9 @@ public sealed class CombatStyleFoundationTests
         Assert.Null(bastion.ValidationIssue);
         Assert.Equal(CombatStyleIds.Bastion, bastion.EffectiveStyle!.CombatStyleId);
         var conduit = await service.PreviewAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], null), default);
-        Assert.Contains("Focus", conduit.ValidationIssue);
+        Assert.Null(conduit.ValidationIssue);
+        Assert.Equal(CombatStyleIds.Conduit, conduit.EffectiveStyle!.CombatStyleId);
+        Assert.Equal("80% of normal strength", conduit.PreviewFacts.Single(x => x.Label == "0 Charge").Value);
         Assert.Empty(repository.Styles);
         Assert.Null(repository.Selection);
         Assert.Equal(0, repository.SelectionAddCount);
@@ -430,23 +459,123 @@ public sealed class CombatStyleFoundationTests
     }
 
     [Fact]
-    public async Task Conduit_uses_one_global_focus_and_rejects_battles_where_that_essence_is_not_equipped()
+    public async Task Conduit_derives_channeled_from_each_battle_loadout_and_supplied_snapshot_order()
     {
         var repository = new TestRepository();
-        var focus = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.focus" };
-        var loadouts = new TestLoadouts([focus]);
+        var channeled = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var loadouts = new TestLoadouts([channeled]);
+        foreach (var activity in Enum.GetValues<EssenceCombatActivity>())
+            loadouts.ByActivity[activity] = [new() { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" }, channeled];
         var service = CreateService(repository, loadouts);
-        Assert.True((await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], focus.Id), default)).Succeeded);
+        Assert.True((await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], channeled.Id), default)).Succeeded);
+        Assert.Empty(loadouts.Activities);
 
         foreach (var activity in Enum.GetValues<EssenceCombatActivity>())
         {
             var snapshot = await service.ResolveAsync(Guid.Empty, activity, default);
             Assert.Equal(CombatStyleIds.Conduit, snapshot!.CombatStyleId);
-            Assert.Equal(focus.Id, snapshot.FocusPlayerEssenceId);
+            Assert.Equal(loadouts.ByActivity[activity][0].Id, snapshot.ChanneledPlayerEssenceId);
         }
         Assert.Equal(Enum.GetValues<EssenceCombatActivity>(), loadouts.Activities.TakeLast(Enum.GetValues<EssenceCombatActivity>().Length));
-        await Assert.ThrowsAsync<CombatStyleConfigurationException>(() => service.ResolveAsync(Guid.Empty, EssenceCombatActivity.Dungeon, default, []));
-        Assert.Equal(focus.Id, repository.Selection!.FocusPlayerEssenceId);
+        var supplied = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var suppliedSnapshot = await service.ResolveAsync(Guid.Empty, EssenceCombatActivity.Dungeon, default, [supplied, channeled]);
+        Assert.Equal(supplied.Id, suppliedSnapshot!.ChanneledPlayerEssenceId);
+        Assert.Equal(Enum.GetValues<EssenceCombatActivity>().Length, loadouts.Activities.Count);
+        Assert.Null(repository.Selection!.ChanneledPlayerEssenceId);
+    }
+
+    [Fact]
+    public async Task Global_conduit_choices_preview_and_save_without_loading_essences_and_clear_legacy_channeled_only_on_save()
+    {
+        var repository = new TestRepository();
+        var legacyChanneled = Guid.NewGuid();
+        var progress = new CharacterCombatStyle
+        {
+            CombatStyleId = CombatStyleIds.Conduit, Level = 9, RefinementId = CombatStyleIds.DeepReservoir,
+            UpgradeIds = [CombatStyleIds.FullCircuit], MasteredUpgradeId = CombatStyleIds.FullCircuit,
+            ChanneledPlayerEssenceId = legacyChanneled
+        };
+        repository.Styles.Add(progress);
+        repository.Add(new CharacterCombatStyleSelection
+        {
+            CombatStyleId = progress.CombatStyleId, RefinementId = progress.RefinementId,
+            UpgradeIds = progress.UpgradeIds, MasteredUpgradeId = progress.MasteredUpgradeId,
+            ChanneledPlayerEssenceId = legacyChanneled
+        });
+        var loadouts = new TestLoadouts([]) { ThrowOnResolve = true };
+        var service = CreateService(repository, loadouts);
+
+        var overview = await service.GetOverviewAsync(Guid.Empty, default);
+        var remembered = await service.PreviewAsync(Guid.Empty,
+            new(CombatStyleIds.Conduit, null, [], Guid.NewGuid(), RestoreRememberedChoices: true), default);
+        Assert.Null(overview.ValidationIssue);
+        Assert.Null(remembered.ValidationIssue);
+        Assert.Null(overview.Selection.ChanneledPlayerEssenceId);
+        Assert.Null(remembered.Selection.ChanneledPlayerEssenceId);
+        Assert.Null(remembered.EffectiveStyle!.ChanneledPlayerEssenceId);
+        Assert.Equal(CombatStyleIds.DeepReservoir, remembered.Selection.RefinementId);
+        Assert.Equal(CombatStyleIds.FullCircuit, remembered.Selection.MasteredUpgradeId);
+        Assert.Equal("60% of normal strength", remembered.PreviewFacts.Single(x => x.Label == "0 Charge").Value);
+        Assert.Equal("174% of normal strength", remembered.PreviewFacts.Single(x => x.Label == "4 Charge").Value);
+        Assert.Equal(legacyChanneled, repository.Selection!.ChanneledPlayerEssenceId);
+        Assert.Equal(legacyChanneled, progress.ChanneledPlayerEssenceId);
+
+        var saved = await service.SelectAsync(Guid.Empty,
+            new(CombatStyleIds.Conduit, CombatStyleIds.Relay, [CombatStyleIds.PartialFlow], Guid.NewGuid(),
+                MasteredUpgradeId: CombatStyleIds.PartialFlow), default);
+        Assert.True(saved.Succeeded);
+        Assert.Equal(CombatStyleIds.Relay, repository.Selection.RefinementId);
+        Assert.Equal(CombatStyleIds.PartialFlow, progress.MasteredUpgradeId);
+        Assert.Null(repository.Selection.ChanneledPlayerEssenceId);
+        Assert.Null(progress.ChanneledPlayerEssenceId);
+        Assert.Empty(loadouts.Activities);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("essence.support")]
+    [InlineData("essence.missing")]
+    public async Task Conduit_battle_rejects_an_empty_or_ineligible_first_slot_even_when_a_later_essence_is_eligible(string? firstDefinition)
+    {
+        var repository = new TestRepository();
+        var eligible = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var loadouts = new TestLoadouts([eligible]) { ThrowOnResolve = true };
+        var service = CreateService(repository, loadouts);
+        Assert.True((await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], eligible.Id), default)).Succeeded);
+        PlayerEssence[] equipped = firstDefinition is null ? [] :
+            [new() { Id = Guid.NewGuid(), EssenceDefinitionId = firstDefinition }, eligible];
+
+        var error = await Assert.ThrowsAsync<CombatStyleConfigurationException>(() =>
+            service.ResolveAsync(Guid.Empty, EssenceCombatActivity.Dungeon, default, equipped));
+
+        Assert.Contains("first occupied Essence slot", error.Message);
+        Assert.Contains("direct damage, heals, or grants Barrier", error.Message);
+        Assert.Empty(loadouts.Activities);
+        Assert.Null(repository.Selection!.ChanneledPlayerEssenceId);
+    }
+
+    [Fact]
+    public async Task Reordering_a_loadout_changes_only_new_captures_and_historical_channeled_ids_round_trip_unchanged()
+    {
+        var first = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var second = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var loadouts = new TestLoadouts([first, second]);
+        var service = CreateService(new TestRepository(), loadouts);
+        await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], second.Id), default);
+        var captured = (await service.ResolveAsync(Guid.Empty, EssenceCombatActivity.Dungeon, default))!;
+        var historical = captured with { ContentVersion = "combat-styles.v4", ChanneledPlayerEssenceId = second.Id };
+        var committedJson = JsonSerializer.Serialize(historical);
+
+        loadouts.ByActivity[EssenceCombatActivity.Dungeon] = [second, first];
+        var next = await service.ResolveAsync(Guid.Empty, EssenceCombatActivity.Dungeon, default);
+
+        Assert.Equal(first.Id, captured.ChanneledPlayerEssenceId);
+        Assert.Equal(second.Id, next!.ChanneledPlayerEssenceId);
+        var restored = JsonSerializer.Deserialize<CombatStyleSnapshot>(committedJson)!;
+        Assert.Equal("combat-styles.v4", restored.ContentVersion);
+        Assert.Equal(second.Id, restored.ChanneledPlayerEssenceId);
+        Assert.Equal("essence.channeled", restored.ChanneledEssenceDefinitionId);
+        Assert.Equal(HarnessJson.Hash(historical), HarnessJson.Hash(restored));
     }
 
     [Fact]
@@ -455,9 +584,9 @@ public sealed class CombatStyleFoundationTests
         var repository = new TestRepository();
         repository.Styles.Add(new() { CombatStyleId = CombatStyleIds.Bastion, Level = 5, CurrentXp = 123,
             RefinementId = CombatStyleIds.Rebuild, UpgradeIds = [CombatStyleIds.PreparedWall] });
-        var focus = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.focus" };
-        var service = CreateService(repository, new TestLoadouts([focus]));
-        await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], focus.Id), default);
+        var channeled = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var service = CreateService(repository, new TestLoadouts([channeled]));
+        await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], channeled.Id), default);
         await service.GrantCapturedCombatXpAsync(Guid.Empty, CombatStyleIds.Bastion, 100, default);
         var result = await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Bastion, null, [], null, true), default);
 
@@ -477,13 +606,13 @@ public sealed class CombatStyleFoundationTests
         var repository = new TestRepository();
         repository.Styles.Add(new() { CombatStyleId = CombatStyleIds.Bastion, Level = 9 });
         repository.Styles.Add(new() { CombatStyleId = CombatStyleIds.Conduit, Level = 9 });
-        var focus = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.focus" };
-        var service = CreateService(repository, new TestLoadouts([focus]));
+        var channeled = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var service = CreateService(repository, new TestLoadouts([channeled]));
         var bastion = new CombatStyleSelectionRequest(CombatStyleIds.Bastion, CombatStyleIds.Shelter,
             [CombatStyleIds.PreparedWall, CombatStyleIds.MeasuredRecovery], null, MasteredUpgradeId: CombatStyleIds.MeasuredRecovery);
         Assert.True((await service.SelectAsync(Guid.Empty, bastion, default)).Succeeded);
         Assert.True((await service.SelectAsync(Guid.Empty,
-            new(CombatStyleIds.Conduit, null, [CombatStyleIds.FullCircuit], focus.Id, MasteredUpgradeId: CombatStyleIds.FullCircuit), default)).Succeeded);
+            new(CombatStyleIds.Conduit, null, [CombatStyleIds.FullCircuit], channeled.Id, MasteredUpgradeId: CombatStyleIds.FullCircuit), default)).Succeeded);
         Assert.True((await service.SelectAsync(Guid.Empty, new(null, null, [], null), default)).Succeeded);
         Assert.Null(repository.Selection!.MasteredUpgradeId);
         Assert.True((await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Bastion, null, [], null, true), default)).Succeeded);
@@ -536,11 +665,11 @@ public sealed class CombatStyleFoundationTests
     {
         var repository = new TestRepository();
         repository.Styles.Add(new() { CombatStyleId = styleId, Level = level });
-        var focus = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.focus" };
-        var service = CreateService(repository, new TestLoadouts([focus]));
+        var channeled = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var service = CreateService(repository, new TestLoadouts([channeled]));
         var conduit = styleId == CombatStyleIds.Conduit;
         var preview = await service.PreviewAsync(Guid.Empty,
-            new(styleId, null, [], conduit ? focus.Id : null), default);
+            new(styleId, null, [], conduit ? channeled.Id : null), default);
 
         Assert.Equal(expected, preview.PreviewFacts.Single(x => x.Label == (conduit ? "1 Charge" : "200 healing received")).Value);
         if (conduit)
@@ -589,14 +718,14 @@ public sealed class CombatStyleFoundationTests
     [InlineData(CombatStyleIds.FullCircuit, "109% of normal strength", "134% of normal strength", "154% of normal strength")]
     [InlineData(CombatStyleIds.PartialFlow, "114% of normal strength", "134% of normal strength", "149% of normal strength")]
     [InlineData(CombatStyleIds.EmergencyChannel, "109% of normal strength", "129% of normal strength", "149% of normal strength")]
-    public async Task Conduit_mastery_previews_match_conditional_focus_bonuses(string mastery, string oneCharge, string twoCharge, string threeCharge)
+    public async Task Conduit_mastery_previews_match_conditional_channeled_bonuses(string mastery, string oneCharge, string twoCharge, string threeCharge)
     {
         var repository = new TestRepository();
         repository.Styles.Add(new() { CombatStyleId = CombatStyleIds.Conduit, Level = 9 });
-        var focus = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.focus" };
-        var service = CreateService(repository, new TestLoadouts([focus]));
+        var channeled = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
+        var service = CreateService(repository, new TestLoadouts([channeled]));
         var preview = await service.PreviewAsync(Guid.Empty,
-            new(CombatStyleIds.Conduit, null, [mastery], focus.Id, MasteredUpgradeId: mastery), default);
+            new(CombatStyleIds.Conduit, null, [mastery], channeled.Id, MasteredUpgradeId: mastery), default);
         Assert.Equal("80% of normal strength", preview.PreviewFacts.Single(x => x.Label == "0 Charge").Value);
         Assert.Equal(oneCharge, preview.PreviewFacts.Single(x => x.Label == "1 Charge").Value);
         Assert.Equal(twoCharge, preview.PreviewFacts.Single(x => x.Label == "2 Charge").Value);
@@ -714,7 +843,7 @@ public sealed class CombatStyleFoundationTests
     public void Current_catalog_validates_reprisal_tuning_while_old_committed_counterweight_snapshot_stays_unchanged()
     {
         var catalog = LoadCatalog();
-        Assert.Equal("combat-styles.v4", catalog.ContentVersion);
+        Assert.Equal("combat-styles.v6", catalog.ContentVersion);
         foreach (var invalid in new double?[] { null, double.NaN, double.PositiveInfinity, -.01, 1.01 })
         {
             var bastion = catalog.Styles.Single(x => x.Id == CombatStyleIds.Bastion);
@@ -751,31 +880,45 @@ public sealed class CombatStyleFoundationTests
     private sealed class TestCatalog : ICombatStyleCatalogProvider { public CombatStyleCatalog Catalog { get; } = LoadCatalog() with { XpRequirements = Requirements }; }
 
     private static CombatStyleService CreateService(TestRepository repository, TestLoadouts? loadouts = null, TestBoundary? boundary = null) =>
-        new(repository, new TestCatalog(), new TestDefinitions(), loadouts ?? new([]), new TestAbilities(), boundary ?? new());
+        new(repository, new TestCatalog(), loadouts ?? new([]), new ChanneledEssenceResolver(new TestDefinitions(), new TestAbilities()), boundary ?? new());
 
     private sealed class TestLoadouts(IReadOnlyList<PlayerEssence> equipped) : IEssenceCombatLoadoutResolver
     {
         public List<EssenceCombatActivity> Activities { get; } = [];
+        public Dictionary<EssenceCombatActivity, IReadOnlyList<PlayerEssence>> ByActivity { get; } = [];
+        public bool ThrowOnResolve { get; init; }
         public Task<EssenceCombatLoadout> ResolveAsync(Guid id, CancellationToken ct) => ResolveAsync(id, EssenceCombatActivity.None, ct);
         public Task<EssenceCombatLoadout> ResolveAsync(Guid id, EssenceCombatActivity activity, CancellationToken ct)
-        { Activities.Add(activity); return Task.FromResult(Resolve(id, equipped)); }
+        {
+            if (ThrowOnResolve) throw new InvalidOperationException("This operation must not load Essence loadouts.");
+            Activities.Add(activity);
+            return Task.FromResult(Resolve(id, ByActivity.GetValueOrDefault(activity, equipped)));
+        }
         public EssenceCombatLoadout Resolve(Guid id, IEnumerable<PlayerEssence> essences) => new(id, essences.ToArray(), [], new HashSet<string>());
     }
 
     private sealed class TestDefinitions : IEssenceDefinitionRepository
     {
-        private static readonly EssenceDefinition Focus = new()
+        private static readonly EssenceDefinition Channeled = new()
         {
-            Id = "essence.focus", Name = "Focus", ActiveAbility = new()
+            Id = "essence.channeled", Name = "Channeled", ActiveAbility = new()
             {
-                Id = "ability.focus", Name = "Focus", Kind = AbilitySpecKind.Active, CooldownTicks = 10,
+                Id = "ability.channeled", Name = "Channeled", Kind = AbilitySpecKind.Active, CooldownTicks = 10,
                 Effects = [new() { Id = "heal", Operation = AbilityEffectOperation.Heal, Target = AbilityTargetSelector.Self, ScalingCoefficient = 1 }]
             }
         };
-        public IReadOnlyList<EssenceDefinition> GetAll() => [Focus];
-        public IReadOnlyList<AbilitySpec> GetAllAbilities() => [Focus.ActiveAbility];
-        public EssenceDefinition? GetById(string id) => id == Focus.Id ? Focus : null;
-        public AbilitySpec? GetAbilityById(string id) => id == Focus.ActiveAbility.Id ? Focus.ActiveAbility : null;
+        private static readonly EssenceDefinition Support = new()
+        {
+            Id = "essence.support", Name = "Support", ActiveAbility = new()
+            {
+                Id = "ability.support", Name = "Support", Kind = AbilitySpecKind.Active, CooldownTicks = 10,
+                Effects = [new() { Id = "threat", Operation = AbilityEffectOperation.ModifyThreat, Target = AbilityTargetSelector.Self, BaseValue = 10 }]
+            }
+        };
+        public IReadOnlyList<EssenceDefinition> GetAll() => [Channeled, Support];
+        public IReadOnlyList<AbilitySpec> GetAllAbilities() => GetAll().Select(x => x.ActiveAbility).ToArray();
+        public EssenceDefinition? GetById(string id) => GetAll().FirstOrDefault(x => x.Id == id);
+        public AbilitySpec? GetAbilityById(string id) => GetAllAbilities().FirstOrDefault(x => x.Id == id);
     }
 
     private sealed class TestAbilities : IAbilityCatalogProvider

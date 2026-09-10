@@ -7,7 +7,7 @@ namespace EssenceSystem.Tests;
 public sealed class CombatStyleHarnessTests
 {
     [Fact]
-    public async Task Styles_are_frozen_and_replayed_with_owned_focus_identity_and_compact_metrics()
+    public async Task Styles_are_frozen_and_replayed_with_owned_channeled_identity_and_compact_metrics()
     {
         var content = new OfflineContent(TestContentPaths.FindApiRoot(), new ThreatAndTankingOptions());
         var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(TestContentPaths.FindApiRoot(),
@@ -16,15 +16,42 @@ public sealed class CombatStyleHarnessTests
         var cell = resolved.Cells.First(x => x.Build == "conduit-10");
         var input = cell.Input;
         Assert.Equal(10, input.Character.CombatStyle!.Level);
-        Assert.Equal(.10, input.Character.CombatStyle.FocusMasteryBonus, 6);
+        Assert.Equal(.10, input.Character.CombatStyle.ChanneledMasteryBonus, 6);
+        Assert.Equal(input.Character.MaterializeEssences().First().Id,
+            input.Character.CombatStyle.ChanneledPlayerEssenceId);
         Assert.Equal(input.Character.MaterializeEssences().Single(x => x.EssenceDefinitionId == "essence.goblin_warrior").Id,
-            input.Character.CombatStyle.FocusPlayerEssenceId);
+            input.Character.CombatStyle.ChanneledPlayerEssenceId);
         var runner = new IdleBattleRunner(content);
         var first = await runner.RunAsync(input);
         var second = await runner.RunAsync(input);
         Assert.Equal(HarnessJson.Hash(first), HarnessJson.Hash(second));
         Assert.Equal(CombatStyleIds.Conduit, Assert.Single(first.Summary.CombatStyles!).CombatStyleId);
         Assert.Null(resolved.Cells.First(x => x.Build == "control").Input.Character.CombatStyle);
+    }
+
+    [Fact]
+    public void Channeled_follows_fixture_slot_order_and_legacy_recipe_cannot_override_it()
+    {
+        var content = new OfflineContent(TestContentPaths.FindApiRoot(), new ThreatAndTankingOptions());
+        var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(TestContentPaths.FindApiRoot(),
+            "..", "..", "..", "tools", "BalanceHarness", "Fixtures", "combat-styles.json"));
+        var scenario = IdleSuite.Resolve(suite with { SamplesPerCell = 1 }, content, new(), 60, 1337)
+            .Cells.First(x => x.Build == "conduit-10").Input.Scenario;
+        var reordered = scenario with
+        {
+            Build = scenario.Build! with
+            {
+                EssenceIds = ["essence.vampire_bat", .. scenario.Build!.EssenceIds.Where(x => x != "essence.vampire_bat")]
+            }
+        };
+        var input = content.CreateInput(reordered, 1337, new(), 60);
+        Assert.Equal("essence.vampire_bat", input.Character.CombatStyle!.ChanneledEssenceDefinitionId);
+        Assert.Equal(input.Character.MaterializeEssences().First().Id, input.Character.CombatStyle.ChanneledPlayerEssenceId);
+        content.Validate(input);
+        Assert.Throws<InvalidDataException>(() => content.CreateInput(reordered with
+        {
+            CombatStyle = reordered.CombatStyle! with { ChanneledEssenceDefinitionId = "essence.goblin_warrior" }
+        }, 1337, new(), 60));
     }
 
     [Fact]
@@ -50,10 +77,10 @@ public sealed class CombatStyleHarnessTests
     }
 
     [Theory]
-    [InlineData(CombatStyleIds.Bastion, CombatStyleIds.PreparedWall, null)]
-    [InlineData(CombatStyleIds.Conduit, CombatStyleIds.FullCircuit, "essence.goblin_warrior")]
+    [InlineData(CombatStyleIds.Bastion, CombatStyleIds.PreparedWall)]
+    [InlineData(CombatStyleIds.Conduit, CombatStyleIds.FullCircuit)]
     public void Mastery_and_opening_tuning_are_frozen_and_validated_with_the_build(
-        string styleId, string upgradeId, string? focus)
+        string styleId, string upgradeId)
     {
         var content = new OfflineContent(TestContentPaths.FindApiRoot(), new ThreatAndTankingOptions());
         var suite = HarnessJson.Read<IdleSuiteDefinition>(Path.Combine(TestContentPaths.FindApiRoot(),
@@ -61,7 +88,7 @@ public sealed class CombatStyleHarnessTests
         var scenario = IdleSuite.Resolve(suite with { SamplesPerCell = 1 }, content, new(), 60, 1337)
             .Cells.First(x => x.Build == "bastion-1").Input.Scenario;
         var recipe = new FixtureCombatStyle(styleId, 9, UpgradeIds: [upgradeId],
-            FocusEssenceDefinitionId: focus, MasteredUpgradeId: upgradeId);
+            MasteredUpgradeId: upgradeId);
         var input = content.CreateInput(scenario with { CombatStyle = recipe }, 1337, new(), 60);
         var frozen = input.Character.CombatStyle!;
 

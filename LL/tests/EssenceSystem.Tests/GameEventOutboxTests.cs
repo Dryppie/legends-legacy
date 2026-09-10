@@ -104,8 +104,8 @@ public sealed class GameEventOutboxTests
     {
         var registry = new GameEventOutboxConsumerRegistry();
 
-        Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.EssenceFocusSet));
-        Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.EssenceFocusSet));
+        Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.CreatureFocusSet));
+        Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.CreatureFocusSet));
         Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.FocusedCreatureEssenceReceived));
         Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.FocusedCreatureEssenceReceived));
         Assert.Contains(
@@ -347,12 +347,14 @@ public sealed class GameEventOutboxTests
         var characterId = Guid.NewGuid();
         var progression = new RecordingQuestProgressionService();
         var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+        Assert.Equal("essence.focus_set", GameEventTypes.CreatureFocusSet);
+        Assert.True(consumer.CanHandle("essence.focus_set"));
 
         await consumer.HandleAsync(
             CreateOutboxMessage(
                 characterId,
-                GameEventTypes.EssenceFocusSet,
-                new EssenceFocusSetPayload(characterId, "monster.goblin")),
+                "essence.focus_set", // Already queued messages retain the historical wire identity.
+                new CreatureFocusSetPayload(characterId, "monster.goblin")),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -389,7 +391,7 @@ public sealed class GameEventOutboxTests
 
         Assert.Equal(
             [
-                "EssenceFocusSet",
+                "CreatureFocusSet",
                 "FocusedCreatureEssenceReceived",
                 "ColosseumBattleStarted",
                 "DailyProphecyCompleted"
@@ -918,13 +920,13 @@ public sealed class GameEventOutboxTests
         public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(new EssenceCodex([]));
 
-        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
+        public Task<CreatureArchive> SetCreatureFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(new CreatureArchive([], true, null, null));
 
-        public Task<string?> GetEssenceFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+        public Task<string?> GetCreatureFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<string?>(null);
 
-        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
+        public Task<bool> IsCreatureFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(false);
     }
 

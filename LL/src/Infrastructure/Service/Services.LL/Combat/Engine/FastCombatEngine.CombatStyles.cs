@@ -82,7 +82,7 @@ public sealed partial class FastCombatEngine
         if (style.Kind != CombatStyleKind.Conduit)
             return context;
 
-        if (origin != style.FocusPlayerEssenceId)
+        if (origin != style.ChanneledPlayerEssenceId)
         {
             // A contributor at capacity is still used in this cycle; overflow is never banked.
             var firstContribution = state.Contributors.Add(origin);
@@ -95,23 +95,23 @@ public sealed partial class FastCombatEngine
             return context;
         }
 
-        context.IsFocus = true;
+        context.IsChanneledEssence = true;
         context.ChargeSpent = state.Charge;
-        context.FocusMultiplier = tuning.FocusBaseMultiplier + tuning.FocusPerCharge * state.Charge;
+        context.ChanneledMultiplier = tuning.ChanneledBaseMultiplier + tuning.ChanneledPerCharge * state.Charge;
         if (state.Charge > 0)
         {
-            context.FocusMultiplier += style.FocusMasteryBonus;
+            context.ChanneledMultiplier += style.ChanneledMasteryBonus;
             if (style.HasUpgrade(CombatStyleIds.FullCircuit)
                 && (state.Charge == tuning.ChargeCap
                     || style.HasMasteredUpgrade(CombatStyleIds.FullCircuit)
                     && style.MilestoneTuning.FullCircuitMinimumCharge > 0
                     && state.Charge >= style.MilestoneTuning.FullCircuitMinimumCharge))
-                context.FocusMultiplier += tuning.FullCircuitBonus;
+                context.ChanneledMultiplier += tuning.FullCircuitBonus;
             if (style.HasUpgrade(CombatStyleIds.PartialFlow)
                 && (state.Charge == 1
                     || style.HasMasteredUpgrade(CombatStyleIds.PartialFlow)
                     && state.Charge <= style.MilestoneTuning.PartialFlowMaximumCharge))
-                context.FocusMultiplier += tuning.PartialFlowBonus;
+                context.ChanneledMultiplier += tuning.PartialFlowBonus;
             var recoveryThreshold = style.HasMasteredUpgrade(CombatStyleIds.EmergencyChannel)
                 ? Math.Max(tuning.EmergencyChannelHealthThreshold, style.MilestoneTuning.EmergencyChannelHealthThreshold)
                 : tuning.EmergencyChannelHealthThreshold;
@@ -120,13 +120,17 @@ public sealed partial class FastCombatEngine
                 context.SelfRecoveryBonus = tuning.EmergencyChannelBonus;
         }
 
-        state.FocusCastsByCharge[state.Charge] = state.FocusCastsByCharge.GetValueOrDefault(state.Charge) + 1;
+        state.ChanneledCastsByCharge[state.Charge] = state.ChanneledCastsByCharge.GetValueOrDefault(state.Charge) + 1;
         state.ChargeSpent += state.Charge;
-        state.FocusMultiplierTotal += context.FocusMultiplier;
+        state.ChanneledMultiplierTotal += context.ChanneledMultiplier;
         state.Charge = 0;
         state.Contributors.Clear();
+        // These captured content versions predate the terminology change. Keep their replay log bytes unchanged.
+        var channeledEssenceName = style.ContentVersion is "combat-styles.v1" or "combat-styles.v2"
+            or "combat-styles.v3" or "combat-styles.v4" or "combat-styles.v5"
+            ? "Focus" : "Channeled Essence";
         Log(actor, actor, "Circuit", EventType.Buff, context.ChargeSpent,
-            $"{actor.Name}'s Focus spent {context.ChargeSpent} Charge for {context.FocusMultiplier:P0} effect amounts.",
+            $"{actor.Name}'s {channeledEssenceName} spent {context.ChargeSpent} Charge for {context.ChanneledMultiplier:P0} effect amounts.",
             "Combat Style: Circuit");
         return context;
     }
@@ -134,7 +138,7 @@ public sealed partial class FastCombatEngine
     private static bool HasImmediateEnemyDamage(CompiledAbility ability) =>
         ability.TriggersByEvent.TryGetValue(AbilityTriggerEvent.OnAbilityUsed, out var triggers)
         && triggers.Any(trigger => trigger.Effects.Any(effect =>
-            IsImmediateFocusComponent(effect)
+            IsImmediateChanneledEssenceComponent(effect)
             && effect.Operation == AbilityEffectOperation.Damage
             && effect.Target is not (AbilityTargetSelector.Self or AbilityTargetSelector.AllAllies
                 or AbilityTargetSelector.LowestHealthAlly or AbilityTargetSelector.HighestMaxHealthAlly
@@ -143,12 +147,12 @@ public sealed partial class FastCombatEngine
                 or AbilityTargetSelector.NonSummonedAllies or AbilityTargetSelector.OwnedSummons
                 or AbilityTargetSelector.HighestCurrentHealthOwnedSummon)));
 
-    public static bool HasEligibleCombatStyleFocusComponent(CompiledAbility ability) =>
+    public static bool HasEligibleChanneledEssenceComponent(CompiledAbility ability) =>
         ability.Kind == AbilitySpecKind.Active
         && ability.TriggersByEvent.TryGetValue(AbilityTriggerEvent.OnAbilityUsed, out var triggers)
-        && triggers.Any(trigger => trigger.Effects.Any(IsImmediateFocusComponent));
+        && triggers.Any(trigger => trigger.Effects.Any(IsImmediateChanneledEssenceComponent));
 
-    public static bool IsImmediateFocusComponent(CompiledEffect effect) =>
+    public static bool IsImmediateChanneledEssenceComponent(CompiledEffect effect) =>
         (effect.Operation is AbilityEffectOperation.Damage or AbilityEffectOperation.Heal or AbilityEffectOperation.GrantBarrier
          || effect.Operation == AbilityEffectOperation.RestoreResource
              && effect.Resource is AbilityResourceType.Health or AbilityResourceType.Barrier)
@@ -160,7 +164,7 @@ public sealed partial class FastCombatEngine
 
     private void CompleteCombatStyleCast(CombatStyleCastContext? context)
     {
-        if (context is not { IsFocus: true })
+        if (context is not { IsChanneledEssence: true })
             return;
         var tuning = context.State.Configuration.Tuning;
         if (tuning.RelayChargeReturn <= 0 || context.ChargeSpent < tuning.RelayMinimumSpent)
@@ -170,22 +174,22 @@ public sealed partial class FastCombatEngine
         context.State.RelayChargeReturned += returned;
     }
 
-    private static int ApplyCombatStyleFocusAmount(
+    private static int ApplyChanneledEssenceAmount(
         CombatStyleCastContext? context, CompiledEffect effect, RuntimeCombatant source,
         RuntimeCombatant target, int value)
     {
-        if (context is not { IsFocus: true } || !ReferenceEquals(context.Actor, source)
-            || !IsImmediateFocusComponent(effect))
+        if (context is not { IsChanneledEssence: true } || !ReferenceEquals(context.Actor, source)
+            || !IsImmediateChanneledEssenceComponent(effect))
             return value;
 
-        var multiplier = context.FocusMultiplier;
+        var multiplier = context.ChanneledMultiplier;
         if (ReferenceEquals(source, target)
             && (effect.Operation is AbilityEffectOperation.Heal or AbilityEffectOperation.GrantBarrier
                 || effect.Operation == AbilityEffectOperation.RestoreResource))
             multiplier += context.SelfRecoveryBonus;
         var modified = Math.Max(0, (int)Math.Round(value * multiplier));
-        context.State.FocusOutputAdded += Math.Max(0, modified - value);
-        context.State.FocusOutputLost += Math.Max(0, value - modified);
+        context.State.ChanneledOutputAdded += Math.Max(0, modified - value);
+        context.State.ChanneledOutputLost += Math.Max(0, value - modified);
         return modified;
     }
 
@@ -193,7 +197,7 @@ public sealed partial class FastCombatEngine
         RuntimeCombatant source, RuntimeCombatant target)
     {
         if (context is null
-            || !ReferenceEquals(context.Actor, source) || !IsImmediateFocusComponent(effect)
+            || !ReferenceEquals(context.Actor, source) || !IsImmediateChanneledEssenceComponent(effect)
             || effect.Operation != AbilityEffectOperation.Damage)
             return default;
         if (context.CounterweightBonus > 0 && source.Team != target.Team)
@@ -399,10 +403,10 @@ public sealed partial class FastCombatEngine
             ChargeSpent = state.ChargeSpent,
             RelayChargeReturned = state.RelayChargeReturned,
             Contributors = state.Contributors.Order().ToArray(),
-            FocusCastsByCharge = new Dictionary<int, int>(state.FocusCastsByCharge),
-            FocusMultiplierTotal = state.FocusMultiplierTotal,
-            FocusOutputAdded = state.FocusOutputAdded,
-            FocusOutputLost = state.FocusOutputLost
+            ChanneledCastsByCharge = new Dictionary<int, int>(state.ChanneledCastsByCharge),
+            ChanneledMultiplierTotal = state.ChanneledMultiplierTotal,
+            ChanneledOutputAdded = state.ChanneledOutputAdded,
+            ChanneledOutputLost = state.ChanneledOutputLost
         }).ToArray();
 
     private readonly record struct RecoveryAllocation(float Health, float Barrier, RuntimeCombatant? Ally, bool Converted);
@@ -416,9 +420,9 @@ public sealed partial class FastCombatEngine
         public CombatStyleEncounterState State { get; } = state;
         public int CounterweightBonus { get; set; }
         public double ReprisalReservedDamage { get; set; }
-        public bool IsFocus { get; set; }
+        public bool IsChanneledEssence { get; set; }
         public int ChargeSpent { get; set; }
-        public double FocusMultiplier { get; set; } = 1;
+        public double ChanneledMultiplier { get; set; } = 1;
         public double SelfRecoveryBonus { get; set; }
     }
 
@@ -432,10 +436,10 @@ public sealed partial class FastCombatEngine
         public int ChargeGenerated { get; set; }
         public int ChargeSpent { get; set; }
         public int RelayChargeReturned { get; set; }
-        public Dictionary<int, int> FocusCastsByCharge { get; } = [];
-        public double FocusMultiplierTotal { get; set; }
-        public double FocusOutputAdded { get; set; }
-        public double FocusOutputLost { get; set; }
+        public Dictionary<int, int> ChanneledCastsByCharge { get; } = [];
+        public double ChanneledMultiplierTotal { get; set; }
+        public double ChanneledOutputAdded { get; set; }
+        public double ChanneledOutputLost { get; set; }
         public double HealingConverted { get; set; }
         public double HealthRestored { get; set; }
         public double HealthRecoveryWasted { get; set; }

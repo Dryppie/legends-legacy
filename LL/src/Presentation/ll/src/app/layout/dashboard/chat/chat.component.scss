@@ -1,4 +1,23 @@
 // Keep the recipient highlight visible over channel and hover backgrounds.
+.chat-composer {
+  min-height: 2rem;
+  max-height: 6rem;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  &:empty::before {
+    content: attr(data-placeholder);
+    color: var(--ll-color-text-subtle);
+    pointer-events: none;
+  }
+
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    color: var(--ll-color-text-subtle);
+  }
+}
+
 .chat-mentioned-message,
 .chat-mentioned-message:hover {
   border-left-color: #89a3ff;

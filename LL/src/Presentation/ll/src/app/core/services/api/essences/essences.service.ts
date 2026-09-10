@@ -38,11 +38,11 @@ export class EssencesService {
     return this.apiService.get('essence/creatures');
   }
 
-  public setEssenceFocus(
+  public setCreatureFocus(
     creatureId: string | null,
   ): Observable<VersionedMutationResult<EssenceStateResponseDto>> {
     return this.apiService.postVersioned<EssenceStateResponseDto>(
-      'essence/creatures/focus',
+      'essence/creature-focus',
       { creatureId },
       { stateSyncScopesHandledByResponse: ESSENCE_STATE_HANDLED_SCOPES },
     );

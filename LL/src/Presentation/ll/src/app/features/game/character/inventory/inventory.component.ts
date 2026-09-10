@@ -1,4 +1,5 @@
 import { EquipmentLoadoutsComponent } from '../../../../shared/components/equipment-loadouts/equipment-loadouts.component';
+import { ChatEquipmentLinkService } from '../../../../core/services/client-side/chat-equipment-link/chat-equipment-link.service';
 import { itemDescription } from '../../../../shared/utils/inventory/item-description';
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
@@ -101,6 +102,12 @@ type SortDirection = 'asc' | 'desc';
   styleUrl: './inventory.component.scss',
 })
 export class InventoryComponent implements OnInit {
+  linkEquipmentInChat(item: InventoryItem): void {
+    if (!this.isEquipmentItem(item)) return;
+    this.mobileItemInspectorOpen.set(false);
+    this.chatEquipmentLinks?.prepare(item.itemInstance as EquipmentInstance);
+  }
+
   readonly collectionView = signal<InventoryCollectionView>('Equipment');
   readonly stockCategory = signal<StockCategory>('Resources');
   readonly stockCategories: readonly StockCategory[] = [
@@ -184,6 +191,7 @@ export class InventoryComponent implements OnInit {
     private readonly characterState?: CharacterStateService,
     private readonly equipmentApi?: EquipmentService,
     private readonly equipmentLoadoutState?: EquipmentLoadoutService,
+    private readonly chatEquipmentLinks?: ChatEquipmentLinkService,
   ) {
     if (this.equipmentLoadoutState) {
       effect(() => {

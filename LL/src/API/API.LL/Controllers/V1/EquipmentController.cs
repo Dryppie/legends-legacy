@@ -8,6 +8,7 @@ using Application.UseCases.Equipments.Commands.EquipEquipment;
 using Application.UseCases.Equipments.Commands.UnequipEquipment;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Equipments.Queries.GetMyEquipment;
+using Application.UseCases.Equipments.Queries.GetLinkedEquipment;
 using Application.UseCases.Equipments.Queries.CompareEquipment;
 using Application.UseCases.Equipments.Queries.PreviewEquipmentUpgrade;
 using Application.UseCases.Equipments.Commands.ReinforceEquipment;
@@ -63,6 +64,13 @@ public class EquipmentController : BaseController
     [HttpGet]
     public async Task<ActionResult<List<EquipmentSlotDto>>> Get() =>
         await Mediator.Send(new GetMyEquipmentQuery(CurrentCharacterGuid));
+
+    [HttpGet("linked/{equipmentInstanceId:guid}")]
+    public async Task<ActionResult<EquipmentInstanceDto>> GetLinked(Guid equipmentInstanceId, CancellationToken cancellationToken)
+    {
+        var item = await Mediator.Send(new GetLinkedEquipmentQuery(equipmentInstanceId), cancellationToken);
+        return item is null ? NotFound() : Ok(item);
+    }
 
     [HttpGet("comparison/{equipmentInstanceId:guid}")]
     public async Task<ActionResult<Response<EquipmentComparisonDto>>> Compare(

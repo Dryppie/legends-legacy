@@ -1,5 +1,5 @@
 {
-  "contentVersion": "combat-styles.v4",
+  "contentVersion": "combat-styles.v6",
   "xpRequirements": [
     36900,
     232225,
@@ -104,7 +104,7 @@
         "partialFlowMaximumCharge": 2,
         "emergencyChannelHealthThreshold": 1
       },
-      "description": "Choose an equipped Essence as your Focus. In the base form, each of your other Essences builds 1 Charge when it casts, once between Focus casts, up to 3 Charge. Your Focus spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.",
+      "description": "The first Essence in your battle loadout is your Channeled Essence. In the base form, each of your other Essences builds 1 Charge when it casts, once between Channeled Essence casts, up to 3 Charge. Your Channeled Essence spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.",
       "tuning": {
         "healthFraction": 0.25,
         "barrierFraction": 0.75,
@@ -162,7 +162,7 @@
         {
           "id": "deep-reservoir",
           "name": "Deep Reservoir",
-          "description": "Store up to 4 Charge, with each of your other Essences building 1 Charge between Focus casts. Your Focus's immediate damage, healing and Barrier start at 60% of normal strength and gain a +25% flat increase per Charge spent.",
+          "description": "Store up to 4 Charge, with each of your other Essences building 1 Charge between Channeled Essence casts. Your Channeled Essence's immediate damage, healing and Barrier start at 60% of normal strength and gain a +25% flat increase per Charge spent.",
           "tuning": {
             "healthFraction": 0.25,
             "barrierFraction": 0.75,
@@ -191,7 +191,7 @@
         {
           "id": "relay",
           "name": "Relay",
-          "description": "After your Focus spends 2 or more Charge, regain 1 Charge for its next cast. Its immediate damage, healing and Barrier start at 80% of normal strength and gain a +15% flat increase per Charge spent.",
+          "description": "After your Channeled Essence spends 2 or more Charge, regain 1 Charge for its next cast. Its immediate damage, healing and Barrier start at 80% of normal strength and gain a +15% flat increase per Charge spent.",
           "tuning": {
             "healthFraction": 0.25,
             "barrierFraction": 0.75,
@@ -223,19 +223,19 @@
           "id": "full-circuit",
           "name": "Full Circuit",
           "masteryDescription": "This bonus now works whenever you spend 2 or more Charge.",
-          "description": "Spending maximum Charge adds a flat +5% to your Focus’s immediate damage, healing and Barrier."
+          "description": "Spending maximum Charge adds a flat +5% to your Channeled Essence’s immediate damage, healing and Barrier."
         },
         {
           "id": "partial-flow",
           "name": "Partial Flow",
           "masteryDescription": "This bonus now works with either 1 or 2 Charge.",
-          "description": "Spending exactly 1 Charge adds a flat +5% to your Focus’s immediate damage, healing and Barrier."
+          "description": "Spending exactly 1 Charge adds a flat +5% to your Channeled Essence’s immediate damage, healing and Barrier."
         },
         {
           "id": "emergency-channel",
           "name": "Emergency Channel",
-          "masteryDescription": "You gain this bonus at any Health, as long as your Focus spends at least 1 Charge.",
-          "description": "When your Focus spends Charge at 35% Health or lower, add a flat +5% to the healing and Barrier it gives you immediately."
+          "masteryDescription": "You gain this bonus at any Health, as long as your Channeled Essence spends at least 1 Charge.",
+          "description": "When your Channeled Essence spends Charge at 35% Health or lower, add a flat +5% to the healing and Barrier it gives you immediately."
         }
       ]
     }

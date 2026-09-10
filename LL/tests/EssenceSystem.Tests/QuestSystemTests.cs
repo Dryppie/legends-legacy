@@ -464,9 +464,9 @@ public sealed partial class QuestSystemTests
 
         await service.ProcessAsync(
             characterId,
-            QuestTrigger.EssenceFocusSet(),
+            QuestTrigger.CreatureFocusSet(),
             null,
-            GameEventTypes.EssenceFocusSet,
+            GameEventTypes.CreatureFocusSet,
             CancellationToken.None);
 
         Assert.Equal(
@@ -513,6 +513,31 @@ public sealed partial class QuestSystemTests
                     QuestConstants.TheArenaCalls or
                     QuestConstants.AnOmenFulfilled),
             progress => Assert.Equal(QuestStatus.Completed, progress.Status));
+    }
+
+    [Theory]
+    [InlineData("EssenceFocusSet", "CreatureFocusSet")]
+    [InlineData("CreatureFocusSet", "EssenceFocusSet")]
+    public async Task Creature_focus_rename_preserves_existing_quest_objective_keys_and_historical_triggers(string objectiveType, string triggerType)
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var definition = definitions.Get(QuestConstants.FocusedPursuit);
+        var objective = Assert.Single(definition.Objectives);
+        Assert.Equal("set_essence_focus", objective.Key);
+        objective.Type = objectiveType;
+        var repository = new RecordingQuestRepository(level: 1);
+        var progress = CreateActiveProgress(characterId, definition, isPinned: false);
+        repository.Progresses.Add(progress);
+        var service = new QuestService(repository, definitions, new RecordingItemBaseRepository(),
+            new RecordingInventoryItemFactory(), new RecordingLootRewardWriter(), TimeProvider.System);
+
+        await service.ProcessAsync(characterId, new QuestTrigger(triggerType), Guid.NewGuid(),
+            GameEventTypes.CreatureFocusSet, CancellationToken.None);
+
+        var savedObjective = Assert.Single(progress.Objectives);
+        Assert.Equal("set_essence_focus", savedObjective.ObjectiveKey);
+        Assert.Equal(1, savedObjective.CurrentAmount);
     }
 
     [Fact]

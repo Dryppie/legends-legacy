@@ -127,6 +127,10 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
         services.TryAddScoped<IEssenceProgressionService, EssenceProgressionService>();
+        services.TryAddSingleton<IAbilityCatalogProvider>(sp => new JsonAbilityCatalogProvider(
+            config, AppContext.BaseDirectory, sp.GetRequiredService<JsonSerializerOptions>()));
+        services.TryAddScoped<Application.Interfaces.Services.LL.CombatStyles.IChanneledEssenceResolver,
+            Services.LL.CombatStyles.ChanneledEssenceResolver>();
         services.TryAddSingleton(_ =>
         {
             var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
@@ -407,6 +411,7 @@ public static class DependencyInjection
             new Services.LL.CombatStyles.JsonCombatStyleCatalogProvider(Path.Combine(contentRootPath,
                 config["Content:Root"] ?? "Data", "combat-styles", "combat-styles.v1.json")));
         services.AddScoped<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleService, Services.LL.CombatStyles.CombatStyleService>();
+        services.AddScoped<Application.Interfaces.Services.LL.CombatStyles.IChanneledEssenceResolver, Services.LL.CombatStyles.ChanneledEssenceResolver>();
         services.AddScoped<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleMutationBoundary, Services.LL.CombatStyles.CombatStyleMutationBoundary>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();

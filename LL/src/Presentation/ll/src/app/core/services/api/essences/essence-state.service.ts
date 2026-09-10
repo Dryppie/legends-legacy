@@ -55,8 +55,8 @@ export class EssenceStateService {
   private readonly _creatureArchive = signal<CreatureArchiveDto | null>(null);
   private readonly _codex = signal<EssenceCodexDto | null>(null);
   private readonly _now = signal(Date.now());
-  private readonly _seenEssenceFocusReadyKey = signal<string | null>(null);
-  private readonly _highlightEssenceFocus = signal(false);
+  private readonly _seenCreatureFocusReadyKey = signal<string | null>(null);
+  private readonly _highlightCreatureFocus = signal(false);
   private readonly _selectedPlayerEssenceId = signal<string | null>(null);
   private readonly _selectedLoadoutId = signal<string | null>(null);
   private readonly _selectedInventoryItemId = signal<string | null>(null);
@@ -111,42 +111,45 @@ export class EssenceStateService {
   readonly focusedCreature = computed(
     () =>
       this._creatureArchive()?.creatures.find(
-        (creature) => creature.isEssenceFocus,
+        (creature) => creature.isCreatureFocus,
       ) ?? null,
   );
-  readonly canChangeEssenceFocus = computed(() => {
+  readonly canChangeCreatureFocus = computed(() => {
     const archive = this._creatureArchive();
     if (!archive) return false;
-    if (archive.canChangeEssenceFocus) return true;
+    if (archive.canChangeCreatureFocus) return true;
 
-    const availableAt = this.getUtcTime(archive.essenceFocusAvailableAtUtc);
+    const availableAt = this.getUtcTime(archive.creatureFocusAvailableAtUtc);
     return availableAt !== null && availableAt <= this._now();
   });
-  private readonly essenceFocusReadyKey = computed(() => {
+  private readonly creatureFocusReadyKey = computed(() => {
     const archive = this._creatureArchive();
-    if (!archive || !this.canChangeEssenceFocus()) return null;
+    if (!archive || !this.canChangeCreatureFocus()) return null;
 
     const hasSelectableTarget = archive.creatures.some(
-      (creature) => creature.essences.length > 0 && !creature.isEssenceFocus,
+      (creature) => creature.essences.length > 0 && !creature.isCreatureFocus,
     );
     if (!hasSelectableTarget) return null;
 
     return (
-      archive.essenceFocusAvailableAtUtc ??
-      archive.essenceFocusSetAtUtc ??
+      archive.creatureFocusAvailableAtUtc ??
+      archive.creatureFocusSetAtUtc ??
       'initial'
     );
   });
-  readonly essenceFocusReady = computed(() => {
-    const key = this.essenceFocusReadyKey();
-    return key !== null && key !== this._seenEssenceFocusReadyKey();
+  readonly creatureFocusReady = computed(() => {
+    const key = this.creatureFocusReadyKey();
+    return key !== null && key !== this._seenCreatureFocusReadyKey();
   });
-  readonly highlightEssenceFocus = computed(() =>
-    this._highlightEssenceFocus(),
+  readonly highlightCreatureFocus = computed(() =>
+    this._highlightCreatureFocus(),
   );
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
+  readonly firstOccupiedDraftSlot = computed(() =>
+    this._draftSlots().findIndex((id) => !!id),
+  );
   readonly savingLoadout = computed(() => this._savingLoadout());
   readonly loading = computed(() => this._loading());
   readonly spendingDust = computed(() => this._spendingDust());
@@ -325,45 +328,39 @@ export class EssenceStateService {
     );
     setInterval(() => this._now.set(Date.now()), 60_000);
 
-    effect(
-      () => {
-        if (this.eventBus.logout()) {
-          untracked(() => this.reset());
-        }
-      },
-    );
+    effect(() => {
+      if (this.eventBus.logout()) {
+        untracked(() => this.reset());
+      }
+    });
 
-    effect(
-      () => {
-        const envelope = this.gameEvents.eventEnvelope.CharacterLevelUp();
-        const levelUp = envelope?.payload;
-        const loadouts = this._loadouts();
-        if (
-          levelUp &&
-          loadouts &&
-          levelUp.characterId === this.characterState.currentCharacterId() &&
-          levelUp.unlockedEssenceSlots > loadouts.unlockedSlots &&
-          this.eventDeduper.shouldProcess('essence-slot-unlock', envelope)
-        ) {
-          untracked(() => this.markDirty());
-        }
-      },
-    );
+    effect(() => {
+      const envelope = this.gameEvents.eventEnvelope.CharacterLevelUp();
+      const levelUp = envelope?.payload;
+      const loadouts = this._loadouts();
+      if (
+        levelUp &&
+        loadouts &&
+        levelUp.characterId === this.characterState.currentCharacterId() &&
+        levelUp.unlockedEssenceSlots > loadouts.unlockedSlots &&
+        this.eventDeduper.shouldProcess('essence-slot-unlock', envelope)
+      ) {
+        untracked(() => this.markDirty());
+      }
+    });
 
-    effect(
-      () => {
-        if (this._activeView() !== 'creatures') {
-          this._highlightEssenceFocus.set(false);
-          return;
-        }
+    effect(() => {
+      if (this._activeView() !== 'creatures') {
+        this._highlightCreatureFocus.set(false);
+        return;
+      }
 
-        const readyKey = this.essenceFocusReadyKey();
-        if (readyKey && readyKey !== this._seenEssenceFocusReadyKey()) {
-          this._highlightEssenceFocus.set(true);
-          this._seenEssenceFocusReadyKey.set(readyKey);
-        }
-      },
-    );
+      const readyKey = this.creatureFocusReadyKey();
+      if (readyKey && readyKey !== this._seenCreatureFocusReadyKey()) {
+        this._highlightCreatureFocus.set(true);
+        this._seenCreatureFocusReadyKey.set(readyKey);
+      }
+    });
   }
 
   setActiveView(view: EssenceView): void {
@@ -558,8 +555,8 @@ export class EssenceStateService {
     this._loading.set(false);
     this._spendingDust.set(false);
     this._error.set(null);
-    this._seenEssenceFocusReadyKey.set(null);
-    this._highlightEssenceFocus.set(false);
+    this._seenCreatureFocusReadyKey.set(null);
+    this._highlightCreatureFocus.set(false);
   }
 
   selectPlayerEssence(essence: PlayerEssenceDto): void {
@@ -573,7 +570,13 @@ export class EssenceStateService {
   spendDust(essence: PlayerEssenceDto, max = false): void {
     if (this._spendingDust()) return;
     const amount = max
-      ? Math.max(0, Math.min(this.archive()?.essenceDust ?? 0, essence.levelCap - essence.level))
+      ? Math.max(
+          0,
+          Math.min(
+            this.archive()?.essenceDust ?? 0,
+            essence.levelCap - essence.level,
+          ),
+        )
       : 1;
     if (amount === 0) return;
 
@@ -656,16 +659,16 @@ export class EssenceStateService {
     });
   }
 
-  setEssenceFocus(creatureId: string | null): void {
-    if (creatureId && !this.canChangeEssenceFocus()) {
-      this._error.set('Essence Focus can be changed once every 8 hours.');
+  setCreatureFocus(creatureId: string | null): void {
+    if (creatureId && !this.canChangeCreatureFocus()) {
+      this._error.set('Creature Focus can be changed once every 8 hours.');
       return;
     }
 
-    this.essencesService.setEssenceFocus(creatureId).subscribe({
+    this.essencesService.setCreatureFocus(creatureId).subscribe({
       next: (result) => this.applyEssenceState(result),
       error: (error) =>
-        this._error.set(error?.message ?? 'Failed to update Essence Focus'),
+        this._error.set(error?.message ?? 'Failed to update Creature Focus'),
     });
   }
 
@@ -817,6 +820,38 @@ export class EssenceStateService {
     if (!this.canPersistDraftLoadout()) return;
 
     this.persistDraftLoadout(true);
+  }
+
+  canChannelEssence(playerEssenceId: string): boolean {
+    const slot = this._draftSlots().indexOf(playerEssenceId);
+    return (
+      !this._savingLoadout() &&
+      !this._loading() &&
+      slot >= 0 &&
+      slot !== this.firstOccupiedDraftSlot() &&
+      this._archive()?.essences.some(
+        (essence) =>
+          essence.id === playerEssenceId && essence.isChanneledEssenceEligible,
+      ) === true
+    );
+  }
+
+  channelEssence(playerEssenceId: string): void {
+    if (!this.canChannelEssence(playerEssenceId)) return;
+    const previousSlots = this._draftSlots();
+    const slots = [...previousSlots];
+    const firstSlot = this.firstOccupiedDraftSlot();
+    const chosenSlot = slots.indexOf(playerEssenceId);
+    [slots[firstSlot], slots[chosenSlot]] = [
+      slots[chosenSlot],
+      slots[firstSlot],
+    ];
+    this._draftSlots.set(slots);
+    if (!this.canPersistDraftLoadout()) {
+      this._draftSlots.set(previousSlots);
+      return;
+    }
+    this.saveDraftSlots();
   }
 
   private persistDraftLoadout(restoreSavedDraftOnError: boolean): void {

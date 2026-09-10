@@ -62,6 +62,7 @@ import {
   matchesCreatureEssenceFilter,
 } from './creature-archive-search';
 import { playerEssenceSearchText } from '../../../../shared/search/essence-search';
+import { CombatStyleStateService } from '../../../../core/services/api/combat-styles/combat-style-state.service';
 import {
   formatLocalDate,
   LocalDatePipe,
@@ -105,6 +106,20 @@ export class EssencesComponent implements OnInit {
   private lastCreatureArchiveCombatRevision: string | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly combatStyles = inject(CombatStyleStateService);
+  readonly conduitEquipped = computed(
+    () => this.combatStyles.data()?.selection.combatStyleId === 'conduit',
+  );
+  readonly channeledEssenceHint = computed(() => {
+    if (!this.conduitEquipped()) return null;
+    const slot = this.essenceState.firstOccupiedDraftSlot();
+    if (slot < 0)
+      return 'Equip an Essence for Conduit to channel in this loadout.';
+    const channeledEssence = this.draftSlotEssence(slot);
+    return channeledEssence?.isChanneledEssenceEligible
+      ? 'The first Essence in your loadout is your Channeled Essence. Your other Essences build Charge to strengthen its casts.'
+      : 'The first Essence in this loadout has no direct damage, healing or Barrier for Conduit to strengthen. Use Channel Essence on another equipped Essence.';
+  });
   private readonly routeEssenceId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('essenceId'))),
     { initialValue: null },
@@ -142,8 +157,8 @@ export class EssencesComponent implements OnInit {
     {
       key: 'creatures',
       label: 'Creatures',
-      badgeCount: this.essenceState.essenceFocusReady() ? 1 : 0,
-      badgeLabel: 'Essence Focus ready',
+      badgeCount: this.essenceState.creatureFocusReady() ? 1 : 0,
+      badgeLabel: 'Creature Focus ready',
     },
     { key: 'codex', label: 'Codex' },
   ]);
@@ -391,6 +406,11 @@ export class EssencesComponent implements OnInit {
     private readonly characterActions: CharacterActionsStateService,
   ) {
     effect(() => {
+      if (this.combatStyles.dirty()) {
+        untracked(() => this.combatStyles.refreshIfDirty());
+      }
+    });
+    effect(() => {
       const view = this.requestedView();
       if (
         view === 'archive' ||
@@ -402,28 +422,26 @@ export class EssencesComponent implements OnInit {
       }
     });
 
-    effect(
-      () => {
-        const objective = this.questState.pinnedOnboardingObjective();
-        if (!objective) {
-          this.lastPreparedQuestObjective = null;
-          return;
-        }
+    effect(() => {
+      const objective = this.questState.pinnedOnboardingObjective();
+      if (!objective) {
+        this.lastPreparedQuestObjective = null;
+        return;
+      }
 
-        if (objective.key === this.lastPreparedQuestObjective) return;
-        this.lastPreparedQuestObjective = objective.key;
+      if (objective.key === this.lastPreparedQuestObjective) return;
+      this.lastPreparedQuestObjective = objective.key;
 
-        if (objective.type === 'EssenceAbsorbed') {
-          this.essenceState.setActiveView('absorb');
-          return;
-        }
+      if (objective.type === 'EssenceAbsorbed') {
+        this.essenceState.setActiveView('absorb');
+        return;
+      }
 
-        if (objective.type === 'EssenceEquipped') {
-          this.essenceState.setActiveView('archive');
-          untracked(() => this.questPresenter.presentCurrentObjective());
-        }
-      },
-    );
+      if (objective.type === 'EssenceEquipped') {
+        this.essenceState.setActiveView('archive');
+        untracked(() => this.questPresenter.presentCurrentObjective());
+      }
+    });
 
     effect(() => {
       const essenceId = this.routeEssenceId();
@@ -598,7 +616,10 @@ export class EssencesComponent implements OnInit {
   }
 
   public maxDustLevels(essence: PlayerEssenceDto): number {
-    return Math.max(0, Math.min(this.essenceDustHeld(), essence.levelCap - essence.level));
+    return Math.max(
+      0,
+      Math.min(this.essenceDustHeld(), essence.levelCap - essence.level),
+    );
   }
 
   public canSpendDust(essence: PlayerEssenceDto): boolean {
@@ -799,7 +820,9 @@ export class EssencesComponent implements OnInit {
   }
 
   public isOnboardingEssenceAttunement(): boolean {
-    return this.questState.pinnedOnboardingObjective()?.type === 'EssenceEquipped';
+    return (
+      this.questState.pinnedOnboardingObjective()?.type === 'EssenceEquipped'
+    );
   }
 
   public equipOnboardingStarterEssence(essence: PlayerEssenceDto): void {
@@ -897,6 +920,10 @@ export class EssencesComponent implements OnInit {
     this.essenceState.saveDraftSlots();
   }
 
+  public channelEssence(essence: PlayerEssenceDto): void {
+    if (this.conduitEquipped()) this.essenceState.channelEssence(essence.id);
+  }
+
   public equippedDraftSlot(essence: PlayerEssenceDto): number | null {
     const slotIndex = this.essenceState.draftSlots().indexOf(essence.id);
     return slotIndex >= 0 ? slotIndex : null;
@@ -950,43 +977,52 @@ export class EssencesComponent implements OnInit {
     return creature.creatureId;
   }
 
-  public setEssenceFocus(creature: CreatureArchiveEntryDto): void {
+  public setCreatureFocus(creature: CreatureArchiveEntryDto): void {
     if (creature.essences.length === 0) return;
-    if (creature.isEssenceFocus || !this.essenceState.canChangeEssenceFocus()) {
+    if (
+      creature.isCreatureFocus ||
+      !this.essenceState.canChangeCreatureFocus()
+    ) {
       return;
     }
 
-    this.essenceState.setEssenceFocus(creature.creatureId);
+    this.essenceState.setCreatureFocus(creature.creatureId);
   }
 
-  public canSetEssenceFocus(creature: CreatureArchiveEntryDto): boolean {
+  public canSetCreatureFocus(creature: CreatureArchiveEntryDto): boolean {
     return (
       creature.essences.length > 0 &&
-      !creature.isEssenceFocus &&
-      this.essenceState.canChangeEssenceFocus()
+      !creature.isCreatureFocus &&
+      this.essenceState.canChangeCreatureFocus()
     );
   }
 
-  public essenceFocusStatusText(): string {
+  public creatureFocusStatusText(): string {
     const archive = this.essenceState.creatureArchive();
-    if (!archive) return 'Loading focus status.';
-    if (this.essenceState.canChangeEssenceFocus()) {
-      return 'You can choose a new target now. After setting one, Focus is locked for 8 hours.';
+    if (!archive) return 'Loading Creature Focus status.';
+    if (this.essenceState.canChangeCreatureFocus()) {
+      return 'You can choose a new target now. After setting one, Creature Focus is locked for 8 hours.';
     }
-    if (archive.essenceFocusAvailableAtUtc) {
-      return `New target available ${formatLocalDate(archive.essenceFocusAvailableAtUtc, 'short')}.`;
+    if (archive.creatureFocusAvailableAtUtc) {
+      return `New target available ${formatLocalDate(archive.creatureFocusAvailableAtUtc, 'short')}.`;
     }
 
-    return 'Focus is locked for 8 hours after choosing a target.';
+    return 'Creature Focus is locked for 8 hours after choosing a target.';
   }
 
-  public totalFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
-    return this.formatDuration(this.getLiveTotalFocusDurationSeconds(creature));
-  }
-
-  public currentFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
+  public totalCreatureFocusDurationLabel(
+    creature: CreatureArchiveEntryDto,
+  ): string {
     return this.formatDuration(
-      this.getLiveCurrentFocusDurationSeconds(creature),
+      this.getLiveTotalCreatureFocusDurationSeconds(creature),
+    );
+  }
+
+  public currentCreatureFocusDurationLabel(
+    creature: CreatureArchiveEntryDto,
+  ): string {
+    return this.formatDuration(
+      this.getLiveCurrentCreatureFocusDurationSeconds(creature),
     );
   }
 
@@ -1018,28 +1054,30 @@ export class EssencesComponent implements OnInit {
     return this.formatDisplayLabel(displayPart);
   }
 
-  private getLiveTotalFocusDurationSeconds(
+  private getLiveTotalCreatureFocusDurationSeconds(
     creature: CreatureArchiveEntryDto,
   ): number {
-    const currentAtLoad = creature.currentEssenceFocusDurationSeconds ?? 0;
+    const currentAtLoad = creature.currentCreatureFocusDurationSeconds ?? 0;
     const completed = Math.max(
       0,
-      (creature.essenceFocusTotalDurationSeconds ?? 0) - currentAtLoad,
+      (creature.creatureFocusTotalDurationSeconds ?? 0) - currentAtLoad,
     );
 
-    return completed + this.getLiveCurrentFocusDurationSeconds(creature);
+    return (
+      completed + this.getLiveCurrentCreatureFocusDurationSeconds(creature)
+    );
   }
 
-  private getLiveCurrentFocusDurationSeconds(
+  private getLiveCurrentCreatureFocusDurationSeconds(
     creature: CreatureArchiveEntryDto,
   ): number {
-    if (!creature.isEssenceFocus) return 0;
+    if (!creature.isCreatureFocus) return 0;
 
-    const startedAt = creature.essenceFocusSetAtUtc
-      ? new Date(creature.essenceFocusSetAtUtc).getTime()
+    const startedAt = creature.creatureFocusSetAtUtc
+      ? new Date(creature.creatureFocusSetAtUtc).getTime()
       : Number.NaN;
     if (Number.isNaN(startedAt)) {
-      return creature.currentEssenceFocusDurationSeconds ?? 0;
+      return creature.currentCreatureFocusDurationSeconds ?? 0;
     }
 
     return Math.max(
