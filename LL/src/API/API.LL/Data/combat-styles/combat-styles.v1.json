@@ -1,5 +1,5 @@
 {
-  "contentVersion": "combat-styles.v6",
+  "contentVersion": "combat-styles.v8",
   "xpRequirements": [
     36900,
     232225,
@@ -236,6 +236,67 @@
           "name": "Emergency Channel",
           "masteryDescription": "You gain this bonus at any Health, as long as your Channeled Essence spends at least 1 Charge.",
           "description": "When your Channeled Essence spends Charge at 35% Health or lower, add a flat +5% to the healing and Barrier it gives you immediately."
+        }
+      ]
+    },
+    {
+      "id": "reaper",
+      "name": "Reaper",
+      "kind": "Reaper",
+      "description": "Your Active Abilities makes the Bleed, Burn and Poison you applied deal damage sooner. When a direct hit damages an enemy that survives, Harvest takes the next tick from each of your applied stacks and deals 110% of that damage straight away. Each mastery level adds a flat +1% to Harvest. Newly applied stacks can be harvested from the next Essence cast.",
+      "tuning": {
+        "barrierPerMasteryLevel": 0.01,
+        "focusPerMasteryLevel": 0.01,
+        "reaper": {
+          "baseMultiplier": 1.10,
+          "perMasteryLevel": 0.01,
+          "deathSentenceBonus": 0.10,
+          "lastRitesHealthThreshold": 0.35,
+          "upgradeBonus": 0.05,
+          "closingHandHealthThreshold": 0.35,
+          "masteredClosingHandHealthThreshold": 0.50,
+          "openingPoisonStacks": 5
+        }
+      },
+      "openingTechnique": {
+        "name": "Grave Seed",
+        "description": "At combat start apply Poison(5) to the enemy with the highest Max Health."
+      },
+      "refinements": [
+        {
+          "id": "soul-siphon",
+          "name": "Soul Siphon",
+          "description": "Draw strength from your afflicted enemies. Harvest takes the next tick from each of your Bleed, Burn and Poison stacks and uses it to heal you instead of dealing damage. Healing Power, Wound and Recovery affect the heal. It cannot crit or heal you beyond full Health."
+        },
+        {
+          "id": "last-rites",
+          "name": "Last Rites",
+          "description": "Save your Harvest for weakened enemies. When your direct hit leaves an enemy at 35% Health or less, Harvest fully triggers Bleed, Burn, and Poison at once, and expire the effects. Deep Roots has no effect with this form."
+        },
+        {
+          "id": "death-sentence",
+          "name": "Death Sentence",
+          "description": "Save your Harvest for a later blow. Each Harvest takes the next tick from each of your Bleed, Burn and Poison stacks and places the Harvest damage on the enemy as Doom. Harvest damage is increased by an additional flat +10%."
+        }
+      ],
+      "upgrades": [
+        {
+          "id": "closing-hand",
+          "name": "Closing Hand",
+          "description": "Your Harvest gains a flat +5% when your opponent is at or below 35% Health",
+          "masteryDescription": "You now get this bonus at 50% enemy Health or less. Last Rites still only activates at 35% Health or less."
+        },
+        {
+          "id": "crosscut",
+          "name": "Crosscut",
+          "description": "Your Harvest gains a flat +5% when it draws damage from at least two of Bleed, Burn and Poison.",
+          "masteryDescription": "Harvesting 3 or more stacks also gives you this bonus, even if they are all the same condition."
+        },
+        {
+          "id": "deep-roots",
+          "name": "Deep Roots",
+          "description": "Your Harvest gains a flat +5% if every stack you harvest still has damage left to deal afterwards. Has no effect with Last Rites.",
+          "masteryDescription": "Only one of the stacks you harvest needs to have damage left afterwards to get this bonus. Has no effect with Last Rites."
         }
       ]
     }

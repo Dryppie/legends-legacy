@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Domain.Models.CombatStyles;
 
-public enum CombatStyleKind { Bastion = 1, Conduit = 2 }
+public enum CombatStyleKind { Bastion = 1, Conduit = 2, Reaper = 3 }
 
 /// <summary>Versioned, immutable effective rules captured when an activity commits.</summary>
 public sealed record CombatStyleSnapshot
@@ -48,6 +48,8 @@ public sealed record CombatStyleSnapshot
 /// <summary>Resolved numerical rules travel with snapshots, so content edits cannot retune committed battles.</summary>
 public sealed record CombatStyleTuning
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ReaperTuning? Reaper { get; init; }
     public double HealthFraction { get; init; } = .25;
     public double BarrierFraction { get; init; } = .75;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -94,6 +96,13 @@ public sealed record CombatStyleTuning
 
 public static class CombatStyleIds
 {
+    public const string Reaper = "reaper";
+    public const string SoulSiphon = "soul-siphon";
+    public const string LastRites = "last-rites";
+    public const string DeathSentence = "death-sentence";
+    public const string ClosingHand = "closing-hand";
+    public const string Crosscut = "crosscut";
+    public const string DeepRoots = "deep-roots";
     public const string Bastion = "bastion";
     public const string Conduit = "conduit";
     public const string Rebuild = "rebuild";

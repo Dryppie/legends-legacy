@@ -164,6 +164,34 @@ public sealed partial class GuildMissionServiceTests
     }
 
     [Fact]
+    public async Task GetOverview_returns_existing_and_newly_generated_orders_in_creation_order()
+    {
+        await using var db = CreateDbContext();
+        var characterId = SeedGuild(db);
+        await db.SaveChangesAsync();
+        var service = new GuildMissionService(db, new GuildRepository(db));
+        var now = new DateTimeOffset(2026, 6, 22, 1, 0, 0, TimeSpan.Zero);
+        var initial = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
+        var orders = await db.PersonalGuildOrders.ToListAsync();
+        var retainedOrder = orders[0];
+        retainedOrder.CurrentAmount = 1;
+        db.PersonalGuildOrders.RemoveRange(orders.Skip(1));
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var overview = await service.GetOverviewAsync(characterId, now.AddMinutes(1), CancellationToken.None);
+
+        Assert.NotNull(overview);
+        Assert.Equal(3, overview.PersonalOrders.Count);
+        Assert.Equal(retainedOrder.Id, overview.PersonalOrders[0].Id);
+        Assert.Equal(1, overview.PersonalOrders[0].CurrentAmount);
+        Assert.All(overview.PersonalOrders.Skip(1), order => Assert.Equal(now.AddMinutes(1), order.GeneratedAt));
+        Assert.Equal(initial!.WeeklyOptions.Select(option => option.Id).Order(),
+            overview.WeeklyOptions.Select(option => option.Id).Order());
+        Assert.Equal(3, await db.PersonalGuildOrders.CountAsync());
+    }
+
+    [Fact]
     public async Task GetOverview_removes_duplicate_weekly_options()
     {
         await using var db = CreateDbContext();

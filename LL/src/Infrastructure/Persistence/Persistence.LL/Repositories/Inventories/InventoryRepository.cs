@@ -347,6 +347,21 @@ public class InventoryRepository : IInventoryRepository
             .Where(x => x.InventoryId == characterId && x.ItemInstance.ItemBaseId == itemBaseId)
             .SumAsync(x => x.Quantity, cancellationToken);
 
+    public async Task<IReadOnlyDictionary<string, int>> GetInventoryQuantitiesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> itemBaseIds,
+        CancellationToken cancellationToken)
+    {
+        if (itemBaseIds.Count == 0)
+            return new Dictionary<string, int>();
+
+        return await _context.InventoryItems
+            .Where(item => item.InventoryId == characterId && itemBaseIds.Contains(item.ItemInstance.ItemBaseId))
+            .GroupBy(item => item.ItemInstance.ItemBaseId)
+            .Select(group => new { ItemBaseId = group.Key, Quantity = group.Sum(item => item.Quantity) })
+            .ToDictionaryAsync(item => item.ItemBaseId, item => item.Quantity, cancellationToken);
+    }
+
     public void RemoveInventoryItem(InventoryItem inventoryItem) =>
         _context.InventoryItems.Remove(inventoryItem);
 

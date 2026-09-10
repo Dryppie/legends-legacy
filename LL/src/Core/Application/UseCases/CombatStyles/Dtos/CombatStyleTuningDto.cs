@@ -3,6 +3,7 @@ namespace Application.UseCases.CombatStyles.Dtos;
 /// <summary>Current API names are independent of the immutable historical battle JSON contract.</summary>
 public sealed record CombatStyleTuningDto
 {
+    public ReaperTuningDto? Reaper { get; init; }
     public double HealthFraction { get; init; }
     public double BarrierFraction { get; init; }
     public double? BarrierPerMasteryLevel { get; init; }

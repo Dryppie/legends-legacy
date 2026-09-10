@@ -1,12 +1,14 @@
 # Possible Combat Styles
 
-Six additional concepts to explore alongside Bastion, Conduit, Reaper, Shepherd, and Gambler. These are early ideas, not implemented features or committed designs. Each would operate automatically through the existing Combat Style slot.
+Six additional concepts to explore alongside Bastion, Conduit, Reaper, Shepherd, and Gambler. Duelist and Spellweaver now have full design proposals; the other four remain early ideas. None is implemented or a committed design. Each would operate automatically through the existing Combat Style slot.
 
 ## Duelist
 
 **Purpose:** Give sustained single-target builds a style centered on learning and overcoming one opponent.
 
 **What it might do:** Repeated attacks against the same enemy could reveal an opening that a later Essence attack exploits for a stronger strike. Changing targets would begin a new read on the opponent, making focused pressure and reliable target selection central to the build.
+
+**Full proposal:** [Duelist](styles/duelist.md) develops this into Read and Opening, with mastery progression, three refinements, upgrades, an Opening Technique and worked examples.
 
 ## Avenger
 
@@ -19,6 +21,8 @@ Six additional concepts to explore alongside Bastion, Conduit, Reaper, Shepherd,
 **Purpose:** Encourage builds that combine Physical and Magical Essences into a complementary rhythm.
 
 **What it might do:** A Physical Essence activation could prepare a benefit for a subsequent Magical activation, and vice versa. Weaving between the two could strengthen their effects or expose the enemy to the other damage channel. The interaction would happen between separate activations, so a single mixed or multi-hit ability would not weave with itself.
+
+**Full proposal:** [Spellweaver](styles/spellweaver.md) develops this into an alternating cast pattern, with mastery progression, three refinements, upgrades, an Opening Technique and worked examples.
 
 ## Saboteur
 

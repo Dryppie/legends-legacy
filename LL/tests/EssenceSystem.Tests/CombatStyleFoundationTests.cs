@@ -113,7 +113,7 @@ public sealed class CombatStyleFoundationTests
         Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(valid with { Styles = [valid.Styles[0], valid.Styles[0]] }));
         Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(valid with { Styles = [valid.Styles[0]] }));
         Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(valid with {
-            Styles = [valid.Styles[0] with { Upgrades = [] }, valid.Styles[1]] }));
+            Styles = [valid.Styles[0] with { Upgrades = [] }, .. valid.Styles.Skip(1)] }));
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public sealed class CombatStyleFoundationTests
         })
             Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(catalog with
             {
-                Styles = [definition with { Tuning = tuning }, catalog.Styles[1]]
+                Styles = [definition with { Tuning = tuning }, .. catalog.Styles.Skip(1)]
             }));
     }
 
@@ -286,7 +286,7 @@ public sealed class CombatStyleFoundationTests
             new CombatStyleMilestoneTuning { FullCircuitMinimumCharge = 3 } })
             Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(valid with
             {
-                Styles = [valid.Styles[0], valid.Styles[1] with { MilestoneTuning = tuning }]
+                Styles = [valid.Styles[0], valid.Styles[1] with { MilestoneTuning = tuning }, valid.Styles[2]]
             }));
     }
 
@@ -400,12 +400,12 @@ public sealed class CombatStyleFoundationTests
     }
 
     [Fact]
-    public async Task Initial_overview_and_preview_make_both_styles_available_without_creating_persistence_rows()
+    public async Task Initial_overview_and_preview_make_all_styles_available_without_creating_persistence_rows()
     {
         var repository = new TestRepository();
         var service = CreateService(repository);
         var overview = await service.GetOverviewAsync(Guid.Empty, default);
-        Assert.Equal(new[] { CombatStyleIds.Bastion, CombatStyleIds.Conduit }, overview.Styles.Select(x => x.Definition.Id));
+        Assert.Equal(new[] { CombatStyleIds.Bastion, CombatStyleIds.Conduit, CombatStyleIds.Reaper }, overview.Styles.Select(x => x.Definition.Id));
         Assert.All(overview.Styles, style => { Assert.Equal(0, style.Level); Assert.Equal(0, style.CurrentXp); Assert.Equal(Requirements[0], style.XpRequired); });
         Assert.Null(overview.Selection.CombatStyleId);
 
@@ -416,9 +416,39 @@ public sealed class CombatStyleFoundationTests
         Assert.Null(conduit.ValidationIssue);
         Assert.Equal(CombatStyleIds.Conduit, conduit.EffectiveStyle!.CombatStyleId);
         Assert.Equal("80% of normal strength", conduit.PreviewFacts.Single(x => x.Label == "0 Charge").Value);
+        var reaper = await service.PreviewAsync(Guid.Empty, new(CombatStyleIds.Reaper, null, [], null), default);
+        Assert.Null(reaper.ValidationIssue);
+        Assert.Equal(CombatStyleKind.Reaper, reaper.EffectiveStyle!.Kind);
+        Assert.Equal("110 damage dealt now", reaper.PreviewFacts.Single(x => x.Label == "100 damage harvested").Value);
+        Assert.DoesNotContain(reaper.PreviewFacts, x => x.Label.Contains("Charge"));
         Assert.Empty(repository.Styles);
         Assert.Null(repository.Selection);
         Assert.Equal(0, repository.SelectionAddCount);
+    }
+
+    [Theory]
+    [InlineData(null, "120 damage dealt now")]
+    [InlineData(CombatStyleIds.SoulSiphon, "120 Health restored")]
+    [InlineData(CombatStyleIds.LastRites, "120 damage dealt now")]
+    [InlineData(CombatStyleIds.DeathSentence, "130 Magical Damage after 15 seconds")]
+    public async Task Reaper_preview_and_dto_use_current_form_bonus_and_opening(string? refinement, string expected)
+    {
+        var repository = new TestRepository();
+        repository.Styles.Add(new() { CombatStyleId = CombatStyleIds.Reaper, Level = 10 });
+        var preview = await CreateService(repository).PreviewAsync(Guid.Empty,
+            new(CombatStyleIds.Reaper, refinement, [CombatStyleIds.ClosingHand], null), default);
+        Assert.Null(preview.ValidationIssue);
+        Assert.Equal(expected, preview.PreviewFacts.Single(x => x.Label == "100 damage harvested").Value);
+        Assert.Equal("Grave Seed: 5 Poison stacks", preview.PreviewFacts.Single(x => x.Label == "Opening Technique").Value);
+        Assert.Equal("Your opponent must be at or below 35% Health.",
+            preview.PreviewFacts.Single(x => x.Label == "Closing Hand").Condition);
+        var mapper = new MapperConfiguration(cfg => cfg.AddProfile<CombatStyleMappingProfile>(),
+            Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance).CreateMapper();
+        var dto = mapper.Map<CombatStyleOverviewDto>(preview);
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        var tuning = json.RootElement.GetProperty("effectiveStyle").GetProperty("tuning").GetProperty("reaper");
+        Assert.Equal(.1, tuning.GetProperty("deathSentenceBonus").GetDouble());
+        Assert.Equal(5, tuning.GetProperty("openingPoisonStacks").GetInt32());
     }
 
     [Fact]
@@ -843,7 +873,7 @@ public sealed class CombatStyleFoundationTests
     public void Current_catalog_validates_reprisal_tuning_while_old_committed_counterweight_snapshot_stays_unchanged()
     {
         var catalog = LoadCatalog();
-        Assert.Equal("combat-styles.v6", catalog.ContentVersion);
+        Assert.Equal("combat-styles.v8", catalog.ContentVersion);
         foreach (var invalid in new double?[] { null, double.NaN, double.PositiveInfinity, -.01, 1.01 })
         {
             var bastion = catalog.Styles.Single(x => x.Id == CombatStyleIds.Bastion);
@@ -852,7 +882,7 @@ public sealed class CombatStyleFoundationTests
                 bastion.Tuning with { ReprisalMaxHealthCapFraction = invalid } })
                 Assert.Throws<InvalidOperationException>(() => CombatStyleRules.ValidateCatalog(catalog with
                 {
-                    Styles = [bastion with { Tuning = tuning }, catalog.Styles.Single(x => x.Id == CombatStyleIds.Conduit)]
+                    Styles = [bastion with { Tuning = tuning }, .. catalog.Styles.Where(x => x.Id != CombatStyleIds.Bastion)]
                 }));
         }
 

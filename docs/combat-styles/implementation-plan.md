@@ -6,7 +6,7 @@
 
 The primary `LL` game service owns this feature: Domain, Application, Infrastructure, `API.LL`, and the Angular game client in `LL/src/Presentation/ll`. Chat, the admin application, and infrastructure-as-code are outside its scope.
 
-Implement Bastion and Conduit with separate levels, one defining mechanic, three mutually exclusive refinements, and three upgrades each. Reaper, Shepherd, and Gambler remain design concepts.
+Implement Bastion and Conduit with separate levels, one defining mechanic, three mutually exclusive refinements, and three upgrades each. Reaper is now implemented; see its style guide and implementation status. Shepherd and Gambler remain design concepts.
 
 The selected Combat Style is **global for every battle type**. There is no Combat Style activity loadout, practice introduction, unlock quest, or combined saved-build system. Existing equipment and Essence loadouts retain their independent behavior.
 

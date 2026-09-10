@@ -34,7 +34,7 @@ import { CombatStyleStateService } from '../../../../core/services/api/combat-st
       } @else if (state.data()) {
         <p class="mt-2 text-sm text-zinc-300">No Combat Style selected.</p>
         <p class="mt-1 text-xs text-zinc-400">
-          Bastion and Conduit are available immediately at Mastery 0.
+          Bastion, Conduit and Reaper are available immediately at Mastery 0.
         </p>
       } @else {
         <p class="mt-2 text-xs text-zinc-400">

@@ -154,6 +154,53 @@ describe('Combat Styles global configuration page', () => {
     return { fixture, element, state };
   }
 
+  it('renders Reaper Harvest mastery and all three refinements without Conduit guidance', async () => {
+    const { fixture, element, state } = await createPage(10);
+    state.data.update((overview) => ({
+      ...overview,
+      styles: overview.styles.map((entry) => ({
+        ...entry,
+        definition: {
+          ...entry.definition,
+          id: 'reaper', name: 'Reaper', kind: 'Reaper',
+          description: 'Harvest future damage from your Bleed, Burn and Poison.',
+          tuning: {
+            ...entry.definition.tuning!,
+            reaper: {
+              baseMultiplier: 1.1, perMasteryLevel: 0.01, deathSentenceBonus: 0.1,
+              lastRitesHealthThreshold: 0.35, upgradeBonus: 0.05,
+              closingHandHealthThreshold: 0.35, masteredClosingHandHealthThreshold: 0.5,
+              openingPoisonStacks: 5,
+            },
+          },
+          openingTechnique: { name: 'Grave Seed', description: 'Apply Poison(5) at battle start.' },
+          refinements: [
+            { id: 'soul-siphon', name: 'Soul Siphon', description: 'Heal yourself.' },
+            { id: 'last-rites', name: 'Last Rites', description: 'Harvest all future ticks at 35% Health.' },
+            { id: 'death-sentence', name: 'Death Sentence', description: 'Bank damage as Doom.' },
+          ],
+        },
+      })),
+    }));
+    state.draft.set({ combatStyleId: 'reaper', refinementId: null, upgradeIds: [], masteredUpgradeId: null });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.mechanicName()).toBe('Harvest');
+    expect(fixture.componentInstance.masteryBenefit()?.current).toBe('Mastery 10: 120% Harvest');
+    expect(element.textContent).toContain('Soul Siphon');
+    expect(element.textContent).toContain('Last Rites');
+    expect(element.textContent).toContain('Death Sentence');
+    expect(element.textContent).toContain('Grave Seed');
+    expect(element.textContent).not.toContain('Channeled Essence');
+    state.draft.update((draft) => ({ ...draft, refinementId: 'death-sentence' }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.masteryBenefit()?.current).toBe('Mastery 10: 130% Harvest');
+    expect(fixture.componentInstance.masteryBenefit()?.example).toContain('store 130 Magical Damage as Doom');
+    state.draft.update((draft) => ({ ...draft, refinementId: 'soul-siphon' }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.masteryBenefit()?.current).toBe('Mastery 10: 120% Harvest');
+    expect(fixture.componentInstance.masteryBenefit()?.example).toContain('restore up to 120 Health');
+  });
+
   it('shows starting mastery and the full first combat XP block', async () => {
     const { element } = await createPage();
     expect(

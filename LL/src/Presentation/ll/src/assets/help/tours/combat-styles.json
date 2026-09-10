@@ -2,7 +2,7 @@
   {
     "element": "[data-tour=combat-style-list]",
     "title": "1. Choose your Combat Style",
-    "description": "Choose Bastion, Conduit, or an empty slot. Your selection applies to every battle, and each style keeps its own permanent level and XP.",
+    "description": "Choose Bastion, Conduit, Reaper, or an empty slot. Your selection applies to every battle, and each style keeps its own permanent level and XP.",
     "position": "bottom"
   },
   {

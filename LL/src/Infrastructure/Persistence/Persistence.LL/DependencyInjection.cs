@@ -130,6 +130,7 @@ public static class DependencyInjection
 
         services.AddScoped<IRegionRepository, RegionRepository>();
         services.AddScoped<IWorldTowerProgressRepository, WorldTowerProgressRepository>();
+        services.AddScoped<IWorldTowerRallyRepository, WorldTowerRallyRepository>();
 
         services.AddScoped<IProphecyRepository, ProphecyRepository>();
         services.AddScoped<IQuestRepository, QuestRepository>();

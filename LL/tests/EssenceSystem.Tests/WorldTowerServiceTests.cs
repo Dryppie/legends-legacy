@@ -36,6 +36,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
 using Persistence.LL.Repositories.Snapshots;
+using Persistence.LL.Repositories.WorldTower;
 using Persistence.LL.Repositories.CombatStyles;
 using Persistence.LL.Repositories.Entities.Characters;
 using Services.LL.CombatStyles;
@@ -2015,6 +2016,7 @@ public sealed class WorldTowerServiceTests
         var resolvedCombatSetup = combatSetup ?? new ThrowingCombatSetupService();
         return new WorldTowerService(
             db,
+            new WorldTowerRallyRepository(db),
             new FixedDefinitionProvider(),
             snapshotService,
             powerRatings,

@@ -930,7 +930,12 @@ public sealed class ProphecyService : IProphecyService
         CancellationToken cancellationToken)
     {
         var definitions = CreateCacheItemBases();
-        await EnsureCacheItemBasesAsync(definitions.Select(x => x.Id).ToList(), cancellationToken);
+        if (definitions.Count == 0)
+            return [];
+
+        var itemIds = definitions.Select(x => x.Id).ToList();
+        await EnsureCacheItemBasesAsync(itemIds, cancellationToken);
+        var quantities = await _inventoryRepository.GetInventoryQuantitiesAsync(characterId, itemIds, cancellationToken);
 
         var result = new List<ProphecyCacheInventory>();
         foreach (var definition in definitions)
@@ -941,7 +946,7 @@ public sealed class ProphecyService : IProphecyService
                 definition.Id,
                 definition.Name,
                 definition.Description,
-                await _inventoryRepository.GetInventoryQuantityAsync(characterId, definition.Id, cancellationToken),
+                quantities.GetValueOrDefault(definition.Id),
                 cacheDefinition.PreviewRewards));
         }
 

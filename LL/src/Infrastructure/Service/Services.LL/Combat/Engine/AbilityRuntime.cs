@@ -491,7 +491,8 @@ public sealed class RuntimeCondition
         float powerSnapshot,
         long applicationOrder,
         string statsSource,
-        int intervalTicks = 0)
+        int intervalTicks = 0,
+        double? storedDamage = null)
     {
         Type = type;
         Source = source;
@@ -504,6 +505,7 @@ public sealed class RuntimeCondition
         StatsSource = statsSource;
         IntervalTicks = Math.Max(0, intervalTicks);
         TicksUntilInterval = IntervalTicks;
+        StoredDamage = storedDamage;
     }
 
     public StandardConditionType Type { get; }
@@ -517,6 +519,18 @@ public sealed class RuntimeCondition
     public string StatsSource { get; }
     public int IntervalTicks { get; }
     public int TicksUntilInterval { get; private set; }
+    public double? StoredDamage { get; }
+    public int UnpaidFutureTicks => IntervalTicks > 0 && TicksUntilInterval > 0
+        && RemainingDurationTicks >= TicksUntilInterval
+            ? 1 + (RemainingDurationTicks - TicksUntilInterval) / IntervalTicks : 0;
+
+    // Advancing the next unpaid event leaves every later timestamp and expiration intact.
+    public int ConsumeFutureTicks(int count)
+    {
+        var consumed = Math.Min(Math.Max(0, count), UnpaidFutureTicks);
+        TicksUntilInterval += consumed * IntervalTicks;
+        return consumed;
+    }
     public bool IsExpired => DurationTicks > 0 && RemainingDurationTicks <= 0;
 
     public void AddValue(int amount, int maximum = int.MaxValue) =>

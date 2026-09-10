@@ -63,24 +63,41 @@ public static class CombatStyleRules
         if (string.IsNullOrWhiteSpace(catalog.ContentVersion)) throw new InvalidOperationException("Combat Style content requires a version.");
         if (catalog.XpRequirements.Count != CombatStyleProgression.MaximumLevel || catalog.XpRequirements.Any(x => x <= 0))
             throw new InvalidOperationException("Combat Styles require ten positive XP requirements.");
-        if (catalog.Styles.Count != 2 || catalog.Styles.Select(x => x.Id).Distinct(StringComparer.Ordinal).Count() != 2)
-            throw new InvalidOperationException("The Combat Styles catalog must contain exactly Bastion and Conduit.");
+        if (catalog.Styles.Count != 3 || catalog.Styles.Select(x => x.Id).Distinct(StringComparer.Ordinal).Count() != 3)
+            throw new InvalidOperationException("The Combat Styles catalog must contain exactly Bastion, Conduit and Reaper.");
         foreach (var definition in catalog.Styles)
         {
             var bastion = definition.Id == CombatStyleIds.Bastion && definition.Kind == CombatStyleKind.Bastion;
             var conduit = definition.Id == CombatStyleIds.Conduit && definition.Kind == CombatStyleKind.Conduit;
-            if (!bastion && !conduit) throw new InvalidOperationException("Unsupported Combat Style mechanic.");
+            var reaper = definition.Id == CombatStyleIds.Reaper && definition.Kind == CombatStyleKind.Reaper;
+            if (!bastion && !conduit && !reaper) throw new InvalidOperationException("Unsupported Combat Style mechanic.");
             var expectedRefinements = bastion
                 ? new[] { CombatStyleIds.Rebuild, CombatStyleIds.Reprisal, CombatStyleIds.Shelter }
+                : reaper ? [CombatStyleIds.SoulSiphon, CombatStyleIds.LastRites, CombatStyleIds.DeathSentence]
                 : [CombatStyleIds.ShortCircuit, CombatStyleIds.DeepReservoir, CombatStyleIds.Relay];
             var expectedUpgrades = bastion
                 ? new[] { CombatStyleIds.PreparedWall, CombatStyleIds.HoldTheBreach, CombatStyleIds.MeasuredRecovery }
+                : reaper ? [CombatStyleIds.ClosingHand, CombatStyleIds.Crosscut, CombatStyleIds.DeepRoots]
                 : [CombatStyleIds.FullCircuit, CombatStyleIds.PartialFlow, CombatStyleIds.EmergencyChannel];
             if (definition.Refinements.Count != 3 || !expectedRefinements.Order().SequenceEqual(definition.Refinements.Select(x => x.Id).Order())
                 || definition.Upgrades.Count != 3 || !expectedUpgrades.Order().SequenceEqual(definition.Upgrades.Select(x => x.Id).Order()))
                 throw new InvalidOperationException($"Invalid choices for Combat Style {definition.Id}.");
             foreach (var tuning in definition.Refinements.Select(x => x.Tuning ?? definition.Tuning).Append(definition.Tuning))
             {
+                if (reaper)
+                {
+                    if (tuning.Reaper is not { } harvest
+                        || !double.IsFinite(harvest.BaseMultiplier) || harvest.BaseMultiplier <= 0
+                        || !double.IsFinite(harvest.PerMasteryLevel) || harvest.PerMasteryLevel < 0
+                        || !double.IsFinite(harvest.DeathSentenceBonus) || harvest.DeathSentenceBonus < 0
+                        || !double.IsFinite(harvest.UpgradeBonus) || harvest.UpgradeBonus < 0
+                        || new[] { harvest.LastRitesHealthThreshold, harvest.ClosingHandHealthThreshold,
+                            harvest.MasteredClosingHandHealthThreshold }.Any(x => !double.IsFinite(x) || x is <= 0 or > 1)
+                        || harvest.MasteredClosingHandHealthThreshold < harvest.ClosingHandHealthThreshold
+                        || harvest.OpeningPoisonStacks <= 0)
+                        throw new InvalidOperationException("Invalid Reaper tuning.");
+                    continue;
+                }
                 if (tuning.HealthFraction <= 0 || tuning.BarrierFraction <= 0 || Math.Abs(tuning.HealthFraction + tuning.BarrierFraction - 1) > .000001
                     || tuning.ChargeCap is < 2 or > 4 || tuning.ChanneledBaseMultiplier <= 0 || tuning.ChanneledBaseMultiplier >= 1
                     || tuning.ChanneledPerCharge <= 0

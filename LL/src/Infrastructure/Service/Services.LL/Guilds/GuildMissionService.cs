@@ -65,13 +65,13 @@ public class GuildMissionService : IGuildMissionService
                 return null;
             }
 
-            await EnsureCurrentStateAsync(guild, characterId, now, cancellationToken);
+            var currentState = await EnsureCurrentStateAsync(guild, characterId, now, cancellationToken);
             if (_context.HasChanges)
             {
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            var overview = await BuildOverviewAsync(guild, characterId, now, cancellationToken);
+            var overview = await BuildOverviewAsync(guild, characterId, now, cancellationToken, currentState);
             await transaction.CommitAsync(cancellationToken);
             return overview;
         });
@@ -305,7 +305,7 @@ public class GuildMissionService : IGuildMissionService
     private async Task<Guild?> LoadGuildForCharacterAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _guildRepository.GetGuildForMissionsAsync(characterId, cancellationToken);
 
-    private async Task EnsureCurrentStateAsync(Guild guild, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<CurrentMissionState> EnsureCurrentStateAsync(Guild guild, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
     {
         await _context.AcquireStateSyncScopeLockAsync($"guild-missions:{guild.Id:N}", cancellationToken);
 
@@ -408,9 +408,14 @@ public class GuildMissionService : IGuildMissionService
                 PeriodKey = dailyKey,
                 TargetAmount = def.BaseTarget,
                 GeneratedAt = now
-            });
+            }).ToList();
             _context.PersonalGuildOrders.AddRange(orders);
+            currentOrders.AddRange(orders);
         }
+
+        return new CurrentMissionState(
+            currentOptions.OrderBy(option => option.GeneratedAt).ToList(),
+            currentOrders.OrderBy(order => order.GeneratedAt).ToList());
     }
 
     private void SelectOption(Guild guild, GuildMissionOption option, Guid? selectedByCharacterId, DateTimeOffset now)
@@ -581,13 +586,19 @@ public class GuildMissionService : IGuildMissionService
         period.LastContributedAt = now;
     }
 
-    private async Task<GuildMissionOverviewDto> BuildOverviewAsync(Guild guild, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<GuildMissionOverviewDto> BuildOverviewAsync(
+        Guild guild,
+        Guid characterId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken,
+        CurrentMissionState? currentState = null)
     {
         var guildId = guild.Id;
         var week = GetWeek(now);
         var dailyKey = GetDailyKey(now);
 
-        var options = await _context.GuildMissionOptions
+        // The overview has already initialized these collections under the guild lock.
+        var options = currentState?.Options ?? await _context.GuildMissionOptions
             .Where(x => x.GuildId == guildId && x.WeekKey == week.Key)
             .OrderBy(x => x.GeneratedAt)
             .ToListAsync(cancellationToken);
@@ -603,7 +614,7 @@ public class GuildMissionService : IGuildMissionService
             }
         }
 
-        var personalOrders = await _context.PersonalGuildOrders
+        var personalOrders = currentState?.PersonalOrders ?? await _context.PersonalGuildOrders
             .Where(x => x.GuildId == guildId && x.CharacterId == characterId && x.PeriodType == GuildMissionPeriodType.Daily && x.PeriodKey == dailyKey)
             .OrderBy(x => x.GeneratedAt)
             .ToListAsync(cancellationToken);
@@ -868,5 +879,8 @@ public class GuildMissionService : IGuildMissionService
     }
 
     private sealed record WeekPeriod(string Key, DateTimeOffset StartsAt, DateTimeOffset EndsAt);
+    private sealed record CurrentMissionState(
+        IReadOnlyList<GuildMissionOption> Options,
+        IReadOnlyList<PersonalGuildOrder> PersonalOrders);
     private sealed record WeeklyReward(long Favor, long GuildXp, int Supplies);
 }

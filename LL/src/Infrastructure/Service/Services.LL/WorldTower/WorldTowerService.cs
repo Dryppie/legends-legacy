@@ -64,6 +64,7 @@ public sealed class WorldTowerService : IWorldTowerService
         TowerMeter.CreateHistogram<long>("world_tower.playback.bundle.size", "By");
 
     private readonly IDbContext _db;
+    private readonly IWorldTowerRallyRepository _rallies;
     private readonly IWorldTowerDefinitionProvider _definitions;
     private readonly ICharacterSnapshotService _snapshots;
     private readonly IPowerRatingService _powerRatings;
@@ -85,6 +86,7 @@ public sealed class WorldTowerService : IWorldTowerService
 
     public WorldTowerService(
         IDbContext db,
+        IWorldTowerRallyRepository rallies,
         IWorldTowerDefinitionProvider definitions,
         ICharacterSnapshotService snapshots,
         IPowerRatingService powerRatings,
@@ -104,6 +106,7 @@ public sealed class WorldTowerService : IWorldTowerService
         ILogger<WorldTowerService> logger)
     {
         _db = db;
+        _rallies = rallies;
         _definitions = definitions;
         _snapshots = snapshots;
         _powerRatings = powerRatings;
@@ -139,13 +142,8 @@ public sealed class WorldTowerService : IWorldTowerService
             .Where(x => x.ServerId == _options.ServerId
                         && releasedFloorNumbers.Contains(x.FloorNumber))
             .ToDictionaryAsync(x => x.FloorNumber, cancellationToken);
-        var rallies = await ActiveRalliesQuery()
-            .AsNoTracking()
-            .Include(x => x.Participants)
-            .Include(x => x.Applications)
-            .Where(x => releasedFloorNumbers.Contains(x.FloorNumber))
-            .OrderBy(x => x.CreatedAt)
-            .ToListAsync(cancellationToken);
+        var rallies = await _rallies.GetActiveForFloorsAsync(
+            _options.ServerId, releasedFloorNumbers, cancellationToken);
         var summaries = releasedFloors
             .Select(floor => ToFloorSummary(
                 floor,
@@ -220,13 +218,7 @@ public sealed class WorldTowerService : IWorldTowerService
             .Where(x => x.Id == characterId)
             .Select(x => (Guid?)x.UserId)
             .SingleOrDefaultAsync(cancellationToken);
-        var rally = await _db.TowerRallies
-            .AsNoTracking()
-            .Include(x => x.Participants)
-            .Include(x => x.Applications)
-            .Include(x => x.Attempt)
-                .ThenInclude(x => x!.Playback)
-            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        var rally = await _rallies.GetDetailsAsync(_options.ServerId, rallyId, cancellationToken);
         return rally is null || _definitions.GetFloor(rally.FloorNumber) is null
             ? null
             : ToRallyDto(rally, characterId, accountId);
@@ -629,11 +621,7 @@ public sealed class WorldTowerService : IWorldTowerService
         var definition = _definitions.GetFloor(floorNumber.Value)!;
         await _db.AcquireWorldTowerFloorLockAsync(_options.ServerId, floorNumber.Value, cancellationToken);
 
-        var rally = await _db.TowerRallies
-            .Include(x => x.Participants)
-            .Include(x => x.Applications)
-            .Include(x => x.Attempt)
-            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        var rally = await _rallies.GetForApplicationAsync(_options.ServerId, rallyId, cancellationToken);
         if (rally is null)
             return TowerOperationResult<TowerRallyDto>.Fail("Tower Expedition was not found.");
         if (rally.Status is not (TowerRallyStatus.Recruiting or TowerRallyStatus.Ready))
@@ -806,12 +794,7 @@ public sealed class WorldTowerService : IWorldTowerService
         Guid rallyId,
         CancellationToken cancellationToken)
     {
-        var rally = await _db.TowerRallies
-            .Include(x => x.Participants)
-            .Include(x => x.Applications)
-                .ThenInclude(x => x.CharacterSnapshot)
-            .Include(x => x.Attempt)
-            .SingleOrDefaultAsync(x => x.Id == rallyId && x.ServerId == _options.ServerId, cancellationToken);
+        var rally = await _rallies.GetWithApplicationSnapshotsAsync(_options.ServerId, rallyId, cancellationToken);
         return rally is not null && _definitions.GetFloor(rally.FloorNumber) is not null
             ? rally
             : null;

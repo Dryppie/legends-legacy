@@ -4,7 +4,21 @@ Updated 10 September 2026. Gameplay authority: [Combat Styles game design](game-
 
 ## Delivered behavior
 
-Each character has one optional **global Combat Style**, used for every battle type. Bastion and Conduit are available immediately. Each retains its own XP, progression through level 10, automatic bonuses at every mastery level, three refinements, three upgrades, and upgrade slots at levels 5 and 8. Neither style adds equipment attributes or Essence slots. Reaper, Shepherd, and Gambler remain unimplemented design proposals.
+Each character has one optional **global Combat Style**, used for every battle type. Bastion, Conduit and Reaper are available immediately. Each retains its own XP, progression through level 10, automatic bonuses at every mastery level, three refinements, three upgrades, and upgrade slots at levels 5 and 8. These styles do not add equipment attributes or Essence slots. Shepherd and Gambler remain unimplemented design proposals.
+
+Reaper is delivered in catalog `combat-styles.v7`. Every qualifying direct Essence hit consumes one future tick from each eligible owned Bleed, Burn and Poison stack. Soul Siphon converts that amount to self-healing; Death Sentence banks it as independent 15-second Magical Doom. Last Rites instead consumes all future ticks at or below 35% enemy Health. Closing Hand, Crosscut, Deep Roots, their mastery effects and the level-7 Grave Seed opening use captured tuning. Reaper encounters process due conditions before active attacks. Other encounters keep their historical ordering, and older snapshots omit the optional Reaper tuning. This addition requires no schema migration.
+
+Reaper balance update in `combat-styles.v8`: Death Sentence now applies its additional **flat +10%** before banking Doom. The bonus is captured in tuning, validated, exposed through the DTO, and included in combat, the API preview and the frontend mastery panel. Soul Siphon and Last Rites retain their existing behavior. Closing Hand already checks the opponent's current Health, including opponents already below the threshold and Barrier-only triggering hits; its preview wording now matches that rule. See the [Reaper guide](styles/reaper.md) for current values.
+
+Grave Seed's catalog tuning supplies **Poison(5)** to new battle snapshots. The existing opening runtime and preview read this value; the tuning model's fallback default remains two stacks, and committed battles retain their captured value. Older snapshots without the Death Sentence bonus retain zero extra bonus and omit that field when reserialized. Release the API catalog/runtime and frontend together. No schema migration, environment configuration change or deployment is performed.
+
+Reaper verification on 10 September 2026, before the latest catalog edits described above:
+
+- `./build/run-tests.ps1`: 2,457 backend tests passed, including 52 Reaper cases.
+- `npm.cmd run test:ci -- --include=src/app/features/game/character/combat-styles/combat-styles.component.spec.ts --reporters=dots`: 19 page tests passed, including Reaper rendering and mastery.
+- `npm.cmd run build:development`: passed.
+- `npm.cmd run test:ci -- --reporters=dots`: 771 passed; one existing Essence-page test fails because it expects “your battle loadout” where the committed copy says “your loadout.” Both the expectation and copy mismatch are present in HEAD, outside this change.
+- `git diff --check` and Reaper documentation-link checks passed. The sandbox's initial NuGet configuration read was blocked; backend verification succeeded with local configuration/cache access. No services were deployed or databases changed.
 
 Bastion converts all healing received during combat, including healing from other characters and their summons, through the recipient's Fortification configuration. The 25% Health / 75% Barrier allocation, mastery level, refinements, upgrades, and mastery apply to incoming healing from every source. Healing target selection and prioritization remain unchanged and do not account for Barrier; existing cast conditions and self-recovery usefulness checks are preserved. Non-Bastion recipients receive ordinary healing, summons do not inherit Fortification, and out-of-combat recovery is unchanged.
 

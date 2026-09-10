@@ -215,7 +215,7 @@ public sealed partial class FastCombatEngine
             : null;
         _checkpointStats = checkpointStats;
         for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
-            ApplyCombatStyleOpening(combatants[combatantIndex]);
+            ApplyCombatStyleOpening(combatants[combatantIndex], combatants);
         if (_captureCompactTelemetry)
             TrackCompactTelemetry(combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
@@ -235,6 +235,9 @@ public sealed partial class FastCombatEngine
                && HasLivingTeam(combatants, CombatTeam.Hostile))
         {
             TickDownedCombatants(combatants);
+            // Preserve historical ordering in encounters without Reaper. At tick zero no time has elapsed.
+            if (_tickConditionsBeforeActions && _currentTick > 0)
+                TickConditions(combatants);
             if ((_currentTick & 63) == 0)
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -262,7 +265,8 @@ public sealed partial class FastCombatEngine
 
             TickEffects(combatants);
             TickStatuses(combatants);
-            TickConditions(combatants);
+            if (!_tickConditionsBeforeActions)
+                TickConditions(combatants);
             TickHealthRegeneration(combatants);
             TickBarrierContributions(combatants);
             TickCovers(combatants);
@@ -340,6 +344,11 @@ public sealed partial class FastCombatEngine
             ? CreateDetailedStats(combatants, checkpointStats)
             : CreateBalanceStats(combatants);
 
+        // Harvest-funded Doom belongs to this encounter, including when combat ends before detonation.
+        if (_tickConditionsBeforeActions)
+            foreach (var combatant in combatants)
+                combatant.Conditions.RemoveAll(x => x.StoredDamage.HasValue);
+
         return new CombatResult
         {
             EventLog = [.. _log],
@@ -395,7 +404,7 @@ public sealed partial class FastCombatEngine
                 InitializeEncounterCombatant(combatant);
                 combatants.Add(combatant);
                 if (publishCombatStart)
-                    ApplyCombatStyleOpening(combatant);
+                    ApplyCombatStyleOpening(combatant, combatants);
             }
 
             if (publishCombatStart)
@@ -1630,6 +1639,8 @@ public sealed partial class FastCombatEngine
                     : effect.DamageType;
                 value = ApplyChanneledEssenceAmount(executionContext?.StyleCast, effect, source, target, value);
                 var styleDamageBonus = TakeCombatStyleDamageBonus(executionContext?.StyleCast, effect, source, target);
+                if (executionContext?.StyleCast is { } hitContext)
+                    hitContext.ReaperHitDealtDamage = false;
                 var healthDamage = ApplyDamage(
                     source,
                     target,
@@ -1643,9 +1654,13 @@ public sealed partial class FastCombatEngine
                     countStatsActivation,
                     delivery,
                     styleDamageBonus: styleDamageBonus.Amount,
-                    styleDamageBonusKind: styleDamageBonus.Kind);
+                    styleDamageBonusKind: styleDamageBonus.Kind,
+                    styleCast: executionContext?.StyleCast);
                 if (delivery == DamageDelivery.Direct)
+                {
                     ApplyLifeSteal(effect, source, target, healthDamage, combatants, statsSource);
+                    ResolveReaperHarvest(executionContext?.StyleCast, effect, source, target, combatants);
+                }
                 break;
             case AbilityEffectOperation.Heal:
                 value = ApplyChanneledEssenceAmount(executionContext?.StyleCast, effect, source, target, value);
@@ -1811,6 +1826,8 @@ public sealed partial class FastCombatEngine
                 Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s {effect.Attribute} changed by {value}.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.ConsumeConditionStacks:
+                if (executionContext?.StyleCast is { } consumptionContext)
+                    consumptionContext.ReaperHitDealtDamage = false;
                 ResolveConditionConsumption(
                     effect,
                     source,
@@ -1819,6 +1836,7 @@ public sealed partial class FastCombatEngine
                     statsSource,
                     countStatsActivation,
                     executionContext ?? CreateEffectExecutionContext());
+                ResolveReaperHarvest(executionContext?.StyleCast, effect, source, target, combatants);
                 break;
             case AbilityEffectOperation.RemoveCondition:
                 RemoveConditionInstances(
@@ -2006,7 +2024,8 @@ public sealed partial class FastCombatEngine
         RuntimeCombatant? redirectedFrom = null,
         bool canConsumeGuard = true,
         int styleDamageBonus = 0,
-        CombatStyleDamageBonusKind styleDamageBonusKind = CombatStyleDamageBonusKind.Counterweight)
+        CombatStyleDamageBonusKind styleDamageBonusKind = CombatStyleDamageBonusKind.Counterweight,
+        CombatStyleCastContext? styleCast = null)
     {
         if (!target.IsAlive || damage + styleDamageBonus <= 0)
             return 0;
@@ -2325,6 +2344,9 @@ public sealed partial class FastCombatEngine
 
         if (!target.IsAlive)
         {
+            if (_tickConditionsBeforeActions)
+                target.Conditions.RemoveAll(x => x.Type is StandardConditionType.Bleed
+                    or StandardConditionType.Burn or StandardConditionType.Poison or StandardConditionType.Doom);
             if (_downedOptions is not null
                 && target.Team == CombatTeam.Friendly
                 && !target.IsSummoned)
@@ -2375,6 +2397,8 @@ public sealed partial class FastCombatEngine
             ExpireOwnedSummons(target, combatants, "owner death");
         }
 
+        if (styleCast is not null)
+            styleCast.ReaperHitDealtDamage = healthDamage + barrierAbsorbed > 0;
         return healthDamage;
     }
 
@@ -2872,7 +2896,9 @@ public sealed partial class FastCombatEngine
         string? statsSource,
         bool countStatsActivation,
         bool guaranteedApplication,
-        int staggerPower)
+        int staggerPower,
+        bool publishApplication = true,
+        double? storedDamage = null)
     {
         if (!guaranteedApplication
             && IsControlCondition(type)
@@ -2956,7 +2982,8 @@ public sealed partial class FastCombatEngine
                 AddIndependentCondition(source, target, type, normalizedValue, 8 * TicksPerSecond, statsSource, 2 * TicksPerSecond);
                 break;
             case StandardConditionType.Doom:
-                AddIndependentCondition(source, target, type, normalizedValue, 15 * TicksPerSecond, statsSource);
+                AddIndependentCondition(source, target, type, normalizedValue, 15 * TicksPerSecond, statsSource,
+                    storedDamage: storedDamage);
                 break;
             case StandardConditionType.Thorns:
                 AddIndependentCondition(source, target, type, normalizedValue, Math.Max(0, authoredDurationTicks), statsSource);
@@ -2987,7 +3014,8 @@ public sealed partial class FastCombatEngine
             $"{source.Name} applied {type} to {target.Name}.",
             statsSource,
             countStatsActivation);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, conditionId), combatants);
+        if (publishApplication)
+            Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, conditionId), combatants);
     }
 
     private void ApplyStagger(
@@ -3113,7 +3141,8 @@ public sealed partial class FastCombatEngine
         int value,
         int durationTicks,
         string? statsSource,
-        int intervalTicks = 0)
+        int intervalTicks = 0,
+        double? storedDamage = null)
     {
         target.Conditions.Add(
             new RuntimeCondition(
@@ -3125,7 +3154,7 @@ public sealed partial class FastCombatEngine
                 GetEffectivePower(source),
                 ++_applicationOrder,
                 statsSource ?? type.ToString(),
-                intervalTicks));
+                intervalTicks, storedDamage));
     }
 
     private static bool IsControlCondition(StandardConditionType type) =>
@@ -3853,7 +3882,8 @@ public sealed partial class FastCombatEngine
             effect.Id,
             statsSource,
             countStatsActivation,
-            DamageDelivery.Direct);
+            DamageDelivery.Direct,
+            styleCast: executionContext.StyleCast);
         ApplyLifeSteal(effect, source, target, healthDamage, combatants, statsSource);
 
         if (effect.HealingScalingAttribute is not { } healingAttribute
@@ -4213,6 +4243,9 @@ public sealed partial class FastCombatEngine
             for (var conditionIndex = 0; conditionIndex < _conditionTickBuffer.Count; conditionIndex++)
             {
                 var condition = _conditionTickBuffer[conditionIndex];
+                // A preceding tick's reactions may already have cleansed this captured instance.
+                if (_tickConditionsBeforeActions && !combatant.Conditions.Contains(condition))
+                    continue;
                 var intervalDue = condition.Tick();
                 if (intervalDue && combatant.IsAlive)
                     ResolvePeriodicCondition(condition, combatants);
@@ -4272,7 +4305,7 @@ public sealed partial class FastCombatEngine
         RuntimeCondition condition,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
-        var damage = Math.Max(0, (int)Math.Round(condition.PowerSnapshot * condition.Value / 100f));
+        var damage = Math.Max(0, (int)Math.Round(condition.StoredDamage ?? condition.PowerSnapshot * condition.Value / 100f));
         if (damage <= 0)
             return;
 

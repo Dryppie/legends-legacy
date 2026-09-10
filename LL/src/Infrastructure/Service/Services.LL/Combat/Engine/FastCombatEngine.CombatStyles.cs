@@ -11,14 +11,18 @@ public sealed partial class FastCombatEngine
     private const string FortificationEffectId = "combat-style:bastion:fortification";
     private const string EntrenchedEffectId = "combat-style:bastion:entrenched";
     private readonly Dictionary<RuntimeCombatant, CombatStyleEncounterState> _combatStyles = [];
+    private bool _tickConditionsBeforeActions;
 
     private void InitializeCombatStyle(RuntimeCombatant combatant)
     {
         if (combatant.CombatStyle is { } style && !combatant.IsSummoned)
+        {
             _combatStyles[combatant] = new CombatStyleEncounterState(combatant, style);
+            _tickConditionsBeforeActions |= style.Kind == CombatStyleKind.Reaper;
+        }
     }
 
-    private void ApplyCombatStyleOpening(RuntimeCombatant combatant)
+    private void ApplyCombatStyleOpening(RuntimeCombatant combatant, IReadOnlyList<RuntimeCombatant> combatants)
     {
         if (!_combatStyles.TryGetValue(combatant, out var state) || state.OpeningApplied)
             return;
@@ -46,6 +50,14 @@ public sealed partial class FastCombatEngine
                 Log(combatant, combatant, "Primed Circuit", EventType.Buff, gained,
                     $"{combatant.Name} began battle with {gained} Charge.", "Combat Style: Primed Circuit");
         }
+        else if (style.Kind == CombatStyleKind.Reaper && style.Tuning.Reaper is { } reaper)
+        {
+            var target = combatants.Where(x => x.IsAlive && !AreAbilityAllies(combatant, x))
+                .OrderByDescending(x => x.GetAttribute(AttributeType.MaxHealth)).FirstOrDefault();
+            if (target is not null)
+                ApplyCondition(combatant, target, StandardConditionType.Poison, reaper.OpeningPoisonStacks,
+                    0, combatants, "Combat Style: Grave Seed", false, false, 0, publishApplication: false);
+        }
     }
 
     private CombatStyleCastContext? BeginCombatStyleCast(RuntimeCombatant actor, RuntimeAbility ability)
@@ -55,6 +67,7 @@ public sealed partial class FastCombatEngine
             return null;
 
         var context = new CombatStyleCastContext(actor, ability, state);
+        context.ReaperApplicationCutoff = _applicationOrder;
         var style = state.Configuration;
         var tuning = style.Tuning;
         var healthFraction = actor.Health / Math.Max(1, actor.GetAttribute(AttributeType.MaxHealth));
@@ -415,6 +428,8 @@ public sealed partial class FastCombatEngine
 
     private sealed class CombatStyleCastContext(RuntimeCombatant actor, RuntimeAbility ability, CombatStyleEncounterState state)
     {
+        public long ReaperApplicationCutoff { get; set; }
+        public bool ReaperHitDealtDamage { get; set; }
         public RuntimeCombatant Actor { get; } = actor;
         public RuntimeAbility Ability { get; } = ability;
         public CombatStyleEncounterState State { get; } = state;

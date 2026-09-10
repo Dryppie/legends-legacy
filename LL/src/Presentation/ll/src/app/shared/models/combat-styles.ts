@@ -7,6 +7,16 @@ export interface CombatStyleChoiceDefinition {
 
 // Mastery-relevant fields from the tuning already returned by the API.
 export interface CombatStyleMasteryTuning {
+  reaper?: {
+    baseMultiplier: number;
+    perMasteryLevel: number;
+    deathSentenceBonus?: number;
+    lastRitesHealthThreshold: number;
+    upgradeBonus: number;
+    closingHandHealthThreshold: number;
+    masteredClosingHandHealthThreshold: number;
+    openingPoisonStacks: number;
+  } | null;
   barrierFraction: number;
   barrierPerMasteryLevel: number;
   channeledBaseMultiplier: number;
@@ -23,7 +33,7 @@ export interface CombatStyleDefinition {
   id: string;
   name: string;
   description: string;
-  kind: 'Bastion' | 'Conduit';
+  kind: 'Bastion' | 'Conduit' | 'Reaper';
   tuning?: CombatStyleMasteryTuning;
   refinements: CombatStyleChoiceDefinition[];
   upgrades: CombatStyleUpgradeDefinition[];
@@ -51,7 +61,7 @@ export interface CombatStyleSelectionRequest {
 
 export interface CombatStyleSnapshot {
   combatStyleId: string;
-  kind: 'Bastion' | 'Conduit';
+  kind: 'Bastion' | 'Conduit' | 'Reaper';
   contentVersion: string;
   level: number;
   refinementId: string | null;

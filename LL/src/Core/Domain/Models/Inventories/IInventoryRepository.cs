@@ -50,6 +50,8 @@ public interface IInventoryRepository
     /// <returns>False when the character does not own the item.</returns>
     Task<bool> SetItemFavoriteAsync(Guid characterId, Guid itemInstanceId, bool isFavorite, CancellationToken cancellationToken);
     Task<int> GetInventoryQuantityAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<string, int>> GetInventoryQuantitiesAsync(
+        Guid characterId, IReadOnlyCollection<string> itemBaseIds, CancellationToken cancellationToken);
     void RemoveInventoryItem(InventoryItem inventoryItem);
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken);
     Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);

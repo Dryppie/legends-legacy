@@ -186,6 +186,33 @@ public sealed class CombatStyleService(
         string HealthBonus(double bonus, double health) =>
             $"+{Number(bonus * 100)}% Health recovery (×{Number(1 + bonus)}) · {Number(health)} Health";
         var facts = new List<CombatStylePreviewFact>();
+        if (style.Kind == CombatStyleKind.Reaper && tuning.Reaper is { } reaper)
+        {
+            var payout = style.RefinementId switch
+            {
+                CombatStyleIds.SoulSiphon => "Health restored",
+                CombatStyleIds.DeathSentence => "Magical Damage after 15 seconds",
+                _ => "damage dealt now"
+            };
+            facts.Add(new("100 damage harvested", $"{Number(100 * reaper.Multiplier(style.Level, style.RefinementId))} {payout}",
+                "Your form decides how you use this damage. Upgrades, damage and healing bonuses, enemy defenses and missing Health can change the final amount."));
+            facts.Add(new("Future ticks consumed", style.RefinementId == CombatStyleIds.LastRites ? "All remaining per stack" : "1 per stack",
+                style.RefinementId == CombatStyleIds.LastRites
+                    ? $"Your hit must leave the enemy at {Number(reaper.LastRitesHealthThreshold * 100)}% Health or less. Deep Roots has no effect with this form."
+                    : "Harvest uses your existing Bleed, Burn and Poison. Stacks added during this cast must wait until the next cast."));
+            if (style.HasUpgrade(CombatStyleIds.ClosingHand))
+                facts.Add(new("Closing Hand", AdditiveBonus(reaper.UpgradeBonus),
+                    $"Your opponent must be at or below {Number(100 * (style.HasMasteredUpgrade(CombatStyleIds.ClosingHand) ? reaper.MasteredClosingHandHealthThreshold : reaper.ClosingHandHealthThreshold))}% Health."));
+            if (style.HasUpgrade(CombatStyleIds.Crosscut))
+                facts.Add(new("Crosscut", AdditiveBonus(reaper.UpgradeBonus),
+                    style.HasMasteredUpgrade(CombatStyleIds.Crosscut) ? "Harvest at least two of Bleed, Burn and Poison, or 3 stacks of any one condition." : "Harvest at least two of Bleed, Burn and Poison."));
+            if (style.HasUpgrade(CombatStyleIds.DeepRoots))
+                facts.Add(new("Deep Roots", style.RefinementId == CombatStyleIds.LastRites ? "Inactive with Last Rites" : AdditiveBonus(reaper.UpgradeBonus),
+                    style.HasMasteredUpgrade(CombatStyleIds.DeepRoots) ? "At least one stack you harvest must still have damage left to deal afterwards." : "Every stack you harvest must still have damage left to deal afterwards."));
+            if (style.Level >= CombatStyleProgression.OpeningTechniqueLevel)
+                facts.Add(new("Opening Technique", $"Grave Seed: {reaper.OpeningPoisonStacks} Poison stacks", "Begin each battle by poisoning the enemy with the highest Max Health."));
+            return facts;
+        }
         if (style.Kind == CombatStyleKind.Bastion)
         {
             var health = 200 * tuning.HealthFraction * (style.HasUpgrade(CombatStyleIds.MeasuredRecovery) ? 1 + tuning.MeasuredRecoveryHealthBonus : 1);

@@ -106,7 +106,7 @@ export class CombatStylesComponent {
   readonly mechanicName = computed(() =>
     this.state.selected()?.definition.id === 'bastion'
       ? 'Fortification'
-      : 'Circuit',
+      : this.state.selected()?.definition.id === 'reaper' ? 'Harvest' : 'Circuit',
   );
   readonly previewFacts = computed(
     () => this.state.preview()?.previewFacts ?? [],
@@ -126,6 +126,24 @@ export class CombatStylesComponent {
     const level = Math.max(0, Math.min(10, entry.level));
     const nextLevel = level + 1;
     const number = (value: number) => formatNumber(value, 'en-US', '1.0-2');
+    if (entry.definition.kind === 'Reaper' && tuning.reaper) {
+      const reaper = tuning.reaper;
+      const refinementId = this.state.draft().refinementId;
+      const formBonus = refinementId === 'death-sentence' ? (reaper.deathSentenceBonus ?? 0) : 0;
+      const multiplier = (rank: number) => number(100 * (reaper.baseMultiplier + rank * reaper.perMasteryLevel + formBonus));
+      const payout = refinementId === 'death-sentence'
+        ? `store ${multiplier(level)} Magical Damage as Doom, dealt after 15 seconds`
+        : refinementId === 'soul-siphon'
+          ? `restore up to ${multiplier(level)} Health`
+          : `deal ${multiplier(level)} damage now`;
+      return {
+        perLevel: `Each mastery level adds a flat +${number(reaper.perMasteryLevel * 100)}% to Harvest.`,
+        bonus: `+${number(level * reaper.perMasteryLevel * 100)}% flat increase`,
+        current: `Mastery ${level}: ${multiplier(level)}% Harvest`,
+        example: `Harvest 100 damage from your conditions to ${payout}. Upgrades, bonuses, defenses and missing Health can change the final amount.`,
+        next: level < 10 ? `Level ${nextLevel}: ${multiplier(nextLevel)}% Harvest` : null,
+      };
+    }
     if (entry.definition.kind === 'Bastion') {
       const perLevel = tuning.barrierPerMasteryLevel * 100;
       const baseBarrier = 200 * tuning.barrierFraction;
