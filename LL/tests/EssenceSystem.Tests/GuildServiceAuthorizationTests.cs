@@ -244,6 +244,8 @@ public sealed class GuildServiceAuthorizationTests
 
     private sealed class FakeGuildRepository : IGuildRepository
     {
+        public Task<Guild?> GetPublicGuildAsync(Guid guildId, CancellationToken cancellationToken) => Task.FromResult<Guild?>(null);
+
         public GuildMember? Member { get; init; }
         public bool CreateCalled { get; private set; }
         public string? CreatedGuildName { get; private set; }

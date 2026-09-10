@@ -181,6 +181,9 @@ describe('Essence loadout Channeled Essence', () => {
     expect(
       element.querySelector('.soul-channeled-essence-hint')?.textContent,
     ).toContain('has no direct damage');
+    expect(
+      element.querySelector('.soul-channeled-essence-hint')?.textContent,
+    ).toContain('Battles proceed with Conduit inactive');
     const channelButton = slots[3].querySelector<HTMLButtonElement>(
       '.soul-channel-essence',
     )!;
@@ -231,7 +234,7 @@ describe('Essence loadout Channeled Essence', () => {
     expect(element.querySelector('.soul-channel-essence')).toBeNull();
     expect(
       element.querySelector('.soul-channeled-essence-hint')?.textContent,
-    ).toContain('The first Essence in your battle loadout');
+    ).toContain('The first Essence in your loadout');
     styles.data.set({ selection: { combatStyleId: 'bastion' } });
     fixture.detectChanges();
     expect(element.querySelector('.soul-channeled-essence-badge')).toBeNull();
@@ -243,6 +246,9 @@ describe('Essence loadout Channeled Essence', () => {
     expect(
       element.querySelector('.soul-channeled-essence-hint')?.textContent,
     ).toContain('Equip an Essence');
+    expect(
+      element.querySelector('.soul-channeled-essence-hint')?.textContent,
+    ).toContain('Conduit is inactive');
     expect(styles.refreshIfDirty).toHaveBeenCalledTimes(1);
   });
 

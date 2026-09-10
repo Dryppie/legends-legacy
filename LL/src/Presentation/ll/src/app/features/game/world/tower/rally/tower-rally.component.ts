@@ -1,8 +1,10 @@
+import { GuildLinkComponent } from '../../../../../shared/components/guild/guild-link.component';
 import { CommonModule } from '@angular/common';
 import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   effect,
   inject,
   signal,
@@ -33,6 +35,7 @@ import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date
 @Component({
   selector: 'app-tower-rally',
   imports: [
+    GuildLinkComponent,
     CommonModule,
     RouterLink,
     CharacterTagComponent,
@@ -53,6 +56,11 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   readonly combatState = inject(CombatStateService);
   private readonly destroyed = new Subject<void>();
   readonly rally = signal<TowerRally | null>(null);
+  readonly pendingApplications = computed(() =>
+    (this.rally()?.applications ?? []).filter(
+      (application) => application.status === 'Pending',
+    ),
+  );
   readonly result = signal<TowerAttemptResult | null>(null);
   readonly loading = signal(true);
   readonly action = signal<string | null>(null);
@@ -546,7 +554,8 @@ export class TowerRallyComponent implements OnInit, OnDestroy {
   currentApplication(rally: TowerRally): TowerRallyApplication | null {
     return (
       rally.applications.find(
-        (application) => application.isCurrentCharacter,
+        (application) =>
+          application.isCurrentCharacter && application.status !== 'Accepted',
       ) ?? null
     );
   }

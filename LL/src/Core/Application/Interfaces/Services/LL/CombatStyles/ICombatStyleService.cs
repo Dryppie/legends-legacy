@@ -11,6 +11,8 @@ public interface ICombatStyleService
     /// Captures the current global style for a new battle. Supplied Essences must contain only occupied
     /// slots in ascending visible SlotIndex order; Conduit channels the first entry. When omitted,
     /// the activity's Essence loadout is resolved, using the normal fallback for unassigned activities.
+    /// Conduit returns no style when that loadout is empty or its first Essence is ineligible;
+    /// the global selection is preserved and the battle can proceed without Combat Style effects.
     /// Existing committed snapshots retain their captured style and must not be resolved again.
     /// </summary>
     Task<CombatStyleSnapshot?> ResolveAsync(Guid characterId, EssenceCombatActivity activity, CancellationToken ct,

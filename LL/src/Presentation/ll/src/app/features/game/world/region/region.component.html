@@ -237,6 +237,27 @@
               <span>{{ regionDungeons().length }}</span>
             </header>
 
+            <a
+              *ngIf="currentDungeon() as run"
+              routerLink="/game/world/dungeon"
+              class="ongoing-dungeon bg-texture"
+              [attr.aria-label]="
+                (run.status === 'Active' ? 'Continue dungeon run: ' : 'Finish up dungeon run: ') +
+                run.dungeonDefinitionName
+              "
+            >
+              <span class="text-xs text-zinc-300">
+                {{ run.status === 'Active' ? 'Ongoing run' : run.status }}
+              </span>
+              <strong class="break-words font-medium text-primary">
+                {{ run.dungeonDefinitionName }}
+              </strong>
+              <span class="text-xs text-primary">
+                {{ run.status === 'Active' ? 'Continue run' : 'Finish up' }}
+                <span aria-hidden="true">→</span>
+              </span>
+            </a>
+
             <div *ngIf="regionDungeons().length; else noDungeons">
               <button
                 *ngFor="let dungeon of regionDungeons(); trackBy: trackDungeon"

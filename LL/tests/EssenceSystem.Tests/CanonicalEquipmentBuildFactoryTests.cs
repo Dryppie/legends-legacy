@@ -351,7 +351,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             essenceDefinitions);
         var essenceResolver = new EssenceSystemService(
             null!, null!, null!, essenceDefinitions, creatureEssences,
-            null!, null!, null!, null!, null!, null!);
+            null!, null!, null!, null!, null!, null!, null!);
         var equipmentCatalog = JsonStarterEquipmentCatalog.Load(
             Path.Combine(contentRoot, "Data", "equipment", "equipment-starters.v1.json"));
         var referenceBuilds = new EquipmentReferenceBuildFactory(

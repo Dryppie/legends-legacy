@@ -1,3 +1,4 @@
+import { GuildLinkComponent } from '../../../../shared/components/guild/guild-link.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
@@ -26,6 +27,7 @@ interface BoardOption {
 @Component({
   selector: 'app-tavern',
   imports: [
+    GuildLinkComponent,
     LocalDatePipe,
     DefaultHeaderComponent,
     DropdownComponent,
@@ -102,9 +104,13 @@ export class TavernComponent implements OnInit {
     this.state.load(this.activeBoardKey);
   }
 
-  get categories(): readonly LeaderboardCategory[] { return this.allCategories; }
+  get categories(): readonly LeaderboardCategory[] {
+    return this.allCategories;
+  }
 
-  get boards(): BoardOption[] { return this.allBoards; }
+  get boards(): BoardOption[] {
+    return this.allBoards;
+  }
 
   get categoryBoards(): BoardOption[] {
     return this.boards.filter(

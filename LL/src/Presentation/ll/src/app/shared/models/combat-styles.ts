@@ -7,6 +7,18 @@ export interface CombatStyleChoiceDefinition {
 
 // Mastery-relevant fields from the tuning already returned by the API.
 export interface CombatStyleMasteryTuning {
+  duelist?: {
+    readRequired: number;
+    openingMultiplier: number;
+    perMasteryLevel: number;
+    returnedRead: number;
+    guardCharges: number;
+    firstImpressionRead: number;
+    upgradeBonus: number;
+    masteredMeasuredStrikesBonus: number;
+    finishingTouchHealthThreshold: number;
+    masteredFinishingTouchHealthThreshold: number;
+  } | null;
   reaper?: {
     baseMultiplier: number;
     perMasteryLevel: number;
@@ -33,7 +45,7 @@ export interface CombatStyleDefinition {
   id: string;
   name: string;
   description: string;
-  kind: 'Bastion' | 'Conduit' | 'Reaper';
+  kind: 'Bastion' | 'Conduit' | 'Reaper' | 'Duelist';
   tuning?: CombatStyleMasteryTuning;
   refinements: CombatStyleChoiceDefinition[];
   upgrades: CombatStyleUpgradeDefinition[];
@@ -61,7 +73,7 @@ export interface CombatStyleSelectionRequest {
 
 export interface CombatStyleSnapshot {
   combatStyleId: string;
-  kind: 'Bastion' | 'Conduit' | 'Reaper';
+  kind: 'Bastion' | 'Conduit' | 'Reaper' | 'Duelist';
   contentVersion: string;
   level: number;
   refinementId: string | null;

@@ -71,7 +71,11 @@ describe('RegionComponent dungeon availability', () => {
         },
         {
           provide: DungeonStateService,
-          useValue: { dungeons: dungeons.asReadonly(), loadAvailableDungeons },
+          useValue: {
+            dungeons: dungeons.asReadonly(),
+            activeDungeon: signal(null),
+            loadAvailableDungeons,
+          },
         },
         {
           provide: RegionService,

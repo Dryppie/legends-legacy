@@ -1,10 +1,10 @@
 {
   "title": "Combat Styles Guide",
-  "lastReviewed": "2026-09-09",
+  "lastReviewed": "2026-09-10",
   "sections": [
     {
       "heading": "Your third build choice",
-      "body": "Equipment supplies attributes, Essences supply abilities, and a Combat Style changes how those abilities work together. Choose one Combat Style for every battle, or leave the slot empty. Bastion, Conduit and Reaper are available immediately at Mastery 0."
+      "body": "Equipment supplies attributes, Essences supply abilities, and a Combat Style changes how those abilities work together. Choose one Combat Style for every battle, or leave the slot empty. Bastion, Conduit, Reaper and Duelist are available immediately at Mastery 0."
     },
     {
       "heading": "Bastion: prepare protection",
@@ -16,11 +16,15 @@
     },
     {
       "heading": "Conduit: prepare your Channeled Essence",
-      "body": "Each battle uses the first occupied Essence slot in its loadout as your Channeled Essence; empty slots are skipped. Your other Essences build Charge through their regular casts, and your Channeled Essence spends that Charge to strengthen its immediate damage, healing and Barrier. In the base form, each different Essence can add 1 Charge before the Channeled Essence casts, up to 3 Charge. The Channeled Essence starts at 80% of normal strength and adds a flat +20% per Charge spent, reaching 140% at 3 Charge before mastery and upgrade bonuses. On the Essences page, use Channel Essence to swap an equipped Essence into the first occupied slot. A Channeled Essence needs direct damage, healing or Barrier for Conduit to strengthen; an ineligible first Essence is never silently replaced by another."
+      "body": "Each battle uses the first occupied Essence slot in its loadout as your Channeled Essence; empty slots are skipped. Your other Essences build Charge through their regular casts, and your Channeled Essence spends that Charge to strengthen its immediate damage, healing and Barrier. In the base form, each different Essence can add 1 Charge before the Channeled Essence casts, up to 3 Charge. The Channeled Essence starts at 80% of normal strength and adds a flat +20% per Charge spent, reaching 140% at 3 Charge before mastery and upgrade bonuses. On the Essences page, use Channel Essence to swap an equipped Essence into the first occupied slot. A Channeled Essence needs direct damage, healing or Barrier for Conduit to strengthen. If the loadout is empty or its first Essence is ineligible, battles proceed with Conduit inactive and none of its effects apply. Conduit stays selected and activates again in new battles with an eligible first Essence; an ineligible first Essence is never replaced by a later one."
     },
     {
       "heading": "Reaper: harvest lingering damage",
       "body": "Bleed, Burn and Poison deal damage in ticks over time. Reaper lets your Essence attacks bring that damage forward. When a direct hit damages an enemy that survives, Harvest takes the next tick from each of your stacks and deals 110% of that damage now. Each mastery level adds a flat +1% to Harvest. A tick you harvest cannot deal damage again, and stacks added during a cast must wait until the next cast. Choose Soul Siphon to turn Harvest into healing. Healing Power, Wound and Recovery affect the heal; it cannot crit or take you beyond full Health. Death Sentence adds an extra flat +10% to Harvest and stores it as Doom that deals Magical Damage 15 seconds later. Last Rites saves Harvest until your hit leaves the enemy at 35% Health or less, then deals all the damage left in your eligible stacks at once and removes them. Deep Roots has no effect with Last Rites because there is no damage left in those stacks afterwards."
+    },
+    {
+      "heading": "Duelist: read your opponent",
+      "body": "Basic attacks and normal Essence casts that land direct damage build Read against one surviving opponent, once per action. At 3 Read, your next damaging Essence spends an Opening to deal 145% direct damage to that opponent. Each mastery level adds a flat +1%. Changing opponents clears Read; splash damage alongside your current opponent does not. Flurry regains 1 Read after an Opening if the opponent survives. Patient Blade needs 5 Read for a stronger strike. Guarded Thrust grants Guard(1) after spending an Opening and finishing the cast. Guard follows its normal rules, with no special timer or opponent restriction."
     },
     {
       "heading": "Individual mastery",
@@ -36,7 +40,7 @@
     },
     {
       "heading": "Opening Technique at level 7",
-      "body": "Your style automatically gains an Opening Technique at level 7. Bastion's Entrenched begins each battle with Barrier equal to 5% of maximum Health. Conduit's Primed Circuit begins each battle with 1 Charge. Reaper\u0027s Grave Seed applies Poison(5) to the enemy with the highest Max Health. Every refinement, including the base form, receives its style's opening. No selection or upgrade slot is needed."
+      "body": "Your style automatically gains an Opening Technique at level 7. Bastion's Entrenched begins each battle with Barrier equal to 5% of maximum Health. Conduit's Primed Circuit begins each battle with 1 Charge. Reaper\u0027s Grave Seed applies Poison(5) to the enemy with the highest Max Health. Duelist's First Impression adds 2 extra Read to its first successful action against a surviving opponent. Every refinement, including the base form, receives its style's opening. No selection or upgrade slot is needed."
     },
     {
       "heading": "Upgrade Mastery at level 9",

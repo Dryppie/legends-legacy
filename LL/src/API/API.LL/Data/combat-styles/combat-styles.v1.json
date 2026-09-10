@@ -1,5 +1,5 @@
 {
-  "contentVersion": "combat-styles.v8",
+  "contentVersion": "combat-styles.v9",
   "xpRequirements": [
     36900,
     232225,
@@ -104,7 +104,7 @@
         "partialFlowMaximumCharge": 2,
         "emergencyChannelHealthThreshold": 1
       },
-      "description": "The first Essence in your battle loadout is your Channeled Essence. In the base form, each of your other Essences builds 1 Charge when it casts, once between Channeled Essence casts, up to 3 Charge. Your Channeled Essence spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.",
+      "description": "The first Essence in your Loadout is Channeled. Each other Essence grants 1 Charge when cast, up to a cap of 3 Charges. Your Channeled Essence consumes all Charges to boost its Damage, Healing, and Barrier.",
       "tuning": {
         "healthFraction": 0.25,
         "barrierFraction": 0.75,
@@ -133,7 +133,7 @@
         {
           "id": "short-circuit",
           "name": "Short Circuit",
-          "description": "Your other Essences build 1 Charge every time they cast, even if the same Essence casts again. Store up to 2 Charge.",
+          "description": "Charges now cap at 2.",
           "tuning": {
             "healthFraction": 0.25,
             "barrierFraction": 0.75,
@@ -162,7 +162,7 @@
         {
           "id": "deep-reservoir",
           "name": "Deep Reservoir",
-          "description": "Store up to 4 Charge, with each of your other Essences building 1 Charge between Channeled Essence casts. Your Channeled Essence's immediate damage, healing and Barrier start at 60% of normal strength and gain a +25% flat increase per Charge spent.",
+          "description": "Charges now cap at 4. Your Channeled Essence starts at 60% strength and gains +25% per Charge spent.",
           "tuning": {
             "healthFraction": 0.25,
             "barrierFraction": 0.75,
@@ -191,7 +191,7 @@
         {
           "id": "relay",
           "name": "Relay",
-          "description": "After your Channeled Essence spends 2 or more Charge, regain 1 Charge for its next cast. Its immediate damage, healing and Barrier start at 80% of normal strength and gain a +15% flat increase per Charge spent.",
+          "description": "Spending 2 or more Charges refunds 1 Charge. Your Channeled Essence starts at 80% strength and gains +15% per Charge spent.",
           "tuning": {
             "healthFraction": 0.25,
             "barrierFraction": 0.75,
@@ -243,7 +243,7 @@
       "id": "reaper",
       "name": "Reaper",
       "kind": "Reaper",
-      "description": "Your Active Abilities makes the Bleed, Burn and Poison you applied deal damage sooner. When a direct hit damages an enemy that survives, Harvest takes the next tick from each of your applied stacks and deals 110% of that damage straight away. Each mastery level adds a flat +1% to Harvest. Newly applied stacks can be harvested from the next Essence cast.",
+      "description": "When an active ability directly damages an enemy, consume the next tick of all current Bleed, Burn, and Poison stacks you applied to them, dealing 110% of that damage immediately.",
       "tuning": {
         "barrierPerMasteryLevel": 0.01,
         "focusPerMasteryLevel": 0.01,
@@ -260,23 +260,23 @@
       },
       "openingTechnique": {
         "name": "Grave Seed",
-        "description": "At combat start apply Poison(5) to the enemy with the highest Max Health."
+        "description": "Innate: apply Poison(5) to the enemy with the highest Max Health."
       },
       "refinements": [
         {
           "id": "soul-siphon",
           "name": "Soul Siphon",
-          "description": "Draw strength from your afflicted enemies. Harvest takes the next tick from each of your Bleed, Burn and Poison stacks and uses it to heal you instead of dealing damage. Healing Power, Wound and Recovery affect the heal. It cannot crit or heal you beyond full Health."
+          "description": "Harvest now heals you instead of dealing damage."
         },
         {
           "id": "last-rites",
           "name": "Last Rites",
-          "description": "Save your Harvest for weakened enemies. When your direct hit leaves an enemy at 35% Health or less, Harvest fully triggers Bleed, Burn, and Poison at once, and expire the effects. Deep Roots has no effect with this form."
+          "description": "Harvest only triggers when the target enemy is at 35% Health or less, and consumes all remaining ticks. Deep Roots has no effect."
         },
         {
           "id": "death-sentence",
           "name": "Death Sentence",
-          "description": "Save your Harvest for a later blow. Each Harvest takes the next tick from each of your Bleed, Burn and Poison stacks and places the Harvest damage on the enemy as Doom. Harvest damage is increased by an additional flat +10%."
+          "description": "Harvest gains a flat +10% and applies its damage as Doom."
         }
       ],
       "upgrades": [
@@ -297,6 +297,109 @@
           "name": "Deep Roots",
           "description": "Your Harvest gains a flat +5% if every stack you harvest still has damage left to deal afterwards. Has no effect with Last Rites.",
           "masteryDescription": "Only one of the stacks you harvest needs to have damage left afterwards to get this bonus. Has no effect with Last Rites."
+        }
+      ]
+    },
+    {
+      "id": "duelist",
+      "name": "Duelist",
+      "kind": "Duelist",
+      "description": "Each basic attack or Essence cast that deals direct damage builds 1 Read. At 3 Read, your next damaging Essence consumes all Read to deal 145% direct damage to that opponent. Changing opponents resets Read.",
+      "tuning": {
+        "duelist": {
+          "readRequired": 3,
+          "openingMultiplier": 1.45,
+          "perMasteryLevel": 0.01,
+          "returnedRead": 0,
+          "guardCharges": 0,
+          "firstImpressionRead": 2,
+          "upgradeBonus": 0.1,
+          "masteredMeasuredStrikesBonus": 0.2,
+          "finishingTouchHealthThreshold": 0.35,
+          "masteredFinishingTouchHealthThreshold": 0.5
+        }
+      },
+      "openingTechnique": {
+        "name": "First Impression",
+        "description": "Your first successful attack against a surviving opponent grants 2 extra Read. The attack that prepares an Opening cannot spend it."
+      },
+      "refinements": [
+        {
+          "id": "flurry",
+          "name": "Flurry",
+          "description": "Openings deal 130% damage and refund 1 Read against that opponent.",
+          "tuning": {
+            "duelist": {
+              "readRequired": 3,
+              "openingMultiplier": 1.3,
+              "perMasteryLevel": 0.01,
+              "returnedRead": 1,
+              "guardCharges": 0,
+              "firstImpressionRead": 2,
+              "upgradeBonus": 0.1,
+              "masteredMeasuredStrikesBonus": 0.2,
+              "finishingTouchHealthThreshold": 0.35,
+              "masteredFinishingTouchHealthThreshold": 0.5
+            }
+          }
+        },
+        {
+          "id": "patient-blade",
+          "name": "Patient Blade",
+          "description": "Openings now require 5 Read and deal 180% damage.",
+          "tuning": {
+            "duelist": {
+              "readRequired": 5,
+              "openingMultiplier": 1.8,
+              "perMasteryLevel": 0.01,
+              "returnedRead": 0,
+              "guardCharges": 0,
+              "firstImpressionRead": 2,
+              "upgradeBonus": 0.1,
+              "masteredMeasuredStrikesBonus": 0.2,
+              "finishingTouchHealthThreshold": 0.35,
+              "masteredFinishingTouchHealthThreshold": 0.5
+            }
+          }
+        },
+        {
+          "id": "guarded-thrust",
+          "name": "Guarded Thrust",
+          "description": "Openings deal 125% damage and grant Guard(1) after your cast.",
+          "tuning": {
+            "duelist": {
+              "readRequired": 3,
+              "openingMultiplier": 1.25,
+              "perMasteryLevel": 0.01,
+              "returnedRead": 0,
+              "guardCharges": 1,
+              "firstImpressionRead": 2,
+              "upgradeBonus": 0.1,
+              "masteredMeasuredStrikesBonus": 0.2,
+              "finishingTouchHealthThreshold": 0.35,
+              "masteredFinishingTouchHealthThreshold": 0.5
+            }
+          }
+        }
+      ],
+      "upgrades": [
+        {
+          "id": "measured-strikes",
+          "name": "Measured Strikes",
+          "description": "Your Opening gains a flat +10% if you landed at least one basic attack against that opponent while preparing it.",
+          "masteryDescription": "Two or more successful basic attacks raise the bonus to a flat +20% instead. One basic attack still grants a flat +10%."
+        },
+        {
+          "id": "know-your-enemy",
+          "name": "Know Your Enemy",
+          "description": "After spending an Opening against an opponent, later Openings against them gain a flat +10% until you change opponents.",
+          "masteryDescription": "The flat +10% also applies to your first Opening against each opponent."
+        },
+        {
+          "id": "finishing-touch",
+          "name": "Finishing Touch",
+          "description": "Your Opening gains a flat +10% when your opponent is at or below 35% Health before the strike.",
+          "masteryDescription": "The same bonus now applies at or below 50% Health."
         }
       ]
     }

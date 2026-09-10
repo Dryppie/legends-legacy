@@ -1,5 +1,6 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { EssenceDescriptionComponent } from '../../essences/essence-description/essence-description.component';
 import {
   EquipmentInstance,
   EquipmentSetBonusMetadata,
@@ -8,7 +9,7 @@ import {
 
 @Component({
   selector: 'app-equipment-set-progress',
-  imports: [NgClass, NgFor, NgIf],
+  imports: [NgClass, NgFor, NgIf, EssenceDescriptionComponent],
   templateUrl: './equipment-set-progress.component.html',
   styleUrl: './equipment-set-progress.component.css',
 })

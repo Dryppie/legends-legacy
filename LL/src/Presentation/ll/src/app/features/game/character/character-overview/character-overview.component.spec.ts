@@ -120,6 +120,7 @@ function createOverview(): CharacterOverviewDto {
     level: 5,
     experience: 5,
     experienceUntilNextLevel: 100,
+    totalAchievementPoints: 1250,
     baseAttributes: [],
     baseCombatAttributes: [],
     isOnline: true,

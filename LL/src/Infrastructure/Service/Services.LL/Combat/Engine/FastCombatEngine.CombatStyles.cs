@@ -58,6 +58,8 @@ public sealed partial class FastCombatEngine
                 ApplyCondition(combatant, target, StandardConditionType.Poison, reaper.OpeningPoisonStacks,
                     0, combatants, "Combat Style: Grave Seed", false, false, 0, publishApplication: false);
         }
+        else if (state.Duelist is { } duelist)
+            duelist.FirstImpressionAvailable = true;
     }
 
     private CombatStyleCastContext? BeginCombatStyleCast(RuntimeCombatant actor, RuntimeAbility ability)
@@ -67,6 +69,7 @@ public sealed partial class FastCombatEngine
             return null;
 
         var context = new CombatStyleCastContext(actor, ability, state);
+        context.Duelist = BeginDuelistAction(actor);
         context.ReaperApplicationCutoff = _applicationOrder;
         var style = state.Configuration;
         var tuning = style.Tuning;
@@ -175,8 +178,9 @@ public sealed partial class FastCombatEngine
         // Recovery derived from an already resolved amount must not receive a second multiplier.
         && effect.EventMagnitudeCoefficient == 0;
 
-    private void CompleteCombatStyleCast(CombatStyleCastContext? context)
+    private void CompleteCombatStyleCast(CombatStyleCastContext? context, IReadOnlyList<RuntimeCombatant> combatants)
     {
+        CompleteDuelistAction(context?.Duelist, combatants);
         if (context is not { IsChanneledEssence: true })
             return;
         var tuning = context.State.Configuration.Tuning;
@@ -428,6 +432,7 @@ public sealed partial class FastCombatEngine
 
     private sealed class CombatStyleCastContext(RuntimeCombatant actor, RuntimeAbility ability, CombatStyleEncounterState state)
     {
+        public DuelistActionContext? Duelist { get; set; }
         public long ReaperApplicationCutoff { get; set; }
         public bool ReaperHitDealtDamage { get; set; }
         public RuntimeCombatant Actor { get; } = actor;
@@ -443,6 +448,8 @@ public sealed partial class FastCombatEngine
 
     private sealed class CombatStyleEncounterState(RuntimeCombatant owner, CombatStyleSnapshot configuration)
     {
+        public DuelistEncounterState? Duelist { get; } = configuration.Kind == CombatStyleKind.Duelist
+            && configuration.Tuning.Duelist is not null ? new() : null;
         public RuntimeCombatant Owner { get; } = owner;
         public CombatStyleSnapshot Configuration { get; } = configuration;
         public bool OpeningApplied { get; set; }

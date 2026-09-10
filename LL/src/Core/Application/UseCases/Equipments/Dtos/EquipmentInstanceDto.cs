@@ -29,6 +29,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public int ItemBudgetTier { get; set; }
     public bool IsGuildBorrowed { get; set; }
     public Guid? GuildVaultItemId { get; set; }
+    public Guid? BorrowedFromGuildId { get; set; }
     public string? BorrowedFromGuildName { get; set; }
     public void Mapping(Profile profile)
     {
@@ -61,6 +62,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.GuildVaultItemId,
                 options => options.MapFrom(source => source.GuildVaultItem == null ? (Guid?)null : source.GuildVaultItem.Id))
+            .ForMember(
+                destination => destination.BorrowedFromGuildId,
+                options => options.MapFrom(source => source.GuildVaultItem == null ? (Guid?)null : source.GuildVaultItem.GuildId))
             .ForMember(
                 destination => destination.BorrowedFromGuildName,
                 options => options.MapFrom(source => source.GuildVaultItem == null ? null : source.GuildVaultItem.Guild.Name));

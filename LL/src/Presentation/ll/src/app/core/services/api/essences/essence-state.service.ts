@@ -902,7 +902,9 @@ export class EssenceStateService {
             this._draftLoadoutName.set(pendingDraftName);
           }
         }
-        this._error.set(error?.message ?? 'Failed to save Essence loadout');
+        this._error.set(
+          this.getRequestErrorMessage(error, 'Failed to save Essence loadout'),
+        );
       },
     });
   }

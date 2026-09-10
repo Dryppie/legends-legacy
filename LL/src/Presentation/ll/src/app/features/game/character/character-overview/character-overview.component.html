@@ -184,9 +184,7 @@
                 <ng-container
                   *ngIf="characterOverview.guild as guild; else noGuild"
                 >
-                  <span class="font-semibold text-zinc-200">{{
-                    guild.name
-                  }}</span>
+                  <app-guild-link [guildId]="guild.id" [name]="guild.name" />
                   <span
                     *ngIf="guild.tag"
                     class="ll-badge ll-badge-accent rounded"
@@ -201,6 +199,15 @@
                 <span class="text-secondary">Essences</span>
                 <span class="font-semibold text-zinc-200">
                   {{ filledLoadoutSlots }} / {{ totalLoadoutSlots }} attuned
+                </span>
+              </div>
+              <div
+                class="mt-3 flex flex-wrap items-baseline gap-2 text-sm"
+                title="Total achievement points earned across this account."
+              >
+                <span class="text-secondary">Achievement Points</span>
+                <span class="font-semibold tabular-nums text-primary">
+                  {{ characterOverview.totalAchievementPoints | number }}
                 </span>
               </div>
             </div>

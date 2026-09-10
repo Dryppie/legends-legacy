@@ -282,10 +282,10 @@ public sealed class CombatStatsAccumulator
             else if (eventType == EventType.Death)
             {
                 target.Deaths++;
+                target.LastDeathTick = timestamp;
                 if (_captureCompactTelemetry)
                 {
                     target.FirstDeathTick ??= timestamp;
-                    target.LastDeathTick = timestamp;
                     if (target.IsSummonedEntity)
                         target.SummonEndedAtTick = timestamp;
                 }

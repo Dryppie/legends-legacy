@@ -30,6 +30,15 @@ export const CITY_ROUTES: Routes = [
         pathMatch: 'full',
       },
       {
+        path: 'guild/:guildId',
+        loadComponent: () =>
+          import('./guild/public-guild/public-guild.component').then(
+            (m) => m.PublicGuildComponent,
+          ),
+        canActivate: [focusedBetaSocialGuard],
+        data: { guideDisabled: true },
+      },
+      {
         path: 'guild',
         component: GuildComponent,
         canActivate: [focusedBetaSocialGuard],

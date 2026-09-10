@@ -1,3 +1,4 @@
+import { GuildLinkComponent } from '../guild/guild-link.component';
 import { itemDescription } from '../../utils/inventory/item-description';
 import { Component, Input } from '@angular/core';
 import {
@@ -24,6 +25,7 @@ import {
 @Component({
   selector: 'app-item',
   imports: [
+    GuildLinkComponent,
     NgClass,
     NgIf,
     EssenceDetailsComponent,
@@ -43,7 +45,6 @@ export class ItemComponent {
     return itemDescription(this.item.itemBase);
   }
 
-
   constructor(
     private readonly essenceItemView: EssenceItemViewService,
     private readonly inventoryState: InventoryStateService,
@@ -56,6 +57,12 @@ export class ItemComponent {
 
   get isEquipment(): boolean {
     return this.item.itemBase.itemType === ItemType.Equipment;
+  }
+
+  get borrowedFromGuildId(): string | null {
+    return this.isEquipment
+      ? ((this.item as EquipmentInstance).borrowedFromGuildId ?? null)
+      : null;
   }
 
   get borrowedFromGuildName(): string | null {
@@ -176,5 +183,4 @@ export class ItemComponent {
         return 'LG';
     }
   }
-
 }

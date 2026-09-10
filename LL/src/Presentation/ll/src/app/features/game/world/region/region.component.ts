@@ -101,7 +101,8 @@ export class RegionComponent implements OnInit, OnDestroy {
     return environment.features.raids && !this.focusedBetaJourney;
   }
   get regionBossEnabled(): boolean {
-    return !this.focusedBetaJourney;
+    // The Mad King and Meran share the server-wide Tower Floor 10 unlock.
+    return !this.focusedBetaJourney && this.isMeranUnlocked();
   }
   regionId = '';
   region!: Region; // You can define a more specific type based on your item data structure
@@ -110,6 +111,7 @@ export class RegionComponent implements OnInit, OnDestroy {
   targetAreaId: string | null = null;
   readonly trainingBattleType = BattleType.Training;
   readonly activeBattle;
+  readonly currentDungeon;
   selectedDungeonId: string | null = null;
   readonly raidBosses = signal<RaidBossSummary[]>([]);
   selectedRaidBossId: string | null = null;
@@ -134,6 +136,8 @@ export class RegionComponent implements OnInit, OnDestroy {
     private readonly characterState: CharacterStateService,
     characterActions: CharacterActionsStateService,
   ) {
+    this.currentDungeon = this.dungeonState.activeDungeon;
+
     this.raidSyncCleanup = this.stateSync.register(
       'raid-directory',
       'world-map-raids',
@@ -430,6 +434,8 @@ export class RegionComponent implements OnInit, OnDestroy {
   }
 
   selectRegionBoss(): void {
+    if (!this.regionBossEnabled) return;
+
     this.selectedRegionBoss = true;
     this.selectedDungeonId = null;
     this.selectedRaidBossId = null;

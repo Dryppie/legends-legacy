@@ -30,6 +30,7 @@ using Application.UseCases.Guilds.Queries.GetGuildMissions;
 using Application.UseCases.Guilds.Queries.GetGuildShop;
 using Application.UseCases.Guilds.Queries.GetGuildBuildings;
 using Application.UseCases.Guilds.Queries.GetMyGuild;
+using Application.UseCases.Guilds.Queries.GetPublicGuild;
 using Application.UseCases.Guilds.Queries.GetMyInvites;
 using Application.Interfaces.Services.LL.Guilds;
 using API.LL.Common;
@@ -44,6 +45,13 @@ namespace API.LL.Controllers.V1;
 [Authorize(Policy = AuthorizationPolicies.MultiplayerAllowed)]
 public class GuildController : BaseController
 {
+    [HttpGet("GetPublicGuild/{guildId:guid}")]
+    public async Task<ActionResult<GuildPublicDto>> GetPublicGuild(Guid guildId, CancellationToken cancellationToken)
+    {
+        var guild = await Mediator.Send(new GetPublicGuildQuery(guildId), cancellationToken);
+        return guild is null ? NotFound() : Ok(guild);
+    }
+
     [HttpGet("GetMyGuild")]
     public async Task<GuildDto?> GetMyGuild() =>
         await Mediator.Send(new GetMyGuildQuery(CurrentCharacterGuid));

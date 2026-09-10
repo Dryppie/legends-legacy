@@ -2,6 +2,22 @@
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => { const el = document.createElement(tag); if (text != null) el.textContent = text; if (className) el.className = className; return el; };
 let session, catalogs = [], runs = [], active = false, job, handledJob, selectedRun, details, events = [], eventPage = 0, searchReady = false;
+let loadoutReady = false, loadoutPlanVersion = 0;
+const loadoutRequest = () => ({ slots: Number($('loadout-slots').value), effort: $('loadout-effort').value, seed: Number($('loadout-seed').value), wholeParty: $('loadout-scope').value === 'whole' });
+function freshLoadoutSeed() { $('loadout-seed').value = crypto.getRandomValues(new Int32Array(1))[0]; }
+async function updateLoadoutPlan() {
+  const version = ++loadoutPlanVersion; loadoutReady = false; $('find-loadouts').disabled = true;
+  try {
+    const plan = await api('/api/loadout-plan', loadoutRequest()); if (version !== loadoutPlanVersion) return;
+    const b = plan.definition.budget;
+    $('loadout-budget').textContent = `Level ${b.characterLevel} · Uncommon ${b.quality} · tier ${b.tier}, rank ${b.rank} · ${b.essenceSlots} Essences per character · priority floor ${b.priorityFloor} · all 15 floors · ${plan.definition.searchSeeds.length} search seeds · ${plan.definition.confirmationSamples} confirmation trials per floor/context · up to ${plan.maximumBattles.toLocaleString()} battles. Each cohort uses its own fixed budget.`;
+    loadoutReady = true; $('find-loadouts').disabled = active;
+  } catch (e) { if (version === loadoutPlanVersion) $('loadout-budget').textContent = `Search unavailable: ${e.message} Choose a new experiment seed if it was already used.`; }
+}
+function updateRecipeLink() {
+  $('export-loadout').hidden = !details?.isLoadoutSearch || !$('battle').value;
+  if (details?.isLoadoutSearch) $('export-loadout').href = `/api/runs/${selectedRun}/recipe/${encodeURIComponent($('battle').value)}`;
+}
 function error(message) { $('error').textContent = message || ''; $('error').hidden = !message; }
 async function api(path, body) {
   const response = await fetch(path, body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Tower-Session': session.token }, body: JSON.stringify(body) });
@@ -77,7 +93,7 @@ async function refreshRuns() {
   runs = await api('/api/runs');
   for (const [id, prompt] of [['saved-run', 'Select saved evidence'], ['reference', 'No comparison · new measurement']]) {
     const previous = $(id).value; $(id).replaceChildren(new Option(prompt, ''));
-    for (const run of runs.filter(r => id !== 'reference' || r.status === 'Complete'))
+    for (const run of runs.filter(r => id !== 'reference' || (r.status === 'Complete' && r.kind !== 'Loadouts')))
       $(id).append(new Option(`${run.name} · ${run.status} · ${run.valid}/${run.planned}`, run.id));
     $(id).value = runs.some(r => r.id === previous) ? previous : '';
   }
@@ -87,6 +103,7 @@ async function showRun(id) {
   const previousBattle = id === selectedRun ? $('battle').value : null;
   $('replay-result').hidden = true;
   selectedRun = id; details = null; $('report').hidden = true;
+  $('loadout-builds').hidden = true; $('export-loadout').hidden = true;
   if (!id) { $('evidence-status').textContent = 'Select a run to verify its evidence and review results.'; return; }
   $('evidence-status').textContent = 'Verifying saved inputs, content and battle results…';
   try {
@@ -110,7 +127,7 @@ async function showRun(id) {
     $('rows').replaceChildren();
     for (const c of result.report.cells) {
       const rate = c.clearRate;
-      row('rows', [`Floor ${c.floor} / ${c.party}`, c.status, `${c.wins} / ${c.valid}`, rate ? `${format(rate.rate * 100, '%')} [${format(rate.lower * 100)}–${format(rate.upper * 100)}]` : '—', format(c.survivalPercent.mean, '%'), format(c.durationSeconds.mean, ' s'), format(c.guardianHealthPercent.mean, '%')]);
+      row('rows', [result.isLoadoutSearch ? c.id : `Floor ${c.floor} / ${c.party}`, c.status, `${c.wins} / ${c.valid}`, rate ? `${format(rate.rate * 100, '%')} [${format(rate.lower * 100)}–${format(rate.upper * 100)}]` : '—', format(c.survivalPercent.mean, '%'), format(c.durationSeconds.mean, ' s'), format(c.guardianHealthPercent.mean, '%')]);
     }
     $('comparison').hidden = !result.comparison && !result.hasSavedComparison; $('comparison-rows').replaceChildren();
     if (result.comparison) {
@@ -119,9 +136,27 @@ async function showRun(id) {
     } else $('comparison-note').textContent = 'The saved reference is not available in this results folder, so this comparison could not be verified here.';
     $('battle').replaceChildren(...result.battles.map(b => new Option(`${b.id} · seed ${b.seed} · ${b.outcome} · ${format(b.durationSeconds, ' s')}`, b.id)));
     if (previousBattle && result.battles.some(b => b.id === previousBattle)) $('battle').value = previousBattle;
+    $('loadout-builds').hidden = !result.isLoadoutSearch; $('loadout-recipes').replaceChildren();
+    if (result.isLoadoutSearch) {
+      $('loadout-results-note').textContent = result.note;
+      for (const party of result.loadouts) {
+        const item = node('details'); item.append(node('summary', `${party.id.slice(0, 12)} · ${party.source}`));
+        for (const [slot, ids] of Object.entries(party.builds)) item.append(node('p', `Group ${Math.floor((Number(slot) - 1) / 5) + 1} · ${['Guardian', 'Restorer', 'Striker 1', 'Striker 2', 'Controller'][(Number(slot) - 1) % 5]}: ${ids.map(id => id.replace('essence.', '').replaceAll('_', ' ')).join(' / ')}`));
+        $('loadout-recipes').append(item);
+      }
+      if (result.deploymentComparisons) {
+        const item = node('details'); item.append(node('summary', 'Compare deployments'));
+        item.append(node('p', 'Repeated and alternating parties fill every required group. Their two authored context runs become identical after replacement; do not pool them as independent trials.'));
+        for (const family of result.deploymentComparisons) for (const variant of family.variants)
+          item.append(node('p', `${family.family} · ${variant.policy} · ${variant.id.slice(0, 12)} · ${variant.confirmed ? 'Confirmed on fresh seeds' : 'Discovery only'}`));
+        $('loadout-recipes').append(item);
+      }
+    }
+    updateRecipeLink();
     $('replay').disabled = active || !result.replayCompatible || !result.battles.length;
     $('replay-hint').textContent = result.replayCompatible ? 'Re-execute a saved trial and verify preparation, combat and outcome.' : 'Start the dashboard with this run’s retained executable and matching runtime to replay it.';
     $('report').hidden = false;
+    error('');
   } catch (e) { if (id === selectedRun) { $('evidence-status').textContent = 'Evidence could not be verified.'; throw e; } }
 }
 function paintJob(next) {
@@ -131,6 +166,7 @@ function paintJob(next) {
   $('counts').textContent = next ? `${next.kind} · ${next.completed} / ${next.planned}` : 'No active operation';
   $('cancel').disabled = next?.status !== 'Running'; $('replay').disabled = active || !details?.replayCompatible || !details?.battles.length;
   $('search').disabled = active || !searchReady;
+  $('find-loadouts').disabled = active || !loadoutReady;
   updateBudget();
 }
 async function poll() {
@@ -138,6 +174,7 @@ async function poll() {
     const next = await api('/api/job'); paintJob(next);
     if (next && !active && handledJob !== next.id) {
       handledJob = next.id;
+      if (next.kind === 'Loadouts') { freshLoadoutSeed(); updateLoadoutPlan(); }
       if (next.status === 'Failed') error(next.message);
       await refreshRuns();
       if (next.run && runs.some(r => r.id === next.run)) { $('saved-run').value = next.run; await showRun(next.run); }
@@ -159,6 +196,17 @@ function renderEvents() {
   $('prev-events').disabled = eventPage === 0; $('next-events').disabled = (eventPage + 1) * 100 >= filtered.length;
 }
 $('catalog').addEventListener('change', () => { $('reference').value = ''; selectCatalog(); });
+$('loadout-slots').addEventListener('change', updateLoadoutPlan);
+$('loadout-scope').addEventListener('change', updateLoadoutPlan);
+$('loadout-effort').addEventListener('change', updateLoadoutPlan);
+$('loadout-seed').addEventListener('change', updateLoadoutPlan);
+$('loadout-new-seed').addEventListener('click', () => { freshLoadoutSeed(); updateLoadoutPlan(); });
+$('battle').addEventListener('change', updateRecipeLink);
+$('find-loadouts').addEventListener('click', async () => {
+  error(''); $('find-loadouts').disabled = true;
+  try { paintJob(await api('/api/loadouts', loadoutRequest())); }
+  catch (e) { error(e.message); updateLoadoutPlan(); }
+});
 $('samples').addEventListener('input', updateSelection);
 $('reference').addEventListener('change', async () => {
   try {
@@ -197,6 +245,7 @@ $('next-events').addEventListener('click', () => { eventPage++; renderEvents(); 
     $('catalog').replaceChildren(...catalogs.map(c => new Option(c.definition.id, c.id)));
     if (!catalogs.length) throw new Error('No valid Tower benchmark catalogs found in the configured catalog folder.');
     selectCatalog(); await refreshRuns(); poll();
+    freshLoadoutSeed(); updateLoadoutPlan();
     try {
       const plan = await api('/api/search-plan');
       $('search-budget').textContent = `${plan.candidates} candidates · ${plan.floors} floors · ${plan.discoverySamples} discovery trials per cell · ${plan.confirmationSamples} confirmation trials per shortlisted cell · up to ${plan.maximumBattles.toLocaleString()} battles`;

@@ -114,6 +114,29 @@ describe('CombatEntityStatsComponent', () => {
     expect(component.teamDisplayName('Hostile')).toBe('Enemy');
   });
 
+  it('shows elapsed battle seconds for a defeat, including zero and fractional seconds', () => {
+    component.playerTeam = [entity('ally', 'Downed Ally', 0, 100)];
+    const allyStats = stats('ally', 'Downed Ally', 0, 'Friendly');
+    component.entityStats = [allyStats];
+    refresh(component);
+    const participant = component.playerParticipants[0];
+
+    for (const [tick, expected] of [
+      [0, 'Defeated after 0 seconds'],
+      [10, 'Defeated after 1 second'],
+      [423, 'Defeated after 42.3 seconds'],
+      [1040, 'Defeated after 104 seconds'],
+    ] as const) {
+      allyStats.lastDeathTick = tick;
+      expect(component.defeatLabel(participant)).toBe(expected);
+    }
+
+    for (const tick of [undefined, null, -1, NaN]) {
+      allyStats.lastDeathTick = tick;
+      expect(component.defeatLabel(participant)).toBe('Defeated');
+    }
+  });
+
   it('shows a revival countdown only for a downed ally with a scheduled revival', () => {
     component.playerTeam = [entity('ally', 'Downed Ally', 0, 100)];
     component.enemyTeam = [entity('enemy', 'Enemy', 0, 100)];

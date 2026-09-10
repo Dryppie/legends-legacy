@@ -21,6 +21,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public int Level { get; set; }
     public long Experience { get; set; }
     public long ExperienceUntilNextLevel { get; set; }
+    public int TotalAchievementPoints { get; set; }
     public OverallPowerRating? Power { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];

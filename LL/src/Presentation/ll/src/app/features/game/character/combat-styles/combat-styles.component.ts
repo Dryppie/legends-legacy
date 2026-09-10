@@ -14,6 +14,7 @@ import {
   NavigationTabsComponent,
 } from '../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
 
 @Component({
   selector: 'app-combat-styles',
@@ -24,6 +25,7 @@ import { RegularButtonComponent } from '../../../../shared/components/custom-com
     DefaultHeaderComponent,
     NavigationTabsComponent,
     RegularButtonComponent,
+    EssenceDescriptionComponent,
   ],
   templateUrl: './combat-styles.component.html',
   styleUrl: './combat-styles.component.css',
@@ -106,8 +108,29 @@ export class CombatStylesComponent {
   readonly mechanicName = computed(() =>
     this.state.selected()?.definition.id === 'bastion'
       ? 'Fortification'
-      : this.state.selected()?.definition.id === 'reaper' ? 'Harvest' : 'Circuit',
+      : this.state.selected()?.definition.id === 'reaper' ? 'Harvest'
+        : this.state.selected()?.definition.id === 'duelist' ? 'Read the Opponent' : 'Circuit',
   );
+  readonly mechanicDescription = computed(() => {
+    const entry = this.state.selected();
+    if (!entry) return '';
+    const tuning = entry.definition.kind === 'Reaper'
+      ? entry.definition.tuning?.reaper
+      : entry.definition.kind === 'Duelist'
+        ? entry.definition.tuning?.duelist
+        : null;
+    if (!tuning) return entry.definition.description;
+    const baseMultiplier = 'baseMultiplier' in tuning
+      ? tuning.baseMultiplier
+      : tuning.openingMultiplier;
+    const level = Math.max(0, Math.min(10, entry.level));
+    const percentage = formatNumber(
+      100 * (baseMultiplier + level * tuning.perMasteryLevel),
+      'en-US',
+      '1.0-2',
+    );
+    return entry.definition.description.replace(/\d+(?:\.\d+)?%/, `${percentage}%`);
+  });
   readonly previewFacts = computed(
     () => this.state.preview()?.previewFacts ?? [],
   );
@@ -126,6 +149,17 @@ export class CombatStylesComponent {
     const level = Math.max(0, Math.min(10, entry.level));
     const nextLevel = level + 1;
     const number = (value: number) => formatNumber(value, 'en-US', '1.0-2');
+    if (entry.definition.kind === 'Duelist' && tuning.duelist) {
+      const duelist = tuning.duelist;
+      const multiplier = (rank: number) => number(100 * (duelist.openingMultiplier + rank * duelist.perMasteryLevel));
+      return {
+        perLevel: `Each mastery level adds a flat +${number(duelist.perMasteryLevel * 100)}% to Opening damage.`,
+        bonus: `+${number(level * duelist.perMasteryLevel * 100)}% flat increase`,
+        current: `Mastery ${level}: ${multiplier(level)}% Opening damage`,
+        example: `At ${duelist.readRequired} Read, your next damaging Essence spends an Opening. A direct hit normally worth 100 deals ${multiplier(level)} to that opponent before upgrades and defenses. Other attacks keep their normal damage.`,
+        next: level < 10 ? `Level ${nextLevel}: ${multiplier(nextLevel)}% Opening damage` : null,
+      };
+    }
     if (entry.definition.kind === 'Reaper' && tuning.reaper) {
       const reaper = tuning.reaper;
       const refinementId = this.state.draft().refinementId;

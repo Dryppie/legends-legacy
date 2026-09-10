@@ -45,6 +45,7 @@ public sealed class EntityStatsDto : IMapFrom<EntityStats>
     public int StaggerContributed { get; set; }
     public int StaggerBreaks { get; set; }
     public int Deaths { get; set; }
+    public int? LastDeathTick { get; set; }
     public int Revivals { get; set; }
     public int DownedTicks { get; set; }
 

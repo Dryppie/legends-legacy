@@ -159,6 +159,7 @@
 
       <section
         class="section tower-panel ll-panel party-bench"
+        *ngIf="benchedParticipants(vm).length"
         [class.party-drop-target]="vm.canManageParties"
         (dragover)="allowPartyDrop($event)"
         (drop)="dropOnBench($event, vm)"
@@ -172,7 +173,7 @@
           </div>
           <button
             class="secondary ll-button"
-            *ngIf="vm.canManageParties && benchedParticipants(vm).length"
+            *ngIf="vm.canManageParties"
             [disabled]="!!action()"
             (click)="distributeBenched(vm)"
           >
@@ -180,26 +181,33 @@
           </button>
         </div>
 
-        <div
-          class="bench-grid"
-          *ngIf="benchedParticipants(vm).length; else emptyBench"
-        >
-          <button
-            type="button"
+        <div class="bench-grid">
+          <div
             class="bench-card"
             *ngFor="let participant of benchedParticipants(vm)"
             [class.selected]="
               selectedParticipantId() === participant.characterId
             "
-            [disabled]="!vm.canManageParties || !!action()"
             [draggable]="vm.canManageParties"
             (click)="selectParticipant(participant, vm)"
             (dragstart)="dragParticipant($event, participant, vm)"
           >
             <span class="bench-identity">
-              <strong>{{ participant.characterName }}</strong>
+              <button
+                type="button"
+                class="text-left font-semibold"
+                [disabled]="!vm.canManageParties || !!action()"
+                [attr.aria-pressed]="
+                  selectedParticipantId() === participant.characterId
+                "
+              >
+                {{ participant.characterName }}
+              </button>
               <small>
-                {{ participant.guildName || "Unaffiliated" }}
+                <app-guild-link
+                  [guildId]="participant.guildId"
+                  [name]="participant.guildName || 'Unaffiliated'"
+                />
                 <ng-container *ngIf="participant.isLeader">
                   · Leader</ng-container
                 >
@@ -211,11 +219,8 @@
             <strong class="party-power">{{
               participant.powerRating | number
             }}</strong>
-          </button>
+          </div>
         </div>
-        <ng-template #emptyBench>
-          <p class="empty-state">Every ascendant is assigned to a party.</p>
-        </ng-template>
       </section>
 
       <section
@@ -309,7 +314,10 @@
                   <span class="badge" *ngIf="participant.isLeader">Leader</span>
                 </strong>
                 <span>
-                  {{ participant.guildName || "Unaffiliated" }}
+                  <app-guild-link
+                    [guildId]="participant.guildId"
+                    [name]="participant.guildName || 'Unaffiliated'"
+                  />
                   <ng-container *ngIf="participant.isCurrentCharacter">
                     · You</ng-container
                   >
@@ -376,15 +384,12 @@
 
       <section
         class="section tower-panel ll-panel"
-        *ngIf="vm.canManageApplications || vm.applications.length"
+        *ngIf="pendingApplications().length"
       >
         <p class="eyebrow">Expedition applications</p>
         <h2>Awaiting the leader</h2>
-        <p class="muted" *ngIf="!vm.applications.length">
-          No applications are waiting.
-        </p>
-        <div class="roster" *ngIf="vm.applications.length">
-          <div class="roster-row" *ngFor="let application of vm.applications">
+        <div class="roster">
+          <div class="roster-row" *ngFor="let application of pendingApplications()">
             <div class="identity">
               <strong>
                 <app-character-tag
@@ -393,8 +398,11 @@
                 ></app-character-tag>
               </strong>
               <span
-                >{{ application.guildName || "Unaffiliated" }} ·
-                {{ application.powerRating | number }} power ·
+                ><app-guild-link
+                  [guildId]="application.guildId"
+                  [name]="application.guildName || 'Unaffiliated'"
+                />
+                · {{ application.powerRating | number }} power ·
                 {{ application.status }}</span
               >
             </div>

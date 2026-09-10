@@ -129,6 +129,7 @@ export class ChatComposerDirective implements ControlValueAccessor, OnDestroy {
       });
       this.views.push(view);
       view.setInput('equipmentId', link.id);
+      view.setInput('rarity', link.rarity);
       view.setInput('name', link.name);
       view.setInput('focusable', false);
       atom.append(view.location.nativeElement);

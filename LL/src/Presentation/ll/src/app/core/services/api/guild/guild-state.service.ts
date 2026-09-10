@@ -739,7 +739,7 @@ export class GuildStateService {
 
   /* ─────────── directory & invites ─────────── */
 
-  private loadAllGuilds(): void {
+  loadAllGuilds(): void {
     this.synchronizeDirectory().subscribe({ error: () => undefined });
   }
 

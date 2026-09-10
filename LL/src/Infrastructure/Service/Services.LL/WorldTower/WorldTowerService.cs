@@ -2123,7 +2123,8 @@ public sealed class WorldTowerService : IWorldTowerService
                 x.PowerRating,
                 x.Status,
                 x.AppliedAt,
-                x.CharacterId == characterId))
+                x.CharacterId == characterId,
+                x.GuildId))
             .ToArray();
         return new TowerRallyDto(
             rally.Id,
@@ -2151,7 +2152,8 @@ public sealed class WorldTowerService : IWorldTowerService
                     x.PartySlot,
                     x.PartySlot.HasValue
                         ? WorldTowerPartyRules.GetPartyNumber(x.PartySlot.Value)
-                        : null))
+                        : null,
+                    x.GuildId))
                 .ToArray(),
             visibleApplications,
             CreateReadiness(rally.Participants, definition),

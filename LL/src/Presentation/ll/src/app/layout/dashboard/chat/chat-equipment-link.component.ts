@@ -5,7 +5,6 @@ import {
   DestroyRef,
   inject,
   input,
-  OnInit,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -49,26 +48,24 @@ const RARITY_CLASSES: Record<Rarity, string> = {
     </ng-template>`,
   host: { '(keydown)': '$event.stopPropagation()' },
 })
-export class ChatEquipmentLinkComponent implements OnInit {
+export class ChatEquipmentLinkComponent {
   readonly equipmentId = input.required<string>();
   readonly name = input.required<string>();
+  readonly rarity = input<Rarity>();
   readonly focusable = input(true);
   readonly equipment = signal<EquipmentInstance | null>(null);
   readonly error = signal('');
-  private readonly rarity = signal<Rarity | null>(null);
+  private readonly resolvedRarity = signal<Rarity | null>(null);
   readonly rarityClass = computed(() => {
-    const rarity = this.rarity();
-    return rarity ? RARITY_CLASSES[rarity] : 'll-text-muted';
+    const rarity = this.resolvedRarity() ?? this.rarity();
+    return rarity
+      ? (RARITY_CLASSES[rarity] ?? 'll-text-muted')
+      : 'll-text-muted';
   });
   private readonly api = inject(EquipmentService);
   private readonly destroyRef = inject(DestroyRef);
   private loading = false;
   private loadedAt = 0;
-
-  ngOnInit(): void {
-    // Resolve the authoritative rarity before hover, including for older links.
-    this.load();
-  }
 
   load(): void {
     if (
@@ -85,7 +82,7 @@ export class ChatEquipmentLinkComponent implements OnInit {
       .subscribe({
         next: (item) => {
           this.equipment.set(item);
-          this.rarity.set(item.rarity);
+          this.resolvedRarity.set(item.rarity);
           this.loadedAt = Date.now();
           this.loading = false;
         },

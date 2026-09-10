@@ -63,27 +63,45 @@ public static class CombatStyleRules
         if (string.IsNullOrWhiteSpace(catalog.ContentVersion)) throw new InvalidOperationException("Combat Style content requires a version.");
         if (catalog.XpRequirements.Count != CombatStyleProgression.MaximumLevel || catalog.XpRequirements.Any(x => x <= 0))
             throw new InvalidOperationException("Combat Styles require ten positive XP requirements.");
-        if (catalog.Styles.Count != 3 || catalog.Styles.Select(x => x.Id).Distinct(StringComparer.Ordinal).Count() != 3)
-            throw new InvalidOperationException("The Combat Styles catalog must contain exactly Bastion, Conduit and Reaper.");
+        if (catalog.Styles.Count != 4 || catalog.Styles.Select(x => x.Id).Distinct(StringComparer.Ordinal).Count() != 4)
+            throw new InvalidOperationException("The Combat Styles catalog must contain exactly Bastion, Conduit, Reaper and Duelist.");
         foreach (var definition in catalog.Styles)
         {
             var bastion = definition.Id == CombatStyleIds.Bastion && definition.Kind == CombatStyleKind.Bastion;
             var conduit = definition.Id == CombatStyleIds.Conduit && definition.Kind == CombatStyleKind.Conduit;
             var reaper = definition.Id == CombatStyleIds.Reaper && definition.Kind == CombatStyleKind.Reaper;
-            if (!bastion && !conduit && !reaper) throw new InvalidOperationException("Unsupported Combat Style mechanic.");
+            var duelist = definition.Id == CombatStyleIds.Duelist && definition.Kind == CombatStyleKind.Duelist;
+            if (!bastion && !conduit && !reaper && !duelist) throw new InvalidOperationException("Unsupported Combat Style mechanic.");
             var expectedRefinements = bastion
                 ? new[] { CombatStyleIds.Rebuild, CombatStyleIds.Reprisal, CombatStyleIds.Shelter }
                 : reaper ? [CombatStyleIds.SoulSiphon, CombatStyleIds.LastRites, CombatStyleIds.DeathSentence]
+                : duelist ? [CombatStyleIds.Flurry, CombatStyleIds.PatientBlade, CombatStyleIds.GuardedThrust]
                 : [CombatStyleIds.ShortCircuit, CombatStyleIds.DeepReservoir, CombatStyleIds.Relay];
             var expectedUpgrades = bastion
                 ? new[] { CombatStyleIds.PreparedWall, CombatStyleIds.HoldTheBreach, CombatStyleIds.MeasuredRecovery }
                 : reaper ? [CombatStyleIds.ClosingHand, CombatStyleIds.Crosscut, CombatStyleIds.DeepRoots]
+                : duelist ? [CombatStyleIds.MeasuredStrikes, CombatStyleIds.KnowYourEnemy, CombatStyleIds.FinishingTouch]
                 : [CombatStyleIds.FullCircuit, CombatStyleIds.PartialFlow, CombatStyleIds.EmergencyChannel];
             if (definition.Refinements.Count != 3 || !expectedRefinements.Order().SequenceEqual(definition.Refinements.Select(x => x.Id).Order())
                 || definition.Upgrades.Count != 3 || !expectedUpgrades.Order().SequenceEqual(definition.Upgrades.Select(x => x.Id).Order()))
                 throw new InvalidOperationException($"Invalid choices for Combat Style {definition.Id}.");
             foreach (var tuning in definition.Refinements.Select(x => x.Tuning ?? definition.Tuning).Append(definition.Tuning))
             {
+                if (duelist)
+                {
+                    if (tuning.Duelist is not { } read
+                        || read.ReadRequired <= 0 || read.ReturnedRead < 0 || read.ReturnedRead >= read.ReadRequired
+                        || read.GuardCharges < 0 || read.FirstImpressionRead < 0
+                        || !double.IsFinite(read.OpeningMultiplier) || read.OpeningMultiplier < 1
+                        || !double.IsFinite(read.PerMasteryLevel) || read.PerMasteryLevel < 0
+                        || !double.IsFinite(read.UpgradeBonus) || read.UpgradeBonus < 0
+                        || !double.IsFinite(read.MasteredMeasuredStrikesBonus) || read.MasteredMeasuredStrikesBonus < read.UpgradeBonus
+                        || new[] { read.FinishingTouchHealthThreshold, read.MasteredFinishingTouchHealthThreshold }
+                            .Any(x => !double.IsFinite(x) || x is <= 0 or > 1)
+                        || read.MasteredFinishingTouchHealthThreshold < read.FinishingTouchHealthThreshold)
+                        throw new InvalidOperationException("Invalid Duelist tuning.");
+                    continue;
+                }
                 if (reaper)
                 {
                     if (tuning.Reaper is not { } harvest

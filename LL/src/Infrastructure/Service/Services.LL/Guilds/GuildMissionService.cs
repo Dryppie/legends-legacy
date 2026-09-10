@@ -469,7 +469,7 @@ public class GuildMissionService : IGuildMissionService
         var completed = 0;
         foreach (var order in orders)
         {
-            if (!_allDefinitions.TryGetValue(order.MissionDefinitionId, out var definition) || definition.Metric != metric)
+            if (!_allDefinitions.TryGetValue(order.MissionDefinitionId, out var definition) || !metric.CountsTowards(definition.Metric))
             {
                 continue;
             }
@@ -504,7 +504,7 @@ public class GuildMissionService : IGuildMissionService
                 && (x.Status == GuildMissionStatus.Active || x.Status == GuildMissionStatus.Completed),
                 cancellationToken);
         if (instance is null) return (0, false, []);
-        if (!_allDefinitions.TryGetValue(instance.MissionDefinitionId, out var definition) || definition.Metric != metric) return (0, false, []);
+        if (!_allDefinitions.TryGetValue(instance.MissionDefinitionId, out var definition) || !metric.CountsTowards(definition.Metric)) return (0, false, []);
 
         var wasCompleted = instance.Status == GuildMissionStatus.Completed;
         var progress = Math.Min(amount, Math.Max(0, instance.TargetAmount - instance.CurrentAmount));

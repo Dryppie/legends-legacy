@@ -1,3 +1,4 @@
+import { GuildLinkComponent } from '../../../../shared/components/guild/guild-link.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnDestroy, signal } from '@angular/core';
@@ -54,6 +55,7 @@ export function estimateEssenceThreatPerSecond(
 @Component({
   selector: 'app-character-overview',
   imports: [
+    GuildLinkComponent,
     DefaultHeaderComponent,
     NgIf,
     NgFor,

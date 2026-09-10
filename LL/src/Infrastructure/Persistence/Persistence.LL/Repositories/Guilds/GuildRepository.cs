@@ -64,6 +64,15 @@ public class GuildRepository : IGuildRepository
             .AsNoTracking()
             .SingleOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
+    public Task<Guild?> GetPublicGuildAsync(Guid guildId, CancellationToken cancellationToken) =>
+        _context.Guilds
+            .AsNoTracking()
+            .Include(g => g.Members)
+                .ThenInclude(m => m.Character)
+            .Include(g => g.Buildings)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(g => g.Id == guildId, cancellationToken);
+
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
         await _context.Guilds
             .Include(g => g.Owner)

@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { LeaderboardBoard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { TavernComponent } from './tavern.component';
-import { Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { ChatService } from '../../../../core/services/ll-chat/chat-service/chat.service';
 
 describe('TavernComponent', () => {
@@ -38,7 +38,7 @@ describe('TavernComponent', () => {
       imports: [TavernComponent],
       providers: [
         { provide: LeaderboardStateService, useValue: state },
-        { provide: Router, useValue: { navigate: jasmine.createSpy() } },
+        provideRouter([]),
         {
           provide: ChatService,
           useValue: { prepareWhisperToName: jasmine.createSpy() },

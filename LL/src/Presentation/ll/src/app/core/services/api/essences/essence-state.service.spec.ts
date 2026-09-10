@@ -1,4 +1,5 @@
 import { signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   discardPeriodicTasks,
   fakeAsync,
@@ -609,6 +610,30 @@ describe('EssenceStateService loadout drafts', () => {
     service.saveDraftSlots();
 
     expect(essences.getArchive).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the server rejection reason and restores slots when equipping during a dungeon run', () => {
+    const message = 'Finish your dungeon run before changing your combat build.';
+    const error = Object.assign(
+      new HttpErrorResponse({
+        status: 400,
+        statusText: 'OK',
+        url: '/api/v1/essence/loadouts/loadout-1',
+        error: { detail: message },
+      }),
+      { errorMessage: message },
+    );
+    essences.updateLoadout.and.returnValue(throwError(() => error));
+    service.setDraftLoadoutName('Boss fights');
+    service.setDraftSlot(0, 'essence-1');
+
+    service.saveDraftSlots();
+
+    expect(essences.updateLoadout).toHaveBeenCalledTimes(1);
+    expect(service.error()).toBe(message);
+    expect(service.draftSlots()).toEqual([null]);
+    expect(service.draftLoadoutName()).toBe('Boss fights');
+    expect(service.savingLoadout()).toBeFalse();
   });
 
   it('uses the mutation state without refetching the Archive for a new loadout', () => {

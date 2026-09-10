@@ -229,6 +229,8 @@ public sealed class GuildMembershipChatCommandTests
 
     private sealed class StubGuildService(Guild guild) : IGuildService
     {
+        public Task<Guild?> GetPublicGuildAsync(Guid guildId, CancellationToken cancellationToken) => Task.FromResult<Guild?>(null);
+
         public Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult<Guild?>(guild);
         public Task<bool> InviteAsync(Guid currentCharacterId, Guid guildId, Guid invitedCharacterId, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<bool> InviteCharacterByNameAsync(Guid currentCharacterId, Guid guildId, string invitedCharacterName, CancellationToken cancellationToken) => Task.FromResult(true);

@@ -24,6 +24,7 @@ import { ItemComponent } from '../../../shared/components/item/item.component';
 import { EquipmentService } from '../../../core/services/api/equipment/equipment.service';
 import { ChatEquipmentLinkService } from '../../../core/services/client-side/chat-equipment-link/chat-equipment-link.service';
 import { EquipmentInstance } from '../../../shared/models/item';
+import { Rarity } from '../../../shared/models/enums/rarity';
 
 describe('Chat mention interaction', () => {
   let fixture: ComponentFixture<ChatComponent>;
@@ -31,8 +32,12 @@ describe('Chat mention interaction', () => {
   let sendPublic: jasmine.Spy;
   let sendWhisper: jasmine.Spy;
   let resolveName: jasmine.Spy;
+  let lookupEquipment: jasmine.Spy;
 
   beforeEach(() => {
+    lookupEquipment = jasmine
+      .createSpy('getLinkedEquipment')
+      .and.callFake(() => throwError(() => ({ status: 404 })));
     const userInfo = { isRegisteredUser: true };
     sendPublic = jasmine.createSpy('sendPublic').and.resolveTo();
     sendWhisper = jasmine.createSpy('sendWhisperToName').and.resolveTo();
@@ -56,7 +61,7 @@ describe('Chat mention interaction', () => {
         {
           provide: EquipmentService,
           useValue: {
-            getLinkedEquipment: () => throwError(() => ({ status: 404 })),
+            getLinkedEquipment: lookupEquipment,
           },
         },
         {
@@ -112,10 +117,11 @@ describe('Chat mention interaction', () => {
     TestBed.inject(ChatEquipmentLinkService).prepare({
       id: '2b84eb39-110d-4b01-aacd-72caef024eba',
       displayName: 'Phoenix Mace',
+      rarity: Rarity.Epic,
     } as EquipmentInstance);
     expect(expand).toHaveBeenCalledWith(false);
     expect(fixture.componentInstance.draft).toBe(
-      '/trade Selling this [Phoenix Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)',
+      '/trade Selling this [Phoenix Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba:Epic)',
     );
     expect(sendPublic).not.toHaveBeenCalled();
     fixture.componentInstance.collapsed = false;
@@ -125,16 +131,44 @@ describe('Chat mention interaction', () => {
         '[appChatComposer] [contenteditable="false"]',
       ),
     ).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[appChatComposer] .ll-rarity-epic'),
+    ).not.toBeNull();
+    expect(lookupEquipment).not.toHaveBeenCalled();
     fixture.componentInstance.send();
     tick();
     expect(sendPublic).toHaveBeenCalledWith(
       ChatChannelType.Trade,
       'trade',
-      'Selling this [Phoenix Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)',
+      'Selling this [Phoenix Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba:Epic)',
     );
 
     expect(fixture.componentInstance.draft).toBe('');
   }));
+
+  it('renders rarity colors for linked items in chat history without fetching their details', () => {
+    fixture.detectChanges();
+    fixture.componentInstance.messages = Array.from(
+      { length: 20 },
+      (_, index) => ({
+        id: String(index),
+        senderId: 'other',
+        senderName: 'Other',
+        channelType: ChatChannelType.General,
+        contextKey: 'general',
+        sentAt: new Date(),
+        body: '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba:Epic) [Axe](equipment:2b84eb39-110d-4b01-aacd-72caef024ebb:Rare)',
+      }),
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelectorAll('article .ll-rarity-epic').length,
+    ).toBe(20);
+    expect(
+      fixture.nativeElement.querySelectorAll('article .ll-rarity-rare').length,
+    ).toBe(20);
+    expect(lookupEquipment).not.toHaveBeenCalled();
+  });
 
   it('deletes an inline piece as a unit and keeps an oversized draft intact', fakeAsync(() => {
     fixture.detectChanges();

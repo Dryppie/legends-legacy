@@ -2,7 +2,7 @@
 
 Combat Styles define how a character's equipment and Essences work together. Equipment supplies attributes, Essences supply abilities, and the equipped Combat Style adds a defining combat interaction.
 
-This folder describes three implemented styles and four developed design proposals. Current implemented rules and values were checked against the repository on 10 September 2026. Reaper's initial balance values and proposed mechanics are starting points for playtesting.
+This folder describes four implemented styles and three developed design proposals. Current implemented rules and values were checked against the repository on 10 September 2026. Reaper's initial balance values and proposed mechanics are starting points for playtesting.
 
 Shared documentation lives in this folder. Individual Combat Style guides live in `styles/`.
 
@@ -25,15 +25,15 @@ Shared documentation lives in this folder. Individual Combat Style guides live i
 | [Reaper](styles/reaper.md) | Implemented | Harvest your own Bleed, Burn and Poison for immediate damage, Soul Siphon healing, Last Rites or delayed Doom with an extra flat +10%. |
 | [Shepherd](styles/shepherd.md) | Design proposal | Build mutual protection around a bond with one chosen summon. |
 | [Gambler](styles/gambler.md) | Design proposal | Draw bounded hands of Steady and Lucky outcomes for your Essence actives. |
-| [Duelist](styles/duelist.md) | Design proposal | Read one opponent through repeated attacks, then exploit an Opening with a stronger Essence strike. |
+| [Duelist](styles/duelist.md) | Implemented | Read one opponent through repeated attacks, then exploit an Opening with a stronger Essence strike. |
 | [Spellweaver](styles/spellweaver.md) | Design proposal | Alternate Physical and Magical Essence casts to strengthen attacks, pierce defenses or weave protection. |
 
-Every style file covers its core mechanic, mastery level bonuses, refinements, upgrades, Opening Technique, and Upgrade Mastery. Shepherd, Gambler, Duelist and Spellweaver have complete proposed rules and worked examples; they are not implemented or available in the game. Their proposals use the same level-0 start, level-10 cap, milestone schedule, individual XP structure, and initial XP requirements described below.
+Every style file covers its core mechanic, mastery level bonuses, refinements, upgrades, Opening Technique, and Upgrade Mastery. Shepherd, Gambler and Spellweaver have complete proposed rules and worked examples; they are not implemented or available in the game. Their proposals use the same level-0 start, level-10 cap, milestone schedule, individual XP structure, and initial XP requirements described below.
 
 ## Equipping and configuring a style
 
 - Equip one global Combat Style for all battles, or leave the slot empty.
-- Bastion, Conduit and Reaper are available at level 0 with their full core mechanics. Each style has its own level and XP.
+- Bastion, Conduit, Reaper and Duelist are available at level 0 with their full core mechanics. Each style has its own level and XP.
 - Retain the base form or choose one refinement once that style reaches level 3.
 - Choose the bonuses that suit your Combat Style. Unlock your first slot at Mastery 5 and a second at Mastery 8. All three upgrade choices become available with the first slot; equip up to two different upgrades, and either slot may stay empty.
 - At level 7, the style's Opening Technique activates automatically once at the start of each battle, with any refinement or the base form.
@@ -65,11 +65,11 @@ Only the Combat Style used for a rewarded encounter earns its eligible base comb
 
 Every mastery level from 1 through 10 automatically improves the core mechanic. Bastion adds 1% of its base converted Barrier per level; Conduit adds a flat +1% to charged Channeled Essence effects per level. Flat bonuses add directly to Channeled Essence strength: `100% + 1% flat = 101%`. Level 0 supplies the full base mechanic, and zero-Charge Conduit output stays unchanged. There is no separate Core Rank system or rank track. Refinements, upgrades and Upgrade Mastery remain player choices.
 
-Reaper and the Shepherd, Gambler, Duelist and Spellweaver proposals use the same continuous progression: Reaper adds a flat +1% to Harvest per level; Shepherd adds 2 points of Bond protection; Gambler adds 1 point to the total Lucky payout per hand, split into 0.5 points per Lucky card for Safe Bet; Duelist adds a flat +1% to Opening damage per level; Spellweaver adds a flat +1% to Weave damage per level.
+Reaper, Duelist and the Shepherd, Gambler and Spellweaver proposals use the same continuous progression: Reaper adds a flat +1% to Harvest per level; Shepherd adds 2 points of Bond protection; Gambler adds 1 point to the total Lucky payout per hand, split into 0.5 points per Lucky card for Safe Bet; Duelist adds a flat +1% to Opening damage per level; Spellweaver adds a flat +1% to Weave damage per level.
 
 ### Current XP requirements
 
-These are the catalog's requirements for each individual advancement, not cumulative totals. Both implemented styles use this schedule independently.
+These are the catalog's requirements for each individual advancement, not cumulative totals. All four implemented styles use this schedule independently.
 
 | Advancement | XP required |
 | --- | ---: |
@@ -86,6 +86,6 @@ These are the catalog's requirements for each individual advancement, not cumula
 
 ## Documentation sources
 
-The implemented guides follow the [current content catalog](../../LL/src/API/API.LL/Data/combat-styles/combat-styles.v1.json), [progression rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleProgression.cs), [selection rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleRules.cs), and [combat implementation](../../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.CombatStyles.cs). The catalog currently declares content version `combat-styles.v8` despite its filename. Version 8 captures Death Sentence's extra flat +10% and Grave Seed's five Poison stacks for new battles; previously committed snapshots retain their original tuning.
+The implemented guides follow the [current content catalog](../../LL/src/API/API.LL/Data/combat-styles/combat-styles.v1.json), [progression rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleProgression.cs), [selection rules](../../LL/src/Core/Domain/Models/CombatStyles/CombatStyleRules.cs), and [combat implementation](../../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.CombatStyles.cs). The catalog currently declares content version `combat-styles.v9` despite its filename. Version 9 adds Duelist, including Guarded Thrust's Guard(1), while retaining the Reaper balance changes from version 8. Previously committed snapshots retain their original tuning.
 
 The [game design](game-design.md) retains the original concepts and design rationale, updated for the level-0 starting point and bonuses at every mastery level. Historical verification records identify earlier rank-based behavior explicitly. Update these guides alongside future changes to the catalog or combat rules.

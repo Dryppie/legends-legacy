@@ -42,6 +42,9 @@ public class GuildService : IGuildService
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
         await _guildRepository.GetAllGuildsAsync(cancellationToken);
 
+    public Task<Guild?> GetPublicGuildAsync(Guid guildId, CancellationToken cancellationToken) =>
+        _guildRepository.GetPublicGuildAsync(guildId, cancellationToken);
+
     public async Task<bool> LeaveGuildAsync(Guid characterId, CancellationToken cancellationToken) => 
         await _guildRepository.LeaveGuildAsync(characterId, cancellationToken);
 

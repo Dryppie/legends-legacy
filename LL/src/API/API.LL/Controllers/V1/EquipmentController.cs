@@ -1,3 +1,4 @@
+using API.LL.Common;
 using Application.UseCases.Equipments.Queries.GetEquipmentLoadouts;
 using Application.UseCases.Equipments.Commands.SaveEquipmentLoadout;
 using Application.UseCases.Equipments.Commands.DeleteEquipmentLoadout;
@@ -68,8 +69,17 @@ public class EquipmentController : BaseController
     [HttpGet("linked/{equipmentInstanceId:guid}")]
     public async Task<ActionResult<EquipmentInstanceDto>> GetLinked(Guid equipmentInstanceId, CancellationToken cancellationToken)
     {
-        var item = await Mediator.Send(new GetLinkedEquipmentQuery(equipmentInstanceId), cancellationToken);
-        return item is null ? NotFound() : Ok(item);
+        try
+        {
+            var item = await Mediator.Send(new GetLinkedEquipmentQuery(equipmentInstanceId), cancellationToken);
+            return item is null ? NotFound() : Ok(item);
+        }
+        catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            // Chat links cancel pending lookups when destroyed. Handle the abort
+            // before MVC's async boundary reports it as user-unhandled locally.
+            return StatusCode(ClientDisconnectMiddleware.ClientClosedRequestStatusCode);
+        }
     }
 
     [HttpGet("comparison/{equipmentInstanceId:guid}")]

@@ -5,7 +5,7 @@
     <div>
       <p class="ll-eyebrow">Guild Headquarters</p>
       <h1 class="ll-heading mt-1 text-2xl">
-        {{ guild.name }}
+        <app-guild-link [guildId]="guild.id" [name]="guild.name" />
       </h1>
       <p class="ll-copy mt-1">
         {{ guild.tag ? "[" + guild.tag + "]" : "No guild tag" }}

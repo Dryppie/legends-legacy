@@ -35,6 +35,7 @@ export interface EquipmentInstance extends ItemInstance {
   itemBudgetTier: number;
   isGuildBorrowed: boolean;
   guildVaultItemId?: string | null;
+  borrowedFromGuildId?: string | null;
   borrowedFromGuildName?: string | null;
 }
 

@@ -20,6 +20,15 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower-benchmark --output <new-directory> [--catalog <json>] [--seed <int>] [--samples <per-cell>] [--reference <benchmark-directory>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-compare --reference <benchmark-directory> --run <benchmark-directory> --output <new-directory>");
                 Console.WriteLine("BalanceHarness tower-search --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-loadout-prepare --output <new-directory> [--definition <json>] [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-loadout-search --output <new-directory> [--definition <json>] [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-loadout-reliability --output <new-directory> [--definition <json>] [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-party-search --output <new-directory> [--definition <json>] [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-party-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-party-progression --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-whole-party --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-loadout-replay --run <pilot-directory> --battle <trial-id> [--detailed]");
+                Console.WriteLine("BalanceHarness tower-loadout-verify --run <pilot-directory>");
                 Console.WriteLine("BalanceHarness tower-dashboard [--port <1-65535>] [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness replay --run <directory> [--battle <suite-battle-id>] [--detailed]");
                 Console.WriteLine("BalanceHarness baseline accept --run <suite-directory> --output <new-manifest.json> --reason <text>");
@@ -49,6 +58,15 @@ public static class Program
                 "tower-benchmark" => new[] { "--output", "--content-root", "--catalog", "--seed", "--samples", "--reference" },
                 "tower-compare" => new[] { "--reference", "--run", "--output" },
                 "tower-search" => new[] { "--output", "--content-root", "--catalogs-root" },
+                "tower-loadout-prepare" => new[] { "--output", "--definition", "--content-root", "--catalogs-root" },
+                "tower-loadout-search" => new[] { "--output", "--definition", "--content-root", "--catalogs-root" },
+                "tower-loadout-reliability" => new[] { "--output", "--definition", "--content-root", "--catalogs-root" },
+                "tower-party-search" => new[] { "--output", "--definition", "--content-root", "--catalogs-root" },
+                "tower-party-verify" => new[] { "--run" },
+                "tower-party-progression" => new[] { "--output", "--content-root", "--catalogs-root" },
+                "tower-whole-party" => new[] { "--output", "--content-root", "--catalogs-root" },
+                "tower-loadout-replay" => new[] { "--run", "--battle", "--detailed" },
+                "tower-loadout-verify" => new[] { "--run" },
                 "tower-dashboard" => new[] { "--port", "--runs-root", "--catalogs-root", "--content-root" },
                 "replay" => new[] { "--run", "--battle", "--detailed" },
                 "baseline" => new[] { "--run", "--output", "--reason" },
@@ -73,6 +91,67 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-party-progression")
+            {
+                await TowerPartyProgression.RunBatchAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures"),
+                    Required(options, "--output"), cancellation.Token, Console.WriteLine);
+                return 0;
+            }
+            if (command == "tower-whole-party")
+            {
+                await TowerWholeParty.RunBatchAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures"),
+                    Required(options, "--output"), cancellation.Token, Console.WriteLine);
+                return 0;
+            }
+            if (command == "tower-party-verify")
+            {
+                var report = await TowerPartySearch.VerifyAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Verified {report.ActualBattles} saved trials; reconstructed all three stages, proposals, shortlists and frozen confirmation.");
+                return 0;
+            }
+            if (command == "tower-party-search")
+            {
+                var definition = options.TryGetValue("--definition", out var file) ? TowerPartySearch.Read(file) : TowerPartySelection.Default;
+                var report = await TowerPartySearch.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures"), Required(options, "--output"),
+                    definition, cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"{report.Status}; {report.ActualBattles} trials; {report.Selection.Count} frozen parties confirmed. Results are descriptive.");
+                return 0;
+            }
+            if (command == "tower-loadout-verify")
+            {
+                var report = TowerLoadoutPilot.ReadReport(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Verified {report.ActualBattles} saved trials and reconstructed discovery fitness and frozen selection.");
+                return 0;
+            }
+            if (command is "tower-loadout-search" or "tower-loadout-reliability")
+            {
+                var definition = options.TryGetValue("--definition", out var file) ? TowerLoadoutPilot.Read(file)
+                    : command == "tower-loadout-reliability" ? TowerLoadoutReliability.Default : TowerLoadoutPilot.Default;
+                var report = await TowerLoadoutPilot.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures"), Required(options, "--output"),
+                    definition, cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"{report.Status}; {report.ActualBattles} trials; frozen character-loadout finalists confirmed. No optimality or balance acceptance claim.");
+                return 0;
+            }
+            if (command == "tower-loadout-replay")
+            {
+                var report = await TowerLoadoutArchive.ReplayAsync(Required(options, "--run"), Required(options, "--battle"), detailed, cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(report, HarnessJson.Options));
+                Console.Error.WriteLine("Replay matched the saved input, combat result and Tower outcome.");
+                return 0;
+            }
+            if (command == "tower-loadout-prepare")
+            {
+                var root = options.GetValueOrDefault("--content-root") ?? FindContentRoot();
+                var definition = options.TryGetValue("--definition", out var file) ? TowerLoadoutFoundation.ReadDefinition(file)
+                    : TowerLoadoutFoundation.Default(root, options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures"));
+                var report = await TowerLoadoutFoundation.CreateAsync(root, definition, Required(options, "--output"), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"{report.Status}; {report.Contexts.Count} contexts prepared; {report.OrderAudit.Count(o => o.GameplayChanged)}/{report.OrderAudit.Count} order probes changed gameplay. No build ranking.");
+                return 0;
+            }
             if (command == "tower-search")
             {
                 var catalogs = options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures");

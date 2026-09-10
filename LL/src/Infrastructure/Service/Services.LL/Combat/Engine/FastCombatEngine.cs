@@ -650,7 +650,7 @@ public sealed partial class FastCombatEngine
             var primaryTarget = SelectActiveAbilityPrimaryTarget(ability, actor, combatants);
             Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, primaryTarget, ability.Definition.Id,
                 StyleCast: styleCast), combatants);
-            CompleteCombatStyleCast(styleCast);
+            CompleteCombatStyleCast(styleCast, combatants);
         }
     }
 
@@ -665,13 +665,17 @@ public sealed partial class FastCombatEngine
         }
 
         _basicAttackProgress[actor] = progress - threshold;
-        PerformBasicAttack(actor, combatants);
+        PerformBasicAttack(actor, combatants, naturalAttack: true);
     }
 
-    private void PerformBasicAttack(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
+    private void PerformBasicAttack(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants, bool naturalAttack = false)
     {
         if (SelectAttentionTarget(actor, combatants) is not { } target)
             return;
+
+        var duelistAction = naturalAttack ? BeginDuelistAction(actor, basicAttack: true) : null;
+        if (duelistAction is not null)
+            ChooseDuelistOpponent(duelistAction, target);
 
         if (_threatAndTankingEnabled)
             AdjustThreatAndTrack(actor, _basicAttackThreatValue, "Basic Attack");
@@ -696,8 +700,10 @@ public sealed partial class FastCombatEngine
             combatants,
             "Basic Attack",
             armorPenetrationBonus: basicAttackModifiers.ArmorPenetration,
-            canConsumeGuard: false);
+            canConsumeGuard: false,
+            duelistAction: duelistAction);
         ApplyLifeSteal(actor, healthDamage, 0, combatants, "Basic Attack", "Basic Attack");
+        CompleteDuelistAction(duelistAction, combatants);
     }
 
     private static bool IsActionBlocked(RuntimeCombatant combatant)
@@ -1394,6 +1400,7 @@ public sealed partial class FastCombatEngine
                             continue;
 
                         var countThisActivation = countStatsActivation && !activationCounted;
+                        SelectDuelistOpponent(styleCast?.Duelist, effect, source, targets.AsSpan(0, targetCount));
                         effectUsage.MarkEffectUsed(effect, target);
                         ExecuteEffect(
                             effect,
@@ -1929,6 +1936,7 @@ public sealed partial class FastCombatEngine
                 break;
             case AbilityEffectOperation.SelfDestruct:
                 target.SetHealth(0);
+                ClearDuelistOnDeath(target);
                 Log(source, target, effect.Id, EventType.Death, 0, $"{target.Name} self-destructed.", statsSource, countStatsActivation);
                 NotifySummonChanged(target, combatants);
                 ExpireOwnedSummons(target, combatants, "owner death");
@@ -2025,9 +2033,17 @@ public sealed partial class FastCombatEngine
         bool canConsumeGuard = true,
         int styleDamageBonus = 0,
         CombatStyleDamageBonusKind styleDamageBonusKind = CombatStyleDamageBonusKind.Counterweight,
-        CombatStyleCastContext? styleCast = null)
+        CombatStyleCastContext? styleCast = null,
+        DuelistActionContext? duelistAction = null)
     {
-        if (!target.IsAlive || damage + styleDamageBonus <= 0)
+        if (!target.IsAlive)
+            return 0;
+        duelistAction ??= styleCast?.Duelist;
+        var duelistDirectHit = duelistAction is not null && delivery == DamageDelivery.Direct
+            && !ReferenceEquals(source, target) && (effect is null || IsDuelistDirectEffect(effect));
+        if (duelistDirectHit)
+            damage = PrepareDuelistDamage(duelistAction, source, target, damage);
+        if (damage + styleDamageBonus <= 0)
             return 0;
 
         var redirectedIncomingDamage = delivery == DamageDelivery.Redirected ? damage : 0;
@@ -2224,6 +2240,11 @@ public sealed partial class FastCombatEngine
         var healthBefore = target.Health;
         target.AdjustHealth(-pendingHealthDamage);
         var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
+        if (!target.IsAlive)
+            ClearDuelistOnDeath(target);
+        if (duelistDirectHit && ReferenceEquals(duelistAction!.Opponent, target)
+            && healthDamage + barrierAbsorbed > 0)
+            duelistAction.LandedDamage = true;
         TrackBalanceDamage(source, target, healthDamage);
 
         Log(

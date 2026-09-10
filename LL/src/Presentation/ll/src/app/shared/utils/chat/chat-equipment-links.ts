@@ -2,9 +2,16 @@ import {
   ChatTextSegment,
   splitChatMentions,
 } from '../../../layout/dashboard/chat/chat-mentions';
+import { Rarity } from '../../models/enums/rarity';
 
 const EQUIPMENT_LINK =
-  /\[([^\[\]\r\n]{1,64})\]\(equipment:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\)/gi;
+  /\[([^\[\]\r\n]{1,64})\]\(equipment:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?::(Common|Uncommon|Rare|Epic|Unique|Legendary|Legacy))?\)/gi;
+
+function linkRarity(value: string | undefined): Rarity | undefined {
+  return Object.values(Rarity).find(
+    (rarity) => rarity.toLowerCase() === value?.toLowerCase(),
+  );
+}
 
 /** Item names count toward the limit; their brackets and encoded IDs do not. */
 export function chatMessageLength(body: string): number {
@@ -18,6 +25,7 @@ export function equipmentLinkRanges(body: string) {
     token: match[0],
     name: match[1],
     id: match[2],
+    rarity: linkRarity(match[3]),
   }));
 }
 
@@ -52,13 +60,17 @@ export function insertEquipmentLinkAtSelection(
     : null;
 }
 
-export function formatEquipmentLink(id: string, name: string): string {
+export function formatEquipmentLink(
+  id: string,
+  name: string,
+  rarity?: Rarity,
+): string {
   const label =
     name
       .replace(/[\[\]\r\n]/g, ' ')
       .trim()
       .slice(0, 64) || 'Equipment';
-  return `[${label}](equipment:${id})`;
+  return `[${label}](equipment:${id}${rarity ? ':' + rarity : ''})`;
 }
 
 export function splitChatEquipmentLinks(
@@ -77,6 +89,7 @@ export function splitChatEquipmentLinks(
       isMention: false,
       isCurrentPlayerMention: false,
       equipmentId: match[2],
+      equipmentRarity: linkRarity(match[3]),
     });
     cursor = match.index! + match[0].length;
   }

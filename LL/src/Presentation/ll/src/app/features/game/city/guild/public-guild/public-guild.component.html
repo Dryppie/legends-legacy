@@ -1,0 +1,132 @@
+<div class="ll-page-stack overflow-hidden">
+  <app-default-header
+    class="flex-none pr-4 sm:pr-6"
+    section="City"
+    title="Guild"
+    text="Create or join a guild, gain powerful allies, and challenge difficult raids"
+    icon="sidebar/city/guild"
+    [showGuide]="false"
+  >
+    <a
+      header-actions
+      routerLink="/game/city/guild"
+      class="text-sm text-primary hover:underline"
+      >Back to Guilds</a
+    >
+  </app-default-header>
+  @if (view$ | async; as view) {
+    @if (view.loading) {
+      <p class="ll-empty-state" role="status">Loading guild...</p>
+    } @else if (view.error) {
+      <div class="ll-panel p-4" role="alert">
+        <p class="text-zinc-300">{{ view.error }}</p>
+        <button type="button" class="ll-button mt-3" (click)="retry()">
+          Try again
+        </button>
+      </div>
+    } @else if (view.guild; as guild) {
+      <section
+        class="ll-page-header flex shrink-0 flex-wrap items-start justify-between gap-4"
+      >
+        <div>
+          <p class="ll-eyebrow">Guild Headquarters</p>
+          <h1 class="ll-heading mt-1 text-2xl">
+            <app-guild-link [guildId]="guild.id" [name]="guild.name" />
+          </h1>
+          <p class="ll-copy mt-1">
+            {{ guild.tag ? "[" + guild.tag + "]" : "No guild tag" }}
+          </p>
+          <p class="ll-copy mt-2 max-w-prose whitespace-pre-line text-sm">
+            {{ guild.description || "No description yet." }}
+          </p>
+        </div>
+        <div class="ll-stat-card px-3 py-2 text-sm">
+          <div class="ll-stat-label">Members</div>
+          <div class="ll-heading mt-1 text-lg">
+            {{ guild.members.length }} / {{ guild.maxMembers }}
+          </div>
+        </div>
+      </section>
+      <app-tabs class="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <app-tab label="Guild">
+          <div class="min-h-0 flex-1 overflow-y-auto">
+            <section
+              class="ll-panel min-w-0 overflow-hidden"
+              aria-labelledby="public-guild-members"
+            >
+              <h2 id="public-guild-members" class="ll-heading p-3">
+                Members ({{ guild.members.length }})
+              </h2>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                  <thead class="ll-table-header">
+                    <tr>
+                      <th class="px-3 py-2">Member</th>
+                      <th class="px-3 py-2">Level</th>
+                      <th class="px-3 py-2">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (member of guild.members; track member.characterId) {
+                      <tr class="ll-table-row">
+                        <td class="break-words px-3 py-2">
+                          <a
+                            routerLink="/game/character/character-overview"
+                            [queryParams]="{ characterName: member.name }"
+                            class="text-primary hover:underline"
+                            >{{ member.name }}</a
+                          >
+                        </td>
+                        <td class="px-3 py-2 tabular-nums">
+                          {{ member.level }}
+                        </td>
+                        <td class="px-3 py-2 text-zinc-300">
+                          {{ member.role }}
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="3" class="p-3 text-zinc-400">
+                          No members.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </app-tab>
+        <app-tab label="Buildings">
+          <div class="min-h-0 flex-1 overflow-y-auto">
+            <section
+              class="ll-panel overflow-hidden"
+              aria-labelledby="public-guild-buildings"
+            >
+              <h2 id="public-guild-buildings" class="ll-heading p-3">
+                Guild Buildings
+              </h2>
+              @for (building of guild.buildings; track building.type) {
+                <div
+                  class="ll-table-row flex items-center justify-between gap-3 px-3 py-2 text-sm"
+                >
+                  <span>{{ building.type | humanize }}</span>
+                  <span class="shrink-0 text-primary"
+                    >Level {{ building.level }}</span
+                  >
+                </div>
+              } @empty {
+                <p class="p-3 text-sm text-zinc-400">
+                  No guild buildings constructed yet.
+                </p>
+              }
+            </section>
+          </div>
+        </app-tab>
+        <app-tab label="Rankings">
+          <app-guild-rankings class="min-h-0 flex-1 overflow-hidden" />
+        </app-tab>
+      </app-tabs>
+    }
+  }
+</div>

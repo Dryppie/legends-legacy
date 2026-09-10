@@ -1,3 +1,4 @@
+import { GuildLinkComponent } from '../../../../../../shared/components/guild/guild-link.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnInit } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
@@ -14,7 +15,14 @@ interface GuildRankingRow extends LeaderboardBoardEntry {
 
 @Component({
   selector: 'app-guild-rankings',
-  imports: [NgClass, NgIf, NgFor, NumberFormatPipe, CharacterTagComponent],
+  imports: [
+    GuildLinkComponent,
+    NgClass,
+    NgIf,
+    NgFor,
+    NumberFormatPipe,
+    CharacterTagComponent,
+  ],
   templateUrl: './guild-rankings.component.html',
 })
 export class GuildRankingsComponent implements OnInit {
@@ -40,6 +48,7 @@ export class GuildRankingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.guildState.loadAllGuilds();
     this.leaderboardState.load('guild-renown', true);
   }
 

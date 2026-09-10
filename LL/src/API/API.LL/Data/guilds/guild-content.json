@@ -373,9 +373,9 @@
       "id": "0171138e-654b-455b-9a81-8b681210ce76",
       "key": "daily.essence_absorption",
       "name": "Strengthen the Soul",
-      "description": "Absorb an essence.",
+      "description": "Absorb or Shatter an Essence.",
       "category": "Essence",
-      "metric": "EssencesAbsorbed",
+      "metric": "EssencesAbsorbedOrShattered",
       "baseTarget": 1
     }
   ],

@@ -7,12 +7,43 @@ using Application.UseCases.WorldTower.Dtos;
 using AutoMapper;
 using Domain.Models.Combat;
 using Microsoft.Extensions.Logging.Abstractions;
+using Services.LL.Combat.Stats;
 
 namespace EssenceSystem.Tests;
 
 public sealed class CombatSummaryTransportTests
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Summary_preserves_latest_defeat_time_without_requiring_compact_telemetry(bool captureCompactTelemetry)
+    {
+        var accumulator = new CombatStatsAccumulator(captureCompactTelemetry);
+        foreach (var (eventType, tick) in new[]
+        {
+            (EventType.Death, 123), (EventType.Revive, 200), (EventType.Death, 456)
+        })
+        {
+            accumulator.Add("Attack", "Attack", false, "enemy", "Hostile",
+                "hero", "Friendly", "Hero", eventType, 0, timestamp: tick);
+        }
+
+        var result = new CombatResult { EntityStats = [.. accumulator.Snapshot()] };
+        var storedJson = JsonSerializer.Serialize(result, JsonOptions);
+        var restored = JsonSerializer.Deserialize<CombatResult>(storedJson, JsonOptions)!;
+        var mapper = new MapperConfiguration(configuration => configuration.AddProfile<MappingProfile>(),
+            NullLoggerFactory.Instance).CreateMapper();
+        var dto = mapper.Map<CombatResultDto>(restored);
+        using var response = JsonDocument.Parse(JsonSerializer.Serialize(dto, JsonOptions));
+        var hero = response.RootElement.GetProperty("entityStats").EnumerateArray()
+            .Single(stats => stats.GetProperty("entityId").GetString() == "hero");
+
+        Assert.Equal(456, hero.GetProperty("lastDeathTick").GetInt32());
+        Assert.Equal(2, hero.GetProperty("deaths").GetInt32());
+        Assert.Null(dto.EntityStats.Single(stats => stats.EntityId == "enemy").LastDeathTick);
+    }
 
     [Fact]
     public void Ordinary_combat_results_keep_normal_stats_without_serializing_internal_style_diagnostics()

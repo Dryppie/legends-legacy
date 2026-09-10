@@ -420,6 +420,14 @@ export class CombatEntityStatsComponent implements OnChanges {
     return this.hasKnownHealth(entity) && entity.health <= 0;
   }
 
+  defeatLabel(participant: StatsParticipant): string {
+    const tick = this.statsFor(participant.id)?.lastDeathTick;
+    if (tick == null || !Number.isFinite(tick) || tick < 0) return 'Defeated';
+
+    const seconds = tick / 10;
+    return `Defeated after ${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
+  }
+
   reviveCountdownLabel(participant: StatsParticipant): string | null {
     if (
       participant.team !== 'Friendly' ||

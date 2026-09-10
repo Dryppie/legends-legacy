@@ -116,7 +116,8 @@ public sealed record TowerRallyParticipantDto(
     bool IsLeader,
     bool IsCurrentCharacter,
     int? PartySlot,
-    int? PartyNumber);
+    int? PartyNumber,
+    Guid? GuildId = null);
 
 public sealed record TowerRallyApplicationDto(
     Guid Id,
@@ -126,7 +127,8 @@ public sealed record TowerRallyApplicationDto(
     int PowerRating,
     TowerRallyApplicationStatus Status,
     DateTimeOffset AppliedAt,
-    bool IsCurrentCharacter);
+    bool IsCurrentCharacter,
+    Guid? GuildId = null);
 
 public sealed record TowerRosterReadinessDto(
     string Rating,

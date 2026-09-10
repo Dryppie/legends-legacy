@@ -1,3 +1,4 @@
+import { GuildLinkComponent } from '../../../../../shared/components/guild/guild-link.component';
 import { Component, computed, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { DialogFocusDirective } from '../../../../../shared/directives/dialog-fo
 
 @Component({
   selector: 'app-no-guild',
-  imports: [NgIf, NgFor, FormsModule, DialogFocusDirective],
+  imports: [GuildLinkComponent, NgIf, NgFor, FormsModule, DialogFocusDirective],
   templateUrl: './no-guild.component.html',
 })
 export class NoGuildComponent {

@@ -108,8 +108,9 @@ public sealed class CombatStyleService(
         {
             equippedEssences ??= (await loadouts.ResolveAsync(characterId, activity, ct)).EquippedEssences;
             if (equippedEssences.FirstOrDefault() is { } first) channeledEssence = channeledEssenceResolver.Resolve(first);
-            if (CombatStyleRules.ValidateChanneledEssence(channeledEssence) is { } channeledEssenceIssue)
-                throw new CombatStyleConfigurationException(channeledEssenceIssue);
+            // Keep the global selection, but capture no style for a loadout Conduit cannot channel.
+            if (CombatStyleRules.ValidateChanneledEssence(channeledEssence) is not null)
+                return null;
         }
         return CombatStyleRules.Snapshot(Catalog, definition, owned!, selection, channeledEssence);
     }
@@ -186,6 +187,32 @@ public sealed class CombatStyleService(
         string HealthBonus(double bonus, double health) =>
             $"+{Number(bonus * 100)}% Health recovery (×{Number(1 + bonus)}) · {Number(health)} Health";
         var facts = new List<CombatStylePreviewFact>();
+        if (style.Kind == CombatStyleKind.Duelist && tuning.Duelist is { } duelist)
+        {
+            facts.Add(new("Read needed", $"{duelist.ReadRequired}", "Each successful basic attack or normal damaging Essence builds 1 Read against the same surviving opponent, once per action."));
+            facts.Add(new("Opening damage", $"{Number(100 * duelist.Multiplier(style.Level))}% of normal damage",
+                "Your next damaging Essence spends a ready Opening. All its direct hits against that opponent receive the bonus; other targets take normal damage."));
+            facts.Add(new("Changing opponents", "Start a fresh Read", "Hitting other enemies alongside your current opponent does not reset Read."));
+            if (duelist.ReturnedRead > 0)
+                facts.Add(new("Flurry", $"Regain {duelist.ReturnedRead} Read", "After spending an Opening, if you and the opponent survive."));
+            if (duelist.GuardCharges > 0)
+                facts.Add(new("Guarded Thrust", $"Guard({duelist.GuardCharges})", "Gain Guard after spending an Opening and finishing the cast, if you survive. Normal Guard rules apply."));
+            if (style.HasUpgrade(CombatStyleIds.MeasuredStrikes))
+                facts.Add(new("Measured Strikes", AdditiveBonus(duelist.UpgradeBonus),
+                    style.HasMasteredUpgrade(CombatStyleIds.MeasuredStrikes)
+                        ? $"One successful basic attack grants this bonus; two or more grant {AdditiveBonus(duelist.MasteredMeasuredStrikesBonus)} instead."
+                        : "Land at least one basic attack against the opponent while preparing the Opening."));
+            if (style.HasUpgrade(CombatStyleIds.KnowYourEnemy))
+                facts.Add(new("Know Your Enemy", AdditiveBonus(duelist.UpgradeBonus),
+                    style.HasMasteredUpgrade(CombatStyleIds.KnowYourEnemy) ? "Every Opening, including your first against an opponent."
+                        : "After you have spent an Opening against this opponent. Changing opponents clears the benefit."));
+            if (style.HasUpgrade(CombatStyleIds.FinishingTouch))
+                facts.Add(new("Finishing Touch", AdditiveBonus(duelist.UpgradeBonus),
+                    $"Your opponent must be at or below {Number(100 * (style.HasMasteredUpgrade(CombatStyleIds.FinishingTouch) ? duelist.MasteredFinishingTouchHealthThreshold : duelist.FinishingTouchHealthThreshold))}% Health before the Opening's first hit."));
+            if (style.Level >= CombatStyleProgression.OpeningTechniqueLevel)
+                facts.Add(new("Opening Technique", $"First Impression: {duelist.FirstImpressionRead} extra Read", "Added to the first successful action's normal Read if the opponent survives. Once per battle."));
+            return facts;
+        }
         if (style.Kind == CombatStyleKind.Reaper && tuning.Reaper is { } reaper)
         {
             var payout = style.RefinementId switch

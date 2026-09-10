@@ -133,7 +133,7 @@
     "id": "ability.creature.raven.bad_omen",
     "kind": "Passive",
     "name": "Bad Omen",
-    "description": "At combat start, apply Vulnerable(2) to all enemies.",
+    "description": "Innate: apply Vulnerable(2) to all enemies.",
     "cooldownTicks": 0,
     "tags": [
       "Debuff",
@@ -387,7 +387,7 @@
     "id": "ability.creature.lumo_wisp.lumo_barrier",
     "kind": "Passive",
     "name": "Lumo Barrier",
-    "description": "At combat start, gain Barrier equal to {scaling} Max Health.",
+    "description": "Innate: gain Barrier equal to {scaling} Max Health.",
     "cooldownTicks": 0,
     "tags": [
       "Barrier",
@@ -819,7 +819,7 @@
     "id": "ability.creature.hobgoblin.threatening_presence",
     "kind": "Passive",
     "name": "Threatening Presence",
-    "description": "At combat start, take 10% less damage from Vulnerable enemies.",
+    "description": "Innate: take 10% less damage from Vulnerable enemies.",
     "cooldownTicks": 0,
     "tags": [
       "Buff",
@@ -966,7 +966,7 @@
     "id": "ability.creature.blue_slime.protective_slime",
     "kind": "Passive",
     "name": "Protective Slime",
-    "description": "At combat start, grant all allies Barrier equal to {scaling} of your Max Health.",
+    "description": "Innate: grant all allies Barrier equal to {scaling} of your Max Health.",
     "cooldownTicks": 0,
     "tags": [
       "Barrier",
@@ -1193,7 +1193,7 @@
     "id": "ability.creature.grave_hound.graveyard_howl",
     "kind": "Passive",
     "name": "Graveyard Howl",
-    "description": "At combat start, apply Slow to all enemies.",
+    "description": "Innate: apply Slow to all enemies.",
     "cooldownTicks": 0,
     "tags": [
       "Debuff",
@@ -1241,7 +1241,7 @@
     "id": "ability.creature.lost_soul.soul_lantern",
     "kind": "Passive",
     "name": "Soul Lantern",
-    "description": "At combat start, apply Vulnerable(5) to a random enemy.",
+    "description": "Innate: apply Vulnerable(5) to a random enemy.",
     "cooldownTicks": 0,
     "tags": [
       "Debuff"
@@ -1359,7 +1359,7 @@
     "id": "ability.creature.skeleton.calcium",
     "kind": "Passive",
     "name": "Calcium",
-    "description": "At combat start, gain Guard(4).",
+    "description": "Innate: gain Guard(4).",
     "cooldownTicks": 0,
     "tags": [
       "Buff",
@@ -1475,7 +1475,7 @@
     "id": "ability.creature.wood_nymph.natures_protection",
     "kind": "Passive",
     "name": "Nature\u0027s Protection",
-    "description": "At combat start, gain Renewal(15) and Ward(2).",
+    "description": "Innate: gain Renewal(15) and Ward(2).",
     "cooldownTicks": 0,
     "tags": [
       "Buff",
@@ -1718,7 +1718,7 @@
     "id": "ability.creature.thornback_boar.bristling_hide",
     "kind": "Passive",
     "name": "Bristling Hide",
-    "description": "At combat start, gain Thorns(10) for 30 seconds.",
+    "description": "Innate: gain Thorns(10) for 30 seconds.",
     "cooldownTicks": 0,
     "tags": [
       "Buff",
@@ -2691,7 +2691,7 @@
     "id": "ability.creature.giant_worm.erupting_ambush",
     "kind": "Passive",
     "name": "Erupting Ambush",
-    "description": "At combat start, deal 180% Physical Damage to the lowest-health enemy and apply Bleed(8).",
+    "description": "Innate: deal 180% Physical Damage to the lowest-health enemy and apply Bleed(8).",
     "cooldownTicks": 0,
     "tags": [
       "Physical",
@@ -4638,7 +4638,7 @@
     "id": "ability.creature.ni.ninefold",
     "kind": "Passive",
     "name": "Ninefold",
-    "description": "At combat start, summon 9 inert copies with 10% of Ni\u0027s Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
+    "description": "Innate: summon 9 inert copies with 10% of Ni\u0027s Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
     "cooldownTicks": 0,
     "tags": [
       "Passive",
@@ -4771,7 +4771,7 @@
     "id": "ability.creature.kodoku.survivors_struggle",
     "kind": "Passive",
     "name": "Survivor\u0027s Struggle",
-    "description": "At combat start, summon five Venomspawn. Whenever one dies, every surviving Venomspawn permanently gains 25% Attack Speed and 25% of its initial Power.",
+    "description": "Innate: summon five Venomspawn. Whenever one dies, every surviving Venomspawn permanently gains 25% Attack Speed and 25% of its initial Power.",
     "cooldownTicks": 0,
     "tags": [
       "Passive",
@@ -6527,7 +6527,7 @@
     "id": "ability.set.aegis.raised_aegis",
     "kind": "Passive",
     "name": "Raised Aegis",
-    "description": "At combat start, gain a barrier equal to 10% of Max Health.",
+    "description": "Innate: gain a barrier equal to 10% of Max Health.",
     "cooldownTicks": 0,
     "tags": [
       "Set",
@@ -8961,7 +8961,7 @@
     "id": "ability.creature.blue_slime.protective_slime.balance_creek",
     "kind": "Passive",
     "name": "Protective Slime",
-    "description": "At combat start, grant all allies Barrier equal to {scaling} of your Max Health.",
+    "description": "Innate: grant all allies Barrier equal to {scaling} of your Max Health.",
     "cooldownTicks": 0,
     "tags": [
       "Barrier",

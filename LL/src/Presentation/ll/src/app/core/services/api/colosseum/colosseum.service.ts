@@ -74,8 +74,15 @@ export class ColosseumService {
         },
       )
       .pipe(
-        catchError(() => {
-          return throwError(() => new Error('Failed to update arena defense'));
+        catchError((err) => {
+          return throwError(
+            () =>
+              new Error(
+                err.errorMessage ??
+                  err.message ??
+                  'Failed to update arena defense',
+              ),
+          );
         }),
       );
   }
@@ -153,7 +160,10 @@ export class ColosseumService {
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to start match'),
+            () =>
+              new Error(
+                err.errorMessage ?? err.message ?? 'Failed to start match',
+              ),
           );
         }),
       );

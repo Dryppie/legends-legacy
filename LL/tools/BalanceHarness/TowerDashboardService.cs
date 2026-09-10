@@ -7,12 +7,12 @@ namespace BalanceHarness;
 public sealed record DashboardRunRequest(string Catalog, int[] Floors, string[] Parties, int Samples, int Seed, string? Reference);
 public sealed record DashboardReplayRequest(string Run, string Battle);
 public sealed record DashboardCatalog(string Id, TowerBenchmarkDefinition Definition);
-public sealed record DashboardRun(string Id, string Name, string Status, int Valid, int Planned);
+public sealed record DashboardRun(string Id, string Name, string Status, int Valid, int Planned, string Kind = "Benchmark");
 public sealed record DashboardJob(string Id, string Kind, string Status, string? Run, int Completed, int Planned,
     string Message, string? ReplayFile = null);
 
 /// <summary>One cancellable local operation at a time. Existing evidence is always read-only.</summary>
-public sealed class TowerDashboardService(string apiRoot, string catalogsRoot, string runsRoot) : IAsyncDisposable
+public sealed partial class TowerDashboardService(string apiRoot, string catalogsRoot, string runsRoot) : IAsyncDisposable
 {
     private readonly string _runsRoot = Path.GetFullPath(runsRoot);
     private readonly object _gate = new();
@@ -55,14 +55,14 @@ public sealed class TowerDashboardService(string apiRoot, string catalogsRoot, s
         {
             var (path, depth) = queue.Dequeue();
             if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0) continue;
-            if (File.Exists(Path.Combine(path, "benchmark-input.json")) && File.Exists(Path.Combine(path, "benchmark.json")))
+            if (IsLoadouts(path) || (File.Exists(Path.Combine(path, "benchmark-input.json")) && File.Exists(Path.Combine(path, "benchmark.json"))))
             {
                 result.Add(RunId(path), path);
                 continue;
             }
             if (depth >= 3 || File.Exists(Path.Combine(path, "tower-input.json")) || File.Exists(Path.Combine(path, "suite-input.json"))) continue;
             foreach (var child in Directory.EnumerateDirectories(path).OrderDescending().Take(2000))
-                if (Path.GetFileName(child) is not ("content" or "source" or "executable" or "replays" or "cells" or "scenarios"))
+                if (Path.GetFileName(child) is not ("content" or "source" or "executable" or "verification-executable" or "verified-source" or "replays" or "cells" or "scenarios" or "recipes" or "battles" or "searches" or "catalogs"))
                     queue.Enqueue((child, depth + 1));
         }
         return result;
@@ -75,6 +75,11 @@ public sealed class TowerDashboardService(string apiRoot, string catalogsRoot, s
     {
         try
         {
+            if (IsLoadouts(entry.Value))
+            {
+                var report = HarnessJson.Read<PartySearchReport>(Path.Combine(entry.Value, "party-search.json"));
+                return new DashboardRun(entry.Key, Path.GetRelativePath(_runsRoot, entry.Value), report.Status, report.ActualBattles, report.PlannedMaximum, "Loadouts");
+            }
             var summary = HarnessJson.Read<TowerBenchmarkReport>(Path.Combine(entry.Value, "benchmark.json"));
             return new DashboardRun(entry.Key, Path.GetRelativePath(_runsRoot, entry.Value), summary.Status, summary.ValidBattles, summary.PlannedBattles);
         }
@@ -88,6 +93,7 @@ public sealed class TowerDashboardService(string apiRoot, string catalogsRoot, s
     public object Details(string id, CancellationToken token)
     {
         var path = ResolveRun(id);
+        if (IsLoadouts(path)) return LoadoutDetails(path, token);
         var saved = TowerBenchmark.ReadSaved(path, token);
         TowerBenchmarkComparisonReport? comparison = null;
         var comparisonPath = Path.Combine(path, "comparison", "comparison.json");
@@ -144,7 +150,8 @@ public sealed class TowerDashboardService(string apiRoot, string catalogsRoot, s
         if (string.IsNullOrWhiteSpace(request.Battle)) throw new InvalidDataException("Choose a saved battle.");
         return Begin("Replay", 1, async (folder, token) =>
         {
-            var replay = await TowerBenchmark.ReplayAsync(path, request.Battle, true, token);
+            var replay = IsLoadouts(path) ? await TowerLoadoutArchive.ReplayAsync(path, request.Battle, true, token)
+                : await TowerBenchmark.ReplayAsync(path, request.Battle, true, token);
             var file = Path.Combine(folder, "replay.json");
             HarnessJson.WriteNew(file, replay);
             Change(j => j with { Completed = 1, Run = request.Run, ReplayFile = file, Message = "Verified replay matched preparation, combat and outcome." });
@@ -197,7 +204,7 @@ public sealed class TowerDashboardService(string apiRoot, string catalogsRoot, s
                 try
                 {
                     await action(folder, token);
-                    Change(j => j with { Status = "Complete", Message = kind is "Replay" or "Essence search" ? j.Message : "Benchmark saved. Results are descriptive." });
+                    Change(j => j with { Status = "Complete", Message = kind is "Replay" or "Essence search" or "Loadouts" ? j.Message : "Benchmark saved. Results are descriptive." });
                 }
                 catch (OperationCanceledException) { Change(j => j with { Status = "Cancelled", Message = "Cancelled. Any completed trials remain saved." }); }
                 catch (Exception error) { Change(j => j with { Status = "Failed", Message = error.Message }); }

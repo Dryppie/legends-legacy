@@ -18,17 +18,21 @@ class EditorHost {
 }
 
 describe('Inline chat composer', () => {
-  const mace = '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba)';
-  const otherMace = '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024ebb)';
+  const mace = '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024eba:Epic)';
+  const otherMace =
+    '[Mace](equipment:2b84eb39-110d-4b01-aacd-72caef024ebb:Epic)';
 
   function setup(value: string) {
+    const lookup = jasmine
+      .createSpy('getLinkedEquipment')
+      .and.callFake((id: string) => of({ id, rarity: Rarity.Epic }));
     TestBed.configureTestingModule({
       imports: [EditorHost],
       providers: [
         {
           provide: EquipmentService,
           useValue: {
-            getLinkedEquipment: (id: string) => of({ id, rarity: Rarity.Epic }),
+            getLinkedEquipment: lookup,
           },
         },
       ],
@@ -41,11 +45,14 @@ describe('Inline chat composer', () => {
     const host = fixture.componentInstance;
     const editor = host.editor;
     editor.focus();
-    return { fixture, host, editor, element: editor.nativeElement };
+    return { fixture, host, editor, element: editor.nativeElement, lookup };
   }
 
   it('shows colored names inline while preserving different IDs for identically named pieces', fakeAsync(() => {
-    const { fixture, editor, element } = setup(`Buy ${mace} and ${otherMace}`);
+    const { fixture, editor, element, lookup } = setup(
+      `Buy ${mace} and ${otherMace}`,
+    );
+    expect(lookup).not.toHaveBeenCalled();
     expect(element.textContent).toBe('Buy [Mace] and [Mace]');
     expect(element.querySelectorAll('.ll-rarity-epic').length).toBe(2);
     expect(element.querySelectorAll('[contenteditable="false"]').length).toBe(

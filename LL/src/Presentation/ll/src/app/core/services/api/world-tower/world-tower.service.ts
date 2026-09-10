@@ -154,6 +154,7 @@ export interface TowerRally {
 }
 
 export interface TowerRallyApplication {
+  guildId?: string | null;
   id: string;
   characterId: string;
   characterName: string;
@@ -165,6 +166,7 @@ export interface TowerRallyApplication {
 }
 
 export interface TowerRallyParticipant {
+  guildId?: string | null;
   characterId: string;
   characterName: string;
   guildName: string | null;

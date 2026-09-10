@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.Interfaces.Services.LL.Essences;
 using Common.Randomness;
 using Domain.Helpers;
@@ -18,7 +19,9 @@ public sealed record EquipmentReferenceBuildDefinition(
     string Id, int CharacterLevel, int Tier, int Rank,
     IReadOnlyList<EquipmentReferenceEquipmentSelection> Equipment, IReadOnlyList<string> EssenceIds,
     ItemQuality Quality = ItemQuality.Standard,
-    double AttributeRollMultiplier = 1d);
+    double AttributeRollMultiplier = 1d,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<string>? IdentityEssenceIds = null);
 
 public sealed record EquipmentReferenceBuild(
     EquipmentReferenceBuildDefinition Definition, Character Character,
@@ -56,7 +59,14 @@ public sealed class EquipmentReferenceBuildFactory(
             throw new ArgumentException("Reference Essences must come from distinct monster families.", nameof(definition));
 
         definition = definition with { Equipment = Array.AsReadOnly(selections), EssenceIds = Array.AsReadOnly(essenceIds) };
-        var identity = JsonSerializer.Serialize(definition);
+        // Controlled loadout experiments can retain the original reference's instance identities.
+        // Null preserves the historical serialized identity exactly. Actual equipped IDs above
+        // still determine legality, attributes and abilities; this field only pins identity.
+        if (definition.IdentityEssenceIds is { } identityEssences
+            && (identityEssences.Count != essenceIds.Length || identityEssences.Any(string.IsNullOrWhiteSpace)))
+            throw new ArgumentException("Identity Essence slots must match the equipped slot count.", nameof(definition));
+        var identity = JsonSerializer.Serialize(definition with
+            { EssenceIds = definition.IdentityEssenceIds ?? definition.EssenceIds, IdentityEssenceIds = null });
         var character = new Character
         {
             Id = StableRandom.Guid(EquipmentKeys.ReferenceCharacterIdentity, identity),

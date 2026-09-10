@@ -69,7 +69,35 @@ public sealed class BalanceHarnessTowerTests
     [InlineData(1337, 1, true, "candidate-15", "tower-essence-search.json")]
     [InlineData(1337, 7, true, "candidate-03", "tower-essence-search.json")]
     [InlineData(1337, 10, true, "candidate-12", "tower-essence-search.json")]
-    public async Task Matches_independent_persisted_normal_Tower_preparation_playback_and_outcome(int seed, int floorNumber = 1, bool benchmark = false, string? preset = null, string? catalogFile = null)
+    [InlineData(1337, 1, true, "balanced", "tower-curve.json", 1)]
+    [InlineData(17, 1, true, "balanced", "tower-curve.json", 1)]
+    [InlineData(1337, 1, true, "balanced", "tower-curve.json", 2)]
+    [InlineData(1337, 1, true, "balanced", "tower-curve.json", 3)]
+    [InlineData(1337, 1, true, "balanced", "tower-curve.json", 5)]
+    [InlineData(1337, 10, true, "balanced", "tower-curve.json", 1)]
+    [InlineData(1337, 15, true, "balanced", "tower-curve.json", 1)]
+    [InlineData(1701, 1, false, "standard-rank-1", null, 0, true)]
+    [InlineData(2903, 10, false, "fine-rank-2", null, 0, true)]
+    [InlineData(-12345, 15, false, "standard-rank-2", null, 0, true)]
+    [InlineData(4111, 1, false, "standard-rank-1", null, 0, true, true)]
+    [InlineData(5227, 10, false, "standard-rank-1", null, 0, true, true)]
+    [InlineData(7451, 15, false, "standard-rank-1", null, 0, true, true)]
+    [InlineData(8563, 1, false, null, null, 0, false, false, true)]
+    [InlineData(9677, 10, false, null, null, 0, false, false, true)]
+    [InlineData(10871, 15, false, null, null, 0, false, false, true)]
+    [InlineData(6721, 1, false, null, null, 0, false, false, false, 6)]
+    [InlineData(6721, 10, false, null, null, 0, false, false, false, 6)]
+    [InlineData(6721, 15, false, null, null, 0, false, false, false, 6)]
+    [InlineData(10921, 1, false, null, null, 0, false, false, false, 10)]
+    [InlineData(10921, 10, false, null, null, 0, false, false, false, 10)]
+    [InlineData(10921, 15, false, null, null, 0, false, false, false, 10)]
+    [InlineData(24071, 1, false, null, null, 0, false, false, false, 6, "repeat")]
+    [InlineData(24071, 10, false, null, null, 0, false, false, false, 6, "alternating")]
+    [InlineData(24071, 15, false, null, null, 0, false, false, false, 6, "repeat")]
+    [InlineData(24079, 1, false, null, null, 0, false, false, false, 10, "alternating")]
+    [InlineData(24079, 10, false, null, null, 0, false, false, false, 10, "repeat")]
+    [InlineData(24079, 15, false, null, null, 0, false, false, false, 10, "alternating")]
+    public async Task Matches_independent_persisted_normal_Tower_preparation_playback_and_outcome(int seed, int floorNumber = 1, bool benchmark = false, string? preset = null, string? catalogFile = null, int reverseSlot = 0, bool loadoutPilot = false, bool alternativeAllies = false, bool jointParty = false, int progressionSlots = 0, string? wholeDeployment = null)
     {
         var scenario = Scenario;
         if (benchmark)
@@ -80,6 +108,47 @@ public sealed class BalanceHarnessTowerTests
                 : HarnessJson.Read<TowerBenchmarkDefinition>(Path.Combine(Path.GetDirectoryName(Fixture)!, catalogFile ?? (preset is null ? "tower-benchmark.json" : "tower-progression.json")));
             scenario = TowerBenchmark.Expand(catalog, Root, seed, 1).Single(s => s.Id == $"floor-{floorNumber}.{preset ?? "mixed"}");
             seed = scenario.Seeds[0];
+        }
+        if (reverseSlot > 0) scenario = scenario with { Party = scenario.Party.Select(p => p.PartySlot == reverseSlot
+            ? p with { Build = p.Build with { IdentityEssenceIds = p.Build.EssenceIds, EssenceIds = p.Build.EssenceIds.Reverse().ToArray() } } : p).ToArray() };
+        if (loadoutPilot)
+        {
+            scenario = TowerLoadoutPilot.Scenarios(Root, Path.GetDirectoryName(Fixture)!, TowerLoadoutPilot.Default.Gear.Single(g => g.Id == preset))
+                .Single(s => s.FloorNumber == floorNumber);
+            scenario = TowerLoadoutPilot.Apply(scenario, 2, new("whole-loadout", "parity",
+                ["essence.horned_wolf", "essence.dire_wolf", "essence.forest_spirit", "essence.lumo_wisp"]), [seed]);
+            if (alternativeAllies)
+            {
+                scenario = TowerLoadoutReliability.Contexts(TowerLoadoutReliability.Default, Root, Path.GetDirectoryName(Fixture)!)
+                    ["standard-rank-1--previous-05"].Single(s => s.FloorNumber == floorNumber);
+                scenario = TowerLoadoutPilot.Apply(scenario, 2, TowerLoadoutReliability.Default.FixedCandidates![0], [seed]);
+            }
+        }
+        if (jointParty)
+        {
+            scenario = TowerPartySearch.Contexts(Root, Path.GetDirectoryName(Fixture)!, 0).Values.Last().Single(s => s.FloorNumber == floorNumber);
+            scenario = TowerPartySelection.Apply(scenario, new Dictionary<int, IReadOnlyList<string>>
+            {
+                [1] = scenario.Party[0].Build.EssenceIds.Reverse().ToArray(),
+                [2] = TowerPartySelection.CandidateC.Essences,
+                [3] = TowerLoadoutReliability.Default.FixedCandidates![0].Essences,
+                [4] = TowerLoadoutReliability.Default.FixedCandidates![1].Essences
+            }, [seed]);
+        }
+        if (progressionSlots > 0)
+        {
+            var d = TowerPartyProgression.Definition(Root, Path.GetDirectoryName(Fixture)!, progressionSlots, seed);
+            scenario = TowerPartySearch.Contexts(Root, Path.GetDirectoryName(Fixture)!, 0, d.Budget).Values.Last().Single(s => s.FloorNumber == floorNumber);
+            scenario = TowerPartySelection.Apply(scenario, d.ReferenceBuilds!, [seed]);
+        }
+        if (wholeDeployment is not null)
+        {
+            var d = TowerWholeParty.Definition(Root, Path.GetDirectoryName(Fixture)!, progressionSlots, seed);
+            scenario = TowerPartySearch.Contexts(Root, Path.GetDirectoryName(Fixture)!, 0, d).Values.Last().Single(s => s.FloorNumber == floorNumber);
+            var first = d.ReferenceBuilds!.ToDictionary(p => p.Key, p => p.Value);
+            first[5] = first[5].Reverse().ToArray();
+            var second = first.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.Reverse().ToArray());
+            scenario = TowerPartySelection.Apply(scenario, TowerWholeParty.Deploy(first, second, wholeDeployment, d.WholeParty!.MaximumPartySlots), [seed]);
         }
         var content = new OfflineContent(Root, Threat);
         var runner = new TowerBattleRunner(Root, content);

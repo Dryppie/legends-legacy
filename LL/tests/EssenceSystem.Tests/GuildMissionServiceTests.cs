@@ -35,7 +35,7 @@ public sealed partial class GuildMissionServiceTests
     }
 
     [Fact]
-    public void Json_weekly_targets_match_code_fallback()
+    public void Json_missions_match_code_fallback()
     {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         options.Converters.Add(new JsonStringEnumConverter());
@@ -46,6 +46,11 @@ public sealed partial class GuildMissionServiceTests
         var fallback = new DefaultGuildContentProvider();
 
         Assert.Equal(fallback.WeeklyMissions, json.WeeklyMissions);
+        Assert.Equal(fallback.DailyOrders, json.DailyOrders);
+        var essenceOrder = Assert.Single(json.DailyOrders, order => order.Key == "daily.essence_absorption");
+        Assert.Equal(Guid.Parse("0171138e-654b-455b-9a81-8b681210ce76"), essenceOrder.Id);
+        Assert.Equal("Absorb or Shatter an Essence.", essenceOrder.Description);
+        Assert.Equal(GuildContributionMetric.EssencesAbsorbedOrShattered, essenceOrder.Metric);
     }
 
     [Fact]

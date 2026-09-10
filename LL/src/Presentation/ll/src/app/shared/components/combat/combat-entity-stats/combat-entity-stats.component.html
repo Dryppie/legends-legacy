@@ -243,9 +243,9 @@
                 *ngIf="
                   isDefeated(participant.entity) && !participant.isSummonGroup
                 "
-                class="ml-2 text-xs uppercase tracking-wider text-danger"
+                class="mt-0.5 block text-xs uppercase tracking-wider text-danger"
               >
-                Defeated<span
+                {{ defeatLabel(participant) }}<span
                   *ngIf="reviveCountdownLabel(participant) as label"
                 >
                   · {{ label }}</span
@@ -574,9 +574,9 @@
                   *ngIf="
                     isDefeated(participant.entity) && !participant.isSummonGroup
                   "
-                  class="ml-1 text-xs uppercase tracking-wider text-danger"
+                  class="mt-0.5 block whitespace-normal text-xs font-normal uppercase tracking-wider text-danger"
                 >
-                  Defeated<span
+                  {{ defeatLabel(participant) }}<span
                     *ngIf="reviveCountdownLabel(participant) as label"
                   >
                     · {{ label }}</span

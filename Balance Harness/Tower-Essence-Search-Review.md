@@ -23,6 +23,8 @@ Save `selection.json` before any confirmation fight. Confirmation uses master se
 
 The search report is regenerated from verified benchmark bundles. It rejects altered selection, mismatched content/settings/execution, changed recipes, missing evidence and overlapping/unpaired schedules. Draws are nonwins. Gained/lost wins compare the same seeds against the control. The JSON includes the existing approximate 95% Bonferroni-Wilson paired-difference interval, which does not adjust for all candidates/floors examined. Results remain descriptive; the starter 50–90% target is not applied.
 
+**Interpretation clarification — 10 September 2026:** the recorded selection above uses full-party combat results, not a Wilson “Essence score.” Wilson clear-rate intervals and paired improvement intervals quantify uncertainty in those results; neither certifies an optimal build. The experiment tests only the four authored substitutions, so it establishes stronger alternatives within that pool. Broader whole-loadout and party exploration is specified in the [loadout search plan](Essence-Loadout-Search-Plan.md#selection-principle-clarified--10-september-2026) and remains unimplemented. This clarification preserves the original selection protocol, measurements and saved evidence.
+
 ## Measured results
 
 The browser button completed **1,920 discovery and 2,700 confirmation battles**, with no invalid/cancelled/missing trials. The frozen shortlist was `00, 05, 07, 11, 01, 03`. Discovery generalists 05 and 07 won 85/120 and 83/120 respectively, versus control 00 at 58/120. Candidates 11, 01 and 03 entered through the floor-winner selection. A saved hash confirms that selection did not change during confirmation.
@@ -55,6 +57,8 @@ For candidate 05 against control, floor 2 gained 21 paired wins and lost one; fl
 Floor 1's stronger builds meet the stated four-Essence/Uncommon entry budget without additional gear. All six finalists won 30/30 at the six-slot floor-10 checkpoint. Floors 4 and 7 remain at zero wins across confirmation, while floor 13 has only rare wins. These are priorities for additional counter-build hypotheses and budget review, not immediate boss nerfs. The shortlist is retained as evidence; no original catalog is replaced with a discovered winner.
 
 ## Diagnostics and interpretation
+
+**Identity audit follow-up — 10 September:** the [loadout foundation](Tower-Loadout-Foundation-Review.md) found that reference character/item IDs depend on the full recipe. This earlier search used different recipe identities across candidates. Its saved results remain valid measurements of those parties, but they do not isolate Essence changes from runtime identity changes. The new foundation pins identities explicitly; the next quality-search pilot must remeasure the control and candidate 05 under that contract before attributing differences solely to Essence selections. Historical results and archives are unchanged.
 
 Reports include candidate substitutions, the complete discovery ranking, per-floor confirmation results and role-level damage, healing, damage taken, attention, stagger and first-death timing. Role means are per original character/trial and exclude summons; first-death means condition on characters that died. These totals help locate failures but do not establish causal ability value. Detailed verified replay retains ability statistics and combat events.
 

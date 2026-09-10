@@ -70,8 +70,15 @@ public sealed class CombatStyleFoundationTests
         {
             var snapshot = CombatStyleRules.Snapshot(catalog, definition,
                 new() { CombatStyleId = definition.Id, Level = level }, new(definition.Id, null, [], null), null);
-            Assert.Equal(expected, snapshot.BarrierMasteryBonus, 8);
-            Assert.Equal(expected, snapshot.ChanneledMasteryBonus, 8);
+            var bonus = snapshot.Kind switch
+            {
+                CombatStyleKind.Bastion => snapshot.BarrierMasteryBonus,
+                CombatStyleKind.Conduit => snapshot.ChanneledMasteryBonus,
+                CombatStyleKind.Reaper => snapshot.Tuning.Reaper!.Multiplier(level) - snapshot.Tuning.Reaper.BaseMultiplier,
+                CombatStyleKind.Duelist => snapshot.Tuning.Duelist!.Multiplier(level) - snapshot.Tuning.Duelist.OpeningMultiplier,
+                _ => throw new InvalidOperationException()
+            };
+            Assert.Equal(expected, bonus, 8);
             var json = JsonSerializer.Serialize(snapshot);
             Assert.DoesNotContain("\"CoreRank\"", json);
             Assert.DoesNotContain("\"BarrierMasteryBonus\"", json);
@@ -405,7 +412,7 @@ public sealed class CombatStyleFoundationTests
         var repository = new TestRepository();
         var service = CreateService(repository);
         var overview = await service.GetOverviewAsync(Guid.Empty, default);
-        Assert.Equal(new[] { CombatStyleIds.Bastion, CombatStyleIds.Conduit, CombatStyleIds.Reaper }, overview.Styles.Select(x => x.Definition.Id));
+        Assert.Equal(new[] { CombatStyleIds.Bastion, CombatStyleIds.Conduit, CombatStyleIds.Reaper, CombatStyleIds.Duelist }, overview.Styles.Select(x => x.Definition.Id));
         Assert.All(overview.Styles, style => { Assert.Equal(0, style.Level); Assert.Equal(0, style.CurrentXp); Assert.Equal(Requirements[0], style.XpRequired); });
         Assert.Null(overview.Selection.CombatStyleId);
 
@@ -565,22 +572,34 @@ public sealed class CombatStyleFoundationTests
     [InlineData(null)]
     [InlineData("essence.support")]
     [InlineData("essence.missing")]
-    public async Task Conduit_battle_rejects_an_empty_or_ineligible_first_slot_even_when_a_later_essence_is_eligible(string? firstDefinition)
+    public async Task Conduit_is_inactive_for_empty_or_ineligible_loadouts_in_every_activity(string? firstDefinition)
     {
         var repository = new TestRepository();
         var eligible = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "essence.channeled" };
-        var loadouts = new TestLoadouts([eligible]) { ThrowOnResolve = true };
+        var loadouts = new TestLoadouts([eligible]);
         var service = CreateService(repository, loadouts);
         Assert.True((await service.SelectAsync(Guid.Empty, new(CombatStyleIds.Conduit, null, [], eligible.Id), default)).Succeeded);
         PlayerEssence[] equipped = firstDefinition is null ? [] :
             [new() { Id = Guid.NewGuid(), EssenceDefinitionId = firstDefinition }, eligible];
 
-        var error = await Assert.ThrowsAsync<CombatStyleConfigurationException>(() =>
-            service.ResolveAsync(Guid.Empty, EssenceCombatActivity.Dungeon, default, equipped));
+        foreach (var activity in Enum.GetValues<EssenceCombatActivity>())
+        {
+            loadouts.ByActivity[activity] = equipped;
+            Assert.Null(await service.ResolveAsync(Guid.Empty, activity, default));
 
-        Assert.Contains("first occupied Essence slot", error.Message);
-        Assert.Contains("direct damage, heals, or grants Barrier", error.Message);
-        Assert.Empty(loadouts.Activities);
+            // Supplied snapshot Essences are authoritative, even when the live loadout is eligible.
+            loadouts.ByActivity[activity] = [eligible];
+            loadouts.ThrowOnResolve = true;
+            Assert.Null(await service.ResolveAsync(Guid.Empty, activity, default, equipped));
+            loadouts.ThrowOnResolve = false;
+
+            // Fixing the loadout reactivates Conduit without selecting the style again.
+            var active = await service.ResolveAsync(Guid.Empty, activity, default);
+            Assert.Equal(CombatStyleIds.Conduit, active!.CombatStyleId);
+            Assert.Equal(eligible.Id, active.ChanneledPlayerEssenceId);
+        }
+
+        Assert.Equal(CombatStyleIds.Conduit, repository.Selection!.CombatStyleId);
         Assert.Null(repository.Selection!.ChanneledPlayerEssenceId);
     }
 
@@ -873,7 +892,7 @@ public sealed class CombatStyleFoundationTests
     public void Current_catalog_validates_reprisal_tuning_while_old_committed_counterweight_snapshot_stays_unchanged()
     {
         var catalog = LoadCatalog();
-        Assert.Equal("combat-styles.v8", catalog.ContentVersion);
+        Assert.Equal("combat-styles.v9", catalog.ContentVersion);
         foreach (var invalid in new double?[] { null, double.NaN, double.PositiveInfinity, -.01, 1.01 })
         {
             var bastion = catalog.Styles.Single(x => x.Id == CombatStyleIds.Bastion);
@@ -897,6 +916,40 @@ public sealed class CombatStyleFoundationTests
         Assert.Equal(.10, roundTrip.Tuning.CounterweightBarrierCost);
     }
 
+    [Theory]
+    [InlineData(null, 3, "155% of normal damage")]
+    [InlineData(CombatStyleIds.Flurry, 3, "140% of normal damage")]
+    [InlineData(CombatStyleIds.PatientBlade, 5, "190% of normal damage")]
+    [InlineData(CombatStyleIds.GuardedThrust, 3, "135% of normal damage")]
+    public async Task Duelist_is_available_and_previews_and_serializes_its_selected_form(string? form, int read, string damage)
+    {
+        var repository = new TestRepository();
+        var service = CreateService(repository);
+        var initial = await service.PreviewAsync(Guid.Empty, new(CombatStyleIds.Duelist, null, [], null), default);
+        Assert.Null(initial.ValidationIssue);
+        Assert.Equal("145% of normal damage", initial.PreviewFacts.Single(x => x.Label == "Opening damage").Value);
+        repository.Styles.Add(new() { CombatStyleId = CombatStyleIds.Duelist, Level = 10 });
+        var selection = new CombatStyleSelectionRequest(CombatStyleIds.Duelist, form,
+            [CombatStyleIds.MeasuredStrikes, CombatStyleIds.FinishingTouch], null, MasteredUpgradeId: CombatStyleIds.MeasuredStrikes);
+        Assert.True((await service.SelectAsync(Guid.Empty, selection, default)).Succeeded);
+        var preview = await service.PreviewAsync(Guid.Empty, selection, default);
+        Assert.Null(preview.ValidationIssue);
+        Assert.Equal(damage, preview.PreviewFacts.Single(x => x.Label == "Opening damage").Value);
+        Assert.Equal(read.ToString(), preview.PreviewFacts.Single(x => x.Label == "Read needed").Value);
+        Assert.Contains(preview.PreviewFacts, x => x.Label == "Opening Technique");
+        if (form == CombatStyleIds.GuardedThrust)
+            Assert.Equal("Guard(1)", preview.PreviewFacts.Single(x => x.Label == "Guarded Thrust").Value);
+        var mapper = new MapperConfiguration(cfg => cfg.AddProfile<CombatStyleMappingProfile>(),
+            Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance).CreateMapper();
+        var dto = mapper.Map<CombatStyleOverviewDto>(preview);
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        Assert.Equal(read, json.RootElement.GetProperty("effectiveStyle").GetProperty("tuning")
+            .GetProperty("duelist").GetProperty("readRequired").GetInt32());
+        var resolved = await service.ResolveAsync(Guid.Empty, EssenceCombatActivity.IdleCombat, default);
+        Assert.Equal(form, resolved!.RefinementId);
+        Assert.Equal(read, resolved.Tuning.Duelist!.ReadRequired);
+    }
+
     internal static CombatStyleCatalog LoadCatalog()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
@@ -916,7 +969,7 @@ public sealed class CombatStyleFoundationTests
     {
         public List<EssenceCombatActivity> Activities { get; } = [];
         public Dictionary<EssenceCombatActivity, IReadOnlyList<PlayerEssence>> ByActivity { get; } = [];
-        public bool ThrowOnResolve { get; init; }
+        public bool ThrowOnResolve { get; set; }
         public Task<EssenceCombatLoadout> ResolveAsync(Guid id, CancellationToken ct) => ResolveAsync(id, EssenceCombatActivity.None, ct);
         public Task<EssenceCombatLoadout> ResolveAsync(Guid id, EssenceCombatActivity activity, CancellationToken ct)
         {

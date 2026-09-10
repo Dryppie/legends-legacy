@@ -40,6 +40,7 @@ export interface EntityStats {
   threatGenerated?: number;
   staggerContributed?: number;
   staggerBreaks?: number;
+  lastDeathTick?: number | null;
   health?: number | null;
   maxHealth?: number | null;
   barrier?: number | null;

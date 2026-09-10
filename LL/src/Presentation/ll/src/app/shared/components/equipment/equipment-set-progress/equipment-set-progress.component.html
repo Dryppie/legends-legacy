@@ -18,9 +18,11 @@
         {{ bonus.requiredEquippedItems }}
       </span>
       <span class="equipment-set-bonus-copy">
-        <span class="equipment-set-bonus-description">
-          {{ bonus.description }}
-        </span>
+        <app-essence-description
+          class="equipment-set-bonus-description"
+          [description]="bonus.description"
+          kind="Passive"
+        />
         <span *ngIf="equippedItems !== null" class="equipment-set-bonus-state">
           {{ bonusProgressLabel(bonus) }}
         </span>

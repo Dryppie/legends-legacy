@@ -16,6 +16,10 @@ export interface CombatKeywordDefinition {
 
 export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   {
+    name: 'Innate',
+    description: 'An effect that activates at combat start',
+  },
+  {
     name: 'Haste',
     aliases: ['Hasted'],
     description: 'Increases Basic Attack rate by 25% for 10 seconds.',

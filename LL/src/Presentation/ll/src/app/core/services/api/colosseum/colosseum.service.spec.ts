@@ -1,4 +1,10 @@
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ApiService } from '../api.service';
 import { ColosseumService } from './colosseum.service';
@@ -46,4 +52,49 @@ describe('ColosseumService response ownership', () => {
       },
     );
   });
+});
+
+describe('ColosseumService arena error messages', () => {
+  let api: ApiService;
+  let http: HttpTestingController;
+  let service: ColosseumService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ApiService, provideHttpClient(), provideHttpClientTesting()],
+    });
+    api = TestBed.inject(ApiService);
+    http = TestBed.inject(HttpTestingController);
+    service = new ColosseumService(api, {} as CombatService);
+  });
+
+  afterEach(() => http.verify());
+
+  for (const action of ['battle', 'defense-snapshot'] as const) {
+    it(`shows the API's configuration guidance when ${action} returns 409 OK`, () => {
+      const detail =
+        'Choose an available refinement from this Combat Style (unlocked at level 3).';
+      let receivedError: Error | undefined;
+      const request: Observable<unknown> =
+        action === 'battle'
+          ? service.startArenaBattle('opponent-1')
+          : service.updateDefenseSnapshot();
+
+      request.subscribe({
+        next: () => fail('Expected the invalid loadout to reject the request'),
+        error: (error: Error) => (receivedError = error),
+      });
+      http.expectOne(`${api.apiUrl}colosseum/${action}`).flush(
+        {
+          status: 409,
+          title: 'Choose a valid Combat Style configuration',
+          detail,
+          errorCode: 'combat_style_configuration_invalid',
+        },
+        { status: 409, statusText: 'OK' },
+      );
+
+      expect(receivedError?.message).toBe(detail);
+    });
+  }
 });

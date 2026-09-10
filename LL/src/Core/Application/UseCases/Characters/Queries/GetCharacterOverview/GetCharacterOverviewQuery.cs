@@ -5,6 +5,7 @@ using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using AutoMapper;
 using Common.Primitives;
+using Domain.Models.Achievements;
 using Domain.Models.Guilds;
 using MediatR;
 
@@ -18,17 +19,20 @@ public sealed class GetCharacterOverviewQueryHandler : IRequestHandler<GetCharac
     private readonly IMapper _mapper;
     private readonly IPowerRatingService _powerRatings;
     private readonly IGuildRepository _guilds;
+    private readonly IAchievementRepository _achievements;
 
     public GetCharacterOverviewQueryHandler(
         ICharacterService characters,
         IMapper mapper,
         IPowerRatingService powerRatings,
-        IGuildRepository guilds)
+        IGuildRepository guilds,
+        IAchievementRepository achievements)
     {
         _characters = characters;
         _mapper = mapper;
         _powerRatings = powerRatings;
         _guilds = guilds;
+        _achievements = achievements;
     }
 
     public async Task<Response<CharacterOverviewDto>> Handle(
@@ -40,6 +44,8 @@ public sealed class GetCharacterOverviewQueryHandler : IRequestHandler<GetCharac
             return Response<CharacterOverviewDto>.Fail("Failed to get character overview.");
 
         var dto = _mapper.Map<CharacterOverviewDto>(character);
+        dto.TotalAchievementPoints = await _achievements.GetTotalAchievementPointsAsync(
+            character.UserId, cancellationToken);
         dto.Power = await _powerRatings.GetCharacterOverallRatingAsync(character, cancellationToken);
         dto.Guild = CharacterGuildDto.From(
             await _guilds.GetGuildMember(character.Id, cancellationToken));

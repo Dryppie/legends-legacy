@@ -740,6 +740,7 @@
     ><app-chat-equipment-link
       *ngIf="segment.equipmentId as id; else mentionSegment"
       [equipmentId]="id"
+      [rarity]="segment.equipmentRarity"
       [name]="segment.text"
     ></app-chat-equipment-link
     ><ng-template #mentionSegment

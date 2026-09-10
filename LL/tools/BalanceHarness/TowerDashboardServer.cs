@@ -58,6 +58,15 @@ public static class TowerDashboardServer
         app.MapGet("/api/runs", () => Results.Json(service.Runs(), HarnessJson.Options));
         app.MapGet("/api/search-plan", () => Results.Json(service.SearchPlan(), HarnessJson.Options));
         app.MapPost("/api/search", () => Results.Json(service.Search(), HarnessJson.Options, statusCode: 202));
+        app.MapPost("/api/loadout-plan", async (HttpRequest request) =>
+        {
+            var definition = service.LoadoutPlan(await request.ReadFromJsonAsync<DashboardLoadoutRequest>(HarnessJson.Options) ?? throw new InvalidDataException("Missing search budget."));
+            return Results.Json(new { Definition = definition, MaximumBattles = TowerPartySelection.Validate(definition) }, HarnessJson.Options);
+        });
+        app.MapPost("/api/loadouts", async (HttpRequest request) => Results.Json(service.FindLoadouts(
+            await request.ReadFromJsonAsync<DashboardLoadoutRequest>(HarnessJson.Options) ?? throw new InvalidDataException("Missing search budget.")), HarnessJson.Options, statusCode: 202));
+        app.MapGet("/api/runs/{id}/recipe/{battle}", (string id, string battle, CancellationToken cancellation) =>
+            Results.File(service.LoadoutRecipe(id, battle, cancellation), "application/json", "tower-party-recipe.json"));
         app.MapGet("/api/runs/{id}/search/{format}", async (string id, string format, CancellationToken cancellation) =>
         {
             if (format is not ("json" or "md")) throw new InvalidDataException("Choose JSON or Markdown.");
@@ -78,9 +87,7 @@ public static class TowerDashboardServer
         app.MapGet("/api/runs/{id}/download/{format}", (string id, string format, CancellationToken cancellation) =>
         {
             if (format is not ("json" or "md")) throw new InvalidDataException("Choose a JSON or Markdown report.");
-            var run = service.ResolveRun(id);
-            TowerBenchmark.ReadSaved(run, cancellation);
-            return Results.File(Path.Combine(run, "benchmark." + format), format == "json" ? "application/json" : "text/markdown", "tower-benchmark." + format);
+            return Results.File(service.ReportFile(id, format, cancellation), format == "json" ? "application/json" : "text/markdown", "tower-report." + format);
         });
         return app;
     }

@@ -8,6 +8,7 @@ using Domain.Models.CharacterActions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.CombatStyles;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Outbox;
 using Domain.Components.Attributes;
@@ -32,18 +33,20 @@ using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Essences;
+using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
 using Persistence.LL.Repositories.Snapshots;
 using Services.LL.Combat;
 using Services.LL.Combat.Stats;
 using Services.LL.Essences;
+using Services.LL.Guilds;
 using Services.LL.Inventories;
 using Services.LL.Interfaces;
 
 namespace EssenceSystem.Tests;
 
-public sealed class EssenceSystemServiceTests
+public sealed partial class EssenceSystemServiceTests
 {
     [Fact]
     public async Task AbsorbUnboundEssence_consumes_item_creates_archive_entry_and_rejects_duplicates()
@@ -1803,7 +1806,8 @@ public sealed class EssenceSystemServiceTests
         ICreatureEssenceLootTableRepository? creatureEssenceLootTables = null,
         IBonusService? bonusService = null,
         ICreatureArchiveService? creatureArchiveService = null,
-        IGameEventOutbox? outbox = null)
+        IGameEventOutbox? outbox = null,
+        IGuildMissionService? guildMissionService = null)
     {
         definitions ??= new FakeDefinitionRepository();
         creatureEssenceLootTables ??= new StaticCreatureEssenceLootTableRepository(
@@ -1823,6 +1827,7 @@ public sealed class EssenceSystemServiceTests
             new InventoryItemFactory(),
             random ?? new QueueRandomProvider(0.99),
             outbox ?? new NoopGameEventOutbox(),
+            guildMissionService ?? new GuildMissionService(db, new GuildRepository(db)),
             bonusService: bonusService,
             creatureArchiveService: creatureArchiveService);
     }

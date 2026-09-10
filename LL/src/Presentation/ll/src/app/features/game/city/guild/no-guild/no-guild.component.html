@@ -14,7 +14,10 @@
         class="ll-table-row flex items-center justify-between gap-2"
       >
         <div>
-          {{ invite.guildName }}
+          <app-guild-link
+            [guildId]="invite.guildId"
+            [name]="invite.guildName"
+          />
         </div>
         <div class="flex gap-2">
           <button
@@ -50,7 +53,7 @@
             *ngFor="let guild of guilds"
           >
             <div class="break-words">
-              {{ guild.name }}
+              <app-guild-link [guildId]="guild.id" [name]="guild.name" />
               <p *ngIf="guild.description" class="mt-1 text-xs text-white/60">
                 {{ guild.description }}
               </p>

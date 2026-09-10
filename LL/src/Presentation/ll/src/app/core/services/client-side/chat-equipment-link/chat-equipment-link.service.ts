@@ -10,7 +10,11 @@ export class ChatEquipmentLinkService {
 
   prepare(item: EquipmentInstance): void {
     this.requests.next(
-      formatEquipmentLink(item.id, item.displayName || item.itemBase.name),
+      formatEquipmentLink(
+        item.id,
+        item.displayName || item.itemBase.name,
+        item.rarity,
+      ),
     );
   }
 }

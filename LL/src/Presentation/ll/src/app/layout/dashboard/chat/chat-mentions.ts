@@ -1,3 +1,5 @@
+import { Rarity } from '../../../shared/models/enums/rarity';
+
 export interface ChatTextSegment {
   text: string;
   isMention: boolean;
@@ -5,6 +7,7 @@ export interface ChatTextSegment {
   mentionName?: string;
   rawText?: string;
   equipmentId?: string;
+  equipmentRarity?: Rarity;
 }
 
 export interface DraftMention {

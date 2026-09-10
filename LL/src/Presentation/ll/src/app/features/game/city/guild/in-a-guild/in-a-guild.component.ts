@@ -1,3 +1,4 @@
+import { GuildLinkComponent } from '../../../../../shared/components/guild/guild-link.component';
 import { Component, computed, Input, Signal, signal } from '@angular/core';
 import { TabComponent } from '../../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { GuildInfoComponent } from './guild-info/guild-info.component';
@@ -21,6 +22,7 @@ import { RegularButtonComponent } from '../../../../../shared/components/custom-
 @Component({
   selector: 'app-in-a-guild',
   imports: [
+    GuildLinkComponent,
     NgFor,
     NgIf,
     FormsModule,

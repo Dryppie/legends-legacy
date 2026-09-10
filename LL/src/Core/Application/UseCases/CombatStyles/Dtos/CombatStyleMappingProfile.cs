@@ -12,6 +12,7 @@ public sealed class CombatStyleMappingProfile : Profile
         CreateMap<CombatStyleDefinition, CombatStyleDefinitionDto>();
         CreateMap<CombatStyleTuning, CombatStyleTuningDto>();
         CreateMap<ReaperTuning, ReaperTuningDto>();
+        CreateMap<DuelistTuning, DuelistTuningDto>();
         CreateMap<CombatStyleSnapshot, CombatStyleSnapshotDto>();
         CreateMap<CombatStyleChoiceDefinition, CombatStyleChoiceDto>();
         CreateMap<CombatStyleOpeningTechnique, CombatStyleOpeningTechniqueDto>();

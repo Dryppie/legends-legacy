@@ -1,5 +1,6 @@
 import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { CombatStyleStateService } from '../../../../core/services/api/combat-styles/combat-style-state.service';
 import { HelpOverlayService } from '../../../../shared/help/help-overlay.service';
 import {
@@ -48,7 +49,7 @@ describe('Combat Styles global configuration page', () => {
             name: 'Conduit',
             kind: 'Conduit',
             description:
-              'The first Essence in your loadout is your Channeled Essence. In the base form, each of your other Essences builds 1 Charge when it casts, once between Channeled Essence casts, up to 3 Charge. Your Channeled Essence spends all Charge to power its immediate damage, healing and Barrier: 80% of normal strength, with a +20% flat increase per Charge.',
+              'The first Essence in your Loadout is Channeled. Each other Essence grants 1 Charge when cast, up to a cap of 3 Charges. Your Channeled Essence consumes all Charges to boost its Damage, Healing, and Barrier.',
             tuning: {
               barrierFraction: 0.75,
               barrierPerMasteryLevel: 0.01,
@@ -141,6 +142,7 @@ describe('Combat Styles global configuration page', () => {
     await TestBed.configureTestingModule({
       imports: [CombatStylesComponent],
       providers: [
+        { provide: CharacterStateService, useValue: { overview: signal(null) } },
         { provide: CombatStyleStateService, useValue: state },
         {
           provide: HelpOverlayService,
@@ -154,6 +156,64 @@ describe('Combat Styles global configuration page', () => {
     return { fixture, element, state };
   }
 
+  it('renders Duelist and switches mastery previews with the selected refinement', async () => {
+    const { fixture, element, state } = await createPage(10);
+    const duelist = {
+      readRequired: 3, openingMultiplier: 1.45, perMasteryLevel: 0.01,
+      returnedRead: 0, guardCharges: 0, firstImpressionRead: 2,
+      upgradeBonus: 0.1, masteredMeasuredStrikesBonus: 0.2,
+      finishingTouchHealthThreshold: 0.35, masteredFinishingTouchHealthThreshold: 0.5,
+    };
+    state.data.update((overview) => ({ ...overview, styles: overview.styles.map((entry) => {
+      const tuning = { ...entry.definition.tuning!, duelist };
+      return { ...entry, definition: {
+        ...entry.definition, id: 'duelist', name: 'Duelist', kind: 'Duelist',
+        description: 'Each basic attack or Essence cast that deals direct damage builds 1 Read. At 3 Read, your next damaging Essence consumes all Read to deal 145% direct damage to that opponent. Changing opponents resets Read.', tuning,
+        openingTechnique: { name: 'First Impression', description: 'Gain 2 extra Read from your first successful action.' },
+        refinements: [
+          { id: 'flurry', name: 'Flurry', description: 'Regain 1 Read.', tuning: { ...tuning, duelist: { ...duelist, openingMultiplier: 1.3, returnedRead: 1 } } },
+          { id: 'patient-blade', name: 'Patient Blade', description: 'Prepare 5 Read.', tuning: { ...tuning, duelist: { ...duelist, openingMultiplier: 1.8, readRequired: 5 } } },
+          { id: 'guarded-thrust', name: 'Guarded Thrust', description: 'Gain Guard(1) after an Opening.', tuning: { ...tuning, duelist: { ...duelist, openingMultiplier: 1.25, guardCharges: 1 } } },
+        ],
+      } };
+    }) }));
+    for (const [form, strength, read] of [[null, 155, 3], ['flurry', 140, 3], ['patient-blade', 190, 5], ['guarded-thrust', 135, 3]] as const) {
+      state.draft.set({ combatStyleId: 'duelist', refinementId: form, upgradeIds: [], masteredUpgradeId: null });
+      fixture.detectChanges();
+      expect(fixture.componentInstance.mechanicName()).toBe('Read the Opponent');
+      expect(fixture.componentInstance.masteryBenefit()?.current).toBe(`Mastery 10: ${strength}% Opening damage`);
+      expect(fixture.componentInstance.masteryBenefit()?.example).toContain(`At ${read} Read`);
+      expect(element.querySelector('#style-mechanic-heading + p')?.textContent)
+        .toContain('deal 155% direct damage to that opponent.');
+    }
+    expect(element.textContent).toContain('Guard(1)');
+    expect(element.textContent).toContain('First Impression');
+    expect(element.textContent).not.toContain('Channeled Essence');
+    for (const [level, openingMultiplier, perMasteryLevel, expected] of [
+      [0, 1.45, 0.01, '145%'],
+      [5, 1.45, 0.01, '150%'],
+      [5, 1.5, 0.015, '157.5%'],
+    ] as const) {
+      state.data.update((overview) => ({
+        ...overview,
+        styles: overview.styles.map((entry) => ({
+          ...entry,
+          level,
+          definition: {
+            ...entry.definition,
+            tuning: {
+              ...entry.definition.tuning!,
+              duelist: { ...duelist, openingMultiplier, perMasteryLevel },
+            },
+          },
+        })),
+      }));
+      fixture.detectChanges();
+      expect(element.querySelector('#style-mechanic-heading + p')?.textContent)
+        .toContain(`deal ${expected} direct damage to that opponent.`);
+    }
+  });
+
   it('renders Reaper Harvest mastery and all three refinements without Conduit guidance', async () => {
     const { fixture, element, state } = await createPage(10);
     state.data.update((overview) => ({
@@ -163,7 +223,7 @@ describe('Combat Styles global configuration page', () => {
         definition: {
           ...entry.definition,
           id: 'reaper', name: 'Reaper', kind: 'Reaper',
-          description: 'Harvest future damage from your Bleed, Burn and Poison.',
+          description: 'When an active ability directly damages an enemy, consume the next tick of all current Bleed, Burn, and Poison stacks you applied to them, dealing 110% of that damage immediately.',
           tuning: {
             ...entry.definition.tuning!,
             reaper: {
@@ -186,6 +246,8 @@ describe('Combat Styles global configuration page', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.mechanicName()).toBe('Harvest');
     expect(fixture.componentInstance.masteryBenefit()?.current).toBe('Mastery 10: 120% Harvest');
+    expect(element.querySelector('#style-mechanic-heading + p')?.textContent)
+      .toContain('dealing 120% of that damage immediately.');
     expect(element.textContent).toContain('Soul Siphon');
     expect(element.textContent).toContain('Last Rites');
     expect(element.textContent).toContain('Death Sentence');
@@ -199,6 +261,29 @@ describe('Combat Styles global configuration page', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.masteryBenefit()?.current).toBe('Mastery 10: 120% Harvest');
     expect(fixture.componentInstance.masteryBenefit()?.example).toContain('restore up to 120 Health');
+    for (const [level, baseMultiplier, perMasteryLevel, expected] of [
+      [0, 1.1, 0.01, '110%'],
+      [5, 1.1, 0.01, '115%'],
+      [5, 1.2, 0.015, '127.5%'],
+    ] as const) {
+      state.data.update((overview) => ({
+        ...overview,
+        styles: overview.styles.map((entry) => ({
+          ...entry,
+          level,
+          definition: {
+            ...entry.definition,
+            tuning: {
+              ...entry.definition.tuning!,
+              reaper: { ...entry.definition.tuning!.reaper!, baseMultiplier, perMasteryLevel },
+            },
+          },
+        })),
+      }));
+      fixture.detectChanges();
+      expect(element.querySelector('#style-mechanic-heading + p')?.textContent)
+        .toContain(`dealing ${expected} of that damage immediately.`);
+    }
   });
 
   it('shows starting mastery and the full first combat XP block', async () => {
@@ -290,7 +375,8 @@ describe('Combat Styles global configuration page', () => {
     expect(
       element.querySelector('[data-tour="combat-style-channeled-essence"]')
         ?.textContent,
-    ).toContain('The first Essence in your loadout is your Channeled Essence.');
+    ).toContain('The first Essence in your Loadout is Channeled.');
+    expect(element.textContent).not.toContain('Your other Essences build Charge to strengthen its casts.');
     action.click();
     expect(state.save).toHaveBeenCalledOnceWith();
   });
@@ -980,8 +1066,13 @@ describe('Combat Styles global configuration page', () => {
               .withContext(`${width}px preview content width`)
               .toBeLessThanOrEqual(part.clientWidth);
           }
-          const condition = row.querySelector('.mechanic-fact-condition')!;
-          expect(condition.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+          const condition = row.querySelector('.mechanic-fact-condition');
+          if (row.querySelector('dt')!.textContent!.trim() === 'Charge limit') {
+            expect(condition).toBeNull();
+            continue;
+          }
+          expect(condition).not.toBeNull();
+          expect(condition!.getBoundingClientRect().top).toBeGreaterThanOrEqual(
             Math.max(
               value.getBoundingClientRect().bottom,
               row.querySelector('dt')!.getBoundingClientRect().bottom,

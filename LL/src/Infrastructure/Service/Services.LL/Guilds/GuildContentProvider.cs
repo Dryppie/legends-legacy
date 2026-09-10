@@ -430,7 +430,7 @@ internal static class GuildContentDefaults
         new(Guid.Parse("8d7a12db-39eb-44f0-8c66-3ba79b606ca2"), "daily.creatures_defeated", "Cull the Wilds", "Defeat 100 creatures.", GuildMissionCategory.Combat, GuildContributionMetric.CreaturesDefeated, 100),
         new(Guid.Parse("ff235b05-d721-4d96-b603-609c8abed319"), "daily.dungeon_rooms", "Scout the Depths", "Clear 5 dungeon rooms.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonRoomsCleared, 5),
         new(Guid.Parse("f5774b7b-fdf9-4791-ab35-e025339dcc62"), "daily.dungeon_completion", "Finish the Expedition", "Complete a dungeon run.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonsCompleted, 1),
-        new(Guid.Parse("0171138e-654b-455b-9a81-8b681210ce76"), "daily.essence_absorption", "Strengthen the Soul", "Absorb an essence.", GuildMissionCategory.Essence, GuildContributionMetric.EssencesAbsorbed, 1)
+        new(Guid.Parse("0171138e-654b-455b-9a81-8b681210ce76"), "daily.essence_absorption", "Strengthen the Soul", "Absorb or Shatter an Essence.", GuildMissionCategory.Essence, GuildContributionMetric.EssencesAbsorbedOrShattered, 1)
     ];
 
     private static readonly GuildShopItemDefinition[] ShopItemDefinitions =

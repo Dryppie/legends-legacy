@@ -13,5 +13,15 @@ public enum GuildContributionMetric
     RaidDamageDealt = 11,
     RaidAttemptsSpent = 12,
     WarAttacksSpent = 13,
-    WarPointsEarned = 14
+    WarPointsEarned = 14,
+    EssencesShattered = 15,
+    EssencesAbsorbedOrShattered = 16
+}
+
+public static class GuildContributionMetricExtensions
+{
+    public static bool CountsTowards(this GuildContributionMetric metric, GuildContributionMetric objective) =>
+        metric == objective ||
+        (objective == GuildContributionMetric.EssencesAbsorbedOrShattered &&
+            metric is GuildContributionMetric.EssencesAbsorbed or GuildContributionMetric.EssencesShattered);
 }

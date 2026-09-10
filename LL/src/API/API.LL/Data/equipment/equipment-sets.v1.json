@@ -81,7 +81,7 @@
       {
         "id": "raised_aegis",
         "requiredEquippedItems": 4,
-        "description": "At combat start, gain a barrier equal to 10% of Max Health.",
+        "description": "Innate: gain a barrier equal to 10% of Max Health.",
         "grantedAbilityIds": ["ability.set.aegis.raised_aegis"]
       },
       {

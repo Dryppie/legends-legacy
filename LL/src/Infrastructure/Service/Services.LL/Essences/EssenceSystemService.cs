@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
 using Domain.Models.Attributes.Modifiers;
@@ -12,6 +13,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Inventories;
+using Domain.Models.Guilds.Missions;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
 using MediatR;
@@ -38,6 +40,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly ICreatureArchiveService? _creatureArchiveService;
     private readonly IPublisher? _publisher;
     private readonly IGameEventOutbox _outbox;
+    private readonly IGuildMissionService _guildMissionService;
     private readonly ICombatStyleMutationBoundary? _buildBoundary;
     private readonly Dictionary<Guid, string?> _creatureFocusCache = [];
     private readonly Dictionary<Guid, Dictionary<string, CreatureResonance>> _resonanceCache = [];
@@ -56,6 +59,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IInventoryItemFactory inventoryItemFactory,
         IRandomProvider random,
         IGameEventOutbox outbox,
+        IGuildMissionService guildMissionService,
         IPublisher? publisher = null,
         IBonusService? bonusService = null,
         ICreatureArchiveService? creatureArchiveService = null,
@@ -75,6 +79,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _creatureArchiveService = creatureArchiveService;
         _publisher = publisher;
         _outbox = outbox;
+        _guildMissionService = guildMissionService;
         _buildBoundary = buildBoundary;
     }
 
@@ -147,6 +152,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             null,
             cancellationToken);
 
+        await _guildMissionService.RecordContributionAsync(
+            new GuildContributionEvent(characterId, GuildContributionSource.Essence,
+                GuildContributionMetric.EssencesAbsorbed, 1, ContextId: definitionId),
+            cancellationToken);
+
         return Ok("Essence absorbed into the Soul Archive.");
     }
 
@@ -176,6 +186,10 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         ConsumeInventoryItem(inventoryItem, quantity);
         await AddInventoryQuantityAsync(characterId, EssenceDustItemId, dust, cancellationToken);
+        await _guildMissionService.RecordContributionAsync(
+            new GuildContributionEvent(characterId, GuildContributionSource.Essence,
+                GuildContributionMetric.EssencesShattered, quantity, ContextId: definitionId),
+            cancellationToken);
         var message = quantity == 1
             ? "Essence dismantled into Essence Dust."
             : $"{quantity} Essences dismantled into Essence Dust.";

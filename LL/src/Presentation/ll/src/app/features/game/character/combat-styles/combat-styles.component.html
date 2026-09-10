@@ -175,22 +175,19 @@
               <h2 id="style-mechanic-heading" class="ll-heading mt-2 text-2xl">
                 {{ mechanicName() }}
               </h2>
-              <p class="ll-copy mt-3 text-sm leading-relaxed">
-                {{ entry.definition.description }}
+              <p
+                class="ll-copy mt-3 text-sm leading-relaxed"
+                [attr.data-tour]="
+                  entry.definition.id === 'conduit'
+                    ? 'combat-style-channeled-essence'
+                    : null
+                "
+              >
+                {{ mechanicDescription() }}
               </p>
               @if (selectedRefinement(); as refinement) {
                 <p class="mt-2 text-xs text-primary">
                   {{ refinement.name }} · {{ refinement.description }}
-                </p>
-              }
-
-              @if (entry.definition.id === "conduit") {
-                <p
-                  class="ll-text-muted mt-4 text-xs"
-                  data-tour="combat-style-channeled-essence"
-                >
-                  The first Essence in your loadout is your Channeled Essence.
-                  Your other Essences build Charge to strengthen its casts.
                 </p>
               }
 
@@ -236,19 +233,33 @@
                 </div>
                 <dl class="mechanic-facts mt-3 text-xs">
                   @for (detail of previewFacts().slice(1); track detail.label) {
-                    <div class="mechanic-fact">
-                      <dt class="ll-copy">{{ detail.label }}</dt>
-                      <dd class="mechanic-fact-value text-primary">
-                        {{ detail.value }}
-                      </dd>
-                      @if (detail.condition) {
-                        <dd class="mechanic-fact-condition ll-text-muted">
-                          {{ detail.condition }}
+                    @if (
+                      !(entry.definition.id === 'reaper' &&
+                        detail.label === 'Future ticks consumed' &&
+                        state.draft().refinementId !== 'last-rites')
+                    ) {
+                      <div class="mechanic-fact">
+                        <dt class="ll-copy">{{ detail.label }}</dt>
+                        <dd class="mechanic-fact-value text-primary">
+                          {{ detail.value }}
                         </dd>
-                      }
-                    </div>
+                        @if (
+                          detail.condition &&
+                          !(entry.definition.id === 'conduit' && detail.label === 'Charge limit')
+                        ) {
+                          <dd class="mechanic-fact-condition ll-text-muted">
+                            {{ detail.condition }}
+                          </dd>
+                        }
+                      </div>
+                    }
                   }
                 </dl>
+              }
+              @if (entry.definition.id === 'reaper') {
+                <p class="ll-text-muted mt-3 text-xs">
+                  New stacks can be harvested from your next Essence cast.
+                </p>
               }
               @if (entry.definition.openingTechnique; as opening) {
                 <div
@@ -271,9 +282,11 @@
                     </span>
                   </div>
                   <h3 class="mt-2 text-lg text-primary">{{ opening.name }}</h3>
-                  <p class="ll-copy mt-1 text-xs leading-relaxed">
-                    {{ opening.description }}
-                  </p>
+                  <app-essence-description
+                    class="ll-copy mt-1 block text-xs leading-relaxed"
+                    [description]="opening.description"
+                    kind="Passive"
+                  />
                 </div>
               }
             </section>

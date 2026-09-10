@@ -114,11 +114,11 @@ export class EssencesComponent implements OnInit {
     if (!this.conduitEquipped()) return null;
     const slot = this.essenceState.firstOccupiedDraftSlot();
     if (slot < 0)
-      return 'Equip an Essence for Conduit to channel in this loadout.';
+      return 'Conduit is inactive in battles using this empty loadout. Equip an Essence with direct damage, healing or Barrier to activate it.';
     const channeledEssence = this.draftSlotEssence(slot);
     return channeledEssence?.isChanneledEssenceEligible
       ? 'The first Essence in your loadout is your Channeled Essence. Your other Essences build Charge to strengthen its casts.'
-      : 'The first Essence in this loadout has no direct damage, healing or Barrier for Conduit to strengthen. Use Channel Essence on another equipped Essence.';
+      : 'The first Essence in this loadout has no direct damage, healing or Barrier for Conduit to strengthen. Battles proceed with Conduit inactive. Use Channel Essence on another eligible equipped Essence to activate it.';
   });
   private readonly routeEssenceId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('essenceId'))),

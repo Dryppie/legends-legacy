@@ -1,0 +1,228 @@
+{
+  "shortlists": [
+    {
+      "slot": 1,
+      "candidates": [
+        {
+          "id": "20a7cb75d82d1499ad2b7c6fb8b5d745b36deae39d0eb5dee26138319a4eb19c",
+          "source": "Unchanged character control",
+          "essences": [
+            "essence.transparent_slime",
+            "essence.brown_slime",
+            "essence.wood_nymph",
+            "essence.hobgoblin"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "04ac8606dae32aaf446eef6c2f3f63096188eb4ed71b972c1c5a0420a394628f",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.poisonous_rat",
+            "essence.nightshade_blossom",
+            "essence.alpha_wolf",
+            "essence.elder_treant_thornstorm"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "e005af2107e6423193415c9cb0b89114c4fcf891c147f2841fb063b8f9a10499",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.nightshade_blossom",
+            "essence.web_weaver_spider",
+            "essence.hollow_stag",
+            "essence.rainbow_slime"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "44d7da67273a7e1a8a37b8bc12a7a7e92cbe5563580aa4ece9c28b576e869c34",
+          "source": "Exploratory floor/context specialist; inspect all-floor tradeoffs",
+          "essences": [
+            "essence.flame_imp",
+            "essence.giant_spider",
+            "essence.shadow_imp",
+            "essence.giant_bat"
+          ],
+          "previousParty": false
+        }
+      ]
+    },
+    {
+      "slot": 2,
+      "candidates": [
+        {
+          "id": "5b09c6c2cd499ad86bda371c4c83f011afa5a23521a570c4a138d27692a405f0",
+          "source": "Unchanged character control",
+          "essences": [
+            "essence.blue_slime",
+            "essence.forest_spirit",
+            "essence.goblin_shaman",
+            "essence.lumo_wisp"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "db86b17c7f3a49762abb7071840dc65112453dffb830c93ce61e7eac0d9d000c",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.glade_panther",
+            "essence.plague_ghoul",
+            "essence.nightshade_blossom",
+            "essence.poisonous_rat"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "c2b00e3edcc6418205f2e6e6c011536937da3948ebe816f2c1a1f4afd9896bab",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.venomous_spiderling",
+            "essence.spider_queen_royal_venom",
+            "essence.nightshade_blossom",
+            "essence.cinder_beetle"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "421efed1d0cc3bff39c0244e01f62d9ca1da373df0fcdf01c7b70dd443e80a87",
+          "source": "Exploratory floor/context specialist; inspect all-floor tradeoffs",
+          "essences": [
+            "essence.nightshade_blossom",
+            "essence.forest_spirit",
+            "essence.venomous_spiderling",
+            "essence.cinder_beetle"
+          ],
+          "previousParty": false
+        }
+      ]
+    },
+    {
+      "slot": 3,
+      "candidates": [
+        {
+          "id": "a49cc62a77ea9a8d76f7309570d86d96bfc96ab21d8095bfe7938b02480ad4d2",
+          "source": "Unchanged character control",
+          "essences": [
+            "essence.green_slime",
+            "essence.cinder_beetle",
+            "essence.pixie",
+            "essence.giant_bat"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "04ac8606dae32aaf446eef6c2f3f63096188eb4ed71b972c1c5a0420a394628f",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.poisonous_rat",
+            "essence.nightshade_blossom",
+            "essence.alpha_wolf",
+            "essence.elder_treant_thornstorm"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "8eb1efb079dc309d9365a77f267579c310c3e4a40378c49f15599fdf7abe90c7",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.shadow_imp",
+            "essence.goblin_shaman",
+            "essence.hollow_stag",
+            "essence.blood_harpy"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "00dd509d2e4cf47f5b0d2b8194ea3de704f73d1761be2ab449a4d75a1ff24604",
+          "source": "Exploratory floor/context specialist; inspect all-floor tradeoffs",
+          "essences": [
+            "essence.lumo_wisp",
+            "essence.rainbow_slime",
+            "essence.feral_ghoul",
+            "essence.illusion_fox"
+          ],
+          "previousParty": false
+        }
+      ]
+    },
+    {
+      "slot": 4,
+      "candidates": [
+        {
+          "id": "a49cc62a77ea9a8d76f7309570d86d96bfc96ab21d8095bfe7938b02480ad4d2",
+          "source": "Unchanged character control",
+          "essences": [
+            "essence.green_slime",
+            "essence.cinder_beetle",
+            "essence.pixie",
+            "essence.giant_bat"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "04ac8606dae32aaf446eef6c2f3f63096188eb4ed71b972c1c5a0420a394628f",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.poisonous_rat",
+            "essence.nightshade_blossom",
+            "essence.alpha_wolf",
+            "essence.elder_treant_thornstorm"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "e005af2107e6423193415c9cb0b89114c4fcf891c147f2841fb063b8f9a10499",
+          "source": "Robust generalist from both ally contexts",
+          "essences": [
+            "essence.nightshade_blossom",
+            "essence.web_weaver_spider",
+            "essence.hollow_stag",
+            "essence.rainbow_slime"
+          ],
+          "previousParty": false
+        },
+        {
+          "id": "00dd509d2e4cf47f5b0d2b8194ea3de704f73d1761be2ab449a4d75a1ff24604",
+          "source": "Exploratory floor/context specialist; inspect all-floor tradeoffs",
+          "essences": [
+            "essence.lumo_wisp",
+            "essence.rainbow_slime",
+            "essence.feral_ghoul",
+            "essence.illusion_fox"
+          ],
+          "previousParty": false
+        }
+      ]
+    }
+  ],
+  "source": "tower-party-search-20260910: four-slot discovery shortlists and observed random-9677 party; new studies must remeasure extensions",
+  "referenceBuilds": {
+    "1": [
+      "essence.poisonous_rat",
+      "essence.nightshade_blossom",
+      "essence.alpha_wolf",
+      "essence.elder_treant_thornstorm"
+    ],
+    "2": [
+      "essence.nightshade_blossom",
+      "essence.spider_queen_royal_venom",
+      "essence.venomous_spiderling",
+      "essence.cinder_beetle"
+    ],
+    "3": [
+      "essence.poisonous_rat",
+      "essence.nightshade_blossom",
+      "essence.alpha_wolf",
+      "essence.elder_treant_thornstorm"
+    ],
+    "4": [
+      "essence.poisonous_rat",
+      "essence.nightshade_blossom",
+      "essence.alpha_wolf",
+      "essence.elder_treant_thornstorm"
+    ]
+  },
+  "schemaVersion": 1
+}

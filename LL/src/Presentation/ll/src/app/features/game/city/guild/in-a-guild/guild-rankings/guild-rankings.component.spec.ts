@@ -4,7 +4,7 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { LeaderboardStateService } from '../../../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { LeaderboardBoard } from '../../../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { GuildRankingsComponent } from './guild-rankings.component';
-import { Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { ChatService } from '../../../../../../core/services/ll-chat/chat-service/chat.service';
 
 describe('GuildRankingsComponent', () => {
@@ -31,6 +31,7 @@ describe('GuildRankingsComponent', () => {
         {
           provide: GuildStateService,
           useValue: {
+            loadAllGuilds: jasmine.createSpy('loadAllGuilds'),
             allGuilds: signal([
               {
                 id: 'lower-renown',
@@ -52,7 +53,7 @@ describe('GuildRankingsComponent', () => {
           },
         },
         { provide: LeaderboardStateService, useValue: leaderboardState },
-        { provide: Router, useValue: { navigate: jasmine.createSpy() } },
+        provideRouter([]),
         {
           provide: ChatService,
           useValue: { prepareWhisperToName: jasmine.createSpy() },

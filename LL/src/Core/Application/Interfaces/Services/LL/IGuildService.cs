@@ -29,6 +29,7 @@ public interface IGuildService
     Task<bool> DisbandGuildAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Guild?> GetMyGuildAsync(Guid guildId, CancellationToken cancellationToken);
     Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken);
+    Task<Guild?> GetPublicGuildAsync(Guid guildId, CancellationToken cancellationToken);
     Task<List<GuildInvite>> GetMyInvitesAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> ApplyToGuildAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken);
     Task<bool> RejectInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken);

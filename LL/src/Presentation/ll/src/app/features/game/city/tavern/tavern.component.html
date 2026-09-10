@@ -61,9 +61,7 @@
     </button>
   </section>
 
-  <ng-container
-    *ngIf="state.board() as board"
-  >
+  <ng-container *ngIf="state.board() as board">
     <section
       class="ll-panel shrink-0 p-4 sm:p-5"
       [attr.aria-busy]="state.refreshing()"
@@ -195,9 +193,11 @@
             [id]="match.participantId"
             [name]="match.participantName"
           ></app-character-tag>
-          <ng-template #searchMatchName>{{
-            match.participantName
-          }}</ng-template>
+          <ng-template #searchMatchName
+            ><app-guild-link
+              [guildId]="match.participantId"
+              [name]="match.participantName"
+          /></ng-template>
         </ng-container>
         <ng-template #noSearchMatch>
           No {{ board.participantLabel.toLowerCase() }} matching “{{
@@ -273,7 +273,10 @@
                     [name]="entry.participantName"
                   ></app-character-tag>
                   <ng-template #podiumParticipantName>
-                    {{ entry.participantName }}
+                    <app-guild-link
+                      [guildId]="entry.participantId"
+                      [name]="entry.participantName"
+                    />
                   </ng-template>
                 </h4>
               </div>
@@ -385,7 +388,10 @@
                       [name]="entry.participantName"
                     ></app-character-tag>
                     <ng-template #tableParticipantName>
-                      {{ entry.participantName }}
+                      <app-guild-link
+                        [guildId]="entry.participantId"
+                        [name]="entry.participantName"
+                      />
                     </ng-template>
                   </span>
                   <span

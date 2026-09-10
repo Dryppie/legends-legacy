@@ -40,7 +40,10 @@ describe('Chat equipment tooltip', () => {
     isGuildBorrowed: false,
   };
 
-  function setup(result: Observable<EquipmentInstance> = of(item)) {
+  function setup(
+    result: Observable<EquipmentInstance> = of(item),
+    rarity: Rarity | null = Rarity.Epic,
+  ) {
     const lookup = jasmine.createSpy().and.returnValue(result);
     TestBed.configureTestingModule({
       imports: [ChatEquipmentLinkComponent],
@@ -51,6 +54,7 @@ describe('Chat equipment tooltip', () => {
     const fixture = TestBed.createComponent(ChatEquipmentLinkComponent);
     fixture.componentRef.setInput('equipmentId', id);
     fixture.componentRef.setInput('name', 'Phoenix Mace');
+    fixture.componentRef.setInput('rarity', rarity ?? undefined);
     fixture.detectChanges();
     const origin: HTMLElement =
       fixture.nativeElement.querySelector('[tabindex="0"]');
@@ -58,9 +62,9 @@ describe('Chat equipment tooltip', () => {
     return { fixture, lookup, origin, overlay };
   }
 
-  it('colors the name before hover and reuses the loaded details in the overlay', fakeAsync(() => {
+  it('colors the name from the message without fetching until hover, then reuses loaded details', fakeAsync(() => {
     const { fixture, lookup, origin, overlay } = setup();
-    expect(lookup).toHaveBeenCalledOnceWith(id);
+    expect(lookup).not.toHaveBeenCalled();
     expect(origin.querySelector('.ll-rarity-epic')?.textContent).toContain(
       'Phoenix Mace',
     );
@@ -72,6 +76,21 @@ describe('Chat equipment tooltip', () => {
     expect(lookup).toHaveBeenCalledOnceWith(id);
     expect(overlay.textContent).toContain('Phoenix Mace');
     expect(overlay.querySelector('app-equipment-display')).not.toBeNull();
+    fixture.componentInstance.load();
+    expect(lookup).toHaveBeenCalledOnceWith(id);
+    fixture.destroy();
+    tick();
+  }));
+
+  it('keeps old links neutral until opened and then uses their resolved rarity', fakeAsync(() => {
+    const { fixture, lookup, origin } = setup(of(item), null);
+    expect(lookup).not.toHaveBeenCalled();
+    expect(origin.querySelector('.ll-text-muted')).not.toBeNull();
+    origin.dispatchEvent(new FocusEvent('focus'));
+    tick(150);
+    fixture.detectChanges();
+    expect(lookup).toHaveBeenCalledOnceWith(id);
+    expect(origin.querySelector('.ll-rarity-epic')).not.toBeNull();
     fixture.destroy();
     tick();
   }));
@@ -79,13 +98,17 @@ describe('Chat equipment tooltip', () => {
   it('shows loading and missing-item feedback on keyboard focus, then retries', fakeAsync(() => {
     const pending = new Subject<EquipmentInstance>();
     const { fixture, lookup, origin, overlay } = setup(pending);
+    expect(lookup).not.toHaveBeenCalled();
     origin.dispatchEvent(new FocusEvent('focus'));
     tick(150);
     fixture.detectChanges();
     expect(overlay.textContent).toContain('Loading equipment');
+    fixture.componentInstance.load();
+    expect(lookup).toHaveBeenCalledOnceWith(id);
     pending.error({ status: 404 });
     fixture.detectChanges();
     expect(overlay.textContent).toContain('no longer available');
+    expect(origin.querySelector('.ll-rarity-epic')).not.toBeNull();
     lookup.and.returnValue(of(item));
     fixture.componentInstance.load();
     fixture.detectChanges();
@@ -95,7 +118,8 @@ describe('Chat equipment tooltip', () => {
   }));
 
   it('opens by touch and offers a close button', fakeAsync(() => {
-    const { fixture, origin, overlay } = setup();
+    const { fixture, lookup, origin, overlay } = setup();
+    expect(lookup).not.toHaveBeenCalled();
     origin.dispatchEvent(
       new PointerEvent('pointerdown', { pointerType: 'touch', bubbles: true }),
     );
@@ -103,6 +127,7 @@ describe('Chat equipment tooltip', () => {
     tick(150);
     fixture.detectChanges();
     expect(overlay.textContent).toContain('Phoenix Mace');
+    expect(lookup).toHaveBeenCalledOnceWith(id);
     expect(
       overlay.querySelector('[aria-label="Close item details"]'),
     ).not.toBeNull();

@@ -22,6 +22,7 @@ export interface CharacterOverviewDto {
   level: number;
   experience: number;
   experienceUntilNextLevel: number;
+  totalAchievementPoints: number;
   power?: OverallPowerRating | null;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];

@@ -101,7 +101,10 @@ describe('CombatStyleStateService', () => {
         },
         {
           provide: CharacterStateService,
-          useValue: { markOverviewDirty: jasmine.createSpy() },
+          useValue: {
+            markOverviewDirty: jasmine.createSpy(),
+            overview: signal(null),
+          },
         },
       ],
     });

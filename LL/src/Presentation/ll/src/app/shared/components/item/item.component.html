@@ -20,7 +20,11 @@
       >
     </div>
     <span *ngIf="borrowedFromGuildName" class="text-xs text-amber-300">
-      Borrowed from {{ borrowedFromGuildName }}
+      Borrowed from
+      <app-guild-link
+        [guildId]="borrowedFromGuildId"
+        [name]="borrowedFromGuildName"
+      />
     </span>
   </div>
 </app-popover>
@@ -75,7 +79,10 @@
       <span *ngIf="rewardCategory" class="ll-item-chip ll-item-chip-accent">
         {{ rewardCategory }}
       </span>
-      <span *ngIf="rewardSource && rewardCategory !== 'Blueprints'" class="ll-item-chip">
+      <span
+        *ngIf="rewardSource && rewardCategory !== 'Blueprints'"
+        class="ll-item-chip"
+      >
         {{ rewardSource }}
       </span>
     </div>

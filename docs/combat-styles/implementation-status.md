@@ -4,7 +4,17 @@ Updated 10 September 2026. Gameplay authority: [Combat Styles game design](game-
 
 ## Delivered behavior
 
-Each character has one optional **global Combat Style**, used for every battle type. Bastion, Conduit and Reaper are available immediately. Each retains its own XP, progression through level 10, automatic bonuses at every mastery level, three refinements, three upgrades, and upgrade slots at levels 5 and 8. These styles do not add equipment attributes or Essence slots. Shepherd and Gambler remain unimplemented design proposals.
+Duelist is delivered in catalog `combat-styles.v9`. Successful basic attacks and normal direct Essence casts build Read once per action against one surviving opponent. A ready Opening strengthens the next damaging Essence's direct hits against that opponent. Switching opponents clears Read; area hits keep the current opponent when present. Flurry returns 1 Read, Patient Blade needs 5 Read for a heavier Opening, and Guarded Thrust grants ordinary Guard(1) after spending an Opening and completing the cast. The Guard is granted even on a miss or lethal Opening, if the Duelist survives.
+
+All three Duelist upgrades, their mastery effects, First Impression and continuous level bonuses are implemented. First Impression waits for a successful action against a surviving opponent and runs once per battle. The catalog, DTOs, previews and mastery panel expose the selected form's captured tuning. Read and Opening changes are recorded in the engine event log; the existing battle summary has no separate live Read panel. Existing committed snapshots omit Duelist tuning and preserve their serialized identity. No schema migration or environment configuration change is needed; release the API catalog/runtime and frontend together. No deployment was performed.
+
+Duelist verification:
+
+- `./build/run-tests.ps1`: **2,501 passed**, including Duelist targeting, cast boundaries, basic attacks, First Impression, upgrades, Guard, death/revival and logged/logless parity, plus the existing combat regressions.
+- `npm.cmd run test:ci -- --include=src/app/features/game/character/combat-styles/combat-styles.component.spec.ts --include=src/app/core/services/api/combat-styles/*.spec.ts --reporters=dots`: **44 passed**.
+- `npm.cmd run build:development`: passed.
+
+Each character has one optional **global Combat Style**, used for every battle type. Bastion, Conduit, Reaper and Duelist are available immediately. Each retains its own XP, progression through level 10, automatic bonuses at every mastery level, three refinements, three upgrades, and upgrade slots at levels 5 and 8. These styles do not add equipment attributes or Essence slots. Shepherd, Gambler and Spellweaver remain unimplemented design proposals.
 
 Reaper is delivered in catalog `combat-styles.v7`. Every qualifying direct Essence hit consumes one future tick from each eligible owned Bleed, Burn and Poison stack. Soul Siphon converts that amount to self-healing; Death Sentence banks it as independent 15-second Magical Doom. Last Rites instead consumes all future ticks at or below 35% enemy Health. Closing Hand, Crosscut, Deep Roots, their mastery effects and the level-7 Grave Seed opening use captured tuning. Reaper encounters process due conditions before active attacks. Other encounters keep their historical ordering, and older snapshots omit the optional Reaper tuning. This addition requires no schema migration.
 

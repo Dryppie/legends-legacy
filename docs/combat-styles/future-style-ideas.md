@@ -1,6 +1,6 @@
 # Possible Combat Styles
 
-Six additional concepts to explore alongside Bastion, Conduit, Reaper, Shepherd, and Gambler. Duelist and Spellweaver now have full design proposals; the other four remain early ideas. None is implemented or a committed design. Each would operate automatically through the existing Combat Style slot.
+Six additional concepts to explore alongside Bastion, Conduit, Reaper, Shepherd, and Gambler. Duelist is now implemented, Spellweaver has a full design proposal, and the other four remain early ideas. The proposed styles would operate automatically through the existing Combat Style slot.
 
 ## Duelist
 
@@ -8,7 +8,7 @@ Six additional concepts to explore alongside Bastion, Conduit, Reaper, Shepherd,
 
 **What it might do:** Repeated attacks against the same enemy could reveal an opening that a later Essence attack exploits for a stronger strike. Changing targets would begin a new read on the opponent, making focused pressure and reliable target selection central to the build.
 
-**Full proposal:** [Duelist](styles/duelist.md) develops this into Read and Opening, with mastery progression, three refinements, upgrades, an Opening Technique and worked examples.
+**Implemented guide:** [Duelist](styles/duelist.md) develops this into Read and Opening, with mastery progression, three refinements, upgrades, an Opening Technique and worked examples.
 
 ## Avenger
 

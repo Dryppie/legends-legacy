@@ -13,12 +13,17 @@ import {
 } from '../../../../shared/models/Dtos/guild/guildBuilding';
 import { GuildRole } from '../../../../shared/models/Dtos/guild/guildRole';
 import { GuildRolePermission } from '../../../../shared/models/Dtos/guild/guildRolePermission';
+import { GuildPublic } from '../../../../shared/models/Dtos/guild/guildPublic';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GuildService {
   constructor(private api: ApiService) {}
+
+  getPublicGuild(guildId: string): Observable<GuildPublic> {
+    return this.api.get(`guild/getPublicGuild/${encodeURIComponent(guildId)}`);
+  }
 
   create(name: string) {
     return this.api.post('guild/createGuild', name).pipe(

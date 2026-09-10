@@ -4,6 +4,7 @@ namespace Application.UseCases.CombatStyles.Dtos;
 public sealed record CombatStyleTuningDto
 {
     public ReaperTuningDto? Reaper { get; init; }
+    public DuelistTuningDto? Duelist { get; init; }
     public double HealthFraction { get; init; }
     public double BarrierFraction { get; init; }
     public double? BarrierPerMasteryLevel { get; init; }

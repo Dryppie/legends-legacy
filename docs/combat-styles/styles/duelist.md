@@ -1,6 +1,6 @@
 # Duelist
 
-**Status:** Design proposal — not implemented. All values below are starting points for playtesting.
+**Status:** Implemented — catalog `combat-styles.v9`. Duelist is available at mastery level 0. These initial balance values remain starting points for playtesting.
 
 Stay on one opponent, learn how they fight, and make your next Essence strike count. Your attacks build **Read** against that enemy. At **3 Read**, you find an **Opening** that your next damaging Essence uses for a stronger attack.
 
@@ -18,12 +18,12 @@ An action that builds the final Read cannot also spend the Opening it just creat
 
 For example, at mastery level 0:
 
-| Action against the same enemy | Result | Read afterward |
-| --- | --- | ---: |
-| Basic attack lands | Begin reading the opponent | 1 |
-| Damaging Essence lands | Keep building Read | 2 |
-| Basic attack lands | Find an Opening | 3 — ready |
-| Next damaging Essence attacks | Spend the Opening; direct damage to that enemy uses 145% strength | 0 |
+| Action against the same enemy | Result                                                            | Read afterward |
+| ----------------------------- | ----------------------------------------------------------------- | -------------: |
+| Basic attack lands            | Begin reading the opponent                                        |              1 |
+| Damaging Essence lands        | Keep building Read                                                |              2 |
+| Basic attack lands            | Find an Opening                                                   |      3 — ready |
+| Next damaging Essence attacks | Spend the Opening; direct damage to that enemy uses 145% strength |              0 |
 
 If the final Essence would normally deal 200 direct damage before defenses, its Opening makes that **290**. It follows its normal cooldown and targeting; Duelist does not hold a cast for a better opportunity or add manual attack selection.
 
@@ -64,19 +64,19 @@ The percentages inside the brackets add together. For example, **145% + 10% flat
 
 Every mastery level adds **a flat +1%** to Opening damage in every form. Ordinary attacks keep their normal strength. Levels do not change how much Read an action builds or how much Read an Opening needs.
 
-| Mastery level | Opening bonus | Base-form Opening strength | Additional unlock |
-| ---: | ---: | ---: | --- |
-| 0 | +0% flat increase | 145% | Full core mechanic |
-| 1 | +1% flat increase | 146% | — |
-| 2 | +2% flat increase | 147% | — |
-| 3 | +3% flat increase | 148% | Refinement choice |
-| 4 | +4% flat increase | 149% | — |
-| 5 | +5% flat increase | 150% | First upgrade slot; all three upgrades available |
-| 6 | +6% flat increase | 151% | — |
-| 7 | +7% flat increase | 152% | Opening Technique |
-| 8 | +8% flat increase | 153% | Second upgrade slot |
-| 9 | +9% flat increase | 154% | Empower one equipped upgrade |
-| 10 | +10% flat increase | 155% | Maximum mastery level |
+| Mastery level |      Opening bonus | Base-form Opening strength | Additional unlock                                |
+| ------------: | -----------------: | -------------------------: | ------------------------------------------------ |
+|             0 |  +0% flat increase |                       145% | Full core mechanic                               |
+|             1 |  +1% flat increase |                       146% | —                                                |
+|             2 |  +2% flat increase |                       147% | —                                                |
+|             3 |  +3% flat increase |                       148% | Refinement choice                                |
+|             4 |  +4% flat increase |                       149% | —                                                |
+|             5 |  +5% flat increase |                       150% | First upgrade slot; all three upgrades available |
+|             6 |  +6% flat increase |                       151% | —                                                |
+|             7 |  +7% flat increase |                       152% | Opening Technique                                |
+|             8 |  +8% flat increase |                       153% | Second upgrade slot                              |
+|             9 |  +9% flat increase |                       154% | Empower one equipped upgrade                     |
+|            10 | +10% flat increase |                       155% | Maximum mastery level                            |
 
 These values are before upgrades. Duelist uses the same individual XP requirements as the implemented styles, with no separate rank track.
 
@@ -84,12 +84,12 @@ These values are before upgrades. Duelist uses the same individual XP requiremen
 
 Choose one refinement or keep the base form. Each choice changes what you want from an Opening while keeping the same attacks, target rules and flat mastery-level bonus.
 
-| Form | Read needed | Opening strength before levels and upgrades | What changes |
-| --- | ---: | ---: | --- |
-| Base form | 3 | 145% | A dependable damage payoff after three successful actions. |
-| **Flurry** | 3 | 130% | Keep 1 Read after spending an Opening, bringing the next one closer. |
-| **Patient Blade** | 5 | 180% | Study the opponent for longer before committing to a heavier strike. |
-| **Guarded Thrust** | 3 | 125% | After using an Opening, take less damage from that opponent's next direct attack. |
+| Form               | Read needed | Opening strength before levels and upgrades | What changes                                                                      |
+| ------------------ | ----------: | ------------------------------------------: | --------------------------------------------------------------------------------- |
+| Base form          |           3 |                                        145% | A dependable damage payoff after three successful actions.                        |
+| **Flurry**         |           3 |                                        130% | Keep 1 Read after spending an Opening, bringing the next one closer.              |
+| **Patient Blade**  |           5 |                                        180% | Study the opponent for longer before committing to a heavier strike.              |
+| **Guarded Thrust** |           3 |                                        125% | After spending an Opening, gain Guard(1). |
 
 ### Flurry
 
@@ -107,23 +107,21 @@ At mastery 10, a Patient Blade Opening uses **190%** strength before upgrades. T
 
 ### Guarded Thrust
 
-Strike without leaving yourself exposed. After the spending Essence finishes, prepare to take **25% less direct damage from your chosen opponent's next basic attack or normal Essence cast against you**, for up to **5 seconds**. That Opening deals less damage: **135%** strength at mastery 10 before upgrades.
+Strike without leaving yourself exposed. After spending an Opening and finishing the Essence cast, gain **Guard(1)** if you are still alive. That Opening deals less damage: **135%** strength at mastery 10 before upgrades.
 
-The protection covers all direct hits against you from that one incoming action. It is consumed on the first attack attempt, including a dodge or fully prevented hit, and ends when that action finishes. The incoming action must begin attacking you before the five-second window expires; an attempt exactly at expiry is too late. Other enemies' attacks do not consume it.
+The Guard is granted even if the Opening misses or defeats the opponent. It arrives after the cast and its immediate reactions, so it cannot protect you from a reaction to the strike that created it. Dying during the cast prevents the grant.
 
-Apply the reduction once, multiplicatively with normal damage reduction, before Barrier absorbs damage. It does not cover damage over time, reflection, passive damage, triggered copies or summons' attacks. A fresh Guarded Thrust replaces unused protection and refreshes its duration; the reductions do not stack. Changing opponents or either combatant dying clears it.
-
-Protection is granted even if your Opening misses, provided both combatants survive. It begins after your cast and its immediate reactions finish, so it cannot reduce a reaction to the strike that created it. This is personal style state, not a new Guard condition or a Barrier grant.
+This is the existing [Guard condition](../../combat-lexicon/conditions/guard.md). Each grant adds one charge to your normal Guard pool. It has no special timer or opponent restriction, and changing opponents does not remove it. Each charge reduces one qualifying incoming direct hit by 25% before Barrier, then is consumed; it does not protect an entire multi-hit cast.
 
 ## Upgrades — mastery 5 and 8
 
 All three upgrades become available at mastery 5. Equip one at mastery 5 and up to two different upgrades at mastery 8. Each works with every form.
 
-| Upgrade | Effect |
-| --- | --- |
-| **Measured Strikes** | An Opening gains **a flat +10%** damage if you landed at least one basic attack against that opponent while preparing it. |
-| **Know Your Enemy** | After you have spent one Opening against an opponent, later Openings against that same opponent gain **a flat +10%** damage until you change opponents. |
-| **Finishing Touch** | An Opening gains **a flat +10%** damage if its opponent has **35% Health or less** when you spend it. |
+| Upgrade              | Effect                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Measured Strikes** | An Opening gains **a flat +10%** damage if you landed at least one basic attack against that opponent while preparing it.                               |
+| **Know Your Enemy**  | After you have spent one Opening against an opponent, later Openings against that same opponent gain **a flat +10%** damage until you change opponents. |
+| **Finishing Touch**  | An Opening gains **a flat +10%** damage if its opponent has **35% Health or less** when you spend it.                                                   |
 
 Check the upgrades when the Opening is spent and keep their bonuses for the whole cast. Finishing Touch uses current Health divided by Max Health, excluding Barrier; crossing its threshold during the cast does not change that cast's bonus.
 
@@ -143,11 +141,11 @@ First Impression waits through misses, healing and other actions that do not bui
 
 Choose one equipped upgrade to empower. It keeps its existing slot and ordinary effect.
 
-| Empowered upgrade | Additional effect |
-| --- | --- |
+| Empowered upgrade    | Additional effect                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Measured Strikes** | Two or more successful basic attacks while preparing an Opening raise its bonus to **a flat +20%** instead of +10%. One basic attack still grants +10%. |
-| **Know Your Enemy** | Its **flat +10%** also applies to your first Opening against each opponent. |
-| **Finishing Touch** | Its **flat +10%** applies at **50% Health or less**, instead of 35%. |
+| **Know Your Enemy**  | Its **flat +10%** also applies to your first Opening against each opponent.                                                                             |
+| **Finishing Touch**  | Its **flat +10%** applies at **50% Health or less**, instead of 35%.                                                                                    |
 
 Mastery changes that upgrade's rule; it does not add another copy of the ordinary bonus. Removing the empowered upgrade clears its mastery selection under the shared configuration rules.
 
@@ -155,46 +153,54 @@ Mastery changes that upgrade's rule; it does not add another copy of the ordinar
 
 Consider a mastery-10 base-form Duelist with empowered Measured Strikes and Know Your Enemy. First Impression has already been used. Each Essence below would normally deal 200 direct damage before defenses. Every listed attack lands on the same surviving opponent until the final row.
 
-| Sequence | Opening bonuses | Opening strength | Essence damage before defenses |
-| --- | --- | ---: | ---: |
-| Land three basic attacks, then spend the first Opening against this opponent | +10% flat from mastery; +20% flat from Measured Strikes | 175% | 350 |
-| Land three more basic attacks, then spend another Opening against them | The same bonuses, plus +10% flat from Know Your Enemy | 185% | 370 |
-| Switch to a new opponent and land one basic attack | Previous progress and upgrade history are cleared; start at 1 Read | No Opening yet | — |
+| Sequence                                                                     | Opening bonuses                                                    | Opening strength | Essence damage before defenses |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------: | -----------------------------: |
+| Land three basic attacks, then spend the first Opening against this opponent | +10% flat from mastery; +20% flat from Measured Strikes            |             175% |                            350 |
+| Land three more basic attacks, then spend another Opening against them       | The same bonuses, plus +10% flat from Know Your Enemy              |             185% |                            370 |
+| Switch to a new opponent and land one basic attack                           | Previous progress and upgrade history are cleared; start at 1 Read |   No Opening yet |                              — |
 
 For a separate comparison, take each form at mastery 10 with no upgrades. A spending cast has two direct hits, each normally worth 100 against the chosen opponent:
 
-| Form | Each hit with an Opening | Total direct damage before defenses | After the cast |
-| --- | ---: | ---: | --- |
-| Base form | 155 | 310 | Start again at 0 Read. |
-| Flurry | 140 | 280 | Return to 1 Read if the opponent survives. |
-| Patient Blade | 190 | 380 | Start again at 0 Read; the next Opening needs 5. |
-| Guarded Thrust | 135 | 270 | Start again at 0 Read and prepare protection if the opponent survives. |
+| Form           | Each hit with an Opening | Total direct damage before defenses | After the cast                                                         |
+| -------------- | -----------------------: | ----------------------------------: | ---------------------------------------------------------------------- |
+| Base form      |                      155 |                                 310 | Start again at 0 Read.                                                 |
+| Flurry         |                      140 |                                 280 | Return to 1 Read if the opponent survives.                             |
+| Patient Blade  |                      190 |                                 380 | Start again at 0 Read; the next Opening needs 5.                       |
+| Guarded Thrust |                      135 |                                 270 | Start again at 0 Read and gain Guard(1) if you survive. |
 
-Any other enemies hit by that cast still take the two normal 100-damage hits. With Guarded Thrust, an incoming hit that would deal 200 after other defenses instead deals **150** before Barrier, provided it belongs to the protected attack and arrives in time.
+Any other enemies hit by that cast still take the two normal 100-damage hits. After Guarded Thrust grants Guard(1), a qualifying incoming hit worth 200 after other defenses instead deals **150** before Barrier and consumes that charge. A second hit needs another Guard charge to receive the reduction.
 
 ## Battle continuity and player information
 
-Read, the chosen opponent, upgrade preparation and unused Guarded Thrust protection belong to the current battle. Opponent death clears them without transferring progress; your own death clears them too. Revival starts a fresh Read and does not restore a used First Impression. A new battle starts from zero and grants First Impression again at mastery 7 or higher. A new wave within the same continuing battle does not grant it again.
+Read, the chosen opponent and upgrade preparation belong to the current battle. Opponent death clears them without transferring progress; your own death clears them too. Guard granted by Guarded Thrust follows ordinary Guard rules and is not removed when the opponent dies. Revival starts a fresh Read and does not restore a used First Impression. A new battle starts from zero and grants First Impression again at mastery 7 or higher. A new wave within the same continuing battle does not grant it again.
 
 A reconnect or display refresh must preserve the active battle's state. Committed battle replays and offline combat must use the same action order, chosen opponents and Opening decisions. Saved style changes take effect at the normal encounter boundary.
 
-The Combat Styles page should show the selected form's Read requirement, current Opening strength, refinements and upgrade effects. During battle, show the chosen opponent and a compact **Read: 2/3** or **Opening ready** indicator. For Guarded Thrust, also show whether its protection is waiting and how long remains. These explain automatic behavior without adding controls.
+The Combat Styles page shows the selected form's Read requirement, current Opening strength, refinements and upgrade effects. The combat engine records the chosen opponent and **Read: 2/3** or **Opening ready** in its event log, along with each spent Opening. Guarded Thrust uses ordinary Guard application and consumption events. The current battle summary does not expose a separate live Read counter.
 
 ## Build directions and playtests
 
 - **Sustained pressure:** Base form with Measured Strikes and Know Your Enemy rewards repeatedly attacking a durable opponent.
 - **Frequent follow-ups:** Flurry suits builds with enough direct Essence casts to spend its more frequent Openings.
 - **A heavier finish:** Patient Blade with Finishing Touch rewards reaching an Opening while the opponent is already wounded. Test whether normal cast order delivers this often enough to feel useful.
-- **Trading blows:** Guarded Thrust gives up damage to survive an opponent who regularly attacks back. Compare its five-second window against fast enemies and slower bosses.
+- **Trading blows:** Guarded Thrust gives up damage to survive an opponent who regularly attacks back. Compare its Guard generation against fast enemies, slower bosses and multi-hit attacks.
 
 Compare the forms over complete fights at equal mastery and upgrade counts, including preparation time and unused Read at the end. Test basic-attack speed, short and long Essence cooldowns, differently sized attacks, and healing-heavy loadouts. No form should consistently win both short fights and sustained encounters.
 
 Target stability needs particular attention: current ordinary targeting can change opponents between attacks. Test against one boss, several enemies with similar Threat, enemy summons, random-target Essences, Taunt and area abilities. Measure how often target changes erase progress. Duelist should reward focused builds without requiring target control the game does not provide.
 
-Verify misses, complete prevention, Barrier-only damage, multi-hit casts, mixed target groups, lethal hits, simultaneous actions, revival and wave transitions. Check exact Read caps, Health thresholds and Guarded Thrust expiry. Confirm that passive effects and repeated casts cannot accelerate Read or spend another Opening, and that an area cast neither multiplies Read gains nor resets progress for every enemy hit.
+Verify misses, complete prevention, Barrier-only damage, multi-hit casts, mixed target groups, lethal hits, simultaneous actions, revival and wave transitions. Check exact Read caps, Health thresholds and normal Guard charge consumption. Confirm that passive effects and repeated casts cannot accelerate Read or spend another Opening, and that an area cast neither multiplies Read gains nor resets progress for every enemy hit.
 
 ## Design references
 
 This expands the [original Duelist concept](../future-style-ideas.md#duelist). The [targeting rules](../../combat-lexicon/targeting-rules.md), [damage categories](../../combat-lexicon/damage-categories.md) and [Conduit guide](conduit.md) provide the existing combat vocabulary and direct-effect boundaries.
 
-Read the Opponent, Read, Opening, all Duelist refinements and upgrades, and First Impression are proposed additions. This document does not add Duelist to the content catalog or implement its battle behavior.
+## Implementation and verification
+
+Duelist uses the existing global style selection, individual XP, refinement unlock, two upgrade slots and Upgrade Mastery. Its resolved tuning is captured in each battle snapshot. Older styles omit the optional Duelist tuning and preserve their serialized identity. No database migration or environment configuration change is required.
+
+- [Content catalog](../../../LL/src/API/API.LL/Data/combat-styles/combat-styles.v1.json): values, choices and descriptions.
+- [Duelist runtime](../../../LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.Duelist.cs): Read, opponent selection, Opening bonuses and Guard grants.
+- [Engine tests](../../../LL/tests/EssenceSystem.Tests/CombatStyleDuelistEngineTests.cs): cast boundaries, target changes, basic attacks, upgrades, Guard, death and logged/logless parity.
+
+Release the API catalog/runtime and frontend together. This change does not deploy services.
