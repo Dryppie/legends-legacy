@@ -4,32 +4,26 @@ using System.Text;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Domain.Models.Attributes;
-using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments.Progression;
-using Services.LL.Interfaces;
 
 namespace Services.LL.PowerRatings;
 
 public sealed record PowerBuildSnapshot(
     string Fingerprint,
-    IReadOnlyList<CombatEntity> Combatants,
     CombatRatingBreakdown Rating);
 
 public sealed class PowerBuildSnapshotFactory
 {
     private readonly ICharacterRepository _characters;
-    private readonly ICombatSetupService _combatSetup;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
 
     public PowerBuildSnapshotFactory(
         ICharacterRepository characters,
-        ICombatSetupService combatSetup,
         IEssenceCombatLoadoutResolver essenceLoadouts)
     {
         _characters = characters;
-        _combatSetup = combatSetup;
         _essenceLoadouts = essenceLoadouts;
     }
 
@@ -50,13 +44,13 @@ public sealed class PowerBuildSnapshotFactory
         return await CreateAsync(character, partySelection, cancellationToken);
     }
 
-    public async Task<PowerBuildSnapshot?> CreateAsync(
+    public Task<PowerBuildSnapshot?> CreateAsync(
         Character character,
         DungeonPartySelection partySelection,
         CancellationToken cancellationToken)
     {
         if (partySelection.CompanionIds.Count > 0)
-            return null;
+            return Task.FromResult<PowerBuildSnapshot?>(null);
 
         var defaultLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, EssenceCombatActivity.None);
         var equippedEssences = defaultLoadout?.Slots
@@ -87,17 +81,11 @@ public sealed class PowerBuildSnapshotFactory
             essenceAttributeSources,
             character.Level);
 
-        var combatant = new CombatEntity(character)
-        {
-            EquippedEssences = equippedEssences,
-            HasEquippedEssenceSnapshot = true
-        };
-        await _combatSetup.PrepareEntitiesForCombat([combatant]);
-
-        return new PowerBuildSnapshot(
+        // Attribute ratings also support empty loadouts; battle preparation and
+        // Combat Style validation are not needed to display a character overview.
+        return Task.FromResult<PowerBuildSnapshot?>(new PowerBuildSnapshot(
             CreateFingerprint(character),
-            [combatant],
-            rating);
+            rating));
     }
 
     public static string CreateFingerprint(Character character)

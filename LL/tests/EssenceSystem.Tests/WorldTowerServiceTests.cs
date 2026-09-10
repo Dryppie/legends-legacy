@@ -8,6 +8,8 @@ using Application.Common.Mappings;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Combat;
+using Application.Interfaces.Services.LL.CombatStyles;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.WorldTower;
 using Application.UseCases.Outbox;
@@ -15,6 +17,9 @@ using Application.WebSockets.Contracts;
 using AutoMapper;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.CombatStyles;
+using Domain.Models.Essences;
+using Domain.Models.Essences.Definitions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
@@ -31,6 +36,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
 using Persistence.LL.Repositories.Snapshots;
+using Persistence.LL.Repositories.CombatStyles;
+using Persistence.LL.Repositories.Entities.Characters;
+using Services.LL.CombatStyles;
+using Services.LL.PowerRatings;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -474,6 +483,52 @@ public sealed class WorldTowerServiceTests
                 .AsNoTracking()
                 .SingleAsync(x => x.Id == applicationId))
                 .CharacterSnapshotId);
+    }
+
+    [Fact]
+    public async Task UpdateRallyLoadout_AcceptsValidTowerConduitWithEmptyDefaultLoadout()
+    {
+        await using var db = CreateDbContext();
+        var character = SeedCharacter(db, "Conduit", 20, Guid.NewGuid());
+        character.BaseAttributes = [new() { EntityId = character.Id, AttributeType = AttributeType.Power, Value = 100 }];
+        var essence = new PlayerEssence
+        {
+            Id = Guid.NewGuid(), CharacterId = character.Id, EssenceDefinitionId = "tower-heal"
+        };
+        character.EssenceLoadouts =
+        [
+            new() { Id = Guid.NewGuid(), CharacterId = character.Id, Name = "First - empty" },
+            new()
+            {
+                Id = Guid.NewGuid(), CharacterId = character.Id, Name = "Second - Tower",
+                AutoUseActivities = EssenceCombatActivity.WorldTower,
+                Slots = [new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = essence.Id, PlayerEssence = essence }]
+            }
+        ];
+        db.CharacterCombatStyleSelections.Add(new() { CharacterId = character.Id, CombatStyleId = CombatStyleIds.Conduit });
+        await db.SaveChangesAsync();
+        var definitions = new TowerConduitDefinitions();
+        var styles = new CombatStyleService(new CombatStyleRepository(db), new TowerCombatStyleCatalog(),
+            new EmptyRatingEssences(), new ChanneledEssenceResolver(definitions, definitions), null!);
+        var ratings = new PowerRatingService(
+            new PowerBuildSnapshotFactory(new CharacterRepository(db), new EmptyRatingEssences()),
+            NullLogger<PowerRatingService>.Instance);
+        var service = CreateService(db, ratings, combatStyles: styles);
+        var created = await service.CreateRallyAsync(character.Id, 1, TowerRallyMode.FirstClear, default);
+        Assert.True(created.Succeeded, created.Error);
+        var rallyId = created.Value!.Id;
+        var originalSnapshotId = (await db.TowerRallyParticipants.SingleAsync(x => x.TowerRallyId == rallyId)).CharacterSnapshotId;
+        db.ChangeTracker.Clear();
+
+        var updated = await service.UpdateRallyLoadoutAsync(character.Id, rallyId, default);
+
+        Assert.True(updated.Succeeded, updated.Error);
+        var participant = await db.TowerRallyParticipants.SingleAsync(x => x.TowerRallyId == rallyId);
+        Assert.NotEqual(originalSnapshotId, participant.CharacterSnapshotId);
+        var snapshot = participant.CharacterSnapshot;
+        Assert.Equal(essence.Id, Assert.Single(snapshot.EquippedEssences).PlayerEssenceId);
+        Assert.Equal(CombatStyleIds.Conduit, snapshot.CombatStyle!.CombatStyleId);
+        Assert.Equal(essence.Id, snapshot.CombatStyle.ChanneledPlayerEssenceId);
     }
 
     [Fact]
@@ -1953,9 +2008,10 @@ public sealed class WorldTowerServiceTests
         ICombatEncounterResultFactory? resultFactory = null,
         IGameEventOutbox? outbox = null,
         IStateSyncService? stateSync = null,
-        bool developmentToolsEnabled = false)
+        bool developmentToolsEnabled = false,
+        ICombatStyleService? combatStyles = null)
     {
-        var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db));
+        var snapshotService = new CharacterSnapshotService(new CharacterSnapshotRepository(db, combatStyles: combatStyles));
         var resolvedCombatSetup = combatSetup ?? new ThrowingCombatSetupService();
         return new WorldTowerService(
             db,
@@ -2109,6 +2165,39 @@ public sealed class WorldTowerServiceTests
         db.ChangeTracker.Clear();
 
         return rallyId;
+    }
+
+    private sealed class TowerCombatStyleCatalog : ICombatStyleCatalogProvider
+    {
+        public CombatStyleCatalog Catalog { get; } = CombatStyleFoundationTests.LoadCatalog();
+    }
+
+    private sealed class EmptyRatingEssences : IEssenceCombatLoadoutResolver
+    {
+        public Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("Use the Tower snapshot's Essences for combat validation.");
+
+        public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences) =>
+            throw new InvalidOperationException("The default rating loadout is empty.");
+    }
+
+    private sealed class TowerConduitDefinitions : IEssenceDefinitionRepository, IAbilityCatalogProvider
+    {
+        private readonly EssenceDefinition _definition = new()
+        {
+            Id = "tower-heal", Name = "Tower Heal",
+            ActiveAbility = new()
+            {
+                Id = "tower-heal-ability", Name = "Tower Heal", Kind = AbilitySpecKind.Active, CooldownTicks = 10,
+                Effects = [new() { Id = "heal", Operation = AbilityEffectOperation.Heal, Target = AbilityTargetSelector.Self, ScalingCoefficient = 1 }]
+            }
+        };
+
+        public IReadOnlyList<EssenceDefinition> GetAll() => [_definition];
+        public IReadOnlyList<AbilitySpec> GetAllAbilities() => [_definition.ActiveAbility];
+        public EssenceDefinition? GetById(string id) => id == _definition.Id ? _definition : null;
+        public AbilitySpec? GetAbilityById(string id) => id == _definition.ActiveAbility.Id ? _definition.ActiveAbility : null;
+        public AbilityCatalog GetCatalog() => new(GetAllAbilities(), [], [], new Dictionary<string, string>());
     }
 
     private static Character SeedCharacter(

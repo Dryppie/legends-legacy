@@ -9,7 +9,9 @@ using Domain.Models.Damages;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
+using Microsoft.Extensions.Logging.Abstractions;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Combat.Engine;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -258,6 +260,46 @@ public sealed class PowerRatingCoreTests
         Assert.Equal(
             PowerBuildSnapshotFactory.CreateFingerprint(first),
             PowerBuildSnapshotFactory.CreateFingerprint(second));
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task Overview_rating_accepts_no_essences_without_selecting_another_loadout(
+        bool hasEmptyLoadout,
+        bool hasPopulatedSecondLoadout)
+    {
+        var character = CreateCharacter();
+        if (hasEmptyLoadout)
+            character.EssenceLoadouts.Add(new EssenceLoadout { Name = "First" });
+        if (hasPopulatedSecondLoadout)
+        {
+            var essence = new PlayerEssence { Id = Guid.NewGuid(), EssenceDefinitionId = "second-loadout-essence" };
+            character.EssenceLoadouts.Add(new EssenceLoadout
+            {
+                Name = "Second",
+                AutoUseActivities = EssenceCombatActivity.IdleCombat,
+                Slots = [new() { SlotIndex = 0, PlayerEssenceId = essence.Id, PlayerEssence = essence }]
+            });
+        }
+        var factory = new PowerBuildSnapshotFactory(null!, new UnusedEssenceResolver());
+        var service = new PowerRatingService(factory, NullLogger<PowerRatingService>.Instance);
+
+        var result = await service.GetCharacterOverallRatingAsync(character, default);
+
+        Assert.Equal(PowerAnalysisState.Available, result.State);
+        Assert.Equal(CombatRatingCalculator.Calculate(character.BaseAttributes, [], characterLevel: character.Level).Overall,
+            result.Overall);
+    }
+
+    private sealed class UnusedEssenceResolver : IEssenceCombatLoadoutResolver
+    {
+        public Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("An empty overview loadout must not resolve a combat loadout.");
+
+        public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences) =>
+            throw new InvalidOperationException("The overview must retain the empty default loadout.");
     }
 
     private static Character CreateCharacter() => new()
