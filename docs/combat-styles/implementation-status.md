@@ -12,6 +12,12 @@ Reaper balance update in `combat-styles.v8`: Death Sentence now applies its addi
 
 Grave Seed's catalog tuning supplies **Poison(5)** to new battle snapshots. The existing opening runtime and preview read this value; the tuning model's fallback default remains two stacks, and committed battles retain their captured value. Older snapshots without the Death Sentence bonus retain zero extra bonus and omit that field when reserialized. Release the API catalog/runtime and frontend together. No schema migration, environment configuration change or deployment is performed.
 
+Verification for the `combat-styles.v8` update:
+
+- `./build/run-tests.ps1 -Filter 'FullyQualifiedName~CombatStyle'`: **318 passed**, including Closing Hand thresholds and Barrier-only hits, all Reaper forms, Doom timing and stored amounts, current catalog tuning, DTO/preview values, and historical snapshot compatibility.
+- `npm.cmd run test:ci -- --include=src/app/features/game/character/combat-styles/combat-styles.component.spec.ts --reporters=dots`: **19 passed**, including switching between Death Sentence's 130% and Soul Siphon's 120% mastery-10 previews.
+- The sandbox initially blocked the local NuGet configuration; the backend run succeeded with local configuration/cache access. The first test run exposed a checkpoint-timing assertion and a floating-point comparison in tests; both were corrected before the passing run.
+
 Reaper verification on 10 September 2026, before the latest catalog edits described above:
 
 - `./build/run-tests.ps1`: 2,457 backend tests passed, including 52 Reaper cases.
