@@ -16,12 +16,11 @@ public interface INobilityService
     Task<Response<SignetIssuance>> GrantAlphaAsync(string actorSubject, Guid characterId, Guid operationId,
         int quantity, string reason, CancellationToken ct);
     Task<Response<bool>> SetAppearanceAsync(Guid accountId, Guid characterId, bool showBadge, CancellationToken ct);
-    Task<int> ApplyDailyRewardsAsync(Guid accountId, Guid characterId, CancellationToken ct);
 }
 
 public sealed record NobilityStatus(bool IsNoble, DateTimeOffset ServerTime, DateTimeOffset? ExpiresAt,
     Guid MembershipVersion, int AvailableSignets, int ListedSignets, bool HasSupportHistory,
-    bool ShowBadge, DateOnly? DailyRewardsThrough,
+    bool ShowBadge,
     NobilityBenefits Benefits);
 
 public sealed record SignetPreview(Guid MembershipVersion, Guid[] UnitIds, DateTimeOffset ExpiresAt,

@@ -43,7 +43,6 @@ public sealed class NobilityService(INobilityRepository repository, TimeProvider
             (await repository.GetUnitsAsync(characterId, SignetState.Available, ct)).Count,
             (await repository.GetUnitsAsync(characterId, SignetState.Listed, ct)).Count,
             await repository.HasCashSupportAsync(accountId, ct), membership?.ShowBadge ?? true,
-            membership?.DailyRewardsThrough,
             active is null ? NobilityBenefits.Free : NobilityBenefits.Noble);
     }
 
@@ -95,8 +94,7 @@ public sealed class NobilityService(INobilityRepository repository, TimeProvider
         var isNew = membership is null;
         membership ??= new NobilityMembership
         {
-            AccountId = accountId, RewardCharacterId = characterId,
-            NextDailyRewardAt = new DateTimeOffset(now.UtcDateTime.Date.AddDays(1), TimeSpan.Zero)
+            AccountId = accountId, RewardCharacterId = characterId
         };
         NobilityExtension extension;
         try { extension = membership.Preview(selected.Length, now); }
@@ -168,32 +166,6 @@ public sealed class NobilityService(INobilityRepository repository, TimeProvider
         membership.ShowBadge = showBadge;
         membership.Version = Guid.NewGuid();
         return Response<bool>.Success(true);
-    }
-
-    public async Task<int> ApplyDailyRewardsAsync(Guid accountId, Guid characterId, CancellationToken ct)
-    {
-        await repository.LockAccountAsync(accountId, characterId, ct);
-        var membership = await repository.GetMembershipAsync(accountId, ct);
-        if (membership is null || membership.RewardCharacterId != characterId || membership.Coverage.Count == 0) return 0;
-        var now = time.GetUtcNow();
-        var yesterday = DateOnly.FromDateTime(now.UtcDateTime).AddDays(-1);
-        var date = membership.DailyRewardsThrough?.AddDays(1)
-            ?? DateOnly.FromDateTime(membership.Coverage.Min(x => x.StartsAt).UtcDateTime);
-        var grants = 0;
-        for (var processed = 0; date <= yesterday && processed < 31; processed++, date = date.AddDays(1))
-        {
-            var start = new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-            if (membership.Coverage.Any(x => x.StartsAt < start.AddDays(1) && x.EndsAt > start) &&
-                !await repository.HasDailyGrantAsync(accountId, date, ct))
-            {
-                await repository.ApplyDailyGrantAsync(new NobilityDailyGrant
-                { AccountId = accountId, CharacterId = characterId, GameDate = date, AppliedAt = now }, ct);
-                grants++;
-            }
-            membership.DailyRewardsThrough = date;
-            membership.NextDailyRewardAt = start.AddDays(2);
-        }
-        return grants;
     }
 
     private async Task<bool> IsRecoverableOwnerAsync(Guid accountId, Guid characterId, CancellationToken ct)

@@ -13,6 +13,40 @@ namespace EssenceSystem.Tests;
 public sealed class NobilityTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Combat_awards_the_same_experience_with_or_without_nobility(bool noble)
+    {
+        await using var fixture = await Fixture.Create();
+        if (noble) await fixture.Activate();
+        var now = fixture.Clock.Now;
+        var id = fixture.Character.Id;
+        var encounterId = Guid.NewGuid();
+        var facts = new Services.LL.Combat.Layers.Rewards.Models.IdleCombatRewardFacts(
+            id, now, now, now, TimeSpan.Zero, new Domain.Models.Regions.Areas.Area { Id = "test" }, [id],
+            [new(encounterId, 1, now, Domain.Models.Combat.BattleOutcome.Victory, [], [], new())]);
+        var outcome = new Services.LL.Combat.Layers.Rewards.Models.IdleCombatCalculatedOutcome(
+            id, now, now, 200, 0, 0, [], [], [], [], [], [new(encounterId, 1, 1, 10, 200, 200, 0, [])]);
+        var writer = new RecordingExperience();
+        await new Services.LL.Combat.Layers.Rewards.Idle.IdleCombatRewardApplier(
+            writer, null!, null!, null!, fixture.Service).ApplyProgressionAsync(facts, outcome, default);
+        Assert.Equal(200, writer.Experience);
+    }
+
+    private sealed class RecordingExperience : Services.LL.Interfaces.Combat.Reward.IExperienceRewardWriter
+    {
+        public int Experience { get; private set; }
+        public Task AddSplitExperienceAsync(IReadOnlyCollection<Guid> ids, int xp, CancellationToken ct) =>
+            AddSplitExperienceAsync(ids, xp, Domain.Models.Essences.EssenceCombatActivity.None, ct);
+        public Task AddSplitExperienceAsync(IReadOnlyCollection<Guid> ids, int xp,
+            Domain.Models.Essences.EssenceCombatActivity activity, CancellationToken ct)
+        {
+            Experience += xp;
+            return Task.CompletedTask;
+        }
+    }
+
+    [Theory]
     [InlineData("2027-01-31T12:00:00Z", "2028-01-31T12:00:00Z")]
     [InlineData("2028-02-29T12:00:00Z", "2029-02-28T12:00:00Z")]
     public void Calendar_anchor_makes_individual_and_bulk_redemption_equivalent(string start, string expected)
@@ -112,25 +146,21 @@ public sealed class NobilityTests
     }
 
     [Fact]
-    public async Task Daily_rewards_are_offline_once_per_covered_day_and_survive_expiry()
+    public async Task Membership_does_not_credit_daily_resources_during_coverage_or_after_expiry()
     {
         await using var fixture = await Fixture.Create();
-        await fixture.Grant(1);
-        var preview = (await fixture.Service.PreviewAsync(fixture.Character.UserId, fixture.Character.Id, 1, default)).Data!;
-        await fixture.Service.RedeemAsync(fixture.Character.UserId, fixture.Character.Id, Guid.NewGuid(), preview.MembershipVersion,
-            preview.UnitIds, DateOnly.FromDateTime(preview.ExpiresAt.UtcDateTime), default);
-        await fixture.Db.SaveChangesAsync();
-        Assert.Equal(0, await fixture.Service.ApplyDailyRewardsAsync(fixture.Character.UserId, fixture.Character.Id, default));
-        fixture.Clock.Now = preview.ExpiresAt.AddDays(5);
-        var total = await fixture.Service.ApplyDailyRewardsAsync(fixture.Character.UserId, fixture.Character.Id, default);
-        await fixture.Db.SaveChangesAsync();
-        total += await fixture.Service.ApplyDailyRewardsAsync(fixture.Character.UserId, fixture.Character.Id, default);
-        await fixture.Db.SaveChangesAsync();
-        Assert.Equal(29, total); // January 31 noon through February 28 noon, including both partial UTC days.
-        Assert.Equal(290, fixture.Character.Soulstones);
-        Assert.Equal(58, (await fixture.Db.InventoryItems.Include(x => x.ItemInstance)
-            .SingleAsync(x => x.ItemInstance.ItemBaseId == SigilFragmentItem.ItemBaseId)).Quantity);
-        Assert.Equal(0, await fixture.Service.ApplyDailyRewardsAsync(fixture.Character.UserId, fixture.Character.Id, default));
+        await fixture.Activate();
+        var expiry = (await fixture.Status()).ExpiresAt!.Value;
+        foreach (var at in new[] { fixture.Clock.Now.AddDays(1), expiry.AddDays(5) })
+        {
+            fixture.Clock.Now = at;
+            await fixture.Status();
+            await fixture.Service.GetBenefitsAsync(fixture.Character.Id, at, default);
+            await fixture.Db.SaveChangesAsync();
+        }
+        Assert.Equal(0, fixture.Character.Soulstones);
+        Assert.Empty(await fixture.Db.Set<NobilityDailyGrant>().ToListAsync());
+        Assert.False(await fixture.Db.InventoryItems.AnyAsync(x => x.ItemInstance.ItemBaseId == SigilFragmentItem.ItemBaseId));
     }
 
     [Fact]
@@ -145,13 +175,6 @@ public sealed class NobilityTests
         Assert.DoesNotContain(windows, x => x.From <= start.AddDays(-2) && x.Until > start.AddDays(-2));
         Assert.Contains(windows, x => x.From == end.AddDays(2));
     }
-
-    [Theory]
-    [InlineData(19, 0)]
-    [InlineData(20, 1)]
-    [InlineData(101, 5)]
-    public void Bonus_rounds_once_on_base_xp(int experience, int expected) =>
-        Assert.Equal(expected, NobilityBenefits.Noble.AdditionalExperience(experience));
 
     [Fact]
     public async Task Arena_uses_earning_time_cap_without_activation_refill_or_expiry_clamping()
@@ -177,11 +200,11 @@ public sealed class NobilityTests
     }
 
     [Theory]
-    [InlineData(0, -1, 110)]
-    [InlineData(74893, -1, 107)]
+    [InlineData(0, -1, 105)]
+    [InlineData(74893, -1, 105)]
     [InlineData(75000, -1, 105)]
     [InlineData(0, 0, 105)]
-    public async Task Mastery_bonus_uses_completion_time_and_does_not_exceed_level_cap(long existing, int secondsFromExpiry, long awarded)
+    public async Task Mastery_awards_base_experience_during_and_after_nobility(long existing, int secondsFromExpiry, long awarded)
     {
         await using var fixture = await Fixture.Create();
         await fixture.Activate();
@@ -191,7 +214,7 @@ public sealed class NobilityTests
         await fixture.Db.SaveChangesAsync();
         fixture.Clock.Now = expiry.AddDays(2);
         var service = new Services.LL.Dungeons.DungeonMasteryService(
-            new Persistence.LL.Repositories.Dungeons.CharacterDungeonMasteryRepository(fixture.Db), fixture.Service);
+            new Persistence.LL.Repositories.Dungeons.CharacterDungeonMasteryRepository(fixture.Db));
         var run = new Domain.Models.Dungeons.Runs.DungeonRun
         { Id = Guid.NewGuid(), CharacterId = fixture.Character.Id, DungeonDefinitionId = "goblin_mines_i",
             Status = Domain.Models.Dungeons.Runs.DungeonRunStatus.Completed, CompletedAt = expiry.AddSeconds(secondsFromExpiry), Rooms = [] };

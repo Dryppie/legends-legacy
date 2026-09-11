@@ -16,13 +16,6 @@ export class NobilityPanelComponent implements OnInit {
   readonly benefitColumns = [
     [
       {
-        label: 'Progression',
-        benefits: [
-          { label: 'Combat / Style / Mastery XP', value: '+5% each' },
-          { label: 'Focus changes', value: 'Every 2 hours' },
-        ],
-      },
-      {
         label: 'Capacity',
         benefits: [
           { label: 'Essence / Equipment presets', value: '6 each (+3)' },
@@ -33,18 +26,10 @@ export class NobilityPanelComponent implements OnInit {
     ],
     [
       {
-        label: 'Daily rewards',
+        label: 'Time & cost',
         benefits: [
-          {
-            label: 'Daily rewards',
-            value: '2 Sigil Fragments + 10 Soulstones',
-          },
           { label: 'Offline retention', value: '7 days' },
-        ],
-      },
-      {
-        label: 'Costs',
-        benefits: [
+          { label: 'Focus changes', value: 'Every 2 hours' },
           {
             label: 'Prophecy reroll costs',
             value: '0 / 0 / 40 / 80 Fate Echo',
@@ -85,6 +70,6 @@ export class NobilityPanelComponent implements OnInit {
 
   ngOnInit(): void {
     this.quantity = this.nobility.pendingQuantity() ?? 1;
-    this.nobility.reconcile();
+    this.nobility.load();
   }
 }

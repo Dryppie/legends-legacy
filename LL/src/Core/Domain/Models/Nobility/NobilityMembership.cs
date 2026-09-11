@@ -6,6 +6,7 @@ public sealed class NobilityMembership
     public Guid RewardCharacterId { get; set; }
     public Guid Version { get; set; } = Guid.NewGuid();
     public bool ShowBadge { get; set; } = true;
+    // Retained for historical reward audit; no longer advanced or scheduled.
     public DateOnly? DailyRewardsThrough { get; set; }
     public DateTimeOffset NextDailyRewardAt { get; set; }
     public List<NobilityCoverage> Coverage { get; set; } = [];

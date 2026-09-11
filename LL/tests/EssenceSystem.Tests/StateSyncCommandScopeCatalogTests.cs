@@ -25,6 +25,7 @@ using Application.UseCases.Prophecies.Commands.AcceptProphecy;
 using Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
 using Application.UseCases.Titles.Commands.EquipTitle;
 using Application.UseCases.WorldTower;
+using Application.UseCases.WorldTower.Commands.BackfillWorldTowerTitles;
 using Application.WebSockets.Contracts;
 
 namespace EssenceSystem.Tests;
@@ -251,14 +252,19 @@ public sealed class StateSyncCommandScopeCatalogTests
         Assert.Empty(profile.WorldScopes);
     }
 
-    [Fact]
-    public void ChampionMarketTitleBackfillDoesNotInvalidateArenaState()
+    [Theory]
+    [InlineData(typeof(BackfillChampionMarketTitleGrantsCommand))]
+    [InlineData(typeof(BackfillWorldTowerTitlesCommand))]
+    public void TitleBackfillsDoNotInvalidateGameplayState(Type commandType)
     {
-        var profile = StateSyncCommandScopeCatalog.GetProfile(
-            typeof(BackfillChampionMarketTitleGrantsCommand));
+        Assert.True(StateSyncCommandScopeCatalog.IsExplicitlyRegistered(commandType));
+        var profile = StateSyncCommandScopeCatalog.GetProfile(commandType);
 
         Assert.Empty(profile.CharacterScopes);
         Assert.Empty(profile.WorldScopes);
+        Assert.False(profile.RefreshCharacterOverview);
+        Assert.False(profile.InventoryWhenChanged);
+        Assert.False(profile.RefreshCharacterSummaryWhenChanged);
     }
 
     [Fact]

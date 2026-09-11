@@ -32,18 +32,14 @@ Redeeming a Signet from any source grants the same Nobility benefits, including 
 | Creature Focus | Change every **2 hours** |
 | Market capacity | **30 sell listings and 30 buy orders**, separately |
 | Daily Prophecy rerolls | **4 total**, costing **0 / 0 / 40 / 80 Fate Echo** |
-| Combat XP | **+5%**; the normal combat award also feeds equipped Essences |
-| Dungeon mastery XP | **+5%**, up to the existing mastery cap |
-| Combat Style XP | **+5%**, up to the existing mastery cap |
-| Daily resources | **2 Sigil Fragments and 10 Soulstones** per covered UTC date, including partial/offline dates; delivered after the date closes to the account's first redeeming character |
 | Active cosmetics | Optional **◆ Noble icon before the character name** |
 
-The subscription specification governs full eligibility, expiry and retention rules. There is no separate subscription Essence XP multiplier or promise of new cosmetics every month.
+The subscription specification governs full eligibility, expiry and retention rules. Nobility grants no XP bonuses or daily resources, and promises no new cosmetics every month.
 
 ## Purchase, ownership and trading
 
 - Both Nobility offers deliver the **same one-month item**. The twelve-Signet bundle is a quantity discount, not a stronger membership tier or a separate annual item.
-- Select a quantity and click **Redeem** once; Nobility activates or extends immediately without a separate confirmation. Months accumulate; benefit percentages, limits and daily grants do not multiply. Twelve Signets grant twelve calendar months, not twelve fixed 30-day periods.
+- Select a quantity and click **Redeem** once; Nobility activates or extends immediately without a separate confirmation. Months accumulate; benefit limits do not multiply. Twelve Signets grant twelve calendar months, not twelve fixed 30-day periods.
 - Unredeemed Signets can be sold and resold for **Cinders** through the player market at player-set prices and normal fees. Listed Signets are reserved and cannot also be redeemed. Unused Signets do not expire with membership.
 - A player obtaining a Signet through the market receives every membership benefit. The future permanent **“Supported LegendsLegacy” history badge** belongs to the original qualifying cash Signet purchaser and does not transfer with the Signet. That badge is deferred with cash purchasing.
 - If selected for launch, permanent cosmetic packs are **account-bound, non-tradable and purchasable once per account**. Their appearance entitlements last for the operating life of the service and remain available without Nobility. They do not grant Signets, XP bonuses or gameplay resources.

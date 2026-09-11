@@ -16,10 +16,10 @@ describe('NobilityService', () => {
   const snapshot = (overrides: Partial<NobilityStatus> = {}): NobilityStatus => ({
     isNoble: false, serverTime: new Date().toISOString(), expiresAt: null,
     membershipVersion: 'version', availableSignets: 2, listedSignets: 0, hasSupportHistory: false,
-    showBadge: true, dailyRewardsThrough: null,
+    showBadge: true,
     benefits: { offlineHours: 24, essenceLoadouts: 3, equipmentLoadouts: 3, arenaTicketCap: 5,
       focusCooldownHours: 8, marketSellLimit: 10, marketBuyLimit: 10, freeProphecyRerolls: 1,
-      totalProphecyRerolls: 3, experienceBonusBps: 0 }, ...overrides,
+      totalProphecyRerolls: 3 }, ...overrides,
   });
   beforeEach(() => {
     logout = signal(0);
@@ -70,10 +70,10 @@ describe('NobilityService', () => {
     expect(api.post.calls.count()).toBe(1);
   });
 
-  it('expires local privileges even when reconciliation fails', fakeAsync(() => {
+  it('expires local privileges even when status refresh fails', fakeAsync(() => {
     service.hydrate(snapshot({ isNoble: true, expiresAt: new Date(Date.now() + 1000).toISOString() }));
     expect(service.equipmentLimit()).toBe(6);
-    api.post.and.returnValue(throwError(() => new Error('Offline')));
+    api.get.and.returnValue(throwError(() => new Error('Offline')));
     tick(1001);
     expect(service.isNoble()).toBeFalse();
     expect(service.equipmentLimit()).toBe(3);
@@ -96,10 +96,10 @@ describe('NobilityService HTTP response contract', () => {
   const snapshot = (): NobilityStatus => ({
     isNoble: false, serverTime: new Date().toISOString(), expiresAt: null,
     membershipVersion: preview.membershipVersion, availableSignets: 1, listedSignets: 0,
-    hasSupportHistory: false, showBadge: true, dailyRewardsThrough: null,
+    hasSupportHistory: false, showBadge: true,
     benefits: { offlineHours: 24, essenceLoadouts: 3, equipmentLoadouts: 3, arenaTicketCap: 5,
       focusCooldownHours: 8, marketSellLimit: 10, marketBuyLimit: 10, freeProphecyRerolls: 1,
-      totalProphecyRerolls: 3, experienceBonusBps: 0 },
+      totalProphecyRerolls: 3 },
   });
 
   beforeEach(() => {

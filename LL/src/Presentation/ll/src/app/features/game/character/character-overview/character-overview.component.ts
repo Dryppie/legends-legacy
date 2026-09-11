@@ -79,11 +79,6 @@ export function estimateEssenceThreatPerSecond(
 export class CharacterOverviewComponent implements OnDestroy {
   readonly showNobilityPerks = signal(false);
   readonly nobilityPerkGroups = [
-    { label: 'Daily', perks: ['2 Sigil Fragments daily', '10 Soulstones daily'] },
-    {
-      label: 'Rates',
-      perks: ['+5% Combat XP', '+5% Dungeon Mastery XP', '+5% Combat Style XP'],
-    },
     {
       label: 'Capacity',
       perks: [

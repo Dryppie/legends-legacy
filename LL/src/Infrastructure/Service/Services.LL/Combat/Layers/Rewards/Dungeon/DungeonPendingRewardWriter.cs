@@ -34,8 +34,7 @@ public sealed class DungeonPendingRewardWriter : IDungeonPendingRewardWriter
             if (run.State.CapturedCombatStyleId is { } previous && previous != styleId)
                 throw new InvalidOperationException("A dungeon run cannot change its captured Combat Style.");
             run.State.CapturedCombatStyleId = styleId;
-            // Freeze the earning-time Nobility bonus with pending style XP, including secured retreat rewards.
-            run.State.PendingCombatStyleBaseExperience += outcome.EligibleBaseExperience + outcome.CombatStyleNobilityExperience;
+            run.State.PendingCombatStyleBaseExperience += outcome.EligibleBaseExperience;
         }
         run.PendingCinders += outcome.TotalCinders;
         run.PendingSoulstones += outcome.TotalSoulstones;

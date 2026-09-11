@@ -17,7 +17,6 @@ public sealed record IdleCombatCalculatedOutcome(
     IReadOnlyList<InventoryItem> DungeonAccessRewards,
     IReadOnlyList<IdleEncounterCalculatedOutcome> EncounterOutcomes)
 {
-    public int AppliedNobilityExperience { get; set; }
     public IdleEncounterCalculatedOutcome? LastEncounterOutcome =>
         EncounterOutcomes.Count == 0 ? null : EncounterOutcomes[^1];
 }

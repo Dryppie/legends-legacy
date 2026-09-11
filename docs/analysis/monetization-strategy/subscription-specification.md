@@ -40,22 +40,17 @@ EUR pricing includes applicable VAT; USD pricing excludes applicable sales tax, 
 | Creature Focus cooldown | Change Focus every **2 hours**, compared with 8 hours free. | While subscribed. |
 | Market capacity | **30 active sell listings and 30 active buy orders**, compared with 10 of each free. These are separate limits; normal market fees remain. | While subscribed. |
 | Extra free Prophecy reroll | **+1 free reroll and +1 total reroll: 2 free, 4 total per day**, compared with 1 free and 3 total for free players. Subscriber costs are **0 / 0 / 40 / 80 Fate Echo**, compared with 0 / 40 / 80 for free players. | While subscribed. |
-| Combat XP bonus | **+5% combat XP**. Equipped Essences receive the increased combat XP through normal progression; no additional subscription Essence XP multiplier. | Progress earned while subscribed. |
-| Dungeon mastery XP bonus | **+5% dungeon mastery XP**, up to the existing mastery cap. | Progress earned while subscribed. |
-| Combat Style XP bonus | **+5% Combat Style XP**, up to the existing mastery cap. | Progress earned while subscribed. |
-| Daily Sigil Fragments | **2 Sigil Fragments per day**. | Accrue while subscribed, including offline. |
-| Daily Soulstones | **10 Soulstones per day**. | Accrue while subscribed, including offline. |
 | Noble badge | One optional **◆** icon before the character name, including for players who redeem market-bought Signets. No text badge, border or profile header. | While subscribed. |
 
 **Future direct-support recognition, not implemented for alpha:** the permanent “Supported LegendsLegacy” history badge belongs to the account making a successfully settled real-money Signet purchase, even if it sells the Signets. It does not transfer with an item. Market buyers and recipients of alpha grants receive every membership benefit above; the history badge records direct financial support. No spending or loyalty tiers.
 
-Benefits are available throughout active Nobility regardless of the Signet's source. Daily resources accrue **once per account per UTC date with any active coverage**, including partial dates, and are delivered automatically after that date closes. The first character to redeem a Signet remains that account's daily reward recipient. Offline days remain eligible without a claim or login requirement. Redeeming more Signets extends membership without duplicating daily grants. There are no additional monthly gifts or promises of new cosmetics every month.
+Benefits are available throughout active Nobility regardless of the Signet's source. Redeeming more Signets extends membership without multiplying benefits. There are no XP bonuses, daily resource grants, additional monthly gifts or promises of new cosmetics every month.
 
-Progression bonuses apply to eligible progress earned while membership is active, including offline combat. They do not retroactively boost progress earned before activation or raise progression caps. Combat XP and Combat Style XP are separate tracks; apply the stated subscription bonus once to each eligible track. The added XP rounds down per eligible encounter share or Mastery completion award; a base award below 20 gains no extra XP.
+The earlier +5% Combat, Combat Style and Dungeon Mastery XP bonuses and daily Sigil Fragment/Soulstone grants were removed on 11 September 2026. This applies to existing and future memberships, including combat newly resolved from offline time. Already awarded progress, inventory, historical receipts and persisted pending combat rewards remain intact. Unprocessed daily resource dates no longer award anything.
 
 ## Display rules
 
-- **Display Nobility** controls the optional active icon on profiles, general/whisper chat, designated guild roster entries and supported Tavern leaderboard entries. Turning it off hides Nobility expiry, the Combat XP note, and the perks toggle/list from other players viewing Character Overview. On your own profile, expiry and **Show perks** remain available, including when opening yourself through search; the icon and XP note still follow the display preference. This changes presentation only; membership benefits remain active. Overview perks start collapsed.
+- **Display Nobility** controls the optional active icon on profiles, general/whisper chat, designated guild roster entries and supported Tavern leaderboard entries. Turning it off hides Nobility expiry and the perks toggle/list from other players viewing Character Overview. On your own profile, expiry and **Show perks** remain available, including when opening yourself through search; the icon still follows the display preference. This changes presentation only; membership benefits remain active. Overview perks start collapsed.
 - Display the permanent history badge principally on the profile. Show at most one membership mark beside a social name.
 - Keep supporter recognition distinct from earned titles, achievements, competitive ranks and moderator status. Players retain their earned title display.
 - Decorations must not change leaderboard placement, message prominence, rarity colors or gameplay readability.
@@ -83,7 +78,6 @@ Cash checkout currently returns an unavailable response through a small purchase
 - Retain Arena tickets already accrued above the free cap. Regeneration resumes once the ticket balance is below that cap.
 - Market limits return to 10 sell listings and 10 buy orders. Existing orders remain valid until filled, cancelled or expired; new orders require the corresponding active count to be below the free limit.
 - Creature Focus returns to an 8-hour cooldown measured from the last Focus change. Prophecy rerolls return to 1 free and 3 total per day at 0 / 40 / 80 Fate Echo. Membership changes do not reset that day's used rerolls or charge for previously free rerolls.
-- Stop earning subscription XP bonuses and daily resources after expiry. Preserve all XP, mastery progress, Sigil Fragments and Soulstones already earned, including pending automatic grants for eligible subscribed days.
 - On expiry, remove the active badge and subscription-only decorations from display; restore the free appearance.
 - Retain the player's cosmetic selections so they can be restored on resubscription.
 - Preserve earned titles, items, Essences, builds, history and separately purchased permanent cosmetics.
@@ -101,10 +95,10 @@ Once cash purchases are enabled, this allows **real money → Signets → Cinder
 
 ## Not included
 
-- Drop-rate boosts, direct equipment or Essence grants, and currency or resource grants beyond the daily Sigil Fragments and Soulstones listed above. Cinders received from selling Signets are player-market proceeds.
+- Drop-rate boosts, direct equipment or Essence grants, and currency or resource grants. Cinders received from selling Signets are player-market proceeds.
 - Additional equipped Essence slots, Soul Archive storage or inventory capacity. Extra loadouts store configurations only.
-- Instant Arena ticket grants, faster ticket regeneration, direct dungeon entry grants or retries. Daily Sigil Fragments can be assembled into sigils through the normal system.
-- Reward multipliers or cooldown reductions beyond the three XP bonuses and Creature Focus cooldown listed above.
+- Instant Arena ticket grants, faster ticket regeneration, direct dungeon entry grants or retries.
+- XP or reward multipliers. Creature Focus is the only reduced cooldown.
 - Exclusive gameplay, priority moderation, developer access, balance influence or early competitive access.
 
 **Free players retain the complete core game and existing free conveniences, and can earn Cinders to buy Signets from other players. Every redeemed Signet grants the same Nobility benefits listed above, regardless of how the Signet was obtained.**

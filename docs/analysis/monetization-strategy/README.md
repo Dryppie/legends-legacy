@@ -4,6 +4,8 @@ For alpha setup, start with the implementation report. For the benefit list, rea
 
 **Status — 11 September 2026:** game functionality, operator grants, redemption and trading are implemented. A follow-up migration gives one Signet to every existing character, including guests, without activating membership. Signet catalog loading now supports the `Misc` type in JSON and persistence. Cash purchasing is disabled behind a stub for future Stripe integration. The follow-up migration and redemption passed disposable PostgreSQL tests; no shared database update or deployment was performed. PostgreSQL concurrency and deployed alpha smoke testing remain outstanding.
 
+**Current benefits exclude all subscription XP bonuses and daily Sigil Fragment/Soulstone grants.** Historical strategy proposals do not override this change.
+
 **Nobility** is the membership, **Noble** is the active player status, and a **Signet** is the tradable item that grants one calendar month of Nobility when redeemed.
 
 | Document | Purpose and status |

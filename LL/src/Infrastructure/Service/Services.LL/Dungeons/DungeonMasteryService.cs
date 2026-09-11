@@ -12,13 +12,10 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
     private const int MiniBossDefeatExperience = 25;
 
     private readonly ICharacterDungeonMasteryRepository _masteries;
-    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
 
-    public DungeonMasteryService(ICharacterDungeonMasteryRepository masteries,
-        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
+    public DungeonMasteryService(ICharacterDungeonMasteryRepository masteries)
     {
         _masteries = masteries;
-        _nobility = nobility;
     }
 
     public int CalculateLevel(long experience) => DungeonMasteryProgression.CalculateLevel(experience);
@@ -68,16 +65,6 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
         var rewardPreviouslyClaimed = mastery.MaxLevelRewardClaimed;
         var reasons = CalculateCompletionExperienceReasons(run).ToList();
         var experienceAwarded = reasons.Sum(x => x.Experience);
-        var benefits = _nobility is null ? Domain.Models.Nobility.NobilityBenefits.Free :
-            await _nobility.GetBenefitsAsync(run.CharacterId, run.CompletedAt ?? DateTimeOffset.UtcNow, cancellationToken);
-        var cap = DungeonMasteryProgression.GetExperienceRequiredForNextLevel(DungeonMasteryBenefits.MaxLevel - 1)!.Value;
-        var bonus = (int)Math.Min(Math.Max(0, cap - mastery.Experience - experienceAwarded), benefits.AdditionalExperience(checked((int)experienceAwarded)));
-        if (bonus > 0)
-        {
-            reasons.Add(new DungeonMasteryAwardReason { Id = "nobility", Description = "Nobility (+5%)", Experience = bonus });
-            experienceAwarded += bonus;
-        }
-
         mastery.Experience += experienceAwarded;
         mastery.Level = CalculateLevel(mastery.Experience);
         mastery.MaxLevelRewardClaimed |= mastery.Level >= DungeonMasteryBenefits.MaxLevel;

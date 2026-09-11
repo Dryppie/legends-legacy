@@ -10,10 +10,9 @@ export interface NobilityStatus {
   isNoble: boolean; serverTime: string; expiresAt: string | null;
   membershipVersion: string; availableSignets: number; listedSignets: number;
   hasSupportHistory: boolean; showBadge: boolean;
-  dailyRewardsThrough: string | null;
   benefits: { offlineHours: number; essenceLoadouts: number; equipmentLoadouts: number;
     arenaTicketCap: number; focusCooldownHours: number; marketSellLimit: number; marketBuyLimit: number;
-    freeProphecyRerolls: number; totalProphecyRerolls: number; experienceBonusBps: number };
+    freeProphecyRerolls: number; totalProphecyRerolls: number };
 }
 export interface SignetPreview { membershipVersion: string; unitIds: string[]; expiresAt: string; expiryIsEstimate: boolean }
 interface SignetRedemptionRequest { operationId: string; membershipVersion: string; unitIds: string[]; expectedExpiryDate: string }
@@ -62,7 +61,7 @@ export class NobilityService {
         if (Date.parse(status.expiresAt!) <= this.time.now()) {
           this.status.update(value => value ? { ...value, isNoble: false } : value);
           this.refreshGameplay();
-          this.reconcile();
+          this.load();
         } else this.refresh().subscribe({ error: () => undefined });
       }, Math.min(delay, 2_147_000_000));
     }
@@ -85,8 +84,8 @@ export class NobilityService {
     return this.api.get('nobility').pipe(tap(status => { if (epoch === this.epoch) this.hydrate(status); }));
   }
 
-  reconcile(): void {
-    this.run(this.post<NobilityStatus>('nobility/reconcile', {}).pipe(tap(status => this.hydrate(status))));
+  load(): void {
+    this.run(this.refresh());
   }
 
   redeem(quantity: number): void {

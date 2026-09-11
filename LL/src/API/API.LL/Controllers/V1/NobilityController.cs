@@ -1,6 +1,5 @@
 using Application.UseCases.Nobility.Commands.RedeemSignets;
 using Application.UseCases.Nobility.Commands.SetNobilityAppearance;
-using Application.UseCases.Nobility.Commands.SettleNobilityDailyRewards;
 using Application.UseCases.Nobility.Queries.GetNobilityStatus;
 using Application.UseCases.Nobility.Queries.PreviewSignetRedemption;
 using Common.Primitives;
@@ -41,13 +40,6 @@ public sealed class NobilityController : BaseController
     public async Task<IActionResult> Appearance([FromBody] AppearanceRequest request, CancellationToken ct) =>
         Result(await Mediator.Send(new SetNobilityAppearanceCommand(CurrentUserId, CurrentCharacterGuid,
             request.ShowBadge), ct));
-
-    [HttpPost("reconcile")]
-    public async Task<IActionResult> Reconcile(CancellationToken ct)
-    {
-        await Mediator.Send(new SettleNobilityDailyRewardsCommand(CurrentUserId, CurrentCharacterGuid), ct);
-        return Ok(await Mediator.Send(new GetNobilityStatusQuery(CurrentUserId, CurrentCharacterGuid), ct));
-    }
 
     private IActionResult Result<T>(Response<T> result) => result.IsSuccess ? Ok(result) :
         result.IsConflict ? Conflict(result) : BadRequest(result);

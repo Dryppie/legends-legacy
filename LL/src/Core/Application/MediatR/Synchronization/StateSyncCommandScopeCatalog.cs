@@ -89,7 +89,6 @@ public static class StateSyncCommandScopeCatalog
         profiles[typeof(global::Application.UseCases.Nobility.Commands.RedeemSignets.RedeemSignetsCommand)] = nobilityProfile;
         profiles[typeof(global::Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommand)] = nobilityProfile;
         profiles[typeof(global::Application.UseCases.Nobility.Commands.SetNobilityAppearance.SetNobilityAppearanceCommand)] = nobilityProfile;
-        profiles[typeof(global::Application.UseCases.Nobility.Commands.SettleNobilityDailyRewards.SettleNobilityDailyRewardsCommand)] = nobilityProfile;
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.CombatStyles], [], [StateSyncScopes.CombatStyles],
             refreshCharacterOverview: true,
             refreshCharacterSummaryWhenChanged: true,
@@ -141,7 +140,8 @@ public static class StateSyncCommandScopeCatalog
             refreshCharacterOverview: false,
             inventoryWhenChanged: false,
             refreshCharacterSummaryWhenChanged: false,
-            typeof(global::Application.UseCases.Colosseum.Commands.BackfillChampionMarketTitleGrants.BackfillChampionMarketTitleGrantsCommand));
+            typeof(global::Application.UseCases.Colosseum.Commands.BackfillChampionMarketTitleGrants.BackfillChampionMarketTitleGrantsCommand),
+            typeof(global::Application.UseCases.WorldTower.Commands.BackfillWorldTowerTitles.BackfillWorldTowerTitlesCommand));
 
         RegisterAuthoritativeResponse(
             profiles,

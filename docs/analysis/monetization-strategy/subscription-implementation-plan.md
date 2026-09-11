@@ -14,12 +14,11 @@ Target services are the LL game API, Core, Persistence, Services, Worker, Angula
 
 | Area | Implemented for alpha | Remaining boundary |
 | --- | --- | --- |
-| Membership and persistence | Account coverage history, centralized benefits, calendar anchor, membership versions, Signet units, issuance/movement/redemption/daily receipts, repositories and EF configuration. JSON and EF both support `MiscItemBase`. | Earlier schema/backfill migrations and actual PostgreSQL contention tests remain outstanding; the follow-up grant migration is tested on PostgreSQL. |
+| Membership and persistence | Account coverage history, centralized benefits, calendar anchor, membership versions, Signet units, issuance/movement/redemption receipts and historical daily receipts, repositories and EF configuration. JSON and EF both support `MiscItemBase`. | Earlier schema/backfill migrations and actual PostgreSQL contention tests remain outstanding; the follow-up grant migration is tested on PostgreSQL. |
 | Alpha grants | One-time migration gift of one Signet per existing character, including guests; permission-protected LiveOps grants for registered players. Grants create available items without activating membership or cash-support history. | Guests register before redeeming/trading. Later-created characters need a separate grant. Other gameplay sources remain future additions. |
 | Redemption | One-click Redeem with an internal available-unit preview, registered-account ownership checks, exact unit/version validation, atomic consumption and extension, idempotent receipt. | Deployed multi-session smoke testing is outstanding. |
 | Trading | Signet market category, listing reservation, buys, automatic matching, explicit fulfillment, commodity flows, resale, cancellation and expiry integration; normal Cinder fees and escrow rules. | Actual PostgreSQL races and an alpha market smoke test are outstanding. |
-| Gameplay policies | Seven-day offline retention; six Essence and Equipment presets; eight Arena tickets; two-hour Focus; thirty sell and thirty buy orders; rerolls at 0/0/40/80; three +5% XP tracks. | Broader operational acceptance remains part of alpha rollout; test evidence is not a production-readiness claim. |
-| Daily resources | Two generic Sigil Fragments and ten Soulstones per covered UTC date; bounded worker and Settings fallback with unique account/date receipts. | Deployed worker outage/recovery and reward-lag smoke tests are outstanding. |
+| Gameplay policies | Seven-day offline retention; six Essence and Equipment presets; eight Arena tickets; two-hour Focus; thirty sell and thirty buy orders; rerolls at 0/0/40/80. | Broader operational acceptance remains part of alpha rollout; test evidence is not a production-readiness claim. |
 | UI and appearance | Settings status/redemption, preserved preset viewing/copying, dynamic limits, market category, optional ◆ Noble icon before the name and expiry refresh. The badge toggle uses the standard LL checkbox. | Manual alpha UI smoke testing remains outstanding. |
 | Purchasing | `INobilityPurchaseGateway`, `DisabledNobilityPurchaseGateway` and an unavailable checkout endpoint. | Stripe products, checkout, webhooks, fulfillment, refunds, payment history and cash-support badge are not implemented. |
 
@@ -34,15 +33,15 @@ Target services are the LL game API, Core, Persistence, Services, Worker, Angula
 - Signet inventory quantities project individual available units. Listing reserves units; partial fills move the corresponding units; cancellation returns the remainder. Issuance identity survives resale. Generic compensation, consumption and direct item-transfer paths cannot substitute for the canonical Signet flow.
 - Mutations use the existing command transaction pipeline, character locks, account locking where appropriate and optimistic versions. PostgreSQL guarantees still need verification with the real provider; in-memory tests do not establish locking behavior.
 
-### Daily resources
+### Removed progression and daily rewards
 
-A UTC date qualifies if it overlaps active coverage for any positive duration, including a partial first or final date. Eligibility closes at the end of the date, then two generic `sigil_fragment` items and ten Soulstones are delivered automatically. There is no daily login or claim requirement.
+Nobility no longer grants Combat, Combat Style or Dungeon Mastery XP bonuses, Sigil Fragments or Soulstones. New coverage records use policy version 2. The current benefit policy also applies to existing memberships and newly resolved offline combat; older coverage versions do not restore removed bonuses.
 
-Rewards are once per account per date. The first character to redeem a Signet remains the daily reward recipient; additional characters do not multiply the stipend. Redeeming more months does not repeat a date's reward. Daily resources are independent of the seven-day combat retention limit and remain deliverable after expiry.
+The daily settlement command, API reconciliation endpoint, repository award methods and worker registration are removed. Settings loads status with GET. The old Quartz job type remains solely to delete its persisted job and triggers when executed by an updated worker. Roll out the API and all Worker instances together so old binaries cannot continue granting rewards.
 
-`NobilityDailyRewardsJob` runs every five minutes, discovers up to 100 due accounts and processes up to 31 dates per account per transaction. Settings reconciliation invokes the same settlement command. Bootstrap remains read-only. Resource changes, the daily receipt and economy records commit together. The daily worker does not simulate combat.
+Keep historical receipts, economy records and inactive reward cursor columns for audit; no data migration or resource clawback is needed. Existing persisted pending combat rewards stay claimable. Unprocessed daily dates no longer accrue or settle.
 
-### Offline combat and XP
+### Offline combat retention
 
 The implementation uses historical coverage windows and the persisted action cursor instead of the originally proposed dedicated expiry combat checkpoints/worker:
 
@@ -52,11 +51,9 @@ The implementation uses historical coverage windows and the persisted action cur
 4. Catch-up consumes retained windows in bounded batches and skips expired free gaps. Returning three days after expiry can therefore resolve retained Noble combat plus the latest free day.
 5. Batches split at membership boundaries, and preset eligibility is evaluated at historical combat time. The action cursor prevents replay of already consumed work.
 
-The separate expiry-settlement entity and expiry worker from the original proposal were not introduced. Existing action/build mutation boundaries and persisted combat snapshots remain relevant; the daily resource worker must not turn seven-day combat retention into unlimited banking.
+The separate expiry-settlement entity and expiry worker from the original proposal were not introduced. Existing action/build mutation boundaries and persisted combat snapshots remain relevant.
 
-Nobility adds 500 basis points to each eligible recipient's base Combat XP share, rather than applying the action owner's membership to everyone. The resulting Combat XP flows once through normal equipped Essence progression. Combat Style XP receives its own +5% on the eligible base share; it does not compound the increased Combat XP.
-
-Bonuses use encounter/completion time rather than claim time. Dungeon pending rewards carry the earning-time Style bonus through claim and retreat flows. Dungeon Mastery adds its bonus once at completion. Added XP rounds down per encounter share or completion award; base awards below 20 receive zero extra. Style grants respect their existing cap. Mastery limits the added Nobility contribution to remaining progress before its cap while preserving existing base XP behavior.
+Combat, Combat Style and Dungeon Mastery use their ordinary reward calculations without a Nobility multiplier. Existing non-membership XP modifiers and reward caps are unchanged.
 
 ### Limits and expiry
 
@@ -67,8 +64,7 @@ Bonuses use encounter/completion time rather than claim time. Dungeon pending re
 | Creature Focus | Two-hour cooldown from the last change. | Recalculate eight hours from the same last-change timestamp. |
 | Marketplace | Thirty resting sell listings and thirty resting buy orders, counted separately. | Preserve orders and escrow. New resting orders require room below the corresponding free limit of ten; existing instant-match behavior remains. |
 | Prophecy rerolls | Two free and two paid uses; 0/0/40/80 Fate Echo. | Retain separate free, paid and total usage. Free policy is one free and three total. No reset, refund or retrospective charge on a membership change. |
-| Appearance | **Display Nobility** controls the ◆ icon and XP note. Hidden expiry/perks remain available to the profile owner, determined by character ID even through search. Other viewers follow the display preference. Perks start collapsed. | Hide active display; retain the preference for later reactivation. |
-| XP / daily resources | Award eligible progress and covered dates. | No new eligibility after expiry; retain earned progress and pending eligible grants. |
+| Appearance | **Display Nobility** controls the ◆ icon. Hidden expiry/perks remain available to the profile owner, determined by character ID even through search. Other viewers follow the display preference. Perks start collapsed. | Hide active display; retain the preference for later reactivation. |
 
 ### UI, state synchronization and identity
 
@@ -85,9 +81,9 @@ The implementation run passed 2,340 backend regression tests plus one subsequent
 Before exposing the feature to alpha players:
 
 - Verify the earlier schema/backfills with existing presets and already-used Prophecy rerolls. The follow-up grant migration has passed disposable PostgreSQL tests: each existing character receives one Signet, earlier grants survive, restart does not repeat the gift, and no membership activates automatically.
-- Exercise real-provider races: sell versus redeem, simultaneous redemptions, competing buyers, cancellation/expiry versus purchase, partial matches and duplicate daily workers. Check unit ownership, inventory projections, receipts and Cinder escrow together.
+- Exercise real-provider races: sell versus redeem, simultaneous redemptions, competing buyers, cancellation/expiry versus purchase, partial matches. Check unit ownership, inventory projections, receipts and Cinder escrow together.
 - Run a two-account smoke test: grant twelve, redeem one, list or sell the remaining eleven, redeem on the buyer, then exercise partial cancellation and resale. Alpha grants and market buyers must not gain cash-support history.
-- Exercise active-to-expired limits, preserved presets and overflow, historical combat continuation, partial UTC reward dates, worker downtime/retry and open-screen/reconnect behavior. Verify desktop/mobile interaction and persisted dungeon claim/retreat rewards.
+- Exercise active-to-expired limits, preserved presets and overflow, historical combat continuation, retirement of persisted daily worker schedules and open-screen/reconnect behavior. Verify desktop/mobile interaction and persisted dungeon claim/retreat rewards.
 - Review the intended alpha database and rollout process. The game API's existing startup automatically runs migrations and then seeds data; starting it is a database mutation. The task has not applied the migration or started a deployment against an external environment.
 
 Backend tests continue to run through `build/run-tests.ps1`. Use npm for the game frontend and keep npm caches outside the checkout. No application builds or tests are needed for markdown-only edits.

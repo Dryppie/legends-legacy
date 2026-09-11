@@ -49,7 +49,7 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
         if (outcome.TotalExperience > 0 && facts.PlayerEntityIds.Count > 0)
         {
             var recipients = facts.PlayerEntityIds.Distinct().ToArray();
-            if (recipients.Length <= 1 && _nobility is null)
+            if (recipients.Length <= 1)
             {
                 await _experienceWriter.AddSplitExperienceAsync(
                     facts.PlayerEntityIds,
@@ -60,7 +60,6 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
             else
             {
                 var shares = new int[recipients.Length];
-                var times = facts.Encounters.ToDictionary(x => x.EncounterId, x => x.StartedAt);
                 // Split each encounter before batching, so offline and online rewards
                 // give the same recipients the remainders. Persist each recipient once.
                 foreach (var encounter in outcome.EncounterOutcomes)
@@ -69,13 +68,7 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
                     var remainder = encounter.ExperienceGained % recipients.Length;
                     for (var index = 0; index < recipients.Length; index++)
                     {
-                        // Preserve existing XP and add a separately rounded bonus on the canonical base share.
-                        var eligibleBase = encounter.EligibleBaseExperience;
-                        var eligibleShare = eligibleBase / recipients.Length + (index < eligibleBase % recipients.Length ? 1 : 0);
-                        var bonus = _nobility is null ? 0 : (await _nobility.GetBenefitsAsync(recipients[index], times[encounter.EncounterId], cancellationToken))
-                            .AdditionalExperience(eligibleShare);
-                        outcome.AppliedNobilityExperience = checked(outcome.AppliedNobilityExperience + bonus);
-                        shares[index] = checked(shares[index] + baseShare + (index < remainder ? 1 : 0) + bonus);
+                        shares[index] = checked(shares[index] + baseShare + (index < remainder ? 1 : 0));
                     }
                 }
 

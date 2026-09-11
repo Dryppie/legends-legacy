@@ -135,8 +135,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
                     var share = eligibleXp / recipients.Length + (index < eligibleXp % recipients.Length ? 1 : 0);
                     // The action cursor, character lock, and tracked progression commit in the same transaction.
                     // Advance templates only after this fight so offline batches match successive online encounters.
-                    var bonus = _nobility is null ? 0 : (await _nobility.GetBenefitsAsync(recipient, cursor, cancellationToken)).AdditionalExperience(share);
-                    var grant = await _combatStyles!.GrantCapturedCombatXpAsync(recipient, captured.CombatStyleId, checked(share + bonus), cancellationToken);
+                    var grant = await _combatStyles!.GrantCapturedCombatXpAsync(recipient, captured.CombatStyleId, share, cancellationToken);
                     if (grant.LevelsGained > 0) resolutionSession.AdvanceCombatStyle(recipient, grant.Level);
                     awards.Add(new(recipient, captured.CombatStyleId, share, grant.XpGained, grant.Level));
                 }

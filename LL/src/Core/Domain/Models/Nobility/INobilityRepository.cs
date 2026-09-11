@@ -17,7 +17,5 @@ public interface INobilityRepository
     void AddMovement(SignetMovement movement);
     void AddRedemption(SignetRedemption redemption);
     Task SynchronizeInventoryAsync(Guid characterId, CancellationToken ct);
-    Task<bool> HasDailyGrantAsync(Guid accountId, DateOnly date, CancellationToken ct);
-    Task ApplyDailyGrantAsync(NobilityDailyGrant grant, CancellationToken ct);
-    Task<IReadOnlyList<(Guid AccountId, Guid CharacterId)>> GetDueAccountsAsync(DateOnly before, int limit, CancellationToken ct);
+
 }

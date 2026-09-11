@@ -23,34 +23,34 @@ The grant endpoint is `POST /api/liveops/characters/{characterId}/signets`, with
 | Focus | Two-hour cooldown while Noble, eight hours free, recalculated from the last change. |
 | Marketplace | Thirty resting sell listings and thirty resting buy orders, counted separately. Existing orders survive expiry. |
 | Prophecy | 0 / 0 / 40 / 80 Fate Echo. Separate free and paid counters preserve consumption when membership changes during a day. |
-| XP | +5% Combat XP, flowing once into equipped Essence XP; +5% Style XP; +5% Dungeon Mastery XP. Bonuses use earning/completion time, round down and respect the existing Style/Mastery caps. |
-| Daily resources | Two generic Sigil Fragments and ten Soulstones once per account per covered UTC day, after that day closes, including partial covered days and offline days. The first redeeming character remains the reward recipient. |
-| Appearance | Optional ◆ icon before the character name, controlled by **Display Nobility**. Disabling it hides overview expiry and perks from other viewers; the owner can still see expiry and Show perks, including through profile search. The icon and XP note follow the preference for everyone. Perks start collapsed. Display disappears on expiry; hiding it never disables gameplay benefits. Character tags fetch canonical game API metadata, including chat tags. |
+| Appearance | Optional ◆ icon before the character name, controlled by **Display Nobility**. Disabling it hides overview expiry and perks from other viewers; the owner can still see expiry and Show perks, including through profile search. The icon follows the preference for everyone. Perks start collapsed. Display disappears on expiry; hiding it never disables gameplay benefits. Character tags fetch canonical game API metadata, including chat tags. |
 
 The client uses server time for expiry and requests refreshed Essence, Equipment, Colosseum and Prophecy state at known server revisions when membership changes. Backend validation remains authoritative. No LL-Chat service change or chat-specific test-runner extension was needed for this display path.
 
-The five-minute `NobilityDailyRewardsJob` processes up to 100 accounts per run and 31 dates per account per transaction. Settings also reconciles rewards. The account/date receipt prevents duplicate rewards. Daily processing does not simulate combat.
+Nobility no longer awards bonus XP or daily resources. Settings reads status with GET; the daily reconciliation endpoint and award command have been removed. The former daily job is no longer registered. Its Quartz type remains only to delete an existing persisted job and its triggers when it next runs on an updated worker.
 
 ## Implementation choices
 
-The original plan proposed dedicated expiry combat checkpoints. This implementation instead retains historical coverage windows and uses the persisted action cursor, splits batches at membership boundaries, and evaluates preset eligibility at the historical combat time. That preserves retained combat through an offline expiry without a separate worker resolving combat or changing character builds. XP entitlement is checked for each recipient and encounter; dungeon rewards retain their earning-time bonus through claim and retreat flows.
+The original plan proposed dedicated expiry combat checkpoints. This implementation instead retains historical coverage windows and uses the persisted action cursor, splits batches at membership boundaries, and evaluates preset eligibility at the historical combat time. That preserves retained combat through an offline expiry without a separate worker resolving combat or changing character builds. Ordinary combat, Style and Mastery calculations apply equally to free and Noble players.
 
-Signet unit versions and membership versions provide optimistic conflict detection. Commands also use the existing transaction pipeline, character row locks and an account advisory lock where appropriate. Issuances, movements, redemption receipts, daily receipts and administration/economy records provide an audit trail. Alpha grants do not create permanent cash-support history.
+Signet unit versions and membership versions provide optimistic conflict detection. Commands also use the existing transaction pipeline, character row locks and an account advisory lock where appropriate. Issuances, movements, redemption receipts, historical daily receipts and administration/economy records provide an audit trail. Alpha grants do not create permanent cash-support history.
 
 ## Changed code map
 
 | Files / directories | Purpose |
 | --- | --- |
 | `Core/Domain/Models/Nobility`, `Core/Application/Interfaces/Services/LL/Nobility`, `Core/Application/UseCases/Nobility` | Entitlements, history, contracts and transactional commands / read queries. |
-| `Infrastructure/Service/Services.LL/Nobility`, `Infrastructure/Persistence/Persistence.LL/{Repositories,Configurations}/Nobility` | Membership, alpha grants, redemption, daily resources and concrete Signet trading. |
+| `Infrastructure/Service/Services.LL/Nobility`, `Infrastructure/Persistence/Persistence.LL/{Repositories,Configurations}/Nobility` | Membership, alpha grants, redemption and concrete Signet trading. |
 | Game and LiveOps `NobilityController`, LiveOps handler registration, `Data/items/items.json` | Authenticated player/admin routes and the Signet catalog item. |
 | Combat orchestration/rewards, Colosseum, Focus, Prophecy, Marketplace, Essence/Equipment services and their consumers | Gameplay policies, historical evaluation and preset expiry. |
 | Bootstrap and state synchronization contracts | Refresh membership, inventory and affected gameplay state after changes. |
 | `Presentation/ll` Nobility service/settings/decoration and market/preset components; `Presentation/liveops` player workspace | Tester redemption, appearance, trading and operator grants. |
-| `Worker.LL/BackgroundJobs/NobilityDailyRewardsJob.cs` | Bounded automatic daily settlement. |
+| `Worker.LL/BackgroundJobs/NobilityDailyRewardsJob.cs` | Retire existing persisted daily schedules without granting resources. |
 | Migration, model snapshot, backend and Angular tests | Schema, backfills and regression coverage. |
 
 ## Schema and release implications
+
+The XP and daily resource removal needs no new migration or configuration. Historical daily receipts and inactive cursor columns remain for audit. Previously earned XP, resources and persisted pending combat rewards are preserved; unprocessed daily dates will not pay out. New coverage uses policy version 2, and the reduced benefit policy applies to all memberships. Update the API, frontend and all Worker instances together; old workers must be stopped to prevent further awards.
 
 `20260911194553_RemoveNobilityProfileHeader` removes the obsolete `ShowHeader` preference. The header is removed from settings, rendering and API/domain contracts. The Noble badge preference and membership duration remain intact. Rollback recreates the field as false and does not restore old choices. This migration has not been applied to a shared database by this task.
 
@@ -69,6 +69,8 @@ The follow-up migration and production redemption service passed PostgreSQL test
 A later implementation must add server-owned products/prices, idempotent checkout creation, verified payment webhooks, payment-to-issuance receipts, refunds/disputes and the permanent cash-support badge. Change the checkout query into a transactional command when it starts creating purchase state. The original plan's payment/reconciliation/reversal stages remain deferred; they are not prerequisites for granting alpha Signets.
 
 ## Verification completed on 11 September 2026
+
+**XP and daily resource removal:** the backend build passed in `NobilityAppearance`, followed by **129 focused tests** through `build/run-tests.ps1` covering Nobility, reward calculations, Mastery, persisted-job retirement, Worker dependency resolution and state synchronization. The game development build and **16 focused Angular tests** passed. EF reports no pending model changes, and `git diff --check` passed with Windows line endings recognized. Existing compiler warnings remain. These checks used local test execution; no deployed smoke test or shared database change was performed.
 
 **Startup fix and automatic grant follow-up:** 26 focused backend tests passed with no skips, including two disposable PostgreSQL 17 migration/redemption cases and real-catalog parsing/persistence coverage. Run through `./build/run-tests.ps1 -NoBuild -Configuration SignetVerification -Filter 'FullyQualifiedName~ItemCatalogSeedingTests|FullyQualifiedName~AlphaSignetMigrationTests|FullyQualifiedName~Nobility|FullyQualifiedName~Signets_survive'`. PostgreSQL cases require `LL_SIGNET_TEST_POSTGRES` pointing to an isolated localhost test server with database-creation rights; each case creates and drops its own random test database. They otherwise report skipped.
 
