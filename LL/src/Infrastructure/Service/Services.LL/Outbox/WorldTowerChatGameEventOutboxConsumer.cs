@@ -46,7 +46,7 @@ public sealed class WorldTowerChatGameEventOutboxConsumer(
                 payload.Body,
                 IsGlobal: !payload.TargetCharacterId.HasValue,
                 TargetCharacterId: payload.TargetCharacterId,
-                SenderName: "World",
+                SenderName: payload.TargetCharacterId.HasValue ? "System" : "World",
                 MessageId: payload.MessageId,
                 SentAt: payload.SentAt,
                 TargetUrl: payload.TargetUrl,

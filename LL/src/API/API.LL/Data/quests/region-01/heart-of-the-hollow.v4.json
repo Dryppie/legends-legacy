@@ -8,7 +8,7 @@
     "id": "chain.shenic.chapter_03",
     "title": "Chapter III — Heart of Shenic",
     "description": "Earn a Goblin Sigil in Twilight, break the Goblin Gate, and cross the Old Forest before the Hollow's Final Trial.",
-    "goal": "Defeat the boss of Goblin Mines I, reach level 30, and clear Forgotten Catacombs I.",
+    "goal": "Defeat the boss of Goblin Mines on any difficulty, reach level 30, and clear Forgotten Catacombs on any difficulty.",
     "promisedReward": "Earn an area Essence Token from every Shenic area you secure.",
     "step": 3,
     "totalSteps": 3
@@ -38,11 +38,11 @@
     },
     {
       "key": "clear_the_hollows_final_trial",
-      "description": "Clear the Hollow's Final Trial: complete Forgotten Catacombs I and defeat its boss.",
+      "description": "Clear the Hollow's Final Trial: complete Forgotten Catacombs on any difficulty and defeat its boss.",
       "type": "DungeonRunCompleted",
       "requiredAmount": 1,
       "filters": {
-        "dungeonDefinitionId": "forgotten_catacombs"
+        "dungeonFamilyId": "forgotten_catacombs"
       },
       "presentation": {
         "actionLabel": "Enter Forgotten Catacombs",

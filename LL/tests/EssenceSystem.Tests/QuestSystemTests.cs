@@ -257,6 +257,55 @@ public sealed partial class QuestSystemTests
         Assert.Equal(1, milestone.CurrentAmount);
     }
 
+    [Theory]
+    [InlineData("forgotten_catacombs")]
+    [InlineData("forgotten_catacombs_ii")]
+    [InlineData("forgotten_catacombs_iii")]
+    public async Task Heart_of_the_hollow_accepts_any_catacombs_difficulty(string dungeonId)
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var definition = definitions.Get(QuestConstants.HeartOfTheHollow);
+        var repository = new RecordingQuestRepository(level: 30);
+        repository.Progresses.Add(CreateActiveProgress(characterId, definition, isPinned: true));
+        var service = new QuestService(
+            repository,
+            definitions,
+            new RecordingItemBaseRepository(),
+            inventoryItemFactory: null!,
+            lootRewardWriter: null!,
+            TimeProvider.System);
+
+        for (var encounter = 0; encounter < 6; encounter++)
+        {
+            await service.ProcessAsync(
+                characterId,
+                QuestTrigger.CombatCompleted("region_01_area_09", true),
+                null,
+                "test",
+                CancellationToken.None);
+        }
+
+        var milestone = repository.Progresses.Single(progress =>
+            progress.QuestId == definition.Id).Objectives.Single(objective =>
+            objective.ObjectiveKey == "clear_the_hollows_final_trial");
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.DungeonRunCompleted("goblin_mines"),
+            null,
+            "test",
+            CancellationToken.None);
+        Assert.Equal(0, milestone.CurrentAmount);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.DungeonRunCompleted(dungeonId),
+            null,
+            "test",
+            CancellationToken.None);
+        Assert.Equal(1, milestone.CurrentAmount);
+    }
+
     [Fact]
     public async Task Soul_archive_only_advances_for_the_selected_first_hunt_essence()
     {

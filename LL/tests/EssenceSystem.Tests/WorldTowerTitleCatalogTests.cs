@@ -51,6 +51,7 @@ public sealed class WorldTowerTitleCatalogTests
         await consumer.HandleAsync(new GameEventOutboxMessage { PayloadJson = JsonSerializer.Serialize(payload, json) }, CancellationToken.None);
         using var request = JsonDocument.Parse(handler.Body!);
         Assert.Equal(!personal, request.RootElement.GetProperty("isGlobal").GetBoolean());
+        Assert.Equal(personal ? "System" : "World", request.RootElement.GetProperty("senderName").GetString());
         Assert.Equal(recipient, request.RootElement.GetProperty("targetCharacterId").Deserialize<Guid?>());
         Assert.True(request.RootElement.GetProperty("broadcast").GetBoolean());
         Assert.Equal(payload.MessageId, request.RootElement.GetProperty("messageId").GetGuid());

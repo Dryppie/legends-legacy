@@ -51,3 +51,9 @@ No service was launched against a database, no migrations were applied, and noth
 Changed AchievementService.GetTitlesAsync to exclude locked WorldTower entries before filtering and projection. Added WorldTowerTitleVisibilityTests.cs covering a 100-floor catalog, an earned title, locked-category filtering, another character on the same account, and equipping. Updated this note.
 
 Verification: `./build/run-tests.ps1 -Filter 'FullyQualifiedName~AchievementServiceTests|FullyQualifiedName~WorldTower'` passed all 98 tests. The sandbox NuGet.Config restriction required a permitted retry. `git diff --check` passed. No frontend change or additional frontend build was needed for this backend list filter. No migration or configuration change; takes effect with the updated API, with no deployment performed here.
+
+### Personal notification sender follow-up
+
+Updated WorldTowerChatGameEventOutboxConsumer.cs so personal title unlocks use the System sender and global Tower announcements retain World, matching the achievement publisher. Extended WorldTowerTitleCatalogTests.cs to verify both labels and preserved recipient routing.
+
+Verification: `./build/run-tests.ps1 -Filter 'FullyQualifiedName~WorldTowerTitleCatalogTests'` passed all 3 tests; `git diff --check` passed. No frontend build was needed. No migration or configuration change, and no deployment was performed. Previously stored chat messages retain their original sender label.
