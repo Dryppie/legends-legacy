@@ -70,6 +70,8 @@ public class InventoryRepository : IInventoryRepository
         Guid? correlationId,
         CancellationToken cancellationToken)
     {
+        if (items.Any(x => x.ItemInstance.ItemBaseId == Domain.Models.Nobility.NobilityBenefits.SignetItemId))
+            throw new InvalidOperationException("Signets must be issued through the audited Signet grant service.");
         var normalizedSource = string.IsNullOrWhiteSpace(acquisitionSource)
             ? ItemAcquisitionSources.Unknown
             : acquisitionSource.Trim();
@@ -249,6 +251,7 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<bool> TryRemoveItemsByBaseIdAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken)
     {
+        if (requiredByItemId.ContainsKey(Domain.Models.Nobility.NobilityBenefits.SignetItemId)) return false;
         var candidateRows = await _context.InventoryItems
             .Where(i => i.InventoryId == characterId && requiredByItemId.Keys.Contains(i.ItemInstance.ItemBaseId))
             .Include(i => i.ItemInstance)
@@ -362,8 +365,12 @@ public class InventoryRepository : IInventoryRepository
             .ToDictionaryAsync(item => item.ItemBaseId, item => item.Quantity, cancellationToken);
     }
 
-    public void RemoveInventoryItem(InventoryItem inventoryItem) =>
+    public void RemoveInventoryItem(InventoryItem inventoryItem)
+    {
+        if (inventoryItem.ItemInstance.ItemBaseId == Domain.Models.Nobility.NobilityBenefits.SignetItemId)
+            throw new InvalidOperationException("Signets can only be redeemed or traded.");
         _context.InventoryItems.Remove(inventoryItem);
+    }
 
     public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken)
     {
@@ -407,6 +414,8 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<InventoryItem?> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
     {
+        if (itemInstance.ItemBaseId == Domain.Models.Nobility.NobilityBenefits.SignetItemId)
+            throw new InvalidOperationException("Signets must be issued through the audited Signet grant service.");
         var itemToAdd = new InventoryItem
         {
             InventoryId = characterId,
@@ -458,6 +467,8 @@ public class InventoryRepository : IInventoryRepository
 
         if (senderItem?.ItemInstance?.ItemBase is null)
             return InventoryTransferResult.Fail(InventoryTransferFailure.ItemNotFound);
+        if (senderItem.ItemInstance.ItemBaseId == Domain.Models.Nobility.NobilityBenefits.SignetItemId)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.ItemIsBound);
         if (senderItem.ItemInstance is EquipmentInstance { ProgressionData: { } data } && data.State.Ownership.OwnerId != senderCharacterId)
             return InventoryTransferResult.Fail(InventoryTransferFailure.ItemNotFound);
         if (senderItem.ItemInstance.IsBound)

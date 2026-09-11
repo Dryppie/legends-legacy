@@ -1,5 +1,7 @@
 # LegendsLegacy Purchase Overview
 
+> **Historical catalog:** These August proposals have been superseded by the [initial product catalog](C:/repos/Legends-Legacy/legends-legacy/docs/analysis/monetization-strategy/initial-product-catalog.md) and [subscription specification](C:/repos/Legends-Legacy/legends-legacy/docs/analysis/monetization-strategy/subscription-specification.md). The offers and exclusions below are retained for reference and are not current launch commitments.
+
 Prices and contents are proposals, not implemented products. “Launch” means after the commerce, entitlement, analytics, legal, and support prerequisites in the [full monetization strategy](./monetization-strategy.md) are complete.
 
 | Availability | Purchase                          |          Proposed price | What the purchase gives                                                                                           | Ownership and limits                                                                                                                 |

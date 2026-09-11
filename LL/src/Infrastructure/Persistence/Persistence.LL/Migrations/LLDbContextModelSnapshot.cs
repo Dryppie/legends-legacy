@@ -1740,11 +1740,12 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<Guid?>("ChanneledPlayerEssenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("FocusPlayerEssenceId");
+
                     b.Property<long>("CurrentXp")
                         .HasColumnType("bigint");
-
-                    b.Property<Guid?>("FocusPlayerEssenceId")
-                        .HasColumnType("uuid");
 
                     b.Property<int>("Level")
                         .ValueGeneratedOnAdd()
@@ -1776,12 +1777,13 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ChanneledPlayerEssenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("FocusPlayerEssenceId");
+
                     b.Property<string>("CombatStyleId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
-
-                    b.Property<Guid?>("FocusPlayerEssenceId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("MasteredUpgradeId")
                         .HasMaxLength(64)
@@ -2194,22 +2196,25 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
+                    b.Property<DateTimeOffset?>("CreatureFocusSetAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("EssenceFocusSetAtUtc");
+
+                    b.Property<long>("CreatureFocusTotalDurationSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("EssenceFocusTotalDurationSeconds");
+
                     b.Property<string>("CreatureName")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<DateTimeOffset?>("EssenceFocusSetAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("EssenceFocusTotalDurationSeconds")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTimeOffset>("FirstDefeatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsEssenceFocus")
-                        .HasColumnType("boolean");
+                    b.Property<bool>("IsCreatureFocus")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsEssenceFocus");
 
                     b.Property<int>("KillCount")
                         .HasColumnType("integer");
@@ -2224,7 +2229,8 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterId", "CreatureDefinitionId")
                         .IsUnique();
 
-                    b.HasIndex("CharacterId", "IsEssenceFocus");
+                    b.HasIndex("CharacterId", "IsCreatureFocus")
+                        .HasDatabaseName("IX_CharacterCreatureArchiveEntries_CharacterId_IsEssenceFocus");
 
                     b.ToTable("CharacterCreatureArchiveEntries");
                 });
@@ -2280,6 +2286,9 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
+
+                    b.Property<int>("PresetSlot")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2969,6 +2978,9 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
 
+                    b.Property<int>("PresetSlot")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CharacterId", "Name")
@@ -3348,6 +3360,252 @@ namespace Persistence.LL.Migrations
                     b.ToTable("MarketPlaceOrders");
                 });
 
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityCoverage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CalendarMonths")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PolicyVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndsAt");
+
+                    b.HasIndex("AccountId", "StartsAt")
+                        .IsUnique();
+
+                    b.ToTable("NobilityCoverage", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_NobilityCoverage_Duration", "\"EndsAt\" > \"StartsAt\" AND \"CalendarMonths\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityDailyGrant", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("GameDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("AppliedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PolicyVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SigilFragments")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Soulstones")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AccountId", "GameDate");
+
+                    b.ToTable("NobilityDailyGrants", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityMembership", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("DailyRewardsThrough")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("NextDailyRewardAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("RewardCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("ShowBadge")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AccountId");
+
+                    b.HasIndex("NextDailyRewardAt");
+
+                    b.HasIndex("RewardCharacterId");
+
+                    b.ToTable("NobilityMemberships", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetIssuance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActorSubject")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Origin")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("Refunded")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "Origin");
+
+                    b.ToTable("SignetIssuances", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SignetIssuance_Quantity", "\"Quantity\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetMovement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("FromCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ToCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UnitId", "OperationId", "Kind")
+                        .IsUnique();
+
+                    b.ToTable("SignetMovements", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetRedemption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MembershipVersion")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("PreviousExpiry")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("RedeemedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<Guid[]>("UnitIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "RedeemedAt");
+
+                    b.ToTable("SignetRedemptions", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetUnit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IssuanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ListingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Ordinal")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("OwnerCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RedemptionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("IssuanceId", "Ordinal")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerCharacterId", "State");
+
+                    b.ToTable("SignetUnits", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SignetUnit_Location", "(\"State\" = 1 AND \"ListingId\" IS NOT NULL AND \"RedemptionId\" IS NULL) OR (\"State\" = 2 AND \"ListingId\" IS NULL AND \"RedemptionId\" IS NOT NULL) OR (\"State\" IN (0, 3) AND \"ListingId\" IS NULL AND \"RedemptionId\" IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxDelivery", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3460,6 +3718,12 @@ namespace Persistence.LL.Migrations
 
                     b.Property<long>("FateEchoSpent")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("FreeRerollsUsed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PaidRerollsUsed")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("PeriodEnd")
                         .HasColumnType("timestamp with time zone");
@@ -5856,6 +6120,13 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(3);
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.MiscItemBase", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemBase");
+
+                    b.HasDiscriminator().HasValue(4);
+                });
+
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>
                 {
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
@@ -6610,6 +6881,81 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemBase");
                 });
 
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityCoverage", b =>
+                {
+                    b.HasOne("Domain.Models.Nobility.NobilityMembership", null)
+                        .WithMany("Coverage")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityDailyGrant", b =>
+                {
+                    b.HasOne("Domain.Models.Nobility.NobilityMembership", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityMembership", b =>
+                {
+                    b.HasOne("Domain.Models.Users.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("RewardCharacterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetIssuance", b =>
+                {
+                    b.HasOne("Domain.Models.Users.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetMovement", b =>
+                {
+                    b.HasOne("Domain.Models.Nobility.SignetUnit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetRedemption", b =>
+                {
+                    b.HasOne("Domain.Models.Users.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.SignetUnit", b =>
+                {
+                    b.HasOne("Domain.Models.Nobility.SignetIssuance", null)
+                        .WithMany()
+                        .HasForeignKey("IssuanceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerCharacterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxDelivery", b =>
                 {
                     b.HasOne("Domain.Models.Outbox.GameEventOutboxMessage", "Message")
@@ -7118,6 +7464,11 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
                 {
                     b.Navigation("ItemInstances");
+                });
+
+            modelBuilder.Entity("Domain.Models.Nobility.NobilityMembership", b =>
+                {
+                    b.Navigation("Coverage");
                 });
 
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxMessage", b =>

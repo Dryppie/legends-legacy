@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using API.LL.Common;
+using Domain.Models.CombatStyles;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.Configuration;
@@ -99,6 +101,103 @@ public sealed class RequestLoggingMiddlewareTests
         Assert.Equal(expectedLevel, entry.Level);
         Assert.Equal("/api/v1/test", entry.Properties["HttpRoute"]);
         Assert.Null(entry.Exception);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Failed_request_logs_contract_identity_without_response_message(bool enrich)
+    {
+        var logger = new CapturingLogger<RequestLoggingMiddleware>();
+        var middleware = new RequestLoggingMiddleware(
+            context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status409Conflict;
+                if (enrich)
+                {
+                    var details = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status409Conflict,
+                        Detail = "private-response-message"
+                    };
+                    details.Extensions["code"] = "essence_loadout_name_conflict";
+                    details.Extensions["category"] = ApiErrorContract.ConflictCategory;
+                    ApiErrorContract.Enrich(details, context);
+                }
+                else
+                {
+                    ApiErrorContract.Create(context, StatusCodes.Status409Conflict,
+                        "Conflict", "private-response-message", "essence_loadout_name_conflict",
+                        ApiErrorContract.ConflictCategory);
+                }
+                return Task.CompletedTask;
+            }, logger, CreateConfiguration());
+
+        await middleware.InvokeAsync(new DefaultHttpContext());
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Information, entry.Level);
+        Assert.Equal("essence_loadout_name_conflict", entry.Properties["ErrorCode"]);
+        Assert.Equal("conflict", entry.Properties["ErrorCategory"]);
+        Assert.DoesNotContain("private-response-message", logger.CapturedText(), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(401, "authentication_required", "authentication")]
+    [InlineData(409, "conflict", "conflict")]
+    [InlineData(500, "unexpected_error", "system")]
+    public async Task Failure_without_problem_details_logs_default_identity(int status, string code, string category)
+    {
+        var logger = new CapturingLogger<RequestLoggingMiddleware>();
+        var middleware = new RequestLoggingMiddleware(context =>
+        {
+            context.Response.StatusCode = status;
+            return Task.CompletedTask;
+        }, logger, CreateConfiguration());
+
+        await middleware.InvokeAsync(new DefaultHttpContext());
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(code, entry.Properties["ErrorCode"]);
+        Assert.Equal(category, entry.Properties["ErrorCategory"]);
+    }
+
+    [Fact]
+    public async Task Handled_combat_style_conflict_logs_specific_code_and_original_route()
+    {
+        var logger = new CapturingLogger<RequestLoggingMiddleware>();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddMetrics();
+        services.AddProblemDetails();
+        services.AddExceptionHandler<CombatStyleConfigurationExceptionHandler>();
+        services.AddSingleton(new DiagnosticListener("RequestLoggingTests"));
+        services.AddSingleton(CreateConfiguration());
+        services.AddSingleton<ILogger<RequestLoggingMiddleware>>(logger);
+        await using var provider = services.BuildServiceProvider();
+        var app = new ApplicationBuilder(provider);
+        app.UseMiddleware<RequestLoggingMiddleware>();
+        app.UseExceptionHandler();
+        app.Run(context =>
+        {
+            context.SetEndpoint(new RouteEndpoint(_ => Task.CompletedTask,
+                RoutePatternFactory.Parse("/api/v1/colosseum/battle"), 0,
+                EndpointMetadataCollection.Empty, "arena battle"));
+            throw new CombatStyleConfigurationException("Choose an available refinement.");
+        });
+        var context = new DefaultHttpContext { RequestServices = provider };
+        context.Request.Method = HttpMethods.Post;
+        context.Response.Body = new MemoryStream();
+
+        await app.Build()(context);
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Information, entry.Level);
+        Assert.Equal(409, entry.Properties["HttpStatusCode"]);
+        Assert.Equal("/api/v1/colosseum/battle", entry.Properties["HttpRoute"]);
+        Assert.Equal("combat_style_configuration_invalid", entry.Properties["ErrorCode"]);
+        Assert.Equal("conflict", entry.Properties["ErrorCategory"]);
+        Assert.IsType<CombatStyleConfigurationException>(entry.Exception);
     }
 
     [Fact]

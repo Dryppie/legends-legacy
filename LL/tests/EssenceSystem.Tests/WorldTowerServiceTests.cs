@@ -53,7 +53,7 @@ using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
-public sealed class WorldTowerServiceTests
+public sealed partial class WorldTowerServiceTests
 {
     [Theory]
     [InlineData(24, 0)]
@@ -1491,8 +1491,8 @@ public sealed class WorldTowerServiceTests
         Assert.Contains("Floor 1", conquest.Body, StringComparison.Ordinal);
         // The rally-start and conquest messages share a rally, so their deterministic ids
         // must still differ or LL-Chat would swallow the second one as a duplicate.
-        Assert.Equal(2, outbox.ChatAnnouncements.Count);
-        Assert.Equal(2, outbox.ChatAnnouncements.Select(x => x.MessageId).Distinct().Count());
+        Assert.Equal(2, outbox.ChatAnnouncements.Count(x => x.TargetCharacterId is null));
+        Assert.Equal(outbox.ChatAnnouncements.Count, outbox.ChatAnnouncements.Select(x => x.MessageId).Distinct().Count());
     }
 
     [Fact]
@@ -1782,6 +1782,8 @@ public sealed class WorldTowerServiceTests
         Assert.All(await db.Characters.ToArrayAsync(), character => Assert.Equal(100, character.TowerTokens));
         Assert.Equal(4, await db.TowerEchoClears.CountAsync());
         Assert.Equal(2, await db.TowerAttempts.CountAsync(x => x.Status == TowerAttemptStatus.Succeeded));
+        Assert.Equal(8, await db.PlayerTitleUnlocks.CountAsync());
+        Assert.All(await db.PlayerTitleUnlocks.GroupBy(u => u.CharacterId).Select(g => g.Count()).ToArrayAsync(), count => Assert.Equal(2, count));
         var floorOneDetails = await service.GetFloorAsync(characters[0].Id, 1, CancellationToken.None);
         var floorTwoDetails = await service.GetFloorAsync(characters[0].Id, 2, CancellationToken.None);
         Assert.NotNull(floorOneDetails);
@@ -1997,7 +1999,15 @@ public sealed class WorldTowerServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
-        return new LLDbContext(options);
+        var db = new LLDbContext(options);
+        db.TitleDefinitions.AddRange(new FixedDefinitionProvider().GetFloors().Select(f => new Domain.Models.Achievements.TitleDefinition
+        {
+            Id = Guid.NewGuid(), Key = f.RewardTitleKey, Name = $"Title {f.FloorNumber}",
+            Description = "Tower victory", Category = Domain.Models.Achievements.AchievementCategory.WorldTower,
+            Scope = Domain.Models.Achievements.TitleScope.Character, IsActive = true
+        }));
+        db.SaveChanges();
+        return db;
     }
 
     private static WorldTowerService CreateService(
@@ -2051,7 +2061,7 @@ public sealed class WorldTowerServiceTests
             new JsonSerializerOptions(JsonSerializerDefaults.Web),
             new MemoryCache(new MemoryCacheOptions()),
             TimeProvider.System,
-            NullLogger<WorldTowerService>.Instance);
+            NullLogger<WorldTowerService>.Instance, CreateTitleService(db, outbox ?? new TestGameEventOutbox()));
     }
 
     private static async Task<Application.UseCases.WorldTower.Dtos.TowerCombatPlaybackDto> SimulatePlaybackAsync(
@@ -2259,6 +2269,7 @@ public sealed class WorldTowerServiceTests
             .Select(number => new TowerFloorDefinition
             {
                 FloorNumber = number,
+                RewardTitleKey = $"title.world_tower.floor_{number:00}",
                 Name = number == 1 ? "The Waking Step" : $"Floor {number}",
                 Type = number == 5 ? TowerFloorType.Sovereign : TowerFloorType.Standard,
                 GuardianCreatureId = Guid.Parse("bfe575f7-f60a-4e09-9452-654a7c8ad1d7"),

@@ -25,6 +25,8 @@ describe('EquipmentLoadoutsComponent', () => {
     const pending = signal(false);
     return {
       loadouts,
+      limit: signal(3),
+      usableCount: computed(() => loadouts().filter(x => x.isUsable !== false).length),
       selectedId,
       selected: computed(() =>
         loadouts().find((entry) => entry.id === selectedId()),

@@ -65,6 +65,7 @@ public sealed class WorldTowerService : IWorldTowerService
 
     private readonly IDbContext _db;
     private readonly IWorldTowerRallyRepository _rallies;
+    private readonly IWorldTowerTitleService _titles;
     private readonly IWorldTowerDefinitionProvider _definitions;
     private readonly ICharacterSnapshotService _snapshots;
     private readonly IPowerRatingService _powerRatings;
@@ -103,10 +104,12 @@ public sealed class WorldTowerService : IWorldTowerService
         JsonSerializerOptions jsonOptions,
         IMemoryCache playbackCache,
         TimeProvider timeProvider,
-        ILogger<WorldTowerService> logger)
+        ILogger<WorldTowerService> logger,
+        IWorldTowerTitleService titles)
     {
         _db = db;
         _rallies = rallies;
+        _titles = titles;
         _definitions = definitions;
         _snapshots = snapshots;
         _powerRatings = powerRatings;
@@ -1774,6 +1777,12 @@ public sealed class WorldTowerService : IWorldTowerService
         attempt.TowerRally.Status = TowerRallyStatus.Completed;
         attempt.TowerRally.CompletedAt = now;
 
+        if (outcome.Succeeded)
+            await _titles.GrantAsync(definition,
+                attempt.TowerRally.Participants.Select(p => new TowerTitleRecipient(
+                    p.AccountId, p.CharacterId, attempt.Id, attempt.TowerRallyId)).ToArray(),
+                announce: true, cancellationToken);
+
         if (outcome.Succeeded && attempt.Mode == TowerRallyMode.FirstClear && !progress.IsCleared)
         {
             createdHallRecord = progress.RecordFirstClear(attempt.Id, now);
@@ -2026,7 +2035,8 @@ public sealed class WorldTowerService : IWorldTowerService
                 .ToArray(),
             definition.FirstClearTowerTokens,
             definition.TowerTokens,
-            echoRewardClaimedThisWeek);
+            echoRewardClaimedThisWeek,
+            (await _titles.GetRewardAsync(definition, cancellationToken)).Name);
     }
 
     private IReadOnlyList<TowerScoutingRevealDto> GetGuardianAbilityReveals(

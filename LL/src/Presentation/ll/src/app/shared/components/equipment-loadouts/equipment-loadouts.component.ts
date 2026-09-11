@@ -25,6 +25,7 @@ export class EquipmentLoadoutsComponent implements OnInit {
   readonly selected = this.state.selected;
   readonly confirmDelete = signal(false);
   name = '';
+  copyTarget = '';
   readonly activities: { id: EssenceCombatActivity; label: string }[] = [
     { id: 'IdleCombat', label: 'Idle combat' },
     { id: 'Dungeon', label: 'Dungeons' },
@@ -69,11 +70,11 @@ export class EquipmentLoadoutsComponent implements OnInit {
   canSaveName(): boolean {
     const name = this.name.trim();
     return (
-      !this.state.busy() &&
+      !this.state.busy() && this.selected()?.isUsable !== false &&
       !!name &&
       (this.selected()
         ? name !== this.selected()!.name
-        : this.state.loadouts().length < 3)
+        : this.state.loadouts().length < this.state.limit())
     );
   }
 

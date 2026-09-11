@@ -1,5 +1,14 @@
 [
   {
+    "id": "signet",
+    "name": "Signet",
+    "description": "Redeem to gain one calendar month of Nobility. Unredeemed Signets can be traded on the market.",
+    "itemType": "Misc",
+    "rarity": "Rare",
+    "stackable": true,
+    "isBound": false
+  },
+  {
     "id": "sigil_fragment",
     "name": "Sigil Fragments",
     "description": "Fragments used to assemble dungeon entrance sigils.",

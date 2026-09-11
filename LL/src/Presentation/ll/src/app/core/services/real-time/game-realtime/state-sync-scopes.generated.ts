@@ -3,6 +3,7 @@
  */
 export const stateSyncScopes = [
   'character',
+  'nobility',
   'character-overview',
   'inventory',
   'loot-history',

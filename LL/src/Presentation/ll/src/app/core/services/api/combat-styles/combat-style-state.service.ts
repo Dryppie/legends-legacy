@@ -30,7 +30,10 @@ export class CombatStyleStateService {
   readonly previewError = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly dirty = signal(true);
-  readonly edited = signal(false);
+  readonly edited = computed(() => {
+    const saved = this.data()?.selection;
+    return !!saved && !this.sameSelection(this.draft(), saved);
+  });
   readonly selected = computed(
     () =>
       this.data()?.styles.find(
@@ -51,6 +54,8 @@ export class CombatStyleStateService {
   readonly canSave = computed(
     () =>
       this.data() !== null &&
+      this.edited() &&
+      this.draft().combatStyleId !== null &&
       !this.busy() &&
       !this.loading() &&
       !this.dirty() &&
@@ -107,6 +112,7 @@ export class CombatStyleStateService {
     this.api.get().subscribe({
       next: (data) => {
         if (epoch !== this.epoch) return;
+        const preserveDraft = this.edited();
         this.data.set(data);
         this.loading.set(false);
         this.revision = revision;
@@ -114,7 +120,7 @@ export class CombatStyleStateService {
           generation !== this.dirtyGeneration ||
             this.latestRevision() > revision,
         );
-        if (!this.edited())
+        if (!preserveDraft)
           this.draft.set({
             ...data.selection,
             masteredUpgradeId: data.selection.masteredUpgradeId ?? null,
@@ -141,6 +147,7 @@ export class CombatStyleStateService {
   }
 
   chooseStyle(id: string | null) {
+    if (!id || this.busy()) return;
     const entry = this.data()?.styles.find(
       (style) => style.definition.id === id,
     );
@@ -200,7 +207,6 @@ export class CombatStyleStateService {
         masteredUpgradeId: selection.masteredUpgradeId ?? null,
         upgradeIds: [...selection.upgradeIds],
       });
-      this.edited.set(false);
       this.requestPreview();
     }
   }
@@ -209,7 +215,6 @@ export class CombatStyleStateService {
     if (this.sameSelection(selection, this.draft()) && !this.previewError())
       return;
     this.draft.set(selection);
-    this.edited.set(true);
     this.message.set(null);
     this.requestPreview();
   }
@@ -313,7 +318,6 @@ export class CombatStyleStateService {
           masteredUpgradeId: result.data.selection.masteredUpgradeId ?? null,
           upgradeIds: [...result.data.selection.upgradeIds],
         });
-        this.edited.set(false);
         this.revision =
           result.domainVersions['combat-styles'] ?? this.latestRevision();
         this.dirty.set(false);
@@ -355,7 +359,6 @@ export class CombatStyleStateService {
     this.loading.set(false);
     this.previewing.set(false);
     this.busy.set(false);
-    this.edited.set(false);
     this.error.set(null);
     this.previewError.set(null);
     this.message.set(null);

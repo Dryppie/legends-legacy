@@ -68,6 +68,15 @@ describe('MarketPlaceCommodityComponent', () => {
     expect(component.isAbsorbedEssence(unabsorbed)).toBeFalse();
   });
 
+  it('exposes only Signets in the Signet order book even when no seller has listed one', () => {
+    const signet = { id: 'signet', name: 'Signet', itemType: ItemType.Misc, stackable: true } as ItemBase;
+    const component = createComponent([signet, { ...signet, id: 'other', name: 'Other' }, absorbed]);
+    component.itemType = ItemType.Misc;
+    component.category = 'signets';
+    expect(component.catalogueHeading()).toBe('Signets');
+    expect(component.filteredCommodities().map(x => x.base.id)).toEqual(['signet']);
+  });
+
   it('never marks non-Essence catalogue entries', () => {
     const component = createComponent();
     const resource: ItemBase = {

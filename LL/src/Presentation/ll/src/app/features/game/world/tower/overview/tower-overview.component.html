@@ -469,6 +469,11 @@
               <section class="tower-rewards-panel ll-panel">
                 <p class="eyebrow">Rewards and unlocks</p>
                 <div class="tower-reward-grid">
+                  <article class="tower-reward-card" *ngIf="floor.rewardTitleName">
+                    <span>Character title</span>
+                    <strong>{{ floor.rewardTitleName }}</strong>
+                    <small>Earned permanently by every member of a victorious Expedition.</small>
+                  </article>
                   <article class="tower-reward-card">
                     <span>First clear</span>
                     <strong>

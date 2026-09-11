@@ -152,6 +152,7 @@ public sealed class AdministrationRepository(IDbContext context) : IAdministrati
         var normalized = trimmed.ToUpper();
         return await context.ItemBases
             .AsNoTracking()
+            .Where(x => x.Id != Domain.Models.Nobility.NobilityBenefits.SignetItemId)
             .Where(x => x.Id.ToUpper().Contains(normalized) ||
                         x.Name.ToUpper().Contains(normalized))
             .OrderBy(x => x.Name)

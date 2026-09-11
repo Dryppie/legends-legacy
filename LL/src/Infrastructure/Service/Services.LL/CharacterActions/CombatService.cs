@@ -22,19 +22,22 @@ public class CombatService : ICombatService
     private readonly IResolutionRandomSource? _resolutionRandom;
     private readonly IdleCombatProgressionOptions _options;
     private readonly ILogger<CombatService>? _logger;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
 
     public CombatService(
         ICombatOrchestrationCoordinator orchestrationCoordinator,
         ICombatOutcomeCoordinator outcomeCoordinator,
         IResolutionRandomSource? resolutionRandom = null,
         IOptions<IdleCombatProgressionOptions>? options = null,
-        ILogger<CombatService>? logger = null)
+        ILogger<CombatService>? logger = null,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
     {
         _orchestrationCoordinator = orchestrationCoordinator;
         _outcomeCoordinator = outcomeCoordinator;
         _resolutionRandom = resolutionRandom;
         _options = options?.Value ?? new IdleCombatProgressionOptions();
         _logger = logger;
+        _nobility = nobility;
     }
 
     public async Task<CombatSession?> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
@@ -44,6 +47,8 @@ public class CombatService : ICombatService
         IdleCombatOrchestrationDetails? lastDetails = null;
         var processedCount = 0;
         var processedBatches = 0;
+        var retention = _nobility is null ? null : Domain.Models.Nobility.NobilityRetention.Windows(
+            await _nobility.GetCoverageAsync(characterAction.CharacterId, cancellationToken), now, _options.MaximumOfflineHours);
 
         // MaximumEncountersPerResolution remains the memory/CPU size of one
         // orchestration batch. Continuation happens here, inside the same command
@@ -63,7 +68,7 @@ public class CombatService : ICombatService
             var orchestrationRequest = new IdleCombatOrchestrationRequest(
                 characterAction,
                 now,
-                captureFinalEncounterLog);
+                captureFinalEncounterLog) { RetentionWindows = retention };
 
             using var randomScope = _resolutionRandom?.UseSeed(StableRandom.Seed(
                 "idle-combat-batch-v1",

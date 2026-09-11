@@ -18,13 +18,16 @@ public sealed class PowerBuildSnapshotFactory
 {
     private readonly ICharacterRepository _characters;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
+    private readonly IEssenceLoadoutLimitService? _essenceLimits;
 
     public PowerBuildSnapshotFactory(
         ICharacterRepository characters,
-        IEssenceCombatLoadoutResolver essenceLoadouts)
+        IEssenceCombatLoadoutResolver essenceLoadouts,
+        IEssenceLoadoutLimitService? essenceLimits = null)
     {
         _characters = characters;
         _essenceLoadouts = essenceLoadouts;
+        _essenceLimits = essenceLimits;
     }
 
     public async Task<PowerBuildSnapshot?> CreateAsync(
@@ -44,13 +47,16 @@ public sealed class PowerBuildSnapshotFactory
         return await CreateAsync(character, partySelection, cancellationToken);
     }
 
-    public Task<PowerBuildSnapshot?> CreateAsync(
+    public async Task<PowerBuildSnapshot?> CreateAsync(
         Character character,
         DungeonPartySelection partySelection,
         CancellationToken cancellationToken)
     {
         if (partySelection.CompanionIds.Count > 0)
-            return Task.FromResult<PowerBuildSnapshot?>(null);
+            return null;
+
+        EssenceLoadoutSelection.SetAvailability(character.EssenceLoadouts,
+            _essenceLimits is null ? 3 : await _essenceLimits.GetLoadoutLimitAsync(character.Id, cancellationToken));
 
         var defaultLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, EssenceCombatActivity.None);
         var equippedEssences = defaultLoadout?.Slots
@@ -83,9 +89,9 @@ public sealed class PowerBuildSnapshotFactory
 
         // Attribute ratings also support empty loadouts; battle preparation and
         // Combat Style validation are not needed to display a character overview.
-        return Task.FromResult<PowerBuildSnapshot?>(new PowerBuildSnapshot(
+        return new PowerBuildSnapshot(
             CreateFingerprint(character),
-            rating));
+            rating);
     }
 
     public static string CreateFingerprint(Character character)

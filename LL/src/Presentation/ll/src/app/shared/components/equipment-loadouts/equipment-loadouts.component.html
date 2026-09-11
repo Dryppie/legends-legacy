@@ -6,7 +6,7 @@
     <div class="loadout-title">
       <h2 class="ll-heading">Loadout</h2>
       <p class="ll-copy whitespace-nowrap">
-        {{ state.loadouts().length }} / 3 saved
+        {{ state.usableCount() }} / {{ state.limit() }} usable
       </p>
     </div>
 
@@ -25,7 +25,7 @@
         [title]="'Equip ' + loadout.name"
         (click)="select(loadout.id)"
       >
-        {{ loadout.name }}
+        {{ loadout.name }}{{ loadout.isUsable === false ? " · locked" : "" }}
       </button>
       <button
         type="button"
@@ -33,11 +33,11 @@
         [class.loadout-choice-active]="!selected()"
         [attr.aria-pressed]="!selected()"
         [disabled]="
-          state.busy() || state.unsavedChanges() || state.loadouts().length >= 3
+          state.busy() || state.unsavedChanges() || state.usableCount() >= state.limit()
         "
         [title]="
-          state.loadouts().length >= 3
-            ? 'All 3 loadouts are saved. Delete one to create another.'
+          state.usableCount() >= state.limit()
+            ? 'All available loadouts are saved.'
             : 'Save your currently equipped items as a new loadout'
         "
         (click)="newLoadout()"
@@ -68,7 +68,7 @@
       <button
         class="ll-button px-2 py-1 text-xs"
         type="button"
-        [disabled]="state.busy() || !selected()"
+        [disabled]="state.busy() || !selected() || selected()?.isUsable === false"
         (click)="confirmDelete.set(true)"
       >
         Delete
@@ -76,6 +76,25 @@
     </div>
   </div>
 
+  @if (selected()?.isUsable === false) {
+    <div class="my-3 rounded border border-light_gray bg-black/30 p-3 text-sm">
+      <p class="text-primary">Saved preset · requires Nobility to use</p>
+      <ul class="my-2 text-zinc-300">
+        @for (slot of selected()?.slots ?? []; track slot.slotType) {
+          <li>{{ slot.slotType }}: {{ slot.equipmentInstance?.displayName ?? 'Unavailable item' }}</li>
+        }
+      </ul>
+      <label>Copy into an available preset
+        <select [(ngModel)]="copyTarget" class="ml-2 rounded border border-light_gray bg-black/40 p-1">
+          <option value="">Choose destination</option>
+          @for (loadout of state.loadouts(); track loadout.id) {
+            @if (loadout.isUsable !== false) { <option [value]="loadout.id">{{ loadout.name }}</option> }
+          }
+        </select>
+      </label>
+      <button class="ll-button ml-2" [disabled]="!copyTarget || state.busy()" (click)="state.copyTo(copyTarget)">Copy and replace destination</button>
+    </div>
+  }
   <div class="auto-use-row">
     <span class="auto-use-label">Auto-use for</span>
     <div
@@ -93,7 +112,7 @@
         [attr.aria-pressed]="
           selected()?.autoUseActivities?.includes(activity.id) ?? false
         "
-        [disabled]="state.busy() || !selected()"
+        [disabled]="state.busy() || !selected() || selected()?.isUsable === false"
         [title]="
           activityOwner(activity.id)
             ? 'Currently assigned to ' +

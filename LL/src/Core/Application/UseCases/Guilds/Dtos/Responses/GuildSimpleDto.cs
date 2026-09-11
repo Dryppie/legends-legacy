@@ -9,7 +9,6 @@ public class GuildSimpleDto : IMapFrom<Guild>
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string OwnerName { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public int MaxMembers { get; set; } = 10;
     public int MemberCount { get; set; }
     public int Upgrades { get; set; }

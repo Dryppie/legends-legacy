@@ -70,6 +70,7 @@ public static class StateSyncCommandScopeCatalog
         "Application.UseCases.Inventories.",
         "Application.UseCases.LootHistory.",
         "Application.UseCases.MarketPlaces.",
+        "Application.UseCases.Nobility.",
         "Application.UseCases.Prophecies.",
         "Application.UseCases.Quests.",
         "Application.UseCases.Raids.",
@@ -81,6 +82,14 @@ public static class StateSyncCommandScopeCatalog
     private static IReadOnlyDictionary<Type, StateSyncCommandScopeProfile> BuildProfiles()
     {
         var profiles = new Dictionary<Type, StateSyncCommandScopeProfile>();
+        var nobilityProfile = new StateSyncCommandScopeProfile(
+            [StateSyncScopes.Nobility, StateSyncScopes.Inventory, StateSyncScopes.Essences, StateSyncScopes.Equipment,
+                StateSyncScopes.Colosseum, StateSyncScopes.Prophecies, StateSyncScopes.Soulstones], [],
+            RefreshCharacterOverview: true, RefreshCharacterSummaryWhenChanged: true);
+        profiles[typeof(global::Application.UseCases.Nobility.Commands.RedeemSignets.RedeemSignetsCommand)] = nobilityProfile;
+        profiles[typeof(global::Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommand)] = nobilityProfile;
+        profiles[typeof(global::Application.UseCases.Nobility.Commands.SetNobilityAppearance.SetNobilityAppearanceCommand)] = nobilityProfile;
+        profiles[typeof(global::Application.UseCases.Nobility.Commands.SettleNobilityDailyRewards.SettleNobilityDailyRewardsCommand)] = nobilityProfile;
         RegisterAuthoritativeResponse(profiles, [StateSyncScopes.CombatStyles], [], [StateSyncScopes.CombatStyles],
             refreshCharacterOverview: true,
             refreshCharacterSummaryWhenChanged: true,
@@ -230,6 +239,7 @@ public static class StateSyncCommandScopeCatalog
         Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Character], [],
             refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Equipments.Commands.SaveEquipmentLoadout.SaveEquipmentLoadoutCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.CopyEquipmentLoadout.CopyEquipmentLoadoutCommand),
             typeof(global::Application.UseCases.Equipments.Commands.DeleteEquipmentLoadout.DeleteEquipmentLoadoutCommand),
             typeof(global::Application.UseCases.Equipments.Commands.SetEquipmentLoadoutActivities.SetEquipmentLoadoutActivitiesCommand),
             typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentLoadout.ApplyEquipmentLoadoutCommand));

@@ -77,7 +77,7 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
                     Outcome: record.Resolution.Outcome,
                     HostileSourceEntityIds: hostileIds,
                     HostileCreatures: hostileCreatures,
-                    CombatResult: record.Resolution.CombatResult);
+                    CombatResult: record.Resolution.CombatResult) { EarnedAt = record.Plan.StartsAt };
             })
             .ToArray();
 

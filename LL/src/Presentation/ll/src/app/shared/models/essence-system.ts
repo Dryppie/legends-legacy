@@ -206,6 +206,8 @@ export interface EssenceLoadoutsDto {
 }
 
 export interface EssenceLoadoutDto {
+  presetSlot?: number;
+  isUsable?: boolean;
   id: string;
   name: string;
   autoUseActivities: EssenceCombatActivity[];

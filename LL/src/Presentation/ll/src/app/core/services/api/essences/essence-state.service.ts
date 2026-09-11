@@ -291,12 +291,13 @@ export class EssenceStateService {
   });
 
   readonly canSaveDraft = computed(() => {
+    if (this.selectedLoadout()?.isUsable === false) return false;
     const name = this._draftLoadoutName().trim();
     const loadouts = this._loadouts();
     const selectedId = this._selectedLoadoutId();
     if (!loadouts) return false;
 
-    const canCreate = loadouts.loadouts.length < loadouts.limit;
+    const canCreate = loadouts.loadouts.filter(x => x.isUsable !== false).length < loadouts.limit;
 
     return (
       !!name &&
@@ -764,6 +765,16 @@ export class EssenceStateService {
     this._draftSlots.set(this.getLoadoutDraftSlots(loadout));
   }
 
+  copySelectedPresetTo(targetId: string): void {
+    const source = this.selectedLoadout();
+    const target = this.loadouts()?.loadouts.find(x => x.id === targetId && x.isUsable !== false);
+    if (!source || !target || source.id === target.id || this._savingLoadout()) return;
+    const slots = this.getLoadoutDraftSlots(source);
+    this.selectLoadout(target);
+    this._draftSlots.set(slots);
+    this.persistDraftLoadout(false);
+  }
+
   setDraftLoadoutName(name: string): void {
     this._draftLoadoutName.set(name);
   }
@@ -910,6 +921,7 @@ export class EssenceStateService {
   }
 
   private canPersistDraftLoadout(): boolean {
+    if (this.selectedLoadout()?.isUsable === false) return false;
     const loadouts = this._loadouts();
     const selectedId = this._selectedLoadoutId();
     if (!loadouts || this._savingLoadout()) return false;
@@ -921,13 +933,14 @@ export class EssenceStateService {
       this.hasDraftChanges() &&
       !this.hasDuplicateDraftEssences() &&
       !this.hasDuplicateDraftCreatureSources() &&
-      (!!selectedId || loadouts.loadouts.length < loadouts.limit)
+      (!!selectedId || loadouts.loadouts.filter(x => x.isUsable !== false).length < loadouts.limit)
     );
   }
 
   setSelectedLoadoutAutoUseActivities(
     activities: readonly EssenceCombatActivity[],
   ): void {
+    if (this.selectedLoadout()?.isUsable === false) return;
     const id = this._selectedLoadoutId();
     if (!id || this._savingLoadout()) return;
 

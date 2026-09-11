@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { NobilityStatus } from '../nobility/nobility.service';
 import { map, Observable } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
@@ -9,6 +10,7 @@ import { ApiService } from '../api.service';
 import { StateVersionMap } from '../../real-time/game-realtime/game-realtime-contracts';
 
 export interface GameBootstrapDto {
+  nobility?: NobilityStatus | null;
   character: CharacterDto;
   questJournal: QuestJournal;
   areaAccess: CombatAreaAccess[];

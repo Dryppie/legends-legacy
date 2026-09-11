@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../core/services/api/nobility/nobility.testing';
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import {
   ComponentFixture,
@@ -56,7 +57,7 @@ describe('Chat mention interaction', () => {
       );
     TestBed.configureTestingModule({
       imports: [ChatComponent],
-      providers: [
+      providers: [...provideFreeNobilityForTests(),
         provideRouter([]),
         {
           provide: EquipmentService,

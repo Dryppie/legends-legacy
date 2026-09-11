@@ -144,6 +144,8 @@ public sealed class AchievementService : IAchievementService
             .ToDictionary(x => x.Key, x => x.OrderByDescending(u => u.UnlockedAt).First());
 
         return titles
+            // Tower titles are earned discoveries; omit locked floors from the collection entirely.
+            .Where(title => title.Category != AchievementCategory.WorldTower || unlockByTitle.ContainsKey(title.Id))
             .Select(title =>
             {
                 unlockByTitle.TryGetValue(title.Id, out var unlock);
@@ -166,7 +168,8 @@ public sealed class AchievementService : IAchievementService
         Guid characterId,
         string titleKey,
         string? metadataJson,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool announce = true)
     {
         titleKey = titleKey.Trim();
         var character = await _repository.GetCharacterAsync(accountId, characterId, cancellationToken);
@@ -203,7 +206,8 @@ public sealed class AchievementService : IAchievementService
             accountId,
             characterId,
             cancellationToken);
-        await PublishUnlockAnnouncementsAsync(characterId, achievementUnlocks, cancellationToken);
+        if (announce)
+            await PublishUnlockAnnouncementsAsync(characterId, achievementUnlocks, cancellationToken);
         return true;
     }
 

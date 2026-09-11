@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
+import { NobleDecorationComponent } from '../noble-decoration.component';
 import { PopoverComponent } from '../../custom-components/popover/popover.component';
 import { Router } from '@angular/router';
 import { ChatService } from '../../../../core/services/ll-chat/chat-service/chat.service';
 
 @Component({
   selector: 'app-character-tag',
-  imports: [PopoverComponent],
+  imports: [PopoverComponent, NobleDecorationComponent],
   templateUrl: './character-tag.component.html',
   styleUrl: './character-tag.component.scss',
 })

@@ -81,6 +81,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
         EnforceAppendOnlyRiskEvidence();
+        if (ChangeTracker.Entries().Any(x => x.State is EntityState.Modified or EntityState.Deleted &&
+            x.Entity is Domain.Models.Nobility.SignetMovement or Domain.Models.Nobility.SignetRedemption or Domain.Models.Nobility.NobilityDailyGrant))
+            throw new InvalidOperationException("Signet movements, redemption receipts and daily grant receipts are append-only.");
         var inventoryChanges = await ReadPendingInventoryQuantityChangesAsync(cancellationToken);
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
         _savedInventoryQuantityChanges.AddRange(inventoryChanges);
@@ -548,6 +551,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         modelBuilder.Entity<ItemBase>()
             .HasDiscriminator<ItemType>("ItemType")
             .HasValue<ItemBase>(ItemType.Resource)
+            .HasValue<MiscItemBase>(ItemType.Misc)
             .HasValue<EquipmentBase>(ItemType.Equipment)
             .HasValue<EssenceItemBase>(ItemType.Essence);
 

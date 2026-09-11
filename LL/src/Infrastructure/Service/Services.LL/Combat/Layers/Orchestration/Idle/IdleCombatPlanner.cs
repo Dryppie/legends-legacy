@@ -40,6 +40,14 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
         var from = nextEncounterAt > to - _maximumOfflineDuration
             ? nextEncounterAt
             : to - _maximumOfflineDuration;
+        DateTimeOffset? windowEnd = null;
+        if (request.RetentionWindows is { } windows && nextEncounterAt <= to)
+        {
+            var window = windows.FirstOrDefault(x => x.Until > nextEncounterAt);
+            from = window is null ? to.Add(_encounterCadence) :
+                nextEncounterAt > window.From ? nextEncounterAt : window.From;
+            windowEnd = window?.Until;
+        }
         var action = request.ActionDetails;
 
         if (from > to)
@@ -59,7 +67,8 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
             };
         }
 
-        var elapsed = to - from;
+        var retainedUntil = windowEnd.HasValue && windowEnd.Value <= to ? windowEnd.Value.AddTicks(-1) : to;
+        var elapsed = retainedUntil - from;
         var dueEncounterCount = checked(
             1 + (int)(elapsed.Ticks / _encounterCadence.Ticks));
         var plannedEncounterCount = Math.Min(

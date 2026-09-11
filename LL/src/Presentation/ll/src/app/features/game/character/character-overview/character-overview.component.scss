@@ -68,7 +68,6 @@
 }
 
 .overview-profile-primary,
-.overview-profile-progress,
 .overview-layout,
 .overview-skills-grid,
 .attribute-section-grid {
@@ -99,8 +98,87 @@
   background: var(--ll-color-border-strong);
 }
 
-.overview-profile-progress {
+.overview-profile {
+  container-name: overview-profile;
+  container-type: inline-size;
+}
+
+.overview-nobility-perks {
+  padding: var(--ll-space-4);
   border-top: 1px solid var(--ll-color-border);
+}
+
+.overview-perks-toggle {
+  padding: var(--ll-space-1) 0;
+  margin-left: var(--ll-space-2);
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.overview-perks-toggle:focus-visible {
+  outline: 2px solid var(--ll-color-primary);
+  outline-offset: 3px;
+}
+
+.overview-perks-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ll-space-2) var(--ll-space-4);
+  margin-bottom: var(--ll-space-4);
+}
+
+.overview-perks-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ll-space-4) var(--ll-space-5);
+}
+
+.overview-perks-group {
+  min-width: 0;
+}
+
+.overview-perks-label {
+  padding-bottom: var(--ll-space-2);
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.overview-perks-list {
+  display: grid;
+  gap: var(--ll-space-2);
+  margin-top: var(--ll-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.overview-perks-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--ll-space-2);
+  line-height: 1.6;
+}
+
+@container overview-profile (min-width: 32rem) {
+  .overview-perks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container overview-profile (min-width: 48rem) {
+  .overview-profile-primary {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr) 12.5rem;
+  }
+
+  .overview-character-level,
+  .overview-combat-rating {
+    border-top: 0;
+    border-left: 1px solid var(--ll-color-border);
+  }
+
+  .overview-perks-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .overview-skills {
@@ -228,16 +306,6 @@
     border-left: 1px solid var(--ll-color-border);
   }
 
-  .overview-profile-primary {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr) 12.5rem;
-  }
-
-  .overview-character-level,
-  .overview-combat-rating {
-    border-top: 0;
-    border-left: 1px solid var(--ll-color-border);
-  }
-
   .overview-skills {
     border-top: 0;
   }
@@ -315,6 +383,7 @@
   .overview-journey-unlock,
   .overview-combat-rating,
   .overview-character-level,
+  .overview-nobility-perks,
   .overview-skills,
   .overview-section-heading,
   .attribute-section,

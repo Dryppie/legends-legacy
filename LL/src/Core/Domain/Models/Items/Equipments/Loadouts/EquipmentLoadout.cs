@@ -9,6 +9,9 @@ public sealed class EquipmentLoadout
     public Guid Id { get; set; }
     public Guid CharacterId { get; set; }
     public string Name { get; set; } = string.Empty;
+    public int PresetSlot { get; set; }
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool IsUsable { get; set; } = true;
     public EssenceCombatActivity AutoUseActivities { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public ICollection<EquipmentLoadoutSlot> Slots { get; set; } = [];

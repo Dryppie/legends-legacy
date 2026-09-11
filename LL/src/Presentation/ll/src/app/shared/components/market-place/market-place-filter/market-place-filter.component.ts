@@ -53,6 +53,13 @@ export class MarketPlaceFilterComponent {
       defaultSubcategory: null,
       subOptions: [],
     },
+    {
+      id: 'signets',
+      label: 'Signets',
+      itemType: ItemType.Misc,
+      defaultSubcategory: null,
+      subOptions: [],
+    },
   ];
 
   readonly selectedTabId = signal<MarketCategoryId>('monster-cores');

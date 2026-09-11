@@ -1,4 +1,5 @@
 import { signal } from '@angular/core';
+import { NobilityService } from '../nobility/nobility.service';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '../auth/auth.service';
 import { CharacterActionsStateService } from '../character-actions/character-actions.state.service';
@@ -32,6 +33,7 @@ describe('GameBootstrapStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         GameBootstrapStateService,
+        { provide: NobilityService, useValue: { hydrate: jasmine.createSpy() } },
         DomainVersionTracker,
         { provide: GameBootstrapService, useValue: {} },
         { provide: AuthService, useValue: auth },
@@ -90,6 +92,7 @@ describe('GameBootstrapStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         GameBootstrapStateService,
+        { provide: NobilityService, useValue: { hydrate: jasmine.createSpy() } },
         DomainVersionTracker,
         { provide: GameBootstrapService, useValue: {} },
         { provide: AuthService, useValue: auth },

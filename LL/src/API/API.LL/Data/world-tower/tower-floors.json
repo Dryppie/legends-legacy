@@ -9,6 +9,7 @@
   "floors": [
     {
       "floorNumber": 1,
+      "rewardTitleKey": "title.world_tower.floor_01",
       "name": "The Waking Step",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000056",
@@ -18,8 +19,8 @@
       "recommendedPowerRating": 161,
       "progressionPosition": 1,
       "guardianScaling": {
-        "health": 1.27,
-        "offense": 1.24,
+        "health": 1.776984,
+        "offense": 1.735008,
         "defense": 1.09,
         "resistance": 1.09,
         "penetration": 1.0,
@@ -46,6 +47,7 @@
     },
     {
       "floorNumber": 2,
+      "rewardTitleKey": "title.world_tower.floor_02",
       "name": "The Bloodwing Roost",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000057",
@@ -55,8 +57,8 @@
       "recommendedPowerRating": 163,
       "progressionPosition": 2,
       "guardianScaling": {
-        "health": 1.45,
-        "offense": 1.38,
+        "health": 2.045587,
+        "offense": 1.946835,
         "defense": 1.29,
         "resistance": 1.29,
         "penetration": 1.0,
@@ -78,6 +80,7 @@
     },
     {
       "floorNumber": 3,
+      "rewardTitleKey": "title.world_tower.floor_03",
       "name": "The Third Vow",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000059",
@@ -87,8 +90,8 @@
       "recommendedPowerRating": 165,
       "progressionPosition": 3,
       "guardianScaling": {
-        "health": 0.86,
-        "offense": 3.79,
+        "health": 1.0105,
+        "offense": 4.45325,
         "defense": 1.71,
         "resistance": 1.71,
         "penetration": 1.0,
@@ -110,6 +113,7 @@
     },
     {
       "floorNumber": 4,
+      "rewardTitleKey": "title.world_tower.floor_04",
       "name": "The Mirrored Hall",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000058",
@@ -119,8 +123,8 @@
       "recommendedPowerRating": 171,
       "progressionPosition": 4,
       "guardianScaling": {
-        "health": 1.11,
-        "offense": 2.4,
+        "health": 1.30425,
+        "offense": 2.82,
         "defense": 2.33,
         "resistance": 2.33,
         "penetration": 1.0,
@@ -147,6 +151,7 @@
     },
     {
       "floorNumber": 5,
+      "rewardTitleKey": "title.world_tower.floor_05",
       "name": "The First Warden's Bastion",
       "type": "Warden",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000060",
@@ -156,8 +161,8 @@
       "recommendedPowerRating": 173,
       "progressionPosition": 5,
       "guardianScaling": {
-        "health": 1.25,
-        "offense": 1.58,
+        "health": 2.106,
+        "offense": 2.661984,
         "defense": 2.65,
         "resistance": 2.65,
         "penetration": 1.0,
@@ -184,6 +189,7 @@
     },
     {
       "floorNumber": 6,
+      "rewardTitleKey": "title.world_tower.floor_06",
       "name": "The Ashen Belfry",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000061",
@@ -216,6 +222,7 @@
     },
     {
       "floorNumber": 7,
+      "rewardTitleKey": "title.world_tower.floor_07",
       "name": "The Endless Spring",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000064",
@@ -253,6 +260,7 @@
     },
     {
       "floorNumber": 8,
+      "rewardTitleKey": "title.world_tower.floor_08",
       "name": "The Poisoned Vessel",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000063",
@@ -290,6 +298,7 @@
     },
     {
       "floorNumber": 9,
+      "rewardTitleKey": "title.world_tower.floor_09",
       "name": "The Ninefold Court",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000062",
@@ -322,6 +331,7 @@
     },
     {
       "floorNumber": 10,
+      "rewardTitleKey": "title.world_tower.floor_10",
       "name": "The Mad King's Throne",
       "type": "Sovereign",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000065",
@@ -363,6 +373,7 @@
     },
     {
       "floorNumber": 11,
+      "rewardTitleKey": "title.world_tower.floor_11",
       "name": "The Hushed Archive",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000098",
@@ -395,6 +406,7 @@
     },
     {
       "floorNumber": 12,
+      "rewardTitleKey": "title.world_tower.floor_12",
       "name": "The Hanging Tempest",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000099",
@@ -427,6 +439,7 @@
     },
     {
       "floorNumber": 13,
+      "rewardTitleKey": "title.world_tower.floor_13",
       "name": "The Drowned Orrery",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000100",
@@ -459,6 +472,7 @@
     },
     {
       "floorNumber": 14,
+      "rewardTitleKey": "title.world_tower.floor_14",
       "name": "The Unlit Forge",
       "type": "Standard",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000106",
@@ -490,6 +504,7 @@
     },
     {
       "floorNumber": 15,
+      "rewardTitleKey": "title.world_tower.floor_15",
       "name": "The Warden's Measure",
       "type": "Warden",
       "guardianCreatureId": "00000000-0000-0000-0000-000000000107",

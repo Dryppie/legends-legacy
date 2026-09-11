@@ -38,6 +38,8 @@ public class ColosseumService : IColosseumService
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IAchievementService? _achievementService;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
+    private readonly TimeProvider _time;
 
     public ColosseumService(
         IEntityService es,
@@ -52,7 +54,9 @@ public class ColosseumService : IColosseumService
         IChampionMarketCatalog championMarketCatalog,
         IInventoryService inventoryService,
         IInventoryItemFactory inventoryItemFactory,
-        IAchievementService? achievementService = null)
+        IAchievementService? achievementService = null,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null,
+        TimeProvider? time = null)
     {
         _entityService = es;
         _characterService = cs;
@@ -67,6 +71,8 @@ public class ColosseumService : IColosseumService
         _inventoryService = inventoryService;
         _inventoryItemFactory = inventoryItemFactory;
         _achievementService = achievementService;
+        _nobility = nobility;
+        _time = time ?? TimeProvider.System;
     }
 
     public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -688,8 +694,10 @@ public class ColosseumService : IColosseumService
 
     public async Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = _time.GetUtcNow();
         var arenaTicketStatus = await _colosseumRepository.GetArenaTicketStatusAsync(characterId, cancellationToken);
+        var coverage = _nobility is null ? [] : await _nobility.GetCoverageAsync(characterId, cancellationToken);
+        arenaTicketStatus.MaxTickets = coverage.Any(x => x.StartsAt <= now && now < x.EndsAt) ? 8 : 5;
         
         var restoreInterval = TimeSpan.FromHours(3);
         var timePassed = now - arenaTicketStatus.LastTicketUpdate;
@@ -697,7 +705,12 @@ public class ColosseumService : IColosseumService
 
         if (ticketsToRestore > 0)
         {
-            arenaTicketStatus.CurrentTickets = Math.Min(arenaTicketStatus.CurrentTickets + ticketsToRestore, arenaTicketStatus.MaxTickets);
+            for (var ticket = 1; ticket <= ticketsToRestore; ticket++)
+            {
+                var earnedAt = arenaTicketStatus.LastTicketUpdate.AddHours(ticket * restoreInterval.TotalHours);
+                var cap = coverage.Any(x => x.StartsAt <= earnedAt && earnedAt < x.EndsAt) ? 8 : 5;
+                if (arenaTicketStatus.CurrentTickets < cap) arenaTicketStatus.CurrentTickets++;
+            }
             // Update LastTicketUpdate based on restored tickets. Even if capped, a new ticket might still restore in..  17 minutes
             arenaTicketStatus.LastTicketUpdate = arenaTicketStatus.LastTicketUpdate.AddHours(ticketsToRestore * restoreInterval.TotalHours);
 

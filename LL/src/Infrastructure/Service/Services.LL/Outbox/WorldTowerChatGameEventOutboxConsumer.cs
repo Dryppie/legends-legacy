@@ -44,8 +44,8 @@ public sealed class WorldTowerChatGameEventOutboxConsumer(
         {
             Content = JsonContent.Create(new SystemChatMessageRequest(
                 payload.Body,
-                IsGlobal: true,
-                TargetCharacterId: null,
+                IsGlobal: !payload.TargetCharacterId.HasValue,
+                TargetCharacterId: payload.TargetCharacterId,
                 SenderName: "World",
                 MessageId: payload.MessageId,
                 SentAt: payload.SentAt,

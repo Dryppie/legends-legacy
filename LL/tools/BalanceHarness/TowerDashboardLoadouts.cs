@@ -16,6 +16,12 @@ public sealed partial class TowerDashboardService
             excluded.AddRange(d.ExcludedCombatSeeds);
             excluded.AddRange(TowerPartyProgression.CombatSeeds(d));
         }
+        foreach (var path in RunPaths().Values.Where(IsBossSearch))
+        {
+            var previous = HarnessJson.Read<TowerBossSearchDefinition>(Path.Combine(path, "definition.json"));
+            excluded.AddRange(previous.ExcludedCombatSeeds);
+            excluded.AddRange(TowerBossSearch.CombatSeeds(previous));
+        }
         return request.WholeParty
             ? TowerWholeParty.Definition(apiRoot, catalogsRoot, request.Slots, request.Seed, excluded.Distinct().Order().ToArray(), request.Effort == "thorough")
             : TowerPartyProgression.Definition(apiRoot, catalogsRoot, request.Slots, request.Seed, excluded.Distinct().Order().ToArray(), request.Effort == "thorough");
@@ -69,6 +75,16 @@ public sealed partial class TowerDashboardService
     {
         if (format is not ("json" or "md")) throw new InvalidDataException("Choose JSON or Markdown.");
         var path = ResolveRun(id);
+        if (IsStudy(path))
+        {
+            ReadStudyAsync(path, token).GetAwaiter().GetResult();
+            return Path.Combine(path, "study." + format);
+        }
+        if (IsBossSearch(path))
+        {
+            ReadBossReportAsync(path, token).GetAwaiter().GetResult();
+            return Path.Combine(path, "boss-search." + format);
+        }
         if (IsLoadouts(path))
         {
             TowerPartySearch.VerifyAsync(path, token).GetAwaiter().GetResult();
@@ -80,8 +96,12 @@ public sealed partial class TowerDashboardService
     public string LoadoutRecipe(string id, string battle, CancellationToken token)
     {
         var path = ResolveRun(id);
-        if (!IsLoadouts(path)) throw new InvalidDataException("Choose a loadout-search run.");
-        var trial = TowerLoadoutArchive.Verify(path, token).SingleOrDefault(t => t.Id == battle)
+        if (!IsStudy(path) && !IsLoadouts(path) && !IsBossSearch(path)) throw new InvalidDataException("Choose a loadout-search run.");
+        if (IsStudy(path)) ReadStudyAsync(path, token).GetAwaiter().GetResult();
+        var trials = IsBossSearch(path)
+            ? ReadBossArchiveAsync(path, token).GetAwaiter().GetResult().Trials
+            : TowerLoadoutArchive.Verify(path, token);
+        var trial = trials.SingleOrDefault(t => t.Id == battle)
             ?? throw new InvalidDataException("Unknown saved battle.");
         if (!System.Text.RegularExpressions.Regex.IsMatch(trial.Recipe, "^[a-f0-9]{64}$")) throw new InvalidDataException("Invalid saved recipe identity.");
         var scope = HarnessJson.Read<LoadoutScope>(Path.Combine(path, "scope.json"));

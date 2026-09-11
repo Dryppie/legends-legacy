@@ -1,5 +1,7 @@
 # LegendsLegacy Monetization Strategy
 
+> **Historical recommendation:** This report predates the current Signet model. Its membership, trading, progression-benefit, catalog and spending recommendations are superseded wherever they conflict with the [subscription specification](C:/repos/Legends-Legacy/legends-legacy/docs/analysis/monetization-strategy/subscription-specification.md) and [initial product catalog](C:/repos/Legends-Legacy/legends-legacy/docs/analysis/monetization-strategy/initial-product-catalog.md). Its repository descriptions reflect the August inspection, including crafting/tempering assumptions that have since changed. Other offers remain proposals, not implemented products.
+
 - **Prepared:** 2026-08-25
 - **Scope:** Product, economy, and monetization design only. No monetization feature is implemented by this report.
 - **Evidence rule:** “Implemented” means present in the repository, not proven deployed or healthy in production.

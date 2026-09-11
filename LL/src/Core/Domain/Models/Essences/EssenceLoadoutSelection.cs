@@ -2,6 +2,12 @@ namespace Domain.Models.Essences;
 
 public static class EssenceLoadoutSelection
 {
+    public static void SetAvailability(IEnumerable<EssenceLoadout> loadouts, int limit)
+    {
+        var legacySlot = 0;
+        foreach (var loadout in loadouts.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+            loadout.IsUsable = (loadout.PresetSlot > 0 ? loadout.PresetSlot : ++legacySlot) <= limit;
+    }
     public const EssenceCombatActivity AllActivities =
         EssenceCombatActivity.IdleCombat |
         EssenceCombatActivity.Dungeon |
@@ -21,7 +27,7 @@ public static class EssenceLoadoutSelection
         IEnumerable<EssenceLoadout> loadouts,
         EssenceCombatActivity activity)
     {
-        var ordered = InArchiveOrder(loadouts).ToList();
+        var ordered = InArchiveOrder(loadouts.Where(x => x.IsUsable)).ToList();
         if (activity != EssenceCombatActivity.None)
         {
             var assigned = ordered.FirstOrDefault(loadout =>

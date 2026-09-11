@@ -1,0 +1,5 @@
+# Preserve the exact bytes of the source-verified portable validation fixture.
+LL/tools/BalanceHarness/Fixtures/tower-boss-validation-references.json text eol=lf
+
+# Keep published recipes byte-identical to their captured Tower exports.
+"Balance Harness/Boss-Expansion-Recipes-20260911/*.json" -text

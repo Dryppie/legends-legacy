@@ -3,6 +3,7 @@ namespace Application.WebSockets.Contracts;
 public static class StateSyncScopes
 {
     public const string Character = "character";
+    public const string Nobility = "nobility";
     public const string CharacterOverview = "character-overview";
     public const string Inventory = "inventory";
     public const string LootHistory = "loot-history";
@@ -32,6 +33,7 @@ public static class StateSyncScopes
     public static readonly IReadOnlyList<string> CharacterResources =
     [
         Character,
+        Nobility,
         CharacterOverview,
         Inventory,
         LootHistory,

@@ -1,6 +1,7 @@
 import { GuildLinkComponent } from '../../../../shared/components/guild/guild-link.component';
+import { NobleDecorationComponent } from '../../../../shared/components/character/noble-decoration.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { DecimalPipe, NgFor, NgIf } from '@angular/common';
+import { DatePipe, DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -55,6 +56,7 @@ export function estimateEssenceThreatPerSecond(
 @Component({
   selector: 'app-character-overview',
   imports: [
+    NobleDecorationComponent,
     GuildLinkComponent,
     DefaultHeaderComponent,
     NgIf,
@@ -65,6 +67,7 @@ export function estimateEssenceThreatPerSecond(
     AttributeValueFormatPipe,
     AttributeTooltipDirective,
     DecimalPipe,
+    DatePipe,
     EssencePreviewComponent,
     PresenceIndicatorComponent,
     OverlayModule,
@@ -74,6 +77,31 @@ export function estimateEssenceThreatPerSecond(
   styleUrl: './character-overview.component.scss',
 })
 export class CharacterOverviewComponent implements OnDestroy {
+  readonly showNobilityPerks = signal(false);
+  readonly nobilityPerkGroups = [
+    { label: 'Daily', perks: ['2 Sigil Fragments daily', '10 Soulstones daily'] },
+    {
+      label: 'Rates',
+      perks: ['+5% Combat XP', '+5% Dungeon Mastery XP', '+5% Combat Style XP'],
+    },
+    {
+      label: 'Capacity',
+      perks: [
+        '+3 Equipment and Essence loadouts',
+        '+3 Arena ticket capacity',
+        '30 sell listings and 30 buy orders instead of 10 each',
+      ],
+    },
+    {
+      label: 'Time & cost',
+      perks: [
+        '7 days of offline combat retention',
+        '2-hour Creature Focus cooldown instead of 8',
+        '+1 free Prophecy reroll (costs: 0, 0, 40, 80 Fate Echo)',
+        'Noble badge',
+      ],
+    },
+  ];
   readonly AttributeType = AttributeType;
   readonly displayCombatRating = toDisplayedCombatRating;
   searchValue = signal('');
@@ -110,6 +138,10 @@ export class CharacterOverviewComponent implements OnDestroy {
       ? this.searchedCharacter()
       : this.currentCharacterOverview(),
   );
+  readonly isOwnProfile = computed(() => {
+    const currentId = this.characterService.currentCharacter()?.id;
+    return !!currentId && this.character()?.id === currentId;
+  });
   readonly estimatedEssenceThreatPerSecond = computed(() =>
     estimateEssenceThreatPerSecond(this.character()?.essenceLoadout),
   );
@@ -390,6 +422,7 @@ export class CharacterOverviewComponent implements OnDestroy {
         finalize(() => this.searchLoading.set(false)),
       )
       .subscribe((character) => {
+        this.showNobilityPerks.set(false);
         this.searchedCharacter.set(character);
         this.viewedCharacterName.set(characterName);
         this.isViewingSearchResult.set(true);
@@ -397,6 +430,7 @@ export class CharacterOverviewComponent implements OnDestroy {
   }
 
   private showCurrentCharacter(): void {
+    this.showNobilityPerks.set(false);
     this.characterState.refreshIfDirty();
     this.searchErrorMessage.set('');
     this.searchedCharacter.set(null);

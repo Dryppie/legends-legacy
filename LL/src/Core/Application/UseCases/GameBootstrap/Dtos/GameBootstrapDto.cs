@@ -10,6 +10,7 @@ namespace Application.UseCases.GameBootstrap.Dtos;
 
 public sealed class GameBootstrapDto : IMapFrom<GameBootstrapSnapshot>
 {
+    public Application.UseCases.Nobility.Dtos.NobilityStatusDto? Nobility { get; init; }
     public required CharacterDto Character { get; init; }
     public required QuestJournalDto QuestJournal { get; init; }
     public required IReadOnlyList<CombatAreaAccessDto> AreaAccess { get; init; }
@@ -28,6 +29,7 @@ public sealed class GameBootstrapDto : IMapFrom<GameBootstrapSnapshot>
 
 public sealed class GameBootstrapSnapshot
 {
+    public Application.UseCases.Nobility.Dtos.NobilityStatusDto? Nobility { get; init; }
     public required CharacterDto Character { get; init; }
     public required QuestJournalDto QuestJournal { get; init; }
     public required IReadOnlyList<CombatAreaAccessDto> AreaAccess { get; init; }

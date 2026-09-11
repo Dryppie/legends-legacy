@@ -154,6 +154,13 @@
             <div class="permission-note">Your staff role cannot grant compensation items.</div>
           } @else {
             <div class="operation-copy"><p class="eyebrow">Support compensation</p><h2>Grant catalog items</h2><p>Uses the game inventory service, economy ledger, and realtime outbox. Direct database edits are never used.</p></div>
+            <div class="operation-copy"><h2>Alpha Signets</h2><p>Each tradable Signet grants one calendar month when redeemed. Alpha grants do not award the cash-support history badge.</p></div>
+            <div class="form-grid">
+              <label>Signets<input type="number" min="1" max="1200" step="1" [(ngModel)]="signetQuantity" (ngModelChange)="signetConfirmation = false" [disabled]="!!busyAction" /></label>
+              <label class="wide">Grant reason<textarea [(ngModel)]="signetReason" (ngModelChange)="signetConfirmation = false" [disabled]="!!busyAction"></textarea></label>
+              @if (signetConfirmation) { <p class="wide">Grant {{ signetQuantity }} tradable Signet(s) to this player? This operation records your identity and reason.</p> }
+              <button class="primary" type="button" [disabled]="!!busyAction" (click)="grantAlphaSignets()">{{ signetConfirmation ? 'Confirm Signet grant' : 'Review Signet grant' }}</button>
+            </div>
             <div class="form-grid">
               <label class="wide">Find item<span class="inline-search"><input [(ngModel)]="itemQuery" placeholder="Item name or server ID" /><button class="secondary" type="button" [disabled]="loadingItems" (click)="searchItems()">Find</button></span></label>
               @if (itemResults.length) { <div class="item-results wide">@for (item of itemResults; track item.id) { <button type="button" (click)="chooseItem(item)"><span class="item-rarity">{{ item.rarity }}</span><strong>{{ item.name }}</strong><small>{{ item.id }} · {{ item.itemType }} · {{ item.stackable ? 'Stackable' : 'Individual instances' }}</small></button> }</div> }

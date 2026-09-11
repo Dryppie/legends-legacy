@@ -1,3 +1,5 @@
+import { inject } from '@angular/core';
+import { NobilityService } from '../../../../../core/services/api/nobility/nobility.service';
 import { equipmentInventorySortOptions, sortInventoryItems, EquipmentInventorySort, SortDirection } from '../../../../../shared/utils/equipment/inventory-sort';
 import { CommonModule } from '@angular/common';
 import {
@@ -60,6 +62,7 @@ import { aggregateAttributes } from '../../../../../shared/utils/attributes/attr
   templateUrl: './market-place-sell.component.html',
 })
 export class MarketPlaceSellComponent implements OnInit {
+  readonly nobility = inject(NobilityService);
   readonly myListings = signal<MarketPlaceListing[]>([]);
   readonly selectedItemType = signal<ItemType | null>(null);
   readonly selectedCategory = signal<MarketCategoryId>('monster-cores');
@@ -436,6 +439,7 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   get inventoryTitle(): string {
+    if (this.selectedCategory() === 'signets') return 'Signets';
     if (this.selectedCategory() === 'monster-cores') return 'Monster Cores';
     if (this.selectedCategory() === 'blueprints') return 'Blueprints';
 
@@ -452,6 +456,7 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   private matchesSelectedCategory(base: ItemBase): boolean {
+    if (this.selectedCategory() === 'signets') return base.id === 'signet';
     if (this.selectedCategory() === 'monster-cores') {
       return isMarketplaceMonsterCore(base);
     }

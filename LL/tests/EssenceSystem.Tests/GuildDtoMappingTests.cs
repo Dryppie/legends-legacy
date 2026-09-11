@@ -33,6 +33,7 @@ public sealed class GuildDtoMappingTests
         {
             Id = guildId,
             Name = "Mapping Guild",
+            Description = "Private guild description",
             OwnerId = donor.Id,
             Owner = donor
         };
@@ -49,6 +50,7 @@ public sealed class GuildDtoMappingTests
 
         var dto = mapper.Map<GuildDto>(guild);
 
+        Assert.Equal("Private guild description", dto.Description);
         Assert.Single(dto.RolePermissions);
         Assert.True(dto.RolePermissions[0].CanBorrowVault);
         Assert.Single(dto.VaultItems);

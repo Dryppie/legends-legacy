@@ -56,6 +56,10 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
             throw new InvalidOperationException("World Tower must define at least one floor.");
         }
 
+        if (floors.Any(f => string.IsNullOrWhiteSpace(f.RewardTitleKey))
+            || floors.Select(f => f.RewardTitleKey).Distinct(StringComparer.OrdinalIgnoreCase).Count() != floors.Count)
+            throw new InvalidOperationException("Every World Tower floor must define a unique title reward key.");
+
         var expected = 1;
         var previousTowerTokens = 0;
         var previousProgressionPosition = 0;

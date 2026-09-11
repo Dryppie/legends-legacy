@@ -54,9 +54,6 @@
           >
             <div class="break-words">
               <app-guild-link [guildId]="guild.id" [name]="guild.name" />
-              <p *ngIf="guild.description" class="mt-1 text-xs text-white/60">
-                {{ guild.description }}
-              </p>
             </div>
             <div class="break-words">
               {{ guild.ownerName }}

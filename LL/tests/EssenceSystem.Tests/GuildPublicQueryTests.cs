@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.Common.Mappings;
+using Application.UseCases.Guilds.Queries.GetAllGuilds;
 using Application.UseCases.Guilds.Queries.GetPublicGuild;
 using AutoMapper;
 using Domain.Models.Entities.Characters;
@@ -25,7 +26,7 @@ public sealed class GuildPublicQueryTests
             Name = "Other Guild",
             Owner = member,
             OwnerId = member.Id,
-            Description = "Recruitment description",
+            Description = "Private guild description",
             Tag = "OG",
             GuildXp = 12345,
             Members = [new GuildMember { Character = member, CharacterId = member.Id, Role = GuildRole.Leader }],
@@ -45,7 +46,6 @@ public sealed class GuildPublicQueryTests
         var dto = await CreateHandler(db).Handle(new GetPublicGuildQuery(guild.Id), CancellationToken.None);
         Assert.NotNull(dto);
         Assert.Equal("Other Guild", dto.Name);
-        Assert.Equal("Recruitment description", dto.Description);
         Assert.Equal("OG", dto.Tag);
         Assert.True(dto.MaxMembers > 0);
         var publicMember = Assert.Single(dto.Members);
@@ -59,9 +59,16 @@ public sealed class GuildPublicQueryTests
 
         // Keep the public wire contract limited even if the domain grows new private fields.
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(dto, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
-        Assert.Equal(new[] { "buildings", "description", "id", "maxMembers", "members", "name", "tag" }, json.RootElement.EnumerateObject().Select(p => p.Name).Order());
+        Assert.Equal(new[] { "buildings", "id", "maxMembers", "members", "name", "tag" }, json.RootElement.EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal(new[] { "characterId", "level", "name", "role" }, json.RootElement.GetProperty("members")[0].EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal(new[] { "level", "type" }, json.RootElement.GetProperty("buildings")[0].EnumerateObject().Select(p => p.Name).Order());
+
+        var mapper = new MapperConfiguration(c => c.AddProfile<MappingProfile>(), NullLoggerFactory.Instance).CreateMapper();
+        var service = new GuildService(repository);
+        var directory = await new GetAllGuildsQueryHandler(service, mapper)
+            .Handle(new GetAllGuildsQuery(), CancellationToken.None);
+        using var directoryJson = JsonDocument.Parse(JsonSerializer.Serialize(Assert.Single(directory), new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        Assert.False(directoryJson.RootElement.TryGetProperty("description", out _));
     }
 
     [Fact]

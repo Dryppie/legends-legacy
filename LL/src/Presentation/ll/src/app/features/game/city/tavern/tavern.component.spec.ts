@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../../core/services/api/nobility/nobility.testing';
 import { signal } from '@angular/core';
 import { of, Subject, throwError } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -36,7 +37,7 @@ describe('TavernComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [TavernComponent],
-      providers: [
+      providers: [...provideFreeNobilityForTests(),
         { provide: LeaderboardStateService, useValue: state },
         provideRouter([]),
         {

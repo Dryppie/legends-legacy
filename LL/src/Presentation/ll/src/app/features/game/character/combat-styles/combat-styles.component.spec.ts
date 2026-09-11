@@ -156,6 +156,16 @@ describe('Combat Styles global configuration page', () => {
     return { fixture, element, state };
   }
 
+  it('offers only actual styles and ignores the removed empty-slot tab', async () => {
+    const { fixture, element, state } = await createPage();
+    expect(fixture.componentInstance.styleTabs().map(tab => tab.key)).toEqual(['conduit']);
+    expect(element.textContent).not.toContain('Empty slot');
+    fixture.componentInstance.selectStyleTab('empty-slot');
+    expect(state.chooseStyle).not.toHaveBeenCalled();
+    fixture.componentInstance.selectStyleTab('conduit');
+    expect(state.chooseStyle).toHaveBeenCalledOnceWith('conduit');
+  });
+
   it('renders Duelist and switches mastery previews with the selected refinement', async () => {
     const { fixture, element, state } = await createPage(10);
     const duelist = {
@@ -312,7 +322,7 @@ describe('Combat Styles global configuration page', () => {
       element.querySelector('app-default-header img')?.getAttribute('src'),
     ).toBe('icons/sidebar/character/combat-styles.svg');
     expect(
-      element.querySelector('app-navigation-tabs [role="tablist"]'),
+      element.querySelector('app-navigation-tabs'),
     ).not.toBeNull();
     expect(
       Array.from(element.querySelectorAll('button')).map((button) =>
@@ -1152,7 +1162,7 @@ describe('Combat Styles global configuration page', () => {
         const tabs = doc.querySelectorAll<HTMLElement>(
           '.style-tabs [role="tab"]',
         );
-        expect(tabs.length).toBe(3);
+        expect(tabs.length).toBe(2);
         for (const tab of Array.from(tabs)) {
           expect(tab.scrollWidth).toBeLessThanOrEqual(tab.clientWidth);
           const badge = tab.querySelector<HTMLElement>(

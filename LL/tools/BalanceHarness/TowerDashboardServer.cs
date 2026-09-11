@@ -50,13 +50,51 @@ public static class TowerDashboardServer
         foreach (var (route, resource, type) in new[]
         {
             ("/", "index.html", "text/html"), ("/dashboard.css", "dashboard.css", "text/css"),
-            ("/dashboard.js", "dashboard.js", "text/javascript")
+            ("/dashboard.js", "dashboard.js", "text/javascript"), ("/studies.js", "studies.js", "text/javascript")
         })
             app.MapGet(route, () => Results.Stream(typeof(TowerDashboardServer).Assembly
                 .GetManifestResourceStream($"BalanceHarness.Dashboard.{resource}")!, type));
-        app.MapGet("/api/session", () => Results.Json(new { token, catalogs = service.Catalogs(), floors = service.Floors() }, HarnessJson.Options));
+        app.MapGet("/api/session", () => Results.Json(new { token, catalogs = service.Catalogs(), floors = service.Floors(), bossBudgets = service.BossBudgets() }, HarnessJson.Options));
         app.MapGet("/api/runs", () => Results.Json(service.Runs(), HarnessJson.Options));
+        app.MapGet("/api/team-options", () => Results.Json(service.StudyOptions(), HarnessJson.Options));
+        // Bounded local JSON imports may include full schedules, pools and several complete references.
+        static void StudyBody(HttpContext context)
+        {
+            var limit = context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
+            if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = 2 * 1024 * 1024;
+        }
+        app.MapPost("/api/team-plan", async (HttpContext context) => {
+            StudyBody(context);
+            return Results.Json(service.StudyPlan(await context.Request.ReadFromJsonAsync<DashboardStudyRequest>(HarnessJson.Options)
+                ?? throw new InvalidDataException("Missing team study budget.")), HarnessJson.Options);
+        });
+        app.MapPost("/api/team-plan/import", async (HttpContext context) => {
+            StudyBody(context);
+            var options = new System.Text.Json.JsonSerializerOptions(HarnessJson.Options) {
+                UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow, RespectRequiredConstructorParameters = true };
+            return Results.Json(service.ImportStudyPlan(await context.Request.ReadFromJsonAsync<TowerBossDiscoveryDefinition>(options)
+                ?? throw new InvalidDataException("Missing complete independent definition.")), HarnessJson.Options);
+        });
+        app.MapPost("/api/teams", async (HttpRequest request) => Results.Json(service.FindTeams(
+            await request.ReadFromJsonAsync<DashboardStudyStart>(HarnessJson.Options) ?? throw new InvalidDataException("Preview a study first.")), HarnessJson.Options, statusCode: 202));
+        app.MapGet("/api/runs/{id}/team-recipe/{cell}", (string id, string cell, CancellationToken cancellation) =>
+            Results.File(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(service.StudyRecipe(id, cell, cancellation), HarnessJson.Options),
+                "application/json", "frozen-team-recipe.json"));
         app.MapGet("/api/search-plan", () => Results.Json(service.SearchPlan(), HarnessJson.Options));
+        app.MapGet("/api/boss-references/{floor:int}/{slots:int}", (int floor, int slots) =>
+            Results.Json(service.BossReferenceList(floor, slots), HarnessJson.Options));
+        app.MapGet("/api/boss-references/{floor:int}/{slots:int}/{id}", (int floor, int slots, string id) =>
+            Results.Json(service.BossReferenceDetails(floor, slots, id), HarnessJson.Options));
+        app.MapGet("/api/boss-references/{floor:int}/{slots:int}/{id}/recipe", (int floor, int slots, string id) =>
+            Results.File(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(service.BossReferenceRecipe(floor, slots, id), HarnessJson.Options),
+                "application/json", "historical-tower-party-recipe.json"));
+        app.MapGet("/api/boss-validations/{floor:int}/{slots:int}", (int floor, int slots) =>
+            Results.Json(service.BossValidationList(floor, slots), HarnessJson.Options));
+        app.MapGet("/api/boss-validations/{floor:int}/{slots:int}/{id}", (int floor, int slots, string id) =>
+            Results.Json(service.BossValidationDetails(floor, slots, id), HarnessJson.Options));
+        app.MapGet("/api/boss-validations/{floor:int}/{slots:int}/{id}/recipe", (int floor, int slots, string id) =>
+            Results.File(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(service.BossValidationRecipe(floor, slots, id), HarnessJson.Options),
+                "application/json", "fixed-validation-tower-party-recipe.json"));
         app.MapPost("/api/search", () => Results.Json(service.Search(), HarnessJson.Options, statusCode: 202));
         app.MapPost("/api/loadout-plan", async (HttpRequest request) =>
         {
@@ -65,6 +103,16 @@ public static class TowerDashboardServer
         });
         app.MapPost("/api/loadouts", async (HttpRequest request) => Results.Json(service.FindLoadouts(
             await request.ReadFromJsonAsync<DashboardLoadoutRequest>(HarnessJson.Options) ?? throw new InvalidDataException("Missing search budget.")), HarnessJson.Options, statusCode: 202));
+        app.MapPost("/api/boss-plan", async (HttpRequest request) =>
+        {
+            var definition = service.BossPlan(await request.ReadFromJsonAsync<DashboardBossRequest>(HarnessJson.Options)
+                ?? throw new InvalidDataException("Missing boss search budget."));
+            return Results.Json(new { Definition = definition, MaximumBattles = TowerBossSearch.Validate(definition),
+                Validation = service.BossValidationList(definition.Budget.PriorityFloor, definition.Budget.EssenceSlots) }, HarnessJson.Options);
+        });
+        app.MapPost("/api/bosses", async (HttpRequest request) => Results.Json(service.FindBossLoadouts(
+            await request.ReadFromJsonAsync<DashboardBossRequest>(HarnessJson.Options) ?? throw new InvalidDataException("Missing boss search budget.")),
+            HarnessJson.Options, statusCode: 202));
         app.MapGet("/api/runs/{id}/recipe/{battle}", (string id, string battle, CancellationToken cancellation) =>
             Results.File(service.LoadoutRecipe(id, battle, cancellation), "application/json", "tower-party-recipe.json"));
         app.MapGet("/api/runs/{id}/search/{format}", async (string id, string format, CancellationToken cancellation) =>

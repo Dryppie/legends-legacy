@@ -18,6 +18,32 @@ namespace EssenceSystem.Tests;
 
 public sealed class EquipmentLoadoutTests
 {
+    [Fact]
+    public async Task Expired_presets_keep_their_slots_and_can_be_copied_but_not_applied_or_reassigned()
+    {
+        await using var db = CreateDb();
+        var (character, _, sword, _) = await Seed(db);
+        var free = new EquipmentLoadout { Id = Guid.NewGuid(), CharacterId = character.Id, Name = "Z free", PresetSlot = 1 };
+        var locked = new EquipmentLoadout { Id = Guid.NewGuid(), CharacterId = character.Id, Name = "A locked", PresetSlot = 4,
+            AutoUseActivities = EssenceCombatActivity.IdleCombat,
+            Slots = [new() { Id = Guid.NewGuid(), EquipmentInstanceId = sword.Id, EquipmentInstance = sword, SlotType = EquipmentSlotType.MainHand }] };
+        db.EquipmentLoadouts.AddRange(free, locked);
+        await db.SaveChangesAsync();
+        var service = Service(db);
+        var loadouts = await service.GetAsync(character.Id, default);
+        Assert.False(loadouts.Single(x => x.Id == locked.Id).IsUsable);
+        Assert.True(loadouts.Single(x => x.Id == free.Id).IsUsable);
+        Assert.False((await service.ApplyAsync(character.Id, locked.Id, default)).Succeeded);
+        Assert.False((await service.SaveAsync(character.Id, locked.Id, "Rename", default)).Succeeded);
+        Assert.False((await service.SetActivitiesAsync(character.Id, locked.Id, [EssenceCombatActivity.Dungeon], default)).Succeeded);
+        Assert.Null(await service.ResolveAsync(character.Id, EssenceCombatActivity.IdleCombat, default));
+        Assert.True((await service.CopyAsync(character.Id, locked.Id, free.Id, default)).Succeeded);
+        await db.SaveChangesAsync();
+        Assert.Equal(sword.Id, Assert.Single(free.Slots).EquipmentInstanceId);
+        Assert.Single(locked.Slots);
+        Assert.Equal(4, locked.PresetSlot);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

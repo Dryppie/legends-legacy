@@ -27,17 +27,20 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
     private readonly ILootService _lootService;
     private readonly IDungeonRewardBalanceProvider _rewardBalance;
     private readonly IEssenceResonanceService _essenceResonanceService;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
 
     public DungeonCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
         IDungeonRewardBalanceProvider rewardBalance,
-        IEssenceResonanceService essenceResonanceService)
+        IEssenceResonanceService essenceResonanceService,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
     {
         _bonusService = bonusService;
         _lootService = lootService;
         _rewardBalance = rewardBalance;
         _essenceResonanceService = essenceResonanceService;
+        _nobility = nobility;
     }
 
     public async Task<DungeonCombatCalculatedOutcome> CalculateAsync(
@@ -56,6 +59,7 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
         var totalLoot = new List<InventoryItem>();
         var totalExperience = 0;
         var totalCinders = 0;
+        long styleNobilityExperience = 0;
 
         foreach (var encounter in facts.Encounters)
         {
@@ -82,6 +86,10 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
                 }
 
                 experience = baseReward.Experience.ApplyPositiveBps(combatExperienceGainBps);
+                var bonus = _nobility is null ? 0 : (await _nobility.GetBenefitsAsync(facts.CharacterId, encounter.EarnedAt, cancellationToken))
+                    .AdditionalExperience(baseReward.Experience);
+                experience = checked(experience + bonus);
+                styleNobilityExperience += bonus;
                 cinders = baseReward.Cinders;
 
                 totalLoot.AddRange(loot);
@@ -106,7 +114,8 @@ public sealed class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculat
             TotalLoot: totalLoot,
             EncounterOutcomes: encounterOutcomes)
         {
-            EligibleBaseExperience = (long)baseReward.Experience * facts.Encounters.Count(x => x.IsVictory)
+            EligibleBaseExperience = (long)baseReward.Experience * facts.Encounters.Count(x => x.IsVictory),
+            CombatStyleNobilityExperience = styleNobilityExperience
         };
     }
 

@@ -36,7 +36,7 @@ public sealed class EssenceLoadoutConverter : ITypeConverter<EssenceLoadout, Ess
                 .Where(activity => EssenceLoadoutSelection.IsValidSingleActivity(activity) &&
                                    source.AutoUseActivities.HasFlag(activity))
                 .ToList(),
-            source.Slots.OrderBy(x => x.SlotIndex).Select(slot => MapSlot(slot, context)).ToList());
+            source.Slots.OrderBy(x => x.SlotIndex).Select(slot => MapSlot(slot, context)).ToList(), source.PresetSlot, source.IsUsable);
 
     private EssenceLoadoutSlotDto MapSlot(EssenceLoadoutSlot slot, ResolutionContext context)
     {

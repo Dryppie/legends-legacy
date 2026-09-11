@@ -30,6 +30,7 @@ public sealed class ProphecyService : IProphecyService
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IItemBaseRepository _itemBases;
     private readonly IAchievementService? _achievementService;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
 
     public ProphecyService(
         IProphecyDefinitionProvider definitionProvider,
@@ -43,7 +44,8 @@ public sealed class ProphecyService : IProphecyService
         IInventoryService inventoryService,
         IInventoryRepository inventoryRepository,
         IItemBaseRepository itemBases,
-        IAchievementService? achievementService = null)
+        IAchievementService? achievementService = null,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
     {
         _definitions = definitionProvider.GetAll();
         _balance = balanceProvider.GetCatalog();
@@ -57,6 +59,7 @@ public sealed class ProphecyService : IProphecyService
         _inventoryRepository = inventoryRepository;
         _itemBases = itemBases;
         _achievementService = achievementService;
+        _nobility = nobility;
     }
 
     public async Task<PropheciesOverview> GetOverviewAsync(
@@ -102,13 +105,14 @@ public sealed class ProphecyService : IProphecyService
             daily,
             now,
             cancellationToken);
-        var nextRerollCost = GetNextRerollCost(rerollState.RerollsUsed);
+        var benefits = await GetBenefitsAsync(characterId, now, cancellationToken);
+        var nextRerollCost = GetNextRerollCost(rerollState, benefits);
 
         return new PropheciesOverview(
             now,
-            rerollState.RerollsUsed == 0 ? 1 : 0,
+            Math.Max(0, benefits.FreeProphecyRerolls - rerollState.FreeRerollsUsed),
             rerollState.RerollsUsed,
-            _balance.Economy.DailyRerollLimit,
+            _balance.Economy.DailyRerollLimit + (benefits.IsNoble ? 1 : 0),
             nextRerollCost,
             character?.FateEcho ?? 0,
             daily,
@@ -243,13 +247,14 @@ public sealed class ProphecyService : IProphecyService
                 "No complete alternative set of daily prophecies is available.");
         }
 
-        var rerollCost = GetNextRerollCost(rerollState.RerollsUsed);
+        var benefits = await GetBenefitsAsync(characterId, now, cancellationToken);
+        var rerollCost = GetNextRerollCost(rerollState, benefits);
         if (rerollCost is null)
         {
             return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll limit has been reached.");
         }
 
-        if (rerollCost == 0)
+        if (rerollCost == 0 && rerollState.FreeRerollsUsed == 0)
         {
             var consumed = await _repository.TryConsumeDailyRerollAsync(
                 playerId,
@@ -262,7 +267,7 @@ public sealed class ProphecyService : IProphecyService
                 return ProphecyOperationResult<PropheciesOverview>.Fail("The free daily prophecy reroll has already been used.");
             }
         }
-        else
+        else if (rerollCost > 0)
         {
             if (!_balance.Economy.PaidRerollsEnabled)
             {
@@ -291,6 +296,8 @@ public sealed class ProphecyService : IProphecyService
         var rerollAnchor = overview.DailyProphecies.First(x => x.SlotType == ProphecySlotType.Steady);
         rerollAnchor.DailyRerollUsedAt = now;
         rerollState.RerollsUsed++;
+        if (rerollCost == 0) rerollState.FreeRerollsUsed++;
+        else rerollState.PaidRerollsUsed++;
         rerollState.UpdatedAt = now;
         rerollState.RowVersion++;
         foreach (var (prophecy, replacement) in replacements)
@@ -301,12 +308,12 @@ public sealed class ProphecyService : IProphecyService
         rerollState.ShownDefinitionIdsJson = JsonSerializer.Serialize(shownDefinitionIds, JsonOptions);
 
         var remainingFateEcho = overview.FateEcho - rerollCost.Value;
-        var nextCost = GetNextRerollCost(rerollState.RerollsUsed);
+        var nextCost = GetNextRerollCost(rerollState, benefits);
 
         return ProphecyOperationResult<PropheciesOverview>.Success(
             overview with
             {
-                DailyRerollsRemaining = 0,
+                DailyRerollsRemaining = Math.Max(0, benefits.FreeProphecyRerolls - rerollState.FreeRerollsUsed),
                 DailyRerollsUsed = rerollState.RerollsUsed,
                 NextDailyRerollCost = nextCost,
                 FateEcho = remainingFateEcho
@@ -1026,6 +1033,7 @@ public sealed class ProphecyService : IProphecyService
             PeriodStart = periodStart,
             PeriodEnd = periodEnd,
             RerollsUsed = daily.Any(x => x.DailyRerollUsedAt.HasValue) ? 1 : 0,
+            FreeRerollsUsed = daily.Any(x => x.DailyRerollUsedAt.HasValue) ? 1 : 0,
             ShownDefinitionIdsJson = JsonSerializer.Serialize(
                 daily.Select(x => x.ProphecyDefinitionId).Distinct(StringComparer.OrdinalIgnoreCase),
                 JsonOptions),
@@ -1036,17 +1044,21 @@ public sealed class ProphecyService : IProphecyService
         return state;
     }
 
-    private int? GetNextRerollCost(int rerollsUsed)
+    private int? GetNextRerollCost(DailyProphecyRerollState state, Domain.Models.Nobility.NobilityBenefits benefits)
     {
-        if (rerollsUsed >= _balance.Economy.DailyRerollLimit)
+        if (state.RerollsUsed >= _balance.Economy.DailyRerollLimit + (benefits.IsNoble ? 1 : 0))
         {
             return null;
         }
 
-        return rerollsUsed == 0
+        return state.FreeRerollsUsed < benefits.FreeProphecyRerolls
             ? 0
-            : _balance.Economy.PaidRerollCosts[rerollsUsed - 1];
+            : state.PaidRerollsUsed < _balance.Economy.PaidRerollCosts.Count
+                ? _balance.Economy.PaidRerollCosts[state.PaidRerollsUsed] : null;
     }
+
+    private async Task<Domain.Models.Nobility.NobilityBenefits> GetBenefitsAsync(Guid characterId, DateTimeOffset now, CancellationToken ct) =>
+        _nobility is null ? Domain.Models.Nobility.NobilityBenefits.Free : await _nobility.GetBenefitsAsync(characterId, now, ct);
 
     private static HashSet<string> ReadShownDefinitionIds(string json)
     {

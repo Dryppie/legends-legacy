@@ -1,3 +1,5 @@
+import { inject } from '@angular/core';
+import { NobilityService } from '../../../../../core/services/api/nobility/nobility.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
@@ -25,6 +27,7 @@ import { LocalDatePipe } from '../../../../../shared/pipes/local-date/local-date
     templateUrl: './market-place-orders.component.html'
 })
 export class MarketPlaceOrdersComponent implements OnInit {
+  readonly nobility = inject(NobilityService);
   constructor(
     readonly marketplaceState: MarketplaceStateService,
     readonly characterState: CharacterStateService,

@@ -99,7 +99,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             ? []
             : EssenceLoadoutSelection.InArchiveOrder(character.EssenceLoadouts).ToList();
 
-        return new(loadouts, _loadoutLimits.GetLoadoutLimit(characterId), _slotUnlocks.GetUnlockedSlotCount(character?.Level ?? 0));
+        var limit = await _loadoutLimits.GetLoadoutLimitAsync(characterId, cancellationToken);
+        EssenceLoadoutSelection.SetAvailability(loadouts, limit);
+        return new(loadouts, limit, _slotUnlocks.GetUnlockedSlotCount(character?.Level ?? 0));
     }
 
     public async Task<EssenceOperationResult> AbsorbUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken)
@@ -328,15 +330,22 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (request.Id.HasValue)
             loadout = await _essences.GetLoadoutAsync(characterId, request.Id.Value, cancellationToken);
 
+        var savedPresets = await GetEligiblePresetsAsync(characterId, cancellationToken);
+        if (loadout is not null && !savedPresets.Any(x => x.Id == loadout.Id && x.IsUsable))
+            return LoadoutSaveFailed("This saved preset requires Nobility. You can still view or copy it.");
+
         if (_buildBoundary is not null && await _buildBoundary.PrepareMutationAsync(characterId, cancellationToken) is { } blocked)
             return LoadoutSaveFailed(blocked);
 
         if (loadout is null)
         {
-            var count = await _essences.CountLoadoutsAsync(characterId, cancellationToken);
-            if (count >= _loadoutLimits.GetLoadoutLimit(characterId))
+            var count = savedPresets.Count(x => x.IsUsable);
+            if (count >= await _loadoutLimits.GetLoadoutLimitAsync(characterId, cancellationToken))
                 return LoadoutSaveFailed("Essence loadout limit reached.");
-            loadout = new EssenceLoadout { Id = Guid.NewGuid(), CharacterId = characterId, Name = name, CreatedAt = DateTimeOffset.UtcNow };
+            var limit = await _loadoutLimits.GetLoadoutLimitAsync(characterId, cancellationToken);
+            var presetSlot = Enumerable.Range(1, limit).FirstOrDefault(slot => !savedPresets.Any(x => x.PresetSlot == slot));
+            if (presetSlot == 0) return LoadoutSaveFailed("Essence loadout limit reached.");
+            loadout = new EssenceLoadout { Id = Guid.NewGuid(), CharacterId = characterId, Name = name, PresetSlot = presetSlot, CreatedAt = DateTimeOffset.UtcNow };
             await _essences.AddLoadoutAsync(loadout, cancellationToken);
         }
 
@@ -389,9 +398,10 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var requestedActivities = activities
             .Distinct()
             .Aggregate(EssenceCombatActivity.None, (current, activity) => current | activity);
-        var loadouts = await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken);
+        var loadouts = await GetEligiblePresetsAsync(characterId, cancellationToken);
         var selected = loadouts.FirstOrDefault(loadout => loadout.Id == loadoutId);
         if (selected is null) return Fail("Essence loadout not found.");
+        if (!selected.IsUsable) return Fail("This saved preset requires Nobility.");
 
         if (_buildBoundary is not null && await _buildBoundary.PrepareMutationAsync(characterId, cancellationToken) is { } blocked)
             return Fail(blocked);
@@ -496,7 +506,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var factors = await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
         var adjustedXp = xp.ApplyPositiveBps(factors.Get(BonusKind.EssenceExperienceGainBps));
         var loadout = EssenceLoadoutSelection.Select(
-            await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
+            await GetEligiblePresetsAsync(characterId, cancellationToken),
             activity);
         foreach (var slot in loadout?.Slots.Where(x => x.PlayerEssence is not null) ?? [])
         {
@@ -551,7 +561,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         CancellationToken cancellationToken)
     {
         var loadout = EssenceLoadoutSelection.Select(
-            await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
+            await GetEligiblePresetsAsync(characterId, cancellationToken),
             activity);
         var equippedEssences = loadout?.Slots
             .OrderBy(x => x.SlotIndex)
@@ -890,8 +900,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         Guid characterId,
         CancellationToken cancellationToken) =>
         EssenceLoadoutSelection.Select(
-            await _essences.GetLoadoutsWithSlotsAsync(characterId, cancellationToken),
+            await GetEligiblePresetsAsync(characterId, cancellationToken),
             EssenceCombatActivity.None)?.Slots.ToList() ?? [];
+
+    private async Task<List<EssenceLoadout>> GetEligiblePresetsAsync(Guid characterId, CancellationToken ct)
+    {
+        var loadouts = (await _essences.GetLoadoutsWithSlotsAsync(characterId, ct)).ToList();
+        EssenceLoadoutSelection.SetAvailability(loadouts, await _loadoutLimits.GetLoadoutLimitAsync(characterId, ct));
+        return loadouts;
+    }
 
     private async Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken) =>
         await _inventory.GetInventoryItemAsync(characterId, inventoryItemId, cancellationToken);

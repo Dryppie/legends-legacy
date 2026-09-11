@@ -106,6 +106,9 @@ public static class DependencyInjection
         IConfiguration config)
     {
         services.AddLiveOpsAdministrationServices(config);
+        services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.INobilityService, Nobility.NobilityService>();
+        services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.ISignetTradingService, Nobility.SignetTradingService>();
+        services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.INobilityPurchaseGateway, Nobility.DisabledNobilityPurchaseGateway>();
         AddDungeonCatalogReader(services, config, AppContext.BaseDirectory);
         // The standalone operator host needs the same equipment rules as the game.
         services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
@@ -201,7 +204,7 @@ public static class DependencyInjection
                            x.MaximumDisplayedMatches > 0,
                 "LiveOps temporal-correlation settings must be positive and ordered.")
             .ValidateOnStart();
-        services.AddSingleton(TimeProvider.System);
+        services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<AccountRestrictionIndex>();
         services.TryAddSingleton<IAccountRestrictionIndex>(sp =>
             sp.GetRequiredService<AccountRestrictionIndex>());
@@ -220,6 +223,10 @@ public static class DependencyInjection
         string contentRootPath,
         bool isDevelopment = false)
     {
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.INobilityService, Nobility.NobilityService>();
+        services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.ISignetTradingService, Nobility.SignetTradingService>();
+        services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.INobilityPurchaseGateway, Nobility.DisabledNobilityPurchaseGateway>();
         // Related to regions
         services.AddScoped<IRegionService, RegionService>();
         services.AddScoped<IAreaService, AreaService>();
@@ -504,6 +511,7 @@ public static class DependencyInjection
                 Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "world-tower", "tower-floors.json"),
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IWorldTowerService, WorldTowerService>();
+        services.AddScoped<IWorldTowerTitleService, WorldTowerTitleService>();
         services.AddScoped<IWorldTowerCombatRuntimeFactory, WorldTowerCombatRuntimeFactory>();
         services.AddScoped<IWorldTowerWorkLeaseService, WorldTowerWorkLeaseService>();
         services.AddOptions<RaidOptions>()

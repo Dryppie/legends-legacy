@@ -6,4 +6,6 @@ public sealed record EssenceLoadoutDto(
     Guid Id,
     string Name,
     IReadOnlyList<EssenceCombatActivity> AutoUseActivities,
-    IReadOnlyList<EssenceLoadoutSlotDto> Slots);
+    IReadOnlyList<EssenceLoadoutSlotDto> Slots,
+    int PresetSlot = 0,
+    bool IsUsable = true);

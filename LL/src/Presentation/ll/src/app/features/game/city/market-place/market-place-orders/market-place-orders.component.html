@@ -13,7 +13,7 @@
   <section>
     <div class="mb-2 flex items-baseline justify-between gap-3">
       <h3 class="ll-heading uppercase">Sell listings</h3>
-      <span class="ll-helper">{{ marketplaceState.myListings().length }}/10 slots</span>
+      <span class="ll-helper">{{ marketplaceState.myListings().length }}/{{ nobility.isNoble() ? 30 : 10 }} slots</span>
     </div>
     <div class="ll-panel overflow-hidden">
       <div
@@ -49,7 +49,7 @@
   <section>
     <div class="mb-2 flex items-baseline justify-between gap-3">
       <h3 class="ll-heading uppercase">Buy orders</h3>
-      <span class="ll-helper">{{ marketplaceState.myBuyOrders().length }}/10 slots</span>
+      <span class="ll-helper">{{ marketplaceState.myBuyOrders().length }}/{{ nobility.isNoble() ? 30 : 10 }} slots</span>
     </div>
     <div class="ll-panel overflow-hidden">
       <div

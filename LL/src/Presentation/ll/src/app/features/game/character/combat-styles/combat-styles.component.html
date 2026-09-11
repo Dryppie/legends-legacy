@@ -64,7 +64,7 @@
       <app-navigation-tabs
         class="style-tabs block"
         [tabs]="styleTabs()"
-        [activeKey]="state.draft().combatStyleId ?? 'empty-slot'"
+        [activeKey]="state.draft().combatStyleId ?? ''"
         ariaLabel="Combat Style preview"
         data-tour="combat-style-list"
         (tabSelected)="selectStyleTab($event)"
@@ -80,7 +80,7 @@
                 ? "Preview only"
                 : data.selection.combatStyleId
                   ? "In battle"
-                  : "Empty slot"
+                  : "Choose a style"
             }}</span>
             <p>
               @if (previewOnly()) {
@@ -95,10 +95,6 @@
                   } @else {
                     Your slot stays empty until you equip this.
                   }
-                } @else {
-                  <strong>Your slot is still occupied.</strong>
-                  {{ equippedStyleName() }} stays in battle until you unequip
-                  it.
                 }
               } @else if (data.selection.combatStyleId) {
                 <strong>{{ equippedStyleName() }} is in your slot.</strong>
@@ -917,13 +913,13 @@
           </dialog>
         } @else {
           <section class="ll-panel style-panel">
-            <p class="ll-eyebrow">Empty slot</p>
+            <p class="ll-eyebrow">Choose a style</p>
             <h2 class="mt-2 text-xl text-primary">
-              Your build, without a Combat Style
+              Choose your Combat Style
             </h2>
             <p class="ll-copy mt-3 text-sm">
-              Choose a Combat Style to apply its mechanic to every battle. Save
-              this choice, or choose a style above to explore its mechanic.
+              Choose a style above to explore its mechanic and take it into
+              battle.
             </p>
             @if (state.previewing()) {
               <p role="status" class="sr-only">

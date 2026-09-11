@@ -29,7 +29,7 @@ namespace EssenceSystem.Tests;
 public sealed class LiveOpsApplicationRegistrationTests
 {
     [Fact]
-    public void LiveOps_registers_only_administration_request_handlers()
+    public void LiveOps_registers_only_administration_and_alpha_grant_request_handlers()
     {
         var services = new ServiceCollection();
 
@@ -44,9 +44,10 @@ public sealed class LiveOpsApplicationRegistrationTests
                     typeof(IRequestHandler<,>)))
             .ToList();
 
-        Assert.Equal(19, handlers.Count);
+        Assert.Equal(20, handlers.Count);
+        Assert.Contains(handlers, descriptor => descriptor.ImplementationType == typeof(Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommandHandler));
         Assert.Contains(handlers, descriptor => descriptor.ImplementationType == typeof(Application.UseCases.Administration.Queries.GetCompensationEquipmentOptions.GetCompensationEquipmentOptionsQueryHandler));
-        Assert.All(handlers, descriptor => Assert.StartsWith(
+        Assert.All(handlers.Where(descriptor => descriptor.ImplementationType != typeof(Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommandHandler)), descriptor => Assert.StartsWith(
             "Application.UseCases.Administration",
             descriptor.ImplementationType?.Namespace,
             StringComparison.Ordinal));

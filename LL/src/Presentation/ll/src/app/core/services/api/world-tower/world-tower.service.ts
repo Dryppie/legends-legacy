@@ -83,6 +83,7 @@ export interface TowerFloorDetail {
   unlocks: TowerUnlock[];
   firstClearTowerTokens: number;
   echoTowerTokens: number;
+  rewardTitleName?: string;
   echoRewardClaimedThisWeek: boolean;
 }
 

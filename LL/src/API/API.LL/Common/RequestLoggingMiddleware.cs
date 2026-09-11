@@ -71,6 +71,23 @@ public sealed class RequestLoggingMiddleware
         var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText
             ?? "(unmatched)";
 
+        if (statusCode >= StatusCodes.Status400BadRequest)
+        {
+            var (code, category) = ApiErrorContract.GetLogIdentity(context);
+            _logger.Log(
+                level,
+                RequestCompleted,
+                exceptionFeature?.Error,
+                "HTTP {HttpMethod} {HttpRoute} responded {HttpStatusCode} in {DurationMs} ms. Error {ErrorCode} ({ErrorCategory}).",
+                context.Request.Method,
+                route,
+                statusCode,
+                Math.Round(elapsedMs, 3),
+                code,
+                category);
+            return;
+        }
+
         _logger.Log(
             level,
             RequestCompleted,

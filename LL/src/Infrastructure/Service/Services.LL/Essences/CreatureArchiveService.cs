@@ -24,6 +24,8 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
     private readonly IEssenceCodexCollectionService _codexCollections;
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IGameEventOutbox? _outbox;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
+    private readonly TimeProvider _time;
 
     public CreatureArchiveService(
         IDbContext dbContext,
@@ -32,7 +34,9 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         IEssenceCodexCollectionService codexCollections,
         IDungeonDefinitions dungeonDefinitions,
         IRegionRepository regions,
-        IGameEventOutbox? outbox = null)
+        IGameEventOutbox? outbox = null,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null,
+        TimeProvider? time = null)
     {
         _dbContext = dbContext;
         _regions = regions;
@@ -41,6 +45,8 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         _codexCollections = codexCollections;
         _dungeonDefinitions = dungeonDefinitions;
         _outbox = outbox;
+        _nobility = nobility;
+        _time = time ?? TimeProvider.System;
     }
 
     public async Task RecordDefeatedCreaturesAsync(
@@ -135,10 +141,10 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             .ToListAsync(cancellationToken);
         var absorbedIds = await GetAbsorbedEssenceDefinitionIdsAsync(characterId, cancellationToken);
         var locationsByCreatureId = await GetCreatureLocationsAsync(cancellationToken);
-        var now = DateTimeOffset.UtcNow;
+        var now = _time.GetUtcNow();
         var lastFocusSetAt = GetLastCreatureFocusSetAt(entries);
-        var focusAvailableAt = GetCreatureFocusAvailableAt(lastFocusSetAt);
-        var canChangeFocus = CanChangeCreatureFocus(lastFocusSetAt, now);
+        var focusAvailableAt = lastFocusSetAt?.Add(await GetCooldownAsync(characterId, now, cancellationToken));
+        var canChangeFocus = focusAvailableAt is null || focusAvailableAt <= now;
 
         var creatures = entries
             .Select(entry =>
@@ -301,8 +307,8 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             return await GetCreatureArchiveAsync(characterId, cancellationToken);
         }
 
-        var now = DateTimeOffset.UtcNow;
-        if (!CanChangeCreatureFocus(GetLastCreatureFocusSetAt(entries), now))
+        var now = _time.GetUtcNow();
+        if (GetLastCreatureFocusSetAt(entries)?.Add(await GetCooldownAsync(characterId, now, cancellationToken)) > now)
         {
             return await GetCreatureArchiveAsync(characterId, cancellationToken);
         }
@@ -407,11 +413,9 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         return lastFocusSetAt;
     }
 
-    private static DateTimeOffset? GetCreatureFocusAvailableAt(DateTimeOffset? lastFocusSetAt) =>
-        lastFocusSetAt?.Add(CreatureFocusCooldown);
-
-    private static bool CanChangeCreatureFocus(DateTimeOffset? lastFocusSetAt, DateTimeOffset now) =>
-        GetCreatureFocusAvailableAt(lastFocusSetAt) is not { } availableAt || availableAt <= now;
+    private async Task<TimeSpan> GetCooldownAsync(Guid characterId, DateTimeOffset now, CancellationToken ct) =>
+        _nobility is null ? CreatureFocusCooldown :
+        TimeSpan.FromHours((await _nobility.GetBenefitsAsync(characterId, now, ct)).FocusCooldownHours);
 
     private static long GetTotalCreatureFocusDurationSeconds(CharacterCreatureArchiveEntry entry, DateTimeOffset now) =>
         entry.CreatureFocusTotalDurationSeconds + GetCurrentCreatureFocusDurationSeconds(entry, now);

@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../../../../core/services/api/nobility/nobility.testing';
 import { signal } from '@angular/core';
 import {
   ComponentFixture,
@@ -26,7 +27,7 @@ describe('GuildInfoComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [GuildInfoComponent],
-      providers: [
+      providers: [...provideFreeNobilityForTests(),
         {
           provide: CharacterService,
           useValue: {

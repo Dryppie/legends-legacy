@@ -184,6 +184,57 @@ describe('CombatComponent', () => {
     expect(emitSpy).toHaveBeenCalledTimes(2);
   });
 
+  it('closes Arena playback on Escape before clicking Skip', () => {
+    const component = fixture.componentInstance;
+    const emitSpy = spyOn(component.skipBattle, 'emit');
+    component.battleType = BattleType.Colosseum;
+    combatActive.set(true);
+    fixture.detectChanges();
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
+
+    expect(component.outcome).toBeNull();
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not dismiss inactive or disabled Arena playback on Escape', () => {
+    const component = fixture.componentInstance;
+    const emitSpy = spyOn(component.skipBattle, 'emit');
+    component.battleType = BattleType.Colosseum;
+    fixture.detectChanges();
+    component.onEscapeKey();
+
+    combatActive.set(true);
+    component.combatActionDisabled = true;
+    fixture.detectChanges();
+    component.onEscapeKey();
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  for (const battleType of [
+    BattleType.IdleCombat,
+    BattleType.Dungeon,
+    BattleType.Tower,
+    BattleType.Raid,
+    BattleType.RegionBoss,
+    BattleType.Training,
+  ]) {
+    it(`does not close ongoing ${battleType} combat on Escape`, () => {
+      const component = fixture.componentInstance;
+      const emitSpy = spyOn(component.skipBattle, 'emit');
+      component.battleType = battleType;
+      component.displayCombat = true;
+      component.outcome = null;
+
+      component.onEscapeKey();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  }
+
   it('does not close other combat views when Escape is pressed', () => {
     const component = fixture.componentInstance;
     const emitSpy = spyOn(component.skipBattle, 'emit');

@@ -332,6 +332,8 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly catalogueTitle = computed(() => {
     switch (this._category()) {
+      case 'signets':
+        return 'Signet market';
       case 'monster-cores':
         return 'Monster Core catalogue';
       case 'blueprints':
@@ -345,6 +347,8 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly catalogueHeading = computed(() => {
     switch (this._category()) {
+      case 'signets':
+        return 'Signets';
       case 'monster-cores':
         return 'Monster Cores';
       case 'blueprints':
@@ -1007,6 +1011,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
     return (
       base.itemType === this._itemType() &&
       base.stackable &&
+      (this._category() !== 'signets' || base.id === 'signet') &&
       (this._category() !== 'monster-cores' || isMarketplaceMonsterCore(base)) &&
       (this._category() !== 'blueprints' || isMarketplaceBlueprint(base)) &&
       (!subcategory ||

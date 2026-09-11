@@ -12,13 +12,16 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
     private readonly IDbContext _dbContext;
     private readonly IEquipmentLoadoutService? _equipmentLoadouts;
     private readonly ICombatStyleService? _combatStyles;
+    private readonly Application.Interfaces.Services.LL.Essences.IEssenceLoadoutLimitService? _essenceLimits;
 
     public CharacterSnapshotRepository(IDbContext dbContext, IEquipmentLoadoutService? equipmentLoadouts = null,
-        ICombatStyleService? combatStyles = null)
+        ICombatStyleService? combatStyles = null,
+        Application.Interfaces.Services.LL.Essences.IEssenceLoadoutLimitService? essenceLimits = null)
     {
         _dbContext = dbContext;
         _equipmentLoadouts = equipmentLoadouts;
         _combatStyles = combatStyles;
+        _essenceLimits = essenceLimits;
     }
 
     public Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct = default) =>
@@ -53,6 +56,8 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
             .ThenBy(e => e.EquipmentInstanceId)
             .ToList();
 
+        EssenceLoadoutSelection.SetAvailability(character.EssenceLoadouts,
+            _essenceLimits is null ? 3 : await _essenceLimits.GetLoadoutLimitAsync(characterId, ct));
         var selectedLoadout = EssenceLoadoutSelection.Select(character.EssenceLoadouts, activity);
         var equippedEssences = (selectedLoadout?.Slots ?? [])
             .Where(x => x.PlayerEssenceId.HasValue && x.PlayerEssence is not null)

@@ -244,22 +244,56 @@ describe('CombatStyleStateService', () => {
     expect(service.draft().upgradeIds).toEqual([]);
   });
 
-  it('saves an empty style selection and clears pending edits', () => {
+  it('prevents clearing an equipped style or saving an unchanged selection', () => {
     api.get.and.returnValue(of(styleOverview('bastion')));
-    const updated = styleOverview();
-    api.select.and.returnValue(
-      of({ data: updated, domainVersions: { 'combat-styles': 1 } }),
-    );
     service.refresh();
     service.chooseStyle(null);
-    expect(service.canSave()).toBeTrue();
+    expect(service.draft().combatStyleId).toBe('bastion');
+    expect(service.canSave()).toBeFalse();
     service.save();
-    expect(api.select).toHaveBeenCalledOnceWith(updated.selection);
-    expect(service.data()?.selection.combatStyleId).toBeNull();
+    expect(api.select).not.toHaveBeenCalled();
     expect(service.edited()).toBeFalse();
   });
 
-  it('keeps equipped indicators tied to the saved style throughout browsing, failed saves, discard and unequipping', () => {
+  it('disables Save and Discard when viewing a style and after reversing edits', () => {
+    api.get.and.returnValue(of(styleOverview('bastion')));
+    const fixture = TestBed.createComponent(CombatStylesComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const expectUnchanged = () => {
+      fixture.detectChanges();
+      expect(service.edited()).toBeFalse();
+      expect(service.canSave()).toBeFalse();
+      for (const button of Array.from(element.querySelectorAll<HTMLButtonElement>('.battle-actions button')))
+        expect(button.disabled).toBeTrue();
+      expect(element.textContent).not.toContain('Unsaved changes');
+    };
+    expectUnchanged();
+    service.chooseStyle('bastion');
+    expectUnchanged();
+    service.toggleUpgrade('prepared-wall');
+    expect(service.edited()).toBeTrue();
+    expect(service.canSave()).toBeTrue();
+    service.toggleUpgrade('prepared-wall');
+    expectUnchanged();
+    service.chooseStyle('conduit');
+    expect(service.edited()).toBeTrue();
+    service.chooseStyle('bastion');
+    expectUnchanged();
+  });
+
+  it('keeps an initial unselected style until a style is saved', () => {
+    service.refresh();
+    expect(service.draft().combatStyleId).toBeNull();
+    expect(service.canSave()).toBeFalse();
+    service.chooseStyle('bastion');
+    expect(service.canSave()).toBeTrue();
+    service.resetDraft();
+    expect(service.draft().combatStyleId).toBeNull();
+    expect(service.edited()).toBeFalse();
+  });
+
+  it('keeps equipped indicators tied to the saved style throughout browsing, failed saves and discard', () => {
     const initial = styleOverview('bastion');
     initial.styles = initial.styles.map((entry) => ({
       ...entry,
@@ -276,10 +310,7 @@ describe('CombatStyleStateService', () => {
     const successfulSave = new Subject<
       VersionedMutationResult<CombatStyleOverview>
     >();
-    const emptySave = new Subject<
-      VersionedMutationResult<CombatStyleOverview>
-    >();
-    api.select.and.returnValues(failedSave, successfulSave, emptySave);
+    api.select.and.returnValues(failedSave, successfulSave);
     const fixture = TestBed.createComponent(CombatStylesComponent);
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
@@ -347,42 +378,14 @@ describe('CombatStyleStateService', () => {
       'Conduit is in your slot.',
     );
 
-    service.chooseStyle(null);
+    service.chooseStyle('bastion');
     fixture.detectChanges();
-    expect(service.draft().combatStyleId).toBeNull();
     expectEquipped('conduit', 'Conduit');
-    expectPendingStyle('Conduit stays in battle until you unequip it.');
-    expect(
-      element.querySelector('.battle-action button')?.textContent,
-    ).toContain('Unequip Combat Style');
     service.resetDraft();
     fixture.detectChanges();
     expect(service.draft().combatStyleId).toBe('conduit');
     expectEquipped('conduit', 'Conduit');
     expect(element.querySelector('.preview-notice')).toBeNull();
-
-    service.chooseStyle(null);
-    service.save();
-    fixture.detectChanges();
-    expect(service.busy()).toBeTrue();
-    expectEquipped('conduit', 'Conduit');
-    emptySave.next({
-      data: { ...savedConduit, selection: { ...service.draft() } },
-      domainVersions: { 'combat-styles': 2 },
-    });
-    fixture.detectChanges();
-    expectEquipped(null, 'None');
-    expect(element.querySelector('.battle-notice')?.textContent).toContain(
-      'No Combat Style is equipped.',
-    );
-    service.chooseStyle('bastion');
-    fixture.detectChanges();
-    expectEquipped(null, 'None');
-    expectPendingStyle('Your slot stays empty until you equip this.');
-    service.resetDraft();
-    fixture.detectChanges();
-    expect(service.draft().combatStyleId).toBeNull();
-    expectEquipped(null, 'None');
   });
 
   it('unlocks openings and mastery from live XP updates without losing a pending upgrade choice', () => {
@@ -471,7 +474,7 @@ describe('CombatStyleStateService', () => {
       'hold-the-breach',
     ]);
     service.chooseStyle(null);
-    expect(service.draft().masteredUpgradeId).toBeNull();
+    expect(service.draft().masteredUpgradeId).toBe('prepared-wall');
   });
 
   it('clears mastery when its upgrade is removed, but preserves it when a different upgrade is removed', () => {
@@ -684,7 +687,8 @@ describe('CombatStyleStateService', () => {
 
     service.resetDraft();
     expect(service.previewError()).toBeNull();
-    expect(service.canSave()).toBeTrue();
+    expect(service.canSave()).toBeFalse();
+    expect(service.edited()).toBeFalse();
   });
 
   it('cancels an obsolete preview when discarding, invalidating or logging out', () => {

@@ -25,6 +25,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
     private readonly ICombatStyleService? _combatStyles;
     private readonly IBonusService? _bonuses;
     private readonly IAreaExperienceBalanceProvider? _experienceBalance;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
 
     public IdleCombatOrchestrator(
         IIdleCombatPlanner planner,
@@ -32,7 +33,8 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
         ICreatureArchiveService? creatureArchive = null,
         ICombatStyleService? combatStyles = null,
         IBonusService? bonuses = null,
-        IAreaExperienceBalanceProvider? experienceBalance = null)
+        IAreaExperienceBalanceProvider? experienceBalance = null,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
     {
         _planner = planner;
         _resolutionSessionFactory = resolutionSessionFactory;
@@ -40,6 +42,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
         _combatStyles = combatStyles;
         _bonuses = bonuses;
         _experienceBalance = experienceBalance;
+        _nobility = nobility;
     }
 
     public CombatMode Mode => CombatMode.Idle;
@@ -56,6 +59,20 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
         }
 
         var plan = _planner.CreatePlan(idleRequest);
+        if (_nobility is not null && plan.PlannedEncounterCount > 0)
+        {
+            var boundaries = new List<DateTimeOffset>();
+            foreach (var recipient in plan.PlayerEntityIds.Distinct())
+                boundaries.AddRange((await _nobility.GetCoverageAsync(recipient, cancellationToken))
+                    .SelectMany(period => new[] { period.StartsAt, period.EndsAt }));
+            var next = boundaries.Where(at => at > plan.From && at < plan.ExecutableUntil).Order().FirstOrDefault();
+            if (next != default)
+            {
+                var count = checked((int)(((next - plan.From).Ticks + plan.EncounterCadence.Ticks - 1) / plan.EncounterCadence.Ticks));
+                plan = plan with { PlannedEncounterCount = count, ExecutableUntil = plan.From.AddTicks(count * plan.EncounterCadence.Ticks) };
+            }
+        }
+        using var entitlementTime = _nobility?.EvaluateCombatAt(plan.From);
 
         if (plan.PlannedEncounterCount == 0)
         {
@@ -118,7 +135,8 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
                     var share = eligibleXp / recipients.Length + (index < eligibleXp % recipients.Length ? 1 : 0);
                     // The action cursor, character lock, and tracked progression commit in the same transaction.
                     // Advance templates only after this fight so offline batches match successive online encounters.
-                    var grant = await _combatStyles!.GrantCapturedCombatXpAsync(recipient, captured.CombatStyleId, share, cancellationToken);
+                    var bonus = _nobility is null ? 0 : (await _nobility.GetBenefitsAsync(recipient, cursor, cancellationToken)).AdditionalExperience(share);
+                    var grant = await _combatStyles!.GrantCapturedCombatXpAsync(recipient, captured.CombatStyleId, checked(share + bonus), cancellationToken);
                     if (grant.LevelsGained > 0) resolutionSession.AdvanceCombatStyle(recipient, grant.Level);
                     awards.Add(new(recipient, captured.CombatStyleId, share, grant.XpGained, grant.Level));
                 }

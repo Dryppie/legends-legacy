@@ -9,6 +9,7 @@ public sealed class TowerFloorDefinition
     public TowerFloorType Type { get; init; }
     public Guid GuardianCreatureId { get; init; }
     public string GuardianName { get; init; } = string.Empty;
+    public string RewardTitleKey { get; init; } = string.Empty;
     public string GuardianAbilityProfileId { get; init; } = string.Empty;
     public int RequiredSlots { get; init; }
     public int RecommendedPowerRating { get; init; }

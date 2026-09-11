@@ -669,7 +669,7 @@
                 [disabled]="essenceState.savingLoadout()"
                 (click)="selectLoadout(loadout)"
               >
-                <span>{{ loadout.name }}</span>
+                <span>{{ loadout.name }}{{ loadout.isUsable === false ? ' · locked' : '' }}</span>
               </button>
               <button
                 type="button"
@@ -681,6 +681,19 @@
               </button>
             </div>
 
+            @if (essenceState.selectedLoadout()?.isUsable === false) {
+              <div class="rounded border border-light_gray bg-black/30 p-3 text-sm">
+                <p class="text-primary">This saved preset requires Nobility. View its Essences below or copy them into an available preset.</p>
+                <select #copyPreset class="mt-2 rounded border border-light_gray bg-black/40 p-1" aria-label="Copy destination">
+                  <option value="">Choose destination</option>
+                  @for (loadout of essenceState.loadouts()?.loadouts ?? []; track loadout.id) {
+                    @if (loadout.isUsable !== false) { <option [value]="loadout.id">{{ loadout.name }}</option> }
+                  }
+                </select>
+                <button class="ll-button ml-2" [disabled]="essenceState.savingLoadout() || !copyPreset.value"
+                  (click)="essenceState.copySelectedPresetTo(copyPreset.value)">Copy and replace destination</button>
+              </div>
+            }
             <div class="soul-loadout-toolbar-actions">
               <label class="ll-field soul-loadout-name-field">
                 <span class="sr-only">Loadout name</span>
@@ -955,7 +968,7 @@
           <p class="mt-2 max-w-3xl text-xs text-zinc-500">
             Creature Focus triples the creature's base Essence drop chance
             before other bonuses. Its area appearance chance increases by 20% of
-            its usual chance. You can change Creature Focus every 8 hours.
+            its usual chance. You can change Creature Focus every 8 hours, or every 2 hours with Nobility.
           </p>
           <p class="mt-2 text-xs text-primary">
             {{ creatureFocusStatusText() }}

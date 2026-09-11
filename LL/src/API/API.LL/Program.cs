@@ -145,6 +145,7 @@ else
     builder.Services.AddHostedService<WorldTowerCombatFinalizationWorker>();
     builder.Services.AddHostedService<RaidResolutionWorker>();
     builder.Services.AddHostedService<ChampionMarketTitleBackfillWorker>();
+    builder.Services.AddHostedService<WorldTowerTitleBackfillWorker>();
     if (builder.Environment.IsDevelopment())
     {
         builder.Services.AddHostedService<TournamentGroundsDevelopmentProgressionWorker>();

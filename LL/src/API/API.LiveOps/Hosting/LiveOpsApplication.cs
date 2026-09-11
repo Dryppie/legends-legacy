@@ -2,6 +2,7 @@ using Application.Common.Mappings;
 using Application.MediatR.Behaviors;
 using Application.MediatR.Synchronization;
 using Application.UseCases.Administration;
+using Application.UseCases.Nobility.Commands.GrantAlphaSignets;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -33,9 +34,9 @@ public static class LiveOpsApplication
         var handlerRegistrations = applicationAssembly.DefinedTypes
             .Where(type =>
                 !type.IsAbstract &&
-                type.Namespace?.StartsWith(
+                (type.AsType() == typeof(GrantAlphaSignetsCommandHandler) || type.Namespace?.StartsWith(
                     AdministrationNamespace,
-                    StringComparison.Ordinal) == true)
+                    StringComparison.Ordinal) == true))
             .SelectMany(type => type.ImplementedInterfaces
                 .Where(IsRequestHandler)
                 .Select(serviceType => new

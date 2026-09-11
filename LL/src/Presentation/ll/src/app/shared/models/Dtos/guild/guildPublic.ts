@@ -5,7 +5,6 @@ export interface GuildPublic {
   id: string;
   name: string;
   tag: string;
-  description: string;
   maxMembers: number;
   members: {
     characterId: string;

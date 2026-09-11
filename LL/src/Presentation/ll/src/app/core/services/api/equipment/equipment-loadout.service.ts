@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, effect, untracked } from '@angular/core';
+import { NobilityService } from '../nobility/nobility.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   EMPTY,
@@ -23,6 +24,8 @@ import { StateSyncCoordinator } from '../../real-time/game-realtime/state-sync-c
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 
 export interface EquipmentLoadout {
+  presetSlot?: number;
+  isUsable?: boolean;
   id: string;
   name: string;
   autoUseActivities: EssenceCombatActivity[];
@@ -36,6 +39,7 @@ export interface EquipmentLoadout {
 @Injectable({ providedIn: 'root' })
 export class EquipmentLoadoutService {
   readonly loadouts = signal<EquipmentLoadout[]>([]);
+  readonly usableCount = computed(() => this.loadouts().filter(x => x.isUsable !== false).length);
   readonly selectedId = signal<string | null>(null);
   readonly selected = computed(() =>
     this.loadouts().find((loadout) => loadout.id === this.selectedId()),
@@ -44,6 +48,7 @@ export class EquipmentLoadoutService {
   readonly busy = computed(() => this.pending() || this.equipment.loading());
   readonly unsavedChanges = signal(false);
   readonly error = signal<string | null>(null);
+  readonly limit = computed(() => this.nobility.equipmentLimit());
   private epoch = 0;
   private selectionInitialized = false;
 
@@ -54,6 +59,7 @@ export class EquipmentLoadoutService {
     private character: CharacterStateService,
     sync: StateSyncCoordinator,
     private events: EventBusService,
+    private nobility: NobilityService,
   ) {
     sync.register('equipment', 'equipment-loadouts', () => this.refresh());
     effect(() => {
@@ -76,7 +82,7 @@ export class EquipmentLoadoutService {
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
         const loadout = this.selected();
-        if (!loadout) return;
+        if (!loadout || loadout.isUsable === false) return;
         this.unsavedChanges.set(true);
         this.saveCurrent(loadout.id, loadout.name);
       });
@@ -122,11 +128,19 @@ export class EquipmentLoadoutService {
   }
 
   newLoadout(): void {
-    if (this.busy() || this.unsavedChanges() || this.loadouts().length >= 3)
+    if (this.busy() || this.unsavedChanges() || this.loadouts().filter(x => x.isUsable !== false).length >= this.limit())
       return;
     this.selectionInitialized = true;
     this.selectedId.set(null);
     this.error.set(null);
+  }
+
+  copyTo(targetId: string): void {
+    const source = this.selected();
+    if (!source || !targetId || this.busy()) return;
+    this.run(this.api.post('equipment/loadouts/' + source.id + '/copy', { targetId }).pipe(
+      tap(response => { if (!response.isSuccess) throw new Error(response.errorMessage ?? 'Preset could not be copied.'); }),
+      switchMap(() => this.refresh())), () => this.error.set(null));
   }
 
   select(id: string): void {
@@ -134,6 +148,7 @@ export class EquipmentLoadoutService {
       return;
     const loadout = this.loadouts().find((entry) => entry.id === id);
     if (!loadout) return;
+    if (loadout.isUsable === false) { this.selectedId.set(id); this.error.set('This saved preset requires Nobility. Its equipment can still be viewed.'); return; }
     this.selectionInitialized = true;
     const session = this.events.logout();
     let applied = false;
@@ -171,7 +186,8 @@ export class EquipmentLoadoutService {
       !name ||
       name.length > 80 ||
       (id && id !== this.selectedId()) ||
-      (!id && this.loadouts().length >= 3)
+      (!id && this.loadouts().filter(x => x.isUsable !== false).length >= this.limit()) ||
+      (!!id && this.loadouts().some(x => x.id === id && x.isUsable === false))
     )
       return;
     this.saveCurrent(id, name);

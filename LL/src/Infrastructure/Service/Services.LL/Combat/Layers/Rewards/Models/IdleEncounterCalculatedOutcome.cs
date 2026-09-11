@@ -10,4 +10,7 @@ public sealed record IdleEncounterCalculatedOutcome(
     int BonusAdjustedExperience,
     int ExperienceGained,
     int CindersGained,
-    IReadOnlyList<InventoryItem> Loot);
+    IReadOnlyList<InventoryItem> Loot)
+{
+    public int EligibleBaseExperience { get; init; }
+}

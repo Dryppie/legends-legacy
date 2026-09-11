@@ -459,6 +459,33 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     );
   }
 
+  signetQuantity = 1;
+  signetReason = '';
+  signetConfirmation = false;
+  private signetOperation: { operationId: string; characterId: string; quantity: number; reason: string } | null = null;
+
+  async grantAlphaSignets(): Promise<void> {
+    const characterId = this.selectedPlayer?.player.characterId;
+    const reason = this.signetReason.trim();
+    if (!characterId || this.busyAction || !this.requireReason(reason)) return;
+    if (!Number.isInteger(this.signetQuantity) || this.signetQuantity < 1 || this.signetQuantity > 1200) {
+      this.showError('Select between 1 and 1200 Signets.'); return;
+    }
+    if (!this.signetConfirmation) { this.signetConfirmation = true; return; }
+    if (!this.signetOperation || this.signetOperation.characterId !== characterId ||
+      this.signetOperation.quantity !== this.signetQuantity || this.signetOperation.reason !== reason)
+      this.signetOperation = { operationId: crypto.randomUUID(), characterId, quantity: this.signetQuantity, reason };
+    this.busyAction = 'signets';
+    try {
+      const result = await this.api.grantAlphaSignets(characterId, this.signetOperation);
+      if (!result.isSuccess) { this.showError(result.errorMessage); return; }
+      this.showInfo(`${this.signetOperation.quantity} Signet(s) granted for alpha testing. The player can redeem or trade them.`);
+      this.signetOperation = null; this.signetConfirmation = false;
+      await this.loadSupportSnapshot(characterId);
+    } catch (error) { this.showError(this.errorMessage(error)); }
+    finally { this.busyAction = ''; }
+  }
+
   async confirmActionPreview(): Promise<void> {
     if (!this.previewSubmit || this.previewSubmitting) return;
     this.previewSubmitting = true;

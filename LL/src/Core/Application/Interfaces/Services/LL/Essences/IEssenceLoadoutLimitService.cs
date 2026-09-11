@@ -2,5 +2,5 @@ namespace Application.Interfaces.Services.LL.Essences;
 
 public interface IEssenceLoadoutLimitService
 {
-    int GetLoadoutLimit(Guid characterId);
+    Task<int> GetLoadoutLimitAsync(Guid characterId, CancellationToken ct);
 }

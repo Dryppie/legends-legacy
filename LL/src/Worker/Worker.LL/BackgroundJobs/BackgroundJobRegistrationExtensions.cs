@@ -13,6 +13,12 @@ public static class BackgroundJobRegistrationExtensions
         RegisterTournamentGroundsProgressionJob(q, configuration, environment);
         RegisterMarketplaceOrderExpirationJob(q, configuration);
         RegisterRegionBossProgressionJob(q, configuration);
+        q.AddJob<NobilityDailyRewardsJob>(job => job.WithIdentity("economy.nobility-daily-rewards", BackgroundJobGroups.Economy)
+            .StoreDurably().RequestRecovery());
+        q.AddTrigger(trigger => trigger.WithIdentity("economy.nobility-daily-rewards.trigger", BackgroundJobGroups.Economy)
+            .ForJob("economy.nobility-daily-rewards", BackgroundJobGroups.Economy)
+            .WithSimpleSchedule(schedule => schedule.WithIntervalInMinutes(5).RepeatForever()
+                .WithMisfireHandlingInstructionNextWithRemainingCount()));
     }
 
     private static void RegisterRegionBossProgressionJob(

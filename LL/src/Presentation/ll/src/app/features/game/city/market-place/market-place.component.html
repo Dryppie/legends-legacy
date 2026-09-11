@@ -68,7 +68,8 @@
           <app-market-place-commodity
             *ngIf="
               selectedMarket().itemType === ItemType.Resource ||
-                selectedMarket().itemType === ItemType.Essence;
+                selectedMarket().itemType === ItemType.Essence ||
+                selectedMarket().id === 'signets';
               else exactItemMarket
             "
             [itemType]="selectedMarket().itemType"

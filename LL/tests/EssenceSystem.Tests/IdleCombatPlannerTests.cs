@@ -11,6 +11,45 @@ namespace EssenceSystem.Tests;
 public sealed class IdleCombatPlannerTests
 {
     [Fact]
+    public void Nobility_catchup_consumes_the_paid_window_then_skips_expired_free_gap()
+    {
+        var start = DateTimeOffset.Parse("2027-01-31T12:00:00Z");
+        var end = start.AddMonths(1);
+        var now = end.AddDays(3);
+        var coverage = new Domain.Models.Nobility.NobilityCoverage { StartsAt = start, EndsAt = end };
+        var action = CreateCombatAction(end.AddDays(-10));
+        var planner = CreatePlanner();
+        var windows = Domain.Models.Nobility.NobilityRetention.Windows([coverage], now);
+        var encountered = new HashSet<DateTimeOffset>();
+        for (var batch = 0; batch < 800 && action.NextResolutionAtUtc <= now; batch++)
+        {
+            var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now) { RetentionWindows = windows });
+            Assert.InRange(plan.PlannedEncounterCount, 1, 100);
+            for (var i = 0; i < plan.PlannedEncounterCount; i++)
+                Assert.True(encountered.Add(plan.From.AddSeconds(i * 10)), "An encounter was planned twice.");
+            action.NextResolutionAtUtc = plan.ExecutableUntil;
+        }
+        Assert.Equal(8 * 24 * 360 + 1, encountered.Count);
+        Assert.Contains(end.AddDays(-7), encountered);
+        Assert.DoesNotContain(end, encountered);
+        Assert.DoesNotContain(end.AddDays(1), encountered);
+        Assert.Contains(end.AddDays(2), encountered);
+        Assert.True(action.NextResolutionAtUtc > now);
+    }
+
+    [Fact]
+    public void Activation_does_not_restore_free_work_older_than_one_day()
+    {
+        var activation = DateTimeOffset.Parse("2027-01-31T12:00:00Z");
+        var now = activation.AddHours(1);
+        var action = CreateCombatAction(activation.AddDays(-7));
+        var windows = Domain.Models.Nobility.NobilityRetention.Windows(
+            [new() { StartsAt = activation, EndsAt = activation.AddMonths(1) }], now);
+        var plan = CreatePlanner().CreatePlan(new IdleCombatOrchestrationRequest(action, now) { RetentionWindows = windows });
+        Assert.Equal(activation.AddDays(-1), plan.From);
+    }
+
+    [Fact]
     public void CreatePlan_plans_first_encounter_immediately_when_action_is_due_now()
     {
         var now = DateTimeOffset.Parse("2026-06-23T12:00:00Z");

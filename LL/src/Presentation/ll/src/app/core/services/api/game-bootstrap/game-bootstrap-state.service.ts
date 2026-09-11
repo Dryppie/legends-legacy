@@ -1,4 +1,5 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
+import { NobilityService } from '../nobility/nobility.service';
 import {
   catchError,
   finalize,
@@ -50,6 +51,7 @@ export class GameBootstrapStateService {
     private readonly timeSync: TimeSyncService,
     private readonly stateSync: StateSyncCoordinator,
     private readonly domainVersions: DomainVersionTracker,
+    private readonly nobility: NobilityService,
   ) {
     effect(
       () => {
@@ -130,6 +132,10 @@ export class GameBootstrapStateService {
     setAttributeDefinitions(bootstrap.attributeDefinitions);
     const versions = bootstrap.stateVersions ?? {};
     const acceptedScopes: StateSyncScope[] = [];
+    if (bootstrap.nobility && this.isCurrentSnapshot('nobility', versions['nobility'])) {
+      this.nobility.hydrate(bootstrap.nobility);
+      acceptedScopes.push('nobility');
+    }
     if (this.isCurrentSnapshot('character', versions['character'])) {
       this.auth.updateCharacter(bootstrap.character);
       acceptedScopes.push('character');

@@ -1001,13 +1001,13 @@ export class EssencesComponent implements OnInit {
     const archive = this.essenceState.creatureArchive();
     if (!archive) return 'Loading Creature Focus status.';
     if (this.essenceState.canChangeCreatureFocus()) {
-      return 'You can choose a new target now. After setting one, Creature Focus is locked for 8 hours.';
+      return 'You can choose a new target now. The cooldown is 2 hours with Nobility, otherwise 8 hours.';
     }
     if (archive.creatureFocusAvailableAtUtc) {
       return `New target available ${formatLocalDate(archive.creatureFocusAvailableAtUtc, 'short')}.`;
     }
 
-    return 'Creature Focus is locked for 8 hours after choosing a target.';
+    return 'Creature Focus has a 2-hour cooldown with Nobility, otherwise 8 hours.';
   }
 
   public totalCreatureFocusDurationLabel(

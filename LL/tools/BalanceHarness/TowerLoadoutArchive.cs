@@ -9,6 +9,8 @@ public sealed record LoadoutScope(string Algorithm, TowerSettings Settings, Exec
     IReadOnlyDictionary<string, string> ContentHashes,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? ReportStorage = null);
 
+internal sealed record VerifiedLoadoutInventory(string Hash, IReadOnlyList<LoadoutTrial> Trials);
+
 /// <summary>Shared frozen content and exact trial cache. Arm namespaces deliberately charge both methods equally.</summary>
 public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int maximumBattles)
 {
@@ -71,7 +73,11 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
     }
 
     public static IReadOnlyList<LoadoutTrial> Verify(string output, CancellationToken token = default)
+        => VerifyInventory(output, token).Trials;
+
+    internal static VerifiedLoadoutInventory VerifyInventory(string output, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
         var files = HarnessJson.Read<Dictionary<string, string>>(Path.Combine(output, "files.json"));
         var actual = Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories)
             .Select(p => Path.GetRelativePath(output, p).Replace('\\', '/')).Where(p => p != "files.json").Order(StringComparer.Ordinal);
@@ -85,7 +91,8 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
             ? File.ReadLines(Path.Combine(output, "trials.jsonl")).Select(s => JsonSerializer.Deserialize<LoadoutTrial>(s, HarnessJson.Options)!).ToArray() : [];
         if (!trials.Select(t => t.Id).SequenceEqual(Enumerable.Range(1, trials.Length).Select(i => $"trial-{i:D6}")))
             throw new InvalidDataException("Invalid trial ledger.");
-        return trials;
+        token.ThrowIfCancellationRequested();
+        return new(HarnessJson.Hash(files), trials);
     }
 
     public static async Task<TowerBattleReport> ReplayAsync(string output, string trialId, bool detailed, CancellationToken token = default)

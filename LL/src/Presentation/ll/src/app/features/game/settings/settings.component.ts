@@ -1,4 +1,5 @@
 import { Component, effect, HostListener } from '@angular/core';
+import { NobilityPanelComponent } from './nobility-panel.component';
 import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
@@ -28,6 +29,7 @@ import {
 @Component({
   selector: 'app-settings',
   imports: [
+    NobilityPanelComponent,
     CommonModule,
     SignupComponent,
     FormsModule,

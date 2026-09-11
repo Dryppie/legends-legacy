@@ -16,6 +16,28 @@ import {
 } from './character-overview.component';
 
 describe('CharacterOverviewComponent', () => {
+  it('recognizes the current profile and keeps perks collapsed initially', () => {
+    const component = createComponent();
+    expect(component.isOwnProfile()).toBeTrue();
+    expect(component.showNobilityPerks()).toBeFalse();
+    component.ngOnDestroy();
+  });
+
+  for (const searchedId of ['character-1', 'another-character']) {
+    it(`checks ownership by ID when opening ${searchedId} through profile search`, () => {
+      const characterService = jasmine.createSpyObj<CharacterService>(
+        'CharacterService', ['suggestCharacterNames', 'searchCharacter'],
+        { currentCharacter: signal(createCharacter()).asReadonly() },
+      );
+      characterService.searchCharacter.and.returnValue(of({ ...createOverview(), id: searchedId }));
+      const component = createComponent(characterService, 'Hero');
+      expect(component.isViewingSearchResult()).toBeTrue();
+      expect(component.isOwnProfile()).toBe(searchedId === 'character-1');
+      expect(component.showNobilityPerks()).toBeFalse();
+      component.ngOnDestroy();
+    });
+  }
+
   it('totals nominal threat generation from the attuned Essence loadout', () => {
     expect(
       estimateEssenceThreatPerSecond({
@@ -78,6 +100,7 @@ function createComponent(
     ['suggestCharacterNames'],
     { currentCharacter: signal(createCharacter()).asReadonly() },
   ),
+  initialCharacterName?: string,
 ): CharacterOverviewComponent {
   return new CharacterOverviewComponent(characterService,
 {
@@ -91,7 +114,7 @@ function createComponent(
       journal: signal({ quests: [] }).asReadonly(),
     } as unknown as QuestStateService,
 {
-      snapshot: { queryParamMap: convertToParamMap({}) },
+      snapshot: { queryParamMap: convertToParamMap(initialCharacterName ? { characterName: initialCharacterName } : {}) },
       queryParamMap: of(convertToParamMap({})),
     } as ActivatedRoute,
 { navigate: jasmine.createSpy('navigate') } as unknown as Router

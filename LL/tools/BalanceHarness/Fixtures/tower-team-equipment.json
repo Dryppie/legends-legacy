@@ -1,0 +1,187 @@
+[
+  [
+    {
+      "slot": "MainHand",
+      "definitionId": "plain.maul.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Chest",
+      "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Head",
+      "definitionId": "plain.heavy_helm.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Legs",
+      "definitionId": "plain.heavy_legplates.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Ring",
+      "definitionId": "plain.band.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Necklace",
+      "definitionId": "plain.amulet.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Relic",
+      "definitionId": "plain.vial.rarity.uncommon",
+      "useNativeStyle": false
+    }
+  ],
+  [
+    {
+      "slot": "MainHand",
+      "definitionId": "plain.staff.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Chest",
+      "definitionId": "plain.light_vest.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Head",
+      "definitionId": "plain.light_hood.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Legs",
+      "definitionId": "plain.light_leggings.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Ring",
+      "definitionId": "plain.band.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Necklace",
+      "definitionId": "plain.amulet.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Relic",
+      "definitionId": "plain.vial.rarity.uncommon",
+      "useNativeStyle": false
+    }
+  ],
+  [
+    {
+      "slot": "MainHand",
+      "definitionId": "plain.gauntlets.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Chest",
+      "definitionId": "plain.light_vest.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Head",
+      "definitionId": "plain.light_hood.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Legs",
+      "definitionId": "plain.light_leggings.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Ring",
+      "definitionId": "plain.band.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Necklace",
+      "definitionId": "plain.amulet.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Relic",
+      "definitionId": "plain.vial.rarity.uncommon",
+      "useNativeStyle": false
+    }
+  ],
+  [
+    {
+      "slot": "MainHand",
+      "definitionId": "plain.gauntlets.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Chest",
+      "definitionId": "plain.light_vest.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Head",
+      "definitionId": "plain.light_hood.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Legs",
+      "definitionId": "plain.light_leggings.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Ring",
+      "definitionId": "plain.band.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Necklace",
+      "definitionId": "plain.amulet.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Relic",
+      "definitionId": "plain.vial.rarity.uncommon",
+      "useNativeStyle": false
+    }
+  ],
+  [
+    {
+      "slot": "MainHand",
+      "definitionId": "plain.greatsword.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Chest",
+      "definitionId": "plain.medium_mail.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Head",
+      "definitionId": "plain.medium_helm.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Legs",
+      "definitionId": "plain.medium_greaves.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Ring",
+      "definitionId": "plain.band.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Necklace",
+      "definitionId": "plain.amulet.rarity.uncommon",
+      "useNativeStyle": false
+    },
+    {
+      "slot": "Relic",
+      "definitionId": "plain.vial.rarity.uncommon",
+      "useNativeStyle": false
+    }
+  ]
+]

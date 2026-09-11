@@ -15,22 +15,26 @@ public class CharacterService : ICharacterService
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
     private readonly ICharacterExperienceProgressionProvider _experienceProgression;
     private readonly EquipmentCatalog? _equipmentCatalog;
+    private readonly IEssenceLoadoutLimitService? _essenceLimits;
 
     public CharacterService(
         ICharacterRepository characterRepository,
         IEssenceCombatLoadoutResolver essenceLoadouts,
         ICharacterExperienceProgressionProvider experienceProgression,
-        EquipmentCatalog? equipmentCatalog = null)
+        EquipmentCatalog? equipmentCatalog = null,
+        IEssenceLoadoutLimitService? essenceLimits = null)
     {
         _characterRepository = characterRepository;
         _essenceLoadouts = essenceLoadouts;
         _experienceProgression = experienceProgression;
         _equipmentCatalog = equipmentCatalog;
+        _essenceLimits = essenceLimits;
     }
 
     public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.CreateCharacterAsync(userId, username, cancellationToken);
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         return character;
     }
@@ -38,6 +42,7 @@ public class CharacterService : ICharacterService
     public async Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterByUserIdAsync(currentUserId, cancellationToken);
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         return character;
     }
@@ -45,6 +50,7 @@ public class CharacterService : ICharacterService
     public async Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         return character;
     }
@@ -54,6 +60,7 @@ public class CharacterService : ICharacterService
         var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(currentUserId, cancellationToken);
         if (character == null) return null;
 
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         ApplyCombatAttributes(character);
         return character;
@@ -64,6 +71,7 @@ public class CharacterService : ICharacterService
         var character = await _characterRepository.GetCharacterOverviewByCharacterNameAsync(characterName, cancellationToken);
         if (character == null) return null;
 
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         ApplyCombatAttributes(character);
         return character;
@@ -72,6 +80,7 @@ public class CharacterService : ICharacterService
     public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         return character;
     }
@@ -79,6 +88,7 @@ public class CharacterService : ICharacterService
     public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         return character;
     }
@@ -89,6 +99,7 @@ public class CharacterService : ICharacterService
     public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+        await SetPresetAvailabilityAsync(character, cancellationToken);
         SetExperienceRequirement(character);
         return character;
     }
@@ -118,6 +129,13 @@ public class CharacterService : ICharacterService
         AttributeCalculator.CalculateBaseAttributes(
             character,
             loadout.AttributeModifiers.Concat(setModifiers));
+    }
+
+    private async Task SetPresetAvailabilityAsync(Character? character, CancellationToken ct)
+    {
+        if (character is null || character.EssenceLoadouts.Count == 0) return;
+        EssenceLoadoutSelection.SetAvailability(character.EssenceLoadouts,
+            _essenceLimits is null ? 3 : await _essenceLimits.GetLoadoutLimitAsync(character.Id, ct));
     }
 
     private void SetExperienceRequirement(Character? character)

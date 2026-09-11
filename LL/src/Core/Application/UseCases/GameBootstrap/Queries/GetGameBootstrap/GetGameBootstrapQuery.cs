@@ -24,18 +24,21 @@ public sealed class GetGameBootstrapQueryHandler
     private readonly TimeProvider _timeProvider;
     private readonly IAccountRestrictionIndex _accountRestrictions;
     private readonly IStateSyncService _stateSync;
+    private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
 
     public GetGameBootstrapQueryHandler(
         IMapper mapper,
         ISender sender,
         IAccountRestrictionIndex accountRestrictions,
         IStateSyncService stateSync,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null,
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
     {
         _mapper = mapper;
         _sender = sender;
         _accountRestrictions = accountRestrictions;
         _stateSync = stateSync;
+        _nobility = nobility;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
@@ -81,6 +84,8 @@ public sealed class GetGameBootstrapQueryHandler
 
         var snapshot = new GameBootstrapSnapshot
         {
+            Nobility = _nobility is null ? null : _mapper.Map<Application.UseCases.Nobility.Dtos.NobilityStatusDto>(
+                await _nobility.GetStatusAsync(request.UserId, request.CharacterId, cancellationToken)),
             Character = characterResponse.Data,
             QuestJournal = questJournal,
             AreaAccess = areaAccess,

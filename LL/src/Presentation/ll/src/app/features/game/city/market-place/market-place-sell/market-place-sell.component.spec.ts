@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../../../core/services/api/nobility/nobility.testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
@@ -8,8 +9,23 @@ import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { MarketPlaceSellComponent } from './market-place-sell.component';
 
 describe('MarketPlaceSellComponent Blueprints', () => {
+  it('lets an alpha player select a Signet stack for sale', () => {
+    TestBed.configureTestingModule({ providers: provideFreeNobilityForTests() });
+    const signet = resource('signet');
+    signet.itemInstance.itemBase.itemType = ItemType.Misc;
+    const component = TestBed.runInInjectionContext(() => new MarketPlaceSellComponent(
+      { items: signal([signet, resource('ore')]), load: () => undefined } as unknown as InventoryStateService,
+      { load: () => undefined, myListings: signal([]), myBuyOrders: signal([]), buyOrders: signal([]) } as unknown as MarketplaceStateService,
+    ));
+    component.itemType = ItemType.Misc;
+    component.category = 'signets';
+    expect(component.inventoryTitle).toBe('Signets');
+    expect(component.filteredItems).toEqual([signet]);
+    component.selectItem(signet);
+    expect(component.pendingItem()).toEqual(signet);
+  });
   it('lists an unbound Blueprint stack and excludes bound Blueprints and other resources', () => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: provideFreeNobilityForTests() });
     const blueprint = resource('item.blueprint_fury');
     const bound = resource('item.blueprint_arcane', true);
     const items = [blueprint, bound, resource('item.monster_core.lesser'), resource('ore')];

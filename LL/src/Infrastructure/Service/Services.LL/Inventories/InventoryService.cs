@@ -73,6 +73,7 @@ public class InventoryService : IInventoryService
     {
         var inventoryItem = await _inventoryRepository.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);
         if (inventoryItem == null) return false;
+        if (inventoryItem.ItemInstance.ItemBaseId == Domain.Models.Nobility.NobilityBenefits.SignetItemId) return false;
 
         inventoryItem.Quantity--;
         if (inventoryItem.Quantity <= 0)

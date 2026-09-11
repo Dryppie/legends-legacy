@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../../../core/services/api/nobility/nobility.testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RaidRun } from '../../../../../core/services/api/raid/raid.service';
@@ -11,7 +12,7 @@ describe('RaidPartyBuilderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RaidPartyBuilderComponent],
-      providers: [
+      providers: [...provideFreeNobilityForTests(),
         { provide: Router, useValue: { navigate: jasmine.createSpy() } },
         {
           provide: ChatService,

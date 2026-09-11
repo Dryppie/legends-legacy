@@ -538,6 +538,8 @@ public sealed class LiveOpsService(
         }
 
         var normalizedItemBaseId = itemBaseId?.Trim() ?? string.Empty;
+        if (normalizedItemBaseId == Domain.Models.Nobility.NobilityBenefits.SignetItemId)
+            return AdministrationOperationResult<ItemGrantOperation>.Fail("signet-grant-required", "Use the audited Alpha Signets grant action.");
         if (normalizedItemBaseId.Length == 0)
         {
             return AdministrationOperationResult<ItemGrantOperation>.Fail(

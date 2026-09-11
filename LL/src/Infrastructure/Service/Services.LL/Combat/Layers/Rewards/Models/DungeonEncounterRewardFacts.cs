@@ -10,5 +10,6 @@ public sealed record DungeonEncounterRewardFacts(
     IReadOnlyList<Creature> HostileCreatures,
     CombatResult CombatResult)
 {
+    public DateTimeOffset EarnedAt { get; init; }
     public bool IsVictory => Outcome == BattleOutcome.Victory;
 }

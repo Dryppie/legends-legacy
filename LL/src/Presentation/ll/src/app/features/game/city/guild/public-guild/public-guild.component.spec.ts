@@ -19,7 +19,6 @@ describe('PublicGuildComponent', () => {
     id: 'other-guild',
     name: 'Other Guild',
     tag: 'OG',
-    description: 'A guild for adventurers.',
     maxMembers: 13,
     members: [
       {
@@ -77,7 +76,7 @@ describe('PublicGuildComponent', () => {
     expect(page.textContent).toContain('42');
     expect(page.textContent).toContain('Guild Headquarters');
     expect(page.textContent).toContain('[OG]');
-    expect(page.textContent).toContain('A guild for adventurers.');
+    expect(page.textContent).not.toContain('No description yet.');
     expect(page.textContent).toContain('1 / 13');
     const tabs = Array.from(
       page.querySelectorAll<HTMLButtonElement>('[role="tab"]'),

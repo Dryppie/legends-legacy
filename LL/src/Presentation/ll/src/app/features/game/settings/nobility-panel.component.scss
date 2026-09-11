@@ -1,0 +1,146 @@
+:host {
+  display: block;
+  min-width: 0;
+  container: nobility-settings / inline-size;
+}
+
+.nobility-header,
+.nobility-benefits,
+.nobility-signets,
+.nobility-appearance,
+.nobility-feedback {
+  padding: var(--ll-space-4);
+}
+
+.nobility-header,
+.nobility-group-heading {
+  border-bottom: 1px solid var(--ll-color-border);
+}
+
+.nobility-layout,
+.nobility-benefit-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nobility-benefits {
+  min-width: 0;
+  container: nobility-benefits / inline-size;
+}
+
+.nobility-benefit-columns {
+  gap: var(--ll-space-5) var(--ll-space-6);
+}
+
+.nobility-benefit-column {
+  display: grid;
+  align-content: start;
+  gap: var(--ll-space-5);
+  min-width: 0;
+}
+
+.nobility-group-heading {
+  padding-bottom: var(--ll-space-2);
+}
+
+.nobility-benefit-list {
+  display: grid;
+  gap: var(--ll-space-3);
+  margin-top: var(--ll-space-3);
+}
+
+.nobility-benefit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) fit-content(65%);
+  align-items: baseline;
+  gap: var(--ll-space-3);
+  line-height: 1.6;
+}
+
+.nobility-benefit-row dd {
+  text-align: right;
+}
+
+.nobility-benefit-note {
+  margin-top: var(--ll-space-5);
+  line-height: 1.8;
+}
+
+.nobility-signets {
+  min-width: 0;
+  border-top: 1px solid var(--ll-color-border);
+}
+
+.nobility-redemption,
+.nobility-purchase-note {
+  margin-top: var(--ll-space-5);
+  padding-top: var(--ll-space-4);
+  border-top: 1px solid var(--ll-color-border);
+}
+
+.nobility-redemption-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--ll-space-2);
+}
+
+.nobility-quantity {
+  display: grid;
+  grid-template-columns: 1.75rem 2.75rem 1.75rem;
+  min-height: 2.5rem;
+}
+
+.nobility-quantity button {
+  color: var(--ll-color-primary);
+}
+
+.nobility-quantity button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.nobility-quantity input {
+  width: 100%;
+  border-inline: 1px solid var(--ll-color-border);
+  background: transparent;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.nobility-quantity input::-webkit-inner-spin-button,
+.nobility-quantity input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.nobility-quantity button:focus-visible,
+.nobility-quantity input:focus-visible {
+  outline: 2px solid var(--ll-color-primary);
+  outline-offset: -2px;
+}
+
+.nobility-purchase-note {
+  line-height: 1.8;
+}
+
+.nobility-appearance {
+  border-top: 1px solid var(--ll-color-border);
+}
+
+@container nobility-benefits (min-width: 34rem) {
+  .nobility-benefit-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container nobility-settings (min-width: 56rem) {
+  .nobility-layout {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+
+  .nobility-signets {
+    border-top: 0;
+    border-left: 1px solid var(--ll-color-border);
+  }
+}

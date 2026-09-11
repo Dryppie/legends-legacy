@@ -17,7 +17,7 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
         // offline interval instead of only the final encounter's rewards. The
         // response is compacted by item base so a 24-hour return stays bounded.
         lastCombatResult.Loot = SummarizeItems(outcome.TotalLoot);
-        lastCombatResult.ExperienceGained = outcome.TotalExperience;
+        lastCombatResult.ExperienceGained = checked(outcome.TotalExperience + outcome.AppliedNobilityExperience);
 
 
         var summary = new CombatSummary
@@ -26,7 +26,7 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
             Wins = facts.Encounters.Count(x => x.Outcome == BattleOutcome.Victory),
             Losses = facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
             Draws = facts.Encounters.Count(x => x.Outcome == BattleOutcome.Draw),
-            TotalExperience = outcome.TotalExperience,
+            TotalExperience = checked(outcome.TotalExperience + outcome.AppliedNobilityExperience),
             TotalCinders = outcome.TotalCinders,
             TotalSoulstones = outcome.TotalSoulstones,
             RewardBreakdown = new CombatRewardBreakdown

@@ -10,7 +10,6 @@ public sealed class GuildPublicDto : IMapFrom<Guild>
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Tag { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public int MaxMembers { get; set; }
     public List<GuildPublicMemberDto> Members { get; set; } = [];
     public List<GuildPublicBuildingDto> Buildings { get; set; } = [];

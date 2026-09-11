@@ -297,6 +297,10 @@ export class LiveOpsApiService {
     );
   }
 
+  grantAlphaSignets(characterId: string, body: { operationId: string; quantity: number; reason: string }): Promise<ApiResponse<unknown>> {
+    return this.post(`/api/liveops/characters/${characterId}/signets`, body);
+  }
+
   previewGrantItems(characterId: string, body: object): Promise<ApiResponse<ActionPreview>> {
     return this.post(
       `/api/liveops/characters/${characterId}/item-grants/preview`,

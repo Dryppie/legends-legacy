@@ -5,6 +5,12 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Prophecies;
 using Services.LL.Prophecies;
+using Microsoft.EntityFrameworkCore;
+using Domain.Models.Nobility;
+using Persistence.LL;
+using Persistence.LL.Repositories.Nobility;
+using Services.LL.Nobility;
+using Application.Interfaces.Services.LL.Nobility;
 
 namespace EssenceSystem.Tests;
 
@@ -223,7 +229,34 @@ public sealed partial class ProphecyLifecycleTests
         Assert.Equal(7, fixture.Repository.Instances.Count);
     }
 
-    private static Fixture CreateFixture(IReadOnlyList<ProphecyDefinition>? definitions = null, bool progression = false)
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Nobility_extra_free_reroll_preserves_paid_costs_and_same_day_expiry_limits(bool activateAfterPaidReroll)
+    {
+        await using var db = new LLDbContext(new DbContextOptionsBuilder<LLDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        var nobility = new NobilityService(new NobilityRepository(db), TimeProvider.System);
+        var fixture = CreateFixture(nobility: nobility);
+        db.Characters.Add(fixture.Character);
+        db.Set<NobilityCoverage>().Add(new NobilityCoverage { AccountId = fixture.PlayerId,
+            StartsAt = activateAfterPaidReroll ? Now.AddMinutes(2) : Now, EndsAt = Now.AddMinutes(4), CalendarMonths = 1 });
+        await db.SaveChangesAsync();
+        await fixture.Service.GetOverviewAsync(fixture.PlayerId, fixture.CharacterId, Now, default);
+        var costs = activateAfterPaidReroll ? new[] { 0, 40, 0, 80 } : new[] { 0, 0, 40, 80 };
+        for (var minute = 0; minute < 4; minute++)
+        {
+            var before = fixture.Character.FateEcho;
+            Assert.True((await fixture.Service.RerollAsync(fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(minute), default)).Succeeded);
+            Assert.Equal(costs[minute], before - fixture.Character.FateEcho);
+        }
+        Assert.False((await fixture.Service.RerollAsync(fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(4), default)).Succeeded);
+        var state = Assert.Single(fixture.Repository.RerollStates);
+        Assert.Equal(2, state.FreeRerollsUsed);
+        Assert.Equal(2, state.PaidRerollsUsed);
+        Assert.Equal(120, state.FateEchoSpent);
+    }
+
+    private static Fixture CreateFixture(IReadOnlyList<ProphecyDefinition>? definitions = null, bool progression = false, INobilityService? nobility = null)
     {
         var playerId = Guid.NewGuid();
         var characterId = Guid.NewGuid();
@@ -248,7 +281,7 @@ public sealed partial class ProphecyLifecycleTests
             null!,
             null!,
             null!,
-            null!);
+            null!, nobility: nobility);
 
         return new Fixture(playerId, characterId, character, repository, service);
     }

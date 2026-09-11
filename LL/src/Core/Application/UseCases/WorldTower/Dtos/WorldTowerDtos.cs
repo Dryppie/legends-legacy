@@ -46,7 +46,8 @@ public sealed record TowerFloorDetailDto(
     IReadOnlyList<TowerUnlockDto> Unlocks,
     int FirstClearTowerTokens,
     int EchoTowerTokens,
-    bool EchoRewardClaimedThisWeek);
+    bool EchoRewardClaimedThisWeek,
+    string RewardTitleName = "");
 
 public sealed record TowerGuardianInfoDto(
     string Name,

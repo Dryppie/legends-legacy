@@ -8,6 +8,8 @@ public sealed class DailyProphecyRerollState
     public DateTimeOffset PeriodStart { get; set; }
     public DateTimeOffset PeriodEnd { get; set; }
     public int RerollsUsed { get; set; }
+    public int FreeRerollsUsed { get; set; }
+    public int PaidRerollsUsed { get; set; }
     public long FateEchoSpent { get; set; }
     public string ShownDefinitionIdsJson { get; set; } = "[]";
     public DateTimeOffset CreatedAt { get; set; }

@@ -147,7 +147,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 BonusAdjustedExperience: bonusAdjustedExperience,
                 ExperienceGained: experience,
                 CindersGained: cinders,
-                Loot: loot));
+                Loot: loot) { EligibleBaseExperience = encounter.IsVictory ? areaBaseExperience : areaBaseExperience.TakeBpsPortion(defeatExperienceRetentionBps) });
         }
 
         if (_progression != null)

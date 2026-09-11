@@ -48,7 +48,8 @@ public sealed class RaidService(
     TimeProvider timeProvider,
     JsonSerializerOptions jsonOptions,
     IOptions<RaidOptions> options,
-    ILogger<RaidService> logger) : IRaidService
+    ILogger<RaidService> logger,
+    Application.Interfaces.Services.LL.Essences.IEssenceLoadoutLimitService? essenceLimits = null) : IRaidService
 {
     private const int MaximumOpenRaidsPerBoss = 20;
     private const int BattlePlanSampleCount = 10;
@@ -1643,6 +1644,8 @@ public sealed class RaidService(
             .Where(loadout => loadout.CharacterId == characterId)
             .Include(loadout => loadout.Slots)
             .ToArrayAsync(cancellationToken);
+        EssenceLoadoutSelection.SetAvailability(loadouts,
+            essenceLimits is null ? 3 : await essenceLimits.GetLoadoutLimitAsync(characterId, cancellationToken));
         var raidLoadout = EssenceLoadoutSelection.Select(loadouts, EssenceCombatActivity.Raid);
         var equippedEssenceCount = raidLoadout?.Slots.Count(slot => slot.PlayerEssenceId.HasValue) ?? 0;
         return equippedEssenceCount < boss.RequiredEquippedEssences

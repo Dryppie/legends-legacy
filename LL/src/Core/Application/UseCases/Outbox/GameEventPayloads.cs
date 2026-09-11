@@ -94,7 +94,8 @@ public sealed record WorldTowerChatAnnouncementPayload(
     Guid MessageId,
     string Body,
     string TargetUrl,
-    DateTimeOffset SentAt);
+    DateTimeOffset SentAt,
+    Guid? TargetCharacterId = null);
 
 public sealed record RaidChatAnnouncementPayload(
     Guid RaidRunId,

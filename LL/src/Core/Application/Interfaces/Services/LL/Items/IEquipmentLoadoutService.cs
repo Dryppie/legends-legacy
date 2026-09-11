@@ -9,6 +9,7 @@ public interface IEquipmentLoadoutService
 {
     Task<List<EquipmentLoadout>> GetAsync(Guid characterId, CancellationToken ct);
     Task<EquipmentEquipResult> SaveAsync(Guid characterId, Guid? id, string name, CancellationToken ct);
+    Task<EquipmentEquipResult> CopyAsync(Guid characterId, Guid sourceId, Guid targetId, CancellationToken ct);
     Task<EquipmentEquipResult> DeleteAsync(Guid characterId, Guid id, CancellationToken ct);
     Task<EquipmentEquipResult> ApplyAsync(Guid characterId, Guid id, CancellationToken ct);
     Task<EquipmentEquipResult> SetActivitiesAsync(Guid characterId, Guid id, IReadOnlyList<EssenceCombatActivity> activities, CancellationToken ct);

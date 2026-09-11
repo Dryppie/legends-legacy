@@ -23,7 +23,6 @@ export interface GuildSimple {
   id: string;
   name: string;
   ownerName: string;
-  description?: string;
   memberCount: number;
   maxMembers: number;
   upgrades: number;

@@ -25,6 +25,10 @@ namespace API.LL.Controllers.V1;
 public class EquipmentController : BaseController
 {
     public sealed record SaveEquipmentLoadoutRequest(Guid? Id, string Name);
+    public sealed record CopyEquipmentLoadoutRequest(Guid TargetId);
+    [HttpPost("loadouts/{sourceId:guid}/copy")]
+    public async Task<ActionResult<Response<bool>>> CopyLoadout(Guid sourceId, CopyEquipmentLoadoutRequest request) =>
+        await Mediator.Send(new Application.UseCases.Equipments.Commands.CopyEquipmentLoadout.CopyEquipmentLoadoutCommand(CurrentCharacterGuid, sourceId, request.TargetId));
     public sealed record EquipmentLoadoutActivitiesRequest(IReadOnlyList<EssenceCombatActivity> Activities);
 
     [HttpGet("loadouts")]

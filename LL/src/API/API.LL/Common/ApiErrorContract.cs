@@ -4,6 +4,8 @@ namespace API.LL.Common;
 
 public static class ApiErrorContract
 {
+    private static readonly object ErrorIdentityItemKey = new();
+
     public const string BusinessCategory = "business";
     public const string ConflictCategory = "conflict";
     public const string SystemCategory = "system";
@@ -68,11 +70,25 @@ public static class ApiErrorContract
         string category,
         string message)
     {
+        // Share only the stable error identity with request logging, never response bodies or messages.
+        context.Items[ErrorIdentityItemKey] = (code, category);
         details.Extensions["code"] = code;
         details.Extensions["category"] = category;
         details.Extensions["message"] = message;
         details.Extensions["requestId"] =
             RequestLoggingMiddleware.GetRequestId(context);
+    }
+
+    internal static (string Code, string Category) GetLogIdentity(HttpContext context)
+    {
+        if (context.Items.TryGetValue(ErrorIdentityItemKey, out var identity)
+            && identity is ValueTuple<string, string> captured)
+        {
+            return captured;
+        }
+
+        var defaults = GetDefaults(context.Response.StatusCode);
+        return (defaults.Code, defaults.Category);
     }
 
     private static string? GetStringExtension(ProblemDetails details, string key) =>

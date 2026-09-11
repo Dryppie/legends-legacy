@@ -17,6 +17,12 @@ public static class Program
                 Console.WriteLine("BalanceHarness run --output <new-directory> [--seed <int>] [--content-root <API.LL-directory>] [--scenario <json>] [--detailed]");
                 Console.WriteLine("BalanceHarness suite --output <new-directory> [--seed <int>] [--suite <json>] [--samples <per-cell>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower --output <new-directory> [--scenario <json>] [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-discover --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] (discovery only)");
+                Console.WriteLine("BalanceHarness tower-boss-discovery-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-boss-study --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-study-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-balance-evaluate --definition <frozen-confirmation-json> --sources <cell-run-map-json> --output <new-directory>");
                 Console.WriteLine("BalanceHarness tower-benchmark --output <new-directory> [--catalog <json>] [--seed <int>] [--samples <per-cell>] [--reference <benchmark-directory>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-compare --reference <benchmark-directory> --run <benchmark-directory> --output <new-directory>");
                 Console.WriteLine("BalanceHarness tower-search --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
@@ -25,6 +31,10 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower-loadout-reliability --output <new-directory> [--definition <json>] [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-party-search --output <new-directory> [--definition <json>] [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-party-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-boss-plan --output <new-definition.json> --floor <1-15> --slots <4-10> [--seed <int>] [--intent <any|focused-damage|add-clearing|protection|sustain|denial>] [--effort <coverage|thorough>] [--content-root <directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-search --definition <json> --output <new-directory> [--content-root <directory>] [--catalogs-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-boss-inventory --output <new-directory> [--content-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-party-progression --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-whole-party --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-loadout-replay --run <pilot-directory> --battle <trial-id> [--detailed]");
@@ -55,6 +65,12 @@ public static class Program
                 "run" => new[] { "--output", "--seed", "--content-root", "--scenario", "--detailed" },
                 "suite" => new[] { "--output", "--seed", "--content-root", "--suite", "--samples" },
                 "tower" => new[] { "--output", "--content-root", "--scenario" },
+                "tower-boss-discovery-prepare" => new[] { "--definition", "--output", "--content-root" },
+                "tower-boss-discover" => new[] { "--definition", "--output", "--content-root" },
+                "tower-boss-discovery-verify" => new[] { "--run" },
+                "tower-boss-study" => new[] { "--definition", "--output", "--content-root" },
+                "tower-boss-study-verify" => new[] { "--run" },
+                "tower-balance-evaluate" => new[] { "--definition", "--sources", "--output" },
                 "tower-benchmark" => new[] { "--output", "--content-root", "--catalog", "--seed", "--samples", "--reference" },
                 "tower-compare" => new[] { "--reference", "--run", "--output" },
                 "tower-search" => new[] { "--output", "--content-root", "--catalogs-root" },
@@ -63,6 +79,10 @@ public static class Program
                 "tower-loadout-reliability" => new[] { "--output", "--definition", "--content-root", "--catalogs-root" },
                 "tower-party-search" => new[] { "--output", "--definition", "--content-root", "--catalogs-root" },
                 "tower-party-verify" => new[] { "--run" },
+                "tower-boss-plan" => new[] { "--output", "--floor", "--slots", "--seed", "--intent", "--effort", "--content-root", "--catalogs-root" },
+                "tower-boss-search" => new[] { "--definition", "--output", "--content-root", "--catalogs-root" },
+                "tower-boss-verify" => new[] { "--run" },
+                "tower-boss-inventory" => new[] { "--output", "--content-root" },
                 "tower-party-progression" => new[] { "--output", "--content-root", "--catalogs-root" },
                 "tower-whole-party" => new[] { "--output", "--content-root", "--catalogs-root" },
                 "tower-loadout-replay" => new[] { "--run", "--battle", "--detailed" },
@@ -91,6 +111,53 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-boss-study")
+            {
+                var report = await TowerBossStudy.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--output"), TowerBossDiscovery.Read(Required(options, "--definition")), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"Tower study: {report.Status}; assessment: {report.Conclusion?.OverallAssessment.ToString() ?? "Unavailable"}; generated viability: {report.Conclusion?.GeneratedViability.ToString() ?? "Unavailable"}.");
+                return report.ExitCode;
+            }
+            if (command == "tower-boss-study-verify")
+            {
+                var report = await TowerBossStudy.VerifyAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Tower study reconstructed: {report.Status}; assessment: {report.Conclusion?.OverallAssessment.ToString() ?? "Unavailable"}. No new combat executed.");
+                return report.Status == "Complete" ? 0 : 3;
+            }
+            if (command == "tower-boss-discover")
+            {
+                var report = await TowerBossDiscoveryRun.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--output"), TowerBossDiscovery.Read(Required(options, "--definition")), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"Independent discovery: {report.Status}; {report.ActualBattles} combats. Selection validation and confirmation have not run.");
+                return report.Status switch { "Complete" => 0, "Cancelled" => 130, "Incomplete" => 3, _ => 2 };
+            }
+            if (command == "tower-boss-discovery-verify")
+            {
+                var report = await TowerBossDiscoveryRun.VerifyAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Independent discovery reconstructed: {report.Status}; {report.ActualBattles} recorded combats. No new combat executed.");
+                return report.Status == "Complete" ? 0 : 3;
+            }
+            if (command == "tower-boss-discovery-prepare")
+            {
+                var definition = TowerBossDiscovery.Read(Required(options, "--definition"));
+                var cost = TowerBossDiscovery.Validate(options.GetValueOrDefault("--content-root") ?? FindContentRoot(), definition);
+                var destination = Required(options, "--output");
+                if (Path.Exists(destination)) throw new IOException("Choose a new discovery preparation directory.");
+                Directory.CreateDirectory(destination);
+                HarnessJson.WriteNew(Path.Combine(destination, "definition.json"), definition);
+                HarnessJson.WriteNew(Path.Combine(destination, "cost.json"), cost);
+                if (definition.Mode == TowerBossDiscovery.Independent)
+                    HarnessJson.WriteNew(Path.Combine(destination, "generation-inputs.json"), TowerBossDiscovery.GenerationInputs(definition));
+                Console.WriteLine($"Validated schema-3 discovery contract: at most {cost.Total} combats. Preparation only; no search executed.");
+                return 0;
+            }
+            if (command == "tower-balance-evaluate")
+            {
+                var report = TowerBalanceRuns.Evaluate(Required(options, "--definition"), Required(options, "--sources"),
+                    Required(options, "--output"), cancellation.Token);
+                Console.WriteLine($"Tower balance: {report.Assessment}; {report.FamilySize} declared confirmation cells. {report.Scope}");
+                return report.ExitCode;
+            }
             if (command == "tower-party-progression")
             {
                 await TowerPartyProgression.RunBatchAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
@@ -118,6 +185,42 @@ public static class Program
                     options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures"), Required(options, "--output"),
                     definition, cancellation.Token, Console.WriteLine);
                 Console.WriteLine($"{report.Status}; {report.ActualBattles} trials; {report.Selection.Count} frozen parties confirmed. Results are descriptive.");
+                return 0;
+            }
+            if (command == "tower-boss-verify")
+            {
+                var report = await TowerBossSearch.VerifyAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Verified {report.ActualBattles} combats, frozen boss selection and all-floor transfer.");
+                return 0;
+            }
+            if (command is "tower-boss-plan" or "tower-boss-search" or "tower-boss-inventory")
+            {
+                var contentRoot = options.GetValueOrDefault("--content-root") ?? FindContentRoot();
+                var catalogs = options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures");
+                var output = Required(options, "--output");
+                if (command == "tower-boss-inventory")
+                {
+                    if (Path.Exists(output)) throw new IOException("Choose a new inventory directory.");
+                    var inventory = TowerBossInventory.Create(contentRoot, TowerBundle.ReadSettings(contentRoot).Threat);
+                    Directory.CreateDirectory(output);
+                    HarnessJson.WriteNew(Path.Combine(output, "boss-profiles.json"), inventory);
+                    File.WriteAllText(Path.Combine(output, "boss-profiles.md"), TowerBossInventory.Markdown(inventory));
+                    Console.WriteLine($"Profiled {inventory.Bosses.Count} bosses; authored facts and counter hypotheses, no quality claim.");
+                    return 0;
+                }
+                if (command == "tower-boss-plan")
+                {
+                    var definition = TowerBossSearch.Definition(contentRoot, catalogs,
+                        int.Parse(Required(options, "--floor"), CultureInfo.InvariantCulture), int.Parse(Required(options, "--slots"), CultureInfo.InvariantCulture),
+                        int.Parse(options.GetValueOrDefault("--seed") ?? "20260910", CultureInfo.InvariantCulture),
+                        options.GetValueOrDefault("--intent") ?? "any", options.GetValueOrDefault("--effort") ?? "coverage");
+                    HarnessJson.WriteNew(output, definition);
+                    Console.WriteLine($"Frozen plan: at most {TowerBossSearch.Validate(definition)} actual combats. No experiment run.");
+                    return 0;
+                }
+                var report = await TowerBossSearch.RunAsync(contentRoot, catalogs, output, TowerBossSearch.Read(Required(options, "--definition")),
+                    cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"{report.Status}; {report.ActualBattles} combats; {report.Selection.Count} frozen boss alternatives with 15-floor transfer. Descriptive evidence only.");
                 return 0;
             }
             if (command == "tower-loadout-verify")

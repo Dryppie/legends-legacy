@@ -12,7 +12,8 @@ public enum EconomyEventType
     GuildVaultReturn,
     GuildVaultWithdrawal,
     QuestReward,
-    EquipmentUpgrade
+    EquipmentUpgrade,
+    NobilityReward
 }
 
 public enum EconomyAssetType

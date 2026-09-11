@@ -9,9 +9,11 @@ public sealed class EssenceSlotUnlockService : IEssenceSlotUnlockService
         => EssenceSlotProgression.GetUnlockedSlotCount(characterLevel);
 }
 
-public sealed class EssenceLoadoutLimitService : IEssenceLoadoutLimitService
+public sealed class EssenceLoadoutLimitService(Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null,
+    TimeProvider? time = null) : IEssenceLoadoutLimitService
 {
-    public int GetLoadoutLimit(Guid characterId) => 3;
+    public async Task<int> GetLoadoutLimitAsync(Guid characterId, CancellationToken ct) => nobility is null ? 3 :
+        (await nobility.GetBenefitsAsync(characterId, nobility.CombatEvaluationTime ?? (time ?? TimeProvider.System).GetUtcNow(), ct)).EssenceLoadouts;
 }
 
 public sealed class SystemRandomProvider : IRandomProvider

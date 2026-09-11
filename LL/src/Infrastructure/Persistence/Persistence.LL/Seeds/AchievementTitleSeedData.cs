@@ -51,6 +51,22 @@ internal static class AchievementTitleSeedData
         ValidateUniqueKeys(document.Achievements.Select(x => x.Key), "achievement");
         ValidateUniqueKeys(document.Titles.Select(x => x.Key), "title");
         ValidateTitleSources(document);
+        var towerPath = Path.Combine(dataPath, "world-tower", "tower-floors.json");
+        if (File.Exists(towerPath))
+        {
+            var tower = LoadJson<Domain.Models.WorldTower.WorldTowerCatalogDocument>(towerPath);
+            var floors = tower.Floors.Where(f => f.FloorNumber <= (tower.ReleasedThroughFloor ?? int.MaxValue)).ToArray();
+            var rewardNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var rewardKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var floor in floors)
+            {
+                var title = document.Titles.SingleOrDefault(t => t.Key == floor.RewardTitleKey);
+                if (title is null || !title.IsActive || title.Scope != TitleScope.Character
+                    || title.Category != AchievementCategory.WorldTower
+                    || !rewardKeys.Add(floor.RewardTitleKey) || !rewardNames.Add(title.Name!))
+                    throw new InvalidOperationException($"World Tower floor {floor.FloorNumber} requires an active, unique character title reward.");
+            }
+        }
 
         return new AchievementTitleSeedCatalog(
             [.. document.Achievements

@@ -16,7 +16,8 @@ public interface IAchievementService
         Guid characterId,
         string titleKey,
         string? metadataJson,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        bool announce = true);
     Task<EquippedTitleDto?> EquipTitleAsync(
         Guid accountId,
         Guid characterId,

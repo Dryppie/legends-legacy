@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../../../../core/services/api/nobility/nobility.testing';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
@@ -27,7 +28,7 @@ describe('GuildRankingsComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [GuildRankingsComponent],
-      providers: [
+      providers: [...provideFreeNobilityForTests(),
         {
           provide: GuildStateService,
           useValue: {

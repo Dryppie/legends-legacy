@@ -51,9 +51,7 @@ export class CombatStylesComponent {
   );
   readonly battleActionLabel = computed(() => {
     if (this.state.busy()) return 'Saving…';
-    return this.state.draft().combatStyleId
-      ? `Take ${this.state.selected()?.definition.name} into battle`
-      : 'Unequip Combat Style';
+    return `Take ${this.state.selected()?.definition.name} into battle`;
   });
 
   openRefinements(dialog: HTMLDialogElement) {
@@ -88,7 +86,6 @@ export class CombatStylesComponent {
         label: entry.definition.name,
         disabled,
       })),
-      { key: 'empty-slot', label: 'Empty slot', disabled },
     ];
   });
   readonly upgradeSlots = [5, 8];
@@ -224,7 +221,7 @@ export class CombatStylesComponent {
   selectStyleTab(key: string) {
     if (!this.styleTabs().some((tab) => tab.key === key && !tab.disabled))
       return;
-    this.state.chooseStyle(key === 'empty-slot' ? null : key);
+    this.state.chooseStyle(key);
   }
 
   refinementStatus(id: string | null): string {

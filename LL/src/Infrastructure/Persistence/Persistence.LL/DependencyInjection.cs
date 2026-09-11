@@ -85,6 +85,7 @@ public static class DependencyInjection
 
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+        services.AddScoped<Domain.Models.Nobility.INobilityRepository, Repositories.Nobility.NobilityRepository>();
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
         services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();
         services.AddScoped<IAccountTemporalCorrelationRepository, AccountTemporalCorrelationRepository>();
@@ -130,6 +131,7 @@ public static class DependencyInjection
 
         services.AddScoped<IRegionRepository, RegionRepository>();
         services.AddScoped<IWorldTowerProgressRepository, WorldTowerProgressRepository>();
+        services.AddScoped<IWorldTowerTitleRepository, WorldTowerTitleRepository>();
         services.AddScoped<IWorldTowerRallyRepository, WorldTowerRallyRepository>();
 
         services.AddScoped<IProphecyRepository, ProphecyRepository>();

@@ -9,6 +9,7 @@ public sealed record IdleCombatOrchestrationRequest(
     bool CaptureFinalEncounterLog = true)
     : CombatOrchestrationRequest(CombatMode.Idle)
 {
+    public IReadOnlyList<Domain.Models.Nobility.NobilityRetentionWindow>? RetentionWindows { get; init; }
     public Guid CharacterId => CharacterAction.CharacterId;
     public DateTimeOffset NextEncounterAt => CharacterAction.NextResolutionAtUtc
         ?? throw new InvalidOperationException("Active idle combat requires a next-resolution boundary.");

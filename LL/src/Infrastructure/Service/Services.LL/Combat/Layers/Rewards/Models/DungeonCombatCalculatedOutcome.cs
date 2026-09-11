@@ -12,6 +12,7 @@ public sealed record DungeonCombatCalculatedOutcome(
     IReadOnlyList<DungeonEncounterCalculatedOutcome> EncounterOutcomes)
 {
     public long EligibleBaseExperience { get; init; }
+    public long CombatStyleNobilityExperience { get; init; }
     public DungeonEncounterCalculatedOutcome? LastEncounterOutcome =>
         EncounterOutcomes.Count == 0 ? null : EncounterOutcomes[^1];
 }

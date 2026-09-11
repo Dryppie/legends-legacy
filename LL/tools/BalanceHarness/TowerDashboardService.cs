@@ -55,7 +55,7 @@ public sealed partial class TowerDashboardService(string apiRoot, string catalog
         {
             var (path, depth) = queue.Dequeue();
             if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0) continue;
-            if (IsLoadouts(path) || (File.Exists(Path.Combine(path, "benchmark-input.json")) && File.Exists(Path.Combine(path, "benchmark.json"))))
+            if (IsStudy(path) || IsBossSearch(path) || IsLoadouts(path) || (File.Exists(Path.Combine(path, "benchmark-input.json")) && File.Exists(Path.Combine(path, "benchmark.json"))))
             {
                 result.Add(RunId(path), path);
                 continue;
@@ -75,6 +75,8 @@ public sealed partial class TowerDashboardService(string apiRoot, string catalog
     {
         try
         {
+            if (IsStudy(entry.Value)) return StudyRun(entry.Key, entry.Value);
+            if (IsBossSearch(entry.Value)) return BossRun(entry.Key, entry.Value);
             if (IsLoadouts(entry.Value))
             {
                 var report = HarnessJson.Read<PartySearchReport>(Path.Combine(entry.Value, "party-search.json"));
@@ -93,6 +95,8 @@ public sealed partial class TowerDashboardService(string apiRoot, string catalog
     public object Details(string id, CancellationToken token)
     {
         var path = ResolveRun(id);
+        if (IsStudy(path)) return StudyDetails(path, token);
+        if (IsBossSearch(path)) return BossDetails(path, token);
         if (IsLoadouts(path)) return LoadoutDetails(path, token);
         var saved = TowerBenchmark.ReadSaved(path, token);
         TowerBenchmarkComparisonReport? comparison = null;
@@ -150,7 +154,9 @@ public sealed partial class TowerDashboardService(string apiRoot, string catalog
         if (string.IsNullOrWhiteSpace(request.Battle)) throw new InvalidDataException("Choose a saved battle.");
         return Begin("Replay", 1, async (folder, token) =>
         {
-            var replay = IsLoadouts(path) ? await TowerLoadoutArchive.ReplayAsync(path, request.Battle, true, token)
+            if (IsStudy(path)) await ReadStudyAsync(path, token);
+            if (IsBossSearch(path)) await ReadBossReportAsync(path, token);
+            var replay = IsStudy(path) || IsLoadouts(path) || IsBossSearch(path) ? await TowerLoadoutArchive.ReplayAsync(path, request.Battle, true, token)
                 : await TowerBenchmark.ReplayAsync(path, request.Battle, true, token);
             var file = Path.Combine(folder, "replay.json");
             HarnessJson.WriteNew(file, replay);
@@ -204,7 +210,8 @@ public sealed partial class TowerDashboardService(string apiRoot, string catalog
                 try
                 {
                     await action(folder, token);
-                    Change(j => j with { Status = "Complete", Message = kind is "Replay" or "Essence search" or "Loadouts" ? j.Message : "Benchmark saved. Results are descriptive." });
+                    Change(j => j with { Status = j.Status is "Running" or "Cancelling" ? "Complete" : j.Status,
+                        Message = kind is "Replay" or "Essence search" or "Loadouts" or "Boss loadouts" or "Independent teams" ? j.Message : "Benchmark saved. Results are descriptive." });
                 }
                 catch (OperationCanceledException) { Change(j => j with { Status = "Cancelled", Message = "Cancelled. Any completed trials remain saved." }); }
                 catch (Exception error) { Change(j => j with { Status = "Failed", Message = error.Message }); }

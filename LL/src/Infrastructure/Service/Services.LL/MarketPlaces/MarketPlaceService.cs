@@ -8,6 +8,8 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.MarketPlaces;
 using Microsoft.Extensions.Options;
+using Application.Interfaces.Services.LL.Nobility;
+using Domain.Models.Nobility;
 
 namespace Services.LL.MarketPlaces;
 
@@ -20,6 +22,8 @@ public class MarketPlaceService : IMarketPlaceService
     private readonly MarketPlaceOptions _options;
     private readonly TimeProvider _timeProvider;
     private readonly IAchievementService? _achievementService;
+    private readonly INobilityService? _nobility;
+    private readonly ISignetTradingService? _signets;
 
     public MarketPlaceService(
         IMarketPlaceRepository marketPlaceRepository,
@@ -28,7 +32,9 @@ public class MarketPlaceService : IMarketPlaceService
         ICharacterService characterService,
         IOptions<MarketPlaceOptions> options,
         TimeProvider timeProvider,
-        IAchievementService? achievementService = null)
+        IAchievementService? achievementService = null,
+        INobilityService? nobility = null,
+        ISignetTradingService? signets = null)
     {
         _marketPlaceRepository = marketPlaceRepository;
         _itemBaseRepository = itemBaseRepository;
@@ -37,6 +43,8 @@ public class MarketPlaceService : IMarketPlaceService
         _options = options.Value;
         _timeProvider = timeProvider;
         _achievementService = achievementService;
+        _nobility = nobility;
+        _signets = signets;
     }
 
     public async Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync(CancellationToken cancellationToken)
@@ -147,7 +155,8 @@ public class MarketPlaceService : IMarketPlaceService
         }
 
         if (remainingQuantity > 0 &&
-            await _marketPlaceRepository.GetListingCountAsync(characterId, cancellationToken) >= _options.MaximumListingsPerCharacter)
+            await _marketPlaceRepository.GetListingCountAsync(characterId, cancellationToken) >=
+            (await IsNobleAsync(characterId, cancellationToken) ? 30 : _options.MaximumListingsPerCharacter))
         {
             return null;
         }
@@ -200,6 +209,8 @@ public class MarketPlaceService : IMarketPlaceService
 
         }
 
+        if (createdListing?.ItemInstance.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.ReserveAsync(createdListing, cancellationToken);
+
         long totalPrice = 0;
         long totalFees = 0;
         var fills = new List<FulfillMarketPlaceBuyOrderResult>(plan.Count);
@@ -245,6 +256,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.BuyOrder,
                 PurchasedAt = now
             };
+            if (trade.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.TradeAsync(trade, null, cancellationToken);
             await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
@@ -349,7 +361,8 @@ public class MarketPlaceService : IMarketPlaceService
         }
 
         if (remainingQuantity > 0 &&
-            await _marketPlaceRepository.GetBuyOrderCountAsync(characterId, cancellationToken) >= _options.MaximumBuyOrdersPerCharacter)
+            await _marketPlaceRepository.GetBuyOrderCountAsync(characterId, cancellationToken) >=
+            (await IsNobleAsync(characterId, cancellationToken) ? 30 : _options.MaximumBuyOrdersPerCharacter))
         {
             return null;
         }
@@ -444,6 +457,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.SellListing,
                 PurchasedAt = now
             };
+            if (trade.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.TradeAsync(trade, listing.Id, cancellationToken);
             await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
@@ -531,6 +545,7 @@ public class MarketPlaceService : IMarketPlaceService
             Source = MarketPlaceTradeSource.SellListing,
             PurchasedAt = now
         };
+        if (trade.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.TradeAsync(trade, listing.Id, cancellationToken);
         await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
         await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
@@ -662,6 +677,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.SellListing,
                 PurchasedAt = now
             };
+            if (trade.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.TradeAsync(trade, listing.Id, cancellationToken);
             await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
@@ -751,6 +767,7 @@ public class MarketPlaceService : IMarketPlaceService
             Source = MarketPlaceTradeSource.BuyOrder,
             PurchasedAt = now
         };
+        if (trade.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.TradeAsync(trade, null, cancellationToken);
         await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
         await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
@@ -898,6 +915,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.BuyOrder,
                 PurchasedAt = now
             };
+            if (trade.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.TradeAsync(trade, null, cancellationToken);
             await _marketPlaceRepository.AddOrderAsync(trade, cancellationToken);
             await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
@@ -942,6 +960,7 @@ public class MarketPlaceService : IMarketPlaceService
         var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
         if (listing == null) return null;
         if (listing.SellerId != characterId) return null;
+        await _marketPlaceRepository.LockCharactersAsync([characterId], cancellationToken);
 
         var inventoryItem = new InventoryItem
         {
@@ -953,6 +972,7 @@ public class MarketPlaceService : IMarketPlaceService
         };
 
         await _inventoryService.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
+        if (listing.ItemInstance.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.ReleaseAsync(listing, cancellationToken);
         _marketPlaceRepository.RemoveListingAsync(listing);
 
         return inventoryItem;
@@ -993,6 +1013,8 @@ public class MarketPlaceService : IMarketPlaceService
             if (listing == null || listing.ExpiresAt > now)
                 continue;
 
+            await _marketPlaceRepository.LockCharactersAsync([listing.SellerId], cancellationToken);
+
             await _inventoryService.AddItemToInventoryFromMarketPlace(listing.SellerId, new InventoryItem
             {
                 InventoryId = listing.SellerId,
@@ -1002,6 +1024,7 @@ public class MarketPlaceService : IMarketPlaceService
                 SeenAtUtc = now
             }, cancellationToken);
 
+            if (listing.ItemInstance.ItemBaseId == NobilityBenefits.SignetItemId) await Signets.ReleaseAsync(listing, cancellationToken);
             _marketPlaceRepository.RemoveListingAsync(listing);
             affectedCharacterIds.Add(listing.SellerId);
             expiredListings++;
@@ -1087,4 +1110,9 @@ public class MarketPlaceService : IMarketPlaceService
             await _achievementService.RecordMarketplaceSaleAsync(sellerId, cancellationToken);
         }
     }
+
+    private async Task<bool> IsNobleAsync(Guid characterId, CancellationToken ct) =>
+        _nobility is not null && (await _nobility.GetBenefitsAsync(characterId, _timeProvider.GetUtcNow(), ct)).IsNoble;
+
+    private ISignetTradingService Signets => _signets ?? throw new InvalidOperationException("Signet trading is unavailable.");
 }

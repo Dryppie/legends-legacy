@@ -1,0 +1,185 @@
+<section
+  class="ll-panel mb-4 overflow-hidden"
+  aria-labelledby="nobility-heading"
+>
+  <header class="nobility-header">
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 id="nobility-heading" class="ll-heading text-2xl text-primary">
+        Nobility
+      </h2>
+      @if (nobility.status(); as status) {
+        <span
+          class="ll-badge gap-1 rounded"
+          [class.ll-badge-accent]="status.isNoble"
+        >
+          <span aria-hidden="true">◆</span>
+          {{ status.isNoble ? "Noble" : "Inactive" }}
+        </span>
+      }
+    </div>
+    <p class="mt-2 text-sm text-zinc-300">
+      One Signet grants one calendar month of Nobility. Redeem it or sell it on
+      the market.
+    </p>
+  </header>
+  @if (nobility.status(); as status) {
+    <div class="nobility-layout">
+      <div class="nobility-benefits">
+        <div class="nobility-benefit-columns">
+          @for (column of benefitColumns; track $index) {
+            <div class="nobility-benefit-column">
+              @for (group of column; track group.label) {
+                <section>
+                  <h3 class="nobility-group-heading ll-stat-label">
+                    <span class="text-primary" aria-hidden="true">◆</span>
+                    {{ group.label }}
+                  </h3>
+                  <dl class="nobility-benefit-list text-sm">
+                    @for (benefit of group.benefits; track benefit.label) {
+                      <div class="nobility-benefit-row">
+                        <dt class="text-zinc-400">{{ benefit.label }}</dt>
+                        <dd class="text-zinc-200">{{ benefit.value }}</dd>
+                      </div>
+                    }
+                  </dl>
+                </section>
+              }
+            </div>
+          }
+        </div>
+        <p class="nobility-benefit-note text-xs text-zinc-400">
+          Daily rewards arrive automatically after each covered UTC day ends,
+          including while offline. XP bonuses round down; Style and Mastery
+          bonuses stop at their caps.
+        </p>
+      </div>
+      <aside
+        class="nobility-signets bg-black/30"
+        aria-labelledby="nobility-signets-heading"
+      >
+        <h3 id="nobility-signets-heading" class="ll-stat-label">Signets</h3>
+        <div class="mt-2 flex flex-wrap items-baseline gap-3">
+          <span class="ll-heading text-4xl tabular-nums text-primary">{{
+            status.availableSignets | number
+          }}</span>
+          <span class="text-xs text-zinc-300"
+            >available · {{ status.listedSignets | number }} listed</span
+          >
+        </div>
+        @if (status.expiresAt) {
+          <p class="mt-2 text-xs text-zinc-400">
+            {{ status.isNoble ? "Nobility expires" : "Nobility expired" }}
+            {{ status.expiresAt | date: "medium" }}.
+          </p>
+        }
+        <div class="nobility-redemption">
+          <label for="signet-quantity" class="mb-2 block text-xs text-zinc-300"
+            >Signets to redeem</label
+          >
+          <div class="nobility-redemption-controls">
+            <div
+              class="nobility-quantity rounded border border-light_gray bg-black/40"
+            >
+              <button
+                type="button"
+                aria-label="Redeem one fewer Signet"
+                [disabled]="
+                  nobility.busy() ||
+                  nobility.pendingQuantity() !== null ||
+                  quantity <= 1 ||
+                  !maxQuantity
+                "
+                (click)="stepQuantity(-1)"
+              >
+                −
+              </button>
+              <input
+                id="signet-quantity"
+                type="number"
+                min="1"
+                [max]="maxQuantity"
+                step="1"
+                [ngModel]="quantity"
+                (ngModelChange)="setQuantity($event)"
+                [disabled]="
+                  nobility.busy() ||
+                  nobility.pendingQuantity() !== null ||
+                  !maxQuantity
+                "
+                class="min-w-0 text-center text-white"
+              />
+              <button
+                type="button"
+                aria-label="Redeem one more Signet"
+                [disabled]="
+                  nobility.busy() ||
+                  nobility.pendingQuantity() !== null ||
+                  quantity >= maxQuantity ||
+                  !maxQuantity
+                "
+                (click)="stepQuantity(1)"
+              >
+                +
+              </button>
+            </div>
+            <app-regular-button
+              [text]="
+                nobility.busy()
+                  ? 'Redeeming…'
+                  : nobility.pendingQuantity() !== null
+                    ? 'Retry redemption'
+                    : 'Redeem'
+              "
+              [disabled]="!canRedeem"
+              (pressed)="nobility.redeem(quantity)"
+            />
+          </div>
+          <p class="mt-3 text-xs text-zinc-400">
+            @if (nobility.pendingQuantity() !== null && !nobility.busy()) {
+              The result could not be confirmed. Retry to finish the same
+              redemption.
+            } @else if (!status.availableSignets) {
+              Obtain a Signet from the market to redeem Nobility.
+            } @else if (status.isNoble) {
+              Redeeming consumes the selected Signets and extends your Nobility
+              immediately.
+            } @else {
+              Redeeming consumes the selected Signets and activates Nobility
+              immediately.
+            }
+          </p>
+        </div>
+        <p class="nobility-purchase-note text-xs text-zinc-400">
+          Purchases are currently unavailable.
+        </p>
+      </aside>
+    </div>
+    @if (status.expiresAt) {
+      <div
+        class="nobility-appearance flex flex-wrap items-center gap-4 text-sm"
+      >
+        <label class="ll-checkbox">
+          <input
+            type="checkbox"
+            [ngModel]="status.showBadge"
+            [disabled]="nobility.busy()"
+            (ngModelChange)="nobility.appearance($event)"
+          />
+          <span>Display Nobility</span>
+        </label>
+      </div>
+    }
+  } @else {
+    <p class="nobility-feedback text-zinc-400">Loading Nobility…</p>
+  }
+  @if (nobility.error()) {
+    <p role="alert" class="nobility-feedback text-sm text-red-300">
+      {{ nobility.error() }}
+    </p>
+  }
+  @if (nobility.message()) {
+    <p role="status" class="nobility-feedback text-sm text-primary">
+      {{ nobility.message() }}
+    </p>
+  }
+</section>

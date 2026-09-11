@@ -1,0 +1,70 @@
+# Tower balance acceptance: 10–50% clear rate
+
+**Progression audit and calibration — 11 September 2026:** [floors 2–5 review](Tower-Progression-Floors-2-to-5-Review.md) records independent four-Essence searches on floors 2–4, their separately confirmed linked Health/Power calibration against every known breach, and Kharad's fresh **20.9%** strongest-control check. Compatible controls and calibrated top builds persist for future searches. Floors 6–11 and practical acquisition coverage remain open.
+
+**Fresh search and Kharad follow-up — 11 September 2026:** [new independent searches](Post-Calibration-Tower-Team-Search-Review.md) confirmed Garran's strongest saved team at **34.8%** and found a stronger Kharad team at **59%**, triggering a separate calibration. The [expanded-portfolio follow-up](Kharad-Expanded-Portfolio-Calibration-Review.md) applied another **8% to both Kharad Health and Power**; its strongest of 122 parties confirmed at **25.25%**, and the full family passes. At that stage, main-dashboard searches retained **4 floor-1 / 6 floor-5 controls**. Broader progression, practical Essence access and further independent ceiling searches remain open.
+
+**First retained-build calibration — 11 September 2026:** compatible saved builds now enter new Tower Lab searches automatically as fresh benchmark controls; completed future studies retain their generated finalists. The [retained-build calibration](Retained-Tower-Builds-Calibration-Review.md) applied linked Health/Power factors of **1.06 to Garran** and **1.56 to Kharad** relative to their pre-campaign inputs. The strongest of 57/106 retained parties confirmed at **34% / 24.25%**, respectively, and both frozen families pass the 10–50% policy. This uses the declared full Essence pool including Rare Essences; this historical result is followed by the fresh searches and expanded calibration above.
+
+User decision, 11 September 2026. This is the approved gameplay target for Tower progression. The standalone **`tower-balance-evaluate` evaluator** and integrated **`tower-boss-study` staged workflow** are implemented. The [contract guide](Automatic-Tower-Team-Discovery-Implementation.md) and [confirmation review](Automatic-Tower-Team-Confirmation-Review.md) document frozen inputs, fresh evidence, separate generated viability and scoped acceptance. Legacy/discovery-only search completion and archive verification do not imply acceptance. [Tower Lab integration](Automatic-Tower-Team-Lab-Review.md) is implemented; the [fixed pilots](Automatic-Tower-Team-Pilot-Review.md) are complete and both tested cohorts fail the ceiling. Target service: the offline `LL/tools/BalanceHarness` and local Tower Lab.
+
+The staged workflow preserves all earlier above-50% findings. If a candidate/context with such a finding remains outside the frozen confirmation family, the overall result cannot be Pass even when that family's fresh results pass. It reports unresolved coverage; it does not add candidates or resample after seeing confirmation. Exact prepared recipe convergence with a confirmed reference counts as coverage without changing finalist selection or generating extra independent samples. This is scoped evidence, not an exhaustive guarantee about all legal parties.
+
+## Required behavior
+
+Evaluate each floor separately at its declared progression budget, including complete party size, character levels, equipment, Essence count/training, ownership assumptions and other combat settings. The current checkpoints are four equipped Essences per character at floor 1, five around floor 5, six around floor 10 and at least seven at floor 11. Exact intervening floors and gear assumptions remain part of the [progression audit](Boss-Specific-Essence-Loadout-Plan.md#next-priority-validate-the-progression-curve).
+
+For each floor and intended budget:
+
+- **Upper bound: no evaluated legal party may exceed a 50% win rate.** A stronger generalist or specialist above this ceiling is a balance concern, even if the authored reference or another candidate falls inside the band.
+- **Lower bound: at least one evaluated legal party must achieve a 10% win rate.** This is an existence requirement. Every weak, unsuitable or random build does not have to achieve 10%.
+- The bounds are inclusive: the desired strongest viable performance is between 10% and 50%. Assess each complete party's results, never a pooled average across builds, floors or incompatible budgets. Losses and draws both count as non-wins; invalid and missing trials prevent acceptance.
+- Preserve known strong recipes as controls. Continue searching for strong builds without a 50% cap on candidate selection. Do not discard high-clear builds, choose deliberately weaker finalists, lower the tested slot count or change seeds to obtain an apparent pass.
+
+The ceiling applies to the floor's intended progression cohort. Higher-level or better-equipped transfer parties are separate evidence; their success on an earlier floor does not automatically fail that floor's intended-budget assessment. Lower-budget successes must still be reported as potential violations of the intended unlock progression. In particular, meeting the win-rate band at fewer than seven slots does not establish the intended floor-11 requirement.
+
+## Evidence and acceptance
+
+The target concerns repeatable performance. A small observed fraction is insufficient to establish the underlying win rate, and a bounded search cannot prove that no unsearched legal build exceeds 50%.
+
+The evaluator keeps the observed-policy finding and sampling uncertainty visible:
+
+| Observation in the declared confirmation set | Required interpretation |
+| --- | --- |
+| Any build above 50%, including 10/10, 20/20 or 40/40 | Reject balance acceptance for this evidence. Report an upper-bound breach; uncertainty may qualify the estimated repeatable rate but must never turn it into a pass. |
+| Every build below 10% | No qualifying viable build has been demonstrated. Do not accept the floor or infer that every possible build is unviable. |
+| All observed rates at most 50%, with at least one at least 10%, but uncertainty overlaps a required boundary | Inconclusive; the observed counts alone do not establish acceptance. In particular, 1/10 and 5/10 are not automatic passes. |
+| Complete frozen confirmation evidence supports an upper bound of at most 50% for every included build and a lower bound of at least 10% for at least one | Eligible for a scoped pass, subject to the declared sample, coverage and progression checks. This is not a global optimum or exhaustive balance certificate. |
+| Missing required floor/build/context, invalid trial, incomplete run or mismatched budget/content | Invalid or incomplete evidence; cannot pass. |
+
+Before running confirmation, declare exact recipes, required floor/budget/context coverage, minimum samples, combat cap, independent unused seeds and the interval/multiple-comparison method. Existing pointwise Wilson intervals remain useful descriptive evidence; they do not by themselves establish simultaneous coverage across a searched family. Do not keep sampling or replacing candidates until the result enters the band. Any later experiment needs a separately frozen protocol and its own fresh evidence.
+
+An overall progression pass requires every required floor to pass. A strong floor must not compensate for an unviable floor, and a weak recipe must not hide an overpowered one. Keep progression assumptions fixed when comparing tuning alternatives and keep slot-isolation experiments separate from normal level/gear progression.
+
+The implemented policy is `bonferroni-wilson-95-v1`: pointwise 95% intervals remain visible, while acceptance uses approximate Wilson intervals with 0.05 divided across the complete predeclared recipe/context family. Missing cells do not reduce that family size. Every declared floor/budget/equipment-context cohort needs its own viable party and must satisfy the ceiling for all included parties. The overall result applies only to the declared cohorts; the plan must include every required progression floor. Keep separately labeled diagnostic-budget experiments outside the intended-progression acceptance family.
+
+The adapter verifies saved normal-Tower recipes, preparation, content/settings/execution identity, files and exact trial schedules. It does not establish that a human-authored definition predates already observed results, or that manually supplied exclusions cover every historical campaign. Freeze the protocol and unused-seed ledger before confirmation. Evaluating an old archive remains retrospective and does not create fresh evidence.
+
+## Server-wide progression and search quality
+
+The user requires Tower pushing to challenge the server's best players. A final competitive balance decision therefore also needs evidence that the tested complete teams approach the strongest combinations achievable within that floor's declared budget. The current evaluator measures the win-rate requirement for the supplied portfolio; it does not implement or establish this additional search-quality requirement.
+
+Preserve current scoped passes and all original evidence. Treat them as provisional for server-wide balance until stronger search coverage is demonstrated. Win-rate confidence intervals quantify sampling uncertainty for tested teams, not confidence that no better build exists. Repeated fresh searches, explicitly labeled improvement of saved winners, increasing-budget comparisons and post-tuning challenger searches are planned in the [discovery plan](Automatic-Tower-Team-Discovery-Plan.md#server-wide-progression-strongest-build-evidence). Their numerical decision rules and practical top-player budgets must be declared before execution.
+
+The approved 10–50% per-party win-rate policy remains unchanged. This clarification neither invents a new gameplay target nor retrospectively changes archive assessments.
+
+## Effect on existing results
+
+The earlier 10/10 floor-1 clears and 40/40 floor-10 clears demonstrate upper-bound breaches under their recorded budgets, rather than acceptable Tower difficulty. The 40/40 five-slot Eydis result and 20/20 four-slot Kodoku result are also high-clear controls to retain. The latter additionally exposes a below-target progression concern. Serevin's four-slot 10/20 result sits at the observed ceiling, has substantial uncertainty and uses fewer slots than intended; it is not a balance pass.
+
+These are interpretations of historical evidence against a newly approved target, not fresh measurements of current content. Preserve sealed reports, recipes, sample counts and original publication snapshots. The live [progression evidence table](Boss-Specific-Essence-Loadout-Plan.md#next-priority-validate-the-progression-curve) records their budgets and limitations.
+
+## Implementation and next integration
+
+The user-approved [boss tuning controls](Boss-Specific-Essence-Loadout-Plan.md#approved-boss-tuning-controls) provide linked Health/Power scaling by default and separate adjustments for encounter-specific issues. They do not change this acceptance policy. Duration, early deaths, damage spikes and timeouts inform tuning; they are not additional numerical pass/fail limits unless explicitly declared as gameplay guardrails. Independent search must still preserve above-ceiling teams, and tuning candidates require a separate frozen protocol and fresh confirmation.
+
+The separate versioned evaluator and JSON/Markdown report implement the universal upper-bound check and per-cohort existence check. Applying a 10–50% band independently to every random build would implement the wrong requirement. [Independent discovery](Automatic-Tower-Team-Generation-Review.md) generates/refines complete parties and preserves all discovery outcomes, including above-ceiling candidates. The [staged study command](Automatic-Tower-Team-Confirmation-Review.md) now connects frozen selection/confirmation to that evaluator; the discovery-only command retains its earlier scope. Tower Lab now exposes the staged workflow with separate balance and integrity views. The [fixed pilots](Automatic-Tower-Team-Pilot-Review.md) are complete and both declared full-pool cohorts fail the ceiling. The retained-build campaign above now calibrates the full-pool budgets requested by the user; practical acquisition limits remain separate coverage. Keep balance assessment separate from search rank, run completion and archive integrity, and preserve legacy report reconstruction.
+
+Implemented tests cover rejection of 10/10, a high-clear specialist hidden by a low pooled average, all builds below 10%, a viable build alongside zero-clear controls, uncertainty at both boundaries, missing/invalid evidence, separate floor/budget/context groups and historical archive compatibility. Run backend checks through `build/run-tests.ps1`. The [first progression batch](Tower-Progression-Floors-2-to-5-Review.md) applies these criteria and preserves an inconclusive Velka attempt separately from its new passing follow-up. The remaining floor-6–11 audit must retain the same policy and fresh-evidence requirements.
+
+This policy does not change the separate approved starter 50–90% goals. The evaluator changes no production content, configuration, database or deployment, and archive evaluation runs no additional simulations.

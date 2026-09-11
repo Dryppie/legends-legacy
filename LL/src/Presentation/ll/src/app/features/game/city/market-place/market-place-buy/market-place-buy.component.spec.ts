@@ -1,3 +1,4 @@
+import { provideFreeNobilityForTests } from '../../../../../core/services/api/nobility/nobility.testing';
 import { Component, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -55,7 +56,7 @@ describe('equipment marketplace', () => {
     purchase.and.returnValue(of({ remainingListing: null }));
     await TestBed.configureTestingModule({
       imports: [MarketPlaceBuyComponent],
-      providers: [
+      providers: [...provideFreeNobilityForTests(),
         {
           provide: MarketplaceStateService,
           useValue: {

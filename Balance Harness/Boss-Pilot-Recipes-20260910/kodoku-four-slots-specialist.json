@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "id": "boss-search-floor-8",
+  "floorNumber": 8,
+  "startsAt": "2000-01-01T01:00:00+01:00",
+  "preparationState": "uncleared-no-contributions",
+  "assumptions": [
+    "Boss search: fixed identities, gear, training and required Tower party size; mutable ordered Essences declared in definition.json.",
+    "Hypothetical ownership; level-1 unascended/unevolved Essences; Combat Styles disabled."
+  ],
+  "seeds": [
+    2123305389,
+    -1189994966,
+    557120597,
+    -821226006,
+    884580298,
+    2038340542,
+    746305493,
+    -842233369,
+    1207867105,
+    657541528,
+    1735859066,
+    1313416641,
+    -1978875713,
+    1520456184,
+    -1047396918,
+    -1521605188,
+    215151264,
+    1378720431,
+    686090778,
+    -1940830204
+  ],
+  "party": [
+    {
+      "partySlot": 1,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-1.slots-4-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.crystal_wisp",
+          "essence.lumo_wisp",
+          "essence.venomous_spiderling",
+          "essence.gnoll_raider"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "partySlot": 2,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-2.slots-4-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.poisonous_rat",
+          "essence.shadow_imp",
+          "essence.goblin_warrior",
+          "essence.viper"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "partySlot": 3,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-3.slots-4-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.spider",
+          "essence.green_slime",
+          "essence.elder_treant_thornstorm",
+          "essence.vampire_fledgeling"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "partySlot": 4,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-4.slots-4-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.green_slime",
+          "essence.shadow_imp",
+          "essence.plague_ghoul",
+          "essence.frost_imp"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "partySlot": 5,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-5.slots-4-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.hobgoblin",
+          "essence.kobold_sorcerer",
+          "essence.feral_ghoul",
+          "essence.elder_treant"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "partySlot": 6,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-6.slots-4-guardian",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.heavy_breastplate.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.heavy_helm.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.heavy_legplates.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.hobgoblin",
+          "essence.blood_harpy",
+          "essence.treant_sapling",
+          "essence.hollow_stag"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.transparent_slime",
+          "essence.brown_slime",
+          "essence.wood_nymph",
+          "essence.hobgoblin"
+        ]
+      }
+    },
+    {
+      "partySlot": 7,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-7.slots-4-restorer",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.kobold_skirmisher",
+          "essence.rotroot_shambler",
+          "essence.goblin_shaman"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.blue_slime",
+          "essence.forest_spirit",
+          "essence.goblin_shaman",
+          "essence.lumo_wisp"
+        ]
+      }
+    },
+    {
+      "partySlot": 8,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-8.slots-4-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.hobgoblin_brutal_charge",
+          "essence.smolder_rat",
+          "essence.spider_queen",
+          "essence.wood_nymph"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "partySlot": 9,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-9.slots-4-striker",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.gauntlets.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.gnoll_shaman",
+          "essence.wind_harpy",
+          "essence.gnoll_raider",
+          "essence.frost_imp"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.green_slime",
+          "essence.cinder_beetle",
+          "essence.pixie",
+          "essence.giant_bat"
+        ]
+      }
+    },
+    {
+      "partySlot": 10,
+      "build": {
+        "id": "tower-party-slots-4.balanced.slot-10.slots-4-controller",
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "equipment": [
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.greatsword.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.uncommon",
+            "activeStyleId": null,
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.enchanted_fairy",
+          "essence.kobold_sorcerer",
+          "essence.crystal_wisp",
+          "essence.cinder_beetle"
+        ],
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "identityEssenceIds": [
+          "essence.enchanted_fairy",
+          "essence.frost_imp",
+          "essence.goblin",
+          "essence.giant_bat"
+        ]
+      }
+    }
+  ]
+}

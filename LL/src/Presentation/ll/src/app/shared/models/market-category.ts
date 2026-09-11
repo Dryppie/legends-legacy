@@ -3,6 +3,7 @@ import { ItemType } from './enums/itemType';
 export type MarketCategoryId =
   | 'monster-cores'
   | 'blueprints'
+  | 'signets'
   | 'equipment'
   | 'essences';
 

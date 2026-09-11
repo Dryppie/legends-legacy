@@ -328,7 +328,8 @@ export class CombatComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.combatActionDisabled) return;
-    if (!this.displayCombat || !this.outcome) return;
+    if (!this.displayCombat) return;
+    if (!this.outcome && this.battleType !== BattleType.Colosseum) return;
     if (!this.isEscapeDismissibleBattleType()) return;
 
     this.skipCombat();
