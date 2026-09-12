@@ -134,7 +134,7 @@ public static partial class TowerBossStudy
         return rebuilt;
     }
 
-    private static IReadOnlyDictionary<string, string> RetainExecutable(string output, ExecutionIdentity execution)
+    internal static IReadOnlyDictionary<string, string> RetainExecutable(string output, ExecutionIdentity execution)
     {
         var source = Path.GetDirectoryName(typeof(TowerBossStudy).Assembly.Location)!;
         var destination = Path.Combine(output, "executable"); Directory.CreateDirectory(destination);

@@ -1,6 +1,8 @@
 # Boss-specific Essence loadouts: analysis and implementation plan
 
-**Competitive search update — 12 September 2026:** [stronger Kharad searches](Tower-Competitive-Build-Search-Review.md) confirmed new teams at **948/1,000** and **1,000/1,000** on the previously passing content. Its earlier scoped Pass is superseded for the expanded build portfolio. Retained-build improvement and the history-capacity extension are implemented; the fresh quality audit and separate linked calibration are documented in the new review. Near-optimality remains unestablished.
+**Current priority — 12 September 2026:** the [compact archive increment](Tower-Compact-Archive-Review.md) is implemented and measured: 88.69% smaller ordinary archives, matching results/replays, and 10.31–15.17% lower total diagnostic runtime. Next implement safe preparation reuse and removal of unused bulk playback checkpoints, followed by bounded/resumable verification and campaign integration. The [bulk-performance prerequisite](Automatic-Tower-Team-Discovery-Plan.md#immediate-next-increment-bulk-performance) remains open before larger searches. Boss tuning still uses the fixed character/gear budget, untrained Essences and approved linked Health/Power controls; no new tuning was performed.
+
+**Competitive search update — 12 September 2026:** [stronger Kharad searches and calibration](Tower-Competitive-Build-Search-Review.md) now support the complete **2,438-recipe portfolio** at Health **2.931552** / Power **3.705482**, applied locally after exact parity checks. The strongest team confirmed at **23,835/50,000 (47.67%)**, adjusted upper **48.23%**. There are **49 distinct floor-5 controls combined (44 local, 32 published, 27 shared)** for future fresh searches. Search quality still fails the predeclared reliability/plateau rule; near-optimality and broader-floor competitive balance remain unestablished.
 
 **Progression audit and calibration — 11 September 2026:** [floors 2–5 review](Tower-Progression-Floors-2-to-5-Review.md) records independent four-Essence searches on floors 2–4, their separately confirmed linked Health/Power calibration against every known breach, and Kharad's fresh **20.9%** strongest-control check. Compatible controls and calibrated top builds persist for future searches. Floors 6–11 and practical acquisition coverage remain open.
 
@@ -47,7 +49,7 @@ The completed expansion instead selected a budget by search headroom: its best c
 | 2: Velka | 4 | 31/150 (20.67%) | Full calibration family passes |
 | 3: Morrowmaw | 4 | 147/400 (36.75%) | Full calibration family passes |
 | 4: Vaelor | 4 | 81/400 (20.25%) | Full calibration family passes |
-| 5: Kharad | 5 | 1,000/1,000 (100%) | New competitive search breaches the ceiling; separate expanded calibration follows |
+| 5: Kharad | 5 | 23,835/50,000 (47.67%) | Expanded 2,438-recipe calibration/precision decision Pass; linked Health 2.931552 / Power 3.705482 applied locally. Search quality remains Fail; a fresh challenger search is next. |
 
 These cohorts use the full 80-Essence pool with hypothetical ownership. Four slots through floor 4 is an explicit working interpolation. Continue with floors 6–9 at five slots, floor 10 at six and floor 11 at seven, with separate lower-budget diagnostics. The [history-capacity prerequisite](Automatic-Tower-Team-Discovery-Plan.md#next-batch-history-capacity-and-floors-611) is complete: cumulative history now supports 1,000,000 exclusions. Remaining progression studies are pending, with competitive search validation taking priority. Preserve every exclusion and keep combat caps separate.
 

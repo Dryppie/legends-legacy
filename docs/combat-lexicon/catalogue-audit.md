@@ -43,9 +43,11 @@ The bullets below preserve the gaps found before the typed standard-condition im
 | --------------------- | ----: |
 | Implemented           |    28 |
 | Partially Implemented |     0 |
-| Proposed              |     0 |
+| Proposed              |     1 |
 | Deprecated            |     0 |
 | Unknown               |     0 |
+
+Exposed is a proposed addition to the lexicon; its target-side critical chance bonus and fixed 10-second condition are not implemented. See the [Exposed contract](conditions/exposed.md).
 
 ## Evidence locations
 

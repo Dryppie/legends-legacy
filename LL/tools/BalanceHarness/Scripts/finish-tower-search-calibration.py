@@ -34,9 +34,24 @@ def verified(out):
     return p, selection, result, entries
 
 
-def prepare(out, expected_live_hash):
+def acceptance(out, report, precision_directory=None):
+    if precision_directory is None:
+        if report['assessment'] != 'Pass': raise ValueError('Only a global Pass permits local application.')
+        return None
+    spec = importlib.util.spec_from_file_location('precision', Path(__file__).with_name('resolve-tower-calibration-precision.py'))
+    precision = importlib.util.module_from_spec(spec); spec.loader.exec_module(precision)
+    p, combined = precision.read_proof(precision_directory)
+    if (Path(p['source']).resolve() != out.resolve() or combined['assessment'] != 'Pass'
+            or p['sourceAssessmentSha256'] != cal.sha(out / 'assessment-parallel.json')):
+        raise ValueError('A separate passing precision decision must cover this exact full calibration.')
+    return {'directory': str(precision_directory.resolve()), 'protocolSha256': cal.sha(precision_directory / 'protocol.json'),
+        'assessmentSha256': cal.sha(precision_directory / 'assessment.json'), 'assessmentPolicy': combined['assessmentPolicy'],
+        'originalAssessment': report['assessment'], 'combinedAssessment': combined['assessment']}
+
+
+def prepare(out, expected_live_hash, precision_directory=None):
     p, selected, report, entries = verified(out)
-    if report['assessment'] != 'Pass': raise ValueError('Only a global Pass permits local application.')
+    precision_proof = acceptance(out, report, precision_directory)
     path = LIVE / 'Data' / cal.FLOORS
     if cal.sha(path) != expected_live_hash: raise ValueError('Live content changed since the declared baseline.')
     if cal.read(path) != cal.read(out / 'baseline-root/Data' / cal.FLOORS): raise ValueError('Live content differs from the experiment baseline.')
@@ -44,6 +59,9 @@ def prepare(out, expected_live_hash):
         if name != cal.FLOORS and cal.sha(LIVE / 'Data' / name) != digest: raise ValueError('Other live input changed: ' + name)
     candidate = out / 'variants/selected/Data' / cal.FLOORS
     if cal.sha(candidate) != selected['selectedContentSha256']: raise ValueError('Selected content changed.')
+    settings_hash = cal.sha(LIVE / 'appsettings.json')
+    if settings_hash != cal.sha(out / 'variants/selected/appsettings.json'):
+        raise ValueError('Live application settings differ from the experiment; review combat settings before application.')
     original = cal.read(path); expected = copy.deepcopy(original)
     values = next(f['guardianScaling'] for f in cal.read(candidate)['floors'] if f['floorNumber'] == p['floor'])
     values = {k: values[k] for k in ('health', 'offense')}
@@ -76,6 +94,8 @@ def prepare(out, expected_live_hash):
         raise ValueError('Earlier current-engine diagnostic did not match.')
     cal.save(folder / 'plan.json', {'status': 'PreparedBeforeApplication', 'sourceAssessmentSha256': cal.sha(out / 'assessment-parallel.json'),
         'scriptSha256': cal.sha(Path(__file__)), 'liveBeforeSha256': cal.sha(path), 'proposedSha256': cal.sha(folder / 'proposed.json'),
+        'liveSettingsSha256': settings_hash,
+        'precisionProof': precision_proof,
         'floor': p['floor'], 'values': values, 'parityIds': sorted(parity), 'strongest': top[0]['id'],
         'paritySeeds': cal.read(out / 'seed-ledger.json')['schedules']['confirmation'][:20],
         'priorDiagnosticCombats': earlier_checks, 'maximumChecks': len(parity)*40 + 14*10 + 4 + earlier_checks, 'reserve': 1000})
@@ -88,11 +108,14 @@ def application_plan(out):
         raise ValueError('Application plan changed or exceeds reserve.')
     if plan['sourceAssessmentSha256'] != cal.sha(out / 'assessment-parallel.json'):
         raise ValueError('Application assessment changed.')
+    proof = plan.get('precisionProof')
+    current = acceptance(out, verified(out)[2], Path(proof['directory']) if proof else None)
+    if current != proof: raise ValueError('Application precision proof changed.')
     return plan
 
 
 def apply(out):
-    verified(out); plan = application_plan(out); path = LIVE / 'Data' / cal.FLOORS
+    protocol, _, _, _ = verified(out); plan = application_plan(out); path = LIVE / 'Data' / cal.FLOORS
     engine = cal.read(out / 'application/current-engine-parity.json')
     if engine['status'] != 'AllReportsMatched': raise ValueError('Current engine parity is required before application.')
     current = cal.ROOT / 'LL/tools/BalanceHarness/bin/Release/net10.0'
@@ -100,9 +123,15 @@ def apply(out):
         if cal.sha(current / name) != digest: raise ValueError('Current engine changed after parity: ' + name)
     if cal.sha(path) != plan['liveBeforeSha256'] or cal.sha(out / 'application/proposed.json') != plan['proposedSha256']:
         raise ValueError('Application inputs changed.')
+    if cal.sha(LIVE / 'appsettings.json') != plan['liveSettingsSha256']:
+        raise ValueError('Live application settings changed after preparation.')
+    for name, digest in protocol['contentHashes'].items():
+        if name != cal.FLOORS and cal.sha(LIVE / 'Data' / name) != digest:
+            raise ValueError('Other live content changed after preparation: ' + name)
     if (out / 'application/applied.json').exists(): raise FileExistsError('Application already recorded.')
     path.write_bytes((out / 'application/proposed.json').read_bytes())
-    cal.save(out / 'application/applied.json', {'status': 'AppliedLocally', 'sha256': cal.sha(path), 'values': plan['values'], 'deployment': 'None'})
+    cal.save(out / 'application/applied.json', {'status': 'AppliedLocally', 'sha256': cal.sha(path), 'values': plan['values'],
+        'precisionProof': plan.get('precisionProof'), 'deployment': 'None'})
 
 
 def current_batch(out, label, content):
@@ -175,8 +204,10 @@ def replay(out):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('phase', choices=['prepare', 'check-engine', 'apply', 'parity', 'replay'])
-    parser.add_argument('--out', type=Path, required=True); parser.add_argument('--expected-live-hash'); args = parser.parse_args()
+    parser.add_argument('--out', type=Path, required=True); parser.add_argument('--expected-live-hash')
+    parser.add_argument('--precision', type=Path, help='Separate verified full-family precision decision, if the original calibration was inconclusive.')
+    args = parser.parse_args()
     if args.phase == 'prepare':
         if not args.expected_live_hash: parser.error('--expected-live-hash is required')
-        prepare(args.out.resolve(), args.expected_live_hash)
+        prepare(args.out.resolve(), args.expected_live_hash, args.precision.resolve() if args.precision else None)
     else: {'check-engine': check_engine, 'apply': apply, 'parity': parity, 'replay': replay}[args.phase](args.out.resolve())

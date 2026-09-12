@@ -26,7 +26,7 @@ def canonical_hash(value):
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
-def stage(out, source, challengers, catalog=None):
+def stage(out, source, challengers, catalog=None, precision_directory=None):
     if out.exists(): raise FileExistsError('Choose a new staging directory.')
     p = cal.check(source); report = cal.read(source / 'assessment-parallel.json')
     if report['protocolSha256'] != cal.sha(source / 'protocol.json') or report['selectionSha256'] != cal.sha(source / 'selection.json'):
@@ -61,6 +61,26 @@ def stage(out, source, challengers, catalog=None):
     additions.append({'id': 'competitive-calibration-' + digest[:32], 'evidenceHash': digest, 'budget': p['budget'],
         'requiredPartySize': p['cohort']['requiredPartySize'],
         'combatSeeds': sorted(set(cal.integers(cal.read(source / 'seed-ledger.json')['schedules']))), 'builds': builds})
+    if precision_directory:
+        spec = importlib.util.spec_from_file_location('precision', Path(__file__).with_name('resolve-tower-calibration-precision.py'))
+        precision = importlib.util.module_from_spec(spec); spec.loader.exec_module(precision)
+        precision_plan, precision_report = precision.read_proof(precision_directory)
+        if Path(precision_plan['source']).resolve() != source.resolve(): raise ValueError('Precision evidence covers another calibration.')
+        precision_builds = []
+        precision_ids = set(precision_plan['selectedIds'])
+        precision_ids.update(r['id'] for r in sorted(precision_report['cells'], key=lambda r: (-r['rate'], r['id']))[:10])
+        for cid in sorted(precision_ids):
+            scenario = copy.deepcopy(next(e['scenario'] for e in entries if e['id'] == cid))
+            if scenario['seeds']: raise ValueError('Retained precision recipes must not carry old schedules.')
+            precision_builds.append({'id': cid, 'recipeHash': canonical_hash(scenario), 'scenario': scenario})
+        precision_digest = cal.sha(precision_directory / 'assessment.json')
+        precision_ledger = cal.read(precision_directory / 'seed-ledger.json')
+        additions.append({'id': 'competitive-precision-' + precision_digest[:32], 'evidenceHash': precision_digest,
+            'budget': p['budget'], 'requiredPartySize': p['cohort']['requiredPartySize'],
+            'combatSeeds': sorted(set(precision_ledger.get('retentionSeeds', precision_ledger['confirmation']))
+                | set(cal.integers(cal.read(source / 'seed-ledger.json')['schedules']))), 'builds': precision_builds})
+        for name in ('assessment.json', 'protocol.json', 'seed-ledger.json'):
+            sources[str(precision_directory / name)] = cal.sha(precision_directory / name)
     if {s['id'] for s in before['studies']}.intersection(s['id'] for s in additions): raise ValueError('These sources are already retained.')
     merged = {**before, 'studies': before['studies'] + additions}; out.mkdir(parents=True)
     cal.save(out / 'before.json', before); cal.save(out / 'retained-tower-builds.json', merged)
@@ -83,5 +103,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--calibration', type=Path, required=True); parser.add_argument('--challengers', type=Path)
     parser.add_argument('--catalog', type=Path, help='Catalog to extend; defaults to the main local library. A published fixture uses the same validated format.')
+    parser.add_argument('--precision', type=Path, help='Also retain completed precision recipes and their fresh seed exclusions.')
     args = parser.parse_args(); stage(args.out.resolve(), args.calibration.resolve(), args.challengers.resolve() if args.challengers else None,
-        args.catalog.resolve() if args.catalog else None)
+        args.catalog.resolve() if args.catalog else None, args.precision.resolve() if args.precision else None)

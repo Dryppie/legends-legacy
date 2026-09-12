@@ -46,8 +46,9 @@ When sources disagree, use this order:
 | [condition.doom](conditions/doom.md)                   | Doom          | Implemented | Doom(X) deals X% snapshotted Power after 15 seconds.         |
 | [condition.thorns](conditions/thorns.md)               | Thorns        | Implemented | Independent timed reflection percentages sum.               |
 | [condition.lifesteal](conditions/lifesteal.md)         | Lifesteal     | Implemented | Eligible direct damage restores health within the 50% cap.   |
+| [condition.exposed](conditions/exposed.md)             | Exposed       | Proposed    | +10 percentage points critical chance against target for 10s. |
 
-Status totals: **28 Implemented**, **0 Partially Implemented**, **0 Proposed**, **0 Deprecated**, **0 Unknown**.
+Status totals: **28 Implemented**, **0 Partially Implemented**, **1 Proposed**, **0 Deprecated**, **0 Unknown**.
 
 ## Reference
 
@@ -69,7 +70,7 @@ Status totals: **28 Implemented**, **0 Partially Implemented**, **0 Proposed**, 
 
 ## Scope
 
-The standard-condition contracts are implemented by the typed ability and combat runtime. Authored
+The conditions marked Implemented are supported by the typed ability and combat runtime. Exposed is a proposed lexicon contract. Authored
 Burn, Bleed, Poison, Chill, Freeze, Stun, Silence, Soaked, Empower, Weaken, Vulnerable, Taunt, Decay, and Thorns
 effects use `ApplyCondition`. Legacy `ApplyStatus` remains available only for bespoke status
 behaviour that has no standard-condition equivalent.

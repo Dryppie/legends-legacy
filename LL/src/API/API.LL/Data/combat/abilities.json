@@ -2298,7 +2298,7 @@
     "id": "ability.creature.blackjaw_spider.blackjaw_bite",
     "kind": "Active",
     "name": "Blackjaw Bite",
-    "description": "Deal 160% Physical Damage, or 220% if the target is below 40% Health.",
+    "description": "Deal 160% Physical Damage, or 220% Physical Damage if the target is below 40% Health.",
     "cooldownTicks": 110,
     "tags": [
       "Physical",

@@ -1,6 +1,60 @@
 # Balance Harness: idle balance workflow and Tower benchmarks
 
-**Competitive search update — 12 September 2026:** [stronger Kharad searches](../../../Balance%20Harness/Tower-Competitive-Build-Search-Review.md) confirmed new teams at **948/1,000** and **1,000/1,000**, breaching the previous balance result. The tools now support explicit improvement of saved teams, larger history imports, paired search-quality comparisons and complete-portfolio calibration. See the review for the latest measurements and remaining competitive-search limits.
+**Compact archive increment — 12 September 2026:** `tower-compact-v1` is available through standalone create/verify/replay commands, the balance evaluator and an opt-in benchmark flag. The [review](../../../Balance%20Harness/Tower-Compact-Archive-Review.md) records identical results/replays, **88.69% smaller ordinary archives** and **10.31–15.17% lower overall runtime** in a fixed 1,200-combat comparison. Search/calibration drivers still emit their existing archives. Preparation reuse, unused checkpoint removal, bounded/resumable verification and campaign integration remain before larger searches or floors 6–11. Fixed gear, untrained Essences and the 10–50% policy are unchanged.
+
+## Bounded Tower performance
+
+```powershell
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-performance --content-root LL/src/API/API.LL --output TestResults/balance/tower-performance-new
+```
+
+Optional `--definition <json>` selects a strict version-1 [performance definition](Fixtures/tower-performance.json). The default uses four saved floor-5 recipes, eight diagnostic seeds, three passes and worker limits 1/2/4: **288 repeated ordinary fights plus 12 detailed replays = 300 total**. Limits are five minutes overall and 2 GiB logical output. Cases retain the fixed character/gear/five-Essence budget. This command does not discover/retain new teams, tune bosses or evaluate balance acceptance.
+
+The output contains the frozen definition, seed ledger, settings/content, producing executable, selected-format Tower archives, per-pass timings, durable battle counters, and `performance.json` / `performance.md`. Normal Tower archives remain the default; add `--archive-format tower-compact-v1` to measure compact storage on the identical schedule and case-level worker limits. Each worker configuration starts a new child process; later passes are warm repeats, with uncontrolled filesystem cache. Complete requires verification of the selected archive format, identical full result digests across configurations/repeats, exact combat accounting and matching selected replays. Optional profiling hooks preserve existing archive schemas and combat execution.
+
+Stage timings separate content/preparation, combined combat/playback checkpoints, report construction, JSON work, file hashes and verification. Inclusive times overlap; use exclusive timings when summing. Reports also record process-wide allocations/CPU/peak memory and logical output bytes. Timings include profiling overhead and do not promise a speedup or establish an optimal worker count.
+
+Cancellation/time/storage stops retain partial evidence and diagnostic counts. Limits are checked during child execution and between setup/configurations; in-flight writes and final receipts can exceed them. The parent waits up to five seconds for cooperative cancellation before terminating only its owned child. Existing output is rejected; automatic resume and cleanup are not implemented. The internal `tower-performance-worker` command is launched by the parent against its frozen output. See the [implementation, measured baseline and limits](../../../Balance%20Harness/Tower-Performance-Benchmark-Review.md).
+
+## Compact Tower archives
+
+Create and verify a new compact archive from an existing Tower scenario:
+
+```powershell
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-compact --scenario LL/tools/BalanceHarness/Fixtures/tower-floor-1-user-party.json --content-root LL/src/API/API.LL --output TestResults/balance/tower-compact-new
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-compact-verify --run TestResults/balance/tower-compact-new
+dotnet TestResults/balance/tower-compact-new/executable/BalanceHarness.dll tower-compact-replay --run TestResults/balance/tower-compact-new --case scenario --battle tower.0001 --detailed
+```
+
+Use your actual scenario path; `--scenario` creates the single case ID `scenario`. Alternatively, use `--definition <json>` for a strict definition with `schemaVersion: 1`, a safe `id`, `maximumBattles`, `chunkSize` (1–32), and `cases`, each containing an `id` and a complete Tower `scenario` object. Supply exactly one of `--scenario` or `--definition`. Case IDs use lowercase letters, digits and hyphens. Each scenario declares its full ordered party, assumptions and exact unique seed schedule. Limits are 256 cases, 1,000 seeds per case and 100,000 reserved battles; use small explicit schedules. The standalone command has no separate elapsed-time/storage cap.
+
+The archive shares content, recipes, input templates and prepared-participant descriptions, and compresses full non-event battle summaries into chunks. The verifier reconstructs original reports and checks hashes, schedule completeness, required ranking/diagnostic data and materialized recipes. The standalone command retains its producing executable for replay; replay writes JSON to stdout and its status to stderr. Verification runs no fights. Existing output, corrupt/incomplete archives and mismatched replay identity are rejected. Interrupted chunks are preserved, but automatic resume and streaming verification are not implemented.
+
+The existing `tower-balance-evaluate` source mapping can select a compact case:
+
+```json
+[
+  { "cellId": "team-a", "runDirectory": "../compact-run", "compactCaseId": "candidate-a" },
+  { "cellId": "team-b", "runDirectory": "../compact-run", "compactCaseId": "candidate-b" }
+]
+```
+
+Paths resolve relative to the source-mapping file. A multi-case archive requires `compactCaseId`; a single case can omit it. Batched evaluation verifies each compact directory once, shares that verified snapshot across its cells, and rereads on the next evaluation. The unchanged statistical evaluator still requires a separately frozen compatible definition and complete evidence. Technical completion never grants automatic balance acceptance.
+
+Measure compact storage with the existing bounded benchmark, then compare saved outputs without more combat:
+
+```powershell
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-performance --archive-format tower-compact-v1 --content-root LL/src/API/API.LL --output TestResults/balance/tower-performance-compact-new
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-performance-compare --reference TestResults/balance/tower-performance-new --run TestResults/balance/tower-performance-compact-new --output TestResults/balance/tower-performance-comparison-new
+```
+
+Comparison requires matching recipes/budgets, complete schedules, producing execution, settings and content, and independently revalidates stored archives. Run both formats with the same executable; repeat in reversed order when assessing timing. Benchmark case-level parallelism and selected detailed replays are identical between formats. Multi-case sharing is supported by the standalone format, but the performance adapter deliberately keeps one bundle per recipe to match the legacy schedule.
+
+This mode is opt-in. Existing search/calibration/retention drivers and saved catalogs are unchanged; immutable preparation reuse, checkpoint removal and bounded/resumable campaign integration remain next. See the [implementation, measured gains and limits](../../../Balance%20Harness/Tower-Compact-Archive-Review.md).
+
+## Competitive search status
+
+**Competitive search update — 12 September 2026:** [stronger Kharad searches and calibration](../../../Balance%20Harness/Tower-Competitive-Build-Search-Review.md) now support the complete **2,438-recipe portfolio** at locally applied Health **2.931552** / Power **3.705482**. Its strongest team confirmed at **23,835/50,000 (47.67%)**, adjusted upper **48.23%**. The tools support explicit saved-team improvement, larger history imports, paired quality comparisons and separately frozen calibration/precision decisions. **49 distinct floor-5 controls combined (44 local, 32 published, 27 shared)** are available for fresh searches. Search quality remains Fail; this does not establish near-optimality or broader-floor competitive balance.
 
 Verified strong discoveries also ship in the [versioned retained catalog](Fixtures/tower-retained-builds.json), with [readable complete recipes](../../../Balance%20Harness/Competitive-Kharad-Recipes-20260912/README.md). Fresh checkouts can use them as compatible controls; future studies still measure them on fresh seeds. Historical results never become current fitness or automatic balance acceptance.
 

@@ -10,11 +10,11 @@
       class="ll-item-name flex min-w-0 items-center gap-1"
       [ngClass]="rarityClasses"
     >
+      <span class="min-w-0 truncate">{{ displayName }}</span>
       <span class="ll-rarity-tag" [attr.title]="rarity">
         <span aria-hidden="true">{{ rarityCode }}</span>
         <span class="sr-only">{{ rarity }} rarity</span>
       </span>
-      <span class="min-w-0 truncate">{{ displayName }}</span>
       <span
         *ngIf="isFavorite"
         class="shrink-0 leading-none text-primary"

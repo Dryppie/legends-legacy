@@ -17,6 +17,12 @@ public static class Program
                 Console.WriteLine("BalanceHarness run --output <new-directory> [--seed <int>] [--content-root <API.LL-directory>] [--scenario <json>] [--detailed]");
                 Console.WriteLine("BalanceHarness suite --output <new-directory> [--seed <int>] [--suite <json>] [--samples <per-cell>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower --output <new-directory> [--scenario <json>] [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-performance --output <new-directory> [--definition <bounded-performance-json>] [--content-root <API.LL-directory>] (diagnostics only)");
+                Console.WriteLine("BalanceHarness tower-performance --archive-format tower-compact-v1 --output <new-directory> [--definition <json>] [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-performance-compare --reference <benchmark-directory> --run <benchmark-directory> --output <new-directory>");
+                Console.WriteLine("BalanceHarness tower-compact --output <new-directory> (--definition <bulk-json> | --scenario <Tower-scenario-json>) [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-compact-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-compact-replay --run <directory> --case <case-id> --battle <tower.0001> [--detailed]");
                 Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-team-plan --floor <1-15> --slots <4-10> --seed <int> --output <new-directory> [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>] (independent preview with retained controls and history)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
@@ -67,6 +73,12 @@ public static class Program
                 "run" => new[] { "--output", "--seed", "--content-root", "--scenario", "--detailed" },
                 "suite" => new[] { "--output", "--seed", "--content-root", "--suite", "--samples" },
                 "tower" => new[] { "--output", "--content-root", "--scenario" },
+                "tower-performance" => new[] { "--output", "--definition", "--content-root", "--archive-format" },
+                "tower-compact" => new[] { "--output", "--definition", "--scenario", "--content-root" },
+                "tower-compact-verify" => new[] { "--run" },
+                "tower-compact-replay" => new[] { "--run", "--case", "--battle", "--detailed" },
+                "tower-performance-worker" => new[] { "--run", "--workers" },
+                "tower-performance-compare" => new[] { "--reference", "--run", "--output" },
                 "tower-boss-discovery-prepare" => new[] { "--definition", "--output", "--content-root" },
                 "tower-boss-discover" => new[] { "--definition", "--output", "--content-root" },
                 "tower-boss-discovery-verify" => new[] { "--run" },
@@ -115,6 +127,54 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-performance-compare")
+            {
+                var report = TowerPerformanceComparison.Compare(Required(options, "--reference"), Required(options, "--run"), Required(options, "--output"), cancellation.Token);
+                Console.WriteLine($"{report.Status}: {report.RepeatedTrialPairs} repeated diagnostic pairs matched after archive verification; no combat executed.");
+                return 0;
+            }
+            if (command == "tower-compact")
+            {
+                if (options.ContainsKey("--definition") == options.ContainsKey("--scenario"))
+                    throw new ArgumentException("Choose exactly one compact definition or Tower scenario.");
+                var scenario = options.TryGetValue("--scenario", out var scenarioFile) ? TowerContractJson.Read<TowerScenario>(scenarioFile) : null;
+                var definition = scenario is null ? TowerContractJson.Read<TowerCompactDefinition>(Required(options, "--definition"))
+                    : new TowerCompactDefinition(1, "compact-tower", scenario.Seeds.Count, 32, [new("scenario", scenario)]);
+                var output = Required(options, "--output");
+                await TowerCompactBundle.CreateAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(), definition,
+                    output, cancellation.Token, Console.WriteLine, retainExecutable: true);
+                var saved = TowerCompactBundle.ReadSaved(output, cancellation.Token);
+                Console.WriteLine($"Compact Tower complete and verified: {saved.Plan.PlannedBattles} battles. No automatic balance acceptance.");
+                return 0;
+            }
+            if (command == "tower-compact-verify")
+            {
+                var saved = TowerCompactBundle.ReadSaved(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Compact Tower verified: {saved.Plan.PlannedBattles} trials in {saved.Plan.Cases.Count} cases; no combat executed.");
+                return 0;
+            }
+            if (command == "tower-compact-replay")
+            {
+                var report = await TowerCompactBundle.ReplayAsync(Required(options, "--run"), Required(options, "--case"), Required(options, "--battle"), detailed, cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(report, HarnessJson.Options));
+                Console.Error.WriteLine("Compact Tower replay matched the full saved report.");
+                return 0;
+            }
+            if (command == "tower-performance")
+            {
+                var report = await TowerPerformanceBenchmark.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    options.GetValueOrDefault("--definition") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures", TowerPerformanceBenchmark.Fixture),
+                    Required(options, "--output"), cancellation.Token, Console.WriteLine, options.GetValueOrDefault("--archive-format"));
+                Console.WriteLine($"Performance: {report.Status}; {report.CompletedBattles}/{report.PlannedBattles} diagnostic combats; {report.ElapsedSeconds:F2}s overall.");
+                return report.Status == "Complete" ? 0 : report.Status == "Cancelled" ? 130 : 2;
+            }
+            if (command == "tower-performance-worker")
+            {
+                var report = await TowerPerformanceBenchmark.RunWorkerAsync(Required(options, "--run"),
+                    int.Parse(Required(options, "--workers"), CultureInfo.InvariantCulture), cancellation.Token, Console.WriteLine);
+                if (report.Error is not null) Console.Error.WriteLine(report.Error);
+                return report.Status == "Complete" ? 0 : 2;
+            }
             if (command == "tower-team-plan")
             {
                 var root = options.GetValueOrDefault("--content-root") ?? FindContentRoot();

@@ -15,7 +15,7 @@ public sealed class BalanceHarnessTowerRetainedBuildTests
         await using var service = new TowerDashboardService(Root, Catalogs, path);
         var catalog = TowerRetainedBuilds.Read(Path.Combine(Catalogs, TowerRetainedBuilds.FixtureFile));
         Assert.Equal(6, catalog.Studies.Where(s => s.Id.StartsWith("independent-pilot-")).Sum(s => s.Builds.Count));
-        foreach (var (floor, slots, count) in new[] { (1,4,2), (5,5,21) })
+        foreach (var (floor, slots, count) in new[] { (1,4,2), (5,5,32) })
         {
             var d = service.StudyPlan(new(floor, slots, 976321)).Definition;
             Assert.Equal(count, d.References.Count);

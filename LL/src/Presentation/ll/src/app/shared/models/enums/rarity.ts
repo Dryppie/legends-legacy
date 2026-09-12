@@ -10,7 +10,7 @@ export enum Rarity {
 
 export const RARITY_CODES: Record<Rarity, string> = {
   [Rarity.Common]: 'C',
-  [Rarity.Uncommon]: 'U',
+  [Rarity.Uncommon]: 'UC',
   [Rarity.Rare]: 'R',
   [Rarity.Epic]: 'E',
   [Rarity.Unique]: 'U',

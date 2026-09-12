@@ -1147,8 +1147,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    min-width: 1.75rem;
-    padding: 0.125rem 0.25rem;
+    min-width: 1.25rem;
+    padding: 0 0.1875rem;
     border: 1px solid var(--ll-color-border-strong);
     border-radius: 0.25rem;
     background: var(--ll-color-bg-deep);

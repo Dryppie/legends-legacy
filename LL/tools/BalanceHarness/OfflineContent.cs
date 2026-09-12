@@ -37,6 +37,7 @@ public sealed class OfflineContent
 
     public OfflineContent(string root, ThreatAndTankingOptions threat)
     {
+        using var timing = TowerPerformanceTrace.Measure("content.load");
         _root = root;
         _threat = threat;
         Essences = new(_configuration, root, HarnessJson.Options, new EssenceDefinitionValidator());

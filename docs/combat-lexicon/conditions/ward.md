@@ -74,4 +74,4 @@ Implemented by the standard condition application pipeline. Legacy statuses must
 
 ## Related Entries
 
-[Unstoppable](unstoppable.md) · [Stacking and duration](../stacking-and-duration.md) · [Combat tags](../combat-tags.md)
+[Exposed (proposed)](exposed.md) · [Unstoppable](unstoppable.md) · [Stacking and duration](../stacking-and-duration.md) · [Combat tags](../combat-tags.md)

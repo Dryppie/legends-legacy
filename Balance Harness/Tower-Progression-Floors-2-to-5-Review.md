@@ -1,6 +1,6 @@
 # Tower progression audit and linked calibration: floors 2–5
 
-**Competitive search update — 12 September 2026:** [stronger Kharad searches](Tower-Competitive-Build-Search-Review.md) confirmed new teams at **948/1,000** and **1,000/1,000** on the previously passing content. Its earlier scoped Pass is superseded for the expanded build portfolio. Retained-build improvement and the history-capacity extension are implemented; the fresh quality audit and separate linked calibration are documented in the new review. Near-optimality remains unestablished.
+**Competitive search update — 12 September 2026:** [stronger Kharad searches and calibration](Tower-Competitive-Build-Search-Review.md) now support the complete **2,438-recipe portfolio** at Health **2.931552** / Power **3.705482**, applied locally after exact parity checks. The strongest team confirmed at **23,835/50,000 (47.67%)**, adjusted upper **48.23%**. There are **32 published / 49 local** compatible controls for future fresh searches. Search quality still fails the predeclared reliability/plateau rule; near-optimality and broader-floor competitive balance remain unestablished.
 
 11 September 2026. The first progression batch independently generated complete teams for floors 2–4 at **four Essences per character**, and checked Kharad again at **five**. Floors 2–4 failed their original settings. A separately frozen calibration then covered every earlier above-ceiling candidate, every shortlisted party and every compatible reference before local application.
 

@@ -17,4 +17,10 @@ The later retained challengers used the separately frozen **1.20** setting: Heal
 | challenger-retained-1 | 985/1000 | [Ordered team](challenger-retained-1.md) · [JSON](challenger-retained-1.json) |
 | challenger-retained-2 | 973/1000 | [Ordered team](challenger-retained-2.md) · [JSON](challenger-retained-2.json) |
 
-The [versioned catalog](../../LL/tools/BalanceHarness/Fixtures/tower-retained-builds.json) includes both challengers and the ten strongest verified first-calibration parties. It provides **21 compatible floor-5 controls** on a fresh checkout. The larger main local library currently provides 38. Future studies remeasure compatible recipes on fresh seeds; they never inherit their historical win rates.
+The complete calibration and separate precision resolution use the linked **1.392** setting: Health **2.931552**, Power/offense **3.705482**. The final decision covers all **2,438** frozen recipes and passes the 10–50% rule. Its strongest observed recipe is exported below; the review records local application and parity status. This remains scoped balance evidence and does not establish search optimality.
+
+| Calibration leader | Fixed resolution measurement | Exact recipe |
+| --- | ---: | --- |
+| calibration-leader | 23,835/50,000 (47.67%), adjusted interval 47.11–48.23% | [Ordered team](calibration-leader.md) · [JSON](calibration-leader.json) |
+
+The [versioned catalog](../../LL/tools/BalanceHarness/Fixtures/tower-retained-builds.json) includes the challengers and verified calibration/precision leaders. It provides **32 compatible floor-5 controls** on a fresh checkout. The larger main local library now provides **49**. The final publication adds 20 evidence-linked records representing 11 additional compatible recipes, preserves all old controls and excludes every used precision schedule from later fresh trials. Future studies remeasure compatible recipes; they never inherit historical win rates.

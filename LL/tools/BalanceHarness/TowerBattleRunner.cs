@@ -36,6 +36,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
     public TowerBattleInput CreateInput(TowerScenario scenario, int seed, ThreatAndTankingOptions threat,
         int checkpointIntervalTicks)
     {
+        using var timing = TowerPerformanceTrace.Measure("input.materialize");
         if (scenario.SchemaVersion != 1 || string.IsNullOrWhiteSpace(scenario.Id)
             || scenario.PreparationState != "uncleared-no-contributions"
             || scenario.Seeds.Count is < 1 or > 1000 || scenario.Seeds.Distinct().Count() != scenario.Seeds.Count
@@ -62,6 +63,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
 
     public async Task<CombatEncounterRuntime> PrepareAsync(TowerBattleInput input, CancellationToken token = default)
     {
+        using var timing = TowerPerformanceTrace.Measure("combat.prepare-and-validate");
         token.ThrowIfCancellationRequested();
         var expected = CreateInput(input.Scenario, input.Rules.RandomSeed, input.ThreatAndTanking, input.CheckpointIntervalTicks);
         if (HarnessJson.Hash(expected) != HarnessJson.Hash(input))
@@ -80,20 +82,31 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
 
     public async Task<TowerBattleReport> RunAsync(TowerBattleInput input, bool detailed = false, CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
+        TowerPerformanceTrace.BattleStarted();
+        using var timing = TowerPerformanceTrace.Measure("battle");
         var runtime = await PrepareAsync(input, token);
-        var prepared = IdleBattleRunner.DescribeParticipants(runtime);
+        JsonElement prepared;
+        using (TowerPerformanceTrace.Measure("report.describe-participants"))
+            prepared = IdleBattleRunner.DescribeParticipants(runtime);
         // Separate executor/cache for every trial and replay.
-        var executor = content.CreateExecutor();
-        var result = detailed
+        CombatEngineExecutor executor;
+        using (TowerPerformanceTrace.Measure("executor.create")) executor = content.CreateExecutor();
+        CombatResult result;
+        using (TowerPerformanceTrace.Measure(detailed ? "engine.detailed" : "engine.playback-including-checkpoints"))
+            result = detailed
             ? await executor.ExecuteSimulationAsync(runtime, input.Rules with { CaptureEventLog = true }, token)
             : (await executor.ExecuteTowerPlaybackAsync(runtime, input.CheckpointIntervalTicks, token)).Result;
+        using var reportTiming = TowerPerformanceTrace.Measure("report.resolve-and-map");
         var resolution = new CombatEncounterResultFactory().Create(runtime, result);
         var guardian = resolution.HostilePostState.Single();
-        return new(new(1, input.Scenario.Id, input.Rules.RandomSeed, FastCombatEngine.TicksPerSecond,
+        var report = new TowerBattleReport(new(1, input.Scenario.Id, input.Rules.RandomSeed, FastCombatEngine.TicksPerSecond,
                 prepared, BattleSummary.From(resolution.CombatResult, input.Rules.MaxTicks), detailed ? result.EventLog : null),
             resolution.Outcome == BattleOutcome.Victory,
             guardian.MaxHealth <= 0 ? 0 : Math.Round(100m * guardian.Health / guardian.MaxHealth, 2),
             Math.Max(0, (int)Math.Ceiling(result.Duration / (double)FastCombatEngine.TicksPerSecond)));
+        TowerPerformanceTrace.BattleCompleted();
+        return report;
     }
 
     public static CharacterSnapshot ToSnapshot(FixtureCharacter fixture, OfflineContent content)

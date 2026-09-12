@@ -32,7 +32,8 @@ Conditions use stable lowercase kebab-case IDs. Status reflects correspondence b
 | [Doom](doom.md)                   | Harmful                   | Implemented |
 | [Thorns](thorns.md)               | Beneficial, Reactive      | Implemented |
 | [Lifesteal](lifesteal.md)         | Beneficial, Sustain       | Implemented |
+| [Exposed](exposed.md)             | Harmful                   | Proposed    |
 
-Totals: **28 Implemented**, **0 Partially Implemented**, **0 Proposed**.
+Totals: **28 Implemented**, **0 Partially Implemented**, **1 Proposed**.
 
 See the [root catalogue](../README.md), [stacking rules](../stacking-and-duration.md), and [condition template](../templates/condition-template.md).

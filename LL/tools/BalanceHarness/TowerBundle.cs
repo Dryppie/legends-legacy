@@ -24,6 +24,7 @@ public static class TowerBundle
     public static async Task<TowerScorecard> CreateAsync(string apiRoot, string scenarioPath, string output,
         CancellationToken token = default, Action<string>? progress = null, TowerSettings? settingsOverride = null)
     {
+        using var timing = TowerPerformanceTrace.Measure("archive.create");
         if (Path.Exists(output)) throw new IOException("Output already exists; choose a new Tower run directory.");
         token.ThrowIfCancellationRequested();
         Directory.CreateDirectory(output);
@@ -87,6 +88,7 @@ public static class TowerBundle
 
     internal static IReadOnlyDictionary<string, string> CopyContent(string apiRoot, string snapshotRoot, CancellationToken token)
     {
+        using var timing = TowerPerformanceTrace.Measure("content.copy-and-hash");
         var hashes = new SortedDictionary<string, string>(StringComparer.Ordinal);
         foreach (var file in Files)
         {
@@ -115,6 +117,7 @@ public static class TowerBundle
     // Reading comparisons across builds must not execute the historical build or regenerate its stats.
     public static SavedTower ReadSaved(string run, CancellationToken token = default)
     {
+        using var timing = TowerPerformanceTrace.Measure("archive.read-verify");
         var inputs = HarnessJson.Read<TowerBattleInput[]>(Path.Combine(run, "tower-input.json"));
         var manifest = HarnessJson.Read<TowerManifest>(Path.Combine(run, "tower-manifest.json"));
         VerifySnapshot(run, manifest, HarnessJson.Hash(inputs), token);

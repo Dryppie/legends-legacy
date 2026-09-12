@@ -18,19 +18,32 @@ public static class HarnessJson
     {
         // Large archives otherwise perform millions of small filesystem reads.
         // Keep ReadAllText's UTF-8 default and BOM detection unchanged.
-        using var reader = new StreamReader(path, Encoding.UTF8, true, ReadBufferSize);
-        return JsonSerializer.Deserialize<T>(reader.ReadToEnd(), Options)
+        string json;
+        using (TowerPerformanceTrace.Measure("io.read-json"))
+        {
+            using var reader = new StreamReader(path, Encoding.UTF8, true, ReadBufferSize);
+            json = reader.ReadToEnd();
+        }
+        using var timing = TowerPerformanceTrace.Measure("json.deserialize");
+        return JsonSerializer.Deserialize<T>(json, Options)
             ?? throw new InvalidDataException($"Empty JSON document: {path}");
     }
 
     public static void WriteNew<T>(string path, T value)
     {
+        using var timing = TowerPerformanceTrace.Measure("json.serialize-write");
         using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
-        JsonSerializer.Serialize(stream, value, Options);
+        if (TowerPerformanceTrace.Enabled)
+        {
+            using var measured = new TowerPerformanceTrace.WriteStream(stream);
+            JsonSerializer.Serialize(measured, value, Options);
+        }
+        else JsonSerializer.Serialize(stream, value, Options);
     }
 
     public static string FileHash(string path)
     {
+        using var timing = TowerPerformanceTrace.Measure("hash.file-read");
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
             ReadBufferSize, FileOptions.SequentialScan);
         return Convert.ToHexStringLower(SHA256.HashData(stream));
@@ -39,6 +52,7 @@ public static class HarnessJson
     // Dictionary iteration (including frozen equipment stats) is not an input identity.
     public static string Hash<T>(T value)
     {
+        using var timing = TowerPerformanceTrace.Measure("hash.canonical-json");
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
             WriteCanonical(writer, JsonSerializer.SerializeToElement(value, Options));

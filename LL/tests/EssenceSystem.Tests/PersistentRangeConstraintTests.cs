@@ -52,7 +52,28 @@ public sealed class PersistentRangeConstraintTests
             db.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(ArenaTicketStatus))!.GetCheckConstraints(),
             check => check.Name == "CK_ArenaTicketStatus_CurrentTickets_Range");
 
-        Assert.Equal("\"CurrentTickets\" >= 0 AND \"CurrentTickets\" <= 5", constraint.Sql);
+        Assert.Equal("\"CurrentTickets\" >= 0 AND \"CurrentTickets\" <= 8", constraint.Sql);
+    }
+
+    [Fact]
+    public void Noble_ticket_migration_replaces_the_existing_cap_without_changing_balances()
+    {
+        var operations = new AllowNobleArenaTicketCapacity().UpOperations;
+
+        Assert.Collection(operations,
+            operation =>
+            {
+                var drop = Assert.IsType<DropCheckConstraintOperation>(operation);
+                Assert.Equal("ArenaTicketStatus", drop.Table);
+                Assert.Equal("CK_ArenaTicketStatus_CurrentTickets_Range", drop.Name);
+            },
+            operation =>
+            {
+                var add = Assert.IsType<AddCheckConstraintOperation>(operation);
+                Assert.Equal("ArenaTicketStatus", add.Table);
+                Assert.Equal("CK_ArenaTicketStatus_CurrentTickets_Range", add.Name);
+                Assert.Equal("\"CurrentTickets\" >= 0 AND \"CurrentTickets\" <= 8", add.Sql);
+            });
     }
 
     [Fact]
