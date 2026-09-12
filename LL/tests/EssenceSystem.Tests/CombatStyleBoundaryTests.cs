@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.CharacterActions;
+using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.CombatStyles;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Snapshots;
@@ -14,6 +15,32 @@ namespace EssenceSystem.Tests;
 
 public sealed class CombatStyleBoundaryTests
 {
+    [Theory]
+    [InlineData(TournamentStatus.RegistrationOpen)]
+    [InlineData(TournamentStatus.RegistrationClosed)]
+    [InlineData(TournamentStatus.BracketGenerated)]
+    [InlineData(TournamentStatus.InProgress)]
+    public async Task Tournament_participation_allows_live_build_changes_and_still_settles_idle(TournamentStatus status)
+    {
+        await using var db = new LLDbContext(new DbContextOptionsBuilder<LLDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        var characterId = Guid.NewGuid();
+        var tournament = new TournamentInstance { Id = Guid.NewGuid(), Name = "Build changes", Status = status };
+        db.ArenaTournaments.Add(tournament);
+        db.TournamentParticipants.Add(new TournamentParticipant
+        {
+            Id = Guid.NewGuid(), CharacterId = characterId, TournamentId = tournament.Id,
+            Tournament = tournament, Status = TournamentParticipantStatus.Active, EntryRankTier = "Bronze"
+        });
+        await db.SaveChangesAsync();
+        var actions = new RecordingActions(false);
+        using var services = new ServiceCollection().AddSingleton<ICharacterActionService>(actions).BuildServiceProvider();
+        var boundary = new CombatStyleMutationBoundary(new CombatStyleActivityRepository(db), services);
+
+        Assert.Null(await boundary.PrepareMutationAsync(characterId, default));
+        Assert.Equal(1, actions.Resolutions);
+    }
+
     [Fact]
     public async Task Clearing_tracked_state_also_requires_a_new_idle_settlement_in_the_same_scope()
     {

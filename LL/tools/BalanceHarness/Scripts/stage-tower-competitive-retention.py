@@ -26,7 +26,7 @@ def canonical_hash(value):
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
-def stage(out, source, challengers):
+def stage(out, source, challengers, catalog=None):
     if out.exists(): raise FileExistsError('Choose a new staging directory.')
     p = cal.check(source); report = cal.read(source / 'assessment-parallel.json')
     if report['protocolSha256'] != cal.sha(source / 'protocol.json') or report['selectionSha256'] != cal.sha(source / 'selection.json'):
@@ -39,7 +39,7 @@ def stage(out, source, challengers):
     entries = cal.read(source / 'portfolio.json'); ids = [e['id'] for e in entries]
     expected = expanded.assess(ids, partitions, p) if p.get('campaignAssessmentPolicy') else cal.global_assessment(ids, partitions)
     if any(report.get(k) != v for k, v in expected.items()): raise ValueError('Global assessment differs from its verified evidence.')
-    target = cal.ROOT / 'TestResults/balance/retained-tower-builds.json'
+    target = catalog or cal.ROOT / 'TestResults/balance/retained-tower-builds.json'
     before = cal.read(target); additions = []; sources = {str(source / 'assessment-parallel.json'): cal.sha(source / 'assessment-parallel.json')}
     if challengers:
         completed = cal.read(challengers / 'completion.json')
@@ -64,7 +64,7 @@ def stage(out, source, challengers):
     if {s['id'] for s in before['studies']}.intersection(s['id'] for s in additions): raise ValueError('These sources are already retained.')
     merged = {**before, 'studies': before['studies'] + additions}; out.mkdir(parents=True)
     cal.save(out / 'before.json', before); cal.save(out / 'retained-tower-builds.json', merged)
-    cal.save(out / 'import-plan.json', {'status': 'Staged', 'sourceCatalogSha256': cal.sha(target), 'candidateSha256': cal.sha(out / 'retained-tower-builds.json'),
+    cal.save(out / 'import-plan.json', {'status': 'Staged', 'targetCatalog': str(target), 'sourceCatalogSha256': cal.sha(target), 'candidateSha256': cal.sha(out / 'retained-tower-builds.json'),
         'sourceHashes': sources, 'addedStudies': [s['id'] for s in additions], 'addedBuildRecords': sum(len(s['builds']) for s in additions),
         'scriptSha256': cal.sha(Path(__file__)), 'calibrationAssessment': report['assessment'],
         'scope': 'Retain exact completed discoveries even when balance fails; future studies must measure them afresh. Preserve all prior controls.'})
@@ -82,4 +82,6 @@ def stage(out, source, challengers):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--calibration', type=Path, required=True); parser.add_argument('--challengers', type=Path)
-    args = parser.parse_args(); stage(args.out.resolve(), args.calibration.resolve(), args.challengers.resolve() if args.challengers else None)
+    parser.add_argument('--catalog', type=Path, help='Catalog to extend; defaults to the main local library. A published fixture uses the same validated format.')
+    args = parser.parse_args(); stage(args.out.resolve(), args.calibration.resolve(), args.challengers.resolve() if args.challengers else None,
+        args.catalog.resolve() if args.catalog else None)

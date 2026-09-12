@@ -16,6 +16,7 @@ using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Damages;
+using Domain.Models.Essences;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Inventories;
@@ -675,6 +676,79 @@ public sealed partial class TournamentGroundsServiceTests
         Assert.False(result.Succeeded);
         Assert.Contains("before the tournament starts", result.ErrorMessage);
         Assert.Equal(snapshotId, participant.Snapshot.CharacterSnapshotId);
+    }
+
+    [Fact]
+    public async Task Tournament_start_captures_assigned_essence_loadout_and_preserves_it_after_start()
+    {
+        await using var db = CreateDbContext();
+        var clock = new MutableTimeProvider(Now);
+        var service = CreateService(db, timeProvider: clock,
+            characterSnapshotService: new Services.LL.Snapshots.CharacterSnapshotService(
+                new Persistence.LL.Repositories.Snapshots.CharacterSnapshotRepository(db)));
+        var tournament = SeedTournament(db, TournamentStatus.BracketGenerated);
+        tournament.StartsAtUtc = Now.AddSeconds(30);
+        var participant = SeedParticipant(db, tournament, 1500, 0);
+        participant.Status = TournamentParticipantStatus.Active;
+        participant.TeamId = Guid.NewGuid();
+        var first = new PlayerEssence
+        {
+            Id = Guid.NewGuid(), CharacterId = participant.CharacterId,
+            EssenceDefinitionId = "essence.first", Level = 2
+        };
+        var second = new PlayerEssence
+        {
+            Id = Guid.NewGuid(), CharacterId = participant.CharacterId,
+            EssenceDefinitionId = "essence.second", Level = 7, AscensionTier = 1, IsEvolved = true
+        };
+        var fallback = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(), CharacterId = participant.CharacterId, Name = "A fallback", PresetSlot = 1,
+            AutoUseActivities = EssenceCombatActivity.Tournament,
+            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = first.Id }]
+        };
+        var assigned = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(), CharacterId = participant.CharacterId, Name = "Tournament", PresetSlot = 2,
+            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = second.Id }]
+        };
+        db.PlayerEssences.AddRange(first, second);
+        db.EssenceLoadouts.AddRange(fallback, assigned);
+        await db.SaveChangesAsync();
+
+        var update = await service.UpdateLoadoutAsync(participant.CharacterId, tournament.Id, CancellationToken.None);
+        Assert.True(update!.Succeeded);
+        Assert.Equal(first.Id, Assert.Single(participant.Snapshot.CharacterSnapshot.EquippedEssences).PlayerEssenceId);
+
+        // Change the Tournament assignment after signup, without manually refreshing the snapshot.
+        fallback.AutoUseActivities = EssenceCombatActivity.None;
+        assigned.AutoUseActivities = EssenceCombatActivity.Tournament;
+        second.CurrentXp = 123;
+        await db.SaveChangesAsync();
+        clock.SetUtcNow(tournament.StartsAtUtc);
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+
+        var snapshotId = participant.Snapshot.CharacterSnapshotId;
+        var captured = Assert.Single(participant.Snapshot.CharacterSnapshot.EquippedEssences);
+        Assert.Equal(second.Id, captured.PlayerEssenceId);
+        Assert.Equal(1, captured.SlotIndex);
+        Assert.Equal(7, captured.Level);
+        Assert.Equal(123, captured.CurrentXp);
+        Assert.Equal(1, captured.AscensionTier);
+        Assert.True(captured.IsEvolved);
+
+        assigned.Slots.Single().PlayerEssenceId = first.Id;
+        second.Level = 8;
+        second.CurrentXp = 0;
+        await db.SaveChangesAsync();
+        await service.AdvanceDueTournamentsAsync(CancellationToken.None);
+        var persisted = await new Persistence.LL.Repositories.Snapshots.CharacterSnapshotRepository(db)
+            .GetSnapshotByIdAsync(snapshotId, CancellationToken.None);
+        var frozen = Assert.Single(persisted!.EquippedEssences);
+        Assert.Equal(snapshotId, participant.Snapshot.CharacterSnapshotId);
+        Assert.Equal(second.Id, frozen.PlayerEssenceId);
+        Assert.Equal(7, frozen.Level);
+        Assert.Equal(123, frozen.CurrentXp);
     }
 
     [Fact]

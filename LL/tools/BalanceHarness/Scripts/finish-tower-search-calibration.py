@@ -63,17 +63,22 @@ def prepare(out, expected_live_hash):
     shutil.copy2(path, folder / 'before.json')
     with (folder / 'proposed.json').open('xb') as stream: stream.write(raw)
     shutil.copy2(Path(__file__), folder / 'producing-finish-script.py')
-    # These three historical primaries are explicitly promised in this campaign.
+    # Preserve parity for every published competitive search snapshot.
     published = cal.ROOT / 'Balance Harness/Competitive-Kharad-Recipes-20260912'
     by_recipe = {cal.recipe_key(e['scenario']): e['id'] for e in entries}
-    parity = {by_recipe[cal.recipe_key(cal.read(published / (n + '.json')))] for n in ('small-retained', 'large-independent', 'large-retained')}
+    parity = {by_recipe[cal.recipe_key(cal.read(published / (n + '.json')))] for n in
+        ('small-retained', 'large-independent', 'large-retained', 'challenger-retained-1', 'challenger-retained-2')}
     top = sorted(report['cells'], key=lambda c: (-c['wins'], c['id']))[:10]
     parity.update(c['id'] for c in top)
+    diagnostic = out / 'current-engine-diagnostic/proof.json'
+    earlier_checks = cal.read(diagnostic)['combats'] if diagnostic.exists() else 0
+    if diagnostic.exists() and cal.read(diagnostic)['status'] != 'AllReportsMatched':
+        raise ValueError('Earlier current-engine diagnostic did not match.')
     cal.save(folder / 'plan.json', {'status': 'PreparedBeforeApplication', 'sourceAssessmentSha256': cal.sha(out / 'assessment-parallel.json'),
         'scriptSha256': cal.sha(Path(__file__)), 'liveBeforeSha256': cal.sha(path), 'proposedSha256': cal.sha(folder / 'proposed.json'),
         'floor': p['floor'], 'values': values, 'parityIds': sorted(parity), 'strongest': top[0]['id'],
         'paritySeeds': cal.read(out / 'seed-ledger.json')['schedules']['confirmation'][:20],
-        'maximumChecks': len(parity)*40 + 14*10 + 4, 'reserve': 1000})
+        'priorDiagnosticCombats': earlier_checks, 'maximumChecks': len(parity)*40 + 14*10 + 4 + earlier_checks, 'reserve': 1000})
     print(json.dumps({'prepared': values, 'parityTeams': len(parity)}), flush=True)
 
 
@@ -114,7 +119,8 @@ def current_batch(out, label, content):
         score = cal.read(target / 'scorecard.json')
         before = cal.read(out / 'runs' / ('confirmation-' + e['id']) / 'tower-results.json')
         after = cal.read(target / 'tower-results.json')
-        if score['status'] != 'Complete' or score['valid'] != len(plan['paritySeeds']) or after != {k: before[k] for k in after}:
+        if (score['status'] != 'Complete' or score['valid'] != len(plan['paritySeeds'])
+                or len(after) != len(plan['paritySeeds']) or after != {k: before[k] for k in after}):
             raise ValueError('Current engine combat parity mismatch: ' + e['id'])
         return {'id': e['id'], 'matched': len(after)}
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool: return list(pool.map(run, chosen))

@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -6,15 +7,21 @@ namespace BalanceHarness;
 
 public static class HarnessJson
 {
+    private const int ReadBufferSize = 128 * 1024;
     public static JsonSerializerOptions Options { get; } = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public static T Read<T>(string path) =>
-        JsonSerializer.Deserialize<T>(File.ReadAllText(path), Options)
-        ?? throw new InvalidDataException($"Empty JSON document: {path}");
+    public static T Read<T>(string path)
+    {
+        // Large archives otherwise perform millions of small filesystem reads.
+        // Keep ReadAllText's UTF-8 default and BOM detection unchanged.
+        using var reader = new StreamReader(path, Encoding.UTF8, true, ReadBufferSize);
+        return JsonSerializer.Deserialize<T>(reader.ReadToEnd(), Options)
+            ?? throw new InvalidDataException($"Empty JSON document: {path}");
+    }
 
     public static void WriteNew<T>(string path, T value)
     {
@@ -24,7 +31,8 @@ public static class HarnessJson
 
     public static string FileHash(string path)
     {
-        using var stream = File.OpenRead(path);
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+            ReadBufferSize, FileOptions.SequentialScan);
         return Convert.ToHexStringLower(SHA256.HashData(stream));
     }
 

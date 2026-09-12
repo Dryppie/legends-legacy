@@ -8,7 +8,7 @@ import {
   ItemInstance,
 } from '../../models/item';
 import { NgClass, NgIf } from '@angular/common';
-import { Rarity } from '../../models/enums/rarity';
+import { Rarity, RARITY_CODES } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 import { ItemType } from '../../models/enums/itemType';
@@ -166,21 +166,6 @@ export class ItemComponent {
   }
 
   get rarityCode(): string {
-    switch (this.rarity) {
-      case Rarity.Common:
-        return 'C';
-      case Rarity.Uncommon:
-        return 'U';
-      case Rarity.Rare:
-        return 'R';
-      case Rarity.Epic:
-        return 'E';
-      case Rarity.Unique:
-        return 'UQ';
-      case Rarity.Legendary:
-        return 'L';
-      case Rarity.Legacy:
-        return 'LG';
-    }
+    return RARITY_CODES[this.rarity];
   }
 }

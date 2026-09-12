@@ -1,6 +1,5 @@
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.CombatStyles;
-using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Raids;
 using Domain.Models.RegionBosses;
@@ -25,11 +24,8 @@ public sealed class CombatStyleActivityRepository(IDbContext db) : ICombatStyleA
         if (await db.TowerRallyParticipants.AnyAsync(x => x.CharacterId == characterId &&
                 x.TowerRally.Status == TowerRallyStatus.InProgress, ct))
             return "World Tower battle";
-        if (await db.TournamentParticipants.AnyAsync(x => x.CharacterId == characterId &&
-                x.Status != TournamentParticipantStatus.Withdrawn && x.Status != TournamentParticipantStatus.Eliminated &&
-                (x.Tournament.Status == TournamentStatus.RegistrationClosed || x.Tournament.Status == TournamentStatus.BracketGenerated ||
-                 x.Tournament.Status == TournamentStatus.InProgress), ct))
-            return "tournament";
+        // Tournament combat uses loadout snapshots captured at start, so participation
+        // must not prevent players from editing their live equipment or essence builds.
         return null;
     }
 }

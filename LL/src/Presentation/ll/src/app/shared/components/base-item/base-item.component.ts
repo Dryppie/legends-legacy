@@ -8,7 +8,7 @@ import {
   ItemBase,
 } from '../../models/item';
 import { ItemType } from '../../models/enums/itemType';
-import { Rarity } from '../../models/enums/rarity';
+import { Rarity, RARITY_CODES } from '../../models/enums/rarity';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { PopoverComponent } from '../custom-components/popover/popover.component';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
@@ -113,5 +113,9 @@ export class BaseItemComponent {
       default:
         return 'll-text-muted';
     }
+  }
+
+  get rarityCode(): string {
+    return RARITY_CODES[this.item.rarity];
   }
 }

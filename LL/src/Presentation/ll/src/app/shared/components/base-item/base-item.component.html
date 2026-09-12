@@ -1,6 +1,10 @@
 <app-popover [template]="hoverTpl" trigger="hover">
-  <div class="ll-item-name flex" [ngClass]="rarityClasses">
-    {{ item.name }}
+  <div class="ll-item-name flex min-w-0 items-center gap-1" [ngClass]="rarityClasses">
+    <span *ngIf="!useBaseName" class="ll-rarity-tag" [attr.title]="item.rarity">
+      <span aria-hidden="true">{{ rarityCode }}</span>
+      <span class="sr-only">{{ item.rarity }} rarity</span>
+    </span>
+    <span class="min-w-0 truncate">{{ item.name }}</span>
   </div>
 </app-popover>
 

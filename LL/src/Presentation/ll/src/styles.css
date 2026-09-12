@@ -1142,6 +1142,22 @@
     color: var(--ll-color-primary);
   }
 
+  .ll-rarity-tag {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    padding: 0.125rem 0.25rem;
+    border: 1px solid var(--ll-color-border-strong);
+    border-radius: 0.25rem;
+    background: var(--ll-color-bg-deep);
+    color: var(--ll-color-text);
+    font-size: var(--ll-text-xs);
+    font-weight: var(--ll-weight-semibold);
+    line-height: var(--ll-leading-tight);
+  }
+
   .ll-rarity-common {
     border-color: rgba(212, 212, 216, 0.4);
     color: var(--ll-rarity-common);

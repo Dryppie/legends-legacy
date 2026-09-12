@@ -97,7 +97,7 @@ public sealed partial class TowerDashboardService
             var job = Begin(plan.Definition.Mode == TowerBossDiscovery.Improve ? "Retained-build improvement" : "Independent teams", plan.Cost.Total, async (folder, token) => {
                 var output = Path.Combine(folder, "run");
                 HarnessJson.WriteNew(Path.Combine(folder, "preview.json"), plan);
-                Change(j => j with { Run = RunId(output), Message = "Freezing independent study inputs…" });
+                Change(j => j with { Run = RunId(output), Message = "Preparing team study…" });
                 var discoveryCount = 0; var selectionCount = 0;
                 var report = await TowerBossStudy.RunAsync(apiRoot, output, plan.Definition, token, message => {
                     var match = System.Text.RegularExpressions.Regex.Match(message, @"(?:parties, |Confirmation: )(\d+)/");
