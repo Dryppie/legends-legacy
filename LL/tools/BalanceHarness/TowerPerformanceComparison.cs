@@ -3,7 +3,9 @@ namespace BalanceHarness;
 public sealed record TowerPerformancePair(int Workers, int Repetition, int Battles, double ReferenceSeconds,
     double CandidateSeconds, double SpeedRatio, long ReferenceArchiveBytes, long CandidateArchiveBytes);
 public sealed record TowerPerformanceComparisonReport(string Status, string ReferenceFormat, string CandidateFormat,
-    int RepeatedTrialPairs, IReadOnlyList<TowerPerformancePair> Passes, string ReferenceReportHash, string CandidateReportHash);
+    int RepeatedTrialPairs, IReadOnlyList<TowerPerformancePair> Passes, string ReferenceReportHash, string CandidateReportHash,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ReferenceExecutionMode = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? CandidateExecutionMode = null);
 
 /// <summary>Revalidates saved archives before comparing matched diagnostic passes; executes no combat.</summary>
 public static class TowerPerformanceComparison
@@ -35,11 +37,13 @@ public static class TowerPerformanceComparison
                 pass.Cases.Sum(c => c.ArchiveBytes), other.Cases.Sum(c => c.ArchiveBytes)));
         }
         var report = new TowerPerformanceComparisonReport("Compared", first.Scope.ArchiveFormat ?? "legacy", second.Scope.ArchiveFormat ?? "legacy",
-            pairs.Sum(p => p.Battles), pairs, HarnessJson.FileHash(Path.Combine(reference, "performance.json")), HarnessJson.FileHash(Path.Combine(candidate, "performance.json")));
+            pairs.Sum(p => p.Battles), pairs, HarnessJson.FileHash(Path.Combine(reference, "performance.json")), HarnessJson.FileHash(Path.Combine(candidate, "performance.json")),
+            first.Scope.ExecutionMode, second.Scope.ExecutionMode);
         Directory.CreateDirectory(output);
         HarnessJson.WriteNew(Path.Combine(output, "comparison.json"), report);
         var text = new System.Text.StringBuilder("# Tower archive performance comparison\n\n");
         text.AppendLine($"**{report.Status}**: {report.ReferenceFormat} → {report.CandidateFormat}. {report.RepeatedTrialPairs} matching repeated trial pairs; these are not independent acceptance samples.\n");
+        text.AppendLine($"Execution: {report.ReferenceExecutionMode ?? "fresh preparation and playback"} → {report.CandidateExecutionMode ?? "fresh preparation and playback"}.\n");
         text.AppendLine("| Workers | Pass | Reference seconds | Candidate seconds | Reference / candidate time | Reference archive MiB | Candidate archive MiB |\n| ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (var p in pairs) text.AppendLine(FormattableString.Invariant($"| {p.Workers} | {p.Repetition + 1} | {p.ReferenceSeconds:F3} | {p.CandidateSeconds:F3} | {p.SpeedRatio:F2}× | {p.ReferenceArchiveBytes / 1048576d:F2} | {p.CandidateArchiveBytes / 1048576d:F2} |"));
         text.AppendLine("\nEach pass includes combat, archive creation and strict verification. Archive sizes exclude external detailed replays, root executable and profiling metadata. Timing is measured under uncontrolled OS cache/load; repeat in reversed order before drawing a performance conclusion. This comparison separately revalidates stored archives without rerunning combat, and that validation is outside the original pass times. It does not alter balance decisions or claim whole-campaign throughput.\n");
@@ -58,7 +62,9 @@ public static class TowerPerformanceComparison
         var planned = TowerPerformanceBenchmark.Validate(d);
         var scope = HarnessJson.Read<TowerPerformanceScope>(Path.Combine(root, "scope.json"));
         var report = HarnessJson.Read<TowerPerformanceReport>(Path.Combine(root, "performance.json"));
+        TowerPerformanceBenchmark.ValidateExecution(scope.ArchiveFormat, scope.ExecutionMode);
         if (scope.DefinitionHash != HarnessJson.Hash(d) || scope.ArchiveFormat != report.ArchiveFormat
+            || scope.ExecutionMode != report.ExecutionMode
             || scope.ArchiveFormat is not null && scope.ArchiveFormat != TowerCompactBundle.Format
             || report.Status != "Complete" || report.PlannedBattles != planned || report.StartedBattles != planned || report.CompletedBattles != planned)
             throw new InvalidDataException("Incomplete or incompatible performance report.");
@@ -77,7 +83,8 @@ public static class TowerPerformanceComparison
                 if (scope.ArchiveFormat == TowerCompactBundle.Format)
                 {
                     var saved = TowerCompactBundle.ReadSaved(path, token);
-                    if (saved.Plan.Cases.Count != 1) throw new InvalidDataException("Unexpected extra compact performance cases.");
+                    if (saved.Plan.Cases.Count != 1 || saved.Plan.ExecutionMode != scope.ExecutionMode)
+                        throw new InvalidDataException("Unexpected compact performance cases or execution mode.");
                     digest = saved.ResultDigests[item.Id]; trials = saved.Cases[item.Id]; evidence = TowerCompactBundle.Evidence(item.Id, saved, item.Id);
                 }
                 else

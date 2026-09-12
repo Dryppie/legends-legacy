@@ -72,7 +72,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         var setup = content.CreateSetup(first.Materialize(content.Equipment), first.MaterializeEssences());
         var pipeline = new CombatPreparationPipeline(new FileSnapshotBuilder(content, setup), setup);
         var request = new WorldTowerCombatRuntimeRequest(
-            StableRandom.Guid("balance-tower-attempt-v1", input.Scenario.Id, input.Rules.RandomSeed.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+            EncounterId(input.Scenario.Id, input.Rules.RandomSeed),
             StableRandom.Guid("balance-tower-rally-v1", input.Scenario.Id), input.Floor,
             input.Party.Select(p => new SnapshotCombatantRequest(ToSnapshot(p.Character, content),
                 new(p.Character.Id.ToString(), p.Character.Id, CombatSide.Friendly, p.PartyNumber))).ToArray(),
@@ -97,16 +97,35 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
             result = detailed
             ? await executor.ExecuteSimulationAsync(runtime, input.Rules with { CaptureEventLog = true }, token)
             : (await executor.ExecuteTowerPlaybackAsync(runtime, input.CheckpointIntervalTicks, token)).Result;
+        var report = CreateReport(runtime, input, result, prepared, detailed);
+        TowerPerformanceTrace.BattleCompleted();
+        return report;
+    }
+
+    internal async Task<TowerPreparedBattle> PrepareReusableAsync(TowerBattleInput input, CancellationToken token = default)
+    {
+        using var timing = TowerPerformanceTrace.Measure("prepared.freeze-and-validate");
+        token.ThrowIfCancellationRequested();
+        // Own all recipe/settings collections before any asynchronous preparation or subsequent caller edits.
+        var owned = JsonSerializer.Deserialize<TowerBattleInput>(JsonSerializer.SerializeToUtf8Bytes(input, HarnessJson.Options), HarnessJson.Options)!;
+        var runtime = await PrepareAsync(owned, token);
+        return new TowerPreparedBattle(owned, runtime, content.CreatePreparedExecutor(owned.ThreatAndTanking));
+    }
+
+    internal static Guid EncounterId(string scenarioId, int seed) =>
+        StableRandom.Guid("balance-tower-attempt-v1", scenarioId, seed.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+    internal static TowerBattleReport CreateReport(CombatEncounterRuntime runtime, TowerBattleInput input,
+        CombatResult result, JsonElement prepared, bool detailed)
+    {
         using var reportTiming = TowerPerformanceTrace.Measure("report.resolve-and-map");
         var resolution = new CombatEncounterResultFactory().Create(runtime, result);
         var guardian = resolution.HostilePostState.Single();
-        var report = new TowerBattleReport(new(1, input.Scenario.Id, input.Rules.RandomSeed, FastCombatEngine.TicksPerSecond,
+        return new TowerBattleReport(new(1, input.Scenario.Id, input.Rules.RandomSeed, FastCombatEngine.TicksPerSecond,
                 prepared, BattleSummary.From(resolution.CombatResult, input.Rules.MaxTicks), detailed ? result.EventLog : null),
             resolution.Outcome == BattleOutcome.Victory,
             guardian.MaxHealth <= 0 ? 0 : Math.Round(100m * guardian.Health / guardian.MaxHealth, 2),
             Math.Max(0, (int)Math.Ceiling(result.Duration / (double)FastCombatEngine.TicksPerSecond)));
-        TowerPerformanceTrace.BattleCompleted();
-        return report;
     }
 
     public static CharacterSnapshot ToSnapshot(FixtureCharacter fixture, OfflineContent content)

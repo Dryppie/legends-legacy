@@ -37,11 +37,13 @@ public sealed class BalanceHarnessTowerCompactTests
         Assert.Throws<InvalidDataException>(() => TowerCompactBundle.Validate(d));
     }
 
-    [Fact]
-    public async Task Multi_case_chunks_preserve_full_reports_search_ranking_and_balance_inputs()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("prepared-v1")]
+    public async Task Multi_case_chunks_preserve_full_reports_search_ranking_and_balance_inputs(string? mode)
     {
         using var temp = new Temp(); var d = Definition(); var compact = Path.Combine(temp.Path, "compact");
-        await TowerCompactBundle.CreateAsync(Root, d, compact, retainExecutable: true);
+        await TowerCompactBundle.CreateAsync(Root, d, compact, retainExecutable: true, executionMode: mode);
         var saved = TowerCompactBundle.ReadSaved(compact);
         Assert.True(File.Exists(Path.Combine(compact, "executable-files.json")));
         Assert.Equal(4, saved.Plan.PlannedBattles);
@@ -157,12 +159,14 @@ public sealed class BalanceHarnessTowerCompactTests
         Assert.Throws<InvalidDataException>(() => TowerCompactBundle.ReadSaved(output, expectedManifestHash: trustedHash));
     }
 
-    [Fact]
-    public async Task Cancellation_preserves_committed_chunks_but_cannot_be_accepted()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("prepared-v1")]
+    public async Task Cancellation_preserves_committed_chunks_but_cannot_be_accepted(string? mode)
     {
         using var temp = new Temp(); using var cancel = new CancellationTokenSource();
         var d = Definition() with { ChunkSize = 1 }; var output = Path.Combine(temp.Path, "run");
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => TowerCompactBundle.CreateAsync(Root, d, output, cancel.Token, _ => cancel.Cancel()));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => TowerCompactBundle.CreateAsync(Root, d, output, cancel.Token, _ => cancel.Cancel(), executionMode: mode));
         Assert.True(File.Exists(Path.Combine(output, "chunks/000000/receipt.json")));
         Assert.Single(Directory.GetDirectories(Path.Combine(output, "chunks")));
         Assert.False(File.Exists(Path.Combine(output, TowerCompactBundle.ManifestFile)));
@@ -184,15 +188,18 @@ public sealed class BalanceHarnessTowerCompactTests
         Assert.Throws<InvalidDataException>(() => TowerCompactBundle.ReadSaved(output));
     }
 
-    [Fact]
-    public async Task Compact_performance_mode_accounts_for_all_repeats_and_replays()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("prepared-v1")]
+    public async Task Compact_performance_mode_accounts_for_all_repeats_and_replays(string? mode)
     {
         using var temp = new Temp(); var d = Performance;
         d = d with { Cases = d.Cases.Take(2).Select(c => c with { Scenario = c.Scenario with { Seeds = [c.Scenario.Seeds[0]] } }).ToArray(),
             WorkerCounts = [1, 2], Repetitions = 2, MaxBattles = 12 };
         var path = Path.Combine(temp.Path, "definition.json"); HarnessJson.WriteNew(path, d);
         var output = Path.Combine(temp.Path, "run");
-        var result = await TowerPerformanceBenchmark.RunAsync(Root, path, output, archiveFormat: TowerCompactBundle.Format);
+        var result = await TowerPerformanceBenchmark.RunAsync(Root, path, output, archiveFormat: TowerCompactBundle.Format, executionMode: mode);
+        Assert.Equal(mode, result.ExecutionMode);
         Assert.True(result.Status == "Complete", result.Error);
         Assert.Equal(12, result.CompletedBattles); Assert.Equal(12, result.StartedBattles);
         Assert.Equal(TowerCompactBundle.Format, result.ArchiveFormat);

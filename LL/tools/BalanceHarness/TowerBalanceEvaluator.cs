@@ -38,6 +38,7 @@ public static class TowerBalanceEvaluator
 
     public static void Validate(TowerBalanceDefinition d)
     {
+        using var timing = TowerPerformanceTrace.Measure("balance.validate");
         if (d is null || d.SchemaVersion != 1 || !TowerBenchmark.SafeId(d.Id) || d.IntervalPolicy != IntervalPolicy
             || d.ContentHashes is null || !d.ContentHashes.Keys.Order().SequenceEqual(TowerBundle.Files.Order())
             || d.ContentHashes.Values.Any(h => !TowerContractJson.Hash(h))
@@ -49,7 +50,11 @@ public static class TowerBalanceEvaluator
             || d.Cohorts.Select(c => c.Id).Distinct().Count() != d.Cohorts.Count
             || d.Cohorts.Select(c => (c.Budget, c.Context, c.EquipmentBudgetHash)).Distinct().Count() != d.Cohorts.Count
             || d.ExcludedCombatSeeds is null || d.ExcludedCombatSeeds.Count > TowerStudyLimits.HistoricalSeeds
-            || d.ExcludedCombatSeeds.Distinct().Count() != d.ExcludedCombatSeeds.Count || d.MaximumBattles is < 1 or > 100000)
+            || d.MaximumBattles is < 1 or > 100000)
+            throw new InvalidDataException("Invalid frozen Tower balance family, cohort, hashes or interval policy.");
+        HashSet<int> excluded;
+        using (TowerPerformanceTrace.Measure("balance.exclusion-set")) excluded = d.ExcludedCombatSeeds.ToHashSet();
+        if (excluded.Count != d.ExcludedCombatSeeds.Count)
             throw new InvalidDataException("Invalid frozen Tower balance family, cohort, hashes or interval policy.");
         var cohorts = d.Cohorts.ToDictionary(c => c.Id);
         var ids = new HashSet<string>(StringComparer.Ordinal);
@@ -63,7 +68,7 @@ public static class TowerBalanceEvaluator
                 || cell.Scenario.PreparationState != "uncleared-no-contributions" || cell.Scenario.Assumptions is null
                 || cell.Scenario.Seeds is not { Count: > 0 and <= 1000 }
                 || cell.Scenario.Seeds.Distinct().Count() != cell.Scenario.Seeds.Count
-                || cell.Scenario.Seeds.Intersect(d.ExcludedCombatSeeds).Any()
+                || cell.Scenario.Seeds.Any(excluded.Contains)
                 || cell.MinimumSamples is < 1 or > 1000 || cell.MinimumSamples > cell.Scenario.Seeds.Count)
                 throw new InvalidDataException("Every confirmation cell requires a unique ID, complete cohort and fresh bounded schedule.");
             TowerBossDiscovery.ValidateEquipment(cell.Scenario.Party, cohort.Budget, cohort.RequiredPartySize);

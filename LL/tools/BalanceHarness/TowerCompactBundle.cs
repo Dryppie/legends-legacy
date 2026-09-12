@@ -14,7 +14,9 @@ public sealed record TowerCompactDefinition(int SchemaVersion, string Id, int Ma
     IReadOnlyList<TowerCompactCase> Cases);
 public sealed record TowerCompactCaseReference(string Id, string RecipeHash, string InputHash);
 public sealed record TowerCompactPlan(int SchemaVersion, string Id, int MaximumBattles, int ChunkSize,
-    int PlannedBattles, IReadOnlyList<TowerCompactCaseReference> Cases);
+    int PlannedBattles, IReadOnlyList<TowerCompactCaseReference> Cases,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ExecutionMode = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? SharedContentPath = null);
 public sealed record TowerCompactInput(int SchemaVersion, string RecipeHash, TowerFloorDefinition Floor,
     JsonElement Guardian, IReadOnlyList<TowerPartyMember> Party, CombatRuleset Rules);
 public sealed record TowerCompactRecord(int Index, string CaseId, int Seed, string PreparedHash,
@@ -27,8 +29,12 @@ public sealed record SavedTowerCompact(TowerCompactPlan Plan, LoadoutScope Scope
     IReadOnlyDictionary<string, TowerScenario> Scenarios, IReadOnlyDictionary<string, IReadOnlyList<TowerTrial>> Cases,
     IReadOnlyDictionary<string, string> ResultDigests, string ManifestHash);
 
+public sealed record VerifiedTowerCompact(TowerCompactPlan Plan, LoadoutScope Scope,
+    IReadOnlyDictionary<string, TowerScenario> Scenarios, IReadOnlyDictionary<string, IReadOnlyList<TowerBalanceTrial>> Cases,
+    IReadOnlyDictionary<string, string> ResultDigests, string ManifestHash, int MaximumBufferedReports);
+
 /// <summary>Lossless non-event Tower reports: shared recipes/inputs/preparation and compressed summary chunks.</summary>
-public static class TowerCompactBundle
+public static partial class TowerCompactBundle
 {
     public const string Format = "tower-compact-v1";
     public const string ManifestFile = "bulk-manifest.json";
@@ -54,22 +60,30 @@ public static class TowerCompactBundle
 
     public static async Task CreateAsync(string apiRoot, TowerCompactDefinition definition, string output,
         CancellationToken token = default, Action<string>? progress = null, TowerSettings? settingsOverride = null,
-        bool retainExecutable = false)
+        bool retainExecutable = false, string? executionMode = null, bool resume = false, bool shareCampaignContent = false, Action? beforeAttempt = null)
     {
+        TowerPreparedBattle.ValidateMode(executionMode);
         // Own the caller's mutable lists before freezing the experiment.
         var d = JsonSerializer.Deserialize<TowerCompactDefinition>(JsonSerializer.Serialize(definition, HarnessJson.Options), HarnessJson.Options)!;
         var planned = Validate(d);
         output = Path.GetFullPath(output);
-        if (Path.Exists(output)) throw new IOException("Choose a new compact Tower output directory.");
+        using var lease = AcquireWriter(output);
+        if (resume)
+        {
+            await ResumeCoreAsync(apiRoot, d, output, token, progress, settingsOverride, retainExecutable, executionMode, shareCampaignContent, beforeAttempt);
+            return;
+        }
+        if (Path.Exists(output)) throw new IOException("Choose a new compact Tower output directory or explicitly resume it.");
         token.ThrowIfCancellationRequested();
         Directory.CreateDirectory(output);
         using var timing = TowerPerformanceTrace.Measure("compact.create");
         var completed = 0; var chunkIndex = 0;
         try
         {
-            var root = Path.Combine(output, "content");
-            var settings = settingsOverride ?? TowerBundle.ReadSettings(apiRoot);
-            var scope = new LoadoutScope(Format, settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(apiRoot, root, token), Format);
+            var root = ContentRoot(output, shareCampaignContent ? "../../content" : null);
+            var settings = JsonSerializer.Deserialize<TowerSettings>(JsonSerializer.SerializeToUtf8Bytes(
+                settingsOverride ?? TowerBundle.ReadSettings(apiRoot), HarnessJson.Options), HarnessJson.Options)!;
+            var scope = new LoadoutScope(Format, settings, ExecutionIdentity.Current(), shareCampaignContent ? ContentHashes(root, token) : TowerBundle.CopyContent(apiRoot, root, token), Format);
             HarnessJson.WriteNew(Path.Combine(output, "bulk-scope.json"), scope);
             if (retainExecutable) HarnessJson.WriteNew(Path.Combine(output, "executable-files.json"), TowerBossStudy.RetainExecutable(output, scope.Execution));
             foreach (var name in new[] { "recipes", "inputs", "prepared", "chunks" }) Directory.CreateDirectory(Path.Combine(output, name));
@@ -87,36 +101,12 @@ public static class TowerCompactBundle
                 WriteShared(output, "inputs", inputHash, compact, false);
                 references.Add(new(item.Id, recipe, inputHash));
             }
-            var plan = new TowerCompactPlan(1, d.Id, d.MaximumBattles, d.ChunkSize, planned, references);
+            var plan = new TowerCompactPlan(1, d.Id, d.MaximumBattles, d.ChunkSize, planned, references, executionMode, shareCampaignContent ? "../../content" : null);
             HarnessJson.WriteNew(Path.Combine(output, "bulk-plan.json"), plan);
-            var pending = new List<TowerCompactRecord>(d.ChunkSize);
-            foreach (var item in d.Cases)
-            foreach (var seed in item.Scenario.Seeds)
-            {
-                token.ThrowIfCancellationRequested();
-                var input = runner.CreateInput(item.Scenario, seed, settings.Threat, settings.CheckpointIntervalTicks);
-                var report = await runner.RunAsync(input, token: token);
-                var prepared = HarnessJson.Hash(report.Battle.PreparedParticipants);
-                WriteShared(output, "prepared", prepared, report.Battle.PreparedParticipants, true);
-                pending.Add(new(completed, item.Id, seed, prepared, report.Battle.Summary, report.Succeeded,
-                    report.GuardianHealthRemainingPercent, report.DisplayDurationSeconds, ReportHash(report)));
-                completed++;
-                if (pending.Count == d.ChunkSize || completed == planned)
-                {
-                    token.ThrowIfCancellationRequested();
-                    CommitChunk(output, chunkIndex, pending);
-                    chunkIndex++;
-                    pending.Clear();
-                    progress?.Invoke($"Compact Tower: {completed}/{planned} trials committed.");
-                }
-            }
-            token.ThrowIfCancellationRequested();
-            HarnessJson.WriteNew(Path.Combine(output, "bulk-status.json"), new { Status = "Complete", Planned = planned, Completed = completed });
-            var files = Files(output).ToDictionary(p => Relative(output, p), HarnessJson.FileHash, StringComparer.Ordinal);
-            // The final manifest is the completion marker; readers reject missing or pending state.
-            var temporary = Path.Combine(output, ManifestFile + ".pending");
-            HarnessJson.WriteNew(temporary, new TowerCompactManifest(1, Format, completed, chunkIndex, files));
-            File.Move(temporary, Path.Combine(output, ManifestFile));
+            WriteCheckpoint(output);
+            await ContinueAsync(output, d, runner, settings, executionMode, 0, 0, token, progress,
+                (count, chunks) => { completed = count; chunkIndex = chunks; }, beforeAttempt);
+            Complete(output, planned, completed, chunkIndex, token);
         }
         catch (Exception error)
         {
@@ -127,17 +117,34 @@ public static class TowerCompactBundle
         }
     }
 
+    // Compatibility API for callers that explicitly need every report. Bulk consumers use Verify.
     public static SavedTowerCompact ReadSaved(string output, CancellationToken token = default, string? expectedManifestHash = null)
+    {
+        var reports = new Dictionary<string, List<TowerTrial>>(StringComparer.Ordinal);
+        var saved = Verify(output, token, expectedManifestHash, (id, trial) => {
+            if (!reports.TryGetValue(id, out var list)) reports[id] = list = [];
+            list.Add(trial);
+        });
+        return new(saved.Plan, saved.Scope, saved.Scenarios,
+            reports.ToDictionary(p => p.Key, p => (IReadOnlyList<TowerTrial>)p.Value, StringComparer.Ordinal), saved.ResultDigests, saved.ManifestHash);
+    }
+
+    /// <summary>Validates the entire archive with at most one chunk of full reports. Visitor results are provisional until this returns.</summary>
+    public static VerifiedTowerCompact Verify(string output, CancellationToken token = default, string? expectedManifestHash = null,
+        Action<string, TowerTrial>? visit = null) => VerifyCore(output, token, expectedManifestHash, visit);
+
+    private static VerifiedTowerCompact VerifyCore(string output, CancellationToken token, string? expectedManifestHash,
+        Action<string, TowerTrial>? visit, TowerCompactManifest? prefix = null)
     {
         using var timing = TowerPerformanceTrace.Measure("compact.read-verify");
         output = Path.GetFullPath(output);
         token.ThrowIfCancellationRequested();
-        var manifestHash = HarnessJson.FileHash(Path.Combine(output, ManifestFile));
+        var manifestHash = prefix is null ? HarnessJson.FileHash(Path.Combine(output, ManifestFile)) : "";
         if (expectedManifestHash is not null && manifestHash != expectedManifestHash)
             throw new InvalidDataException("Compact Tower manifest differs from the trusted receipt.");
-        var manifest = TowerContractJson.Read<TowerCompactManifest>(Path.Combine(output, ManifestFile));
-        if (manifest.SchemaVersion != 1 || manifest.Format != Format || manifest.CompletedBattles is < 1 or > 100_000
-            || manifest.Chunks is < 1 or > 100_000 || manifest.Files is null || manifest.Files.Count > 400_000)
+        var manifest = prefix ?? TowerContractJson.Read<TowerCompactManifest>(Path.Combine(output, ManifestFile));
+        if (manifest.SchemaVersion != 1 || manifest.Format != Format || manifest.CompletedBattles < (prefix is null ? 1 : 0) || manifest.CompletedBattles > 100_000
+            || manifest.Chunks < (prefix is null ? 1 : 0) || manifest.Chunks > 100_000 || manifest.Files is null || manifest.Files.Count > 400_000)
             throw new InvalidDataException("Unsupported compact Tower manifest.");
         var files = Files(output).Select(p => Relative(output, p)).Where(p => p != ManifestFile).Order(StringComparer.Ordinal).ToArray();
         if (!files.SequenceEqual(manifest.Files.Keys.Order(StringComparer.Ordinal))) throw new InvalidDataException("Compact Tower inventory is missing files or contains uncommitted/extra files.");
@@ -149,15 +156,20 @@ public static class TowerCompactBundle
         }
         var scope = TowerContractJson.Read<LoadoutScope>(Path.Combine(output, "bulk-scope.json"));
         var plan = TowerContractJson.Read<TowerCompactPlan>(Path.Combine(output, "bulk-plan.json"));
+        TowerPreparedBattle.ValidateMode(plan.ExecutionMode);
+        var contentRoot = ContentRoot(output, plan.SharedContentPath);
+        var sharedHashes = plan.SharedContentPath is null ? null : ContentHashes(contentRoot, token);
         if (scope.Algorithm != Format || scope.ReportStorage != Format || scope.ContentHashes is null
             || !scope.ContentHashes.Keys.Order(StringComparer.Ordinal).SequenceEqual(TowerBundle.Files.Order(StringComparer.Ordinal))
-            || scope.ContentHashes.Any(p => !manifest.Files.TryGetValue("content/Data/" + p.Key, out var hash) || hash != p.Value)
+            || scope.ContentHashes.Any(p => plan.SharedContentPath is null
+                ? !manifest.Files.TryGetValue("content/Data/" + p.Key, out var hash) || hash != p.Value
+                : sharedHashes!.GetValueOrDefault(p.Key) != p.Value)
             || plan.SchemaVersion != 1 || plan.Cases is not { Count: >= 1 and <= 256 }
             || plan.Cases.Any(c => c is null || !TowerContractJson.Hash(c.RecipeHash) || !TowerContractJson.Hash(c.InputHash)))
             throw new InvalidDataException("Compact Tower scope, recipe or input index is invalid.");
         var scenarios = new Dictionary<string, TowerScenario>(StringComparer.Ordinal);
         var inputs = new Dictionary<string, TowerCompactInput>(StringComparer.Ordinal);
-        var runner = new TowerBattleRunner(Path.Combine(output, "content"), new OfflineContent(Path.Combine(output, "content"), scope.Settings.Threat));
+        var runner = new TowerBattleRunner(contentRoot, new OfflineContent(contentRoot, scope.Settings.Threat));
         foreach (var item in plan.Cases)
         {
             token.ThrowIfCancellationRequested();
@@ -170,7 +182,10 @@ public static class TowerCompactBundle
         var definition = new TowerCompactDefinition(1, plan.Id, plan.MaximumBattles, plan.ChunkSize,
             plan.Cases.Select(c => new TowerCompactCase(c.Id, scenarios[c.Id])).ToArray());
         var planned = Validate(definition);
-        if (plan.PlannedBattles != planned || manifest.CompletedBattles != planned || manifest.Chunks != (planned + plan.ChunkSize - 1) / plan.ChunkSize)
+        if (plan.PlannedBattles != planned || manifest.CompletedBattles > planned
+            || prefix is null && manifest.CompletedBattles != planned
+            || manifest.CompletedBattles != planned && manifest.CompletedBattles % plan.ChunkSize != 0
+            || manifest.Chunks != (manifest.CompletedBattles + plan.ChunkSize - 1) / plan.ChunkSize)
             throw new InvalidDataException("Compact Tower schedule is incomplete or has been extended.");
         foreach (var item in plan.Cases)
         {
@@ -180,13 +195,13 @@ public static class TowerCompactBundle
                 throw new InvalidDataException("Compact Tower materialized input does not match frozen content/recipe.");
         }
         var schedule = definition.Cases.SelectMany(c => c.Scenario.Seeds.Select(seed => (Case: c.Id, Seed: seed))).ToArray();
-        var cases = definition.Cases.ToDictionary(c => c.Id, _ => new List<TowerTrial>(), StringComparer.Ordinal);
+        var cases = definition.Cases.ToDictionary(c => c.Id, _ => new List<TowerBalanceTrial>(), StringComparer.Ordinal);
         var reportHashes = definition.Cases.ToDictionary(c => c.Id, _ => new Dictionary<string, string>(), StringComparer.Ordinal);
         var prepared = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
         var usedFiles = new HashSet<string>(StringComparer.Ordinal) { "bulk-plan.json", "bulk-scope.json", "bulk-status.json" };
-        foreach (var file in TowerBundle.Files) usedFiles.Add("content/Data/" + file);
+        if (plan.SharedContentPath is null) foreach (var file in TowerBundle.Files) usedFiles.Add("content/Data/" + file);
         foreach (var item in plan.Cases) { usedFiles.Add("recipes/" + item.RecipeHash + ".json"); usedFiles.Add("inputs/" + item.InputHash + ".json"); }
-        var cursor = 0;
+        var cursor = 0; var maximumBufferedReports = 0;
         for (var index = 0; index < manifest.Chunks; index++)
         {
             token.ThrowIfCancellationRequested();
@@ -198,7 +213,9 @@ public static class TowerCompactBundle
             if (receipt.SchemaVersion != 1 || receipt.Index != index || receipt.FirstTrial != cursor || receipt.Count != expectedCount
                 || !manifest.Files.TryGetValue(dataName, out var dataHash) || receipt.DataHash != dataHash)
                 throw new InvalidDataException("Compact Tower chunk receipt, count or digest changed.");
+            prepared.Clear(); // Prepared descriptions are bounded by the current chunk, not the whole archive.
             var rows = ReadGzip<TowerCompactRecord[]>(Path.Combine(output, dataName));
+            maximumBufferedReports = Math.Max(maximumBufferedReports, rows.Length);
             if (rows.Length != expectedCount) throw new InvalidDataException("Compact Tower chunk is truncated or contains extra trials.");
             usedFiles.Add(dataName); usedFiles.Add(receiptName);
             foreach (var row in rows)
@@ -218,15 +235,33 @@ public static class TowerCompactBundle
                 if (ReportHash(report) != row.ReportHash) throw new InvalidDataException("Compact summary does not reconstruct its original full report.");
                 var trials = cases[row.CaseId];
                 var trialId = TowerId(trials.Count);
-                trials.Add(new(trialId, row.Seed, report));
+                trials.Add(new(row.Seed, report.Battle.Summary.ContentOutcome));
+                visit?.Invoke(row.CaseId, new(trialId, row.Seed, report));
                 reportHashes[row.CaseId].Add(trialId, row.ReportHash);
                 cursor++;
             }
         }
-        var status = HarnessJson.Read<JsonElement>(Path.Combine(output, "bulk-status.json"));
-        if (status.GetProperty("status").GetString() != "Complete" || status.GetProperty("planned").GetInt32() != planned
-            || status.GetProperty("completed").GetInt32() != planned)
-            throw new InvalidDataException("Compact Tower status is incomplete.");
+        if (prefix is null || manifest.Files.ContainsKey("bulk-status.json"))
+        {
+            var status = HarnessJson.Read<JsonElement>(Path.Combine(output, "bulk-status.json"));
+            if (status.GetProperty("status").GetString() != "Complete" || status.GetProperty("planned").GetInt32() != planned
+                || status.GetProperty("completed").GetInt32() != planned)
+                throw new InvalidDataException("Compact Tower status is incomplete.");
+        }
+        else usedFiles.Remove("bulk-status.json");
+        if (prefix is not null)
+        {
+            if (manifest.Files.ContainsKey("bulk-failure.json")) usedFiles.Add("bulk-failure.json");
+            // A completed but uncommitted trial may have published its immutable prepared description.
+            foreach (var path in files.Where(p => p.StartsWith("prepared/", StringComparison.Ordinal) && !usedFiles.Contains(p)))
+            {
+                var name = Path.GetFileName(path);
+                var hash = name.EndsWith(".json.gz", StringComparison.Ordinal) ? name[..^8] : "";
+                if (!TowerContractJson.Hash(hash) || HarnessJson.Hash(ReadGzip<JsonElement>(Path.Combine(output, path))) != hash)
+                    throw new InvalidDataException("Invalid uncommitted prepared description.");
+                usedFiles.Add(path);
+            }
+        }
         if (manifest.Files.ContainsKey("executable-files.json"))
         {
             usedFiles.Add("executable-files.json");
@@ -240,9 +275,17 @@ public static class TowerCompactBundle
             if (scope.Execution.AssemblyHashes.Any(p => !executable.TryGetValue(p.Key + ".dll", out var hash) || hash != p.Value))
                 throw new InvalidDataException("Retained compact executable differs from producing identity.");
         }
+        if (manifest.Files.ContainsKey(ResumeFile))
+        {
+            var checkpoint = ReadCheckpoint(output, token);
+            ValidateAttempts(output, definition, manifest.CompletedBattles);
+            usedFiles.Add(ResumeFile); usedFiles.Add(AttemptsFile);
+            if (checkpoint.Files.Any(p => !manifest.Files.TryGetValue(p.Key, out var hash) || hash != p.Value))
+                throw new InvalidDataException("Compact resume identity differs from its final manifest.");
+        }
         if (!usedFiles.Order(StringComparer.Ordinal).SequenceEqual(files)) throw new InvalidDataException("Compact Tower contains unreferenced data or pending chunks.");
-        return new(plan, scope, scenarios, cases.ToDictionary(p => p.Key, p => (IReadOnlyList<TowerTrial>)p.Value, StringComparer.Ordinal),
-            reportHashes.ToDictionary(p => p.Key, p => HarnessJson.Hash(p.Value), StringComparer.Ordinal), manifestHash);
+        return new(plan, scope, scenarios, cases.ToDictionary(p => p.Key, p => (IReadOnlyList<TowerBalanceTrial>)p.Value, StringComparer.Ordinal),
+            reportHashes.ToDictionary(p => p.Key, p => HarnessJson.Hash(p.Value), StringComparer.Ordinal), manifestHash, maximumBufferedReports);
     }
 
     public static TowerBalanceEvidence Evidence(string cellId, SavedTowerCompact saved, string? caseId = null)
@@ -255,15 +298,24 @@ public static class TowerCompactBundle
             trials.Select(t => new TowerBalanceTrial(t.Seed, t.Report.Battle.Summary.ContentOutcome)).ToArray(), saved.ManifestHash);
     }
 
+    public static TowerBalanceEvidence Evidence(string cellId, VerifiedTowerCompact saved, string? caseId = null)
+    {
+        caseId ??= saved.Plan.Cases.Count == 1 ? saved.Plan.Cases[0].Id : throw new InvalidDataException("A multi-case compact archive requires an explicit case ID.");
+        if (!saved.Cases.TryGetValue(caseId, out var trials)) throw new InvalidDataException("Unknown compact case ID.");
+        var scenario = saved.Scenarios[caseId];
+        return new(cellId, "Complete", HarnessJson.Hash(scenario), HarnessJson.Hash(saved.Scope.ContentHashes),
+            HarnessJson.Hash(saved.Scope.Settings), HarnessJson.Hash(saved.Scope.Execution), scenario.Party.Count, trials, saved.ManifestHash);
+    }
+
     public static async Task<TowerBattleReport> ReplayAsync(string output, string caseId, string battleId, bool detailed,
         CancellationToken token = default)
     {
-        var saved = ReadSaved(output, token);
+        TowerTrial? original = null;
+        var saved = Verify(output, token, visit: (id, trial) => { if (id == caseId && trial.Id == battleId) original = trial; });
         if (HarnessJson.Hash(saved.Scope.Execution) != HarnessJson.Hash(ExecutionIdentity.Current()))
             throw new InvalidDataException("Compact replay requires original assemblies, runtime and platform.");
-        if (!saved.Cases.TryGetValue(caseId, out var trials)) throw new InvalidDataException("Unknown compact replay case.");
-        var original = trials.SingleOrDefault(t => t.Id == battleId) ?? throw new InvalidDataException("Unknown compact replay trial.");
-        var root = Path.Combine(output, "content");
+        if (original is null) throw new InvalidDataException("Unknown compact replay case or trial.");
+        var root = ContentRoot(output, saved.Plan.SharedContentPath);
         var runner = new TowerBattleRunner(root, new OfflineContent(root, saved.Scope.Settings.Threat));
         var input = runner.CreateInput(saved.Scenarios[caseId], original.Seed, saved.Scope.Settings.Threat, saved.Scope.Settings.CheckpointIntervalTicks);
         var report = await runner.RunAsync(input, detailed, token);
@@ -318,6 +370,7 @@ public static class TowerCompactBundle
     }
     private static void WriteShared<T>(string output, string folder, string hash, T value, bool gzip)
     {
+        using var timing = TowerPerformanceTrace.Measure("compact.write-shared");
         var path = SharedPath(output, folder, hash, gzip);
         if (File.Exists(path)) return;
         if (gzip) WriteGzip(path, value); else HarnessJson.WriteNew(path, value);
@@ -341,6 +394,7 @@ public static class TowerCompactBundle
     private static string Relative(string root, string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
     private static IReadOnlyList<string> Files(string output)
     {
+        using var timing = TowerPerformanceTrace.Measure("compact.enumerate-files");
         var files = new List<string>(); var pending = new Stack<string>(); pending.Push(output);
         while (pending.TryPop(out var directory))
         {

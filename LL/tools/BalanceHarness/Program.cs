@@ -19,8 +19,15 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower --output <new-directory> [--scenario <json>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-performance --output <new-directory> [--definition <bounded-performance-json>] [--content-root <API.LL-directory>] (diagnostics only)");
                 Console.WriteLine("BalanceHarness tower-performance --archive-format tower-compact-v1 --output <new-directory> [--definition <json>] [--content-root <directory>]");
+                Console.WriteLine("Add --execution-mode prepared-v1 to tower-compact or compact tower-performance for reusable preparation without playback checkpoints.");
                 Console.WriteLine("BalanceHarness tower-performance-compare --reference <benchmark-directory> --run <benchmark-directory> --output <new-directory>");
                 Console.WriteLine("BalanceHarness tower-compact --output <new-directory> (--definition <bulk-json> | --scenario <Tower-scenario-json>) [--content-root <directory>]");
+                Console.WriteLine("Compact resume: append --resume true with the identical definition and execution mode. Campaign limits: --chunk-size 32 --retry-reserve 32 --max-seconds 300 --max-bytes 2147483648.");
+                Console.WriteLine("BalanceHarness tower-balance-run --definition <frozen-family-json> --output <directory> [--content-root <API.LL-directory>] [--resume true] [campaign limits]");
+                Console.WriteLine("BalanceHarness tower-balance-run-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-staged-balance --definition <two-stage-family-json> --output <directory> [--content-root <directory>] [--resume true] [campaign limits]");
+                Console.WriteLine("BalanceHarness tower-staged-balance-verify --run <directory>");
+                Console.WriteLine("Compact discovery: tower-boss-discover --archive-format tower-compact-v1 [--execution-mode prepared-v1] [--resume true] [campaign limits]");
                 Console.WriteLine("BalanceHarness tower-compact-verify --run <directory>");
                 Console.WriteLine("BalanceHarness tower-compact-replay --run <directory> --case <case-id> --battle <tower.0001> [--detailed]");
                 Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
@@ -73,19 +80,23 @@ public static class Program
                 "run" => new[] { "--output", "--seed", "--content-root", "--scenario", "--detailed" },
                 "suite" => new[] { "--output", "--seed", "--content-root", "--suite", "--samples" },
                 "tower" => new[] { "--output", "--content-root", "--scenario" },
-                "tower-performance" => new[] { "--output", "--definition", "--content-root", "--archive-format" },
-                "tower-compact" => new[] { "--output", "--definition", "--scenario", "--content-root" },
+                "tower-performance" => new[] { "--output", "--definition", "--content-root", "--archive-format", "--execution-mode" },
+                "tower-compact" => new[] { "--output", "--definition", "--scenario", "--content-root", "--execution-mode", "--resume" },
                 "tower-compact-verify" => new[] { "--run" },
                 "tower-compact-replay" => new[] { "--run", "--case", "--battle", "--detailed" },
                 "tower-performance-worker" => new[] { "--run", "--workers" },
                 "tower-performance-compare" => new[] { "--reference", "--run", "--output" },
                 "tower-boss-discovery-prepare" => new[] { "--definition", "--output", "--content-root" },
-                "tower-boss-discover" => new[] { "--definition", "--output", "--content-root" },
+                "tower-boss-discover" => new[] { "--definition", "--output", "--content-root", "--archive-format", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes" },
                 "tower-boss-discovery-verify" => new[] { "--run" },
                 "tower-boss-improvement-prepare" => new[] { "--definition", "--references", "--output", "--content-root" },
                 "tower-team-plan" => new[] { "--floor", "--slots", "--seed", "--output", "--runs-root", "--catalogs-root", "--content-root" },
                 "tower-boss-study" => new[] { "--definition", "--output", "--content-root", "--runs-root" },
                 "tower-boss-study-verify" => new[] { "--run" },
+                "tower-balance-run" => new[] { "--definition", "--output", "--content-root", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes" },
+                "tower-balance-run-verify" => new[] { "--run" },
+                "tower-staged-balance" => new[] { "--definition", "--output", "--content-root", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes" },
+                "tower-staged-balance-verify" => new[] { "--run" },
                 "tower-balance-evaluate" => new[] { "--definition", "--sources", "--output" },
                 "tower-benchmark" => new[] { "--output", "--content-root", "--catalog", "--seed", "--samples", "--reference" },
                 "tower-compare" => new[] { "--reference", "--run", "--output" },
@@ -142,14 +153,14 @@ public static class Program
                     : new TowerCompactDefinition(1, "compact-tower", scenario.Seeds.Count, 32, [new("scenario", scenario)]);
                 var output = Required(options, "--output");
                 await TowerCompactBundle.CreateAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(), definition,
-                    output, cancellation.Token, Console.WriteLine, retainExecutable: true);
-                var saved = TowerCompactBundle.ReadSaved(output, cancellation.Token);
+                    output, cancellation.Token, Console.WriteLine, retainExecutable: true, executionMode: options.GetValueOrDefault("--execution-mode"), resume: bool.Parse(options.GetValueOrDefault("--resume", "false")));
+                var saved = TowerCompactBundle.Verify(output, cancellation.Token);
                 Console.WriteLine($"Compact Tower complete and verified: {saved.Plan.PlannedBattles} battles. No automatic balance acceptance.");
                 return 0;
             }
             if (command == "tower-compact-verify")
             {
-                var saved = TowerCompactBundle.ReadSaved(Required(options, "--run"), cancellation.Token);
+                var saved = TowerCompactBundle.Verify(Required(options, "--run"), cancellation.Token);
                 Console.WriteLine($"Compact Tower verified: {saved.Plan.PlannedBattles} trials in {saved.Plan.Cases.Count} cases; no combat executed.");
                 return 0;
             }
@@ -164,7 +175,7 @@ public static class Program
             {
                 var report = await TowerPerformanceBenchmark.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
                     options.GetValueOrDefault("--definition") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures", TowerPerformanceBenchmark.Fixture),
-                    Required(options, "--output"), cancellation.Token, Console.WriteLine, options.GetValueOrDefault("--archive-format"));
+                    Required(options, "--output"), cancellation.Token, Console.WriteLine, options.GetValueOrDefault("--archive-format"), options.GetValueOrDefault("--execution-mode"));
                 Console.WriteLine($"Performance: {report.Status}; {report.CompletedBattles}/{report.PlannedBattles} diagnostic combats; {report.ElapsedSeconds:F2}s overall.");
                 return report.Status == "Complete" ? 0 : report.Status == "Cancelled" ? 130 : 2;
             }
@@ -207,10 +218,49 @@ public static class Program
             }
             if (command == "tower-boss-discover")
             {
-                var report = await TowerBossDiscoveryRun.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
-                    Required(options, "--output"), TowerBossDiscovery.Read(Required(options, "--definition")), cancellation.Token, Console.WriteLine);
+                var definition = TowerBossDiscovery.Read(Required(options, "--definition"));
+                var root = options.GetValueOrDefault("--content-root") ?? FindContentRoot();
+                var output = Required(options, "--output");
+                BossDiscoveryRunReport report;
+                if (options.GetValueOrDefault("--archive-format") == TowerCompactBundle.Format)
+                    report = await TowerCompactDiscovery.RunAsync(root, output, definition, BulkOptions(options),
+                        bool.Parse(options.GetValueOrDefault("--resume", "false")), cancellation.Token, Console.WriteLine);
+                else
+                {
+                    if (options.Keys.Any(k => k is "--archive-format" or "--execution-mode" or "--resume" or "--chunk-size" or "--retry-reserve" or "--max-seconds" or "--max-bytes"))
+                        throw new ArgumentException("Bulk execution/resume options require --archive-format tower-compact-v1.");
+                    report = await TowerBossDiscoveryRun.RunAsync(root, output, definition, cancellation.Token, Console.WriteLine);
+                }
                 Console.WriteLine($"Team discovery: {report.Status}; {report.ActualBattles} combats. Selection validation and confirmation have not run.");
                 return report.Status switch { "Complete" => 0, "Cancelled" => 130, "Incomplete" => 3, _ => 2 };
+            }
+            if (command == "tower-staged-balance")
+            {
+                var report = await TowerStagedBalanceRun.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--output"), TowerStagedBalance.Read(Required(options, "--definition")), BulkOptions(options),
+                    bool.Parse(options.GetValueOrDefault("--resume", "false")), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"Staged Tower family: {report.Assessment}; {report.FamilySize} cells, {report.LogicalTrials} fights; {report.Selection.Status}.");
+                return report.ExitCode;
+            }
+            if (command == "tower-staged-balance-verify")
+            {
+                var report = await TowerStagedBalanceRun.VerifyAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Staged Tower family reconstructed: {report.Assessment}; no new combat executed.");
+                return report.ExitCode;
+            }
+            if (command == "tower-balance-run")
+            {
+                var report = await TowerCompactBalanceRun.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--output"), TowerBalanceEvaluator.Read(Required(options, "--definition")), BulkOptions(options),
+                    bool.Parse(options.GetValueOrDefault("--resume", "false")), cancellation.Token, Console.WriteLine);
+                Console.WriteLine($"Frozen Tower family: {report.Assessment}; {report.FamilySize} cells. Boss settings were not changed.");
+                return report.ExitCode;
+            }
+            if (command == "tower-balance-run-verify")
+            {
+                var report = await TowerCompactBalanceRun.VerifyAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Frozen Tower family reconstructed: {report.Assessment}; no new combat executed.");
+                return report.ExitCode;
             }
             if (command == "tower-boss-discovery-verify")
             {
@@ -499,6 +549,13 @@ public static class Program
         catch (Exception exception) { Console.Error.WriteLine($"{exception.GetType().Name}: {exception.Message}"); return 2; }
         finally { Console.CancelKeyPress -= cancelHandler; }
     }
+
+    private static TowerBulkOptions BulkOptions(IReadOnlyDictionary<string, string> options) => new(
+        int.Parse(options.GetValueOrDefault("--chunk-size", "32"), CultureInfo.InvariantCulture),
+        int.Parse(options.GetValueOrDefault("--retry-reserve", "32"), CultureInfo.InvariantCulture),
+        int.Parse(options.GetValueOrDefault("--max-seconds", "300"), CultureInfo.InvariantCulture),
+        long.Parse(options.GetValueOrDefault("--max-bytes", "2147483648"), CultureInfo.InvariantCulture),
+        options.GetValueOrDefault("--execution-mode", "prepared-v1"));
 
     private static string Required(IReadOnlyDictionary<string, string> options, string key) =>
         options.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value)

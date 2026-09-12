@@ -1,15 +1,18 @@
 using System.Numerics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace BalanceHarness;
 
 public sealed record BossGenerationMechanics(int Floor, IReadOnlyList<string> CounterIntents,
     IReadOnlyList<TowerEssenceMechanics> Essences, IReadOnlyList<TowerEnablerConsumerPair> Interactions,
-    IReadOnlyDictionary<string, string> SourceHashes);
+    IReadOnlyDictionary<string, string> SourceHashes,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossMechanicCore>? Cores = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageFeature>? Coverage = null);
 public sealed record BossGeneratedChoice(PartyChoice? Party, string Intent, string? Interaction, string? Rejection);
 
 /// <summary>Reference-free complete-party construction. Capability weights propose hypotheses; combat measures strength.</summary>
-public sealed class TowerBossPartyGenerator
+public sealed partial class TowerBossPartyGenerator
 {
     private readonly BossDiscoveryInputs input;
     private readonly BossGenerationMechanics mechanics;
@@ -38,6 +41,15 @@ public sealed class TowerBossPartyGenerator
             || mechanics.Interactions is null)
             throw new InvalidDataException("Generation mechanics must match the frozen target and eligible content.");
         families = this.input.AllowedEssences.ToDictionary(e => e.Id, e => e.Family, StringComparer.Ordinal);
+        if (input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion && this.mechanics.Cores is null
+            || this.mechanics.Cores is not null && (this.mechanics.Cores.Any(c => c is null || !TowerContractJson.Hash(c.Id)
+                || c.Kind is not ("condition" or "basic-attack" or "chain") || c.EssenceIds is not { Count: >= 2 and <= 3 }
+                || c.EssenceIds.Count > input.Budget.EssenceSlots || c.EssenceIds.Any(id => !families.ContainsKey(id))
+                || c.EssenceIds.Select(id => families[id]).Distinct(StringComparer.OrdinalIgnoreCase).Count() != c.EssenceIds.Count
+                || c.EvidenceKeys is not { Count: > 0 } || c.EvidenceKeys.Any(string.IsNullOrWhiteSpace) || string.IsNullOrWhiteSpace(c.Limitation))
+                || this.mechanics.Cores.Select(c => c.Id).Distinct().Count() != this.mechanics.Cores.Count))
+            throw new InvalidDataException("Invalid same-owner mechanic cores.");
+        ValidateCoverage();
         features = this.mechanics.Essences.ToDictionary(e => e.Id, StringComparer.Ordinal);
         capabilities = features.ToDictionary(p => p.Key, p => CapabilitySignals(p.Value.Signals), StringComparer.Ordinal);
         if (features.Any(e => !StringComparer.OrdinalIgnoreCase.Equals(e.Value.SourceMonsterId, families[e.Key]))
@@ -74,7 +86,9 @@ public sealed class TowerBossPartyGenerator
             inventory.EnablerConsumerPairs.Where(p => allowed.Contains(p.EnablerEssenceId) && allowed.Contains(p.ConsumerEssenceId))
                 .OrderBy(p => p.EnablerEssenceId, StringComparer.Ordinal).ThenBy(p => p.ConsumerEssenceId, StringComparer.Ordinal)
                 .ThenBy(p => p.Mechanism, StringComparer.Ordinal).ThenBy(p => p.ProducerNodeKey, StringComparer.Ordinal)
-                .ThenBy(p => p.ConsumerNodeKey, StringComparer.Ordinal).ToArray(), inventory.SourceHashes);
+                .ThenBy(p => p.ConsumerNodeKey, StringComparer.Ordinal).ToArray(), inventory.SourceHashes,
+            input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion ? TowerMechanicCores.Create(input, inventory) : null,
+            input.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion ? TowerPartyCoverage.Create(input, inventory) : null);
     }
 
     public BigInteger LegalOrderedCharacterCount => combinations[0, input.Budget.EssenceSlots]
@@ -125,10 +139,94 @@ public sealed class TowerBossPartyGenerator
         return Choice(builds, intent, null);
     }
 
-    private IReadOnlyList<string>? ConstructCharacter(Random random, IReadOnlyDictionary<int, IReadOnlyList<string>> other, string intent)
+    public BossGeneratedChoice FreshCoordinated(Random random)
+    {
+        var intent = intents[random.Next(intents.Length)];
+        var builds = new Dictionary<int, IReadOnlyList<string>>();
+        var prototype = ConstructCharacter(random, builds, intent);
+        if (prototype is null) return new(null, intent, null, "owned-or-family-dead-end");
+        var shuffled = prototype.ToArray(); random.Shuffle(shuffled);
+        var core = shuffled.Take(random.Next(1, input.Budget.EssenceSlots)).ToArray();
+        var slots = Enumerable.Range(1, input.RequiredPartySize).ToArray(); random.Shuffle(slots);
+        var sharedCount = input.RequiredPartySize == 1 ? 1 : random.Next(2, input.RequiredPartySize + 1);
+        if (input.OwnedCopies is not null) sharedCount = Math.Min(sharedCount, core.Min(id => input.OwnedCopies.GetValueOrDefault(id)));
+        for (var i = 0; i < slots.Length; i++)
+        {
+            var ids = ConstructCharacter(random, builds, intent, i < sharedCount ? core : null);
+            if (ids is null) return new(null, intent, null, "owned-or-family-dead-end");
+            builds.Add(slots[i], ids);
+        }
+        return Choice(builds, "shared-core:" + intent, null);
+    }
+
+    public BossGeneratedChoice BroadcastCore(Random random, PartyChoice parent)
+    {
+        if (Invalid(parent) is not null) throw new InvalidDataException("Broadcast requires a legal generated parent.");
+        if (input.RequiredPartySize < 2) return new(null, "broadcast-core", null, "needs-two-characters");
+        var builds = parent.Builds.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.ToArray());
+        var slots = builds.Keys.Order().ToArray(); random.Shuffle(slots);
+        var donor = builds[slots[0]].ToArray(); random.Shuffle(donor);
+        var core = donor.Take(random.Next(1, input.Budget.EssenceSlots)).ToArray();
+        var coreFamilies = core.Select(id => families[id]).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var count = random.Next(1, input.RequiredPartySize);
+        foreach (var slot in slots.Skip(1).Take(count))
+            builds[slot] = core.Concat(builds[slot].Where(id => !coreFamilies.Contains(families[id])))
+                .Take(input.Budget.EssenceSlots).ToArray();
+        return Choice(builds, "broadcast-core", null);
+    }
+
+    private BossMechanicCore? PickCore(Random random)
+    {
+        var groups = (mechanics.Cores ?? []).Where(c => c.EssenceIds.All(id => input.OwnedCopies is null || input.OwnedCopies.GetValueOrDefault(id) > 0))
+            .GroupBy(c => c.Kind).OrderBy(g => g.Key, StringComparer.Ordinal).Select(g => g.ToArray()).ToArray();
+        if (groups.Length == 0) return null;
+        var group = groups[random.Next(groups.Length)]; return group[random.Next(group.Length)];
+    }
+
+    public BossGeneratedChoice FreshMechanics(Random random)
+    {
+        var primary = PickCore(random);
+        if (primary is null) return FreshCoordinated(random) with { Intent = "no-compatible-core:fallback-coordinated" };
+        var secondary = PickCore(random)!;
+        var slots = Enumerable.Range(1, input.RequiredPartySize).ToArray(); random.Shuffle(slots);
+        var count = input.RequiredPartySize == 1 ? 1 : random.Next(2, input.RequiredPartySize + 1);
+        var builds = new Dictionary<int, IReadOnlyList<string>>();
+        foreach (var (slot, index) in slots.Select((slot, index) => (slot, index)))
+        {
+            var core = index < count ? primary : secondary;
+            var available = core.EssenceIds.All(id => input.OwnedCopies is null
+                || builds.Values.Sum(ids => ids.Count(e => e == id)) < input.OwnedCopies.GetValueOrDefault(id));
+            var ids = ConstructCharacter(random, builds, intents[random.Next(intents.Length)], available ? core.EssenceIds : null);
+            if (ids is null) return new(null, "mechanic-cores", core.Id, "owned-or-family-dead-end");
+            builds.Add(slot, ids);
+        }
+        return Choice(builds, "mechanic-cores", primary.Id + ";" + secondary.Id);
+    }
+
+    public BossGeneratedChoice ReplaceMechanicCore(Random random, PartyChoice parent)
+    {
+        if (Invalid(parent) is not null) throw new InvalidDataException("Core replacement requires a legal generated parent.");
+        var core = PickCore(random);
+        if (core is null) return new(null, "mechanic-core", null, "no-compatible-core");
+        var builds = parent.Builds.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.ToArray());
+        var slots = builds.Keys.Order().ToArray(); random.Shuffle(slots);
+        var coreFamilies = core.EssenceIds.Select(id => families[id]).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var slot in slots.Take(random.Next(1, input.RequiredPartySize + 1)))
+            builds[slot] = core.EssenceIds.Concat(builds[slot].Where(id => !coreFamilies.Contains(families[id])))
+                .Take(input.Budget.EssenceSlots).ToArray();
+        return Choice(builds, "mechanic-core", core.Id);
+    }
+
+    private IReadOnlyList<string>? ConstructCharacter(Random random, IReadOnlyDictionary<int, IReadOnlyList<string>> other, string intent,
+        IReadOnlyList<string>? prefix = null)
     {
         var used = other.Values.SelectMany(ids => ids).GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count());
         var ids = new List<string>(); var selectedFamilies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var id in prefix ?? [])
+        {
+            if (!selectedFamilies.Add(families[id]) || input.OwnedCopies is not null && used.GetValueOrDefault(id) >= input.OwnedCopies.GetValueOrDefault(id)) return null;
+            ids.Add(id); used[id] = used.GetValueOrDefault(id) + 1;
+        }
         while (ids.Count < input.Budget.EssenceSlots)
         {
             var eligible = pool.Where(id => !selectedFamilies.Contains(families[id])

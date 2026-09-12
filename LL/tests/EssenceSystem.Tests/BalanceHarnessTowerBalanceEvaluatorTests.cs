@@ -63,6 +63,21 @@ public sealed class BalanceHarnessTowerBalanceEvaluatorTests
     }
 
     [Fact]
+    public void Exclusion_checks_reject_duplicates_and_rebuild_for_each_validation_call()
+    {
+        var d = Plan(samples: 32, cells: 3);
+        var excluded = new List<int> { int.MinValue, -1, int.MaxValue };
+        var shared = d with { ExcludedCombatSeeds = excluded };
+        TowerBalanceEvaluator.Validate(shared);
+        excluded.Add(d.Cells[0].Scenario.Seeds[^1]);
+        Assert.Throws<InvalidDataException>(() => TowerBalanceEvaluator.Validate(shared));
+        excluded.RemoveAt(excluded.Count - 1);
+        TowerBalanceEvaluator.Validate(shared);
+        excluded.Add(int.MinValue);
+        Assert.Throws<InvalidDataException>(() => TowerBalanceEvaluator.Validate(shared));
+    }
+
+    [Fact]
     public void One_viable_team_can_pass_alongside_zero_clear_controls_but_high_outlier_cannot_hide_in_average()
     {
         var d=Plan(cells:3);

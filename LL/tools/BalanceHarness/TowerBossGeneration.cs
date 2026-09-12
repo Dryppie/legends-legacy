@@ -16,9 +16,27 @@ public sealed record BossGenerationResult(string Version, string Status, IReadOn
 public static class TowerBossGeneration
 {
     public const string Version = "independent-teams-v1";
+    public const string CoordinatedVersion = "independent-coordinated-v2";
+    public static readonly string[] CoordinatedMethods = ["constructive-joint", "coordinated-joint"];
+    public const string MechanicsVersion = "independent-mechanics-v3";
+    public static readonly string[] MechanicsMethods = ["coordinated-joint", "mechanics-joint"];
+    public const string CoverageVersion = "independent-coverage-v4";
+    public static readonly string[] CoverageMethods = ["mechanics-joint", "coverage-joint"];
     public const int BeamSize = 4;
     public const int ExplorationSize = 4;
     public static readonly string[] Operators = ["single", "double", "order", "cross-character", "whole-character", "recombine"];
+    private static readonly string[] CoordinatedOperators = [.. Operators, "broadcast-core"];
+    private static readonly string[] MechanicsOperators = [.. CoordinatedOperators, "mechanic-core"];
+    private static readonly string[] CoverageOperators = ["coverage-count", "placement", "single", "double", "order", "cross-character",
+        "whole-character", "recombine", "mechanic-core", "placement"];
+
+    internal static bool LegalPolicy(BossDiscoveryGeneration? g) => g?.Methods is not null && (g.PolicyVersion switch {
+        Version => g.Methods.SequenceEqual(TowerBossDiscovery.Methods),
+        CoordinatedVersion => g.Methods.SequenceEqual(CoordinatedMethods),
+        MechanicsVersion => g.Methods.SequenceEqual(MechanicsMethods),
+        CoverageVersion => g.Methods.SequenceEqual(CoverageMethods),
+        _ => false
+    });
 
     public static void ValidateInputs(BossDiscoveryInputs d)
     {
@@ -45,8 +63,8 @@ public static class TowerBossGeneration
             || d.ContentHashes.Values.Any(h => !TowerContractJson.Hash(h)))
             throw new InvalidDataException("Invalid independent generation input boundary.");
         var g = d.Generation;
-        if (g is null || g.PolicyVersion != Version || g.Objective != TowerBossDiscovery.Objective || g.FreshEvery != 4
-            || g.Methods is null || !g.Methods.SequenceEqual(TowerBossDiscovery.Methods) || g.Seeds is not { Count: > 0 and <= 4 }
+        if (g is null || g.Methods is null || !LegalPolicy(g) || g.Objective != TowerBossDiscovery.Objective || g.FreshEvery != 4
+            || g.Seeds is not { Count: > 0 and <= 4 }
             || g.Seeds.Distinct().Count() != g.Seeds.Count || g.CandidatesPerArm is < 1 or > 1000
             || g.MaximumAttemptsPerArm < g.CandidatesPerArm || g.MaximumAttemptsPerArm > 10000
             || d.ShortlistCandidates < g.Methods.Count * g.Seeds.Count || d.ShortlistCandidates > 64
@@ -85,11 +103,11 @@ public static class TowerBossGeneration
         // Isolate caller mutation and keep the policy independent of definition/reference serialization.
         var d = JsonSerializer.Deserialize<BossDiscoveryInputs>(JsonSerializer.Serialize(inputs, HarnessJson.Options), HarnessJson.Options)!;
         ValidateInputs(d);
-        if (d.Generation.PolicyVersion != Version) throw new InvalidDataException("Independent execution cannot consume a retained-build policy.");
+        if (!LegalPolicy(d.Generation)) throw new InvalidDataException("Independent execution cannot consume a retained-build policy.");
         var generator = new TowerBossPartyGenerator(d, mechanics);
         var arms = new List<BossGenerationArm>();
         var status = "Incomplete"; string? error = null;
-        BossGenerationResult Report(bool select = false) => new(Version, status, arms.ToArray(), select ? Shortlist(d, generator, arms) : [], error);
+        BossGenerationResult Report(bool select = false) => new(d.Generation.PolicyVersion, status, arms.ToArray(), select ? Shortlist(d, generator, arms) : [], error);
         try
         {
             foreach (var seed in d.Generation.Seeds)
@@ -98,6 +116,13 @@ public static class TowerBossGeneration
                 token.ThrowIfCancellationRequested();
                 var armId = method + "-" + seed.ToString(CultureInfo.InvariantCulture);
                 var random = new Random(StableRandom.Seed(Version, armId));
+                // Keep legacy arm streams and operators unchanged, including the paired v2 baseline.
+                var coordinated = method == "coordinated-joint";
+                var mechanical = method == "mechanics-joint";
+                var coverage = method == "coverage-joint";
+                var operators = coverage ? CoverageOperators : mechanical ? MechanicsOperators : coordinated ? CoordinatedOperators : Operators;
+                var freshOperation = coverage ? "fresh-coverage" : mechanical ? "fresh-mechanics" : coordinated ? "fresh-coordinated" : "fresh-constructive";
+                BossGeneratedChoice Fresh() => coverage ? generator.FreshCoverage(random) : mechanical ? generator.FreshMechanics(random) : coordinated ? generator.FreshCoordinated(random) : generator.Fresh(random, true);
                 var proposals = new List<BossGeneratedProposal>(); var measurements = new List<BossDiscoveryMeasurement>();
                 var measured = new Dictionary<string, BossGeneratedProposal>(StringComparer.Ordinal);
                 var initial = Math.Max(1, (d.Generation.CandidatesPerArm + 3) / 4);
@@ -115,17 +140,17 @@ public static class TowerBossGeneration
                     string operation; BossGeneratedChoice choice; string[] parents = [];
                     if (method == "random" || measurements.Count < initial)
                     {
-                        operation = method == "random" ? "fresh-random" : "fresh-constructive";
-                        choice = generator.Fresh(random, method != "random");
+                        operation = method == "random" ? "fresh-random" : freshOperation;
+                        choice = method == "random" ? generator.Fresh(random, false) : Fresh();
                     }
                     else
                     {
                         var turn = refinement++;
                         if (turn % d.Generation.FreshEvery == d.Generation.FreshEvery - 1)
-                        { operation = "fresh-constructive"; choice = generator.Fresh(random, true); }
+                        { operation = freshOperation; choice = Fresh(); }
                         else
                         {
-                            operation = Operators[(turn - turn / d.Generation.FreshEvery) % Operators.Length];
+                            operation = operators[(turn - turn / d.Generation.FreshEvery) % operators.Length];
                             var beam = Rank(measurements).Take(BeamSize).Select(m => m.Id).ToArray();
                             var exploration = Explore(generator, measurements, measured, beam, ExplorationSize);
                             var choices = exploration.Length > 0 && random.Next(4) == 0 ? exploration : beam;
@@ -137,11 +162,15 @@ public static class TowerBossGeneration
                                 if (alternatives.Length > 0) other = measured[alternatives[random.Next(alternatives.Length)]];
                             }
                             if (operation == "recombine" && other is null)
-                            { operation = "fresh-constructive"; choice = generator.Fresh(random, true); }
+                            { operation = freshOperation; choice = Fresh(); }
                             else
                             {
                                 parents = other is null ? [parent.Provenance.Id] : [parent.Provenance.Id, other.Provenance.Id];
-                                choice = generator.Mutate(random, operation, parent.Party!, other?.Party);
+                                choice = operation == "broadcast-core" ? generator.BroadcastCore(random, parent.Party!)
+                                    : operation == "mechanic-core" ? generator.ReplaceMechanicCore(random, parent.Party!)
+                                    : operation == "coverage-count" ? generator.ChangeCoverage(random, parent.Party!)
+                                    : operation == "placement" ? generator.ChangePlacement(random, parent.Party!)
+                                    : generator.Mutate(random, operation, parent.Party!, other?.Party);
                             }
                         }
                     }

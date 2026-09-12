@@ -75,6 +75,79 @@ public sealed class BalanceHarnessTowerBossGenerationTests
     }
 
     [Fact]
+    public async Task Coordinated_policy_preserves_the_legacy_comparator_and_records_new_parentage()
+    {
+        var input = Input(candidates: 128);
+        Task<BossDiscoveryMeasurement> Score(PartyChoice p, string arm, CancellationToken token) => Task.FromResult(Measure(input, p, Convert.ToInt32(p.Id[..2], 16) % 9));
+        var legacy = await TowerBossGeneration.RunAsync(input, Mechanics(input), Score);
+        var coordinated = input with { Generation = input.Generation with {
+            PolicyVersion = TowerBossGeneration.CoordinatedVersion, Methods = TowerBossGeneration.CoordinatedMethods } };
+        var result = await TowerBossGeneration.RunAsync(coordinated, Mechanics(coordinated), Score);
+        Assert.Equal("Complete", result.Status);
+        Assert.Equal(TowerBossGeneration.CoordinatedVersion, result.Version);
+        Assert.Equal(HarnessJson.Hash(legacy.Arms.Single(a => a.Method == "constructive-joint")),
+            HarnessJson.Hash(result.Arms.Single(a => a.Method == "constructive-joint")));
+        var arm = result.Arms.Single(a => a.Method == "coordinated-joint");
+        Assert.Contains(arm.Proposals, p => p.Provenance.Operator == "broadcast-core" && p.Provenance.ParentIds.Count == 1);
+        Assert.Contains(arm.Proposals, p => p.Provenance.Operator == "fresh-coordinated" && p.Provenance.ParentIds.Count == 0);
+        Assert.All(arm.Proposals, p => Assert.Empty(p.Provenance.ReferenceIds));
+        Assert.Equal(HarnessJson.Hash(result), HarnessJson.Hash(await TowerBossGeneration.RunAsync(coordinated, Mechanics(coordinated), Score)));
+    }
+
+    [Fact]
+    public void Shared_cores_respect_family_and_owned_copy_limits_without_mutating_the_parent()
+    {
+        var input = Input(); var free = new TowerBossPartyGenerator(input, Mechanics(input));
+        var parent = TowerPartySelection.Choice("generated-parent", new Dictionary<int, IReadOnlyList<string>> {
+            [1] = ["a", "b", "c", "d"], [2] = ["enabler", "consumer", "g", "h"] });
+        var before = HarnessJson.Hash(parent);
+        var shared = free.BroadcastCore(new Random(1), parent);
+        Assert.Null(shared.Rejection); Assert.Null(free.Invalid(shared.Party!));
+        Assert.NotEmpty(shared.Party!.Builds[1].Intersect(shared.Party.Builds[2]));
+        var limited = input with { OwnedCopies = input.AllowedEssences.ToDictionary(e => e.Id, _ => 1) };
+        var owned = new TowerBossPartyGenerator(limited, Mechanics(limited));
+        Assert.Equal("owned-copies-exceeded", owned.BroadcastCore(new Random(1), parent).Rejection);
+        Assert.Equal(before, HarnessJson.Hash(parent));
+        for (var seed = 0; seed < 20; seed++)
+        {
+            var proposal = owned.FreshCoordinated(new Random(seed));
+            if (proposal.Rejection is null) Assert.Null(owned.Invalid(proposal.Party!));
+        }
+    }
+
+    [Fact]
+    public void Coordinated_operator_provenance_requires_its_explicit_policy_and_method()
+    {
+        var d = Base.Value with { Generation = Base.Value.Generation with {
+            PolicyVersion = TowerBossGeneration.CoordinatedVersion, Methods = TowerBossGeneration.CoordinatedMethods } };
+        TowerBossDiscovery.Validate(d);
+        var seed = d.Generation.Seeds[0];
+        var fresh = new BossDiscoveryProvenance("generated-0", seed, "coordinated-joint", "fresh-coordinated", [], []);
+        var spread = new BossDiscoveryProvenance("generated-1", seed, "coordinated-joint", "broadcast-core", [fresh.Id], []);
+        TowerBossDiscovery.ValidateProvenance(d, [fresh, spread]);
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.ValidateProvenance(Base.Value, [fresh, spread]));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.ValidateProvenance(d, [fresh with { Method = "constructive-joint" }]));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.ValidateProvenance(d, [fresh, spread with { ParentIds = [] }]));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.ValidateProvenance(d, [fresh with { ReferenceIds = ["hidden-reference"] }]));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.Validate(d with { Generation = d.Generation with { Methods = TowerBossDiscovery.Methods } }));
+    }
+
+    [Theory]
+    [InlineData(1, 4)] [InlineData(5, 5)] [InlineData(11, 7)] [InlineData(15, 10)]
+    public void Coordinated_generation_fills_the_declared_floor_budget_with_legal_shared_cores(int floor, int slots)
+    {
+        var d = BalanceHarnessTowerBossDiscoveryContractTests.Definition(floor, slots);
+        var input = TowerBossDiscovery.GenerationInputs(d);
+        var sampler = new TowerBossPartyGenerator(input, TowerBossPartyGenerator.FromInventory(input, Inventory.Value));
+        for (var seed = 0; seed < 8; seed++)
+        {
+            var choice = sampler.FreshCoordinated(new Random(seed));
+            Assert.Null(choice.Rejection); TowerBossDiscovery.ValidateParty(d, choice.Party!);
+            Assert.Contains(choice.Party!.Builds.Values.SelectMany(x => x).GroupBy(x => x), g => g.Count() > 1);
+        }
+    }
+
+    [Fact]
     public async Task Every_operator_is_recorded_and_every_fourth_refinement_attempt_is_fresh()
     {
         var input = Input(candidates: 128);
@@ -125,10 +198,13 @@ public sealed class BalanceHarnessTowerBossGenerationTests
         Assert.Equal(8, Wins(result.DiscoveryShortlist[0]));
     }
 
-    [Fact]
-    public async Task References_cannot_change_proposals_scores_or_shortlist_even_when_a_reference_is_the_generated_winner()
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task References_cannot_change_proposals_scores_or_shortlist_even_when_a_reference_is_the_generated_winner(bool coordinated)
     {
         var d = Base.Value with { Generation = Base.Value.Generation with { CandidatesPerArm = 48, Seeds = [431] } };
+        if (coordinated) d = d with { Generation = d.Generation with {
+            PolicyVersion = TowerBossGeneration.CoordinatedVersion, Methods = TowerBossGeneration.CoordinatedMethods } };
         async Task<BossGenerationResult> Run(TowerBossDiscoveryDefinition definition)
         {
             var input = TowerBossDiscovery.GenerationInputs(definition);

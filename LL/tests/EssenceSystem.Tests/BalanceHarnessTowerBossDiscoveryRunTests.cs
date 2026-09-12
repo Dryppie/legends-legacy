@@ -16,10 +16,14 @@ public sealed class BalanceHarnessTowerBossDiscoveryRunTests
                 Schedules = new Dictionary<string, BossDiscoverySchedule> { [context] = new(new[] { 81091, 81092 }.Take(samples).ToArray(), [82091], [83091], []) } } };
     }
 
-    [Fact]
-    public async Task Real_combat_is_reference_invariant_reconstructs_and_exports_normal_Tower_recipes()
+    [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
+    public async Task Real_combat_is_reference_invariant_reconstructs_and_exports_normal_Tower_recipes(int version)
     {
         using var temp = new DiscoveryTemp(); var d = Small(candidates: 16, samples: 1);
+        if (version > 1) d = d with { Generation = d.Generation with {
+            PolicyVersion = version == 2 ? TowerBossGeneration.CoordinatedVersion : version == 3 ? TowerBossGeneration.MechanicsVersion : TowerBossGeneration.CoverageVersion,
+            Methods = version == 2 ? TowerBossGeneration.CoordinatedMethods : version == 3 ? TowerBossGeneration.MechanicsMethods : TowerBossGeneration.CoverageMethods } };
         var reference = BalanceHarnessTowerBossDiscoveryContractTests.Reference();
         var alternate = reference with { Id = "ordered-alternative", Scenario = reference.Scenario with { Party = reference.Scenario.Party.Select(p =>
             p with { Build = p.Build with { EssenceIds = p.Build.EssenceIds.Reverse().ToArray() } }).ToArray() } };

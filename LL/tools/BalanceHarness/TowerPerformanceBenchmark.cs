@@ -11,7 +11,8 @@ public sealed record TowerPerformanceDefinition(int SchemaVersion, string Id, IR
     IReadOnlyList<int> WorkerCounts, int Repetitions, int MaxBattles, int MaxSeconds, long MaxOutputBytes);
 public sealed record TowerPerformanceScope(string DefinitionHash, TowerSettings Settings, ExecutionIdentity Execution,
     IReadOnlyDictionary<string, string> ContentHashes,
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ArchiveFormat = null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ArchiveFormat = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ExecutionMode = null);
 public sealed record TowerPerformanceCaseResult(string CaseId, int Repetition, double ElapsedMilliseconds,
     int Battles, int Wins, int TickLimits, double MeanDurationSeconds, string ResultDigest,
     long ArchiveBytes, IReadOnlyList<TowerStageTiming> Stages);
@@ -24,9 +25,10 @@ public sealed record TowerPerformanceWorker(int Workers, string Status, int Star
 public sealed record TowerPerformanceReport(string Status, int PlannedBattles, int StartedBattles, int CompletedBattles,
     double ElapsedSeconds, long LogicalOutputBytesBeforeReport, int VisibleProcessors,
     IReadOnlyList<TowerPerformanceWorker> Workers, IReadOnlyList<TowerStageTiming> SetupStages, string? Error,
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ArchiveFormat = null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ArchiveFormat = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? ExecutionMode = null);
 
-/// <summary>A bounded measurement of the legacy Tower path, not a search or balance decision.</summary>
+/// <summary>A bounded measurement of explicitly selected Tower paths, not a search or balance decision.</summary>
 public static class TowerPerformanceBenchmark
 {
     public const string Fixture = "tower-performance.json";
@@ -53,9 +55,10 @@ public static class TowerPerformanceBenchmark
     }
 
     public static async Task<TowerPerformanceReport> RunAsync(string apiRoot, string definitionPath, string output,
-        CancellationToken token = default, Action<string>? progress = null, string? archiveFormat = null)
+        CancellationToken token = default, Action<string>? progress = null, string? archiveFormat = null, string? executionMode = null)
     {
         ValidateFormat(archiveFormat);
+        ValidateExecution(archiveFormat, executionMode);
         var definition = TowerContractJson.Read<TowerPerformanceDefinition>(definitionPath);
         var planned = Validate(definition);
         output = Path.GetFullPath(output);
@@ -84,7 +87,7 @@ public static class TowerPerformanceBenchmark
                     foreach (var seed in item.Scenario.Seeds)
                         runner.CreateInput(item.Scenario, seed, settings.Threat, settings.CheckpointIntervalTicks);
                 }
-                HarnessJson.WriteNew(Path.Combine(output, "scope.json"), new TowerPerformanceScope(HarnessJson.Hash(definition), settings, execution, hashes, archiveFormat));
+                HarnessJson.WriteNew(Path.Combine(output, "scope.json"), new TowerPerformanceScope(HarnessJson.Hash(definition), settings, execution, hashes, archiveFormat, executionMode));
                 HarnessJson.WriteNew(Path.Combine(output, "seed-ledger.json"), new {
                     Purpose = "Diagnostic repeats only; never independent search or balance acceptance samples.",
                     PlannedBattles = planned, definition.Repetitions, definition.WorkerCounts,
@@ -144,7 +147,7 @@ public static class TowerPerformanceBenchmark
         if (status == "Complete" && (counts.Started != planned || counts.Completed != planned))
         { status = "Invalid"; error = "Execution ledger differs from the complete diagnostic reservation."; }
         var result = new TowerPerformanceReport(status, planned, counts.Started, counts.Completed,
-            timer.Elapsed.TotalSeconds, LogicalBytes(output), Environment.ProcessorCount, reports, setup.Snapshot(), error, archiveFormat);
+            timer.Elapsed.TotalSeconds, LogicalBytes(output), Environment.ProcessorCount, reports, setup.Snapshot(), error, archiveFormat, executionMode);
         HarnessJson.WriteNew(Path.Combine(output, "performance.json"), result);
         File.WriteAllText(Path.Combine(output, "performance.md"), Markdown(result));
         HarnessJson.WriteNew(Path.Combine(output, "performance-index.json"),
@@ -169,6 +172,7 @@ public static class TowerPerformanceBenchmark
         if (!definition.WorkerCounts.Contains(workers)) throw new InvalidDataException("Worker count is not frozen in this benchmark.");
         var scope = HarnessJson.Read<TowerPerformanceScope>(Path.Combine(output, "scope.json"));
         ValidateFormat(scope.ArchiveFormat);
+        ValidateExecution(scope.ArchiveFormat, scope.ExecutionMode);
         TowerBundle.VerifySnapshot(output, new TowerManifest(1, scope.DefinitionHash, scope.ContentHashes, scope.Execution), HarnessJson.Hash(definition), token);
         if (HarnessJson.Hash(scope.Execution) != HarnessJson.Hash(ExecutionIdentity.Current()))
             throw new InvalidDataException("Performance worker must use the frozen producing executable/runtime.");
@@ -211,8 +215,9 @@ public static class TowerPerformanceBenchmark
                             {
                                 await TowerCompactBundle.CreateAsync(Path.Combine(output, "content"),
                                     new(1, "performance-case", item.Scenario.Seeds.Count, 32, [new(item.Id, item.Scenario)]),
-                                    run, caseToken, settingsOverride: scope.Settings);
+                                    run, caseToken, settingsOverride: scope.Settings, executionMode: scope.ExecutionMode);
                                 var saved = TowerCompactBundle.ReadSaved(run, caseToken);
+                                if (saved.Plan.ExecutionMode != scope.ExecutionMode) throw new InvalidDataException("Unexpected compact execution mode.");
                                 trials = saved.Cases[item.Id];
                                 evidence = TowerCompactBundle.Evidence(item.Id, saved, item.Id);
                                 digest = saved.ResultDigests[item.Id];
@@ -321,10 +326,18 @@ public static class TowerPerformanceBenchmark
     private static void ValidateFormat(string? format)
     { if (format is not null && format != TowerCompactBundle.Format) throw new InvalidDataException("Unknown performance archive format."); }
 
+    internal static void ValidateExecution(string? format, string? mode)
+    {
+        TowerPreparedBattle.ValidateMode(mode);
+        if (mode is not null && format != TowerCompactBundle.Format)
+            throw new InvalidDataException("Prepared execution requires the compact Tower archive format.");
+    }
+
     private static string Markdown(TowerPerformanceReport report)
     {
         var text = new StringBuilder("# Bounded Tower performance benchmark\n\n");
         text.AppendLine($"Archive format: **{report.ArchiveFormat ?? "legacy Tower"}**.\n");
+        text.AppendLine($"Execution: **{report.ExecutionMode ?? "fresh preparation and playback"}**.\n");
         text.AppendLine($"Status: **{report.Status}**. Started {report.StartedBattles}, completed {report.CompletedBattles}, reserved {report.PlannedBattles} combats, including repeated diagnostics and detailed replays. No search, independent acceptance samples or boss changes.\n");
         text.AppendLine(FormattableString.Invariant($"End-to-end: {report.ElapsedSeconds:F2}s. Logical output before final report: {report.LogicalOutputBytesBeforeReport / 1048576d:F2} MiB. Visible logical processors: {report.VisibleProcessors}.\n"));
         text.AppendLine("| Workers | Pass | Process condition | Battles | Combat + archives + verification (s) | Battles/s | Allocated MiB | Process CPU (s) | Process lifetime peak MiB |\n| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |");
@@ -333,9 +346,12 @@ public static class TowerPerformanceBenchmark
                 text.AppendLine(FormattableString.Invariant($"| {worker.Workers} | {pass.Repetition + 1} | {pass.Temperature} | {pass.Cases.Sum(c => c.Battles)} | {pass.ElapsedMilliseconds / 1000:F2} | {pass.Cases.Sum(c => c.Battles) * 1000 / pass.ElapsedMilliseconds:F2} | {pass.ProcessAllocatedBytes / 1048576d:F2} | {pass.ProcessCpuMilliseconds / 1000:F2} | {pass.ProcessPeakWorkingSetBytes / 1048576d:F2} |"));
         text.AppendLine("\nStage timings, case durations/wins, archive bytes and complete result digests are in performance.json. Inclusive stages overlap their children; use exclusive times when summing. Parallel worker time can exceed elapsed time. Allocations and CPU are process-wide, not per-thread estimates.\n");
         text.AppendLine("The first pass is in a fresh child process, after identity checks but before combat/content preparation. OS filesystem cache is uncontrolled; later worker configurations can benefit from earlier disk reads. There are no uncounted warmup fights. Child startup, frozen executable/content copying, preflight, monitoring and replay are included only in overall elapsed time, not pass throughput.\n");
-        text.AppendLine("Engine execution includes playback checkpoint collection; this version does not isolate checkpoint construction inside production combat. JSON serialization is measured on its normal streaming path, with nested synchronous writes timed separately. File hashing includes its reads. Write buffering/disposal, profiler instrumentation and the durable battle counter have overhead; these measurements do not establish uninstrumented throughput or a speedup.\n");
+        text.AppendLine(report.ExecutionMode == TowerPreparedBattle.Mode
+            ? "Prepared execution validates and prepares once per recipe bundle, reuses its executor's compiled definitions, and creates fresh actors/engine/RNG per seed. Bulk simulation collects no playback checkpoints or event log. Detailed replays independently use fresh production preparation. Preparation is not cached across bundles or passes.\n"
+            : "Engine execution includes playback checkpoint collection; this version does not isolate checkpoint construction inside production combat.\n");
+        text.AppendLine("JSON serialization is measured on its normal streaming path, with nested synchronous writes timed separately. File hashing includes its reads. Write buffering/disposal, profiler instrumentation and the durable battle counter have overhead; these measurements do not establish uninstrumented throughput or a speedup.\n");
         text.AppendLine("Time and logical-storage limits are polled at 500 ms while a child runs, and between setup/configurations. Cooperative cancellation has a five-second grace period before the owned child is terminated. In-flight writes and final diagnostic receipts can exceed a limit; logical bytes are not physical disk allocation. Keep artifacts from interrupted runs; no automatic resume or cleanup occurs.\n");
-        text.AppendLine("Complete requires normal archive validation, identical full report digests across repetitions/worker counts, exact battle accounting and one matching detailed replay per case/configuration. Stored archives retain their original readers. Performance repeats must never be pooled into balance evidence.\n");
+        text.AppendLine("Complete requires selected-format archive validation, identical full report digests across repetitions/worker counts, exact battle accounting and one matching detailed replay per case/configuration. Stored archives retain their original readers. Performance repeats must never be pooled into balance evidence.\n");
         if (report.Error is not null) text.AppendLine("Error: " + report.Error);
         return text.ToString();
     }

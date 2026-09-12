@@ -104,6 +104,7 @@ public static class TowerBossDiscoveryRun
 
     public static async Task<BossDiscoveryRunReport> VerifyAsync(string output, CancellationToken token = default)
     {
+        if (File.Exists(Path.Combine(output, TowerBulkCampaign.ContractFile))) return await TowerCompactDiscovery.VerifyAsync(output, token);
         var trials = TowerLoadoutArchive.Verify(output, token);
         var saved = HarnessJson.Read<BossDiscoveryRunReport>(Path.Combine(output, "discovery.json"));
         if (saved.Status is not ("Complete" or "Incomplete")) throw new InvalidDataException("Only complete or attempt-exhausted discovery supports full reconstruction; interrupted evidence remains partial.");

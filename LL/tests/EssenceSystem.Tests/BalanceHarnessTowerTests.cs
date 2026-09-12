@@ -156,6 +156,8 @@ public sealed class BalanceHarnessTowerTests
         var input = runner.CreateInput(scenario, seed, Threat, 10);
         var harnessRuntime = await runner.PrepareAsync(input);
         var harness = await runner.RunAsync(input);
+        var reusable = await runner.PrepareReusableAsync(input);
+        Assert.Equal(TowerCompactBundle.ReportHash(harness), TowerCompactBundle.ReportHash(await reusable.RunAsync(seed)));
 
         // Independent normal route: create real characters from recipes, persist snapshots and
         // reload their navigation data, then invoke the same factory/executor as WorldTowerService.

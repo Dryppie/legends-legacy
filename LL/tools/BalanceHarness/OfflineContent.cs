@@ -39,12 +39,12 @@ public sealed class OfflineContent
     {
         using var timing = TowerPerformanceTrace.Measure("content.load");
         _root = root;
-        _threat = threat;
+        _threat = JsonSerializer.Deserialize<ThreatAndTankingOptions>(JsonSerializer.SerializeToUtf8Bytes(threat, HarnessJson.Options), HarnessJson.Options)!;
         Essences = new(_configuration, root, HarnessJson.Options, new EssenceDefinitionValidator());
         _creatureEssences = new(_configuration, root, HarnessJson.Options, Essences);
         _creatureAbilities = new(_configuration, root, HarnessJson.Options);
         _scaling = new(_configuration, root, HarnessJson.Options);
-        _abilities = new(_configuration, root, HarnessJson.Options, threat);
+        _abilities = new(_configuration, root, HarnessJson.Options, _threat);
         Equipment = JsonStarterEquipmentCatalog.Load(Path.Combine(root, "Data", "equipment", "equipment-starters.v1.json"));
     }
 
@@ -135,6 +135,13 @@ public sealed class OfflineContent
         Essences, _creatureEssences, _creatureAbilities, Equipment);
 
     public CombatEngineExecutor CreateExecutor() => new(_abilities, Essences, Equipment, Options.Create(_threat));
+
+    internal CombatEngineExecutor CreatePreparedExecutor(ThreatAndTankingOptions threat)
+    {
+        if (HarnessJson.Hash(threat) != HarnessJson.Hash(_threat))
+            throw new InvalidDataException("Prepared Tower settings differ from the frozen content provider.");
+        return CreateExecutor();
+    }
 
     private CombatStyleSnapshot FreezeCombatStyle(FixtureCharacter character, FixtureCombatStyle recipe)
     {

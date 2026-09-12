@@ -14,7 +14,7 @@ public static class TowerBalanceRuns
         try
         {
             if (File.Exists(Path.Combine(directory, "bulk-plan.json")) || File.Exists(Path.Combine(directory, TowerCompactBundle.ManifestFile)))
-                return TowerCompactBundle.Evidence(cellId, TowerCompactBundle.ReadSaved(directory, token), compactCaseId);
+                return TowerCompactBundle.Evidence(cellId, TowerCompactBundle.Verify(directory, token), compactCaseId);
             if (compactCaseId is not null) throw new InvalidDataException("A compact case ID cannot select a normal Tower archive.");
             var saved = TowerBundle.ReadSaved(directory, token);
             var first = saved.Inputs[0];
@@ -55,8 +55,8 @@ public static class TowerBalanceRuns
                 continue;
             }
             // Share one verified snapshot within this evaluation only. Do not retain full reports across bundles or calls.
-            SavedTowerCompact saved;
-            try { saved = TowerCompactBundle.ReadSaved(group.Key, token); }
+            VerifiedTowerCompact saved;
+            try { saved = TowerCompactBundle.Verify(group.Key, token); }
             catch (Exception error) when (VerificationError(error))
             {
                 foreach (var item in group) results[item.Index] = Invalid(item.Source.CellId, error);

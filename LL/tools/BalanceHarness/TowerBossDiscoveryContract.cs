@@ -160,10 +160,11 @@ public static class TowerBossDiscovery
         var g = d.Generation;
         var s = d.Stages;
         var improvement = d.Mode == Improve && g?.PolicyVersion == TowerBossImprovement.Version;
-        if (g is null || g.Methods is null || !g.Methods.SequenceEqual(improvement ? TowerBossImprovement.Methods : Methods) || g.Seeds is not { Count: > 0 and <= 4 }
+        if (g is null || g.Methods is null || (improvement ? !g.Methods.SequenceEqual(TowerBossImprovement.Methods) : !TowerBossGeneration.LegalPolicy(g))
+            || g.PolicyVersion is TowerBossGeneration.CoordinatedVersion or TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion && d.Mode != Independent || g.Seeds is not { Count: > 0 and <= 4 }
             || g.Seeds.Distinct().Count() != g.Seeds.Count || g.CandidatesPerArm is < 1 or > 1000
             || g.MaximumAttemptsPerArm < g.CandidatesPerArm || g.MaximumAttemptsPerArm > 10000
-            || g.FreshEvery != 4 || g.Objective != Objective || (!improvement && g.PolicyVersion != TowerBossGeneration.Version) || s is null
+            || g.FreshEvery != 4 || g.Objective != Objective || s is null
             || s.Shortlist is < 1 or > 64 || s.Shortlist < g.Methods.Count * g.Seeds.Count
             || s.Shortlist > g.Methods.Count * g.Seeds.Count * g.CandidatesPerArm
             || s.GeneratedFinalists is < 1 or > 5 || s.GeneratedFinalists > s.Shortlist || s.SelectionPolicyVersion != TowerBossStudyPolicy.Version
@@ -274,6 +275,15 @@ public static class TowerBossDiscovery
                 throw new InvalidDataException("Invalid proposal identity, generation provenance or duplicate parents.");
             var parents = p.Operator switch {
                 "fresh-random" or "fresh-constructive" => 0,
+                "fresh-coordinated" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.CoordinatedVersion or TowerBossGeneration.MechanicsVersion && p.Method == "coordinated-joint" => 0,
+                "broadcast-core" when d.Mode == Independent && (d.Generation.PolicyVersion == TowerBossGeneration.CoordinatedVersion && p.Method == "coordinated-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.MechanicsVersion && p.Method is "coordinated-joint" or "mechanics-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "mechanics-joint") => 1,
+                "fresh-mechanics" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion && p.Method == "mechanics-joint" => 0,
+                "mechanic-core" when d.Mode == Independent && (d.Generation.PolicyVersion == TowerBossGeneration.MechanicsVersion && p.Method == "mechanics-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method is "mechanics-joint" or "coverage-joint") => 1,
+                "fresh-coverage" when d.Mode == Independent && d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "coverage-joint" => 0,
+                "coverage-count" or "placement" when d.Mode == Independent && d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "coverage-joint" => 1,
                 "supplied" when d.Mode == Improve && d.Generation.PolicyVersion == TowerBossImprovement.Version => 1,
                 "single" or "double" or "order" or "cross-character" or "whole-character" => 1,
                 "recombine" => 2,
