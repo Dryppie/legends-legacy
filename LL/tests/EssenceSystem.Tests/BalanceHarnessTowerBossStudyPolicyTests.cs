@@ -3,6 +3,7 @@ using Domain.Models.Combat;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossStudyPolicyTests
 {
     private static readonly Lazy<TowerBossInventoryReport> Inventory = new(() => TowerBossInventory.Create(TestContentPaths.FindApiRoot(), new()));

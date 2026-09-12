@@ -3,6 +3,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossRefinementTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

@@ -50,6 +50,9 @@ public static partial class TowerBossStudy
         text.AppendLine("\n## Reproduction\n\nThe archive retains content, settings, seed exclusions, stage schedules, producing assemblies/dependencies, recipes, compressed trials, frozen shortlist/finalists/family, comparisons and detailed replay audits. " +
             "Use the same .NET runtime/platform with `dotnet executable/BalanceHarness.dll tower-boss-study-verify --run <archive>`. " +
             "Use `tower-loadout-replay --run <archive> --battle <trial-id> --detailed` for an additional explicit replay. Additional user-requested replays occur outside this study's recorded budget.\n");
-        return text.ToString();
+        return report.Discovery?.Version == TowerBossImprovement.Version
+            ? text.ToString().Replace("Independent generated viability", "Retained-build search viability")
+                .Replace("References never enter generation, discovery scoring or finalist selection.", "Explicit supplied references enter discovery as scored starts; their ancestry propagates through every descendant. This is reference-derived improvement. Historical fitness and fresh confirmation outcomes never enter search or finalist selection.")
+            : text.ToString();
     }
 }

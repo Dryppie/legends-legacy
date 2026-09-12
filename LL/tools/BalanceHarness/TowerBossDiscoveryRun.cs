@@ -42,7 +42,7 @@ public static class TowerBossDiscoveryRun
         CancellationToken token = default, Action<string>? progress = null)
     {
         var cost = TowerBossDiscovery.Validate(root, definition);
-        var inputs = TowerBossDiscovery.GenerationInputs(definition); // Reject improve mode before output or combat.
+        var inputs = TowerBossImprovement.Inputs(definition);
         if (Path.Exists(output)) throw new IOException("Choose a new independent discovery output directory.");
         token.ThrowIfCancellationRequested();
         Directory.CreateDirectory(output);
@@ -54,7 +54,7 @@ public static class TowerBossDiscoveryRun
         {
             var settings = TowerBundle.ReadSettings(root);
             var frozen = Path.Combine(output, "content");
-            var scope = new LoadoutScope(Algorithm, settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(root, frozen, token), "gzip-json-v1");
+            var scope = new LoadoutScope(TowerBossImprovement.Algorithm(definition) + "/discovery-only", settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(root, frozen, token), "gzip-json-v1");
             if (HarnessJson.Hash(scope.ContentHashes) != HarnessJson.Hash(definition.ContentHashes)
                 || HarnessJson.Hash(scope.Settings) != definition.SettingsHash || HarnessJson.Hash(scope.Execution) != definition.ExecutionHash)
                 throw new InvalidDataException("Content/settings/execution changed while freezing discovery.");
@@ -62,13 +62,14 @@ public static class TowerBossDiscoveryRun
             HarnessJson.WriteNew(Path.Combine(output, "definition.json"), definition);
             HarnessJson.WriteNew(Path.Combine(output, "cost.json"), cost);
             HarnessJson.WriteNew(Path.Combine(output, "generation-inputs.json"), inputs);
+            if (definition.Mode == TowerBossDiscovery.Improve) HarnessJson.WriteNew(Path.Combine(output, "improvement-starts.json"), definition.Starts);
             var inventory = TowerBossInventory.Create(frozen, settings.Threat);
             var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
             HarnessJson.WriteNew(Path.Combine(output, "boss-profiles.json"), inventory);
             HarnessJson.WriteNew(Path.Combine(output, "generation-mechanics.json"), mechanics);
             archive = new(output, scope, cost.Discovery);
             var lastCount = -1;
-            generation = await TowerBossGeneration.RunAsync(inputs, mechanics,
+            generation = await TowerBossImprovement.ExecuteAsync(definition, inputs, mechanics,
                 (party, arm, ct) => Measure(definition, inputs, party, arm, archive.EvaluateAsync, ct), token, partial => {
                     generation = partial;
                     var count = partial.Arms.Sum(a => a.Evaluations.Count);
@@ -107,9 +108,9 @@ public static class TowerBossDiscoveryRun
         var saved = HarnessJson.Read<BossDiscoveryRunReport>(Path.Combine(output, "discovery.json"));
         if (saved.Status is not ("Complete" or "Incomplete")) throw new InvalidDataException("Only complete or attempt-exhausted discovery supports full reconstruction; interrupted evidence remains partial.");
         var d = TowerBossDiscovery.Read(Path.Combine(output, "definition.json"));
-        var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossDiscovery.GenerationInputs(d);
+        var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossImprovement.Inputs(d);
         var scope = HarnessJson.Read<LoadoutScope>(Path.Combine(output, "scope.json"));
-        if (scope.Algorithm != Algorithm || HarnessJson.Hash(scope.Execution) != d.ExecutionHash
+        if (scope.Algorithm != TowerBossImprovement.Algorithm(d) + "/discovery-only" || HarnessJson.Hash(scope.Execution) != d.ExecutionHash
             || d.ExecutionHash != HarnessJson.Hash(ExecutionIdentity.Current()) || HarnessJson.Hash(scope.Settings) != d.SettingsHash
             || HarnessJson.Hash(scope.ContentHashes) != HarnessJson.Hash(d.ContentHashes)
             || trials.Count > cost.Discovery || saved.CacheHits != 0)
@@ -123,13 +124,14 @@ public static class TowerBossDiscoveryRun
         if (d.ContentHashes.Any(p => HarnessJson.FileHash(Path.Combine(root, "Data", p.Key)) != p.Value))
             throw new InvalidDataException("Discovery frozen content changed.");
         Match("cost.json", cost); Match("generation-inputs.json", inputs);
+        if (d.Mode == TowerBossDiscovery.Improve) Match("improvement-starts.json", d.Starts);
         var inventory = TowerBossInventory.Create(root, scope.Settings.Threat);
         var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
         Match("boss-profiles.json", inventory); Match("generation-mechanics.json", mechanics);
         var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
         var index = 0;
         TowerScenario? lastScenario = null; TowerBattleInput? template = null; string? recipeHash = null;
-        var result = await TowerBossGeneration.RunAsync(inputs, mechanics, (party, arm, ct) => Measure(d, inputs, party, arm,
+        var result = await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics, (party, arm, ct) => Measure(d, inputs, party, arm,
             (trialArm, stage, scenario, seed, ct2) => {
                 ct2.ThrowIfCancellationRequested();
                 if (index >= trials.Count) throw new InvalidDataException("Missing discovery trial.");
@@ -174,6 +176,9 @@ public static class TowerBossDiscoveryRun
             text.AppendLine(string.Create(CultureInfo.InvariantCulture, $"| {party.Id} | {row.Fitness.WorstContextWinRate:P2} | {row.Fitness.GuardianHealth:F2}% | {row.Fitness.Survival:F2}% | {row.Cells.Any(c => c.Clears.Count(x => x) * 2 > c.Clears.Count)} |"));
         }
         text.AppendLine("\nAll evaluated/rejected proposals, ordered recipes, parent/operator lineage and context outcomes are in discovery.json. Capability labels and interaction links are unconfirmed hypotheses. Method restarts and repeated recipes across arms do not create additional independent seed samples. Partial or attempt-exhausted runs do not establish equal-budget method comparisons.\n");
-        return text.ToString();
+        return report.Generation?.Version == TowerBossImprovement.Version
+            ? text.ToString().Replace("Independent team discovery", "Retained-build improvement")
+                .Replace("No benchmark reference was used as a parent or scored by this pass.", "Explicit supplied references were scored on discovery seeds and used as parents. This is reference-derived search, not independent discovery.")
+            : text.ToString();
     }
 }

@@ -126,6 +126,18 @@ export class TournamentGroundsComponent implements OnInit, OnDestroy {
   readonly playerTeam = computed(
     () => this.teams().find((team) => team.isPlayerTeam) ?? null,
   );
+  readonly canUpdateLoadout = computed(() => {
+    const tournament = this.displayedTournament();
+    return (
+      !!tournament &&
+      !!this.playerTeam() &&
+      ['RegistrationOpen', 'RegistrationClosed', 'BracketGenerated'].includes(
+        tournament.status,
+      ) &&
+      this.clock() >= Date.parse(tournament.registrationStartsAtUtc) &&
+      this.clock() < Date.parse(tournament.startsAtUtc)
+    );
+  });
   readonly openTeams = computed(() =>
     this.teams().filter((team) => team.isOpen),
   );

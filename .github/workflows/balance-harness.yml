@@ -2,22 +2,10 @@ name: Balance harness
 
 on:
   pull_request:
-    paths:
-      - 'LL/src/Core/**'
-      - 'LL/src/Infrastructure/**'
-      - 'LL/src/API/**'
-      - 'LL/src/Worker/**'
-      - 'LL/tools/BalanceHarness/**'
-      - 'LL/tests/EssenceSystem.Tests/**'
-      - 'LL/LegendsLegacy.sln'
-      - '**/Directory.Build.*'
-      - '**/Directory.Packages.props'
-      - '**/NuGet.Config'
-      - '**/nuget.config'
-      - '**/global.json'
-      - 'build/run-tests.ps1'
-      - 'build/smoke-balance.ps1'
-      - '.github/workflows/balance-harness.yml'
+  push:
+    branches:
+      - main
+      - 'releases/**'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +16,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect balance impact
+    runs-on: ubuntu-latest
+    outputs:
+      harness: ${{ steps.impact.outputs.harness }}
+      smoke: ${{ steps.impact.outputs.smoke }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify impact policy
+        shell: pwsh
+        run: ./build/test-balance-impact.ps1
+      - name: Classify changes
+        id: impact
+        shell: pwsh
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT: ${{ github.event_name }}
+        run: >-
+          ./build/get-balance-impact.ps1 -Base $env:BASE -Head $env:HEAD
+          -PullRequest:($env:EVENT -eq 'pull_request')
+          -Force:($env:EVENT -eq 'workflow_dispatch')
+
   smoke:
+    needs: changes
+    if: needs.changes.outputs.harness == 'true'
     name: Idle workflow / advisory balance
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -43,14 +58,16 @@ jobs:
 
       - name: Verify harness correctness and parity
         shell: pwsh
-        run: ./build/run-tests.ps1 -Filter 'FullyQualifiedName~BalanceHarness|FullyQualifiedName~CombatStyleHarness'
+        run: ./build/run-tests.ps1 -Filter 'Category=BalanceHarness'
 
       - name: Run repeatability, replay and draft evaluation smoke
+        if: needs.changes.outputs.smoke == 'true'
         timeout-minutes: 3
         shell: pwsh
         run: ./build/smoke-balance.ps1 -NoBuild -SamplesPerCell 3 -OutputDirectory TestResults/balance/ci-smoke
 
       - name: Verify First Hunt cohort and group replay
+        if: needs.changes.outputs.smoke == 'true'
         timeout-minutes: 3
         shell: pwsh
         run: >-

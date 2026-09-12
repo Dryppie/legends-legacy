@@ -5,6 +5,7 @@ using Domain.Models.Combat;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBalanceEvaluatorTests
 {
     private static string Root => TestContentPaths.FindApiRoot();
@@ -29,6 +30,17 @@ public sealed class BalanceHarnessTowerBalanceEvaluatorTests
             d.Cohorts.Single(cohort=>cohort.Id==c.CohortId).RequiredPartySize,
             c.Scenario.Seeds.Select((seed,i)=>new TowerBalanceTrial(seed,i<wins?BattleOutcome.Victory:i<wins+draws?BattleOutcome.Draw:BattleOutcome.Defeat)).ToArray(),
             new string('a',64));
+    }
+
+    [Fact]
+    public void Cumulative_history_expansion_does_not_change_acceptance_or_confirmation_combat_cap()
+    {
+        var d = Plan();
+        var large = d with { ExcludedCombatSeeds = Enumerable.Range(-1000000, 1000000).ToArray() };
+        Assert.Equal(GoalOutcome.Pass, TowerBalanceEvaluator.Evaluate(large, [Evidence(large, 0, 300)]).Assessment);
+        Assert.Throws<InvalidDataException>(() => TowerBalanceEvaluator.Validate(large with { ExcludedCombatSeeds = Enumerable.Range(-1000001, 1000001).ToArray() }));
+        Assert.Throws<InvalidDataException>(() => TowerBalanceEvaluator.Validate(large with { MaximumBattles = 100001 }));
+        Assert.Throws<InvalidDataException>(() => TowerBalanceEvaluator.Validate(large with { ExcludedCombatSeeds = [1] }));
     }
 
     [Theory]

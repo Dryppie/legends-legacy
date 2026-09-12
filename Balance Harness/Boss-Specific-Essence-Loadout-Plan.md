@@ -1,5 +1,7 @@
 # Boss-specific Essence loadouts: analysis and implementation plan
 
+**Competitive search update — 12 September 2026:** [stronger Kharad searches](Tower-Competitive-Build-Search-Review.md) confirmed new teams at **948/1,000** and **1,000/1,000** on the previously passing content. Its earlier scoped Pass is superseded for the expanded build portfolio. Retained-build improvement and the history-capacity extension are implemented; the fresh quality audit and separate linked calibration are documented in the new review. Near-optimality remains unestablished.
+
 **Progression audit and calibration — 11 September 2026:** [floors 2–5 review](Tower-Progression-Floors-2-to-5-Review.md) records independent four-Essence searches on floors 2–4, their separately confirmed linked Health/Power calibration against every known breach, and Kharad's fresh **20.9%** strongest-control check. Compatible controls and calibrated top builds persist for future searches. Floors 6–11 and practical acquisition coverage remain open.
 
 **Fresh search and Kharad follow-up — 11 September 2026:** [new independent searches](Post-Calibration-Tower-Team-Search-Review.md) confirmed Garran's strongest saved team at **34.8%** and found a stronger Kharad team at **59%**, triggering a separate calibration. The [expanded-portfolio follow-up](Kharad-Expanded-Portfolio-Calibration-Review.md) applied another **8% to both Kharad Health and Power**; its strongest of 122 parties confirmed at **25.25%**, and the full family passes. At that stage, main-dashboard searches retained **4 floor-1 / 6 floor-5 controls**. Broader progression, practical Essence access and further independent ceiling searches remain open.
@@ -45,9 +47,9 @@ The completed expansion instead selected a budget by search headroom: its best c
 | 2: Velka | 4 | 31/150 (20.67%) | Full calibration family passes |
 | 3: Morrowmaw | 4 | 147/400 (36.75%) | Full calibration family passes |
 | 4: Vaelor | 4 | 81/400 (20.25%) | Full calibration family passes |
-| 5: Kharad | 5 | 209/1000 (20.90%) | Fresh independent family passes; saved control supplies viability |
+| 5: Kharad | 5 | 1,000/1,000 (100%) | New competitive search breaches the ceiling; separate expanded calibration follows |
 
-These cohorts use the full 80-Essence pool with hypothetical ownership. Four slots through floor 4 is an explicit working interpolation. Continue with floors 6–9 at five slots, floor 10 at six and floor 11 at seven, with separate lower-budget diagnostics. The [next-batch checklist](Automatic-Tower-Team-Discovery-Plan.md#next-batch-history-capacity-and-floors-611) first extends bounded history capacity: the latest previews already exclude 97,838 seeds. Preserve every exclusion and keep combat caps separate; the capacity change and remaining studies are pending.
+These cohorts use the full 80-Essence pool with hypothetical ownership. Four slots through floor 4 is an explicit working interpolation. Continue with floors 6–9 at five slots, floor 10 at six and floor 11 at seven, with separate lower-budget diagnostics. The [history-capacity prerequisite](Automatic-Tower-Team-Discovery-Plan.md#next-batch-history-capacity-and-floors-611) is complete: cumulative history now supports 1,000,000 exclusions. Remaining progression studies are pending, with competitive search validation taking priority. Preserve every exclusion and keep combat caps separate.
 
 The following table preserves earlier concerns under their historical content, rather than describing current acceptance of the already calibrated floors:
 

@@ -4,6 +4,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerPartySearchTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

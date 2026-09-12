@@ -162,6 +162,47 @@ describe('TournamentGroundsComponent initialization', () => {
   });
 });
 
+describe('Tournament Grounds loadout availability', () => {
+  for (const status of [
+    'RegistrationOpen',
+    'RegistrationClosed',
+    'BracketGenerated',
+  ] as const) {
+    it(`allows updates during ${status} until the start time`, () => {
+      const { component } = createRaceHarness([]);
+      const now = Date.now();
+      component.clock.set(now);
+      component.details.set({
+        summary: {
+          status,
+          registrationStartsAtUtc: new Date(now - 60000).toISOString(),
+          registrationEndsAtUtc: new Date(now - 1000).toISOString(),
+          startsAtUtc: new Date(now + 1000).toISOString(),
+        },
+        teams: [{ isPlayerTeam: true }],
+      } as TournamentDetails);
+
+      expect(component.canUpdateLoadout()).toBeTrue();
+      component.clock.set(now + 1000);
+      expect(component.canUpdateLoadout()).toBeFalse();
+    });
+  }
+
+  it('does not allow updates once the tournament is in progress', () => {
+    const { component } = createRaceHarness([]);
+    const now = Date.now();
+    component.details.set({
+      summary: {
+        status: 'InProgress',
+        registrationStartsAtUtc: new Date(now - 60000).toISOString(),
+        startsAtUtc: new Date(now + 60000).toISOString(),
+      },
+      teams: [{ isPlayerTeam: true }],
+    } as TournamentDetails);
+    expect(component.canUpdateLoadout()).toBeFalse();
+  });
+});
+
 function createRaceHarness(
   statusRequests: Subject<TournamentGroundsStatus>[],
   detailRequests: Subject<TournamentDetails>[] = [],

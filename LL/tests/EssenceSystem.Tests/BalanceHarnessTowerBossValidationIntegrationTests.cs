@@ -3,6 +3,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossValidationIntegrationTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

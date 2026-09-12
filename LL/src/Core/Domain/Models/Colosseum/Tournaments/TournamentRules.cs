@@ -2,6 +2,13 @@ namespace Domain.Models.Colosseum.Tournaments;
 
 public static class TournamentRules
 {
+    public static bool CanUpdateLoadout(TournamentInstance tournament, DateTimeOffset now) =>
+        tournament.Status is TournamentStatus.RegistrationOpen
+            or TournamentStatus.RegistrationClosed
+            or TournamentStatus.BracketGenerated
+        && now >= tournament.RegistrationStartsAtUtc
+        && now < tournament.StartsAtUtc;
+
     public static int GetBracketSize(int participantCount)
     {
         var power = 1;

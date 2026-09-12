@@ -2,6 +2,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossReferenceTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

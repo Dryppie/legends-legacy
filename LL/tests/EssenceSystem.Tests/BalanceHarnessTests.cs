@@ -15,6 +15,7 @@ using Services.LL.Interfaces.Combat.Resolution;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTests
 {
     private static string ApiRoot => TestContentPaths.FindApiRoot();

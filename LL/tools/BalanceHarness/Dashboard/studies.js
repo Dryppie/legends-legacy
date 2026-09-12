@@ -18,7 +18,7 @@ function teamReferenceAvailability() {
 }
 async function readTeamFile(id, fallback) {
   const file = $(id).files[0]; if (!file) return fallback;
-  if (file.size > 2 * 1024 * 1024) throw new Error('Study imports must be no larger than 2 MB.');
+  if (file.size > 32 * 1024 * 1024) throw new Error('Study imports must be no larger than 32 MiB.');
   return JSON.parse(await file.text());
 }
 function teamTable(headers, rows) {
@@ -38,14 +38,17 @@ function teamBuilds(party, title) {
   return disclosure;
 }
 function displayTeamPreview(plan) {
-  teamPreview = plan; const d = plan.definition, b = d.budget;
+  teamPreview = plan; const d = plan.definition, b = d.budget, improvement = d.mode === 'improve-supplied';
   $('team-preview').hidden = false;
-  $('team-budget').textContent = `Floor ${b.priorityFloor} · ${d.requiredPartySize} independently generated characters · ${b.essenceSlots} Essences each · level ${b.characterLevel} · Uncommon ${b.quality}, tier ${b.tier}, rank ${b.rank} · ${d.contexts.length} equipment context(s) · ${d.budgetPurpose}. ${d.allowedEssences.length} allowed Essences; ${d.ownedCopies ? 'declared owned copies' : 'hypothetical ownership'}.`;
+  $('team-budget').textContent = `Floor ${b.priorityFloor} · ${d.requiredPartySize} characters · ${improvement ? 'Improve saved builds' : 'Independent discovery'} · ${b.essenceSlots} Essences each · level ${b.characterLevel} · Uncommon ${b.quality}, tier ${b.tier}, rank ${b.rank} · ${d.contexts.length} equipment context(s) · ${d.budgetPurpose}. ${d.allowedEssences.length} allowed Essences; ${d.ownedCopies ? 'declared owned copies' : 'hypothetical ownership'}.`;
   $('team-cost').replaceChildren(teamTable(['Stage', 'Reserved combats'], Object.entries(plan.cost).map(([key, count]) => [key.replace(/([A-Z])/g, ' $1'), count.toLocaleString()])));
   $('team-preview-builds').replaceChildren(...d.contexts.map(c => teamBuilds(c.characterTemplates, `Equipment context: ${c.id} · all ${c.characterTemplates.length} characters`)));
   $('team-preview-references').replaceChildren(node('h3', `${d.references.length} benchmark reference(s)`));
+  const parents = new Set((d.starts || []).map(start => start.referenceId));
+  if (improvement) $('team-preview-references').append(node('p', `${parents.size} supplied search parent(s). These teams are measured inside each arm's discovery budget.`, 'hint'));
   for (const r of d.references) {
     const panel = node('div', null, 'boss-strategy'); panel.append(node('strong', r.id), node('p', `${r.context} · ${r.source}`, 'hint'), teamBuilds(r.scenario.party, 'Inspect reference party'));
+    if (parents.has(r.id)) panel.prepend(node('p', 'Used as a supplied search parent in this study.', 'hint'));
     $('team-preview-references').append(panel);
   }
   if (!d.references.length) $('team-preview-references').append(node('p', 'No benchmark references registered. Generated teams can still establish scoped viability.', 'hint'));
@@ -91,13 +94,13 @@ function renderTeamResults(result) {
   $('team-results').hidden = !result.isStudy; $('rows').closest('.table-wrap').hidden = !!result.isStudy;
   if (!result.isStudy) return;
   $('metrics').after($('team-results'));
-  const study = result.study, verified = result.integrity === 'Reconstructed', conclusion = study.conclusion;
+  const study = result.study, verified = result.integrity === 'Reconstructed', conclusion = study.conclusion, improvement = result.studyDefinition.mode === 'improve-supplied';
   $('team-assessments').replaceChildren();
-  for (const [title, value] of [['Execution', study.status], ['Generated viability', conclusion?.generatedViability || 'Unavailable'],
+  for (const [title, value] of [['Execution', study.status], [improvement ? 'Retained-search viability' : 'Generated viability', conclusion?.generatedViability || 'Unavailable'],
     ['Frozen family', study.balance?.assessment || 'Unavailable'], ['Overall balance', verified ? conclusion?.overallAssessment || 'Unavailable' : 'Unverified'], ['Evidence', result.integrity]]) {
     const card = node('div', null, 'team-status'); card.dataset.outcome = value; card.append(node('span', title), node('strong', value)); $('team-assessments').append(card);
   }
-  $('team-results-note').textContent = `Floor ${result.studyDefinition.budget.priorityFloor} · ${result.studyDefinition.budgetPurpose}. ${result.isPartialEvidence ? 'Partial or historical evidence: no verified recommendation. ' : ''}The strongest generated primary stays frozen; confirmation never selects a new winner. References alone do not establish generated viability. Draws are non-wins. Family size ${study.balance?.familySize || 0}. No acceptance is claimed for unsearched parties or other floors.`;
+  $('team-results-note').textContent = `Floor ${result.studyDefinition.budget.priorityFloor} · ${result.studyDefinition.budgetPurpose}. ${improvement ? 'Reference-derived improvement: supplied teams were scored as search parents; inherited ancestry is retained. ' : 'Independent discovery: no supplied search parents. '}${result.isPartialEvidence ? 'Partial or historical evidence: no verified recommendation. ' : ''}The strongest generated primary stays frozen; confirmation never selects a new winner. References alone do not establish generated viability. Draws are non-wins. Family size ${study.balance?.familySize || 0}. No acceptance is claimed for unsearched parties or other floors.`;
   $('team-accounting').replaceChildren(teamTable(['Stage', 'Attempted', 'Completed'], Object.keys(study.accounting.attempted).map(stage => [stage, study.accounting.attempted[stage], study.accounting.completed[stage]])),
     node('p', `Reserved ${study.accounting.reserved}; hard cap ${study.accounting.maximum}; unused ${study.accounting.unusedReservation}.`, 'hint'));
   $('team-result-cards').replaceChildren();
@@ -111,7 +114,7 @@ function renderTeamResults(result) {
     card.append(node('p', `50% ceiling check: ${cell?.outcome || 'Unavailable'}. 10% viability: ${cell?.lowerSupported ? 'Supported' : 'Not established'}.`, 'hint'));
     const interval = rate => rate ? `${format(rate.lower * 100, '%')}–${format(rate.upper * 100, '%')}` : 'unavailable';
     card.append(node('p', `Pointwise 95%: ${interval(cell?.pointwiseInterval)}. Family-adjusted: ${interval(cell?.adjustedInterval)}. ${cell?.observedAboveCeiling ? 'ABOVE 50% CEILING.' : ''}`, 'hint'));
-    if (member.generatedIds.length && member.referenceIds.length) card.append(node('p', 'Independent convergence: one exact recipe, shared confirmation samples, both provenances retained.', 'hint'));
+    if (member.generatedIds.length && member.referenceIds.length) card.append(node('p', improvement ? 'Exact retained recipe: shared confirmation samples, search and reference labels preserved. This is not independent rediscovery.' : 'Independent convergence: one exact recipe, shared confirmation samples, both provenances retained.', 'hint'));
     if (recipe) { card.append(teamBuilds(recipe.party, 'Full ordered team and fixed equipment')); const link = node('a', 'Export frozen party recipe ↓', 'download'); link.href = `/api/runs/${selectedRun}/team-recipe/${member.cellId}`; card.append(link); }
     $('team-result-cards').append(card);
   }

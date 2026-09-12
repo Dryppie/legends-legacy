@@ -4,6 +4,7 @@ using Domain.Models.WorldTower;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossDiagnosticsTests
 {
     private static readonly Lazy<TowerBossInventoryReport> Actual = new(() =>

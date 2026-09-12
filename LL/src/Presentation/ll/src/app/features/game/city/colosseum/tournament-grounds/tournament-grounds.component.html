@@ -513,14 +513,12 @@
             </ng-container>
 
             <div
-              *ngIf="
-                playerTeam() &&
-                displayedTournament.status === 'RegistrationOpen'
-              "
+              *ngIf="canUpdateLoadout()"
               class="mt-4 border-t border-white/10 pt-4"
             >
               <p class="text-xs text-secondary">
-                Save your current equipment and essences for the tournament.
+                Your current equipment and essences are captured automatically
+                when the tournament starts and used for the entire tournament.
               </p>
               <button
                 type="button"

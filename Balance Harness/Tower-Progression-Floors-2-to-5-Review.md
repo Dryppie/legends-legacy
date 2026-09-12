@@ -1,5 +1,7 @@
 # Tower progression audit and linked calibration: floors 2–5
 
+**Competitive search update — 12 September 2026:** [stronger Kharad searches](Tower-Competitive-Build-Search-Review.md) confirmed new teams at **948/1,000** and **1,000/1,000** on the previously passing content. Its earlier scoped Pass is superseded for the expanded build portfolio. Retained-build improvement and the history-capacity extension are implemented; the fresh quality audit and separate linked calibration are documented in the new review. Near-optimality remains unestablished.
+
 11 September 2026. The first progression batch independently generated complete teams for floors 2–4 at **four Essences per character**, and checked Kharad again at **five**. Floors 2–4 failed their original settings. A separately frozen calibration then covered every earlier above-ceiling candidate, every shortlisted party and every compatible reference before local application.
 
 Four slots through floor 4 is an explicit working interpolation of the approved floor-1/floor-5 checkpoints. The experiments use the full 80-Essence pool, including Rare Essences, with hypothetical ownership and the existing neutral equipment budget. Practical acquisition timing remains unverified.
@@ -94,6 +96,6 @@ The [verification summary](../TestResults/balance/tower-progression-calibration-
 
 Continue with floors **6–9 at five Essences**, **floor 10 at six**, then **floor 11 at seven**, keeping lower-budget Serevin teams as separate diagnostics. These intermediate groupings remain explicit working assumptions. Carry saved specialists forward as controls, independently search for stronger teams, and keep any subsequent calibration separately frozen. The full Tower progression curve and practical Essence access are not yet established.
 
-The final previews contain **97,838 historical exclusions**, approaching the current 100,000-entry history limit. Before the next multi-floor batch, extend that bounded history capacity while preserving the separate study and confirmation combat caps and seed-disjointness checks. Do not discard old seeds to make room.
+This batch's final previews contained **97,838 historical exclusions**, approaching its then-current 100,000-entry history limit. The subsequent [competitive search increment](Tower-Competitive-Build-Search-Review.md) extends cumulative history to 1,000,000 without changing per-study combat caps or discarding old seeds.
 
 The [next-batch checklist](Automatic-Tower-Team-Discovery-Plan.md#next-batch-history-capacity-and-floors-611) records the implementation boundaries and verification required before those new studies. No floor-6–11 campaign or history-capacity change is included in this completed batch.

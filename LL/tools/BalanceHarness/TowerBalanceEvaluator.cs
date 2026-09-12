@@ -48,7 +48,7 @@ public static class TowerBalanceEvaluator
                 || c.RequiredPartySize is < 1 or > 50 || !TowerContractJson.Hash(c.EquipmentBudgetHash))
             || d.Cohorts.Select(c => c.Id).Distinct().Count() != d.Cohorts.Count
             || d.Cohorts.Select(c => (c.Budget, c.Context, c.EquipmentBudgetHash)).Distinct().Count() != d.Cohorts.Count
-            || d.ExcludedCombatSeeds is null || d.ExcludedCombatSeeds.Count > 100000
+            || d.ExcludedCombatSeeds is null || d.ExcludedCombatSeeds.Count > TowerStudyLimits.HistoricalSeeds
             || d.ExcludedCombatSeeds.Distinct().Count() != d.ExcludedCombatSeeds.Count || d.MaximumBattles is < 1 or > 100000)
             throw new InvalidDataException("Invalid frozen Tower balance family, cohort, hashes or interval policy.");
         var cohorts = d.Cohorts.ToDictionary(c => c.Id);

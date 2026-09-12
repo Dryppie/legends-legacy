@@ -30,6 +30,8 @@ public interface ITournamentGroundsRepository
     Task<IReadOnlyList<Domain.Models.Inventories.InventoryItem>> GrantSigilFragmentsAsync(Guid characterId, int amount, CancellationToken cancellationToken);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    Task RemovePreparedTeamPlaybacksAsync(Guid tournamentId, Guid teamId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<TournamentParticipant>> GetActiveParticipantsWithSnapshotsAsync(Guid tournamentId, CancellationToken cancellationToken);
     Task<ITournamentGroundsTransaction> BeginTransactionIfNeededAsync(CancellationToken cancellationToken);
     Task ExecuteTournamentAdvisoryLockAsync(long lockId, CancellationToken cancellationToken);
 }

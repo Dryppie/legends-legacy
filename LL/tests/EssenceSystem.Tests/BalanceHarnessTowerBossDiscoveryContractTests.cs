@@ -4,6 +4,7 @@ using Domain.Models.Items;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossDiscoveryContractTests
 {
     private static string Root => TestContentPaths.FindApiRoot();
@@ -47,6 +48,19 @@ public sealed class BalanceHarnessTowerBossDiscoveryContractTests
         Assert.Equal(HarnessJson.Hash(d.ContentHashes), HarnessJson.Hash(inputs.ContentHashes));
         Assert.All(d.Contexts[0].CharacterTemplates, p => { Assert.Empty(p.Build.EssenceIds); Assert.Null(p.Build.IdentityEssenceIds); });
         Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.Validate(d with { References = [reference, reference with { Id = "duplicate" }] }));
+    }
+
+    [Fact]
+    public void Cumulative_history_has_its_own_bound_and_preserves_fresh_stage_and_combat_limits()
+    {
+        var d = Definition();
+        var used = d.Stages.Schedules.Values.SelectMany(s => s.Discovery.Concat(s.Selection).Concat(s.Confirmation).Concat(s.Diagnostics)).ToHashSet();
+        var history = Enumerable.Range(-1100000, 1100000).Where(n => !used.Contains(n)).Take(TowerStudyLimits.HistoricalSeeds + 1).ToArray();
+        var full = d with { ExcludedCombatSeeds = history.Take(TowerStudyLimits.HistoricalSeeds).ToArray() };
+        Assert.Equal(TowerBossDiscovery.Validate(d), TowerBossDiscovery.Validate(full));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.Validate(full with { ExcludedCombatSeeds = history }));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.Validate(full with { MaximumBattles = 100001 }));
+        Assert.Throws<InvalidDataException>(() => TowerBossDiscovery.Validate(full with { ExcludedCombatSeeds = [used.First()] }));
     }
 
     [Fact]

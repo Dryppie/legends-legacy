@@ -9,7 +9,7 @@ public static partial class TowerBossStudy
     {
         // Own the arrays and dictionaries too: callers cannot change a running experiment through a record's children.
         var d = JsonSerializer.Deserialize<TowerBossDiscoveryDefinition>(JsonSerializer.Serialize(definition, HarnessJson.Options), HarnessJson.Options)!;
-        var cost = TowerBossDiscovery.Validate(root, d); var inputs = TowerBossDiscovery.GenerationInputs(d);
+        var cost = TowerBossDiscovery.Validate(root, d); var inputs = TowerBossImprovement.Inputs(d);
         if (Path.Exists(output)) throw new IOException("Choose a new Tower study output directory.");
         token.ThrowIfCancellationRequested();
         Directory.CreateDirectory(output);
@@ -18,13 +18,14 @@ public static partial class TowerBossStudy
         try
         {
             var settings = TowerBundle.ReadSettings(root); var frozen = Path.Combine(output, "content");
-            var scope = new LoadoutScope(Algorithm, settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(root, frozen, token), "gzip-json-v1");
+            var scope = new LoadoutScope(TowerBossImprovement.Algorithm(d) + "/" + TowerBossStudyPolicy.Version, settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(root, frozen, token), "gzip-json-v1");
             if (HarnessJson.Hash(scope.ContentHashes) != HarnessJson.Hash(d.ContentHashes)
                 || HarnessJson.Hash(settings) != d.SettingsHash || HarnessJson.Hash(scope.Execution) != d.ExecutionHash)
                 throw new InvalidDataException("Content, settings or execution changed while freezing the study.");
             void Freeze(string name, object value) => HarnessJson.WriteNew(Path.Combine(output, name), value);
             Freeze("definition.json", d); Freeze("scope.json", scope); Freeze("cost.json", cost);
             Freeze("generation-inputs.json", inputs);
+            if (d.Mode == TowerBossDiscovery.Improve) Freeze("improvement-starts.json", d.Starts);
             Freeze("seed-ledger.json", new { d.ExcludedCombatSeeds, Generation = d.Generation.Seeds, d.Stages.Schedules });
             var inventory = TowerBossInventory.Create(frozen, settings.Threat);
             var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
@@ -69,9 +70,9 @@ public static partial class TowerBossStudy
         if (saved.Status is not ("Complete" or "Incomplete"))
             throw new InvalidDataException("Interrupted or invalid studies retain partial evidence; they cannot pass full study reconstruction.");
         var d = TowerBossDiscovery.Read(Path.Combine(output, "definition.json"));
-        var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossDiscovery.GenerationInputs(d);
+        var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossImprovement.Inputs(d);
         var scope = HarnessJson.Read<LoadoutScope>(Path.Combine(output, "scope.json"));
-        if (scope.Algorithm != Algorithm || HarnessJson.Hash(scope.Execution) != d.ExecutionHash
+        if (scope.Algorithm != TowerBossImprovement.Algorithm(d) + "/" + TowerBossStudyPolicy.Version || HarnessJson.Hash(scope.Execution) != d.ExecutionHash
             || d.ExecutionHash != HarnessJson.Hash(ExecutionIdentity.Current()) || HarnessJson.Hash(scope.Settings) != d.SettingsHash
             || HarnessJson.Hash(scope.ContentHashes) != HarnessJson.Hash(d.ContentHashes))
             throw new InvalidDataException("Study scope changed; use the retained producing executable and platform.");
@@ -86,6 +87,7 @@ public static partial class TowerBossStudy
         if (d.ContentHashes.Any(p => HarnessJson.FileHash(Path.Combine(root, "Data", p.Key)) != p.Value))
             throw new InvalidDataException("Frozen study content changed.");
         Match("cost.json", cost); Match("generation-inputs.json", inputs);
+        if (d.Mode == TowerBossDiscovery.Improve) Match("improvement-starts.json", d.Starts);
         Match("seed-ledger.json", new { d.ExcludedCombatSeeds, Generation = d.Generation.Seeds, d.Stages.Schedules });
         var executable = HarnessJson.Read<Dictionary<string, string>>(Path.Combine(output, "executable-files.json"));
         var actualExecutable = Directory.EnumerateFiles(Path.Combine(output, "executable"), "*", SearchOption.AllDirectories)

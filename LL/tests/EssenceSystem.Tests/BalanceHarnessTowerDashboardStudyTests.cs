@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerDashboardStudyTests
 {
     private static string Root => TestContentPaths.FindApiRoot();
@@ -116,6 +117,48 @@ public sealed class BalanceHarnessTowerDashboardStudyTests
         var replaced = plan.Definition with { ExecutionHash = new string('f', 64) };
         Assert.Equal(HttpStatusCode.BadRequest, (await host.Client.PostAsJsonAsync("/api/team-plan/import", replaced, HarnessJson.Options)).StatusCode);
         Assert.Null(host.Service.Job);
+    }
+
+    [Fact]
+    public async Task Large_history_survives_preview_http_import_and_cumulative_local_union_without_raising_combat_caps()
+    {
+        await using var host = await Host.Start(); await host.Authorize();
+        var historical = Enumerable.Range(-900000, 300000).ToArray();
+        var folder = Path.Combine(host.Directory, "larger-history"); System.IO.Directory.CreateDirectory(folder);
+        HarnessJson.WriteNew(Path.Combine(folder, "seed-ledger.json"), new { Prior = historical });
+        var plan = await host.Preview(new(1, 4, 744031));
+        Assert.Empty(historical.Except(plan.Definition.ExcludedCombatSeeds));
+        Assert.True(plan.Definition.ExcludedCombatSeeds.Count > 100000);
+        var json = JsonSerializer.Serialize(plan.Definition, HarnessJson.Options);
+        Assert.True(System.Text.Encoding.UTF8.GetByteCount(json) > 2 * 1024 * 1024);
+        var response = await host.Client.PostAsJsonAsync("/api/team-plan/import", plan.Definition, HarnessJson.Options);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var imported = (await response.Content.ReadFromJsonAsync<DashboardStudyPreview>(HarnessJson.Options))!;
+        Assert.Equal(plan.PlanHash, imported.PlanHash);
+        Assert.Equal(100000, imported.Definition.MaximumBattles);
+        var overlap = plan.Definition with { Stages = plan.Definition.Stages with { Schedules = plan.Definition.Stages.Schedules.ToDictionary(p => p.Key,
+            p => p.Value with { Discovery = [historical[0]] }) } };
+        Assert.Equal(HttpStatusCode.BadRequest, (await host.Client.PostAsJsonAsync("/api/team-plan/import", overlap, HarnessJson.Options)).StatusCode);
+        Assert.Null(host.Service.Job);
+    }
+
+    [Fact]
+    public async Task Imported_improvement_is_explicit_in_preview_run_and_saved_result_and_retains_finalists()
+    {
+        await using var host = await Host.Start(); await host.Authorize();
+        var d = BalanceHarnessTowerBossImprovementTests.WithStart(BalanceHarnessTowerBossStudyTests.Small());
+        var response = await host.Client.PostAsJsonAsync("/api/team-plan/import", d, HarnessJson.Options);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var plan = (await response.Content.ReadFromJsonAsync<DashboardStudyPreview>(HarnessJson.Options))!;
+        Assert.Contains("reference ancestry", plan.Note);
+        Assert.Equal(HttpStatusCode.Accepted, (await host.Client.PostAsJsonAsync("/api/teams", new DashboardStudyStart(plan.PlanHash))).StatusCode);
+        Assert.Equal("Complete", (await Wait(host.Service)).Status);
+        var run = Assert.Single(host.Service.Runs()); Assert.Equal("Retained-build improvement", run.Kind);
+        var detail = await host.Client.GetFromJsonAsync<JsonElement>($"/api/runs/{run.Id}");
+        Assert.Equal("improve-supplied", detail.GetProperty("studyDefinition").GetProperty("mode").GetString());
+        Assert.Contains("Reference-derived", detail.GetProperty("note").GetString());
+        Assert.Equal("Reconstructed", detail.GetProperty("integrity").GetString());
+        Assert.Single(TowerRetainedBuilds.Read(Path.Combine(host.Directory, TowerRetainedBuilds.LocalFile)).Studies);
     }
 
     private static async Task<DashboardJob> Wait(TowerDashboardService service)

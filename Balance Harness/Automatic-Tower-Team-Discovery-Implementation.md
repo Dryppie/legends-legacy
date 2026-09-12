@@ -1,5 +1,7 @@
 # Automatic Tower team discovery: contracts, generation and acceptance
 
+**Competitive search update — 12 September 2026:** [stronger Kharad searches](Tower-Competitive-Build-Search-Review.md) confirmed new teams at **948/1,000** and **1,000/1,000** on the previously passing content. Its earlier scoped Pass is superseded for the expanded build portfolio. Retained-build improvement and the history-capacity extension are implemented; the fresh quality audit and separate linked calibration are documented in the new review. Near-optimality remains unestablished.
+
 **Progression audit and calibration — 11 September 2026:** [floors 2–5 review](Tower-Progression-Floors-2-to-5-Review.md) records independent four-Essence searches on floors 2–4, their separately confirmed linked Health/Power calibration against every known breach, and Kharad's fresh **20.9%** strongest-control check. Compatible controls and calibrated top builds persist for future searches. Floors 6–11 and practical acquisition coverage remain open.
 
 **Fresh search and Kharad follow-up — 11 September 2026:** [new independent searches](Post-Calibration-Tower-Team-Search-Review.md) confirmed Garran's strongest saved team at **34.8%** and found a stronger Kharad team at **59%**, triggering a separate calibration. The [expanded-portfolio follow-up](Kharad-Expanded-Portfolio-Calibration-Review.md) applied another **8% to both Kharad Health and Power**; its strongest of 122 parties confirmed at **25.25%**, and the full family passes. At that stage, main-dashboard searches retained **4 floor-1 / 6 floor-5 controls**. Broader progression, practical Essence access and further independent ceiling searches remain open.
@@ -28,7 +30,7 @@ The new definition freezes:
 
 Every generated character position can receive any legal ordered Essence selection. Preparation holds actor identities fixed behind the generation boundary. Equipment labels impose no Essence roles. Reordering a candidate's Essences remains a distinct tested loadout.
 
-Independent mode requires zero supplied starts. `improve-supplied` requires explicitly named starts matching registered references. The provenance validator checks parent existence, operator arity, generation seed/method and propagation of reference ancestry through mutation and recombination; missing, cyclic or relabeled ancestry is rejected. The improve-mode generator itself is not implemented in this increment.
+Independent mode requires zero supplied starts. `improve-supplied` requires explicitly named starts matching registered references. The provenance validator checks parent existence, operator arity, generation seed/method and propagation of reference ancestry through mutation and recombination; missing, cyclic or relabeled ancestry is rejected. The explicitly versioned `retained-teams-v1` generator now implements this separate workflow; legacy reserved definitions require explicit conversion. See the [competitive search review](Tower-Competitive-Build-Search-Review.md) for operators, CLI commands and verification.
 
 Exact reference recipes are deduplicated after normalizing equipment order and equivalent explicit/default identity vectors. Distinct actual actor identities remain distinct recipes. References must match the target floor, full party and context's fixed equipment budget; the user's floor-1 party is accepted only through explicit registration.
 
@@ -113,7 +115,7 @@ Independent generation, staged confirmation, Tower Lab integration and the [fixe
 
 The latest [progression batch](Tower-Progression-Floors-2-to-5-Review.md) passed **25 relevant retention, Tower Lab and World Tower tests both before and after local application**, plus 140 exact current-content reports, 60 unaffected-floor pairs and 32 detailed replays. These targeted checks used the captured compiled engine and do not claim a rebuild or full-suite check of concurrent source changes. Both evidence packages are sealed.
 
-The next implementation is the [bounded history-capacity extension](Automatic-Tower-Team-Discovery-Plan.md#next-batch-history-capacity-and-floors-611): current previews already contain **97,838 exclusions**. Cumulative history capacity must remain separate from per-study combat limits. After verification, continue the remaining floor-6–11 studies; no such extension or campaign has run yet.
+The [competitive search increment](Tower-Competitive-Build-Search-Review.md) now allows **1,000,000 cumulative historical exclusions** and **32 MiB imports** in both the browser and server, while retaining the separate 100,000-combat study/confirmation cap. It adds retained-build improvement, equal-budget search comparisons, fresh quality audits and complete-portfolio calibration across explicitly bounded verification partitions. Floor-6–11 coverage remains open; stronger search evidence takes priority before competitive acceptance.
 
 ## Increment 1 changed files
 

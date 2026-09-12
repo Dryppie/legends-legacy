@@ -9,6 +9,7 @@ using Services.LL.Items;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessHandoffTests
 {
     private static string ApiRoot => TestContentPaths.FindApiRoot();

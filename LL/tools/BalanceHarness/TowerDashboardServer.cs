@@ -61,7 +61,7 @@ public static class TowerDashboardServer
         static void StudyBody(HttpContext context)
         {
             var limit = context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
-            if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = 2 * 1024 * 1024;
+            if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = TowerStudyLimits.ImportBytes;
         }
         app.MapPost("/api/team-plan", async (HttpContext context) => {
             StudyBody(context);

@@ -2,6 +2,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessLocalBloodGroveTests
 {
     private static string ApiRoot => TestContentPaths.FindApiRoot();

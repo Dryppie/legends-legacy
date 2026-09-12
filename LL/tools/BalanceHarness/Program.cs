@@ -17,10 +17,12 @@ public static class Program
                 Console.WriteLine("BalanceHarness run --output <new-directory> [--seed <int>] [--content-root <API.LL-directory>] [--scenario <json>] [--detailed]");
                 Console.WriteLine("BalanceHarness suite --output <new-directory> [--seed <int>] [--suite <json>] [--samples <per-cell>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower --output <new-directory> [--scenario <json>] [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-team-plan --floor <1-15> --slots <4-10> --seed <int> --output <new-directory> [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>] (independent preview with retained controls and history)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-discover --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] (discovery only)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-verify --run <directory>");
-                Console.WriteLine("BalanceHarness tower-boss-study --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-boss-study --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] [--runs-root <retained-library-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-study-verify --run <directory>");
                 Console.WriteLine("BalanceHarness tower-balance-evaluate --definition <frozen-confirmation-json> --sources <cell-run-map-json> --output <new-directory>");
                 Console.WriteLine("BalanceHarness tower-benchmark --output <new-directory> [--catalog <json>] [--seed <int>] [--samples <per-cell>] [--reference <benchmark-directory>] [--content-root <API.LL-directory>]");
@@ -68,7 +70,9 @@ public static class Program
                 "tower-boss-discovery-prepare" => new[] { "--definition", "--output", "--content-root" },
                 "tower-boss-discover" => new[] { "--definition", "--output", "--content-root" },
                 "tower-boss-discovery-verify" => new[] { "--run" },
-                "tower-boss-study" => new[] { "--definition", "--output", "--content-root" },
+                "tower-boss-improvement-prepare" => new[] { "--definition", "--references", "--output", "--content-root" },
+                "tower-team-plan" => new[] { "--floor", "--slots", "--seed", "--output", "--runs-root", "--catalogs-root", "--content-root" },
+                "tower-boss-study" => new[] { "--definition", "--output", "--content-root", "--runs-root" },
                 "tower-boss-study-verify" => new[] { "--run" },
                 "tower-balance-evaluate" => new[] { "--definition", "--sources", "--output" },
                 "tower-benchmark" => new[] { "--output", "--content-root", "--catalog", "--seed", "--samples", "--reference" },
@@ -111,10 +115,27 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-team-plan")
+            {
+                var root = options.GetValueOrDefault("--content-root") ?? FindContentRoot();
+                var destination = Required(options, "--output");
+                if (Path.Exists(destination)) throw new IOException("Choose a new team planning directory.");
+                var catalogs = options.GetValueOrDefault("--catalogs-root") ?? Path.Combine(AppContext.BaseDirectory, "Fixtures");
+                await using var service = new TowerDashboardService(root, catalogs, options.GetValueOrDefault("--runs-root") ?? "TestResults/balance");
+                var preview = service.StudyPlan(new(int.Parse(Required(options, "--floor"), CultureInfo.InvariantCulture),
+                    int.Parse(Required(options, "--slots"), CultureInfo.InvariantCulture), int.Parse(Required(options, "--seed"), CultureInfo.InvariantCulture)));
+                Directory.CreateDirectory(destination);
+                HarnessJson.WriteNew(Path.Combine(destination, "preview.json"), preview);
+                HarnessJson.WriteNew(Path.Combine(destination, "definition.json"), preview.Definition);
+                Console.WriteLine($"Independent team preview: {preview.Definition.References.Count} controls, {preview.Definition.ExcludedCombatSeeds.Count} excluded seeds, at most {preview.Cost.Total} combats. No combat executed.");
+                return 0;
+            }
             if (command == "tower-boss-study")
             {
+                var studyDefinition = TowerBossDiscovery.Read(Required(options, "--definition"));
                 var report = await TowerBossStudy.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
-                    Required(options, "--output"), TowerBossDiscovery.Read(Required(options, "--definition")), cancellation.Token, Console.WriteLine);
+                    Required(options, "--output"), studyDefinition, cancellation.Token, Console.WriteLine);
+                if (options.TryGetValue("--runs-root", out var retainedRoot)) TowerRetainedBuilds.Remember(retainedRoot, Required(options, "--output"), studyDefinition, report);
                 Console.WriteLine($"Tower study: {report.Status}; assessment: {report.Conclusion?.OverallAssessment.ToString() ?? "Unavailable"}; generated viability: {report.Conclusion?.GeneratedViability.ToString() ?? "Unavailable"}.");
                 return report.ExitCode;
             }
@@ -128,26 +149,27 @@ public static class Program
             {
                 var report = await TowerBossDiscoveryRun.RunAsync(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
                     Required(options, "--output"), TowerBossDiscovery.Read(Required(options, "--definition")), cancellation.Token, Console.WriteLine);
-                Console.WriteLine($"Independent discovery: {report.Status}; {report.ActualBattles} combats. Selection validation and confirmation have not run.");
+                Console.WriteLine($"Team discovery: {report.Status}; {report.ActualBattles} combats. Selection validation and confirmation have not run.");
                 return report.Status switch { "Complete" => 0, "Cancelled" => 130, "Incomplete" => 3, _ => 2 };
             }
             if (command == "tower-boss-discovery-verify")
             {
                 var report = await TowerBossDiscoveryRun.VerifyAsync(Required(options, "--run"), cancellation.Token);
-                Console.WriteLine($"Independent discovery reconstructed: {report.Status}; {report.ActualBattles} recorded combats. No new combat executed.");
+                Console.WriteLine($"Team discovery reconstructed: {report.Status}; {report.ActualBattles} recorded combats. No new combat executed.");
                 return report.Status == "Complete" ? 0 : 3;
             }
-            if (command == "tower-boss-discovery-prepare")
+            if (command is "tower-boss-discovery-prepare" or "tower-boss-improvement-prepare")
             {
                 var definition = TowerBossDiscovery.Read(Required(options, "--definition"));
+                if (command == "tower-boss-improvement-prepare") definition = TowerBossImprovement.Prepare(definition, Required(options, "--references").Split(',', StringSplitOptions.TrimEntries));
                 var cost = TowerBossDiscovery.Validate(options.GetValueOrDefault("--content-root") ?? FindContentRoot(), definition);
                 var destination = Required(options, "--output");
                 if (Path.Exists(destination)) throw new IOException("Choose a new discovery preparation directory.");
                 Directory.CreateDirectory(destination);
                 HarnessJson.WriteNew(Path.Combine(destination, "definition.json"), definition);
                 HarnessJson.WriteNew(Path.Combine(destination, "cost.json"), cost);
-                if (definition.Mode == TowerBossDiscovery.Independent)
-                    HarnessJson.WriteNew(Path.Combine(destination, "generation-inputs.json"), TowerBossDiscovery.GenerationInputs(definition));
+                HarnessJson.WriteNew(Path.Combine(destination, "generation-inputs.json"), TowerBossImprovement.Inputs(definition));
+                if (definition.Mode == TowerBossDiscovery.Improve) HarnessJson.WriteNew(Path.Combine(destination, "improvement-starts.json"), definition.Starts);
                 Console.WriteLine($"Validated schema-3 discovery contract: at most {cost.Total} combats. Preparation only; no search executed.");
                 return 0;
             }

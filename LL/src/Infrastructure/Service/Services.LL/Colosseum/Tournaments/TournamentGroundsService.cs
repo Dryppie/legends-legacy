@@ -844,13 +844,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             item => item.Id == tournamentId,
             cancellationToken);
         if (tournament is null) return null;
-        if (tournament.Status != TournamentStatus.RegistrationOpen
-            || now < tournament.RegistrationStartsAtUtc
-            || now >= tournament.RegistrationEndsAtUtc)
+        if (!TournamentRules.CanUpdateLoadout(tournament, now))
         {
             return new TournamentTeamActionResult(
                 false,
-                "Tournament loadouts can only be updated while registration is open.");
+                "Tournament loadouts can only be updated before the tournament starts.");
         }
 
         var participant = await _tournaments.Participants.FirstOrDefaultAsync(
@@ -879,8 +877,30 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             cancellationToken);
         if (tournamentSnapshot is null) return null;
 
+        await RefreshLoadoutSnapshotAsync(participant, tournamentSnapshot, now, cancellationToken);
+
+        // Prepared combat must be simulated again using the updated snapshot.
+        await _tournaments.RemovePreparedTeamPlaybacksAsync(
+            tournamentId, participant.TeamId.Value, cancellationToken);
+
+        await SaveCommitAndPublishTournamentEventAsync(
+            transaction,
+            tournament,
+            "TournamentLoadoutUpdated",
+            now,
+            cancellationToken);
+
+        return new TournamentTeamActionResult(true);
+    }
+
+    private async Task RefreshLoadoutSnapshotAsync(
+        TournamentParticipant participant,
+        TournamentCombatSnapshot tournamentSnapshot,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
         var snapshot = await _characterSnapshotService.CreateAsync(
-            characterId,
+            participant.CharacterId,
             EssenceCombatActivity.Tournament,
             cancellationToken);
         tournamentSnapshot.CharacterSnapshotId = snapshot.Id;
@@ -894,14 +914,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournamentSnapshot.CreatedAtUtc = now;
         participant.UpdatedAtUtc = now;
 
-        await SaveCommitAndPublishTournamentEventAsync(
-            transaction,
-            tournament,
-            "TournamentLoadoutUpdated",
-            now,
-            cancellationToken);
-
-        return new TournamentTeamActionResult(true);
     }
 
     public async Task<WithdrawTournamentResult?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
@@ -1527,6 +1539,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     }
                     break;
                 case TournamentStatus.BracketGenerated when tournament.StartsAtUtc <= now:
+                    await CaptureStartingLoadoutsAsync(tournament.Id, now, cancellationToken);
                     await AutoClaimOutstandingRewardsAsync(
                         tournament.Id,
                         now,
@@ -1606,6 +1619,20 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 rewardOwner.TournamentId,
                 now,
                 cancellationToken);
+        }
+    }
+
+    private async Task CaptureStartingLoadoutsAsync(Guid tournamentId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var participants = await _tournaments.GetActiveParticipantsWithSnapshotsAsync(tournamentId, cancellationToken);
+        foreach (var participant in participants)
+        {
+            await RefreshLoadoutSnapshotAsync(participant, participant.Snapshot, now, cancellationToken);
+        }
+
+        foreach (var teamId in participants.Select(participant => participant.TeamId!.Value).Distinct())
+        {
+            await _tournaments.RemovePreparedTeamPlaybacksAsync(tournamentId, teamId, cancellationToken);
         }
     }
 

@@ -67,7 +67,7 @@ public sealed partial class TowerDashboardService
 
     public DashboardStudyPreview ImportStudyPlan(TowerBossDiscoveryDefinition definition)
     {
-        TowerBossDiscovery.Validate(apiRoot, definition); TowerBossDiscovery.GenerationInputs(definition);
+        TowerBossDiscovery.Validate(apiRoot, definition); TowerBossImprovement.Inputs(definition);
         var seeds = StudySeedExclusions();
         var used = definition.Stages.Schedules.Values.SelectMany(s => s.Discovery.Concat(s.Selection).Concat(s.Confirmation).Concat(s.Diagnostics));
         if (used.Intersect(seeds.Seeds).Any()) throw new InvalidDataException("Imported stage seeds overlap recorded history; author a fresh definition.");
@@ -78,9 +78,9 @@ public sealed partial class TowerDashboardService
     private DashboardStudyPreview SaveStudyPlan(TowerBossDiscoveryDefinition definition, IReadOnlyList<string> sources)
     {
         var d = JsonSerializer.Deserialize<TowerBossDiscoveryDefinition>(JsonSerializer.Serialize(definition, HarnessJson.Options), HarnessJson.Options)!;
-        var cost = TowerBossDiscovery.Validate(apiRoot, d); TowerBossDiscovery.GenerationInputs(d);
+        var cost = TowerBossDiscovery.Validate(apiRoot, d); TowerBossImprovement.Inputs(d);
         var result = new DashboardStudyPreview(HarnessJson.Hash(d), d, cost, sources,
-            "Preview only. References enter after generated finalists freeze. Recorded history in this results folder is excluded; import the complete historical union for any additional campaigns. No global floor-balance guarantee.");
+            (d.Mode == TowerBossDiscovery.Improve ? "Retained-build improvement: explicit starts are scored on fresh discovery seeds and carry reference ancestry. " : "Independent discovery: no supplied starts. ") + "Preview only. Benchmark confirmation enters after search finalists freeze. Recorded history in this results folder is excluded; import the complete historical union for any additional campaigns. No global floor-balance guarantee.");
         lock (_gate) _studyPlan = JsonSerializer.Deserialize<DashboardStudyPreview>(JsonSerializer.Serialize(result, HarnessJson.Options), HarnessJson.Options);
         return result;
     }
@@ -94,7 +94,7 @@ public sealed partial class TowerDashboardService
             TowerBossDiscovery.Validate(apiRoot, plan.Definition);
             var schedule = plan.Definition.Stages.Schedules.Values.SelectMany(s => s.Discovery.Concat(s.Selection).Concat(s.Confirmation).Concat(s.Diagnostics));
             if (schedule.Intersect(StudySeedExclusions().Seeds).Any()) throw new InvalidDataException("The preview now overlaps recorded history. Prepare a new study.");
-            var job = Begin("Independent teams", plan.Cost.Total, async (folder, token) => {
+            var job = Begin(plan.Definition.Mode == TowerBossDiscovery.Improve ? "Retained-build improvement" : "Independent teams", plan.Cost.Total, async (folder, token) => {
                 var output = Path.Combine(folder, "run");
                 HarnessJson.WriteNew(Path.Combine(folder, "preview.json"), plan);
                 Change(j => j with { Run = RunId(output), Message = "Freezing independent study inputs…" });
@@ -119,7 +119,7 @@ public sealed partial class TowerDashboardService
     private DashboardRun StudyRun(string id, string path)
     {
         var report = HarnessJson.Read<BossStudyReport>(Path.Combine(path, "study.json"));
-        return new(id, Path.GetRelativePath(_runsRoot, path), report.Status, report.Accounting.Completed.Values.Sum(), report.Accounting.Reserved, "Independent teams");
+        return new(id, Path.GetRelativePath(_runsRoot, path), report.Status, report.Accounting.Completed.Values.Sum(), report.Accounting.Reserved, TowerBossDiscovery.Read(Path.Combine(path, "definition.json")).Mode == TowerBossDiscovery.Improve ? "Retained-build improvement" : "Independent teams");
     }
 
     private async Task<BossStudyReport> ReadStudyAsync(string path, CancellationToken token)
@@ -163,7 +163,7 @@ public sealed partial class TowerDashboardService
             Integrity = compatible && report.Status is "Complete" or "Incomplete" ? "Reconstructed" : "File integrity only",
             Report = new TowerBenchmarkReport(1, report.Status, report.Accounting.Reserved, report.Accounting.Completed.Values.Sum(), []),
             MasterSeed = definition.Generation.Seeds[0], ReplayCompatible = compatible,
-            Battles = battles, Loadouts = Array.Empty<PartyChoice>(), Note = "Independent target-only study. Generation, references, balance and integrity are separate findings." };
+            Battles = battles, Loadouts = Array.Empty<PartyChoice>(), Note = definition.Mode == TowerBossDiscovery.Improve ? "Reference-derived improvement. Explicit starts and inherited ancestry remain in the archive; this does not establish independent rediscovery." : "Independent target-only study. Generation, references, balance and integrity are separate findings." };
     }
 
     public TowerScenario StudyRecipe(string id, string cell, CancellationToken token)

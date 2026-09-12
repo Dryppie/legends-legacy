@@ -5,6 +5,7 @@ using System.Text.Json;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerWholePartyTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

@@ -2,6 +2,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossOptimizationTests
 {
     private static readonly BossBehavior NoBehavior = new(0, 0, 0, 0, 0);

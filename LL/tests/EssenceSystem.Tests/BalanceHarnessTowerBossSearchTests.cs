@@ -16,6 +16,7 @@ using Services.LL.WorldTower;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossSearchTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

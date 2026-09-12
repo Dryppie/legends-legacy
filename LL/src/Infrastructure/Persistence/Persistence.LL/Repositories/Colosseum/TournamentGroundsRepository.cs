@@ -43,6 +43,26 @@ public sealed class TournamentGroundsRepository(LLDbContext context) : ITourname
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         => context.SaveChangesAsync(cancellationToken);
 
+    public async Task RemovePreparedTeamPlaybacksAsync(Guid tournamentId, Guid teamId, CancellationToken cancellationToken)
+    {
+        var replays = await context.TournamentCombatReplays
+            .Include(replay => replay.Artifact)
+            .Where(replay => replay.TournamentId == tournamentId
+                && replay.Match.Status == TournamentMatchStatus.Ready
+                && (replay.Match.PlayerOneParticipantId == teamId
+                    || replay.Match.PlayerTwoParticipantId == teamId))
+            .ToListAsync(cancellationToken);
+        context.TournamentCombatReplays.RemoveRange(replays);
+    }
+
+    public async Task<IReadOnlyList<TournamentParticipant>> GetActiveParticipantsWithSnapshotsAsync(Guid tournamentId, CancellationToken cancellationToken) =>
+        await context.TournamentParticipants
+            .Include(participant => participant.Snapshot)
+            .Where(participant => participant.TournamentId == tournamentId
+                && participant.Status == TournamentParticipantStatus.Active
+                && participant.TeamId.HasValue)
+            .ToListAsync(cancellationToken);
+
     public async Task<ITournamentGroundsTransaction> BeginTransactionIfNeededAsync(CancellationToken cancellationToken)
     {
         if (context.CurrentTransaction is not null)

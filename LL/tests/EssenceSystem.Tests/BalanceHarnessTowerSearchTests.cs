@@ -3,6 +3,7 @@ using Services.LL.Combat.Engine;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerSearchTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

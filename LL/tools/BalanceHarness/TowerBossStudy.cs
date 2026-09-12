@@ -19,7 +19,7 @@ public static partial class TowerBossStudy
     internal static async Task<BossStudyReport> ExecuteAsync(TowerBossDiscoveryDefinition d, BossGenerationMechanics mechanics,
         TowerBossDiscoveryRun.Battle battle, Replay replay, Action<string, object> freeze, CancellationToken token, Action<string>? progress = null)
     {
-        var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossDiscovery.GenerationInputs(d);
+        var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossImprovement.Inputs(d);
         var caps = new Dictionary<string, int>(StringComparer.Ordinal) { ["discovery"] = cost.Discovery, ["selection"] = cost.Selection,
             ["confirmation"] = cost.GeneratedConfirmation + cost.ReferenceConfirmation, ["diagnostics"] = cost.Diagnostics, ["replay"] = cost.ReplayReserve };
         var attempted = caps.Keys.ToDictionary(k => k, _ => 0); var completed = caps.Keys.ToDictionary(k => k, _ => 0);
@@ -50,7 +50,7 @@ public static partial class TowerBossStudy
         try
         {
             var lastCount = -1;
-            discovery = await TowerBossGeneration.RunAsync(inputs, mechanics,
+            discovery = await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics,
                 (party, arm, ct) => TowerBossDiscoveryRun.Measure(d, inputs, party, arm, Fight, ct), token, partial => {
                     discovery = partial;
                     var count = partial.Arms.Sum(a => a.Evaluations.Count);

@@ -86,7 +86,7 @@ public sealed partial class TowerDashboardService
                 if (Path.GetFileName(child) is not ("content" or "source" or "source-snapshot" or "executable" or "verification-executable" or "verified-source" or "replays" or "recipes" or "battles" or ".git"))
                     pending.Enqueue((child, depth + 1));
         }
-        if (seeds.Count > 100000) throw new InvalidDataException("Historical exclusion union exceeds the study contract limit.");
+        if (seeds.Count > TowerStudyLimits.HistoricalSeeds) throw new InvalidDataException("Historical exclusion union exceeds the study contract limit.");
         return (seeds.Order().ToArray(), sources);
     }
 }

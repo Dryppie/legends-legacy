@@ -132,7 +132,7 @@ public static class TowerBossDiscovery
             || d.AllowedEssences.Any(e => e is null || string.IsNullOrWhiteSpace(e.Id) || string.IsNullOrWhiteSpace(e.Family))
             || d.AllowedEssences.Select(e => e.Id).Distinct().Count() != d.AllowedEssences.Count
             || d.AllowedEssences.Select(e => e.Family).Distinct(StringComparer.OrdinalIgnoreCase).Count() < d.Budget.EssenceSlots
-            || d.ExcludedCombatSeeds is null || d.ExcludedCombatSeeds.Count > 100000
+            || d.ExcludedCombatSeeds is null || d.ExcludedCombatSeeds.Count > TowerStudyLimits.HistoricalSeeds
             || d.ExcludedCombatSeeds.Distinct().Count() != d.ExcludedCombatSeeds.Count
             || d.References is null || d.References.Count > 96 || d.Starts is null || d.Starts.Count > 64
             || d.MaximumBattles is < 1 or > 100000 || !TowerContractJson.Hash(d.SettingsHash) || !TowerContractJson.Hash(d.ExecutionHash)
@@ -159,10 +159,11 @@ public static class TowerBossDiscovery
             throw new InvalidDataException("Identical effective equipment contexts must be declared once.");
         var g = d.Generation;
         var s = d.Stages;
-        if (g is null || g.Methods is null || !g.Methods.SequenceEqual(Methods) || g.Seeds is not { Count: > 0 and <= 4 }
+        var improvement = d.Mode == Improve && g?.PolicyVersion == TowerBossImprovement.Version;
+        if (g is null || g.Methods is null || !g.Methods.SequenceEqual(improvement ? TowerBossImprovement.Methods : Methods) || g.Seeds is not { Count: > 0 and <= 4 }
             || g.Seeds.Distinct().Count() != g.Seeds.Count || g.CandidatesPerArm is < 1 or > 1000
             || g.MaximumAttemptsPerArm < g.CandidatesPerArm || g.MaximumAttemptsPerArm > 10000
-            || g.FreshEvery != 4 || g.Objective != Objective || g.PolicyVersion != TowerBossGeneration.Version || s is null
+            || g.FreshEvery != 4 || g.Objective != Objective || (!improvement && g.PolicyVersion != TowerBossGeneration.Version) || s is null
             || s.Shortlist is < 1 or > 64 || s.Shortlist < g.Methods.Count * g.Seeds.Count
             || s.Shortlist > g.Methods.Count * g.Seeds.Count * g.CandidatesPerArm
             || s.GeneratedFinalists is < 1 or > 5 || s.GeneratedFinalists > s.Shortlist || s.SelectionPolicyVersion != TowerBossStudyPolicy.Version
@@ -207,7 +208,11 @@ public static class TowerBossDiscovery
             var reference = d.References.SingleOrDefault(r => r.Id == start.ReferenceId);
             if (reference is null || HarnessJson.Hash(reference.Scenario.Party.ToDictionary(p => p.PartySlot, p => p.Build.EssenceIds)) != start.Party.Id)
                 throw new InvalidDataException("Each supplied start must name the exact reference it descends from.");
+            if (improvement && RecipeHash(reference.Scenario.Party) != RecipeHash(Scenario(d, reference.Context, start.Party, []).Party))
+                throw new InvalidDataException("Improvement starts must match the fixed character identities as well as equipment and ordered Essences.");
         }
+        if (improvement && (d.Starts.Count > g.CandidatesPerArm || d.Starts.Select(s => s.Party.Id).Distinct().Count() != d.Starts.Count))
+            throw new InvalidDataException("Each distinct supplied start must fit inside every arm's candidate budget.");
         var discovery = checked(g.Methods.Count * g.Seeds.Count * g.CandidatesPerArm * s.Schedules.Values.Sum(v => v.Discovery.Count));
         var selection = checked(s.Shortlist * s.Schedules.Values.Sum(v => v.Selection.Count));
         var generated = checked(s.GeneratedFinalists * s.Schedules.Values.Sum(v => v.Confirmation.Count));
@@ -269,6 +274,7 @@ public static class TowerBossDiscovery
                 throw new InvalidDataException("Invalid proposal identity, generation provenance or duplicate parents.");
             var parents = p.Operator switch {
                 "fresh-random" or "fresh-constructive" => 0,
+                "supplied" when d.Mode == Improve && d.Generation.PolicyVersion == TowerBossImprovement.Version => 1,
                 "single" or "double" or "order" or "cross-character" or "whole-character" => 1,
                 "recombine" => 2,
                 _ => -1

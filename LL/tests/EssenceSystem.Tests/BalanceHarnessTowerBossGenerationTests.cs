@@ -3,6 +3,7 @@ using BalanceHarness;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossGenerationTests
 {
     private static readonly Lazy<TowerBossDiscoveryDefinition> Base = new(() => BalanceHarnessTowerBossDiscoveryContractTests.Definition());

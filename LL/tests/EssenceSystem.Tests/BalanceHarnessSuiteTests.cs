@@ -8,6 +8,7 @@ using Services.LL.PowerRatings;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessSuiteTests
 {
     private static string ApiRoot => TestContentPaths.FindApiRoot();

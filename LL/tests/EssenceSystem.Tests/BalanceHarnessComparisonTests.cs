@@ -5,6 +5,7 @@ using Domain.Models.Combat;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessComparisonTests
 {
     [Theory]

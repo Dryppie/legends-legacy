@@ -6,6 +6,7 @@ using Domain.Models.Essences;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerBossInventoryTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 
 namespace EssenceSystem.Tests;
 
+[Trait("Category", "BalanceHarness")]
 public sealed class BalanceHarnessTowerDashboardTests
 {
     private static string Root => TestContentPaths.FindApiRoot();

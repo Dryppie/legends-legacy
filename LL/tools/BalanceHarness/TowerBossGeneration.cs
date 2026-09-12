@@ -22,6 +22,12 @@ public static class TowerBossGeneration
 
     public static void ValidateInputs(BossDiscoveryInputs d)
     {
+        if (d?.Generation is { PolicyVersion: TowerBossImprovement.Version } generation)
+        {
+            if (generation.Methods is null || !generation.Methods.SequenceEqual(TowerBossImprovement.Methods))
+                throw new InvalidDataException("Invalid retained-build generation methods.");
+            d = d with { Generation = generation with { PolicyVersion = Version, Methods = TowerBossDiscovery.Methods } };
+        }
         if (d is null || !TowerBossDiscovery.LegalBudget(d.Budget) || d.Floor != d.Budget.PriorityFloor
             || d.RequiredPartySize is < 1 or > 50 || d.AllowedEssences is not { Count: >= 4 and <= 1000 }
             || d.AllowedEssences.Any(e => e is null || string.IsNullOrWhiteSpace(e.Id) || string.IsNullOrWhiteSpace(e.Family))
@@ -79,6 +85,7 @@ public static class TowerBossGeneration
         // Isolate caller mutation and keep the policy independent of definition/reference serialization.
         var d = JsonSerializer.Deserialize<BossDiscoveryInputs>(JsonSerializer.Serialize(inputs, HarnessJson.Options), HarnessJson.Options)!;
         ValidateInputs(d);
+        if (d.Generation.PolicyVersion != Version) throw new InvalidDataException("Independent execution cannot consume a retained-build policy.");
         var generator = new TowerBossPartyGenerator(d, mechanics);
         var arms = new List<BossGenerationArm>();
         var status = "Incomplete"; string? error = null;
@@ -188,7 +195,7 @@ public static class TowerBossGeneration
         return result.ToArray();
     }
 
-    private static IReadOnlyList<PartyChoice> Shortlist(BossDiscoveryInputs d, TowerBossPartyGenerator generator, IReadOnlyList<BossGenerationArm> arms)
+    internal static IReadOnlyList<PartyChoice> Shortlist(BossDiscoveryInputs d, TowerBossPartyGenerator generator, IReadOnlyList<BossGenerationArm> arms)
     {
         var proposals = arms.SelectMany(a => a.Proposals).Where(p => p.Result == "evaluated").DistinctBy(p => p.Party!.Id)
             .ToDictionary(p => p.Party!.Id, StringComparer.Ordinal);

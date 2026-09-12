@@ -152,7 +152,10 @@ public static class TowerBossStudyPolicy
         var unresolved = breaches.Any(b => !b.Confirmed);
         var overall = assessment.Assessment == GoalOutcome.Pass && unresolved ? GoalOutcome.Inconclusive : assessment.Assessment;
         if (unresolved) notes.Add("An earlier above-ceiling candidate/context was not confirmed. Coverage remains unresolved; do not add candidates or resample this frozen family to manufacture acceptance.");
-        if (generated != GoalOutcome.Pass) notes.Add("Reference viability alone does not establish that independent generation found a supported viable party in every declared context.");
+        if (generated != GoalOutcome.Pass) notes.Add(d.Mode == TowerBossDiscovery.Independent
+            ? "Reference viability alone does not establish that independent generation found a supported viable party in every declared context."
+            : "Benchmark viability alone does not establish that retained-build search found a supported viable party in every declared context.");
+        if (d.Mode == TowerBossDiscovery.Improve) notes.Add("This is explicitly reference-derived improvement; searched viability is not independent rediscovery or evidence of near-optimality.");
         notes.Add("Generated viability tests the 10% lower threshold only; an above-50% generated party can demonstrate search viability while balance fails.");
         notes.Add("Fresh confirmation assesses the frozen family. Earlier rates remain visible and are not pooled with confirmation. Paired reference differences are descriptive, not acceptance gates.");
         if (d.BudgetPurpose == "diagnostic") notes.Add("This diagnostic budget cannot establish intended progression acceptance.");
