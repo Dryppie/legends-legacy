@@ -8,8 +8,12 @@ public sealed record BossGenerationMechanics(int Floor, IReadOnlyList<string> Co
     IReadOnlyList<TowerEssenceMechanics> Essences, IReadOnlyList<TowerEnablerConsumerPair> Interactions,
     IReadOnlyDictionary<string, string> SourceHashes,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossMechanicCore>? Cores = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageFeature>? Coverage = null);
-public sealed record BossGeneratedChoice(PartyChoice? Party, string Intent, string? Interaction, string? Rejection);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageFeature>? Coverage = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageFeature>? DefenseCoverage = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossProtectionCompatibility? CompatibleDefense = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossStaggerReservations? StaggerReservations = null);
+public sealed record BossGeneratedChoice(PartyChoice? Party, string Intent, string? Interaction, string? Rejection,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageReservation>? Reservations = null);
 
 /// <summary>Reference-free complete-party construction. Capability weights propose hypotheses; combat measures strength.</summary>
 public sealed partial class TowerBossPartyGenerator
@@ -24,13 +28,25 @@ public sealed partial class TowerBossPartyGenerator
     private readonly string[][] groups;
     private readonly BigInteger[,] combinations;
     private readonly string[] intents;
+    private readonly bool attributeDefense;
+    private readonly bool compatibleDefense;
+    private readonly bool staggerReservation;
 
-    public TowerBossPartyGenerator(BossDiscoveryInputs input, BossGenerationMechanics mechanics)
+    public TowerBossPartyGenerator(BossDiscoveryInputs input, BossGenerationMechanics mechanics, bool attributeDefense = false, bool compatibleDefense = false, bool staggerReservation = false)
     {
         // Neither API accepts a discovery definition, historical context builder or benchmark catalog.
         this.input = JsonSerializer.Deserialize<BossDiscoveryInputs>(JsonSerializer.Serialize(input, HarnessJson.Options), HarnessJson.Options)!;
         this.mechanics = JsonSerializer.Deserialize<BossGenerationMechanics>(JsonSerializer.Serialize(mechanics, HarnessJson.Options), HarnessJson.Options)!;
         TowerBossGeneration.ValidateInputs(this.input);
+        if (attributeDefense && this.input.Generation.PolicyVersion is not (TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion))
+            throw new InvalidDataException("Attribute-defense construction requires the opt-in defense policy.");
+        if (compatibleDefense && (!attributeDefense || this.input.Generation.PolicyVersion is not (TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion)))
+            throw new InvalidDataException("Compatible defense requires its opt-in policy and augmented coverage.");
+        if (staggerReservation && (!compatibleDefense || this.input.Generation.PolicyVersion is not (TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion)))
+            throw new InvalidDataException("Stagger reservations require the opt-in policy and compatible defense.");
+        this.attributeDefense = attributeDefense;
+        this.compatibleDefense = compatibleDefense;
+        this.staggerReservation = staggerReservation;
         if (mechanics is null || mechanics.Floor != input.Floor || mechanics.Essences is null
             || mechanics.Essences.Any(e => e is null || e.Signals is null)
             || mechanics.Essences.Select(e => e.Id).Distinct().Count() != mechanics.Essences.Count
@@ -41,7 +57,7 @@ public sealed partial class TowerBossPartyGenerator
             || mechanics.Interactions is null)
             throw new InvalidDataException("Generation mechanics must match the frozen target and eligible content.");
         families = this.input.AllowedEssences.ToDictionary(e => e.Id, e => e.Family, StringComparer.Ordinal);
-        if (input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion && this.mechanics.Cores is null
+        if (input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion && this.mechanics.Cores is null
             || this.mechanics.Cores is not null && (this.mechanics.Cores.Any(c => c is null || !TowerContractJson.Hash(c.Id)
                 || c.Kind is not ("condition" or "basic-attack" or "chain") || c.EssenceIds is not { Count: >= 2 and <= 3 }
                 || c.EssenceIds.Count > input.Budget.EssenceSlots || c.EssenceIds.Any(id => !families.ContainsKey(id))
@@ -50,6 +66,7 @@ public sealed partial class TowerBossPartyGenerator
                 || this.mechanics.Cores.Select(c => c.Id).Distinct().Count() != this.mechanics.Cores.Count))
             throw new InvalidDataException("Invalid same-owner mechanic cores.");
         ValidateCoverage();
+        ValidateStaggerReservations();
         features = this.mechanics.Essences.ToDictionary(e => e.Id, StringComparer.Ordinal);
         capabilities = features.ToDictionary(p => p.Key, p => CapabilitySignals(p.Value.Signals), StringComparer.Ordinal);
         if (features.Any(e => !StringComparer.OrdinalIgnoreCase.Equals(e.Value.SourceMonsterId, families[e.Key]))
@@ -87,8 +104,11 @@ public sealed partial class TowerBossPartyGenerator
                 .OrderBy(p => p.EnablerEssenceId, StringComparer.Ordinal).ThenBy(p => p.ConsumerEssenceId, StringComparer.Ordinal)
                 .ThenBy(p => p.Mechanism, StringComparer.Ordinal).ThenBy(p => p.ProducerNodeKey, StringComparer.Ordinal)
                 .ThenBy(p => p.ConsumerNodeKey, StringComparer.Ordinal).ToArray(), inventory.SourceHashes,
-            input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion ? TowerMechanicCores.Create(input, inventory) : null,
-            input.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion ? TowerPartyCoverage.Create(input, inventory) : null);
+            input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerMechanicCores.Create(input, inventory) : null,
+            input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerPartyCoverage.Create(input, inventory) : null,
+            input.Generation.PolicyVersion is TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerAttributeDefense.Create(input, inventory) : null,
+            input.Generation.PolicyVersion is TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerProtectionCompatibility.Create(input, inventory) : null,
+            input.Generation.PolicyVersion is TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerStaggerReservation.Create(input, inventory, TowerPartyCoverage.Create(input, inventory)) : null);
     }
 
     public BigInteger LegalOrderedCharacterCount => combinations[0, input.Budget.EssenceSlots]

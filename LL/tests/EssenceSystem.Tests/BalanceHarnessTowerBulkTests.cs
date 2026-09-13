@@ -104,13 +104,13 @@ public sealed class BalanceHarnessTowerBulkTests
     }
 
     [Theory]
-    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
+    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)] [InlineData(6)] [InlineData(7)] [InlineData(8)] [InlineData(9)] [InlineData(10)] [InlineData(11)]
     public async Task Discovery_interrupt_resume_reconstructs_identical_proposals_fitness_and_shortlist_without_replaying_completed_fights(int version)
     {
         using var temp = new DiscoveryTemp(); using var cancel = new CancellationTokenSource(); var d = Discovery();
         if (version > 1) d = d with { Generation = d.Generation with {
-            PolicyVersion = version == 2 ? TowerBossGeneration.CoordinatedVersion : version == 3 ? TowerBossGeneration.MechanicsVersion : TowerBossGeneration.CoverageVersion,
-            Methods = version == 2 ? TowerBossGeneration.CoordinatedMethods : version == 3 ? TowerBossGeneration.MechanicsMethods : TowerBossGeneration.CoverageMethods } };
+            PolicyVersion = version == 2 ? TowerBossGeneration.CoordinatedVersion : version == 3 ? TowerBossGeneration.MechanicsVersion : version == 4 ? TowerBossGeneration.CoverageVersion : version == 5 ? TowerBossGeneration.ProviderVersion : version == 6 ? TowerBossGeneration.CollectiveVersion : version == 7 ? TowerBossGeneration.CompletionVersion : version == 8 ? TowerBossGeneration.DefenseVersion : version == 9 ? TowerBossGeneration.CompatibleDefenseVersion : version == 10 ? TowerBossGeneration.StaggerReservationVersion : TowerBossGeneration.LoadoutDiversityVersion,
+            Methods = version == 2 ? TowerBossGeneration.CoordinatedMethods : version == 3 ? TowerBossGeneration.MechanicsMethods : version == 4 ? TowerBossGeneration.CoverageMethods : version == 5 ? TowerBossGeneration.ProviderMethods : version == 6 ? TowerBossGeneration.CollectiveMethods : version == 7 ? TowerBossGeneration.CompletionMethods : version == 8 ? TowerBossGeneration.DefenseMethods : version == 9 ? TowerBossGeneration.CompatibleDefenseMethods : version == 10 ? TowerBossGeneration.StaggerReservationMethods : TowerBossGeneration.LoadoutDiversityMethods } };
         var path = Path.Combine(temp.Path, "compact"); var options = new TowerBulkOptions(ChunkSize: 2);
         var partial = await TowerCompactDiscovery.RunAsync(Root, path, d, options, token: cancel.Token, progress: message => {
             if (message.Contains("2/2 trials committed", StringComparison.Ordinal)) cancel.Cancel();

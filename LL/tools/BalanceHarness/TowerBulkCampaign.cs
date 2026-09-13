@@ -215,7 +215,7 @@ internal sealed class TowerBulkCampaign : IDisposable
     private static Dictionary<string, string> Inventory(string output) => Paths(output)
         .ToDictionary(p => Path.GetRelativePath(output, p).Replace('\\', '/'), HarnessJson.FileHash, StringComparer.Ordinal);
 
-    private static void VerifyFiles(string output, string name, bool exact, CancellationToken token)
+    internal static void VerifyFiles(string output, string name, bool exact, CancellationToken token)
     {
         var actual = Paths(output).Select(p => Path.GetRelativePath(output, p).Replace('\\', '/')).ToHashSet(StringComparer.Ordinal);
         var files = TowerContractJson.Read<Dictionary<string, string>>(Path.Combine(output, name));

@@ -1,9 +1,11 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Models.Combat.Abilities;
 
 namespace BalanceHarness;
 
-public sealed record BossCoverageFeature(string EssenceId, string Kind, IReadOnlyList<string> EvidenceKeys);
+public sealed record BossCoverageFeature(string EssenceId, string Kind, IReadOnlyList<string> EvidenceKeys,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Limitation = null);
 
 /// <summary>Direct authored effects supply proposal categories, not estimated uptime or combat strength.</summary>
 public static class TowerPartyCoverage
@@ -72,18 +74,57 @@ public sealed partial class TowerBossPartyGenerator
 {
     private void ValidateCoverage()
     {
-        if (input.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && mechanics.Coverage is null
+        if (input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion && mechanics.Coverage is null
             || mechanics.Coverage is not null && (mechanics.Coverage.Any(f => f is null || !families.ContainsKey(f.EssenceId)
                 || !TowerPartyCoverage.Kinds.Contains(f.Kind) || f.EvidenceKeys is not { Count: > 0 } || f.EvidenceKeys.Any(string.IsNullOrWhiteSpace))
                 || mechanics.Coverage.Select(f => (f.EssenceId, f.Kind)).Distinct().Count() != mechanics.Coverage.Count))
             throw new InvalidDataException("Invalid content-derived party coverage features.");
+        if (input.Generation.PolicyVersion is TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion)
+        {
+            var augmented = mechanics.DefenseCoverage;
+            if (augmented is null || augmented.Any(f => f is null || !families.ContainsKey(f.EssenceId)
+                    || !TowerPartyCoverage.Kinds.Contains(f.Kind) || f.EvidenceKeys is not { Count: > 0 } || f.EvidenceKeys.Any(string.IsNullOrWhiteSpace))
+                || augmented.Select(f => (f.EssenceId, f.Kind)).Distinct().Count() != augmented.Count
+                || mechanics.Coverage!.Any(old => !augmented.Any(f => f.EssenceId == old.EssenceId && f.Kind == old.Kind
+                    && (f.Kind == "protection" ? old.EvidenceKeys.All(f.EvidenceKeys.Contains) : HarnessJson.Hash(f) == HarnessJson.Hash(old))))
+                || augmented.Any(f => !mechanics.Coverage!.Any(old => HarnessJson.Hash(old) == HarnessJson.Hash(f))
+                    && (f.Kind != "protection" || f.Limitation != TowerAttributeDefense.Limitation)))
+                throw new InvalidDataException("Defense coverage must preserve legacy features and label only protection additions.");
+        }
+        else if (mechanics.DefenseCoverage is not null)
+            throw new InvalidDataException("Attribute-defense coverage requires the opt-in defense policy.");
+        if (input.Generation.PolicyVersion is TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion)
+        {
+            var c = mechanics.CompatibleDefense;
+            if (c is null || c.Threat is null || c.Coverage is null || c.Excluded is null
+                || c.Threat.DamageTypes is null || c.Threat.EvidenceKeys is null || c.Threat.Limitations is null
+                || c.Threat.DamageTypes.Any(t => t == Domain.Models.Damages.DamageType.None || !Enum.IsDefined(t))
+                || c.Threat.DamageTypes.Distinct().Count() != c.Threat.DamageTypes.Count
+                || c.Threat.Complete != (c.Threat.Limitations.Count == 0)
+                || c.Threat.EvidenceKeys.Count == 0 || c.Threat.EvidenceKeys.Any(string.IsNullOrWhiteSpace)
+                || c.Excluded.Any(f => f is null || f.Kind != "protection")
+                || c.Coverage.Concat(c.Excluded).Any(f => f is null)
+                || c.Coverage.Concat(c.Excluded).Select(f => (f.EssenceId, f.Kind)).Distinct().Count() != c.Coverage.Count + c.Excluded.Count
+                || HarnessJson.Hash(c.Coverage.Concat(c.Excluded).OrderBy(f => f.Kind, StringComparer.Ordinal).ThenBy(f => f.EssenceId, StringComparer.Ordinal)) != HarnessJson.Hash(mechanics.DefenseCoverage)
+                || (!c.Threat.Complete || c.Threat.DamageTypes.Count == 0) && c.Excluded.Count > 0)
+                throw new InvalidDataException("Compatible defense must partition augmented coverage and preserve unknown threats.");
+        }
+        else if (mechanics.CompatibleDefense is not null)
+            throw new InvalidDataException("Compatible defense requires its opt-in policy.");
     }
 
-    private IGrouping<string, BossCoverageFeature>[] CoverageGroups() => (mechanics.Coverage ?? [])
+    private IGrouping<string, BossCoverageFeature>[] CoverageGroups() => ((compatibleDefense ? mechanics.CompatibleDefense!.Coverage : attributeDefense ? mechanics.DefenseCoverage : mechanics.Coverage) ?? [])
         .Where(f => input.OwnedCopies is null || input.OwnedCopies.GetValueOrDefault(f.EssenceId) > 0)
         .GroupBy(f => f.Kind).OrderBy(g => g.Key, StringComparer.Ordinal).ToArray();
 
     public BossGeneratedChoice FreshCoverage(Random random)
+        => FreshCoverage(random, completeCores: false);
+
+    /// <summary>Attempt every compatible core insertion on the guided route; preserve uniform construction.</summary>
+    public BossGeneratedChoice FreshCompletion(Random random)
+        => FreshCoverage(random, completeCores: true);
+
+    private BossGeneratedChoice FreshCoverage(Random random, bool completeCores)
     {
         // This arm explicitly retains a uniform route to every legal ordered team, including uncategorized effects.
         if (random.Next(8) == 0) return Fresh(random, false) with { Intent = "coverage:uniform" };
@@ -92,6 +133,7 @@ public sealed partial class TowerBossPartyGenerator
         random.Shuffle(groups);
         var planned = Enumerable.Range(1, input.RequiredPartySize).ToDictionary(s => s, _ => new List<string>());
         var used = new Dictionary<string, int>(); var trace = new List<string>();
+        var reservations = staggerReservation ? new List<BossCoverageReservation>() : null;
         bool Add(int slot, string id)
         {
             var ids = planned[slot];
@@ -103,16 +145,22 @@ public sealed partial class TowerBossPartyGenerator
         foreach (var group in groups)
         {
             var choices = group.OrderBy(f => f.EssenceId, StringComparer.Ordinal).ToArray();
-            var provider = choices[random.Next(choices.Length)].EssenceId;
-            var count = random.Next(input.RequiredPartySize + 1);
+            var selected = choices[random.Next(choices.Length)]; var provider = selected.EssenceId;
+            var reservation = staggerReservation && group.Key == "recurring-control"
+                ? mechanics.StaggerReservations!.Providers.Single(p => p.EssenceId == provider) : null;
+            var count = reservation is { FallbackReason: null, MinimumCount: > 0 }
+                ? random.Next(reservation.MinimumCount.Value, input.RequiredPartySize + 1) : random.Next(input.RequiredPartySize + 1);
             var slots = planned.Keys.ToArray(); random.Shuffle(slots);
             var placed = 0;
             foreach (var slot in slots) { if (placed == count) break; if (Add(slot, provider)) placed++; }
             trace.Add(group.Key + ":" + count + "/" + placed);
+            reservations?.Add(new(group.Key, provider, selected.EvidenceKeys,
+                reservation is null ? null : mechanics.StaggerReservations!.FirstThreshold, reservation?.StaggerPower,
+                reservation?.MinimumCount, count, placed, reservation is null ? "other-category" : reservation.FallbackReason));
         }
         // Reserve coverage before trying compatible cores. Existing assignments and ownership constrain completion.
         var order = planned.Keys.ToArray(); random.Shuffle(order);
-        foreach (var slot in order.Where(_ => random.Next(2) == 0))
+        foreach (var slot in order.Where(_ => completeCores || random.Next(2) == 0))
         {
             var eligible = (mechanics.Cores ?? []).Where(c => {
                 var extra = c.EssenceIds.Where(id => !planned[slot].Contains(id)).ToArray();
@@ -127,10 +175,10 @@ public sealed partial class TowerBossPartyGenerator
         {
             var prefix = builds[slot]; builds.Remove(slot);
             var ids = ConstructCharacter(random, builds, intents[random.Next(intents.Length)], prefix);
-            if (ids is null) return new(null, "coverage:" + string.Join(";", trace), null, "owned-or-family-dead-end");
+            if (ids is null) return new(null, "coverage:" + string.Join(";", trace), null, "owned-or-family-dead-end", reservations);
             var shuffled = ids.ToArray(); random.Shuffle(shuffled); builds.Add(slot, shuffled);
         }
-        return Choice(builds, "coverage:" + string.Join(";", trace), null);
+        return Choice(builds, "coverage:" + string.Join(";", trace), null) with { Reservations = reservations };
     }
 
     public BossGeneratedChoice ChangeCoverage(Random random, PartyChoice parent)

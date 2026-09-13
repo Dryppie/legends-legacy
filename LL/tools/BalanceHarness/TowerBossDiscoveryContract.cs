@@ -281,9 +281,39 @@ public static class TowerBossDiscovery
                     || d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "mechanics-joint") => 1,
                 "fresh-mechanics" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion && p.Method == "mechanics-joint" => 0,
                 "mechanic-core" when d.Mode == Independent && (d.Generation.PolicyVersion == TowerBossGeneration.MechanicsVersion && p.Method == "mechanics-joint"
-                    || d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method is "mechanics-joint" or "coverage-joint") => 1,
-                "fresh-coverage" when d.Mode == Independent && d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "coverage-joint" => 0,
-                "coverage-count" or "placement" when d.Mode == Independent && d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "coverage-joint" => 1,
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method is "mechanics-joint" or "coverage-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.ProviderVersion && p.Method is "coverage-joint" or "provider-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CollectiveVersion && p.Method is "provider-joint" or "collective-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CompletionVersion && p.Method is "collective-joint" or "completion-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.DefenseVersion && p.Method is "collective-joint" or "defense-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CompatibleDefenseVersion && p.Method is "defense-joint" or "compatible-defense-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.StaggerReservationVersion && p.Method is "compatible-defense-joint" or "stagger-reservation-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.LoadoutDiversityVersion && p.Method is "stagger-reservation-joint" or "loadout-diversity-joint") => 1,
+                "fresh-coverage" when d.Mode == Independent && (d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "coverage-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.ProviderVersion && p.Method is "coverage-joint" or "provider-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CollectiveVersion && p.Method is "provider-joint" or "collective-joint"
+                    || d.Generation.PolicyVersion is TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion && p.Method == "collective-joint") => 0,
+                "fresh-completion" when d.Mode == Independent && d.Generation.PolicyVersion == TowerBossGeneration.CompletionVersion && p.Method == "completion-joint" => 0,
+                "fresh-defense" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion && p.Method == "defense-joint" => 0,
+                "fresh-compatible-defense" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion && p.Method == "compatible-defense-joint" => 0,
+                "fresh-stagger-reservation" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion && p.Method == "stagger-reservation-joint" => 0,
+                "fresh-loadout-diversity" when d.Mode == Independent && d.Generation.PolicyVersion == TowerBossGeneration.LoadoutDiversityVersion && p.Method == "loadout-diversity-joint" => 0,
+                "coverage-count" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion && p.Method == "coverage-joint" => 1,
+                "placement" when d.Mode == Independent && (d.Generation.PolicyVersion == TowerBossGeneration.CoverageVersion && p.Method == "coverage-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.ProviderVersion && p.Method is "coverage-joint" or "provider-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CollectiveVersion && p.Method is "provider-joint" or "collective-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CompletionVersion && p.Method is "collective-joint" or "completion-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.DefenseVersion && p.Method is "collective-joint" or "defense-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CompatibleDefenseVersion && p.Method is "defense-joint" or "compatible-defense-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.StaggerReservationVersion && p.Method is "compatible-defense-joint" or "stagger-reservation-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.LoadoutDiversityVersion && p.Method is "stagger-reservation-joint" or "loadout-diversity-joint") => 1,
+                "coverage-provider" when d.Mode == Independent && d.Generation.PolicyVersion is TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion && p.Method == "provider-joint" => 1,
+                "collective-provider" when d.Mode == Independent && (d.Generation.PolicyVersion == TowerBossGeneration.CollectiveVersion && p.Method == "collective-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CompletionVersion && p.Method is "collective-joint" or "completion-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.DefenseVersion && p.Method is "collective-joint" or "defense-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.CompatibleDefenseVersion && p.Method is "defense-joint" or "compatible-defense-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.StaggerReservationVersion && p.Method is "compatible-defense-joint" or "stagger-reservation-joint"
+                    || d.Generation.PolicyVersion == TowerBossGeneration.LoadoutDiversityVersion && p.Method is "stagger-reservation-joint" or "loadout-diversity-joint") => 1,
                 "supplied" when d.Mode == Improve && d.Generation.PolicyVersion == TowerBossImprovement.Version => 1,
                 "single" or "double" or "order" or "cross-character" or "whole-character" => 1,
                 "recombine" => 2,

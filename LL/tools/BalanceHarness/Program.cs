@@ -50,6 +50,7 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower-boss-search --definition <json> --output <new-directory> [--content-root <directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-verify --run <directory>");
                 Console.WriteLine("BalanceHarness tower-boss-inventory --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-coverage-diagnostics --definition <hashed-saved-inputs-json> --output <new-directory> (zero new combats)");
                 Console.WriteLine("BalanceHarness tower-party-progression --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-whole-party --output <new-directory> [--content-root <API.LL-directory>] [--catalogs-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-loadout-replay --run <pilot-directory> --battle <trial-id> [--detailed]");
@@ -110,6 +111,7 @@ public static class Program
                 "tower-boss-search" => new[] { "--definition", "--output", "--content-root", "--catalogs-root" },
                 "tower-boss-verify" => new[] { "--run" },
                 "tower-boss-inventory" => new[] { "--output", "--content-root" },
+                "tower-coverage-diagnostics" => new[] { "--definition", "--output" },
                 "tower-party-progression" => new[] { "--output", "--content-root", "--catalogs-root" },
                 "tower-whole-party" => new[] { "--output", "--content-root", "--catalogs-root" },
                 "tower-loadout-replay" => new[] { "--run", "--battle", "--detailed" },
@@ -138,6 +140,12 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-coverage-diagnostics")
+            {
+                TowerCoverageDiagnostics.Run(Required(options, "--definition"), Required(options, "--output"), cancellation.Token);
+                Console.WriteLine("Verified saved coverage diagnostics; zero new combats, constructors and seeds.");
+                return 0;
+            }
             if (command == "tower-performance-compare")
             {
                 var report = TowerPerformanceComparison.Compare(Required(options, "--reference"), Required(options, "--run"), Required(options, "--output"), cancellation.Token);

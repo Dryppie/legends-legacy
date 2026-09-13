@@ -1,0 +1,31 @@
+# Search hypothesis assessment: stagger reservations
+
+Completed **13 September 2026**, using the verified coverage report and frozen source/content. One hypothesis is selected **for implementation planning only**: derive guided fresh control reservation counts from the boss's first stagger threshold and the selected provider's authored stagger power. The [separate plan](Tower-Stagger-Reservation-Plan.md) specifies the opt-in comparison, fallback behavior, tests and proposed resource envelope. **No implementation, campaign, party-constructor call or new seed was performed.**
+
+## Rationale and derivation
+
+The current fresh-coverage constructor selects each category's provider uniformly, then samples its requested count uniformly from zero through party size. Recurring control therefore receives no count information from the target's threshold. The [typed report](../TestResults/balance/tower-coverage-diagnostics-20260913/report-final/mechanics.json) supplies four eligible direct routes with stagger powers **40, 50, 35 and 25**. The target's first threshold is **250** for the fixed ten-character party. The minimum numbers of accepted applications are consequently **7, 5, 8 and 10**.
+
+The proposal changes only that count draw during the new arm's guided fresh construction: uniformly request the derived minimum through the full party size. All four providers remain selectable, including the low-health-gated control. Other categories, uniform construction, ownership/family legality, mutations and combat fitness retain their algorithms. Unsupported or unattainable routes use the existing count range.
+
+The [exhaustive authored assessment](../TestResults/balance/tower-search-hypothesis-assessment-20260913/authored-assessment.json) found that **14/44 (31.818%)** of the existing provider/count combinations have one-application nominal capacity at least equal to the threshold. This enumerates count choices, not generated parties, actual placements, stagger breaks or successful battles. The proposed distribution's mean requested control count is **8.75**, versus **5** now; shared-category copies mean this is not an estimate of additional occupied slots. The derivation reads only authored mechanics and the frozen character budget. It does not use saved recipes, ancestry, outcomes or control copy counts.
+
+The evidence justifies a narrow test, not a performance claim. Higher control reservations can displace damage/recovery/cores. The target-health-gated effect may contribute only late; other effects remain subject to authored/runtime chance, targeting, casts, survival and immunity. Repeated contributions or mixed providers can also make fewer carriers effective. The four fixed replays do not identify a causal timing remedy. These counter-hypotheses are retained in the [decision record](../TestResults/balance/tower-search-hypothesis-assessment-20260913/decision.json).
+
+Removing self-only recovery, adding an eligibility filter for late control, and fitting count margins to proc odds or replay timing were not selected. Recipient scope alone does not establish ineffectiveness; changing eligibility with count sampling would confound the comparison; and a joint activation model or fixed opening deadline is unsupported. No new category, Essence ID allowlist, count learned from a control, or surrogate fitness score is proposed.
+
+## Verification and preservation
+
+- All **14 preceding packages**, **72 sealed reviews**, **2,235 C# source files**, five producing assemblies, frozen content and both catalogs were hash-verified before assessment. The [initial receipt](../TestResults/balance/tower-search-hypothesis-assessment-20260913/initial-verification.json) retains the existing working tree and provenance.
+- The count formula was checked against an independent linear scan over **60,000 deterministic arithmetic cases**, including minima above the available party size. This invokes no random generator, party constructor or combat service. See [arithmetic verification](../TestResults/balance/tower-search-hypothesis-assessment-20260913/arithmetic-verification.json).
+- Source review checked the production threshold formula, initial friendly participant count, progression/compiler treatment of `StaggerPower`, contribution capping and break/recovery gates. The assessment records those source hashes. It preserves trigger/predicate/chance caveats without calculating an aggregate application probability.
+- The latest ledger is copied byte for byte and still contains **471,656 distinct seeds** across every array. No backend tests were rerun because no C# or gameplay file changed; the preceding **20 passing diagnostic fixtures** remain historical verification, not a new result.
+- The [final verification](../TestResults/balance/tower-search-hypothesis-assessment-20260913/final-verification.json) checks all preserved packages, unchanged source/content/execution/catalogs, Markdown links/anchors and `git diff --check`. No required command remains blocked.
+
+Changed files are this review, the new stagger-reservation plan, active handoff/status paragraphs, and the harness README. The new ignored assessment package retains the source audit, exact count enumeration, arithmetic checks, copied ledger, frozen plan snapshot and receipts. No source implementation, configuration, migration, catalog/default promotion, deployment or external-environment change was made.
+
+The current scientific result remains v9 **Fail 0/3**, all twelve generated finalists **0/256**, strongest control **126/256**, and tested-family **Inconclusive**. Earlier ceiling breaches remain separate. Kharad stays at **Health 3.04881408 / Power 3.85370128** with fixed gear and untrained Essences. Practical acquisition, near-optimality and complete-family acceptance remain unestablished.
+
+## Next bounded work
+
+Implement and test the isolated opt-in count change described in the [plan](Tower-Stagger-Reservation-Plan.md), preserving v9 comparator behavior and the independent-generation boundary. A new pilot may begin only after implementation checks and a separately frozen executable protocol with fresh seed exclusions and limits. The proposed 9,224-battle envelope is not an allocation made by this assessment. The [current handoff](Tower-Coverage-Replication-Plan.md) records this next step.
