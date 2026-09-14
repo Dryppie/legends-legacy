@@ -4245,16 +4245,16 @@ public sealed partial class FastCombatEngine
             _healthRegenerationPulses[combatant] =
                 _healthRegenerationPulses.GetValueOrDefault(combatant) + 1;
 
-            if (combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth)
-                && !IsBastionSelfRecovery(combatant, combatant))
+            if (combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth))
             {
                 _healthRegenerationOverhealed[combatant] =
                     _healthRegenerationOverhealed.GetValueOrDefault(combatant) + potential;
                 continue;
             }
 
-            var restored = Math.Max(0, (int)Math.Round(
-                ApplyCombatStyleRecovery(combatant, regeneration, combatants)));
+            var before = combatant.Health;
+            combatant.AdjustHealth(regeneration);
+            var restored = Math.Max(0, (int)Math.Round(combatant.Health - before));
             _healthRegenerationOverhealed[combatant] =
                 _healthRegenerationOverhealed.GetValueOrDefault(combatant)
                 + Math.Max(0, potential - restored);

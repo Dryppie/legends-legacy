@@ -39,7 +39,8 @@ public static class TowerBalanceEvaluator
     public static void Validate(TowerBalanceDefinition d)
     {
         using var timing = TowerPerformanceTrace.Measure("balance.validate");
-        if (d is null || d.SchemaVersion != 1 || !TowerBenchmark.SafeId(d.Id) || d.IntervalPolicy != IntervalPolicy
+        var portfolio = d is { SchemaVersion: 2, Id: TowerPortfolioConfirmation.Policy };
+        if (d is null || (d.SchemaVersion != 1 && !portfolio) || !TowerBenchmark.SafeId(d.Id) || d.IntervalPolicy != IntervalPolicy
             || d.ContentHashes is null || !d.ContentHashes.Keys.Order().SequenceEqual(TowerBundle.Files.Order())
             || d.ContentHashes.Values.Any(h => !TowerContractJson.Hash(h))
             || !TowerContractJson.Hash(d.SettingsHash) || !TowerContractJson.Hash(d.ExecutionHash)
@@ -50,8 +51,14 @@ public static class TowerBalanceEvaluator
             || d.Cohorts.Select(c => c.Id).Distinct().Count() != d.Cohorts.Count
             || d.Cohorts.Select(c => (c.Budget, c.Context, c.EquipmentBudgetHash)).Distinct().Count() != d.Cohorts.Count
             || d.ExcludedCombatSeeds is null || d.ExcludedCombatSeeds.Count > TowerStudyLimits.HistoricalSeeds
-            || d.MaximumBattles is < 1 or > 100000)
+            || d.MaximumBattles < 1 || d.MaximumBattles > (portfolio ? TowerPortfolioConfirmation.MaximumFights : 100000))
             throw new InvalidDataException("Invalid frozen Tower balance family, cohort, hashes or interval policy.");
+        // New envelope only for the separately frozen v19 family; legacy definitions retain their original cap.
+        if (portfolio && (d.MaximumBattles != TowerPortfolioConfirmation.MaximumFights || d.Cells.Count != TowerPortfolioConfirmation.Recipes
+            || d.Cohorts.Count != 1 || d.Cells.Any(c => c is null) || d.Cells.Count(c => c.Role == "reference") != 112 || d.Cells.Count(c => c.Role == "generated") != 141
+            || !d.Cells.Select(c => c.Id).SequenceEqual(d.Cells.Select(c => c.Id).Order(StringComparer.Ordinal))
+            || d.Cells.Any(c => c.Scenario?.Seeds?.Count != TowerPortfolioConfirmation.Samples || c.MinimumSamples != TowerPortfolioConfirmation.Samples)))
+            throw new InvalidDataException("Schema 2 requires the exact 253-recipe, 512-trial portfolio confirmation envelope.");
         HashSet<int> excluded;
         using (TowerPerformanceTrace.Measure("balance.exclusion-set")) excluded = d.ExcludedCombatSeeds.ToHashSet();
         if (excluded.Count != d.ExcludedCombatSeeds.Count)

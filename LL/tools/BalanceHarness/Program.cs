@@ -12,8 +12,14 @@ public static class Program
         Console.CancelKeyPress += cancelHandler;
         try
         {
+            if (args.Length > 0 && args[0].StartsWith("tower-ceiling-", StringComparison.Ordinal))
+                return await TowerCeilingScreenCommand.ExecuteAsync(args, cancellation.Token);
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
+                Console.WriteLine("BalanceHarness tower-ceiling-audit <prepared> <manifest-hash> <new-result.json>; tower-ceiling-bind <binding-request.json> <new-study>; tower-ceiling-check|tower-ceiling-run|tower-ceiling-verify <study> (four fixed variants, one global budget; separately authorized binding/execution)");
+                Console.WriteLine("BalanceHarness tower-portfolio-confirmation-audit --source-run <sealed-v19> --source-work <sealed-v19-work> --content-root <captured-content> --output <new-audit> [--comparison-content-root <current-content>] [--comparison-executable <current-binaries>] (zero fights/seeds)");
+                Console.WriteLine("BalanceHarness tower-portfolio-confirmation-prepare --source-run <sealed-v19> --source-work <sealed-v19-work> --content-root <captured-content> --history <current-ledger> --seed <int> --plan <markdown> --max-seconds <int> --max-bytes <long> --output <new-study>");
+                Console.WriteLine("BalanceHarness tower-portfolio-confirmation-check|tower-portfolio-confirmation-run|tower-portfolio-confirmation-verify --run <directory> (253 fixed recipes; 129536 fights; no retries/resume)");
                 Console.WriteLine("BalanceHarness tower-allocation-confirmation-prepare --source-run <stopped-run> --source-work <sealed-audit> --history <current-ledger-json> --seed <int> --plan <markdown> --output <new-directory> [--content-root <directory>]");
                 Console.WriteLine("BalanceHarness tower-allocation-confirmation-check|tower-allocation-confirmation-run|tower-allocation-confirmation-verify --run <directory> (94 fixed recipes; 512 fresh shared trials; no resume)");
                 Console.WriteLine("BalanceHarness run --output <new-directory> [--seed <int>] [--content-root <API.LL-directory>] [--scenario <json>] [--detailed]");
@@ -99,6 +105,9 @@ public static class Program
             }
             var allowed = command switch
             {
+                "tower-portfolio-confirmation-audit" => new[] { "--source-run", "--source-work", "--content-root", "--output", "--comparison-content-root", "--comparison-executable" },
+                "tower-portfolio-confirmation-prepare" => new[] { "--source-run", "--source-work", "--history", "--seed", "--plan", "--output", "--content-root", "--max-seconds", "--max-bytes" },
+                "tower-portfolio-confirmation-check" or "tower-portfolio-confirmation-run" or "tower-portfolio-confirmation-verify" => new[] { "--run" },
                 "tower-allocation-confirmation-prepare" => new[] { "--source-run", "--source-work", "--history", "--seed", "--plan", "--output", "--content-root" },
                 "tower-allocation-confirmation-check" or "tower-allocation-confirmation-run" or "tower-allocation-confirmation-verify" => new[] { "--run" },
                 "run" => new[] { "--output", "--seed", "--content-root", "--scenario", "--detailed" },
@@ -172,6 +181,33 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-portfolio-confirmation-audit")
+            {
+                var result = TowerPortfolioConfirmationRun.Audit(Required(options, "--source-run"), Required(options, "--source-work"),
+                    Required(options, "--content-root"), Required(options, "--output"), options.GetValueOrDefault("--comparison-content-root"),
+                    options.GetValueOrDefault("--comparison-executable"), cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options)); return 0;
+            }
+            if (command == "tower-portfolio-confirmation-prepare")
+            {
+                var result = TowerPortfolioConfirmationRun.Prepare(Required(options, "--content-root"), Required(options, "--source-run"),
+                    Required(options, "--source-work"), Required(options, "--history"), int.Parse(Required(options, "--seed"), CultureInfo.InvariantCulture),
+                    Required(options, "--plan"), Required(options, "--output"), int.Parse(Required(options, "--max-seconds"), CultureInfo.InvariantCulture),
+                    long.Parse(Required(options, "--max-bytes"), CultureInfo.InvariantCulture), cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(result with { FrozenFiles = new Dictionary<string, string>() }, HarnessJson.Options)); return 0;
+            }
+            if (command == "tower-portfolio-confirmation-check")
+            {
+                var result = TowerPortfolioConfirmationRun.VerifyPrepared(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine($"Prepared {result.Version} verified; zero new fights."); return 0;
+            }
+            if (command is "tower-portfolio-confirmation-run" or "tower-portfolio-confirmation-verify")
+            {
+                var verify = command.EndsWith("-verify", StringComparison.Ordinal);
+                var result = verify ? await TowerPortfolioConfirmationRun.VerifyAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine)
+                    : await TowerPortfolioConfirmationRun.RunAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options)); return verify || result.Quality?.Adoption == "Eligible" ? 0 : 1;
+            }
             if (command == "tower-allocation-confirmation-prepare")
             {
                 var result = TowerAllocationConfirmationRun.Prepare(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),

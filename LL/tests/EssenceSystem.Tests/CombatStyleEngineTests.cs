@@ -321,15 +321,18 @@ public sealed class CombatStyleEngineTests
     }
 
     [Fact]
-    public void Regeneration_uses_its_own_modifiers_once_and_does_not_gain_healing_power()
+    public void Regeneration_restores_health_directly_without_triggering_bastion_fortification()
     {
         var actor = Actor([], Bastion()); actor.SetHealth(500);
         actor.AdjustAttribute(AttributeType.HealthRegeneration, 200);
         actor.AdjustAttribute(AttributeType.HealingPowerPercent, 100);
         AddCondition(actor, StandardConditionType.Wound);
         var result = Run(actor, ticks: 50);
-        Assert.Equal(535, actor.Health); Assert.Equal(105, actor.Barrier);
-        Assert.Equal(140, Assert.Single(result.CombatStyles).HealingConverted);
+        Assert.Equal(640, actor.Health);
+        Assert.Equal(0, actor.Barrier);
+        Assert.Equal(0, Assert.Single(result.CombatStyles).HealingConverted);
+        Assert.Equal(140, Assert.Single(result.EventLog, x =>
+            x.EventType == EventType.HealthRegeneration && x.TargetId == actor.Id).Magnitude);
     }
 
     [Fact]

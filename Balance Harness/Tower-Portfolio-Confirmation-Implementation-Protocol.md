@@ -1,0 +1,19 @@
+# Portfolio confirmation: implementation verification protocol
+
+Frozen for engineering verification on 14 September 2026. This is not a confirmation study plan, fresh seed schedule or authorization to execute confirmation combat.
+
+Implement `tower-portfolio-confirmation-v1` as a separate import of the sealed capacity-stopped v19 campaign and work package. Preserve all 253 ordered recipes/origins, 112 controls, original and screened nominations, fixed anchor and stronger control, ordinary/joint rules and numerical 2/3 reliability gate. The future study needs 512 fresh shared trials per recipe (129,536 fights). Its actual schedule and explicit time/storage limits must be frozen separately before execution. Leave the v19 capacity 144 and legacy evaluator cap 100,000 intact; use a new narrowly validated definition schema for this family.
+
+Verification in this task:
+
+1. Relevant backend tests through `build/run-tests.ps1`: new portfolio confirmation, previous 94-recipe allocation confirmation, portfolio/feedback, compact archives, owned storage and balance evaluator. Use synthetic unit-test data for fresh allocation/statistics tests. Do not allocate real balance reservations or execute the new confirmation runner.
+2. Compile the new harness against retained v19 Application, Common, Domain and Services.LL assemblies in an isolated directory. Copy its full retained runtime, replacing only the harness DLL/PDB. Freeze source snapshots, both source manifest hashes, runtime hashes, command arguments and this protocol before the audit.
+3. One positive zero-combat audit of `TestResults/balance/tower-search-portfolio-20260914` and `tower-search-portfolio-work-20260914`, using the captured v19 content. Verify both complete inventories/hashes and source completion/independent-selection receipts. Validate all 253 recipes through production input materialization. Copy only the bound source/audit inputs into a new audit bundle; it has no new schedule or executable study protocol.
+4. Compare captured content/settings and gameplay DLL hashes with the current checkout/test build and record all differences. The intended scope for finishing the original reliability comparison is captured v19 gameplay. An updated-gameplay study needs a separate baseline and cannot inherit that claim automatically.
+5. Independently preserve v19 and both earlier performance evidence packages, check source continuity, resource usage, documentation and whitespace, then seal this engineering package.
+
+Audit limit: 900 seconds, 512 MiB retained audit output, zero fights and zero new seeds. Entire engineering package: at most 1 GiB new logical output. Keep the earlier cumulative performance diagnostic total at 76 fights; combined diagnostic/audit execution must remain under the original 1,800-second/4-GiB envelope. Compilation and correctness tests are outside the diagnostic workload clock. No combat retries, altered sealed packages, old-cap increases, gameplay/Kharad changes, deployment or confirmation execution. If a check fails, retain its evidence and resolve code/test issues without treating synthetic or repeated data as fresh balance evidence.
+
+The initial contract tests exposed the legacy evaluator's 100,000-fight boundary before any audit or study execution. Their failed log/TRX remain preserved; the implementation was amended with an exact schema-2 envelope. The final relevant suite must pass before the captured-scope audit starts.
+
+Evidence directory: `TestResults/balance/tower-portfolio-confirmation-implementation-20260914`. Final commands, measurements and remaining limitations belong in the implementation review. V19 remains VerifiedCapacityExceeded, reliability Unresolved, adoption Hold and ordinary/joint NotRun / NotRun until a separate complete confirmation establishes its own result. Preserve all 480,707 reservations, including 512 unused v19 confirmation values.
