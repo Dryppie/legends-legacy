@@ -35,7 +35,15 @@
               [attr.aria-pressed]="selectedCrateOptionId() === option.id"
               (click)="selectCrateOption(option)"
             >
-              <span>{{ option.name }}</span>
+              <span class="flex min-w-0 items-center gap-2">
+                <span>{{ option.name }}</span>
+                <span
+                  *ngIf="isCrateOptionAbsorbed(option)"
+                  class="shrink-0 rounded border border-success/40 bg-success/10 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-success"
+                >
+                  Absorbed
+                </span>
+              </span>
               <strong class="text-primary">×{{ option.quantity }}</strong>
             </button>
           </app-essence-preview>

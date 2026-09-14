@@ -2240,5 +2240,185 @@
     "expectedLogs": [
       { "source": "effect.creature.frost_imp.ice_needle.damage.balance_creek", "eventType": "Damage", "minCount": 1, "minMagnitude": 1 }
     ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_brute.skullcrusher.scalehold",
+    "abilityId": "ability.creature.lizardfolk_brute.skullcrusher",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_brute.skullcrusher"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_brute.skullcrusher.0",
+        "eventType": "Damage",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_brute.brutal_follow_up.scalehold",
+    "abilityId": "ability.creature.lizardfolk_brute.brutal_follow_up",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_brute.brutal_follow_up",
+      "ability.creature.lizardfolk_brute.skullcrusher"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_brute.brutal_follow_up.0",
+        "eventType": "Buff",
+        "minCount": 1,
+        "minMagnitude": 75
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_elementalist.converging_element.scalehold",
+    "abilityId": "ability.creature.lizardfolk_elementalist.converging_element",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_elementalist.converging_element"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [],
+    "randomSeed": 1337,
+    "expectedConditions": [
+      {
+        "combatantId": "hostile-1",
+        "condition": "Burn",
+        "minStacks": 40
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_elementalist.elemental_bond.scalehold",
+    "abilityId": "ability.creature.lizardfolk_elementalist.elemental_bond",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_elementalist.elemental_bond"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_elementalist.elemental_bond.0",
+        "eventType": "Summon",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_scout.find_weakness.scalehold",
+    "abilityId": "ability.creature.lizardfolk_scout.find_weakness",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_scout.find_weakness"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_scout.find_weakness.0",
+        "eventType": "Damage",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_scout.keen_eye.scalehold",
+    "abilityId": "ability.creature.lizardfolk_scout.keen_eye",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_scout.keen_eye"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_scout.keen_eye.0",
+        "eventType": "Buff",
+        "minCount": 1,
+        "minMagnitude": 25
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_shaman.herb_mixture.scalehold",
+    "abilityId": "ability.creature.lizardfolk_shaman.herb_mixture",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_shaman.herb_mixture"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_shaman.herb_mixture.0",
+        "eventType": "Heal",
+        "minCount": 1,
+        "minMagnitude": 1
+      }
+    ],
+    "friendlyHealth": 100
+  },
+  {
+    "id": "behavior.creature.lizardfolk_shaman.cleansing_herbs.scalehold",
+    "abilityId": "ability.creature.lizardfolk_shaman.cleansing_herbs",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_shaman.cleansing_herbs",
+      "ability.creature.lizardfolk_shaman.herb_mixture"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_shaman.cleansing_herbs.0",
+        "eventType": "StatusEffectCleansed",
+        "minCount": 1,
+        "minMagnitude": 1
+      }
+    ],
+    "friendlyHealth": 100,
+    "initialConditions": [
+      {
+        "combatantId": "friendly",
+        "condition": "Exposed",
+        "stacks": 1,
+        "durationTicks": 100
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_warrior.spearhead_assault.scalehold",
+    "abilityId": "ability.creature.lizardfolk_warrior.spearhead_assault",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_warrior.spearhead_assault"
+    ],
+    "maxTicks": 1,
+    "hostileHealth": 10000,
+    "expectedLogs": [
+      {
+        "source": "effect.creature.lizardfolk_warrior.spearhead_assault.1",
+        "eventType": "Damage",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.creature.lizardfolk_warrior.battle_rhythm.scalehold",
+    "abilityId": "ability.creature.lizardfolk_warrior.battle_rhythm",
+    "friendlyAbilityIds": [
+      "ability.creature.lizardfolk_warrior.battle_rhythm"
+    ],
+    "maxTicks": 31,
+    "hostileHealth": 10000,
+    "expectedLogs": [],
+    "basicAttackIntervalTicks": 10,
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.lizardfolk_warrior.battle_rhythm",
+        "minStacks": 1
+      }
+    ]
   }
 ]

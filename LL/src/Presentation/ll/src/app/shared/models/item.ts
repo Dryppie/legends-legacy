@@ -1,4 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
+import { AttributeType } from './enums/attributeType';
 import { EquipmentType } from './enums/equipmentType';
 import { ItemType } from './enums/itemType';
 import { ItemQuality } from './enums/itemQuality';
@@ -48,6 +49,13 @@ export interface ItemBase {
   stackable: boolean;
   isBound?: boolean;
   selectionCrate?: SelectionCrateMetadata | null;
+  blueprint?: EquipmentBlueprintMetadata | null;
+}
+
+export interface EquipmentBlueprintMetadata {
+  styleId: string;
+  attributes: AttributeType[];
+  equipmentSet?: EquipmentSetMetadata | null;
 }
 
 export interface SelectionCrateMetadata {

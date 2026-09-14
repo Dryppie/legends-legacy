@@ -20,11 +20,17 @@ import { ItemQuality } from '../../../../shared/models/enums/itemQuality';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  SelectionCrateOption,
+} from '../../../../shared/models/item';
 import { QuestObjectiveState } from '../../../../shared/models/quest';
 import { InventoryComponent } from './inventory.component';
 import { EquipmentLoadoutService } from '../../../../core/services/api/equipment/equipment-loadout.service';
 import { EquipmentStateService } from '../../../../core/services/api/equipment/equipment-state.service';
+import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
+import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
 
 describe('InventoryComponent', () => {
   it('clears the old equipped-item inspection when switching loadouts', () => {
@@ -66,6 +72,133 @@ describe('InventoryComponent', () => {
     component.ngOnInit();
 
     expect(state.load).toHaveBeenCalledOnceWith();
+  });
+
+  it('formats blueprint attributes as equipment stats', () => {
+    const component = createComponent(inventoryState([]));
+
+    expect(
+      component.blueprintAttributeLabel(AttributeType.MagicPenetration),
+    ).toBe('Magic Penetration');
+    expect(component.blueprintAttributeLabel(AttributeType.CritChance)).toBe(
+      'Crit Chance',
+    );
+  });
+
+  it('identifies absorbed Essence Token options from the Soul Archive', () => {
+    const essenceState = {
+      archive: signal({ essences: [] }),
+      absorbedEssenceDefinitionIds: signal(
+        new Set(['essence.illusion_fox']),
+      ),
+      refreshArchive: jasmine.createSpy('refreshArchive'),
+    } as unknown as EssenceStateService;
+    const component = createComponent(
+      inventoryState([]),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      essenceState,
+    );
+    const illusionFox = {
+      essence: { id: 'essence.illusion_fox' },
+    } as SelectionCrateOption;
+    const pixie = {
+      essence: { id: 'essence.pixie' },
+    } as SelectionCrateOption;
+
+    expect(component.isSelectionEssenceAbsorbed(illusionFox)).toBeTrue();
+    expect(component.isSelectionEssenceAbsorbed(pixie)).toBeFalse();
+  });
+
+  it('loads the Soul Archive when an Essence Token is inspected', () => {
+    const essenceState = {
+      archive: signal(null),
+      absorbedEssenceDefinitionIds: signal(new Set<string>()),
+      refreshArchive: jasmine.createSpy('refreshArchive'),
+    } as unknown as EssenceStateService;
+    const component = createComponent(
+      inventoryState([]),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      essenceState,
+    );
+    const token = {
+      id: 'twilight-clearing-token',
+      quantity: 1,
+      itemInstance: {
+        id: 'twilight-clearing-token-instance',
+        itemBase: {
+          id: 'item.essence_token.twilight_clearing',
+          name: 'Twilight Clearing - Essence Token',
+          rarity: Rarity.Rare,
+          itemType: ItemType.Resource,
+          description: '',
+          stackable: true,
+          selectionCrate: {
+            selectionLabel: 'Essence',
+            options: [
+              {
+                id: 'illusion-fox',
+                name: 'Illusion Fox Essence',
+                quantity: 1,
+                essence: { id: 'essence.illusion_fox' },
+              } as unknown as SelectionCrateOption,
+            ],
+          },
+        },
+      },
+    } as InventoryItem;
+
+    component.selectInventoryItem(token);
+
+    expect(essenceState.refreshArchive).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns borrowed equipment to its guild vault and refreshes local state', () => {
+    const item = inventoryEquipment(
+      'borrowed-weapon',
+      EquipmentType.OneHanded,
+      ItemQuality.Standard,
+      4,
+    );
+    const equipment = item.itemInstance as EquipmentInstance;
+    equipment.isGuildBorrowed = true;
+    equipment.guildVaultItemId = 'vault-item';
+    equipment.borrowedFromGuildName = 'The Vanguard';
+    const state = inventoryState([item]);
+    const equippedState = equipmentState([]);
+    equippedState.load = jasmine.createSpy('load');
+    const guildState = jasmine.createSpyObj<GuildStateService>(
+      'GuildStateService',
+      ['returnVaultItem'],
+    );
+    guildState.returnVaultItem.and.returnValue(of(undefined));
+    const component = createComponent(
+      state,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      equippedState,
+      guildState,
+    );
+    component.selectInventoryItem(item);
+
+    component.returnToGuild(item);
+
+    expect(guildState.returnVaultItem).toHaveBeenCalledOnceWith('vault-item');
+    expect(state.load).toHaveBeenCalledOnceWith(true);
+    expect(equippedState.load).toHaveBeenCalledOnceWith(true);
+    expect(component.selectedItem()).toBeNull();
+    expect(component.guildReturnPendingItemId()).toBeNull();
   });
 
   it('keeps the equipment collection selected for the equip objective', () => {
@@ -467,6 +600,8 @@ function createComponent(
   equipmentApi?: EquipmentService,
   loadoutState?: EquipmentLoadoutService,
   equippedState?: EquipmentStateService,
+  guildState?: GuildStateService,
+  essenceState?: EssenceStateService,
 ): InventoryComponent {
   return TestBed.runInInjectionContext(
     () =>
@@ -478,10 +613,12 @@ function createComponent(
         modal,
         equippedState,
         undefined,
-        undefined,
+        guildState,
         undefined,
         equipmentApi,
         loadoutState,
+        undefined,
+        essenceState,
       ),
   );
 }

@@ -434,6 +434,7 @@
 }
 
 .dungeon-node__circle {
+  position: relative;
   display: grid;
   width: 3.25rem;
   height: 3.25rem;
@@ -445,6 +446,26 @@
   font-size: var(--ll-text-lg);
   box-shadow: var(--ll-shadow-sm);
   transition: all 160ms ease;
+}
+
+.dungeon-node__shortcut {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.45rem;
+  display: grid;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  padding: 0 0.25rem;
+  place-items: center;
+  border: 1px solid var(--dungeon-node-color);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-bg-deep);
+  color: var(--dungeon-node-color);
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: var(--ll-weight-bold);
+  line-height: 1;
+  box-shadow: var(--ll-shadow-sm);
 }
 
 .dungeon-node__label {

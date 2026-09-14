@@ -10,6 +10,7 @@ describe('EssencesAbsorbComponent', () => {
   let component: EssencesAbsorbComponent;
   let selectInventoryEssence: jasmine.Spy;
   let selectedInventoryItemState = signal<InventoryItem | null>(null);
+  let inventoryEssencesState = signal<InventoryItem[]>([]);
   let isAbsorbed = true;
 
   const absorbedItem = {
@@ -27,13 +28,14 @@ describe('EssencesAbsorbComponent', () => {
   beforeEach(async () => {
     isAbsorbed = true;
     selectedInventoryItemState = signal<InventoryItem | null>(null);
+    inventoryEssencesState = signal<InventoryItem[]>([absorbedItem]);
     selectInventoryEssence = jasmine
       .createSpy('selectInventoryEssence')
       .and.callFake((item: InventoryItem) =>
         selectedInventoryItemState.set(item),
       );
     const essenceState = {
-      inventoryEssences: signal([absorbedItem]),
+      inventoryEssences: inventoryEssencesState,
       selectedInventoryItem: selectedInventoryItemState,
       selectedInventoryEssence: signal<Essence | null>(null),
       isSelectedInventoryEssenceAbsorbed: signal(false),
@@ -135,5 +137,34 @@ describe('EssencesAbsorbComponent', () => {
 
     isAbsorbed = true;
     expect(component.spareCopies(absorbedItem)).toBe(6);
+  });
+
+  it('highlights unabsorbed Essences and keeps them above absorbed copies', () => {
+    const unabsorbedItem = {
+      ...absorbedItem,
+      id: 'inventory-row-2',
+      itemInstance: {
+        ...absorbedItem.itemInstance,
+        id: 'inventory-item-2',
+      },
+    } as InventoryItem;
+    inventoryEssencesState.set([absorbedItem, unabsorbedItem]);
+    spyOn(component.essenceState, 'isInventoryEssenceAbsorbed').and.callFake(
+      (item) => item === absorbedItem,
+    );
+    spyOn(component.essenceState, 'asEssence').and.callFake(
+      (item) =>
+        ({
+          id: item.itemInstance.id,
+          name: item === absorbedItem ? 'Alpha Essence' : 'Zeta Essence',
+        }) as Essence,
+    );
+
+    expect(component.visibleEssences()).toEqual([unabsorbedItem, absorbedItem]);
+
+    fixture.detectChanges();
+    const rows = fixture.nativeElement.querySelectorAll('.absorb-list-row');
+    expect(rows[0].textContent).toContain('Not absorbed');
+    expect(rows[1].textContent).toContain('Absorbed');
   });
 });

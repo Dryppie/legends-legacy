@@ -2,6 +2,12 @@ import { EssenceDescriptionFormatter } from './essence-description-formatter';
 import { COMBAT_KEYWORDS } from './combat-keyword-glossary';
 
 describe('Combat keyword descriptions', () => {
+  it('explains Exposed as a capped target critical-chance bonus', () => {
+    const exposed = COMBAT_KEYWORDS.find((entry) => entry.name === 'Exposed');
+    expect(exposed?.description).toContain('10 percentage points');
+    expect(exposed?.description).toContain('100% cap');
+    expect(exposed?.description).toContain('10 seconds');
+  });
   it('identifies the damage type dealt by each periodic damage condition', () => {
     for (const damageType of ['Poison', 'Burn', 'Bleed']) {
       const keyword = COMBAT_KEYWORDS.find(

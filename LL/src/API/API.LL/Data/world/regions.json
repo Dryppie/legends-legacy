@@ -500,6 +500,40 @@
               "weightedSpawnRate": 0.2
             }
           ]
+        },
+        {
+          "id": "region_02_area_05",
+          "name": "Sunken Scalehold",
+          "levelRequirement": 70,
+          "difficultyTier": 15,
+          "requiredTowerFloor": 10,
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
+          "creatures": [
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000108",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000109",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000110",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000111",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000112",
+              "weightedSpawnRate": 0.2
+            }
+          ]
         }
       ]
     }

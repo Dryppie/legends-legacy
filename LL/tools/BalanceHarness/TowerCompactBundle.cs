@@ -134,7 +134,7 @@ public static partial class TowerCompactBundle
         Action<string, TowerTrial>? visit = null) => VerifyCore(output, token, expectedManifestHash, visit);
 
     private static VerifiedTowerCompact VerifyCore(string output, CancellationToken token, string? expectedManifestHash,
-        Action<string, TowerTrial>? visit, TowerCompactManifest? prefix = null)
+        Action<string, TowerTrial>? visit, TowerCompactManifest? prefix = null, int? pendingChunk = null)
     {
         using var timing = TowerPerformanceTrace.Measure("compact.read-verify");
         output = Path.GetFullPath(output);
@@ -205,7 +205,7 @@ public static partial class TowerCompactBundle
         for (var index = 0; index < manifest.Chunks; index++)
         {
             token.ThrowIfCancellationRequested();
-            var chunk = ChunkName(index);
+            var chunk = (pendingChunk == index ? ".pending-" : "") + ChunkName(index);
             var dataName = "chunks/" + chunk + "/records.json.gz";
             var receiptName = "chunks/" + chunk + "/receipt.json";
             var receipt = TowerContractJson.Read<TowerCompactChunk>(Path.Combine(output, receiptName));
@@ -353,15 +353,16 @@ public static partial class TowerCompactBundle
             throw new InvalidDataException("Compact Tower result has inconsistent outcome, duration or required statistics.");
     }
     private static string ChunkName(int index) => index.ToString("D6", System.Globalization.CultureInfo.InvariantCulture);
-    private static void CommitChunk(string output, int index, IReadOnlyList<TowerCompactRecord> rows)
+    private static async Task CommitChunkAsync(string output, int index, IReadOnlyList<TowerCompactRecord> rows, CancellationToken token)
     {
         using var timing = TowerPerformanceTrace.Measure("compact.commit-chunk");
         var folder = Path.Combine(output, "chunks", ".pending-" + ChunkName(index));
         Directory.CreateDirectory(folder);
         var data = Path.Combine(folder, "records.json.gz");
         WriteGzip(data, rows);
-        HarnessJson.WriteNew(Path.Combine(folder, "receipt.json"), new TowerCompactChunk(1, index, rows[0].Index, rows.Count, HarnessJson.FileHash(data)));
-        Directory.Move(folder, Path.Combine(output, "chunks", ChunkName(index)));
+        var receipt = new TowerCompactChunk(1, index, rows[0].Index, rows.Count, HarnessJson.FileHash(data));
+        HarnessJson.WriteNew(Path.Combine(folder, "receipt.json"), receipt);
+        await PublishChunkAsync(output, index, receipt, token);
     }
     private static string SharedPath(string output, string folder, string hash, bool gzip)
     {

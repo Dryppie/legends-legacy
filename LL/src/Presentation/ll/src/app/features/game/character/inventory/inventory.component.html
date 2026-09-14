@@ -336,6 +336,11 @@
                   class="ll-badge ll-badge-accent inventory-new-badge"
                   >New</span
                 >
+                <span
+                  *ngIf="equipment.isGuildBorrowed"
+                  class="ll-badge shrink-0 border-amber-400/40 bg-amber-400/10 text-amber-200"
+                  >Borrowed</span
+                >
               </span>
             </span>
 
@@ -472,6 +477,32 @@
             <button type="button" class="ll-button mb-2 w-full" (click)="linkEquipmentInChat(item)">
               Link in chat
             </button>
+
+            <ng-container *ngIf="equipmentInstance(item) as selectedEquipment">
+              <button
+                *ngIf="selectedEquipment.isGuildBorrowed"
+                type="button"
+                class="ll-button mb-2 w-full border-amber-400/40 text-amber-100"
+                [disabled]="
+                  guildReturnPendingItemId() !== null ||
+                  !selectedEquipment.guildVaultItemId
+                "
+                (click)="returnToGuild(item)"
+              >
+                {{
+                  guildReturnPendingItemId() === item.itemInstance.id
+                    ? "Returning..."
+                    : "Return to guild"
+                }}
+              </button>
+              <div
+                *ngIf="guildReturnActionError() as message"
+                class="ll-state ll-state-danger mb-2"
+              >
+                {{ message }}
+              </div>
+            </ng-container>
+
             <button
               *ngIf="canManageEquipment(item)"
               type="button"
@@ -793,12 +824,40 @@
         <div class="ll-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
           <div class="ll-card p-3">
             <app-item [item]="item.itemInstance"></app-item>
-            <p class="ll-copy mt-3">
-              {{
-                itemDescription(item.itemInstance.itemBase) ||
-                  "No description available."
-              }}
-            </p>
+            <ng-container
+              *ngIf="
+                item.itemInstance.itemBase.blueprint as blueprint;
+                else stockItemDescription
+              "
+            >
+              <div class="mt-3">
+                <p class="ll-eyebrow">Item attributes</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span
+                    *ngFor="let attribute of blueprint.attributes"
+                    class="ll-item-chip ll-item-chip-accent"
+                  >
+                    {{ blueprintAttributeLabel(attribute) }}
+                  </span>
+                </div>
+              </div>
+
+              <app-equipment-set-progress
+                *ngIf="blueprint.equipmentSet"
+                class="mt-3 block"
+                [equipmentSet]="blueprint.equipmentSet"
+                [highlightAllBonuses]="true"
+              ></app-equipment-set-progress>
+            </ng-container>
+
+            <ng-template #stockItemDescription>
+              <p class="ll-copy mt-3">
+                {{
+                  itemDescription(item.itemInstance.itemBase) ||
+                    "No description available."
+                }}
+              </p>
+            </ng-template>
             <div class="ll-item-stat-row mt-3">
               <span>Held</span>
               <strong class="tabular-nums text-primary">
@@ -831,7 +890,15 @@
                   [attr.aria-pressed]="selectedContainerOptionId() === option.id"
                   (click)="selectContainerOption(option)"
                 >
-                  <span>{{ option.name }}</span>
+                  <span class="selection-container-option-label">
+                    <span>{{ option.name }}</span>
+                    <span
+                      *ngIf="isSelectionEssenceAbsorbed(option)"
+                      class="selection-container-option-status"
+                    >
+                      ✓ Absorbed
+                    </span>
+                  </span>
                   <strong class="tabular-nums text-primary">
                     ×{{ option.quantity | number: "1.0-0" }}
                   </strong>

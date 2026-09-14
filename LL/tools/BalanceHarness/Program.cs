@@ -14,27 +14,48 @@ public static class Program
         {
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
+                Console.WriteLine("BalanceHarness tower-allocation-confirmation-prepare --source-run <stopped-run> --source-work <sealed-audit> --history <current-ledger-json> --seed <int> --plan <markdown> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-allocation-confirmation-check|tower-allocation-confirmation-run|tower-allocation-confirmation-verify --run <directory> (94 fixed recipes; 512 fresh shared trials; no resume)");
                 Console.WriteLine("BalanceHarness run --output <new-directory> [--seed <int>] [--content-root <API.LL-directory>] [--scenario <json>] [--detailed]");
                 Console.WriteLine("BalanceHarness suite --output <new-directory> [--seed <int>] [--suite <json>] [--samples <per-cell>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower --output <new-directory> [--scenario <json>] [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-performance --output <new-directory> [--definition <bounded-performance-json>] [--content-root <API.LL-directory>] (diagnostics only)");
+                Console.WriteLine("BalanceHarness tower-discovery-performance --definition <frozen-diagnostic-json> --output <new-directory> (zero new seeds; bounded scaling and parity only)");
+                Console.WriteLine("BalanceHarness tower-discovery-parity-check --definition <frozen-parity-json> (zero fights); tower-discovery-parity --definition <frozen-parity-json> --output <new-directory> (34 candidate fights; retained reference)");
                 Console.WriteLine("BalanceHarness tower-performance --archive-format tower-compact-v1 --output <new-directory> [--definition <json>] [--content-root <directory>]");
                 Console.WriteLine("Add --execution-mode prepared-v1 to tower-compact or compact tower-performance for reusable preparation without playback checkpoints.");
                 Console.WriteLine("BalanceHarness tower-performance-compare --reference <benchmark-directory> --run <benchmark-directory> --output <new-directory>");
                 Console.WriteLine("BalanceHarness tower-compact --output <new-directory> (--definition <bulk-json> | --scenario <Tower-scenario-json>) [--content-root <directory>]");
                 Console.WriteLine("Compact resume: append --resume true with the identical definition and execution mode. Campaign limits: --chunk-size 32 --retry-reserve 32 --max-seconds 300 --max-bytes 2147483648.");
+                Console.WriteLine("New campaigns/feedback preparation may opt into --storage-accounting owned-storage-v1 (execute once; closed-subtree changes detected at full lifecycle audits).");
                 Console.WriteLine("BalanceHarness tower-balance-run --definition <frozen-family-json> --output <directory> [--content-root <API.LL-directory>] [--resume true] [campaign limits]");
                 Console.WriteLine("BalanceHarness tower-balance-run-verify --run <directory>");
                 Console.WriteLine("BalanceHarness tower-staged-balance --definition <two-stage-family-json> --output <directory> [--content-root <directory>] [--resume true] [campaign limits]");
                 Console.WriteLine("BalanceHarness tower-staged-balance-verify --run <directory>");
                 Console.WriteLine("Compact discovery: tower-boss-discover --archive-format tower-compact-v1 [--execution-mode prepared-v1] [--resume true] [campaign limits]");
                 Console.WriteLine("BalanceHarness tower-compact-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-compact-recover-publication --run <unfinished-directory> (verify and publish one complete pending chunk; zero fights)");
                 Console.WriteLine("BalanceHarness tower-compact-replay --run <directory> --case <case-id> --battle <tower.0001> [--detailed]");
                 Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-team-plan --floor <1-15> --slots <4-10> --seed <int> --output <new-directory> [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>] (independent preview with retained controls and history)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-discover --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] (discovery only)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-verify --run <directory>");
+                Console.WriteLine("BalanceHarness tower-loadout-benchmark-prepare (same arguments as tower-search-benchmark-prepare plus --plan <study-plan>; 24,200 fights, always validate)");
+                Console.WriteLine("BalanceHarness tower-loadout-replication-prepare (same arguments, --plan required, eight external controls; unchanged v13, 24,840 fights)");
+                Console.WriteLine("BalanceHarness tower-finalist-rescreen-prepare --definition <template> --controls <20-recipe selection> --history <ledger> --anchor <id> --seed <int> --plan <plan> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-finalist-rescreen-check|tower-finalist-rescreen-run|tower-finalist-rescreen-verify --run <directory> (check/verify: zero fights; run once: at most 57,344)");
+                Console.WriteLine("BalanceHarness tower-feedback-prepare --definition <template> --controls <36-recipe prior comparison> --history <ledger> --anchor <id> --strong-control <id> --seed <int> --plan <plan> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-feedback-check|tower-feedback-run|tower-feedback-verify --run <directory> (check/verify: zero fights; run once: at most 63,488)");
+                Console.WriteLine("BalanceHarness tower-retention-prepare --definition <template> --controls <48-recipe prior comparison> --history <ledger> --anchor <id> --strong-control <id> --seed <int> --plan <plan> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-retention-check|tower-retention-run|tower-retention-verify --run <directory> (check/verify: zero fights; run once: at most 71,680)");
+                Console.WriteLine("BalanceHarness tower-allocation-prepare --definition <template> --controls <74-recipe prior comparison> --history <ledger> --anchor <id> --strong-control <id> --seed <int> --plan <plan> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-allocation-check|tower-allocation-run|tower-allocation-verify --run <directory> (check/verify: zero fights; run once: at most 106,496)");
+                Console.WriteLine("BalanceHarness tower-lineage-prepare --definition <template> --controls <62-recipe prior comparison> --history <ledger> --anchor <id> --strong-control <id> --seed <int> --plan <plan> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-lineage-check|tower-lineage-run|tower-lineage-verify --run <directory> (check/verify: zero fights; run once: at most 79,872)");
+                Console.WriteLine("BalanceHarness tower-search-benchmark-prepare --definition <template> --history <seed-ledger> --parity <historical-controls> --anchor <reference-id> --seed <int> --output <new-directory> [--content-root <directory>]");
+                Console.WriteLine("BalanceHarness tower-search-benchmark-run --run <prepared-directory> (single attempt, at most 28,424 fights)");
+                Console.WriteLine("BalanceHarness tower-search-benchmark-verify --run <completed-directory> (zero new fights)");
                 Console.WriteLine("BalanceHarness tower-boss-study --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] [--runs-root <retained-library-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-study-verify --run <directory>");
                 Console.WriteLine("BalanceHarness tower-balance-evaluate --definition <frozen-confirmation-json> --sources <cell-run-map-json> --output <new-directory>");
@@ -78,25 +99,36 @@ public static class Program
             }
             var allowed = command switch
             {
+                "tower-allocation-confirmation-prepare" => new[] { "--source-run", "--source-work", "--history", "--seed", "--plan", "--output", "--content-root" },
+                "tower-allocation-confirmation-check" or "tower-allocation-confirmation-run" or "tower-allocation-confirmation-verify" => new[] { "--run" },
                 "run" => new[] { "--output", "--seed", "--content-root", "--scenario", "--detailed" },
                 "suite" => new[] { "--output", "--seed", "--content-root", "--suite", "--samples" },
                 "tower" => new[] { "--output", "--content-root", "--scenario" },
                 "tower-performance" => new[] { "--output", "--definition", "--content-root", "--archive-format", "--execution-mode" },
+                "tower-discovery-performance" => new[] { "--output", "--definition" },
+                "tower-discovery-parity" => new[] { "--output", "--definition" },
+                "tower-discovery-parity-check" => new[] { "--definition" },
                 "tower-compact" => new[] { "--output", "--definition", "--scenario", "--content-root", "--execution-mode", "--resume" },
-                "tower-compact-verify" => new[] { "--run" },
+                "tower-compact-verify" or "tower-compact-recover-publication" => new[] { "--run" },
                 "tower-compact-replay" => new[] { "--run", "--case", "--battle", "--detailed" },
                 "tower-performance-worker" => new[] { "--run", "--workers" },
                 "tower-performance-compare" => new[] { "--reference", "--run", "--output" },
                 "tower-boss-discovery-prepare" => new[] { "--definition", "--output", "--content-root" },
-                "tower-boss-discover" => new[] { "--definition", "--output", "--content-root", "--archive-format", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes" },
+                "tower-boss-discover" => new[] { "--definition", "--output", "--content-root", "--archive-format", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes", "--storage-accounting" },
                 "tower-boss-discovery-verify" => new[] { "--run" },
+                "tower-search-benchmark-prepare" or "tower-loadout-benchmark-prepare" or "tower-loadout-replication-prepare" => new[] { "--definition", "--history", "--parity", "--anchor", "--seed", "--output", "--content-root", "--plan" },
+                "tower-search-benchmark-run" or "tower-search-benchmark-verify" => new[] { "--run" },
+                "tower-finalist-rescreen-prepare" => new[] { "--definition", "--controls", "--history", "--anchor", "--seed", "--plan", "--output", "--content-root" },
+                "tower-feedback-prepare" or "tower-retention-prepare" or "tower-allocation-prepare" or "tower-late-allocation-prepare" or "tower-portfolio-prepare" or "tower-lineage-prepare" => new[] { "--definition", "--controls", "--history", "--anchor", "--strong-control", "--seed", "--plan", "--output", "--content-root", "--storage-accounting" },
+                "tower-finalist-rescreen-check" or "tower-finalist-rescreen-run" or "tower-finalist-rescreen-verify" => new[] { "--run" },
+                "tower-feedback-check" or "tower-feedback-run" or "tower-feedback-verify" or "tower-retention-check" or "tower-retention-run" or "tower-retention-verify" or "tower-allocation-check" or "tower-late-allocation-check" or "tower-portfolio-check" or "tower-lineage-check" or "tower-allocation-run" or "tower-late-allocation-run" or "tower-portfolio-run" or "tower-allocation-verify" or "tower-late-allocation-verify" or "tower-portfolio-verify" or "tower-lineage-run" or "tower-lineage-verify" => new[] { "--run" },
                 "tower-boss-improvement-prepare" => new[] { "--definition", "--references", "--output", "--content-root" },
                 "tower-team-plan" => new[] { "--floor", "--slots", "--seed", "--output", "--runs-root", "--catalogs-root", "--content-root" },
                 "tower-boss-study" => new[] { "--definition", "--output", "--content-root", "--runs-root" },
                 "tower-boss-study-verify" => new[] { "--run" },
-                "tower-balance-run" => new[] { "--definition", "--output", "--content-root", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes" },
+                "tower-balance-run" => new[] { "--definition", "--output", "--content-root", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes", "--storage-accounting" },
                 "tower-balance-run-verify" => new[] { "--run" },
-                "tower-staged-balance" => new[] { "--definition", "--output", "--content-root", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes" },
+                "tower-staged-balance" => new[] { "--definition", "--output", "--content-root", "--execution-mode", "--resume", "--chunk-size", "--retry-reserve", "--max-seconds", "--max-bytes", "--storage-accounting" },
                 "tower-staged-balance-verify" => new[] { "--run" },
                 "tower-balance-evaluate" => new[] { "--definition", "--sources", "--output" },
                 "tower-benchmark" => new[] { "--output", "--content-root", "--catalog", "--seed", "--samples", "--reference" },
@@ -140,6 +172,102 @@ public static class Program
                 else options.Add(key, args[index]);
             }
             var detailed = options.ContainsKey("--detailed");
+            if (command == "tower-allocation-confirmation-prepare")
+            {
+                var result = TowerAllocationConfirmationRun.Prepare(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--source-run"), Required(options, "--source-work"), Required(options, "--history"),
+                    int.Parse(Required(options, "--seed"), CultureInfo.InvariantCulture), Required(options, "--plan"), Required(options, "--output"));
+                Console.WriteLine(JsonSerializer.Serialize(result with { FrozenFiles = new Dictionary<string, string>() }, HarnessJson.Options)); return 0;
+            }
+            if (command == "tower-allocation-confirmation-check")
+            {
+                var result = TowerAllocationConfirmationRun.VerifyPrepared(Required(options, "--run"));
+                Console.WriteLine($"Prepared {result.Version} verified; zero new fights."); return 0;
+            }
+            if (command == "tower-discovery-parity-check")
+            {
+                Console.WriteLine("Parity inputs verified; zero fights. " + TowerDiscoveryParity.Check(Required(options, "--definition"), cancellation.Token));
+                return 0;
+            }
+            if (command == "tower-discovery-parity")
+            {
+                await TowerDiscoveryParity.RunAsync(Required(options, "--definition"), Required(options, "--output"), cancellation.Token, Console.WriteLine);
+                return 0;
+            }
+            if (command == "tower-discovery-performance")
+            {
+                await TowerDiscoveryPerformance.RunAsync(Required(options, "--definition"), Required(options, "--output"), cancellation.Token, Console.WriteLine);
+                return 0;
+            }
+            if (command is "tower-allocation-confirmation-run" or "tower-allocation-confirmation-verify")
+            {
+                var verify = command.EndsWith("-verify", StringComparison.Ordinal);
+                var result = verify ? await TowerAllocationConfirmationRun.VerifyAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine)
+                    : await TowerAllocationConfirmationRun.RunAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                return verify || result.Quality?.Adoption == "Eligible" ? 0 : 1;
+            }
+            if (command is "tower-feedback-prepare" or "tower-retention-prepare" or "tower-allocation-prepare" or "tower-late-allocation-prepare" or "tower-portfolio-prepare" or "tower-lineage-prepare")
+            {
+                var result = TowerFeedbackBenchmarkRun.Prepare(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--definition"), Required(options, "--controls"), Required(options, "--history"), Required(options, "--anchor"), Required(options, "--strong-control"),
+                    int.Parse(Required(options, "--seed"), CultureInfo.InvariantCulture), Required(options, "--plan"), Required(options, "--output"),
+                    command == "tower-portfolio-prepare" ? TowerSearchPortfolio.Policy : command == "tower-late-allocation-prepare" ? TowerLateAllocation.Policy : command == "tower-allocation-prepare" ? TowerSearchAllocation.Policy : command == "tower-lineage-prepare" ? TowerGenerationComparisonDesign.LineagePolicy : command == "tower-retention-prepare" ? TowerGenerationComparisonDesign.RetentionPolicy : TowerFeedbackBenchmark.Policy,
+                    options.GetValueOrDefault("--storage-accounting"));
+                Console.WriteLine(JsonSerializer.Serialize(result with { FrozenFiles = new Dictionary<string, string>() }, HarnessJson.Options));
+                return 0;
+            }
+            if (command is "tower-feedback-check" or "tower-retention-check" or "tower-allocation-check" or "tower-late-allocation-check" or "tower-portfolio-check" or "tower-lineage-check")
+            {
+                var result = TowerFeedbackBenchmarkRun.VerifyPrepared(Required(options, "--run"));
+                Console.WriteLine($"Prepared {result.Version} verified; zero new fights."); return 0;
+            }
+            if (command is "tower-feedback-run" or "tower-feedback-verify" or "tower-retention-run" or "tower-retention-verify" or "tower-allocation-run" or "tower-late-allocation-run" or "tower-portfolio-run" or "tower-allocation-verify" or "tower-late-allocation-verify" or "tower-portfolio-verify" or "tower-lineage-run" or "tower-lineage-verify")
+            {
+                var verify = command.EndsWith("-verify", StringComparison.Ordinal);
+                var result = verify ? await TowerFeedbackBenchmarkRun.VerifyAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine)
+                    : await TowerFeedbackBenchmarkRun.RunAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                return verify || result.Quality?.Adoption == "Eligible" ? 0 : 1;
+            }
+            if (command == "tower-finalist-rescreen-prepare")
+            {
+                var result = TowerFinalistRescreenStudy.Prepare(options.GetValueOrDefault("--content-root") ?? FindContentRoot(),
+                    Required(options, "--definition"), Required(options, "--controls"), Required(options, "--history"), Required(options, "--anchor"),
+                    int.Parse(Required(options, "--seed"), CultureInfo.InvariantCulture), Required(options, "--plan"), Required(options, "--output"));
+                Console.WriteLine(JsonSerializer.Serialize(result with { FrozenFiles = new Dictionary<string, string>() }, HarnessJson.Options));
+                return 0;
+            }
+            if (command == "tower-finalist-rescreen-check")
+            {
+                var result = TowerFinalistRescreenStudy.VerifyPrepared(Required(options, "--run"));
+                Console.WriteLine($"Prepared {result.Version} verified; zero new fights."); return 0;
+            }
+            if (command is "tower-finalist-rescreen-run" or "tower-finalist-rescreen-verify")
+            {
+                var verify = command.EndsWith("-verify", StringComparison.Ordinal);
+                var result = verify ? await TowerFinalistRescreenStudy.VerifyAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine)
+                    : await TowerFinalistRescreenStudy.RunAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                return verify || result.Quality?.Adoption == "Eligible" ? 0 : 1;
+            }
+            if (command is "tower-search-benchmark-prepare" or "tower-loadout-benchmark-prepare" or "tower-loadout-replication-prepare")
+            {
+                var root = options.GetValueOrDefault("--content-root") ?? FindContentRoot();
+                var result = TowerSearchBenchmark.Prepare(root, Required(options, "--definition"), Required(options, "--history"),
+                    Required(options, "--parity"), Required(options, "--anchor"), int.Parse(Required(options, "--seed"), CultureInfo.InvariantCulture), Required(options, "--output"), loadoutComposition: command != "tower-search-benchmark-prepare", planPath: options.GetValueOrDefault("--plan"), loadoutReplication: command == "tower-loadout-replication-prepare");
+                Console.WriteLine($"Frozen {result.Version}: at most {result.MaximumFights} fights, {result.MaximumSeconds} seconds, {result.MaximumBytes} bytes; no retries.");
+                return 0;
+            }
+            if (command is "tower-search-benchmark-run" or "tower-search-benchmark-verify")
+            {
+                var result = command.EndsWith("-verify", StringComparison.Ordinal)
+                    ? await TowerSearchBenchmark.VerifyAsync(Required(options, "--run"), cancellation.Token)
+                    : await TowerSearchBenchmark.RunAsync(Required(options, "--run"), cancellation.Token, Console.WriteLine);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                return command.EndsWith("-verify", StringComparison.Ordinal) ? 0 : result.Status == "ScreenFailed" ? 1
+                    : result.Quality!.Methods.Any(m => m.Reliability == "Pass") ? 0 : 1;
+            }
             if (command == "tower-coverage-diagnostics")
             {
                 TowerCoverageDiagnostics.Run(Required(options, "--definition"), Required(options, "--output"), cancellation.Token);
@@ -164,6 +292,13 @@ public static class Program
                     output, cancellation.Token, Console.WriteLine, retainExecutable: true, executionMode: options.GetValueOrDefault("--execution-mode"), resume: bool.Parse(options.GetValueOrDefault("--resume", "false")));
                 var saved = TowerCompactBundle.Verify(output, cancellation.Token);
                 Console.WriteLine($"Compact Tower complete and verified: {saved.Plan.PlannedBattles} battles. No automatic balance acceptance.");
+                return 0;
+            }
+            if (command == "tower-compact-recover-publication")
+            {
+                var result = await TowerCompactBundle.RecoverPublicationAsync(Required(options, "--run"), cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                Console.WriteLine("Complete pending chunk verified and published; zero fights. Existing resume identity and attempt checks still apply.");
                 return 0;
             }
             if (command == "tower-compact-verify")
@@ -563,7 +698,7 @@ public static class Program
         int.Parse(options.GetValueOrDefault("--retry-reserve", "32"), CultureInfo.InvariantCulture),
         int.Parse(options.GetValueOrDefault("--max-seconds", "300"), CultureInfo.InvariantCulture),
         long.Parse(options.GetValueOrDefault("--max-bytes", "2147483648"), CultureInfo.InvariantCulture),
-        options.GetValueOrDefault("--execution-mode", "prepared-v1"));
+        options.GetValueOrDefault("--execution-mode", "prepared-v1"), options.GetValueOrDefault("--storage-accounting"));
 
     private static string Required(IReadOnlyDictionary<string, string> options, string key) =>
         options.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value)

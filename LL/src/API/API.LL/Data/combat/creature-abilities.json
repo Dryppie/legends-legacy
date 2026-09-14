@@ -740,6 +740,41 @@
         "ability.creature.serath.sixfold_sentence",
         "ability.creature.serath.the_living_scale"
       ]
+    },
+    {
+      "monsterId": "monster.lizardfolk_brute",
+      "abilityIds": [
+        "ability.creature.lizardfolk_brute.skullcrusher",
+        "ability.creature.lizardfolk_brute.brutal_follow_up"
+      ]
+    },
+    {
+      "monsterId": "monster.lizardfolk_elementalist",
+      "abilityIds": [
+        "ability.creature.lizardfolk_elementalist.converging_element",
+        "ability.creature.lizardfolk_elementalist.elemental_bond"
+      ]
+    },
+    {
+      "monsterId": "monster.lizardfolk_scout",
+      "abilityIds": [
+        "ability.creature.lizardfolk_scout.find_weakness",
+        "ability.creature.lizardfolk_scout.keen_eye"
+      ]
+    },
+    {
+      "monsterId": "monster.lizardfolk_shaman",
+      "abilityIds": [
+        "ability.creature.lizardfolk_shaman.herb_mixture",
+        "ability.creature.lizardfolk_shaman.cleansing_herbs"
+      ]
+    },
+    {
+      "monsterId": "monster.lizardfolk_warrior",
+      "abilityIds": [
+        "ability.creature.lizardfolk_warrior.spearhead_assault",
+        "ability.creature.lizardfolk_warrior.battle_rhythm"
+      ]
     }
   ]
 }

@@ -42,7 +42,7 @@ public sealed partial class FastCombatEngine
             var consumed = condition.ConsumeFutureTicks(lastRites ? condition.UnpaidFutureTicks : 1);
             var family = condition.Type == StandardConditionType.Bleed ? 0
                 : condition.Type == StandardConditionType.Burn ? 1 : 2;
-            amounts[family] += condition.PowerSnapshot * .01d * condition.Value * consumed;
+            amounts[family] += condition.PowerSnapshot * .01d * condition.Value * consumed * condition.DamageMultiplier;
             stacks += condition.Value;
             if (condition.UnpaidFutureTicks > 0)
                 retainedStacks++;

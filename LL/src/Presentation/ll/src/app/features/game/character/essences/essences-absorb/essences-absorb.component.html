@@ -140,7 +140,13 @@
                 >★</span
               >
             </span>
-            <span class="absorb-row-status">
+            <span
+              class="absorb-row-status"
+              [class.absorb-row-status-ready]="
+                !essenceState.isInventoryEssenceAbsorbed(invItem)
+              "
+            >
+              <span class="absorb-row-status-dot" aria-hidden="true"></span>
               {{
                 essenceState.isInventoryEssenceAbsorbed(invItem)
                   ? "Absorbed"

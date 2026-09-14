@@ -5,4 +5,7 @@ public static class EquipmentTypeExtension
 {
     public static bool IsWeaponType(this EquipmentType equipmentType)
         => equipmentType == EquipmentType.TwoHanded || equipmentType == EquipmentType.OneHanded || equipmentType == EquipmentType.OffHand;
+
+    public static int OccupiedSlotCount(this EquipmentType equipmentType)
+        => equipmentType == EquipmentType.TwoHanded ? 2 : 1;
 }

@@ -20,12 +20,16 @@ public class ItemBaseDto : IMapFrom<ItemBase>
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }
     public SelectionCrateMetadataDto? SelectionCrate { get; set; }
+    public EquipmentBlueprintMetadataDto? Blueprint { get; set; }
     public void Mapping(Profile profile)
     {
         profile.CreateMap<ItemBase, ItemBaseDto>()
             .ForMember(
                 destination => destination.SelectionCrate,
                 options => options.MapFrom<SelectionCrateMetadataResolver>())
+            .ForMember(
+                destination => destination.Blueprint,
+                options => options.MapFrom<EquipmentBlueprintMetadataResolver>())
             .Include<EssenceItemBase, EssenceItemBaseDto>()
             .Include<EquipmentBase, EquipmentBaseDto>();
     }

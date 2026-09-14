@@ -3,14 +3,14 @@
 | Field                  | Value                              |
 | ---------------------- | ---------------------------------- |
 | Stable ID              | `condition.exposed`                |
-| Status                 | Proposed                           |
+| Status                 | Implemented                        |
 | Classification         | Harmful                            |
 | Default Stacking Model | Unique                             |
 | Default Removal        | Cleanse / Expiration               |
 | Primary Tags           | Debuff                             |
 | Player-Facing Term     | Exposed                            |
 | Known Aliases          | None                               |
-| Runtime IDs            | None                               |
+| Runtime IDs            | `StandardConditionType.Exposed`     |
 
 ## Definition
 
@@ -22,11 +22,11 @@ Create a temporary focus-fire opportunity by making the target more susceptible 
 
 ## Current Implementation
 
-Proposed lexicon contract only. `StandardConditionType` has no Exposed entry, and `FastCombatEngine.RollCriticalStrike` accepts source and effect bonuses without an Exposed target modifier.
+Implemented by the typed condition runtime. Eligible damage critical rolls read Exposed on the target. The shared critical chance cap is currently 100%; the earlier 75% proposal is obsolete.
 
 ## Canonical Target Behaviour
 
-The target owns one shared Exposed condition. For damage eligible to critically strike against that target, add 10 percentage points to the attacker's critical chance before the existing 75% cap. This is an additive chance bonus, not a 10% relative multiplier. It does not change the attacker's critical chance against other targets or increase critical damage.
+The target owns one shared Exposed condition. For damage eligible to critically strike against that target, add 10 percentage points to the attacker's critical chance before the existing 100% cap. This is an additive chance bonus, not a 10% relative multiplier. It does not change the attacker's critical chance against other targets or increase critical damage.
 
 ## Parameters
 
@@ -46,7 +46,7 @@ Living enemies.
 
 ## Removal and Prevention
 
-Cleanse removes Exposed. Natural expiration and encounter end clear it. A specific immunity can prevent application; [Ward](ward.md) can negate an otherwise-successful application, including a refresh. Damage does not consume Exposed. Exposed is not control, so Unstoppable does not prevent it.
+Cleanse removes Exposed. Natural expiration and encounter end clear it. [Ward](ward.md) can negate an otherwise-successful application, including a refresh. Damage does not consume Exposed. Exposed is not control, so Unstoppable does not prevent it.
 
 ## Interactions
 
@@ -54,25 +54,25 @@ Exposed modifies chance only for damage already eligible to critically strike un
 
 ## Immunity and Resistance
 
-The fixed 10-second duration and critical chance bonus are not reduced by Status Resistance. Specific Exposed immunity prevents application.
+The fixed 10-second duration and critical chance bonus are not reduced by Status Resistance. No separate Exposed-specific immunity system is introduced.
 
 ## Examples
 
 - **Ability text:** “Apply Exposed.”
 - **Hover text:** “Damage against an Exposed target has 10% Increased Critical Chance. Lasts 10 seconds. Does not stack; reapplication refreshes its duration.”
 
-An attacker with 20% critical chance has 30% against an Exposed target. An attacker with 70% reaches the existing 75% cap. Reapplying Exposed after 6 seconds resets its remaining duration to 10 seconds and preserves the same bonus.
+An attacker with 20% critical chance has 30% against an Exposed target. An attacker with 95% reaches the existing 100% cap. Reapplying Exposed after 6 seconds resets its remaining duration to 10 seconds and preserves the same bonus.
 
 ## Implementation References
 
-- `LL/src/Core/Domain/Models/Combat/Abilities/AbilitySpec.cs`: `StandardConditionType` (no Exposed runtime ID).
+- `LL/src/Core/Domain/Models/Combat/Abilities/AbilitySpec.cs`: `StandardConditionType.Exposed` (appended ID 27).
 - `LL/src/Infrastructure/Service/Services.LL/Combat/Engine/FastCombatEngine.cs`: `RollCriticalStrike` (existing additive chance calculation and cap).
 
-These references establish existing primitives, not implementation of Exposed.
+Regression coverage is in `LL/tests/EssenceSystem.Tests/SunkenScaleholdTests.cs`.
 
 ## Known Differences or Open Questions
 
-The shared runtime condition, target-side critical chance integration, authoring support, frontend presentation, and executable coverage are not implemented. Unique refresh and the additive interpretation above follow existing fixed-condition and critical chance conventions.
+The shared runtime condition, target-side critical chance integration, authoring support, frontend glossary, and executable coverage are implemented. Unique refresh and the additive interpretation follow existing fixed-condition and critical chance conventions.
 
 ## Related Entries
 

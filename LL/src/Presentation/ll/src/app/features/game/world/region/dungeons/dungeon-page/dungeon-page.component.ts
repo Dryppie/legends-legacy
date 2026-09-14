@@ -245,6 +245,38 @@ export class DungeonPageComponent {
     });
   });
 
+  readonly keyboardShortcutNodes = computed(() =>
+    this.graphNodes()
+      .filter((node) => this.isMapNodeActionable(node))
+      .slice(0, 9),
+  );
+
+  @HostListener('document:keydown', ['$event'])
+  onDungeonKeydown(event: KeyboardEvent): void {
+    if (
+      event.defaultPrevented ||
+      event.repeat ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.shiftKey ||
+      event.metaKey ||
+      this.loading() ||
+      this.combatStateService.getIsCombatActive(this.battleType)() ||
+      this.isTypingOrDialogTarget(event.target)
+    ) {
+      return;
+    }
+
+    const shortcutIndex = /^[1-9]$/.test(event.key)
+      ? Number(event.key) - 1
+      : -1;
+    const node = this.keyboardShortcutNodes()[shortcutIndex];
+    if (!node) return;
+
+    event.preventDefault();
+    this.chooseMapNode(node);
+  }
+
   @HostListener('window:resize')
   onViewportResize(): void {
     const nextWidth = window.innerWidth;
@@ -747,6 +779,13 @@ export class DungeonPageComponent {
     return 'Begin Combat';
   }
 
+  mapNodeShortcut(node: DungeonGraphNode): string | null {
+    const index = this.keyboardShortcutNodes().findIndex(
+      (candidate) => candidate.roomIndex === node.roomIndex,
+    );
+    return index === -1 ? null : String(index + 1);
+  }
+
   mapNodeVigorForecast(node: DungeonGraphNode): DungeonVigorForecast | null {
     if (node.room?.type !== 'Combat' && node.room?.type !== 'MiniBoss') {
       return null;
@@ -796,6 +835,16 @@ export class DungeonPageComponent {
       type === 'Boss' ||
       type === 'RestSite' ||
       type === 'Treasury'
+    );
+  }
+
+  private isTypingOrDialogTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    return (
+      target.isContentEditable ||
+      !!target.closest(
+        'input, textarea, select, [role="textbox"], [role="dialog"]',
+      )
     );
   }
 

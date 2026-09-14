@@ -3,7 +3,8 @@ using System.Text.Json;
 namespace BalanceHarness;
 
 public sealed record TowerBulkOptions(int ChunkSize = 32, int RetryReserve = 32, int MaximumSeconds = 300,
-    long MaximumBytes = 2147483648, string ExecutionMode = "prepared-v1");
+    long MaximumBytes = 2147483648, string ExecutionMode = "prepared-v1",
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? StorageAccounting = null);
 public sealed record TowerBulkContract(int SchemaVersion, string Kind, JsonElement Definition, LoadoutScope Scope,
     TowerBulkOptions Options, int PlannedBattles, int MaximumAttempts);
 public sealed record TowerBulkAccounting(int LogicalTrials, int ChargedAttempts, int RetryOrUncommittedAttempts, int MaximumAttempts);
@@ -21,6 +22,7 @@ internal sealed class TowerBulkCampaign : IDisposable
     private readonly string output;
     private readonly HashSet<string> visited = new(StringComparer.Ordinal);
     private int attempts;
+    private readonly TowerStorageAccountant? storage;
     public TowerBulkContract Contract { get; }
     public CancellationToken Token => cancellation.Token;
     public string Root => Path.Combine(output, "content");
@@ -43,6 +45,11 @@ internal sealed class TowerBulkCampaign : IDisposable
         foreach (var directory in directories)
             attempts = checked(attempts + TowerCompactBundle.AttemptCount(directory));
         if (attempts > contract.MaximumAttempts) throw new InvalidDataException("Campaign attempt cap exceeded.");
+        if (!verifyOnly && !WasComplete && contract.Options.StorageAccounting == TowerStorageAccountant.Mode)
+        {
+            storage = new(output, contract.Options.MaximumBytes, [FinalFiles, FinalFiles + ".pending", "campaign-failure.json", "campaign-failure.json.pending"], Token);
+            TowerStorageOwnership.Parent?.Attach(storage);
+        }
     }
 
     public static TowerBulkCampaign Open<T>(string root, string output, string kind, T definition,
@@ -53,6 +60,10 @@ internal sealed class TowerBulkCampaign : IDisposable
             || options.MaximumSeconds is < 1 or > 86400 || options.MaximumBytes is < 1048576 or > 107374182400
             || planned + options.RetryReserve > maximum || planned < 1 || options.ExecutionMode != TowerPreparedBattle.Mode)
             throw new InvalidDataException("Invalid compact campaign limits; planned trials plus retry reserve must fit the definition's combat cap.");
+        if (options.StorageAccounting is not null && options.StorageAccounting != TowerStorageAccountant.Mode)
+            throw new InvalidDataException("Unknown campaign storage accounting contract.");
+        if (options.StorageAccounting is not null && resume && !verifyOnly)
+            throw new InvalidDataException("Owned storage campaigns are execute-once; interrupted evidence cannot be resumed.");
         output = Path.GetFullPath(output);
         var lease = TowerCompactBundle.AcquireWriter(output);
         try
@@ -92,6 +103,7 @@ internal sealed class TowerBulkCampaign : IDisposable
     public async Task<VerifiedTowerCompact> BatchAsync(string id, IReadOnlyList<TowerCompactCase> cases,
         Action<string, TowerTrial>? visit = null)
     {
+        using var timing = TowerPerformanceTrace.Measure("campaign.batch");
         Token.ThrowIfCancellationRequested();
         if (!TowerBenchmark.SafeId(id) || !visited.Add(id)) throw new InvalidDataException("Duplicate or invalid campaign batch.");
         var path = Path.Combine(output, "batches", id);
@@ -106,6 +118,7 @@ internal sealed class TowerBulkCampaign : IDisposable
         else
         {
             CheckStorage();
+            storage?.BeginDirectory(path, Token);
             await TowerCompactBundle.CreateAsync(Root, definition, path, Token, message => {
                 CheckStorage(); progress?.Invoke(id + ": " + message);
             }, Contract.Scope.Settings, executionMode: Contract.Options.ExecutionMode, resume: Directory.Exists(path),
@@ -121,6 +134,7 @@ internal sealed class TowerBulkCampaign : IDisposable
             || HarnessJson.Hash(saved.Scope.Settings) != HarnessJson.Hash(Contract.Scope.Settings)
             || HarnessJson.Hash(saved.Scope.Execution) != HarnessJson.Hash(Contract.Scope.Execution))
             throw new InvalidDataException("Campaign batch content, execution or settings changed.");
+        if (storage is not null) storage.SealDirectory(Token);
         return saved;
     }
 
@@ -131,7 +145,7 @@ internal sealed class TowerBulkCampaign : IDisposable
             if (HarnessJson.Hash(HarnessJson.Read<T>(Path.Combine(output, name))) != HarnessJson.Hash(value))
                 throw new InvalidDataException("Campaign result differs from reconstruction: " + name);
         }
-        else Replace(Path.Combine(output, name), value);
+        else { storage?.AllowMetadata(name); Replace(Path.Combine(output, name), value); }
     }
 
     public void TextResult(string name, string value)
@@ -143,6 +157,7 @@ internal sealed class TowerBulkCampaign : IDisposable
         }
         else
         {
+            storage?.AllowMetadata(name);
             using (var writer = new StreamWriter(new FileStream(path + ".pending", FileMode.CreateNew, FileAccess.Write))) writer.Write(value);
             File.Move(path + ".pending", path, true);
         }
@@ -158,7 +173,14 @@ internal sealed class TowerBulkCampaign : IDisposable
         if (verifyOnly || WasComplete) return;
         File.Delete(Path.Combine(output, "campaign-failure.json"));
         CheckStorage();
-        HarnessJson.WriteNew(Path.Combine(output, FinalFiles), Inventory(output));
+        if (storage is null) HarnessJson.WriteNew(Path.Combine(output, FinalFiles), Inventory(output));
+        else
+        {
+            // Include the inventory's own bytes before publishing the completion marker.
+            HarnessJson.WriteNew(Path.Combine(output, FinalFiles + ".pending"), Inventory(output));
+            storage.Audit(Token);
+            File.Move(Path.Combine(output, FinalFiles + ".pending"), Path.Combine(output, FinalFiles));
+        }
     }
 
     public void Failure(string status, string? error)
@@ -170,7 +192,7 @@ internal sealed class TowerBulkCampaign : IDisposable
     {
         using var timing = TowerPerformanceTrace.Measure("campaign.check-storage");
         Token.ThrowIfCancellationRequested();
-        if (StorageBytes(output, Token) > Contract.Options.MaximumBytes)
+        if ((storage?.Check(Token) ?? StorageBytes(output, Token)) > Contract.Options.MaximumBytes)
             throw new InvalidDataException("Compact campaign storage limit reached at a batch/chunk boundary.");
     }
 
@@ -198,6 +220,7 @@ internal sealed class TowerBulkCampaign : IDisposable
         var stack = new Stack<string>(); stack.Push(output);
         while (stack.TryPop(out var directory))
         {
+            TowerPerformanceTrace.Count("storage.directories-visited");
             token.ThrowIfCancellationRequested();
             if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0) throw new InvalidDataException("Linked campaign directory.");
             // Enumeration supplies attributes and length together. Reuse those values for this scan only;
@@ -207,7 +230,8 @@ internal sealed class TowerBulkCampaign : IDisposable
                 token.ThrowIfCancellationRequested();
                 var attributes = entry.Attributes;
                 if ((attributes & FileAttributes.ReparsePoint) != 0) throw new InvalidDataException("Linked campaign file.");
-                if ((attributes & FileAttributes.Directory) != 0) stack.Push(entry.FullName); else yield return (FileInfo)entry;
+                if ((attributes & FileAttributes.Directory) != 0) stack.Push(entry.FullName);
+                else { TowerPerformanceTrace.Count("storage.files-visited"); yield return (FileInfo)entry; }
             }
         }
     }

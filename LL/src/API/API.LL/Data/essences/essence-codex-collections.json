@@ -355,6 +355,25 @@
         "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% Essence drop rate."
       }
+    },
+    {
+      "id": "codex.collection.meran.sunken-scalehold",
+      "title": "Keepers of Sunken Scalehold",
+      "description": "Archive the five lizardfolk that defend Sunken Scalehold.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.lizardfolk_brute",
+        "essence.lizardfolk_elementalist",
+        "essence.lizardfolk_scout",
+        "essence.lizardfolk_shaman",
+        "essence.lizardfolk_warrior"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate."
+      }
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { EquipmentSetProgressComponent } from './equipment-set-progress.component';
 import { EquipmentInstance, EquipmentSetMetadata } from '../../../models/item';
+import { EquipmentType } from '../../../models/enums/equipmentType';
 
 describe('EquipmentSetProgressComponent', () => {
   it('distinguishes the next and locked bonuses from active bonuses', () => {
@@ -36,6 +37,19 @@ describe('EquipmentSetProgressComponent', () => {
       'equipment-set-bonus-active',
     ]);
   });
+
+  it('counts a two-handed weapon as two set items without counting duplicate slot references twice', () => {
+    const component = new EquipmentSetProgressComponent();
+    component.equipmentSet = equipmentSet();
+    const twoHanded = setItem('greatsword', EquipmentType.TwoHanded);
+    component.equippedItems = [twoHanded, twoHanded];
+
+    expect(component.equippedCount).toBe(2);
+    expect(component.hasEquippedTwoHandedItem).toBeTrue();
+    expect(component.bonusClass(component.equipmentSet.bonuses[0])).toBe(
+      'equipment-set-bonus-active',
+    );
+  });
 });
 
 function equipmentSet(): EquipmentSetMetadata {
@@ -51,9 +65,13 @@ function equipmentSet(): EquipmentSetMetadata {
   };
 }
 
-function setItem(id: string): EquipmentInstance {
+function setItem(
+  id: string,
+  equipmentType = EquipmentType.Chest,
+): EquipmentInstance {
   return {
     id,
     equipmentSet: equipmentSet(),
+    equipmentBase: { equipmentType },
   } as unknown as EquipmentInstance;
 }

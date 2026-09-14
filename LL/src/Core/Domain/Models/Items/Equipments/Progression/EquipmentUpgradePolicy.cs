@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Domain.Extensions;
 
 namespace Domain.Models.Items.Equipments.Progression;
 
@@ -23,6 +24,7 @@ public sealed class EquipmentUpgradePolicy(
         string? error = null;
         string? blueprintItemId = null;
         long availableBlueprints = 0;
+        long requiredBlueprints = 0;
 
         try
         {
@@ -42,6 +44,8 @@ public sealed class EquipmentUpgradePolicy(
             if (context.InventoryItem is { Quantity: not 1 })
                 throw new InvalidOperationException("Equipment must be an individual inventory item.");
 
+            var slotCount = before.EquipmentType.OccupiedSlotCount();
+
             if (request.Kind == EquipmentUpgradeOperationKind.Dismantle)
             {
                 if (context.IsEquipped || context.InventoryItem?.Quantity != 1)
@@ -49,7 +53,7 @@ public sealed class EquipmentUpgradePolicy(
 
                 // Rank value is intrinsic to the awarded item. It is deliberately
                 // calculated before confirmation checks so previews can disclose it.
-                partsReturned = prices.GetDismantleParts(before.State.Tier, before.State.Rank);
+                partsReturned = checked(prices.GetDismantleParts(before.State.Tier, before.State.Rank) * slotCount);
                 after = null;
                 if ((context.InventoryItem.IsFavorite || context.Equipment!.IsFavorite)
                     && !request.AllowFavoriteDismantle)
@@ -65,10 +69,13 @@ public sealed class EquipmentUpgradePolicy(
                 blueprintItemId = blueprint.ItemId;
                 availableBlueprints = context.BlueprintStacks?.Where(x => x.ItemInstance.ItemBaseId == blueprintItemId)
                     .Sum(x => (long)x.Quantity) ?? 0;
-                cinderCost = checked(blueprints!.CindersPerTier * before.State.Tier);
+                requiredBlueprints = slotCount;
+                cinderCost = checked(blueprints!.CindersPerTier * before.State.Tier * slotCount);
                 after = before.ApplyVariant(catalog.Evaluator, blueprint.StyleId);
-                if (availableBlueprints < 1)
-                    throw new InvalidOperationException("You need one matching blueprint.");
+                if (availableBlueprints < requiredBlueprints)
+                    throw new InvalidOperationException(requiredBlueprints == 1
+                        ? "You need one matching blueprint."
+                        : $"You need {requiredBlueprints} matching blueprints.");
             }
             else
             {
@@ -80,8 +87,8 @@ public sealed class EquipmentUpgradePolicy(
                         $"Equipment is already at rank {EquipmentBalance.MaximumRank}.");
 
                 var tierPrices = prices.ForTier(before.State.Tier);
-                partsCost = tierPrices.RankPartCosts[before.State.Rank];
-                cinderCost = tierPrices.RankCinderCosts[before.State.Rank];
+                partsCost = checked(tierPrices.RankPartCosts[before.State.Rank] * slotCount);
+                cinderCost = checked(tierPrices.RankCinderCosts[before.State.Rank] * slotCount);
                 after = before.MatchesEvaluation(evaluated)
                     ? EquipmentData.Create(before.EquipmentState.Reinforce(catalog.Evaluator), catalog.Evaluator)
                     : before.ReinforceFrozen(catalog.Evaluator.Balance);
@@ -114,7 +121,8 @@ public sealed class EquipmentUpgradePolicy(
             context?.Equipment?.Version ?? 0,
             prices.Version,
             blueprintItemId,
-            availableBlueprints);
+            availableBlueprints,
+            requiredBlueprints);
     }
 
     public static string Fingerprint<T>(T data) => Convert.ToHexString(

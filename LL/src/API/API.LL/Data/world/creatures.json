@@ -779,6 +779,56 @@
       "defenseProfile": "Balanced",
       "baseLevel": 63,
       "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000108",
+      "name": "Lizardfolk Brute",
+      "imagePath": "lizardfolk_brute",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 70,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000109",
+      "name": "Lizardfolk Elementalist",
+      "imagePath": "lizardfolk_elementalist",
+      "archetype": "DPS",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 70,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000110",
+      "name": "Lizardfolk Scout",
+      "imagePath": "lizardfolk_scout",
+      "archetype": "DPS",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 70,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000111",
+      "name": "Lizardfolk Shaman",
+      "imagePath": "lizardfolk_shaman",
+      "archetype": "Support",
+      "damageProfile": "Magical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 70,
+      "tier": 2
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000112",
+      "name": "Lizardfolk Warrior",
+      "imagePath": "lizardfolk_warrior",
+      "archetype": "Bruiser",
+      "damageProfile": "Physical",
+      "defenseProfile": "Balanced",
+      "baseLevel": 70,
+      "tier": 2
     }
   ]
 }

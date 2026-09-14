@@ -912,6 +912,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private static AbilityTriggerSpec CloneTrigger(AbilityTriggerSpec trigger) =>
         new()
         {
+            ChooseOneEffect = trigger.ChooseOneEffect,
+            SnapshotEffectConditions = trigger.SnapshotEffectConditions,
             Event = trigger.Event,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
             InitialDelayTicks = trigger.InitialDelayTicks,
@@ -964,6 +966,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
             RefreshDuration = effect.RefreshDuration,
+            RefreshPendingModifier = effect.RefreshPendingModifier,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,

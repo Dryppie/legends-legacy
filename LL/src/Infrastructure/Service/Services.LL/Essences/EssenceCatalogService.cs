@@ -253,6 +253,11 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
 
     private static IReadOnlyList<EssenceCatalogSourceEntry> BuildMeranSources() =>
     [
+        new("region_02_area_05", "Sunken Scalehold", "Idle Area", "T2", "Lizardfolk Brute", "lizardfolk_brute"),
+        new("region_02_area_05", "Sunken Scalehold", "Idle Area", "T2", "Lizardfolk Elementalist", "lizardfolk_elementalist"),
+        new("region_02_area_05", "Sunken Scalehold", "Idle Area", "T2", "Lizardfolk Scout", "lizardfolk_scout"),
+        new("region_02_area_05", "Sunken Scalehold", "Idle Area", "T2", "Lizardfolk Shaman", "lizardfolk_shaman"),
+        new("region_02_area_05", "Sunken Scalehold", "Idle Area", "T2", "Lizardfolk Warrior", "lizardfolk_warrior"),
         new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Gnoll Pack Leader", "gnoll_pack_leader"),
         new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Gnoll Raider", "gnoll_raider"),
         new("region_02_area_01", "Warfang Frontier", "Idle Area", "T2", "Gnoll Shaman", "gnoll_shaman"),

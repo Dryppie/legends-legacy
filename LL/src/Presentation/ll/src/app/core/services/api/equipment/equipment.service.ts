@@ -72,6 +72,7 @@ export interface EquipmentUpgradeQuote {
   priceVersion: number;
   blueprintItemId?: string | null;
   availableBlueprints?: number;
+  requiredBlueprints: number;
 }
 
 export interface EquipmentUpgradeOutcome {

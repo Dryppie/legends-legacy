@@ -219,9 +219,12 @@
         </span>
       </div>
       <p class="mt-2 text-xs text-zinc-300">
-        Consumes 1 {{ selectedBlueprint?.name }} blueprint +
+        Consumes {{ quote.requiredBlueprints }}
+        {{ selectedBlueprint?.name }}
+        {{ quote.requiredBlueprints === 1 ? "blueprint" : "blueprints" }} +
         {{ quote.cinderCost }} Cinders. Held:
-        {{ quote.availableBlueprints ?? 0 }} blueprints /
+        {{ quote.availableBlueprints ?? 0 }}/{{ quote.requiredBlueprints }}
+        blueprints /
         {{ quote.availableCinders }} Cinders.
       </p>
       <p class="mt-1 text-xs text-zinc-400">

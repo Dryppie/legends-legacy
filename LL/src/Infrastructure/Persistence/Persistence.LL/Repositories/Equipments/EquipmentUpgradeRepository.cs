@@ -131,12 +131,21 @@ public sealed class EquipmentUpgradeRepository(IDbContext db, EquipmentBlueprint
         switch (quote.Request.Kind)
         {
             case EquipmentUpgradeOperationKind.ApplyVariant:
-                var blueprintStack = context.BlueprintStacks?.FirstOrDefault(x =>
-                    x.ItemInstance.ItemBaseId == quote.BlueprintItemId && x.Quantity > 0)
-                    ?? throw new InvalidOperationException("Blueprint balance changed during conversion.");
-                Consume(blueprintStack, 1);
-                Ledger(blueprintStack.ItemInstance.ItemBaseId, blueprintStack.ItemInstance.ItemBase.Name,
-                    1, outgoing: true, blueprintStack.ItemInstanceId);
+                var remainingBlueprints = quote.RequiredBlueprints;
+                foreach (var blueprintStack in context.BlueprintStacks?.Where(x =>
+                             x.ItemInstance.ItemBaseId == quote.BlueprintItemId && x.Quantity > 0)
+                         ?? [])
+                {
+                    var spent = Math.Min(remainingBlueprints, blueprintStack.Quantity);
+                    if (spent == 0)
+                        break;
+                    Consume(blueprintStack, (int)spent);
+                    remainingBlueprints -= spent;
+                    Ledger(blueprintStack.ItemInstance.ItemBaseId, blueprintStack.ItemInstance.ItemBase.Name,
+                        spent, outgoing: true, blueprintStack.ItemInstanceId);
+                }
+                if (remainingBlueprints != 0)
+                    throw new InvalidOperationException("Blueprint balance changed during conversion.");
                 context.Equipment!.ApplyProgressionData(quote.After!);
                 break;
             case EquipmentUpgradeOperationKind.Reinforce:

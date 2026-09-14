@@ -21,17 +21,6 @@
   text-transform: uppercase;
 }
 
-.identity strong,
-.identity span {
-  display: block;
-}
-
-.identity span {
-  margin-top: var(--ll-space-1);
-  color: var(--ll-color-text-muted);
-  font-size: var(--ll-text-xs);
-}
-
 .badge {
   display: inline-flex;
   min-height: 1.35rem;

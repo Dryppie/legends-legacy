@@ -32,6 +32,7 @@ describe('RegionService', () => {
       'Rotgrave Fields',
       'Tempest Aerie',
       'Wolfsbane Reach',
+      'Sunken Scalehold',
     ]);
     expect(region.areas[0].creatures).toEqual([
       'Gnoll Pack Leader',
@@ -41,7 +42,7 @@ describe('RegionService', () => {
       'Kobold Sorcerer',
     ]);
     expect(region.areas.map((area) => area.levelRequirement)).toEqual([
-      50, 55, 60, 65,
+      50, 55, 60, 65, 70,
     ]);
     expect(region.areas[2].creatures).toEqual([
       'Blood Harpy',
@@ -56,6 +57,10 @@ describe('RegionService', () => {
       'Horned Wolf',
       'Bloodfang Wolf',
       'Pack Howler',
+    ]);
+    expect(region.areas[4].creatures).toEqual([
+      'Lizardfolk Brute', 'Lizardfolk Elementalist', 'Lizardfolk Scout',
+      'Lizardfolk Shaman', 'Lizardfolk Warrior',
     ]);
   });
 
@@ -76,6 +81,7 @@ describe('RegionService', () => {
     expect(service.getRegionNameByAreaId('region_02_area_02')).toBe('Meran');
     expect(service.getRegionNameByAreaId('region_02_area_03')).toBe('Meran');
     expect(service.getRegionNameByAreaId('region_02_area_04')).toBe('Meran');
+    expect(service.getRegionNameByAreaId('region_02_area_05')).toBe('Meran');
     expect(service.getRegionNameByAreaId('unknown_area')).toBeNull();
   });
 });

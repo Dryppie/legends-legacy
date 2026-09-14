@@ -2,6 +2,8 @@
 
 Repository review: 12 September 2026. Analysis only; no gameplay changes implemented.
 
+**Historical analysis:** implementation proceeded on 14 September with the revised Elementalist and clarified mechanics. See [the implementation record](../design/sunken-scalehold-implementation.md) for the final behavior; the open questions below describe the earlier design.
+
 The target is the primary LL game service: shared combat definitions/runtime, persisted world content, essence acquisition, and the Angular game frontend. LL-Chat, infrastructure-as-code, and external environments are outside scope.
 
 This is a medium-sized content expansion with several shared combat extensions. Five creature records and five essence records are straightforward; exact passive behavior, random Elementals, and Exposed account for most implementation and testing work. Creatures and equipped essences should reference the same ten active/passive definitions, following existing Meran content. Their behavior must remain correct when a player combines the passives with other creatures' abilities.

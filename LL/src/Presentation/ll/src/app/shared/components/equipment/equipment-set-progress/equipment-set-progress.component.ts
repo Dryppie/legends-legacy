@@ -6,6 +6,7 @@ import {
   EquipmentSetBonusMetadata,
   EquipmentSetMetadata,
 } from '../../../models/item';
+import { EquipmentType } from '../../../models/enums/equipmentType';
 
 @Component({
   selector: 'app-equipment-set-progress',
@@ -19,17 +20,21 @@ export class EquipmentSetProgressComponent {
   @Input() highlightAllBonuses = false;
 
   get equippedCount(): number {
-    if (!this.equippedItems) return 0;
+    return this.matchingEquippedItems.reduce(
+      (count, equipment) =>
+        count +
+        (equipment.equipmentBase.equipmentType === EquipmentType.TwoHanded
+          ? 2
+          : 1),
+      0,
+    );
+  }
 
-    const normalizedSetId = this.equipmentSet.id.toLowerCase();
-    return new Set(
-      this.equippedItems
-        .filter(
-          (equipment) =>
-            equipment.equipmentSet?.id.toLowerCase() === normalizedSetId,
-        )
-        .map((equipment) => equipment.id),
-    ).size;
+  get hasEquippedTwoHandedItem(): boolean {
+    return this.matchingEquippedItems.some(
+      (equipment) =>
+        equipment.equipmentBase.equipmentType === EquipmentType.TwoHanded,
+    );
   }
 
   get maximumThreshold(): number {
@@ -64,5 +69,19 @@ export class EquipmentSetProgressComponent {
 
     const remaining = bonus.requiredEquippedItems - this.equippedCount;
     return `${remaining} more item${remaining === 1 ? '' : 's'}`;
+  }
+
+  private get matchingEquippedItems(): EquipmentInstance[] {
+    if (!this.equippedItems) return [];
+
+    const normalizedSetId = this.equipmentSet.id.toLowerCase();
+    const matchingItems = new Map<string, EquipmentInstance>();
+    this.equippedItems
+      .filter(
+        (equipment) =>
+          equipment.equipmentSet?.id.toLowerCase() === normalizedSetId,
+      )
+      .forEach((equipment) => matchingItems.set(equipment.id, equipment));
+    return Array.from(matchingItems.values());
   }
 }

@@ -47,7 +47,7 @@ The bullets below preserve the gaps found before the typed standard-condition im
 | Deprecated            |     0 |
 | Unknown               |     0 |
 
-Exposed is a proposed addition to the lexicon; its target-side critical chance bonus and fixed 10-second condition are not implemented. See the [Exposed contract](conditions/exposed.md).
+Exposed is implemented with a target-side critical chance bonus and fixed 10-second condition. See the [Exposed contract](conditions/exposed.md).
 
 ## Evidence locations
 

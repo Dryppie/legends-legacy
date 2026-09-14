@@ -922,6 +922,76 @@
     {
       "id": "monster.pack_howler",
       "essenceLootTable": {"baseDropChance": 0.0001, "passiveAbilityId": "ability.creature.pack_howler.strength_of_the_pack", "variants": [{"essenceDefinitionId": "essence.pack_howler", "activeAbilityId": "ability.creature.pack_howler.coordinated_attack", "weight": 1}]}
+    },
+    {
+      "id": "monster.lizardfolk_brute",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lizardfolk_brute.brutal_follow_up",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lizardfolk_brute",
+            "activeAbilityId": "ability.creature.lizardfolk_brute.skullcrusher",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lizardfolk_elementalist",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lizardfolk_elementalist.elemental_bond",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lizardfolk_elementalist",
+            "activeAbilityId": "ability.creature.lizardfolk_elementalist.converging_element",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lizardfolk_scout",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lizardfolk_scout.keen_eye",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lizardfolk_scout",
+            "activeAbilityId": "ability.creature.lizardfolk_scout.find_weakness",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lizardfolk_shaman",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lizardfolk_shaman.cleansing_herbs",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lizardfolk_shaman",
+            "activeAbilityId": "ability.creature.lizardfolk_shaman.herb_mixture",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lizardfolk_warrior",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lizardfolk_warrior.battle_rhythm",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lizardfolk_warrior",
+            "activeAbilityId": "ability.creature.lizardfolk_warrior.spearhead_assault",
+            "weight": 1
+          }
+        ]
+      }
     }
   ]
 }

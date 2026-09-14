@@ -237,6 +237,18 @@ export class RegionService {
             'Pack Howler',
           ],
         },
+        {
+          id: 'region_02_area_05',
+          name: 'Sunken Scalehold',
+          levelRequirement: 70,
+          creatures: [
+            'Lizardfolk Brute',
+            'Lizardfolk Elementalist',
+            'Lizardfolk Scout',
+            'Lizardfolk Shaman',
+            'Lizardfolk Warrior',
+          ],
+        },
       ],
       dungeons: [],
       raids: [],

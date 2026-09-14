@@ -18,9 +18,11 @@ describe('DungeonPageComponent', () => {
   let dungeonState: jasmine.SpyObj<DungeonStateService>;
   let router: jasmine.SpyObj<Router>;
   const activeDungeon = signal<DungeonRun | null>(null);
+  const combatActive = signal(false);
 
   beforeEach(() => {
     activeDungeon.set(createRestSiteRun());
+    combatActive.set(false);
     dungeonState = jasmine.createSpyObj<DungeonStateService>(
       'DungeonStateService',
       [
@@ -49,7 +51,12 @@ describe('DungeonPageComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: DungeonStateService, useValue: dungeonState },
-        { provide: CombatStateService, useValue: {} },
+        {
+          provide: CombatStateService,
+          useValue: {
+            getIsCombatActive: () => combatActive.asReadonly(),
+          },
+        },
         { provide: Router, useValue: router },
       ],
     });
@@ -73,6 +80,68 @@ describe('DungeonPageComponent', () => {
 
     expect(dungeonState.restAtSite).toHaveBeenCalledOnceWith();
     expect(dungeonState.chooseRoute).not.toHaveBeenCalled();
+  });
+
+  it('numbers available routes from top to bottom and selects them with number keys', () => {
+    const run = createRun(RoomType.Combat);
+    addRouteChoices(run);
+    activeDungeon.set(run);
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+    const shortcutNodes = component.keyboardShortcutNodes();
+
+    expect(shortcutNodes.map((node) => node.roomIndex)).toEqual([4, 5, 6]);
+    expect(
+      shortcutNodes.map((node) => component.mapNodeShortcut(node)),
+    ).toEqual(['1', '2', '3']);
+
+    const event = new KeyboardEvent('keydown', {
+      key: '2',
+      cancelable: true,
+    });
+    component.onDungeonKeydown(event);
+
+    expect(event.defaultPrevented).toBeTrue();
+    expect(dungeonState.chooseRoute).toHaveBeenCalledOnceWith('route-5');
+  });
+
+  it('uses 1 for a direct room action', () => {
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+
+    component.onDungeonKeydown(
+      new KeyboardEvent('keydown', { key: '1', cancelable: true }),
+    );
+
+    expect(dungeonState.restAtSite).toHaveBeenCalledOnceWith();
+  });
+
+  it('ignores dungeon shortcuts while typing or viewing combat', () => {
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+    const input = document.createElement('input');
+
+    component.onDungeonKeydown({
+      key: '1',
+      target: input,
+      preventDefault: jasmine.createSpy('preventDefault'),
+    } as unknown as KeyboardEvent);
+    component.onDungeonKeydown(
+      new KeyboardEvent('keydown', {
+        key: '1',
+        shiftKey: true,
+        cancelable: true,
+      }),
+    );
+    combatActive.set(true);
+    component.onDungeonKeydown(
+      new KeyboardEvent('keydown', { key: '1', cancelable: true }),
+    );
+
+    expect(dungeonState.restAtSite).not.toHaveBeenCalled();
   });
 
   for (const vigor of [18, 19]) {
@@ -419,4 +488,42 @@ function createRun(roomType: RoomType): DungeonRun {
     },
     createdAt: new Date().toISOString(),
   };
+}
+
+function addRouteChoices(run: DungeonRun): void {
+  run.rooms[0].status = RoomInstanceStatus.Completed;
+  run.state.mapNodes[0].nextRoomIndexes = [4, 5, 6];
+
+  for (const [offset, lane] of [-1, 0, 1].entries()) {
+    const roomIndex = offset + 4;
+    run.rooms.push({
+      id: `route-room-${roomIndex}`,
+      index: roomIndex,
+      type: RoomType.Combat,
+      status: RoomInstanceStatus.Pending,
+      encounterIds: [],
+    });
+    run.state.mapNodes.push({
+      id: `route-node-${roomIndex}`,
+      displayName: `Route ${roomIndex}`,
+      roomIndex,
+      depth: 4,
+      lane,
+      section: 1,
+      forecast: 'A possible path.',
+      vigorCostMin: 8,
+      vigorCostMax: 17,
+      nextRoomIndexes: [],
+    });
+    run.state.currentRouteOptions.push({
+      id: `route-${roomIndex}`,
+      roomIndex,
+      displayName: `Route ${roomIndex}`,
+      roomType: RoomType.Combat,
+      riskLevel: 1,
+      vigorCostMin: 8,
+      vigorCostMax: 17,
+      forecast: 'A possible path.',
+    });
+  }
 }

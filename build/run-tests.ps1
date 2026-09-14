@@ -11,7 +11,8 @@
 param(
     [switch]$NoBuild,
     [string]$Configuration = "Release",
-    [string]$Filter
+    [string]$Filter,
+    [string]$ArtifactsPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,9 +24,13 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
 
 $root = $root.Trim()
 $testProject = Join-Path $root "LL/tests/EssenceSystem.Tests/EssenceSystem.Tests.csproj"
+$artifactArguments = @()
+if (-not [string]::IsNullOrWhiteSpace($ArtifactsPath)) {
+    $artifactArguments = @("--artifacts-path", [IO.Path]::GetFullPath($ArtifactsPath, $root))
+}
 
 if (-not $NoBuild) {
-    & dotnet build $testProject --configuration $Configuration
+    & dotnet build $testProject --configuration $Configuration @artifactArguments
     if ($LASTEXITCODE -ne 0) {
         throw "Test project build failed with exit code $LASTEXITCODE."
     }
@@ -36,7 +41,7 @@ if (-not [string]::IsNullOrWhiteSpace($Filter)) {
     $filterArguments = @("--filter", $Filter)
 }
 
-& dotnet test $testProject @filterArguments `
+& dotnet test $testProject @filterArguments @artifactArguments `
     --configuration $Configuration `
     --no-build `
     --logger "trx;LogFileName=tests.trx" `

@@ -109,6 +109,8 @@ public static class AbilityCompiler
     public static CompiledSummon CompileSummon(SummonSpec spec, AbilityThreatTuning? threatTuning) =>
         new()
         {
+            BasicAttackType = spec.BasicAttackType,
+            BasicAttackDamageType = spec.BasicAttackDamageType,
             Id = spec.Id,
             Name = spec.Name,
             ImagePath = spec.ImagePath,
@@ -136,6 +138,8 @@ public static class AbilityCompiler
 
         return new CompiledTrigger
         {
+            ChooseOneEffect = trigger.ChooseOneEffect,
+            SnapshotEffectConditions = trigger.SnapshotEffectConditions,
             Event = trigger.Event,
             ThreatValue = threatValue,
             ThreatInternalCooldownTicks = threatValue != 0
@@ -213,6 +217,7 @@ public static class AbilityCompiler
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
             RefreshDuration = effect.RefreshDuration,
+            RefreshPendingModifier = effect.RefreshPendingModifier,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,

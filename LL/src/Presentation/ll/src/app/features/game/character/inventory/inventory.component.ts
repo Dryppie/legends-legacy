@@ -25,6 +25,7 @@ import {
 } from '../../../../shared/models/item';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
+import { AttributeType } from '../../../../shared/models/enums/attributeType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
 import { marketplaceStyleLabel } from '../../../../shared/utils/market-place/marketplace-equipment';
 import { FormsModule } from '@angular/forms';
@@ -36,6 +37,7 @@ import {
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import { EquipmentDisplayComponent } from '../../../../shared/components/equipment/equipment-display/equipment-display.component';
+import { EquipmentSetProgressComponent } from '../../../../shared/components/equipment/equipment-set-progress/equipment-set-progress.component';
 import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 import { EquipmentStateService } from '../../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentLoadoutService } from '../../../../core/services/api/equipment/equipment-loadout.service';
@@ -65,11 +67,14 @@ import {
   toArray,
 } from 'rxjs';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
 import {
   EquipmentService,
   EquipmentUpgradeMutation,
   EquipmentUpgradeQuote,
 } from '../../../../core/services/api/equipment/equipment.service';
+import { formatAttributeType } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+
 type InventoryCollectionView = 'Equipment' | 'Stock';
 type StockCategory =
   | 'Resources'
@@ -97,6 +102,7 @@ type SortDirection = 'asc' | 'desc';
     DropdownComponent,
     InventoryTransferComponent,
     EssencePreviewComponent,
+    EquipmentSetProgressComponent,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -122,6 +128,8 @@ export class InventoryComponent implements OnInit {
   readonly selectedItem = signal<InventoryItem | null>(null);
   readonly mobileItemInspectorOpen = signal(false);
   readonly itemDescription = itemDescription;
+  readonly blueprintAttributeLabel = (attribute: AttributeType) =>
+    formatAttributeType(attribute, true);
   readonly selectedContainerOptionId = signal('');
   readonly isOpeningContainer = signal(false);
   readonly containerActionError = signal<string | null>(null);
@@ -129,6 +137,8 @@ export class InventoryComponent implements OnInit {
   readonly favoriteActionError = signal<string | null>(null);
   readonly donationPendingItemId = signal<string | null>(null);
   readonly donationActionError = signal<string | null>(null);
+  readonly guildReturnPendingItemId = signal<string | null>(null);
+  readonly guildReturnActionError = signal<string | null>(null);
   readonly selectedDismantleQuote = signal<EquipmentUpgradeQuote | null>(null);
   readonly selectedDismantleLoading = signal(false);
   readonly selectedDismantleConfirmation = signal(false);
@@ -192,6 +202,7 @@ export class InventoryComponent implements OnInit {
     private readonly equipmentApi?: EquipmentService,
     private readonly equipmentLoadoutState?: EquipmentLoadoutService,
     private readonly chatEquipmentLinks?: ChatEquipmentLinkService,
+    private readonly essenceState?: EssenceStateService,
   ) {
     if (this.equipmentLoadoutState) {
       effect(() => {
@@ -298,6 +309,43 @@ export class InventoryComponent implements OnInit {
           if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
             this.donationActionError.set(
               error?.message ?? 'Failed to donate this item to the guild.',
+            );
+          }
+        },
+      });
+  }
+
+  returnToGuild(item: InventoryItem): void {
+    const equipment = this.equipmentInstance(item);
+    const vaultItemId = equipment?.guildVaultItemId;
+    if (
+      this.guildReturnPendingItemId() !== null ||
+      !this.guildState ||
+      !equipment?.isGuildBorrowed ||
+      !vaultItemId
+    ) {
+      return;
+    }
+
+    const itemInstanceId = item.itemInstance.id;
+    this.guildReturnPendingItemId.set(itemInstanceId);
+    this.guildReturnActionError.set(null);
+
+    this.guildState
+      .returnVaultItem(vaultItemId)
+      .pipe(finalize(() => this.guildReturnPendingItemId.set(null)))
+      .subscribe({
+        next: () => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.clearSelectedItem();
+          }
+          this.state.load(true);
+          this.equipmentState?.load(true);
+        },
+        error: (error) => {
+          if (this.selectedItem()?.itemInstance.id === itemInstanceId) {
+            this.guildReturnActionError.set(
+              error?.message ?? 'Failed to return this item to the guild.',
             );
           }
         },
@@ -499,6 +547,13 @@ export class InventoryComponent implements OnInit {
 
     this.selectedItem.set(inspected);
     if (changedItem) {
+      const container = this.selectionContainerMetadata(inspected);
+      if (
+        container?.options.some((option) => !!option.essence) &&
+        !this.essenceState?.archive()
+      ) {
+        this.essenceState?.refreshArchive();
+      }
       this.favoriteActionError.set(null);
       this.donationActionError.set(null);
       this.resetContainerAction(item);
@@ -566,6 +621,16 @@ export class InventoryComponent implements OnInit {
   selectContainerOption(option: SelectionCrateOption): void {
     this.selectedContainerOptionId.set(option.id);
     this.containerActionError.set(null);
+  }
+
+  isSelectionEssenceAbsorbed(option: SelectionCrateOption): boolean {
+    const essenceDefinitionId = option.essence?.id;
+    return !!(
+      essenceDefinitionId &&
+      this.essenceState
+        ?.absorbedEssenceDefinitionIds()
+        .has(essenceDefinitionId)
+    );
   }
 
   openSelectionContainer(item: InventoryItem): void {

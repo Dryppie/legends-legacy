@@ -1,9 +1,214 @@
 # Balance Harness: idle balance workflow and Tower benchmarks
 
-**Current World Tower status — 13 September 2026:** the [completed elite-loadout diversity pilot](../../../Balance%20Harness/Tower-Loadout-Diversity-Review.md), opt-in `independent-loadout-diversity-v11`, used **9,224 fights** with zero retries. Independent reliability is **Fail (0/3; 2 required)**; **0 of 6 new-arm finalists** recorded a held-out win. The strongest saved control measured **131/256 (51.17%)**, joint-adjusted interval **41.33–60.92%**. Ordinary and joint-adjusted family assessments are **Fail / Fail**. Every observed >50% remains a ceiling breach; earlier studies remain separate.
+New compact campaigns can opt into `--storage-accounting owned-storage-v1`. The flag also applies when preparing a new feedback/retention/allocation/lineage/portfolio package; the resulting schema-2 protocol freezes it for execution. It is not an override for an existing package. Legacy defaults, serialized contracts without the optional property, and archive verification remain compatible.
 
-The [current handoff](../../../Balance%20Harness/Tower-Coverage-Replication-Plan.md) records all closed studies, recipes and the authoritative **472,194-seed** exclusion union; exclude every array, including unused and constructor-only reservations. Kharad remains **Health 3.04881408 / Power 3.85370128**, with fixed gear and untrained/unevolved Essences. The [v11 implementation](../../../Balance%20Harness/Tower-Loadout-Diversity-Implementation-Review.md) passed 264 tests and exact archived/comparator checks; the [fresh pilot](../../../Balance%20Harness/Tower-Loadout-Diversity-Review.md) completes its separate combat comparison. All six controls stayed outside generation, rank-one primaries froze before validation, both campaigns reconstructed and eight fixed replay checks passed. The [completed zero-combat v11 diagnosis](../../../Balance%20Harness/Tower-Loadout-Diversity-Diagnosis-Review.md) verifies all 9,216 saved records, 333 parent decisions, 220 control nominations and four fixed replays. All 167 new-method decisions used four distinct elite loadouts; all six new finalists retain nominal control capacity. Realized recovery differs by trigger and recipient, and no causal remedy is established. Next is one source-grounded assessment of death-dependent recovery coverage, permitting rejection; no new policy or campaign is selected. Earlier v10 and other failures retain their original scopes. No retuning, default/catalog promotion or floor expansion is allocated.
+Owned accounting keeps sealed batch totals and hashes, scans root metadata and the active archive at the existing boundaries, and includes nested child outputs once. It counts pending writes, replacements and durable journals. Complete inventory/hash audits reject external changes to closed subtrees before publishing a completion marker, including the marker's own bytes in the cap. Closed-subtree external changes are detected at lifecycle audits, later than legacy per-boundary scans. The new mode is execute-once and rejects resume; a writer lease is not protection against unrelated filesystem changes. Completed archives always use normal exact verification.
 
+`tower-discovery-performance --definition <frozen-diagnostic-json> --output <new-directory>` runs the bounded archive-scaling/saved-reconstruction/parity protocol. It reuses `TowerPerformanceTrace` and the original `tower-performance` reference benchmark, preserves detailed timings on success/failure, and allocates no seeds. See the [frozen diagnostic protocol](../../../Balance%20Harness/Tower-Discovery-Performance-Diagnostic-Protocol.md) for exact budgets and the separate recorded CLI/input preflight corrections. Profiling snapshots use exclusive durations for breakdowns; the feedback snapshot explicitly excludes serialization/publication after its snapshot boundary.
+
+The backend wrapper accepts `-ArtifactsPath <directory>` for isolated compilation and test execution without replacing another task's shared binaries.
+
+`tower-discovery-parity-check --definition <frozen-parity-json>` validates a retained reference and identical frozen gameplay inputs with zero combat. `tower-discovery-parity --definition <frozen-parity-json> --output <new-directory>` executes the separately frozen 34-fight candidate closure, including zero-combat nested fixtures and completed-campaign reconstruction. It never launches reference combat, allocates seeds, retries or resumes. See the [closure protocol](../../../Balance%20Harness/Tower-Discovery-Parity-Closure-Protocol.md) and [measured result](../../../Balance%20Harness/Tower-Discovery-Parity-Closure-Review.md). Existing evidence directories must not be reused.
+
+**Current result — 14 September 2026:** the [v19 search portfolio](../../../Balance%20Harness/Tower-Search-Portfolio-Review.md) completed discovery and all six screens: **86,016 fights** in **292.69 minutes**. Its required **253-recipe family exceeded capacity 144**; every recipe is retained and **zero confirmation fights** ran. Reliability is **Unresolved**, adoption **Hold**, and ordinary/joint confirmation-family acceptance **NotRun / NotRun**. The 129 discovery and 46 screening observations above 50% remain unconfirmed.
+
+**Next step:** audit the confirmation gameplay scope, then implement and verify the separate **253-recipe confirmation contract**. The [parity closure review](../../../Balance%20Harness/Tower-Discovery-Parity-Closure-Review.md) records **34/34 exact candidate fights**, both detailed replays, completed campaign reconstruction, full-scale nested accounting and **129 passing tests**. The previous **622.54× incremental / 4.50× sixteen-write lifecycle** measurements retain their limits; the broader 5× target and whole-run throughput remain unestablished. The stopped diagnostic remains sealed. The **129,536-fight** confirmation remains unprepared and unstarted; preserve all **480,707 reservations**, including 512 unused v19 confirmation values. The [current handoff](../../../Balance%20Harness/Tower-Coverage-Replication-Plan.md#next-scoped-work) retains the full confirmation scope and rules.
+
+**Earlier evidence:** the [94-recipe saved-allocation confirmation](../../../Balance%20Harness/Tower-Allocation-Confirmation-Review.md) and [112-recipe v18 comparison](../../../Balance%20Harness/Tower-Late-Allocation-Review.md) each returned reliability **Fail 1/3**, with ordinary/joint family **Pass / Pass**. The [17,821-recipe precision Pass](../../../Balance%20Harness/Tower-Kharad-Precision-Resolution-Review.md) retains its separate captured scope. These results and the v19 producing-version tests do not establish balance or test coverage for subsequent gameplay edits.
+
+
+The captured v19 experiment used Kharad **Health 3.5366243328 / Power 4.4702934848** and the unchanged 2/3 reliability gate. Historical sections below retain their original settings, limits and results; use the [handoff](../../../Balance%20Harness/Tower-Coverage-Replication-Plan.md) for current work. No default, content or catalog promotion follows from the capacity stop.
+
+## Equal-budget search portfolio: v19
+
+The opt-in `independent-search-portfolio-v19` policy compares one 1,536-candidate deep search with a fixed portfolio: deep 768 plus the v18 isolated 512+256 pair. All four components keep separate random state, parents, counters and libraries. Both units spend 1,536 evaluations, 384 initial fresh evaluations and up to 16,384 proposals per root. Portfolio recipes merge before top-32 screening, retaining duplicate charges and origins. Selection and confirmation use the existing 64/512 fresh-trial schedules and 2/3 gate.
+
+```text
+BalanceHarness tower-portfolio-prepare --definition <template> --controls <112-recipe-family.json> --history <complete-ledger.json> --anchor <fixed-anchor-id> --strong-control <fixed-control-id> --seed <declared-master-seed> --plan <frozen-plan.md> --output <new-directory> --content-root <API.LL-directory>
+BalanceHarness tower-portfolio-check --run <prepared-directory>
+BalanceHarness tower-portfolio-run --run <prepared-directory>
+BalanceHarness tower-portfolio-verify --run <completed-directory>
+```
+
+Use the captured executable after preparation. V19 alone permits 112 controls, family capacity 144, 159,744 fights, 21,600 execution seconds and 8 GiB. Existing policy limits remain unchanged. Overflow preserves the complete family without confirmation. A start forbids repeated execution; interruption permits no retry, resume or larger cap. A complete Hold returns exit code 1; successful reconstruction returns 0 regardless of adoption. See the [plan](../../../Balance%20Harness/Tower-Search-Portfolio-Plan.md) and [implementation review](../../../Balance%20Harness/Tower-Search-Portfolio-Implementation-Review.md).
+
+## Late allocation: v18
+
+The opt-in `independent-late-allocation-v18` policy compares unchanged deep v13 with two isolated 256-candidate prefixes. It then gives the better prefix another 256 evaluations, ending at 512+256. Both isolated components retain 96 initial fresh parties and separate RNG, proposal counters, parents and module libraries. The saved generation report binds both complete prefix rankings, attempt counts and the chosen continuation. The [implementation review](../../../Balance%20Harness/Tower-Late-Allocation-Implementation-Review.md) records tests and historical parity; the [frozen plan](../../../Balance%20Harness/Tower-Late-Allocation-Plan.md) records this experiment's contract.
+
+```text
+BalanceHarness tower-late-allocation-prepare --definition <template> --controls <94-recipe-family.json> --history <complete-ledger.json> --anchor <fixed-anchor-id> --strong-control <fixed-control-id> --seed <declared-master-seed> --plan <frozen-plan.md> --output <new-directory> --content-root <API.LL-directory>
+BalanceHarness tower-late-allocation-check --run <prepared-directory>
+BalanceHarness tower-late-allocation-run --run <prepared-directory>
+BalanceHarness tower-late-allocation-verify --run <completed-directory>
+```
+
+Use the retained executable after preparation. Only this policy permits 94 controls, capacity 128, 114,688 fights and 10,800 execution seconds; storage remains 4 GiB. The unchanged selection and 2/3 gate use 64 fresh screening trials and 512 fresh confirmation trials. An overflowing required family is preserved without confirmation. A start marker forbids another execution, and interruption does not grant resume, retry or larger caps. `run` returns 1 for Hold or capacity-exceeded; valid completed reconstruction returns 0 regardless of adoption. Existing v17 limits and archived results remain unchanged.
+
+<a id="separate-confirmation-of-saved-allocation-nominees"></a>
+
+## Separate confirmation of saved v17 allocation nominees
+
+This implemented workflow is specific to the saved v17 study. It does not implement the proposed 253-recipe v19 follow-up.
+
+The additive `tower-allocation-confirmation-prepare/check/run/verify` workflow imports the audited stopped v17 family, keeps all 94 recipes and six screened primaries, and allocates 512 fresh shared trials. It runs no discovery or screening. The [frozen plan](../../../Balance%20Harness/Tower-Allocation-Confirmation-Plan.md) fixes 48,128 fights, 3,600 seconds, 4 GiB, 32-report chunks, three dense batches and zero retries/resumes/extensions. Preparation verifies the full source and audit inventories; checks use a frozen self-contained source snapshot. Content, settings, gameplay assemblies and runtime remain unchanged. The shared statistical evaluator and storage checks are retained.
+
+```text
+BalanceHarness tower-allocation-confirmation-prepare --source-run <audited-stopped-directory> --source-work <sealed-audit-directory> --history <current-complete-ledger.json> --seed <declared-master-seed> --plan <frozen-plan.md> --output <new-directory> --content-root <API.LL-directory>
+BalanceHarness tower-allocation-confirmation-check --run <prepared-directory>
+BalanceHarness tower-allocation-confirmation-run --run <prepared-directory>
+BalanceHarness tower-allocation-confirmation-verify --run <completed-directory>
+```
+
+Use the retained executable for checks, execution and reconstruction. `run` returns 1 for a complete Hold result; `verify` returns 0 for a valid completed archive regardless of adoption. A start marker permanently forbids another run. Missing or inconsistent trials cannot publish quality. This study passed **238 distinct relevant tests**, including **30 new confirmation cases**, plus seven actual prepared-package checks. The [94 full recipe exports](../../../TestResults/balance/tower-allocation-confirmation-work-20260914/recipe-index.md), [independent statistics check](../../../TestResults/balance/tower-allocation-confirmation-work-20260914/independent-statistics-check.json) and [closure receipt](../../../TestResults/balance/tower-allocation-confirmation-work-20260914/final-verification.json) retain the evidence. The result concerns fixed saved nominees; it is not a fresh candidate-generation replication or default promotion.
+
+## V13 search allocation: implemented, comparison stopped
+
+The opt-in `independent-search-allocation-v17` compares one 768-candidate v13 search with two isolated 384-candidate searches. Each component keeps its own parents, random stream, exploration and ranked 128-module library. Initial fresh allocation is 192 versus 96 + 96; proposal limits are 8,192 versus 4,096 + 4,096. Group only after all nine components complete; freeze complete grouped rankings, original top two and top 32, retaining every origin and every charged duplicate evaluation. All six groups receive fresh 64-trial screening. Three paired allocation units supply the unchanged 2/3 reliability gate.
+
+The [frozen plan](../../../Balance%20Harness/Tower-Search-Allocation-Plan.md) was executed once. The [stopped-run review](../../../Balance%20Harness/Tower-Search-Allocation-Review.md) records the time cap, retained evidence and [94 saved builds](../../../TestResults/balance/tower-search-allocation-work-20260913/exports/saved-builds.md). All 4,608 generation evaluations and 12,288 screening fights completed. Confirmation completed 11,763 of 48,128 required fights, with 11,744 reports committed. The full-family and method results are Unresolved.
+
+The additive commands are `tower-allocation-prepare/check/run/verify`. Preparation requires exactly 74 prior controls and the separately frozen plan; capacity 112, maximum 106,496 fights, 5,400 seconds and 4 GiB, zero combat retries/resumes/extensions. Older versions retain their original caps. **Do not run or resume this stopped directory.** Complete `tower-allocation-verify` requires a finished campaign and cannot certify this archive. The [stopped-evidence audit](../../../TestResults/balance/tower-search-allocation-work-20260913/stopped-audit/Program.cs) reconstructed complete discovery/screens and verified the saved confirmation prefix with a no-combat guard, without publishing chunks or mutating the archive.
+
+**495 relevant tests passed**, including 30 new allocation cases. All 9,024 prior v13/v14/v15/v16 evaluations and 48 feedback probes reconstructed exactly. Independent audits verified current grouping, identities, ancestry, module hashes and donor provenance. No confidence intervals or adoption assessment were fabricated for the unfinished family.
+
+The separate fresh confirmation of these saved v17 nominees returned reliability **Fail 1/3** and ordinary/joint family **Pass / Pass**. The original allocation experiment remains stopped and unresolved. The later v18 and v19 outcomes are documented above; use the [current handoff](../../../Balance%20Harness/Tower-Coverage-Replication-Plan.md#next-scoped-work) for the version audit and proposed 253-recipe confirmation.
+
+## Whole-party lineages: historical completed comparison
+
+The opt-in `independent-party-lineages-v16` changes the main four-place parent beam: retain two globally ranked elites, then the best candidates from two other closest-parent founders, with ranked fallback. Founder labels follow the contributing complete party with most matching ordered Essence positions, tied by party/proposal ID. They are structural ancestry labels, not statistical independence. The ranked 128-module library, exploration rule and all v13 operators remain unchanged. Both arms use 384 × 8 generation fights, the same initial 96 parties, 32 × 64 independent screening and complete 512-trial confirmation. [Frozen plan](../../../Balance%20Harness/Tower-Party-Lineages-Plan.md), [measured review](../../../Balance%20Harness/Tower-Party-Lineages-Review.md), [all 74 confirmed builds](../../../TestResults/balance/tower-party-lineages-work-20260913/exports/saved-builds.md).
+
+```powershell
+dotnet TestResults/balance/tower-party-lineages-20260913/executable/BalanceHarness.dll tower-lineage-verify --run TestResults/balance/tower-party-lineages-20260913
+```
+
+Captured verification reconstructs saved evidence with zero new fights. `tower-lineage-prepare` accepts the same named arguments as `tower-feedback-prepare`, but requires exactly **62** preceding controls and a separately frozen plan. `tower-lineage-check --run <directory>` checks an unstarted package; `tower-lineage-run` starts it once. Capacity **96**; maximum **79,872 fights**, **5,400 seconds**, **4 GiB**, zero retries or resume. This completed study cannot be extended or rerun. The later allocation family contains 94 saved recipes; any follow-up needs its own compatible contract and complete current exclusions. Historical v14/v15 commands retain their original counts and behavior.
+
+**465 relevant tests passed**. All **6,720** older v13/v14/v15 evaluations and **48** feedback probes reconstructed exactly with unchanged gameplay assemblies. New labels, ranked library hashes, rates and nine paired differences were independently checked from saved evidence.
+
+V16 remains experimental with reliability Fail 0/3. Its proposed allocation follow-up was implemented and stopped at its time cap as described above; the original v16 contracts retain their historical scope.
+
+## Loadout retention: historical completed comparison
+
+The opt-in `independent-loadout-retention-v15` changes only the reusable module library: 64 places preserve complete-party rank and 64 use farthest-first membership/ordering distance. Both arms retain 384 × 8 discovery fights, the same initial 96 parties and v13 operators. Both receive 32 × 64 independent screening and complete 512-trial confirmation. [Plan](../../../Balance%20Harness/Tower-Loadout-Retention-Plan.md), [measured review](../../../Balance%20Harness/Tower-Loadout-Retention-Review.md), and [all 62 confirmed recipes](../../../TestResults/balance/tower-loadout-retention-work-20260913/exports/saved-builds.md).
+
+```powershell
+dotnet TestResults/balance/tower-loadout-retention-20260913/executable/BalanceHarness.dll tower-retention-verify --run TestResults/balance/tower-loadout-retention-20260913
+```
+
+This captured verification runs no fights. The completed v15 contract fixes `tower-retention-prepare` to exactly **48** preceding controls, with the same named arguments as `tower-feedback-prepare`. `tower-retention-check --run <directory>` verifies an unstarted package; `tower-retention-run` starts it once. Limits: 71,680 fights, 5,400 seconds, 4 GiB, no retries or resume. The versioned comparison runner preserves the historical v14 contract. All 4,416 older v13/v14 evaluations and 48 feedback probes reconstructed exactly. **427 relevant tests passed.**
+
+The subsequent v16 lineage comparison above completed the 62-control/96-capacity contract. This v15 result remains historical: reliability Fail 0/3 and adoption Hold. Its [confirmed v13 primary](../../../TestResults/balance/tower-loadout-retention-work-20260913/exports/team-bfabfcfb4d7795b70fcb4c83a370c5a5.json) remains saved with its original 87/512 measurement.
+
+## Generation feedback: historical completed comparison
+
+The opt-in `independent-generation-feedback-v14` policy spends part of its generation budget on independent training reassessments. V13 evaluates 384 candidates × 8 fights; v14 evaluates 320 × 8 plus sixteen × 32 probes. Both retain the same initial 96 parties and v13 operators. At checkpoints 96/160/224/288, freeze four unprobed leaders and use their pooled 40-trial score for later parents, exploration and loadout-library rank. Raw observations remain separate. Both methods then receive 32 × 64 fresh screening trials per restart and a complete shared 512-trial confirmation family.
+
+The [frozen plan](../../../Balance%20Harness/Tower-Generation-Feedback-Plan.md) and [review](../../../Balance%20Harness/Tower-Generation-Feedback-Review.md) record the exact limits and outcome: **Fail 0/3 reliability**, **Hold adoption**, **55,296 completed fights**, zero retries. All [48 complete confirmed recipes](../../../TestResults/balance/tower-generation-feedback-work-20260913/exports/saved-builds.md), 2,112 original evaluations and 48 feedback probes are retained. Generation is independent of controls; both original and screened nominations remain in confirmation.
+
+```powershell
+dotnet TestResults/balance/tower-generation-feedback-20260913/executable/BalanceHarness.dll tower-feedback-verify --run TestResults/balance/tower-generation-feedback-20260913
+```
+
+This reconstruction runs zero fights. Use `tower-feedback-prepare --definition <template> --controls <36-recipe prior comparison> --history <complete ledger> --anchor <id> --strong-control <id> --seed <int> --plan <plan> --output <new-directory> --content-root <root>` only for a separately authorized and frozen study. `tower-feedback-check --run <directory>` checks an unstarted package; `tower-feedback-run` starts it once. Interrupted evidence cannot resume or retry. Limits are 63,488 fights, 5,400 execution seconds and 4 GiB. That historical ledger is superseded by the 480,707-reservation v19 ledger above, including its unused confirmation values.
+
+That historical implementation passed 399 relevant tests and reproduced the preceding six-arm v13 search's 2,304 saved evaluations exactly, with no combat or gameplay-assembly changes. V14 remains experimental: it found no new competitive team and failed the 2/3 reliability requirement. The subsequent v15/v16/v17 comparisons and current next-work boundary are documented above; this paragraph retains the v14 result and scope.
+
+## Finalist rescreen: completed, adoption Hold
+
+The [completed comparison](../../../Balance%20Harness/Tower-Finalist-Rescreen-Review.md) used **43,008 fights, 1,872.29 execute seconds and about 1.11 GiB**, with zero retries. Rescreening selected original ranks 6, 1 and 27; confirmation measured the complete 36-recipe family on 512 fresh shared seeds. All original finalists and 20 controls remain included. Reliability and selection benefit each passed only **1/3**, below the fixed 2/3 requirements. Keep the workflow opt-in; no default, catalog or game-content promotion follows.
+
+| Restart | Original → rescreened primary wins/512 | Reliability | Supported selection benefit |
+| --- | ---: | --- | --- |
+| 1 | 19 → 72 | Fail: adjusted viability lower bound 9.64% | Yes |
+| 2 | 0 → 0 | Fail | No |
+| 3 | 68 → 78 | Pass | No |
+
+The ordinary/joint 36-recipe family result is **Pass/Pass**, with six supported viable recipes and no observed ceiling breach. This is separate from search reliability and from the unchanged prior 17,821-recipe precision Pass. All [36 complete seed-free builds](../../../TestResults/balance/tower-finalist-rescreen-execution-20260913/exports/saved-builds.md) and [machine-readable recipes](../../../TestResults/balance/tower-finalist-rescreen-execution-20260913/exports/saved-builds.json) are retained, including every zero-win finalist/control. The complete 2,015-recipe generated family is not certified.
+
+Reconstruct the completed campaign from the repository root with its captured executable; this performs zero fights:
+
+```powershell
+dotnet TestResults/balance/tower-finalist-rescreen-20260913/executable/BalanceHarness.dll tower-finalist-rescreen-verify --run TestResults/balance/tower-finalist-rescreen-20260913
+```
+
+The run exited 1 for a completed negative adoption result; verification exited 0 for intact evidence. The supplemental `python -B TestResults/balance/tower-finalist-rescreen-execution-20260913/analyze.py verify` independently checks every rate and all nine paired differences and the saved exports without writes or fights. Use an available Python runtime's explicit path if needed. No C# changed in this execution step; the preceding 170 passing tests and producing identities were preserved.
+
+The [frozen protocol](../../../TestResults/balance/tower-finalist-rescreen-20260913/protocol.json) and [execution plan](../../../Balance%20Harness/Tower-Finalist-Rescreen-Execution-Plan.md) retain their original caps and gates. The historical [476,641-reservation ledger](../../../TestResults/balance/tower-finalist-rescreen-20260913/seed-ledger.json) remains unchanged; the current [480,707-reservation search-portfolio ledger](../../../TestResults/balance/tower-search-portfolio-20260914/seed-ledger.json) supplies subsequent exclusions. All 587 values prepared for that rescreen study were used; its execution reserved none. Do not rerun this completed experiment, prepare it again, or use the preparation-only `check`/readiness verifier on its completed state.
+
+The [implementation review](../../../Balance%20Harness/Tower-Finalist-Rescreen-Implementation-Review.md), [diagnosis](../../../Balance%20Harness/Tower-Kharad-Search-Diagnosis-Review.md) and [proposal](../../../Balance%20Harness/Tower-Finalist-Rescreen-Plan.md) remain historical snapshots. Preserve their guards and receipts. The [completion receipt](../../../TestResults/balance/tower-finalist-rescreen-execution-20260913/final-verification.json) records current source/content preservation and evidence integrity.
+
+That follow-up was completed by the generation-feedback implementation and comparison above. The rescreen result remains historical; its failed gates are unchanged.
+
+Reusable commands remain `tower-finalist-rescreen-prepare --definition <template> --controls <20-recipe selection> --history <latest ledger> --anchor <id> --seed <int> --plan <plan> --output <new directory> --content-root <root>` and captured `check`, `run`, `verify --run <directory>`. `check` accepts only an unstarted package, `run` starts once, and `verify` reconstructs a complete sealed run. Interrupted evidence is preserved without implicit retries or extensions.
+
+## Applied Kharad candidate: saved evidence and verification
+
+The [checked local application](../../../Balance%20Harness/Tower-Kharad-Precision-Application-Review.md) installed the accepted +16% candidate at Health **3.5366243328**, Power **4.4702934848** on 13 September. At that boundary, all 16 content files matched the candidate byte for byte; four complete report pairs, eight diagnostic fights and 89 backend tests verified application. The source [precision resolution](../../../Balance%20Harness/Tower-Kharad-Precision-Resolution-Review.md) remains Pass for its 17,821 recipes and captured gameplay. Subsequent checkout edits are outside that verification.
+
+The historical application verifier below reconstructs the source decision and saved parity reports with **zero new fights**. It also checks sealing-time workspace hashes, so a changed checkout may fail that guard. Audit the version boundary first; preserve its original guards and receipts:
+
+```powershell
+dotnet TestResults/balance/tower-kharad-application-20260913/driver/precision/bin/Release/net10.0/Driver.dll verify
+```
+
+The older calibration/full-family/precision top-level study helpers retain their sealing-time workspace fingerprints. Their original local floor hash now differs because of the checked application. Do not edit those historical guards or receipts. The application verifier explicitly checks the approved local after-content hashes while calling the unchanged captured precision API against the original archives. Never repeat a completed run or application phase to reconstruct evidence.
+
+Read the [four selected application cases](../../../TestResults/balance/tower-kharad-application-20260913/selected-cases.json), [refreshed seed-free recipe](../../../TestResults/balance/tower-kharad-precision-20260913/recipe.json), [361 selected full-family builds](../../../TestResults/balance/tower-kharad-full-family-work-20260913/exports/saved-builds.md), [all 17,821 recipes with origins](../../../TestResults/balance/tower-kharad-full-family-20260913/family.json.gz), and historical **[476,054-reservation ledger](../../../TestResults/balance/tower-kharad-precision-20260913/seed-ledger.json)**. Local artifacts do not imply catalog promotion or fresh-checkout availability.
+
+Reusable APIs: `TowerPrecisionBalance.Select/Validate/Evaluate` bind the whole source family, evidence, complete tightened selection and fixed fresh schedule. `TowerPrecisionBalanceRun.VerifySource/RunAsync/VerifyAsync` reconstruct source archives and execute or reconstruct the separately frozen fresh campaign. Existing staged commands retain their original two-stage meaning and limits; the source full-family Inconclusive and later composite Pass both remain preserved.
+
+The application-era calibration remains **Fail 0/3**. The later finalist-rescreen comparison is complete with reliability **Fail 1/3** and selection benefit **Fail 1/3**; it does not alter the application evidence. No additional search or later-floor campaign ran during application. A running service must reload the singleton content provider before using the edited definitions; no service was restarted or deployed.
+
+## Coordinated complete-loadout benchmark
+
+Opt-in `independent-loadout-composition-v13` compares `coverage-deep-joint` and `loadout-composition-joint` at 384 candidates each. A library of at most 128 complete ordered character loadouts comes only from fully measured parties in the current arm. Distribution, whole-party composition, shared refinement and complete-loadout placement alternate with v4 refinement moves. Each library use records generated ancestry and destination slots. Whole-party fitness, parent selection, initial construction and eight-seed discovery sampling remain unchanged; both arms start with the same v4 random stream.
+
+```powershell
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-loadout-benchmark-prepare --definition <compatible-template.json> --history <latest-seed-ledger.json> --parity <historical-controls.json> --anchor <fixed-control-id> --seed <int> --output <new-directory> --plan <study-plan.md> --content-root LL/src/API/API.LL
+dotnet <new-directory>/executable/BalanceHarness.dll tower-search-benchmark-run --run <new-directory>
+dotnet <new-directory>/executable/BalanceHarness.dll tower-search-benchmark-verify --run <new-directory>
+```
+
+The [frozen design](../../../Balance%20Harness/Tower-Loadout-Composition-Plan.md) allows at most 24,200 fights, 2,700 execute seconds and 2 GiB. All selected recipes receive descriptive 64-seed screening and separate 256-seed validation, including after a poor screen. Joint alpha .025 covers the complete rate family; .025 covers six paired comparisons. Two of three fixed new primaries must support viability, improvement over deeper v4 and reference-anchor competitiveness. Defaults, reference boundaries and the 10–50% balance rule remain unchanged. The captured executable verifies its frozen package with zero new fights. A completed negative result exits 1; successful verification exits 0 regardless of efficacy.
+
+## Publication recovery and unchanged-v13 replication
+
+Completed chunk publication makes at most four directory-rename attempts, with 50/100/200 ms waits and receipt/data validation before every attempt. Time remains charged to the running campaign. Cancellation or persistent failure preserves pending records. No combat is retried by publication handling.
+
+For an explicitly authorized unfinished compact archive, the following verifies all saved prefix records, frozen inputs, ordered seeds, report hashes and charged attempts, then publishes exactly the next complete pending chunk with zero combat:
+
+```powershell
+dotnet <producing-executable>/BalanceHarness.dll tower-compact-recover-publication --run <unfinished-compact-archive>
+```
+
+Normal compact/campaign resume can then apply its existing execution-identity and remaining-budget checks. Recovery rejects incomplete/tampered data, conflicting destinations, extra pending chunks and sealed archives. It does not reset a top-level benchmark start marker, authorize combat retries or extend an allocation. Preserve historical interrupted packages; use an explicitly documented recovery copy when required by the study protocol.
+
+`tower-loadout-replication-prepare` accepts the same arguments as `tower-loadout-benchmark-prepare`, including a required frozen plan, but requires eight external controls and reserves at most **24,840 fights / 2,700 seconds / 2 GiB**. The `tower-loadout-replication-v1` profile keeps the v13 generation algorithm and six paired reliability comparisons unchanged; its larger complete rate family includes the two newly saved external builds. Use the same captured `tower-search-benchmark-run` and `tower-search-benchmark-verify` commands. The [confirmation and replication plan](../../../Balance%20Harness/Tower-Loadout-Replication-Plan.md) separately freezes the eight-build, 1,000-seed confirmation.
+
+## Sustained independent search benchmark
+
+`independent-depth-behavior-v12` explicitly compares v4 at one-quarter and full candidate budgets with a measured-behavior parent archive at the full budget. `CandidatesPerArm` is the deep budget for this policy only; the unchanged policies retain their previous meaning and defaults. The benchmark fixes it at 384, giving 96/384/384 parties across three restarts. It preserves v4 construction/operators and baseline random streams, uses at most 32 behavior representatives, and retains exact ordered combat identities. Behavior partitions are descriptors, not additional win-rate targets.
+
+The reusable workflow captures producing binaries, content, non-secret combat settings, all-array seed history and six external controls before combat:
+
+```powershell
+dotnet LL/tools/BalanceHarness/bin/Release/net10.0/BalanceHarness.dll tower-search-benchmark-prepare --definition <compatible-schema-3-template.json> --history <latest-seed-ledger.json> --parity <historical-controls.json> --anchor <fixed-control-id> --seed <int> --output <new-directory> --content-root LL/src/API/API.LL
+dotnet <new-directory>/executable/BalanceHarness.dll tower-search-benchmark-run --run <new-directory>
+dotnet <new-directory>/executable/BalanceHarness.dll tower-search-benchmark-verify --run <new-directory>
+```
+
+Preparation allocates three generation, eight discovery, 64 screen and 256 validation seeds, excluding every array in the supplied ledger and every reservation in the template. The parity input supplies exactly four `detailedParity` entries with `id`, `scenario`, `seed` and `reference` report path. Those repeated diagnostic fights are separately charged. Two finalists per arm freeze before screening; all six controls remain outside generation. Validation runs only when the frozen screen rule passes, with no replacement of primaries. The total cap is 28,424 fights, 1,800 execute seconds and 2 GiB, with zero combat retries. Existing compact archives retain resume support, but this benchmark's command rejects a second execution after its exclusive start marker. An interrupted benchmark is incomplete unless explicitly recovered and fully verified. Recovery must preserve the original interruption evidence, producing executable, schedules, decisions and attempt journals, repeat no fights, and charge recovery/continuation against the original remaining limits; deleting the start marker or running a fresh allocation is not recovery.
+
+Run exit code 0 means at least one candidate method passed search reliability; 1 means a completed negative result or the planned `ScreenFailed` stop; 2 means an execution/input error. Verification returns 0 for intact evidence even when search failed, and performs no combat. `selected-family.json` and `saved-builds.json` preserve every finalist/control recipe and its measurement stage. `report.md`, `screen-decision.json`, optional `quality.json`, and `summary.json` distinguish search quality, screening and balance. Read the [strategic analysis](../../../Balance%20Harness/Tower-Search-Strategy-Reset.md) for the scope and interpretation.
+
+The September 13 study required an explicitly authorized validation continuation after its original cap expired. That original package remains interrupted and immutable; its composite completion is in the [completion review](../../../Balance%20Harness/Tower-Sustained-Search-Completion-Review.md). The separate captured continuation checker reconstructs both validation sources against the original full family without fights or file writes:
+
+```powershell
+dotnet TestResults/balance/tower-search-validation-continuation-20260913/check-driver/bin/Release/net10.0/Check.dll
+```
+
+This artifact-specific continuation is not an automatic retry mode for the benchmark. It executed the previously prepared 3,456-outcome suffix, explicitly accounting for 15 repeated attempts and keeping all recipes, seeds and statistical rules unchanged.
 
 ## Opt-in elite-loadout diversity (v11)
 
@@ -11,7 +216,7 @@ Set `generation.policyVersion` to `independent-loadout-diversity-v11` and ordere
 
 Only the new method selects elite parents by taking the best-ranked representative of each per-character unordered loadout, then filling remaining beam positions with ranked ordered recipes. Signatures retain numeric character slots and ordinal Essence identities/multiplicities. Capacity stays four; combat ranking, ordered cache identities, exploration algorithm, mutation portfolio, shortlist and primary selection stay unchanged. This does not declare different Essence orderings combat-equivalent.
 
-The [implementation review](../../../Balance%20Harness/Tower-Loadout-Diversity-Implementation-Review.md) records 264 passing tests, exact archived/comparator parity and all 341 frozen parent-pool checks. Ordinary and compact discovery/verification support v11. The [separately frozen v11 pilot](../../../Balance%20Harness/Tower-Loadout-Diversity-Review.md) is complete: reliability Fail 0/3 after 9,224 fights. No default or catalog promotion follows; see the [current boundary](../../../Balance%20Harness/Tower-Loadout-Diversity-Plan.md#next-boundary). The [saved-evidence diagnosis](../../../Balance%20Harness/Tower-Loadout-Diversity-Diagnosis-Review.md) is complete with zero new fights; parent diversity was active and nominal control was retained. A source-grounded recovery assessment is next, with no new policy selected.
+The [implementation review](../../../Balance%20Harness/Tower-Loadout-Diversity-Implementation-Review.md) records 264 passing tests, exact archived/comparator parity and all 341 frozen parent-pool checks. Ordinary and compact discovery/verification support v11. The [separately frozen v11 pilot](../../../Balance%20Harness/Tower-Loadout-Diversity-Review.md) is complete: reliability Fail 0/3 after 9,224 fights. No default or catalog promotion follows; see the [current boundary](../../../Balance%20Harness/Tower-Loadout-Diversity-Plan.md#next-boundary). The [saved-evidence diagnosis](../../../Balance%20Harness/Tower-Loadout-Diversity-Diagnosis-Review.md) is complete with zero new fights; parent diversity was active and nominal control was retained. The subsequent sustained-search comparison is recorded in the current status above; this v11 review remains historical.
 
 ## Opt-in stagger reservation (v10)
 
@@ -198,7 +403,7 @@ Anchors skip the first look and always receive the second sample. Other cells st
 
 Each stage receives alpha .025, divided across its whole tested family. Stage two uses independent fresh data and its entire selected family; first and second samples are never pooled. Every final upper bound must be at most 50%, and each cohort needs a lower bound of at least 10%. Completed-stage observed rates above 50% cannot pass. Wilson coverage is approximate; this does not certify unsearched builds or lifetime repeated experiments. See the [acceptance policy](../../../Balance%20Harness/Tower-Balance-Acceptance-Policy.md#planned-staged-sampling-and-compact-evidence).
 
-The reservation is `(cells - anchors) × firstSeeds.Count + maximumSecondStageCells × secondSeeds.Count`, plus the explicit retry reserve. Limits are 10,000 cells and 500,000 reserved battles for this contract; ordinary definitions retain their existing limits. Matching interrupted campaigns can resume with the identical command plus `--resume true`; retries consume attempts without enlarging samples. Time limits apply per invocation and storage checks are cooperative. Freeze any overall experiment limit separately and never automatically raise it.
+The reservation is `(cells - anchors) × firstSeeds.Count + maximumSecondStageCells × secondSeeds.Count`, plus the explicit retry reserve. Staged schema 1 / `tower-staged-bonferroni-wilson-95-v1` permits 10,000 cells. Opt-in schema 2 / `tower-staged-bonferroni-wilson-95-v2` permits 20,000 cells with identical confidence calculations. Both retain the 500,000-battle ceiling; ordinary definitions retain their existing limits. Matching interrupted campaigns can resume with the identical command plus `--resume true`; retries consume attempts without enlarging samples. Time limits apply per invocation and storage checks are cooperative. Freeze any overall experiment limit separately and never automatically raise it.
 
 Outputs include `stage-selection.json`, stage evidence/source mappings, `assessment.json/md`, compact batch archives and accounting/integrity manifests. The verifier reconstructs everything without fights. Use this dedicated verifier for the two-stage policy; the ordinary evaluator does not interpret it. Exit codes are 0 Pass, 1 Fail, 2 Invalid and 3 Inconclusive. This CLI path does not change Tower Lab's workflow, promote catalog entries or apply boss settings.
 

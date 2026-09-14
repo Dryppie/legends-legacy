@@ -51,7 +51,7 @@ public static class TowerPerformanceComparison
         return report;
     }
 
-    private static (TowerPerformanceDefinition Definition, TowerPerformanceScope Scope, TowerPerformanceReport Report) Read(string root, CancellationToken token)
+    internal static (TowerPerformanceDefinition Definition, TowerPerformanceScope Scope, TowerPerformanceReport Report) Read(string root, CancellationToken token)
     {
         var index = HarnessJson.Read<Dictionary<string, string>>(Path.Combine(root, "performance-index.json"));
         var expected = new[] { "definition.json", "scope.json", "seed-ledger.json", "executable-files.json", "performance.json", "performance.md" };

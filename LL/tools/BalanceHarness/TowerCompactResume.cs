@@ -140,8 +140,8 @@ public static partial class TowerCompactBundle
                 checkpoint(completed, chunkIndex);
                 if (pending.Count == d.ChunkSize || completed == planned)
                 {
-                    token.ThrowIfCancellationRequested();
-                    CommitChunk(output, chunkIndex, pending);
+                    // Persist completed outcomes even if cancellation arrived after the final fight.
+                    await CommitChunkAsync(output, chunkIndex, pending, token);
                     chunkIndex++;
                     pending.Clear();
                     checkpoint(completed, chunkIndex);

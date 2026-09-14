@@ -1000,7 +1000,8 @@ public sealed partial class EssenceSystemServiceTests
                 Source = "Claw",
                 EventType = EventType.Damage,
                 Magnitude = 7,
-                BarrierAbsorbed = 13
+                BarrierAbsorbed = 13,
+                DamageType = DamageType.Physical
             }
         ],
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1014,6 +1015,13 @@ public sealed partial class EssenceSystemServiceTests
         Assert.Equal(13, player.DamageBlocked);
         Assert.Equal(7, player.DamageTaken);
         Assert.Equal(20, player.Abilities.Single(x => x.Name == "Bone Bulwark").TotalBarrier);
+
+        var enemy = stats.Single(x => x.EntityId == "enemy");
+        Assert.Equal(20, enemy.DamageDone);
+        var claw = enemy.Abilities.Single(x => x.Name == "Claw");
+        Assert.Equal(20, claw.TotalDamage);
+        Assert.Equal(20, claw.DamageByType!.Single(x => x.DamageType == DamageType.Physical).TotalDamage);
+        Assert.Equal(20, enemy.TargetInteractions.Single(x => x.TargetId == "player").DamageDone);
     }
 
     [Fact]

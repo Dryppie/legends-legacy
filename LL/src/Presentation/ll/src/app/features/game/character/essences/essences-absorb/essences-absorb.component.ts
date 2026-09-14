@@ -48,15 +48,13 @@ export class EssencesAbsorbComponent {
     });
 
     return [...items].sort((left, right) => {
+      const statusDifference =
+        Number(this.essenceState.isInventoryEssenceAbsorbed(left)) -
+        Number(this.essenceState.isInventoryEssenceAbsorbed(right));
+      if (statusDifference !== 0) return statusDifference;
+
       if (sort === 'quantity') {
         return right.quantity - left.quantity;
-      }
-
-      if (sort === 'status') {
-        const statusDifference =
-          Number(this.essenceState.isInventoryEssenceAbsorbed(right)) -
-          Number(this.essenceState.isInventoryEssenceAbsorbed(left));
-        if (statusDifference !== 0) return statusDifference;
       }
 
       return this.essenceState

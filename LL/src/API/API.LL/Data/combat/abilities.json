@@ -9000,5 +9000,448 @@
         "procCoefficient": 1
       }
     ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_brute.skullcrusher",
+    "kind": "Active",
+    "name": "Skullcrusher",
+    "description": "Deal 180% Physical Damage and apply Stun(2). If the target is already stunned, deal 270% Physical Damage instead without refreshing Stun.",
+    "cooldownTicks": 170,
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
+    "owningEssenceId": "essence.lizardfolk_brute",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_brute.skullcrusher.0",
+        "procCoefficient": 1,
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.8,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "conditions": [
+          {
+            "type": "LacksCondition",
+            "condition": "Stun"
+          }
+        ]
+      },
+      {
+        "id": "effect.creature.lizardfolk_brute.skullcrusher.1",
+        "procCoefficient": 1,
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.7,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "conditions": [
+          {
+            "type": "HasCondition",
+            "condition": "Stun"
+          }
+        ]
+      },
+      {
+        "id": "effect.creature.lizardfolk_brute.skullcrusher.2",
+        "procCoefficient": 1,
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Stun",
+        "baseValue": 2,
+        "scalesWithAscension": false,
+        "conditions": [
+          {
+            "type": "LacksCondition",
+            "condition": "Stun"
+          }
+        ]
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "snapshotEffectConditions": true
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_brute.brutal_follow_up",
+    "kind": "Passive",
+    "name": "Brutal Follow-Up",
+    "description": "After using an ability, your next basic attack deals 75% increased damage. Repeated ability uses refresh this bonus.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Passive"
+    ],
+    "owningEssenceId": "essence.lizardfolk_brute",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_brute.brutal_follow_up.0",
+        "procCoefficient": 1,
+        "operation": "ModifyNextBasicAttackDamage",
+        "target": "Self",
+        "baseValue": 75,
+        "refreshPendingModifier": true
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed"
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_elementalist.converging_element",
+    "kind": "Active",
+    "name": "Converging Element",
+    "description": "Randomly apply Burn(40), Chill(5), or deal 180% Magical Damage. Each outcome is equally likely.",
+    "cooldownTicks": 200,
+    "tags": [
+      "Magical",
+      "Ranged",
+      "Burn",
+      "Chill"
+    ],
+    "owningEssenceId": "essence.lizardfolk_elementalist",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_elementalist.converging_element.0",
+        "procCoefficient": 1,
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Burn",
+        "baseValue": 40
+      },
+      {
+        "id": "effect.creature.lizardfolk_elementalist.converging_element.1",
+        "procCoefficient": 1,
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Chill",
+        "baseValue": 5
+      },
+      {
+        "id": "effect.creature.lizardfolk_elementalist.converging_element.2",
+        "procCoefficient": 1,
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.8,
+        "attackType": "Ranged",
+        "damageType": "Magical"
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "chooseOneEffect": true
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_elementalist.elemental_bond",
+    "kind": "Passive",
+    "name": "Elemental Bond",
+    "description": "Innate: summon a Lightning Elemental with 10% of your Max Health, 30% of your Power, normal basic-attack speed, and +20 percentage points Critical Chance. It lasts until death and does not respawn.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Passive"
+    ],
+    "owningEssenceId": "essence.lizardfolk_elementalist",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_elementalist.elemental_bond.0",
+        "procCoefficient": 1,
+        "operation": "Summon",
+        "target": "Self",
+        "summonId": "lightningElemental",
+        "baseValue": 1
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart"
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_scout.find_weakness",
+    "kind": "Active",
+    "name": "Find Weakness",
+    "description": "Deal 120% Physical Damage and apply Exposed.",
+    "cooldownTicks": 160,
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
+    "owningEssenceId": "essence.lizardfolk_scout",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_scout.find_weakness.0",
+        "procCoefficient": 1,
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.2,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      },
+      {
+        "id": "effect.creature.lizardfolk_scout.find_weakness.1",
+        "procCoefficient": 1,
+        "operation": "ApplyCondition",
+        "target": "CurrentTarget",
+        "condition": "Exposed",
+        "baseValue": 1,
+        "scalesWithAscension": false
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_scout.keen_eye",
+    "kind": "Passive",
+    "name": "Keen Eye",
+    "description": "Your Critical Strikes against stunned targets deal an additional +25% Critical Damage.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Passive"
+    ],
+    "owningEssenceId": "essence.lizardfolk_scout",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_scout.keen_eye.0",
+        "procCoefficient": 1,
+        "operation": "ModifyCriticalDamageAgainstCondition",
+        "target": "Self",
+        "condition": "Stun",
+        "baseValue": 25
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart"
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_shaman.herb_mixture",
+    "kind": "Active",
+    "name": "Herb Mixture",
+    "description": "Heal the ally with the least current Health, including yourself and summons, for 210% Power.",
+    "cooldownTicks": 140,
+    "tags": [
+      "Healing",
+      "Support"
+    ],
+    "owningEssenceId": "essence.lizardfolk_shaman",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_shaman.herb_mixture.0",
+        "procCoefficient": 1,
+        "operation": "Heal",
+        "target": "LowestHealthAlly",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.1
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_shaman.cleansing_herbs",
+    "kind": "Passive",
+    "name": "Cleansing Herbs",
+    "description": "Whenever you directly apply a heal to an ally, including yourself or a summon, cleanse 1 negative effect. Periodic heals do not trigger this effect.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Passive"
+    ],
+    "owningEssenceId": "essence.lizardfolk_shaman",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_shaman.cleansing_herbs.0",
+        "procCoefficient": 1,
+        "operation": "Cleanse",
+        "target": "EventTarget",
+        "maximumCount": 1,
+        "scalesWithAscension": false
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnDirectHealApplied"
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_warrior.spearhead_assault",
+    "kind": "Active",
+    "name": "Spearhead Assault",
+    "description": "Deal 150% Physical Damage. If the target is above 70% Health, deal 220% Physical Damage instead.",
+    "cooldownTicks": 150,
+    "tags": [
+      "Physical",
+      "Melee"
+    ],
+    "owningEssenceId": "essence.lizardfolk_warrior",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_warrior.spearhead_assault.0",
+        "procCoefficient": 1,
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 1.5,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "conditions": [
+          {
+            "type": "HealthAtOrBelowPercent",
+            "value": 70
+          }
+        ]
+      },
+      {
+        "id": "effect.creature.lizardfolk_warrior.spearhead_assault.1",
+        "procCoefficient": 1,
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 2.2,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "conditions": [
+          {
+            "type": "HealthAbovePercent",
+            "value": 70
+          }
+        ]
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "snapshotEffectConditions": true
+      }
+    ]
+  },
+  {
+    "id": "ability.creature.lizardfolk_warrior.battle_rhythm",
+    "kind": "Passive",
+    "name": "Battle Rhythm",
+    "description": "Each basic attack grants 2% Attack Speed, stacking up to 8 times. Using a damage ability consumes the stacks, increasing all damage from that cast, including repeats and damage over time, by 2% per stack consumed.",
+    "cooldownTicks": 0,
+    "tags": [
+      "Passive"
+    ],
+    "owningEssenceId": "essence.lizardfolk_warrior",
+    "effects": [
+      {
+        "id": "effect.creature.lizardfolk_warrior.battle_rhythm.0",
+        "procCoefficient": 1,
+        "operation": "ApplyStatus",
+        "target": "Self",
+        "statusId": "status.lizardfolk_warrior.battle_rhythm",
+        "baseValue": 1,
+        "scalesWithAscension": false
+      },
+      {
+        "id": "effect.creature.lizardfolk_warrior.battle_rhythm.1",
+        "procCoefficient": 1,
+        "operation": "SynchronizeAttributePerStatusStack",
+        "target": "Self",
+        "statusId": "status.lizardfolk_warrior.battle_rhythm",
+        "attribute": "AttackSpeed",
+        "baseValue": 2,
+        "scalesWithAscension": false
+      },
+      {
+        "id": "effect.creature.lizardfolk_warrior.battle_rhythm.2",
+        "procCoefficient": 1,
+        "operation": "ConsumeStatusForCastDamage",
+        "target": "Self",
+        "statusId": "status.lizardfolk_warrior.battle_rhythm",
+        "baseValue": 2,
+        "scalesWithAscension": false
+      }
+    ],
+    "triggers": [
+      {
+        "event": "OnBasicAttack",
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.0",
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      },
+      {
+        "event": "OnStatusApplied",
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.lizardfolk_warrior.battle_rhythm"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      },
+      {
+        "event": "OnStatusRemoved",
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.lizardfolk_warrior.battle_rhythm"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      },
+      {
+        "event": "OnStatusCleansed",
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.lizardfolk_warrior.battle_rhythm"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      },
+      {
+        "event": "OnStatusDispelled",
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.lizardfolk_warrior.battle_rhythm"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      },
+      {
+        "event": "OnStatusExpired",
+        "conditions": [
+          {
+            "type": "EventIdIs",
+            "statusId": "status.lizardfolk_warrior.battle_rhythm"
+          }
+        ],
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      },
+      {
+        "event": "OnBeforeDamageAbility",
+        "effectIds": [
+          "effect.creature.lizardfolk_warrior.battle_rhythm.2",
+          "effect.creature.lizardfolk_warrior.battle_rhythm.1"
+        ]
+      }
+    ]
   }
 ]

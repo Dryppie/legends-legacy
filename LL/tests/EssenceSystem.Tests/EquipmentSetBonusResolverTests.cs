@@ -63,6 +63,20 @@ public sealed class EquipmentSetBonusResolverTests
         Assert.Empty(EquipmentSetBonusResolver.ResolveGrantedAbilityIds(equipment, [CreateDefinition()]));
     }
 
+    [Fact]
+    public void TwoHandedEquipmentCountsAsTwoSetItemsButDuplicateSlotReferencesCountOnce()
+    {
+        var twoHanded = CreateItem("set.test", EquipmentType.TwoHanded);
+
+        var state = Assert.Single(EquipmentSetBonusResolver.Resolve(
+            [twoHanded, twoHanded],
+            [CreateDefinition()]));
+
+        Assert.Equal(2, state.EquippedCount);
+        Assert.Equal(["two"], state.ActiveBonuses.Select(active => active.Bonus.Id));
+        Assert.Equal([twoHanded.Id], state.EquippedItemInstanceIds);
+    }
+
     private static EquipmentSetDefinition CreateDefinition() => new()
     {
         Id = "set.test",
@@ -103,6 +117,8 @@ public sealed class EquipmentSetBonusResolverTests
         ]
     };
 
-    private static EquipmentInstance CreateItem(string setId) =>
-        ProgressionTestEquipment.Create(setId);
+    private static EquipmentInstance CreateItem(
+        string setId,
+        EquipmentType equipmentType = EquipmentType.Chest) =>
+        ProgressionTestEquipment.Create(setId, equipmentType);
 }

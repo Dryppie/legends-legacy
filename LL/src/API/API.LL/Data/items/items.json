@@ -1688,5 +1688,55 @@
     "essenceDefinitionId": "essence.pack_howler",
     "equipmentType": "Head",
     "attributeModifiers": []
+  },
+  {
+    "id": "item.essence.lizardfolk_brute",
+    "name": "Unbound Lizardfolk Brute Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.lizardfolk_brute",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.essence.lizardfolk_elementalist",
+    "name": "Unbound Lizardfolk Elementalist Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.lizardfolk_elementalist",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.essence.lizardfolk_scout",
+    "name": "Unbound Lizardfolk Scout Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.lizardfolk_scout",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.essence.lizardfolk_shaman",
+    "name": "Unbound Lizardfolk Shaman Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.lizardfolk_shaman",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "item.essence.lizardfolk_warrior",
+    "name": "Unbound Lizardfolk Warrior Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "essenceDefinitionId": "essence.lizardfolk_warrior",
+    "equipmentType": "Head",
+    "attributeModifiers": []
   }
 ]

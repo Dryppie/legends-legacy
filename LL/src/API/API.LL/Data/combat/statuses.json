@@ -543,5 +543,19 @@
     "tags": ["Tower.LivingScale", "Scale.Conviction", "Mechanic.Stance"],
     "triggers": [],
     "effects": []
+  },
+  {
+    "id": "status.lizardfolk_warrior.battle_rhythm",
+    "name": "Battle Rhythm",
+    "description": "Each stack grants 2% Attack Speed and adds 2% damage to the next damaging cast. Maximum eight stacks.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 8,
+    "durationTicks": 0,
+    "tags": [
+      "Status.Buff",
+      "Pattern.StackingBuff"
+    ],
+    "triggers": [],
+    "effects": []
   }
 ]

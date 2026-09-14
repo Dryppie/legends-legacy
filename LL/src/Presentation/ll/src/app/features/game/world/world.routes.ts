@@ -10,11 +10,12 @@ import { TowerPersonalExpeditionsComponent } from './tower/personal-expeditions/
 import { RaidPageComponent } from './raid/raid-page.component';
 import { raidFeatureGuard } from '../../../core/guards/raid-feature.guard';
 import { RegionBossComponent } from './region-boss/region-boss.component';
-import { worldMapRegionRedirect } from '../../../core/guards/world-map-region.guard';
+import { activeDungeonGuard } from '../../../core/guards/active-dungeon.guard';
 import {
   focusedBetaMinimumLevelGuard,
   focusedBetaRegionGuard,
 } from '../../../core/guards/focused-beta-journey.guard';
+import { worldMapRegionRedirect } from '../../../core/guards/world-map-region.guard';
 import { PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL } from '../../../core/services/client-side/player-journey/player-journey';
 
 const focusedBetaFullGameGuard = focusedBetaMinimumLevelGuard(
@@ -29,6 +30,7 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'dungeon',
         component: DungeonPageComponent,
+        canActivate: [activeDungeonGuard],
         data: { guidePageId: GUIDE_PAGE_IDS.dungeons },
       },
       {

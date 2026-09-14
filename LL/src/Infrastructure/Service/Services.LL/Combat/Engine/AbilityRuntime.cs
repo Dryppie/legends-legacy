@@ -42,6 +42,8 @@ public sealed class CompiledCost
 
 public sealed class CompiledTrigger
 {
+    public bool ChooseOneEffect { get; init; }
+    public bool SnapshotEffectConditions { get; init; }
     public AbilityTriggerEvent Event { get; init; }
     public int ThreatValue { get; init; }
     public int ThreatInternalCooldownTicks { get; init; }
@@ -96,6 +98,7 @@ public sealed class CompiledEffect
     public AbilityResourceType Resource { get; init; }
     public int DurationTicks { get; init; }
     public bool RefreshDuration { get; init; }
+    public bool RefreshPendingModifier { get; init; }
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
     public bool OncePerTarget { get; init; }
@@ -154,6 +157,8 @@ public sealed class CompiledStatus
 
 public sealed class CompiledSummon
 {
+    public AttackType BasicAttackType { get; init; } = AttackType.Melee;
+    public DamageType BasicAttackDamageType { get; init; } = DamageType.Physical;
     public required string Id { get; init; }
     public required string Name { get; init; }
     public required string ImagePath { get; init; }
@@ -330,6 +335,7 @@ public sealed class RuntimeStatus
     }
 
     public CompiledStatus Definition { get; }
+    public double CastDamageMultiplier { get; set; } = 1d;
     public RuntimeCombatant Source { get; }
     public RuntimeCombatant Owner { get; }
     public string StatsSource { get; }
@@ -431,7 +437,8 @@ public sealed class RuntimeEffect
         string? statsSource = null,
         double durationMultiplier = 1d,
         string? activationId = null,
-        int? appliedModifierValue = null)
+        int? appliedModifierValue = null,
+        double castDamageMultiplier = 1d)
     {
         Definition = definition;
         Source = source;
@@ -439,6 +446,7 @@ public sealed class RuntimeEffect
         StatsSource = string.IsNullOrWhiteSpace(statsSource) ? definition.StatsSource : statsSource;
         ActivationId = activationId;
         AppliedModifierValue = appliedModifierValue;
+        CastDamageMultiplier = castDamageMultiplier;
         RemainingDurationTicks = definition.DurationTicks <= 0
             ? definition.DurationTicks
             : Math.Max(1, (int)Math.Ceiling(definition.DurationTicks * Math.Max(0, durationMultiplier)));
@@ -452,6 +460,7 @@ public sealed class RuntimeEffect
     public string StatsSource { get; }
     public string? ActivationId { get; }
     public int? AppliedModifierValue { get; }
+    public double CastDamageMultiplier { get; }
     public int RemainingDurationTicks { get; private set; }
     public int TicksUntilInterval { get; private set; }
     public int RemainingUses { get; private set; }
@@ -492,7 +501,8 @@ public sealed class RuntimeCondition
         long applicationOrder,
         string statsSource,
         int intervalTicks = 0,
-        double? storedDamage = null)
+        double? storedDamage = null,
+        double damageMultiplier = 1d)
     {
         Type = type;
         Source = source;
@@ -506,6 +516,7 @@ public sealed class RuntimeCondition
         IntervalTicks = Math.Max(0, intervalTicks);
         TicksUntilInterval = IntervalTicks;
         StoredDamage = storedDamage;
+        DamageMultiplier = damageMultiplier;
     }
 
     public StandardConditionType Type { get; }
@@ -520,6 +531,7 @@ public sealed class RuntimeCondition
     public int IntervalTicks { get; }
     public int TicksUntilInterval { get; private set; }
     public double? StoredDamage { get; }
+    public double DamageMultiplier { get; }
     public int UnpaidFutureTicks => IntervalTicks > 0 && TicksUntilInterval > 0
         && RemainingDurationTicks >= TicksUntilInterval
             ? 1 + (RemainingDurationTicks - TicksUntilInterval) / IntervalTicks : 0;
@@ -1164,15 +1176,23 @@ public sealed class RuntimeCombatant
         return total;
     }
 
-    public void ModifyNextBasicAttackDamage(float percentagePoints) =>
-        _nextBasicAttackDamagePercent += percentagePoints;
+    private readonly Dictionary<string, float> _pendingBasicDamageModifiers = new(StringComparer.OrdinalIgnoreCase);
+
+    public void ModifyNextBasicAttackDamage(float percentagePoints, string? refreshingModifierId = null)
+    {
+        if (refreshingModifierId is null)
+            _nextBasicAttackDamagePercent += percentagePoints;
+        else
+            _pendingBasicDamageModifiers[refreshingModifierId] = percentagePoints;
+    }
 
     public void ModifyNextBasicAttackArmorPenetration(float percentagePoints) =>
         _nextBasicAttackArmorPenetration += percentagePoints;
 
     public (float DamagePercent, float ArmorPenetration) ConsumeNextBasicAttackModifiers()
     {
-        var result = (_nextBasicAttackDamagePercent, _nextBasicAttackArmorPenetration);
+        var result = (_nextBasicAttackDamagePercent + _pendingBasicDamageModifiers.Values.Sum(), _nextBasicAttackArmorPenetration);
+        _pendingBasicDamageModifiers.Clear();
         _nextBasicAttackDamagePercent = 0;
         _nextBasicAttackArmorPenetration = 0;
         return result;

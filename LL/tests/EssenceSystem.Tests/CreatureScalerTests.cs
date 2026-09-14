@@ -66,6 +66,12 @@ public sealed class CreatureScalerTests
         Assert.Equal(13, tempestAerie.GlobalStep);
         Assert.Equal(14, wolfsbaneReach.GlobalStep);
         Assert.Equal(354, wolfsbaneReach.RecommendedCombatRating);
+        Assert.Equal(200, regionTwoStart.RecommendedCombatRating);
+        Assert.Equal(242, rotgraveFields.RecommendedCombatRating);
+        Assert.Equal(293, tempestAerie.RecommendedCombatRating);
+        var sunkenScalehold = provider.GetScaling(new Area { Id = "region_02_area_05" });
+        Assert.Equal(15, sunkenScalehold.GlobalStep);
+        Assert.Equal(428, sunkenScalehold.RecommendedCombatRating);
         Assert.Equal(5.96, rotgraveFields.HealthMultiplier, 5);
         Assert.Equal(14.3, rotgraveFields.OffenseMultiplier, 5);
         Assert.Equal(2.73, rotgraveFields.DefenseMultiplier, 5);

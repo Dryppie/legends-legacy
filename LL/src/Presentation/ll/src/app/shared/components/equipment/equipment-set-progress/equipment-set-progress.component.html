@@ -3,6 +3,9 @@
     <div class="equipment-set-name">{{ equipmentSet.name }}</div>
     <div *ngIf="equippedItems !== null" class="equipment-set-count">
       <span>{{ equippedCount }}/{{ maximumThreshold }} equipped</span>
+      <span *ngIf="hasEquippedTwoHandedItem"
+        >Two-handed weapon counts as 2</span
+      >
     </div>
   </div>
   <p *ngIf="equipmentSet.description" class="equipment-set-description">

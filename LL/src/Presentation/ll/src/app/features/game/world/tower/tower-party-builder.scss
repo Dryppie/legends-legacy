@@ -208,6 +208,24 @@
   font-size: var(--ll-text-xs);
 }
 
+.identity {
+  min-width: 0;
+}
+
+.identity > strong {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--ll-space-2);
+}
+
+.identity > span {
+  display: block;
+  margin-top: var(--ll-space-1);
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+}
+
 .party-member-actions {
   display: flex;
   gap: var(--ll-space-2);

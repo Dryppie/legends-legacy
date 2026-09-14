@@ -45,7 +45,9 @@ public enum AbilityTriggerEvent
     OnEnemyDeath = 31,
     OnDamageDealt = 32,
     OnStaggerBroken = 33,
-    OnEnemyHealed = 34
+    OnEnemyHealed = 34,
+    OnBeforeDamageAbility = 35,
+    OnDirectHealApplied = 36
 }
 
 public enum AbilityEffectOperation
@@ -89,7 +91,8 @@ public enum AbilityEffectOperation
     SynchronizeAttributePerLivingNonSummonedAlly = 36,
     ModifyCriticalDamageAgainstCondition = 37,
     PerformBasicAttack = 38,
-    ResetAbilityCooldown = 39
+    ResetAbilityCooldown = 39,
+    ConsumeStatusForCastDamage = 40
 }
 
 public enum AbilityTargetSelector
@@ -155,7 +158,8 @@ public enum AbilityConditionType
     EventInstigatorIsSelf = 27,
     OutnumbersEnemies = 28,
     NonSummonedEnemyHealthSpreadAtMostPercent = 29,
-    NonSummonedEnemyHealthSpreadAbovePercent = 30
+    NonSummonedEnemyHealthSpreadAbovePercent = 30,
+    LacksCondition = 31
 }
 
 public enum StandardConditionType
@@ -186,7 +190,8 @@ public enum StandardConditionType
     Mark = 23,
     Cover = 24,
     Silence = 25,
-    Soaked = 26
+    Soaked = 26,
+    Exposed = 27
 }
 
 public enum AbilityConditionSubject
@@ -265,6 +270,8 @@ public sealed class AbilityCostSpec
 
 public sealed class AbilityTriggerSpec
 {
+    public bool ChooseOneEffect { get; set; }
+    public bool SnapshotEffectConditions { get; set; }
     public AbilityTriggerEvent Event { get; set; }
     public int InternalCooldownTicks { get; set; }
     public int InitialDelayTicks { get; set; }
@@ -319,6 +326,7 @@ public sealed class AbilityEffectSpec
     public AbilityResourceType Resource { get; set; } = AbilityResourceType.Health;
     public int DurationTicks { get; set; }
     public bool RefreshDuration { get; set; }
+    public bool RefreshPendingModifier { get; set; }
     public int IntervalTicks { get; set; }
     public int Uses { get; set; }
     public bool OncePerTarget { get; set; }
@@ -375,6 +383,8 @@ public sealed class StatusSpec
 
 public sealed class SummonSpec
 {
+    public AttackType BasicAttackType { get; set; } = AttackType.Melee;
+    public DamageType BasicAttackDamageType { get; set; } = DamageType.Physical;
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -682,7 +692,7 @@ public static class AbilityThreatRules
                 => AbilityThreatFunctionBand.HardControl,
             StandardConditionType.Slow or StandardConditionType.Weaken or StandardConditionType.Vulnerable
                 or StandardConditionType.Chill or StandardConditionType.Corrosion or StandardConditionType.Wound
-                or StandardConditionType.Decay or StandardConditionType.Doom or StandardConditionType.Soaked
+                or StandardConditionType.Decay or StandardConditionType.Doom or StandardConditionType.Soaked or StandardConditionType.Exposed
                 when !targetsSelf && !targetsAllies
                 => AbilityThreatFunctionBand.SoftControl,
             StandardConditionType.Poison or StandardConditionType.Burn or StandardConditionType.Bleed

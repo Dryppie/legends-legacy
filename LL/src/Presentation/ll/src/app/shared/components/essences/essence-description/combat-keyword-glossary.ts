@@ -16,6 +16,11 @@ export interface CombatKeywordDefinition {
 
 export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   {
+    name: 'Exposed',
+    description:
+      'Damage eligible to critically strike against this target gains 10 percentage points Critical Chance, up to the 100% cap. Lasts 10 seconds. Does not stack; reapplication refreshes the duration. Can be cleansed.',
+  },
+  {
     name: 'Innate',
     description: 'An effect that activates at combat start',
   },

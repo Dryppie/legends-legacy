@@ -1,8 +1,19 @@
-# World Tower: the next substantial search milestone
+# World Tower: search strategy history and current handoff
+
+**Current result — 14 September 2026:** the [v19 search portfolio](Tower-Search-Portfolio-Review.md) completed discovery and all six screens: **86,016 fights** in **292.69 minutes**. Its required **253-recipe family exceeded capacity 144**; every recipe is retained and **zero confirmation fights** ran. Reliability is **Unresolved**, adoption **Hold**, and ordinary/joint confirmation-family acceptance **NotRun / NotRun**. The 129 discovery and 46 screening observations above 50% remain unconfirmed.
+
+**Next step:** audit the confirmation gameplay scope, then implement and verify the separate **253-recipe confirmation contract**. The [parity closure review](Tower-Discovery-Parity-Closure-Review.md) records **34/34 exact candidate fights**, both detailed replays, completed campaign reconstruction, full-scale nested accounting and **129 passing tests**. The previous **622.54× incremental / 4.50× sixteen-write lifecycle** measurements retain their limits; the broader 5× target and whole-run throughput remain unestablished. The stopped diagnostic remains sealed. The **129,536-fight** confirmation remains unprepared and unstarted; preserve all **480,707 reservations**, including 512 unused v19 confirmation values. The [current handoff](Tower-Coverage-Replication-Plan.md#next-scoped-work) retains the full confirmation scope and rules.
+
+**Earlier evidence:** the [94-recipe saved-allocation confirmation](Tower-Allocation-Confirmation-Review.md) and [112-recipe v18 comparison](Tower-Late-Allocation-Review.md) each returned reliability **Fail 1/3**, with ordinary/joint family **Pass / Pass**. The [17,821-recipe precision Pass](Tower-Kharad-Precision-Resolution-Review.md) retains its separate captured scope. These results and the v19 producing-version tests do not establish balance or test coverage for subsequent gameplay edits.
+
+
+The captured v19 experiment used Kharad **Health 3.5366243328 / Power 4.4702934848** and the unchanged 2/3 reliability gate. Historical sections below retain their original settings, limits and results; use the [handoff](Tower-Coverage-Replication-Plan.md) for current work. No default, content or catalog promotion follows from the capacity stop.
+
+The optimizer proposal below was carried through sustained comparison, v13 replication, candidate calibration, complete-family measurement and [precision resolution](Tower-Kharad-Precision-Resolution-Review.md). Its recommendations and accounting are historical. The latest v19 comparison found stronger unconfirmed challengers and stopped at the full-family capacity boundary. The [current handoff](Tower-Coverage-Replication-Plan.md#next-scoped-work) now calls for a version audit after the [completed performance engineering gate](Tower-Discovery-Parity-Closure-Review.md), followed by separate confirmation of all 253 recipes before another search variant or Kharad tuning. No confirmation package or fresh schedule has been prepared.
 
 13 September 2026. Analysis requested after eight continuation comparisons failed independent-search reliability. Target: the offline `LL/tools/BalanceHarness`. This is a recommendation and implementation direction, not a frozen experiment, new combat allocation or claim of improved balance.
 
-## Recommendation
+## Historical recommendation
 
 Make the next work package **a sustained complete-party optimizer and one decisive search-quality benchmark**. Test whether greater search depth alone recovers competitive parties, and whether retaining different measured combat behaviors improves on that deeper baseline. Finish that work package with saved parties and a fresh reliability result, including an explicit failure if necessary.
 
@@ -83,7 +94,7 @@ The next milestone is **repeatable independent recovery of competitive parties**
 
 Even success here is a first search milestone. Matching one fixed anchor does not establish that the search challenges the best players. Before renewed calibration, independently challenge the **strongest known control portfolio**, assess additional search budget and an alternative search route, and preserve every discovered above-ceiling party. Those steps provide bounded evidence about search coverage, never proof of a global optimum. Practical acquisition remains unverified.
 
-After that prerequisite is met, use the existing separate calibration and fresh-confirmation workflow on the expanded portfolio, then resume floors 6–11 with the approved Essence-slot progression. Kharad stays at Health 3.04881408 / Power 3.85370128 during search development. Keep fixed gear and untrained/unevolved Essences throughout.
+After that prerequisite is met, use the existing separate calibration and fresh-confirmation workflow on the expanded portfolio, then resume floors 6–11 with the approved Essence-slot progression. Current search diagnosis holds the applied Health 3.5366243328 / Power 4.4702934848 fixed; older proposals retain their historical settings. Keep fixed gear and untrained/unevolved Essences throughout.
 
 ## Deliver the work as one package
 

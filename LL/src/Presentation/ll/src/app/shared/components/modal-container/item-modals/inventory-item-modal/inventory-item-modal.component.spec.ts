@@ -7,11 +7,13 @@ import { InventoryItem } from '../../../../models/inventoryItem';
 import { ItemType } from '../../../../models/enums/itemType';
 import { Rarity } from '../../../../models/enums/rarity';
 import { InventoryItemModalComponent } from './inventory-item-modal.component';
+import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 
 describe('InventoryItemModalComponent selection containers', () => {
   let component: InventoryItemModalComponent;
   let inventoryService: jasmine.SpyObj<InventoryService>;
   let inventoryState: jasmine.SpyObj<InventoryStateService>;
+  let essenceState: jasmine.SpyObj<EssenceStateService>;
 
   beforeEach(() => {
     inventoryService = jasmine.createSpyObj<InventoryService>(
@@ -22,8 +24,17 @@ describe('InventoryItemModalComponent selection containers', () => {
       'InventoryStateService',
       ['applyVersionedInventory'],
     );
-    component = new InventoryItemModalComponent(inventoryService,
-inventoryState
+    essenceState = jasmine.createSpyObj<EssenceStateService>(
+      'EssenceStateService',
+      ['refreshArchive'],
+      {
+        absorbedEssenceDefinitionIds: signal(new Set(['skeleton'])),
+      },
+    );
+    component = new InventoryItemModalComponent(
+      inventoryService,
+      inventoryState,
+      essenceState,
     );
     component.inventoryItem = {
       id: 'token',
@@ -53,6 +64,13 @@ inventoryState
     component.ngOnInit();
 
     expect(component.selectedCrateOptionId()).toBe('');
+    expect(essenceState.refreshArchive).toHaveBeenCalledOnceWith();
+    expect(
+      component.isCrateOptionAbsorbed(component.selectionCrate!.options[0]),
+    ).toBeFalse();
+    expect(
+      component.isCrateOptionAbsorbed(component.selectionCrate!.options[1]),
+    ).toBeTrue();
     component.openSelectionCrate();
     expect(inventoryService.openSelectionContainer).not.toHaveBeenCalled();
     expect(component.isOpeningCrate()).toBeFalse();
@@ -93,25 +111,36 @@ inventoryState
     component.ngOnInit();
 
     expect(component.selectedCrateOptionId()).toBe('flame');
+    expect(essenceState.refreshArchive).not.toHaveBeenCalled();
   });
 
   it('opens random equipment boxes without choosing an item', () => {
-    component.inventoryItem.itemInstance.itemBase.id = 'item.uncommon_equipment_box';
+    component.inventoryItem.itemInstance.itemBase.id =
+      'item.uncommon_equipment_box';
     component.inventoryItem.itemInstance.itemBase.selectionCrate = {
-      selectionLabel: 'Equipment', isRandom: true, options: [],
+      selectionLabel: 'Equipment',
+      isRandom: true,
+      options: [],
     };
-    inventoryService.openSelectionContainer.and.returnValue(of({
-      data: {
-        consumedItemInstanceId: 'token-instance', grantId: 'box-grant',
-        rewards: [], inventoryItems: [],
-      },
-      domainVersions: { inventory: 1 },
-    }));
+    inventoryService.openSelectionContainer.and.returnValue(
+      of({
+        data: {
+          consumedItemInstanceId: 'token-instance',
+          grantId: 'box-grant',
+          rewards: [],
+          inventoryItems: [],
+        },
+        domainVersions: { inventory: 1 },
+      }),
+    );
 
     component.ngOnInit();
     component.openSelectionCrate();
 
-    expect(inventoryService.openSelectionContainer).toHaveBeenCalledOnceWith('token-instance', 'random');
+    expect(inventoryService.openSelectionContainer).toHaveBeenCalledOnceWith(
+      'token-instance',
+      'random',
+    );
     expect(inventoryState.applyVersionedInventory).toHaveBeenCalled();
   });
 });

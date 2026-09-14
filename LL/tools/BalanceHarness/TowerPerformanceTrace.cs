@@ -22,6 +22,16 @@ internal sealed class TowerPerformanceTrace(Action<bool>? battleProgress = null)
     public static IDisposable? Measure(string name, long bytes = 0) => Active.Value is { } trace
         ? new Frame(trace, name, bytes) : null;
     public static bool Enabled => Active.Value is not null;
+    public static void Count(string name, long count = 1)
+    {
+        if (Active.Value is not { } trace) return;
+        lock (trace.totals)
+        {
+            var path = CurrentFrame.Value is { } frame ? frame.Path + "/" + name : name;
+            if (!trace.totals.TryGetValue(path, out var total)) trace.totals[path] = total = new();
+            total.Calls += count;
+        }
+    }
     public static void BattleStarted() => Active.Value?.onBattle?.Invoke(false);
     public static void BattleCompleted() => Active.Value?.onBattle?.Invoke(true);
     public IReadOnlyList<TowerStageTiming> Snapshot()
@@ -42,6 +52,7 @@ internal sealed class TowerPerformanceTrace(Action<bool>? battleProgress = null)
         private readonly long bytes;
         private long childTicks;
         private bool disposed;
+        public string Path => path;
         public Frame(TowerPerformanceTrace trace, string name, long byteCount)
         {
             owner = trace; parent = CurrentFrame.Value; bytes = byteCount;

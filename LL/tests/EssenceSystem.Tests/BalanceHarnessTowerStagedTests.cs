@@ -101,25 +101,68 @@ public sealed class BalanceHarnessTowerStagedTests
     [InlineData(80,256,384,0.2107120257469235,0.43627940009782107)]
     [InlineData(128,256,1,0.430633501151987,0.569366498848013)]
     [InlineData(1,32,10000,0.0012968829500159818,0.44485510998171585)]
+    [InlineData(0,24,17789,0,0.49231402081314474)]
+    [InlineData(1,24,17789,0.001653758229710367,0.5329674275156723)]
+    [InlineData(58,192,416,0.18876689377783307,0.4460234018795829)]
     public void Numerical_intervals_match_independent_normal_quantiles(int wins,int samples,int family,double low,double high)
     {
         var interval=TowerStagedBalance.Interval(wins,samples,family);
         Assert.InRange(Math.Abs(interval.Lower-low),0,1e-8); Assert.InRange(Math.Abs(interval.Upper-high),0,1e-8);
     }
     [Fact]
-    public async Task Cancel_resume_reconstructs_selection_and_committed_work_without_accepting_tampering()
+    public void Large_family_opt_in_preserves_legacy_limit_and_the_combat_ceiling()
+    {
+        var d=Plan(20000) with { SchemaVersion=2,Policy=TowerStagedBalance.LargeFamilyPolicy,
+            FirstSeeds=Enumerable.Range(101,24).ToArray(),MaximumSecondStageCells=1 };
+        Assert.Equal(480232,TowerStagedBalance.Validate(d));
+        foreach(var invalid in new[]{d with { SchemaVersion=1,Policy=TowerStagedBalance.Policy },
+            d with { SchemaVersion=1 },d with { Policy=TowerStagedBalance.Policy },
+            d with { Cells=[..d.Cells,d.Cells[0]] },d with { MaximumSecondStageCells=100 },
+            d with { MaximumBattles=500001 }})
+            Assert.Throws<InvalidDataException>(()=>TowerStagedBalance.Validate(invalid));
+        Assert.Throws<ArgumentOutOfRangeException>(()=>TowerStagedBalance.Interval(0,24,20001));
+    }
+    [Fact]
+    public void Entire_large_family_uses_global_bounds_and_cannot_drop_an_unresolved_recipe()
+    {
+        var d=Plan(17821) with { SchemaVersion=2,Policy=TowerStagedBalance.LargeFamilyPolicy,
+            FirstSeeds=Enumerable.Range(101,24).ToArray(),MaximumSecondStageCells=2 };
+        var first=Enumerable.Range(1,d.Cells.Count-1).Select(i=>Evidence(d,i,1,i==1?1:0)).ToArray();
+        var result=TowerStagedBalance.Evaluate(d,first,[Evidence(d,0,2,80),Evidence(d,1,2,60)]);
+        Assert.Equal(GoalOutcome.Pass,result.Assessment);
+        Assert.Equal(TowerStagedBalance.LargeFamilyPolicy,result.Policy);
+        Assert.Equal(17821,result.Cells.Count);
+        Assert.Equal(new[]{"team-0","team-1"},result.Selection.SecondStageIds);
+        Assert.Equal(TowerStagedBalance.Interval(0,24,17820),result.Cells[2].Adjusted);
+        Assert.Equal(TowerStagedBalance.Interval(60,256,2),result.Cells[1].Adjusted);
+        var overflow=TowerStagedBalance.Evaluate(d with { MaximumSecondStageCells=1 },first,[]);
+        Assert.Equal(GoalOutcome.Inconclusive,overflow.Assessment);
+        Assert.Equal("SecondStageCapacityExceeded",overflow.Selection.Status);
+        Assert.Equal(17821,overflow.Cells.Count); Assert.Null(overflow.Cells[1].Adjusted);
+    }
+    [Theory]
+    [InlineData(1,TowerStagedBalance.Policy)]
+    [InlineData(2,TowerStagedBalance.LargeFamilyPolicy)]
+    public async Task Cancel_resume_reconstructs_selection_and_committed_work_without_accepting_tampering(int schema,string policy)
     {
         using var temp=new DiscoveryTemp(); var path=Path.Combine(temp.Path,"staged");
-        var d=Plan(2) with { AnchorIds=["team-0","team-1"],FirstSeeds=[81001,81002],SecondSeeds=[82001,82002] };
+        var d=Plan(2) with { SchemaVersion=schema,Policy=policy,AnchorIds=["team-0","team-1"],FirstSeeds=[81001,81002],SecondSeeds=[82001,82002] };
         var options=new TowerBulkOptions(ChunkSize:1,RetryReserve:4);
         using var cancel=new CancellationTokenSource(); var completed=0;
         using(new TowerPerformanceTrace(done=>{ if(done && ++completed==2) cancel.Cancel(); }).Activate())
             await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>TowerStagedBalanceRun.RunAsync(Root,path,d,options,token:cancel.Token));
+        using(new TowerPerformanceTrace(_=>throw new InvalidOperationException("Recovery must not fight")).Activate())
+        {
+            await Assert.ThrowsAsync<InvalidDataException>(()=>TowerStagedBalanceRun.RunAsync(Root,path,d,options,resume:true));
+            var recovery=await TowerCompactBundle.RecoverPublicationAsync(Path.Combine(path,"batches","confirmation-000000"));
+            Assert.Equal(1,recovery.PreservedTrials);
+            Assert.Equal(2,recovery.ChargedAttempts);
+        }
         var resumed=await TowerStagedBalanceRun.RunAsync(Root,path,d,options,resume:true);
         Assert.Equal(4,resumed.LogicalTrials);
         Assert.Equal(HarnessJson.Hash(resumed),HarnessJson.Hash(await TowerStagedBalanceRun.VerifyAsync(path)));
         var accounting=HarnessJson.Read<TowerBulkAccounting>(Path.Combine(path,"campaign-accounting.json"));
-        Assert.Equal(5,accounting.ChargedAttempts);
+        Assert.Equal(4,accounting.ChargedAttempts);
         Assert.Equal(resumed.ExitCode,await BalanceHarness.Program.Main(["tower-staged-balance-verify","--run",path]));
         File.AppendAllText(Path.Combine(path,"stage-selection.json")," ");
         await Assert.ThrowsAsync<InvalidDataException>(()=>TowerStagedBalanceRun.VerifyAsync(path));

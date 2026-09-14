@@ -1441,6 +1441,116 @@
       "activeAbilityId": "ability.creature.pack_howler.coordinated_attack",
       "passiveAbilityId": "ability.creature.pack_howler.strength_of_the_pack",
       "evolution": {"id": "evolution.pack_howler", "name": "Awakened Pack Howler", "description": "The awakened form of Pack Howler Essence.", "requiredAscensionTier": 2, "requiredCatalystItemId": "", "addsTags": [], "attributeModifierChanges": [], "activeAbilityModifiers": [], "passiveAbilityModifiers": []}
+    },
+    {
+      "id": "essence.lizardfolk_brute",
+      "sourceMonsterId": "monster.lizardfolk_brute",
+      "name": "Lizardfolk Brute Essence",
+      "description": "The combat essence of Lizardfolk Brute, granting Skullcrusher and Brutal Follow-Up.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.lizardfolk_brute.skullcrusher",
+      "passiveAbilityId": "ability.creature.lizardfolk_brute.brutal_follow_up",
+      "evolution": {
+        "id": "evolution.lizardfolk_brute",
+        "name": "Awakened Lizardfolk Brute",
+        "description": "The awakened form of Lizardfolk Brute Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lizardfolk_elementalist",
+      "sourceMonsterId": "monster.lizardfolk_elementalist",
+      "name": "Lizardfolk Elementalist Essence",
+      "description": "The combat essence of Lizardfolk Elementalist, granting Converging Element and Elemental Bond.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.lizardfolk_elementalist.converging_element",
+      "passiveAbilityId": "ability.creature.lizardfolk_elementalist.elemental_bond",
+      "evolution": {
+        "id": "evolution.lizardfolk_elementalist",
+        "name": "Awakened Lizardfolk Elementalist",
+        "description": "The awakened form of Lizardfolk Elementalist Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lizardfolk_scout",
+      "sourceMonsterId": "monster.lizardfolk_scout",
+      "name": "Lizardfolk Scout Essence",
+      "description": "The combat essence of Lizardfolk Scout, granting Find Weakness and Keen Eye.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.lizardfolk_scout.find_weakness",
+      "passiveAbilityId": "ability.creature.lizardfolk_scout.keen_eye",
+      "evolution": {
+        "id": "evolution.lizardfolk_scout",
+        "name": "Awakened Lizardfolk Scout",
+        "description": "The awakened form of Lizardfolk Scout Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lizardfolk_shaman",
+      "sourceMonsterId": "monster.lizardfolk_shaman",
+      "name": "Lizardfolk Shaman Essence",
+      "description": "The combat essence of Lizardfolk Shaman, granting Herb Mixture and Cleansing Herbs.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.lizardfolk_shaman.herb_mixture",
+      "passiveAbilityId": "ability.creature.lizardfolk_shaman.cleansing_herbs",
+      "evolution": {
+        "id": "evolution.lizardfolk_shaman",
+        "name": "Awakened Lizardfolk Shaman",
+        "description": "The awakened form of Lizardfolk Shaman Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lizardfolk_warrior",
+      "sourceMonsterId": "monster.lizardfolk_warrior",
+      "name": "Lizardfolk Warrior Essence",
+      "description": "The combat essence of Lizardfolk Warrior, granting Spearhead Assault and Battle Rhythm.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [],
+      "activeAbilityId": "ability.creature.lizardfolk_warrior.spearhead_assault",
+      "passiveAbilityId": "ability.creature.lizardfolk_warrior.battle_rhythm",
+      "evolution": {
+        "id": "evolution.lizardfolk_warrior",
+        "name": "Awakened Lizardfolk Warrior",
+        "description": "The awakened form of Lizardfolk Warrior Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
     }
   ]
 }

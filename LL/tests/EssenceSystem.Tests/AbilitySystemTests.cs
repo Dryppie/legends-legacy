@@ -4198,7 +4198,7 @@ public sealed class AbilitySystemTests
             ["ability.creature.blue_slime.protective_slime.balance_creek"] = "ability.creature.blue_slime.protective_slime",
             ["ability.creature.frost_imp.ice_needle.balance_creek"] = "ability.creature.frost_imp.ice_needle"
         };
-        Assert.Equal(234, catalog.AbilitiesById.Count);
+        Assert.Equal(244, catalog.AbilitiesById.Count);
         Assert.All(creatureVariants.Keys, id => Assert.Contains(id, allAbilityIds.SelectMany(x => x.AbilityIds)));
         Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
         Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
@@ -4241,10 +4241,10 @@ public sealed class AbilitySystemTests
             item.TryGetProperty("itemType", out var itemType)
             && itemType.GetString()?.Equals("Essence", StringComparison.OrdinalIgnoreCase) == true).ToList();
 
-        Assert.Equal(80, allDefinitions.Count);
-        Assert.Equal(77, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
-        Assert.Equal(77, allLootTables.Count);
-        Assert.Equal(80, essenceItems.Count);
+        Assert.Equal(85, allDefinitions.Count);
+        Assert.Equal(82, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(82, allLootTables.Count);
+        Assert.Equal(85, essenceItems.Count);
         Assert.All(allDefinitions, definition =>
         {
             Assert.StartsWith("monster.", definition.SourceMonsterId, StringComparison.Ordinal);
@@ -6479,8 +6479,8 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(160, report.RequiredSlotCount);
-        Assert.Equal(80, report.EssenceCount);
+        Assert.Equal(170, report.RequiredSlotCount);
+        Assert.Equal(85, report.EssenceCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {

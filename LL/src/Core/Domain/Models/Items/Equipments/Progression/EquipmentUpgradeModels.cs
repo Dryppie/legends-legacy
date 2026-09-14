@@ -87,7 +87,8 @@ public sealed record EquipmentUpgradeQuote(
     uint ItemVersion,
     int PriceVersion,
     string? BlueprintItemId = null,
-    long AvailableBlueprints = 0);
+    long AvailableBlueprints = 0,
+    long RequiredBlueprints = 0);
 
 public sealed record EquipmentUpgradeOutcome(
     Guid OperationId,

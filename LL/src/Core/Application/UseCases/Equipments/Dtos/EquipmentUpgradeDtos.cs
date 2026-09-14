@@ -22,6 +22,7 @@ public sealed class EquipmentUpgradeQuoteDto : IMapFrom<EquipmentUpgradeQuote>
     public int PriceVersion { get; set; }
     public string? BlueprintItemId { get; set; }
     public long AvailableBlueprints { get; set; }
+    public long RequiredBlueprints { get; set; }
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<EquipmentUpgradeQuote, EquipmentUpgradeQuoteDto>();

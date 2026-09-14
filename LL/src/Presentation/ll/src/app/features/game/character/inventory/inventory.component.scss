@@ -414,6 +414,26 @@
   background: var(--ll-color-primary-soft);
 }
 
+.selection-container-option-label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--ll-space-2);
+}
+
+.selection-container-option-status {
+  flex: none;
+  color: color-mix(
+    in srgb,
+    var(--ll-color-success) 62%,
+    var(--ll-color-text-muted)
+  );
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 :host ::ng-deep app-equipment-overview > .ll-card {
   max-width: none;
   border: 0;

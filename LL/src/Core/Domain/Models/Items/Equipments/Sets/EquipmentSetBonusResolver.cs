@@ -1,4 +1,5 @@
 using Domain.Models.Attributes.Modifiers;
+using Domain.Extensions;
 using Domain.Models.Items.Equipments;
 
 namespace Domain.Models.Items.Equipments.Sets;
@@ -56,8 +57,11 @@ public static class EquipmentSetBonusResolver
         if (!definitions.TryGetValue(setId, out var definition))
             return null;
 
+        var equippedCount = equipment.Sum(item =>
+            item.ProgressionData!.EquipmentType.OccupiedSlotCount());
+
         var activeBonuses = definition.Bonuses
-            .Where(bonus => bonus.Enabled && equipment.Count >= bonus.RequiredEquippedItems)
+            .Where(bonus => bonus.Enabled && equippedCount >= bonus.RequiredEquippedItems)
             .OrderBy(bonus => bonus.RequiredEquippedItems)
             .ThenBy(bonus => bonus.Id, StringComparer.OrdinalIgnoreCase)
             .Select(bonus => new ActiveEquipmentSetBonus(definition.Id, bonus))
@@ -66,6 +70,7 @@ public static class EquipmentSetBonusResolver
         return new EquipmentSetState(
             definition,
             equipment.Select(item => item.Id).Order().ToArray(),
+            equippedCount,
             activeBonuses);
     }
 }
@@ -73,10 +78,8 @@ public static class EquipmentSetBonusResolver
 public sealed record EquipmentSetState(
     EquipmentSetDefinition Definition,
     IReadOnlyList<Guid> EquippedItemInstanceIds,
-    IReadOnlyList<ActiveEquipmentSetBonus> ActiveBonuses)
-{
-    public int EquippedCount => EquippedItemInstanceIds.Count;
-}
+    int EquippedCount,
+    IReadOnlyList<ActiveEquipmentSetBonus> ActiveBonuses);
 
 public sealed record ActiveEquipmentSetBonus(
     string SetId,

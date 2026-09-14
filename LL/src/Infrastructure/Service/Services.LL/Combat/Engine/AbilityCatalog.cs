@@ -277,6 +277,10 @@ public static class AbilityCatalogValidator
             {
                 errors.Add($"{label}: refreshDuration requires a timed modifier operation.");
             }
+            if (effect.RefreshPendingModifier && effect.Operation != AbilityEffectOperation.ModifyNextBasicAttackDamage)
+                errors.Add($"{label}: refreshPendingModifier requires ModifyNextBasicAttackDamage.");
+            if (effect.Operation == AbilityEffectOperation.ConsumeStatusForCastDamage && effect.BaseValue <= 0)
+                errors.Add($"{label}: ConsumeStatusForCastDamage requires a positive damage percentage per stack.");
 
             if (effect.MaintainWhileConditionsMet)
             {
@@ -397,6 +401,7 @@ public static class AbilityCatalogValidator
                  || effect.Operation == AbilityEffectOperation.ScaleStatusStacks
                  || effect.Operation == AbilityEffectOperation.RemoveStatus
                  || effect.Operation == AbilityEffectOperation.ToggleStatus
+                 || effect.Operation == AbilityEffectOperation.ConsumeStatusForCastDamage
                  || effect.Operation == AbilityEffectOperation.SynchronizeAttributePerStatusStack)
                 && string.IsNullOrWhiteSpace(effect.StatusId))
             {
@@ -638,6 +643,8 @@ public static class AbilityCatalogValidator
 
         foreach (var trigger in triggers)
         {
+            if (trigger.ChooseOneEffect && (trigger.EffectIds.Count == 0 ? effects.Count : trigger.EffectIds.Count) < 2)
+                errors.Add($"{ownerId}: chooseOneEffect requires at least two effects.");
             if (trigger.InternalCooldownTicks < 0)
                 errors.Add($"{ownerId}: trigger {trigger.Event} internal cooldown cannot be negative.");
             if (trigger.InitialDelayTicks < 0)
@@ -673,6 +680,7 @@ public static class AbilityCatalogValidator
                 errors.Add($"{ownerId}: condition HasTag requires tag.");
 
             if ((condition.Type == AbilityConditionType.HasCondition
+                 || condition.Type == AbilityConditionType.LacksCondition
                  || condition.Type == AbilityConditionType.ConditionStacksAtLeast
                  || condition.Type == AbilityConditionType.AnyEnemyHasCondition
                  || condition.Type == AbilityConditionType.NoEnemyHasCondition)

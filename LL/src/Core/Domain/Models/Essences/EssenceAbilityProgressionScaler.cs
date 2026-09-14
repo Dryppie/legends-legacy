@@ -185,6 +185,8 @@ public static class EssenceAbilityProgressionScaler
     private static AbilityTriggerSpec CloneTrigger(AbilityTriggerSpec trigger) =>
         new()
         {
+            ChooseOneEffect = trigger.ChooseOneEffect,
+            SnapshotEffectConditions = trigger.SnapshotEffectConditions,
             Event = trigger.Event,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
             InitialDelayTicks = trigger.InitialDelayTicks,
@@ -238,6 +240,7 @@ public static class EssenceAbilityProgressionScaler
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
             RefreshDuration = effect.RefreshDuration,
+            RefreshPendingModifier = effect.RefreshPendingModifier,
             IntervalTicks = effect.IntervalTicks,
             Uses = effect.Uses,
             OncePerTarget = effect.OncePerTarget,

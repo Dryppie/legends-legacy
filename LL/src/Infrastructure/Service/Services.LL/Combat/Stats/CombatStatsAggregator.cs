@@ -113,14 +113,15 @@ public sealed class CombatStatsAccumulator
             case EventType.DamageOverTime:
             case EventType.DamageCrit:
             case EventType.ReflectedDamage:
+                var creditedDamage = magnitude + barrierAbsorbed;
                 if (relationship == DamageTargetRelationship.Opponent)
-                    entity.DamageDone += magnitude;
+                    entity.DamageDone += creditedDamage;
                 else if (relationship == DamageTargetRelationship.Self)
-                    entity.SelfDamageDone += magnitude;
+                    entity.SelfDamageDone += creditedDamage;
                 else if (relationship == DamageTargetRelationship.Ally)
-                    entity.AlliedDamageDone += magnitude;
+                    entity.AlliedDamageDone += creditedDamage;
                 if (_captureCompactTelemetry && !string.IsNullOrWhiteSpace(targetId))
-                    entity.GetOrAddTarget(targetId, targetName).DamageDone += magnitude;
+                    entity.GetOrAddTarget(targetId, targetName).DamageDone += creditedDamage;
                 break;
             case EventType.Heal:
             case EventType.HealOverTime:
@@ -181,15 +182,16 @@ public sealed class CombatStatsAccumulator
                     break;
 
                 var damageAbility = entity.GetOrAddAbility(statsSource);
+                var creditedDamage = magnitude + barrierAbsorbed;
                 if (relationship == DamageTargetRelationship.Opponent)
                 {
-                    damageAbility.TotalDamage += magnitude;
-                    damageAbility.AddDamage(damageType, magnitude);
+                    damageAbility.TotalDamage += creditedDamage;
+                    damageAbility.AddDamage(damageType, creditedDamage);
                 }
                 else if (relationship == DamageTargetRelationship.Self)
-                    damageAbility.SelfDamage += magnitude;
+                    damageAbility.SelfDamage += creditedDamage;
                 else if (relationship == DamageTargetRelationship.Ally)
-                    damageAbility.AlliedDamage += magnitude;
+                    damageAbility.AlliedDamage += creditedDamage;
                 damageAbility.Hits++;
                 if (eventType == EventType.DamageCrit)
                     damageAbility.Crits++;

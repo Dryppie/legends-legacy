@@ -359,10 +359,17 @@
                     [style.top.px]="node.y"
                     [disabled]="!isMapNodeActionable(node) || loading()"
                     [attr.aria-label]="mapNodeAriaLabel(node)"
+                    [attr.aria-keyshortcuts]="mapNodeShortcut(node)"
                     [attr.title]="mapNodeTitle(node)"
                     (click)="chooseMapNode(node)"
                   >
                     <span class="dungeon-node__circle">
+                      <kbd
+                        *ngIf="mapNodeShortcut(node) as shortcut"
+                        class="dungeon-node__shortcut"
+                        aria-hidden="true"
+                        >{{ shortcut }}</kbd
+                      >
                       <span
                         class="dungeon-node__check"
                         *ngIf="

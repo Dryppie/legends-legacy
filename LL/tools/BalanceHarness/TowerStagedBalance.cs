@@ -21,12 +21,20 @@ public sealed record TowerStagedReport(string Policy, string DefinitionHash, Goa
 public static class TowerStagedBalance
 {
     public const string Policy = "tower-staged-bonferroni-wilson-95-v1";
+    // Capacity-only opt-in: the alpha allocation, selection and combat ceiling remain unchanged.
+    public const string LargeFamilyPolicy = "tower-staged-bonferroni-wilson-95-v2";
     public static TowerStagedDefinition Read(string path) => TowerContractJson.Read<TowerStagedDefinition>(path);
 
     public static int Validate(TowerStagedDefinition d)
     {
-        if (d is null || d.SchemaVersion != 1 || d.Policy != Policy || !TowerBenchmark.SafeId(d.Id)
-            || d.Cells is not { Count: > 0 and <= 10000 } || d.Cohorts is not { Count: > 0 and <= 100 }
+        var familyLimit = (d?.SchemaVersion, d?.Policy) switch
+        {
+            (1, Policy) => 10000,
+            (2, LargeFamilyPolicy) => 20000,
+            _ => 0
+        };
+        if (d is null || familyLimit == 0 || !TowerBenchmark.SafeId(d.Id)
+            || d.Cells is not { Count: > 0 } || d.Cells.Count > familyLimit || d.Cohorts is not { Count: > 0 and <= 100 }
             || d.AnchorIds is not { Count: > 0 } || d.AnchorIds.Distinct().Count() != d.AnchorIds.Count
             || d.MaximumSecondStageCells < d.AnchorIds.Count || d.MaximumSecondStageCells > d.Cells.Count
             || d.FirstSeeds is not { Count: > 0 and <= 1000 } || d.SecondSeeds is not { Count: > 0 and <= 1000 }
@@ -99,7 +107,7 @@ public static class TowerStagedBalance
             : d.Cohorts.Any(g => rows.Where(c => c.CohortId==g.Id).All(c => c.Adjusted!.Upper < .1)) ? GoalOutcome.Fail
             : rows.All(c => c.Adjusted!.Upper <= .5) && d.Cohorts.All(g => rows.Any(c => c.CohortId==g.Id && c.Adjusted!.Lower >= .1)) ? GoalOutcome.Pass
             : GoalOutcome.Inconclusive;
-        return new(Policy,HarnessJson.Hash(d),outcome,outcome switch { GoalOutcome.Pass=>0,GoalOutcome.Fail=>1,GoalOutcome.Invalid=>2,_=>3 },
+        return new(d.Policy,HarnessJson.Hash(d),outcome,outcome switch { GoalOutcome.Pass=>0,GoalOutcome.Fail=>1,GoalOutcome.Invalid=>2,_=>3 },
             d.Cells.Count,first.Count,second.Count,first.Sum(e=>e.Trials.Count)+second.Sum(e=>e.Trials.Count),maximum,selection,rows,
             "Entire frozen family; alpha .025 per stage. Anchors skip the short look and always require the larger fresh sample. Unresolved first-stage cells also receive that sample. Stage-two Bonferroni uses its complete selected family, conditional on first-stage data and independent new seeds. No pooling, optional extension or dropped cells. Any completed-stage observed rate above 50% rejects acceptance. Fixed-look Wilson coverage is approximate; no claim about unsearched builds or lifetime repeated studies.");
     }
@@ -126,7 +134,7 @@ public static class TowerStagedBalance
 
     public static RateEstimate Interval(int wins,int samples,int familySize)
     {
-        if (samples<1 || wins<0 || wins>samples || familySize is <1 or >10000) throw new ArgumentOutOfRangeException(nameof(samples));
+        if (samples<1 || wins<0 || wins>samples || familySize is <1 or >20000) throw new ArgumentOutOfRangeException(nameof(samples));
         // Acklam lower-tail approximation; .025 stage alpha split across both tails and every stage cell.
         var q=Math.Sqrt(-2*Math.Log(.0125/familySize));
         var numerator=(((((-7.784894002430293e-3*q-.3223964580411365)*q-2.400758277161838)*q-2.549732539343734)*q+4.374664141464968)*q+2.938163982698783);

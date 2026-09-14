@@ -140,6 +140,32 @@ describe('Equipment blueprint panel', () => {
     ]);
   });
 
+  it('shows the two-blueprint requirement returned for a two-handed weapon', () => {
+    api.previewUpgrade.and.returnValues(
+      of({} as EquipmentUpgradeQuote),
+      of({
+        canExecute: false,
+        requiredBlueprints: 2,
+        availableBlueprints: 1,
+        availableCinders: 500,
+        cinderCost: 200,
+      } as EquipmentUpgradeQuote),
+    );
+    api.getBlueprints.and.returnValue(of([panel.blueprints[0]]));
+    const fixture = TestBed.createComponent(EquipmentUpgradePanelComponent);
+    fixture.componentInstance.equipmentInstance = {
+      id: 'greatsword',
+    } as EquipmentInstance;
+    fixture.detectChanges();
+
+    fixture.componentInstance.selectBlueprint('fury');
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ');
+    expect(text).toContain('Consumes 2 fury blueprints + 200 Cinders');
+    expect(text).toContain('Held: 1/2 blueprints');
+  });
+
   it('shows removed bonus attributes when replacing a variant', () => {
     panel.variantQuote = {
       before: { stats: { Power: 100, CritChance: 8 } },

@@ -23,6 +23,7 @@ import {
 } from '../../../../utils/inventory/selection-container.utils';
 import { InventoryTransferComponent } from '../../../inventory-transfer/inventory-transfer.component';
 import { EssencePreviewComponent } from '../../../essences/essence-preview/essence-preview.component';
+import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 
 @Component({
   selector: 'app-inventory-item-modal',
@@ -44,10 +45,10 @@ export class InventoryItemModalComponent implements OnInit {
 
   readonly itemDescription = itemDescription;
 
-
   constructor(
     private readonly inventoryService: InventoryService,
     private readonly inventoryState: InventoryStateService,
+    private readonly essenceState: EssenceStateService,
   ) {}
 
   get itemName(): string {
@@ -58,11 +59,8 @@ export class InventoryItemModalComponent implements OnInit {
   }
 
   get selectionCrate() {
-    return selectionContainerMetadata(
-      this.inventoryItem.itemInstance.itemBase,
-    );
+    return selectionContainerMetadata(this.inventoryItem.itemInstance.itemBase);
   }
-
 
   ngOnInit(): void {
     this.selectedCrateOptionId.set(
@@ -70,6 +68,17 @@ export class InventoryItemModalComponent implements OnInit {
         this.inventoryItem.itemInstance.itemBase,
       ),
     );
+
+    if (this.selectionCrate?.selectionLabel.toLowerCase() === 'essence') {
+      this.essenceState.refreshArchive();
+    }
+  }
+
+  isCrateOptionAbsorbed(option: SelectionCrateOption): boolean {
+    const essenceDefinitionId = option.essence?.id ?? option.id;
+    return this.essenceState
+      .absorbedEssenceDefinitionIds()
+      .has(essenceDefinitionId);
   }
 
   selectCrateOption(option: SelectionCrateOption): void {
@@ -98,7 +107,4 @@ export class InventoryItemModalComponent implements OnInit {
         },
       });
   }
-
-
-
 }

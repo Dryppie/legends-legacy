@@ -24,9 +24,11 @@ public static class TowerCompactDiscovery
         campaign.Result("generation-inputs.json", inputs);
         campaign.Result("generation-mechanics.json", mechanics);
         var batch = 0; var logicalTrials = 0;
-        var generation = await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics, async (party, arm, ct) => {
+        async Task<BossDiscoveryMeasurement> Measure(PartyChoice party, string arm, CancellationToken ct, bool feedback)
+        {
             TowerBossDiscovery.ValidateParty(d, party);
-            var contexts = inputs.DiscoverySeeds.OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
+            var measurementInputs = feedback ? inputs with { DiscoverySeeds = inputs.FeedbackSeeds! } : inputs;
+            var contexts = measurementInputs.DiscoverySeeds.OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
             var cases = contexts.Select((p, i) => new TowerCompactCase("context-" + i.ToString("D3", System.Globalization.CultureInfo.InvariantCulture),
                 TowerBossDiscovery.Scenario(d, p.Key, party, p.Value))).ToArray();
             var contextNames = cases.Select((c, i) => (c.Id, Context: contexts[i].Key)).ToDictionary(p => p.Id, p => p.Context);
@@ -52,8 +54,15 @@ public static class TowerCompactDiscovery
                     Average(b => b.Recovery!.GuardianHealing), Average(b => b.Recovery!.GuardianRegeneration)));
             progress?.Invoke($"Compact discovery: {batch} evaluated parties; {logicalTrials}/{cost.Discovery} logical trials.");
             return new BossDiscoveryMeasurement(party.Id,
-                TowerBossGeneration.Fitness(inputs, cells, wins.Length == 0 ? double.MaxValue : wins.Average(o => o.Duration)), cells, behavior);
-        }, campaign.Token);
+                TowerBossGeneration.Fitness(measurementInputs, cells, wins.Length == 0 ? double.MaxValue : wins.Average(o => o.Duration)), cells, behavior);
+        }
+        Task<BossDiscoveryMeasurement> Evaluate(PartyChoice party, string arm, CancellationToken ct) => Measure(party, arm, ct, false);
+        BossGenerationResult generation;
+        using (TowerPerformanceTrace.Measure("search.generate-and-rank"))
+        generation = d.Generation.PolicyVersion == TowerGenerationFeedback.Version
+            ? await TowerBossGeneration.RunAsync(inputs, mechanics, Evaluate, campaign.Token,
+                evaluateFeedback: (party, arm, ct) => Measure(party, arm, ct, true))
+            : await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics, Evaluate, campaign.Token);
         TowerBossDiscovery.ValidateProvenance(d, generation.Arms.SelectMany(a => a.Proposals).Select(p => p.Provenance).ToArray());
         var report = new BossDiscoveryRunReport(generation.Status, cost.Discovery, logicalTrials, 0, generation, generation.Error);
         campaign.Result("discovery.json", report);
@@ -61,7 +70,8 @@ public static class TowerCompactDiscovery
         if (report.Status is "Complete" or "Incomplete")
         {
             if (report.Status == "Complete" && logicalTrials != cost.Discovery
-                || logicalTrials != generation.Arms.Sum(a => a.Evaluations.Count) * inputs.DiscoverySeeds.Values.Sum(s => s.Count))
+                || logicalTrials != generation.Arms.Sum(a => a.Evaluations.Count) * inputs.DiscoverySeeds.Values.Sum(s => s.Count)
+                    + generation.Arms.Sum(a => a.Feedback?.Sum(r => r.Measurements.Count) ?? 0) * (inputs.FeedbackSeeds?.Values.Sum(s => s.Count) ?? 0))
                 throw new InvalidDataException("Compact discovery logical accounting differs from the generator.");
             campaign.Result("shortlist.json", generation.DiscoveryShortlist.SelectMany(p => inputs.DiscoverySeeds.Select(c =>
                 new TowerCompactCase(p.Id + "-" + c.Key, TowerBossDiscovery.Scenario(d, c.Key, p, c.Value)))).ToArray());

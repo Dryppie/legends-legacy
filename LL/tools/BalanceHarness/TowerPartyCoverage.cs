@@ -74,7 +74,7 @@ public sealed partial class TowerBossPartyGenerator
 {
     private void ValidateCoverage()
     {
-        if (input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion && mechanics.Coverage is null
+        if (input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version && mechanics.Coverage is null
             || mechanics.Coverage is not null && (mechanics.Coverage.Any(f => f is null || !families.ContainsKey(f.EssenceId)
                 || !TowerPartyCoverage.Kinds.Contains(f.Kind) || f.EvidenceKeys is not { Count: > 0 } || f.EvidenceKeys.Any(string.IsNullOrWhiteSpace))
                 || mechanics.Coverage.Select(f => (f.EssenceId, f.Kind)).Distinct().Count() != mechanics.Coverage.Count))

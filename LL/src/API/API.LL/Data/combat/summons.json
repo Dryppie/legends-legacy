@@ -282,5 +282,56 @@
       {"attribute": "Power", "baseValue": 0, "minimumValue": 0, "scalingAttribute": "Power", "scalingCoefficient": 1},
       {"attribute": "AttackSpeed", "baseValue": 0, "minimumValue": 0}
     ]
+  },
+  {
+    "id": "lightningElemental",
+    "name": "Lightning Elemental",
+    "description": "An innate elemental companion that attacks with lightning until slain.",
+    "imagePath": "lightning_elemental",
+    "durationTicks": 0,
+    "maxActive": 1,
+    "canBasicAttack": true,
+    "basicAttackType": "Ranged",
+    "basicAttackDamageType": "Magical",
+    "tags": [
+      "Summon.LightningElemental",
+      "Element.Lightning"
+    ],
+    "abilityIds": [],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 0,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1,
+        "minimumValue": 1
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.3,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "CritChance",
+        "baseValue": 20,
+        "scalingAttribute": "CritChance",
+        "scalingCoefficient": 1,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "CritDamage",
+        "baseValue": 0,
+        "scalingAttribute": "CritDamage",
+        "scalingCoefficient": 1,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "AttackSpeed",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
   }
 ]
