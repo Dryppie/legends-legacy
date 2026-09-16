@@ -49,6 +49,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
+using Persistence.LL.Repositories.Equipments;
 
 namespace Persistence.LL;
 public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(options), IDbContext
@@ -84,11 +85,79 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         if (ChangeTracker.Entries().Any(x => x.State is EntityState.Modified or EntityState.Deleted &&
             x.Entity is Domain.Models.Nobility.SignetMovement or Domain.Models.Nobility.SignetRedemption or Domain.Models.Nobility.NobilityDailyGrant))
             throw new InvalidOperationException("Signet movements, redemption receipts and daily grant receipts are append-only.");
+        var loadoutCleanupCharacters = await GetEquipmentLoadoutCleanupCharactersAsync(cancellationToken);
         var inventoryChanges = await ReadPendingInventoryQuantityChangesAsync(cancellationToken);
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
+        affectedRows += await RemoveUnavailableEquipmentLoadoutSlotsAsync(loadoutCleanupCharacters, cancellationToken);
         _savedInventoryQuantityChanges.AddRange(inventoryChanges);
         _saveChangesVersion++;
         return affectedRows;
+    }
+
+    private async Task<HashSet<Guid>> GetEquipmentLoadoutCleanupCharactersAsync(CancellationToken ct)
+    {
+        var changedItemIds = ChangeTracker.Entries<InventoryItem>()
+            .Where(entry => entry.State == EntityState.Deleted ||
+                entry.State == EntityState.Modified && entry.Entity.Quantity == 0)
+            .Select(entry => entry.Entity.ItemInstanceId).ToHashSet();
+        var characters = new HashSet<Guid>();
+
+        foreach (var entry in ChangeTracker.Entries<GuildVaultItem>()
+                     .Where(entry => entry.State is EntityState.Modified or EntityState.Deleted))
+        {
+            var borrower = entry.Property(item => item.BorrowedByCharacterId).OriginalValue;
+            if (borrower.HasValue &&
+                (entry.State == EntityState.Deleted || entry.Entity.BorrowedByCharacterId != borrower))
+                characters.Add(borrower.Value);
+        }
+
+        foreach (var entry in ChangeTracker.Entries<GuildMember>()
+                     .Where(entry => entry.State == EntityState.Deleted))
+            characters.Add(entry.Entity.CharacterId);
+
+        foreach (var entry in ChangeTracker.Entries<EquipmentSlot>()
+                     .Where(entry => entry.State is EntityState.Modified or EntityState.Deleted))
+        {
+            var previousItemId = entry.Property(slot => slot.EquipmentInstanceId).OriginalValue;
+            if (previousItemId.HasValue &&
+                (entry.State == EntityState.Deleted || entry.Entity.EquipmentInstanceId != previousItemId))
+                changedItemIds.Add(previousItemId.Value);
+        }
+
+        changedItemIds.UnionWith(ChangeTracker.Entries<EquipmentInstance>()
+            .Where(entry => entry.State == EntityState.Deleted)
+            .Select(entry => entry.Entity.Id));
+        if (changedItemIds.Count > 0)
+        {
+            var owners = await EquipmentLoadoutSlots.AsNoTracking()
+                .Where(slot => slot.EquipmentInstanceId.HasValue && changedItemIds.Contains(slot.EquipmentInstanceId.Value))
+                .Join(EquipmentLoadouts.AsNoTracking(), slot => slot.EquipmentLoadoutId,
+                    loadout => loadout.Id, (_, loadout) => loadout.CharacterId)
+                .Distinct().ToListAsync(ct);
+            characters.UnionWith(owners);
+        }
+
+        return characters;
+    }
+
+    private async Task<int> RemoveUnavailableEquipmentLoadoutSlotsAsync(HashSet<Guid> characters, CancellationToken ct)
+    {
+        if (characters.Count == 0) return 0;
+        var repository = new EquipmentLoadoutRepository(this);
+        foreach (var characterId in characters)
+        {
+            var available = await repository.GetAvailableItemIdsAsync(characterId, ct);
+            var slots = await EquipmentLoadoutSlots
+                .Where(slot => EquipmentLoadouts.Any(loadout =>
+                    loadout.Id == slot.EquipmentLoadoutId && loadout.CharacterId == characterId))
+                .ToListAsync(ct);
+            EquipmentLoadoutSlots.RemoveRange(slots.Where(slot =>
+                !slot.EquipmentInstanceId.HasValue || !available.Contains(slot.EquipmentInstanceId.Value)));
+        }
+
+        return ChangeTracker.Entries<EquipmentLoadoutSlot>().Any(entry => entry.State == EntityState.Deleted)
+            ? await base.SaveChangesAsync(ct)
+            : 0;
     }
 
     public async Task<IReadOnlyList<InventoryQuantityChange>> GetInventoryQuantityChangesAsync(CancellationToken cancellationToken)

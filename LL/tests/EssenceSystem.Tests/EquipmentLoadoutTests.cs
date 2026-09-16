@@ -133,7 +133,7 @@ public sealed class EquipmentLoadoutTests
     }
 
     [Fact]
-    public async Task Activity_assignments_are_exclusive_and_missing_items_cannot_replace_current_equipment()
+    public async Task Activity_assignments_are_exclusive_and_lost_items_are_removed_from_presets()
     {
         await using var db = CreateDb();
         var (character, twoHanded, sword, _) = await Seed(db);
@@ -160,10 +160,75 @@ public sealed class EquipmentLoadoutTests
         Assert.Equal(sword.Id, character.EquipmentSlots.Single(x => x.EquipmentSlotType == EquipmentSlotType.MainHand).EquipmentInstanceId);
         db.InventoryItems.Remove(await db.InventoryItems.SingleAsync(x => x.ItemInstanceId == twoHanded.Id));
         await db.SaveChangesAsync();
-        Assert.False((await service.ApplyAsync(character.Id, boss.Id, default)).Succeeded);
-        Assert.Null(await service.ResolveAsync(character.Id, EssenceCombatActivity.Dungeon, default));
+        Assert.Empty((await service.GetAsync(character.Id, default)).Single(x => x.Id == boss.Id).Slots);
+        Assert.Empty((await service.ResolveAsync(character.Id, EssenceCombatActivity.Dungeon, default))!);
         Assert.Equal(sword.Id, character.EquipmentSlots.Single(x => x.EquipmentSlotType == EquipmentSlotType.MainHand).EquipmentInstanceId);
         Assert.All(snapshot.Equipment, x => Assert.Equal(twoHanded.Id, x.EquipmentInstanceId));
+        Assert.True((await service.ApplyAsync(character.Id, boss.Id, default)).Succeeded);
+    }
+
+    [Fact]
+    public async Task Losing_equipment_removes_it_from_every_preset_and_preserves_other_slots()
+    {
+        await using var db = CreateDb();
+        var (character, _, sword, shield) = await Seed(db);
+        var first = new EquipmentLoadout
+        {
+            Id = Guid.NewGuid(), CharacterId = character.Id, Name = "First", PresetSlot = 1,
+            AutoUseActivities = EssenceCombatActivity.Dungeon,
+            Slots =
+            [
+                new() { Id = Guid.NewGuid(), SlotType = EquipmentSlotType.MainHand, EquipmentInstanceId = sword.Id, EquipmentInstance = sword },
+                new() { Id = Guid.NewGuid(), SlotType = EquipmentSlotType.OffHand, EquipmentInstanceId = shield.Id, EquipmentInstance = shield }
+            ]
+        };
+        var second = new EquipmentLoadout
+        {
+            Id = Guid.NewGuid(), CharacterId = character.Id, Name = "Second", PresetSlot = 2,
+            Slots = [new() { Id = Guid.NewGuid(), SlotType = EquipmentSlotType.MainHand, EquipmentInstanceId = sword.Id, EquipmentInstance = sword }]
+        };
+        db.EquipmentLoadouts.AddRange(first, second);
+        await db.SaveChangesAsync();
+
+        db.InventoryItems.Remove(await db.InventoryItems.SingleAsync(x => x.ItemInstanceId == sword.Id));
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var presets = await Service(db).GetAsync(character.Id, default);
+        Assert.Equal(shield.Id, Assert.Single(presets.Single(x => x.Id == first.Id).Slots).EquipmentInstanceId);
+        Assert.Equal(EssenceCombatActivity.Dungeon, presets.Single(x => x.Id == first.Id).AutoUseActivities);
+        Assert.Empty(presets.Single(x => x.Id == second.Id).Slots);
+        Assert.Equal(1, await db.EquipmentLoadoutSlots.CountAsync());
+    }
+
+    [Fact]
+    public async Task Previously_stale_preset_is_usable_and_is_repaired_when_applied()
+    {
+        await using var db = CreateDb();
+        var (character, _, sword, shield) = await Seed(db);
+        db.InventoryItems.Remove(await db.InventoryItems.SingleAsync(x => x.ItemInstanceId == sword.Id));
+        await db.SaveChangesAsync();
+        var preset = new EquipmentLoadout
+        {
+            Id = Guid.NewGuid(), CharacterId = character.Id, Name = "Old preset", PresetSlot = 1,
+            Slots =
+            [
+                new() { Id = Guid.NewGuid(), SlotType = EquipmentSlotType.MainHand, EquipmentInstanceId = sword.Id, EquipmentInstance = sword },
+                new() { Id = Guid.NewGuid(), SlotType = EquipmentSlotType.OffHand, EquipmentInstanceId = shield.Id, EquipmentInstance = shield }
+            ]
+        };
+        db.EquipmentLoadouts.Add(preset);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var service = Service(db);
+        var displayed = Assert.Single(await service.GetAsync(character.Id, default));
+        Assert.Equal(shield.Id, Assert.Single(displayed.Slots).EquipmentInstanceId);
+        Assert.True((await service.ApplyAsync(character.Id, displayed.Id, default)).Succeeded);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        Assert.Equal(shield.Id, Assert.Single((await service.GetAsync(character.Id, default)).Single().Slots).EquipmentInstanceId);
+        Assert.Single(await db.EquipmentLoadoutSlots.ToListAsync());
     }
 
     [Fact]

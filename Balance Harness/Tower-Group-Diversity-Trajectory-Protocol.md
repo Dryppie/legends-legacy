@@ -1,0 +1,23 @@
+# Group-diversity saved-trajectory audit
+
+15 September 2026. Target: offline BalanceHarness evidence analysis. The user authorized the archived-evidence investigation after the verified diversity/variation comparison. **Zero fights, fresh seeds, combat preparations, replays, candidate construction or scoring callbacks.** No executable, gameplay, policy, sealed study or caps change. The comparison's 45-value exception is exhausted.
+
+## Frozen scope
+
+Read the sealed `tower-group-diversity-comparison-{preparation,study,execution}-20260915` packages. Analyze **88 saved evaluations and 92 proposals** (47 variation, 45 diversity), parent references, complete group-owner counts, parent eligibility, library hashes/uses, roots and complete finalist ancestry. Reconstruct the existing fitness ordering and top-two nominations, then the frozen wins/rank/identity screen choices. Keep rejected and duplicate proposals distinct from new evaluations.
+
+For both policies, retain every count/filler request, group-visit identity, owner count, filler index, outcome, evaluated health/rank, parent use and finalist ancestry membership. Preserve incomplete bundles; never fill missing requests or assign fitness to unevaluated requests. Diversity's group visits traverse different groups before revisiting count/filler variants. Describe four-seed discovery observations without causal or significance claims.
+
+For both nominees per policy, retain discovery rank/health, all eight archived screen outcomes, boss-health mean and missingness, and selected/not-selected status. Describe ties and health ordering without changing selection. Include every complete catalogue group present in either fixed control, generated coverage, module-library availability, recorded carrier uses and finalist counts. Control features are post-hoc descriptive references; they must not enter generation.
+
+Reconstruct the 214-entry diversity order from catalogue metadata and the already-bound generation label, without constructing or evaluating recipes. Compare the recorded guided prefix with that order. For each control group, locate the exact entry and all entries containing its entire Essence set; retain their one-based guided/request positions and how many of those containing groups were actually requested. Report structural evidence/core/Essence coverage within the executed prefix. This distinguishes reaching component metadata from constructing a complete combination. Positions beyond the executed prefix are untested, not predicted combat outcomes.
+
+Retain independent reconstruction of beam/exploration eligibility, the 128-entry module library order/hash, donor identities, recipes, full parent ancestry and fresh-root sets. Parent-child health changes are observed discovery comparisons; multi-parent contributions and unmeasured alternatives cannot be causally assigned. No pooling with earlier studies.
+
+## Verification and limits
+
+Freeze readers, protocol, input hashes and seals before diagnostics. Reuse the 11 verified saved-data fixtures and add exactly two: diversity's interleaved group visits remain separate, and exact/superset catalogue positions retain one-based indices and absent matches. **13 Python fixtures**, one analysis pass and one independent verification pass. The latter reconstructs raw records, graph/group/library/ranking/screen/bundle results and catalogue-order positions without importing the analysis engine. The prior **87 backend tests through `build/run-tests.ps1`** and four metric fixtures remain sealed; there are no backend edits requiring a repeat.
+
+New diagnostic workload, including freeze/preservation, fixtures, analysis, verification and publication, is capped at **120 seconds**, each subprocess at most 45 seconds, with **zero retries**. Carry forward **834.300 seconds**, including preceding failures/corrections, within the **1,800-second cumulative cap**. New output is capped at **32 MiB** and the full retained chain at **4 GiB**. Preserve all **27** preceding sealed packages before/after. On failure or limits, stop dependent diagnostics and preserve evidence.
+
+Publish results, a measured review, reproducible commands and six updated active Markdown handoffs. Identify supported construction/retention/selection observations and unresolved causal questions. Preserve **482,551 reservations**, including v19's unused 512, all 253 retained v19 recipes, fixed ability order, unchanged gameplay and adoption **Hold**. Historical reliability remains Fail 1/3, deep recovery 0/3, sealed v19 Unresolved. No Kharad tuning, deployment, larger fight study or 129,536-fight confirmation.

@@ -154,10 +154,14 @@ WHERE datname = '$DatabaseName'
 
     $fixedNowLiteral = $FixedUtcNow.ToString('O', [Globalization.CultureInfo]::InvariantCulture)
     $boundaryLiteral = $FixedBoundary.ToString('O', [Globalization.CultureInfo]::InvariantCulture)
+    # Rewinding a snapshot starts a new test schedule. Reusing its generation would
+    # regenerate reward IDs for encounters that the snapshot has already settled.
     $prepareSql = @"
 UPDATE public."CharacterActions"
 SET "UpdatedAt" = '$fixedNowLiteral'::timestamptz,
     "NextResolutionAtUtc" = '$boundaryLiteral'::timestamptz,
+    "ScheduleGeneration" = "ScheduleGeneration" + 1,
+    "RowVersion" = "RowVersion" + 1,
     "BlockedUntilUtc" = NULL,
     "IsDeleted" = FALSE
 WHERE "CharacterId" = '$AdminCharacterId'::uuid;

@@ -30,6 +30,18 @@ public sealed class EquipmentLoadoutRepository(IDbContext context) : IEquipmentL
         return EquipmentLoadoutAvailability.GetAvailableItemIds(character.Level, characterId, items, loans);
     }
 
+    public void RemoveUnavailableSlots(IReadOnlyCollection<EquipmentLoadout> loadouts, IReadOnlySet<Guid> availableItemIds)
+    {
+        foreach (var loadout in loadouts)
+        {
+            var unavailable = loadout.Slots.Where(slot =>
+                !slot.EquipmentInstanceId.HasValue ||
+                !availableItemIds.Contains(slot.EquipmentInstanceId.Value)).ToArray();
+            context.EquipmentLoadoutSlots.RemoveRange(unavailable);
+            foreach (var slot in unavailable) loadout.Slots.Remove(slot);
+        }
+    }
+
     public async Task AddAsync(EquipmentLoadout loadout, CancellationToken ct) => await context.EquipmentLoadouts.AddAsync(loadout, ct);
     public void Remove(EquipmentLoadout loadout) => context.EquipmentLoadouts.Remove(loadout);
     public void ReplaceSlots(EquipmentLoadout loadout, IReadOnlyCollection<EquipmentSlot> slots)

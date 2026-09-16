@@ -1,8 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace BalanceHarness;
 
 public sealed record BossLoadoutModule(string Id, string ProposalId, int SourceSlot, IReadOnlyList<string> Essences);
 public sealed record BossLoadoutUse(BossLoadoutModule Module, IReadOnlyList<int> TargetSlots);
-public sealed record BossLoadoutTrace(int LibraryCount, string LibraryHash, IReadOnlyList<BossLoadoutUse> Uses);
+public sealed record BossDistributionConstruction(int MaximumChecks, int Checks, int DonorOffset, int RequestedCount, string Status);
+public sealed record BossLoadoutTrace(int LibraryCount, string LibraryHash, IReadOnlyList<BossLoadoutUse> Uses,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossDistributionConstruction? Construction = null);
 internal sealed record BossLoadoutProposal(BossGeneratedChoice Choice, string[] Parents, BossLoadoutTrace Trace);
 
 /// <summary>Reusable ordered loadouts from this arm's measured parties. A loadout has no standalone fitness.</summary>
@@ -33,16 +37,21 @@ public static class TowerLoadoutComposition
 public sealed partial class TowerBossPartyGenerator
 {
     internal BossLoadoutProposal CoordinateLoadouts(Random random, string operation, BossGeneratedProposal parent,
-        IReadOnlyList<BossLoadoutModule> library)
+        IReadOnlyList<BossLoadoutModule> library, IReadOnlySet<string>? observedPartyIds = null, CancellationToken token = default)
     {
-        if (input.Generation.PolicyVersion is not (TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version)
+        if (input.Generation.PolicyVersion is not (TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version or TowerDeepChallenger.Version or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion)
             || parent.Result != "evaluated" || parent.Party is null || Invalid(parent.Party) is not null
             || parent.Provenance.ReferenceIds.Count != 0 || library.Count is < 1 or > TowerLoadoutComposition.Capacity
             || library.Select(m => m.Id).Distinct().Count() != library.Count
             || library.Any(m => m.Id != HarnessJson.Hash(m.Essences) || m.Essences.Count != input.Budget.EssenceSlots
+                || TowerCompositionSearch.IsCompositionOnly(input.Generation.PolicyVersion) && !TowerCompositionSearch.IsCanonical(m.Essences)
                 || m.Essences.Any(id => !families.ContainsKey(id))
                 || m.Essences.Select(id => families[id]).Distinct(StringComparer.OrdinalIgnoreCase).Count() != m.Essences.Count))
             throw new InvalidDataException("Coordinated loadouts require legal generated parents and ordered modules.");
+        if (input.Generation.PolicyVersion == TowerDiscoveryRefinementSearch.NovelVersion
+            ? observedPartyIds is null || !observedPartyIds.Contains(parent.Party.Id)
+            : observedPartyIds is not null)
+            throw new InvalidDataException("Novel refinement requires this arm's completed party identities.");
         var builds = parent.Party.Builds.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.ToArray());
         var slots = builds.Keys.Order().ToArray(); random.Shuffle(slots);
         var uses = new List<BossLoadoutUse>();
@@ -58,7 +67,14 @@ public sealed partial class TowerBossPartyGenerator
         {
             case "loadout-distribute":
                 parents.Add(parent.Provenance.Id);
-                Apply(library[random.Next(library.Count)], slots.Take(random.Next(1, slots.Length + 1)).ToArray());
+                var donorOffset = random.Next(library.Count);
+                var requestedCount = random.Next(1, slots.Length + 1);
+                if (input.Generation.PolicyVersion == TowerDiscoveryRefinementSearch.NovelVersion)
+                    return NovelDistribution(parent, library, slots, donorOffset, requestedCount, observedPartyIds!, token);
+                var donor = library[donorOffset];
+                var requested = slots.Take(requestedCount).ToArray();
+                Apply(donor, input.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion
+                    ? RoleSafeTargets(builds, donor.Essences, requested) : requested);
                 break;
             case "loadout-compose":
                 // Every module count from one to party size is reachable. Random positive
@@ -76,10 +92,16 @@ public sealed partial class TowerBossPartyGenerator
                 var targets = slots.Where(slot => parent.Party.Builds[slot].SequenceEqual(source.Essences)).ToArray();
                 var ids = source.Essences.ToArray();
                 var left = random.Next(ids.Length); var right = (left + 1 + random.Next(ids.Length - 1)) % ids.Length;
-                switch (random.Next(3))
+                string Replacement(int position)
                 {
-                    case 0: ids[left] = pool[random.Next(pool.Length)]; break;
-                    case 1: ids[left] = pool[random.Next(pool.Length)]; ids[right] = pool[random.Next(pool.Length)]; break;
+                    var offset = random.Next(pool.Length);
+                    return input.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion
+                        ? RoleSafeReplacement(builds, targets, ids, position, offset) : pool[offset];
+                }
+                switch (random.Next(TowerCompositionSearch.IsCompositionOnly(input.Generation.PolicyVersion) ? 2 : 3))
+                {
+                    case 0: ids[left] = Replacement(left); break;
+                    case 1: ids[left] = Replacement(left); ids[right] = Replacement(right); break;
                     case 2: (ids[left], ids[right]) = (ids[right], ids[left]); break;
                 }
                 Apply(source, targets);
@@ -92,8 +114,8 @@ public sealed partial class TowerBossPartyGenerator
                 break;
             default: throw new InvalidDataException("Unknown coordinated loadout operator.");
         }
-        // Enforce owned copies and all family/slot constraints after the whole coordinated
-        // change. Never silently repair a rejected recipe or spend combat on it.
+        // Enforce owned copies and all family/slot constraints after construction, including
+        // v2's explicit role-aware choices. Rejected recipes still consume their proposal.
         return new(Choice(builds, operation, null), parents.Distinct(StringComparer.Ordinal).ToArray(),
             new(library.Count, HarnessJson.Hash(library), uses));
     }

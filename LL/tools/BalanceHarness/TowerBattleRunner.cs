@@ -27,6 +27,7 @@ public sealed record TowerBattleInput(int SchemaVersion, TowerScenario Scenario,
     int CheckpointIntervalTicks, CombatRuleset Rules);
 public sealed record TowerBattleReport(BattleReport Battle, bool Succeeded, decimal GuardianHealthRemainingPercent,
     int DisplayDurationSeconds);
+public sealed record TowerObservedBattle(TowerBattleReport Battle, CombatMechanicTrace Diagnostics);
 
 /// <summary>One uncleared floor with no contributions; production Tower preparation and playback.</summary>
 public sealed class TowerBattleRunner(string root, OfflineContent content)
@@ -80,7 +81,20 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         return await new WorldTowerCombatRuntimeFactory(pipeline).CreateAsync(request, token);
     }
 
-    public async Task<TowerBattleReport> RunAsync(TowerBattleInput input, bool detailed = false, CancellationToken token = default)
+    public Task<TowerBattleReport> RunAsync(TowerBattleInput input, bool detailed = false, CancellationToken token = default)
+        => RunCoreAsync(input, detailed, token);
+
+    /// <summary>Explicit opt-in. The caller owns publication of the separate diagnostic trace.</summary>
+    public async Task<TowerObservedBattle> RunObservedAsync(TowerBattleInput input,
+        CombatMechanicDiagnostics diagnostics, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(diagnostics);
+        var battle = await RunCoreAsync(input, false, token, diagnostics);
+        return new(battle, diagnostics.Snapshot());
+    }
+
+    private async Task<TowerBattleReport> RunCoreAsync(TowerBattleInput input, bool detailed,
+        CancellationToken token, CombatMechanicDiagnostics? diagnostics = null)
     {
         token.ThrowIfCancellationRequested();
         TowerPerformanceTrace.BattleStarted();
@@ -96,7 +110,9 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         using (TowerPerformanceTrace.Measure(detailed ? "engine.detailed" : "engine.playback-including-checkpoints"))
             result = detailed
             ? await executor.ExecuteSimulationAsync(runtime, input.Rules with { CaptureEventLog = true }, token)
-            : (await executor.ExecuteTowerPlaybackAsync(runtime, input.CheckpointIntervalTicks, token)).Result;
+            : diagnostics is null
+                ? (await executor.ExecuteTowerPlaybackAsync(runtime, input.CheckpointIntervalTicks, token)).Result
+                : (await executor.ExecuteTowerPlaybackObservedAsync(runtime, input.CheckpointIntervalTicks, diagnostics, token)).Result;
         var report = CreateReport(runtime, input, result, prepared, detailed);
         TowerPerformanceTrace.BattleCompleted();
         return report;

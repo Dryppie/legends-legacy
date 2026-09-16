@@ -177,7 +177,7 @@ public static class TowerBossDiscoveryRun
             text.AppendLine(string.Create(CultureInfo.InvariantCulture, $"| {party.Id} | {row.Fitness.WorstContextWinRate:P2} | {row.Fitness.GuardianHealth:F2}% | {row.Fitness.Survival:F2}% | {row.Cells.Any(c => c.Clears.Count(x => x) * 2 > c.Clears.Count)} |"));
         }
         text.AppendLine("\nAll evaluated/rejected proposals, ordered recipes, parent/operator lineage and context outcomes are in discovery.json. Capability labels and interaction links are unconfirmed hypotheses. Method restarts and repeated recipes across arms do not create additional independent seed samples. Partial or attempt-exhausted runs do not establish equal-budget method comparisons.\n");
-        return report.Generation?.Version == TowerBossImprovement.Version
+        return report.Generation?.Version is TowerBossImprovement.Version or TowerSuppliedCompositionSearch.Version or TowerSuppliedCompositionSearch.ScheduledVersion or TowerSuppliedCompositionSearch.StandaloneVersion
             ? text.ToString().Replace("Independent team discovery", "Retained-build improvement")
                 .Replace("No benchmark reference was used as a parent or scored by this pass.", "Explicit supplied references were scored on discovery seeds and used as parents. This is reference-derived search, not independent discovery.")
             : text.ToString();

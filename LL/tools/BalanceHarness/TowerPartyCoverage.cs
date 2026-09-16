@@ -74,7 +74,7 @@ public sealed partial class TowerBossPartyGenerator
 {
     private void ValidateCoverage()
     {
-        if (input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version && mechanics.Coverage is null
+        if (input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version or TowerDeepChallenger.Version or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerJointStructuralSearch.Version or TowerJointStructuralDiversity.Version or TowerTeamCoverageSearch.Version or TowerFillerDiversitySearch.Version or TowerCorePortfolioSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion && mechanics.Coverage is null
             || mechanics.Coverage is not null && (mechanics.Coverage.Any(f => f is null || !families.ContainsKey(f.EssenceId)
                 || !TowerPartyCoverage.Kinds.Contains(f.Kind) || f.EvidenceKeys is not { Count: > 0 } || f.EvidenceKeys.Any(string.IsNullOrWhiteSpace))
                 || mechanics.Coverage.Select(f => (f.EssenceId, f.Kind)).Distinct().Count() != mechanics.Coverage.Count))
@@ -124,16 +124,16 @@ public sealed partial class TowerBossPartyGenerator
     public BossGeneratedChoice FreshCompletion(Random random)
         => FreshCoverage(random, completeCores: true);
 
-    private BossGeneratedChoice FreshCoverage(Random random, bool completeCores)
+    private BossGeneratedChoice FreshCoverage(Random random, bool completeCores, IReadOnlyDictionary<int, IReadOnlyList<string>>? prefix = null)
     {
         // This arm explicitly retains a uniform route to every legal ordered team, including uncategorized effects.
-        if (random.Next(8) == 0) return Fresh(random, false) with { Intent = "coverage:uniform" };
+        if (prefix is null && random.Next(8) == 0) return Fresh(random, false) with { Intent = "coverage:uniform", Joined = JoinedTrace("uniform") };
         var groups = CoverageGroups();
-        if (groups.Length == 0) return Fresh(random, false) with { Intent = "coverage:no-features-uniform" };
+        if (groups.Length == 0 && joinedCatalogue is null) return Fresh(random, false) with { Intent = "coverage:no-features-uniform" };
         random.Shuffle(groups);
-        var planned = Enumerable.Range(1, input.RequiredPartySize).ToDictionary(s => s, _ => new List<string>());
-        var used = new Dictionary<string, int>(); var trace = new List<string>();
-        var reservations = staggerReservation ? new List<BossCoverageReservation>() : null;
+        var planned = Enumerable.Range(1, input.RequiredPartySize).ToDictionary(s => s, s => prefix is null ? new List<string>() : prefix[s].ToList());
+        var used = planned.Values.SelectMany(ids => ids).GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count()); var trace = new List<string>();
+        var reservations = staggerReservation || joinedCatalogue is not null ? new List<BossCoverageReservation>() : null;
         bool Add(int slot, string id)
         {
             var ids = planned[slot];
@@ -160,7 +160,10 @@ public sealed partial class TowerBossPartyGenerator
         }
         // Reserve coverage before trying compatible cores. Existing assignments and ownership constrain completion.
         var order = planned.Keys.ToArray(); random.Shuffle(order);
-        foreach (var slot in order.Where(_ => completeCores || random.Next(2) == 0))
+        var insertions = joinedCatalogue is not null && prefix is null ? new List<BossJoinedInsertion>() : null;
+        if (insertions is not null)
+            foreach (var slot in order) insertions.Add(InsertJoined(random, slot, planned));
+        else if (prefix is null) foreach (var slot in order.Where(_ => completeCores || random.Next(2) == 0))
         {
             var eligible = (mechanics.Cores ?? []).Where(c => {
                 var extra = c.EssenceIds.Where(id => !planned[slot].Contains(id)).ToArray();
@@ -173,12 +176,12 @@ public sealed partial class TowerBossPartyGenerator
         var builds = planned.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.ToArray());
         foreach (var slot in order)
         {
-            var prefix = builds[slot]; builds.Remove(slot);
-            var ids = ConstructCharacter(random, builds, intents[random.Next(intents.Length)], prefix);
-            if (ids is null) return new(null, "coverage:" + string.Join(";", trace), null, "owned-or-family-dead-end", reservations);
+            var selectedPrefix = builds[slot]; builds.Remove(slot);
+            var ids = ConstructCharacter(random, builds, intents[random.Next(intents.Length)], selectedPrefix);
+            if (ids is null) return new(null, "coverage:" + string.Join(";", trace), null, "owned-or-family-dead-end", reservations, prefix is null ? JoinedTrace("guided", insertions) : null);
             var shuffled = ids.ToArray(); random.Shuffle(shuffled); builds.Add(slot, shuffled);
         }
-        return Choice(builds, "coverage:" + string.Join(";", trace), null) with { Reservations = reservations };
+        return Choice(builds, "coverage:" + string.Join(";", trace), null) with { Reservations = reservations, Joined = prefix is null ? JoinedTrace("guided", insertions) : null };
     }
 
     public BossGeneratedChoice ChangeCoverage(Random random, PartyChoice parent)

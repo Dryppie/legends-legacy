@@ -4,7 +4,8 @@ namespace BalanceHarness;
 
 public sealed record TowerBulkOptions(int ChunkSize = 32, int RetryReserve = 32, int MaximumSeconds = 300,
     long MaximumBytes = 2147483648, string ExecutionMode = "prepared-v1",
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? StorageAccounting = null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? StorageAccounting = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? SharedExecutablePath = null);
 public sealed record TowerBulkContract(int SchemaVersion, string Kind, JsonElement Definition, LoadoutScope Scope,
     TowerBulkOptions Options, int PlannedBattles, int MaximumAttempts);
 public sealed record TowerBulkAccounting(int LogicalTrials, int ChargedAttempts, int RetryOrUncommittedAttempts, int MaximumAttempts);
@@ -62,6 +63,9 @@ internal sealed class TowerBulkCampaign : IDisposable
             throw new InvalidDataException("Invalid compact campaign limits; planned trials plus retry reserve must fit the definition's combat cap.");
         if (options.StorageAccounting is not null && options.StorageAccounting != TowerStorageAccountant.Mode)
             throw new InvalidDataException("Unknown campaign storage accounting contract.");
+        if (options.SharedExecutablePath is not null && (options.SharedExecutablePath != TowerSharedExecutable.RelativePath
+            || options.StorageAccounting != TowerStorageAccountant.Mode))
+            throw new InvalidDataException("Unknown shared executable contract.");
         if (options.StorageAccounting is not null && resume && !verifyOnly)
             throw new InvalidDataException("Owned storage campaigns are execute-once; interrupted evidence cannot be resumed.");
         output = Path.GetFullPath(output);
@@ -73,10 +77,11 @@ internal sealed class TowerBulkCampaign : IDisposable
             if (HarnessJson.Hash(settings) != settingsHash || HarnessJson.Hash(execution) != executionHash
                 || HarnessJson.Hash(TowerCompactBundle.ContentHashes(root, token)) != HarnessJson.Hash(content))
                 throw new InvalidDataException("Campaign content, settings or producing execution differs from its frozen definition.");
-            var contract = new TowerBulkContract(1, kind, JsonSerializer.SerializeToElement(definition, HarnessJson.Options),
+            var contract = new TowerBulkContract(options.SharedExecutablePath is null ? 1 : 2, kind, JsonSerializer.SerializeToElement(definition, HarnessJson.Options),
                 new(kind, settings, execution, content, TowerCompactBundle.Format), options, planned, planned + options.RetryReserve);
             if (resume || verifyOnly)
             {
+                if (options.SharedExecutablePath is not null) TowerSharedExecutable.VerifyReference(output, execution, token);
                 VerifyFiles(output, FrozenFiles, exact: false, token);
                 var saved = TowerContractJson.Read<TowerBulkContract>(Path.Combine(output, ContractFile));
                 if (HarnessJson.Hash(contract) != HarnessJson.Hash(saved))
@@ -91,7 +96,9 @@ internal sealed class TowerBulkCampaign : IDisposable
                 if (HarnessJson.Hash(copied) != HarnessJson.Hash(content)) throw new InvalidDataException("Content changed while freezing campaign.");
                 HarnessJson.WriteNew(Path.Combine(output, ContractFile), contract);
                 HarnessJson.WriteNew(Path.Combine(output, "definition.json"), definition);
-                HarnessJson.WriteNew(Path.Combine(output, "executable-files.json"), TowerBossStudy.RetainExecutable(output, execution));
+                if (options.SharedExecutablePath is null)
+                    HarnessJson.WriteNew(Path.Combine(output, "executable-files.json"), TowerBossStudy.RetainExecutable(output, execution));
+                else TowerSharedExecutable.WriteReference(output, execution, token);
                 HarnessJson.WriteNew(Path.Combine(output, FrozenFiles), Inventory(output));
                 Directory.CreateDirectory(Path.Combine(output, "batches"));
             }

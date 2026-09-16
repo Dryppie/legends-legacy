@@ -33,11 +33,9 @@ public static class TowerBossImprovement
     {
         TowerBossDiscovery.Validate(d);
         if (d.Mode == TowerBossDiscovery.Independent) return TowerBossDiscovery.GenerationInputs(d);
-        if (d.Generation.PolicyVersion != Version)
+        if (d.Generation.PolicyVersion != Version && !TowerSuppliedCompositionSearch.IsSupported(d.Generation.PolicyVersion))
             throw new InvalidDataException("Legacy improve-supplied definitions are not executable. Prepare the retained-teams-v1 policy explicitly.");
-        return TowerBossDiscovery.GenerationInputs(d with { Mode = TowerBossDiscovery.Independent, Starts = [],
-            Generation = d.Generation with { PolicyVersion = TowerBossGeneration.Version, Methods = TowerBossDiscovery.Methods } })
-            with { Generation = d.Generation };
+        return TowerBossDiscovery.CopyGenerationInputs(d);
     }
 
     internal static string Algorithm(TowerBossDiscoveryDefinition d) => TowerBossDiscovery.Version + "/" + d.Generation.PolicyVersion;
@@ -46,6 +44,8 @@ public static class TowerBossImprovement
         BossGenerationMechanics mechanics, Func<PartyChoice, string, CancellationToken, Task<BossDiscoveryMeasurement>> evaluate,
         CancellationToken token, Action<BossGenerationResult>? checkpoint = null) => d.Mode == TowerBossDiscovery.Independent
         ? TowerBossGeneration.RunAsync(inputs, mechanics, evaluate, token, checkpoint)
+        : TowerSuppliedCompositionSearch.IsSupported(d.Generation.PolicyVersion)
+        ? TowerSuppliedCompositionSearch.RunAsync(d, mechanics, evaluate, token, checkpoint)
         : RunAsync(d, mechanics, evaluate, token, checkpoint);
 
     public static async Task<BossGenerationResult> RunAsync(TowerBossDiscoveryDefinition definition, BossGenerationMechanics mechanics,

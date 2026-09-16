@@ -71,7 +71,7 @@ public static partial class TowerBossStudy
                     progress?.Invoke($"Selection: {selection.Count}/{discovery.DiscoveryShortlist.Count} generated parties validated.");
                 }
                 freeze("selection-results.json", selection);
-                var finalists = TowerBossStudyPolicy.Select(inputs, mechanics, discovery.DiscoveryShortlist, selection, selectionSeeds, d.Stages.GeneratedFinalists);
+                var finalists = TowerBossStudyPolicy.Select(inputs, mechanics, discovery.DiscoveryShortlist, selection, selectionSeeds, d.Stages.GeneratedFinalists, d.Stages.SelectionPolicyVersion);
                 freeze("finalists.json", finalists);
                 family = TowerBossStudyPolicy.Freeze(d, discovery.DiscoveryShortlist, selection, finalists, completed.Values.Sum());
                 freeze("confirmation-freeze.json", family);

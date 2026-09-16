@@ -10,7 +10,12 @@ public sealed record BossDiscoveryMeasurement(string Id, BossDiscoveryFitness Fi
 public sealed record BossGeneratedProposal(BossDiscoveryProvenance Provenance, PartyChoice? Party, string Intent, string? Interaction, string Result,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageReservation>? Reservations = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossLoadoutTrace? Loadouts = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossPartyLineage? Lineage = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossPartyLineage? Lineage = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossJoinedTrace? Joined = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossGroupCountTrace? GroupCount = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossJointStructuralTrace? JointStructural = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossLocalRefinementTrace? LocalRefinement = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossSuppliedSearchTrace? Supplied = null);
 public sealed record BossGenerationArm(string Method, int Seed, string StopReason,
     IReadOnlyList<BossGeneratedProposal> Proposals, IReadOnlyList<BossDiscoveryMeasurement> Evaluations,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossFeedbackRound>? Feedback = null);
@@ -68,6 +73,7 @@ public static class TowerBossGeneration
         "whole-character", "recombine", "mechanic-core", "placement"];
     private static readonly string[] LoadoutOperators = CoverageOperators.SelectMany((op, i) => new[] {
         new[] { "loadout-distribute", "loadout-compose", "loadout-refine", "loadout-placement" }[i % 4], op }).ToArray();
+    private static readonly string[] CompositionOperators = LoadoutOperators.Where(op => op != "order").ToArray();
     // A single operator substitution tests provider choice at the parent's existing count and placement.
     private static readonly string[] ProviderOperators = CoverageOperators.Select(op => op == "coverage-count" ? "coverage-provider" : op).ToArray();
     private static readonly string[] CollectiveOperators = ProviderOperators.Select(op => op == "coverage-provider" ? "collective-provider" : op).ToArray();
@@ -85,8 +91,38 @@ public static class TowerBossGeneration
         StaggerReservationVersion => g.Methods.SequenceEqual(StaggerReservationMethods),
         LoadoutDiversityVersion => g.Methods.SequenceEqual(LoadoutDiversityMethods),
         LoadoutCompositionVersion => g.Methods.SequenceEqual(LoadoutCompositionMethods),
+        TowerCompositionSearch.Version => g.Methods.SequenceEqual([TowerCompositionSearch.Method]),
+        TowerJoinedMechanics.Version => g.Methods.SequenceEqual([TowerJoinedMechanics.Method]),
+        TowerGroupCountSearch.Version => g.Methods.SequenceEqual([TowerGroupCountSearch.Method]),
+        TowerGroupVariationSearch.Version => g.Methods.SequenceEqual([TowerGroupVariationSearch.Method]),
+        TowerGroupDiversitySearch.Version => g.Methods.SequenceEqual([TowerGroupDiversitySearch.Method]),
+        TowerGroupCompletionSearch.Version => g.Methods.SequenceEqual([TowerGroupCompletionSearch.Method]),
+        TowerGroupAllocationSearch.Version => g.Methods.SequenceEqual([TowerGroupAllocationSearch.Method]),
+        TowerJointStructuralSearch.Version => g.Methods.SequenceEqual([TowerJointStructuralSearch.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm <= TowerJointStructuralSearch.MaximumCandidates,
+        TowerJointStructuralDiversity.Version => g.Methods.SequenceEqual([TowerJointStructuralDiversity.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm <= TowerJointStructuralSearch.MaximumCandidates,
+        TowerTeamCoverageSearch.Version => g.Methods.SequenceEqual([TowerTeamCoverageSearch.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm <= TowerJointStructuralSearch.MaximumCandidates,
+        TowerDiscoveryRefinementSearch.FreshFirstVersion => g.Methods.SequenceEqual([TowerDiscoveryRefinementSearch.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm == g.CandidatesPerArm,
+        TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion => g.Methods.SequenceEqual([TowerDiscoveryRefinementSearch.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm <= TowerJointStructuralSearch.MaximumCandidates,
+        TowerCorePortfolioSearch.Version => g.Methods.SequenceEqual([TowerCorePortfolioSearch.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm <= TowerJointStructuralSearch.MaximumCandidates,
+        TowerFillerDiversitySearch.Version => g.Methods.SequenceEqual([TowerFillerDiversitySearch.Method])
+            && g.Seeds is { Count: 1 } && g.CandidatesPerArm is >= 1 and <= TowerJointStructuralSearch.MaximumCandidates
+            && g.MaximumAttemptsPerArm <= TowerJointStructuralSearch.MaximumCandidates,
         TowerPartyLineages.Version => g.Methods.SequenceEqual(TowerPartyLineages.Methods),
         TowerSearchPortfolio.Version => g.Methods.SequenceEqual(TowerSearchPortfolio.Methods) && g.CandidatesPerArm == TowerSearchPortfolio.Candidates && g.MaximumAttemptsPerArm % 4 == 0,
+        TowerDeepChallenger.Version => g.Methods.SequenceEqual([TowerSearchAllocation.Deep])
+            && g.CandidatesPerArm == TowerDeepChallenger.Candidates && g.MaximumAttemptsPerArm == TowerDeepChallenger.Attempts,
         TowerLateAllocation.Version => g.Methods.SequenceEqual(TowerSearchAllocation.Methods) && g.CandidatesPerArm == 768 && g.MaximumAttemptsPerArm % 2 == 0,
         TowerSearchAllocation.Version => g.Methods.SequenceEqual(TowerSearchAllocation.Methods) && g.CandidatesPerArm >= 2 && g.CandidatesPerArm % 2 == 0 && g.MaximumAttemptsPerArm % 2 == 0,
         TowerLoadoutRetention.Version => g.Methods.SequenceEqual(TowerLoadoutRetention.Methods),
@@ -98,6 +134,12 @@ public static class TowerBossGeneration
 
     public static void ValidateInputs(BossDiscoveryInputs d)
     {
+        if (d?.Generation is { } supplied && TowerSuppliedCompositionSearch.IsSupported(supplied.PolicyVersion))
+        {
+            if (!TowerSuppliedCompositionSearch.ValidGeneration(supplied))
+                throw new InvalidDataException("Invalid supplied composition generation allocation.");
+            d = d with { Generation = supplied with { PolicyVersion = Version, Methods = TowerBossDiscovery.Methods } };
+        }
         if (d?.Generation is { PolicyVersion: TowerBossImprovement.Version } generation)
         {
             if (generation.Methods is null || !generation.Methods.SequenceEqual(TowerBossImprovement.Methods))
@@ -123,11 +165,12 @@ public static class TowerBossGeneration
         var g = d.Generation;
         if (g is null || g.Methods is null || !LegalPolicy(g) || g.Objective != TowerBossDiscovery.Objective || g.FreshEvery != 4
             || g.Seeds is not { Count: > 0 and <= 4 }
-            || g.Seeds.Distinct().Count() != g.Seeds.Count || (g.CandidatesPerArm < 1 || g.CandidatesPerArm > (g.PolicyVersion == TowerSearchPortfolio.Version ? TowerSearchPortfolio.Candidates : 1000))
-            || g.MaximumAttemptsPerArm < g.CandidatesPerArm || g.MaximumAttemptsPerArm > (g.PolicyVersion == TowerSearchPortfolio.Version ? TowerSearchPortfolio.Attempts : 10000)
+            || g.Seeds.Distinct().Count() != g.Seeds.Count || (g.CandidatesPerArm < 1 || g.CandidatesPerArm > (g.PolicyVersion is TowerSearchPortfolio.Version or TowerDeepChallenger.Version ? TowerSearchPortfolio.Candidates : 1000))
+            || g.MaximumAttemptsPerArm < g.CandidatesPerArm || g.MaximumAttemptsPerArm > (g.PolicyVersion is TowerSearchPortfolio.Version or TowerDeepChallenger.Version ? TowerSearchPortfolio.Attempts : 10000)
             || d.ShortlistCandidates < g.Methods.Count * g.Seeds.Count || d.ShortlistCandidates > 64
             || d.ShortlistCandidates > CandidateTotal(g))
             throw new InvalidDataException("Invalid bounded generation policy or shortlist allocation.");
+        TowerJointStructuralSearch.ValidateBounds(g.PolicyVersion, d.RequiredPartySize, d.Budget.EssenceSlots, d.AllowedEssences.Count);
         TowerGenerationFeedback.ValidateInputs(d);
         if (d.OwnedCopies is not null && (d.OwnedCopies.Any(p => !d.AllowedEssences.Any(e => e.Id == p.Key) || p.Value is < 0 or > 50)
             || d.AllowedEssences.GroupBy(e => e.Family, StringComparer.OrdinalIgnoreCase)
@@ -181,9 +224,13 @@ public static class TowerBossGeneration
             var feedbackArm = method == TowerGenerationFeedback.Method;
             var retentionArm = method == TowerLoadoutRetention.Method;
             var lineageArm = method == TowerPartyLineages.Method;
-            var loadoutComposition = method == "loadout-composition-joint" || feedbackArm || retentionArm || lineageArm || TowerSearchAllocation.IsComponent(method) || method == TowerSearchPortfolio.DeepComponent;
+            var compositionOnly = TowerCompositionSearch.IsCompositionOnly(d.Generation.PolicyVersion);
+            var loadoutComposition = compositionOnly || method == "loadout-composition-joint" || feedbackArm || retentionArm || lineageArm || TowerSearchAllocation.IsComponent(method) || method == TowerSearchPortfolio.DeepComponent;
             var behaviorArchive = method == "behavior-archive-joint";
-            var streamId = portfolio ? TowerSearchPortfolio.StreamId(method, seed) : d.Generation.PolicyVersion is TowerSearchAllocation.Version or TowerLateAllocation.Version ? TowerSearchAllocation.StreamId(method, seed) : coverageBaseline || loadoutComposition ? "coverage-joint-" + seed.ToString(CultureInfo.InvariantCulture) : armId;
+            // V5 changes allocation only; keep V4's local-edit random stream.
+            var streamPolicy = d.Generation.PolicyVersion == TowerDiscoveryRefinementSearch.FreshFirstVersion
+                ? TowerDiscoveryRefinementSearch.LocalVersion : d.Generation.PolicyVersion;
+            var streamId = compositionOnly ? streamPolicy + "/" + armId : portfolio ? TowerSearchPortfolio.StreamId(method, seed) : d.Generation.PolicyVersion is TowerSearchAllocation.Version or TowerLateAllocation.Version ? TowerSearchAllocation.StreamId(method, seed) : coverageBaseline || loadoutComposition ? "coverage-joint-" + seed.ToString(CultureInfo.InvariantCulture) : armId;
             var random = new Random(StableRandom.Seed(Version, streamId));
             var candidateBudget = CandidateBudget(d.Generation, method);
             // Keep legacy arm streams and operators unchanged, including the paired v2 baseline.
@@ -198,9 +245,20 @@ public static class TowerBossGeneration
             var generator = defense ? new TowerBossPartyGenerator(d, mechanics, attributeDefense: true, compatibleDefense: compatibleDefense, staggerReservation: staggerReservation) : baselineGenerator;
             var collective = method == "collective-joint" || completion || defense;
             var coverage = method == "coverage-joint" || coverageBaseline || behaviorArchive || loadoutComposition || provider || collective;
-            var operators = loadoutComposition ? LoadoutOperators : collective ? CollectiveOperators : provider ? ProviderOperators : coverage ? CoverageOperators : mechanical ? MechanicsOperators : coordinated ? CoordinatedOperators : Operators;
+            var operators = compositionOnly ? CompositionOperators : loadoutComposition ? LoadoutOperators : collective ? CollectiveOperators : provider ? ProviderOperators : coverage ? CoverageOperators : mechanical ? MechanicsOperators : coordinated ? CoordinatedOperators : Operators;
             var freshOperation = loadoutDiversity ? "fresh-loadout-diversity" : staggerReservation ? "fresh-stagger-reservation" : compatibleDefense ? "fresh-compatible-defense" : defense ? "fresh-defense" : completion ? "fresh-completion" : coverage ? "fresh-coverage" : mechanical ? "fresh-mechanics" : coordinated ? "fresh-coordinated" : "fresh-constructive";
-            BossGeneratedChoice Fresh() => completion ? generator.FreshCompletion(random) : coverage ? generator.FreshCoverage(random) : mechanical ? generator.FreshMechanics(random) : coordinated ? generator.FreshCoordinated(random) : generator.Fresh(random, true);
+            var freshIndex = 0;
+            BossGeneratedChoice Fresh() => d.Generation.PolicyVersion == TowerGroupCountSearch.Version
+                ? generator.FreshGroupCount(random, freshIndex++, seed)
+                : d.Generation.PolicyVersion == TowerGroupVariationSearch.Version
+                ? generator.FreshGroupVariation(random, freshIndex++, seed)
+                : d.Generation.PolicyVersion == TowerGroupDiversitySearch.Version
+                ? generator.FreshGroupDiversity(random, freshIndex++, seed)
+                : d.Generation.PolicyVersion == TowerGroupCompletionSearch.Version
+                ? generator.FreshGroupCompletion(random, freshIndex++, seed)
+                : d.Generation.PolicyVersion == TowerGroupAllocationSearch.Version
+                ? generator.FreshGroupAllocation(random, freshIndex++, seed)
+                : completion ? generator.FreshCompletion(random) : coverage ? generator.FreshCoverage(random) : mechanical ? generator.FreshMechanics(random) : coordinated ? generator.FreshCoordinated(random) : generator.Fresh(random, true);
             var proposals = new List<BossGeneratedProposal>(); var measurements = new List<BossDiscoveryMeasurement>();
             var measured = new Dictionary<string, BossGeneratedProposal>(StringComparer.Ordinal);
             var byProposalId = new Dictionary<string, BossGeneratedProposal>(StringComparer.Ordinal);
@@ -226,7 +284,53 @@ public static class TowerBossGeneration
                 {
                     token.ThrowIfCancellationRequested();
                     string operation; BossGeneratedChoice choice; string[] parents = []; BossLoadoutTrace? loadouts = null;
-                    if (method == "random" || measurements.Count < initial)
+                    BossLocalRefinementTrace? localRefinement = null;
+                    if (d.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion)
+                    {
+                        // Proposal count fixes exploration; rejected edits never trigger an uncharged refill.
+                        if (d.Generation.PolicyVersion == TowerDiscoveryRefinementSearch.FreshFirstVersion
+                            ? TowerDiscoveryRefinementSearch.FreshFirst(attempt, measurements.Count, candidateBudget)
+                            : TowerDiscoveryRefinementSearch.Fresh(attempt, measurements.Count))
+                        {
+                            operation = TowerDiscoveryRefinementSearch.FreshOperator;
+                            choice = generator.FreshJointStructural(freshIndex++, token);
+                        }
+                        else
+                        {
+                            operation = d.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion
+                                ? TowerDiscoveryRefinementSearch.LocalOperator : TowerDiscoveryRefinementSearch.RefinementOperator(attempt);
+                            var parent = measured[Rank(measurements).First().Id];
+                            if (operation == TowerDiscoveryRefinementSearch.LocalOperator)
+                            {
+                                parents = [parent.Provenance.Id];
+                                var edit = generator.RefineLocal(random, parent, measured.Keys.ToHashSet(StringComparer.Ordinal), token);
+                                choice = edit.Choice; localRefinement = edit.Trace;
+                            }
+                            else if (operation == "whole-character")
+                            {
+                                parents = [parent.Provenance.Id];
+                                choice = generator.Mutate(random, operation, parent.Party!);
+                            }
+                            else
+                            {
+                                var edit = generator.CoordinateLoadouts(random, operation, parent,
+                                    TowerLoadoutComposition.Library(measurements, measured),
+                                    d.Generation.PolicyVersion == TowerDiscoveryRefinementSearch.NovelVersion
+                                        ? measured.Keys.ToHashSet(StringComparer.Ordinal) : null, token);
+                                choice = edit.Choice; parents = edit.Parents; loadouts = edit.Trace;
+                            }
+                        }
+                    }
+                    else if (TowerJointStructuralSearch.IsStructural(d.Generation.PolicyVersion))
+                    {
+                        operation = d.Generation.PolicyVersion == TowerCorePortfolioSearch.Version ? TowerCorePortfolioSearch.Operator
+                            : d.Generation.PolicyVersion == TowerFillerDiversitySearch.Version ? TowerFillerDiversitySearch.Operator
+                            : d.Generation.PolicyVersion == TowerTeamCoverageSearch.Version ? TowerTeamCoverageSearch.Operator
+                            : d.Generation.PolicyVersion == TowerJointStructuralDiversity.Version
+                            ? TowerJointStructuralDiversity.Operator : TowerJointStructuralSearch.Operator;
+                        choice = generator.FreshJointStructural(attempt, token);
+                    }
+                    else if (method == "random" || measurements.Count < initial)
                     {
                         operation = method == "random" ? "fresh-random" : freshOperation;
                         choice = method == "random" ? generator.Fresh(random, false) : Fresh();
@@ -278,7 +382,7 @@ public static class TowerBossGeneration
                     }
                     var provenance = new BossDiscoveryProvenance($"{armId}-proposal-{attempt:D5}", seed, method, operation, parents, []);
                     var rejection = choice.Rejection ?? (choice.Party is null ? "no-legal-proposal" : measured.ContainsKey(choice.Party.Id) ? "duplicate" : null);
-                    var proposal = new BossGeneratedProposal(provenance, choice.Party, choice.Intent, choice.Interaction, rejection ?? "evaluating", choice.Reservations, loadouts);
+                    var proposal = new BossGeneratedProposal(provenance, choice.Party, choice.Intent, choice.Interaction, rejection ?? "evaluating", choice.Reservations, loadouts, Joined: choice.Joined, GroupCount: choice.GroupCount, JointStructural: choice.JointStructural, LocalRefinement: localRefinement);
                     proposals.Add(proposal);
                     if (rejection is not null) { Snapshot("Running"); continue; }
                     Snapshot("Running");

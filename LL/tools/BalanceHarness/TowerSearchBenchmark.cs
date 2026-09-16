@@ -69,7 +69,12 @@ public static partial class TowerSearchBenchmark
                     else Visit(child);
                 }
             else if (element.ValueKind == JsonValueKind.Object)
+            {
+                if (element.TryGetProperty("reservationState", out var state)
+                    && (state.ValueKind != JsonValueKind.String || state.GetString() != "Complete"))
+                    throw new InvalidDataException("Unresolved external seed reservation; preserve its intent and journal before further allocation.");
                 foreach (var property in element.EnumerateObject()) Visit(property.Value);
+            }
         }
         Visit(ledger);
         if (seeds.Count == 0 || seeds.Count > TowerStudyLimits.HistoricalSeeds - 331)

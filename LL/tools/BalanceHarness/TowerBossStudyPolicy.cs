@@ -13,10 +13,12 @@ public sealed record BossEarlierBreach(string Stage, string PartyId, string Cont
 public sealed record BossStudyConclusion(GoalOutcome GeneratedViability, GoalOutcome OverallAssessment,
     IReadOnlyList<BossEarlierBreach> EarlierBreaches, IReadOnlyList<string> Notes);
 
-/// <summary>Selection sees generated measurements only; references enter after finalists freeze.</summary>
+/// <summary>Selection sees frozen shortlist measurements, which may include supplied incumbents.
+/// Independent confirmation measurements enter only after finalists freeze.</summary>
 public static class TowerBossStudyPolicy
 {
     public const string Version = "tower-staged-confirmation-v1";
+    public const string ZeroWinVersion = "tower-staged-zero-win-health-v1";
     public const double AlternativeMargin = .10;
 
     public static string BehaviorPattern(BossBehavior b)
@@ -30,8 +32,9 @@ public static class TowerBossStudyPolicy
 
     public static IReadOnlyList<BossFinalist> Select(BossDiscoveryInputs inputs, BossGenerationMechanics mechanics,
         IReadOnlyList<PartyChoice> shortlist, IReadOnlyList<BossDiscoveryMeasurement> selection,
-        IReadOnlyDictionary<string, IReadOnlyList<int>> selectionSeeds, int maximum)
+        IReadOnlyDictionary<string, IReadOnlyList<int>> selectionSeeds, int maximum, string policyVersion = Version)
     {
+        if (policyVersion is not (Version or ZeroWinVersion)) throw new InvalidDataException("Unknown staged selection policy.");
         if (maximum is < 1 or > 5 || shortlist.Count == 0 || shortlist.Count != selection.Count
             || shortlist.Select(p => p.Id).Distinct().Count() != shortlist.Count || selection.Select(p => p.Id).Distinct().Count() != selection.Count
             || !shortlist.Select(p => p.Id).Order().SequenceEqual(selection.Select(p => p.Id).Order()))
@@ -45,14 +48,20 @@ public static class TowerBossStudyPolicy
                     row.Behavior.Recovery?.GuardianHealing ?? 0, row.Behavior.Recovery?.GuardianRegeneration ?? 0 }.Any(n => !double.IsFinite(n) || n < 0))
                 throw new InvalidDataException("Invalid or incomplete selection measurement.");
         var parties = shortlist.ToDictionary(p => p.Id);
-        var primary = TowerBossGeneration.Rank(selection).First();
+        var discoveryRanks = shortlist.Select((p, i) => (p.Id, Rank: i + 1)).ToDictionary(p => p.Id, p => p.Rank);
+        var ranked = policyVersion == ZeroWinVersion ? TowerZeroWinSelection.Rank(selection,
+            r => r.Cells.Sum(c => c.Clears.Count(won => won)),
+            r => r.Cells.OrderBy(c => c.Context, StringComparer.Ordinal).Sum(c => c.GuardianHealth * c.Clears.Count) / r.Cells.Sum(c => c.Clears.Count),
+            r => discoveryRanks[r.Id], r => r.Id) : TowerBossGeneration.Rank(selection);
+        var primary = ranked.First();
         BossFinalist Finalist(BossDiscoveryMeasurement row, bool first) => new(parties[row.Id], first,
             generator.CapabilityPattern(parties[row.Id]), BehaviorPattern(row.Behavior), first
-                ? "Primary selected by target win rate, boss progress, survival, winning duration and stable ID."
+                ? policyVersion == ZeroWinVersion ? "Primary selected by selection wins; only zero-win ties use mean guardian health, then frozen discovery rank and stable ID."
+                    : "Primary selected by target win rate, boss progress, survival, winning duration and stable ID."
                 : "Distinct capability and observed behavior patterns within ten percentage points of the selection primary; not a causal strategy claim.");
         var result = new List<BossFinalist> { Finalist(primary, true) };
-        foreach (var row in selection.Where(r => r.Id != primary.Id && r.Fitness.WorstContextWinRate + AlternativeMargin + 1e-12 >= primary.Fitness.WorstContextWinRate)
-            .OrderByDescending(r => r.Fitness.WorstContextWinRate).ThenBy(r => r.Id, StringComparer.Ordinal))
+        var alternatives = policyVersion == ZeroWinVersion ? ranked : selection.OrderByDescending(r => r.Fitness.WorstContextWinRate).ThenBy(r => r.Id, StringComparer.Ordinal);
+        foreach (var row in alternatives.Where(r => r.Id != primary.Id && r.Fitness.WorstContextWinRate + AlternativeMargin + 1e-12 >= primary.Fitness.WorstContextWinRate))
         {
             if (result.Count >= maximum) break;
             var candidate = Finalist(row, false);
@@ -99,7 +108,7 @@ public static class TowerBossStudyPolicy
         var definition = new TowerBalanceDefinition(1, "confirmation-" + HarnessJson.Hash(d.Id)[..20], TowerBalanceEvaluator.IntervalPolicy,
             d.ContentHashes, d.SettingsHash, d.ExecutionHash, cohorts, cells, exclusions, checked(cells.Sum(c => c.Scenario.Seeds.Count)));
         TowerBalanceEvaluator.Validate(definition);
-        return new(Version, HarnessJson.Hash(shortlist), HarnessJson.Hash(selection), trials, definition, members);
+        return new(d.Stages.SelectionPolicyVersion, HarnessJson.Hash(shortlist), HarnessJson.Hash(selection), trials, definition, members);
     }
 
     public static IReadOnlyList<BossStudyComparison> Compare(BossConfirmationFreeze frozen, IReadOnlyList<TowerBalanceEvidence> evidence)

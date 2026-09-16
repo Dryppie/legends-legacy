@@ -1,0 +1,9 @@
+# Refinement comparison driver: timeout closure amendment
+
+16 September 2026. The frozen test phase timed out. Both isolated builds succeeded, and the test process subsequently reported all 117 tests passing. The timeout handler's termination attempt did not stop it promptly. This scope remains **FailurePreserved**, with no retry or dependent native/audit/preservation execution.
+
+Preserve both TRX files: the timeout handler copied the previous 105-test TRX before the new run finished; the distinct late TRX contains the 117-test result. Never label the stale file a current test pass. Late TRX start-to-finish was 11.2236 seconds. Read-only process inspection found no remaining dotnet/testhost run; the only listed PowerShell process was the inspection itself. A CIM process query was denied, so the available `Get-Process` inventory was used.
+
+Use a separate `close_failure.py` for the already-authorized failure publication. Do not modify any frozen implementation, protocol, scripts, logs or failure receipts. This closure copies late evidence, records the source of the deadline overrun, updates active Markdown and seals the failed scope. Its maximum remains the reserved five diagnostic seconds, with one closure second. Charge the additional interval from the timeout-failure file timestamp to the late TRX timestamp, plus one second for process teardown and one second for read-only failure triage. Charge actual closure work separately. The 65-second scope, cumulative 3,000 seconds and 4 GiB caps remain unchanged.
+
+No new test, fixture, engine preparation, combat, replay or reservation. Native three-case evidence, independent Python audit and full final 72-package audit remain unrun. Preserve 482,821 reservations, all sealed predecessors and adoption Hold. Next work must first repair reliable process-tree termination and freeze a realistic allocation for the duration of durable-journal tests; a late test pass does not close this scope.

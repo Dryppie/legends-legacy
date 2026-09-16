@@ -1,0 +1,47 @@
+# Four-party comparison adapter: literal readiness completed
+
+**The isolated comparison adapter is implemented and its literal checks passed: 12 valid outcome cases, 29 rejected malformed cases, and an independent arithmetic audit.** This verifies the numerical decision and static preflight. It is not native runtime admission, a launch authorization, or evidence of a stronger team. No combat or new balance values occurred.
+
+The [frozen readiness design](Tower-Subgroup-Readiness-Design-Review.md) and [four-party matrix](Tower-Subgroup-Matrix-Design-Review.md) remain unchanged. AA and BB are the admitted historical anchors; AB already occurred in one archived discovery pool, while BA was absent from the two checked pools. This implementation neither constructs new parties nor changes a recipe, ordering rule, threshold or experiment family. The archive-model proposal and prior pilots remain closed.
+
+## Implemented behavior
+
+The [adapter](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/adapter.py) uses only the existing Python standard library. Its `preflight` mode checks pinned matrix/contract identities and emits the four recipe IDs, fixed overrides and unresolved external checks. Its `assess` mode accepts a strictly shaped four-party export, validates all 256 trial identities per party, joins by trial key and sample, and computes the frozen rate and paired-contrast results. Party order and trial order may change without changing the result; duplicate or missing identities cannot pass.
+
+The export binds the complete captured context, source matrix and contract, each canonical recipe ID and a fingerprint of the full character context. Fingerprints are adapter canonical-JSON fingerprints, not a claim to have regenerated native prepared-actor identities. The [input record](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/inputs.json) pins the captured context and documents that difference. Supplied execution metadata must claim Complete with **1,024 planned/completed/charged trials and zero retries**, and its balance assessment must match the inspected CLI exit mapping: Pass=0, Fail=1, Inconclusive=3. Invalid=2 and unsupported failures are rejected. These checks establish export consistency, not the truth of caller-supplied execution claims.
+
+**No export field can authorize promotion or launch.** Literal exports use string sample labels under `LiteralOutcomeFixture`; they cannot supply integer balance values. A real-data-shaped export is explicitly named `UnattestedNativeOutcomeExport` and remains unauthenticated. Results always retain `nativeExecutionAuthenticated=false`, `promotionAuthorized=false` and `launchReady=false`. A caller-supplied claim such as nativeVerification=Passed is rejected as an unexpected field. Complete native archive reconstruction and independent attempt-ledger verification remain necessary before a numerical result can be treated as combat evidence.
+
+## Frozen arithmetic
+
+Four win-rate intervals share alpha .025, and eight gained/lost discordance intervals share alpha .025. The adapter uses `NormalDist().inv_cdf(1-alpha/2)` and two-sided Wilson endpoints. Per-interval alpha values remain **.00625** for rates and **.003125** for discordances. It reports all four planned contrasts **AB−AA, AB−BB, BA−AA, BA−BB**, with gains/losses matched by trial identity and draws counted as non-wins.
+
+Each paired interval subtracts the opposing endpoints of the gained/lost intervals. A candidate passes the numerical gate only when its adjusted rate lower bound reaches **10%**, both paired lower bounds are strictly positive, and both observed gains satisfy `100*(gained-lost) >= 5*256`. The exact threshold is therefore **13 net wins**. The four-way interaction is descriptive. If both candidates pass, both remain reported without an unsupported claim that one beats the other.
+
+The generic balance ceiling remains separate from this improvement calculation. A literal high-win family with a balance Fail/exit 1 can pass the numerical improvement gate, while promotion still remains unauthorized pending native evidence. Exit 1 is never a blanket success condition. Similarly, a balance Pass/exit 0 can fail the improvement gate.
+
+## Verification completed
+
+The [literal definitions](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/literal-cases.json) and [complete results](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/literal-results.json) retain all 12 valid cases: all losses; all draws; identical half-win teams; a generic balance pass without improvement; 12 net wins; 13 net wins; a large supported advantage; beating only one anchor; both candidates passing; high-win balance failure; reversed party/trial order; and identical all-win teams. The 13-net-win case passes the point-gain condition but still fails its uncertainty condition, confirming that the point threshold alone cannot promote a party. Identical teams retain nonzero paired-interval width.
+
+All **29 malformed cases** were rejected, covering missing/duplicate parties and trials, changed identities/context/bindings, mismatched samples, missing or extra attempts, retries, invalid outcome/count/schema types, inconsistent assessment/exit code, unsupported process failure, self-attested native approval, duplicate JSON properties and non-finite JSON. The malformed JSON artifacts are literal parser checks, not damaged source evidence.
+
+The [independent audit](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/independent-audit.json) imports neither the adapter nor fixture generator. It reconstructs outcome sets from the retained range descriptions, uses set discordances, the captured repository's independent Acklam tail approximation and Wilson quadratic roots, and reproduces every interval, gate, candidate decision and descriptive interaction. Maximum interval difference was **7.57e-11**, within the frozen **1e-8** absolute tolerance. It also checks the source/fixture freeze and standalone CLI parity. The 29 rejection results are retained by the fixture runner; the independent audit's separate arithmetic reconstruction covers the 12 complete cases.
+
+The workflow ran the pinned Python runtime with `workflow.py input`, `workflow.py checks`, and `workflow.py publish`. Both public modes ran through the CLI: preflight and assessment of a reversed-order [literal example export](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/example-literal-export.json). No real native outcome export was assessed. Phase processes ran in owned Windows jobs with work deadlines and cleanup reserves; all completed with zero owned processes remaining.
+
+## Remaining boundary
+
+The [preflight output](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/preflight.json) lists five unresolved external checks: admission of a producing executable/runtime inventory; explicit independent-panel authorization and exclusion reconciliation; a frozen native family/run envelope; native input/preparation admission of all four parties; and completed native reconstruction plus an independent 1,024-attempt audit. The existing `tower-balance-run` path is the intended future runner, but was never invoked here. No native export extraction/attestation layer is claimed complete by these literal checks.
+
+The prospective comparison remains **four fixed parties ×256 independent shared outcomes =1,024 fights**, with the original simultaneous gate and stopping rule. A fixture pass supplies no seed, preparation, combat or sample-extension authorization. The two old anchors remain practical references; no stronger party has been validated by this work.
+
+## Resource and file preservation
+
+The approved once-only transfer moved **30 seconds /1 MiB from run to engineering**. Component caps are now engineering **1,605 seconds /672,137,216 bytes**, run **1,695 seconds /368,050,176 bytes**, audit unchanged. Overall caps and carried run/audit consumption are unchanged.
+
+This scope conservatively charges its full **30 seconds /1 MiB**, including setup/source/output, literal checks, independent audit and preservation. The three phase ceilings remain 10 seconds /384 KiB, 10 seconds /384 KiB and 10 seconds /256 KiB. The [completion receipt](../TestResults/balance/tower-subgroup-adapter-readiness-20260916/completion.json) leaves **1.525880 engineering seconds /443,128 bytes**, and **1,748.748608 overall diagnostic seconds /91,753,742 output bytes**. No previous charge or failed work was erased.
+
+Changed files are the isolated adapter, literal fixture generator, independent auditor, bounded workflow, frozen inputs and evidence package; this execution review; and the current notice in the original search review. Parent packages, source/fixture hashes, original review text and previously recorded unrelated dirty files are preserved. Document links, whitespace, package/source identities and resource arithmetic were checked. All **483,732 exclusions**, V19 **253 required recipes /512 unused confirmation values**, V19 **Unresolved**, adoption **Hold**, and previous closed experiment decisions remain unchanged.
+
+No production C# changes, builds, backend tests, dependency installations, native preparations, new balance values, combat, replays, benchmarks or model fits ran. Backend tests through `build/run-tests.ps1` were outside this Python-only scope. There are no gameplay-content, migration, persistent-configuration or deployment changes.

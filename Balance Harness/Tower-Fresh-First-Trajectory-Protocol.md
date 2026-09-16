@@ -1,0 +1,24 @@
+# Saved V5 refinement and nomination diagnosis
+
+16 September 2026. Offline BalanceHarness evidence analysis only, following the completed 280-fight fresh-first comparison. No implementation changes or additional combat.
+
+## Frozen workload
+
+Read `tower-fresh-first-comparison-study-20260916` and its sealed readiness/execution packages. Execution seal: `bbe518a8dd8142fdf0eba6bea062c9d415630b04d44f33edbc1248d269246249`; readiness seal: `7be18e07bc141846dd261116b296beab7abf45796c0ce1d37c94eb39438046c5`. Preserve them unchanged. Write new evidence only under `TestResults/balance/tower-fresh-first-trajectory-20260916`, plus this protocol, its review and the six active Markdown handoffs.
+
+Start from `tower-fresh-first-comparison-publication-20260916.json`: **4,037.795272355642 diagnostic seconds / 4,717,896,657 bytes**. Cumulative ceilings remain **4,380 seconds / 4,731,174,912 bytes**. This scope allows **60 diagnostic seconds / 1 MiB**, including failures and publication, within those ceilings. Charge ten seconds conservatively for initial instruction, schema and source inspection. Setup has five seconds, analysis thirty-five, publication ten; all share the sixty-second ceiling. Publication reserves one second for sealing. Script/report drafting is excluded. Zero fresh values, generated proposals, preparations, fights, combat replays, retries or history-registry scans. Stop dependent diagnostics at the first failed assertion and preserve it.
+
+Freeze scripts, protocol, prior resource receipt, exact input manifests and relevant producing-source pins before analysis. Snapshot the dirty checkout and preserve unrelated work. No old execution command or cap changes.
+
+## Exact checks and outputs
+
+1. Verify exact membership/hashes of the 64-file readiness, 50-file execution and 553-file study inventories (inventory files themselves excluded where applicable). Verify the relevant current sources against the tested V5 source pins captured by readiness. Read **280 saved records**: 64 baseline discovery, 64 V5 discovery, 24 selection and 128 confirmation. Check receipts, seed schedules, canonical recipes, outcomes and all 280 durable attempt charges.
+2. Recompute all 32 discovery measurements and complete rankings: wins descending, boss health ascending, survival descending, victory duration ascending, ordinal ID. Reconstruct both top-two nominations and selection decisions: selection wins descending, original discovery rank, ID. Verify the shared selection recipe keeps both origins and saves eight fights. Report descriptive health ordering without changing finalists.
+3. Trace all sixteen V5 proposals: twelve fresh followed by four local edits. Verify the first twelve recipes and their per-seed results match the baseline prefix. For each local edit verify the best completed parent, one changed slot and one removed/added Essence, fixed ordinal order, novelty, trace agreement and bounded construction checks. Save parent/child win and health differences, per-seed signs, incumbent changes, nomination/selection outcomes and construction skips.
+4. For every local edge, report paired saved results in discovery, selection and confirmation **only when both exact recipes occur in that stage**. Record unavailable pairs explicitly. This includes checking whether the baseline finalist is a parent of V5's finalist. Do not infer unobserved fights, choose a finalist retrospectively or change the frozen win-rate endpoint.
+5. Independently recompute discovery aggregates and all available stagewise paired differences with Decimal sum/count arithmetic from compressed raw records. Run the sixteen existing pure-reader fixtures plus two additions: merged-origin lookup with ambiguity rejection; paired seed alignment with missing-seed rejection. No backend build/test rerun: no harness implementation changes, and the V5 implementation retains its verified 85 passing tests through `build/run-tests.ps1`.
+6. Persist candidate/edit details, independent arithmetic, usage, preservation receipts and a readable review. Explain what survived held-out evaluation and what remains unresolved. Four reused discovery seeds and one adaptive trajectory do not establish general strength or an Essence's causal effect. Do not implement another policy in this scope.
+
+All **483,046 reservations** remain excluded, including V19's 512 unused values and prior failed allocations. V19 retains all 253 recipes and no confirmation; reliability Unresolved, later Fail 1/3, deep recovery 0/3 and adoption Hold. Ability order stays fixed. No Kharad tuning, gameplay/content, migrations, configuration or deployment changes.
+
+After freezing, execute `workflow.py setup`, `workflow.py analyze` and `workflow.py publish` once each using bundled Python with `-B`. Failure permits failure publication only, never retry. Commands and exit evidence are retained in the new package.

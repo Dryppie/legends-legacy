@@ -1,0 +1,25 @@
+# Saved group/count trajectory diagnosis
+
+15 September 2026. Authorized follow-up to the completed group/count comparison. Target: offline BalanceHarness saved-data analysis only. **Zero new fights, replays, preparations, candidate generation or fresh seed values.** Preserve all **482,461 reservations**, fixed ability order, captured gameplay, sealed experiments and adoption Hold.
+
+## Frozen scope and questions
+
+Read both completed arms from `tower-group-count-comparison-study-20260915`: exactly **90 proposals and 88 evaluated teams**, their mechanics, definitions, nominations, shortlist, screen evidence, finalists and family. Use the preparation's frozen 214-group catalogue and source, plus the execution's already verified descriptive metrics. Do not read new combat inputs or generate teams. Controls are diagnostic comparators only and never become search inputs.
+
+Reconstruct the exact ranking key (win rate descending, boss health ascending, survival descending, victory duration ascending, ordinal ID), chronological four-leader beam, four-member capability/recipe exploration pool, 128-module library, operator schedule and earlier-parent references. Verify every saved module-library hash and module use against its source recipe. Distinguish proposal IDs from recipe IDs and deduplicated screen/confirmation IDs.
+
+For every evaluated team retain its rank, fitness, complete catalogue-group counts, fresh/mutated origin, chronological parent eligibility, actual parent uses and fresh-root ancestry. For every actual parent-to-child edge retain all changed group counts and fitness differences; these comparisons are descriptive, especially for multi-parent composition. For every guided fresh request retain the chosen group/member names, requested/placed/final counts, rank, eligibility, uses and evaluated descendants. Define a concentrated team in advance as one with any complete catalogue group on **at least five of ten characters**; also retain all unbinned counts 0..10 and the maximum-count example. Do not select a more favorable threshold afterward.
+
+Trace each finalist back through all recorded parents to its fresh roots. Establish whether a low-count finalist descends from a high-count fresh recipe before describing its path as erosion. Separately report how concentrated fresh teams scored and whether they had parent or library opportunities. Reconstruct top-two nominations and screen selection including win ties; no reselection or alternative-policy simulation.
+
+Derive diagnostic control groups from every catalogue group present in either fixed control. For each, report control owner counts, whether it was directly scheduled, its maximum occurrence in all generated recipes, whether carrier loadouts appeared in libraries or recorded uses, and finalist counts. Also derive the shared ingredient set from Essences on at least eight characters in both controls, then report complete same-character set coverage. These are coverage observations, not proof of synergy or permission to hardcode control recipes.
+
+## Exact verification and limits
+
+Run exactly **eight Python reader fixtures** before analysis: ranking/tie direction; overlapping-group owner unions; same-group parent/child changes; shared-root deduplication; rejection of missing/future parents; canonical recipe handling; module hashing/order; and screen tie/membership handling. Then run one primary analysis and one independently implemented recount of all ranks, groups, fresh ancestry, edges, control coverage, library content/hash checks and nominations. The independent recount must read the saved source records again, not accept the primary summary as truth.
+
+Freeze protocol, scripts, relevant source/data hashes and package seals before any diagnostic. Verify the three new comparison packages and the ten previously preserved packages before/after; do not scan unrelated campaign trees or allocate replacement values. No backend/search source changes: retain the previously passed 56 backend tests and native reconstruction by hash; do not rerun them for this Python/Markdown-only scope.
+
+Additional measured workload at most **120 seconds**, new output at most **32 MiB**, zero retries. Charge this follow-up against the prior **247.579 seconds / 1,800 seconds** and approximately 280.51 MiB / 4 GiB comparison allowance. Each phase runs once, with failure receipts retained; stop dependent analysis on failure or a limit. Publication may preserve and explain a failure but must not silently rerun it.
+
+Deliver a measured report, full candidate/edge/root/group tables, verification receipts, reproducible commands and active Markdown updates. Separate measured facts from hypotheses. Do not conclude that group retention, more depth or any specific combination would improve combat without evidence. No Kharad/content tuning, ability-order changes, sealed-v19 modification, larger confirmation, deployment or old-cap increase. Historical reliability Fail 1/3, deep recovery 0/3, sealed v19 Unresolved and adoption Hold remain unchanged.

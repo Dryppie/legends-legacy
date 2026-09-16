@@ -18,7 +18,7 @@ public static partial class TowerBossStudy
         try
         {
             var settings = TowerBundle.ReadSettings(root); var frozen = Path.Combine(output, "content");
-            var scope = new LoadoutScope(TowerBossImprovement.Algorithm(d) + "/" + TowerBossStudyPolicy.Version, settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(root, frozen, token), "gzip-json-v1");
+            var scope = new LoadoutScope(TowerBossImprovement.Algorithm(d) + "/" + d.Stages.SelectionPolicyVersion, settings, ExecutionIdentity.Current(), TowerBundle.CopyContent(root, frozen, token), "gzip-json-v1");
             if (HarnessJson.Hash(scope.ContentHashes) != HarnessJson.Hash(d.ContentHashes)
                 || HarnessJson.Hash(settings) != d.SettingsHash || HarnessJson.Hash(scope.Execution) != d.ExecutionHash)
                 throw new InvalidDataException("Content, settings or execution changed while freezing the study.");
@@ -72,7 +72,7 @@ public static partial class TowerBossStudy
         var d = TowerBossDiscovery.Read(Path.Combine(output, "definition.json"));
         var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossImprovement.Inputs(d);
         var scope = HarnessJson.Read<LoadoutScope>(Path.Combine(output, "scope.json"));
-        if (scope.Algorithm != TowerBossImprovement.Algorithm(d) + "/" + TowerBossStudyPolicy.Version || HarnessJson.Hash(scope.Execution) != d.ExecutionHash
+        if (scope.Algorithm != TowerBossImprovement.Algorithm(d) + "/" + d.Stages.SelectionPolicyVersion || HarnessJson.Hash(scope.Execution) != d.ExecutionHash
             || d.ExecutionHash != HarnessJson.Hash(ExecutionIdentity.Current()) || HarnessJson.Hash(scope.Settings) != d.SettingsHash
             || HarnessJson.Hash(scope.ContentHashes) != HarnessJson.Hash(d.ContentHashes))
             throw new InvalidDataException("Study scope changed; use the retained producing executable and platform.");
@@ -134,16 +134,20 @@ public static partial class TowerBossStudy
         return rebuilt;
     }
 
-    internal static IReadOnlyDictionary<string, string> RetainExecutable(string output, ExecutionIdentity execution)
+    internal static IReadOnlyDictionary<string, string> RetainExecutable(string output, ExecutionIdentity execution,
+        long maximumBytes = long.MaxValue, CancellationToken token = default)
     {
         var source = Path.GetDirectoryName(typeof(TowerBossStudy).Assembly.Location)!;
         var destination = Path.Combine(output, "executable"); Directory.CreateDirectory(destination);
         var copied = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        long written = 0;
         void Copy(string relative)
         {
             if (!copied.Add(relative)) return;
+            token.ThrowIfCancellationRequested();
             var target = Path.Combine(destination, relative); Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            File.Copy(Path.Combine(source, relative), target, overwrite: false);
+            if (maximumBytes == long.MaxValue) File.Copy(Path.Combine(source, relative), target, overwrite: false);
+            else written = checked(written + CopyBounded(Path.Combine(source, relative), target, maximumBytes - written, token));
         }
         foreach (var name in new[] { "BalanceHarness.dll", "BalanceHarness.deps.json", "BalanceHarness.runtimeconfig.json" }) Copy(name);
         var deps = HarnessJson.Read<JsonElement>(Path.Combine(source, "BalanceHarness.deps.json"));
@@ -166,5 +170,17 @@ public static partial class TowerBossStudy
         if (execution.AssemblyHashes.Any(p => !hashes.TryGetValue(p.Key + ".dll", out var hash) || hash != p.Value))
             throw new InvalidDataException("Producing assemblies changed while copying the executable.");
         return hashes;
+    }
+
+    internal static long CopyBounded(string source, string target, long maximumBytes, CancellationToken token)
+    {
+        using var input = File.OpenRead(source);
+        using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write);
+        var buffer = new byte[65536]; long written = 0;
+        while (true) {
+            token.ThrowIfCancellationRequested(); var count = input.Read(buffer); if (count == 0) return written;
+            if (count > maximumBytes - written) throw new InvalidDataException("Executable copy cap exceeded.");
+            output.Write(buffer, 0, count); written += count;
+        }
     }
 }

@@ -13,7 +13,10 @@ public sealed record BossGenerationMechanics(int Floor, IReadOnlyList<string> Co
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossProtectionCompatibility? CompatibleDefense = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossStaggerReservations? StaggerReservations = null);
 public sealed record BossGeneratedChoice(PartyChoice? Party, string Intent, string? Interaction, string? Rejection,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageReservation>? Reservations = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossCoverageReservation>? Reservations = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossJoinedTrace? Joined = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossGroupCountTrace? GroupCount = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossJointStructuralTrace? JointStructural = null);
 
 /// <summary>Reference-free complete-party construction. Capability weights propose hypotheses; combat measures strength.</summary>
 public sealed partial class TowerBossPartyGenerator
@@ -57,7 +60,7 @@ public sealed partial class TowerBossPartyGenerator
             || mechanics.Interactions is null)
             throw new InvalidDataException("Generation mechanics must match the frozen target and eligible content.");
         families = this.input.AllowedEssences.ToDictionary(e => e.Id, e => e.Family, StringComparer.Ordinal);
-        if (input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version && this.mechanics.Cores is null
+        if (input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version or TowerDeepChallenger.Version or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerJointStructuralSearch.Version or TowerJointStructuralDiversity.Version or TowerTeamCoverageSearch.Version or TowerFillerDiversitySearch.Version or TowerCorePortfolioSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion && this.mechanics.Cores is null
             || this.mechanics.Cores is not null && (this.mechanics.Cores.Any(c => c is null || !TowerContractJson.Hash(c.Id)
                 || c.Kind is not ("condition" or "basic-attack" or "chain") || c.EssenceIds is not { Count: >= 2 and <= 3 }
                 || c.EssenceIds.Count > input.Budget.EssenceSlots || c.EssenceIds.Any(id => !families.ContainsKey(id))
@@ -66,7 +69,12 @@ public sealed partial class TowerBossPartyGenerator
                 || this.mechanics.Cores.Select(c => c.Id).Distinct().Count() != this.mechanics.Cores.Count))
             throw new InvalidDataException("Invalid same-owner mechanic cores.");
         ValidateCoverage();
+        if (TowerJointStructuralSearch.IsStructural(input.Generation.PolicyVersion)
+            && this.mechanics.Cores is not { Count: <= TowerJointStructuralSearch.MaximumCores })
+            throw new InvalidDataException("Joint structural search requires a bounded authored core catalogue.");
         ValidateStaggerReservations();
+        joinedCatalogue = input.Generation.PolicyVersion is TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version
+            ? TowerJoinedMechanics.Create(this.input, this.mechanics.Cores!) : null;
         features = this.mechanics.Essences.ToDictionary(e => e.Id, StringComparer.Ordinal);
         capabilities = features.ToDictionary(p => p.Key, p => CapabilitySignals(p.Value.Signals), StringComparer.Ordinal);
         if (features.Any(e => !StringComparer.OrdinalIgnoreCase.Equals(e.Value.SourceMonsterId, families[e.Key]))
@@ -104,8 +112,8 @@ public sealed partial class TowerBossPartyGenerator
                 .OrderBy(p => p.EnablerEssenceId, StringComparer.Ordinal).ThenBy(p => p.ConsumerEssenceId, StringComparer.Ordinal)
                 .ThenBy(p => p.Mechanism, StringComparer.Ordinal).ThenBy(p => p.ProducerNodeKey, StringComparer.Ordinal)
                 .ThenBy(p => p.ConsumerNodeKey, StringComparer.Ordinal).ToArray(), inventory.SourceHashes,
-            input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version ? TowerMechanicCores.Create(input, inventory) : null,
-            input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version ? TowerPartyCoverage.Create(input, inventory) : null,
+            input.Generation.PolicyVersion is TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version or TowerDeepChallenger.Version or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerJointStructuralSearch.Version or TowerJointStructuralDiversity.Version or TowerTeamCoverageSearch.Version or TowerFillerDiversitySearch.Version or TowerCorePortfolioSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion ? TowerMechanicCores.Create(input, inventory) : null,
+            input.Generation.PolicyVersion is TowerBossGeneration.CoverageVersion or TowerBossGeneration.ProviderVersion or TowerBossGeneration.CollectiveVersion or TowerBossGeneration.CompletionVersion or TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion or TowerBossGeneration.DepthBehaviorVersion or TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version or TowerDeepChallenger.Version or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerJointStructuralSearch.Version or TowerJointStructuralDiversity.Version or TowerTeamCoverageSearch.Version or TowerFillerDiversitySearch.Version or TowerCorePortfolioSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion ? TowerPartyCoverage.Create(input, inventory) : null,
             input.Generation.PolicyVersion is TowerBossGeneration.DefenseVersion or TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerAttributeDefense.Create(input, inventory) : null,
             input.Generation.PolicyVersion is TowerBossGeneration.CompatibleDefenseVersion or TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerProtectionCompatibility.Create(input, inventory) : null,
             input.Generation.PolicyVersion is TowerBossGeneration.StaggerReservationVersion or TowerBossGeneration.LoadoutDiversityVersion ? TowerStaggerReservation.Create(input, inventory, TowerPartyCoverage.Create(input, inventory)) : null);
@@ -290,12 +298,19 @@ public sealed partial class TowerBossPartyGenerator
         if (party.Builds.Values.Any(ids => ids.Select(id => families[id]).Distinct(StringComparer.OrdinalIgnoreCase).Count() != ids.Count)) return "duplicate-family";
         if (input.OwnedCopies is not null && party.Builds.Values.SelectMany(ids => ids).GroupBy(id => id)
             .Any(g => g.Count() > input.OwnedCopies.GetValueOrDefault(g.Key))) return "owned-copies-exceeded";
+        if (TowerCompositionSearch.IsCompositionOnly(input.Generation.PolicyVersion)
+            && party.Builds.Values.Any(ids => !TowerCompositionSearch.IsCanonical(ids))) return "noncanonical-composition-order";
+        if (input.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion
+            && TowerTeamCoverageSearch.RequiredKindsPerTeam.Any(kind => !mechanics.Coverage!.Any(feature =>
+                feature.Kind == kind && party.Builds.Values.Any(ids => ids.Contains(feature.EssenceId)))))
+            return "missing-team-roles";
         return null;
     }
 
     private BossGeneratedChoice Choice(IReadOnlyDictionary<int, IReadOnlyList<string>> builds, string intent, string? interaction)
     {
-        var party = TowerPartySelection.Choice("independent-generated", builds.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+        var party = TowerPartySelection.Choice("independent-generated", TowerCompositionSearch.IsCompositionOnly(input.Generation.PolicyVersion)
+            ? TowerCompositionSearch.CanonicalBuilds(builds) : builds.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
         return new(party, intent, interaction, Invalid(party));
     }
 
@@ -316,6 +331,8 @@ public sealed partial class TowerBossPartyGenerator
 
     public BossGeneratedChoice Mutate(Random random, string operation, PartyChoice parent, PartyChoice? other = null)
     {
+        if (TowerCompositionSearch.IsCompositionOnly(input.Generation.PolicyVersion) && operation == "order")
+            throw new InvalidDataException("Composition-only search cannot mutate ability order.");
         if (Invalid(parent) is not null || other is not null && Invalid(other) is not null)
             throw new InvalidDataException("Mutation requires legal generated parents.");
         var builds = parent.Builds.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.ToArray());
@@ -350,7 +367,9 @@ public sealed partial class TowerBossPartyGenerator
                 var partner = builds[second].ToArray(); partner[right] = pool[random.Next(pool.Length)]; builds[second] = partner; break;
             case "whole-character":
                 builds.Remove(first);
-                var replacement = ConstructCharacter(random, builds, intents[random.Next(intents.Length)]);
+                var replacement = ConstructCharacter(random, builds, intents[random.Next(intents.Length)],
+                    input.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion
+                        ? RoleSafePrefix(builds, parent.Builds[first]) : null);
                 if (replacement is null) return new(null, "whole-character", null, "owned-or-family-dead-end");
                 builds[first] = replacement; break;
             case "recombine":

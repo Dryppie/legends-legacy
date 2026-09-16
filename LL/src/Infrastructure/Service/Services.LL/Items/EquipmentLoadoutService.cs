@@ -15,6 +15,8 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
     public async Task<List<EquipmentLoadout>> GetAsync(Guid characterId, CancellationToken ct)
     {
         var loadouts = await repository.GetAsync(characterId, ct);
+        if (loadouts.Any(loadout => loadout.Slots.Count > 0))
+            repository.RemoveUnavailableSlots(loadouts, await repository.GetAvailableItemIdsAsync(characterId, ct));
         var limit = await GetLimitAsync(characterId, ct);
         var legacySlot = 0;
         foreach (var loadout in loadouts.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))

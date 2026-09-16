@@ -1,0 +1,26 @@
+# One-Essence, one-slot refinement implementation
+
+16 September 2026. Target: offline `LL/tools/BalanceHarness`. This implements the next step from the [saved V3 trajectory review](Tower-Refinement-V3-Trajectory-Review.md). No combat study is authorized here.
+
+## Frozen implementation and verification scope
+
+Add opt-in `independent-discovery-refinement-local-v4`. Keep the existing seven-fresh/nine-refinement proposal schedule, fresh recipe stream, discovery ranking, parent selection, nominations, selection rules, fixed ordinal ability order, 16-candidate/16-attempt limits and durable campaign accounting. Each local proposal replaces exactly one Essence in one character slot. Search the finite slot/Essence-position/provider neighbourhood from one sampled offset, skipping unchanged, illegal and previously measured parties. Apply the existing family, inventory and team-role checks; record bounds, skips and the exact replacement. Exhaustion returns the unchanged parent for the controller's ordinary charged duplicate. Do not refill or optimize ability order. Check cancellation during construction. Leave V1–V3 behavior and serialization unchanged.
+
+Expose this policy through an explicit comparison version and matching discovery gate and driver-receipt checks. This makes the option selectable; it does not allocate seeds or execute a study. Existing comparison versions and the seed-allocation namespace stay unchanged.
+
+Evidence directory: `TestResults/balance/tower-local-refinement-20260916`. Begin with the sealed trajectory receipt: **3,718.235272355615 diagnostic seconds**, **4,476,170,515 cumulative bytes** after counting its final 1,499,777 bytes. Existing ceilings remain **4,080 seconds / 4,496,293,888 bytes**. This scope permits at most **180 additional diagnostic seconds / 18 MiB new output**, including setup, isolated compilation, fixtures, temporary output, audits, failure evidence and publication. Charge ten seconds for initial inspection, plus measured setup. Source editing is excluded. Reserve 1 MiB for shared test-runner output and retain/count the dedicated temporary fixture root. No fresh seeds, production allocation, preparations, combat, replays, retries or full registry scans.
+
+Before edits, snapshot/hash the dirty checkout. Freeze all source/test inputs, scripts, protocol, prior seals, pinned gameplay assemblies and exact test filter before compilation. Reuse sealed dependency/restore assets. Build only the isolated harness and test assembly, never gameplay. Execute each phase once: freeze (15 s), harness build (30 s), test build (25 s), tests (85 s), audit (10 s), publication (10 s), all within the shared 180-second ceiling. A process deadline owns and stops its child processes. On the first failed check or exhausted limit, preserve evidence, skip dependent phases and publish the limitation. No automatic rerun or same-scope repair-and-retry.
+
+## Exact zero-combat checks
+
+Run **69 backend facts** through `build/run-tests.ps1`:
+
+- Existing discovery-refinement (12), role-preservation (8), novelty (8), comparison-version (10), and discovery-gate (10) facts.
+- New local-refinement facts (14): opt-in/bounds/metadata; exactly one replacement with immutable input; last role-provider preservation; family collision rejection; shared-inventory protection; measured-neighbour avoidance; complete exhaustion; cancellation; deterministic metadata reordering; unchanged fresh prefix/schedule and best-completed parent; exhaustion attempt charging; checkpoint failure/cancellation charges; version-specific ancestry/order rejection; maximum 10-character/5-Essence/128-provider neighbourhood with all legal neighbours already measured.
+- New local comparison-version facts (6): policy-only definition differences and unchanged schedules; version-specific driver receipt; authorization mismatch before allocation; complete synthetic binding/archive reconstruction; incomplete discovery stops selection with charges preserved; mismatched nominations rejected.
+- One evidence-only compatibility fact: load the pinned pre-change harness in an isolated assembly context, run identical literal-input V1, V2 and V3 generation fixtures in both assemblies, compare complete serialized results and persist their hashes. No engine or production allocator is called.
+
+Synthetic evaluators return fabricated observations. Synthetic pipeline charge callbacks are journal fixtures, not executed fights or production reservations. Persist native local-construction timing traces, per-test results/TRX, command logs, source/binary hashes, maximum-neighbourhood counts and before/after legacy hashes. Record runtime/output costs honestly; no combat-strength improvement claim follows from these checks.
+
+Audit unchanged gameplay assets and unrelated dirty files, exact frozen source/test bytes, phase exits, all 69 results and whitespace. Update the review and six active handoffs. Preserve all **482,956 reservations**, including the failed V3 allocation's 45 unused values, earlier failure's 40, and V19's separate 512 unused values and 253 recipes. V19 reliability Unresolved; later Fail 1/3, deep recovery 0/3; adoption Hold. No configuration, migration or deployment changes.

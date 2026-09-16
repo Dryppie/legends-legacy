@@ -104,6 +104,20 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 CaptureEventLog: false),
             cancellationToken);
 
+    /// <summary>Explicit diagnostic opt-in; uses the same Tower rules and checkpoint path.</summary>
+    public Task<CombatExecutionWithCheckpoints> ExecuteTowerPlaybackObservedAsync(
+        CombatEncounterRuntime runtime,
+        int checkpointIntervalTicks,
+        CombatMechanicDiagnostics diagnostics,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(diagnostics);
+        return ExecuteCompactPlaybackCoreAsync(runtime, checkpointIntervalTicks,
+            new CombatRuleset(ResolveRandomSeed(runtime), 6000,
+                StartActiveAbilitiesOnCooldown: true, CaptureEventLog: false),
+            cancellationToken, diagnostics);
+    }
+
     public async Task<CombatExecutionWithCheckpoints> ExecuteRaidPlaybackAsync(
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
@@ -140,7 +154,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatEncounterRuntime runtime,
         int checkpointIntervalTicks,
         CombatRuleset ruleset,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        CombatMechanicDiagnostics? diagnostics = null)
     {
         var checkpoints = new List<CombatCheckpoint>();
         var execution = await ExecuteCoreAsync(
@@ -149,7 +164,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             cancellationToken,
             checkpoint => checkpoints.Add(checkpoint),
             checkpointIntervalTicks,
-            captureEventLog: false);
+            captureEventLog: false,
+            diagnostics: diagnostics);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
@@ -205,7 +221,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CancellationToken cancellationToken,
         Action<CombatCheckpoint>? checkpointObserver = null,
         int checkpointIntervalTicks = 0,
-        bool captureEventLog = true)
+        bool captureEventLog = true,
+        CombatMechanicDiagnostics? diagnostics = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -304,7 +321,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 Downed: options.Downed,
                 WaveRecovery: options.WaveRecovery,
                 HostileFury: options.HostileFury,
-                CaptureCompactTelemetry: options.CaptureCompactTelemetry));
+                CaptureCompactTelemetry: options.CaptureCompactTelemetry))
+        {
+            MechanicDiagnostics = diagnostics
+        };
         var result = engine.Run(
             friendly,
             hostile,

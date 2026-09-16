@@ -12,10 +12,37 @@ public static class Program
         Console.CancelKeyPress += cancelHandler;
         try
         {
+            if (args.Length > 0 && args[0].StartsWith("tower-complete-family-", StringComparison.Ordinal))
+            {
+                object result = args switch {
+                    ["tower-complete-family-binding-check", var request, var output] => await TowerCompleteFamilyBinding.Check(request, output, cancellation.Token),
+                    ["tower-complete-family-reserve-bind", var request] => await TowerCompleteFamilyBinding.ReserveAndBind(request, cancellation.Token),
+                    ["tower-complete-family-setup-inspect", var request, var output] => await TowerCompleteFamilySetup.Inspect(request, output, cancellation.Token),
+                    ["tower-complete-family-inspect", var source, var output] => await TowerCompleteFamilyInputs.Inspect(source, output, cancellation.Token),
+                    ["tower-complete-family-run", var root] => await TowerCompleteFamilyRun.Run(root, cancellation.Token, Console.WriteLine),
+                    ["tower-complete-family-verify", var root] => await TowerCompleteFamilyRun.Verify(root, cancellation.Token),
+                    ["tower-complete-family-launch-check", var request] => await TowerCompleteFamilyLaunch.Check(request, cancellation.Token),
+                    ["tower-complete-family-launch-run", var request] => await TowerCompleteFamilyLaunch.Run(request, cancellation.Token, Console.WriteLine),
+                    ["tower-complete-family-launch-verify", var request] => await TowerCompleteFamilyLaunch.Verify(request, cancellation.Token),
+                    _ => throw new InvalidDataException("Use tower-complete-family-binding-check <request.json> <new-result.json>, tower-complete-family-reserve-bind <explicit-reservation-request.json>, tower-complete-family-setup-inspect <request.json> <new-result.json>, tower-complete-family-inspect <sealed-source> <new-result.json> or tower-complete-family-run|verify <externally-bound-study>. No retries, overrides or resume.") };
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options)); return 0;
+            }
+            if (args.Length > 0 && args[0] == "tower-retained-audit")
+            {
+                if (args.Length != 3) throw new InvalidDataException("Use tower-retained-audit <frozen-request.json> <new-output>. Zero combat; no resume.");
+                var audit = await TowerRetainedFamilyAudit.Run(args[1], args[2], cancellation.Token, Console.WriteLine);
+                Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(audit, HarnessJson.Options));
+                return 0;
+            }
+            if (args.Length > 0 && args[0].StartsWith("tower-midpoint-", StringComparison.Ordinal))
+                return await TowerMidpointRun.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-ceiling-", StringComparison.Ordinal))
                 return await TowerCeilingScreenCommand.ExecuteAsync(args, cancellation.Token);
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
+                Console.WriteLine("BalanceHarness tower-complete-family-binding-check <request.json> <new-result.json> (zero seeds/combat); tower-complete-family-reserve-bind <explicit-reservation-request.json> (288 fresh values; zero combat; separate reservation scope required)");
+                Console.WriteLine("BalanceHarness tower-complete-family-inspect <sealed-UTC-source> <new-result.json> (zero combat/seeds); tower-complete-family-run|verify <externally-bound-study> (43879 fixed recipes; dedicated global caps; no retries/overrides/resume)");
+                Console.WriteLine("BalanceHarness tower-midpoint-materialize|bind|check|run|verify <root> (fixed +10%, all 253 recipes, 256 shared seeds, 64768 fights; no overrides/resume)");
                 Console.WriteLine("BalanceHarness tower-ceiling-audit <prepared> <manifest-hash> <new-result.json>; tower-ceiling-bind <binding-request.json> <new-study>; tower-ceiling-check|tower-ceiling-run|tower-ceiling-verify <study> (four fixed variants, one global budget; separately authorized binding/execution)");
                 Console.WriteLine("BalanceHarness tower-portfolio-confirmation-audit --source-run <sealed-v19> --source-work <sealed-v19-work> --content-root <captured-content> --output <new-audit> [--comparison-content-root <current-content>] [--comparison-executable <current-binaries>] (zero fights/seeds)");
                 Console.WriteLine("BalanceHarness tower-portfolio-confirmation-prepare --source-run <sealed-v19> --source-work <sealed-v19-work> --content-root <captured-content> --history <current-ledger> --seed <int> --plan <markdown> --max-seconds <int> --max-bytes <long> --output <new-study>");
@@ -43,6 +70,8 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower-compact-recover-publication --run <unfinished-directory> (verify and publish one complete pending chunk; zero fights)");
                 Console.WriteLine("BalanceHarness tower-compact-replay --run <directory> --case <case-id> --battle <tower.0001> [--detailed]");
                 Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-supplied-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--policy-version supplied-composition-block-v1|supplied-composition-block-v2] [--content-root <API.LL-directory>]");
+                Console.WriteLine("BalanceHarness tower-retained-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--content-root <API.LL-directory>] (standalone fixed-order retained-composition-v1)");
                 Console.WriteLine("BalanceHarness tower-team-plan --floor <1-15> --slots <4-10> --seed <int> --output <new-directory> [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>] (independent preview with retained controls and history)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-discover --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] (discovery only)");
@@ -132,6 +161,8 @@ public static class Program
                 "tower-finalist-rescreen-check" or "tower-finalist-rescreen-run" or "tower-finalist-rescreen-verify" => new[] { "--run" },
                 "tower-feedback-check" or "tower-feedback-run" or "tower-feedback-verify" or "tower-retention-check" or "tower-retention-run" or "tower-retention-verify" or "tower-allocation-check" or "tower-late-allocation-check" or "tower-portfolio-check" or "tower-lineage-check" or "tower-allocation-run" or "tower-late-allocation-run" or "tower-portfolio-run" or "tower-allocation-verify" or "tower-late-allocation-verify" or "tower-portfolio-verify" or "tower-lineage-run" or "tower-lineage-verify" => new[] { "--run" },
                 "tower-boss-improvement-prepare" => new[] { "--definition", "--references", "--output", "--content-root" },
+                "tower-supplied-composition-prepare" => new[] { "--definition", "--references", "--output", "--content-root", "--policy-version" },
+                "tower-retained-composition-prepare" => new[] { "--definition", "--references", "--output", "--content-root", "--policy-version" },
                 "tower-team-plan" => new[] { "--floor", "--slots", "--seed", "--output", "--runs-root", "--catalogs-root", "--content-root" },
                 "tower-boss-study" => new[] { "--definition", "--output", "--content-root", "--runs-root" },
                 "tower-boss-study-verify" => new[] { "--run" },
@@ -447,10 +478,21 @@ public static class Program
                 Console.WriteLine($"Team discovery reconstructed: {report.Status}; {report.ActualBattles} recorded combats. No new combat executed.");
                 return report.Status == "Complete" ? 0 : 3;
             }
-            if (command is "tower-boss-discovery-prepare" or "tower-boss-improvement-prepare")
+            if (command is "tower-boss-discovery-prepare" or "tower-boss-improvement-prepare" or "tower-supplied-composition-prepare" or "tower-retained-composition-prepare")
             {
                 var definition = TowerBossDiscovery.Read(Required(options, "--definition"));
                 if (command == "tower-boss-improvement-prepare") definition = TowerBossImprovement.Prepare(definition, Required(options, "--references").Split(',', StringSplitOptions.TrimEntries));
+                if (command == "tower-supplied-composition-prepare") definition = TowerSuppliedCompositionSearch.Prepare(definition,
+                    Required(options, "--references").Split(',', StringSplitOptions.TrimEntries),
+                    options.GetValueOrDefault("--policy-version") ?? TowerSuppliedCompositionSearch.Version);
+                if (command == "tower-retained-composition-prepare")
+                {
+                    var policy = options.GetValueOrDefault("--policy-version") ?? TowerSuppliedCompositionSearch.StandaloneVersion;
+                    if (policy is not (TowerSuppliedCompositionSearch.StandaloneVersion or TowerSuppliedCompositionSearch.IncumbentVersion))
+                        throw new InvalidDataException("Retained preparation requires a standalone retained-composition policy.");
+                    definition = TowerSuppliedCompositionSearch.Prepare(definition,
+                        Required(options, "--references").Split(',', StringSplitOptions.TrimEntries), policy);
+                }
                 var cost = TowerBossDiscovery.Validate(options.GetValueOrDefault("--content-root") ?? FindContentRoot(), definition);
                 var destination = Required(options, "--output");
                 if (Path.Exists(destination)) throw new IOException("Choose a new discovery preparation directory.");

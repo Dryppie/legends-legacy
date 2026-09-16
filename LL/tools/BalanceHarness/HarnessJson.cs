@@ -8,11 +8,21 @@ namespace BalanceHarness;
 public static class HarnessJson
 {
     private const int ReadBufferSize = 128 * 1024;
-    public static JsonSerializerOptions Options { get; } = new(JsonSerializerDefaults.Web)
+    private static readonly JsonSerializerOptions IndentedOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
+    private static readonly JsonSerializerOptions CompactOptions = new(IndentedOptions) { WriteIndented = false };
+    private static readonly AsyncLocal<bool> CompactOutput = new();
+    public static JsonSerializerOptions Options => CompactOutput.Value ? CompactOptions : IndentedOptions;
+
+    internal static IDisposable UseCompactOutput()
+    {
+        var previous = CompactOutput.Value; CompactOutput.Value = true;
+        return new Restore(() => CompactOutput.Value = previous);
+    }
+    private sealed class Restore(Action restore) : IDisposable { public void Dispose() => restore(); }
 
     public static T Read<T>(string path)
     {

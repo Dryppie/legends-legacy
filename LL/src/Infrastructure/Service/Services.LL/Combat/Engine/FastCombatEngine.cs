@@ -137,6 +137,17 @@ public sealed partial class FastCombatEngine
         Redirected
     }
 
+    private CombatMechanicDiagnostics? _mechanicDiagnostics;
+    public CombatMechanicDiagnostics? MechanicDiagnostics
+    {
+        get => _mechanicDiagnostics;
+        init
+        {
+            value?.Attach();
+            _mechanicDiagnostics = value;
+        }
+    }
+
     public FastCombatEngine(
         IReadOnlyDictionary<string, CompiledStatus> statusesById,
         FastCombatEngineOptions? options = null)
@@ -192,6 +203,7 @@ public sealed partial class FastCombatEngine
         IReadOnlyList<IReadOnlyList<RuntimeCombatant>>? hostileReinforcementWaves = null,
         Func<int, IReadOnlyList<RuntimeCombatant>?>? hostileWaveFactory = null)
     {
+        MechanicDiagnostics?.Begin();
         var combatants = friendly.Concat(hostile).ToList();
         for (var combatantIndex = 0; combatantIndex < combatants.Count; combatantIndex++)
             InitializeEncounterCombatant(combatants[combatantIndex]);
@@ -349,7 +361,7 @@ public sealed partial class FastCombatEngine
             foreach (var combatant in combatants)
                 combatant.Conditions.RemoveAll(x => x.StoredDamage.HasValue);
 
-        return new CombatResult
+        var result = new CombatResult
         {
             EventLog = [.. _log],
             Duration = _currentTick,
@@ -360,6 +372,8 @@ public sealed partial class FastCombatEngine
                 ? CreateCompactTelemetry(combatants)
                 : new CompactCombatTelemetry()
         };
+        MechanicDiagnostics?.Complete(_currentTick);
+        return result;
     }
 
     private void InitializeEncounterCombatant(RuntimeCombatant combatant)
@@ -2206,6 +2220,9 @@ public sealed partial class FastCombatEngine
         var damageAmplified = vulnerableAmplified + Math.Max(0, reducedDamage - blockedDamage);
         var barrierBefore = target.Barrier;
         var barrierConsumption = target.ConsumeBarrierWithSources(guardedDamage);
+        if (MechanicDiagnostics is { CaptureBarrierDamage: true } damageDiagnostics)
+            damageDiagnostics.BarrierDamage(_currentTick, source, target, barrierConsumption,
+                effect?.Id, statsSource ?? sourceName, damageType.ToString(), delivery.ToString());
         // Count the recipient's total once, independently of who supplied each Barrier contribution.
         RecordReprisalBarrierAbsorbed(source, target, barrierConsumption.Total);
         var barrierAbsorbed = (int)barrierConsumption.Total;
@@ -2238,6 +2255,9 @@ public sealed partial class FastCombatEngine
 
                 if (contribution.IsDepleted && !string.IsNullOrWhiteSpace(contribution.EffectId))
                 {
+                    MechanicDiagnostics?.Barrier(_currentTick, CombatMechanicEventKind.BarrierBroken,
+                        barrierSource, target, contribution.EffectId, contribution.ActivationId,
+                        contribution.LinkedEffectId, contribution.ApplicationOrder, contribution.Amount);
                     RemoveLinkedActiveEffects(
                         contribution.ActivationId,
                         contribution.LinkedEffectId,
@@ -2570,6 +2590,8 @@ public sealed partial class FastCombatEngine
         if (granted <= 0)
             return;
 
+        MechanicDiagnostics?.Barrier(_currentTick, CombatMechanicEventKind.BarrierStarted,
+            source, target, effect.Id, activationId, effect.LinkedEffectId, applicationOrder, accepted);
         Log(
             source,
             target,
@@ -2943,6 +2965,10 @@ public sealed partial class FastCombatEngine
             target.Statuses.Add(status);
         }
 
+        if (MechanicDiagnostics is { } diagnostics)
+            foreach (var status in target.Statuses)
+                if (status.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase))
+                    diagnostics.Status(_currentTick, source, target, status, "applied");
         Log(source, target, statusId, EventType.StatusEffect, stacks, $"{source.Name} applied {statusId} to {target.Name}.", statsSource, countStatsActivation);
         Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, statusId), combatants);
     }
@@ -3372,6 +3398,9 @@ public sealed partial class FastCombatEngine
             group.Members.Add(summon);
         }
 
+        MechanicDiagnostics?.Summon(_currentTick, summon, CombatMechanicEventKind.SummonSpawned,
+            scheduledEndTick: groupInstanceId is not null && _summonGroups.TryGetValue(groupInstanceId, out var diagnosticGroup)
+                ? diagnosticGroup.ExpiresAtTick : null);
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
         NotifySummonChanged(summon, combatants);
     }
@@ -3732,6 +3761,8 @@ public sealed partial class FastCombatEngine
 
         var previousStacks = existing.Stacks;
         existing.AddStacks(amount);
+        MechanicDiagnostics?.Status(_currentTick, source, target, existing,
+            existing.Stacks == previousStacks ? "unchanged" : "modified");
         if (existing.Stacks == previousStacks)
             return;
 
@@ -4063,6 +4094,7 @@ public sealed partial class FastCombatEngine
         if (!target.Statuses.Remove(status))
             return;
 
+        MechanicDiagnostics?.Status(_currentTick, source, target, status, GetRemovalDescription(removalReason), removed: true);
         Log(
             source,
             target,
@@ -4122,6 +4154,8 @@ public sealed partial class FastCombatEngine
             {
                 var effect = _effectTickBuffer[effectIndex];
                 if (effect.Tick() && (effect.Definition.ChancePercent >= 100 || _random.Next(1, 101) <= effect.Definition.ChancePercent))
+                {
+                    MechanicDiagnostics?.Periodic(_currentTick, effect);
                     ApplyEffectOnce(
                         effect.Definition,
                         effect.Source,
@@ -4130,6 +4164,7 @@ public sealed partial class FastCombatEngine
                         statsSourceOverride: effect.StatsSource,
                         executionContext: effect.CastDamageMultiplier == 1d ? null
                             : new EffectExecutionContext(0) { CastDamageMultiplier = effect.CastDamageMultiplier });
+                }
 
                 if (effect.IsExpired)
                 {
@@ -4596,6 +4631,9 @@ public sealed partial class FastCombatEngine
                     combatants);
                 var source = contribution.Source ?? target;
                 var effectId = contribution.EffectId ?? "Barrier";
+                MechanicDiagnostics?.Barrier(_currentTick, CombatMechanicEventKind.BarrierTimedOut,
+                    source, target, contribution.EffectId, contribution.ActivationId,
+                    contribution.LinkedEffectId, contribution.ApplicationOrder, contribution.Remaining);
                 Log(
                     source,
                     target,
@@ -4682,6 +4720,7 @@ public sealed partial class FastCombatEngine
 
             if (group.Owner.IsAlive)
             {
+                MechanicDiagnostics?.GroupResolved(_currentTick, group.Owner, group.GroupId, group.InstanceId, survivingCount);
                 Publish(
                     new CombatEvent(
                         AbilityTriggerEvent.OnSummonGroupResolved,
@@ -5289,6 +5328,12 @@ public sealed partial class FastCombatEngine
 
     private void LogSummonExpired(RuntimeCombatant summon, string reason)
     {
+        MechanicDiagnostics?.Summon(_currentTick, summon, reason switch
+        {
+            "expired" => CombatMechanicEventKind.SummonTimedOut,
+            "owner death" => CombatMechanicEventKind.SummonOwnerDied,
+            _ => CombatMechanicEventKind.SummonEnded
+        }, reason);
         var source = summon.SummonOwner ?? summon;
         Log(source, summon, summon.Name, EventType.SummonExpired, 0, $"{summon.Name} {reason}.");
     }
@@ -6011,6 +6056,8 @@ public sealed partial class FastCombatEngine
         int damageRedirectedAway,
         bool countsAsTargetedAttack)
     {
+        if (eventType == EventType.Death && target is not null)
+            MechanicDiagnostics?.Summon(_currentTick, target, CombatMechanicEventKind.SummonKilled);
         if (!_captureEventLog)
         {
             (_checkpointStats ?? _balanceStats).Add(
