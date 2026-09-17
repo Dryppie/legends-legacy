@@ -1,0 +1,61 @@
+# Fixed-team confirmation controller: implementation review
+
+**Subsequent execution:** the [completed fixed-team confirmation](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) now qualifies the exact candidate with AdoptFixedTeam. The implementation review below retains its original fixture-only closeout and then-current Hold/history snapshot.
+
+17 September 2026. Scope: offline `LL/tools/BalanceHarness`, literal-report fixtures and documentation. The [frozen plan](Tower-Practical-Fixed-Team-Confirmation-Plan.md) remains the scientific protocol. This implementation does not launch it. Current adoption remains **Hold**, both anchors remain recommended, the permanent registry remains **486,374 values**, and V19 remains **Unresolved** with 512 unused values and 253 required recipes.
+
+## Contract and commands
+
+The separate `tower-practical-fixed-team-confirmation-v1` contract has three public commands:
+
+```text
+tower-fixed-team-confirmation-check <request.json>
+tower-fixed-team-confirmation-run <request.json>
+tower-fixed-team-confirmation-verify <completed-output>
+```
+
+`check` performs native legality, content, settings, execution and complete-history checks without reservation or combat. A successful check does not establish resource feasibility or grant a run. `run` owns the registry/output leases and watched worker through reservation, combat, both audits and publication. `verify` requires the retained producing runtime, reconstructs saved inputs and decisions, and performs no combat or entropy draw. There is no new retry, resume, refill, extension or replay command. Ordinary practical-search and selection-diagnostic contracts retain their original rules.
+
+The strict request fields are `version`, `contentRoot`, `definitionPath`, `definitionHash`, `registryRoot`, `outputRoot`, `requiredHistory`, `maximumSeconds`, `maximumBytes`, and `phases`. Optional `priorSeconds` / `priorBytes` default to zero only for genuinely new accounting scopes; future admission must carry all applicable charges. Optional `pendingHistoryRecoveries` and `recoveryReceiptHashes` bind supported **older** recovery receipts. This contract adds no recovery format for its own Pending entropy records. Paths are absolute; output must be a new direct child of the complete registry. Unknown JSON fields are rejected.
+
+The separately hashed definition contains `version`, `teams`, `contentHashes`, `settingsHash`, `executionHash`, and sorted distinct `excludedCombatSeeds`. Each team contains `role`, `partyId`, `referenceIds`, and the exact seed-free `scenario`. The three teams are the corresponding fields of `recipesInFixedExecutionOrder` in the [plan JSON](Tower-Practical-Fixed-Team-Confirmation-Plan.json). Canonical native hashes enforce every scenario field, party assignment, equipment choice, identity, start time and order, together with the frozen content and settings. The implementation does not accept replacement teams or samples. A new producing runtime and refreshed complete history are bound at admission. The planning JSON itself is not a runnable definition or request.
+
+The candidate, 040e and 49f6 each receive **5,500 paired trials**. Their shared panel is transported as five 1,000-value slices and one 500-value slice per team, with exactly **18 recipe bindings**. Only `Scenario.Seeds` varies. The native 1,000-seed limit and search kernel are unchanged. All 16,500 attempts must complete once before the single final decision.
+
+## Sampling, decision and failure behavior
+
+Recipes, history and request identity freeze before entropy. After native preparation and retained runtime/content setup, the worker writes Pending, intent and start records, calls cryptographic Fill once for **44,000 bytes**, and durably records the whole batch before observing cancellation. Signed little-endian words are filtered against complete history and earlier batch words. The first 5,500 eligible values form the panel; every eligible unused tail value is also permanently reserved. There are at most 11,000 new values, so the current illustrative maximum union is 497,374. Shortfall closes without a refill; unresolved interruption retains blocking Pending evidence.
+
+The family-seven gate is unchanged: candidate Wilson lower win rate at least 10%; candidate-only wins minus anchor-only wins at least **275** against each anchor; and a strictly positive adjusted paired lower bound against each. **610 candidate wins** is the viability boundary. Draws count as non-wins. Success is `StrongerFixedTeamConfirmed` / `AdoptFixedTeam`; it recommends the exact candidate and retains both anchors as controls. A complete negative result is `StrengthNotDemonstrated` / `Hold`, recommending the anchors. Incomplete evidence cannot recommend a team. Every result keeps encounter balance `NotAssessed`; neither method reliability nor global optimality is inferred.
+
+Native reconstruction authenticates the exact inventories, original source/freeze, entropy transcript, 18 chunks, attempt/event journals, ordered trials, native prepared-input hashes, cache bindings, gzip reports, summaries and seed-free exports. A separate direct-outcome audit counts both paired contrasts from the reports without calling the execution assessor. Results publish only when both reconstructions agree, with a final history recheck. The controller forbids cache reuse and observed-outcome stopping.
+
+The parent and worker enforce cumulative and nontransferable phase caps. Additional limits cannot exceed the proposal: 2,400 seconds /1 GiB, with admission at most 180 seconds /128 MiB, combat 1,440 seconds /768 MiB and audit/publication 600 seconds /64 MiB. The explicit request can use smaller limits. Phase sums plus the 2-second /4-MiB closeout reserve must fit the remaining cumulative allowance. The cumulative byte ceiling accommodates the existing 1,088-MiB charge plus the proposed new allowance.
+
+`files.json` hashes the exact published files except itself and the final `closeout.json` commit receipt. Closeout binds the manifest hash, measured time after inventory sealing, and exact retained bytes including its own serialized length. Limits are checked again after the receipt write. Verification rejects missing closeout, extra files, modified bytes, failed workers, changed phase accounting and inconsistent result/export/audit records. Enclosing launch preparation, external logs and oversight still require accounting at future admission; fixture timing does not price those costs or prove native combat feasibility.
+
+## Verification
+
+**293 tests passed, zero failures or skips**, through the normal backend wrapper; build completed with **zero errors and nine existing warnings**. This includes **55 new confirmation checks** and 238 practical/diagnostic regressions. The earlier 40-case confirmation run also passed. Initial validation corrected a canonical JSON escaping pin, a test content path and one incorrect high-discordance fixture expectation before these successful runs. No test-project exclusions or alternate build targets were introduced.
+
+```powershell
+./build/run-tests.ps1 -Filter 'FullyQualifiedName~BalanceHarnessFixedTeamConfirmationTests|FullyQualifiedName~BalanceHarnessPractical|FullyQualifiedName~BalanceHarnessSelectionDiagnosticTests' -ArtifactsPath 'TestResults/fixed-team-confirmation-build'
+```
+
+Retained verification: [build/test log](../TestResults/fixed-team-confirmation-implementation-20260917/verification.log), [293-case TRX](../TestResults/fixed-team-confirmation-implementation-20260917/verification.trx), [runtime and fixture observations](../TestResults/fixed-team-confirmation-implementation-20260917/test-summary.json), and [implementation receipt](Tower-Practical-Fixed-Team-Confirmation-Implementation.json). CLI help exposes the new commands. The restricted first build could not read the user's NuGet configuration; the authorized wrapper rerun succeeded. No implementation verification remains blocked.
+
+The 55 cases cover the exact plan/schema/cohort; native preparation of all 18 chunks with the unchanged seed limit; the 610-win and 275-net-gain boundaries, both signed contrasts, ties and incomplete evidence; one-batch collision/duplicate/negative/tail/shortfall behavior; every entropy/binding boundary; durable cancellation after a draw; exact 16,500-report publication; missing/extra/reordered/reused trials; altered prepared-input hashes, report bindings, recipes, outcomes, decisions, exports and phase records even after re-signing manifests; an audit combat guard; all publication interruption boundaries; competing writer leases; actual owner/worker death; cancellation during a started attempt; phase/cumulative/storage limits; immutable output and rejected old recovery. The owned negative fixture completes with Hold and both anchor recommendations. Public native verification rejects synthetic preparation.
+
+Fixtures use literal reports and literal entropy in isolated temporary registries. The positive full-archive fixture measured **173.188 seconds /25,607,362 bytes (24.42 MiB)** through sealed publication. Its recorded admission/combat/audit phases measured 0.519 /165.035 /6.470 seconds; the combat phase writes literal reports. The owned negative fixture measured **193.007 seconds /25,609,892 bytes**. These observations omit real combat, retained executable/content copying and the large production history, and do not establish native feasibility or a maximum. Fixture limits were 600 seconds /256 MiB with 60/300/180-second phases; they are not a gameplay grant or a replacement for the proposed production envelope.
+
+The tested producing identity is **.NET 10.0.12, Windows 10.0.26200, X64**, with BalanceHarness assembly SHA-256 `d728747ab6a9332d2e24c4d38e880f7272465a5152dc5263c0a7e65b53b23a49`. The observation JSON retains every execution assembly hash. Future admission must freeze and authenticate the local producing runtime; this test record does not silently bind a future executable.
+
+Preservation checks cover **5,545 distinct baseline files**: 5,530 remain byte-identical; only the two intended command/fixture routers and 13 Markdown files changed. All **4,855 files** in the prior diagnostic, enclosing oversight and admission package are byte-identical. The plan JSON, its analysis, gameplay source, policy and old controllers are unchanged. All **1,082 checked local Markdown links** resolved, and whitespace checks passed; the receipt records these final checks.
+
+The historical planning reader deliberately pins the previous producing source through its admission package. Its attempted rerun stops at `Producing source changed: LL/tests/BalanceHarness.ProcessFixture/FixtureHost.cs`; the command router has also changed. This is the expected boundary of that pre-implementation reader. Its source pins, plan JSON, arithmetic and sealed evidence are preserved; they are not rebound to the new implementation. New runtime identity and verification receipts belong to this implementation review and future admission.
+
+## Files and next boundary
+
+Implementation is confined to the five `TowerFixedTeamConfirmation*.cs` files and a narrow command route/help addition in [Program.cs](../LL/tools/BalanceHarness/Program.cs). The test host adds [FixedTeamFixtureHost.cs](../LL/tests/BalanceHarness.ProcessFixture/FixedTeamFixtureHost.cs) and its dispatch route; the two `BalanceHarnessFixedTeam*Tests.cs` files cover the controller. Current Markdown handoffs and the public guide point here. Gameplay source, old scientific contracts and frozen evidence are unchanged. No migrations, application configuration changes or deployments are required.
+
+The subsequent [completed fixed-team confirmation](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) completed the separately approved native request, all 16,500 trials and both audits in 806.937 seconds /384.76 MiB including oversight, returning AdoptFixedTeam for the exact candidate. The run accepted the disclosed engineering-accounting treatment and closed all capped operational charges at 4,800 seconds /2,304 MiB. No further gameplay, probe, draw, replay or public native verifier is queued. This implementation review and its 293-test evidence retain their original no-gameplay scope.

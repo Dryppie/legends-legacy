@@ -17,7 +17,9 @@ public static partial class TowerBossStudy
     internal delegate Task<TowerBattleReport> Replay(LoadoutTrial trial, TowerScenario scenario, CancellationToken token);
 
     internal static async Task<BossStudyReport> ExecuteAsync(TowerBossDiscoveryDefinition d, BossGenerationMechanics mechanics,
-        TowerBossDiscoveryRun.Battle battle, Replay replay, Action<string, object> freeze, CancellationToken token, Action<string>? progress = null)
+        TowerBossDiscoveryRun.Battle battle, Replay replay, Action<string, object> freeze, CancellationToken token,
+        Action<string>? progress = null, Action<bool>? attempt = null,
+        Func<BossConfirmationFreeze, CancellationToken, Task>? beforeConfirmation = null)
     {
         var cost = TowerBossDiscovery.Validate(d); var inputs = TowerBossImprovement.Inputs(d);
         var caps = new Dictionary<string, int>(StringComparer.Ordinal) { ["discovery"] = cost.Discovery, ["selection"] = cost.Selection,
@@ -34,11 +36,13 @@ public static partial class TowerBossStudy
             if (attempted[stage] >= caps[stage] || attempted.Values.Sum() >= d.MaximumBattles)
                 throw new InvalidDataException("Frozen study combat reservation exhausted: " + stage);
             attempted[stage]++;
+            attempt?.Invoke(false); // Optional outer durable journal, before preparation or combat can fail.
         }
         async Task<(LoadoutTrial Trial, TowerBattleReport Report)> Fight(string arm, string stage, TowerScenario scenario, int seed, CancellationToken ct)
         {
             Charge(stage);
             var result = await battle(arm, stage, scenario, seed, ct);
+            attempt?.Invoke(true);
             completed[stage]++;
             if (result.Trial.Stage != stage || result.Trial.Seed != seed || result.Trial.Recipe != HarnessJson.Hash(scenario)
                 || result.Report.Battle.Seed != seed || result.Report.Battle.ScenarioId != scenario.Id
@@ -50,9 +54,9 @@ public static partial class TowerBossStudy
         try
         {
             var lastCount = -1;
-            discovery = await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics,
-                (party, arm, ct) => TowerBossDiscoveryRun.Measure(d, inputs, party, arm, Fight, ct), token, partial => {
+            discovery = await TowerBossImprovement.ExecuteBattlesAsync(d, inputs, mechanics, Fight, token, partial => {
                     discovery = partial;
+                    if (TowerAnchoredNeighborhoodSearch.IsFrozenBatch(partial)) freeze(TowerAnchoredNeighborhoodSearch.BatchArtifact, partial);
                     var count = partial.Arms.Sum(a => a.Evaluations.Count);
                     if (count != lastCount) { lastCount = count; progress?.Invoke($"Discovery: {count} parties, {completed["discovery"]}/{cost.Discovery} combats."); }
                 });
@@ -77,6 +81,7 @@ public static partial class TowerBossStudy
                 freeze("confirmation-freeze.json", family);
                 foreach (var cell in family.Definition.Cells) freeze("exports/" + cell.Id + ".json", cell.Scenario);
                 progress?.Invoke($"Confirmation frozen: {finalists.Count} generated finalists, {family.Definition.Cells.Count} distinct party/context cells.");
+                if (beforeConfirmation is not null) await beforeConfirmation(family, token);
                 foreach (var cell in family.Definition.Cells)
                 {
                     var outcomes = new List<TowerBalanceTrial>(); var artifacts = new List<object>();
@@ -106,6 +111,7 @@ public static partial class TowerBossStudy
                 {
                     Charge("replay");
                     var actual = await replay(choice.Trial, choice.Scenario, token);
+                    attempt?.Invoke(true);
                     completed["replay"]++;
                     VerifyReplay(choice.Report, actual);
                     replays.Add(new(choice.Trial.Id, actual.Battle.Summary.ContentOutcome, ReplayHash(actual)));

@@ -1,0 +1,134 @@
+{
+  "version": "practical-selection-resource-probe-02-review-v1",
+  "status": "ResourceWorkloadMeasured",
+  "gameplayLaunchDecision": "NoGo",
+  "observedNonCombatWorkloadQualified": true,
+  "completeDiagnosticAuditsExecuted": false,
+  "combatFeasibilityEstablished": false,
+  "attemptsInThisScope": 1,
+  "retries": 0,
+  "chargedSeconds": 180,
+  "chargedBytes": 268435456,
+  "combinedClosedProbeScopeCharges": {
+    "seconds": 360,
+    "bytes": 536870912
+  },
+  "externalElapsedSeconds": 125.776384,
+  "parentElapsedSeconds": 125.5983343,
+  "finalBytes": 176759620,
+  "finalMiB": 168.57110977172852,
+  "sampledHighWaterBytes": 176759620,
+  "phases": [
+    {
+      "name": "admission",
+      "seconds": 38.7439381,
+      "startBytes": 558,
+      "endBytes": 81252395,
+      "sampledHighWaterBytes": 81252395,
+      "growthBytes": 81251837,
+      "growthMiB": 77.48779010772705
+    },
+    {
+      "name": "search",
+      "seconds": 17.059159099999995,
+      "startBytes": 81252533,
+      "endBytes": 94160530,
+      "sampledHighWaterBytes": 94160530,
+      "growthBytes": 12907997,
+      "growthMiB": 12.310025215148926
+    },
+    {
+      "name": "confirmation",
+      "seconds": 37.41007630000001,
+      "startBytes": 94160678,
+      "endBytes": 175738981,
+      "sampledHighWaterBytes": 175738981,
+      "growthBytes": 81578303,
+      "growthMiB": 77.79913234710693
+    },
+    {
+      "name": "audit",
+      "seconds": 31.826523699999996,
+      "startBytes": 175739136,
+      "endBytes": 176222390,
+      "sampledHighWaterBytes": 176222390,
+      "growthBytes": 483254,
+      "growthMiB": 0.46086692810058594
+    }
+  ],
+  "otherParentOverheadSeconds": 0.5586370999999986,
+  "historyAdmissionAndRecheckSeconds": 75.74706679999998,
+  "stepSeconds": {
+    "authenticate-retained-inventories": 0.1417719,
+    "history-admission": 37.4848596,
+    "content-validation": 0.26138609999999574,
+    "history-payload-serialization": 0.10905349999999459,
+    "copy-content": 0.07230069999999955,
+    "copy-runtime": 0.17475470000000115,
+    "inventory-and-mechanics": 0.11361519999999814,
+    "authenticate-study": 0.0872955000000033,
+    "history-before-search": 13.0717425,
+    "history-before-confirmation": 12.66200899999999,
+    "native-audit-read-workload": 16.4083952,
+    "independent-audit-read-workload": 2.5374111,
+    "history-after-audits": 12.528455699999995
+  },
+  "historicalValues": 484285,
+  "historicalFiles": 202,
+  "reportWrites": {
+    "discovery": 512,
+    "selection": 128,
+    "confirmation": 4000
+  },
+  "totalReportWrites": 4640,
+  "byteIdenticalToRetainedReports": 4640,
+  "inputMaterializations": 9280,
+  "auditWorkloadReads": {
+    "native": 4640,
+    "independent": 4000
+  },
+  "inventoryHashPassesInAuditWorkload": 2,
+  "runtimeAssets": 26,
+  "retainedRuntimeBytes": 19111561,
+  "newFights": 0,
+  "newReservations": 0,
+  "entropyCalls": 0,
+  "newCandidates": 0,
+  "verifiedNativeInventoryEntries": {
+    "TestResults/practical-native-verification-20260917": 53,
+    "TestResults/balance/tower-practical-native-verification-20260917": 1564
+  },
+  "verifiedProbeManifestEntries": 4717,
+  "verifiedPayloadManifestEntries": 4686,
+  "passedProbeTests": 14,
+  "evidencePins": {
+    "TestResults/selection-diagnostic-probe-02-checks/scope.json": "316d119f952e24db342eefb3fa9d22605621f56d3239689e451e9578aa4e7b80",
+    "TestResults/selection-diagnostic-resource-probe-20260917-02/resource-receipt.json": "84169a46a7b3bfebcfe4860f1e7c3c120e738b85f20a0fcdc89a77b3fc6eff27",
+    "TestResults/selection-diagnostic-probe-02-checks/native-outcome.json": "45cc25c04d4bed29f49ecf59ba69c2e9fa71f139179616a64a5d17f09c707043",
+    "TestResults/selection-diagnostic-probe-02-checks/native-launch-observation.json": "6c90b73e520f44a2e906809a5c3fc530d4a2237d9b2c0d3888561ac02fcb6731"
+  },
+  "probeManifestSha256": "38710e0d1a472ccbb9b5b811a07c1257fd742644c4843a74bdf1c318c0e775cd",
+  "producingExecution": {
+    "runtime": ".NET 10.0.12",
+    "operatingSystem": "Microsoft Windows 10.0.26200",
+    "architecture": "X64",
+    "assemblyHashes": {
+      "Application": "a05966b750991b6e8aa1c2a81b96e3da91ef0451cc9586394501b71fb8e18223",
+      "BalanceHarness": "4b7546a01425c51ba364f69f22b6490cbee5c46bd067a74877e0dc8504623a08",
+      "Common": "cd167214e2d84f0401e9fdc92543fb10e5f6c20e4accb899fdfdd48c37628322",
+      "Domain": "9d0b5c1cc83b8543ec551aa2f3498796bc048d01b8ac9030a41bd5c50b26d29e",
+      "Services.LL": "0f5b4aaa801616ad48b93854408d43cb17c76b903b2370a01b1cddd940a5a728"
+    }
+  },
+  "limitations": [
+    "Repeated historical reports are not new evidence or a diagnostic study.",
+    "No candidate generation, combat runtime preparation, simulation, entropy sampler, statistical assessment or decision verifier is executed.",
+    "Only three retained confirmation recipes exist; a fourth nominee's report distribution is unmeasured.",
+    "Report source reads, pin authentication and probe bookkeeping add work absent from a new combat run.",
+    "Disk byte counts and sampled file-size high water are not RAM or allocated filesystem blocks.",
+    "One observation is not a worst-case timing/storage bound or a completion probability.",
+    "The wrapped metadata payload differs from the diagnostic archive; phase comparisons are conditional.",
+    "The earlier failed scope remains charged and preserved. Neither closed probe grants gameplay resources."
+  ],
+  "nextStep": "Freeze a prospective gameplay admission package, including prior accounting and an explicit decision on unmeasured combat completion risk."
+}

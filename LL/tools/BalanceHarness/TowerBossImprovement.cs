@@ -42,11 +42,22 @@ public static class TowerBossImprovement
 
     internal static Task<BossGenerationResult> ExecuteAsync(TowerBossDiscoveryDefinition d, BossDiscoveryInputs inputs,
         BossGenerationMechanics mechanics, Func<PartyChoice, string, CancellationToken, Task<BossDiscoveryMeasurement>> evaluate,
-        CancellationToken token, Action<BossGenerationResult>? checkpoint = null) => d.Mode == TowerBossDiscovery.Independent
+        CancellationToken token, Action<BossGenerationResult>? checkpoint = null,
+        TowerEvaluationAllocationSearch.PanelEvaluator? evaluatePanel = null) => d.Generation.PolicyVersion == TowerEvaluationAllocationSearch.Version
+        ? TowerEvaluationAllocationSearch.RunAsync(d, mechanics, evaluatePanel
+            ?? throw new InvalidDataException("Racing requires an explicit panel-aware evaluator."), token, checkpoint)
+        : d.Mode == TowerBossDiscovery.Independent
         ? TowerBossGeneration.RunAsync(inputs, mechanics, evaluate, token, checkpoint)
         : TowerSuppliedCompositionSearch.IsSupported(d.Generation.PolicyVersion)
         ? TowerSuppliedCompositionSearch.RunAsync(d, mechanics, evaluate, token, checkpoint)
         : RunAsync(d, mechanics, evaluate, token, checkpoint);
+
+    internal static Task<BossGenerationResult> ExecuteBattlesAsync(TowerBossDiscoveryDefinition d, BossDiscoveryInputs inputs,
+        BossGenerationMechanics mechanics, TowerBossDiscoveryRun.Battle battle, CancellationToken token,
+        Action<BossGenerationResult>? checkpoint = null) => ExecuteAsync(d, inputs, mechanics,
+            (party, arm, ct) => TowerBossDiscoveryRun.Measure(d, inputs, party, arm, battle, ct), token, checkpoint,
+            (party, arm, panel, ct) => TowerBossDiscoveryRun.Measure(d,
+                TowerEvaluationAllocationSearch.PanelInputs(inputs, panel), party, arm, battle, ct));
 
     public static async Task<BossGenerationResult> RunAsync(TowerBossDiscoveryDefinition definition, BossGenerationMechanics mechanics,
         Func<PartyChoice, string, CancellationToken, Task<BossDiscoveryMeasurement>> evaluate,

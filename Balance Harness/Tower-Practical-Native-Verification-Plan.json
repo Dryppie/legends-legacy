@@ -1,0 +1,174 @@
+{
+  "blockingPrerequisite": "Explicit scope for native admission, complete live-history reconciliation and the bounded real workflow; handoff implementation has passed synthetic verification only",
+  "nativeLaunchReady": false,
+  "nextWork": "Decide the proposed native scope before creating its concrete master, request and unscheduled template; preserve the quality-experiment no-go",
+  "ownedHandoff": {
+    "allocationPhase": "publicAllocationRunIncludingNativeVerification",
+    "checkCommand": "tower-practical-search-allocation-check",
+    "partialPendingRecovery": "Unsupported; unresolved allocated-search Pending blocks later allocation",
+    "requestVersion": "tower-practical-allocated-search-v1",
+    "runCommand": "tower-practical-search-allocate-run",
+    "status": "ImplementedAndSyntheticallyVerified"
+  },
+  "proposal": {
+    "attemptedFightsMaximum": 1408,
+    "constructionRestarts": 1,
+    "evaluatedParties": 64,
+    "fights": {
+      "confirmationMaximum": 768,
+      "discovery": 512,
+      "selection": 128
+    },
+    "finalists": 1,
+    "freshValuesMaximum": 297,
+    "historicalBudgetTransfer": false,
+    "masterChosen": false,
+    "maximumBytes": 268435456,
+    "maximumProposals": 256,
+    "maximumSeconds": 600,
+    "nominees": 4,
+    "phases": {
+      "admissionAndAllocationCheck": {
+        "maximumBytes": 33554432,
+        "maximumSeconds": 120
+      },
+      "publicAllocationRunIncludingNativeVerification": {
+        "maximumBytes": 218103808,
+        "maximumSeconds": 360
+      },
+      "separateAuditAndCloseout": {
+        "maximumBytes": 16777216,
+        "maximumSeconds": 120
+      }
+    },
+    "policy": "retained-composition-incumbents-v1",
+    "replays": 0,
+    "resume": false,
+    "retries": 0,
+    "runnableDefinitionCreated": false,
+    "sampleExtension": false,
+    "stages": {
+      "confirmationValues": 256,
+      "constructionValues": 1,
+      "discoveryValues": 8,
+      "selectionValues": 32
+    }
+  },
+  "purpose": "One representative native integration and resource-feasibility observation; no search-policy comparison",
+  "retainedEvidence": {
+    "closedHistoricalRemainingBytes": 23754037,
+    "closedHistoricalRemainingSeconds": 1284.5357276443629,
+    "historicalExclusions": 483988,
+    "latestKnownHistoryFiles": 198,
+    "pilotBindingAndRunSeconds": 84.23399999999674,
+    "pilotStudyBytesIncludingManifest": 68626021,
+    "pilotStudyFiles": 1543,
+    "pilotTotalChargedBytes": 90624083,
+    "pilotTotalChargedSeconds": 193.6239999999816,
+    "pilotVerificationSeconds": 28.32699999999022,
+    "verification": "Selected metadata matches pinned manifests; recorded native/audit results read, not rerun"
+  },
+  "sourcePins": {
+    "TestResults/balance/tower-fresh-first-comparison-study-20260916/request.json": "12cf274e63166346fadc4d42b60f5bb24c547b6213d34d671ccc6bd01db71d1a",
+    "TestResults/balance/tower-fresh-first-comparison-study-20260916/seed-ledger.json": "f779a17520b4a48665756a85e75113b38dcc166c39059fe8d9fc06e4c7ded47a",
+    "TestResults/balance/tower-history-recovery-20260916/recovery.json": "16df7f95f28efeb0272546c383885eea36ffd9123dbee472f6fd9b092ec73193",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/completion.json": "f1fc5a59d88b04464ca878b8fc4cc2dfd42b19b0e273f8fd880da07b014663db",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/files.json": "687187963760b347593a60efd0f4573eb988755d42725ce13b47cdb02dad79de",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/independent-audit.json": "3b9b7280603deeee00c307de0fb76be62b6f81bb001e1bb214793f051353848c",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/native-verification.json": "1f1ac409912af58f9c052b70b7efb5da60f84e07b6f1f6184685f8cbb0146d8f",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/cost.json": "a8f46d9e958e4d8132809b704f8ea828e1210894adeac3a0617b66eeaac3c058",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/definition.json": "6cfecd58fa2d7d7d208f3cdd2eb17339062af15768907bc804b7eec683657715",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/files.json": "777a4905692c5b72ed6c471fc406b6949fda6b8f510b209a2649326e2311101d",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/scope.json": "c278314eac9f84175567c4626415add0bf6bcbd1065ca84cc137447d5630017f",
+    "TestResults/balance/tower-refinement-v3-comparison-execution-20260916/study-files.json": "6180b07a3d262eaacf49382b8e21f3f5f0a6dfc871f829e49ba0e6a1c041cdbc",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/allocation-journal.jsonl": "0814252ec8febb8f7574bf155cd21c0c7ea08159fda89a02f7efa936cd72bb20",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/authorization.json": "a25250b23db56587961eb10f51bedf8acece7632895714d3cbea6c64c1326111",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/binding-failure.json": "f505a356ef6f23a181ceb5c1250b198d14af3145dba6f92d07416d692739d073",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/binding-started.json": "a37941e140abf679226b0bc7e38ee00dfe0cbef40e9e24fb7818c55e50ac54fc",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/definitions.json": "730f7388f59b5a796ae24b8665cea6a047bce598358b1a21131b3cf51c74e031",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/history-input.json": "a8fbb8c6272c95870781e918540c4b20032c031dec75b88b57729498c8269abf",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/request.json": "66dce0f3252ea9f1c99c7dbd9721c85ec48fb2d5995e7895a0552e50cfd1889a",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/reservation-intent.json": "2491cc98874430e9c5b93cc1481b41db8f76a9124333612d4fc34a59eed8661a",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/seed-ledger.json": "f1924d82e79b8fc58feca4d65ef00e9a5b2ccff787b7af75f6d86562faef9258",
+    "TestResults/balance/tower-refinement-v3-comparison-study-20260916/seeds.json": "cace37b786e4087e3c90121cab2b22299b035b6adc9597dec63a202f2ff875c0",
+    "TestResults/balance/tower-subgroup-comparison-20260916/completion.json": "650e5a765b0fc8ed99220d11523824c50e03ac80e3ccb739871706afbdeb633b",
+    "TestResults/balance/tower-subgroup-comparison-20260916/files.json": "f30d8e85e90e65ad5fee8062b2f01aee422fd96dd533eaba5643c8b1cec4d119",
+    "TestResults/balance/tower-subgroup-comparison-20260916/history-input.json": "a6d7829baa35fe78ce14ce9eba2935f5d4c38a31a0b91b3fca2362c77a1270ca",
+    "TestResults/balance/tower-subgroup-comparison-20260916/independent-audit.json": "8e3d6f3a4e14156f8523fe16eb1043f47f7f6341a974be5ef7c79271389a8c97",
+    "TestResults/balance/tower-subgroup-comparison-20260916/live-history-files.json": "3360e2cf09e4bd1882c3147848b59345e9d9e70640cf2ca7f3b60e0977bb1c8e",
+    "TestResults/balance/tower-subgroup-comparison-20260916/recovery-pins.json": "70fe103fe0aaf609c68ae100e39fba052584508f397d0a0bb6ff948e7ec52f48"
+  },
+  "staticCompatibility": {
+    "assemblies": {
+      "Application": {
+        "currentSha256": "b9ce4b148ce6e1105d3d14b86fdee9edabfbbf4fbbd16e83fc512734ac13ead0",
+        "retainedSha256": "57ac7ade55dca043dea56b3fae11de42e30e0ad82c6cdf8d3479ee1ab937fe51"
+      },
+      "BalanceHarness": {
+        "currentSha256": "6a37a65b11a70e8acecafcf619a66e63efc33ae8d0f0bcc9433e54934d0083f8",
+        "retainedSha256": "4cbb6bd5dd03205ea136533ea6ee8ad054a48cef4fe26322ea4eb4d8830c0202"
+      },
+      "Common": {
+        "currentSha256": "a48ab84a29a7c1fe1f6802bee2294f079446d9af5965ec4b04c2826597c5f69c",
+        "retainedSha256": "51a3c7fa018ac594403b4d1d75d0edd89a2741e314862b90cbbeacc44162d6af"
+      },
+      "Domain": {
+        "currentSha256": "1c80df7fc7fd195fc59e581d2659a24ec5ff972d332a750e42c1aca56da7a45c",
+        "retainedSha256": "ad05e725863c7f1108396e5909f8cba8a37c38efb4e570ee3238fb33d71512dc"
+      },
+      "Services.LL": {
+        "currentSha256": "ff435f7422d83c086972d79cd02feb0f29b8712a41cfaa8f6e20e0af6219b6f5",
+        "retainedSha256": "9655c7e886469764bfbf671a0e8d834ab8c54c65200846674e29ef1c70d6a56a"
+      }
+    },
+    "completeLiveRegistryScanned": false,
+    "contentFiles": 16,
+    "contentFilesMatching": 16,
+    "currentRuntimeFiles": {
+      "Application.dll": "b9ce4b148ce6e1105d3d14b86fdee9edabfbbf4fbbd16e83fc512734ac13ead0",
+      "AutoMapper.dll": "9e95d0f45c175ef972ab3a8bebc5be0115b780ca8fe86f6ce9f789edba9011df",
+      "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+      "BalanceHarness.dll": "6a37a65b11a70e8acecafcf619a66e63efc33ae8d0f0bcc9433e54934d0083f8",
+      "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca",
+      "Common.dll": "a48ab84a29a7c1fe1f6802bee2294f079446d9af5965ec4b04c2826597c5f69c",
+      "DeepCloner.dll": "d33df6263dfd771be100e6ebc83eb437539e99f46816fb62f512e9f159165d22",
+      "Domain.dll": "1c80df7fc7fd195fc59e581d2659a24ec5ff972d332a750e42c1aca56da7a45c",
+      "Google.Apis.Auth.dll": "a2a4f688c1e34bca248c2a589e73a20ac3c834a9615c13bcb08a317a78842609",
+      "Google.Apis.Core.dll": "198f959ef53b86d9c6f4b3305503960995cfaaa096252dc7bbbb803c57c58bc7",
+      "Google.Apis.dll": "7d9abc7e9b29b2414d7ddee9286a4ce997d12cb6a55badcc1eb975ed5e1d4092",
+      "MediatR.Contracts.dll": "c2601304aa9d15c51a543e1c3300368c64ac38633e7277bb835a04f68ddf6a61",
+      "MediatR.dll": "caf467b9b8a81ad6f54c034ce3fbdd2d7a24448b95e3b9b38b08b91f4f2ac260",
+      "Microsoft.EntityFrameworkCore.Abstractions.dll": "ce57cf5176bcb701644ec4a66fddb4cb74885a3307663a00d57d3e826f5c506a",
+      "Microsoft.EntityFrameworkCore.Relational.dll": "672f721aa1a046baa776e8e558dbfa5feb6936f185687611007129c8b85a7d6a",
+      "Microsoft.EntityFrameworkCore.dll": "d9e2824485fd07188359b2c3247087c720b88b5b3dde53a814de9cdc43d876e4",
+      "Microsoft.IdentityModel.Abstractions.dll": "028587cebe70187ad288eb70dacf51bc26005aa7755ad202d606217bf41aa523",
+      "Microsoft.IdentityModel.JsonWebTokens.dll": "5f042a540eeb5ce1aec2e969ce5768b621139bc98ccf7823a839e255f92b96af",
+      "Microsoft.IdentityModel.Logging.dll": "ef479f51771b44b99b8c8f64ac0700549dcd61eeace47b9f345af1f6930303bf",
+      "Microsoft.IdentityModel.Tokens.dll": "a8d2169c8be62213aba73054e572e5e43457afa268653308ca68586f83c5eb84",
+      "Newtonsoft.Json.dll": "a28c251dfe36d881e9e2462e171441b8b0ec156fe3f452602c9149b1b9efe05b",
+      "Services.LL.dll": "ff435f7422d83c086972d79cd02feb0f29b8712a41cfaa8f6e20e0af6219b6f5",
+      "System.CodeDom.dll": "4d33e2986a84d4460853e2b98d3a1ba9f8aa2950f7fa12ff6ad2e15a4bccfd18",
+      "System.IdentityModel.Tokens.Jwt.dll": "22deb6c7c258864fc8ac331e261dd97cc8aa90e5e8d4b06e81febdda5d90c529",
+      "System.Management.dll": "36056b240f488b7da63720585d84f93183cf7bd05da68d5340151ebdd85e4d88",
+      "runtimes/win/lib/net7.0/System.Management.dll": "979fee559e30cc0fc4af6f34548a225b6f08cae0a6c61d24a3e389b3f22dc9d1"
+    },
+    "nativeAdmissionPerformed": false,
+    "settingsSemanticallyCompared": false
+  },
+  "status": "ProposedNotAuthorizedOrAllocated",
+  "storagePlanning": {
+    "currentRuntimeBytes": 18988681,
+    "definitionBytes": 4052158,
+    "limitation": "One retained archive plus current dependency sizes and four definition-sized wrapper copies; not a measured new-workflow peak or guarantee",
+    "retiredRuntimeBytes": 18756745,
+    "runBytesAboveProxy": 133037219,
+    "studyAndWrapperProxyBytes": 85066589,
+    "wrapperProxyFiles": [
+      "source-definition.json",
+      "definition.json",
+      "history-input.json",
+      "seed-ledger.json"
+    ]
+  },
+  "version": "tower-practical-native-verification-proposal-v1"
+}

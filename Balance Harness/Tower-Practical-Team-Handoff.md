@@ -1,8 +1,45 @@
 # Measured World Tower teams: practical handoff
 
-**Current closeout — 16 September 2026:** keep both admitted anchors, **040e (AA)** and **49f6 (BB)**, as practical reference teams. No stronger replacement or search method was validated. The latest saved-report diagnostic does not justify another candidate experiment; the subgroup, archive-model, block-search and Web Weaver proposals remain closed. See the [final assessment](Tower-Team-Search-Design-Review.md), [loss diagnostic](Tower-Anchor-Loss-Diagnostic-Review.md) and [latest diagnostic receipt](../TestResults/balance/tower-anchor-loss-diagnostic-20260916/completion.json). **No experiment is queued.** All **483,988 exclusions** remain, including V19's 512 unused confirmation values; adoption **Hold**, V19 **Unresolved** with 253 required recipes.
+**Current native-admission readiness — 17 September 2026:** The [captured runtime and bounded request](Tower-Current-Family-Admission-Readiness-Review.md) preserve the original gameplay assemblies, 16 content files and effective settings. **45 adapter fixtures** passed against that runtime, plus **six saved-row accounting fixtures**. The native loader checked **46,077 input projections**, **51,624 source occurrences** and **973 forced input cells** without preparing parties; **162 context exceptions** remain unresolved. **Next: one native admission within 1,800 seconds /2 GiB overall**, with zero combat or fresh values and no retry/resume. The request uses 1,500 seconds /1,920 MiB internally, reserving enclosing overhead. Real preparation has **not** run, and exceptions still block family freeze. **AdoptFixedTeam**, **497,371 exclusions**, old limits and historical decisions remain unchanged.
 
-**Three exact fixed-cohort recipes are available.** Retain the selected challenger as a measured alternative with unproven superiority. The two evaluation panels below are separate experiments; their scores are not pooled or treated as a before/after improvement. The complete compositions and equipment remain unchanged.
+## Confirmed recommendation: fresh 5,500-value panel
+
+| Team | Wins /5,500 | Win rate | Role |
+| --- | ---: | ---: | --- |
+| **Candidate `399bc776…`** | **3,932** | **71.49%** | **Recommended exact fixed team** |
+| Anchor 040e | 3,511 | 63.84% | Control |
+| Anchor 49f6 | 3,469 | 63.07% | Control |
+
+The candidate's paired gains are **+7.65 pp** against 040e and **+8.42 pp** against 49f6; adjusted intervals are **+4.71–10.58 pp** and **+5.45–11.37 pp**. Both predeclared gates passed. Use the [complete seed-free export](../TestResults/balance/tower-practical-fixed-team-confirmation-20260917/teams.json) or [exact candidate scenario](../TestResults/balance/tower-practical-fixed-team-confirmation-20260917/study/exports/399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b.json) for all ten characters, equipment, subgroups, ordering and copy requirements.
+
+Relative to 040e, change slot 6 to **Bark Golem, Enchanted Fairy, Pack Howler, Spider Queen Royal Venom, Venomous Spiderling**, in that order. This replaces Hobgoblin Brutal Charge and Web Weaver Spider; all other 48 assignments and non-Essence fields remain unchanged. These results do not isolate the replacements' individual causal effects. The formal balance result remains NotAssessed; all three adjusted lower win-rate bounds exceed the declared cohort's 50% ceiling, so encounter balance warrants separate review.
+
+## Selection diagnostic: separate 1,000-value panel
+
+| Frozen team | Wins /1,000 | Role at diagnostic close |
+| --- | ---: | --- |
+| Primary `399bc776…` | 712 | Promising measured candidate; adoption Hold |
+| Anchor 040e | 632 | Recommended practical reference |
+| Anchor 49f6 | 628 | Recommended practical reference |
+| Other challenger `bdaffdc6…` | 598 | Measured alternative |
+
+The primary was frozen before the earlier diagnostic confirmation. Its +8.0 /+8.4-point diagnostic margins did not authorize adoption; that result remains `NoSelectionMissDemonstrated`. The later [completed fixed-team confirmation](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) prospectively tested the exact primary and both anchors on fresh evidence and now supports AdoptFixedTeam. Keep the two panels and their original decision rules separate.
+
+Relative to anchor 040e, this primary changes only character slot **6**: replace `essence.hobgoblin_brutal_charge` and `essence.web_weaver_spider` with `essence.bark_golem` and `essence.spider_queen_royal_venom`. **48/50** assignments and all non-Essence party fields are unchanged. Its canonical slot-6 order is Bark Golem, Enchanted Fairy, Pack Howler, Spider Queen Royal Venom, Venomous Spiderling. Full equipment, identities, all ten character builds and copy counts are in the [seed-free export](../TestResults/balance/tower-practical-selection-diagnostic-20260917/teams.json) and [readable diagnostic](../TestResults/balance/tower-practical-selection-diagnostic-20260917/diagnostic.md). The saved ancestry includes both supplied anchors; these outcomes do not isolate either replacement's causal effect.
+
+This is the declared floor-5, ten-character level-40, five-Essence cohort. All four diagnostic rates exceed the balance policy's 50% ceiling; that concern does not disqualify a strong team as a useful control. The diagnostic's formal balance field remains `NotAssessed`. No tuning or adoption change followed from that diagnostic; the current fixed-team adoption comes from the separate prospective confirmation above.
+
+## Native workflow: separate 17 September confirmation panel
+
+| Team | Wins /256 | Recommendation at that close |
+| --- | ---: | --- |
+| Selected `0ca7c00b…` | 169 | Measured alternative; improvement unproven |
+| Anchor 040e | 155 | Retain as a practical reference |
+| Anchor 49f6 | 150 | Retain as a practical reference |
+
+Both adjusted paired lower bounds remained negative, so the decision is **ImprovementNotDemonstrated**. The new selected party is distinct from the earlier pilot challenger described below. Its exact composition, equipment, subgroup and copy requirements are in the [native workflow team sheet](../TestResults/balance/tower-practical-native-verification-20260917/practical.md) and [seed-free team exports](../TestResults/balance/tower-practical-native-verification-20260917/teams.json). See the [execution review](Tower-Practical-Native-Verification-Execution-Review.md#independent-strength-result) for paired counts and intervals.
+
+**The recipe tables below retain the earlier pilot's three exact fixed-cohort recipes.** Its challenger remains a measured alternative with unproven superiority. All four confirmation panels described on this page are separate experiments: do not pool their outcomes or compare scores across panels to choose a winner. The historical recipe tables have not been rewritten to describe the new selected party.
 
 ## Latest subgroup comparison: separate 256-seed panel
 
@@ -26,6 +63,8 @@ The closed pilot confirmed 167/256 wins for the challenger and 161/256 for each 
 | Anchor 49f6 | 161/256 | 62.89% | 54.52–70.55% | [Exact scenario](../TestResults/balance/tower-incumbent-practical-pilot-20260916/study/exports/cell-f7315130ac1ae89b8d5ec0839f9cd35b2e6d2b7508ed234bf02730e74a361f30.json) |
 
 The paired challenger-minus-anchor intervals are −12.07 to +16.62 points against 040e and −11.06 to +15.62 against 49f6. Neither superiority nor equivalence was established. Equal anchor totals do not imply interchangeable outcomes. These rates refer to the same saved 256-value confirmation panel; older pilot results are not pooled. See the [execution review](Tower-Incumbent-Practical-Pilot-Execution-Review.md) for the decision and [independent audit](../TestResults/balance/tower-incumbent-practical-pilot-20260916/independent-audit.json) for exact counts.
+
+**Historical build detail:** the compositions and comparisons below describe earlier practical/subgroup work. Use the confirmed candidate export above for the current recommendation; the old selected-challenger table is not its replacement.
 
 ## What changed in the challenger
 
@@ -140,8 +179,8 @@ The JSON [team handoff](../TestResults/balance/tower-practical-team-handoff-2026
 
 ## Handoff decision and verification
 
-Use both anchors as the measured reference choices for this cohort. Keep anchor 040e as the direct baseline when discussing the challenger’s changes; neither the earlier challenger advantage nor the later AA advantage establishes a stronger default recipe. Preserve each panel's results and original decision rules. No next search variant, extra confirmation samples or adoption change follows from this handoff. Adoption remains **Hold** and V19 reliability **Unresolved**.
+Use the confirmed exact `399bc776…` team for this cohort and retain both anchors as controls. Keep 040e as the direct baseline for its slot-6 changes. The [completed fixed-team confirmation](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) supplies the prospective strength endpoint; earlier panels keep their original Hold decisions. This is fixed-team adoption, not a search-reliability or encounter-balance pass. V19 remains Unresolved. The next useful work is a saved-evidence balance/readiness review; no new experiment or tuning is queued.
 
 This documentation closeout updates this handoff and the current assessment in `Tower-Team-Search-Design-Review.md`. Verification checks the AA/BB mapping against the full saved anchor parties, displayed counts/rates against retained results, relative links, unchanged composition tables and scoped Markdown whitespace. The original JSON handoff, scenario exports, sealed experiment packages and resource receipts remain historical evidence and are unchanged. No build, backend test, new seed, fight, replay, native preparation or native reconstruction is part of this update. There are no gameplay changes, migrations, configuration changes or deployment implications.
 
-The [original handoff receipt](../TestResults/balance/tower-practical-team-handoff-20260916/completion.json) records that earlier documentation checkpoint, when 483,640 reservations existed. The [latest diagnostic receipt](../TestResults/balance/tower-anchor-loss-diagnostic-20260916/completion.json) carries the subsequent accounting and **483,988 exclusions**. Earlier receipts and their remaining balances are historical, not additional allocations. This closeout creates no experiment allocation or cap increase.
+The [original handoff receipt](../TestResults/balance/tower-practical-team-handoff-20260916/completion.json) records that earlier documentation checkpoint, when 483,640 reservations existed. The [historical anchor diagnostic receipt](../TestResults/balance/tower-anchor-loss-diagnostic-20260916/completion.json) carries the subsequent accounting and **483,988 exclusions**. Earlier receipts and their remaining balances are historical, not additional allocations. This closeout creates no experiment allocation or cap increase.

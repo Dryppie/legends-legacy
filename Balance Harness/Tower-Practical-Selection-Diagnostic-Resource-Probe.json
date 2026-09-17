@@ -1,0 +1,49 @@
+{
+  "version": "practical-selection-resource-probe-review-v1",
+  "status": "FailedBeforeNativeWorkload",
+  "launchDecision": "NoGo",
+  "attempts": 1,
+  "retries": 0,
+  "chargedSeconds": 180,
+  "chargedBytes": 268435456,
+  "measuredExternalSeconds": 0.6522882,
+  "measuredParentSecondsIncludingFailure": 0.4748715,
+  "finalProbeBytes": 25214,
+  "sampledParentHighWaterBytes": 24795,
+  "failure": "System.IO.InvalidDataException: Changed native source location.\r\n   at BalanceHarness.ProcessFixture.ResourceProbeHost.Require(Boolean ok, String message) in C:\\repos\\Legends-Legacy\\legends-legacy\\LL\\tests\\BalanceHarness.ProcessFixture\\ResourceProbeHost.cs:line 20\r\n   at BalanceHarness.ProcessFixture.ResourceProbeWork.Run(ResourceProbeSpec q, Control control, CancellationToken ct) in C:\\repos\\Legends-Legacy\\legends-legacy\\LL\\tests\\BalanceHarness.ProcessFixture\\ResourceProbeWork.cs:line 58\r\n   at BalanceHarness.ProcessFixture.ResourceProbeHost.Worker(String output) in C:\\repos\\Legends-Legacy\\legends-legacy\\LL\\tests\\BalanceHarness.ProcessFixture\\ResourceProbeHost.cs:line 166",
+  "verifiedRetainedInventories": {
+    "TestResults/practical-native-verification-20260917": 53,
+    "TestResults/balance/tower-practical-native-verification-20260917": 1564
+  },
+  "retainedAuthenticationSeconds": 0.1627275,
+  "completedWork": [
+    "Authenticate both retained manifests and exact file inventories"
+  ],
+  "unmeasuredWork": [
+    "Live history admission",
+    "Content and runtime copy",
+    "Full-history serialization",
+    "4640 report occurrences",
+    "Both audit read workloads",
+    "Combat"
+  ],
+  "newFights": 0,
+  "newReservations": 0,
+  "entropyCalls": 0,
+  "newCandidates": 0,
+  "diagnosticPublished": false,
+  "nativeResourceQualificationEstablished": false,
+  "postAttemptCorrection": {
+    "file": "LL/tests/BalanceHarness.ProcessFixture/ResourceProbeWork.cs",
+    "sha256": "1c50f0e42f1843d1ba08cebeccb69db187050f6a4b2199782518f70aafb0fc01",
+    "change": "Normalize both paths and compare with platform path casing rules; regression tested without another native attempt"
+  },
+  "testRuns": {
+    "pre-probe.trx": 63,
+    "path-fix.trx": 12
+  },
+  "distinctTests": 64,
+  "verificationInventory": "TestResults/selection-diagnostic-probe-checks/failed-attempt-inventory.json",
+  "verificationInventorySha256": "6fad067071c0f954e628a6fb374c3f4c0f86bd470b402d6cb2e984d73945a986",
+  "attemptSourcePreserved": true
+}

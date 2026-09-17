@@ -12,6 +12,26 @@ public static class Program
         Console.CancelKeyPress += cancelHandler;
         try
         {
+            if (args is ["tower-anchored-comparison-run", var anchoredRequest])
+            {
+                var result = await TowerAnchoredComparison.RunAsync(HarnessJson.Read<TowerAllocationComparisonRequest>(anchoredRequest), cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                return 0;
+            }
+            if (args is ["tower-allocation-comparison-run", var comparisonRequest])
+            {
+                var result = await TowerAllocationComparison.RunAsync(HarnessJson.Read<TowerAllocationComparisonRequest>(comparisonRequest), cancellation.Token);
+                Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
+                return 0;
+            }
+            if (args.Length > 0 && args[0].StartsWith("tower-current-family-", StringComparison.Ordinal))
+                return await TowerCurrentFamilyAdmission.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-fixed-team-confirmation-", StringComparison.Ordinal))
+                return await TowerFixedTeamConfirmation.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-selection-diagnostic-", StringComparison.Ordinal))
+                return await TowerSelectionDiagnostic.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-practical-search-", StringComparison.Ordinal))
+                return await TowerPracticalSearch.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-complete-family-", StringComparison.Ordinal))
             {
                 object result = args switch {
@@ -40,6 +60,12 @@ public static class Program
                 return await TowerCeilingScreenCommand.ExecuteAsync(args, cancellation.Token);
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
+                Console.WriteLine("BalanceHarness tower-fixed-team-confirmation-check|run <request.json>; tower-fixed-team-confirmation-verify <completed-output> (three exact teams; 5500 paired trials; family-seven strength gate; one entropy batch; no retry/replay/resume)");
+                Console.WriteLine("BalanceHarness tower-current-family-admit <request.json> <new-output>; tower-current-family-admission-verify <completed-output> (seed-free preparation/origin/alias audit only; no combat or allocation)");
+                Console.WriteLine("BalanceHarness tower-selection-diagnostic-check|run <request.json>; tower-selection-diagnostic-verify <completed-output> (four frozen nominees; post-freeze entropy; family-ten diagnostic; explicit phase limits; no promotion/retry/resume)");
+                Console.WriteLine("BalanceHarness tower-practical-search-check|run <request.json>; tower-practical-search-verify <completed-output> (fixed-order supplied incumbents; cumulative limits; verified strength decision; no retries/resume)");
+                Console.WriteLine("BalanceHarness tower-practical-search-recover <recovery-request.json>; tower-practical-search-recovery-verify <receipt.json> (versioned declared/allocated pre-combat Pending; closed derivations only; permanent exclusions; zero combat)");
+                Console.WriteLine("BalanceHarness tower-practical-search-allocation-check|allocate-run <request.json> (versioned seed-free template; owned durable allocation and native run; no retries/resume)");
                 Console.WriteLine("BalanceHarness tower-complete-family-binding-check <request.json> <new-result.json> (zero seeds/combat); tower-complete-family-reserve-bind <explicit-reservation-request.json> (288 fresh values; zero combat; separate reservation scope required)");
                 Console.WriteLine("BalanceHarness tower-complete-family-inspect <sealed-UTC-source> <new-result.json> (zero combat/seeds); tower-complete-family-run|verify <externally-bound-study> (43879 fixed recipes; dedicated global caps; no retries/overrides/resume)");
                 Console.WriteLine("BalanceHarness tower-midpoint-materialize|bind|check|run|verify <root> (fixed +10%, all 253 recipes, 256 shared seeds, 64768 fights; no overrides/resume)");
@@ -71,7 +97,7 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower-compact-replay --run <directory> --case <case-id> --battle <tower.0001> [--detailed]");
                 Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-supplied-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--policy-version supplied-composition-block-v1|supplied-composition-block-v2] [--content-root <API.LL-directory>]");
-                Console.WriteLine("BalanceHarness tower-retained-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--content-root <API.LL-directory>] (standalone fixed-order retained-composition-v1)");
+                Console.WriteLine("BalanceHarness tower-retained-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--policy-version <retained-policy|anchored-neighborhood-v1>] [--primary-reference <reference-id>] [--content-root <API.LL-directory>] (default retained-composition-v1; anchored policy requires primary-reference)");
                 Console.WriteLine("BalanceHarness tower-team-plan --floor <1-15> --slots <4-10> --seed <int> --output <new-directory> [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>] (independent preview with retained controls and history)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-discover --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] (discovery only)");
@@ -162,7 +188,7 @@ public static class Program
                 "tower-feedback-check" or "tower-feedback-run" or "tower-feedback-verify" or "tower-retention-check" or "tower-retention-run" or "tower-retention-verify" or "tower-allocation-check" or "tower-late-allocation-check" or "tower-portfolio-check" or "tower-lineage-check" or "tower-allocation-run" or "tower-late-allocation-run" or "tower-portfolio-run" or "tower-allocation-verify" or "tower-late-allocation-verify" or "tower-portfolio-verify" or "tower-lineage-run" or "tower-lineage-verify" => new[] { "--run" },
                 "tower-boss-improvement-prepare" => new[] { "--definition", "--references", "--output", "--content-root" },
                 "tower-supplied-composition-prepare" => new[] { "--definition", "--references", "--output", "--content-root", "--policy-version" },
-                "tower-retained-composition-prepare" => new[] { "--definition", "--references", "--output", "--content-root", "--policy-version" },
+                "tower-retained-composition-prepare" => new[] { "--definition", "--references", "--output", "--content-root", "--policy-version", "--primary-reference" },
                 "tower-team-plan" => new[] { "--floor", "--slots", "--seed", "--output", "--runs-root", "--catalogs-root", "--content-root" },
                 "tower-boss-study" => new[] { "--definition", "--output", "--content-root", "--runs-root" },
                 "tower-boss-study-verify" => new[] { "--run" },
@@ -488,10 +514,10 @@ public static class Program
                 if (command == "tower-retained-composition-prepare")
                 {
                     var policy = options.GetValueOrDefault("--policy-version") ?? TowerSuppliedCompositionSearch.StandaloneVersion;
-                    if (policy is not (TowerSuppliedCompositionSearch.StandaloneVersion or TowerSuppliedCompositionSearch.IncumbentVersion))
+                    if (policy != TowerSuppliedCompositionSearch.StandaloneVersion && !TowerSuppliedCompositionSearch.PreservesIncumbents(policy))
                         throw new InvalidDataException("Retained preparation requires a standalone retained-composition policy.");
                     definition = TowerSuppliedCompositionSearch.Prepare(definition,
-                        Required(options, "--references").Split(',', StringSplitOptions.TrimEntries), policy);
+                        Required(options, "--references").Split(',', StringSplitOptions.TrimEntries), policy, options.GetValueOrDefault("--primary-reference"));
                 }
                 var cost = TowerBossDiscovery.Validate(options.GetValueOrDefault("--content-root") ?? FindContentRoot(), definition);
                 var destination = Required(options, "--output");

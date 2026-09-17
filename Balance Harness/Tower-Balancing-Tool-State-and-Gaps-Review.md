@@ -2,6 +2,30 @@
 
 16 September 2026. Scope: the dirty working-tree implementation of `LL/tools/BalanceHarness`, its gameplay dependencies, and retained evidence. This is an independent source/evidence assessment, not a new search experiment. **Observed** below means visible in source or saved records; **inference** means an interpretation supported by those observations; **hypothesis** means an untested proposed benefit.
 
+## Follow-up status — 17 September 2026
+
+**Current native-admission readiness — 17 September 2026:** The [captured runtime and bounded request](Tower-Current-Family-Admission-Readiness-Review.md) preserve the original gameplay assemblies, 16 content files and effective settings. **45 adapter fixtures** passed against that runtime, plus **six saved-row accounting fixtures**. The native loader checked **46,077 input projections**, **51,624 source occurrences** and **973 forced input cells** without preparing parties; **162 context exceptions** remain unresolved. **Next: one native admission within 1,800 seconds /2 GiB overall**, with zero combat or fresh values and no retry/resume. The request uses 1,500 seconds /1,920 MiB internally, reserving enclosing overhead. Real preparation has **not** run, and exceptions still block family freeze. **AdoptFixedTeam**, **497,371 exclusions**, old limits and historical decisions remain unchanged.
+
+**Fixed-team strength confirmed; exact candidate adopted.** The [completed fixed-team confirmation](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) completed **16,500 trials** and both audits, returning **StrongerFixedTeamConfirmed /AdoptFixedTeam**. Recommend exact candidate `399bc776…` (**3,932/5,500; 71.49%**); anchors 040e (**3,511/5,500; 63.84%**) and 49f6 (**3,469/5,500; 63.07%**) remain controls. The run took **806.937 seconds /384.76 MiB** inside the approved additional cap. Permanent exclusions are **497,371**, all new reservations Complete. Balance remains **NotAssessed** and V19 **Unresolved**. The allowance is fully charged and closed; no further experiment or tuning is queued.
+
+| Completed work | Evidence and limits |
+| --- | --- |
+| Practical integration and supported recovery | [Public guide](../LL/tools/BalanceHarness/PRACTICAL-SEARCH.md), [allocation recovery](Tower-Practical-Allocation-Recovery-Review.md) and 316 distinct focused checks. Missing ownership, unresolved derivations and unsupported Pending histories remain blocked. |
+| Native practical workflow | [1,408-fight execution](Tower-Practical-Native-Verification-Execution-Review.md), both audits, 166.547 operational seconds. Selected 169/256 versus anchors 155/256 and 150/256; `ImprovementNotDemonstrated`. This panel remains separate. |
+| Four-nominee selection diagnostic | [4,640-fight execution](Tower-Practical-Selection-Diagnostic-Execution-Review.md), both built-in audits, 248.562 enclosing seconds /152.36 MiB. Primary 712/1,000, anchors 632/1,000 and 628/1,000, other challenger 598/1,000; `NoSelectionMissDemonstrated`. |
+| Fixed-primary readiness | [Completed review](Tower-Practical-Primary-Adoption-Readiness.md): favorable numerical margins, but the diagnostic expressly excluded a strength/adoption endpoint. That readiness review kept both anchors and Hold until the separate prospective confirmation. |
+| Fixed-team confirmation | [Implementation and fixture review](Tower-Practical-Fixed-Team-Confirmation-Implementation-Review.md): exact three-team family, single entropy batch, six-slice adapter, dual audits and owned publication. The subsequent [native execution](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) completed 16,500 trials and both audits, qualifying the exact candidate with AdoptFixedTeam. This is one successful workload, not a universal feasibility guarantee. |
+
+The fixed-team plan's 82.82% conditional joint-power lower bound retained its stated model and alternative; it was not a forecast. The [completed fixed-team confirmation](Tower-Practical-Fixed-Team-Confirmation-Execution-Review.md) now supplies observed evidence: candidate gains **+7.65 /+8.42 pp**, with positive adjusted paired lower bounds against both anchors. Both prospective gates passed. Fixed-team strength is established for this cohort; reliable independent discovery and encounter balance remain separate questions.
+
+The completed diagnostic preserved **486,374** exclusions. The fixed-team run adds **10,997** Complete reservations, bringing the permanent union to **497,371**, with no new Pending state. All operational allowances are closed. V19 retains **512 unused values /253 required recipes /Unresolved**. All three current adjusted lower win-rate bounds exceed the declared cohort's 50% ceiling; the formal strength experiment balance field remains `NotAssessed`. The [balance/readiness review](Tower-Practical-Balance-Readiness-Review.md) now closes that saved-evidence assessment; a current-gameplay calibration protocol remains to be designed.
+
+No new search algorithm is qualified. The [larger three-restart design](Tower-Practical-Evaluation-Design.md) remains a separate, unlaunched proposal; this fixed-team comparison does not establish search-method reliability or independent discovery. Earlier studies and frozen contracts retain their original results and scope. In particular, the original 1,408-fight runner-up was not retroactively confirmed by the later diagnostic's different candidate pool.
+
+The assessment body below preserves the original pre-integration snapshot and its rationale. Its capability/gap tables and proposed integration are historical findings, not an outstanding task list. The closing plain answers reflect the current follow-up. Sealed reports and experimental receipts remain unchanged.
+
+**Historical source assessment:** the following analysis records the original 16 September snapshot. The follow-up above and Plain answers below contain the current result.
+
 ## Executive diagnosis
 
 **The tool can construct, fight, preserve and independently evaluate legal complete parties. It has not demonstrated a reliable, efficient way to find improvements over its admitted strong teams. The missing ingredient is not simply a coordinated mutation operator.** Several such operators, broader construction policies, additional feedback, deeper searches and diversity schemes already exist. Some have useful mechanical evidence; none of the recent replacements established the required general improvement.
@@ -174,7 +198,7 @@ There is no supported need to change gameplay content, weaken Kharad, collect ac
 
 ## Recommended next step and its limits
 
-**Next engineering step: consolidate one practical incumbent-preserving route, with zero changes to the search kernel or historical contracts.** Do not begin another combat study merely to justify the integration. If this is judged insufficient product value on its own, stop at this review; no alternative optimizer is currently evidence-mandated.
+**Original engineering recommendation, now implemented with the limits in the [readiness review](Tower-Practical-Workflow-Readiness.md): consolidate one practical incumbent-preserving route, with zero changes to the search kernel or historical contracts.** The scope and verification requirements below record that original recommendation. Practical Pending recovery has also been implemented; successful live-workflow verification remains separate from these fixtures and from a quality experiment.
 
 Minimum scope:
 
@@ -189,7 +213,7 @@ Minimum scope:
 
 ### A later bounded quality evaluation, only after a new hypothesis qualifies
 
-The following is a design envelope, not allocation, launch approval, reuse of unused reservations or a recommendation to repeat a closed proposal.
+The following is the original design envelope, not allocation, launch approval, reuse of unused reservations or a recommendation to repeat a closed proposal. The [completed prospective design](Tower-Practical-Evaluation-Design.md) now supplies the comparison family, conditional power calculation and no-go decision. It distinguishes the observed usefulness threshold from the true effect assumed for power; it does not raise the former or establish search effectiveness.
 
 * Compare **one new complete policy against the unchanged practical comparator**, both receiving the same two admitted anchors, pool, fixed cohort and canonical order. Independent-from-scratch research must be a separate contract with neither arm receiving anchors as parents. Freeze all starting information before evaluation.
 * Use three prospectively declared construction restarts, with matching starting information and per-restart budgets. A concrete maximum envelope is **512 discovery fights +128 selection fights per method per restart**, ≤256 proposals, with the same incumbent eligibility and one selected output each. An allocation-changing proposal may redistribute its 640 fights only if frozen beforehand; the measured comparison is then of complete policies.
@@ -292,8 +316,8 @@ Code references use current working-tree line numbers; evidence references use t
 
 ## Plain answers
 
-* **What is missing?** Demonstrated reliable improvement over strong legal references at realistic total cost, plus a consistent practical workflow connecting the already implemented safeguards and evidence.
-* **Which missing piece matters most?** Scientifically, useful candidate construction coupled to informative evaluation. The evidence does not isolate one winning fix. Operationally, an explicit practical contract is the clearest actionable gap.
-* **What should we build or change next?** Consolidate the existing fixed-order incumbent mode, authenticated strength decision and readable export; fix its misleading report. Build no new optimizer yet.
-* **Why should it help where previous attempts did not?** It addresses observed integration/provenance failures without assuming another operator or coverage label creates strength. Any later scientific change must earn its own independent evidence.
-* **What would convince us—or make us stop?** Exact contract/evidence parity establishes the integration. Only a prospectively powered, equal-information/equal-cost comparison with supported gains across declared restarts establishes improved search. If no distinct hypothesis fits that evaluation budget, or the frozen gate fails, stop without retuning or extending it.
+* **What is missing?** Reliable independent discovery and a separately justified encounter-balance decision. One exact reference-derived team is now confirmed stronger; this does not validate a search method across restarts.
+* **Which gap matters most now?** Current-gameplay calibration and coverage. The completed [balance/readiness review](Tower-Practical-Balance-Readiness-Review.md) finds supported ceiling breaches; the older +10% setting has different content, gameplay assemblies and ability order, so its scoped Pass cannot be transferred.
+* **What should we build or change next?** The [captured runtime and bounded admission request](Tower-Current-Family-Admission-Readiness-Review.md) are prepared and fixture-checked. Next is one native preparation/audit pass for all **46,077 projections**, within **1,800 seconds /2 GiB overall**, with zero combat/fresh values and no retries. This will establish current native legality and preparation cost; it cannot by itself resolve the **162 context exceptions** or produce a balance Pass. Screen/confirmation adapters remain future work; keep method reliability separate and all **497,371 exclusions** intact.
+* **What did the fixed-team step establish?** On 5,500 fresh paired trials each, candidate `399bc776…` won 71.49%, versus 63.84% and 63.07% for the anchors. Both predeclared strength comparisons and both audits passed: AdoptFixedTeam for this exact cohort, with anchors retained as controls.
+* **What stopped this scope?** Planned completion of all 16,500 trials and agreeing sealed publication. Its full approved allowance is charged and closed, with no retry, refill, extension or follow-up draw.

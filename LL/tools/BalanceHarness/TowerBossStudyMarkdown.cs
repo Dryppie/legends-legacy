@@ -5,7 +5,32 @@ namespace BalanceHarness;
 
 public static partial class TowerBossStudy
 {
-    public static string Markdown(BossStudyReport report)
+    internal const string ReportFormat = "tower-study-report-v2";
+
+    internal static string ArchivedMarkdown(BossStudyReport report, TowerBossDiscoveryDefinition definition, string? format) => format switch {
+        null => LegacyMarkdown(report),
+        ReportFormat => Markdown(report, definition),
+        _ => throw new InvalidDataException("Unknown study report format.")
+    };
+
+    public static string Markdown(BossStudyReport report, TowerBossDiscoveryDefinition? definition = null)
+    {
+        var text = LegacyMarkdown(report);
+        var supplied = definition?.Mode == TowerBossDiscovery.Improve || report.Discovery?.Version is TowerBossImprovement.Version
+            || TowerSuppliedCompositionSearch.IsSupported(report.Discovery?.Version);
+        if (supplied) text = text.Replace("Independent generated viability", "Reference-derived search viability")
+            .Replace("Retained-build search viability", "Reference-derived search viability")
+            .Replace("References never enter generation, discovery scoring or finalist selection.",
+                "Explicit supplied references enter discovery as scored starts; their ancestry propagates through descendants. This is reference-derived search. Historical fitness and confirmation outcomes do not enter selection.");
+        if (definition?.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.ZeroWinVersion
+            || TowerSuppliedCompositionSearch.IsSupported(report.Discovery?.Version))
+            text = text.Replace("The primary maximizes the worst-context win rate, with boss progress, survival, winning duration and stable ID as tie-breakers.",
+                "The primary uses selection wins; only zero-win ties use mean guardian health, then frozen discovery rank and stable ID. Positive-win ties use frozen discovery rank and stable ID.");
+        return text;
+    }
+
+    // Retained archives without an explicit report format reconstruct their original bytes.
+    private static string LegacyMarkdown(BossStudyReport report)
     {
         string Rate(RateEstimate? rate) => rate is null ? "unavailable" : string.Create(CultureInfo.InvariantCulture,
             $"{rate.Lower:P2}–{rate.Upper:P2}");

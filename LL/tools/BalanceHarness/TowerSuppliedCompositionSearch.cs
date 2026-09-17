@@ -14,16 +14,18 @@ public static class TowerSuppliedCompositionSearch
     public const string ScheduledVersion = "supplied-composition-block-v2";
     public const string StandaloneVersion = "retained-composition-v1";
     public const string IncumbentVersion = "retained-composition-incumbents-v1";
-    public static bool IsSupported(string? version) => version is Version or ScheduledVersion or StandaloneVersion or IncumbentVersion;
+    public static bool IsSupported(string? version) => version is Version or ScheduledVersion or StandaloneVersion or IncumbentVersion or TowerEvaluationAllocationSearch.Version or TowerAnchoredNeighborhoodSearch.Version;
+    internal static bool PreservesIncumbents(string? version) => version is IncumbentVersion or TowerEvaluationAllocationSearch.Version or TowerAnchoredNeighborhoodSearch.Version;
     public const string Baseline = "retained-composition", Block = "supplied-block";
     public static readonly string[] Methods = [Baseline, Block];
-    private static IReadOnlyList<string> MethodsFor(string policyVersion) => policyVersion is StandaloneVersion or IncumbentVersion ? [Baseline] : Methods;
+    private static IReadOnlyList<string> MethodsFor(string policyVersion) => policyVersion == StandaloneVersion || PreservesIncumbents(policyVersion) ? [Baseline] : Methods;
     public const int ConstructionChecks = 32;
     private static readonly string[] BaselineOperators = ["single", "double", "cross-character", "whole-character", "recombine"];
+    internal static string BaselineOperator(int mutation) => BaselineOperators[mutation % BaselineOperators.Length];
     private static readonly string[] BlockOperators = ["essence-block", "character-block", "donor-block"];
 
     public static TowerBossDiscoveryDefinition Prepare(TowerBossDiscoveryDefinition source, IReadOnlyList<string> referenceIds,
-        string policyVersion = Version)
+        string policyVersion = Version, string? primaryReferenceId = null)
     {
         if (!IsSupported(policyVersion)) throw new InvalidDataException("Unknown supplied composition policy.");
         TowerBossDiscovery.Validate(source);
@@ -39,7 +41,7 @@ public static class TowerSuppliedCompositionSearch
         var starts = references.OrderBy(r => r.Id, StringComparer.Ordinal).Select(r => new BossDiscoveryStart(
             "start-" + HarnessJson.Hash(r.Id)[..24], r.Id, TowerPartySelection.Choice("supplied",
                 r.Scenario.Party.ToDictionary(p => p.PartySlot, p => p.Build.EssenceIds)))).ToArray();
-        var result = source with { Mode = TowerBossDiscovery.Improve, References = references, Starts = starts,
+        var result = source with { Mode = TowerBossDiscovery.Improve, References = references, Starts = starts, PrimaryReferenceId = primaryReferenceId,
             Generation = source.Generation with { PolicyVersion = policyVersion, Methods = MethodsFor(policyVersion) },
             Stages = source.Stages with { SelectionPolicyVersion = TowerBossStudyPolicy.ZeroWinVersion } };
         TowerBossDiscovery.Validate(result);
@@ -105,16 +107,29 @@ public static class TowerSuppliedCompositionSearch
         }
     }
 
-    public static async Task<BossGenerationResult> RunAsync(TowerBossDiscoveryDefinition definition, BossGenerationMechanics mechanics,
+    public static Task<BossGenerationResult> RunAsync(TowerBossDiscoveryDefinition definition, BossGenerationMechanics mechanics,
         Func<PartyChoice, string, CancellationToken, Task<BossDiscoveryMeasurement>> evaluate,
         CancellationToken token = default, Action<BossGenerationResult>? checkpoint = null)
+        => RunCoreAsync(definition, mechanics, evaluate, token, checkpoint, false);
+
+    internal static Task<BossGenerationResult> RunDiagnosticAsync(TowerDiagnosticSearchBinding binding, BossGenerationMechanics mechanics,
+        Func<PartyChoice, string, CancellationToken, Task<BossDiscoveryMeasurement>> evaluate, CancellationToken token)
+        => RunCoreAsync(binding.Definition, mechanics, evaluate, token, null, true);
+
+    private static async Task<BossGenerationResult> RunCoreAsync(TowerBossDiscoveryDefinition definition, BossGenerationMechanics mechanics,
+        Func<PartyChoice, string, CancellationToken, Task<BossDiscoveryMeasurement>> evaluate,
+        CancellationToken token, Action<BossGenerationResult>? checkpoint, bool diagnostic)
     {
         ArgumentNullException.ThrowIfNull(evaluate);
+        if (definition.Generation.PolicyVersion == TowerAnchoredNeighborhoodSearch.Version)
+            return await TowerAnchoredNeighborhoodSearch.RunAsync(definition, evaluate, token, checkpoint);
+        if (definition.Generation.PolicyVersion == TowerEvaluationAllocationSearch.Version)
+            throw new InvalidDataException("Racing needs the panel-aware study/discovery evaluator; a fixed-panel callback is insufficient.");
         var d = JsonSerializer.Deserialize<TowerBossDiscoveryDefinition>(JsonSerializer.Serialize(definition, HarnessJson.Options), HarnessJson.Options)!;
-        TowerBossDiscovery.Validate(d);
+        if (diagnostic) TowerSelectionDiagnostic.ValidateDefinition(d, false); else TowerBossDiscovery.Validate(d);
         if (d.Mode != TowerBossDiscovery.Improve || !IsSupported(d.Generation.PolicyVersion))
             throw new InvalidDataException("Supplied composition search requires its explicit improve-supplied contract.");
-        var input = TowerBossImprovement.Inputs(d);
+        var input = TowerBossDiscovery.CopyGenerationInputs(d);
         var generator = new TowerBossPartyGenerator(input, mechanics);
         var arms = new List<BossGenerationArm>(); var status = "Incomplete"; string? error = null;
         PartyChoice[]? incumbentShortlist = null;
@@ -218,7 +233,7 @@ public static class TowerSuppliedCompositionSearch
             status = arms.All(a => a.StopReason == "CandidateBudgetReached") ? "Complete" : "Incomplete";
             if (status == "Complete" && d.Generation.PolicyVersion == IncumbentVersion)
             {
-                incumbentShortlist = IncumbentShortlist(d, arms);
+                incumbentShortlist = IncumbentShortlist(d, arms, diagnostic);
                 if (incumbentShortlist.Length != d.Stages.Shortlist) status = "Incomplete";
             }
         }
@@ -226,20 +241,20 @@ public static class TowerSuppliedCompositionSearch
         catch (Exception exception) { status = "Invalid"; error = exception.GetType().Name + ": " + exception.Message; }
         if (status is "Cancelled" or "Invalid" && arms.Count > 0)
             arms[^1] = arms[^1] with { StopReason = status, Proposals = arms[^1].Proposals.Select(p => p.Result == "evaluating" ? p with { Result = status } : p).ToArray() };
-        TowerBossDiscovery.ValidateProvenance(d, arms.SelectMany(a => a.Proposals).Select(p => p.Provenance).ToArray());
+        TowerBossDiscovery.ValidateProvenanceCore(d, arms.SelectMany(a => a.Proposals).Select(p => p.Provenance).ToArray(), diagnostic);
         var result = Report(); checkpoint?.Invoke(result); return result;
     }
 
-    internal static PartyChoice[] IncumbentShortlist(TowerBossDiscoveryDefinition d, IReadOnlyList<BossGenerationArm> arms)
+    internal static PartyChoice[] IncumbentShortlist(TowerBossDiscoveryDefinition d, IReadOnlyList<BossGenerationArm> arms, bool diagnostic = false)
     {
-        TowerBossDiscovery.Validate(d);
-        if (d.Generation.PolicyVersion != IncumbentVersion || arms.Count != 1)
+        if (diagnostic) TowerSelectionDiagnostic.ValidateDefinition(d, false); else TowerBossDiscovery.Validate(d);
+        if (d.Generation.PolicyVersion is not (IncumbentVersion or TowerAnchoredNeighborhoodSearch.Version) || arms.Count != 1)
             throw new InvalidDataException("Incumbent nomination requires its single-arm contract.");
         var arm = arms[0];
         var measured = arm.Proposals.Where(p => p.Result == "evaluated").ToDictionary(p => p.Party!.Id, StringComparer.Ordinal);
         var ranked = TowerBossGeneration.Rank(arm.Evaluations).ToArray();
         var rows = ranked.ToDictionary(r => r.Id, StringComparer.Ordinal);
-        var inputs = TowerBossImprovement.Inputs(d);
+        var inputs = TowerBossDiscovery.CopyGenerationInputs(d);
         foreach (var start in d.Starts)
         {
             if (!measured.TryGetValue(start.Party.Id, out var proposal)
@@ -281,7 +296,7 @@ public static class TowerSuppliedCompositionSearch
             .Select(r => parties[r.Id].Party!).ToArray();
     }
 
-    private sealed class SingleNeighborhood
+    internal sealed class SingleNeighborhood
     {
         private readonly PartyChoice parent;
         private readonly string[] pool;

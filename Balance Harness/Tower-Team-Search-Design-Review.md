@@ -1,6 +1,10 @@
 # World Tower team search: design review
 
-> Current documentation closeout: retain anchors 040e (AA) and 49f6 (BB) as practical references. The [handoff](Tower-Practical-Team-Handoff.md) separates the latest 179/256 and 172/256 results from the earlier pilot. No stronger replacement is established and no experiment is queued. The [loss diagnostic](Tower-Anchor-Loss-Diagnostic-Review.md) concluded NoGoForNewCandidateFromSavedSummaries. All 483,988 exclusions remain; adoption Hold, V19 Unresolved. Preparation notices below are historical checkpoints, superseded by the final assessment.
+**Current native-admission readiness — 17 September 2026:** The [captured runtime and bounded request](Tower-Current-Family-Admission-Readiness-Review.md) preserve the original gameplay assemblies, 16 content files and effective settings. **45 adapter fixtures** passed against that runtime, plus **six saved-row accounting fixtures**. The native loader checked **46,077 input projections**, **51,624 source occurrences** and **973 forced input cells** without preparing parties; **162 context exceptions** remain unresolved. **Next: one native admission within 1,800 seconds /2 GiB overall**, with zero combat or fresh values and no retry/resume. The request uses 1,500 seconds /1,920 MiB internally, reserving enclosing overhead. Real preparation has **not** run, and exceptions still block family freeze. **AdoptFixedTeam**, **497,371 exclusions**, old limits and historical decisions remain unchanged.
+
+The original design analysis and experiment decisions below remain historical findings; the native success verifies operation, not reliable stronger-team discovery.
+
+> Historical documentation closeout — 16 September 2026: the [handoff](Tower-Practical-Team-Handoff.md) preserves the subgroup panel's 179/256 and 172/256 anchor results separately from the earlier pilot. The [loss diagnostic](Tower-Anchor-Loss-Diagnostic-Review.md) concluded NoGoForNewCandidateFromSavedSummaries. Its 483,988 exclusions and preparation notices are historical; the current follow-up above supersedes their next-step statements without changing those results.
 
 
 > Current four-party comparison: NoCandidateClearedImprovementGate. See [execution review](Tower-Subgroup-Comparison-Execution-Review.md). This comparison is closed; no retuning or sample extension is authorized.

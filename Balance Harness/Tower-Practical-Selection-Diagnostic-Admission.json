@@ -1,0 +1,113 @@
+{
+  "version": "tower-selection-admission-review-v1",
+  "status": "NativeCheckPassedAwaitingRunDecision",
+  "gameplayAuthorized": false,
+  "combatRiskAccepted": false,
+  "requestFileHash": "d0baa036cd43c0e70edc8f33dd9b8db375ddaad1e9c77f33ddd43e039ee02136",
+  "nativeRequestHash": "a7989e15bf3a39d86397a0856288948f5003c975525c4f2bee90bd3908944e07",
+  "templateFileHash": "6e2e39295d44625241f363a036c2ca3566f57d08906c63cdd49ba06d710f86c6",
+  "packageManifestSha256": "3dbb77e0097c1f8fa791fdbe8b37894a55c84b0b65643d93a18039206dbf4661",
+  "packageManifestEntries": 39,
+  "packageReceiptSha256": "b580f16396604a1c2afa770e4cf469e0a668ecd3754f54b1d5acae638ebad23a",
+  "packageBytes": 25734559,
+  "preparationSecondsAfterSealing": 21.125,
+  "nativeCheckSeconds": 17.0,
+  "preparationCharge": {
+    "seconds": 120,
+    "bytes": 67108864
+  },
+  "previousProbeCharges": {
+    "seconds": 360,
+    "bytes": 536870912
+  },
+  "carriedPriorCharges": {
+    "seconds": 480,
+    "bytes": 603979776
+  },
+  "proposedAdditionalRunAllowance": {
+    "seconds": 1380,
+    "bytes": 536870912
+  },
+  "proposedCumulativeCeiling": {
+    "seconds": 1860,
+    "bytes": 1140850688
+  },
+  "phases": {
+    "admission": {
+      "seconds": 180,
+      "bytes": 100663296
+    },
+    "search": {
+      "seconds": 120,
+      "bytes": 67108864
+    },
+    "confirmation": {
+      "seconds": 660,
+      "bytes": 268435456
+    },
+    "audit": {
+      "seconds": 360,
+      "bytes": 16777216
+    }
+  },
+  "closeoutReserve": {
+    "seconds": 2,
+    "bytes": 4194304
+  },
+  "remainingSetupHeadroom": {
+    "seconds": 58,
+    "bytes": 79691776
+  },
+  "historicalValues": 484285,
+  "requiredHistoryFiles": 202,
+  "maximumFights": 4640,
+  "maximumNewReservations": 2089,
+  "newFights": 0,
+  "newReservations": 0,
+  "entropyCalls": 0,
+  "nativeAdmission": {
+    "status": "ContractValidNoReservation",
+    "version": "tower-practical-selection-diagnostic-v1",
+    "requestHash": "a7989e15bf3a39d86397a0856288948f5003c975525c4f2bee90bd3908944e07",
+    "historicalValues": 484285,
+    "maximumFights": 4640,
+    "maximumNewReservations": 2089,
+    "resourceFeasibilityEstablished": false,
+    "newValues": 0,
+    "fights": 0
+  },
+  "proposedOutput": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\balance\\tower-practical-selection-diagnostic-20260917",
+  "commandAfterApproval": {
+    "executableArguments": [
+      "dotnet",
+      "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\selection-diagnostic-admission-20260917\\runtime\\BalanceHarness.dll",
+      "tower-selection-diagnostic-run",
+      "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\selection-diagnostic-admission-20260917\\request.proposed.json"
+    ],
+    "executed": false,
+    "preconditions": [
+      "Explicit approval of this request and combat-failure risk",
+      "Revalidate package/source/runtime/content/recovery/history pins",
+      "Gameplay output absent"
+    ],
+    "verificationIncluded": "Run performs native reconstruction and independent audit before publication; no extra standalone audit or replay is authorized."
+  },
+  "decision": {
+    "status": "AwaitingExplicitRunDecision",
+    "gameplayAuthorized": false,
+    "riskAccepted": false,
+    "question": "Approve one 4640-fight diagnostic with 1380 seconds and 512 MiB additional allowance, accepting capped operational failure?",
+    "risk": "Current native combat, candidate-generation and full-verifier cost are unmeasured at this workload. A timeout, storage stop, incomplete entropy panel or integrity error yields no valid completed diagnostic.",
+    "reservationConsequences": "Up to 2089 exposed values remain excluded. Pending entropy interruptions may block later allocation and have no supported automatic recovery/resume.",
+    "controls": "One run; fixed phase ceilings; no retry, refill, replay, sample extension, seed shopping, budget transfer or automatic team promotion.",
+    "primaryAndNominees": "Freeze all four nominees and one primary after 512 discovery and 128 selection fights; confirm all four on the same post-freeze 1000-value panel.",
+    "outcomes": "SelectionMissDemonstrated, NoSelectionMissDemonstrated, or incomplete/invalid evidence. Both anchors and adoption Hold remain unchanged."
+  },
+  "pins": {
+    "Balance Harness\\Tower-Practical-Selection-Diagnostic-Resource-Probe-02.json": "c93860df4e4317293b8948a797cfceaf37993afbb2c37eb47dd211207f1f83e8",
+    "Balance Harness\\Tower-Practical-Selection-Diagnostic-Resources.json": "b08f13bcdb9b1698bc1eeed6edfb75237728b9e57bdb60fd4ad0328c12d9fabe",
+    "Balance Harness\\Tower-Practical-Selection-Diagnostic-Contract.json": "adb15e0fb652d1ebcae03b56bc4c79ef64ddbe1595b90a4b59523a0cf6bb5630",
+    "Balance Harness\\Tower-Practical-Selection-Diagnostic-Design.json": "bc47df34b8d0219d079623183dafc31b07b7187b81b569fc081cc22c8784d7ec",
+    "TestResults\\practical-native-verification-20260917\\files.json": "2c8415a62bdf6d72451a6468be5ba0c7ea78a10744e0688516a796690b921e15"
+  }
+}

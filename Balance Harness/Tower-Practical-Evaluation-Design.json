@@ -1,0 +1,165 @@
+{
+  "kind": "Prospective conditional confirmation-power bound; not an experiment",
+  "launchDecision": "NoGo",
+  "scope": "Statistical gate only, conditional on eligible fixed strong outputs; assumes a complete prescribed panel without outcome-dependent truncation; excludes search success and operational failure",
+  "model": "Independent confirmation trials conditional on frozen recipes; arbitrary dependence between recipes, contrasts and restarts within a trial",
+  "method": "Wilson maximum-width sufficient event; Hoeffding tails; union and failed-restart count bounds",
+  "nominalIntervalFamily": 26,
+  "nominalFamilyCoverage": 0.95,
+  "intervalCoverageIsApproximate": true,
+  "confirmationTrialsPerRecipe": 1024,
+  "observedUsefulGainThreshold": 0.05,
+  "supportedViabilityThreshold": 0.1,
+  "conditionalPowerTarget": 0.8,
+  "sufficientPlanningAlternative": 0.18,
+  "criticalValue": 3.101861832155473,
+  "strictSufficientContrastCutoff": 0.09738751164279433,
+  "viabilityObservedCutoff": 0.12907995467645755,
+  "maximumFights": {
+    "discovery": 3072,
+    "selection": 768,
+    "confirmation": 8192,
+    "total": 12032
+  },
+  "bounds": [
+    {
+      "trueGainAtLeast": 0.05,
+      "eligibleStrongRestartsAtLeast": 2,
+      "oneContrastFailureUpper": 1.0,
+      "oneViabilityFailureUpper": 1.0,
+      "oneStrongRestartFailureUpper": 1.0,
+      "jointConfirmationPassLower": 0.0
+    },
+    {
+      "trueGainAtLeast": 0.05,
+      "eligibleStrongRestartsAtLeast": 3,
+      "oneContrastFailureUpper": 1.0,
+      "oneViabilityFailureUpper": 1.0,
+      "oneStrongRestartFailureUpper": 1.0,
+      "jointConfirmationPassLower": 0.0
+    },
+    {
+      "trueGainAtLeast": 0.1,
+      "eligibleStrongRestartsAtLeast": 2,
+      "oneContrastFailureUpper": 0.9965116496274502,
+      "oneViabilityFailureUpper": 1.0,
+      "oneStrongRestartFailureUpper": 1.0,
+      "jointConfirmationPassLower": 0.0
+    },
+    {
+      "trueGainAtLeast": 0.1,
+      "eligibleStrongRestartsAtLeast": 3,
+      "oneContrastFailureUpper": 0.9965116496274502,
+      "oneViabilityFailureUpper": 1.0,
+      "oneStrongRestartFailureUpper": 1.0,
+      "jointConfirmationPassLower": 0.0
+    },
+    {
+      "trueGainAtLeast": 0.15,
+      "eligibleStrongRestartsAtLeast": 2,
+      "oneContrastFailureUpper": 0.24237871143853415,
+      "oneViabilityFailureUpper": 0.4080752395562645,
+      "oneStrongRestartFailureUpper": 1.0,
+      "jointConfirmationPassLower": 0.0
+    },
+    {
+      "trueGainAtLeast": 0.15,
+      "eligibleStrongRestartsAtLeast": 3,
+      "oneContrastFailureUpper": 0.24237871143853415,
+      "oneViabilityFailureUpper": 0.4080752395562645,
+      "oneStrongRestartFailureUpper": 1.0,
+      "jointConfirmationPassLower": 0.0
+    },
+    {
+      "trueGainAtLeast": 0.18,
+      "eligibleStrongRestartsAtLeast": 2,
+      "oneContrastFailureUpper": 0.03036971163363091,
+      "oneViabilityFailureUpper": 0.0049411416054524916,
+      "oneStrongRestartFailureUpper": 0.09605027650634522,
+      "jointConfirmationPassLower": 0.8078994469873095
+    },
+    {
+      "trueGainAtLeast": 0.18,
+      "eligibleStrongRestartsAtLeast": 3,
+      "oneContrastFailureUpper": 0.03036971163363091,
+      "oneViabilityFailureUpper": 0.0049411416054524916,
+      "oneStrongRestartFailureUpper": 0.09605027650634522,
+      "jointConfirmationPassLower": 0.8559245852404822
+    },
+    {
+      "trueGainAtLeast": 0.2,
+      "eligibleStrongRestartsAtLeast": 2,
+      "oneContrastFailureUpper": 0.004557353227074785,
+      "oneViabilityFailureUpper": 3.360858582391145e-05,
+      "oneStrongRestartFailureUpper": 0.013705668267048266,
+      "jointConfirmationPassLower": 0.9725886634659034
+    },
+    {
+      "trueGainAtLeast": 0.2,
+      "eligibleStrongRestartsAtLeast": 3,
+      "oneContrastFailureUpper": 0.004557353227074785,
+      "oneViabilityFailureUpper": 3.360858582391145e-05,
+      "oneStrongRestartFailureUpper": 0.013705668267048266,
+      "jointConfirmationPassLower": 0.9794414975994276
+    }
+  ],
+  "checks": {
+    "status": "Passed",
+    "priorArithmeticChecks": {
+      "status": "Passed",
+      "directMultinomialMaximumAbsoluteError": 2.7755575615628914e-17
+    },
+    "feasibleGainLossPairsChecked": 525825,
+    "sufficientGainLossPairsChecked": 214369,
+    "viabilityCountsChecked": 1025,
+    "restartPatternsChecked": 12,
+    "minimumViabilityWins": 133,
+    "singleContrastSensitivity": [
+      {
+        "trueGain": 0.18,
+        "discordance": 0.18,
+        "singleContrastPassProbability": 1.0
+      },
+      {
+        "trueGain": 0.18,
+        "discordance": 0.4,
+        "singleContrastPassProbability": 0.9999999778672354
+      },
+      {
+        "trueGain": 0.18,
+        "discordance": 0.6,
+        "singleContrastPassProbability": 0.9999452399464097
+      },
+      {
+        "trueGain": 0.18,
+        "discordance": 1.0,
+        "singleContrastPassProbability": 0.9965324976739135
+      },
+      {
+        "trueGain": 0.2,
+        "discordance": 0.2,
+        "singleContrastPassProbability": 0.9999999999999999
+      },
+      {
+        "trueGain": 0.2,
+        "discordance": 0.4,
+        "singleContrastPassProbability": 0.999999999981781
+      },
+      {
+        "trueGain": 0.2,
+        "discordance": 0.6,
+        "singleContrastPassProbability": 0.9999989387216602
+      },
+      {
+        "trueGain": 0.2,
+        "discordance": 1.0,
+        "singleContrastPassProbability": 0.999603873549997
+      }
+    ]
+  },
+  "arithmeticSourceSha256": "3404dbbd3beca5d86329a631727e30c0278c44341eb9d495c7255dcfef46d1fa",
+  "historicalEvidenceReadOrAuthenticated": false,
+  "randomDraws": 0,
+  "evaluationSeedValuesReadOrAllocated": 0,
+  "combatExecutions": 0
+}

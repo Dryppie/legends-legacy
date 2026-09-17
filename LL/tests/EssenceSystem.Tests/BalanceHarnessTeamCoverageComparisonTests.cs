@@ -1,3 +1,6 @@
+// Requires the isolated protocol's ComparisonModel, source definition and mechanics.
+// Ordinary policy coverage lives in BalanceHarnessTeamCoverageTests.
+#if TOWER_TEAM_COVERAGE_COMPARISON_FIXTURE
 using BalanceHarness;
 using Domain.Models.Combat;
 namespace EssenceSystem.Tests;
@@ -85,3 +88,4 @@ public sealed class BalanceHarnessTeamCoverageComparisonTests : IDisposable
         Assert.Throws<InvalidDataException>(()=>TowerRescreenAttempts.Verify(path,2));
     }
 }
+#endif

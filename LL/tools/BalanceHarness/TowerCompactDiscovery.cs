@@ -24,10 +24,12 @@ public static class TowerCompactDiscovery
         campaign.Result("generation-inputs.json", inputs);
         campaign.Result("generation-mechanics.json", mechanics);
         var batch = 0; var logicalTrials = 0;
-        async Task<BossDiscoveryMeasurement> Measure(PartyChoice party, string arm, CancellationToken ct, bool feedback)
+        async Task<BossDiscoveryMeasurement> Measure(PartyChoice party, string arm, CancellationToken ct, bool feedback,
+            IReadOnlyList<int>? panel = null)
         {
             TowerBossDiscovery.ValidateParty(d, party);
-            var measurementInputs = feedback ? inputs with { DiscoverySeeds = inputs.FeedbackSeeds! } : inputs;
+            var measurementInputs = panel is not null ? TowerEvaluationAllocationSearch.PanelInputs(inputs, panel)
+                : feedback ? inputs with { DiscoverySeeds = inputs.FeedbackSeeds! } : inputs;
             var contexts = measurementInputs.DiscoverySeeds.OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
             var cases = contexts.Select((p, i) => new TowerCompactCase("context-" + i.ToString("D3", System.Globalization.CultureInfo.InvariantCulture),
                 TowerBossDiscovery.Scenario(d, p.Key, party, p.Value))).ToArray();
@@ -62,19 +64,25 @@ public static class TowerCompactDiscovery
         generation = d.Generation.PolicyVersion == TowerGenerationFeedback.Version
             ? await TowerBossGeneration.RunAsync(inputs, mechanics, Evaluate, campaign.Token,
                 evaluateFeedback: (party, arm, ct) => Measure(party, arm, ct, true))
-            : await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics, Evaluate, campaign.Token);
+            : await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics, Evaluate, campaign.Token,
+                checkpoint: partial => {
+                    if (TowerAnchoredNeighborhoodSearch.IsFrozenBatch(partial)) campaign.Result(TowerAnchoredNeighborhoodSearch.BatchArtifact, partial);
+                },
+                evaluatePanel: (party, arm, panel, ct) => Measure(party, arm, ct, false, panel));
         TowerBossDiscovery.ValidateProvenance(d, generation.Arms.SelectMany(a => a.Proposals).Select(p => p.Provenance).ToArray());
         var report = new BossDiscoveryRunReport(generation.Status, cost.Discovery, logicalTrials, 0, generation, generation.Error);
         campaign.Result("discovery.json", report);
         campaign.TextResult("discovery.md", TowerBossDiscoveryRun.Markdown(report));
         if (report.Status is "Complete" or "Incomplete")
         {
-            if (report.Status == "Complete" && logicalTrials != cost.Discovery
-                || logicalTrials != generation.Arms.Sum(a => a.Evaluations.Count) * inputs.DiscoverySeeds.Values.Sum(s => s.Count)
-                    + generation.Arms.Sum(a => a.Feedback?.Sum(r => r.Measurements.Count) ?? 0) * (inputs.FeedbackSeeds?.Values.Sum(s => s.Count) ?? 0))
+            var racing = d.Generation.PolicyVersion == TowerEvaluationAllocationSearch.Version;
+            var measured = racing ? TowerEvaluationAllocationSearch.ActualFights(generation)
+                : generation.Arms.Sum(a => a.Evaluations.Count) * inputs.DiscoverySeeds.Values.Sum(s => s.Count)
+                    + generation.Arms.Sum(a => a.Feedback?.Sum(r => r.Measurements.Count) ?? 0) * (inputs.FeedbackSeeds?.Values.Sum(s => s.Count) ?? 0);
+            if (report.Status == "Complete" && !racing && logicalTrials != cost.Discovery || logicalTrials != measured)
                 throw new InvalidDataException("Compact discovery logical accounting differs from the generator.");
             campaign.Result("shortlist.json", generation.DiscoveryShortlist.SelectMany(p => inputs.DiscoverySeeds.Select(c =>
-                new TowerCompactCase(p.Id + "-" + c.Key, TowerBossDiscovery.Scenario(d, c.Key, p, c.Value)))).ToArray());
+                new TowerCompactCase(p.Id + "-" + c.Key, TowerBossDiscovery.Scenario(d, c.Key, p, TowerBossDiscoveryRun.ShortlistSeeds(d, c.Key))))).ToArray());
             campaign.Finish(logicalTrials);
         }
         else campaign.Failure(report.Status, report.Error);

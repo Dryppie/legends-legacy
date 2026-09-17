@@ -1,0 +1,487 @@
+{
+  "version": "practical-selection-diagnostic-resource-qualification-v1",
+  "status": "ConditionalEnvelopeSpecified_NativeResourceQualificationMissing",
+  "launchDecision": "NoGo",
+  "runnableRequest": false,
+  "grantedAllowance": false,
+  "newFights": 0,
+  "newValues": 0,
+  "benchmarksRun": 0,
+  "verifiedManifestEntries": {
+    "TestResults/practical-native-verification-20260917": 53,
+    "TestResults/balance/tower-practical-native-verification-20260917": 1564
+  },
+  "compatibility": {
+    "currentContentMatches": {
+      "combat-styles/combat-styles.v1.json": true,
+      "combat/abilities.json": true,
+      "combat/creature-abilities.json": true,
+      "combat/statuses.json": true,
+      "combat/summons.json": true,
+      "equipment/equipment-named.v1.json": true,
+      "equipment/equipment-sets.v1.json": true,
+      "equipment/equipment-starters.v1.json": true,
+      "equipment/equipment-styles.v1.json": true,
+      "essences/essences.json": true,
+      "items/items.json": true,
+      "progression/region-combat-balance.json": true,
+      "world-tower/tower-floors.json": true,
+      "world/creature-essence-loot-tables.json": true,
+      "world/creatures.json": true,
+      "world/regions.json": true
+    },
+    "assemblyIdentity": {
+      "Application": {
+        "retained": "b9ce4b148ce6e1105d3d14b86fdee9edabfbbf4fbbd16e83fc512734ac13ead0",
+        "current": "a05966b750991b6e8aa1c2a81b96e3da91ef0451cc9586394501b71fb8e18223",
+        "matches": false
+      },
+      "BalanceHarness": {
+        "retained": "6a37a65b11a70e8acecafcf619a66e63efc33ae8d0f0bcc9433e54934d0083f8",
+        "current": "4b7546a01425c51ba364f69f22b6490cbee5c46bd067a74877e0dc8504623a08",
+        "matches": false
+      },
+      "Common": {
+        "retained": "a48ab84a29a7c1fe1f6802bee2294f079446d9af5965ec4b04c2826597c5f69c",
+        "current": "cd167214e2d84f0401e9fdc92543fb10e5f6c20e4accb899fdfdd48c37628322",
+        "matches": false
+      },
+      "Domain": {
+        "retained": "1c80df7fc7fd195fc59e581d2659a24ec5ff972d332a750e42c1aca56da7a45c",
+        "current": "9d0b5c1cc83b8543ec551aa2f3498796bc048d01b8ac9030a41bd5c50b26d29e",
+        "matches": false
+      },
+      "Services.LL": {
+        "retained": "ff435f7422d83c086972d79cd02feb0f29b8712a41cfaa8f6e20e0af6219b6f5",
+        "current": "0f5b4aaa801616ad48b93854408d43cb17c76b903b2370a01b1cddd940a5a728",
+        "matches": false
+      }
+    },
+    "retainedSourceCount": 166,
+    "changedRetainedSourcePaths": [
+      "LL/tools/BalanceHarness/Program.cs",
+      "LL/tools/BalanceHarness/TowerBossDiscoveryContract.cs",
+      "LL/tools/BalanceHarness/TowerCompleteReservation.cs",
+      "LL/tools/BalanceHarness/TowerPracticalAllocation.cs",
+      "LL/tools/BalanceHarness/TowerPracticalReservationRecovery.cs",
+      "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs",
+      "LL/tools/BalanceHarness/TowerSuppliedCompositionSearch.cs"
+    ],
+    "unchangedRetainedSourceCount": 159,
+    "warning": "Assembly inequality does not prove gameplay changed; exact producing-runtime parity is unestablished."
+  },
+  "nativeObserved": {
+    "phaseMeasurements": {
+      "admission": {
+        "accounting": "Full phase allowance forfeited; no transfer, refund or retry",
+        "chargedBytes": 33554432,
+        "chargedSeconds": 120,
+        "measuredSeconds": 19.984000000025844,
+        "observedPeakBytes": 23240210,
+        "status": "Passed"
+      },
+      "audit": {
+        "accounting": "Full phase allowance forfeited; no transfer, refund or retry",
+        "chargedBytes": 16777216,
+        "chargedSeconds": 120,
+        "measuredSeconds": 46.937000000005355,
+        "observedPeakBytes": 4253,
+        "status": "Passed"
+      },
+      "run": {
+        "accounting": "Full phase allowance forfeited; no transfer, refund or retry",
+        "chargedBytes": 218103808,
+        "chargedSeconds": 360,
+        "measuredSeconds": 99.57799999997951,
+        "observedPeakBytes": 104488432,
+        "status": "Passed"
+      }
+    },
+    "stages": {
+      "discovery": {
+        "count": 512,
+        "compressedBytes": {
+          "minimum": 18876,
+          "median": 20222.5,
+          "maximum": 21963,
+          "sum": 10357006,
+          "mean": 20228.52734375
+        },
+        "expandedBytes": {
+          "minimum": 145274,
+          "median": 161357.5,
+          "maximum": 173925,
+          "sum": 81926473,
+          "mean": 160012.642578125
+        },
+        "simulationTicks": {
+          "minimum": 420,
+          "median": 875.0,
+          "maximum": 1160,
+          "sum": 394330,
+          "mean": 770.17578125
+        }
+      },
+      "selection": {
+        "count": 128,
+        "compressedBytes": {
+          "minimum": 19216,
+          "median": 19951.5,
+          "maximum": 20751,
+          "sum": 2550866,
+          "mean": 19928.640625
+        },
+        "expandedBytes": {
+          "minimum": 155973,
+          "median": 162097.0,
+          "maximum": 167183,
+          "sum": 20633979,
+          "mean": 161202.9609375
+        },
+        "simulationTicks": {
+          "minimum": 701,
+          "median": 901.0,
+          "maximum": 1184,
+          "sum": 117817,
+          "mean": 920.4453125
+        }
+      },
+      "confirmation": {
+        "count": 768,
+        "compressedBytes": {
+          "minimum": 19170,
+          "median": 19902.5,
+          "maximum": 20863,
+          "sum": 15298955,
+          "mean": 19920.514322916668
+        },
+        "expandedBytes": {
+          "minimum": 155207,
+          "median": 161968.0,
+          "maximum": 168454,
+          "sum": 123777427,
+          "mean": 161168.52473958334
+        },
+        "simulationTicks": {
+          "minimum": 701,
+          "median": 901.0,
+          "maximum": 1169,
+          "sum": 706770,
+          "mean": 920.2734375
+        }
+      }
+    },
+    "perFightWallSecondsAvailable": false
+  },
+  "literalObserved": {
+    "completion": {
+      "version": "tower-practical-selection-diagnostic-v1",
+      "status": "Complete",
+      "requestHash": "20645975b513ac36021d3ada313ffab7fc9f2f5ab0f7c06fe6e6cf1dda562542",
+      "measuredSeconds": 21.5241127,
+      "chargedSeconds": 240,
+      "chargedBytes": 134217728,
+      "retries": 0,
+      "fights": 4640
+    },
+    "retainedBytes": 10058719,
+    "phases": [
+      {
+        "phase": {
+          "name": "admission",
+          "startedAt": "2026-09-17T00:45:28.0084894+00:00",
+          "deadline": "2026-09-17T00:45:58.0084894+00:00",
+          "baseBytes": 2234
+        },
+        "measuredSeconds": 0.2040565,
+        "observedBytes": 364173,
+        "chargedSeconds": 30,
+        "chargedBytes": 8388608
+      },
+      {
+        "phase": {
+          "name": "search",
+          "startedAt": "2026-09-17T00:45:28.2176445+00:00",
+          "deadline": "2026-09-17T00:46:28.2176445+00:00",
+          "baseBytes": 366702
+        },
+        "measuredSeconds": 2.3899324,
+        "observedBytes": 2530580,
+        "chargedSeconds": 60,
+        "chargedBytes": 33554432
+      },
+      {
+        "phase": {
+          "name": "confirmation",
+          "startedAt": "2026-09-17T00:45:30.6117866+00:00",
+          "deadline": "2026-09-17T00:46:30.6117866+00:00",
+          "baseBytes": 2897578
+        },
+        "measuredSeconds": 15.1150664,
+        "observedBytes": 6424220,
+        "chargedSeconds": 60,
+        "chargedBytes": 67108864
+      },
+      {
+        "phase": {
+          "name": "audit",
+          "startedAt": "2026-09-17T00:45:45.7342026+00:00",
+          "deadline": "2026-09-17T00:46:45.7342026+00:00",
+          "baseBytes": 9322102
+        },
+        "measuredSeconds": 3.7921942,
+        "observedBytes": 214323,
+        "chargedSeconds": 60,
+        "chargedBytes": 16777216
+      }
+    ],
+    "actualCombat": 0,
+    "productionEntropyDraws": 0,
+    "scope": "Synthetic reports; no content/executable copy or combat-cost qualification"
+  },
+  "nativeReadWork": {
+    "stateMachineReports": 4640,
+    "independentConfirmationReports": 4000,
+    "totalReportDeserializations": 8640,
+    "fullStudyInventoryPasses": 2,
+    "stageWeightedExpandedBytesRead": 1391908649,
+    "isProjectionNotMeasurement": true
+  },
+  "admissionByteModel": {
+    "components": {
+      "indentedSourceTemplate": 7005735,
+      "rootAndStudySearchBindings": 15961440,
+      "studyDefinition": 7006698,
+      "completeHistoricalLedgerWith41Words": 6919080,
+      "contentCopy": 584903,
+      "producingExecutableCopy": 19111561,
+      "bossProfiles": 3870509,
+      "generationInputsAndMechanics": 275710,
+      "otherAdmissionMetadataAllowance": 2097152
+    },
+    "totalBytes": 62832788,
+    "largestBindingBytes": 7980720,
+    "maximumLedgerBytes": 6955944,
+    "serializationMatchesRetainedDefinitionExactly": true,
+    "oldAdmission32MiBInsufficientForThisModel": true,
+    "assumptions": "Same identifiers/cohort/gear and retained 484285-value history; live reconciliation pending; indented template; current dependency assets; 2 MiB metadata allowance."
+  },
+  "currentExecutableAssets": {
+    "Application.dll": {
+      "bytes": 2687488,
+      "sha256": "a05966b750991b6e8aa1c2a81b96e3da91ef0451cc9586394501b71fb8e18223"
+    },
+    "AutoMapper.dll": {
+      "bytes": 301056,
+      "sha256": "9e95d0f45c175ef972ab3a8bebc5be0115b780ca8fe86f6ce9f789edba9011df"
+    },
+    "BalanceHarness.deps.json": {
+      "bytes": 14194,
+      "sha256": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c"
+    },
+    "BalanceHarness.dll": {
+      "bytes": 3914752,
+      "sha256": "4b7546a01425c51ba364f69f22b6490cbee5c46bd067a74877e0dc8504623a08"
+    },
+    "BalanceHarness.runtimeconfig.json": {
+      "bytes": 527,
+      "sha256": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+    },
+    "Common.dll": {
+      "bytes": 16384,
+      "sha256": "cd167214e2d84f0401e9fdc92543fb10e5f6c20e4accb899fdfdd48c37628322"
+    },
+    "DeepCloner.dll": {
+      "bytes": 29184,
+      "sha256": "d33df6263dfd771be100e6ebc83eb437539e99f46816fb62f512e9f159165d22"
+    },
+    "Domain.dll": {
+      "bytes": 1375232,
+      "sha256": "9d0b5c1cc83b8543ec551aa2f3498796bc048d01b8ac9030a41bd5c50b26d29e"
+    },
+    "Google.Apis.Auth.dll": {
+      "bytes": 246272,
+      "sha256": "a2a4f688c1e34bca248c2a589e73a20ac3c834a9615c13bcb08a317a78842609"
+    },
+    "Google.Apis.Core.dll": {
+      "bytes": 86528,
+      "sha256": "198f959ef53b86d9c6f4b3305503960995cfaaa096252dc7bbbb803c57c58bc7"
+    },
+    "Google.Apis.dll": {
+      "bytes": 84480,
+      "sha256": "7d9abc7e9b29b2414d7ddee9286a4ce997d12cb6a55badcc1eb975ed5e1d4092"
+    },
+    "MediatR.Contracts.dll": {
+      "bytes": 6656,
+      "sha256": "c2601304aa9d15c51a543e1c3300368c64ac38633e7277bb835a04f68ddf6a61"
+    },
+    "MediatR.dll": {
+      "bytes": 92672,
+      "sha256": "caf467b9b8a81ad6f54c034ce3fbdd2d7a24448b95e3b9b38b08b91f4f2ac260"
+    },
+    "Microsoft.EntityFrameworkCore.Abstractions.dll": {
+      "bytes": 34880,
+      "sha256": "ce57cf5176bcb701644ec4a66fddb4cb74885a3307663a00d57d3e826f5c506a"
+    },
+    "Microsoft.EntityFrameworkCore.Relational.dll": {
+      "bytes": 2193992,
+      "sha256": "672f721aa1a046baa776e8e558dbfa5feb6936f185687611007129c8b85a7d6a"
+    },
+    "Microsoft.EntityFrameworkCore.dll": {
+      "bytes": 2825800,
+      "sha256": "d9e2824485fd07188359b2c3247087c720b88b5b3dde53a814de9cdc43d876e4"
+    },
+    "Microsoft.IdentityModel.Abstractions.dll": {
+      "bytes": 19528,
+      "sha256": "028587cebe70187ad288eb70dacf51bc26005aa7755ad202d606217bf41aa523"
+    },
+    "Microsoft.IdentityModel.JsonWebTokens.dll": {
+      "bytes": 173088,
+      "sha256": "5f042a540eeb5ce1aec2e969ce5768b621139bc98ccf7823a839e255f92b96af"
+    },
+    "Microsoft.IdentityModel.Logging.dll": {
+      "bytes": 38472,
+      "sha256": "ef479f51771b44b99b8c8f64ac0700549dcd61eeace47b9f345af1f6930303bf"
+    },
+    "Microsoft.IdentityModel.Tokens.dll": {
+      "bytes": 391200,
+      "sha256": "a8d2169c8be62213aba73054e572e5e43457afa268653308ca68586f83c5eb84"
+    },
+    "Newtonsoft.Json.dll": {
+      "bytes": 723368,
+      "sha256": "a28c251dfe36d881e9e2462e171441b8b0ec156fe3f452602c9149b1b9efe05b"
+    },
+    "Services.LL.dll": {
+      "bytes": 3207168,
+      "sha256": "0f5b4aaa801616ad48b93854408d43cb17c76b903b2370a01b1cddd940a5a728"
+    },
+    "System.CodeDom.dll": {
+      "bytes": 186496,
+      "sha256": "4d33e2986a84d4460853e2b98d3a1ba9f8aa2950f7fa12ff6ad2e15a4bccfd18"
+    },
+    "System.IdentityModel.Tokens.Jwt.dll": {
+      "bytes": 92192,
+      "sha256": "22deb6c7c258864fc8ac331e261dd97cc8aa90e5e8d4b06e81febdda5d90c529"
+    },
+    "System.Management.dll": {
+      "bytes": 74352,
+      "sha256": "36056b240f488b7da63720585d84f93183cf7bd05da68d5340151ebdd85e4d88"
+    },
+    "runtimes/win/lib/net7.0/System.Management.dll": {
+      "bytes": 295600,
+      "sha256": "979fee559e30cc0fc4af6f34548a225b6f08cae0a6c61d24a3e389b3f22dc9d1"
+    }
+  },
+  "conditionalStorageScenarios": {
+    "1": {
+      "reportSizeMultiplier": 1,
+      "searchGrowthBytes": 18250624,
+      "confirmationGrowthBytes": 96277472,
+      "auditGrowthBytes": 4194304,
+      "modeledRetainedBytes": 181555188,
+      "withOneLargestAtomicTemporaryAndCloseoutBytes": 193730212
+    },
+    "2": {
+      "reportSizeMultiplier": 2,
+      "searchGrowthBytes": 32306944,
+      "confirmationGrowthBytes": 184129472,
+      "auditGrowthBytes": 4194304,
+      "modeledRetainedBytes": 283463508,
+      "withOneLargestAtomicTemporaryAndCloseoutBytes": 295638532
+    },
+    "4": {
+      "reportSizeMultiplier": 4,
+      "searchGrowthBytes": 60419584,
+      "confirmationGrowthBytes": 359833472,
+      "auditGrowthBytes": 4194304,
+      "modeledRetainedBytes": 487280148,
+      "withOneLargestAtomicTemporaryAndCloseoutBytes": 499455172
+    }
+  },
+  "conditionalTimeProxiesSeconds": {
+    "admission": 119.56200000000536,
+    "search": 90.52545454543592,
+    "confirmation": 585.7680909090003,
+    "audit": 309.3575000000353
+  },
+  "simulationDurationSensitivity": {
+    "nativeTotalTicks": 1218917,
+    "nativeMaximumTicks": 1184,
+    "engineMaximumTicksPerBattle": 6000,
+    "fullDiagnosticMaximumTicks": 27840000,
+    "fullCapToNativeTickTotalRatio": 22.83994726466199,
+    "allFutureCapToNativeMeanTickRatio": 6.930742618242259,
+    "wallTimeBound": false,
+    "reason": "Tick work and event complexity are not constant; simulation seconds are not wall seconds."
+  },
+  "candidateEnvelope": {
+    "maximumSeconds": 1380,
+    "maximumBytes": 536870912,
+    "phases": {
+      "admission": {
+        "seconds": 180,
+        "bytes": 100663296
+      },
+      "search": {
+        "seconds": 120,
+        "bytes": 67108864
+      },
+      "confirmation": {
+        "seconds": 660,
+        "bytes": 268435456
+      },
+      "audit": {
+        "seconds": 360,
+        "bytes": 16777216
+      }
+    },
+    "closeoutSeconds": 2,
+    "closeoutBytes": 4194304,
+    "headroomForPriorSecondsAndSetup": 58,
+    "headroomBeyondPhaseBytesAndCloseout": 79691776,
+    "resourceFeasibilityEstablished": false,
+    "completionProbabilityEstablished": false,
+    "basis": "Rounded above explicit 2x aggregate-time proxies and 2x observed maximum report-size scenario; margins are assumptions."
+  },
+  "nextObservation": {
+    "kind": "Bounded zero-combat resource probe on current producing runtime",
+    "proposedMaximumSeconds": 180,
+    "proposedMaximumBytes": 268435456,
+    "attempts": 1,
+    "allowanceGranted": false,
+    "requiredWork": [
+      "Complete live-history admission without allocation",
+      "Content/executable copy and full-size metadata writes",
+      "4640 retained report occurrences with native preparation/serialization and two audit read workloads",
+      "Per-phase elapsed time, sampled storage high-water and final full-run elapsed time"
+    ],
+    "forbiddenConclusions": [
+      "Repeated reports are independent evidence",
+      "Probe is a valid completed diagnostic",
+      "Probe establishes future combat cost or operational completion probability"
+    ],
+    "stillNeededAfterProbe": "Compatible combat-time evidence or explicit acceptance of capped operational-failure risk; freeze exact request/runtime/history and prior costs."
+  },
+  "inputPins": {
+    "TestResults/practical-native-verification-20260917/files.json": "2c8415a62bdf6d72451a6468be5ba0c7ea78a10744e0688516a796690b921e15",
+    "TestResults/balance/tower-practical-native-verification-20260917/files.json": "54a3a877b209207bc66edd027396e7116e79acbae379639c513990d1a37f3db3",
+    "TestResults/selection-diagnostic-checks/literal-resource-observation.json": "77dae5b9ab3212d76ed9774c8b98282d61ef1f43432027bdfd51018a7248845a",
+    "TestResults/selection-diagnostic-checks/final-durability.trx": "1499d8970c50c52f2e214b24e1c7795e04fddeb68f69da7101fe6bc80ee12318"
+  },
+  "sourcePins": {
+    "LL/tools/BalanceHarness/TowerSelectionDiagnostic.cs": "705a97e068f4fdb4166c8ea265e947f311a056a33d0baf4101332b2863b488ab",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnosticRun.cs": "4a8c9c0d7b29f42234f8ca2a7a95e57cb13863556ffbe92c40d46a4a65473231",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnosticArchive.cs": "7d213be6a9989709fae1176a05ec376d12e1aefde531493a3a5eddbd600f4cb1",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnosticReservation.cs": "4bd51c3e403bfc5a56c6ee7f68cfdef6fa8c66d1f21d690e4955b6f397153337",
+    "LL/tools/BalanceHarness/TowerBossDiscoveryContract.cs": "a5558cd72de7c24a7447d3300536648145c566fafeef02346da02da43e9d5ffc",
+    "LL/tools/BalanceHarness/TowerBossStudyArchive.cs": "8c46a03f638bec0da2e9b478bf76233c7b879e8b609fd63cafe9724643e5aabe",
+    "LL/tools/BalanceHarness/TowerLoadoutArchive.cs": "0fa3cecc9831140856dbb8414675b5fde57fda11f2421317bee7ac7c3378d656",
+    "LL/tools/BalanceHarness/TowerBattleRunner.cs": "5ca9d52bd850163e00a201b3f13e75fa925e196e64294c42d9253a85bb3b1278",
+    "LL/tools/BalanceHarness/TowerHistoryRegistry.cs": "2fb79cec7d63860a86135a2148604941636bc7fc3e296d7a3a82811d78b5b87d",
+    "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+    "LL/tools/BalanceHarness/TowerCompleteReservation.cs": "535fb9b8844461b9c7abcfd49a1f8930ed15ff9ab5963c2aa77bfc5b91f8c997",
+    "LL/tools/BalanceHarness/TowerSuppliedCompositionSearch.cs": "5c4abfa747b4e1f6934ab0fe19cd4cb0b4797779edeb67c3a314824bb82d7ea9",
+    "LL/tools/BalanceHarness/HarnessJson.cs": "eb350bb592e7bb88685a7d69bce7f59a64efeb40ae737ca7f06c4d65578ea7fa"
+  },
+  "analysisSourceSha256": "d19da2a5708dbd3b491267d7990964d882a82667667389b35b6856ca908edf78"
+}

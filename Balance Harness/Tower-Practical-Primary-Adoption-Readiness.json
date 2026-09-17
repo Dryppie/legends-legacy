@@ -1,0 +1,158 @@
+{
+  "version": "tower-practical-primary-adoption-readiness-v1",
+  "scope": "Read-only policy and retained-recipe review; no new scientific endpoint.",
+  "decision": "HoldNoProspectiveAdoptionEndpoint",
+  "primaryId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+  "primaryWins": 712,
+  "samples": 1000,
+  "primaryRetainedRateInterval": {
+    "rate": 0.712,
+    "lower": 0.6702696649468207,
+    "upper": 0.7504155715677894,
+    "confidence": 0.995
+  },
+  "primaryIsNovelRecipe": true,
+  "primarySelectedBeforeConfirmation": true,
+  "freezeCompletedAttempts": 640,
+  "selection": [
+    {
+      "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+      "wins": 16,
+      "samples": 32
+    },
+    {
+      "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "wins": 23,
+      "samples": 32
+    },
+    {
+      "partyId": "bdaffdc65dd047254a3075786f6b74100a8bd2499c3b10898f2ae68e7fa8a61b",
+      "wins": 22,
+      "samples": 32
+    },
+    {
+      "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+      "wins": 18,
+      "samples": 32
+    }
+  ],
+  "anchorComparisonsReorientedOnly": [
+    {
+      "referenceId": "team-040e60d3dbc5c127321653c47ed3a9d3",
+      "anchorPartyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+      "anchorWins": 632,
+      "primaryOnlyWins": 246,
+      "anchorOnlyWins": 166,
+      "primaryMinusAnchor": 0.08,
+      "retainedFamilyTenLower": 0.008240578784245861,
+      "retainedFamilyTenUpper": 0.15050856707032403
+    },
+    {
+      "referenceId": "team-49f6979895354870c89362d4abf214bb",
+      "anchorPartyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+      "anchorWins": 628,
+      "primaryOnlyWins": 266,
+      "anchorOnlyWins": 182,
+      "primaryMinusAnchor": 0.084,
+      "retainedFamilyTenLower": 0.010025232382387173,
+      "retainedFamilyTenUpper": 0.15666137076491127
+    }
+  ],
+  "observedNumericalMarginsMeetPracticalThresholdsUsingRetainedFamilyTenIntervals": true,
+  "practicalFamilySevenEndpointApplied": false,
+  "practicalStrengthDecision": null,
+  "recommendationChanged": false,
+  "adoption": "Hold",
+  "nominalFamilySize": 10,
+  "intervalCoverage": "Approximate; unchanged published diagnostic intervals.",
+  "policyBoundary": "The frozen diagnostic expressly excludes the practical strength gate and keeps anchor recommendations and Hold.",
+  "budget": {
+    "essenceSlots": 5,
+    "characterLevel": 40,
+    "tier": 1,
+    "rank": 2,
+    "quality": "Standard",
+    "priorityFloor": 5
+  },
+  "budgetPurpose": "intended-progression",
+  "ownedCopies": null,
+  "recipeChangesFrom040e": [
+    {
+      "partySlot": 6,
+      "removed": [
+        "essence.hobgoblin_brutal_charge",
+        "essence.web_weaver_spider"
+      ],
+      "added": [
+        "essence.bark_golem",
+        "essence.spider_queen_royal_venom"
+      ]
+    }
+  ],
+  "unchangedCharacterEssenceAssignments": 48,
+  "sameNonEssencePartyFieldsAs040e": true,
+  "requiredCopies": {
+    "essence.bark_golem": 4,
+    "essence.cinder_beetle": 1,
+    "essence.elder_treant": 1,
+    "essence.elder_treant_thornstorm": 2,
+    "essence.enchanted_fairy": 9,
+    "essence.flame_harpy": 1,
+    "essence.illusion_fox": 1,
+    "essence.pack_howler": 10,
+    "essence.poisonous_rat": 1,
+    "essence.ravenous_ghoul": 1,
+    "essence.spider_queen_royal_venom": 9,
+    "essence.venomous_spiderling": 9,
+    "essence.wood_nymph": 1
+  },
+  "provenance": {
+    "id": "retained-composition-692585915-proposal-00026",
+    "generationSeed": 692585915,
+    "method": "retained-composition",
+    "operator": "recombine",
+    "parentIds": [
+      "retained-composition-692585915-proposal-00001",
+      "retained-composition-692585915-proposal-00020"
+    ],
+    "referenceIds": [
+      "team-040e60d3dbc5c127321653c47ed3a9d3",
+      "team-49f6979895354870c89362d4abf214bb"
+    ]
+  },
+  "independentDiscoveryFromScratch": false,
+  "causalEffectOfIndividualReplacementsEstablished": false,
+  "balancePolicyObservation": "Above50PercentCeilingInDeclaredIntendedProgressionCohort",
+  "allFourObservedRatesAboveCeiling": true,
+  "allFourRetainedRateLowerBoundsAboveCeiling": true,
+  "publishedBalanceAssessment": "NotAssessed",
+  "formalBalanceAssessmentRecomputed": false,
+  "searchMethodReliability": "Unresolved",
+  "v19RequiredRecipes": 253,
+  "v19UnusedValues": 512,
+  "permanentExclusions": 486374,
+  "newFights": 0,
+  "newReservations": 0,
+  "replays": 0,
+  "nativeReconstructions": 0,
+  "extraPublicVerifierRuns": 0,
+  "nextStep": "Prepare a prospective fixed-primary versus both-anchor confirmation plan under the existing practical strength criteria; no new search or executable request is authorized here.",
+  "remainingBeforeAnyRun": [
+    "Choose and freeze a compatible fixed-recipe execution/audit route; the ordinary practical command performs search and is not a fixed-team confirmation command.",
+    "Predeclare both contrasts, family-seven rate/discordance quantities, exact sample size, sampling model, power alternative and no-extension stopping rule.",
+    "Bind unchanged exact recipes/cohort/content/runtime, full current exclusions and fresh independent panel; do not reuse the diagnostic panel or its exposed tail.",
+    "Account for setup, complete-history admission, all three teams, audit/publication and closeout under a concrete new allowance; completed scopes provide none."
+  ],
+  "authenticatedNativeFiles": 4803,
+  "authenticatedOversightFiles": 11,
+  "policyAndEvidencePins": {
+    "Balance Harness/Tower-Balance-Acceptance-Policy.md": "9d2bc97e660224513ffd7436fdd167ce01c3291b5f0a703f05ad175efb44810f",
+    "Balance Harness/Tower-Practical-Selection-Diagnostic-Contract.md": "9e91779cca1ba485eecfddc1da4460776dd94025a7734e34b47920681c4e3643",
+    "LL/tools/BalanceHarness/TowerPracticalSearch.cs": "5c480233e5ca667d5dc1374b32f8b4c5481cbcab61bae1978b4caa949d1acbec",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnostic.cs": "705a97e068f4fdb4166c8ea265e947f311a056a33d0baf4101332b2863b488ab",
+    "Balance Harness/analysis/practical-selection-execution.py": "4b212a86e09482640633d08811ac3f05eca199cd3d1285328a6f7e50854b4de8",
+    "Balance Harness/Tower-Practical-Selection-Diagnostic-Execution.json": "a475e337dddfc6d95b22e76b72d9d28b25db3e62278671a47b0c7e371fdc777d",
+    "TestResults/balance/tower-practical-selection-diagnostic-20260917/files.json": "b73a6fc344214693dddfc14d74c4114ab4782d0ae80456ebd019c1103f149552",
+    "TestResults/selection-diagnostic-execution-20260917/files.json": "a14c73e7d330d284d1072fd62424843be4c8bd7a70c43782bd6fc70d54d824df"
+  }
+}

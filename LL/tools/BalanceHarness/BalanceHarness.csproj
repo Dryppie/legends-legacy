@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="EssenceSystem.Tests" />
+    <InternalsVisibleTo Include="BalanceHarness.ProcessFixture" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../../src/Infrastructure/Service/Services.LL/Services.LL.csproj" />
     <None Update="Fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />

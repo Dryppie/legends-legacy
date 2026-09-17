@@ -1,0 +1,228 @@
+{
+  "kind": "Deterministic prospective sensitivity calculation; not an experiment",
+  "model": "IID paired win/non-win outcomes: gains=(q+delta)/2, losses=(q-delta)/2, ties=1-q",
+  "gate": "observed gain >= 0.05 and WilsonLower(gains)-WilsonUpper(losses) > 0",
+  "scope": "One necessary contrast only; excludes viability, joint anchors, selection uncertainty and multi-restart success",
+  "futureFamilyAssumption": "26 quantities: 8 recipe rates plus gain/loss rates for 9 predeclared contrasts; not adopted",
+  "fixture": "LL/tests/EssenceSystem.Tests/Fixtures/tower-practical-pilot-outcomes.json",
+  "fixtureSha256": "68eecb2e7f575f57dc5c54b4b5b6d511efcb85ccd100f75206af7041804cc435",
+  "retainedSourceSha256RecordedInFixture": "519e69bd8c32d59cf8e6726e10020926a932d699f7c1846b199349ab3f51affb",
+  "retainedSourceReauthenticated": false,
+  "checks": {
+    "status": "Passed",
+    "directMultinomialMaximumAbsoluteError": 2.7755575615628914e-17
+  },
+  "pilotArithmetic": [
+    {
+      "gains": 66,
+      "losses": 60,
+      "discordance": 0.4921875,
+      "observedGain": 0.0234375,
+      "pairedLower": -0.1206544569202895
+    },
+    {
+      "gains": 54,
+      "losses": 48,
+      "discordance": 0.3984375,
+      "observedGain": 0.0234375,
+      "pairedLower": -0.11059936583524455
+    }
+  ],
+  "probabilities": [
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "low-discordance sensitivity",
+      "discordance": 0.1,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.08438592690368073
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "low-discordance sensitivity",
+      "discordance": 0.1,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.9931890137088953
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot second contrast",
+      "discordance": 0.3984375,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.014960634674131335
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot second contrast",
+      "discordance": 0.3984375,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.1857235788900478
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot first contrast",
+      "discordance": 0.4921875,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.014526695762101414
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot first contrast",
+      "discordance": 0.4921875,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.14961395274885822
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "high-discordance sensitivity",
+      "discordance": 0.6,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.015208777326616098
+    },
+    {
+      "samples": 256,
+      "intervalFamily": 7,
+      "discordanceProfile": "high-discordance sensitivity",
+      "discordance": 0.6,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.12923291914401686
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "low-discordance sensitivity",
+      "discordance": 0.1,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.4855978671648781
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "low-discordance sensitivity",
+      "discordance": 0.1,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.9999999965889343
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot second contrast",
+      "discordance": 0.3984375,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.19121269012435638
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot second contrast",
+      "discordance": 0.3984375,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.9555192237367697
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot first contrast",
+      "discordance": 0.4921875,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.15253696057301291
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "pilot first contrast",
+      "discordance": 0.4921875,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.8993051658036403
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "high-discordance sensitivity",
+      "discordance": 0.6,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.13143297162524986
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 7,
+      "discordanceProfile": "high-discordance sensitivity",
+      "discordance": 0.6,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.8313717767274409
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "low-discordance sensitivity",
+      "discordance": 0.1,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.4855978646016466
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "low-discordance sensitivity",
+      "discordance": 0.1,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.9999999965889343
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "pilot second contrast",
+      "discordance": 0.3984375,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.08053053025822522
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "pilot second contrast",
+      "discordance": 0.3984375,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.8790105025183633
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "pilot first contrast",
+      "discordance": 0.4921875,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.062465734063608766
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "pilot first contrast",
+      "discordance": 0.4921875,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.7784547442159186
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "high-discordance sensitivity",
+      "discordance": 0.6,
+      "assumedTrueGain": 0.05,
+      "singleContrastPassProbability": 0.0537912162687101
+    },
+    {
+      "samples": 1024,
+      "intervalFamily": 26,
+      "discordanceProfile": "high-discordance sensitivity",
+      "discordance": 0.6,
+      "assumedTrueGain": 0.1,
+      "singleContrastPassProbability": 0.6803803577662423
+    }
+  ],
+  "randomDraws": 0,
+  "evaluationSeedValuesReadOrAllocated": 0,
+  "combatExecutions": 0
+}

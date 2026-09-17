@@ -69,23 +69,27 @@ public static class TowerBossDiscoveryRun
             HarnessJson.WriteNew(Path.Combine(output, "generation-mechanics.json"), mechanics);
             archive = new(output, scope, cost.Discovery);
             var lastCount = -1;
-            generation = await TowerBossImprovement.ExecuteAsync(definition, inputs, mechanics,
-                (party, arm, ct) => Measure(definition, inputs, party, arm, archive.EvaluateAsync, ct), token, partial => {
+            generation = await TowerBossImprovement.ExecuteBattlesAsync(definition, inputs, mechanics,
+                archive.EvaluateAsync, token, partial => {
                     generation = partial;
+                    if (TowerAnchoredNeighborhoodSearch.IsFrozenBatch(partial))
+                        HarnessJson.WriteNew(Path.Combine(output, TowerAnchoredNeighborhoodSearch.BatchArtifact), partial);
                     var count = partial.Arms.Sum(a => a.Evaluations.Count);
                     if (count != lastCount) { lastCount = count; progress?.Invoke($"Independent discovery: {count} evaluated parties; {archive.Trials.Count}/{cost.Discovery} combats."); }
                 });
             status = generation.Status; error = generation.Error;
             TowerBossDiscovery.ValidateProvenance(definition, generation.Arms.SelectMany(a => a.Proposals).Select(p => p.Provenance).ToArray());
-            var measuredCost = generation.Arms.Sum(a => a.Evaluations.Count) * inputs.DiscoverySeeds.Values.Sum(s => s.Count);
+            var racing = definition.Generation.PolicyVersion == TowerEvaluationAllocationSearch.Version;
+            var measuredCost = racing ? TowerEvaluationAllocationSearch.ActualFights(generation)
+                : generation.Arms.Sum(a => a.Evaluations.Count) * inputs.DiscoverySeeds.Values.Sum(s => s.Count);
             if (status is "Complete" or "Incomplete" && (archive.Trials.Count != measuredCost || archive.CacheHits != 0
-                || status == "Complete" && archive.Trials.Count != cost.Discovery))
+                || status == "Complete" && !racing && archive.Trials.Count != cost.Discovery))
                 throw new InvalidDataException("Discovery accounting differs from its actual trial ledger.");
             foreach (var party in generation.DiscoveryShortlist)
             foreach (var context in definition.Contexts)
             {
                 // Export the already-measured discovery recipe, not an unused-seed confirmation claim.
-                var scenario = TowerBossDiscovery.Scenario(definition, context.Id, party, inputs.DiscoverySeeds[context.Id]);
+                var scenario = TowerBossDiscovery.Scenario(definition, context.Id, party, ShortlistSeeds(definition, context.Id));
                 HarnessJson.WriteNew(Path.Combine(output, "shortlist", party.Id + "-" + context.Id + ".json"), scenario);
             }
         }
@@ -132,7 +136,7 @@ public static class TowerBossDiscoveryRun
         var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
         var index = 0;
         TowerScenario? lastScenario = null; TowerBattleInput? template = null; string? recipeHash = null;
-        var result = await TowerBossImprovement.ExecuteAsync(d, inputs, mechanics, (party, arm, ct) => Measure(d, inputs, party, arm,
+        var result = await TowerBossImprovement.ExecuteBattlesAsync(d, inputs, mechanics,
             (trialArm, stage, scenario, seed, ct2) => {
                 ct2.ThrowIfCancellationRequested();
                 if (index >= trials.Count) throw new InvalidDataException("Missing discovery trial.");
@@ -148,7 +152,9 @@ public static class TowerBossDiscoveryRun
                     || trial.InputHash != HarnessJson.Hash(input) || trial.CacheKey != TowerLoadoutArchive.Key(scope, trialArm, input))
                     throw new InvalidDataException("Discovery trial recipe, identity, stage, arm or seed differs.");
                 return Task.FromResult((trial, TowerLoadoutArchive.ReadBattle(output, trial.Id, scope.ReportStorage)));
-            }, ct), token);
+            }, token, partial => {
+                if (TowerAnchoredNeighborhoodSearch.IsFrozenBatch(partial)) Match(TowerAnchoredNeighborhoodSearch.BatchArtifact, partial);
+            });
         token.ThrowIfCancellationRequested();
         TowerBossDiscovery.ValidateProvenance(d, result.Arms.SelectMany(a => a.Proposals).Select(p => p.Provenance).ToArray());
         var rebuilt = new BossDiscoveryRunReport(result.Status, cost.Discovery, trials.Count, 0, result, result.Error);
@@ -156,7 +162,7 @@ public static class TowerBossDiscoveryRun
             throw new InvalidDataException("Discovery proposals, evaluations, shortlist or accounting differ from deterministic reconstruction.");
         foreach (var party in result.DiscoveryShortlist)
         foreach (var context in d.Contexts)
-            Match("shortlist/" + party.Id + "-" + context.Id + ".json", TowerBossDiscovery.Scenario(d, context.Id, party, inputs.DiscoverySeeds[context.Id]));
+            Match("shortlist/" + party.Id + "-" + context.Id + ".json", TowerBossDiscovery.Scenario(d, context.Id, party, ShortlistSeeds(d, context.Id)));
         if (File.ReadAllText(Path.Combine(output, "discovery.md")) != Markdown(rebuilt)) throw new InvalidDataException("Discovery Markdown differs.");
         return rebuilt;
     }
@@ -173,13 +179,23 @@ public static class TowerBossDiscoveryRun
         text.AppendLine("\n## Discovery shortlist\n\n| Recipe | Worst-context wins | Guardian health remaining | Party survival | Above observed 50% |\n| --- | ---: | ---: | ---: | --- |");
         foreach (var party in report.Generation?.DiscoveryShortlist ?? [])
         {
-            var row = report.Generation!.Arms.SelectMany(a => a.Evaluations).First(r => r.Id == party.Id);
+            var row = report.Generation!.Arms.SelectMany(TowerEvaluationAllocationSearch.NominationMeasurements).First(r => r.Id == party.Id);
             text.AppendLine(string.Create(CultureInfo.InvariantCulture, $"| {party.Id} | {row.Fitness.WorstContextWinRate:P2} | {row.Fitness.GuardianHealth:F2}% | {row.Fitness.Survival:F2}% | {row.Cells.Any(c => c.Clears.Count(x => x) * 2 > c.Clears.Count)} |"));
         }
         text.AppendLine("\nAll evaluated/rejected proposals, ordered recipes, parent/operator lineage and context outcomes are in discovery.json. Capability labels and interaction links are unconfirmed hypotheses. Method restarts and repeated recipes across arms do not create additional independent seed samples. Partial or attempt-exhausted runs do not establish equal-budget method comparisons.\n");
-        return report.Generation?.Version is TowerBossImprovement.Version or TowerSuppliedCompositionSearch.Version or TowerSuppliedCompositionSearch.ScheduledVersion or TowerSuppliedCompositionSearch.StandaloneVersion
+        if (report.Generation?.Version == TowerEvaluationAllocationSearch.Version)
+            return text.ToString().Replace("Independent team discovery", "Retained-build evaluation allocation")
+                .Replace("on reused discovery seeds", "on separate training panels in each round")
+                .Replace("No benchmark reference was used as a parent or scored by this pass.",
+                    "Supplied teams were evaluated and used as parents. Shortlist scores use the final 16-trial promotion panel; they are training results, not independent strength evidence.");
+        return report.Generation?.Version is TowerBossImprovement.Version or TowerSuppliedCompositionSearch.Version or TowerSuppliedCompositionSearch.ScheduledVersion or TowerSuppliedCompositionSearch.StandaloneVersion or TowerAnchoredNeighborhoodSearch.Version
             ? text.ToString().Replace("Independent team discovery", "Retained-build improvement")
                 .Replace("No benchmark reference was used as a parent or scored by this pass.", "Explicit supplied references were scored on discovery seeds and used as parents. This is reference-derived search, not independent discovery.")
             : text.ToString();
     }
+
+    internal static IReadOnlyList<int> ShortlistSeeds(TowerBossDiscoveryDefinition d, string context)
+        => d.Generation.PolicyVersion == TowerEvaluationAllocationSearch.Version
+            ? d.Stages.Schedules[context].Discovery.TakeLast(TowerEvaluationAllocationSearch.PromotionSamples).ToArray()
+            : d.Stages.Schedules[context].Discovery;
 }

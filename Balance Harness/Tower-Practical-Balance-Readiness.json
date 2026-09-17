@@ -1,0 +1,177 @@
+{
+  "version": "tower-practical-balance-readiness-v1",
+  "status": "SavedEvidenceReviewComplete",
+  "formalFixedTeamAdoption": "AdoptFixedTeam",
+  "formalFixedTeamBalanceAssessment": "NotAssessed",
+  "retrospectiveBalanceImplication": "SupportedCeilingBreachesInDeclaredCohort",
+  "rates": [
+    {
+      "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "wins": 3932,
+      "trials": 5500,
+      "rate": 0.7149090909090909,
+      "adjustedLower": 0.6982590996129919,
+      "adjustedUpper": 0.73099428704582,
+      "lowerAboveCeilingPercentagePoints": 19.825909961299192
+    },
+    {
+      "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+      "wins": 3511,
+      "trials": 5500,
+      "rate": 0.6383636363636364,
+      "adjustedLower": 0.6207638788240095,
+      "adjustedUpper": 0.6555997652092864,
+      "lowerAboveCeilingPercentagePoints": 12.076387882400951
+    },
+    {
+      "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+      "wins": 3469,
+      "trials": 5500,
+      "rate": 0.6307272727272727,
+      "adjustedLower": 0.6130603114380125,
+      "adjustedUpper": 0.6480506741860871,
+      "lowerAboveCeilingPercentagePoints": 11.306031143801254
+    }
+  ],
+  "cohort": {
+    "purpose": "intended-progression",
+    "budget": {
+      "essenceSlots": 5,
+      "characterLevel": 40,
+      "tier": 1,
+      "rank": 2,
+      "quality": "Standard",
+      "priorityFloor": 5
+    },
+    "partySize": 10,
+    "ownedCopies": null,
+    "canonicalOrderVerified": true,
+    "fixedEquipmentMatchesDeclaredTemplates": true
+  },
+  "capturedComparison": {
+    "settingsEqual": true,
+    "equipmentEqualFor040e": true,
+    "essenceSetsEqualFor040e": true,
+    "changedOrderSlotsFor040e": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "changedContentFiles": [
+      "combat/abilities.json",
+      "combat/creature-abilities.json",
+      "combat/statuses.json",
+      "combat/summons.json",
+      "essences/essences.json",
+      "items/items.json",
+      "progression/region-combat-balance.json",
+      "world-tower/tower-floors.json",
+      "world/creature-essence-loot-tables.json",
+      "world/creatures.json",
+      "world/regions.json"
+    ],
+    "changedAssemblies": [
+      "Application",
+      "BalanceHarness",
+      "Common",
+      "Domain",
+      "Services.LL"
+    ],
+    "guardianScaling": {
+      "current": {
+        "health": 3.5366243328,
+        "offense": 4.4702934848,
+        "defense": 2.65,
+        "resistance": 2.65,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      },
+      "capturedPlus10": {
+        "health": 3.89028676608,
+        "offense": 4.91732283328,
+        "defense": 2.65,
+        "resistance": 2.65,
+        "penetration": 1.0,
+        "regeneration": 1.0
+      }
+    },
+    "transferOfBalancePassSupported": false
+  },
+  "historicalObligations": {
+    "originalV19": {
+      "status": "VerifiedCapacityExceeded",
+      "reliability": "Unresolved",
+      "ordinary": "NotRun",
+      "joint": "NotRun",
+      "requiredRecipes": 253,
+      "unusedValues": 512
+    },
+    "separateCapturedConfirmation": {
+      "familyRecipes": 253,
+      "passedRestarts": 1,
+      "reliability": "Fail",
+      "adoption": "Hold",
+      "ordinary": "Fail",
+      "joint": "Fail",
+      "observedAboveCeiling": 85,
+      "jointSupportedAboveCeiling": 58
+    },
+    "midpoint": {
+      "status": "CandidateForFullFamilyConfirmation",
+      "factor": 1.1,
+      "recipes": 253
+    },
+    "focused": {
+      "focusedOutcome": "Pass",
+      "fullRetainedFamilyPass": false,
+      "cells": 989,
+      "trials": 253184,
+      "bestWins": 61,
+      "bestInterval": {
+        "lower": 0.14546166328640858,
+        "upper": 0.3650289847063929
+      },
+      "viableLowerBounds": 2,
+      "ceilingUpperBoundsAboveHalf": 0
+    },
+    "retainedFamily": {
+      "entries": 43879,
+      "outsideFocusedConfirmation": 42890
+    },
+    "currentMethodReliability": "NotEstablishedByFixedTeamConfirmation"
+  },
+  "history": {
+    "reserved": 497371,
+    "sourcePinnedLimit": 1000000,
+    "headroom": 502629,
+    "fixedTeamMaximumBatchWords": 11000,
+    "fixedTeamHistoryAdmissionMaximum": 989000,
+    "fitsHistoryLimitOnly": true,
+    "newRunAuthorized": false,
+    "freshRegistryScanPerformed": false,
+    "unusedExposedTail": 5497
+  },
+  "nextStep": "Seed-free current-gameplay calibration scope and complete recipe/context coverage inventory",
+  "scope": {
+    "newFights": 0,
+    "newSeedValues": 0,
+    "nativeCommands": 0,
+    "newTestsOrBuilds": 0,
+    "tuning": false,
+    "historicalResultsRewritten": false,
+    "migrations": false,
+    "deployment": false
+  },
+  "authentication": {
+    "fixedTeam": "Complete saved native and oversight inventories",
+    "olderStudies": "Selected manifest-bound receipts only; no new full-archive reconstruction",
+    "pinnedInputs": 24
+  }
+}

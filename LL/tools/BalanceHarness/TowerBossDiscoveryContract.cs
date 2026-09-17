@@ -29,7 +29,8 @@ public sealed record TowerBossDiscoveryDefinition(int SchemaVersion, string Id, 
     BossDiscoveryGeneration Generation, BossDiscoveryStages Stages, IReadOnlyList<int> ExcludedCombatSeeds,
     IReadOnlyList<BossBenchmarkReference> References, IReadOnlyList<BossDiscoveryStart> Starts,
     IReadOnlyDictionary<string, string> ContentHashes, string SettingsHash, string ExecutionHash, int MaximumBattles,
-    string BudgetPurpose = "intended-progression");
+    string BudgetPurpose = "intended-progression",
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? PrimaryReferenceId = null);
 public sealed record BossDiscoveryCost(int Discovery, int Selection, int GeneratedConfirmation,
     int ReferenceConfirmation, int Diagnostics, int ReplayReserve, int Total);
 
@@ -135,7 +136,17 @@ public static class TowerBossDiscovery
                 IdentityEssenceIds = Enumerable.Range(1, d.Budget.EssenceSlots).Select(i => $"neutral-identity-slot-{i}").ToArray() } }).ToArray());
     }
 
-    public static BossDiscoveryCost Validate(TowerBossDiscoveryDefinition d)
+    public static BossDiscoveryCost Validate(TowerBossDiscoveryDefinition d) => ValidateCore(d, 0);
+
+    // Diagnostic-only phase validation. Ordinary definitions still require all schedules.
+    internal static BossDiscoveryCost ValidateDiagnosticPhase(TowerBossDiscoveryDefinition d, bool template)
+    {
+        if (d.Generation.PolicyVersion != TowerSuppliedCompositionSearch.IncumbentVersion)
+            throw new InvalidDataException("Diagnostic phases require the unchanged incumbent policy.");
+        return ValidateCore(d, template ? 1 : 2);
+    }
+
+    private static BossDiscoveryCost ValidateCore(TowerBossDiscoveryDefinition d, int diagnosticPhase)
     {
         if (d is null || d.SchemaVersion != 3 || !TowerBenchmark.SafeId(d.Id) || d.Mode is not (Independent or Improve)
             || !LegalBudget(d.Budget) || !LegalPurpose(d.Budget, d.BudgetPurpose) || d.RequiredPartySize is < 1 or > 50
@@ -177,12 +188,12 @@ public static class TowerBossDiscovery
         if (g is null || g.Methods is null || (improvement
                 ? suppliedComposition ? !TowerSuppliedCompositionSearch.ValidGeneration(g) : !g.Methods.SequenceEqual(TowerBossImprovement.Methods)
                 : !TowerBossGeneration.LegalPolicy(g))
-            || g.PolicyVersion is TowerBossGeneration.CoordinatedVersion or TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerJointStructuralSearch.Version or TowerJointStructuralDiversity.Version or TowerTeamCoverageSearch.Version or TowerFillerDiversitySearch.Version or TowerCorePortfolioSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion && d.Mode != Independent || g.Seeds is not { Count: > 0 and <= 4 }
+            || g.PolicyVersion is TowerBossGeneration.CoordinatedVersion or TowerBossGeneration.MechanicsVersion or TowerBossGeneration.CoverageVersion or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerJointStructuralSearch.Version or TowerJointStructuralDiversity.Version or TowerTeamCoverageSearch.Version or TowerFillerDiversitySearch.Version or TowerCorePortfolioSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion && d.Mode != Independent || g.Seeds is null || (diagnosticPhase == 1 ? g.Seeds.Count != 0 : g.Seeds.Count is < 1 or > 4)
             || g.Seeds.Distinct().Count() != g.Seeds.Count || (g.CandidatesPerArm < 1 || g.CandidatesPerArm > (g.PolicyVersion is TowerSearchPortfolio.Version or TowerDeepChallenger.Version ? TowerSearchPortfolio.Candidates : 1000))
             || g.MaximumAttemptsPerArm < g.CandidatesPerArm || g.MaximumAttemptsPerArm > (g.PolicyVersion is TowerSearchPortfolio.Version or TowerDeepChallenger.Version ? TowerSearchPortfolio.Attempts : 10000)
             || g.FreshEvery != 4 || g.Objective != Objective || s is null
             || s.Shortlist is < 1 or > 64 || s.Shortlist < g.Methods.Count * g.Seeds.Count
-            || s.Shortlist > TowerBossGeneration.CandidateTotal(g)
+            || diagnosticPhase != 1 && s.Shortlist > TowerBossGeneration.CandidateTotal(g)
             || s.GeneratedFinalists is < 1 or > 5 || s.GeneratedFinalists > s.Shortlist
             || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.Version or TowerBossStudyPolicy.ZeroWinVersion)
             || s.DiagnosticCandidates is < 0 or > 32 || s.ReplayReserve is < 0 or > 1000 || s.Schedules is null
@@ -194,8 +205,10 @@ public static class TowerBossDiscovery
         var seeds = new List<int>();
         foreach (var schedule in s.Schedules.Values)
         {
-            if (schedule is null || !Schedule(schedule.Discovery, 1, 100) || !Schedule(schedule.Selection, 1, 1000)
-                || !Schedule(schedule.Confirmation, 1, 1000) || !Schedule(schedule.Diagnostics, s.DiagnosticCandidates == 0 ? 0 : 1, 1000))
+            if (schedule is null || !Schedule(schedule.Discovery, diagnosticPhase == 1 ? 0 : 1, diagnosticPhase == 1 ? 0 : 100)
+                || !Schedule(schedule.Selection, diagnosticPhase == 1 ? 0 : 1, diagnosticPhase == 1 ? 0 : 1000)
+                || !Schedule(schedule.Confirmation, diagnosticPhase == 0 ? 1 : 0, diagnosticPhase == 0 ? 1000 : 0)
+                || !Schedule(schedule.Diagnostics, s.DiagnosticCandidates == 0 ? 0 : 1, 1000))
                 throw new InvalidDataException("Every context requires explicit bounded paired schedules.");
             seeds.AddRange(schedule.Discovery.Concat(schedule.Selection).Concat(schedule.Confirmation).Concat(schedule.Diagnostics));
             if (g.PolicyVersion == TowerGenerationFeedback.Version)
@@ -247,12 +260,17 @@ public static class TowerBossDiscovery
             || d.References.Any(r => r.Scenario.Party.Any(p => !TowerCompositionSearch.IsCanonical(p.Build.EssenceIds)))
             || s.SelectionPolicyVersion != TowerBossStudyPolicy.ZeroWinVersion))
             throw new InvalidDataException("Supplied composition requires one or two canonical starts, capacity beyond the shared initial batch and its explicit selection policy.");
-        if (g.PolicyVersion == TowerSuppliedCompositionSearch.IncumbentVersion
-            && (d.Mode != Improve || g.Seeds.Count != 1 || d.Contexts.Count != 1 || d.Starts.Count != 2 || d.References.Count != 2
+        if (TowerSuppliedCompositionSearch.PreservesIncumbents(g.PolicyVersion)
+            && (d.Mode != Improve || g.Seeds.Count != (diagnosticPhase == 1 ? 0 : 1) || d.Contexts.Count != 1 || d.Starts.Count != 2 || d.References.Count != 2
                 || d.Starts.Select(start => start.ReferenceId).Distinct(StringComparer.Ordinal).Count() != 2
                 || s.Shortlist != 4 || s.GeneratedFinalists != 1 || s.DiagnosticCandidates != 0 || s.ReplayReserve != 0))
             throw new InvalidDataException("Incumbent nomination requires two distinct supplied references, one root/context, four nominees, one finalist and no diagnostics or replays.");
-        var discovery = checked(TowerBossGeneration.CandidateTotal(g) * s.Schedules.Values.Sum(v => v.Discovery.Count)
+        if (g.PolicyVersion == TowerAnchoredNeighborhoodSearch.Version) TowerAnchoredNeighborhoodSearch.Validate(d);
+        else if (d.PrimaryReferenceId is not null)
+            throw new InvalidDataException("A primary reference designation requires the anchored-neighborhood policy.");
+        if (g.PolicyVersion == TowerEvaluationAllocationSearch.Version) TowerEvaluationAllocationSearch.Validate(d);
+        var discovery = g.PolicyVersion == TowerEvaluationAllocationSearch.Version ? TowerEvaluationAllocationSearch.MaximumFights(g)
+            : checked(TowerBossGeneration.CandidateTotal(g) * s.Schedules.Values.Sum(v => v.Discovery.Count)
             + (g.PolicyVersion == TowerGenerationFeedback.Version ? g.Seeds.Count * 16 * s.Schedules.Values.Sum(v => v.Feedback!.Count) : 0));
         var selection = checked(s.Shortlist * s.Schedules.Values.Sum(v => v.Selection.Count));
         var generated = checked(s.GeneratedFinalists * s.Schedules.Values.Sum(v => v.Confirmation.Count));
@@ -266,6 +284,18 @@ public static class TowerBossDiscovery
     public static BossDiscoveryCost Validate(string root, TowerBossDiscoveryDefinition d)
     {
         var cost = Validate(d);
+        ValidateContent(root, d, false);
+        return cost;
+    }
+
+    internal static void ValidateDiagnosticContent(string root, TowerBossDiscoveryDefinition d, bool template)
+    {
+        ValidateDiagnosticPhase(d, template);
+        ValidateContent(root, d, true);
+    }
+
+    private static void ValidateContent(string root, TowerBossDiscoveryDefinition d, bool diagnostic)
+    {
         var settings = TowerBundle.ReadSettings(root);
         if (HarnessJson.Hash(settings) != d.SettingsHash || HarnessJson.Hash(ExecutionIdentity.Current()) != d.ExecutionHash
             || d.ContentHashes.Any(p => HarnessJson.FileHash(Path.Combine(root, "Data", p.Key)) != p.Value))
@@ -282,10 +312,17 @@ public static class TowerBossDiscovery
         var runner = new TowerBattleRunner(root, content);
         foreach (var reference in d.References)
         {
-            var recipe = reference.Scenario with { Seeds = [d.Stages.Schedules[reference.Context].Confirmation[0]] };
-            runner.CreateInput(recipe, recipe.Seeds[0], settings.Threat, settings.CheckpointIntervalTicks);
+            if (diagnostic && d.Stages.Schedules[reference.Context].Discovery.Count == 0)
+            {
+                foreach (var member in reference.Scenario.Party) content.CreateBuild(member.Build);
+            }
+            else
+            {
+                var seed = (diagnostic ? d.Stages.Schedules[reference.Context].Discovery : d.Stages.Schedules[reference.Context].Confirmation)[0];
+                var recipe = reference.Scenario with { Seeds = [seed] };
+                runner.CreateInput(recipe, seed, settings.Threat, settings.CheckpointIntervalTicks);
+            }
         }
-        return cost;
     }
 
     public static void ValidateParty(TowerBossDiscoveryDefinition d, PartyChoice party)
@@ -302,8 +339,11 @@ public static class TowerBossDiscovery
     }
 
     public static void ValidateProvenance(TowerBossDiscoveryDefinition d, IReadOnlyList<BossDiscoveryProvenance> proposals)
+        => ValidateProvenanceCore(d, proposals, false);
+
+    internal static void ValidateProvenanceCore(TowerBossDiscoveryDefinition d, IReadOnlyList<BossDiscoveryProvenance> proposals, bool diagnostic)
     {
-        Validate(d);
+        if (diagnostic) ValidateDiagnosticPhase(d, false); else Validate(d);
         ArgumentNullException.ThrowIfNull(proposals);
         var ancestry = d.Starts.ToDictionary(s => s.Id, s => new[] { s.ReferenceId }, StringComparer.Ordinal);
         foreach (var p in proposals)

@@ -1,0 +1,527 @@
+{
+  "version": "practical-selection-diagnostic-design-v1",
+  "launchDecision": "NoGo",
+  "planningDecision": "ConditionalPrecisionSpecified_ResourceAndSamplingAdmissionUnresolved",
+  "confirmationTrialsPerRecipe": 1000,
+  "frozenNominees": 4,
+  "frozenPrimary": 1,
+  "intervalFamily": 10,
+  "nominalFamilyCoverage": 0.95,
+  "intervalCoverageIsApproximate": true,
+  "usefulObservedGain": 0.05,
+  "viabilityLowerRequirement": 0.1,
+  "powerTarget": 0.8,
+  "sufficientTrueGainAlternative": 0.16,
+  "criticalValue": 2.8070337701141264,
+  "sufficientCutoffs": {
+    "contrast": 0.08911522955702081,
+    "viability": 0.1266298605477104
+  },
+  "iidConditionalBound": {
+    "samples": 1000,
+    "trueGainAtLeast": 0.16,
+    "impliedOrAssumedWinRateAtLeast": 0.16,
+    "contrastFailureUpper": 0.08107948246974755,
+    "viabilityFailureUpper": 0.10783721967127564,
+    "conditionalDiagnosticPassLower": 0.8110832978589767
+  },
+  "withoutReplacementIllustration": {
+    "eligibleInt32ValuesAtCurrentHistory": 4294482970,
+    "couplingFailureUpper": 0.00011631202253900194,
+    "conditionalPassLower": 0.8109669858364377,
+    "requiresActuallyUniformSampling": true,
+    "currentHashDerivationProvesUniformity": false
+  },
+  "minimumNForThisSufficientBoundAt16Points": 988,
+  "bounds": [
+    {
+      "samples": 1000,
+      "trueGainAtLeast": 0.05,
+      "impliedOrAssumedWinRateAtLeast": 0.05,
+      "contrastFailureUpper": 1.0,
+      "viabilityFailureUpper": 1.0,
+      "conditionalDiagnosticPassLower": 0.0
+    },
+    {
+      "samples": 1000,
+      "trueGainAtLeast": 0.1,
+      "impliedOrAssumedWinRateAtLeast": 0.1,
+      "contrastFailureUpper": 0.9424813819086341,
+      "viabilityFailureUpper": 1.0,
+      "conditionalDiagnosticPassLower": 0.0
+    },
+    {
+      "samples": 1000,
+      "trueGainAtLeast": 0.15,
+      "impliedOrAssumedWinRateAtLeast": 0.15,
+      "contrastFailureUpper": 0.15669130239995133,
+      "viabilityFailureUpper": 0.3354350825127163,
+      "conditionalDiagnosticPassLower": 0.5078736150873324
+    },
+    {
+      "samples": 1000,
+      "trueGainAtLeast": 0.16,
+      "impliedOrAssumedWinRateAtLeast": 0.16,
+      "contrastFailureUpper": 0.08107948246974755,
+      "viabilityFailureUpper": 0.10783721967127564,
+      "conditionalDiagnosticPassLower": 0.8110832978589767
+    },
+    {
+      "samples": 1000,
+      "trueGainAtLeast": 0.2,
+      "impliedOrAssumedWinRateAtLeast": 0.2,
+      "contrastFailureUpper": 0.00213835987339344,
+      "viabilityFailureUpper": 2.1097527034721676e-05,
+      "conditionalDiagnosticPassLower": 0.9978405425995719
+    }
+  ],
+  "additional15PointSensitivity": {
+    "samples": 1000,
+    "trueGainAtLeast": 0.15,
+    "impliedOrAssumedWinRateAtLeast": 0.25,
+    "contrastFailureUpper": 0.15669130239995133,
+    "viabilityFailureUpper": 6.02434454930586e-14,
+    "conditionalDiagnosticPassLower": 0.8433086975999884
+  },
+  "sensitivity": [
+    {
+      "samples": 256,
+      "discordance": 0.25,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.014150943697256946,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.014047796274970407
+    },
+    {
+      "samples": 256,
+      "discordance": 0.25,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.29090247546276365,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.2907993280404771
+    },
+    {
+      "samples": 256,
+      "discordance": 0.25,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.892526722474186,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.8924235750518994
+    },
+    {
+      "samples": 256,
+      "discordance": 0.25,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.948499550106331,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9483964026840445
+    },
+    {
+      "samples": 256,
+      "discordance": 0.5,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.009968392518783675,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.009865245096497137
+    },
+    {
+      "samples": 256,
+      "discordance": 0.5,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.11646082836138526,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.11635768093909872
+    },
+    {
+      "samples": 256,
+      "discordance": 0.5,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.4855630077085966,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.48545986028631005
+    },
+    {
+      "samples": 256,
+      "discordance": 0.5,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.578923807057414,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.5788206596351274
+    },
+    {
+      "samples": 256,
+      "discordance": 0.6,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.010622756817307179,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.01051960939502064
+    },
+    {
+      "samples": 256,
+      "discordance": 0.6,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.10211761273401064,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.1020144653117241
+    },
+    {
+      "samples": 256,
+      "discordance": 0.6,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.41237906367157007,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.4122759162492835
+    },
+    {
+      "samples": 256,
+      "discordance": 0.6,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.49631593379285177,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.4962127863705652
+    },
+    {
+      "samples": 256,
+      "discordance": 1.0,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.02167728731818981,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.021574139895903274
+    },
+    {
+      "samples": 256,
+      "discordance": 1.0,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.11126434393335134,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.1111611965110648
+    },
+    {
+      "samples": 256,
+      "discordance": 1.0,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.3392582218751654,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.33915507445287885
+    },
+    {
+      "samples": 256,
+      "discordance": 1.0,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.40030704063894607,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.4002038932166595
+    },
+    {
+      "samples": 512,
+      "discordance": 0.25,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.06915280005106322,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.06915279983779529
+    },
+    {
+      "samples": 512,
+      "discordance": 0.25,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.8056989094264536,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.8056989092131857
+    },
+    {
+      "samples": 512,
+      "discordance": 0.25,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.999696148027532,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9996961478142641
+    },
+    {
+      "samples": 512,
+      "discordance": 0.25,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.9999668073479397,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9999668071346718
+    },
+    {
+      "samples": 512,
+      "discordance": 0.5,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.03230530472510759,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.03230530451183967
+    },
+    {
+      "samples": 512,
+      "discordance": 0.5,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.40642881467698616,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.40642881446371826
+    },
+    {
+      "samples": 512,
+      "discordance": 0.5,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.920458538076438,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.92045853786317
+    },
+    {
+      "samples": 512,
+      "discordance": 0.5,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.959348680566537,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.959348680353269
+    },
+    {
+      "samples": 512,
+      "discordance": 0.6,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.03074228083247627,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.03074228061920834
+    },
+    {
+      "samples": 512,
+      "discordance": 0.6,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.34351326951402894,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.34351326930076104
+    },
+    {
+      "samples": 512,
+      "discordance": 0.6,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.8612420939307956,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.8612420937175277
+    },
+    {
+      "samples": 512,
+      "discordance": 0.6,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.9173608667873278,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9173608665740598
+    },
+    {
+      "samples": 512,
+      "discordance": 1.0,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.04879085084811568,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.048790850634847754
+    },
+    {
+      "samples": 512,
+      "discordance": 1.0,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.30049385049490085,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.30049385028163295
+    },
+    {
+      "samples": 512,
+      "discordance": 1.0,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.731772561535686,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.7317725613224181
+    },
+    {
+      "samples": 512,
+      "discordance": 1.0,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.8016994904878983,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.8016994902746304
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.25,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.28851468972508015,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.28851468972508015
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.25,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.9968954177021004,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9968954177021004
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.25,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.9999999998909779,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9999999998909779
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.25,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.9999999999995218,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9999999999995218
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.5,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.11366702528881126,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.11366702528881126
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.5,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.8530434316142044,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.8530434316142044
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.5,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.9996040896842814,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9996040896842814
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.5,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.9999347669455492,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9999347669455492
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.6,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.09945294492277536,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.09945294492277536
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.6,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.7791978725680647,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.7791978725680647
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.6,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.9978519261544715,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9978519261544715
+    },
+    {
+      "samples": 1000,
+      "discordance": 0.6,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.9994779553418386,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9994779553418386
+    },
+    {
+      "samples": 1000,
+      "discordance": 1.0,
+      "trueGain": 0.05,
+      "singleContrastPassProbability": 0.10838458874626908,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.10838458874626908
+    },
+    {
+      "samples": 1000,
+      "discordance": 1.0,
+      "trueGain": 0.1,
+      "singleContrastPassProbability": 0.6370210644613143,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.6370210644613143
+    },
+    {
+      "samples": 1000,
+      "discordance": 1.0,
+      "trueGain": 0.15,
+      "singleContrastPassProbability": 0.9742365052205868,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9742365052205868
+    },
+    {
+      "samples": 1000,
+      "discordance": 1.0,
+      "trueGain": 0.16,
+      "singleContrastPassProbability": 0.9883426977947749,
+      "diagnosticPassLowerIfThisNomineeWinRateAtLeast25Percent": 0.9883426977947749
+    }
+  ],
+  "fights": {
+    "discovery": 512,
+    "selection": 128,
+    "confirmation": 4000,
+    "total": 4640
+  },
+  "resources": {
+    "observed": {
+      "fights": 1408,
+      "operationalSeconds": 166.5470000000205,
+      "finalRetainedBytes": 127739696,
+      "battleRecordBytes": 28206827,
+      "otherRetainedBytes": 99532869,
+      "largestBattleRecordBytes": 21963,
+      "phaseMeasurements": {
+        "admission": {
+          "accounting": "Full phase allowance forfeited; no transfer, refund or retry",
+          "chargedBytes": 33554432,
+          "chargedSeconds": 120,
+          "measuredSeconds": 19.984000000025844,
+          "observedPeakBytes": 23240210,
+          "status": "Passed"
+        },
+        "audit": {
+          "accounting": "Full phase allowance forfeited; no transfer, refund or retry",
+          "chargedBytes": 16777216,
+          "chargedSeconds": 120,
+          "measuredSeconds": 46.937000000005355,
+          "observedPeakBytes": 4253,
+          "status": "Passed"
+        },
+        "run": {
+          "accounting": "Full phase allowance forfeited; no transfer, refund or retry",
+          "chargedBytes": 218103808,
+          "chargedSeconds": 360,
+          "measuredSeconds": 99.57799999997951,
+          "observedPeakBytes": 104488432,
+          "status": "Passed"
+        }
+      }
+    },
+    "historicalReferenceOnly": {
+      "seconds": 600,
+      "bytes": 268435456,
+      "remainingSpendableAllowance": 0
+    },
+    "assumptionsNotBounds": {
+      "linearTimeSeconds": 548.8480681818857,
+      "fixedOtherPlusObservedMaxBytes": 201441189,
+      "relativeSlowdownToReferenceTime": 0.09319870977693379,
+      "stress": [
+        {
+          "multiplier": 1.0,
+          "illustrativeSeconds": 548.8480681818857,
+          "illustrativeBytes": 201441189,
+          "withinHistoricalReferenceTime": true,
+          "withinHistoricalReferenceBytes": true
+        },
+        {
+          "multiplier": 1.25,
+          "illustrativeSeconds": 686.060085227357,
+          "illustrativeBytes": 251801487,
+          "withinHistoricalReferenceTime": false,
+          "withinHistoricalReferenceBytes": true
+        },
+        {
+          "multiplier": 2.0,
+          "illustrativeSeconds": 1097.6961363637713,
+          "illustrativeBytes": 402882378,
+          "withinHistoricalReferenceTime": false,
+          "withinHistoricalReferenceBytes": false
+        }
+      ]
+    },
+    "newWallStorageAllowanceGranted": false,
+    "feasibilityEstablished": false,
+    "verifiedManifestEntries": {
+      "TestResults/practical-native-verification-20260917": 53,
+      "TestResults/balance/tower-practical-native-verification-20260917": 1564
+    },
+    "pins": {
+      "TestResults/practical-native-verification-20260917/files.json": "2c8415a62bdf6d72451a6468be5ba0c7ea78a10744e0688516a796690b921e15",
+      "TestResults/balance/tower-practical-native-verification-20260917/files.json": "54a3a877b209207bc66edd027396e7116e79acbae379639c513990d1a37f3db3",
+      "TestResults/practical-native-verification-20260917/completion.json": "f916bfad9887a1a69d61124b493ca201051c70d0f27cc6b666105b260203f625"
+    }
+  },
+  "checks": {
+    "priorArithmetic": {
+      "status": "Passed",
+      "directMultinomialMaximumAbsoluteError": 2.7755575615628914e-17
+    },
+    "feasibleGainLossPairs": 501501,
+    "sufficientGainLossPairs": 207936,
+    "viabilityCounts": 1001,
+    "minimumViabilityWins": 127,
+    "family10DirectMultinomialError": 0.0
+  },
+  "precisionSourceSha256": "3404dbbd3beca5d86329a631727e30c0278c44341eb9d495c7255dcfef46d1fa",
+  "analysisSourceSha256": "d10e5de4776fe764ff9e3d0ee2b5b662d553c9129cda78c7bce646a4554d6296",
+  "newFights": 0,
+  "newValues": 0,
+  "randomDraws": 0,
+  "preservedExclusions": 484285
+}

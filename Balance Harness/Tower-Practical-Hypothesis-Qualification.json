@@ -1,0 +1,304 @@
+{
+  "version": "practical-hypothesis-qualification-v1",
+  "decision": "NoSearchChangeQualified",
+  "scope": "Saved JSON arithmetic and source review; no new native authentication",
+  "runs": [
+    {
+      "study": "TestResults/balance/tower-incumbent-practical-pilot-20260916",
+      "panelsPooled": false,
+      "evaluatedParties": 64,
+      "proposals": 67,
+      "proposalOutcomes": {
+        "duplicate": 3,
+        "evaluated": 64
+      },
+      "discoveryWinHistogram": {
+        "0": 23,
+        "1": 3,
+        "2": 5,
+        "3": 5,
+        "4": 12,
+        "5": 7,
+        "6": 7,
+        "7": 2
+      },
+      "operatorDescriptionsNotCausalEstimates": {
+        "cross-character": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 35,
+          "zeroWinParties": 2
+        },
+        "double": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 31,
+          "zeroWinParties": 1
+        },
+        "fresh-legal": {
+          "evaluatedParties": 20,
+          "discoveryFights": 160,
+          "recordedWins": 0,
+          "zeroWinParties": 20
+        },
+        "recombine": {
+          "evaluatedParties": 6,
+          "discoveryFights": 48,
+          "recordedWins": 27,
+          "zeroWinParties": 0
+        },
+        "single": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 40,
+          "zeroWinParties": 0
+        },
+        "supplied": {
+          "evaluatedParties": 2,
+          "discoveryFights": 16,
+          "recordedWins": 8,
+          "zeroWinParties": 0
+        },
+        "whole-character": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 26,
+          "zeroWinParties": 0
+        }
+      },
+      "freshAncestryDescendants": {
+        "evaluatedParties": 0,
+        "recordedDiscoveryWins": 0
+      },
+      "nominees": [
+        {
+          "partyId": "a0f9ffe3bcccabf28f1d7b3c2290075e94efb06b59df88a87af74a2be5134462",
+          "referenceId": null,
+          "discoveryRank": 1,
+          "discoveryWinsOf8": 7,
+          "selectionWinsOf32": 26,
+          "selected": true,
+          "confirmationWinsOf256": 167,
+          "primarySelectionGains": 0,
+          "primarySelectionLosses": 0
+        },
+        {
+          "partyId": "5645554b96d24bfff3681d0b0031dcd2feb48656f74a0847b3941bea0973d592",
+          "referenceId": null,
+          "discoveryRank": 2,
+          "discoveryWinsOf8": 7,
+          "selectionWinsOf32": 20,
+          "selected": false,
+          "confirmationWinsOf256": null,
+          "primarySelectionGains": 9,
+          "primarySelectionLosses": 3
+        },
+        {
+          "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "referenceId": "team-49f6979895354870c89362d4abf214bb",
+          "discoveryRank": 20,
+          "discoveryWinsOf8": 4,
+          "selectionWinsOf32": 23,
+          "selected": false,
+          "confirmationWinsOf256": 161,
+          "primarySelectionGains": 8,
+          "primarySelectionLosses": 5
+        },
+        {
+          "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "referenceId": "team-040e60d3dbc5c127321653c47ed3a9d3",
+          "discoveryRank": 26,
+          "discoveryWinsOf8": 4,
+          "selectionWinsOf32": 23,
+          "selected": false,
+          "confirmationWinsOf256": 161,
+          "primarySelectionGains": 8,
+          "primarySelectionLosses": 5
+        }
+      ],
+      "selectedDistanceFromAnchors": {
+        "team-040e60d3dbc5c127321653c47ed3a9d3": {
+          "replacementsOf50": 3,
+          "changedOwnersOf10": 2
+        },
+        "team-49f6979895354870c89362d4abf214bb": {
+          "replacementsOf50": 9,
+          "changedOwnersOf10": 6
+        }
+      },
+      "unconfirmedEvaluatedParties": 61,
+      "strengthDecision": "ImprovementNotDemonstrated"
+    },
+    {
+      "study": "TestResults/balance/tower-practical-native-verification-20260917",
+      "panelsPooled": false,
+      "evaluatedParties": 64,
+      "proposals": 70,
+      "proposalOutcomes": {
+        "duplicate": 3,
+        "duplicate-family": 3,
+        "evaluated": 64
+      },
+      "discoveryWinHistogram": {
+        "0": 28,
+        "1": 6,
+        "2": 7,
+        "3": 6,
+        "4": 13,
+        "5": 3,
+        "6": 1
+      },
+      "operatorDescriptionsNotCausalEstimates": {
+        "cross-character": {
+          "evaluatedParties": 8,
+          "discoveryFights": 64,
+          "recordedWins": 22,
+          "zeroWinParties": 1
+        },
+        "double": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 24,
+          "zeroWinParties": 1
+        },
+        "fresh-legal": {
+          "evaluatedParties": 21,
+          "discoveryFights": 168,
+          "recordedWins": 0,
+          "zeroWinParties": 21
+        },
+        "recombine": {
+          "evaluatedParties": 6,
+          "discoveryFights": 48,
+          "recordedWins": 25,
+          "zeroWinParties": 0
+        },
+        "single": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 25,
+          "zeroWinParties": 1
+        },
+        "supplied": {
+          "evaluatedParties": 2,
+          "discoveryFights": 16,
+          "recordedWins": 6,
+          "zeroWinParties": 0
+        },
+        "whole-character": {
+          "evaluatedParties": 9,
+          "discoveryFights": 72,
+          "recordedWins": 9,
+          "zeroWinParties": 4
+        }
+      },
+      "freshAncestryDescendants": {
+        "evaluatedParties": 3,
+        "recordedDiscoveryWins": 0
+      },
+      "nominees": [
+        {
+          "partyId": "897432640ced1a4cf115a33f07af8c7b7338d91049c46475f7cd85926b1fb13b",
+          "referenceId": null,
+          "discoveryRank": 1,
+          "discoveryWinsOf8": 6,
+          "selectionWinsOf32": 25,
+          "selected": false,
+          "confirmationWinsOf256": null,
+          "primarySelectionGains": 6,
+          "primarySelectionLosses": 5
+        },
+        {
+          "partyId": "0ca7c00b2918684c37b046e45f23bbf24d191616bebe47445b15198de3619860",
+          "referenceId": null,
+          "discoveryRank": 2,
+          "discoveryWinsOf8": 5,
+          "selectionWinsOf32": 26,
+          "selected": true,
+          "confirmationWinsOf256": 169,
+          "primarySelectionGains": 0,
+          "primarySelectionLosses": 0
+        },
+        {
+          "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "referenceId": "team-040e60d3dbc5c127321653c47ed3a9d3",
+          "discoveryRank": 8,
+          "discoveryWinsOf8": 4,
+          "selectionWinsOf32": 22,
+          "selected": false,
+          "confirmationWinsOf256": 155,
+          "primarySelectionGains": 8,
+          "primarySelectionLosses": 4
+        },
+        {
+          "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "referenceId": "team-49f6979895354870c89362d4abf214bb",
+          "discoveryRank": 27,
+          "discoveryWinsOf8": 2,
+          "selectionWinsOf32": 20,
+          "selected": false,
+          "confirmationWinsOf256": 150,
+          "primarySelectionGains": 10,
+          "primarySelectionLosses": 4
+        }
+      ],
+      "selectedDistanceFromAnchors": {
+        "team-040e60d3dbc5c127321653c47ed3a9d3": {
+          "replacementsOf50": 4,
+          "changedOwnersOf10": 3
+        },
+        "team-49f6979895354870c89362d4abf214bb": {
+          "replacementsOf50": 3,
+          "changedOwnersOf10": 2
+        }
+      },
+      "unconfirmedEvaluatedParties": 61,
+      "strengthDecision": "ImprovementNotDemonstrated"
+    }
+  ],
+  "nativeOperationalObservation": {
+    "fights": 1408,
+    "measuredSeconds": 166.5470000000205,
+    "forfeitedSeconds": 600,
+    "forfeitedBytes": 268435456,
+    "largerStudyFeasibilityEstablished": false
+  },
+  "futureDiagnosticAccountingOnly": {
+    "pairedRecipes": 4,
+    "searchAndSelectionFights": 640,
+    "totalAt256PerParty": 1664,
+    "totalAt1024PerParty": 4736,
+    "launchReady": false
+  },
+  "preservedExclusions": 484285,
+  "seedValuesExported": 0,
+  "newValues": 0,
+  "newFights": 0,
+  "verifiedInputHashes": {
+    "LL/tools/BalanceHarness/TowerBossGeneration.cs": "bde0749425bd7179352cf2226a8646ed41163acb295866588425ba9f27592fc3",
+    "LL/tools/BalanceHarness/TowerBossStudyPolicy.cs": "14b42dd8cd792c4fb1defc435ab1cc81e671208d91778f59f8e7e61c356cb2f3",
+    "LL/tools/BalanceHarness/TowerSuppliedCompositionSearch.cs": "17025c38316c014579130ed5c42a81c1cc46100f49906fd6692b0c9ffd653375",
+    "LL/tools/BalanceHarness/TowerZeroWinSelection.cs": "9ce6d7845416c541160ac8ce78d8023eabe3997ecb80855e62f1116c8485d511",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/files.json": "687187963760b347593a60efd0f4573eb988755d42725ce13b47cdb02dad79de",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/independent-audit.json": "3b9b7280603deeee00c307de0fb76be62b6f81bb001e1bb214793f051353848c",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/definition.json": "6cfecd58fa2d7d7d208f3cdd2eb17339062af15768907bc804b7eec683657715",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/discovery-shortlist.json": "2daf1ded1e8a776c92ba698ed1f234f21fb313bf29471d59006af6ad0465bc09",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/discovery.json": "8f547edee9d5cce344af3aa67f3fb0edf18c8d8e80d646be75ff9e4deea5c3cf",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/finalists.json": "1bb8fd1ae54a365b6abf97ad6a8c21d372a6f0a66eb98c59f8e37bcb6d1bb97f",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/selection-results.json": "9278d8274e1dd7f3199eab7ccdbe8de9beeaafa05237e52ac10cb3875ee94813",
+    "TestResults/balance/tower-incumbent-practical-pilot-20260916/study/study.json": "519e69bd8c32d59cf8e6726e10020926a932d699f7c1846b199349ab3f51affb",
+    "TestResults/balance/tower-practical-native-verification-20260917/files.json": "54a3a877b209207bc66edd027396e7116e79acbae379639c513990d1a37f3db3",
+    "TestResults/balance/tower-practical-native-verification-20260917/study/definition.json": "46362effbf1595dabb24c004ceb0924e784b3cd6fd1818e9f1e43f7479570676",
+    "TestResults/balance/tower-practical-native-verification-20260917/study/discovery-shortlist.json": "1def41cdb46a110d2d51b38776d7438ccedffe2d8d66c6f4eeff1c50247bdf3f",
+    "TestResults/balance/tower-practical-native-verification-20260917/study/discovery.json": "b5af1bce124fecd23f66d1eadb8cbbacd606c0f6d046716b45902b99d16d24a1",
+    "TestResults/balance/tower-practical-native-verification-20260917/study/finalists.json": "45e688ad75b1ee298e63d505096a25d2be2c49503a84aea68798c47c2d5e6dd2",
+    "TestResults/balance/tower-practical-native-verification-20260917/study/selection-results.json": "a36a73e784421606f0b9875dbd5dfe8f6ff22cd899554772e0bee7c7e964a33d",
+    "TestResults/balance/tower-practical-native-verification-20260917/study/study.json": "87a5bde1730386f362c8279101306dfb9b6bbc8e2a6918f7f2be951b9dcca39f",
+    "TestResults/practical-native-verification-20260917/completion.json": "f916bfad9887a1a69d61124b493ca201051c70d0f27cc6b666105b260203f625",
+    "TestResults/practical-native-verification-20260917/files.json": "2c8415a62bdf6d72451a6468be5ba0c7ea78a10744e0688516a796690b921e15",
+    "TestResults/practical-native-verification-20260917/independent-audit.json": "20d080f62393f4601788b1853e92f7c1608ed38e1030280eeb141b82cd06dec6",
+    "TestResults/practical-native-verification-20260917/retained-input-pins.json": "e7b02e922e6b971c3589cd2e8cc8856904a5affb556b01670cdff3b8002f849c",
+    "TestResults/practical-native-verification-20260917/source-files.json": "31eb90cae9e24b233c05fb474063864cb80bedd94892d317380c1bd0e5863991"
+  },
+  "analysisSourceSha256": "d6121e633dc00c9a87fc82b3f0b9d6097375744d927c199c786f536c8afdf130"
+}

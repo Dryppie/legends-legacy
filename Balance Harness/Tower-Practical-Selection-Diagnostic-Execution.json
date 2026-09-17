@@ -1,0 +1,293 @@
+{
+  "version": "tower-selection-execution-review-v1",
+  "receipt": {
+    "status": "CompletedVerified",
+    "error": null,
+    "attempts": 1,
+    "retries": 0,
+    "additionalChargedSeconds": 1380,
+    "additionalChargedBytes": 536870912,
+    "cumulativeChargedSeconds": 1860,
+    "cumulativeChargedBytes": 1140850688,
+    "measuredSecondsAfterSealingBeforeReceipt": 248.56200000000536,
+    "sampledHighWaterBytesBeforeReceipt": 159763984,
+    "oversightManifestSha256": "a14c73e7d330d284d1072fd62424843be4c8bd7a70c43782bd6fc70d54d824df",
+    "nativeManifestSha256": "b73a6fc344214693dddfc14d74c4114ab4782d0ae80456ebd019c1103f149552",
+    "extraPublicVerifierRuns": 0,
+    "automaticPromotion": false
+  },
+  "process": {
+    "exitCode": 0,
+    "timedOut": false,
+    "rootPid": 54132,
+    "totalProcesses": 4,
+    "activeProcesses": 0,
+    "seconds": 247.40599999998813,
+    "workAllowanceSeconds": 1377.5159999999742,
+    "cleanupAllowanceSeconds": 1,
+    "mechanism": "suspended-owned-job-v1"
+  },
+  "observation": {
+    "result": {
+      "version": "tower-practical-selection-diagnostic-v1",
+      "executionStatus": "Complete",
+      "integrityStatus": "Verified",
+      "diagnosticDecision": "NoSelectionMissDemonstrated",
+      "primaryId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "rates": [
+        {
+          "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "wins": 632,
+          "estimate": {
+            "rate": 0.632,
+            "lower": 0.5883147158440573,
+            "upper": 0.673621374815983,
+            "confidence": 0.995
+          }
+        },
+        {
+          "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+          "wins": 712,
+          "estimate": {
+            "rate": 0.712,
+            "lower": 0.6702696649468207,
+            "upper": 0.7504155715677894,
+            "confidence": 0.995
+          }
+        },
+        {
+          "partyId": "bdaffdc65dd047254a3075786f6b74100a8bd2499c3b10898f2ae68e7fa8a61b",
+          "wins": 598,
+          "estimate": {
+            "rate": 0.598,
+            "lower": 0.5538752994481374,
+            "upper": 0.6405924042237107,
+            "confidence": 0.995
+          }
+        },
+        {
+          "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "wins": 628,
+          "estimate": {
+            "rate": 0.628,
+            "lower": 0.5842515272104899,
+            "upper": 0.669747106156822,
+            "confidence": 0.995
+          }
+        }
+      ],
+      "contrasts": [
+        {
+          "otherPartyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "gains": 166,
+          "losses": 246,
+          "observedGain": -0.08,
+          "lower": -0.15050856707032403,
+          "upper": -0.008240578784245861,
+          "qualifies": false
+        },
+        {
+          "otherPartyId": "bdaffdc65dd047254a3075786f6b74100a8bd2499c3b10898f2ae68e7fa8a61b",
+          "gains": 155,
+          "losses": 269,
+          "observedGain": -0.114,
+          "lower": -0.18447120140093443,
+          "upper": -0.04174633144182771,
+          "qualifies": false
+        },
+        {
+          "otherPartyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "gains": 182,
+          "losses": 266,
+          "observedGain": -0.084,
+          "lower": -0.15666137076491127,
+          "upper": -0.010025232382387173,
+          "qualifies": false
+        }
+      ],
+      "recommendedPartyIds": [
+        "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b"
+      ],
+      "balanceAssessment": "NotAssessed",
+      "samplingAssumption": "Single post-freeze cryptographic byte batch modeled as independent uniform bits; approximate Wilson family coverage; operational completion is not assumed.",
+      "studyHash": "55ad9f5cb54e6d1f2a87b06c587ceee160dfbca0630226760f5c59c3969ad2a4",
+      "archiveHash": "89ea5e9997f8e78e7e73cf82923c27dcd1903a0eccacc8c67549ba37e5858783",
+      "stopReason": "Frozen diagnostic completed; no promotion, retry or extension."
+    },
+    "completion": {
+      "version": "tower-practical-selection-diagnostic-v1",
+      "status": "Complete",
+      "requestHash": "a7989e15bf3a39d86397a0856288948f5003c975525c4f2bee90bd3908944e07",
+      "measuredSeconds": 247.0203442,
+      "chargedSeconds": 1860,
+      "chargedBytes": 1140850688,
+      "retries": 0,
+      "fights": 4640
+    },
+    "native-audit": {
+      "status": "Passed",
+      "studyHash": "55ad9f5cb54e6d1f2a87b06c587ceee160dfbca0630226760f5c59c3969ad2a4",
+      "archiveHash": "89ea5e9997f8e78e7e73cf82923c27dcd1903a0eccacc8c67549ba37e5858783",
+      "newFights": 0
+    },
+    "independent-audit": {
+      "version": "tower-practical-selection-diagnostic-v1",
+      "executionStatus": "Complete",
+      "integrityStatus": "Verified",
+      "diagnosticDecision": "NoSelectionMissDemonstrated",
+      "primaryId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "rates": [
+        {
+          "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "wins": 632,
+          "estimate": {
+            "rate": 0.632,
+            "lower": 0.5883147158440573,
+            "upper": 0.673621374815983,
+            "confidence": 0.995
+          }
+        },
+        {
+          "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+          "wins": 712,
+          "estimate": {
+            "rate": 0.712,
+            "lower": 0.6702696649468207,
+            "upper": 0.7504155715677894,
+            "confidence": 0.995
+          }
+        },
+        {
+          "partyId": "bdaffdc65dd047254a3075786f6b74100a8bd2499c3b10898f2ae68e7fa8a61b",
+          "wins": 598,
+          "estimate": {
+            "rate": 0.598,
+            "lower": 0.5538752994481374,
+            "upper": 0.6405924042237107,
+            "confidence": 0.995
+          }
+        },
+        {
+          "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "wins": 628,
+          "estimate": {
+            "rate": 0.628,
+            "lower": 0.5842515272104899,
+            "upper": 0.669747106156822,
+            "confidence": 0.995
+          }
+        }
+      ],
+      "contrasts": [
+        {
+          "otherPartyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "gains": 166,
+          "losses": 246,
+          "observedGain": -0.08,
+          "lower": -0.15050856707032403,
+          "upper": -0.008240578784245861,
+          "qualifies": false
+        },
+        {
+          "otherPartyId": "bdaffdc65dd047254a3075786f6b74100a8bd2499c3b10898f2ae68e7fa8a61b",
+          "gains": 155,
+          "losses": 269,
+          "observedGain": -0.114,
+          "lower": -0.18447120140093443,
+          "upper": -0.04174633144182771,
+          "qualifies": false
+        },
+        {
+          "otherPartyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "gains": 182,
+          "losses": 266,
+          "observedGain": -0.084,
+          "lower": -0.15666137076491127,
+          "upper": -0.010025232382387173,
+          "qualifies": false
+        }
+      ],
+      "recommendedPartyIds": [
+        "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b"
+      ],
+      "balanceAssessment": "NotAssessed",
+      "samplingAssumption": "Single post-freeze cryptographic byte batch modeled as independent uniform bits; approximate Wilson family coverage; operational completion is not assumed.",
+      "studyHash": "55ad9f5cb54e6d1f2a87b06c587ceee160dfbca0630226760f5c59c3969ad2a4",
+      "archiveHash": "89ea5e9997f8e78e7e73cf82923c27dcd1903a0eccacc8c67549ba37e5858783",
+      "stopReason": "Frozen diagnostic completed; no promotion, retry or extension."
+    },
+    "history-input": {
+      "reservationState": "Complete",
+      "reservedCount": 2089
+    },
+    "confirmation-binding": {
+      "version": "tower-practical-selection-diagnostic-v1",
+      "freezeHash": "22c0102342eff8afc5c3c15be36662ef2ba94baadb9eb1f9fa14670691101885",
+      "entropyHash": "6b01b4c3a13ce642920c604b9431a85d652709b680ad091c2e0d52d54b502be2",
+      "historicalHash": "4e23e505a1cc4761eaf75d2cebfcf6298fa94367457c463e917c0244f528eca7",
+      "words": 2048,
+      "panel": 1000,
+      "newReservations": 2048
+    },
+    "admission-phase": {
+      "phase": {
+        "name": "admission",
+        "startedAt": "2026-09-17T02:02:29.8385071+00:00",
+        "deadline": "2026-09-17T02:05:29.8385071+00:00",
+        "baseBytes": 44865
+      },
+      "measuredSeconds": 30.9874131,
+      "observedBytes": 60305617,
+      "chargedSeconds": 180,
+      "chargedBytes": 100663296
+    },
+    "search-phase": {
+      "phase": {
+        "name": "search",
+        "startedAt": "2026-09-17T02:03:00.8327797+00:00",
+        "deadline": "2026-09-17T02:05:00.8327797+00:00",
+        "baseBytes": 60350784
+      },
+      "measuredSeconds": 21.8701208,
+      "observedBytes": 15060918,
+      "chargedSeconds": 120,
+      "chargedBytes": 67108864
+    },
+    "confirmation-phase": {
+      "phase": {
+        "name": "confirmation",
+        "startedAt": "2026-09-17T02:03:22.708954+00:00",
+        "deadline": "2026-09-17T02:14:22.708954+00:00",
+        "baseBytes": 75412003
+      },
+      "measuredSeconds": 159.8627906,
+      "observedBytes": 83033498,
+      "chargedSeconds": 660,
+      "chargedBytes": 268435456
+    },
+    "audit-phase": {
+      "phase": {
+        "name": "audit",
+        "startedAt": "2026-09-17T02:06:02.5798746+00:00",
+        "deadline": "2026-09-17T02:12:02.5798746+00:00",
+        "baseBytes": 158445808
+      },
+      "measuredSeconds": 34.151774,
+      "observedBytes": 230213,
+      "chargedSeconds": 360,
+      "chargedBytes": 16777216
+    },
+    "attemptCounts": {
+      "Started": 4640,
+      "Completed": 4640,
+      "unreadableLines": 0
+    }
+  },
+  "nativeInventoryEntries": 4803,
+  "oversightInventoryEntries": 9,
+  "nativeBytes": 159203511,
+  "oversightBytes": 561081,
+  "combinedBytes": 159764592
+}

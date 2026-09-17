@@ -1,0 +1,267 @@
+{
+  "version": "tower-fixed-team-execution-review-v1",
+  "receipt": {
+    "status": "CompletedVerified",
+    "error": null,
+    "attempts": 1,
+    "retries": 0,
+    "additionalChargedSeconds": 2400,
+    "additionalChargedBytes": 1073741824,
+    "cumulativeChargedSeconds": 4800,
+    "cumulativeChargedBytes": 2415919104,
+    "measuredSecondsAfterSealingBeforeReceipt": 806.9370000000054,
+    "sampledHighWaterBytesBeforeReceipt": 403450782,
+    "oversightManifestSha256": "0b25880480e0feb69e019894c779f2eef8e5d23766c893fd9a1ec91a08c85bc8",
+    "nativeManifestSha256": "dc60ca20d41ef58d7c26fc8765055e6336832a05fdb119f97e0d0ff76b0cc8a7",
+    "extraPublicVerifierRuns": 0,
+    "engineeringTreatmentAccepted": true,
+    "gameplayConfigurationChanged": false
+  },
+  "process": {
+    "exitCode": 0,
+    "timedOut": false,
+    "rootPid": 68408,
+    "totalProcesses": 4,
+    "activeProcesses": 0,
+    "seconds": 753.375,
+    "workAllowanceSeconds": 2333.1089999999967,
+    "cleanupAllowanceSeconds": 1,
+    "mechanism": "suspended-owned-job-v1"
+  },
+  "observation": {
+    "result": {
+      "version": "tower-practical-fixed-team-confirmation-v1",
+      "executionStatus": "Complete",
+      "integrityStatus": "Verified",
+      "strengthDecision": "StrongerFixedTeamConfirmed",
+      "adoption": "AdoptFixedTeam",
+      "candidateId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "rates": [
+        {
+          "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+          "wins": 3932,
+          "estimate": {
+            "rate": 0.7149090909090909,
+            "lower": 0.698259099596181,
+            "upper": 0.7309942870615098,
+            "confidence": 0.9928571428571429
+          }
+        },
+        {
+          "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "wins": 3511,
+          "estimate": {
+            "rate": 0.6383636363636364,
+            "lower": 0.6207638788063587,
+            "upper": 0.6555997652262155,
+            "confidence": 0.9928571428571429
+          }
+        },
+        {
+          "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "wins": 3469,
+          "estimate": {
+            "rate": 0.6307272727272727,
+            "lower": 0.613060311420305,
+            "upper": 0.6480506742031125,
+            "confidence": 0.9928571428571429
+          }
+        }
+      ],
+      "contrasts": [
+        {
+          "otherPartyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "gains": 1365,
+          "losses": 944,
+          "observedGain": 0.07654545454545454,
+          "lower": 0.04710785295109063,
+          "upper": 0.10578188967402596,
+          "qualifies": true
+        },
+        {
+          "otherPartyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "gains": 1417,
+          "losses": 954,
+          "observedGain": 0.08418181818181818,
+          "lower": 0.05448263074400361,
+          "upper": 0.11365977029026955,
+          "qualifies": true
+        }
+      ],
+      "recommendedPartyIds": [
+        "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b"
+      ],
+      "controlPartyIds": [
+        "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b"
+      ],
+      "balanceAssessment": "NotAssessed",
+      "samplingAssumption": "One post-freeze cryptographic batch modeled as independent uniform bits; approximate family-seven Wilson coverage; operational completion is not assumed.",
+      "studyHash": "e87ccfa94a1070d165d19580e6760b05005e79b671879f9ba31d39e1a16c497e",
+      "archiveHash": "8fd46354600b245f6f31ef0e587590fd33030f4d2e48ec0938d78a141500bd74",
+      "stopReason": "One complete fixed panel; no retry, extension, method-reliability or global-optimality claim."
+    },
+    "completion": {
+      "version": "tower-practical-fixed-team-confirmation-v1",
+      "status": "Complete",
+      "requestHash": "1c9b66d1f67ba26305c70258275f230bd8468f25d3af21df5b5aefd2e93b91d7",
+      "measuredSecondsBeforeSeal": 752.5361391,
+      "chargedSeconds": 4800,
+      "chargedBytes": 2415919104,
+      "retries": 0,
+      "fights": 16500
+    },
+    "closeout": {
+      "version": "tower-practical-fixed-team-confirmation-v1",
+      "requestHash": "1c9b66d1f67ba26305c70258275f230bd8468f25d3af21df5b5aefd2e93b91d7",
+      "filesHash": "dc60ca20d41ef58d7c26fc8765055e6336832a05fdb119f97e0d0ff76b0cc8a7",
+      "measuredSeconds": 753.205844,
+      "retainedBytes": 401614649
+    },
+    "native-audit": {
+      "status": "Passed",
+      "studyHash": "e87ccfa94a1070d165d19580e6760b05005e79b671879f9ba31d39e1a16c497e",
+      "archiveHash": "8fd46354600b245f6f31ef0e587590fd33030f4d2e48ec0938d78a141500bd74",
+      "newFights": 0
+    },
+    "independent-audit": {
+      "version": "tower-practical-fixed-team-confirmation-v1",
+      "executionStatus": "Complete",
+      "integrityStatus": "Verified",
+      "strengthDecision": "StrongerFixedTeamConfirmed",
+      "adoption": "AdoptFixedTeam",
+      "candidateId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "rates": [
+        {
+          "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+          "wins": 3932,
+          "estimate": {
+            "rate": 0.7149090909090909,
+            "lower": 0.698259099596181,
+            "upper": 0.7309942870615098,
+            "confidence": 0.9928571428571429
+          }
+        },
+        {
+          "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "wins": 3511,
+          "estimate": {
+            "rate": 0.6383636363636364,
+            "lower": 0.6207638788063587,
+            "upper": 0.6555997652262155,
+            "confidence": 0.9928571428571429
+          }
+        },
+        {
+          "partyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "wins": 3469,
+          "estimate": {
+            "rate": 0.6307272727272727,
+            "lower": 0.613060311420305,
+            "upper": 0.6480506742031125,
+            "confidence": 0.9928571428571429
+          }
+        }
+      ],
+      "contrasts": [
+        {
+          "otherPartyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+          "gains": 1365,
+          "losses": 944,
+          "observedGain": 0.07654545454545454,
+          "lower": 0.04710785295109063,
+          "upper": 0.10578188967402596,
+          "qualifies": true
+        },
+        {
+          "otherPartyId": "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b",
+          "gains": 1417,
+          "losses": 954,
+          "observedGain": 0.08418181818181818,
+          "lower": 0.05448263074400361,
+          "upper": 0.11365977029026955,
+          "qualifies": true
+        }
+      ],
+      "recommendedPartyIds": [
+        "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b"
+      ],
+      "controlPartyIds": [
+        "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "6825709c4bcd84b0c72c60c552530007bed67128eb518c7c721d7a0188e0172b"
+      ],
+      "balanceAssessment": "NotAssessed",
+      "samplingAssumption": "One post-freeze cryptographic batch modeled as independent uniform bits; approximate family-seven Wilson coverage; operational completion is not assumed.",
+      "studyHash": "e87ccfa94a1070d165d19580e6760b05005e79b671879f9ba31d39e1a16c497e",
+      "archiveHash": "8fd46354600b245f6f31ef0e587590fd33030f4d2e48ec0938d78a141500bd74",
+      "stopReason": "One complete fixed panel; no retry, extension, method-reliability or global-optimality claim."
+    },
+    "history-input": {
+      "reservationState": "Complete",
+      "reservedCount": 10997
+    },
+    "confirmation-binding": {
+      "version": "tower-practical-fixed-team-confirmation-v1",
+      "freezeHash": "0c8a6b021cbf6c7ed3bfb462edbdce43c2c71bea848ab07fdf77b0c57703f322",
+      "entropyHash": "c6c6a85c964be4d4e89abef36206c0ad5438e60306b675c01a31ae29267f969f",
+      "historicalHash": "e016802cc499c5a2bbd160ae8d49085e66d6bd90724306812a7922a1689d860a",
+      "words": 11000,
+      "panel": 5500,
+      "newReservations": 10997
+    },
+    "admission-phase": {
+      "phase": {
+        "name": "admission",
+        "startedAt": "2026-09-17T03:48:42.812739+00:00",
+        "deadline": "2026-09-17T03:51:42.812739+00:00",
+        "baseBytes": 44479
+      },
+      "measuredSeconds": 30.9360656,
+      "observedBytes": 52032764,
+      "chargedSeconds": 180,
+      "chargedBytes": 134217728
+    },
+    "combat-phase": {
+      "phase": {
+        "name": "combat",
+        "startedAt": "2026-09-17T03:49:13.7550337+00:00",
+        "deadline": "2026-09-17T04:13:13.7550337+00:00",
+        "baseBytes": 52077543
+      },
+      "measuredSeconds": 630.1084161,
+      "observedBytes": 347556260,
+      "chargedSeconds": 1440,
+      "chargedBytes": 805306368
+    },
+    "audit-phase": {
+      "phase": {
+        "name": "audit",
+        "startedAt": "2026-09-17T03:59:43.8746804+00:00",
+        "deadline": "2026-09-17T04:09:43.8746804+00:00",
+        "baseBytes": 399634108
+      },
+      "measuredSeconds": 91.3527472,
+      "observedBytes": 169714,
+      "chargedSeconds": 600,
+      "chargedBytes": 67108864
+    },
+    "attemptCounts": {
+      "Started": 16500,
+      "Completed": 16500,
+      "unreadableLines": 0
+    },
+    "reservation": {
+      "state": "Complete",
+      "historicalValues": 486374,
+      "newReservations": 10997,
+      "overlap": 0,
+      "cumulativeValues": 497371,
+      "ledgerSha256": "440440b8526f66235c5ea8c6f0ccb5f57815dc716dbb40ee43870ef6784a9757"
+    }
+  },
+  "nativeInventoryEntries": 16599,
+  "oversightInventoryEntries": 9,
+  "nativeBytes": 401614649,
+  "oversightBytes": 1836791,
+  "combinedBytes": 403451440
+}

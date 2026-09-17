@@ -67,7 +67,12 @@ public static class TowerRefinementComparisonLaunch
         foreach (var path in paths.Order(StringComparer.Ordinal)) {
             ct.ThrowIfCancellationRequested(); var hash = HarnessJson.FileHash(path); files.Add(path, hash);
             if (recoveries.TryGetValue(path, out var receipt)) {
-                values.UnionWith(TowerRefinementReservationRecovery.ReadPending(path, receipt, ct, recordedCandidate)); recovered++;
+                var version = HarnessJson.Read<JsonElement>(receipt).GetProperty("version").GetString();
+                values.UnionWith(version switch {
+                    TowerPracticalReservationRecovery.Version or TowerPracticalReservationRecovery.AllocationVersion
+                        => TowerPracticalReservationRecovery.ReadPending(path, receipt, ct, recordedCandidate),
+                    TowerRefinementReservationRecovery.Version => TowerRefinementReservationRecovery.ReadPending(path, receipt, ct, recordedCandidate),
+                    _ => throw new InvalidDataException("Unknown Pending recovery receipt version.") }); recovered++;
             }
             else if (seen.Add(hash)) values.UnionWith(TowerSearchBenchmark.History(HarnessJson.Read<JsonElement>(path)));
             Require(HarnessJson.FileHash(path) == hash, "History changed while reading it.");

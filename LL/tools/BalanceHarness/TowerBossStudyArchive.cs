@@ -4,8 +4,13 @@ namespace BalanceHarness;
 
 public static partial class TowerBossStudy
 {
-    public static async Task<BossStudyReport> RunAsync(string root, string output, TowerBossDiscoveryDefinition definition,
+    public static Task<BossStudyReport> RunAsync(string root, string output, TowerBossDiscoveryDefinition definition,
         CancellationToken token = default, Action<string>? progress = null)
+        => RunWithAttemptsAsync(root, output, definition, null, token, progress);
+
+    internal static async Task<BossStudyReport> RunWithAttemptsAsync(string root, string output, TowerBossDiscoveryDefinition definition,
+        Action<bool>? attempt, CancellationToken token = default, Action<string>? progress = null,
+        Func<BossConfirmationFreeze, CancellationToken, Task>? beforeConfirmation = null)
     {
         // Own the arrays and dictionaries too: callers cannot change a running experiment through a record's children.
         var d = JsonSerializer.Deserialize<TowerBossDiscoveryDefinition>(JsonSerializer.Serialize(definition, HarnessJson.Options), HarnessJson.Options)!;
@@ -43,10 +48,11 @@ public static partial class TowerBossStudy
                 var replay = await runner.RunAsync(input, detailed: true, token: ct);
                 Freeze("replays/" + trial.Id + ".json", replay);
                 return replay;
-            }, Freeze, token, progress);
+            }, Freeze, token, progress, attempt, beforeConfirmation);
             Freeze("study.json", report);
             if (report.Balance is not null) Freeze("assessment.json", report.Balance);
-            File.WriteAllText(Path.Combine(output, "study.md"), Markdown(report));
+            Freeze("report-format.json", ReportFormat);
+            File.WriteAllText(Path.Combine(output, "study.md"), Markdown(report, d));
             return report;
         }
         catch (Exception exception)
@@ -128,8 +134,10 @@ public static partial class TowerBossStudy
             if (!Directory.EnumerateFiles(Path.Combine(output, folder)).Select(p => Path.GetRelativePath(output, p).Replace('\\', '/')).Order(StringComparer.Ordinal)
                 .SequenceEqual(seen.Where(p => p.StartsWith(folder + "/", StringComparison.Ordinal)).Order(StringComparer.Ordinal)))
                 throw new InvalidDataException("Unexpected study recipes or exports.");
+        var reportFormatPath = Path.Combine(output, "report-format.json");
+        var reportFormat = File.Exists(reportFormatPath) ? HarnessJson.Read<string>(reportFormatPath) : null;
         if (!Directory.EnumerateFiles(Path.Combine(output, "replays")).Select(Path.GetFileNameWithoutExtension).Order(StringComparer.Ordinal)
-            .SequenceEqual(replayIds.Order(StringComparer.Ordinal)) || File.ReadAllText(Path.Combine(output, "study.md")) != Markdown(rebuilt))
+            .SequenceEqual(replayIds.Order(StringComparer.Ordinal)) || File.ReadAllText(Path.Combine(output, "study.md")) != ArchivedMarkdown(rebuilt, d, reportFormat))
             throw new InvalidDataException("Study replay inventory or Markdown changed.");
         return rebuilt;
     }

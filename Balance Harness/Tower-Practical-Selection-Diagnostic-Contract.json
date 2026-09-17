@@ -1,0 +1,150 @@
+{
+  "version": "practical-selection-diagnostic-contract-analysis-v1",
+  "proposedProtocol": "tower-practical-selection-diagnostic-v1",
+  "status": "DesignSpecified_ImplementationAndResourceAdmissionPending",
+  "runnableRequest": false,
+  "launchDecision": "NoGo",
+  "fights": {
+    "discovery": 512,
+    "selection": 128,
+    "confirmation": 4000,
+    "total": 4640
+  },
+  "confirmationNominees": 4,
+  "intervalFamily": 10,
+  "frozenPrimaryCount": 1,
+  "maximumProposals": 256,
+  "samplingProposal": {
+    "source": "RandomNumberGenerator.Fill, single batch after nominee freeze",
+    "sourceModelIsAssumption": true,
+    "rawWordCount": 2048,
+    "rawBytes": 8192,
+    "mapping": "ReadInt32LittleEndian without modulo or sign masking",
+    "selection": "First 1000 distinct values absent from history and pre-confirmation reservations",
+    "reserveUnusedTail": true,
+    "extraBatches": 0,
+    "preConfirmationNewValues": 41,
+    "maximumNewReservations": 2089,
+    "minimumNewReservationsOnCompletePanel": 1041,
+    "maximumNewUnusedTailReservations": 1048,
+    "currentHistoricalExclusions": 484285,
+    "maximumTotalExclusionsAtCurrentHistory": 486374,
+    "targetEligiblePopulationBeforeBatch": 4294482970,
+    "shortfallRejectionsRequired": 1049,
+    "perPositionRejectionUpper": 0.00011324253864586353,
+    "batchShortfallProbabilityLog10Upper": -3522.8345019223516,
+    "couplingFailureUpper": 0.00011631202253900194,
+    "roundedConditionalDetectionLowerIncludingBatchCap": 0.8109,
+    "trueGainAlternative": 0.16,
+    "operationalFailureProbabilityIncluded": false
+  },
+  "resourceAdmission": {
+    "status": "InsufficientEvidence",
+    "newMaximumSeconds": null,
+    "newMaximumBytes": null,
+    "grantedAllowance": false,
+    "measuredDiagnosticRuns": 0,
+    "historicalReferenceOnly": {
+      "seconds": 600,
+      "bytes": 268435456,
+      "remainingSpendableAllowance": 0
+    },
+    "phaseIllustrationsAreNotBounds": true,
+    "phaseIllustrations": [
+      {
+        "phase": "admission",
+        "observedSeconds": 19.984000000025844,
+        "historicalCeilingSeconds": 120,
+        "illustrativeSeconds": 19.984000000025844,
+        "illustrationExceedsHistoricalPhase": false
+      },
+      {
+        "phase": "audit",
+        "observedSeconds": 46.937000000005355,
+        "historicalCeilingSeconds": 120,
+        "illustrativeSeconds": 154.67875000001766,
+        "illustrationExceedsHistoricalPhase": true
+      },
+      {
+        "phase": "run",
+        "observedSeconds": 99.57799999997951,
+        "historicalCeilingSeconds": 360,
+        "illustrativeSeconds": 328.1547727272052,
+        "illustrationExceedsHistoricalPhase": false
+      }
+    ],
+    "illustrativeTotalSeconds": 502.81752272724873,
+    "observedProcesses": {
+      "public-run": {
+        "seconds": 99.54699999999139,
+        "receiptSha256": "277b2db89a9cbcfcf6c0f15eb5d8b7ef2f95e05b03ca56f9312753faf5558b39"
+      },
+      "public-audit": {
+        "seconds": 10.25,
+        "receiptSha256": "9e68a399b05fc1d05d3afc09ad5f8393a83178e12a3f97f796b3d70f73700acf"
+      },
+      "independent-audit": {
+        "seconds": 36.562000000005355,
+        "receiptSha256": "b97240bd91674580ce2d9a53b3b6d7227ce71bde6c07205a894d911cfbd05431"
+      }
+    },
+    "observedFinalRetainedBytes": 127739696,
+    "observedLargestBattleBytes": 21963,
+    "missingEvidence": [
+      "Implemented diagnostic runtime identity and zero-combat parity",
+      "Compatible phase time and storage model including separate audits and closeout",
+      "Explicit prospective operational envelope and allowance"
+    ]
+  },
+  "requiredArtifacts": [
+    "diagnostic-request",
+    "search-binding",
+    "discovery-shortlist",
+    "selection-results",
+    "nominees-freeze",
+    "entropy-intent",
+    "entropy-start",
+    "entropy-bytes",
+    "entropy-complete",
+    "confirmation-binding",
+    "complete-reservation-ledger",
+    "ordered-attempt-journal",
+    "battle-archive",
+    "native-audit",
+    "independent-audit",
+    "diagnostic-result",
+    "seed-free-team-exports",
+    "phase-resource-receipts"
+  ],
+  "recoveryPolicy": "No resume; unresolved entropy remains Pending; legacy receipts reject new version",
+  "sourcePins": {
+    "LL/tools/BalanceHarness/TowerBossDiscoveryContract.cs": "778590d210f205b91456c53e3932c1d2593b0f15ec53a3ba1d03a12456c9a2c9",
+    "LL/tools/BalanceHarness/TowerSuppliedCompositionSearch.cs": "17025c38316c014579130ed5c42a81c1cc46100f49906fd6692b0c9ffd653375",
+    "LL/tools/BalanceHarness/TowerBossStudy.cs": "f801d31457310fd209f3d7e9c5995356a2e52c5e5c8ef3657eec7a71669a82d9",
+    "LL/tools/BalanceHarness/TowerBossStudyPolicy.cs": "14b42dd8cd792c4fb1defc435ab1cc81e671208d91778f59f8e7e61c356cb2f3",
+    "LL/tools/BalanceHarness/TowerBossStudyArchive.cs": "8c46a03f638bec0da2e9b478bf76233c7b879e8b609fd63cafe9724643e5aabe",
+    "LL/tools/BalanceHarness/TowerPracticalSearch.cs": "5c480233e5ca667d5dc1374b32f8b4c5481cbcab61bae1978b4caa949d1acbec",
+    "LL/tools/BalanceHarness/TowerPracticalSearchRun.cs": "18003a4b095e5000b8b7688a46990ed2a4c61fe6a9bec6af8fbd4f51ae9c63d6",
+    "LL/tools/BalanceHarness/TowerPracticalAllocation.cs": "6fbcd9e509e13fba1436ebc08977bc2a312c6a232c99df5121ee52ebb02ae02a",
+    "LL/tools/BalanceHarness/TowerPracticalAllocationRecovery.cs": "2d60b772732bd9ea695c4a5ff5dae58ff5d1dbff7d6cd70353f78c3e127a89d2",
+    "LL/tools/BalanceHarness/TowerCompleteReservation.cs": "4de57311b46e9b72fc49234d07cd8b6498ef55b25e4880feac9d249974165c89",
+    "LL/tools/BalanceHarness/TowerHistoryRegistry.cs": "2fb79cec7d63860a86135a2148604941636bc7fc3e296d7a3a82811d78b5b87d",
+    "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+    "LL/tools/BalanceHarness/TowerStudyLimits.cs": "54fb94c0779be8c514721f6a10d978bbd7b3e8079bc10bdeef34edfbeeaaeaca",
+    "LL/src/Core/Common/Randomness/StableRandom.cs": "4d9fce0b12d52eba842464338465f3bdcb721a46a36c155bff796b5553cd8d67"
+  },
+  "retainedEvidencePins": {
+    "TestResults/practical-native-verification-20260917/files.json": "2c8415a62bdf6d72451a6468be5ba0c7ea78a10744e0688516a796690b921e15",
+    "TestResults/balance/tower-practical-native-verification-20260917/files.json": "54a3a877b209207bc66edd027396e7116e79acbae379639c513990d1a37f3db3",
+    "TestResults/practical-native-verification-20260917/completion.json": "f916bfad9887a1a69d61124b493ca201051c70d0f27cc6b666105b260203f625"
+  },
+  "verifiedManifestEntries": {
+    "TestResults/practical-native-verification-20260917": 53,
+    "TestResults/balance/tower-practical-native-verification-20260917": 1564
+  },
+  "priorDesignSha256": "bc47df34b8d0219d079623183dafc31b07b7187b81b569fc081cc22c8784d7ec",
+  "analysisSourceSha256": "5fc1edd470d8922df817849a7a5d397d45212ccfa23acba722f09c5e76e8c6f3",
+  "newFights": 0,
+  "newValues": 0,
+  "entropyCalls": 0
+}

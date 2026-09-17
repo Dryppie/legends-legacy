@@ -1,0 +1,156 @@
+{
+  "version": "tower-practical-fixed-team-confirmation-implementation-v1",
+  "status": "ImplementedFixtureVerifiedNoGameplay",
+  "contract": "tower-practical-fixed-team-confirmation-v1",
+  "sourceHashes": {
+    "LL/tests/BalanceHarness.ProcessFixture/FixedTeamFixtureHost.cs": "41357c4fba708c8305618139830735301b8be7ed13fcf0e0fc5830a583382ad3",
+    "LL/tests/BalanceHarness.ProcessFixture/FixtureHost.cs": "7aa1dbef17964d1d411fecce36a3a0dfcf1653a9861812e99a2a1116f29856a7",
+    "LL/tests/EssenceSystem.Tests/BalanceHarnessFixedTeamConfirmationTests.cs": "aa7736b5b3a958f0497420c7b4f2e4a7706efcb4c74a0485e3f515d36fa385ab",
+    "LL/tests/EssenceSystem.Tests/BalanceHarnessFixedTeamProcessTests.cs": "887ea110ac5515571a863a550593ae07ef32887649904b1eb00ca9e8ee302c37",
+    "LL/tools/BalanceHarness/Program.cs": "9ef4731940aca02e87676662fa0872b4e3a67a1e849ce52500a4e8b644aadaf2",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmation.cs": "68c6e75e3eebd2841280af3f3b5b89633173e9b0a7a059500041f3268a80fbb0",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationArchive.cs": "9b8b26fd2972ecef5b132e95b7dcd7ad5891f2edb11ebc695833696d88072454",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationReservation.cs": "6739768fe9f751a5f5d288eeb5f4a8d5a4ea567852cf5a5d573b53fe1711cd95",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationRun.cs": "3df4cacb9c4ee046e9495c83fe2841cb0b1d1abb558cca532ed8c19e74d84dff",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationWorker.cs": "2b246bef0e94e0f54d504048670eb417b4700c9d900053c378c011fb57c7c7e2"
+  },
+  "planSha256": "5f12203adf1f74d28a21d657df7fe7d74212700481bc8e316d7354f1b74c5149",
+  "testCounts": {
+    "BalanceHarnessPracticalRecoveryTests": 41,
+    "BalanceHarnessPracticalProcessTests": 20,
+    "BalanceHarnessPracticalAllocationRecoveryTests": 58,
+    "BalanceHarnessPracticalSearchTests": 54,
+    "BalanceHarnessPracticalAllocationTests": 33,
+    "BalanceHarnessFixedTeamConfirmationTests": 55,
+    "BalanceHarnessSelectionDiagnosticTests": 32
+  },
+  "testsPassed": 293,
+  "testsFailed": 0,
+  "testsSkipped": 0,
+  "buildErrors": 0,
+  "existingBuildWarnings": 9,
+  "testLog": {
+    "path": "TestResults/fixed-team-confirmation-implementation-20260917/verification.log",
+    "sha256": "abeaf303d134913a036aee70ef08ec89b599cedd304d4e23563f733ee9154274"
+  },
+  "testTrx": {
+    "path": "TestResults/fixed-team-confirmation-implementation-20260917/verification.trx",
+    "sha256": "47cc048a195eaae27855afd7619f57362d03b5bdecef16a0e11b5789c7baeba2"
+  },
+  "fixtureObservations": {
+    "ownedNegative": {
+      "version": "tower-practical-fixed-team-confirmation-v1",
+      "requestHash": "75d3e1607d66dd4e5ac527c18f0c5db1cfedb254dd7b89177db9f376e0c705fe",
+      "filesHash": "2628129f7daaa6688c816103effae87b56f0cc2d4d4822e21d1771b3d864e6e9",
+      "measuredSeconds": 193.0072316,
+      "retainedBytes": 25609892
+    },
+    "literalArchive": {
+      "closeout": {
+        "version": "tower-practical-fixed-team-confirmation-v1",
+        "requestHash": "5f3d2df83b49abe93d29000acdc964b0ffff658b803e54fa322d48d41e3751a2",
+        "filesHash": "8578a6c757ff5ceed4e1c50c302a21f207c8e447ac6462f12eb68eb3e468f235",
+        "measuredSeconds": 173.1876484,
+        "retainedBytes": 25607362
+      },
+      "phases": [
+        {
+          "phase": {
+            "name": "admission",
+            "startedAt": "2026-09-17T03:12:00.0944975+00:00",
+            "deadline": "2026-09-17T03:13:00.0944975+00:00",
+            "baseBytes": 1875
+          },
+          "measuredSeconds": 0.5187306,
+          "observedBytes": 2664138,
+          "chargedSeconds": 60,
+          "chargedBytes": 33554432
+        },
+        {
+          "phase": {
+            "name": "combat",
+            "startedAt": "2026-09-17T03:12:00.6366155+00:00",
+            "deadline": "2026-09-17T03:17:00.6366155+00:00",
+            "baseBytes": 2666310
+          },
+          "measuredSeconds": 165.0354807,
+          "observedBytes": 20965310,
+          "chargedSeconds": 300,
+          "chargedBytes": 134217728
+        },
+        {
+          "phase": {
+            "name": "audit",
+            "startedAt": "2026-09-17T03:14:45.6866025+00:00",
+            "deadline": "2026-09-17T03:17:45.6866025+00:00",
+            "baseBytes": 23631922
+          },
+          "measuredSeconds": 6.4697062,
+          "observedBytes": 169708,
+          "chargedSeconds": 180,
+          "chargedBytes": 67108864
+        }
+      ],
+      "actualCombat": 0,
+      "productionEntropyDraws": 0,
+      "scope": "Synthetic reports and inputs; no retained runtime/content or combat feasibility claim"
+    },
+    "producingExecution": {
+      "runtime": ".NET 10.0.12",
+      "operatingSystem": "Microsoft Windows 10.0.26200",
+      "architecture": "X64",
+      "assemblyHashes": {
+        "Application": "26f199b48fddf0130d9af77edc2f5255091219c486f976887b842f698bc3d4b0",
+        "BalanceHarness": "d728747ab6a9332d2e24c4d38e880f7272465a5152dc5263c0a7e65b53b23a49",
+        "Common": "4a92cc3a3289bf6056ad460879870552a8d7b5d6013eee3e532e3f80a0d06389",
+        "Domain": "d48e7c5ebf8ca3aa2f0cd76183153ccf2f6c29d67689f7aaa62cdc6a24d83941",
+        "Services.LL": "399f94c8f61e055da15731b1e069a36f3b94a0e29ec2f964d4e06c300948bbee"
+      }
+    }
+  },
+  "preservation": {
+    "baseline": "TestResults/fixed-team-confirmation-implementation-20260917/baseline.json",
+    "baselineSha256": "6b7f87e464c44d3c56989f08fbb74b60cb4fe18bf61269096c8e7008f6ffb15a",
+    "distinctBaselineFiles": 5545,
+    "unchangedFiles": 5530,
+    "intendedChangedFiles": [
+      "Balance Harness/Automatic-Tower-Team-Discovery-Implementation.md",
+      "Balance Harness/Automatic-Tower-Team-Discovery-Plan.md",
+      "Balance Harness/Tower-Balancing-Tool-State-and-Gaps-Review.md",
+      "Balance Harness/Tower-Practical-Evaluation-Design.md",
+      "Balance Harness/Tower-Practical-Fixed-Team-Confirmation-Plan.md",
+      "Balance Harness/Tower-Practical-Hypothesis-Qualification.md",
+      "Balance Harness/Tower-Practical-Selection-Diagnostic-Design.md",
+      "Balance Harness/Tower-Practical-Team-Handoff.md",
+      "Balance Harness/Tower-Practical-Workflow-Readiness.md",
+      "Balance Harness/Tower-Search-Strategy-Reset.md",
+      "Balance Harness/Tower-Team-Search-Design-Review.md",
+      "LL/tests/BalanceHarness.ProcessFixture/FixtureHost.cs",
+      "LL/tools/BalanceHarness/PRACTICAL-SEARCH.md",
+      "LL/tools/BalanceHarness/Program.cs",
+      "LL/tools/BalanceHarness/README.md"
+    ],
+    "sealedFilesPreserved": 4855
+  },
+  "historicalPlanner": "Expected refusal: original admission package pins changed producing source. Frozen plan and source/evidence pins preserved without rebinding.",
+  "newGameplayFights": 0,
+  "productionEntropyDraws": 0,
+  "newPermanentReservations": 0,
+  "productionArchiveReconstructions": 0,
+  "permanentHistoryValues": 486374,
+  "adoption": "Hold",
+  "v19Status": "Unresolved",
+  "v19UnusedValues": 512,
+  "v19RequiredRecipes": 253,
+  "nativeCombatFeasibilityEstablished": false,
+  "futureGameplayAdmissionRequired": true,
+  "migrations": false,
+  "applicationConfigurationChanges": false,
+  "deployments": false,
+  "finalChecks": {
+    "localMarkdownLinks": 1082,
+    "brokenLinks": 0,
+    "whitespace": "Passed",
+    "cliHelp": "Passed"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "version": "tower-fixed-team-admission-review-v1",
+  "status": "NativeCheckPassedAwaitingRunAndAccountingDecision",
+  "gameplayAuthorized": false,
+  "nativeCombatFeasibilityEstablished": false,
+  "engineeringTreatmentAccepted": false,
+  "requestFileHash": "315063b481751d273ad17b568c8c785e8bff31738b9a960b7ee4d2db2a67dcf6",
+  "nativeRequestHash": "1c9b66d1f67ba26305c70258275f230bd8468f25d3af21df5b5aefd2e93b91d7",
+  "definitionFileHash": "13eb745f29e7691e5339359f1c9dc879bb798bd152233294f7bbeeaa99286372",
+  "executionHash": "32fc85b3ee4f6dd14a2c0c068599e4ae7345d41d94e01d92491144507e72c36e",
+  "packageManifestSha256": "0aa1b905a57b0e931f07139eb122f1b5b7e3eb7696ebb10118b1b20b8090a3fd",
+  "packageReceiptSha256": "76604bc528f4368998bf9d1838502da94bc4f1a600dfd944ea077223299e7bb3",
+  "packageFiles": 42,
+  "packageBytes": 25866409,
+  "preparationSeconds": 119.06299999999464,
+  "nativeCheckSeconds": 17.280999999988126,
+  "runtimeFiles": 26,
+  "sourcePins": 183,
+  "sealedHistoricalFilesPreserved": 4855,
+  "historicalValues": 486374,
+  "requiredHistoryFiles": 204,
+  "supportedRecoveryReceipts": 1,
+  "maximumFights": 16500,
+  "maximumNewReservations": 11000,
+  "maximumHistoricalUnion": 497374,
+  "phases": {
+    "admission": {
+      "seconds": 180,
+      "bytes": 134217728
+    },
+    "combat": {
+      "seconds": 1440,
+      "bytes": 805306368
+    },
+    "audit": {
+      "seconds": 600,
+      "bytes": 67108864
+    }
+  },
+  "closeoutReserve": {
+    "seconds": 2,
+    "bytes": 4194304
+  },
+  "enclosingHeadroom": {
+    "seconds": 178,
+    "bytes": 62914560
+  },
+  "carriedOperationalCharges": {
+    "seconds": 2400,
+    "bytes": 1342177280
+  },
+  "additionalRunProposal": {
+    "seconds": 2400,
+    "bytes": 1073741824
+  },
+  "proposedOperationalCumulativeCeiling": {
+    "seconds": 4800,
+    "bytes": 2415919104
+  },
+  "newFights": 0,
+  "newReservations": 0,
+  "entropyCalls": 0,
+  "adoption": "Hold",
+  "v19Status": "Unresolved",
+  "decision": {
+    "status": "AwaitingRunAndAccountingDecision",
+    "gameplayAuthorized": false,
+    "riskAccepted": false,
+    "engineeringTreatmentAccepted": false,
+    "proposal": "One 16500-fight fixed-team run, 5500 paired trials per exact team, within 2400 seconds and 1 GiB additional allowance.",
+    "accountingDecision": "Accept separately disclosed unmetered engineering; operational prior is 2400 seconds /1280 MiB and proposed cumulative is 4800 seconds /2304 MiB. These are not all-in engineering totals.",
+    "risk": "Native full-run feasibility is unproven. Resource, integrity or entropy failure is terminal; no retry, replay, refill, extension or budget transfer.",
+    "reservationConsequences": "Up to 11000 exposed values remain permanently excluded; entropy interruption can leave blocking Pending with no supported automatic recovery.",
+    "outcomes": "Complete agreeing positive audits may AdoptFixedTeam; a complete negative keeps Hold and both anchors. Incomplete evidence cannot pass. Balance and method reliability remain unassessed."
+  },
+  "commandAfterApproval": {
+    "executableArguments": [
+      "dotnet",
+      "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\fixed-team-confirmation-admission-20260917-03\\runtime\\BalanceHarness.dll",
+      "tower-fixed-team-confirmation-run",
+      "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\fixed-team-confirmation-admission-20260917-03\\request.proposed.json"
+    ],
+    "executed": false,
+    "preconditions": [
+      "Approve the exact run and capped failure risk",
+      "Accept the explicitly separate unmetered engineering accounting treatment",
+      "Revalidate this package, runtime, content, source, recoveries and complete history",
+      "Use enclosing owned execution with combined output/log/oversight accounting inside 2400 seconds and 1 GiB",
+      "Gameplay output must still be absent"
+    ],
+    "audits": "Both audits are included in the run; no extra public native verification, probe or replay is authorized."
+  }
+}

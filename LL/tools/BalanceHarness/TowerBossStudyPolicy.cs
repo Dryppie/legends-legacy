@@ -142,7 +142,10 @@ public static class TowerBossStudyPolicy
             return frozen.Members.Where(m => m.Context == context).Any(m =>
                 TowerBossDiscovery.RecipeHash(frozen.Definition.Cells.Single(c => c.Id == m.CellId).Scenario.Party) == hash);
         }
-        foreach (var stage in new[] { (Name: "discovery", Rows: discovery.Arms.SelectMany(a => a.Evaluations).DistinctBy(r => r.Id)),
+        var discoveryRows = d.Generation.PolicyVersion == TowerEvaluationAllocationSearch.Version
+            ? discovery.Arms.SelectMany(TowerEvaluationAllocationSearch.Observations)
+            : discovery.Arms.SelectMany(a => a.Evaluations).DistinctBy(r => r.Id);
+        foreach (var stage in new[] { (Name: "discovery", Rows: discoveryRows),
             (Name: "selection", Rows: selection.AsEnumerable()) })
         foreach (var row in stage.Rows)
         foreach (var cell in row.Cells.Where(c => c.Clears.Count(x => x) * 2 > c.Clears.Count))

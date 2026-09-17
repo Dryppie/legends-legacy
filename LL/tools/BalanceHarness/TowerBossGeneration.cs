@@ -15,10 +15,13 @@ public sealed record BossGeneratedProposal(BossDiscoveryProvenance Provenance, P
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossGroupCountTrace? GroupCount = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossJointStructuralTrace? JointStructural = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossLocalRefinementTrace? LocalRefinement = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossSuppliedSearchTrace? Supplied = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossSuppliedSearchTrace? Supplied = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossAnchoredEdit? AnchoredEdit = null);
 public sealed record BossGenerationArm(string Method, int Seed, string StopReason,
     IReadOnlyList<BossGeneratedProposal> Proposals, IReadOnlyList<BossDiscoveryMeasurement> Evaluations,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossFeedbackRound>? Feedback = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossFeedbackRound>? Feedback = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<BossEvaluationRound>? EvaluationRounds = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossAnchoredBatch? AnchoredBatch = null);
 public sealed record BossGenerationResult(string Version, string Status, IReadOnlyList<BossGenerationArm> Arms,
     IReadOnlyList<PartyChoice> DiscoveryShortlist, string? Error,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<TowerLateAllocationDecision>? AllocationDecisions = null);

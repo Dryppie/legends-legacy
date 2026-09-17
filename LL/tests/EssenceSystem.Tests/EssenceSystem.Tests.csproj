@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BalanceHarness.ProcessFixture\BalanceHarness.ProcessFixture.csproj" />
     <ProjectReference Include="..\..\tools\BalanceHarness\BalanceHarness.csproj" />
     <ProjectReference Include="..\..\src\Core\Application\Application.csproj" />
     <ProjectReference Include="..\..\src\Core\Domain\Domain.csproj" />

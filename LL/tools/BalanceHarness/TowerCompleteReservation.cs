@@ -21,8 +21,11 @@ internal static class TowerCompleteReservation
             if (extra < 0 || extra > maximum - 32768 - Bytes) throw new InvalidDataException("Binding storage cap exceeded.");
         }
         internal void Put<T>(string name, T value, bool replace = false)
+            => PutBytes(name, JsonSerializer.SerializeToUtf8Bytes(value, HarnessJson.Options), replace);
+
+        internal void PutBytes(string name, byte[] bytes, bool replace = false)
         {
-            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, HarnessJson.Options); Check(bytes.LongLength);
+            Check(bytes.LongLength);
             var path = Path.Combine(root, name); var pending = path + ".pending";
             if (!replace && File.Exists(path)) throw new IOException("No overwrite: " + name);
             using (var f = new FileStream(pending, FileMode.CreateNew, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough))
