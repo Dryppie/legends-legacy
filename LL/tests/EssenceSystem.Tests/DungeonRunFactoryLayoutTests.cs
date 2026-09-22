@@ -89,7 +89,9 @@ public sealed class DungeonRunFactoryLayoutTests
                 Assert.All(run.State.MapNodes.Where(node => node.Depth == treasuryNode.Depth - 1),
                     node => Assert.Contains(treasury.RoomIndex, node.NextRoomIndexes));
                 Assert.All(alternatives, node => Assert.Equal(treasuryNode.NextRoomIndexes, node.NextRoomIndexes));
-                Assert.Equal(dungeon.RestSiteCount, run.Rooms.Count(room => room.Type == RoomType.RestSite));
+                Assert.True(
+                    run.Rooms.Count(room => room.Type == RoomType.RestSite) >= dungeon.RestSiteCount,
+                    $"{dungeon.Id} seed {seed} generated fewer Rest Sites than its authored baseline.");
                 Assert.Equal(authoredMinibossCount, run.Rooms.Count(room => room.Type == RoomType.MiniBoss));
                 Assert.Equal(run.State.MapNodes.Count, Traverse([0], index => run.State.MapNodes[index].NextRoomIndexes).Count);
             }

@@ -1440,6 +1440,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournament.StartsAtUtc = now.AddHours(1);
         tournament.UpdatedAtUtc = now;
 
+        await EnqueueTournamentSignupAnnouncementAsync(
+            tournament,
+            now,
+            cancellationToken);
+
         await SaveCommitAndPublishTournamentEventAsync(
             transaction,
             tournament,
@@ -1521,6 +1526,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 case TournamentStatus.Scheduled when tournament.RegistrationStartsAtUtc <= now:
                     tournament.Status = TournamentStatus.RegistrationOpen;
                     changed = Touch(tournament, now);
+                    if (now < tournament.RegistrationEndsAtUtc)
+                    {
+                        await EnqueueTournamentSignupAnnouncementAsync(
+                            tournament,
+                            now,
+                            cancellationToken);
+                    }
                     break;
                 case TournamentStatus.RegistrationOpen when tournament.RegistrationEndsAtUtc <= now:
                     tournament.Status = TournamentStatus.RegistrationClosed;
@@ -2176,7 +2188,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         string body,
         string announcementKey,
         DateTimeOffset sentAt,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool isSignupInvite = false)
     {
         if (_outbox is null)
         {
@@ -2190,11 +2203,24 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 CreateTournamentAnnouncementMessageId(tournament.Id, announcementKey),
                 body,
                 TournamentGroundsTargetUrl,
-                sentAt),
+                sentAt,
+                isSignupInvite),
             characterId: null,
             accountId: null,
             cancellationToken: cancellationToken);
     }
+
+    private Task EnqueueTournamentSignupAnnouncementAsync(
+        TournamentInstance tournament,
+        DateTimeOffset sentAt,
+        CancellationToken cancellationToken) =>
+        EnqueueTournamentChatAnnouncementAsync(
+            tournament,
+            $"Registration is open for {tournament.Name}.",
+            "registration-opened",
+            sentAt,
+            cancellationToken,
+            isSignupInvite: true);
 
     private static Guid CreateTournamentAnnouncementMessageId(
         Guid tournamentId,

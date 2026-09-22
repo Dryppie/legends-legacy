@@ -11,6 +11,42 @@ namespace EssenceSystem.Tests;
 public sealed class RaidChatOutboxTests
 {
     [Fact]
+    public async Task Consumer_sends_recruitment_announcement_to_invites()
+    {
+        var handler = new RecordingHttpMessageHandler();
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var payload = new RaidChatAnnouncementPayload(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "A raid leader is recruiting for The Hollow King.",
+            "/game/world/raid/raid-id",
+            DateTimeOffset.UtcNow,
+            IsSignupInvite: true);
+        var message = new GameEventOutboxMessage
+        {
+            EventType = GameEventTypes.RaidChatAnnouncement,
+            PayloadJson = JsonSerializer.Serialize(payload, jsonOptions)
+        };
+        var consumer = new RaidChatGameEventOutboxConsumer(
+            new HttpClient(handler),
+            Options.Create(new AchievementSystemChatOptions
+            {
+                BaseUrl = "https://chat.example/",
+                Secret = "test-secret",
+                TimeoutSeconds = 2
+            }),
+            jsonOptions);
+
+        await consumer.HandleAsync(message, CancellationToken.None);
+
+        Assert.Equal("https://chat.example/api/v1/chat/System", handler.RequestUri?.ToString());
+        using var request = JsonDocument.Parse(handler.Body!);
+        Assert.Equal("Invites", request.RootElement.GetProperty("channelType").GetString());
+        Assert.Equal(payload.TargetUrl, request.RootElement.GetProperty("targetUrl").GetString());
+        Assert.True(request.RootElement.GetProperty("broadcast").GetBoolean());
+    }
+
+    [Fact]
     public async Task Consumer_sends_versioned_channel_snapshot_to_chat_service()
     {
         var handler = new RecordingHttpMessageHandler();

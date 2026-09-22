@@ -75,13 +75,26 @@
             </div>
           </div>
 
-          <button
-            class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
-            type="button"
-            (click)="returnToWorldAfterClaim()"
-          >
-            Return to World
-          </button>
+          <div class="dungeon-result__actions">
+            <button
+              class="dungeon-button ll-button"
+              type="button"
+              [disabled]="!canReplayDungeon()"
+              (click)="replayClaimedDungeon()"
+            >
+              Run Again
+            </button>
+            <button
+              class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
+              type="button"
+              (click)="returnToWorldAfterClaim()"
+            >
+              Return to World
+            </button>
+          </div>
+          <p class="dungeon-result__replay-hint">
+            {{ replayDungeonHint() }}
+          </p>
         </section>
 
         <aside class="dungeon-result__loot ll-panel">

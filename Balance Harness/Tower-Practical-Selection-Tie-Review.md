@@ -1,8 +1,10 @@
 # Practical Tower selection tie audit
 
+**22 September follow-up:** The optional selector is now implemented; see [configuration, compatibility and verification](Tower-Practical-Incumbent-Tie-Implementation.md). This audit's historical evidence and conclusions are unchanged. The next step is a separately declared prospective selector comparison.
+
 17 September 2026. Target: offline BalanceHarness. **VerifiedRetrospectiveSelectionAudit.** All **12 selected outputs** from the two completed paired comparisons, plus the earlier selection diagnostic's primary, match an independent reconstruction of the existing selector. Three comparison outputs had a tie for the highest selection win count. A hypothetical rule retaining the designated supplied primary on positive win ties would change **two outputs**, whose observed confirmation scores would improve by **7.9** and **2.8 percentage points**. This is an outcome-informed hypothesis, not prospective evidence that the rule improves future searches.
 
-The concrete next engineering step is an **optional, separately versioned incumbent tie policy**, with an explicit primary designation frozen before search. The current selector, incumbent search default, confirmed `399bc776…` recommendation and both closed comparison decisions remain unchanged. This audit allocated **zero values**, generated **zero parties**, prepared **zero native parties** and ran **zero fights**.
+The engineering step identified by this audit was an **optional, separately versioned incumbent tie policy**, with an explicit primary designation frozen before search; its subsequent implementation is linked above. The default selector, incumbent search default, confirmed `399bc776…` recommendation and both closed comparison decisions remain unchanged. This audit allocated **zero values**, generated **zero parties**, prepared **zero native parties** and ran **zero fights**.
 
 ## Evidence and scope
 

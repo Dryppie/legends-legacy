@@ -32,7 +32,8 @@ public sealed record CreatureArchiveLocation(
     string RegionName,
     string SourceType,
     string SourceId,
-    string SourceName);
+    string SourceName,
+    int? LevelRequirement);
 
 public sealed record CreatureArchiveEssenceEntry(
     string EssenceDefinitionId,

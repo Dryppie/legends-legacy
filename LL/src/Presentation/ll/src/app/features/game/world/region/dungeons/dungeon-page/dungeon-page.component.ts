@@ -27,6 +27,8 @@ import { DungeonRoomIconComponent } from '../../../../../../shared/components/du
 import { InventoryItemComponent } from '../../../../../../shared/components/inventory-item/inventory-item.component';
 import { InventoryItem } from '../../../../../../shared/models/inventoryItem';
 import { HelpLauncherComponent } from '../../../../../../shared/help/help-launcher.component';
+import { DungeonDifficulty } from '../../../../../../shared/models/enums/dungeonDifficulty';
+import { DungeonPreviewData } from '../../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 
 interface DungeonGraphNode extends DungeonMapNode {
   x: number;
@@ -581,6 +583,52 @@ export class DungeonPageComponent {
       : 'The dungeon is cleared. Every reward from the expedition has been added to your character.',
   );
 
+  readonly replayDungeon = computed<DungeonPreviewData | null>(() => {
+    const definitionId = this.claimedRewardResult()?.run.dungeonDefinitionId;
+    if (!definitionId) return null;
+
+    return (
+      this.dungeonState
+        .dungeons()
+        .find(
+          (dungeon) => dungeon.id.toLowerCase() === definitionId.toLowerCase(),
+        ) ?? null
+    );
+  });
+
+  readonly canReplayDungeon = computed(
+    () => this.replayDungeon()?.canEnter === true && !this.loading(),
+  );
+
+  readonly replayDungeonRequirement = computed(() => {
+    const dungeon = this.replayDungeon();
+    if (!dungeon) return null;
+    return (
+      dungeon.entryRequirements?.find(
+        (requirement) =>
+          requirement.itemId.toLowerCase() ===
+          dungeon.sigilItemId?.toLowerCase(),
+      ) ?? null
+    );
+  });
+
+  readonly replayDungeonHint = computed(() => {
+    const dungeon = this.replayDungeon();
+    const requirement = this.replayDungeonRequirement();
+    if (!dungeon) return 'Return to the world to choose another expedition.';
+    if (dungeon.canEnter) {
+      return requirement
+        ? `${requirement.ownedAmount} ${requirement.name} available.`
+        : 'Entry requirements met.';
+    }
+    return (
+      dungeon.missingRequirements?.[0] ??
+      (requirement
+        ? `Requires ${requirement.requiredAmount} ${requirement.name}.`
+        : 'Entry requirements are not met.')
+    );
+  });
+
   readonly vigorPercent = computed(() =>
     Math.min(100, Math.max(0, this.activeDungeon()?.state?.vigor ?? 100)),
   );
@@ -669,6 +717,34 @@ export class DungeonPageComponent {
     );
     this.claimedRewardResult.set(null);
     void this.router.navigate([returnRoute]);
+  }
+
+  replayClaimedDungeon(): void {
+    const dungeon = this.replayDungeon();
+    if (!dungeon || !this.canReplayDungeon()) return;
+
+    this.dungeonState.startDungeon(
+      dungeon.id,
+      this.difficultyForPreview(dungeon),
+      () => this.claimedRewardResult.set(null),
+    );
+  }
+
+  private difficultyForPreview(dungeon: DungeonPreviewData): DungeonDifficulty {
+    switch (dungeon.difficulty?.toString().toLowerCase()) {
+      case 'veteran':
+      case 'heroic':
+        return DungeonDifficulty.Heroic;
+      case 'champion':
+      case 'mythic':
+        return DungeonDifficulty.Mythic;
+      default:
+        return dungeon.grade === 'Grade II'
+          ? DungeonDifficulty.Heroic
+          : dungeon.grade === 'Grade III'
+            ? DungeonDifficulty.Mythic
+            : DungeonDifficulty.Normal;
+    }
   }
 
   dismissFailedDungeonRun(): void {

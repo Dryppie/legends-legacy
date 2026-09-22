@@ -777,16 +777,20 @@ describe('Combat Styles global configuration page', () => {
     expect(state.save).not.toHaveBeenCalled();
   });
 
-  it('keeps mobile refinements locked before level three and while saving', async () => {
+  it('lets mobile players inspect locked refinements before level three but not choose them', async () => {
     const { fixture, element, state } = await createPage();
     const dialog =
       element.querySelector<HTMLDialogElement>('.refinement-sheet')!;
     fixture.componentInstance.openRefinements(dialog);
-    expect(dialog.open).toBeFalse();
-    state.data.update((data) => ({
-      ...data,
-      styles: data.styles.map((entry) => ({ ...entry, level: 10 })),
-    }));
+    expect(dialog.open).toBeTrue();
+    expect(
+      dialog
+        .querySelector<HTMLInputElement>('input[type="radio"]')
+        ?.matches(':disabled'),
+    ).toBeTrue();
+    expect(dialog.textContent).toContain('choosing one unlocks at Mastery 3');
+
+    dialog.close();
     state.busy.set(true);
     fixture.detectChanges();
     fixture.componentInstance.openRefinements(dialog);

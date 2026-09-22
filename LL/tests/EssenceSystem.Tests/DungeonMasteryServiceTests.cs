@@ -43,13 +43,13 @@ public sealed class DungeonMasteryServiceTests
 
         foreach (var run in new[] { novice, veteran, champion })
         {
-            var award = await service.AwardCompletionAsync(run, default);
+            var award = await service.AwardRunMasteryAsync(run, default);
             // Three completed rooms + boss + miniboss, without an XP nerf per clear.
             Assert.Equal(190, award.ExperienceAwarded);
             Assert.Equal("goblin_mines", award.DungeonDefinitionId);
         }
 
-        var retry = await service.AwardCompletionAsync(novice, default);
+        var retry = await service.AwardRunMasteryAsync(novice, default);
         Assert.True(retry.AlreadyAwarded);
         Assert.Equal(0, retry.ExperienceAwarded);
 
@@ -77,10 +77,86 @@ public sealed class DungeonMasteryServiceTests
         Assert.All((await service.GetMasteryByDungeonAsync(Guid.NewGuid(), ids, default)).Values,
             mastery => Assert.Equal(0, mastery.Experience));
 
-        await service.AwardCompletionAsync(Run(character, "tangled_cave_ii"), default);
+        await service.AwardRunMasteryAsync(Run(character, "tangled_cave_ii"), default);
         await db.SaveChangesAsync();
         Assert.Equal(2, await db.CharacterDungeonMasteries.CountAsync());
         Assert.Equal(570, (await db.CharacterDungeonMasteries.SingleAsync(x => x.DungeonDefinitionId == "goblin_mines")).Experience);
+    }
+
+    [Fact]
+    public async Task Failed_and_retreated_runs_award_progress_without_counting_as_completions()
+    {
+        await using var db = CreateDb();
+        var service = new DungeonMasteryService(new CharacterDungeonMasteryRepository(db));
+        var character = Guid.NewGuid();
+        var failed = new DungeonRun
+        {
+            Id = Guid.NewGuid(), CharacterId = character, DungeonDefinitionId = "goblin_mines_i",
+            Status = DungeonRunStatus.Failed, CurrentRoomIndex = 2,
+            State = new DungeonRunState
+            {
+                FailureAnalysis = new DungeonFailureAnalysis { PrimaryCause = "Combat Readiness" }
+            },
+            Rooms =
+            [
+                new() { RoomIndex = 0, Type = RoomType.Entrance, Status = RoomInstanceStatus.Completed },
+                new() { RoomIndex = 1, Type = RoomType.Combat, Status = RoomInstanceStatus.Completed },
+                // FailRun marks this room completed even though the boss won.
+                new() { RoomIndex = 2, Type = RoomType.Boss, Status = RoomInstanceStatus.Completed }
+            ]
+        };
+        var retreated = new DungeonRun
+        {
+            Id = Guid.NewGuid(), CharacterId = character, DungeonDefinitionId = "goblin_mines_ii",
+            Status = DungeonRunStatus.Retreated, CurrentRoomIndex = 3,
+            Rooms =
+            [
+                new() { RoomIndex = 0, Type = RoomType.Entrance, Status = RoomInstanceStatus.Completed },
+                new() { RoomIndex = 1, Type = RoomType.Combat, Status = RoomInstanceStatus.Completed },
+                new() { RoomIndex = 2, Type = RoomType.MiniBoss, Status = RoomInstanceStatus.Completed },
+                new() { RoomIndex = 3, Type = RoomType.Boss, Status = RoomInstanceStatus.Pending }
+            ]
+        };
+
+        var failedAward = await service.AwardRunMasteryAsync(failed, default);
+        var retreatedAward = await service.AwardRunMasteryAsync(retreated, default);
+
+        Assert.Equal(10, failedAward.ExperienceAwarded);
+        Assert.Collection(
+            failedAward.Reasons,
+            reason => Assert.Equal("attempt", reason.Id),
+            reason => Assert.Equal("rooms_cleared", reason.Id));
+        Assert.Equal(40, retreatedAward.ExperienceAwarded);
+        Assert.Contains(retreatedAward.Reasons, reason => reason.Id == "miniboss_defeated");
+        var mastery = Assert.Single(db.CharacterDungeonMasteries.Local);
+        Assert.Equal(50, mastery.Experience);
+        Assert.Equal(0, mastery.CompletionCount);
+    }
+
+    [Fact]
+    public async Task Reaching_mastery_cap_on_a_failed_run_defers_the_one_time_completion_reward()
+    {
+        await using var db = CreateDb();
+        var character = Guid.NewGuid();
+        db.CharacterDungeonMasteries.Add(new CharacterDungeonMastery
+        {
+            CharacterId = character, DungeonDefinitionId = "goblin_mines", Experience = 74995, Level = 9
+        });
+        await db.SaveChangesAsync();
+        var service = new DungeonMasteryService(new CharacterDungeonMasteryRepository(db));
+        var failed = new DungeonRun
+        {
+            Id = Guid.NewGuid(), CharacterId = character, DungeonDefinitionId = "goblin_mines_i",
+            Status = DungeonRunStatus.Failed, State = new DungeonRunState(), Rooms = []
+        };
+
+        var failedAward = await service.AwardRunMasteryAsync(failed, default);
+        var completionAward = await service.AwardRunMasteryAsync(Run(character, "goblin_mines_ii"), default);
+
+        Assert.Equal(10, failedAward.Level);
+        Assert.False(failedAward.UnlocksMaxLevelReward);
+        Assert.True(completionAward.UnlocksMaxLevelReward);
+        Assert.True(Assert.Single(db.CharacterDungeonMasteries.Local).MaxLevelRewardClaimed);
     }
 
     [Theory]
@@ -98,11 +174,11 @@ public sealed class DungeonMasteryServiceTests
         await db.SaveChangesAsync();
         var service = new DungeonMasteryService(new CharacterDungeonMasteryRepository(db));
 
-        var award = await service.AwardCompletionAsync(Run(character, "goblin_mines_ii"), default);
+        var award = await service.AwardRunMasteryAsync(Run(character, "goblin_mines_ii"), default);
         Assert.Equal(10, award.Level);
         Assert.Equal(!previouslyClaimed, award.UnlocksMaxLevelReward);
         Assert.True(Assert.Single(db.CharacterDungeonMasteries.Local).MaxLevelRewardClaimed);
-        var next = await service.AwardCompletionAsync(Run(character, "goblin_mines_iii"), default);
+        var next = await service.AwardRunMasteryAsync(Run(character, "goblin_mines_iii"), default);
         Assert.False(next.UnlocksMaxLevelReward);
     }
 

@@ -52,7 +52,8 @@ public class ChatController : BaseController
         Guid? MessageId,
         DateTimeOffset? SentAt,
         string? TargetUrl = null,
-        bool Broadcast = false);
+        bool Broadcast = false,
+        ChatChannelType ChannelType = ChatChannelType.System);
     public record SendGuildSystemMessageRequest(
         Guid GuildId,
         Guid ActorCharacterId,
@@ -206,7 +207,8 @@ public class ChatController : BaseController
             request.SenderName,
             request.MessageId,
             request.SentAt,
-            request.TargetUrl));
+            request.TargetUrl,
+            request.ChannelType));
 
         if (message is null) return BadRequest("Invalid system chat message.");
 

@@ -5,7 +5,7 @@
     *ngFor="let slot of slots()"
     type="button"
     (click)="handleSlotClick(slot)"
-    class="ll-item-row h-16 w-full cursor-pointer rounded-none border-x-0 border-t-0 px-4 text-left"
+    class="ll-item-row h-auto min-h-16 w-full cursor-pointer rounded-none border-x-0 border-t-0 px-4 py-2 text-left"
     [ngClass]="{
       'border-l-2 border-l-primary bg-primary/10':
         selectedSlotType === slot.equipmentSlotType,
@@ -34,6 +34,7 @@
       *ngIf="slot.equipmentInstance"
       [item]="slot.equipmentInstance"
       [popoverFocusable]="false"
+      [wrapName]="true"
     ></app-item>
     <span
       *ngIf="slot.equipmentInstance"

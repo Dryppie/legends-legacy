@@ -94,7 +94,7 @@ public sealed class EquipmentDungeonConsumerTests
         public Task<IReadOnlyList<DungeonPreviewReward>> GetPossibleCompletionRewardsAsync(DungeonDefinition dungeon, CancellationToken ct) => throw new NotSupportedException();
         public int CalculateLevel(long experience) => throw new NotSupportedException();
         public int? GetExperienceRequiredForNextLevel(int level) => throw new NotSupportedException();
-        public Task<DungeonMasteryAwardResult> AwardCompletionAsync(DungeonRun run, CancellationToken ct) => throw new NotSupportedException();
+        public Task<DungeonMasteryAwardResult> AwardRunMasteryAsync(DungeonRun run, CancellationToken ct) => throw new NotSupportedException();
         public Task<ClaimDungeonRewardsResult?> ClaimRewardsAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
         public Task<bool> DismissFailedRunAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
         public Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid id, Guid runId, string action, object? payload, CancellationToken ct) => throw new NotSupportedException();

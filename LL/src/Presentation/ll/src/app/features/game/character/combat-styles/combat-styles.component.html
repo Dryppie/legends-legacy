@@ -403,7 +403,7 @@
                   </h2>
                   <span class="ll-text-muted text-xs">{{
                     entry.level < 3
-                      ? "Unlocks at level 3"
+                      ? "View options · Unlocks at level 3"
                       : "Unlocked at level 3 · 1 of " +
                         (entry.definition.refinements.length + 1) +
                         " chosen"
@@ -413,7 +413,7 @@
                   type="button"
                   class="ll-card mobile-summary"
                   aria-haspopup="dialog"
-                  [disabled]="entry.level < 3 || state.busy()"
+                  [disabled]="state.busy()"
                   (click)="openRefinements(refinementDialog)"
                 >
                   <span>
@@ -829,7 +829,8 @@
             <div class="editor-scroll">
               <p class="ll-text-muted mb-4 text-xs leading-relaxed">
                 Mutually exclusive alternatives. Keeping the base form is a
-                valid choice.
+                valid choice. @if (entry.level < 3) { Preview these options
+                now; choosing one unlocks at Mastery 3. }
               </p>
               <ng-container
                 *ngTemplateOutlet="refinementOptions; context: { mobile: true }"

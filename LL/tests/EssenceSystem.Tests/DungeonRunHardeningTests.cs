@@ -5,6 +5,7 @@ using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
+using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Snapshots;
@@ -35,7 +36,7 @@ public sealed class DungeonRunHardeningTests
             new FixedDungeonRunRepository(run), new FixedCharacterSnapshotRepository(run.CharacterId),
             new StubCombatOrchestrationCoordinator(), new VictoryCombatOutcomeCoordinator(),
             null!, null!, new StubDungeonCompletionRewardApplier(), new FixedDungeonDefinitions(run.DungeonDefinitionId),
-            null!, new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), null!, acquisition);
+            null!, new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), new RecordingDungeonMasteryService(), acquisition);
 
         await service.ExecuteActionAsync(run.CharacterId, run.Id, "fight", null, default);
         await service.ExecuteActionAsync(run.CharacterId, run.Id, "fight", null, default);
@@ -163,7 +164,36 @@ public sealed class DungeonRunHardeningTests
 
     private static DungeonRunService TreasuryService(DungeonRun run, IEquipmentAcquisitionService acquisition) =>
         new(new FixedDungeonRunRepository(run), null!, null!, null!, null!, null!, null!, null!, null!,
-            new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), null!, acquisition);
+            new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), new RecordingDungeonMasteryService(), acquisition);
+
+    [Fact]
+    public async Task Retreat_and_combat_defeat_finalize_dungeon_mastery()
+    {
+        var retreatedRun = CreateTreasuryRun(false, 100);
+        var retreatMastery = new RecordingDungeonMasteryService();
+        var retreatService = new DungeonRunService(
+            new FixedDungeonRunRepository(retreatedRun), null!, null!, null!, null!, null!, null!, null!, null!,
+            new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), retreatMastery);
+
+        await retreatService.ExecuteActionAsync(
+            retreatedRun.CharacterId, retreatedRun.Id, "retreat", null, default);
+
+        var failedRun = CreateTreasuryRun(false, 100);
+        failedRun.Rooms[1].Type = RoomType.Combat;
+        failedRun.Rooms[1].EncounterIds = ["skeleton"];
+        var failureMastery = new RecordingDungeonMasteryService();
+        var failureService = new DungeonRunService(
+            new FixedDungeonRunRepository(failedRun), new FixedCharacterSnapshotRepository(failedRun.CharacterId),
+            new StubCombatOrchestrationCoordinator(), new DefeatCombatOutcomeCoordinator(),
+            null!, null!, null!, new FixedDungeonDefinitions(failedRun.DungeonDefinitionId), null!,
+            new DungeonVigorService(), new DungeonRouteService(), new RecordingGuildMissionService(), failureMastery);
+
+        await failureService.ExecuteActionAsync(
+            failedRun.CharacterId, failedRun.Id, "fight", null, default);
+
+        Assert.Equal(DungeonRunStatus.Retreated, Assert.Single(retreatMastery.AwardedRuns).Status);
+        Assert.Equal(DungeonRunStatus.Failed, Assert.Single(failureMastery.AwardedRuns).Status);
+    }
 
     private sealed class TreasuryAcquisition : IEquipmentAcquisitionService
     {
@@ -539,6 +569,40 @@ public sealed class DungeonRunHardeningTests
             {
                 CombatResult = new CombatResult { Outcome = BattleOutcome.Victory }
             });
+    }
+
+    private sealed class DefeatCombatOutcomeCoordinator : ICombatOutcomeCoordinator
+    {
+        public Task<CombatSession> ApplyAsync(
+            CombatOutcomeRequest request,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(new CombatSession
+            {
+                CombatResult = new CombatResult { Outcome = BattleOutcome.Defeat }
+            });
+    }
+
+    private sealed class RecordingDungeonMasteryService : IDungeonMasteryService
+    {
+        public List<DungeonRun> AwardedRuns { get; } = [];
+        public int CalculateLevel(long experience) => 0;
+        public int? GetExperienceRequiredForNextLevel(int level) => null;
+
+        public Task<DungeonMasteryAwardResult> AwardRunMasteryAsync(
+            DungeonRun run,
+            CancellationToken cancellationToken)
+        {
+            AwardedRuns.Add(run);
+            return Task.FromResult(new DungeonMasteryAwardResult(
+                run.DungeonDefinitionId, 0, 0, 0, 0, 0, [], AlreadyAwarded: false));
+        }
+
+        public Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
+            Guid characterId,
+            IReadOnlyCollection<string> dungeonDefinitionIds,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<string, DungeonMasterySnapshot>>(
+                new Dictionary<string, DungeonMasterySnapshot>());
     }
 
     private sealed class StubDungeonCompletionRewardApplier : IDungeonCompletionRewardApplier

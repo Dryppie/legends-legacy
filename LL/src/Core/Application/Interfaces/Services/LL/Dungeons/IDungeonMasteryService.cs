@@ -8,7 +8,7 @@ public interface IDungeonMasteryService
     int CalculateLevel(long experience);
     int? GetExperienceRequiredForNextLevel(int level);
 
-    Task<DungeonMasteryAwardResult> AwardCompletionAsync(
+    Task<DungeonMasteryAwardResult> AwardRunMasteryAsync(
         DungeonRun run,
         CancellationToken cancellationToken);
 
@@ -30,8 +30,10 @@ public sealed record DungeonMasteryAwardResult(
 {
     public int LevelsGained => Math.Max(0, Level - PreviousLevel);
     public bool MaxLevelRewardPreviouslyClaimed { get; init; }
+    public bool MaxLevelRewardWasDeferred { get; init; }
     public bool UnlocksMaxLevelReward => !AlreadyAwarded && !MaxLevelRewardPreviouslyClaimed &&
-        PreviousLevel < DungeonMasteryBenefits.MaxLevel && Level >= DungeonMasteryBenefits.MaxLevel;
+        Level >= DungeonMasteryBenefits.MaxLevel &&
+        (PreviousLevel < DungeonMasteryBenefits.MaxLevel || MaxLevelRewardWasDeferred);
 }
 
 public sealed record DungeonMasterySnapshot(

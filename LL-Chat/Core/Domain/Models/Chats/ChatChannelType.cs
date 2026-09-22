@@ -7,5 +7,6 @@ public enum ChatChannelType
     Guild,      // based on user's guild ID
     Whisper,     // direct player-to-player
     System,
-    Raid         // isolated by raid run ID
+    Raid,        // isolated by raid run ID
+    Invites      // read-only recruitment notices for group activities
 }

@@ -61,6 +61,9 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
         if (dungeon.RestSiteCount < 0)
             errors.Add($"{label}: restSiteCount cannot be negative.");
 
+        if (dungeon.VigorFeasibilityMasteryLevel is < 0 or > 10)
+            errors.Add($"{label}: vigorFeasibilityMasteryLevel must be between 0 and 10.");
+
         if (dungeon.TreasuryCount < 0 || (dungeon.TreasuryCount > 0 && dungeon.TreasuryVigorCost is < 1 or >= 100))
             errors.Add($"{label}: treasuryCount must be nonnegative and enabled Treasuries require a vigor cost between 1 and 99.");
 

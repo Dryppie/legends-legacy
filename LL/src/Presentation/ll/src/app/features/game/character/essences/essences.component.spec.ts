@@ -62,6 +62,10 @@ describe('Essence loadout Channeled Essence', () => {
     );
     const savingLoadout = signal(false);
     const creatureArchive = signal<CreatureArchiveDto | null>(null);
+    const currentAction = signal<{
+      isDeleted: boolean;
+      combatActionDetails?: { area?: { id: string } };
+    } | null>(null);
     const selectedLoadout = computed(
       () => loadouts.find((entry) => entry.id === selectedLoadoutId())!,
     );
@@ -138,7 +142,7 @@ describe('Essence loadout Channeled Essence', () => {
           provide: CharacterActionsStateService,
           useValue: {
             resolvingOfflineProgress: () => false,
-            currentAction: () => null,
+            currentAction,
           },
         },
         {
@@ -165,6 +169,7 @@ describe('Essence loadout Channeled Essence', () => {
       state,
       styles,
       options,
+      currentAction,
     };
   }
 
@@ -357,5 +362,63 @@ describe('Essence loadout Channeled Essence', () => {
     expect(action.textContent?.trim()).toBe('Creature Focus');
     expect(action.disabled).toBeTrue();
     expect(element.textContent).toContain('Ember Wolf has 3×');
+  });
+
+  it('sorts creature locations by level and marks the active combat area', async () => {
+    const { fixture, state, currentAction } = await createPage();
+    state.creatureArchive.set({
+      creatures: [
+        {
+          creatureId: 'creature-1',
+          name: 'Archive Creature',
+          killCount: 1,
+          firstDefeatedAtUtc: new Date().toISOString(),
+          lastDefeatedAtUtc: new Date().toISOString(),
+          isCreatureFocus: false,
+          creatureFocusTotalDurationSeconds: 0,
+          currentCreatureFocusDurationSeconds: 0,
+          essences: [],
+          tags: [],
+          locations: [
+            {
+              regionId: 1,
+              regionName: 'Shenic',
+              sourceType: 'Area',
+              sourceId: 'low-area',
+              sourceName: 'Lowlands',
+              levelRequirement: 5,
+            },
+            {
+              regionId: 1,
+              regionName: 'Shenic',
+              sourceType: 'Area',
+              sourceId: 'high-area',
+              sourceName: 'Highlands',
+              levelRequirement: 35,
+            },
+          ],
+        },
+      ],
+      canChangeCreatureFocus: true,
+    });
+    currentAction.set({
+      isDeleted: false,
+      combatActionDetails: { area: { id: 'low-area' } },
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.creatureLocationOptions()).toEqual([
+      { label: 'All locations', value: 'all' },
+      {
+        label: 'Lv 35 · Highlands · (Area)',
+        value: 'Area:high-area',
+        detail: undefined,
+      },
+      {
+        label: 'Lv 5 · Lowlands · (Area)',
+        value: 'Area:low-area',
+        detail: 'Current',
+      },
+    ]);
   });
 });

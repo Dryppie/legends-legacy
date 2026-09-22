@@ -87,7 +87,8 @@ public sealed record TournamentChatAnnouncementPayload(
     Guid MessageId,
     string Body,
     string TargetUrl,
-    DateTimeOffset SentAt);
+    DateTimeOffset SentAt,
+    bool IsSignupInvite = false);
 
 public sealed record WorldTowerChatAnnouncementPayload(
     Guid RallyId,
@@ -95,21 +96,24 @@ public sealed record WorldTowerChatAnnouncementPayload(
     string Body,
     string TargetUrl,
     DateTimeOffset SentAt,
-    Guid? TargetCharacterId = null);
+    Guid? TargetCharacterId = null,
+    bool IsSignupInvite = false);
 
 public sealed record RaidChatAnnouncementPayload(
     Guid RaidRunId,
     Guid MessageId,
     string Body,
     string TargetUrl,
-    DateTimeOffset SentAt);
+    DateTimeOffset SentAt,
+    bool IsSignupInvite = false);
 
 public sealed record RegionBossChatAnnouncementPayload(
     Guid RegionBossEventId,
     Guid MessageId,
     string Body,
     string TargetUrl,
-    DateTimeOffset SentAt);
+    DateTimeOffset SentAt,
+    bool IsSignupInvite = false);
 
 public sealed record RaidChatChannelSnapshotPayload(
     Guid RaidRunId,

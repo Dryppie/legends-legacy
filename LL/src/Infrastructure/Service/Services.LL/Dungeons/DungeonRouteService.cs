@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
-using Domain.Models.Dungeons.Mastery;
 
 namespace Services.LL.Dungeons;
 
@@ -40,9 +39,6 @@ public sealed class DungeonRouteService : IDungeonRouteService
             }
 
             var widenForecast = run.State.VigorState is "Strained" or "Exhausted";
-            var vigorReduction = DungeonMasteryBenefits
-                .Resolve(run.State.MasteryLevelAtStart)
-                .CombatVigorCostReduction;
             var graphOptions = targetRooms
                 .Select(room =>
                 {
@@ -52,15 +48,15 @@ public sealed class DungeonRouteService : IDungeonRouteService
                     var scaledVigorCostMin = isBoss
                         ? 0
                         : isTreasury ? node.VigorCostMin
-                        : Math.Max(
-                            0,
-                            DungeonVigorService.ScaleCombatToll(node.VigorCostMin) - vigorReduction);
+                        : DungeonVigorService.CalculateCombatToll(
+                            node.VigorCostMin,
+                            run.State.MasteryLevelAtStart);
                     var scaledVigorCostMax = isBoss
                         ? 0
                         : isTreasury ? node.VigorCostMax
-                        : Math.Max(
-                            0,
-                            DungeonVigorService.ScaleCombatToll(node.VigorCostMax) - vigorReduction);
+                        : DungeonVigorService.CalculateCombatToll(
+                            node.VigorCostMax,
+                            run.State.MasteryLevelAtStart);
                     var vigorCostMin = scaledVigorCostMin;
                     var vigorCostMax = scaledVigorCostMax;
                     if (!isBoss && !isTreasury && widenForecast)

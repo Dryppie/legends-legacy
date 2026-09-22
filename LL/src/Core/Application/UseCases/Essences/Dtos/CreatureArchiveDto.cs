@@ -51,10 +51,11 @@ public sealed record CreatureArchiveLocationDto(
     string RegionName,
     string SourceType,
     string SourceId,
-    string SourceName) : IMapFrom<CreatureArchiveLocation>
+    string SourceName,
+    int? LevelRequirement) : IMapFrom<CreatureArchiveLocation>
 {
     public CreatureArchiveLocationDto()
-        : this(0, string.Empty, string.Empty, string.Empty, string.Empty)
+        : this(0, string.Empty, string.Empty, string.Empty, string.Empty, null)
     {
     }
 

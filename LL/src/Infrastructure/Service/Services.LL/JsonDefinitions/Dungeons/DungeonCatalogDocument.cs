@@ -38,6 +38,7 @@ public sealed class DungeonDifficultyDefinition
     public int Difficulty { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }
+    public int VigorFeasibilityMasteryLevel { get; set; }
     public float? EnemyStrengthMultiplier { get; set; }
     public DungeonRewardTable RewardTable { get; set; } = new();
     public List<string> CompletionRewardTableIds { get; set; } = [];

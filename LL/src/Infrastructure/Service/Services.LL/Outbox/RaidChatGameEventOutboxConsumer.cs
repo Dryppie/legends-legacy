@@ -50,7 +50,8 @@ public sealed class RaidChatGameEventOutboxConsumer(
                 payload.MessageId,
                 payload.SentAt,
                 payload.TargetUrl,
-                Broadcast: true))
+                Broadcast: true,
+                ChannelType: payload.IsSignupInvite ? "Invites" : "System"))
         };
         request.Headers.TryAddWithoutValidation(SystemMessageSecretHeader, chatOptions.Secret);
         using var response = await httpClient.SendAsync(request, timeout.Token);
@@ -93,5 +94,6 @@ public sealed class RaidChatGameEventOutboxConsumer(
         Guid? MessageId,
         DateTimeOffset? SentAt,
         string? TargetUrl,
-        bool Broadcast);
+        bool Broadcast,
+        string ChannelType);
 }

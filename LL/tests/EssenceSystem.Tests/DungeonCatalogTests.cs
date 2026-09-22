@@ -351,6 +351,22 @@ public sealed class DungeonCatalogTests
             error.Contains(difficulty.Id) && error.Contains("completion reward table"));
     }
 
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(11)]
+    public void Catalog_rejects_out_of_range_vigor_feasibility_mastery(int masteryLevel)
+    {
+        var catalog = CreateReader().Value;
+        var difficulty = catalog.Families[0].Difficulties[0];
+        difficulty.VigorFeasibilityMasteryLevel = masteryLevel;
+
+        var errors = new DungeonCatalogValidator().Validate(catalog);
+
+        Assert.Contains(errors, error =>
+            error.Contains(difficulty.Id) &&
+            error.Contains("vigorFeasibilityMasteryLevel"));
+    }
+
     private static JsonRewardTableDefinitionProvider CreateRewardTables() => new(
         new ConfigurationBuilder().Build(),
         TestContentPaths.FindApiRoot(),
@@ -415,6 +431,14 @@ public sealed class DungeonCatalogTests
         Assert.Equal(expected.RestSiteCount, actual.RestSiteCount);
         Assert.Equal(expected.RequiredPreviousDungeonId, actual.RequiredPreviousDungeonId);
         Assert.Equal(expected.EnemyStrengthMultiplier, actual.EnemyStrengthMultiplier);
+        Assert.Equal(
+            expected.Grade switch
+            {
+                DungeonGrade.GradeII => 4,
+                DungeonGrade.GradeIII => 9,
+                _ => 0
+            },
+            actual.VigorFeasibilityMasteryLevel);
         Assert.Equal(expected.RequiredPreviousDungeonId is null ? null : (DungeonGrade?)((int)expected.Grade - 1), actual.RequiredPreviousDungeonGrade);
         Assert.Empty(actual.TierRewardTableIds);
     }

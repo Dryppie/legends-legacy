@@ -218,9 +218,9 @@ public sealed class NobilityTests
         var run = new Domain.Models.Dungeons.Runs.DungeonRun
         { Id = Guid.NewGuid(), CharacterId = fixture.Character.Id, DungeonDefinitionId = "goblin_mines_i",
             Status = Domain.Models.Dungeons.Runs.DungeonRunStatus.Completed, CompletedAt = expiry.AddSeconds(secondsFromExpiry), Rooms = [] };
-        var reward = await service.AwardCompletionAsync(run, default);
+        var reward = await service.AwardRunMasteryAsync(run, default);
         Assert.Equal(awarded, reward.ExperienceAwarded);
-        Assert.Equal(0, (await service.AwardCompletionAsync(run, default)).ExperienceAwarded);
+        Assert.Equal(0, (await service.AwardRunMasteryAsync(run, default)).ExperienceAwarded);
     }
 
     [Fact]

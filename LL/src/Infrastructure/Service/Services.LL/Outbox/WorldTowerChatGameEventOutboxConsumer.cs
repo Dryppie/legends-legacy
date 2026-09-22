@@ -50,7 +50,8 @@ public sealed class WorldTowerChatGameEventOutboxConsumer(
                 MessageId: payload.MessageId,
                 SentAt: payload.SentAt,
                 TargetUrl: payload.TargetUrl,
-                Broadcast: true))
+                Broadcast: true,
+                ChannelType: payload.IsSignupInvite ? "Invites" : "System"))
         };
         request.Headers.TryAddWithoutValidation(SystemMessageSecretHeader, _options.Secret);
 
@@ -72,5 +73,6 @@ public sealed class WorldTowerChatGameEventOutboxConsumer(
         Guid? MessageId,
         DateTimeOffset? SentAt,
         string? TargetUrl,
-        bool Broadcast);
+        bool Broadcast,
+        string ChannelType);
 }

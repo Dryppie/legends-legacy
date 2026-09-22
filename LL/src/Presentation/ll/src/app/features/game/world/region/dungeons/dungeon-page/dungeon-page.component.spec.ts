@@ -12,6 +12,7 @@ import { DungeonStateService } from '../../../../../../core/services/api/dungeon
 import { CombatStateService } from '../../../../../../core/state/combat-state/combat-state.service';
 import { InventoryItem } from '../../../../../../shared/models/inventoryItem';
 import { DungeonPreviewData } from '../../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { DungeonDifficulty } from '../../../../../../shared/models/enums/dungeonDifficulty';
 import { DungeonPageComponent } from './dungeon-page.component';
 
 describe('DungeonPageComponent', () => {
@@ -31,13 +32,28 @@ describe('DungeonPageComponent', () => {
         'restAtSite',
         'openTreasury',
         'retreat',
+        'startDungeon',
         'claimDungeonRewards',
         'dismissFailedDungeonRun',
       ],
       {
         activeDungeon: activeDungeon.asReadonly(),
         dungeons: signal([
-          { id: 'goblin_mines_Normal', region: 1 },
+          {
+            id: 'goblin_mines_Normal',
+            region: 1,
+            difficulty: DungeonDifficulty.Normal,
+            canEnter: true,
+            sigilItemId: 'sigil_goblin_mines',
+            entryRequirements: [
+              {
+                itemId: 'sigil_goblin_mines',
+                name: 'Goblin Sigil',
+                requiredAmount: 1,
+                ownedAmount: 2,
+              },
+            ],
+          },
           { id: 'hives_abyss_Normal', region: 2 },
         ] as DungeonPreviewData[]).asReadonly(),
         loading: signal(false).asReadonly(),
@@ -395,6 +411,30 @@ describe('DungeonPageComponent', () => {
     component.returnToWorldAfterClaim();
 
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world/meran']);
+  });
+
+  it('starts the same dungeon again when its refreshed sigil requirement is met', () => {
+    const run = createRun(RoomType.Boss);
+    run.status = DungeonRunStatus.Completed;
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+    component.claimedRewardResult.set({ run, claimedLoot: [] });
+    dungeonState.startDungeon.and.callFake((_id, _difficulty, onSuccess) =>
+      onSuccess?.(),
+    );
+
+    expect(component.canReplayDungeon()).toBeTrue();
+    expect(component.replayDungeonHint()).toBe('2 Goblin Sigil available.');
+
+    component.replayClaimedDungeon();
+
+    expect(dungeonState.startDungeon).toHaveBeenCalledOnceWith(
+      'goblin_mines_Normal',
+      DungeonDifficulty.Normal,
+      jasmine.any(Function),
+    );
+    expect(component.claimedRewardResult()).toBeNull();
   });
 
   it('returns to the failed dungeon region after dismissing the run', () => {

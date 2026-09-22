@@ -154,6 +154,7 @@ public sealed class CreatureArchiveServiceTests
                 {
                     Id = "blood_grove",
                     Name = "Blood Grove",
+                    LevelRequirement = 35,
                     Creatures =
                     [
                         new AreaCreature
@@ -187,13 +188,15 @@ public sealed class CreatureArchiveServiceTests
             location.RegionName == "Shenic" &&
             location.SourceType == "Area" &&
             location.SourceId == "blood_grove" &&
-            location.SourceName == "Blood Grove");
+            location.SourceName == "Blood Grove" &&
+            location.LevelRequirement == 35);
         Assert.Contains(creature.Locations, location =>
             location.RegionId == 1 &&
             location.RegionName == "Shenic" &&
             location.SourceType == "Dungeon" &&
             location.SourceId == "bat_cave" &&
-            location.SourceName == "Bat Cave");
+            location.SourceName == "Bat Cave" &&
+            location.LevelRequirement == null);
         Assert.Single(creature.Locations, location => location.SourceType == "Dungeon");
     }
 

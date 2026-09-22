@@ -37,6 +37,7 @@ export enum ChatChannelType {
   Whisper = 'Whisper',
   System = 'System',
   Raid = 'Raid',
+  Invites = 'Invites',
 }
 
 export function mergeChatMessagesChronologically(

@@ -104,6 +104,7 @@ export interface CreatureArchiveLocationDto {
   sourceType: 'Area' | 'Dungeon';
   sourceId: string;
   sourceName: string;
+  levelRequirement?: number | null;
 }
 
 export interface CreatureArchiveEssenceEntryDto {

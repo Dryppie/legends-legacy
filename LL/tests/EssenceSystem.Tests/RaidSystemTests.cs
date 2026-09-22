@@ -870,6 +870,12 @@ public sealed partial class RaidSystemTests
         Assert.Equal(
             "Raid channel opened. Raid Developer is leading the raid.",
             channelSnapshot.LifecycleMessage?.Body);
+        var signupInvite = Assert.Single(
+            outbox.Payloads.OfType<RaidChatAnnouncementPayload>());
+        Assert.True(signupInvite.IsSignupInvite);
+        Assert.Equal(run.Id, signupInvite.RaidRunId);
+        Assert.Equal($"/game/world/raid/{run.Id}", signupInvite.TargetUrl);
+        Assert.Contains("is recruiting", signupInvite.Body, StringComparison.Ordinal);
     }
 
     [Fact]

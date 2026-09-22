@@ -544,19 +544,24 @@
                     <div class="mt-3 grid gap-1.5">
                       <span
                         *ngFor="let reward of milestone.rewards"
-                        class="flex items-center gap-2 text-xs text-zinc-400"
+                        class="flex min-w-0 items-start gap-2 text-xs text-zinc-400"
                       >
-                        3
-                        <span class="text-primary">{{ reward.quantity }}</span>
+                        <span class="shrink-0 text-primary">{{
+                          reward.quantity
+                        }}</span>
                         <app-base-item
                           *ngIf="
                             reward.itemBase as itemBase;
                             else eventMilestoneRewardFallback
                           "
+                          class="min-w-0 flex-1"
                           [item]="itemBase"
+                          [wrapName]="true"
                         ></app-base-item>
                         <ng-template #eventMilestoneRewardFallback>
-                          <span>{{ rewardLabel(reward, false) }}</span>
+                          <span class="min-w-0 break-words">{{
+                            rewardLabel(reward, false)
+                          }}</span>
                         </ng-template>
                       </span>
                     </div>
@@ -611,18 +616,22 @@
                   <div class="flex flex-wrap gap-2">
                     <span
                       *ngFor="let reward of event.rewards"
-                      class="flex items-center gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
+                      class="flex max-w-full min-w-0 items-start gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
                     >
-                      {{ reward.quantity }}
+                      <span class="shrink-0">{{ reward.quantity }}</span>
                       <app-base-item
                         *ngIf="
                           reward.itemBase as itemBase;
                           else eventRewardFallback
                         "
+                        class="min-w-0 flex-1"
                         [item]="itemBase"
+                        [wrapName]="true"
                       ></app-base-item>
                       <ng-template #eventRewardFallback>
-                        <span>{{ rewardLabel(reward, false) }}</span>
+                        <span class="min-w-0 break-words">{{
+                          rewardLabel(reward, false)
+                        }}</span>
                       </ng-template>
                     </span>
                   </div>
@@ -1028,12 +1037,16 @@
                       </ng-container>
 
                       <span
-                        class="mt-auto flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[var(--ll-text-xs)] text-zinc-300"
+                        class="mt-auto flex min-w-0 items-start gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[var(--ll-text-xs)] text-zinc-300"
                       >
-                        <span class="ll-eyebrow text-xs">Guaranteed</span>
+                        <span class="ll-eyebrow shrink-0 text-xs"
+                          >Guaranteed</span
+                        >
                         <app-base-item
                           *ngIf="option.rewardItemBase as rewardItem"
+                          class="min-w-0 flex-1"
                           [item]="rewardItem"
+                          [wrapName]="true"
                         ></app-base-item>
                       </span>
                     </button>
@@ -1076,15 +1089,21 @@
                   <div class="flex flex-wrap gap-2">
                     <span
                       *ngFor="let reward of quest.rewards"
-                      class="flex items-center gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
+                      class="flex max-w-full min-w-0 items-start gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
                     >
-                      <span class="tabular-nums">{{ reward.quantity }}</span>
+                      <span class="shrink-0 tabular-nums">{{
+                        reward.quantity
+                      }}</span>
                       <app-base-item
                         *ngIf="reward.itemBase as itemBase; else rewardFallback"
+                        class="min-w-0 flex-1"
                         [item]="itemBase"
+                        [wrapName]="true"
                       ></app-base-item>
                       <ng-template #rewardFallback>
-                        <span>{{ rewardLabel(reward, false) }}</span>
+                        <span class="min-w-0 break-words">{{
+                          rewardLabel(reward, false)
+                        }}</span>
                       </ng-template>
                     </span>
                     <span

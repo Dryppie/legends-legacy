@@ -387,7 +387,7 @@
 
         <div
           *ngIf="readyClaimCount() > 0"
-          class="mt-4 border-t border-primary/10 pt-4"
+          class="prophecy-ready-claims mt-4 min-w-0 border-t border-primary/10 pt-4"
         >
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
@@ -400,14 +400,14 @@
           <div class="grid gap-2 md:grid-cols-2">
             <article
               *ngFor="let prophecy of readyProphecies(); trackBy: trackById"
-              class="ll-list-row flex items-center justify-between gap-3 px-3 py-2"
+              class="ll-list-row prophecy-ready-row min-w-0 px-3 py-2"
             >
               <div class="min-w-0">
                 <div class="ll-stat-label">{{ prophecy.scope }} Prophecy</div>
                 <div class="truncate text-sm text-white">
                   {{ prophecy.title }}
                 </div>
-                <div class="truncate text-xs text-zinc-400">
+                <div class="prophecy-ready-reward text-xs text-zinc-400">
                   {{ rewardSummary(prophecy.reward) }}
                 </div>
               </div>
@@ -423,7 +423,7 @@
 
             <article
               *ngFor="let milestone of readyMilestones(); trackBy: trackById"
-              class="ll-list-row flex items-center justify-between gap-3 px-3 py-2"
+              class="ll-list-row prophecy-ready-row min-w-0 px-3 py-2"
             >
               <div class="min-w-0">
                 <div class="ll-stat-label">
@@ -432,7 +432,7 @@
                 <div class="truncate text-sm text-white">
                   {{ milestone.title }}
                 </div>
-                <div class="truncate text-xs text-zinc-400">
+                <div class="prophecy-ready-reward text-xs text-zinc-400">
                   {{ rewardSummary(milestone.reward) }}
                 </div>
               </div>

@@ -87,6 +87,36 @@ public sealed class RaidChatServiceTests
         Assert.Equal("new raid", Assert.Single(raidMessages).Body);
     }
 
+    [Fact]
+    public async Task History_includes_public_invites()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.ChatMessages.Add(new ChatMessage
+        {
+            ChannelType = ChatChannelType.Invites,
+            ContextKey = "invites",
+            SenderId = Guid.Empty,
+            SenderName = "World",
+            Body = "A Tower Expedition is recruiting.",
+            TargetUrl = "/game/world/tower/rallies/rally-id"
+        });
+        await db.SaveChangesAsync();
+
+        var repository = new ChatMessageRepository(db);
+        var history = await repository.LatestAsync(
+            characterId,
+            50,
+            guildChannel: null,
+            raidChannel: null,
+            after: null,
+            CancellationToken.None);
+
+        var invite = Assert.Single(history);
+        Assert.Equal(ChatChannelType.Invites, invite.ChannelType);
+        Assert.Equal("invites", invite.ContextKey);
+    }
+
     private static ChatMessage Message(Guid raidRunId, Guid senderId, string body) =>
         new()
         {

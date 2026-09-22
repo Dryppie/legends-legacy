@@ -481,6 +481,11 @@ public sealed class RaidService(
             cancellationToken,
             $"Raid channel opened. {eligibility.CharacterName} is leading the raid.",
             "opened");
+        await EnqueueSignupAnnouncementAsync(
+            run,
+            boss.Name,
+            eligibility.CharacterName,
+            cancellationToken);
         await QueueRaidUpdateAsync(run, "Created", cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return RaidOperationResult<RaidRunDto>.Success(await ToDtoAsync(run, characterId, cancellationToken));
@@ -2041,6 +2046,27 @@ public sealed class RaidService(
             accountId: null,
             cancellationToken);
     }
+
+    private Task EnqueueSignupAnnouncementAsync(
+        RaidRun run,
+        string bossName,
+        string leaderName,
+        CancellationToken cancellationToken) =>
+        outbox.EnqueueAsync(
+            GameEventTypes.RaidChatAnnouncement,
+            new RaidChatAnnouncementPayload(
+                run.Id,
+                StableRandom.Guid(
+                    "raid-chat-announcement-v1",
+                    run.Id.ToString("N"),
+                    "signup-opened"),
+                $"{leaderName} is recruiting a raid for {bossName} ({RaidPlusDifficulty.Label(run.Tier)}).",
+                $"/game/world/raid/{run.Id}",
+                run.CreatedAt,
+                IsSignupInvite: true),
+            characterId: null,
+            accountId: null,
+            cancellationToken: cancellationToken);
 
     private Task QueueRaidChatSnapshotAsync(
         RaidRun run,

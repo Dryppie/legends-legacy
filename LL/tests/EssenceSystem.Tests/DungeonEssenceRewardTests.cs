@@ -416,7 +416,7 @@ public sealed class DungeonEssenceRewardTests
         public int CalculateLevel(long experience) => 0;
         public int? GetExperienceRequiredForNextLevel(int level) => null;
 
-        public Task<DungeonMasteryAwardResult> AwardCompletionAsync(
+        public Task<DungeonMasteryAwardResult> AwardRunMasteryAsync(
             DungeonRun run,
             CancellationToken cancellationToken) =>
             Task.FromResult(new DungeonMasteryAwardResult(
@@ -469,7 +469,7 @@ public sealed class DungeonEssenceRewardTests
         public int CalculateLevel(long experience) => level;
         public int? GetExperienceRequiredForNextLevel(int currentLevel) => null;
 
-        public Task<DungeonMasteryAwardResult> AwardCompletionAsync(
+        public Task<DungeonMasteryAwardResult> AwardRunMasteryAsync(
             DungeonRun run,
             CancellationToken cancellationToken) =>
             Task.FromResult(new DungeonMasteryAwardResult(

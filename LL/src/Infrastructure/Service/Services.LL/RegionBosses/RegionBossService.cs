@@ -1151,7 +1151,8 @@ public sealed class RegionBossService(
                 + "Players active within the last 24 hours have been signed up automatically.",
             "signup-opened",
             sentAt,
-            cancellationToken);
+            isSignupInvite: true,
+            cancellationToken: cancellationToken);
 
     private Task EnqueueFightStartedChatAnnouncementAsync(
         RegionBossEvent item,
@@ -1163,13 +1164,15 @@ public sealed class RegionBossService(
             $"The Region Boss battle against {definition.Name} has begun!",
             "fight-started",
             sentAt,
-            cancellationToken);
+            isSignupInvite: false,
+            cancellationToken: cancellationToken);
 
     private Task EnqueueChatAnnouncementAsync(
         RegionBossEvent item,
         string body,
         string announcementKey,
         DateTimeOffset sentAt,
+        bool isSignupInvite,
         CancellationToken cancellationToken) =>
         outbox.EnqueueAsync(
             GameEventTypes.RegionBossChatAnnouncement,
@@ -1178,7 +1181,8 @@ public sealed class RegionBossService(
                 CreateAnnouncementMessageId(item.Id, announcementKey),
                 body,
                 "/game/world/shenic",
-                sentAt),
+                sentAt,
+                isSignupInvite),
             characterId: null,
             accountId: null,
             cancellationToken);

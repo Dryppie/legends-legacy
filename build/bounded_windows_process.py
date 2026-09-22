@@ -74,13 +74,14 @@ def _check(value):
     return value
 
 
-def run(command, cwd, log_path, deadline, cleanup_seconds=1.0):
+def run(command, cwd, log_path, deadline, cleanup_seconds=1.0, check=None):
     """Return measured completion/timeout data; on API failure raise and kill owned work.
 
     deadline is an absolute monotonic work deadline. The caller must also reserve
     cleanup_seconds inside its phase envelope. Log files are create-new, never reused.
     """
     started = time.monotonic()
+    last_check = float('-inf')
     if not math.isfinite(deadline) or deadline <= started or not 0 < cleanup_seconds <= 2:
         raise ValueError('A future work deadline and bounded cleanup allowance are required.')
     command = [os.fspath(arg) for arg in command]
@@ -138,6 +139,9 @@ def run(command, cwd, log_path, deadline, cleanup_seconds=1.0):
                 state = accounting()
                 if state.active_processes == 0:
                     break
+                if check is not None and time.monotonic() - last_check >= .25:
+                    check()
+                    last_check = time.monotonic()
                 if time.monotonic() >= deadline:
                     timed_out = True
                     cleanup_started = True
@@ -160,6 +164,8 @@ def run(command, cwd, log_path, deadline, cleanup_seconds=1.0):
                 if assigned:
                     _check(_terminate_job(job, 124))
                     drain()
+                    if _wait(process.process, math.ceil(cleanup_seconds * 1000)) != 0:
+                        raise TimeoutError('Terminated owned root did not signal within cleanup allowance.')
                 else:
                     _check(_terminate_process(process.process, 124))
                     if _wait(process.process, math.ceil(cleanup_seconds * 1000)) != 0:

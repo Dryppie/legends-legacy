@@ -42,8 +42,13 @@ public static class TowerAllocationComparison
         return new(fresh.Take(selectedCount).ToArray(), fresh.Order().ToArray(), collisions, duplicates);
     }
 
+    internal static void ValidateSelection(TowerBossDiscoveryDefinition template) =>
+        Require(template.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.ZeroWinVersion
+            && template.Stages.SelectionPrimaryReferenceId is null, "The closed generator comparisons require their original selection policy.");
+
     internal static TowerBossDiscoveryDefinition Bind(TowerBossDiscoveryDefinition template, int[] values, int restart, bool racing)
     {
+        ValidateSelection(template);
         Require(values.Length == Restarts * ValuesPerRestart && values.Distinct().Count() == values.Length
             && restart is >= 0 and < Restarts && !values.Intersect(template.ExcludedCombatSeeds).Any(), "Invalid comparison allocation.");
         var panel = values.Skip(restart * ValuesPerRestart).Take(ValuesPerRestart).ToArray();
@@ -88,6 +93,7 @@ public static class TowerAllocationComparison
         int started, int completed, double elapsed, int searchValuesPerRestart = 81)
     {
         Require(reports.Count == 6 && reports.All(r => r.Status == "Complete") && started == completed
+            && reports.All(r => r.Confirmation?.PolicyVersion == TowerBossStudyPolicy.ZeroWinVersion && r.Confirmation.IncumbentSelection is null)
             && completed == reports.Sum(r => r.Accounting.Completed.Values.Sum()) && completed <= MaximumFights,
             "Every planned study and attempted fight must complete.");
         var pairs = new List<AllocationComparisonPair>(); var allSeeds = new HashSet<int>();
@@ -175,6 +181,7 @@ public static class TowerAllocationComparison
             Save("request.json", q);
             var inputs = TowerPracticalSearch.Inspect(shape, stop.Token);
             var template = inputs.Definition;
+            ValidateSelection(template); // Reject a changed selector before any Pending reservation or entropy draw.
             Require(template.Generation.PolicyVersion == policy
                 && template.Generation.CandidatesPerArm == candidates && template.Generation.MaximumAttemptsPerArm == 256,
                 "Comparison template requires its declared policy, candidate count and fixed 256 proposal-attempt ceiling.");

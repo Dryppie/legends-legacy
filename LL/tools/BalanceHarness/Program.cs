@@ -12,6 +12,8 @@ public static class Program
         Console.CancelKeyPress += cancelHandler;
         try
         {
+            if (args.Length > 0 && args[0].StartsWith("tower-incumbent-tie-comparison-", StringComparison.Ordinal))
+                return await TowerIncumbentTieComparison.Command(args, cancellation.Token);
             if (args is ["tower-anchored-comparison-run", var anchoredRequest])
             {
                 var result = await TowerAnchoredComparison.RunAsync(HarnessJson.Read<TowerAllocationComparisonRequest>(anchoredRequest), cancellation.Token);
@@ -60,6 +62,7 @@ public static class Program
                 return await TowerCeilingScreenCommand.ExecuteAsync(args, cancellation.Token);
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
+                Console.WriteLine("BalanceHarness tower-incumbent-tie-comparison-check <request.json>; tower-incumbent-tie-comparison-verify <completed-output> (24 shared searches; conditional confirmation; run only through build/run-incumbent-tie-comparison.py; no retry/resume/default change)");
                 Console.WriteLine("BalanceHarness tower-fixed-team-confirmation-check|run <request.json>; tower-fixed-team-confirmation-verify <completed-output> (three exact teams; 5500 paired trials; family-seven strength gate; one entropy batch; no retry/replay/resume)");
                 Console.WriteLine("BalanceHarness tower-current-family-admit <request.json> <new-output>; tower-current-family-admission-verify <completed-output> (seed-free preparation/origin/alias audit only; no combat or allocation)");
                 Console.WriteLine("BalanceHarness tower-selection-diagnostic-check|run <request.json>; tower-selection-diagnostic-verify <completed-output> (four frozen nominees; post-freeze entropy; family-ten diagnostic; explicit phase limits; no promotion/retry/resume)");

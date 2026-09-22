@@ -5,7 +5,7 @@ namespace Services.LL.JsonDefinitions.Dungeons;
 
 public sealed class DungeonCatalogValidator
 {
-    private const int SupportedSchemaVersion = 3;
+    private const int SupportedSchemaVersion = 4;
 
     public IReadOnlyList<string> Validate(DungeonCatalogDocument document)
     {
@@ -118,6 +118,9 @@ public sealed class DungeonCatalogValidator
 
             if (difficulty.MaxRooms < difficulty.MinRooms)
                 errors.Add($"{difficultyLabel}: maxRooms must be greater than or equal to minRooms.");
+
+            if (difficulty.VigorFeasibilityMasteryLevel is < 0 or > 10)
+                errors.Add($"{difficultyLabel}: vigorFeasibilityMasteryLevel must be between 0 and 10.");
 
             if (difficulty.EnemyStrengthMultiplier is { } multiplier
                 && (!float.IsFinite(multiplier) || multiplier <= 0f))

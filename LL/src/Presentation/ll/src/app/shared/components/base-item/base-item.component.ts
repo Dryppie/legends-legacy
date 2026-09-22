@@ -34,6 +34,7 @@ import {
 export class BaseItemComponent {
   @Input({ required: true }) item!: ItemBase;
   @Input() useBaseName = false;
+  @Input() wrapName = false;
 
   constructor(
     private readonly essenceItemView: EssenceItemViewService,

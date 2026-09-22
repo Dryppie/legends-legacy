@@ -223,7 +223,13 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                     AddLocation(
                         locations,
                         CreatureEssenceSource.GetMonsterDefinitionId(creatureName),
-                        new CreatureArchiveLocation(region.Id, region.Name, "Area", area.Id, area.Name));
+                        new CreatureArchiveLocation(
+                            region.Id,
+                            region.Name,
+                            "Area",
+                            area.Id,
+                            area.Name,
+                            area.LevelRequirement));
                 }
             }
         }
@@ -245,14 +251,16 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                         regionName,
                         "Dungeon",
                         DungeonDefinitionIdentity.GetFamilyId(dungeon.Id),
-                        DungeonDefinitionIdentity.GetFamilyTitle(dungeon.Name)));
+                        DungeonDefinitionIdentity.GetFamilyTitle(dungeon.Name),
+                        null));
             }
         }
 
         return locations.ToDictionary(
             item => item.Key,
             item => (IReadOnlyList<CreatureArchiveLocation>)item.Value
-                .OrderBy(location => location.RegionId)
+                .OrderByDescending(location => location.LevelRequirement ?? int.MinValue)
+                .ThenBy(location => location.RegionId)
                 .ThenBy(location => location.SourceType)
                 .ThenBy(location => location.SourceName)
                 .ToList(),

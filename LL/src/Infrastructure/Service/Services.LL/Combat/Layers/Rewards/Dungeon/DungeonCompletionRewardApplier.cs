@@ -102,7 +102,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
         treasureProgress += await AddMonsterCoreRewardsAsync(run.Id, run.CharacterId, dungeon.Grade, cancellationToken);
         treasureProgress += await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, isFirstCompletion, cancellationToken);
-        var masteryAward = await _mastery.AwardCompletionAsync(run, cancellationToken);
+        var masteryAward = await _mastery.AwardRunMasteryAsync(run, cancellationToken);
         if (_achievementService is not null)
         {
             await _achievementService.RecordDungeonMasteryLevelReachedAsync(run.CharacterId, masteryAward.Level, cancellationToken);

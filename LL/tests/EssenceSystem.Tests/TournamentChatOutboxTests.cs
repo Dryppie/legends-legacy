@@ -11,7 +11,7 @@ namespace EssenceSystem.Tests;
 public sealed class TournamentChatOutboxTests
 {
     [Fact]
-    public async Task ConsumerSendsClickableGlobalTournamentAnnouncement()
+    public async Task ConsumerSendsClickableTournamentSignupToInvites()
     {
         var handler = new RecordingHttpMessageHandler();
         var options = new AchievementSystemChatOptions
@@ -24,9 +24,10 @@ public sealed class TournamentChatOutboxTests
         var payload = new TournamentChatAnnouncementPayload(
             Guid.NewGuid(),
             Guid.NewGuid(),
-            "Tournament Grounds: Semifinals has started!",
+            "Registration is open for Tournament Grounds.",
             "/game/city/colosseum?tab=tournaments",
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            IsSignupInvite: true);
         var message = new GameEventOutboxMessage
         {
             EventType = GameEventTypes.TournamentChatAnnouncement,
@@ -48,6 +49,7 @@ public sealed class TournamentChatOutboxTests
         Assert.Equal(payload.MessageId, request.RootElement.GetProperty("messageId").GetGuid());
         Assert.Equal(payload.Body, request.RootElement.GetProperty("body").GetString());
         Assert.Equal(payload.TargetUrl, request.RootElement.GetProperty("targetUrl").GetString());
+        Assert.Equal("Invites", request.RootElement.GetProperty("channelType").GetString());
     }
 
     private sealed class RecordingHttpMessageHandler : HttpMessageHandler

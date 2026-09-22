@@ -48,6 +48,7 @@ public sealed class WorldTowerService : IWorldTowerService
     private const int PlaybackKeyframeIntervalTicks = 30 * FastCombatEngine.TicksPerSecond;
     private const string EchoModeUnlockKey = "tower_echo_mode_unlock";
     private const string TowerExpeditionTargetUrlFormat = "/game/world/tower/expeditions/{0}";
+    private const string TowerRallyTargetUrlFormat = "/game/world/tower/rallies/{0}";
     private const string TowerHallOfFameTargetUrl = "/game/world/tower/hall-of-fame";
     private static readonly TowerRallyStatus[] ActiveRallyStatuses =
     [
@@ -446,6 +447,15 @@ public sealed class WorldTowerService : IWorldTowerService
         rally.Participants.Add(leader);
         _db.TowerRallies.Add(rally);
         await EnqueueRallyUpdateAsync(rally, "Created", now, cancellationToken);
+        if (rally.Status == TowerRallyStatus.Recruiting)
+        {
+            await EnqueueRallySignupChatAnnouncementAsync(
+                rally,
+                definition,
+                eligibility.CharacterName,
+                now,
+                cancellationToken);
+        }
         await _db.SaveChangesAsync(cancellationToken);
 
         return TowerOperationResult<TowerRallyDto>.Success(ToRallyDto(rally, characterId, eligibility.AccountId));
@@ -2450,6 +2460,34 @@ public sealed class WorldTowerService : IWorldTowerService
                     TowerExpeditionTargetUrlFormat,
                     rally.Id),
                 sentAt),
+            characterId: null,
+            accountId: null,
+            cancellationToken: cancellationToken);
+    }
+
+    private Task EnqueueRallySignupChatAnnouncementAsync(
+        TowerRally rally,
+        TowerFloorDefinition definition,
+        string leaderName,
+        DateTimeOffset sentAt,
+        CancellationToken cancellationToken)
+    {
+        var body = $"{leaderName} is recruiting for World Tower Floor {definition.FloorNumber}: "
+            + $"{definition.GuardianName}.";
+
+        return _outbox.EnqueueAsync(
+            GameEventTypes.WorldTowerChatAnnouncement,
+            new WorldTowerChatAnnouncementPayload(
+                rally.Id,
+                CreateTowerAnnouncementMessageId(rally.Id, "signup-opened"),
+                body,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    TowerRallyTargetUrlFormat,
+                    rally.Id),
+                sentAt,
+                TargetCharacterId: null,
+                IsSignupInvite: true),
             characterId: null,
             accountId: null,
             cancellationToken: cancellationToken);

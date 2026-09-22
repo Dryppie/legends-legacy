@@ -40,6 +40,28 @@ describe('parseWhisperCommand', () => {
 });
 
 describe('ChatComponent message submission', () => {
+  it('keeps the signup invites channel read-only', async () => {
+    const sendPublic = jasmine.createSpy('sendPublic');
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      userInfoLoaded: true,
+      userInfo: { isRegisteredUser: true },
+      draft: 'Trying to post',
+      sendError: '',
+      isSending: false,
+      activeChannel: {
+        type: ChatChannelType.Invites,
+        contextKey: 'invites',
+      },
+      chat: { sendPublic },
+    }) as ChatComponent;
+
+    await component.send();
+
+    expect(sendPublic).not.toHaveBeenCalled();
+    expect(component.sendError).toBe('Signup invites are read-only.');
+    expect(component.draft).toBe('Trying to post');
+  });
+
   it('ignores repeated sends while the current message is still in flight', async () => {
     let completeSend!: () => void;
     const pendingSend = new Promise<void>((resolve) => {
@@ -282,6 +304,17 @@ describe('isWorldSystemMessage', () => {
   it('recognizes world announcements by their system sender', () => {
     expect(
       isWorldSystemMessage({ ...systemMessage, senderName: 'World' }),
+    ).toBeTrue();
+  });
+
+  it('recognizes signup invites as world announcements', () => {
+    expect(
+      isWorldSystemMessage({
+        ...systemMessage,
+        channelType: ChatChannelType.Invites,
+        contextKey: 'invites',
+        senderName: 'World',
+      }),
     ).toBeTrue();
   });
 

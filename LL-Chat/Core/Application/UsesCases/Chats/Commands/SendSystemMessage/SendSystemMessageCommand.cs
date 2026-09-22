@@ -13,7 +13,8 @@ public record SendSystemMessageCommand(
     string? SenderName = null,
     Guid? MessageId = null,
     DateTimeOffset? SentAt = null,
-    string? TargetUrl = null) : IRequest<ChatMessageDto?>;
+    string? TargetUrl = null,
+    ChatChannelType ChannelType = ChatChannelType.System) : IRequest<ChatMessageDto?>;
 
 public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessageCommand, ChatMessageDto?>
 {
@@ -41,6 +42,11 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
             return null;
         }
 
+        if (request.ChannelType is not ChatChannelType.System and not ChatChannelType.Invites)
+        {
+            return null;
+        }
+
         if (request.MessageId.HasValue)
         {
             var existing = await _chatService.GetByIdAsync(
@@ -62,9 +68,9 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
             SenderTitleDisplayName = null,
             Body = request.Body.Trim(),
             TargetUrl = string.IsNullOrWhiteSpace(request.TargetUrl) ? null : request.TargetUrl.Trim(),
-            ContextKey = "system",
+            ContextKey = request.ChannelType == ChatChannelType.Invites ? "invites" : "system",
             SentAt = request.SentAt ?? DateTimeOffset.UtcNow,
-            ChannelType = ChatChannelType.System,
+            ChannelType = request.ChannelType,
             TargetCharacterId = request.IsGlobal ? null : request.TargetCharacterId,
             TargetCharacterName = null,
             TargetCharacterTitleDisplayName = null

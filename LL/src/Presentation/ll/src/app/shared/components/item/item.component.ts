@@ -38,6 +38,7 @@ export class ItemComponent {
   @Input() item!: ItemInstance;
   @Input() popoverTouchDisabled = false;
   @Input() popoverFocusable = true;
+  @Input() wrapName = false;
   itemHovered: boolean = false;
   tooltipPosition = {};
 

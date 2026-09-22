@@ -2,6 +2,42 @@
   display: none;
 }
 
+.prophecies-page {
+  min-width: 0;
+  overflow-x: hidden;
+  container-type: inline-size;
+}
+
+.prophecy-ready-row {
+  display: grid;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+}
+
+.prophecy-ready-reward {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@container (max-width: 42rem) {
+  .prophecy-ready-row {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prophecy-ready-row .ll-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .prophecy-ready-reward {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
 @media (max-width: 39.999rem) {
   .prophecies-page {
     gap: 0.75rem;

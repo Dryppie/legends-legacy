@@ -55,7 +55,7 @@ export class CombatStylesComponent {
   });
 
   openRefinements(dialog: HTMLDialogElement) {
-    if (this.state.busy() || (this.state.selected()?.level ?? 0) < 3) return;
+    if (this.state.busy()) return;
     this.refinementChoice.set(this.state.draft().refinementId);
     dialog.showModal();
   }

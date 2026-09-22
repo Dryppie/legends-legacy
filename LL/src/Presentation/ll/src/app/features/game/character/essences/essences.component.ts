@@ -355,9 +355,15 @@ export class EssencesComponent implements OnInit {
   >(() => {
     const region = this.creatureRegionFilter();
     const source = this.creatureSourceFilter();
+    const currentAreaId = this.currentCreatureAreaId();
     const locations = new Map<
       string,
-      { sourceName: string; sourceType: 'Area' | 'Dungeon' }
+      {
+        sourceId: string;
+        sourceName: string;
+        sourceType: 'Area' | 'Dungeon';
+        levelRequirement: number | null;
+      }
     >();
 
     for (const creature of this.essenceState.creatureArchive()?.creatures ??
@@ -369,8 +375,10 @@ export class EssencesComponent implements OnInit {
         if (source !== 'all' && location.sourceType !== source) continue;
 
         locations.set(this.creatureLocationKey(location), {
+          sourceId: location.sourceId,
           sourceName: location.sourceName,
           sourceType: location.sourceType,
+          levelRequirement: location.levelRequirement ?? null,
         });
       }
     }
@@ -378,17 +386,39 @@ export class EssencesComponent implements OnInit {
     return [
       { label: 'All locations', value: 'all' },
       ...[...locations.entries()]
-        .sort(([, left], [, right]) =>
-          left.sourceName.localeCompare(right.sourceName),
-        )
+        .sort(([, left], [, right]) => {
+          const levelDifference =
+            (right.levelRequirement ?? Number.NEGATIVE_INFINITY) -
+            (left.levelRequirement ?? Number.NEGATIVE_INFINITY);
+          return (
+            levelDifference || left.sourceName.localeCompare(right.sourceName)
+          );
+        })
         .map(([value, location]) => ({
-          label:
-            source === 'all'
-              ? `${location.sourceName} (${location.sourceType})`
-              : location.sourceName,
+          label: [
+            location.levelRequirement !== null
+              ? `Lv ${location.levelRequirement}`
+              : null,
+            location.sourceName,
+            source === 'all' ? `(${location.sourceType})` : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
           value,
+          detail:
+            location.sourceType === 'Area' &&
+            location.sourceId === currentAreaId
+              ? 'Current'
+              : undefined,
         })),
     ];
+  });
+
+  readonly currentCreatureAreaId = computed(() => {
+    const action = this.characterActions.currentAction();
+    return action && !action.isDeleted
+      ? (action.combatActionDetails?.area?.id ?? null)
+      : null;
   });
 
   readonly unlockedCodexEntries = computed(

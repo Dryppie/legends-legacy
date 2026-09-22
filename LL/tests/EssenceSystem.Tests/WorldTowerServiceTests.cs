@@ -316,7 +316,14 @@ public sealed partial class WorldTowerServiceTests
         Assert.Equal(
             ["Created", "ApplicationSubmitted", "ApplicationAccepted"],
             outbox.RallyEvents.Take(3).Select(x => x.Event));
-        Assert.All(outbox.EventTypes, eventType => Assert.Equal(GameEventTypes.WorldTowerRallyUpdated, eventType));
+        Assert.Equal(
+            3,
+            outbox.EventTypes.Count(eventType =>
+                eventType == GameEventTypes.WorldTowerRallyUpdated));
+        Assert.Equal(
+            1,
+            outbox.EventTypes.Count(eventType =>
+                eventType == GameEventTypes.WorldTowerChatAnnouncement));
     }
 
     [Fact]
@@ -1446,7 +1453,15 @@ public sealed partial class WorldTowerServiceTests
         var result = await service.StartRallyAsync(characters[0].Id, rallyId, CancellationToken.None);
 
         Assert.True(result.Succeeded, result.Error);
-        var announcement = Assert.Single(outbox.ChatAnnouncements);
+        var signup = Assert.Single(
+            outbox.ChatAnnouncements,
+            announcement => announcement.IsSignupInvite);
+        Assert.Equal(rallyId, signup.RallyId);
+        Assert.Equal($"/game/world/tower/rallies/{rallyId}", signup.TargetUrl);
+        Assert.Contains("is recruiting", signup.Body, StringComparison.Ordinal);
+        var announcement = Assert.Single(
+            outbox.ChatAnnouncements,
+            announcement => announcement.Body.Contains("is starting!", StringComparison.Ordinal));
         Assert.Equal(rallyId, announcement.RallyId);
         Assert.Equal($"/game/world/tower/expeditions/{rallyId}", announcement.TargetUrl);
         Assert.Contains("is starting!", announcement.Body, StringComparison.Ordinal);
@@ -1491,7 +1506,7 @@ public sealed partial class WorldTowerServiceTests
         Assert.Contains("Floor 1", conquest.Body, StringComparison.Ordinal);
         // The rally-start and conquest messages share a rally, so their deterministic ids
         // must still differ or LL-Chat would swallow the second one as a duplicate.
-        Assert.Equal(2, outbox.ChatAnnouncements.Count(x => x.TargetCharacterId is null));
+        Assert.Equal(3, outbox.ChatAnnouncements.Count(x => x.TargetCharacterId is null));
         Assert.Equal(outbox.ChatAnnouncements.Count, outbox.ChatAnnouncements.Select(x => x.MessageId).Distinct().Count());
     }
 

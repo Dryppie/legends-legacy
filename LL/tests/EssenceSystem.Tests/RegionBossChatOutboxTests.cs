@@ -11,16 +11,17 @@ namespace EssenceSystem.Tests;
 public sealed class RegionBossChatOutboxTests
 {
     [Fact]
-    public async Task Consumer_sends_region_boss_announcement_to_the_world_channel()
+    public async Task Consumer_sends_region_boss_signup_to_the_invites_channel()
     {
         var handler = new RecordingHttpMessageHandler();
         var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var payload = new RegionBossChatAnnouncementPayload(
             Guid.NewGuid(),
             Guid.NewGuid(),
-            "The Region Boss battle against The Mad King has begun!",
+            "Region Boss signups are now open for The Mad King!",
             "/game/world/shenic",
-            new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero));
+            new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero),
+            IsSignupInvite: true);
         var message = new GameEventOutboxMessage
         {
             EventType = GameEventTypes.RegionBossChatAnnouncement,
@@ -47,6 +48,7 @@ public sealed class RegionBossChatOutboxTests
         Assert.True(request.RootElement.GetProperty("broadcast").GetBoolean());
         Assert.Equal(payload.MessageId, request.RootElement.GetProperty("messageId").GetGuid());
         Assert.Equal(payload.TargetUrl, request.RootElement.GetProperty("targetUrl").GetString());
+        Assert.Equal("Invites", request.RootElement.GetProperty("channelType").GetString());
     }
 
     private sealed class RecordingHttpMessageHandler : HttpMessageHandler

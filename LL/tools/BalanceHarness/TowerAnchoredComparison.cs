@@ -15,6 +15,7 @@ public static class TowerAnchoredComparison
 
     internal static TowerBossDiscoveryDefinition Bind(TowerBossDiscoveryDefinition template, int[] values, int restart, bool anchored)
     {
+        TowerAllocationComparison.ValidateSelection(template);
         TowerPracticalSearch.Require(template.Generation.PolicyVersion == TowerAnchoredNeighborhoodSearch.Version
             && template.PrimaryReferenceId is not null && template.Starts.Any(s => s.ReferenceId == template.PrimaryReferenceId)
             && values.Length == SelectedValues && values.Distinct().Count() == values.Length

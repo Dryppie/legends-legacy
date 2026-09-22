@@ -763,6 +763,7 @@ public sealed class RegionBossDevelopmentTests
         Assert.Contains("signups are now open", announcement.Body, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("last 24 hours", announcement.Body, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("/game/world/shenic", announcement.TargetUrl);
+        Assert.True(announcement.IsSignupInvite);
     }
 
     [Fact]
@@ -811,6 +812,7 @@ public sealed class RegionBossDevelopmentTests
         Assert.Equal(
             "The Region Boss battle against Test Region Boss has begun!",
             announcement.Body);
+        Assert.False(announcement.IsSignupInvite);
     }
 
     [Fact]

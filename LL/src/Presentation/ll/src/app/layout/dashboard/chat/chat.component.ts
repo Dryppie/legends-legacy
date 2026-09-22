@@ -188,7 +188,8 @@ export function fallbackFromUnavailableGuildChannel(
 
 export function isWorldSystemMessage(message: ChatMessageDto): boolean {
   return (
-    message.channelType === ChatChannelType.System &&
+    (message.channelType === ChatChannelType.System ||
+      message.channelType === ChatChannelType.Invites) &&
     message.senderName.trim().toLowerCase() === 'world'
   );
 }
@@ -310,6 +311,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       channelType: ChatChannelType.General,
     },
     {
+      label: 'Invites',
+      contextKey: 'invites',
+      channelType: ChatChannelType.Invites,
+    },
+    {
       label: 'Guild',
       contextKey: 'guild',
       channelType: ChatChannelType.Guild,
@@ -399,6 +405,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     return this.userInfoLoaded && this.userInfo?.isRegisteredUser === true;
   }
 
+  get canWriteActiveChannel(): boolean {
+    return (
+      this.canWriteChat && this.activeRoomType !== ChatChannelType.Invites
+    );
+  }
+
   get chatPlaceholder(): string {
     if (!this.userInfoLoaded) {
       return 'Checking chat access...';
@@ -406,6 +418,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     if (this.chatAccessFailed) {
       return 'Unable to verify chat access';
+    }
+
+    if (this.activeRoomType === ChatChannelType.Invites) {
+      return 'Signup invites are read-only';
     }
 
     return this.canWriteChat
@@ -536,7 +552,10 @@ export class ChatComponent implements OnInit, OnDestroy {
         'There is not enough room for this link. Shorten your message and try again (200 characters maximum).';
       return;
     }
-    if (this.activeChannel.type === ChatChannelType.System) {
+    if (
+      this.activeChannel.type === ChatChannelType.System ||
+      this.activeChannel.type === ChatChannelType.Invites
+    ) {
       this.activeChannel = {
         type: ChatChannelType.General,
         contextKey: 'general',
@@ -678,6 +697,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   channelLabel(message: ChatMessageDto): string {
+    if (message.channelType === ChatChannelType.Invites) {
+      return 'Invites';
+    }
+
     if (isWorldSystemMessage(message)) {
       return 'World';
     }
@@ -701,6 +724,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         return 'border-rose-400/40 bg-rose-400/10 text-rose-300';
       case ChatChannelType.Raid:
         return 'border-orange-400/40 bg-orange-400/10 text-orange-300';
+      case ChatChannelType.Invites:
+        return 'border-violet-400/40 bg-violet-400/10 text-violet-300';
       case ChatChannelType.Whisper:
         return 'border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-300';
       case ChatChannelType.System:
@@ -722,6 +747,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         return 'border-l-rose-400';
       case ChatChannelType.Raid:
         return 'border-l-orange-400 bg-orange-400/5';
+      case ChatChannelType.Invites:
+        return 'border-l-violet-400 bg-violet-400/5 hover:bg-violet-400/10';
       case ChatChannelType.Whisper:
         return 'border-l-fuchsia-400 bg-fuchsia-400/5';
       case ChatChannelType.System:
@@ -910,6 +937,11 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   async send(): Promise<void> {
     if (this.isSending) return;
+
+    if (this.activeRoomType === ChatChannelType.Invites) {
+      this.sendError = 'Signup invites are read-only.';
+      return;
+    }
 
     if (!this.canWriteChat) {
       this.sendError = this.isGuestAccount

@@ -18,7 +18,8 @@ public sealed record BossDiscoverySchedule(IReadOnlyList<int> Discovery, IReadOn
     IReadOnlyList<int> Confirmation, IReadOnlyList<int> Diagnostics,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<int>? Feedback = null);
 public sealed record BossDiscoveryStages(int Shortlist, int GeneratedFinalists, int DiagnosticCandidates, int ReplayReserve,
-    IReadOnlyDictionary<string, BossDiscoverySchedule> Schedules, string SelectionPolicyVersion = TowerBossStudyPolicy.Version);
+    IReadOnlyDictionary<string, BossDiscoverySchedule> Schedules, string SelectionPolicyVersion = TowerBossStudyPolicy.Version,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? SelectionPrimaryReferenceId = null);
 public sealed record BossBenchmarkReference(string Id, string Context, TowerScenario Scenario, string Source, string EvidenceHash);
 public sealed record BossDiscoveryStart(string Id, string ReferenceId, PartyChoice Party);
 public sealed record BossDiscoveryProvenance(string Id, int GenerationSeed, string Method, string Operator,
@@ -195,7 +196,7 @@ public static class TowerBossDiscovery
             || s.Shortlist is < 1 or > 64 || s.Shortlist < g.Methods.Count * g.Seeds.Count
             || diagnosticPhase != 1 && s.Shortlist > TowerBossGeneration.CandidateTotal(g)
             || s.GeneratedFinalists is < 1 or > 5 || s.GeneratedFinalists > s.Shortlist
-            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.Version or TowerBossStudyPolicy.ZeroWinVersion)
+            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.Version or TowerBossStudyPolicy.ZeroWinVersion or TowerBossStudyPolicy.IncumbentTieVersion)
             || s.DiagnosticCandidates is < 0 or > 32 || s.ReplayReserve is < 0 or > 1000 || s.Schedules is null
             || !s.Schedules.Keys.Order().SequenceEqual(d.Contexts.Select(c => c.Id).Order()))
             throw new InvalidDataException("Invalid three-stage discovery allocation, objective, methods or bounded attempts.");
@@ -258,13 +259,22 @@ public static class TowerBossDiscovery
             || d.Starts.Count + 6 >= g.CandidatesPerArm || d.References.Count != d.Starts.Count
             || d.Starts.Any(start => !start.Party.Builds.Values.All(TowerCompositionSearch.IsCanonical))
             || d.References.Any(r => r.Scenario.Party.Any(p => !TowerCompositionSearch.IsCanonical(p.Build.EssenceIds)))
-            || s.SelectionPolicyVersion != TowerBossStudyPolicy.ZeroWinVersion))
+            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.ZeroWinVersion or TowerBossStudyPolicy.IncumbentTieVersion)))
             throw new InvalidDataException("Supplied composition requires one or two canonical starts, capacity beyond the shared initial batch and its explicit selection policy.");
         if (TowerSuppliedCompositionSearch.PreservesIncumbents(g.PolicyVersion)
             && (d.Mode != Improve || g.Seeds.Count != (diagnosticPhase == 1 ? 0 : 1) || d.Contexts.Count != 1 || d.Starts.Count != 2 || d.References.Count != 2
                 || d.Starts.Select(start => start.ReferenceId).Distinct(StringComparer.Ordinal).Count() != 2
                 || s.Shortlist != 4 || s.GeneratedFinalists != 1 || s.DiagnosticCandidates != 0 || s.ReplayReserve != 0))
             throw new InvalidDataException("Incumbent nomination requires two distinct supplied references, one root/context, four nominees, one finalist and no diagnostics or replays.");
+        if (s.SelectionPolicyVersion == TowerBossStudyPolicy.IncumbentTieVersion)
+        {
+            if (diagnosticPhase != 0 || !TowerSuppliedCompositionSearch.PreservesIncumbents(g.PolicyVersion)
+                || s.SelectionPrimaryReferenceId is null
+                || d.Starts.Count(start => start.ReferenceId == s.SelectionPrimaryReferenceId) != 1)
+                throw new InvalidDataException("Incumbent tie selection requires the practical supplied-team scope and one explicit supplied primary reference.");
+        }
+        else if (s.SelectionPrimaryReferenceId is not null)
+            throw new InvalidDataException("A selection primary designation requires the explicit incumbent tie selection policy.");
         if (g.PolicyVersion == TowerAnchoredNeighborhoodSearch.Version) TowerAnchoredNeighborhoodSearch.Validate(d);
         else if (d.PrimaryReferenceId is not null)
             throw new InvalidDataException("A primary reference designation requires the anchored-neighborhood policy.");

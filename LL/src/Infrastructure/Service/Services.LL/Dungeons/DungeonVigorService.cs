@@ -36,8 +36,7 @@ public sealed class DungeonVigorService : IDungeonVigorService
             (maximumToll - minimumToll) * Math.Clamp(missingHealthPercent, 0d, 1d),
             MidpointRounding.AwayFromZero);
         var combatToll = minimumToll + performanceToll;
-        var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State.MasteryLevelAtStart);
-        var toll = Math.Max(0, ScaleCombatToll(combatToll) - masteryBenefits.CombatVigorCostReduction);
+        var toll = CalculateCombatToll(combatToll, run.State.MasteryLevelAtStart);
 
         return Apply(run, room, -Math.Clamp(toll, 0, 35), "Combat toll");
     }
@@ -46,6 +45,15 @@ public sealed class DungeonVigorService : IDungeonVigorService
         (int)Math.Round(
             Math.Max(0, toll) * CombatTollMultiplier,
             MidpointRounding.AwayFromZero);
+
+    public static int CalculateCombatToll(int authoredToll, int masteryLevel) =>
+        Math.Max(
+            0,
+            ScaleCombatToll(authoredToll) -
+            DungeonMasteryBenefits.Resolve(masteryLevel).CombatVigorCostReduction);
+
+    public static int CalculateRestSiteRecovery(int masteryLevel) =>
+        RestSiteRecovery + DungeonMasteryBenefits.Resolve(masteryLevel).RestSiteVigorBonus;
 
     public int SpendTreasuryVigor(DungeonRun run, RoomInstance room, int cost)
     {
@@ -56,11 +64,10 @@ public sealed class DungeonVigorService : IDungeonVigorService
 
     public int RecoverAtRestSite(DungeonRun run, RoomInstance room)
     {
-        var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State.MasteryLevelAtStart);
         return Apply(
             run,
             room,
-            RestSiteRecovery + masteryBenefits.RestSiteVigorBonus,
+            CalculateRestSiteRecovery(run.State.MasteryLevelAtStart),
             "Rest Site recovery");
     }
 

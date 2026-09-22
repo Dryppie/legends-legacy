@@ -122,6 +122,7 @@ public sealed class DungeonRunFactory
         ConfigureRestSiteChoices(nodes, rooms, dungeon.RestSiteCount, random);
         ConfigureTreasuryChoices(nodes, rooms, dungeon, random);
         RandomizeLayout(nodes, rooms, random);
+        EnsureVigorFeasibility(nodes, rooms, dungeon);
         return new DungeonLayout(rooms, nodes);
     }
 
@@ -384,6 +385,137 @@ public sealed class DungeonRunFactory
             : $"{location} Guard";
     }
 
+    private static void EnsureVigorFeasibility(
+        List<DungeonMapNode> nodes,
+        List<RoomInstance> rooms,
+        DungeonDefinition dungeon)
+    {
+        var result = DungeonVigorFeasibilityEvaluator.Evaluate(
+            nodes,
+            rooms,
+            dungeon.VigorFeasibilityMasteryLevel);
+
+        while (!result.IsFeasible)
+        {
+            var candidates = nodes
+                .Where(node =>
+                    rooms[node.RoomIndex].Type == RoomType.Combat &&
+                    !nodes.Any(candidate =>
+                        candidate.Depth == node.Depth &&
+                        rooms[candidate.RoomIndex].Type == RoomType.Treasury))
+                .OrderBy(node => node.Depth)
+                .ThenBy(node => node.RoomIndex)
+                .ToList();
+            if (candidates.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Dungeon '{dungeon.Id}' cannot produce a Vigor-feasible layout at Mastery " +
+                    $"{dungeon.VigorFeasibilityMasteryLevel}.");
+            }
+
+            DungeonMapNode? selected = null;
+            DungeonVigorFeasibilityResult? selectedResult = null;
+            foreach (var candidate in candidates)
+            {
+                var room = rooms[candidate.RoomIndex];
+                room.Type = RoomType.RestSite;
+                var candidateResult = DungeonVigorFeasibilityEvaluator.Evaluate(
+                    nodes,
+                    rooms,
+                    dungeon.VigorFeasibilityMasteryLevel);
+                room.Type = RoomType.Combat;
+
+                if (selectedResult is null || IsBetterFeasibility(candidateResult, selectedResult))
+                {
+                    selected = candidate;
+                    selectedResult = candidateResult;
+                }
+            }
+
+            if (selected is null || selectedResult is null)
+            {
+                throw new InvalidOperationException(
+                    $"Dungeon '{dungeon.Id}' has no combat room that can become a Rest Site.");
+            }
+
+            PromoteToRestSite(selected, rooms[selected.RoomIndex], nodes);
+            result = DungeonVigorFeasibilityEvaluator.Evaluate(
+                nodes,
+                rooms,
+                dungeon.VigorFeasibilityMasteryLevel);
+        }
+    }
+
+    private static bool IsBetterFeasibility(
+        DungeonVigorFeasibilityResult candidate,
+        DungeonVigorFeasibilityResult current)
+    {
+        if (candidate.IsFeasible != current.IsFeasible)
+        {
+            return candidate.IsFeasible;
+        }
+
+        if (candidate.DeepestReachableDepth != current.DeepestReachableDepth)
+        {
+            return candidate.DeepestReachableDepth > current.DeepestReachableDepth;
+        }
+
+        if (candidate.BestVigorAtDeepestDepth != current.BestVigorAtDeepestDepth)
+        {
+            return candidate.BestVigorAtDeepestDepth > current.BestVigorAtDeepestDepth;
+        }
+
+        return candidate.BestFinalVigor > current.BestFinalVigor;
+    }
+
+    private static void PromoteToRestSite(
+        DungeonMapNode node,
+        RoomInstance room,
+        IReadOnlyCollection<DungeonMapNode> nodes)
+    {
+        room.Type = RoomType.RestSite;
+        room.EncounterIds.Clear();
+        node.DisplayName = GetGeneratedRestSiteDisplayName(node.DisplayName);
+        node.Forecast = "Rest to recover Vigor before continuing deeper into the dungeon.";
+        node.VigorCostMin = 0;
+        node.VigorCostMax = 0;
+
+        var restRow = nodes
+            .Where(candidate => candidate.Depth == node.Depth)
+            .OrderBy(candidate => candidate.Lane)
+            .ThenBy(candidate => candidate.RoomIndex)
+            .ToList();
+        var restRowIndexes = restRow.Select(candidate => candidate.RoomIndex).ToList();
+        foreach (var previous in nodes.Where(candidate => candidate.Depth == node.Depth - 1))
+        {
+            previous.NextRoomIndexes = restRowIndexes.ToList();
+        }
+
+        var nextRowIndexes = nodes
+            .Where(candidate => candidate.Depth == node.Depth + 1)
+            .OrderBy(candidate => candidate.Lane)
+            .ThenBy(candidate => candidate.RoomIndex)
+            .Select(candidate => candidate.RoomIndex)
+            .ToList();
+        foreach (var restRowNode in restRow)
+        {
+            restRowNode.NextRoomIndexes = nextRowIndexes.ToList();
+        }
+    }
+
+    private static string GetGeneratedRestSiteDisplayName(string displayName)
+    {
+        const string guardSuffix = " Guard";
+        if (displayName.EndsWith(guardSuffix, StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{displayName[..^guardSuffix.Length]} Rest Site";
+        }
+
+        return string.IsNullOrWhiteSpace(displayName)
+            ? "Expedition Rest Site"
+            : $"{displayName} Rest Site";
+    }
+
     private static void RandomizeLayout(
         List<DungeonMapNode> nodes,
         IReadOnlyList<RoomInstance> rooms,
@@ -497,6 +629,19 @@ public sealed class DungeonRunFactory
         foreach (var edge in additionalEdges.Take(extraEdgeCount))
         {
             edge.Source.NextRoomIndexes.Add(edge.Target.RoomIndex);
+        }
+
+        var easiestTarget = targetRow
+            .OrderBy(node => node.VigorCostMin)
+            .ThenBy(node => node.VigorCostMax)
+            .ThenBy(node => node.RoomIndex)
+            .First();
+        foreach (var source in sourceRow)
+        {
+            if (!source.NextRoomIndexes.Contains(easiestTarget.RoomIndex))
+            {
+                source.NextRoomIndexes.Add(easiestTarget.RoomIndex);
+            }
         }
 
         foreach (var source in sourceRow)

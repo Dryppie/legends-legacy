@@ -146,7 +146,7 @@
           (click)="updateMentionSearch(chatInput)"
           (focus)="updateMentionSearch(chatInput)"
           (blur)="mentions.close()"
-          [disabled]="!canWriteChat || isSending"
+          [disabled]="!canWriteActiveChannel || isSending"
         ></div>
         <ng-container
           *ngTemplateOutlet="
@@ -158,7 +158,7 @@
           class="shrink-0"
           (pressed)="send()"
           [text]="isSending ? 'Sending...' : 'Send'"
-          [disabled]="!canWriteChat || !draft.trim() || isSending"
+          [disabled]="!canWriteActiveChannel || !draft.trim() || isSending"
         />
       </div>
 
@@ -408,7 +408,11 @@
                 <ng-template #regularSender>
                   <ng-container *ngIf="!m.linkedItem">
                     <ng-container
-                      *ngIf="m.channelType === 'System'; else playerSender"
+                      *ngIf="
+                        m.channelType === 'System' ||
+                          m.channelType === 'Invites';
+                        else playerSender
+                      "
                     >
                       <span
                         *ngIf="m.senderName !== channelLabel(m)"
@@ -454,7 +458,8 @@
                     m.channelType === 'System' && !isWorldAnnouncement(m),
                   'font-medium text-[var(--ll-color-primary)]':
                     isWorldAnnouncement(m),
-                  'text-[var(--ll-color-text)]': m.channelType !== 'System',
+                  'text-[var(--ll-color-text)]':
+                    m.channelType !== 'System' && !isWorldAnnouncement(m),
                 }"
               >
                 <span *ngIf="m.linkedItem">
@@ -481,6 +486,14 @@
                   ></app-item>
                   <span>.</span>
                 </ng-container>
+                <a
+                  *ngIf="m.channelType === 'Invites' && m.targetUrl"
+                  class="ml-1 font-semibold text-violet-300 underline decoration-violet-300/40 underline-offset-2 hover:text-violet-200"
+                  [routerLink]="m.targetUrl"
+                  (click)="$event.stopPropagation()"
+                >
+                  View signup →
+                </a>
               </div>
             </article>
           </ng-container>
@@ -524,7 +537,7 @@
             (click)="updateMentionSearch(chatInput)"
             (focus)="updateMentionSearch(chatInput)"
             (blur)="mentions.close()"
-            [disabled]="!canWriteChat || isSending"
+            [disabled]="!canWriteActiveChannel || isSending"
           ></div>
           <ng-container
             *ngTemplateOutlet="
@@ -536,7 +549,7 @@
             class="shrink-0"
             (pressed)="send()"
             [text]="isSending ? 'Sending...' : 'Send'"
-            [disabled]="!canWriteChat || !draft.trim() || isSending"
+            [disabled]="!canWriteActiveChannel || !draft.trim() || isSending"
           />
         </div>
         <nav

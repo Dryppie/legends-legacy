@@ -55,6 +55,7 @@ public sealed class WorldTowerTitleCatalogTests
         Assert.Equal(recipient, request.RootElement.GetProperty("targetCharacterId").Deserialize<Guid?>());
         Assert.True(request.RootElement.GetProperty("broadcast").GetBoolean());
         Assert.Equal(payload.MessageId, request.RootElement.GetProperty("messageId").GetGuid());
+        Assert.Equal("System", request.RootElement.GetProperty("channelType").GetString());
     }
 
     private sealed class CaptureHandler : HttpMessageHandler

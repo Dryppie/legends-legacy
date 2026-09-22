@@ -22,7 +22,15 @@ public static partial class TowerBossStudy
             .Replace("Retained-build search viability", "Reference-derived search viability")
             .Replace("References never enter generation, discovery scoring or finalist selection.",
                 "Explicit supplied references enter discovery as scored starts; their ancestry propagates through descendants. This is reference-derived search. Historical fitness and confirmation outcomes do not enter selection.");
-        if (definition?.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.ZeroWinVersion
+        if (definition?.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.IncumbentTieVersion
+            || report.Confirmation?.PolicyVersion == TowerBossStudyPolicy.IncumbentTieVersion)
+        {
+            text = text.Replace("The primary maximizes the worst-context win rate, with boss progress, survival, winning duration and stable ID as tie-breakers.",
+                "The primary uses selection wins. A designated supplied primary sharing a positive maximum win count is retained; other positive ties use frozen discovery rank and stable ID. Zero-win ties use mean guardian health, then frozen discovery rank and stable ID.");
+            if (report.Confirmation?.IncumbentSelection is { } designation)
+                text += $"\nSelection policy: `{TowerBossStudyPolicy.IncumbentTieVersion}`. Designated reference: `{designation.ReferenceId}`; canonical party: `{designation.PartyId}`. {designation.Reason}\n";
+        }
+        else if (definition?.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.ZeroWinVersion
             || TowerSuppliedCompositionSearch.IsSupported(report.Discovery?.Version))
             text = text.Replace("The primary maximizes the worst-context win rate, with boss progress, survival, winning duration and stable ID as tie-breakers.",
                 "The primary uses selection wins; only zero-win ties use mean guardian health, then frozen discovery rank and stable ID. Positive-win ties use frozen discovery rank and stable ID.");

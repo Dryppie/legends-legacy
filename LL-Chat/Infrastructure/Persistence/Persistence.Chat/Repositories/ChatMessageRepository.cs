@@ -32,7 +32,13 @@ public class ChatMessageRepository : IChatMessageRepository
         CancellationToken cancellationToken)
     {
         take = Math.Clamp(take, 1, 200);
-        var publicChannels = new List<ChatChannelType> { ChatChannelType.General, ChatChannelType.Trade, ChatChannelType.Help };
+        var publicChannels = new List<ChatChannelType>
+        {
+            ChatChannelType.General,
+            ChatChannelType.Trade,
+            ChatChannelType.Help,
+            ChatChannelType.Invites
+        };
         var query = _context.ChatMessages
             .AsNoTracking()
             .Where(m =>

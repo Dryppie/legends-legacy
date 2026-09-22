@@ -227,6 +227,24 @@
   white-space: nowrap;
 }
 
+.dungeon-result__actions {
+  display: grid;
+  margin-top: var(--ll-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ll-space-2);
+}
+
+.dungeon-result__actions .dungeon-button {
+  width: 100%;
+  margin-top: 0;
+}
+
+.dungeon-result__replay-hint {
+  margin: var(--ll-space-2) 0 0;
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+}
+
 .dungeon-result__guidance {
   margin-top: var(--ll-space-6);
 }
@@ -1011,6 +1029,10 @@
   }
 
   .dungeon-result__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .dungeon-result__actions {
     grid-template-columns: 1fr;
   }
 

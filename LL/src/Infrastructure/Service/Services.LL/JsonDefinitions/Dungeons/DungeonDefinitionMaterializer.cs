@@ -47,6 +47,7 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 RestSiteCount = family.RestSiteCount,
                 TreasuryCount = family.TreasuryCount,
                 TreasuryVigorCost = family.TreasuryVigorCost,
+                VigorFeasibilityMasteryLevel = difficulty.VigorFeasibilityMasteryLevel,
                 MinRooms = difficulty.MinRooms,
                 MaxRooms = difficulty.MaxRooms,
                 Rooms = family.RoomTemplates.Select(MaterializeRoom).ToList()

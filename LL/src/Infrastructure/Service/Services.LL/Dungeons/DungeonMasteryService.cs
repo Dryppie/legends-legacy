@@ -8,6 +8,8 @@ namespace Services.LL.Dungeons;
 
 public sealed class DungeonMasteryService : IDungeonMasteryService
 {
+    private const int AttemptExperience = 5;
+    private const int ClearedRoomExperience = 5;
     private const int BossDefeatExperience = 50;
     private const int MiniBossDefeatExperience = 25;
 
@@ -23,7 +25,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
     public int? GetExperienceRequiredForNextLevel(int level) =>
         DungeonMasteryProgression.GetExperienceRequiredForNextLevel(level);
 
-    public async Task<DungeonMasteryAwardResult> AwardCompletionAsync(
+    public async Task<DungeonMasteryAwardResult> AwardRunMasteryAsync(
         DungeonRun run,
         CancellationToken cancellationToken)
     {
@@ -63,12 +65,16 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
 
         var previousLevel = mastery.Level;
         var rewardPreviouslyClaimed = mastery.MaxLevelRewardClaimed;
-        var reasons = CalculateCompletionExperienceReasons(run).ToList();
+        var reasons = CalculateRunExperienceReasons(run).ToList();
         var experienceAwarded = reasons.Sum(x => x.Experience);
         mastery.Experience += experienceAwarded;
         mastery.Level = CalculateLevel(mastery.Experience);
-        mastery.MaxLevelRewardClaimed |= mastery.Level >= DungeonMasteryBenefits.MaxLevel;
-        mastery.CompletionCount++;
+        var isCompletion = run.Status == DungeonRunStatus.Completed;
+        if (isCompletion)
+        {
+            mastery.MaxLevelRewardClaimed |= mastery.Level >= DungeonMasteryBenefits.MaxLevel;
+            mastery.CompletionCount++;
+        }
         mastery.LastAwardedRunId = run.Id;
         mastery.UpdatedAt = DateTimeOffset.UtcNow;
         run.State ??= new DungeonRunState { RunId = run.Id };
@@ -84,7 +90,12 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             reasons,
             AlreadyAwarded: false)
         {
-            MaxLevelRewardPreviouslyClaimed = rewardPreviouslyClaimed
+            // The one-time cap reward remains a completion reward. A failed or
+            // retreated run can reach Mastery 10 without consuming that reward.
+            MaxLevelRewardPreviouslyClaimed = rewardPreviouslyClaimed || !isCompletion,
+            MaxLevelRewardWasDeferred = isCompletion &&
+                !rewardPreviouslyClaimed &&
+                previousLevel >= DungeonMasteryBenefits.MaxLevel
         };
     }
 
@@ -121,19 +132,45 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             GetExperienceRequiredForNextLevel(mastery.Level),
             mastery.CompletionCount);
 
-    private static IReadOnlyList<DungeonMasteryAwardReason> CalculateCompletionExperienceReasons(DungeonRun run)
+    private static IReadOnlyList<DungeonMasteryAwardReason> CalculateRunExperienceReasons(DungeonRun run)
     {
         var reasons = new List<DungeonMasteryAwardReason>();
-        var completedRooms = run.Rooms.Count(x => x.Status == RoomInstanceStatus.Completed);
-        var roomExperience = Math.Max(1, completedRooms) * 5;
-        reasons.Add(new DungeonMasteryAwardReason
+        if (run.Status == DungeonRunStatus.Completed)
         {
-            Id = "completion",
-            Description = "Dungeon completed",
-            Experience = 100 + roomExperience
-        });
+            var completedRooms = run.Rooms.Count(x => x.Status == RoomInstanceStatus.Completed);
+            reasons.Add(new DungeonMasteryAwardReason
+            {
+                Id = "completion",
+                Description = "Dungeon completed",
+                Experience = 100 + (Math.Max(1, completedRooms) * ClearedRoomExperience)
+            });
+        }
+        else
+        {
+            reasons.Add(new DungeonMasteryAwardReason
+            {
+                Id = "attempt",
+                Description = "Dungeon attempt",
+                Experience = AttemptExperience
+            });
+        }
 
-        var bossExperience = run.Rooms.Any(x => x.Type == RoomType.Boss && x.Status == RoomInstanceStatus.Completed)
+        var creditedRooms = GetCreditedRooms(run).ToList();
+        if (run.Status != DungeonRunStatus.Completed)
+        {
+            var clearedRoomExperience = creditedRooms.Count * ClearedRoomExperience;
+            if (clearedRoomExperience > 0)
+            {
+                reasons.Add(new DungeonMasteryAwardReason
+                {
+                    Id = "rooms_cleared",
+                    Description = "Rooms cleared",
+                    Experience = clearedRoomExperience
+                });
+            }
+        }
+
+        var bossExperience = creditedRooms.Any(x => x.Type == RoomType.Boss)
             ? BossDefeatExperience
             : 0;
         if (bossExperience > 0)
@@ -146,7 +183,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             });
         }
 
-        var miniBossExperience = run.Rooms.Count(x => x.Type == RoomType.MiniBoss && x.Status == RoomInstanceStatus.Completed) *
+        var miniBossExperience = creditedRooms.Count(x => x.Type == RoomType.MiniBoss) *
             MiniBossDefeatExperience;
         if (miniBossExperience > 0)
         {
@@ -159,5 +196,22 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
         }
 
         return reasons;
+    }
+
+    private static IEnumerable<RoomInstance> GetCreditedRooms(DungeonRun run)
+    {
+        var completedRooms = run.Rooms.Where(room =>
+            room.Status == RoomInstanceStatus.Completed &&
+            room.Type != RoomType.Entrance);
+
+        // FailRun marks the current room completed for terminal-state handling,
+        // even when the encounter was lost or never attempted due to expiry.
+        if (run.Status == DungeonRunStatus.Failed &&
+            run.State?.FailureAnalysis?.PrimaryCause is "Combat Readiness" or "Abandonment")
+        {
+            completedRooms = completedRooms.Where(room => room.RoomIndex != run.CurrentRoomIndex);
+        }
+
+        return completedRooms;
     }
 }

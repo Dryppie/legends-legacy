@@ -223,7 +223,9 @@ public sealed class DungeonRunService : IDungeonRunService
 
         if (actionId.Equals(DungeonActionConstants.Retreat, StringComparison.OrdinalIgnoreCase))
         {
-            return RetreatAndSecureLoot(run);
+            var result = RetreatAndSecureLoot(run);
+            await _mastery.AwardRunMasteryAsync(run, ct);
+            return result;
         }
 
         if (run.State.CurrentRouteOptions.Count > 0)
@@ -397,6 +399,7 @@ public sealed class DungeonRunService : IDungeonRunService
             {
                 FailRun(run, room, "Attrition", "Vigor was spent at the end of the combat.");
                 await RecordDungeonProgressContributionAsync(run, room, ct);
+                await _mastery.AwardRunMasteryAsync(run, ct);
                 outcome = DungeonActionOutcome.CombatDefeat;
             }
             else
@@ -418,6 +421,7 @@ public sealed class DungeonRunService : IDungeonRunService
                 room.Type == RoomType.Boss
                     ? "The final encounter overwhelmed the party."
                     : "The party was defeated before reaching the next Rest Site.");
+            await _mastery.AwardRunMasteryAsync(run, ct);
             outcome = DungeonActionOutcome.CombatDefeat;
         }
 
