@@ -1,6 +1,6 @@
 # Proposal-affinity runtime qualification and admission
 
-Current status (2026-09-25): The twelve-root placement comparison completed 16,000 actual fights and all audits. Frozen decision: Inconclusive; no demonstrated improvement and no default promotion. See [completed comparison and diagnosis](<Tower-Loadout-Placement-Plain-Cost-Reconciliation.md>).
+Current status (2026-09-25): Original affinity creation with benchmark validation is the supported baseline. The one nomination experiment completed 15,744 actual fights and all audits; both arms retained the benchmark on all 12 roots. This tuning cycle is closed. See [completed result and next work](<Tower-Affinity-Nomination-Pilot-01-Execution.md>).
 
 23 September 2026. Target: the offline `LL/tools/BalanceHarness`.
 

@@ -10,9 +10,23 @@ public static class BackgroundJobRegistrationExtensions
         IHostEnvironment environment)
     {
         RegisterSmokeJob(q, configuration, environment);
+        RegisterDailyTelemetryJob(q, configuration);
         RegisterTournamentGroundsProgressionJob(q, configuration, environment);
         RegisterMarketplaceOrderExpirationJob(q, configuration);
         RegisterRegionBossProgressionJob(q, configuration);
+    }
+
+    private static void RegisterDailyTelemetryJob(IServiceCollectionQuartzConfigurator q, IConfiguration configuration)
+    {
+        q.AddJob<DailyTelemetryJob>(job => job
+            .WithIdentity(BackgroundJobNames.DailyTelemetry, BackgroundJobGroups.System)
+            .StoreDurably().RequestRecovery());
+        if (!(configuration.GetValue<bool?>("Analytics:DailyJobEnabled") ?? true)) return;
+        q.AddTrigger(trigger => trigger
+            .WithIdentity("system.daily-telemetry.trigger", BackgroundJobGroups.System)
+            .ForJob(BackgroundJobNames.DailyTelemetry, BackgroundJobGroups.System)
+            .WithCronSchedule("0 0 2 * * ?", schedule => schedule.InTimeZone(TimeZoneInfo.Utc)
+                .WithMisfireHandlingInstructionFireAndProceed()));
     }
 
     private static void RegisterRegionBossProgressionJob(

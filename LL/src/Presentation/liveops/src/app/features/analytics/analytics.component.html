@@ -1,0 +1,38 @@
+<main class="analytics">
+  <div class="heading">
+    <div><p class="eyebrow">Daily reports</p><h1>Analytics</h1>
+      <p class="note">UTC calendar days. Activity means the visible game was opened or refocused.</p></div>
+    <div class="controls">
+      <label>Range <select [(ngModel)]="days" (change)="load()"><option [ngValue]="7">7 days</option><option [ngValue]="30">30 days</option><option [ngValue]="90">90 days</option></select></label>
+      <label>Day <select [(ngModel)]="selectedDate"><option *ngFor="let report of reports" [value]="report.reportDateUtc">{{ report.reportDateUtc }}</option></select></label>
+      <button type="button" (click)="load()" [disabled]="loading">{{ loading ? 'Loading…' : 'Refresh' }}</button>
+    </div>
+  </div>
+  <p *ngIf="error" class="error" role="alert">{{ error }}</p>
+  <p *ngIf="!loading && !error && !reports.length" class="note">No daily report yet. Reports appear after the 02:00 UTC job runs.</p>
+  <p *ngIf="stale" class="error">Latest report is stale. Check the daily telemetry job.</p>
+  <ng-container *ngIf="selected as report">
+    <p class="note">Report for {{ report.reportDateUtc }} · generated {{ report.generatedAtUtc | date:'medium':'UTC' }} UTC. Adoption and economy snapshot taken {{ report.snapshotAtUtc | date:'medium':'UTC' }} UTC; a delayed job may capture it later than the report day.</p>
+    <section class="cards" aria-label="Daily users">
+      <div class="card"><span>DAU</span><strong>{{ report.population.dau }}</strong></div>
+      <div class="card"><span>WAU · rolling 7d</span><strong>{{ report.population.wau }}</strong></div>
+      <div class="card"><span>MAU · rolling 30d</span><strong>{{ report.population.mau }}</strong></div>
+      <div class="card"><span>New active</span><strong>{{ report.population.newActive }}</strong></div>
+      <div class="card"><span>Returning active</span><strong>{{ report.population.returningActive }}</strong></div>
+      <div class="card"><span>D1 return</span><strong>{{ percent(report.population.d1Returned, report.population.d1Cohort) }}</strong><small> {{ report.population.d1Returned }}/{{ report.population.d1Cohort }}</small></div>
+      <div class="card"><span>D7 return</span><strong>{{ percent(report.population.d7Returned, report.population.d7Cohort) }}</strong><small> {{ report.population.d7Returned }}/{{ report.population.d7Cohort }}</small></div>
+    </section>
+    <h2>Daily user trend</h2><p class="note">D1 and D7 use accounts created one or seven UTC days before the report day.</p>
+    <div class="panel"><table><thead><tr><th>UTC day</th><th>DAU</th><th>WAU</th><th>MAU</th><th>New active</th><th>D1</th><th>D7</th></tr></thead>
+      <tbody><tr *ngFor="let day of reports"><td>{{ day.reportDateUtc }}</td><td>{{ day.population.dau }}</td><td>{{ day.population.wau }}</td><td>{{ day.population.mau }}</td><td>{{ day.population.newActive }}</td><td>{{ percent(day.population.d1Returned, day.population.d1Cohort) }}</td><td>{{ percent(day.population.d7Returned, day.population.d7Cohort) }}</td></tr></tbody></table></div>
+    <h2>Major content outcomes</h2><p class="note">Starts and results are counted on their own UTC date. Unique characters are counted per content key.</p>
+    <div class="panel"><table><thead><tr><th>Content</th><th>Key</th><th>Started</th><th>Completed</th><th>Failed</th><th>Unique characters</th></tr></thead>
+      <tbody><tr *ngFor="let row of report.outcomes"><td>{{ row.kind }}</td><td>{{ row.key }}</td><td>{{ row.started }}</td><td>{{ row.completed }}</td><td>{{ row.failed }}</td><td>{{ row.uniqueCharacters }}{{ row.uniqueCharacters < 5 ? ' · small sample' : '' }}</td></tr></tbody></table></div>
+    <h2>Essence and Combat Style adoption</h2><p class="note">Recently active characters, by level band. Selected style means current selection, not combat usage.</p>
+    <div class="panel"><table><thead><tr><th>Cohort</th><th>Measure</th><th>Definition</th><th>Level</th><th>Observed</th><th>Active characters</th></tr></thead>
+      <tbody><tr *ngFor="let row of report.adoption"><td>{{ row.cohortDays }}d</td><td>{{ row.kind }}</td><td>{{ row.key }}</td><td>{{ row.levelBand }}</td><td>{{ row.observedCharacters }}</td><td>{{ row.cohortCharacters }}</td></tr></tbody></table></div>
+    <h2>Economy health</h2><p class="note">Balance distribution among recently active characters, not total currency minted.</p>
+    <div class="panel"><table><thead><tr><th>Cohort</th><th>Resource</th><th>Level</th><th>Characters</th><th>Zero balance</th><th>P50</th><th>P90</th></tr></thead>
+      <tbody><tr *ngFor="let row of report.economy"><td>{{ row.cohortDays }}d</td><td>{{ row.resource }}</td><td>{{ row.levelBand }}</td><td>{{ row.characterCount }}</td><td>{{ row.zeroCount }}</td><td>{{ row.p50Balance | number }}</td><td>{{ row.p90Balance | number }}</td></tr></tbody></table></div>
+  </ng-container>
+</main>

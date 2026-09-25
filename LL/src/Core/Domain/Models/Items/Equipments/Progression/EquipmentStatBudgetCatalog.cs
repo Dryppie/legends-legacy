@@ -10,7 +10,9 @@ public static class EquipmentStatBudgetCatalog
     public const int MinimumTier = 1;
 
     private const double TypedMitigationCostPerPoint = 0.9d;
-    private const double TypedMitigationHalfCapNormalizedRating = 55d;
+    // At 55 normalized rating per piece, this yields about 15% for one and 40% for three.
+    private const double TypedMitigationHalfCapNormalizedRating = 165d;
+    private const double TypedMitigationRatingExponent = 1.1d;
 
     // Source-compatible only. V16 never uses this value to clamp progression.
     public const int MaximumTier = int.MaxValue;
@@ -115,12 +117,7 @@ public static class EquipmentStatBudgetCatalog
 
         var normalizedRating = Math.Max(0d, rawRating)
             / EquipmentTierBudgetCurve.GetScale(Math.Max(MinimumTier, progressionTier));
-        if (normalizedRating <= 0d)
-            return 0f;
-        var effective = rule.EffectiveCap
-            * normalizedRating
-            / (rule.HalfCapNormalizedRating + normalizedRating);
-        return (float)Math.Clamp(effective, 0d, rule.EffectiveCap);
+        return ConvertNormalizedRatingToEffectiveValue(stat, normalizedRating);
     }
 
     public static double ConvertEffectiveValueToNormalizedRating(
@@ -138,8 +135,8 @@ public static class EquipmentStatBudgetCatalog
             return double.MaxValue;
 
         return rule.HalfCapNormalizedRating
-            * effective
-            / (rule.EffectiveCap - effective);
+            * Math.Pow(-Math.Log2(1d - effective / rule.EffectiveCap),
+                1d / TypedMitigationRatingExponent);
     }
 
     public static float ConvertNormalizedRatingToEffectiveValue(
@@ -154,8 +151,8 @@ public static class EquipmentStatBudgetCatalog
         if (!double.IsFinite(normalizedRating))
             return rule.EffectiveCap;
         var effective = rule.EffectiveCap
-            * normalizedRating
-            / (rule.HalfCapNormalizedRating + normalizedRating);
+            * (1d - Math.Pow(0.5d, Math.Pow(normalizedRating / rule.HalfCapNormalizedRating,
+                TypedMitigationRatingExponent)));
         return (float)Math.Clamp(effective, 0d, rule.EffectiveCap);
     }
 

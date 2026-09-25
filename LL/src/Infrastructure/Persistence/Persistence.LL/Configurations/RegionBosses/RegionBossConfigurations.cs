@@ -48,6 +48,8 @@ public sealed class RegionBossRunConfiguration : IEntityTypeConfiguration<Region
         builder.Property(x => x.LastError).HasMaxLength(4000);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.RegionBossEventId, x.PartyNumber }).IsUnique();
+        builder.HasIndex(x => x.StartedAtUtc).IsCreatedConcurrently();
+        builder.HasIndex(x => x.ResolvedAtUtc).IsCreatedConcurrently();
         builder.HasIndex(x => new { x.Status, x.SimulationLeaseUntil });
         builder.HasIndex(x => new { x.RegionBossEventId, x.HighestLevelDefeated, x.CurrentBossProgressBasisPoints });
         builder.HasMany(x => x.ParticipantResults).WithOne(x => x.Run).HasForeignKey(x => x.RegionBossRunId).OnDelete(DeleteBehavior.Cascade);

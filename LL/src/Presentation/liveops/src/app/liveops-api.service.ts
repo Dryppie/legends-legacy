@@ -14,6 +14,7 @@ import {
   AdministrationAuditPage,
   ItemCatalogEntry,
   OperationalStatus,
+  TelemetrySnapshot,
   OperatorSession,
   PlayerDetails,
   PlayerMessageHistoryPage,
@@ -30,6 +31,11 @@ export class LiveOpsApiService {
   private antiforgeryToken = '';
 
   constructor(private readonly http: HttpClient) {}
+
+  analyticsOverview(days: number): Promise<ApiResponse<TelemetrySnapshot[]>> {
+    return firstValueFrom(this.http.get<ApiResponse<TelemetrySnapshot[]>>(
+      '/api/liveops/analytics/overview', { params: new HttpParams().set('days', days) }));
+  }
 
   session(): Promise<OperatorSession> {
     return firstValueFrom(this.http.get<OperatorSession>('/auth/session'));

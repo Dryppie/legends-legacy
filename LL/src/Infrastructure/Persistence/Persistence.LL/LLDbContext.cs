@@ -1,6 +1,7 @@
 using Domain.Models.Items.Equipments.Loadouts;
 using Application.Common.Interfaces;
 using Domain.Models.Achievements;
+using Domain.Models.Analytics;
 using Domain.Models.Administration;
 using Domain.Models.Attributes;
 using Domain.Models.BackgroundJobs;
@@ -79,6 +80,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        await CaptureDungeonAttemptHistoryAsync(cancellationToken);
         NormalizeIdentityFields();
         EnforceAppendOnlyAdminActions();
         EnforceAppendOnlyEconomyLedger();
@@ -93,6 +95,38 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         _savedInventoryQuantityChanges.AddRange(inventoryChanges);
         _saveChangesVersion++;
         return affectedRows;
+    }
+
+    private async Task CaptureDungeonAttemptHistoryAsync(CancellationToken ct)
+    {
+        foreach (var entry in ChangeTracker.Entries<DungeonRun>()
+                     .Where(x => x.State == EntityState.Added ||
+                         x.State == EntityState.Deleted &&
+                         (x.Entity.Status is DungeonRunStatus.Completed or DungeonRunStatus.Failed or DungeonRunStatus.Retreated) ||
+                         x.State == EntityState.Modified &&
+                         x.Property(run => run.Status).OriginalValue != x.Entity.Status).ToArray())
+        {
+            var run = entry.Entity;
+            var history = entry.State == EntityState.Added
+                ? null
+                : await DungeonAttemptHistories.FindAsync([run.Id], ct);
+            if (history is null)
+            {
+                history = new DungeonAttemptHistory
+                {
+                    RunId = run.Id,
+                    CharacterId = run.CharacterId,
+                    DungeonDefinitionId = run.DungeonDefinitionId,
+                    StartedAtUtc = run.CreatedAt
+                };
+                DungeonAttemptHistories.Add(history);
+            }
+            if (run.Status is DungeonRunStatus.Completed or DungeonRunStatus.Failed or DungeonRunStatus.Retreated)
+            {
+                history.Outcome = run.Status.ToString();
+                history.FinishedAtUtc = run.CompletedAt ?? DateTimeOffset.UtcNow;
+            }
+        }
     }
 
     private async Task<HashSet<Guid>> GetEquipmentLoadoutCleanupCharactersAsync(CancellationToken ct)
@@ -655,6 +689,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     }
 
     public DbSet<AdminAction> AdminActions => Set<AdminAction>();
+    public DbSet<AccountActivityDay> AccountActivityDays => Set<AccountActivityDay>();
+    public DbSet<DungeonAttemptHistory> DungeonAttemptHistories => Set<DungeonAttemptHistory>();
+    public DbSet<DailyTelemetryReport> DailyTelemetryReports => Set<DailyTelemetryReport>();
     public DbSet<AdminActionPreview> AdminActionPreviews => Set<AdminActionPreview>();
     public DbSet<AccountRestriction> AccountRestrictions => Set<AccountRestriction>();
     public DbSet<AccountRiskSnapshot> AccountRiskSnapshots => Set<AccountRiskSnapshot>();

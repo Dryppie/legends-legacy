@@ -4,6 +4,27 @@ export interface ApiResponse<T> {
   errorMessage: string;
 }
 
+export interface TelemetrySnapshot {
+  reportDateUtc: string;
+  generatedAtUtc: string;
+  snapshotAtUtc: string;
+  population: {
+    dau: number; wau: number; mau: number; newActive: number; returningActive: number;
+    d1Cohort: number; d1Returned: number; d7Cohort: number; d7Returned: number;
+  };
+  outcomes: Array<{
+    kind: string; key: string; started: number; completed: number; failed: number; uniqueCharacters: number;
+  }>;
+  adoption: Array<{
+    cohortDays: number; kind: string; key: string; levelBand: string;
+    cohortCharacters: number; observedCharacters: number;
+  }>;
+  economy: Array<{
+    cohortDays: number; resource: string; levelBand: string; characterCount: number;
+    zeroCount: number; p50Balance: number; p90Balance: number;
+  }>;
+}
+
 export interface OperatorSession {
   subject: string;
   displayName: string;

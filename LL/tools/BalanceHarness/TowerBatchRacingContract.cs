@@ -43,8 +43,15 @@ public static partial class TowerBatchRacing
     private static readonly string[] Roles = ["wave-1-screen", "wave-1-continuation",
         "wave-2-screen", "wave-2-continuation", "selection"];
 
-    internal static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(
-        JsonSerializer.Serialize(value, HarnessJson.Options), HarnessJson.Options)!;
+    private static readonly JsonSerializerOptions CopyOptions = new(HarnessJson.Options) { WriteIndented = false };
+
+    internal static T Copy<T>(T value)
+    {
+        using var timing = TowerPerformanceTrace.Measure("search.copy");
+        // Private copies need no display whitespace or UTF-16 string. Keep the
+        // same JSON contract and round trip so callers cannot mutate owned state.
+        return JsonSerializer.Deserialize<T>(JsonSerializer.SerializeToUtf8Bytes(value, CopyOptions), CopyOptions)!;
+    }
 
     public static void Validate(TowerBatchRacingPlan plan)
     {

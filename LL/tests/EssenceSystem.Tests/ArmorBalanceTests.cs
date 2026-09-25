@@ -72,9 +72,9 @@ public sealed class ArmorBalanceTests
     [Theory]
     [InlineData(-1d, 0f)]
     [InlineData(0d, 0f)]
-    [InlineData(55d, 40f)]
-    [InlineData(165d, 60f)]
-    [InlineData(1045d, 76f)]
+    [InlineData(55d, 14.959102f)]
+    [InlineData(110d, 28.669239f)]
+    [InlineData(165d, 40f)]
     public void Both_defenses_use_the_same_tier_normalized_damage_reduction_curve(
         double normalizedRating, float expectedReduction)
     {
@@ -91,6 +91,43 @@ public sealed class ArmorBalanceTests
             Assert.Equal(Math.Max(0d, normalizedRating),
                 EquipmentStatBudgetCatalog.ConvertEffectiveValueToNormalizedRating(attribute, expectedReduction), precision: 4);
             Assert.Equal(80f, EquipmentStatBudgetCatalog.ConvertNormalizedRatingToEffectiveValue(attribute, double.PositiveInfinity));
+        }
+    }
+
+    [Fact]
+    public void Premium_heavy_armor_still_benefits_from_a_third_piece()
+    {
+        var catalog = LoadCatalog();
+        var piece = catalog.Evaluator.Evaluate(
+            "plain.heavy_breastplate.rarity.legendary",
+            tier: 1,
+            rank: EquipmentBalance.MaximumRank,
+            activeStyleId: "blueprint_aegis",
+            quality: ItemQuality.Masterpiece,
+            attributeRollMultiplier: 1.05d);
+        var lightPiece = catalog.Evaluator.Evaluate(
+            "plain.light_hood.rarity.legendary",
+            tier: 1,
+            rank: EquipmentBalance.MaximumRank,
+            activeStyleId: "blueprint_aegis",
+            quality: ItemQuality.Masterpiece,
+            attributeRollMultiplier: 1.05d);
+        foreach (var attribute in new[] { AttributeType.Armor, AttributeType.Resistance })
+        {
+            var premiumPieceRating = piece.Stats[attribute];
+            var one = EquipmentStatBudgetCatalog.ConvertNormalizedRatingToEffectiveValue(
+                attribute, premiumPieceRating);
+            var two = EquipmentStatBudgetCatalog.ConvertNormalizedRatingToEffectiveValue(
+                attribute, premiumPieceRating * 2d);
+            var three = EquipmentStatBudgetCatalog.ConvertNormalizedRatingToEffectiveValue(
+                attribute, premiumPieceRating * 3d);
+            var heavyAndTwoLight = EquipmentStatBudgetCatalog.ConvertNormalizedRatingToEffectiveValue(
+                attribute, premiumPieceRating + 2d * lightPiece.Stats[attribute]);
+
+            Assert.InRange(one, 40f, 45f);
+            Assert.InRange(three, 70f, 75f);
+            Assert.True(three - two >= 9f);
+            Assert.True(three - heavyAndTwoLight >= 10f);
         }
     }
 

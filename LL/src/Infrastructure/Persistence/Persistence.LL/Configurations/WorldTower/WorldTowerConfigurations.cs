@@ -88,6 +88,8 @@ public sealed class TowerAttemptConfiguration : IEntityTypeConfiguration<TowerAt
         builder.Property(x => x.ServerId).HasMaxLength(64).IsRequired();
         builder.Property(x => x.SimulationLeaseOwner).HasMaxLength(128);
         builder.HasIndex(x => x.TowerRallyId).IsUnique();
+        builder.HasIndex(x => x.StartedAt).IsCreatedConcurrently();
+        builder.HasIndex(x => x.CompletedAt).IsCreatedConcurrently();
         builder.HasIndex(x => new { x.ServerId, x.FloorNumber, x.Mode, x.Succeeded });
         builder.HasIndex(x => new { x.Status, x.SimulationLeaseUntil });
         builder.HasOne(x => x.Playback)

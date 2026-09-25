@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Domain.Models.Achievements;
+using Domain.Models.Analytics;
 using Domain.Models.Administration;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
@@ -85,6 +86,7 @@ public static class DependencyInjection
 
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+        services.AddScoped<ITelemetryRepository, Repositories.Analytics.TelemetryRepository>();
         services.AddScoped<Domain.Models.Nobility.INobilityRepository, Repositories.Nobility.NobilityRepository>();
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
         services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();

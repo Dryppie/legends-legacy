@@ -74,6 +74,7 @@ internal sealed class TowerAdaptiveRacingGenerator
     internal TowerAdaptiveBatch Generate(int wave, IReadOnlyList<PartyChoice> beam, IReadOnlySet<string> seenBefore,
         IReadOnlyList<TowerPanelEvaluation> feedback, CancellationToken token)
     {
+        using var timing = TowerPerformanceTrace.Measure("search.generate");
         if (loadoutPlacement is not null) return loadoutPlacement.Generate(wave, beam, seenBefore, feedback, token);
         if (wave is not (1 or 2)) throw new InvalidDataException("Unknown proposal wave.");
         var schedule = wave == 1 ? policy.FirstWave : policy.SecondWave;

@@ -3,6 +3,7 @@ namespace Worker.LL.BackgroundJobs;
 public static class BackgroundJobNames
 {
     public const string QuartzSmoke = "system.quartz-smoke";
+    public const string DailyTelemetry = "system.daily-telemetry";
 
     public const string DailyGameMaintenance = "system.daily-game-maintenance";
     public const string WeeklyColosseumSettlement = "pvp.weekly-colosseum-settlement";

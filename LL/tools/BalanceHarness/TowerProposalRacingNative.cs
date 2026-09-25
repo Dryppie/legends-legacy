@@ -15,6 +15,7 @@ public static class TowerProposalRacingNative
         long maximumEvidenceBytes, Action checkLimits, CancellationToken token = default, Action<bool>? attempt = null,
         TowerProposalEvidenceStorage.Writer? storage = null)
     {
+        using var timing = TowerPerformanceTrace.Measure("search.native");
         ArgumentNullException.ThrowIfNull(archive); ArgumentNullException.ThrowIfNull(checkLimits);
         plan = TowerBatchRacing.Copy(plan);
         checkLimits(); token.ThrowIfCancellationRequested();

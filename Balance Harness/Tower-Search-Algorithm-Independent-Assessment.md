@@ -1,6 +1,6 @@
 # Independent assessment of World Tower team search
 
-Current status (2026-09-25): The twelve-root placement comparison completed 16,000 actual fights and all audits. Frozen decision: Inconclusive; no demonstrated improvement and no default promotion. See [completed comparison and diagnosis](<Tower-Loadout-Placement-Plain-Cost-Reconciliation.md>).
+Current status (2026-09-25): Original affinity creation with benchmark validation is the supported baseline. The one nomination experiment completed 15,744 actual fights and all audits; both arms retained the benchmark on all 12 roots. This tuning cycle is closed. See [completed result and next work](<Tower-Affinity-Nomination-Pilot-01-Execution.md>).
 
 **Later implementation and evidence update — 23 September 2026:** The prospective design below was implemented. After one preserved technical failure, a separately declared [second pilot](Tower-Adaptive-Racing-Pilot-02.md) completed and reached `AbandonThisConfiguration`. The subsequent [27,648-fight recognition diagnostic](Tower-Frozen-Pool-Recognition-Execution.md) passed both audits: 68 of 72 measured challengers were below the fixed benchmark, two tied and two had small uncertain positive gains. Proposal quality is now the next development priority, beginning with a versioned proposal-policy contract and deterministic batch export for a controlled generation comparison. The original assessment remains historical rationale; its proposed settings are not demonstrated improvements, and 132 unsampled candidates remain unmeasured.
 

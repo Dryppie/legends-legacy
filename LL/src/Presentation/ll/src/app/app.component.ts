@@ -8,6 +8,7 @@ import { AppUpdatePopupComponent } from './shared/components/app-update-popup/ap
 import { AppUpdateService } from './core/services/client-side/app-update/app-update.service';
 import { FirstPartyTourOverlayComponent } from './shared/components/first-party-tour-overlay/first-party-tour-overlay.component';
 import { TypographyPreferenceService } from './core/services/client-side/typography/typography-preference.service';
+import { ActivityDayService } from './core/services/api/activity-day.service';
 
 @Component({
   selector: 'app-root',
@@ -30,10 +31,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     private readonly toastService: ToastService,
     private readonly appUpdate: AppUpdateService,
     private readonly typographyPreference: TypographyPreferenceService,
+    private readonly activityDay: ActivityDayService,
   ) {}
 
   ngOnInit(): void {
     this.appUpdate.start();
+    void this.activityDay;
   }
 
   ngAfterViewInit(): void {

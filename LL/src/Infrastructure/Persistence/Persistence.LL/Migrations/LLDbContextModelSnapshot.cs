@@ -688,6 +688,77 @@ namespace Persistence.LL.Migrations
                     b.ToTable("AdminActionPreviews", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Analytics.AccountActivityDay", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ActivityDateUtc")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("FirstSeenAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("AccountId", "ActivityDateUtc");
+
+                    b.HasIndex("ActivityDateUtc");
+
+                    b.ToTable("AccountActivityDays", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Analytics.DailyTelemetryReport", b =>
+                {
+                    b.Property<DateOnly>("ReportDateUtc")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("GeneratedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("ReportDateUtc");
+
+                    b.ToTable("DailyTelemetryReports", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Analytics.DungeonAttemptHistory", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DungeonDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("FinishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("RunId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("FinishedAtUtc");
+
+                    b.HasIndex("StartedAtUtc");
+
+                    b.ToTable("DungeonAttemptHistories", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Attributes.EntityAttribute", b =>
                 {
                     b.Property<Guid>("EntityId")
@@ -1069,6 +1140,9 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CharacterBId");
+
+                    b.HasIndex("PlayedAt")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     b.ToTable("ColosseumMatches");
                 });
@@ -4546,6 +4620,12 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CommencedAt")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    b.HasIndex("ResolvedAt")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
                     b.HasIndex("LeaderCharacterId", "Status");
 
                     b.HasIndex("Status", "PlaybackEndsAt");
@@ -4978,6 +5058,12 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResolvedAtUtc")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    b.HasIndex("StartedAtUtc")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     b.HasIndex("RegionBossEventId", "PartyNumber")
                         .IsUnique();
@@ -5423,6 +5509,9 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedUtc")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
                     b.HasIndex("NormalizedEmail")
                         .IsUnique()
                         .HasFilter("\"NormalizedEmail\" IS NOT NULL");
@@ -5604,6 +5693,12 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompletedAt")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    b.HasIndex("StartedAt")
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     b.HasIndex("TowerRallyId")
                         .IsUnique();
@@ -6195,6 +6290,24 @@ namespace Persistence.LL.Migrations
                         .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Analytics.AccountActivityDay", b =>
+                {
+                    b.HasOne("Domain.Models.Users.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Analytics.DungeonAttemptHistory", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

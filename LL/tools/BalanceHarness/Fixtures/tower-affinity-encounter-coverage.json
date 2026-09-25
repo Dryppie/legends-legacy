@@ -1,0 +1,15 @@
+{
+  "version": "affinity-encounter-coverage-v1",
+  "purpose": "Engineering compatibility only; fixed level-40 diagnostic budget and reused historical seeds. No strength confirmation.",
+  "maximumFights": 3168,
+  "maximumSeconds": 600,
+  "maximumBytes": 1610612736,
+  "cases": [
+    { "floor": 3, "reason": "Five-member party with hostile summons and summon consumption", "requiredSignals": ["operation:Summon", "operation:ConsumeOwnedSummon"] },
+    { "floor": 5, "reason": "Ten-member baseline with barriers, statuses and summons", "requiredSignals": ["operation:GrantBarrier", "operation:Summon"] },
+    { "floor": 7, "reason": "Five-member party facing guardian healing", "requiredSignals": ["operation:Heal"] },
+    { "floor": 8, "reason": "Ten-member party facing healing and regeneration suppression", "requiredSignals": ["operation:ModifyHealingReceived", "operation:ModifyRegenerationRate"] },
+    { "floor": 10, "reason": "Fifteen-member party with health-dependent damage modifiers", "requiredSignals": ["operation:SynchronizeAttributePerMissingHealthStep"] },
+    { "floor": 15, "reason": "Fifteen-member late Warden with statuses and damage modification", "requiredSignals": ["operation:ModifyDamageTaken", "operation:RemoveStatus"] }
+  ]
+}

@@ -35,6 +35,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
     public async Task<(LoadoutTrial Trial, TowerBattleReport Report)> EvaluateAsync(string arm, string stage,
         TowerScenario scenario, int seed, CancellationToken token)
     {
+        using var timing = TowerPerformanceTrace.Measure("archive.evaluate");
         token.ThrowIfCancellationRequested();
         var input = runner.CreateInput(scenario, seed, scope.Settings.Threat, scope.Settings.CheckpointIntervalTicks);
         var key = Key(scope, arm, input);
@@ -64,6 +65,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
 
     public static void WriteBattle(string output, string id, TowerBattleReport report, string? storage)
     {
+        using var timing = TowerPerformanceTrace.Measure("archive.write-battle");
         var path = BattlePath(output, id, storage);
         if (storage is null) { HarnessJson.WriteNew(path, report); return; }
         using var file = TowerWorkAccounting.WriteStream(new FileStream(path, FileMode.CreateNew, FileAccess.Write), path);

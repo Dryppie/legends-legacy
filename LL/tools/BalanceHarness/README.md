@@ -1,6 +1,6 @@
 # Balance Harness: idle balance workflow and Tower benchmarks
 
-Current status (2026-09-25): The twelve-root placement comparison completed 16,000 actual fights and all audits. Frozen decision: Inconclusive; no demonstrated improvement and no default promotion. See [completed comparison and diagnosis](<../../../Balance Harness/Tower-Loadout-Placement-Plain-Cost-Reconciliation.md>).
+Current status (2026-09-25): Original affinity creation with benchmark validation is the supported baseline. The one nomination experiment completed 15,744 actual fights and all audits; both arms retained the benchmark on all 12 roots. This tuning cycle is closed. See [completed result and next work](<../../../Balance Harness/Tower-Affinity-Nomination-Pilot-01-Execution.md>).
 
 **Interaction scopes reviewed — 23 September 2026:** The [captured-runtime audit](../../../Balance%20Harness/Tower-Benchmark-Interaction-Scope-Review.md) resolves the three existing Poison/Viper entries as shared-target predicates and finds a separate missing owner-specific Poison damage affinity. Fourteen component checks passed without running a battle. Next add a separately versioned affinity/preservation policy and verify distinct exported recipes; original metadata and defaults remain unchanged.
 

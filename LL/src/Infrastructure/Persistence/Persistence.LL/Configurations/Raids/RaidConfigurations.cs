@@ -19,6 +19,8 @@ public sealed class RaidRunConfiguration : IEntityTypeConfiguration<RaidRun>
         builder.Property(x => x.BossHealthRemainingPercent).HasPrecision(8, 4);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.RaidBossId, x.Status, x.SignupClosesAt });
+        builder.HasIndex(x => x.CommencedAt).IsCreatedConcurrently();
+        builder.HasIndex(x => x.ResolvedAt).IsCreatedConcurrently();
         builder.HasIndex(x => new { x.Status, x.SimulationLeaseUntil });
         builder.HasIndex(x => new { x.Status, x.PlaybackEndsAt });
         builder.HasIndex(x => new { x.LeaderCharacterId, x.Status });

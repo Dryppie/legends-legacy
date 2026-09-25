@@ -2,6 +2,8 @@
 
 Status: design proposal, based on repository inspection on 2026-09-25. Paths and types under **Existing** are present in the checkout; names under **Proposed** are new design concepts. This document does not implement telemetry or change deployment configuration.
 
+**Current implementation direction:** [Lean telemetry plan](lean-telemetry-plan.md). It narrows the first release to major content outcomes, Essence/Combat Style adoption, economy health, and daily users. The broader contracts, questions, and roadmap below remain a future reference, not the current build list.
+
 ## 1. Executive summary
 
 LegendsLegacy already stores substantial game history. Start by making that history queryable, then preserve the few facts that are lost at the moment of play: the build used for an encounter, the encounter outcome and reward attribution, and durable transitions between build and progression states. A small PostgreSQL reporting schema and scheduled SQL aggregation are enough for beta. Keep operational metrics in the existing .NET metrics/logging path; do not put player, item, or build IDs in metric labels. Do not stream combat ticks, replay logs, UI clicks, or all outbox messages into an analytics platform.

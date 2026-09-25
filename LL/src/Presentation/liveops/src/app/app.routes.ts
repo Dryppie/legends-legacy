@@ -2,6 +2,12 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
+    path: 'analytics',
+    loadComponent: () => import('./features/analytics/analytics.component')
+      .then((component) => component.AnalyticsComponent),
+    title: 'LiveOps analytics',
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./features/dashboard/dashboard.component')
       .then((component) => component.DashboardComponent),

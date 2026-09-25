@@ -1,6 +1,6 @@
 # World Tower balancing and team search: current state and consequential gaps
 
-Current status (2026-09-25): The twelve-root placement comparison completed 16,000 actual fights and all audits. Frozen decision: Inconclusive; no demonstrated improvement and no default promotion. See [completed comparison and diagnosis](<Tower-Loadout-Placement-Plain-Cost-Reconciliation.md>).
+Current status (2026-09-25): Original affinity creation with benchmark validation is the supported baseline. The one nomination experiment completed 15,744 actual fights and all audits; both arms retained the benchmark on all 12 roots. This tuning cycle is closed. See [completed result and next work](<Tower-Affinity-Nomination-Pilot-01-Execution.md>).
 
 **Confirmation verification and accounting — 23 September 2026:** The [complete verifier improvement and prospective resource amendment](Tower-Practical-Three-Reference-Confirmation-Resource-Amendment.md) are ready. Full input verification measured 55.94 seconds with the original helper and 18.41 seconds with the new helper; all 30 relevant tests pass. The proposed 8,400-second /4.5-GiB cumulative allowance includes the failed admission and one new admission. Next is explicit v2 accounting implementation. No new admission, preparation, reservation or combat ran.
 

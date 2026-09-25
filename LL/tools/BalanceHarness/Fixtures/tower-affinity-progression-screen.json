@@ -1,0 +1,150 @@
+{
+  "version": "tower-affinity-progression-screen-v1",
+  "purpose": "Find informative reference contexts before evaluating the unchanged supported affinity search. Descriptive only; no transferred quality claims.",
+  "archive": "TestResults/balance/tower-affinity-nomination-pilot-01-20260925",
+  "archiveManifestSha256": "a085d004823246466ec860876fcfdb370769cc76a71527a09c2b4a32dec79ee1",
+  "seedRule": "First 32 saved seeds of study/freeze.json families[0] (root 1); reused historical seeds, not a fresh holdout.",
+  "screenRule": "Only reference 1 determines follow-up eligibility: 4 through 28 wins out of 32 inclusive. Retain every result; do not switch references or budgets using this screen.",
+  "budgetCaveat": "Existing progression/catalog budgets are hypotheses, not approved player-population or balance targets. Floor 15 uses the late 10-slot cohort.",
+  "curve": {
+    "path": "LL/tools/BalanceHarness/Fixtures/tower-curve.json",
+    "sha256": "fff5988751e2e82dbe7d6a14058d6db2f953cee13c8720eff7a1f0169942bc63"
+  },
+  "sources": [
+    {
+      "path": "TestResults/balance/retained-tower-builds.json",
+      "sha256": "2946f58ad36291175ea173453a895f74a884b77cafa69af854206407d0cea33d"
+    },
+    {
+      "path": "LL/tools/BalanceHarness/Fixtures/tower-boss-references-refinement.json",
+      "sha256": "c7c9c56117a92a4be9a3de39896316c60b4300735e8bb62f43dee3f2f48ee065"
+    },
+    {
+      "path": "LL/tools/BalanceHarness/Fixtures/tower-whole-party-controls.json",
+      "sha256": "94302e81e4de71efddad3914f79ccb7fef8d1be6d3544541f11e2b4f98efadc2"
+    }
+  ],
+  "cases": [
+    {
+      "floor": 3,
+      "partySize": 5,
+      "budget": {
+        "essenceSlots": 4,
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "priorityFloor": 3
+      },
+      "sourceKind": "retained",
+      "source": "TestResults/balance/retained-tower-builds.json",
+      "studyId": "progression-linked-f3-20260911",
+      "referenceIds": [
+        "f3-50cbb8cef4d4dad78fcf",
+        "f3-846afdb79866f9ca123c",
+        "f3-c9d3e5babdeb25fc627a"
+      ],
+      "selectionRule": "First three saved calibrated recipes in retained study order; first remains anchor."
+    },
+    {
+      "floor": 7,
+      "partySize": 5,
+      "budget": {
+        "essenceSlots": 5,
+        "characterLevel": 40,
+        "tier": 1,
+        "rank": 2,
+        "quality": "Standard",
+        "priorityFloor": 7
+      },
+      "sourceKind": "boss",
+      "source": "LL/tools/BalanceHarness/Fixtures/tower-boss-references-refinement.json",
+      "referenceIds": [
+        "68bcf1597a0cba4906df7986ec66583bfb2b4036963b0ebfa7168a20362e3873",
+        "611c869288b4d528965d99c0215b7e17750cad27a63f2af08a09409ec838f30e",
+        "02d3a2ff16227319bd3936ff3e2aaf5cf2f2aab2daa46cf2e4442eb9678668d0"
+      ],
+      "selectionRule": "Catalog anchor, pilot control, then lowest distinct ID with identical equipment, training and identities."
+    },
+    {
+      "floor": 8,
+      "partySize": 10,
+      "budget": {
+        "essenceSlots": 4,
+        "characterLevel": 30,
+        "tier": 1,
+        "rank": 1,
+        "quality": "Standard",
+        "priorityFloor": 8
+      },
+      "sourceKind": "boss",
+      "source": "LL/tools/BalanceHarness/Fixtures/tower-boss-references-refinement.json",
+      "referenceIds": [
+        "b4b8971c6c8f794ec2fa5c61981c39398777d8935dc2d5e70a784ac993641eef",
+        "6368118c8fb2d7997abe98ecdad6dbe0041b05cd988c1d341b923af29e0af0b1",
+        "05ae44a4435f7b10bae9010f8dd2a518b24c55e4df97c1b8e685e3d7c1584054"
+      ],
+      "selectionRule": "Catalog anchor, pilot control, then lowest distinct ID with identical equipment, training and identities."
+    },
+    {
+      "floor": 10,
+      "partySize": 15,
+      "budget": {
+        "essenceSlots": 6,
+        "characterLevel": 50,
+        "tier": 2,
+        "rank": 2,
+        "quality": "Standard",
+        "priorityFloor": 10
+      },
+      "sourceKind": "progression",
+      "source": "LL/tools/BalanceHarness/Fixtures/tower-whole-party-controls.json",
+      "referenceIds": [
+        "d87bb2acb55233898be3f5c241e7a89ae6d6162e30eade0111aaa7b4f2b995ee",
+        "10121f7f9ffdaedaaa1ae938194ee7733102466784a95fee2db9fb94655034d9",
+        "03386c4a3a18a24bb6fb7c70fc2a6d2248567893bc69f5bcc348817c24cb6672"
+      ],
+      "selectionRule": "First three saved portable controls (authored, guided, random), applied only to absolute slots 1-4; all other allies retain authored progression profiles."
+    },
+    {
+      "floor": 13,
+      "partySize": 10,
+      "budget": {
+        "essenceSlots": 7,
+        "characterLevel": 60,
+        "tier": 2,
+        "rank": 3,
+        "quality": "Fine",
+        "priorityFloor": 13
+      },
+      "sourceKind": "boss",
+      "source": "LL/tools/BalanceHarness/Fixtures/tower-boss-references-refinement.json",
+      "referenceIds": [
+        "7f48c238712abd89e1af15b37b53e94d27255712dfc0316ba0f955ec9393744e",
+        "aa01a2f23966ff674b71b129213181d465ecdd05da8cb45e6cfeebd9169452e7",
+        "007bba7b69d690178ba0cda468da66513296e565300228fdf437bdbf3da4fccb"
+      ],
+      "selectionRule": "Catalog anchor, pilot control, then lowest distinct ID with identical equipment, training and identities."
+    },
+    {
+      "floor": 15,
+      "partySize": 15,
+      "budget": {
+        "essenceSlots": 10,
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 4,
+        "quality": "Fine",
+        "priorityFloor": 15
+      },
+      "sourceKind": "progression",
+      "source": "LL/tools/BalanceHarness/Fixtures/tower-whole-party-controls.json",
+      "referenceIds": [
+        "a87744f390253e1a479ef67b519cbf28a407a14953421603b64e2098d078c2d3",
+        "ea618982571cbae2673ecf7082063079f0d0cd4845758f7a9c4c39ddafd485de",
+        "bf5e3631705dd93aac0e02c500150b8ae8bb2f8f9fc26b09a7124eb7ffc665c5"
+      ],
+      "selectionRule": "First three saved portable controls (authored, guided, random), applied only to absolute slots 1-4; all other allies retain authored progression profiles."
+    }
+  ]
+}

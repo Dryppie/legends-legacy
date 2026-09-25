@@ -23,5 +23,6 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.HasIndex(e => e.NormalizedEmail)
             .IsUnique()
             .HasFilter("\"NormalizedEmail\" IS NOT NULL");
+        builder.HasIndex(e => e.CreatedUtc).IsCreatedConcurrently();
     }
 }

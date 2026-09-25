@@ -281,7 +281,11 @@ public sealed class AttributeCombatSystemTests
 
         RunSingleTick(penetratingSource, penetratedTarget);
 
-        Assert.Equal(944, penetratedTarget.Health);
+        Assert.Equal(941, penetratedTarget.Health);
+
+        Assert.Equal(0.408553f,
+            AttributeCombatRules.CalculateDefenseMitigation(defense: 50, penetrationPercent: 25),
+            precision: 4);
 
         Assert.Equal(
             0.8f,
