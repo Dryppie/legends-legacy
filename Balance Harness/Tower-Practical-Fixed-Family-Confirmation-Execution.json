@@ -1,0 +1,351 @@
+{
+  "status": "CompletedVerifiedScopeClosed",
+  "result": {
+    "version": "tower-practical-fixed-family-confirmation-v1",
+    "executionStatus": "Complete",
+    "integrityStatus": "Verified",
+    "strengthDecision": "StrongerFixedCandidatesConfirmed",
+    "adoption": "RecommendFixedCandidates",
+    "candidateIds": [
+      "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+      "c29b42e31e2142245fd342a76dcb35c13331c2aacdbc1352d2cdc126bcfab178",
+      "efd10263519b51b8fbd2d1e499df442c1e78984ad69e031be423dd479a121c4d",
+      "6434390b22450467cb392f2140bf57022e08cc444283cd5cf6afd5a368066556",
+      "71c87a42db073d29f0def13e448fa3f2798460d70b26d98509a4542e6c03f6c5",
+      "db529a010220a522c01c7e9d639f396fdf872466412561178c0352ba53cb40c2"
+    ],
+    "qualifyingPartyIds": [
+      "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c"
+    ],
+    "rates": [
+      {
+        "partyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+        "wins": 4188,
+        "estimate": {
+          "rate": 0.7614545454545455,
+          "lower": 0.742814090662638,
+          "upper": 0.779145658197321,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "c29b42e31e2142245fd342a76dcb35c13331c2aacdbc1352d2cdc126bcfab178",
+        "wins": 3499,
+        "estimate": {
+          "rate": 0.6361818181818182,
+          "lower": 0.6154341639113219,
+          "upper": 0.6564349959607987,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "efd10263519b51b8fbd2d1e499df442c1e78984ad69e031be423dd479a121c4d",
+        "wins": 3382,
+        "estimate": {
+          "rate": 0.614909090909091,
+          "lower": 0.5939653160179517,
+          "upper": 0.635435630629819,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "6434390b22450467cb392f2140bf57022e08cc444283cd5cf6afd5a368066556",
+        "wins": 3732,
+        "estimate": {
+          "rate": 0.6785454545454546,
+          "lower": 0.6583189197437388,
+          "upper": 0.6981236903956768,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "71c87a42db073d29f0def13e448fa3f2798460d70b26d98509a4542e6c03f6c5",
+        "wins": 3979,
+        "estimate": {
+          "rate": 0.7234545454545455,
+          "lower": 0.7039861149988649,
+          "upper": 0.7421116119475117,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "db529a010220a522c01c7e9d639f396fdf872466412561178c0352ba53cb40c2",
+        "wins": 3554,
+        "estimate": {
+          "rate": 0.6461818181818182,
+          "lower": 0.6255411936624621,
+          "upper": 0.6662916561869169,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "wins": 3885,
+        "estimate": {
+          "rate": 0.7063636363636364,
+          "lower": 0.6865802012220703,
+          "upper": 0.7253977646722645,
+          "confidence": 0.9984375
+        }
+      },
+      {
+        "partyId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "wins": 3529,
+        "estimate": {
+          "rate": 0.6416363636363637,
+          "lower": 0.6209458946728951,
+          "upper": 0.6618125506413665,
+          "confidence": 0.9984375
+        }
+      }
+    ],
+    "contrasts": [
+      {
+        "candidateId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+        "referenceId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "gains": 1211,
+        "losses": 908,
+        "observedGain": 0.05509090909090909,
+        "lower": 0.021497159027499047,
+        "upper": 0.08848462393812512,
+        "qualifies": true
+      },
+      {
+        "candidateId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+        "referenceId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "gains": 1472,
+        "losses": 813,
+        "observedGain": 0.11981818181818182,
+        "lower": 0.08559574178297952,
+        "upper": 0.15360556176271783,
+        "qualifies": true
+      },
+      {
+        "candidateId": "c29b42e31e2142245fd342a76dcb35c13331c2aacdbc1352d2cdc126bcfab178",
+        "referenceId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "gains": 925,
+        "losses": 1311,
+        "observedGain": -0.07018181818181818,
+        "lower": -0.10416365570259173,
+        "upper": -0.03594515031962253,
+        "qualifies": false
+      },
+      {
+        "candidateId": "c29b42e31e2142245fd342a76dcb35c13331c2aacdbc1352d2cdc126bcfab178",
+        "referenceId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "gains": 1183,
+        "losses": 1213,
+        "observedGain": -0.005454545454545455,
+        "lower": -0.04063304027584258,
+        "upper": 0.029743754833701563,
+        "qualifies": false
+      },
+      {
+        "candidateId": "efd10263519b51b8fbd2d1e499df442c1e78984ad69e031be423dd479a121c4d",
+        "referenceId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "gains": 719,
+        "losses": 1222,
+        "observedGain": -0.09145454545454546,
+        "lower": -0.12338777451797062,
+        "upper": -0.059189244728593604,
+        "qualifies": false
+      },
+      {
+        "candidateId": "efd10263519b51b8fbd2d1e499df442c1e78984ad69e031be423dd479a121c4d",
+        "referenceId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "gains": 1133,
+        "losses": 1280,
+        "observedGain": -0.026727272727272728,
+        "lower": -0.06193095810598398,
+        "upper": 0.008573459439493059,
+        "qualifies": false
+      },
+      {
+        "candidateId": "6434390b22450467cb392f2140bf57022e08cc444283cd5cf6afd5a368066556",
+        "referenceId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "gains": 984,
+        "losses": 1137,
+        "observedGain": -0.02781818181818182,
+        "lower": -0.0613719301873181,
+        "upper": 0.005836574432398961,
+        "qualifies": false
+      },
+      {
+        "candidateId": "6434390b22450467cb392f2140bf57022e08cc444283cd5cf6afd5a368066556",
+        "referenceId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "gains": 1282,
+        "losses": 1079,
+        "observedGain": 0.03690909090909091,
+        "lower": 0.0018913947939492304,
+        "upper": 0.07179277003120496,
+        "qualifies": false
+      },
+      {
+        "candidateId": "71c87a42db073d29f0def13e448fa3f2798460d70b26d98509a4542e6c03f6c5",
+        "referenceId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "gains": 1091,
+        "losses": 997,
+        "observedGain": 0.01709090909090909,
+        "lower": -0.016364845790491717,
+        "upper": 0.0504846068425335,
+        "qualifies": false
+      },
+      {
+        "candidateId": "71c87a42db073d29f0def13e448fa3f2798460d70b26d98509a4542e6c03f6c5",
+        "referenceId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "gains": 1379,
+        "losses": 929,
+        "observedGain": 0.08181818181818182,
+        "lower": 0.047220551463969584,
+        "upper": 0.1161187301681455,
+        "qualifies": true
+      },
+      {
+        "candidateId": "db529a010220a522c01c7e9d639f396fdf872466412561178c0352ba53cb40c2",
+        "referenceId": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+        "gains": 976,
+        "losses": 1307,
+        "observedGain": -0.060181818181818184,
+        "lower": -0.09450387976931515,
+        "upper": -0.025641236275640578,
+        "qualifies": false
+      },
+      {
+        "candidateId": "db529a010220a522c01c7e9d639f396fdf872466412561178c0352ba53cb40c2",
+        "referenceId": "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+        "gains": 1223,
+        "losses": 1198,
+        "observedGain": 0.004545454545454545,
+        "lower": -0.030782878462783797,
+        "upper": 0.03985728299790134,
+        "qualifies": false
+      }
+    ],
+    "recommendedPartyIds": [
+      "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c"
+    ],
+    "controlPartyIds": [
+      "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50"
+    ],
+    "balanceAssessment": "NotAssessed",
+    "samplingAssumption": "One post-freeze cryptographic batch modeled as independent uniform bits; approximate family-32 Wilson coverage; operational completion is not assumed.",
+    "studyHash": "8af91cdb8bb8421f46da1a84769d6bd538cc7998e0965bef1f6bdd8083c41ccb",
+    "archiveHash": "49034a4b4f7f1102e54a455b9ae04449f4bc6eb374d53aa790c761c4afe83312",
+    "stopReason": "One complete fixed panel; report every qualifier in frozen order; no new primary, retry, extension, method-reliability or global-optimality claim."
+  },
+  "execution": {
+    "status": "CompletedVerifiedScopeClosed",
+    "authorizationBasis": "User said Please proceed after the final 44000-fight, 100-minute /3-GiB handoff; separate engineering treatment was explicitly accepted earlier.",
+    "oversightManifestSha256": "b98dda92b138abf8df93b10e54506105518cca62ebe831491ec1dddb6a0f73ab",
+    "oversightCloseoutSha256": "9dd461c43569496a9058d7f55e8a1a3db6982d21fd15e1f3fd800282bd1c6eff",
+    "nativeManifestSha256": "997b72992fb5a66821b165e582c891b187ecc50b15e11315c5ba7e5ce214c4fe",
+    "nativeCloseoutSha256": "bad39653933c7cfe590d22c851dd43fe27c7721525e9ca90e95b046b51f4b103",
+    "resultSha256": "a804da4bb7f0b6f0312dd31aeccf4bb588b889c7695e669cc17a8a8b2a01b78e",
+    "admissionManifestSha256": "7695a0b426474a5b024161e0301c9584fd5abfc188975d4056bd9fbeacddba90",
+    "qualifyingPartyIds": [
+      "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c"
+    ],
+    "fights": 44000,
+    "newReservations": 11000,
+    "totalExclusions": 550367,
+    "historyFiles": 229,
+    "nativeBytes": 974840029,
+    "oversightBytes": 4862935,
+    "combinedRetainedBytes": 979702964,
+    "nativeInventoryFiles": 44145,
+    "oversightInventoryFiles": 11,
+    "enclosingSecondsBeforeFinalReceipt": 2391.8589999999967,
+    "additionalChargedSeconds": 6000,
+    "additionalChargedBytes": 3221225472,
+    "cumulativeChargedSeconds": 24180,
+    "cumulativeChargedBytes": 17465081856,
+    "extraPublicVerifiers": 0,
+    "retries": 0,
+    "engineeringSeparatelyDisclosed": true
+  },
+  "entropyClassification": {
+    "Confirmation": 5500,
+    "ReservedUnused": 5500
+  },
+  "qualifyingRecipeChanges": [
+    {
+      "partyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+      "partySlot": 8,
+      "removed": [
+        "essence.bark_golem"
+      ],
+      "added": [
+        "essence.viper"
+      ]
+    },
+    {
+      "partyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+      "partySlot": 9,
+      "removed": [
+        "essence.bark_golem"
+      ],
+      "added": [
+        "essence.flame_imp"
+      ]
+    }
+  ],
+  "nativeAudit": {
+    "status": "Passed",
+    "studyHash": "8af91cdb8bb8421f46da1a84769d6bd538cc7998e0965bef1f6bdd8083c41ccb",
+    "archiveHash": "49034a4b4f7f1102e54a455b9ae04449f4bc6eb374d53aa790c761c4afe83312",
+    "newFights": 0
+  },
+  "phases": {
+    "admission": {
+      "phase": {
+        "name": "admission",
+        "startedAt": "2026-09-22T13:28:59.2212066+00:00",
+        "deadline": "2026-09-22T13:32:59.2212066+00:00",
+        "baseBytes": 52869
+      },
+      "measuredSeconds": 31.7122518,
+      "observedBytes": 57867814,
+      "chargedSeconds": 240,
+      "chargedBytes": 268435456
+    },
+    "combat": {
+      "phase": {
+        "name": "combat",
+        "startedAt": "2026-09-22T13:29:30.9404015+00:00",
+        "deadline": "2026-09-22T14:29:30.9404015+00:00",
+        "baseBytes": 57920985
+      },
+      "measuredSeconds": 1997.279126,
+      "observedBytes": 911644660,
+      "chargedSeconds": 3600,
+      "chargedBytes": 2281701376
+    },
+    "audit": {
+      "phase": {
+        "name": "audit",
+        "startedAt": "2026-09-22T14:02:48.2474874+00:00",
+        "deadline": "2026-09-22T14:28:48.2474874+00:00",
+        "baseBytes": 969565951
+      },
+      "measuredSeconds": 260.7097303,
+      "observedBytes": 459147,
+      "chargedSeconds": 1560,
+      "chargedBytes": 268435456
+    }
+  },
+  "process": {
+    "exitCode": 0,
+    "timedOut": false,
+    "rootPid": 51460,
+    "totalProcesses": 4,
+    "activeProcesses": 0,
+    "seconds": 2292.3910000000033,
+    "workAllowanceSeconds": 5760.0,
+    "cleanupAllowanceSeconds": 1,
+    "mechanism": "suspended-owned-job-v1"
+  },
+  "historyInventorySha256": "b32e934d261a7da255500665ab89c7daf6e8f3f2a5b5cc7e1df0d60883cb12b2",
+  "newReviewFights": 0,
+  "newReviewValues": 0
+}

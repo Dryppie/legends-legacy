@@ -1,0 +1,562 @@
+{
+  "version": "tower-proposal-accounting-boundary-inventory-v1",
+  "status": "ReviewedBoundariesWithOpenGaps",
+  "scope": "Selected source-level boundary families; not an exhaustive static or dynamic call graph",
+  "applicationOperationCoverageComplete": false,
+  "wholeProcessCoverage": false,
+  "usableForAdmission": false,
+  "productionMeasurementAuthorized": false,
+  "scientificAdmitted": false,
+  "resourceModelStatus": "DesignDraftNotImplementedOrQualified",
+  "sourceReferencesPinned": true,
+  "rows": [
+    {
+      "id": "native-reservation-bytes",
+      "applicationCoverage": "instrumented",
+      "observation": "One successful ReadAllBytes return counts the actual returned length; failed calls record unknown progress.",
+      "remainingGap": "Length metadata before the read is not counted; the API does not expose failed-read prefixes.",
+      "prospectiveTreatment": "Use returned-byte counters diagnostically; keep failures and metadata separate from bytes.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs",
+          "sourceSha256": "3484c9ed598ebd706b0e8b80a7ac4a827d429968592a042c000d754a131321bb",
+          "anchor": "Classify(TowerWorkAccounting.ReadAllBytes",
+          "lines": [
+            194
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Files.cs",
+          "sourceSha256": "67a0df3026ef67d4f29a68742815576c209a6ec6c10fa18ad7b6eeeedf7f3e83",
+          "anchor": "public static byte[] ReadAllBytes",
+          "lines": [
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "owner-result-json",
+      "applicationCoverage": "instrumented-when-active",
+      "observation": "Four result reads in the real owner use decoded-text parse counters and raw returned-byte counters.",
+      "remainingGap": "Initial request/admission reads execute before the supervisor activates FILE_WORK. They are not included merely because they share the helper.",
+      "prospectiveTreatment": "Begin any future admitting enclosing timer before admission authentication; retain the present diagnostic scope label.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "def read_json(",
+          "lines": [
+            41
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "if accounting is not None: accounting.start(",
+          "lines": [
+            237
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "def read_json_text(",
+          "lines": [
+            198
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-content-and-archive-reads",
+      "applicationCoverage": "selective",
+      "observation": "Harness JSON, counted streams, injected content readers, codecs and reconstruction counters cover selected reads/parses.",
+      "remainingGap": "Open/stat/close calls and all possible transitive library work are not established as an exhaustive application count.",
+      "prospectiveTreatment": "Use the enclosing time/job observation for broad scope; counters diagnose rather than replace that boundary.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/HarnessJson.cs",
+          "sourceSha256": "98e6d5ea41845a6b287a4d6c4bdabd5533ddb7f2621c6c37b4780f2cd41484bd",
+          "anchor": "public static T Read<T>",
+          "lines": [
+            27
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.cs",
+          "sourceSha256": "5c0fd5c74e7399c155e8c3b0d57d6cb07c961ac33f1ce32f829e0e1f0cc1d816",
+          "anchor": "public static Stream ReadStream",
+          "lines": [
+            49
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerContentJsonReader.cs",
+          "sourceSha256": "6f3b085382ff08c9cdc38df3829eed53d34878da844624739478d43fd6ff37df",
+          "anchor": "class TowerContentJsonReader",
+          "lines": [
+            7
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyArchive.cs",
+          "sourceSha256": "039dff2d341203f2d7c94f69dc6833fc9dffc626b1e5638edc33aec0847beae8",
+          "anchor": "internal static async Task<ProposalStudyResult> Audit(",
+          "lines": [
+            130
+          ]
+        }
+      ]
+    },
+    {
+      "id": "independent-audit-and-codec-reads",
+      "applicationCoverage": "selective",
+      "observation": "Opt-in raw, parse, hash and decoder counters cover the independent auditor and selected compressed payload readers.",
+      "remainingGap": "Python imports, path checks, stat calls and full runtime activity are not counted as application operations.",
+      "prospectiveTreatment": "Retain raw/decoded/parser units separately and authenticate the actual modules used.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/audit-proposal-affinity-study.py",
+          "sourceSha256": "4237b97997a8ed191b4f8720884a360804e7b94f42d7952bf8842b39d9d53224",
+          "anchor": "def read(path)",
+          "lines": [
+            96
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/audit-proposal-affinity-study.py",
+          "sourceSha256": "4237b97997a8ed191b4f8720884a360804e7b94f42d7952bf8842b39d9d53224",
+          "anchor": "def parse_line(",
+          "lines": [
+            64
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_evidence_storage.py",
+          "sourceSha256": "0128bb6e6a22e9c2e1615e9eed69062dec6b549a0a811db240e7740cdec8c866",
+          "anchor": "def metadata(",
+          "lines": [
+            55
+          ]
+        }
+      ]
+    },
+    {
+      "id": "in-memory-json-and-canonicalization",
+      "applicationCoverage": "unattributed",
+      "observation": "Existing parse counters cover explicit boundaries only.",
+      "remainingGap": "Native Copy serialize/deserialize round trips and canonical SerializeToElement work bypass those parse counters.",
+      "prospectiveTreatment": "Include this CPU/allocation work in an enclosing duration/memory boundary; do not infer time from counted parses alone.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerBatchRacingContract.cs",
+          "sourceSha256": "399b3089576fa30c0776ee1724218c5218cf5f284fef03f69a310091ca7fba46",
+          "anchor": "internal static T Copy<T>",
+          "lines": [
+            46
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/HarnessJson.cs",
+          "sourceSha256": "98e6d5ea41845a6b287a4d6c4bdabd5533ddb7f2621c6c37b4780f2cd41484bd",
+          "anchor": "JsonSerializer.SerializeToElement(value, Options)",
+          "lines": [
+            76
+          ]
+        }
+      ]
+    },
+    {
+      "id": "filesystem-metadata-and-inventory",
+      "applicationCoverage": "unattributed",
+      "observation": "Directory scans and size samples exist; selected native performance traces count visited entries.",
+      "remainingGap": "Exists, attributes, link checks, enumeration, path resolution and length queries have no complete attempt/success/failure counter series.",
+      "prospectiveTreatment": "Add a scoped operation boundary only where needed; never relabel visited entries or size samples as bytes transferred or a storage peak.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "def inventory(",
+          "lines": [
+            97
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "def storage_bytes(",
+          "lines": [
+            107
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerBulkCampaign.cs",
+          "sourceSha256": "07cfedda4bb899df16aa84f6992f7c1bcae3e60acb3bb90ac1121e72287d6abf",
+          "anchor": "private static IEnumerable<FileInfo> EnumerateFiles(",
+          "lines": [
+            224
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs",
+          "sourceSha256": "3484c9ed598ebd706b0e8b80a7ac4a827d429968592a042c000d754a131321bb",
+          "anchor": "internal static void Unlinked(",
+          "lines": [
+            28
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "def unlinked(",
+          "lines": [
+            365
+          ]
+        }
+      ]
+    },
+    {
+      "id": "owner-writer-leases",
+      "applicationCoverage": "unattributed",
+      "observation": "Two real exclusive DeleteOnClose handles protect registry allocation and study output.",
+      "remainingGap": "Acquisition/release is not instrumented. Python writer_lease ignores the CloseHandle return value; context exit alone does not prove release succeeded.",
+      "prospectiveTreatment": "Next add checked release and opt-in lifecycle observations. Preserve an original body failure if release also fails; release failure must not become successful closeout.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "def writer_lease(",
+          "lines": [
+            151
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "close(handle)",
+          "lines": [
+            167
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "leases.enter_context(writer_lease(",
+          "lines": [
+            256,
+            257
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-writer-leases-and-probes",
+      "applicationCoverage": "unattributed",
+      "observation": "FileStream owns a sibling DeleteOnClose lease; RequireLeases expects sharing/lock violations as ownership evidence.",
+      "remainingGap": "Probe rejection is expected success for the ownership check, not automatically a worker failure; lease paths may be outside archive roots.",
+      "prospectiveTreatment": "Classify acquire-held, expected-held probe, release, and failures separately. Preserve native sharing/deletion semantics.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerCompactResume.cs",
+          "sourceSha256": "e5337dd63ed7cc219cd458ba36a6493c6b9eb3764d8b29ce3883f790d6eaf53b",
+          "anchor": "internal static FileStream AcquireWriter(",
+          "lines": [
+            15
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyRun.cs",
+          "sourceSha256": "e2dccba2fae94db8b62258a5d4fd4ed6755aabed745858f2c8a01c8e2ff9f862",
+          "anchor": "private static void RequireLeases(",
+          "lines": [
+            30
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-pending-publication",
+      "applicationCoverage": "selective",
+      "observation": "Instrumented pending-file writes/moves/deletes track observed logical lengths and selected transient lifetimes.",
+      "remainingGap": "Only registered files participate; unknown writes, untracked members and failed length observations prevent whole-process storage claims.",
+      "prospectiveTreatment": "Require a closed set of owned paths and full lifetime accounting before using a logical storage bound.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerCompleteReservation.cs",
+          "sourceSha256": "8a60c8166c4ded0367170cb7deaae92b196aad5a65938f4f6d09a0b5bfb7f523",
+          "anchor": "internal void PutBytes(",
+          "lines": [
+            26
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs",
+          "sourceSha256": "8442a8fe4a6ef207ea388578f2bd77571c23aac110d057af76c346cff12614c0",
+          "anchor": "public static void MoveFile(",
+          "lines": [
+            29
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs",
+          "sourceSha256": "8442a8fe4a6ef207ea388578f2bd77571c23aac110d057af76c346cff12614c0",
+          "anchor": "public static void DeleteFile(",
+          "lines": [
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "id": "owner-managed-and-sampled-files",
+      "applicationCoverage": "selective",
+      "observation": "ManagedStorage tracks exclusive managed-directory lengths; OwnerFileCounters observes copies, logs and lengths.",
+      "remainingGap": "SampledPeakTrackedFileBytes is a maximum of samples, not a process-wide high-water mark. Failed copies have unknown progress.",
+      "prospectiveTreatment": "Separate exclusive managed storage from sampled external storage and reject unknown members rather than assigning zero.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "class ManagedStorage:",
+          "lines": [
+            671
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "def observe_file(",
+          "lines": [
+            225
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "def copyfile(",
+          "lines": [
+            247
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "def snapshot(",
+          "lines": [
+            740
+          ]
+        }
+      ]
+    },
+    {
+      "id": "external-and-transient-scratch",
+      "applicationCoverage": "unknown",
+      "observation": "Enclosing job I/O observes operations but does not enumerate live filesystem storage.",
+      "remainingGap": "Transient files can grow and disappear between scans. Inherited environment/runtime paths are not an enforced private scratch namespace.",
+      "prospectiveTreatment": "Declare retained, pending, lease, log, scratch and runtime-cache domains; establish confinement or a separate conservative bound. Redirecting TEMP alone is insufficient.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "25c52818c53f8f68bb4c2ff1a5a413a4a5c8133b9067e64cb06fb87a5f97ed2f",
+          "anchor": "def storage_bytes(",
+          "lines": [
+            107
+          ]
+        },
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "3c312b179c34588556edac1ea76069a65891783c6975e7da0635dad3a93583fb",
+          "anchor": "def run(",
+          "lines": [
+            126
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "d5ca324d6b5d6840361a9ef452baffb6f23c1fa6aec0421ad332ead4df4989fd",
+          "anchor": "'wholeProcessScratch'",
+          "lines": [
+            118
+          ]
+        }
+      ]
+    },
+    {
+      "id": "worker-and-supervisor-terminal-persistence",
+      "applicationCoverage": "selective",
+      "observation": "V3 observes publication-observation persistence; supervisor sidecars retain observations through their own stated boundaries.",
+      "remainingGap": "Each final receipt excludes its own persistence. Job totals overlap application counters and are not additive.",
+      "prospectiveTreatment": "Use the enclosing owner job to observe child tails; preserve self-exclusions and terminal failure semantics.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "sourceSha256": "16cc4fa51a3b4590086e7246477adf6703f5496491d0e8ec9420c609d6432b81",
+          "anchor": "persistence.Persist(",
+          "lines": [
+            178
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "a0a50787403168a7375fa76805018753a97d72103b1f14816f6ed08159169389",
+          "anchor": "class PublicationObservationPersistence",
+          "lines": [
+            447
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "1d9221c211bef47f84e04e6718ad9bb3daf1c0f44fcc0f106a49215aa1de32dc",
+          "anchor": "AfterObservationManifestCloseAndVerification",
+          "lines": [
+            193
+          ]
+        }
+      ]
+    },
+    {
+      "id": "supervisor-bootstrap",
+      "applicationCoverage": "outside-application-scope",
+      "observation": "The owner timer precedes supervisor.start, but file-accounting activation occurs after setup and initial hashes.",
+      "remainingGap": "validate/start raw reads, hashes and directory creation are not all attributed to owner application counters.",
+      "prospectiveTreatment": "A complete future outer boundary must include bootstrap work, not merely the four phase receipts.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "1d9221c211bef47f84e04e6718ad9bb3daf1c0f44fcc0f106a49215aa1de32dc",
+          "anchor": "def validate(",
+          "lines": [
+            33
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "1d9221c211bef47f84e04e6718ad9bb3daf1c0f44fcc0f106a49215aa1de32dc",
+          "anchor": "def start(",
+          "lines": [
+            58
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "1d9221c211bef47f84e04e6718ad9bb3daf1c0f44fcc0f106a49215aa1de32dc",
+          "anchor": "self.file_scope.__enter__()",
+          "lines": [
+            71
+          ]
+        }
+      ]
+    },
+    {
+      "id": "runtime-loader-and-descendants",
+      "applicationCoverage": "kernel-only-within-job",
+      "observation": "Owned Windows jobs include native/Python descendants through drain, kernel transfer totals and job memory high water.",
+      "remainingGap": "Runtime/module loading and library operations lack exhaustive application attribution; monitor memory is sampled at a separate boundary.",
+      "prospectiveTreatment": "Do not add nested job totals, counters or separate lifetime memory peaks as though they were a simultaneous measured peak.",
+      "references": [
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "3c312b179c34588556edac1ea76069a65891783c6975e7da0635dad3a93583fb",
+          "anchor": "def _job_io_observation(",
+          "lines": [
+            90
+          ]
+        },
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "3c312b179c34588556edac1ea76069a65891783c6975e7da0635dad3a93583fb",
+          "anchor": "memoryCoverage='KernelJobHighWaterPlusOwnerLifetimeHighWater'",
+          "lines": [
+            256
+          ]
+        }
+      ]
+    },
+    {
+      "id": "monitor-preparation-and-final-tail",
+      "applicationCoverage": "excluded",
+      "observation": "OwnerProcessMonitor observes the child owner through handle cleanup and closed-console hashing.",
+      "remainingGap": "Its own preparation, later publication/verification, console and exit lie outside that observation; cooperative checks do not hard-bound the monitor.",
+      "prospectiveTreatment": "Define a finite external enforcing boundary or separately bounded/charged monitor work; do not recurse through self-measuring receipts.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "d5ca324d6b5d6840361a9ef452baffb6f23c1fa6aec0421ad332ead4df4989fd",
+          "anchor": "def run(",
+          "lines": [
+            135
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "d5ca324d6b5d6840361a9ef452baffb6f23c1fa6aec0421ad332ead4df4989fd",
+          "anchor": "def _publish(",
+          "lines": [
+            122
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "d5ca324d6b5d6840361a9ef452baffb6f23c1fa6aec0421ad332ead4df4989fd",
+          "anchor": "'outerMonitorPublicationVerificationConsoleAndExit'",
+          "lines": [
+            118
+          ]
+        }
+      ]
+    },
+    {
+      "id": "live-history-rechecks",
+      "applicationCoverage": "not-executed-in-this-review",
+      "observation": "Production code refreshes and rechecks required registry history; file/JSON helpers cover some reads.",
+      "remainingGap": "Future study cost depends on the full pinned history and metadata workload. Current correctness fixtures do not establish that workload bound.",
+      "prospectiveTreatment": "Include the actual admitted history closure in a future resource declaration; do not rescan or allocate in this inventory task.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs",
+          "sourceSha256": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+          "anchor": "internal static TowerRefinementLiveHistory Refresh(",
+          "lines": [
+            57
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs",
+          "sourceSha256": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+          "anchor": "internal static void Recheck(",
+          "lines": [
+            86
+          ]
+        }
+      ]
+    }
+  ],
+  "prospectiveModel": {
+    "status": "DraftOnly",
+    "elapsedUnit": "EnclosingMonotonicSeconds",
+    "elapsedBoundary": "Before authentication through driver publication, verification, console and exit, with separately bounded outer-monitor work",
+    "memoryUnit": "Explicit process/job commit high-water boundary; monitor separately identified",
+    "storageUnit": "Logical retained plus scratch file bytes over declared complete lifetimes; not allocated disk blocks",
+    "ioUnit": "Kernel job transfer totals; overlapping application bytes, decoded bytes and parser bytes remain separate diagnostics",
+    "failurePolicy": "Unknown observations, failed release, missing membership, process escape or unresolved scratch prevent qualification; missing is never zero",
+    "cumulativePolicy": "Charge all admitted attempts including failed work; never rewrite the first failure or historical totals",
+    "newLimits": null,
+    "coefficients": null,
+    "qualifiedForecast": null,
+    "measurementAuthorized": false,
+    "prerequisites": [
+      "Checked lease release and scoped metadata lifecycle observations",
+      "Complete owned path/scratch-domain specification and enforcement or defensible external bounds",
+      "Finite boundary for outer-monitor work and failure cleanup",
+      "Authenticated full owner/native audit/independent audit/publication path under that boundary",
+      "Separately justified prospective resource protocol and explicit authorization before measurement"
+    ]
+  },
+  "gates": {
+    "nativeCompressedPreparation": "ClosedUnchanged",
+    "pythonCompressedLaunch": "ClosedUnchanged",
+    "existingAuditFloorSeconds": 1806,
+    "existingAuditLimitSeconds": 1800
+  }
+}

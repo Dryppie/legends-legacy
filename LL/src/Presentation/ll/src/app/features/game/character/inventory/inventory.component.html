@@ -130,6 +130,17 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-end gap-2">
+          <app-dropdown
+            class="block w-32 shrink-0"
+            appearance="field"
+            label="All tiers"
+            [value]="selectedEquipmentTier()"
+            [options]="equipmentTierOptions"
+            [selectedValue]="selectedEquipmentTier()"
+            [disabled]="massDismantlePending()"
+            (selection)="selectEquipmentTierFromDropdown($event)"
+          ></app-dropdown>
+
           <ng-container
             *ngIf="massDismantleConfirmation(); else massDismantleControls"
           >
@@ -156,6 +167,20 @@
 
           <ng-template #massDismantleControls>
             <app-dropdown
+              class="block w-36 shrink-0"
+              appearance="field"
+              label="Dismantle by"
+              [value]="massDismantleCriterion()"
+              [options]="massDismantleCriterionOptions"
+              [selectedValue]="massDismantleCriterion()"
+              [disabled]="massDismantlePending()"
+              (selection)="selectMassDismantleCriterionFromDropdown($event)"
+            ></app-dropdown>
+            <app-dropdown
+              *ngIf="
+                massDismantleCriterion() === 'Rarity';
+                else gearPowerDismantleLimit
+              "
               class="block w-44 shrink-0"
               appearance="field"
               label="Maximum rarity"
@@ -165,6 +190,20 @@
               [disabled]="massDismantlePending()"
               (selection)="selectMassDismantleRarityFromDropdown($event)"
             ></app-dropdown>
+            <ng-template #gearPowerDismantleLimit>
+              <app-dropdown
+                class="block w-48 shrink-0"
+                appearance="field"
+                label="Maximum gear power"
+                [value]="massDismantleMaximumGearPower()"
+                [options]="massDismantleGearPowerOptions"
+                [selectedValue]="massDismantleMaximumGearPower()"
+                [disabled]="massDismantlePending()"
+                (selection)="
+                  selectMassDismantleMaximumGearPowerFromDropdown($event)
+                "
+              ></app-dropdown>
+            </ng-template>
             <button
               type="button"
               class="ll-button ll-button-primary min-w-32 shrink-0 whitespace-nowrap px-4"
@@ -178,12 +217,12 @@
           </ng-template>
 
           <button
-            *ngIf="selectedEquipmentSlot()"
+            *ngIf="selectedEquipmentSlot() || selectedEquipmentTier()"
             type="button"
             class="ll-button"
-            (click)="clearEquipmentSlotFilter()"
+            (click)="clearEquipmentFilters()"
           >
-            Clear filter
+            Clear filters
           </button>
         </div>
       </header>

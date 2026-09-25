@@ -149,7 +149,8 @@ public class ColosseumService : IColosseumService
 
         var streakBefore = attackerArena.CurrentAttackWinStreak;
         ApplyRecordsAndStreak(attacker, defender, combatResult.Outcome);
-        var (baseGlory, firstWinBonus) = ApplyAttackGlory(attacker, combatResult.Outcome, now);
+        var (baseGlory, firstWinBonus) = ArenaRewards.AwardBattleGlory(
+            attackerArena, defenderArena, combatResult.Outcome, now);
 
         var matchResult = new ColosseumMatchResult
         {
@@ -168,7 +169,7 @@ public class ColosseumService : IColosseumService
             CharacterBRatingBefore = defenderRatingBefore,
             CharacterBRatingAfter = ratingResult.CharacterBRatingAfter,
             CharacterBRatingDelta = ratingResult.CharacterBDelta,
-            CharacterBGloryEarned = 0,
+            CharacterBGloryEarned = baseGlory,
 
             WinnerId = combatResult.Outcome == BattleOutcome.Victory ? characterId : combatResult.Outcome == BattleOutcome.Defeat ? enemyId : null,
             WinnerName = combatResult.Outcome == BattleOutcome.Victory ? attacker.Name : combatResult.Outcome == BattleOutcome.Defeat ? defender.Name : string.Empty,
@@ -202,7 +203,6 @@ public class ColosseumService : IColosseumService
             baseGlory + firstWinBonus,
             baseGlory,
             firstWinBonus,
-            0,
             streakBefore,
             attackerArena.CurrentAttackWinStreak,
             new ColosseumPlaybackResult(
@@ -269,26 +269,6 @@ public class ColosseumService : IColosseumService
                 attackerArena.CurrentAttackWinStreak = 0;
                 break;
         }
-    }
-
-    private static (int BaseGlory, int DailyFirstWinBonus) ApplyAttackGlory(Character attacker, BattleOutcome outcome, DateTimeOffset now)
-    {
-        var (baseGlory, firstWinBonus) = ArenaRewards.CalculateAttackGlory(
-            outcome,
-            !HasReceivedFirstWinBonusToday(attacker, now));
-
-        if (firstWinBonus > 0)
-        {
-            attacker.ArenaProfile.LastFirstWinBonusAt = now;
-        }
-
-        attacker.ArenaProfile.Glory += baseGlory + firstWinBonus;
-        return (baseGlory, firstWinBonus);
-    }
-
-    private static bool HasReceivedFirstWinBonusToday(Character attacker, DateTimeOffset now)
-    {
-        return attacker.ArenaProfile.LastFirstWinBonusAt?.UtcDateTime.Date == now.UtcDateTime.Date;
     }
 
     private static string ToHistoryOutcome(BattleOutcome outcome)

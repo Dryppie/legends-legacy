@@ -1,6 +1,7 @@
 using Domain.Models.Combat.Abilities;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
+using Services.LL.Content;
 
 namespace Services.LL.Combat.Engine;
 
@@ -13,16 +14,18 @@ public sealed class JsonAbilityCatalogProvider : ICompiledAbilityCatalogProvider
         IConfiguration config,
         string contentRootPath,
         JsonSerializerOptions options,
-        ThreatAndTankingOptions? threatAndTankingOptions = null)
+        ThreatAndTankingOptions? threatAndTankingOptions = null,
+        ContentJsonReader? reader = null)
     {
+        reader ??= ContentJsonReader.Default;
         var contentRoot = config["Content:Root"] ?? "Data";
         var abilityPath = Path.Combine(contentRootPath, contentRoot, "combat", "abilities.json");
         var statusPath = Path.Combine(contentRootPath, contentRoot, "combat", "statuses.json");
         var summonPath = Path.Combine(contentRootPath, contentRoot, "combat", "summons.json");
 
-        var abilities = ReadList<AbilitySpec>(abilityPath, options);
-        var statuses = ReadList<StatusSpec>(statusPath, options);
-        var summons = ReadList<SummonSpec>(summonPath, options);
+        var abilities = ReadList<AbilitySpec>(abilityPath, options, reader);
+        var statuses = ReadList<StatusSpec>(statusPath, options, reader);
+        var summons = ReadList<SummonSpec>(summonPath, options, reader);
         var owningEssences = abilities
             .Where(x => !string.IsNullOrWhiteSpace(x.OwningEssenceId))
             .ToDictionary(x => x.Id, x => x.OwningEssenceId!, StringComparer.OrdinalIgnoreCase);
@@ -40,11 +43,11 @@ public sealed class JsonAbilityCatalogProvider : ICompiledAbilityCatalogProvider
 
     public CompiledAbilityCatalog GetCompiledCatalog() => _compiledCatalog.Value;
 
-    private static IReadOnlyList<T> ReadList<T>(string path, JsonSerializerOptions options)
+    private static IReadOnlyList<T> ReadList<T>(string path, JsonSerializerOptions options, ContentJsonReader reader)
     {
         if (!File.Exists(path))
             throw new FileNotFoundException($"Could not find ability catalog file '{path}'.", path);
 
-        return JsonSerializer.Deserialize<List<T>>(File.ReadAllText(path), options) ?? [];
+        return reader.Deserialize<List<T>>(reader.ReadAllText(path), options) ?? [];
     }
 }

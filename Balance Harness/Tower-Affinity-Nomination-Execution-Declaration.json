@@ -1,0 +1,15 @@
+{
+  "version": "tower-affinity-nomination-execution-v1",
+  "admissionManifestSha256": "e9250de72dc581f3b1845ad7f1df9307490de870ed78b98af0df721ade239a5c",
+  "requestSha256": "dbb0960662e116920da8abbc29d51bf03ff5e5127db8d5ebbfab810453a8143c",
+  "designSha256": "a9a84c32d0a8c12f15843469621cafcf87967a022be400a643c7f0924f32d156",
+  "output": "TestResults/balance/tower-affinity-nomination-pilot-01-20260925",
+  "attempts": 1,
+  "retries": 0,
+  "roots": 12,
+  "freshAssignedValues": 4380,
+  "maximumFights": 21888,
+  "maximumSeconds": 10800,
+  "maximumBytes": 6442450944,
+  "stopRule": "Use the frozen analysis. No automatic promotion, parameter changes, replacement roots or follow-up variant in this cycle."
+}

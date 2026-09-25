@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL.WorldTower;
 using Domain.Models.WorldTower;
+using Services.LL.Content;
 
 namespace Services.LL.WorldTower;
 
@@ -9,15 +10,16 @@ public sealed class JsonWorldTowerDefinitionProvider : IWorldTowerDefinitionProv
     private readonly IReadOnlyList<TowerFloorDefinition> _floors;
     private readonly IReadOnlyDictionary<int, TowerFloorDefinition> _byNumber;
 
-    public JsonWorldTowerDefinitionProvider(string path, JsonSerializerOptions jsonOptions)
+    public JsonWorldTowerDefinitionProvider(string path, JsonSerializerOptions jsonOptions, ContentJsonReader? reader = null)
     {
+        reader ??= ContentJsonReader.Default;
         if (!File.Exists(path))
         {
             throw new InvalidOperationException($"World Tower catalog was not found at '{path}'.");
         }
 
-        using var stream = File.OpenRead(path);
-        var document = JsonSerializer.Deserialize<WorldTowerCatalogDocument>(stream, jsonOptions)
+        using var stream = reader.OpenRead(path);
+        var document = reader.Deserialize<WorldTowerCatalogDocument>(stream, jsonOptions)
             ?? throw new InvalidOperationException("World Tower catalog is empty or invalid.");
 
         ValidateRewardCurve(document.RewardCurve);

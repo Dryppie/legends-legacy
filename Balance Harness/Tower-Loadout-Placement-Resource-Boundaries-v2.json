@@ -1,0 +1,434 @@
+{
+  "version": "tower-proposal-resource-boundaries-v2",
+  "status": "PartialCooperativeOwnershipImplemented",
+  "scope": "Named file-domain and observer-lifetime obligations; not an exhaustive dynamic path inventory or an implemented confinement protocol",
+  "domains": [
+    {
+      "id": "admission-and-captured-runtime",
+      "pathRule": "Authenticated admission package, captured content/runtime/auditor sources; study executable capture is a separate retained study member.",
+      "lifetime": "Existing before owner launch; retained through audits and later evidence retention. Read/authentication lifetimes extend through verification.",
+      "ownership": "Hash-authenticated snapshots; read-only intent is not OS-enforced filesystem confinement.",
+      "observedBoundary": "Selected authentication reads are counted in worker/owner scopes; monitor-call preparation counts its driver, monitor, helper, accounting module and interpreter reads.",
+      "unresolved": "Initial scientific admission/authentication precedes its application scope. Runtime/library/cache writes are not ruled out by authenticated input hashes.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def validate_admission(",
+          "lines": [
+            198
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "binding = dict(requestSha256=",
+          "lines": [
+            267
+          ]
+        }
+      ]
+    },
+    {
+      "id": "registry-and-historical-evidence",
+      "pathRule": "registryRoot, its pre-existing studies/history and complete-family-allocation records; each admitted output is directly beneath the registry.",
+      "lifetime": "Pre-existing history survives all attempts. Failed attempts and unresolved reservations remain retained; no cleanup/retry resets historical charges.",
+      "ownership": "Registry and output leases serialize selected writers, but are not a complete filesystem namespace restriction.",
+      "observedBoundary": "Historical pins are preserved. Current storage checks sample output and diagnostic sidecars, not every registry/history lifetime.",
+      "unresolved": "No live-history rescan or bound on all pre-existing and concurrent registry storage is established here.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "leases.enter_context(writer_lease(output.parent/'complete-family-allocation'))",
+          "lines": [
+            284
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def storage_bytes(",
+          "lines": [
+            117
+          ]
+        }
+      ]
+    },
+    {
+      "id": "study-retained-members",
+      "pathRule": "outputRoot retained archive members, captured executable/content, results and receipts, excluding separately classified pending files, leases and logs.",
+      "lifetime": "From first creation through reservation, native work, audits, publication and permanent success/failure retention.",
+      "ownership": "Create-new output, hashes/manifests and an exclusive output lease; linked/non-file members are rejected at selected checks.",
+      "observedBoundary": "Selected native lifetime tracking and owner logical size samples; completion/closeout precede final lease cleanup.",
+      "unresolved": "Samples cannot bound unobserved growth/deletion; external writes and validation-to-use races are not constrained by these checks alone.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def storage_bytes(",
+          "lines": [
+            117
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "with leases:",
+          "lines": [
+            301
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs",
+          "sourceSha256": "8442a8fe4a6ef207ea388578f2bd77571c23aac110d057af76c346cff12614c0",
+          "anchor": "public static void MoveFile(",
+          "lines": [
+            29
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-pending-and-atomic-publication",
+      "pathRule": "Registered target-adjacent .pending files and pending directories, including paths outside outputRoot when the target is outside it.",
+      "lifetime": "Creation through writes/flush/close and rename/delete; on interruption, remaining pending members persist as failed evidence.",
+      "ownership": "Selected writer APIs track registered members; registration alone does not constrain all writers or paths.",
+      "observedBoundary": "Successful accepted writes, selected moves/deletes and managed logical lengths are recorded. Failed progress is unknown.",
+      "unresolved": "A pending name can disappear between enumeration and stat. The known rename fallback does not establish an unsampled peak or cover all temporary naming schemes.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerCompleteReservation.cs",
+          "sourceSha256": "8a60c8166c4ded0367170cb7deaae92b196aad5a65938f4f6d09a0b5bfb7f523",
+          "anchor": "var path = Path.Combine(root, name); var pending = path + \".pending\";",
+          "lines": [
+            29
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs",
+          "sourceSha256": "8442a8fe4a6ef207ea388578f2bd77571c23aac110d057af76c346cff12614c0",
+          "anchor": "public static void DeleteFile(",
+          "lines": [
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "id": "writer-lease-files",
+      "pathRule": "Registry allocation and output sibling .writer.lock paths, plus native racing and other native writer lease paths.",
+      "lifetime": "Create/open through explicit close or process/finalizer cleanup; failed release leaves lifetime unresolved.",
+      "ownership": "Exclusive sharing/DeleteOnClose. Python checks CloseHandle; selected native explicit releases are observed.",
+      "observedBoundary": "Operation outcomes and held-owner probes are counted. Only racing leases have an explicit empty-file requirement in the owner storage sampler.",
+      "unresolved": "Do not assume every lease has zero length: the native FileStream contract permits writes/SetLength. Finalization and unknown failed release remain outside complete lifetime proof.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def writer_lease(",
+          "lines": [
+            161
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "'Native writer lease must be empty'",
+          "lines": [
+            142
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "sourceSha256": "14eca17b40c7965b24ec6097df0993774162252e1ea8620ea51aaaa492a5b472",
+          "anchor": "protected override void Dispose(bool disposing)",
+          "lines": [
+            50
+          ]
+        }
+      ]
+    },
+    {
+      "id": "worker-receipt-sidecars",
+      "pathRule": "StudyWorkSupervisor.root/worker-receipts, including work, receipt-publication and publication-persistence files.",
+      "lifetime": "Exclusive publication through close, authentication, owner import and retained success/failure evidence.",
+      "ownership": "Bound worker producer/request/phase and create-new receipt destinations outside study archives.",
+      "observedBoundary": "Selected publication v1/v3 application calls and enclosing job observations; terminal receipts exclude their own persistence.",
+      "unresolved": "Sidecars have an explicit retention role but are not proof that a worker writes only there. Failed writes/closes remain charged and uncertain.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "1d9221c211bef47f84e04e6718ad9bb3daf1c0f44fcc0f106a49215aa1de32dc",
+          "anchor": "(self.root/'worker-receipts').mkdir()",
+          "lines": [
+            62
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "4c8e32e170b0ff7564942a99f0bdbcc50aff05ec4a2f07ae3962a4736343deb6",
+          "anchor": "class PublicationObservationPersistence",
+          "lines": [
+            461
+          ]
+        }
+      ]
+    },
+    {
+      "id": "managed-owner-and-supervisor-evidence",
+      "pathRule": "Supervisor root/owner, root/supervisor and root/terminal managed directories, separately from worker-receipts and the scientific output.",
+      "lifetime": "Directory creation through registered file creation/write/close/delete, snapshot, manifest verification and retained evidence.",
+      "ownership": "RetainedOwner optionally accepts a closed, source-bound diagnostic storage declaration. Each declared leaf has one fixed role and one creation lifetime. The default ManagedStorage remains unchanged. Supervisor directories are not opted in.",
+      "observedBoundary": "Cooperative API accepted appends, closes and scratch deletions through snapshot. Per-file/live/scratch/total byte caps reject before writes. Root/file identity, content, links and inventory are validated.",
+      "unresolved": "No OS confinement. Concurrent/transient external writes, caches, undeclared process paths, terminal persistence and observer lifetime remain uncovered. Metadata/hash checks do not remove check/use races.",
+      "qualificationReady": false,
+      "requiredTreatment": "Extend explicit ownership to the remaining writing domains, or establish defensible finite bounds. Declared fixture caps are not scientific limits.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "4c8e32e170b0ff7564942a99f0bdbcc50aff05ec4a2f07ae3962a4736343deb6",
+          "anchor": "class ManagedStorage:",
+          "lines": [
+            685
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "1d9221c211bef47f84e04e6718ad9bb3daf1c0f44fcc0f106a49215aa1de32dc",
+          "anchor": "def _persist_observation(",
+          "lines": [
+            160
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_diagnostic_storage.py",
+          "sourceSha256": "1c59960242e20ec6312fff80284323100fcbd609ce7edc68ec4bd9f9b2b7badd",
+          "anchor": "class DiagnosticStorage:",
+          "lines": [
+            40
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_diagnostic_storage.py",
+          "sourceSha256": "1c59960242e20ec6312fff80284323100fcbd609ce7edc68ec4bd9f9b2b7badd",
+          "anchor": "def declaration(",
+          "lines": [
+            18
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "4c8e32e170b0ff7564942a99f0bdbcc50aff05ec4a2f07ae3962a4736343deb6",
+          "anchor": "storageContractSha256=self.storage.contract_sha256",
+          "lines": [
+            880
+          ]
+        }
+      ]
+    },
+    {
+      "id": "redirected-console-and-worker-logs",
+      "pathRule": "The owner monitor console.log and native/audit/publication logs under declared output paths; each leaf must be counted once despite enclosing archive roots.",
+      "lifetime": "Exclusive log creation before process start through inherited handles, descendant drain, parent-handle close, hash and retention.",
+      "ownership": "Owned Windows jobs and selected log handles; zero exit is distinct from complete observation and scientific success.",
+      "observedBoundary": "Closed log length/hash and kernel job transfers. Monitor-call counters include its closed child-console sample, not the child stdout write calls.",
+      "unresolved": "Kernel transfer bytes overlap application observations and are not live storage or physical disk bytes. Unknown drain/close/query invalidates corresponding coverage.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "3c312b179c34588556edac1ea76069a65891783c6975e7da0635dad3a93583fb",
+          "anchor": "def run(command, cwd, log_path,",
+          "lines": [
+            126
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "console_info = dict(path='console.log'",
+          "lines": [
+            138
+          ]
+        }
+      ]
+    },
+    {
+      "id": "outer-monitor-publication",
+      "pathRule": "Fresh OwnerProcessMonitor.root with console.log, owner-process.json and files.json; publication uses direct exclusive files, not a .pending rename.",
+      "lifetime": "Per-call creation through process observation, two publication files, close, inventory and hash verification. Failure retains partial files.",
+      "ownership": "Fresh destination, selected ancestor/link checks and exact member verification. Optional monitor-call observation is API-only.",
+      "observedBoundary": "Opt-in phase counters cover preparation, ownerProcess, observation, publication and verification. Elapsed boundary ends before terminal snapshot construction.",
+      "unresolved": "Closed-file sizes are samples. Constructor/earlier imports, terminal snapshot construction/persistence, outer memory lifetime and process exit remain excluded.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "def _seal(",
+          "lines": [
+            78
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "def _monitor_snapshot(",
+          "lines": [
+            213
+          ]
+        }
+      ]
+    },
+    {
+      "id": "caller-terminal-persistence-and-console",
+      "pathRule": "Caller-selected destination for monitor_terminal_observation, caller stdout/stderr, subsequent logs and process-exit work; no path is bound by the monitor API.",
+      "lifetime": "Begins after the monitor snapshot boundary and lasts through caller serialization, persistence, verification, console, shutdown hooks and process exit.",
+      "ownership": "Caller-owned, currently unconfined. Tests persist terminal observations outside the sealed v1 monitor package.",
+      "observedBoundary": "Explicitly excluded from the terminal observation. A separate enclosing job may observe a monitor driver through exit, with its observer separately bounded.",
+      "unresolved": "No complete enclosing observer budget is supplied. Do not recursively add another observer and claim the remaining observer tail disappeared.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "'terminalSnapshotConstructionSerializationAndPersistence'",
+          "lines": [
+            232
+          ]
+        },
+        {
+          "path": "build/test-proposal-monitor-boundary.py",
+          "sourceSha256": "23c40a037b3781d5bae8e2a80b75f7035ae117825181d3da3f384c8a26b7b48c",
+          "anchor": "w.seal_new(base/'monitor-call.json',terminal)",
+          "lines": [
+            119
+          ]
+        }
+      ]
+    },
+    {
+      "id": "external-runtime-temp-and-unclassified-files",
+      "pathRule": "Inherited TEMP/TMP and other environment paths, runtime caches, arbitrary driver/descendant paths, and every file outside the classified owned leaves.",
+      "lifetime": "Before process start through runtime/library/descendant activity, transient create-grow-delete cycles, failed cleanup and later retained cache files.",
+      "ownership": "Current CreateProcessW call inherits the environment. Working-directory selection, Python -B, protected-root overlap checks and job ownership do not confine filesystem writes.",
+      "observedBoundary": "Job I/O can observe operations whose files disappear. The literal nested-owner fixture deletes a 131072-byte file before final inventories.",
+      "unresolved": "Unknown lifetime/size/path membership. Redirecting TEMP alone is insufficient; runtime and arbitrary external paths need enforcement or separately justified finite bounds.",
+      "qualificationReady": false,
+      "requiredTreatment": "Declare and enforce ownership or supply a justified conservative bound; unknown is not zero.",
+      "references": [
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "3c312b179c34588556edac1ea76069a65891783c6975e7da0635dad3a93583fb",
+          "anchor": "None, None, True, 0x08000004, None, os.fspath(cwd)",
+          "lines": [
+            192
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "command = [sys.executable, '-B', '-X'",
+          "lines": [
+            266
+          ]
+        },
+        {
+          "path": "build/test-proposal-owner-process.py",
+          "sourceSha256": "3b5db6d92c45a5ad6c4f232a36ebfff5da5eaeb1cc48ba23231a3bf13e937d08",
+          "anchor": "scratch = f.base/'late-owner.tmp'",
+          "lines": [
+            69
+          ]
+        }
+      ]
+    }
+  ],
+  "domainCount": 11,
+  "wholeProcessCoverage": false,
+  "usableForAdmission": false,
+  "measurementAuthorized": false,
+  "units": {
+    "elapsed": "Monotonic seconds over a declared finite process/observer boundary",
+    "memory": "Explicit process/job commit high-water scope; separately bound the observer",
+    "storage": "Logical retained plus scratch file bytes over complete declared lifetimes",
+    "io": "Separate overlapping accepted application bytes, decoded/parser bytes and kernel job transfers"
+  },
+  "pathAssignmentRule": "A future implementation must map each canonical path to exactly one leaf domain before summing. Pending/lease/log/sidecar roles take precedence over enclosing retained roots. Unclassified paths remain unknown; no sums are computed by this design artifact.",
+  "physicalBackingStorage": "Allocated disk blocks, pagefile and OS backing storage are not measured by logical file-byte counters. Any exclusion from a future budget requires explicit justification; they are not assigned zero here.",
+  "outerBoundary": {
+    "implemented": "Opt-in monitor run entry through publication/verification before terminal snapshot construction",
+    "excluded": [
+      "constructorAndEarlierImports",
+      "terminalSnapshotConstructionSerializationAndPersistence",
+      "callerConsoleAndMonitorProcessExit",
+      "outerMonitorMemoryLifetime"
+    ],
+    "closureRule": "Choose a finite monitored process set and identify the observer outside it. Bound that observer separately and conservatively, including setup, publication, verification, failure cleanup and exit. Keep nested job overlap explicit. Until both components have justified bounds the resource gate remains closed.",
+    "observerBoundSeconds": null,
+    "observerBoundMemoryBytes": null,
+    "observerBoundStorageBytes": null
+  },
+  "failurePolicy": "Preserve all failed attempts and partial artifacts. Failed writes/releases, missing membership, unresolved scratch and missing observations prevent qualification. Missing is never zero.",
+  "newLimits": null,
+  "coefficients": null,
+  "qualifiedForecast": null,
+  "next": "Adopt explicit ownership or defensible bounds for pending publication, leases, worker sidecars/logs and external runtime/cache paths. Then bound the finite external observer including terminal persistence/exit. Unknown domains disqualify admission; no measurement authorized.",
+  "gates": {
+    "nativeCompressedPreparation": "ClosedUnchanged",
+    "pythonCompressedLaunch": "ClosedUnchanged",
+    "existingAuditFloorSeconds": 1806,
+    "existingAuditLimitSeconds": 1800
+  },
+  "priorSpecification": "Balance Harness/Tower-Loadout-Placement-Resource-Boundaries.json",
+  "priorSpecificationSha256": "0c98ccf8e497ea73273f57c591b79142848d7a9258cd039a0302604d6ec93d42",
+  "diagnosticContract": {
+    "version": "tower-proposal-diagnostic-storage-v1",
+    "scope": "Trusted single-owner private directory; explicit opt-in on RetainedOwner",
+    "declarationKeys": [
+      "version",
+      "files",
+      "maxLiveBytes",
+      "maxScratchBytes",
+      "maxTotalWrittenBytes"
+    ],
+    "fileKeys": [
+      "kind",
+      "maxBytes"
+    ],
+    "allowedKinds": [
+      "retained",
+      "scratch"
+    ],
+    "rules": [
+      "Finite case-distinct portable leaf names declared before mkdir",
+      "Exclusive root creation and one create attempt per declared name",
+      "Ordinary directory/file identities; reject reparse points and hard links",
+      "Closed content hashes checked before create/delete/snapshot and on close",
+      "Requested append must fit every applicable cap before write",
+      "Accepted short returns counted; thrown write progress unknown",
+      "Only closed scratch deletable; deletions retain lifetime total and peak",
+      "Any API/storage failure poisons scope; cleanup closes still attempted",
+      "Binding retains canonical declaration hash and implementation hash"
+    ],
+    "confinement": false,
+    "qualificationReady": false,
+    "fixtureLimitsAreScientificBounds": false
+  }
+}

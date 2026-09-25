@@ -1,0 +1,119 @@
+{
+  "version": "tower-affinity-allied-action-comparison-v1",
+  "scopeHash": "ef4a3813f849c732227c52ee4e86f7db81eab52a218487e747d0c7e14974afeb",
+  "inventoryHash": "f06496a3079c4b9aa8d3366ac94e58de994ee7317fd41996eb90905a802d45c6",
+  "benchmarkPartyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+  "control": {
+    "version": "tower-proposal-policy-v4",
+    "name": "benchmark-preserving-affinity-creation-v4",
+    "firstWave": [
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create"
+    ],
+    "secondWave": [
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create"
+    ],
+    "parentTickets": [
+      "benchmark"
+    ],
+    "preserveParentInteractions": false,
+    "preservedDamageAffinityIds": [],
+    "createdDamageAffinityIds": [
+      "09d48cd50f4fad5e7d81088514d48ac3367eb2797b20357480727f6d88d935f4",
+      "41d9b77a974edaf408edccc24c67b75c3d446d49439e8578887fcb1d27470e3e",
+      "ae4c3c8c716a80d55a689cb74f993c51f1251a4df5e3799f9557d83e3fe2cbb3"
+    ],
+    "creationRemovalRule": "preserve-completable-affinity-endpoints-v1"
+  },
+  "candidate": {
+    "version": "tower-proposal-policy-v5",
+    "name": "benchmark-allied-action-affinity-creation-v5",
+    "firstWave": [
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create"
+    ],
+    "secondWave": [
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create",
+      "affinity-create"
+    ],
+    "parentTickets": [
+      "benchmark"
+    ],
+    "preserveParentInteractions": false,
+    "preservedDamageAffinityIds": [],
+    "createdDamageAffinityIds": [
+      "09d48cd50f4fad5e7d81088514d48ac3367eb2797b20357480727f6d88d935f4",
+      "41d9b77a974edaf408edccc24c67b75c3d446d49439e8578887fcb1d27470e3e",
+      "ae4c3c8c716a80d55a689cb74f993c51f1251a4df5e3799f9557d83e3fe2cbb3"
+    ],
+    "creationRemovalRule": "preserve-completable-affinity-endpoints-and-allied-basic-attack-providers-v1"
+  },
+  "roots": 12,
+  "heldoutSamples": 256,
+  "searchFightsPerArm": 528,
+  "requiredFreshValues": 4380,
+  "maximumFights": 21888,
+  "maximumSeconds": 10800,
+  "maximumBytes": 6442450944,
+  "pairing": "same-proposal-root-racing-nomination-and-validation-panels-separate-charges",
+  "barrier": "freeze-all-24-outputs-before-any-heldout-observation",
+  "interpretation": "development-pilot-no-efficacy-or-adoption-claim",
+  "analysis": {
+    "primaryEndpoint": "equal-root-mean-heldout-candidate-minus-control-win-rate",
+    "guardrailEndpoint": "equal-root-mean-heldout-candidate-minus-fixed-benchmark-win-rate",
+    "identicalOutputs": "reuse-one-physical-recipe-per-root-heldout-panel-exact-zero-method-contrast-retain-absolute-benchmark-results",
+    "rootRetention": "all-12-roots-no-preview-screening-no-replacement-no-refill-any-incomplete-root-invalidates-study",
+    "rootUncertainty": "report-all-12-paired-root-contrasts-and-descriptive-95-percent-t-df11-not-a-powered-efficacy-test",
+    "conditionalUncertainty": "paired-seed-standard-errors-and-covariance-conditional-on-frozen-outputs-not-future-root-reliability",
+    "goMethodAtLeast": 0.02,
+    "goBenchmarkAtLeast": 0,
+    "goDifferingRootsAtLeast": 3,
+    "goPromisingNovelRootsAtLeast": 0,
+    "promisingNovelGainAtLeast": 0.03,
+    "abandonMethodAtMost": -0.02,
+    "abandonBenchmarkAtMost": -0.02,
+    "abandonPromisingNovelRootsBelow": 0,
+    "decisionOrder": "incomplete-then-abandon-without-novelty-gate-then-no-observed-output-differentiation-then-larger-fresh-evaluation-warranted-else-inconclusive-never-adopt"
+  },
+  "selectionContrast": {
+    "control": "tower-racing-benchmark-validation-v1",
+    "candidate": "tower-racing-benchmark-validation-v1"
+  },
+  "validationProtocol": {
+    "valuesPerPair": 109,
+    "sharedRacingValues": 32,
+    "controlSelectionValues": 16,
+    "nominationValues": 16,
+    "validationValues": 60,
+    "nominationPairing": "both-arms-share-all-16-nomination-values-in-frozen-order",
+    "validationIsolation": "both-arms-share-60-validation-values-disjoint-from-training-and-all-heldout-panels",
+    "reporting": "both-arm-all-root-gate-counts-fallback-and-novel-output-frequency-plus-paired-heldout-effects-and-costs"
+  }
+}

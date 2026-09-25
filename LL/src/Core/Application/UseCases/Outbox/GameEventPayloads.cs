@@ -51,7 +51,8 @@ public sealed record CharacterCreatedPayload(Guid CharacterId);
 /// <summary>
 /// Carries everything the realtime level-up broadcast needs so it can be sent after the
 /// originating transaction commits. The trailing values are optional so outbox rows queued by
-/// an older build still deserialize.
+/// an older build still deserialize for their existing consumers. Delivery targets are stored
+/// when the row is enqueued, so those older rows do not acquire the realtime consumer.
 /// </summary>
 public sealed record CharacterLevelReachedPayload(
     Guid CharacterId,

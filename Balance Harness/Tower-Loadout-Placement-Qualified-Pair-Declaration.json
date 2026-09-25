@@ -1,0 +1,157 @@
+{
+  "version": "tower-loadout-placement-qualified-pair-v1",
+  "output": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-qualified-pair-20260925",
+  "maximumManifestSha256": "52520d5bb7e77714aef52f16be9cf93a31d7c208b9524263372c2e58b400db1a",
+  "failedPairManifestSha256": "7dd1df4ab8ea9d24c53d50cac4137bdb59351a56110e9642cd791474e3f02605",
+  "originalPlanSha256": "059e00c200bb1e8322693f75c04c3219d9b4c3438acffa7b9ed2445064687bcd",
+  "amendmentSha256": "4f48c4b268225c22333dbb0bb3f4011d2bfaddc6d850d0978118934e39333c73",
+  "sourcePins": {
+    "build/test-loadout-placement-plain-maximum.py": "4097d6c4bfc370ad50fc99810a6d4dd8cc1f463ebf025e322fe45538eb7c2b73",
+    "build/test-proposal-affinity-study-owned.py": "caecd3bf8f2be6ae597172fb5369d3dbecf10405f43ec8964fdfee0b2c731852",
+    "build/run-proposal-affinity-study.py": "ddee737fd2e5c059903dac7989001a3cadaf40d8bab0465648a7f1ffc1697b36",
+    "build/bounded_windows_process.py": "b3fd07f8f5c564bcb1c04191cf162c5a42bc0d8d6284ac603525c70e263e19e7",
+    "build/test-loadout-placement-matched-owned.py": "63a7be71b99d2e0292886af3c4dc6452aced48f5f35ae810c61cd42dcbcc0ccb",
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "4237b97997a8ed191b4f8720884a360804e7b94f42d7952bf8842b39d9d53224",
+    "Balance Harness/analysis/loadout-placement-resource-precheck.py": "3a29f7d66b9d932f0d2f5e6a0e06cc00b386c2fd850c96851d61b23a23c91d76",
+    "LL/tests/BalanceHarness.ProcessFixture/PlainMaximumFixtureHost.cs": "d686bc44ce94eab45a11e4443cd60076ea9b394f22e02a8c6dd278c86e3130be",
+    "LL/tests/BalanceHarness.ProcessFixture/ProposalStudyFixtureHost.cs": "0a7b90fb44b2739471e25fd5a6843872812a73db2dd48795b7571ade7c656e38",
+    "LL/tests/BalanceHarness.ProcessFixture/BalanceHarness.ProcessFixture.csproj": "9d91790b767d7a7f86be0a2eb592199bae7b18db76aea59d8fa321a082a7adee",
+    "LL/tests/EssenceSystem.Tests/BalanceHarnessPlainMaximumFixtureTests.cs": "c212feaf5164c44e275ff2a721e4e7a8e6b07a08be2df85619a1c5dc0a8f4233",
+    "build/test-loadout-placement-qualified-pair.py": "f573292211f147202013c8e7525cd691a7c36ea02d5b37843fd1c318e256bb6a",
+    "Balance Harness/analysis/loadout-placement-qualified-costs.py": "7ad9e4f150073bb20be93a68442a6d2c209c2c5285c02ffd72f9190c89521f78",
+    "Balance Harness/analysis/test-loadout-placement-qualified-costs.py": "56a8f94549a9aed8ec16a427504da3351249287857fd91c5d68f533cb388947a",
+    "Balance Harness/analysis/loadout-placement-recovery-protocol.py": "43405a24a27985ae6b91f71b6daad8087e4019f300f84eb8ff19442d7895451e",
+    "Balance Harness/Tower-Loadout-Placement-Publication-Inventory-Amendment.json": "4f48c4b268225c22333dbb0bb3f4011d2bfaddc6d850d0978118934e39333c73"
+  },
+  "hostPins": {
+    "Application.dll": "26f199b48fddf0130d9af77edc2f5255091219c486f976887b842f698bc3d4b0",
+    "AutoMapper.dll": "9e95d0f45c175ef972ab3a8bebc5be0115b780ca8fe86f6ce9f789edba9011df",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.dll": "445e62c459e850408e13942ff762a398c1865d3b202f8855d3878089b7da4913",
+    "BalanceHarness.pdb": "3baee8fb2a90a1f41ba6f0183d49402fdbb1645634e2df902d4b5841ec9172ca",
+    "BalanceHarness.ProcessFixture.deps.json": "4b30821dd40b7f77be9b822ff265adb447e5ea24489cf34f35abdf554cd2e363",
+    "BalanceHarness.ProcessFixture.dll": "bf72cfa8521a8e121a4b95a2e36571056859461b2ba86cf17ab6d2f820f318ae",
+    "BalanceHarness.ProcessFixture.pdb": "e2d14c1a7d1c0afd8bbbeee248b1e3242c01f41dbe4f070fada215dfc20189f9",
+    "BalanceHarness.ProcessFixture.runtimeconfig.json": "b4aad84277c120c025a443649c4e09ca20b08725acc12ef60940786bfb8c024f",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca",
+    "Common.dll": "4a92cc3a3289bf6056ad460879870552a8d7b5d6013eee3e532e3f80a0d06389",
+    "DeepCloner.dll": "d33df6263dfd771be100e6ebc83eb437539e99f46816fb62f512e9f159165d22",
+    "Domain.dll": "d48e7c5ebf8ca3aa2f0cd76183153ccf2f6c29d67689f7aaa62cdc6a24d83941",
+    "Google.Apis.Auth.dll": "a2a4f688c1e34bca248c2a589e73a20ac3c834a9615c13bcb08a317a78842609",
+    "Google.Apis.Core.dll": "198f959ef53b86d9c6f4b3305503960995cfaaa096252dc7bbbb803c57c58bc7",
+    "Google.Apis.dll": "7d9abc7e9b29b2414d7ddee9286a4ce997d12cb6a55badcc1eb975ed5e1d4092",
+    "MediatR.Contracts.dll": "c2601304aa9d15c51a543e1c3300368c64ac38633e7277bb835a04f68ddf6a61",
+    "MediatR.dll": "caf467b9b8a81ad6f54c034ce3fbdd2d7a24448b95e3b9b38b08b91f4f2ac260",
+    "Microsoft.EntityFrameworkCore.Abstractions.dll": "ce57cf5176bcb701644ec4a66fddb4cb74885a3307663a00d57d3e826f5c506a",
+    "Microsoft.EntityFrameworkCore.dll": "d9e2824485fd07188359b2c3247087c720b88b5b3dde53a814de9cdc43d876e4",
+    "Microsoft.EntityFrameworkCore.Relational.dll": "672f721aa1a046baa776e8e558dbfa5feb6936f185687611007129c8b85a7d6a",
+    "Microsoft.IdentityModel.Abstractions.dll": "028587cebe70187ad288eb70dacf51bc26005aa7755ad202d606217bf41aa523",
+    "Microsoft.IdentityModel.JsonWebTokens.dll": "5f042a540eeb5ce1aec2e969ce5768b621139bc98ccf7823a839e255f92b96af",
+    "Microsoft.IdentityModel.Logging.dll": "ef479f51771b44b99b8c8f64ac0700549dcd61eeace47b9f345af1f6930303bf",
+    "Microsoft.IdentityModel.Tokens.dll": "a8d2169c8be62213aba73054e572e5e43457afa268653308ca68586f83c5eb84",
+    "Newtonsoft.Json.dll": "a28c251dfe36d881e9e2462e171441b8b0ec156fe3f452602c9149b1b9efe05b",
+    "runtimes/win/lib/net7.0/System.Management.dll": "979fee559e30cc0fc4af6f34548a225b6f08cae0a6c61d24a3e389b3f22dc9d1",
+    "Services.LL.dll": "399f94c8f61e055da15731b1e069a36f3b94a0e29ec2f964d4e06c300948bbee",
+    "System.CodeDom.dll": "4d33e2986a84d4460853e2b98d3a1ba9f8aa2950f7fa12ff6ad2e15a4bccfd18",
+    "System.IdentityModel.Tokens.Jwt.dll": "22deb6c7c258864fc8ac331e261dd97cc8aa90e5e8d4b06e81febdda5d90c529",
+    "System.Management.dll": "36056b240f488b7da63720585d84f93183cf7bd05da68d5340151ebdd85e4d88"
+  },
+  "costInputs": {
+    "design": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\Balance Harness\\Tower-Loadout-Placement-Comparison-Design.json",
+      "sha256": "d30f1bee4d997ab6c551d62e5d4a43a954681449e64feb2b00da20a169eda9d7"
+    },
+    "old-costs": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-allied-action-20260924\\result\\completion.json",
+      "sha256": "af6cf48b6a29eebec9c0bd5105966eca5a0b1c9adc53edf9e556f98c2c089b54"
+    },
+    "old-closeout": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-allied-action-20260924\\result\\closeout.json",
+      "sha256": "b4b480e943047eaae01ca10d0ddec666a03226e3c876860d6e8b72aafd7783b9"
+    },
+    "old-context": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-allied-action-20260924\\result\\source\\context.json",
+      "sha256": "fcb3f73d47a3461f2e98e7cfd090c9be4666d0c093e6a453ae9f27fd01221d3e"
+    },
+    "old-settings": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-allied-action-20260924\\result\\source\\settings.json",
+      "sha256": "b099ccd03a2f987d7e4a0b395ec7bc50aefe0f8413c12cfc7ac0efea367cabd6"
+    },
+    "new-costs": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-loadout-placement-20260924\\result\\completion.json",
+      "sha256": "980bd87e459c0904445f5fe74eaa5bf291676aebe2d7cda9b1782d06bc8dff97"
+    },
+    "new-closeout": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-loadout-placement-20260924\\result\\closeout.json",
+      "sha256": "768819516339b61c987c1ec125777622dcf5b6178fe917188da1587de565c0e4"
+    },
+    "new-context": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-loadout-placement-20260924\\result\\source\\context.json",
+      "sha256": "7aad661980f766064d9de53aaef2429be7bf66c1af6ffeea99492f50fc679395"
+    },
+    "new-settings": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\tower-proposal-owned-fixture-loadout-placement-20260924\\result\\source\\settings.json",
+      "sha256": "b099ccd03a2f987d7e4a0b395ec7bc50aefe0f8413c12cfc7ac0efea367cabd6"
+    },
+    "pilot-costs": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\balance\\tower-affinity-allied-action-pilot-01-20260924\\completion.json",
+      "sha256": "072d9aa0cd8759eb0189872134e65134bd12c07bf15d0513c3bcf5aea8ddcf45"
+    },
+    "pilot-closeout": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\balance\\tower-affinity-allied-action-pilot-01-20260924\\closeout.json",
+      "sha256": "f58552cbd568e66f6e76090f01cd0be8d450e173b552513d445e97a73379dc82"
+    },
+    "pilot-result": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\balance\\tower-affinity-allied-action-pilot-01-20260924\\result.json",
+      "sha256": "cd99bb8ad2614ffc14379890e47ed2bdef139a0b98c8286a4c4e9bccb6737ece"
+    },
+    "inherited-forecast": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\affinity-allied-action-admission-20260924\\resource-forecast.json",
+      "sha256": "a0053d2579db16bda205c134e41ee56d28d208329c0b49e68795fd80c4e0d373"
+    },
+    "audit-probe": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\proposal-native-audit-cost-probe-20260923\\resource-assessment.json",
+      "sha256": "2e74ca5f8db64ddfb09f13ac7d9a55ca48b99827dec88990a196541e95d7074a"
+    },
+    "probe-previous-forecast": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\loadout-placement-recovery-protocol-20260924\\precheck\\evidence\\TestResults\\proposal-native-audit-cost-probe-20260923\\previous-resource-forecast.json",
+      "sha256": "61c4c72c34009d4742e029866cedb31fc0f9668cdd3a0a61e25f05a3738c5d51"
+    }
+  },
+  "failedNativeReceiptSha256": "fc52f6c123fc2e5e90facb7d724a390d3ac08fdbbcf2e4720d9aa4d2e68a8900",
+  "physicalSource": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-loadout-placement-20260924\\result",
+  "physicalPins": {
+    "context": "7aad661980f766064d9de53aaef2429be7bf66c1af6ffeea99492f50fc679395",
+    "plan": "e0eaba98734bca5c1718f4e8c48702ea4a6bc2722c90ac13c8d2db60ee5f3f59",
+    "settings": "b099ccd03a2f987d7e4a0b395ec7bc50aefe0f8413c12cfc7ac0efea367cabd6",
+    "history": "f9339f47d435375c17f718d46efe9c6314d483cfed904e05909247b252fd2ce9",
+    "runtime": "d42a7d0ac9d400532457681820e8b7c9ca3e925ec772960cfba8cfeec5c23f66"
+  },
+  "profiles": [
+    "matched-placement-baseline-v1",
+    "matched-placement-candidate-v1"
+  ],
+  "attemptsPerProfile": 1,
+  "retryPermitted": false,
+  "executionOrder": [
+    "baseline",
+    "placement"
+  ],
+  "maximumSeconds": 24420,
+  "maximumBytes": 13019119616,
+  "fullPairAllowanceChargedAtStart": true,
+  "perOwnerMaximumSeconds": 10800,
+  "perOwnerMaximumBytes": 6442450944,
+  "nativeMaximumSeconds": 9000,
+  "auditMaximumSeconds": 1800,
+  "nativeMaximumBytes": 5905580032,
+  "auditMaximumBytes": 536870912,
+  "preparationSecondsPerFixture": 120,
+  "verificationSecondsPerFixture": 1200,
+  "supportingSeconds": 180,
+  "costRule": "Pin the qualified-costs implementation before either matched owner starts. Keep failed native denominator ceilings; max(original placement, new candidate) numerators; every ratio >=1; factor two and 120-second reserve; all inherited floors; exactly one extra protected inventory pass; absolute maximum-workload floors including final native verification. No per-report normalization or favorable resampling.",
+  "actualCombat": 0,
+  "productionEntropyDraws": 0,
+  "scientificReservations": 0,
+  "scientificAdmitted": false
+}

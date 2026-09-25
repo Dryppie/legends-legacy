@@ -12,6 +12,22 @@ public static class Program
         Console.CancelKeyPress += cancelHandler;
         try
         {
+            if (args.Length > 0 && args[0].StartsWith("tower-affinity-search-", StringComparison.Ordinal))
+                return await TowerAffinitySearch.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-proposal-study-", StringComparison.Ordinal))
+                return await TowerProposalStudy.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-proposal-racing-", StringComparison.Ordinal))
+                return await TowerProposalRacingNative.Command(args, cancellation.Token);
+            if (args.Length > 0 && (args[0].StartsWith("tower-proposal-comparison-", StringComparison.Ordinal)
+                || args[0] == "tower-benchmark-tie-comparison-plan" || args[0] == "tower-benchmark-validation-comparison-plan"
+                || args[0] == "tower-affinity-preservation-comparison-plan" || args[0] == "tower-affinity-allied-action-comparison-plan" || args[0] == "tower-loadout-placement-comparison-plan" || args[0] == "tower-affinity-nomination-comparison-plan"))
+                return TowerProposalComparison.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-proposal-policy-", StringComparison.Ordinal))
+                return TowerProposalPolicies.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-adaptive-racing-", StringComparison.Ordinal))
+                return await TowerAdaptiveRacingNative.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-reference-exploration-comparison-", StringComparison.Ordinal))
+                return await TowerReferenceExplorationComparison.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-incumbent-tie-comparison-", StringComparison.Ordinal))
                 return await TowerIncumbentTieComparison.Command(args, cancellation.Token);
             if (args is ["tower-anchored-comparison-run", var anchoredRequest])
@@ -28,6 +44,18 @@ public static class Program
             }
             if (args.Length > 0 && args[0].StartsWith("tower-current-family-", StringComparison.Ordinal))
                 return await TowerCurrentFamilyAdmission.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-frozen-pool-recognition-", StringComparison.Ordinal))
+                return await TowerFixedFamilyConfirmation.RecognitionCommand(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-affinity-creation-recognition-", StringComparison.Ordinal))
+                return await TowerFixedFamilyConfirmation.RecognitionCommand(args, cancellation.Token, TowerFixedFamilyConfirmation.AffinityRecognitionVersion);
+            if (args.Length > 0 && args[0].StartsWith("tower-affinity-preservation-recognition-", StringComparison.Ordinal))
+                return await TowerFixedFamilyConfirmation.RecognitionCommand(args, cancellation.Token, TowerFixedFamilyConfirmation.PreservationRecognitionVersion);
+            if (args.Length > 0 && args[0].StartsWith("tower-affinity-neighborhood-recognition-", StringComparison.Ordinal))
+                return await TowerFixedFamilyConfirmation.RecognitionCommand(args, cancellation.Token, TowerFixedFamilyConfirmation.NeighborhoodRecognitionVersion);
+            if (args.Length > 0 && args[0].StartsWith("tower-three-reference-confirmation-", StringComparison.Ordinal))
+                return await TowerFixedFamilyConfirmation.ThreeReferenceCommand(args, cancellation.Token);
+            if (args.Length > 0 && args[0].StartsWith("tower-fixed-family-confirmation-", StringComparison.Ordinal))
+                return await TowerFixedFamilyConfirmation.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-fixed-team-confirmation-", StringComparison.Ordinal))
                 return await TowerFixedTeamConfirmation.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-selection-diagnostic-", StringComparison.Ordinal))
@@ -62,13 +90,17 @@ public static class Program
                 return await TowerCeilingScreenCommand.ExecuteAsync(args, cancellation.Token);
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
-                Console.WriteLine("BalanceHarness tower-incumbent-tie-comparison-check <request.json>; tower-incumbent-tie-comparison-verify <completed-output> (24 shared searches; conditional confirmation; run only through build/run-incumbent-tie-comparison.py; no retry/resume/default change)");
+                Console.WriteLine("BalanceHarness tower-reference-exploration-comparison-check <request.json>; tower-reference-exploration-comparison-verify <completed-output> (12 paired searches, shared controls; owned build/run-reference-exploration-comparison.py; no retry/resume/default change)");
+                Console.WriteLine("BalanceHarness tower-incumbent-tie-comparison-check <request.json>; tower-incumbent-tie-comparison-verify <completed-output> (24 shared searches; versioned two/three-reference selectors; run through build/run-incumbent-tie-comparison.py or build/run-three-reference-tie-comparison.py; no retry/resume/default change)");
                 Console.WriteLine("BalanceHarness tower-fixed-team-confirmation-check|run <request.json>; tower-fixed-team-confirmation-verify <completed-output> (three exact teams; 5500 paired trials; family-seven strength gate; one entropy batch; no retry/replay/resume)");
+                Console.WriteLine("BalanceHarness tower-fixed-family-confirmation-check|run <request.json>; tower-fixed-family-confirmation-verify <completed-output> (eight exact recipes; 5500 paired trials; family-32 strength gate; all qualifiers; no new primary/retry/replay/resume)");
                 Console.WriteLine("BalanceHarness tower-current-family-admit <request.json> <new-output>; tower-current-family-admission-verify <completed-output> (seed-free preparation/origin/alias audit only; no combat or allocation)");
                 Console.WriteLine("BalanceHarness tower-selection-diagnostic-check|run <request.json>; tower-selection-diagnostic-verify <completed-output> (four frozen nominees; post-freeze entropy; family-ten diagnostic; explicit phase limits; no promotion/retry/resume)");
                 Console.WriteLine("BalanceHarness tower-practical-search-check|run <request.json>; tower-practical-search-verify <completed-output> (fixed-order supplied incumbents; cumulative limits; verified strength decision; no retries/resume)");
                 Console.WriteLine("BalanceHarness tower-practical-search-recover <recovery-request.json>; tower-practical-search-recovery-verify <receipt.json> (versioned declared/allocated pre-combat Pending; closed derivations only; permanent exclusions; zero combat)");
                 Console.WriteLine("BalanceHarness tower-practical-search-allocation-check|allocate-run <request.json> (versioned seed-free template; owned durable allocation and native run; no retries/resume)");
+                Console.WriteLine("BalanceHarness tower-practical-search-incumbent-tie-preset <allocation-request.json> <primary-reference-id> <new-preset-directory> (explicit incumbent; new template/request only; admission required; no allocation or combat)");
+                Console.WriteLine("BalanceHarness tower-practical-search-three-reference-preset <allocation-request.json> <reuse-bundle> <manifest-sha256> <new-preset-directory> (three protected references; five nominees; family-ten strength gate; admission required; no allocation or combat)");
                 Console.WriteLine("BalanceHarness tower-complete-family-binding-check <request.json> <new-result.json> (zero seeds/combat); tower-complete-family-reserve-bind <explicit-reservation-request.json> (288 fresh values; zero combat; separate reservation scope required)");
                 Console.WriteLine("BalanceHarness tower-complete-family-inspect <sealed-UTC-source> <new-result.json> (zero combat/seeds); tower-complete-family-run|verify <externally-bound-study> (43879 fixed recipes; dedicated global caps; no retries/overrides/resume)");
                 Console.WriteLine("BalanceHarness tower-midpoint-materialize|bind|check|run|verify <root> (fixed +10%, all 253 recipes, 256 shared seeds, 64768 fights; no overrides/resume)");
@@ -100,7 +132,7 @@ public static class Program
                 Console.WriteLine("BalanceHarness tower-compact-replay --run <directory> --case <case-id> --battle <tower.0001> [--detailed]");
                 Console.WriteLine("BalanceHarness tower-boss-improvement-prepare --definition <fresh-schema-3-json> --references <comma-separated-reference-ids> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-supplied-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--policy-version supplied-composition-block-v1|supplied-composition-block-v2] [--content-root <API.LL-directory>]");
-                Console.WriteLine("BalanceHarness tower-retained-composition-prepare --definition <fresh-schema-3-json> --references <one-or-two-reference-ids> --output <new-directory> [--policy-version <retained-policy|anchored-neighborhood-v1>] [--primary-reference <reference-id>] [--content-root <API.LL-directory>] (default retained-composition-v1; anchored policy requires primary-reference)");
+                Console.WriteLine("BalanceHarness tower-retained-composition-prepare --definition <fresh-schema-3-json> --references <reference-ids> --output <new-directory> [--policy-version <retained-policy|anchored-neighborhood-v1>] [--primary-reference <reference-id>] [--content-root <API.LL-directory>] (default retained-composition-v1; three references require retained-composition-three-references-v1, retained-composition-three-reference-exploration-v1 or opt-in retained-composition-three-reference-exploration-offset-v1; anchored policy requires primary-reference)");
                 Console.WriteLine("BalanceHarness tower-team-plan --floor <1-15> --slots <4-10> --seed <int> --output <new-directory> [--runs-root <directory>] [--catalogs-root <directory>] [--content-root <API.LL-directory>] (independent preview with retained controls and history)");
                 Console.WriteLine("BalanceHarness tower-boss-discovery-prepare --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>]");
                 Console.WriteLine("BalanceHarness tower-boss-discover --definition <schema-3-json> --output <new-directory> [--content-root <API.LL-directory>] (discovery only)");

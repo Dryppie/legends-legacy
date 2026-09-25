@@ -10,6 +10,7 @@ import {
   mapEquipmentToDisplay,
   mapInstanceToDisplay,
 } from './equipment-display';
+import { EquipmentDisplayComponent } from './equipment-display/equipment-display.component';
 
 describe('equipment display mapping', () => {
   it('maps catalog equipment without retired crafting metadata', () => {
@@ -64,6 +65,20 @@ describe('equipment display mapping', () => {
         hoveredAmount: 0,
       },
     ]);
+  });
+
+  it('omits a blueprint style already stated in the equipment name', () => {
+    const instance = equipmentInstance();
+    instance.displayName = 'Phoenix Heavy Helm';
+    instance.progression!.activeStyleId = 'blueprint_phoenix';
+    const component = new EquipmentDisplayComponent();
+
+    expect(
+      component.equipmentMeta(mapInstanceToDisplay(instance)),
+    ).not.toContain('Blueprint Phoenix');
+    expect(
+      component.equipmentMeta(mapInstanceToDisplay(instance)),
+    ).not.toContain('Phoenix ·');
   });
 });
 

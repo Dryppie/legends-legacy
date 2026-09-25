@@ -28,14 +28,20 @@ internal static class TowerCompleteReservation
             Check(bytes.LongLength);
             var path = Path.Combine(root, name); var pending = path + ".pending";
             if (!replace && File.Exists(path)) throw new IOException("No overwrite: " + name);
-            using (var f = new FileStream(pending, FileMode.CreateNew, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough))
-            { f.Write(bytes); f.Flush(true); }
-            File.Move(pending, path, replace); lengths[name] = bytes.LongLength;
+            TowerWorkAccounting.ObserveExistingFile(path);
+            using (var f = TowerWorkAccounting.OpenWrite(pending, () => new FileStream(pending, FileMode.CreateNew, FileAccess.Write,
+                FileShare.Read, 4096, FileOptions.WriteThrough), scratch: true))
+            { f.Write(bytes); TowerWorkAccounting.FlushToDisk(f); }
+            TowerWorkAccounting.MoveFile(pending, path, replace); lengths[name] = bytes.LongLength;
         }
-        internal void Append(FileStream stream, TowerReservationEvent value)
+        internal void Append(Stream stream, TowerReservationEvent value)
         {
             var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, HarnessJson.Options).Replace("\r", "").Replace("\n", "") + "\n");
-            Check(bytes.LongLength); stream.Write(bytes); stream.Flush(true);
+            Check(bytes.LongLength);
+            // Other allocation paths still own a raw FileStream; observe their append without closing it.
+            var observed = stream is FileStream file ? TowerWorkAccounting.WriteStream(file, file.Name, leaveOpen: true) : stream;
+            try { observed.Write(bytes); TowerWorkAccounting.FlushToDisk(observed); }
+            finally { if (!ReferenceEquals(observed, stream)) observed.Dispose(); }
             lengths["allocation-journal.jsonl"] = stream.Length;
         }
     }
@@ -52,8 +58,9 @@ internal static class TowerCompleteReservation
         // The registry sees Pending before any candidate is derived. New harnesses reject Pending/unknown states.
         storage.Put("history-input.json", new { reservationState = "Pending", reserved = Array.Empty<int>() });
         boundary?.Invoke("pending"); ct.ThrowIfCancellationRequested();
-        using var journal = new FileStream(Path.Combine(root, "allocation-journal.jsonl"), FileMode.CreateNew,
-            FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough);
+        var journalPath = Path.Combine(root, "allocation-journal.jsonl");
+        using var journal = TowerWorkAccounting.WriteStream(new FileStream(journalPath, FileMode.CreateNew,
+            FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough), journalPath);
         foreach (var (stage, count, values) in new[] { ("first", plan.FirstCount, first), ("second", plan.SecondCount, second) })
         {
             for (var ordinal = 0; values.Count < count; ordinal++)
@@ -69,7 +76,7 @@ internal static class TowerCompleteReservation
                 boundary?.Invoke("candidate"); ct.ThrowIfCancellationRequested(); // Returned values are durable before cancellation is observed.
             }
         }
-        journal.Flush(true); journal.Close();
+        TowerWorkAccounting.FlushToDisk(journal); journal.Close();
         var seeds = new TowerCompleteSeeds(TowerCompleteFamily.Version, historical, first.ToArray(), second.ToArray());
         storage.Put("seeds.json", seeds);
         storage.Put("seed-ledger.json", new { reservationState = "Complete", historical, first = first.ToArray(), second = second.ToArray() });

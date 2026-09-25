@@ -24,6 +24,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Nobility;
 using Domain.Models.Outbox;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
@@ -144,6 +145,7 @@ public interface IDbContext
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
     DbSet<MarketPlaceBuyOrder> MarketPlaceBuyOrders { get; }
     DbSet<MarketPlaceOrder> MarketPlaceOrders { get; }
+    DbSet<NobilityMembership> NobilityMemberships { get; }
     DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
     DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }
     DbSet<StateSyncRevision> StateSyncRevisions { get; }

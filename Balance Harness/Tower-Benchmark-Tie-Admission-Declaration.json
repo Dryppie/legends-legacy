@@ -1,0 +1,62 @@
+{
+  "version": "tower-benchmark-tie-admission-v1",
+  "studyVersion": "tower-benchmark-tie-comparison-v1",
+  "scopeId": "benchmark-tie-pilot-01",
+  "package": "TestResults/benchmark-tie-admission-20260923",
+  "output": "TestResults/balance/tower-benchmark-tie-pilot-01-20260923",
+  "harness": "TestResults/benchmark-tie-study-build-20260923/bin/BalanceHarness/release",
+  "resourceEnvelope": "tower-proposal-resource-envelope-v2",
+  "chargedSeconds": 900,
+  "chargedBytes": 1073741824,
+  "scientificMaximumSeconds": 10800,
+  "scientificMaximumBytes": 6442450944,
+  "precedingChargedSeconds": 24094.359000000055,
+  "precedingChargedBytes": 19195820950,
+  "originalPlanFileSha256": "d0b76b5c9f24ce917887ec7a1e02eb61a001975e864a9e5ef9dde8d2a155afe1",
+  "harnessSha256": "f5583644f02239313621b20757a0debea5b8102712a8f8153ca457db8acf8ab8",
+  "backendTestCount": 68,
+  "focusedTestCount": 10,
+  "probeRecipeInstances": 48,
+  "preparationsPerRuntime": 96,
+  "retries": 0,
+  "timingResamples": 0,
+  "scientificLaunches": 0,
+  "admissionOnly": true,
+  "sourceManifests": {
+    "TestResults/proposal-affinity-pilot-02-admission-repaired-20260923": "e5172f3b6b3db3ddcbe2e4a68cdd96eeb04e6822a3e65d12078676b1da7979fa",
+    "TestResults/affinity-creation-preview-20260923": "db58d54f7a1c595e6b39995508643f16207941be9b772719ac039a9e1775ad39",
+    "TestResults/benchmark-tie-study-verification-20260923": "37e5c2eaf0861fe77cd0321fbdd4e51a80041cc6c073c1daec8614419b86a44b",
+    "TestResults/affinity-creation-stage-review-20260923": "e5ca00fc0f43c10693908281a77213074a77b384ba8c8df8b02689617a1fc21d",
+    "TestResults/affinity-creation-admission-20260923": "554071201e9c01f99dbe084e5561df22fa7c97b785d823802d39a808898fa884",
+    "TestResults/balance/tower-affinity-creation-pilot-01-20260923": "67ba1f437ab09a06d13eb76647a3d5e10e0aca7eba56f33e01775216a0630139",
+    "TestResults/tower-proposal-owned-fixture-benchmark-tie-20260923/result": "e367bfbb85cd64cba547e33c39c609a87fe027d18e01acd48431ef186344101f",
+    "TestResults/tower-proposal-owned-fixture-creation-versioned-20260923/result": "9334cb659e5615490c1e957199264e1fee081851e9415c3f71d5e4c1f7076c06",
+    "TestResults/balance/tower-frozen-pool-recognition-repaired-20260923": "5fd7e9eb38eb4319f41be7a0e874297a897c7a32a73d09030261579b2473b377",
+    "TestResults/proposal-native-audit-cost-probe-20260923": "8929c5b94a95e717e8f7ec2ffb4d94ee01d0cbc9083e4b31873f635a5cc85cf7"
+  },
+  "forecastRule": "Upward-only maximum of prior admission, frozen native audit probe, current preparation and selector-fixture forecast, and twice the completed creation study scaled from 19840 to 21888 fights with upward-only selector/creation fixture phase ratios. Apply all storage floors before scaling the frozen audit probe. Margin 2 and publication reserve 120 remain. No timing retry.",
+  "harnessFiles": {
+    "BalanceHarness.dll": "f5583644f02239313621b20757a0debea5b8102712a8f8153ca457db8acf8ab8",
+    "BalanceHarness.pdb": "bd3b38faee966aa5eeea4635b93311a51eed4f03ca8b082db374b4171d8fd0e1",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/prepare-benchmark-tie-admission.py": "e31c7b3bfb09cc0035f8d94bb4dab6819f19c79cd0f6e895ee97bcf27103e8ea",
+    "Balance Harness/analysis/test-benchmark-tie-admission.py": "507e115d51deee54ee87f07c6f67cc5e2dc0eed1c03231baba2ec434413cb0c7",
+    "Balance Harness/analysis/prepare-affinity-creation-admission.py": "93e79ab2ad98e7f42a6477cbc6f98339eca54a1654c2e74301643c687e02c1ff",
+    "Balance Harness/analysis/prepare-proposal-affinity-admission.py": "d3300ff7ec7c538ca6ac140403fcbb8c3fbe211734e626fc2eed6a3574b3c963",
+    "Balance Harness/analysis/prepare-proposal-affinity-resource-admission.py": "81d3544bb4098d330b6f91d5a3240720315915dee9461288f6a8c0777861e5eb",
+    "Balance Harness/analysis/benchmark-tie-admission-context.ps1": "ca1f429e765e9c4a17c6c0cb2feaff934db3cac9577bb7f83ac52f8f8058f347",
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "a35aba8bca6bf6d9aa00cdf741c028575e2ee4823049987073ec37fc8a02b83b",
+    "build/run-proposal-affinity-study.py": "10f5f83853d81405052cacb70e00338bcb81f5826f3d225c191c5f59685aafc1",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30",
+    "TestResults\\three-reference-admission-closeout-20260922\\comparison-preparation.py": "edcda4fbbc9f2c19ee9e23ce0ffb15b44f7e29c9596e63982406edd470c0224b"
+  },
+  "tests": {
+    "path": "TestResults/benchmark-tie-admission-tests-20260923.log",
+    "sha256": "a5e2f5d7da30dd6311f71a566cb0fcd0b9b41af670161b98a814ac60d6ef422c",
+    "passed": 23,
+    "failed": 0
+  }
+}

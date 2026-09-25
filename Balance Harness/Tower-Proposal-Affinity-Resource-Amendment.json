@@ -1,0 +1,51 @@
+{
+  "version": "tower-proposal-affinity-resource-amendment-v1",
+  "status": "ProposedNotImplementedOrAdmitted",
+  "scope": "Offline proposal-affinity study resource partitions only",
+  "originalPlanFileSha256": "f7840ded410c34a3283fd3424ec18af98cfc2057cee76181b02dfddf51666188",
+  "originalPlanCanonicalHash": "3774a637af5e04d3d1683d244676d5723048c4eb97d69f0edee86a361fc690cd",
+  "qualifiedPlanFileSha256": "a8379616310ada1669f5aef617603609b7fe44846edf38a01f9af8daa8f00eb2",
+  "resourceProbeManifestSha256": "8929c5b94a95e717e8f7ec2ffb4d94ee01d0cbc9083e4b31873f635a5cc85cf7",
+  "current": {
+    "maximumSeconds": 10800,
+    "nativeSeconds": 9600,
+    "auditPublicationSeconds": 1200,
+    "maximumBytes": 6442450944,
+    "nativeBytes": 5905580032,
+    "auditPublicationBytes": 536870912
+  },
+  "proposed": {
+    "maximumSeconds": 10800,
+    "nativeSeconds": 9000,
+    "auditPublicationSeconds": 1800,
+    "maximumBytes": 6442450944,
+    "nativeBytes": 5905580032,
+    "auditPublicationBytes": 536870912
+  },
+  "basis": {
+    "nativePlanningSecondsFromPriorAdmission": 4158.749925591708,
+    "auditPlanningSecondsFromNativeProbe": 1301.0065557691128,
+    "probeTimingMargin": 2,
+    "probePublicationReserveSeconds": 120,
+    "guaranteedUpperBound": false
+  },
+  "scientificDesignUnchanged": [
+    "twelve roots and both proposal policies",
+    "fixed benchmark and explicit damage affinities",
+    "3948 assigned values and one fixed 16384-word entropy batch",
+    "528 trials per search arm and 256 held-out samples per root",
+    "21888-fight maximum and all-output barrier",
+    "all endpoints, thresholds, root retention and no adoption decision",
+    "no replacement, refill, resume or scientific retry"
+  ],
+  "requiredBeforeLaunch": [
+    "Implement an explicitly bound versioned envelope while preserving v1 archive verification",
+    "Verify owned completion, failure, cumulative deadlines and envelope-tampering rejection",
+    "Qualify and pin the updated harness against the captured gameplay runtime",
+    "Prepare a new separately charged admission with the full live history and all preceding charges",
+    "Retain both failed admissions and the native probe; never silently revise their receipts"
+  ],
+  "fights": 0,
+  "newValues": 0,
+  "admitted": false
+}

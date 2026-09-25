@@ -1,6 +1,6 @@
 # Incumbent tie comparison runner and verifier
 
-22 September 2026. The offline runner, native saved-archive verifier, owned Windows launcher and independent Python row auditor implement the [frozen prospective protocol](Tower-Practical-Incumbent-Tie-Comparison-Plan.md). **The scientific experiment has not launched.** No production entropy, fresh scientific values or combat were used to implement or test this change. Both search and selector defaults remain unchanged.
+22 September 2026. The offline runner, native saved-archive verifier, owned Windows launcher and independent Python row auditor implement the [frozen prospective protocol](Tower-Practical-Incumbent-Tie-Comparison-Plan.md). The subsequent [completed experiment](Tower-Practical-Incumbent-Tie-Comparison-Execution.md) passed both archive audits and returned **SupportsIncumbentTieForFrozenOutputs** (+2.575 points; conditional lower bound +1.930). No production entropy, fresh scientific values or combat were used in the earlier implementation/test step documented below. Both search and selector defaults remain unchanged.
 
 ## Execution and evidence
 
@@ -48,6 +48,6 @@ Python commands used the bundled runtime. The first sandboxed backend build coul
 
 ## Prepared launch package
 
-The [captured runtime and admission review](Tower-Practical-Incumbent-Tie-Comparison-Admission.md) records the concrete package, producing-source/runtime inventories and request pins. The original gameplay assemblies, content and settings passed compatibility with the tested harness. Public admission returned `ReadyNoReservation` for 505,562 exclusions across 222 ledger files, with zero new values and zero fights. Next: recheck live history, execute the single frozen comparison and independently audit its saved outcomes. The historical planning package and past experiment outcomes remain immutable.
+The [captured runtime and admission review](Tower-Practical-Incumbent-Tie-Comparison-Admission.md) records the concrete package, producing-source/runtime inventories and request pins. The original gameplay assemblies, content and settings passed compatibility with the tested harness. Public admission returned `ReadyNoReservation` for 505,562 exclusions across 222 ledger files, with zero new values and zero fights at that stage. The subsequent [single experiment completed](Tower-Practical-Incumbent-Tie-Comparison-Execution.md) with 19,904 fights, both audits passing and 538,326 permanent exclusions at close. This scope is closed; the historical packages and prior experimental decisions remain immutable.
 
 No gameplay code, application configuration, database schema or migrations changed in this work. There is no service deployment.

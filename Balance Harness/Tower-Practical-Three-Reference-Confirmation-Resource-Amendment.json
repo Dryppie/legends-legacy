@@ -1,0 +1,139 @@
+{
+  "version": "tower-three-reference-confirmation-resource-amendment-v1",
+  "status": "ProspectiveRequiresVersionedImplementation",
+  "runnableRequest": false,
+  "implementationComplete": false,
+  "originalPlanPath": "C:\\repos\\Legends-Legacy\\legends-legacy\\Balance Harness\\Tower-Practical-Three-Reference-Confirmation-Plan.json",
+  "originalPlanSha256": "c6544a63a569de5197c4e2a35749c01a14388478e6a9986509d991c64bd6a74f",
+  "originalNativeVersion": "tower-practical-three-reference-confirmation-v1",
+  "proposedNativeVersion": "tower-practical-three-reference-confirmation-v2",
+  "unchangedProtocolFields": {
+    "version": "076e392707e479fa7a687b80f40ce4541c7d4a759f20d3340b384c824b0ee6c7",
+    "status": "840541895b82d41af5f9f08ab99cb8077a9da33b30f5752cd64a5db9b008402b",
+    "runnableRequest": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+    "question": "c31f46b5c77653f16a75064e21a9d2ced9be03625c97ff399b84b94762ca2549",
+    "recipesInFixedExecutionOrder": "0b4695c8e6188e2dcb6558f03c7d5e0a7b83375d05c9d89ccf183596dd530ee0",
+    "contrastsInFixedReportingOrder": "85bd3acec7a99fa15a1475e532b8f73372221e82c96b82d2d17f9371081373d6",
+    "designatedPrimaryPartyId": "2d640608be333dbfed2fdd2ee20a7dc76ae5c14606d928d610452456515fb38d",
+    "contentHashes": "34efd7e17756456f245724b271f4c40a5e0f87dcbc626363ed558c1bb4343995",
+    "settingsHash": "4bc7f9660de77b494be937b3d6586cd973dca7dd34ec751bb0adab0e8468cde5",
+    "sourceExecutionHash": "44b920b64b4c0ce4842c2d7dc117d17e8d00cec08b9843d4a79ddd9fe8c238f3",
+    "budget": "ebb18e6d5b282b7b508b89208240e982187871f5c218c3379ddea14f9c54cd52",
+    "ownedCopies": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+    "runtimeBinding": "b78bf86da6e7f07bf804614a2d3d5e0cc4f234ab07f0ef9d406dd2be4e17c317",
+    "samplesPerRecipe": "01375f53651cff383d9aca5da90de6f4d859a2069e920c39f9700fe8a86e463c",
+    "maximumAttemptedFights": "99b7424d371c8bc92e701eafd02ea4ba521dddabe3b54aae1da8e5df7b152941",
+    "discoveryFights": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "selectionFights": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "endpoint": "344e4f98a63fec086ba3e49cd83cb2469ccd6f78a035281a6d9b3950287ee256",
+    "power": "ff03e1514cd986a51fa1e577be21597317f0b229de3a8722caf5ae3684996499",
+    "sampling": "e5aba4bc85a160afcda77c27278908d80ef2433d99e2267095445401d8591885",
+    "execution": "7296e71e5cbdd0df72e05ffeabd3053756ce8d781860fbbdd96db4e905409048",
+    "requiredImplementationChecks": "b1570c9c6fb458bc63b7f84f19c3c181db0a0c1f5b8d57de0b0ba78da4b19aa9",
+    "arithmeticChecks": "eab7470ea414a3e2002f453c974e518e3cef1f955caa181fb147bb7d2039e18c",
+    "sourceManifests": "f8ac2ea9041f0c952f7292f0055439023796252c83fe787048f9f02a0339cf5f",
+    "planningSourcePins": "a3e360a748d5934833322aff3c46345eee795a8a8f80984ee9afd98a667c3ac4",
+    "commonHelperSha256": "e233d2073ef74e1ce3042bd2040077592e0c00b643bb59cfcedb1cfddb206a80",
+    "sourceCatalogueSha256": "0e19605c0fb5ff62e272c83b4f3d3715d38e8d738c33d94e52605c559c0890ca",
+    "savedHistoryInventorySha256": "8485d8be3b7992f33d3e4cfba6704064713c0abedcbdd83cc5e9903faa70cb04",
+    "plannerSha256": "a81738afcffb79e52b6316a642f2fcb0e4bcc04cd0d86596f868d4f2c397d7bb",
+    "newFights": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "newReservations": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "randomDraws": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "nativePreparations": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "currentRecommendationsChanged": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+    "defaultsChanged": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+  },
+  "resources": {
+    "proposedStudyCumulative": {
+      "seconds": 8400,
+      "bytes": 4831838208
+    },
+    "admissionAllowance": {
+      "seconds": 600,
+      "bytes": 536870912
+    },
+    "executionOwner": {
+      "seconds": 7200,
+      "bytes": 3758096384
+    },
+    "nativeRunMaximum": {
+      "seconds": 6000,
+      "bytes": 3221225472
+    },
+    "auditAndPublicationReserve": {
+      "seconds": 1200,
+      "bytes": 536870912
+    },
+    "fullAdmissionAllowanceCharged": true,
+    "fullWorkflowFeasibilityEstablished": false,
+    "sizing": {
+      "sourceFights": 55672,
+      "sourceOwnerSeconds": 3506.5160000000033,
+      "sourceOwnerBytes": 1267889961,
+      "ownerSeconds": 3275.2340853570945,
+      "ownerBytes": 1184262789,
+      "nativeSeconds": 2941.941658284258,
+      "auditSeconds": 326.71023135504146,
+      "method": "Linear scaling of the closed 55,672-fight owner, including both audits and publication; deliberately not a performance guarantee."
+    },
+    "ownership": "Suspended process assigned to a hidden Windows Job before execution; retain leases and require empty process trees. Audit and publication share the original owner deadline, with no fresh cap.",
+    "accounting": "Failed admission plus one proposed new admission plus unchanged execution owner. Full admission allowances remain charged, including failures; no refund, transfer or reset.",
+    "priorEngineeringLedger": {
+      "seconds": 18180,
+      "MiB": 13584,
+      "treatment": "Preserved separately as accepted; complete historical engineering totals remain unknown."
+    },
+    "implementationRequirement": "Measure relevant fixture overhead, capture producing runtime and verify limits before the separate native admission. Include temporary writes, copied runtime/content, journals, logs, cleanup, completion and manifest bytes.",
+    "originalStudyCumulative": {
+      "seconds": 7800,
+      "bytes": 4294967296
+    },
+    "previousFailedAdmission": {
+      "seconds": 600,
+      "bytes": 536870912,
+      "receiptPath": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\three-reference-confirmation-admission-20260923\\admission-charge.json",
+      "receiptSha256": "01796af5a4979e50230379c446ad9d07631d01cfeb4967f818eecdfd4936e38b",
+      "failurePath": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\three-reference-confirmation-admission-20260923\\failure.json",
+      "failureSha256": "866aa154c5b1067f422f9b226d9e9345e5a59cdd6a2217cb1a57f3d8a470fc78",
+      "externalInventoryPath": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\three-reference-confirmation-admission-tooling-20260923\\failed-admission-files.json",
+      "externalInventorySha256": "b238a72eb240fef91cf18a6ed5876cee0ad70880f623142059724c979595c5be"
+    },
+    "preExecutionCharges": {
+      "seconds": 1200,
+      "bytes": 1073741824,
+      "requiredDistinctReceipts": 2
+    },
+    "additionalStudyAllowance": {
+      "seconds": 600,
+      "bytes": 536870912
+    }
+  },
+  "costEvidence": {
+    "comparisonPath": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\three-reference-confirmation-admission-overhead-20260923\\comparison.json",
+    "comparisonSha256": "3ccd822a562d014bc13e68c290a0eb38ce8e2029bddfbe29bd9d71404a0f3511",
+    "processReceiptSha256": "773322bfc9480f89edd9988125c713024773ec20f3159972418e428e03424ec6",
+    "oldVerifierSeconds": 55.93800000002375,
+    "newVerifierSeconds": 18.405999999959022,
+    "completeInputArchives": 3,
+    "limitation": "One sequential comparison on the same machine and filesystem cache; not a cold-cache bound or full admission forecast.",
+    "nativeAdmissionCostMeasured": false,
+    "fullWorkflowFeasibilityEstablished": false
+  },
+  "implementationRequirements": [
+    "Add an explicit v2 resource profile while preserving v1 commands, canonical request identity, thresholds and all closed evidence.",
+    "Pin both the original scientific plan and this resource amendment; do not accept widened resources under v1.",
+    "Require the preserved failed-admission receipt and the separately charged new-admission receipt: exactly 1200 seconds and 1 GiB before execution.",
+    "Keep the execution owner at 7200 seconds/3.5 GiB, native work at 6000 seconds/3 GiB, and both audits/publication at 1200 seconds/512 MiB.",
+    "Use complete-byte verification and the repaired framework host; retain source symbols, copied runtime/content, both independent Python history scans and the native history check.",
+    "Use a new package and output identity after versioned implementation and tests; never mutate or resume the failed admission.",
+    "A further admission failure is terminal within this amendment: preserve both charges; no automatic additional attempt or budget extension.",
+    "Test all cumulative charge paths, missing/changed receipts, interrupted publication, unchanged family-38 statistics and legacy v1 parity before any new admission."
+  ],
+  "newAdmissions": 0,
+  "nativePreparations": 0,
+  "scientificLaunches": 0,
+  "newValues": 0,
+  "fights": 0,
+  "oldEngineeringTreatment": "Keep the accepted 18180-second /13584-MiB ledger separately disclosed; complete historical engineering totals remain unknown."
+}

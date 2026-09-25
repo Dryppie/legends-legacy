@@ -19,7 +19,7 @@ public static class EssenceMechanicsInventory
     public static EssenceMechanicsReport Create(string root, ThreatAndTankingOptions threat)
     {
         // Use the same catalog validation/compiler as combat, including reference resolution.
-        new JsonAbilityCatalogProvider(new ConfigurationBuilder().Build(), root, HarnessJson.Options, threat).GetCompiledCatalog();
+        TowerContentProviders.Abilities(new ConfigurationBuilder().Build(), root, HarnessJson.Options, threat).GetCompiledCatalog();
         var content = new OfflineContent(root, threat);
         var entries = content.Essences.GetAll().OrderBy(e => e.Id, StringComparer.Ordinal).Select(e =>
         {

@@ -1,0 +1,70 @@
+{
+  "version": "tower-loadout-placement-recovery-protocol-v1",
+  "status": "ProspectiveRecoveryNecessaryGate",
+  "purpose": "Determine whether a separately registered corrected-auditor pair could possibly qualify under conservative retained-cost floors before permitting any new measurement",
+  "priorHandoff": "TestResults/loadout-placement-matched-fixture-handoff-20260924.json",
+  "priorHandoffSha256": "ab2f67fd0f195dd5f8dd0c00f1be35828efc3fe0f5189ac90dcefc817e6ac0fb",
+  "originalPlan": "Balance Harness/Tower-Loadout-Placement-Matched-Fixture-Plan.json",
+  "originalPlanSha256": "059e00c200bb1e8322693f75c04c3219d9b4c3438acffa7b9ed2445064687bcd",
+  "failedPair": "TestResults/loadout-placement-matched-owned-20260924",
+  "failedPairManifestSha256": "7dd1df4ab8ea9d24c53d50cac4137bdb59351a56110e9642cd791474e3f02605",
+  "correctedAuditorSha256": "4769d793e1d5eb14fc70ac21efe10b6720b9618a10b52d15636fa88888a110be",
+  "harnessSha256": "a2bd39956ffdc56c352336019960494a5c501a4afff61f4488e8b45635cceff9",
+  "retention": {
+    "originalExperiment": "Permanently failed; no resume, completion amendment, alternate-output replacement, or reinterpretation of the diagnostic replay as successful publication",
+    "originalCharges": "Keep the entire 24420-second and 13019119616-byte declared pair allowance, including the unused placement allowance",
+    "originalNativeReceipt": "Incomplete study with a completed native worker and successful native reconstruction; retain measuredSeconds and observedBytes as conservative ceilings on a future baseline native-cost denominator, never as a completed cost receipt",
+    "failedAuditCosts": "Retain the failed native and independent audit process receipts and logs for accounting. There is no completed audit/publication phase or closeout; do not invent one or use a partial audit as a completed denominator"
+  },
+  "recoveryPairRequirements": {
+    "precondition": "The necessary gate must pass before any recovery preparation, baseline, candidate or timing measurement is authorized",
+    "newRegistration": "A new explicitly versioned registration and one fixed new output are required; this protocol does not unlock the original runner or start a pair",
+    "attemptsPerProfile": 1,
+    "executionOrder": ["matched-placement-baseline-v1", "matched-placement-candidate-v1"],
+    "requireBothCompleted": true,
+    "correctedAuditorForBoth": true,
+    "unchangedPhysicalAndLiteralContract": "All context, actor, slot, reference, content, runtime/PDB, synthetic value, evaluator, owner, audit and retention requirements from the pinned original plan remain binding",
+    "requireCommonV5TrajectoriesAndTwelveCatalogues": true,
+    "failedOrIncompleteRecovery": "Retain and stop; no replacement, timing retry or qualification"
+  },
+  "prospectiveCostRule": {
+    "phaseSources": "Both recovery studies must complete. Read native costs from completion and audit/publication costs from final closeout without reducing completion costs",
+    "nativeBaselineDenominator": "For nativeSeconds and nativeBytes separately, use min(first failed baseline native receipt anchor, completed recovery baseline phase cost). A slower recovery baseline cannot make the native ratio smaller",
+    "auditBaselineDenominator": "Use the first completed corrected-auditor recovery baseline audit/publication phase. The original failed audit has no completed denominator and remains charged and retained",
+    "placementNumerator": "For every phase use max(original retained placement phase cost, completed recovery placement phase cost). Preserve the original final-closeout audit/publication costs",
+    "ratios": "max(1, placement numerator / baseline denominator), separately for each native and audit time/storage partition",
+    "forecast": "Preserve completed-pilot scaling to 21888 fights, margin two, inherited floors, storage-before-audit scaling and the 120-second publication reserve",
+    "normalization": "None. No per-actor, per-slot, per-report, path-length or other retrospective normalization"
+  },
+  "necessaryGate": {
+    "nativeMinimumRatios": "max(1, original placement native cost / first failed native receipt anchor)",
+    "auditMinimumRatios": "One for both audit phases is a mathematical lower bound, not an observed cost or assumed equality",
+    "monotonicity": "Any permitted future numerator is at least the original placement cost; any native denominator is at most the retained anchor; all audit ratios are at least one. The complete forecast is monotone in these ratios, including storage-driven audit scaling",
+    "failureRule": "If any rounded necessary phase floor is greater than or equal to its frozen partition cap, reject recovery before execution. A new measurement cannot lower that bound under this protocol",
+    "successRule": "A passing necessary gate alone grants no admission or runtime qualification; a separately registered completed matched pair and guarded current-runtime qualification remain required",
+    "interpretation": "A protocol-specific necessary resource bound only; not a current-runtime forecast, causal overhead estimate, scientific failure or efficacy result"
+  },
+  "resources": {
+    "readOnlyGateMaximumSeconds": 180,
+    "readOnlyGateMaximumBytes": 67108864,
+    "fullGateAllowanceChargedAtStart": true,
+    "resourceEnvelope": "tower-proposal-resource-envelope-v2",
+    "nativeMaximumSeconds": 9000,
+    "auditPublicationMaximumSeconds": 1800,
+    "nativeMaximumBytes": 5905580032,
+    "auditPublicationMaximumBytes": 536870912,
+    "scientificMaximumSeconds": 10800,
+    "scientificMaximumBytes": 6442450944,
+    "qualificationMaximumSeconds": 900,
+    "qualificationMaximumBytes": 1073741824,
+    "timingMargin": 2,
+    "publicationReserveSeconds": 120
+  },
+  "notPermitted": [
+    "Changing the original experiment, failure receipts, cost formula or evidence",
+    "Borrowing unused native time for audit/publication",
+    "Rounding down, reducing inherited floors, choosing a faster timing sample or enlarging resource limits",
+    "Running a recovery pair after a failed necessary gate",
+    "Native preparation, production entropy, scientific reservation or combat in this read-only gate"
+  ]
+}

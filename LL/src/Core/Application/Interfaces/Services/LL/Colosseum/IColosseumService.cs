@@ -17,7 +17,6 @@ public sealed record StartArenaBattleResult(
     int GloryEarned,
     int BaseGloryEarned,
     int DailyFirstWinBonus,
-    int DefenderGloryEarned,
     int AttackStreakBefore,
     int AttackStreakAfter,
     ColosseumPlaybackResult? Playback = null);

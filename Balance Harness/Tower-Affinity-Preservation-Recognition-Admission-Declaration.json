@@ -1,0 +1,59 @@
+{
+  "version": "tower-affinity-preservation-recognition-v1",
+  "admissionVersion": "tower-affinity-preservation-recognition-admission-v1",
+  "package": "TestResults/affinity-preservation-recognition-admission-20260924",
+  "output": "TestResults/balance/tower-affinity-preservation-recognition-20260924",
+  "chargedSeconds": 600,
+  "chargedBytes": 536870912,
+  "scientificSeconds": 10800,
+  "scientificBytes": 6442450944,
+  "priorRecordedSeconds": 35591.65600000019,
+  "priorRecordedBytes": 29290708486,
+  "priorDeclaredMaximumSeconds": 89640,
+  "priorDeclaredMaximumBytes": 56186896384,
+  "planSha256": "8456bb84f4f061eba78d35371602ec8a49ac81e5e60a550552c02bda3d3fddf6",
+  "harnessSha256": "2577c25c5cdba2da955e1ddac2bb62e1755dab682ec24a05ea204d091e2d3f29",
+  "sourceManifests": {
+    "capture": "607b32435968ca9ea96e35234b5246aa0a359ef9b178521d7719b2b57d6b1109",
+    "pilot": "1c4fb870912fca7b168596cc86645cb54e96361ba8099eac1da5b4b8748d49e4",
+    "recognition": "f1bb922ea31e59e8c7f270b3ae05f95fff111a35524d26e70ee22739add2e897",
+    "verification": "952772b91727d49e7d59545dd3aa246c892f9b6593ea3a57bd9a6a7546686956",
+    "publication": "d22377f904f4c287cd9a47364ce3843173cc805d16a16cbf102401c1c5027883",
+    "review": "dc09dc54929ec14403804e6cc6d97c1af632fcb708eb11ba9d0c512d7ccf5abd",
+    "fixture": "52ba8e85cf1b3a01f143cade4559f49b908ff7cae5f07546817c051f0e6e18c1"
+  },
+  "populationManifests": {
+    "catalogue": "c9b448243b4cd2edb530678740c733e485257550de7810db6fb5296420330529",
+    "sampling": "a3dd8159dc8d4016d5a1e172387816ad8d016e19a933b28c31a5930ae9619ae0",
+    "plan": "8df81444183e1b335d55af8fe0914dc752724735d5f334638a1ee83416dc90b1"
+  },
+  "closeoutPins": {
+    "pilot": "f9740a37d49210308261c841115661f774cfbf9e893e84398c138c74fb689d26",
+    "recognition": "cfd116043e4dd279fadee60b0920ab2064e0abb4b856ff7c1d0b36393f952aeb"
+  },
+  "populationHelperManifestSha256": "ccd05f08fda2c86ab014c12ca056d061053683d7b47c69cafee6902a08831814",
+  "retries": 0,
+  "timingResamples": 0,
+  "scientificLaunches": 0,
+  "forecastRule": "Margin 2. Native time: maximum of completed recognition and preservation-pilot time per fight scaled to 37120, plus current context/check elapsed time. Audit time: same maximum using full closeout audit times, plus current context/check elapsed time. Native storage: 37120 times the maximum authenticated gzip report size across both studies, plus the larger of recognition non-report native bytes and current literal-fixture native bytes, plus 64 MiB. Audit storage: larger of historical/fixture audit bytes scaled for fight count plus 16 MiB. Apply margin 2 to every estimate; no downward correction or timing retry.",
+  "harnessFiles": {
+    "BalanceHarness.dll": "2577c25c5cdba2da955e1ddac2bb62e1755dab682ec24a05ea204d091e2d3f29",
+    "BalanceHarness.pdb": "33ab1d3d79c908764b6c03177fbeb0f3f85958af9fa15d037d6fa7b335cf9d81",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/prepare-affinity-preservation-recognition.py": "2b147643b9407fb8dda55b02b271fb72e2fda91388bb2d399ae739064674ab02",
+    "Balance Harness/analysis/affinity-preservation-recognition-context.ps1": "df9defa84820dee75123c4b84cf44bd60daf3b379c66d355e050fd251a45a7fe",
+    "Balance Harness/analysis/test-affinity-preservation-recognition-admission.py": "7eccea5b46133df05ae326687c7c9f144427737ec99f79921f2c94a5d9fc7b59",
+    "Balance Harness/analysis/audit-affinity-preservation-recognition.py": "6a49797f5c5e2c707140fc156ff07f4bbef35010fc57725054b9e9e06fa3fc5d",
+    "build/run-affinity-preservation-recognition.py": "28676f541edd2bd623635beb586e2d618fb6d3a6d87b43167eab4ba512015abf",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30"
+  },
+  "tests": {
+    "path": "TestResults/affinity-preservation-recognition-admission-verification-20260924/tests.log",
+    "sha256": "ca0e3a1727aeee3dbef847032b182ce8ea77c187a127d2f75d9b89012cfd2c23",
+    "passed": 21,
+    "failed": 0
+  }
+}

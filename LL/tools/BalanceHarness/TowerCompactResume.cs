@@ -15,9 +15,13 @@ public static partial class TowerCompactBundle
     internal static FileStream AcquireWriter(string output)
     {
         var path = Path.GetFullPath(output) + ".writer.lock";
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        if (File.Exists(path) && new FileInfo(path).LinkTarget is not null) throw new InvalidDataException("Linked writer lease.");
-        return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
+        // The bounded scope validates membership before parent creation or open.
+        if (TowerNativeLeases.Enabled) return TowerWorkAccounting.OpenWriterLease(path);
+        TowerWorkAccounting.ObserveOperation("writerLeaseParentEnsure", () => Directory.CreateDirectory(Path.GetDirectoryName(path)!));
+        if (TowerWorkAccounting.ObserveOperation("metadataFileExists", () => File.Exists(path))
+            && TowerWorkAccounting.ObserveOperation("metadataLinkTarget", () => new FileInfo(path).LinkTarget) is not null)
+            throw new InvalidDataException("Linked writer lease.");
+        return TowerWorkAccounting.OpenWriterLease(path);
     }
 
     private static string ContentRoot(string output, string? shared)
@@ -53,8 +57,9 @@ public static partial class TowerCompactBundle
     {
         HarnessJson.WriteNew(Path.Combine(output, ResumeFile), new TowerCompactCheckpoint(1,
             Files(output).ToDictionary(p => Relative(output, p), HarnessJson.FileHash, StringComparer.Ordinal)));
-        using var attempts = new FileStream(Path.Combine(output, AttemptsFile), FileMode.CreateNew, FileAccess.Write);
-        attempts.Flush(true);
+        var path = Path.Combine(output, AttemptsFile);
+        using var attempts = TowerWorkAccounting.WriteStream(new FileStream(path, FileMode.CreateNew, FileAccess.Write), path);
+        TowerWorkAccounting.FlushToDisk(attempts);
     }
 
     private static TowerCompactCheckpoint ReadCheckpoint(string output, CancellationToken token)
@@ -97,15 +102,16 @@ public static partial class TowerCompactBundle
         return count;
     }
 
-    private static void AppendAttempt(string output, TowerCompactDefinition d, int index, int trialIndex, string caseId, int seed)
+    internal static void AppendAttempt(string output, TowerCompactDefinition d, int index, int trialIndex, string caseId, int seed)
     {
         using var timing = TowerPerformanceTrace.Measure("compact.append-attempt");
         if (index >= d.MaximumBattles) throw new InvalidDataException("Compact actual-attempt budget exhausted; uncommitted retries also consume the frozen reservation.");
         var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new TowerCompactAttempt(index, trialIndex, caseId, seed), CompactJson) + "\n");
-        using var file = new FileStream(Path.Combine(output, AttemptsFile), FileMode.Append, FileAccess.Write, FileShare.Read);
+        var path = Path.Combine(output, AttemptsFile);
+        using var file = TowerWorkAccounting.WriteStream(new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read), path);
         file.Write(bytes);
         // Durable before starting combat, including crashes and cancelled attempts.
-        using (TowerPerformanceTrace.Measure("compact.flush-attempt")) file.Flush(true);
+        using (TowerPerformanceTrace.Measure("compact.flush-attempt")) TowerWorkAccounting.FlushToDisk(file);
     }
 
     private static async Task ContinueAsync(string output, TowerCompactDefinition d, TowerBattleRunner runner, TowerSettings settings,
@@ -159,8 +165,8 @@ public static partial class TowerCompactBundle
         var files = Files(output).ToDictionary(p => Relative(output, p), HarnessJson.FileHash, StringComparer.Ordinal);
         // The final manifest is the completion marker; readers reject missing or pending state.
         var temporary = Path.Combine(output, ManifestFile + ".pending");
-        HarnessJson.WriteNew(temporary, new TowerCompactManifest(1, Format, completed, chunkIndex, files));
-        File.Move(temporary, Path.Combine(output, ManifestFile));
+        HarnessJson.WriteNew(temporary, new TowerCompactManifest(1, Format, completed, chunkIndex, files), scratch: true);
+        TowerWorkAccounting.MoveFile(temporary, Path.Combine(output, ManifestFile), overwrite: false);
     }
 
     private static async Task ResumeCoreAsync(string apiRoot, TowerCompactDefinition d, string output, CancellationToken token,
@@ -189,13 +195,13 @@ public static partial class TowerCompactBundle
         if (attempts + Validate(d) - completed > d.MaximumBattles)
             throw new InvalidDataException("Remaining compact reservation cannot cover retries of uncommitted trials.");
         // Only validated artifacts owned by this unfinished run are replaced. Committed chunks stay immutable.
-        File.Delete(Path.Combine(output, "bulk-failure.json"));
-        File.Delete(Path.Combine(output, "bulk-status.json"));
+        TowerWorkAccounting.DeleteFile(Path.Combine(output, "bulk-failure.json"));
+        TowerWorkAccounting.DeleteFile(Path.Combine(output, "bulk-status.json"));
         var referenced = new HashSet<string>(StringComparer.Ordinal);
         foreach (var folder in chunkDirs)
             foreach (var row in ReadGzip<TowerCompactRecord[]>(Path.Combine(folder, "records.json.gz"))) referenced.Add(row.PreparedHash);
         foreach (var file in Directory.GetFiles(Path.Combine(output, "prepared")))
-            if (!referenced.Contains(Path.GetFileName(file)[..^8])) File.Delete(file);
+            if (!referenced.Contains(Path.GetFileName(file)[..^8])) TowerWorkAccounting.DeleteFile(file);
         var committedChunks = chunkDirs.Length;
         try
         {

@@ -1,0 +1,108 @@
+{
+  "version": "proposal-affinity-pilot-02-qualified-admission-v1",
+  "scopeId": "proposal-affinity-pilot-02",
+  "package": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-affinity-pilot-02-admission-repaired-20260923",
+  "output": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\balance\\tower-proposal-affinity-pilot-02-20260923",
+  "resourceEnvelope": "tower-proposal-resource-envelope-v2",
+  "chargedSeconds": 900,
+  "chargedBytes": 1073741824,
+  "originalPlanFileSha256": "f7840ded410c34a3283fd3424ec18af98cfc2057cee76181b02dfddf51666188",
+  "resourceProbeManifestSha256": "8929c5b94a95e717e8f7ec2ffb4d94ee01d0cbc9083e4b31873f635a5cc85cf7",
+  "failedStudyCloseoutManifestSha256": "c095d252617a9ed1a85db096b586aa0d1a532ff4acb59c5d928def480d8e586f",
+  "precedingChargedSeconds": 16380,
+  "precedingChargedBytes": 12280922112,
+  "scientificMaximumSeconds": 10800,
+  "scientificMaximumBytes": 6442450944,
+  "scientificLaunches": 0,
+  "maximumScientificLaunches": 1,
+  "retries": 0,
+  "retentionMaximumBytes": 67108864,
+  "retentionCheckRequired": true,
+  "forecastFloorManifestSha256": "4737c0bc455f3e7f7ce82149072564ec2f5431567ed45f8e5d10499c3235c711",
+  "forecastRule": "Maximum of the consumed admission and current qualification forecasts; frozen native audit probe, upward-only inventory scaling, margin 2 and publication reserve 120. No timing resampling.",
+  "harness": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-runtime-retention-build-20260923\\bin\\BalanceHarness\\release",
+  "harnessFiles": {
+    "BalanceHarness.dll": "aeec5f125fdccc0a682a93fb053ba90e19f5ec09627c60101a5983264e1e272f",
+    "BalanceHarness.pdb": "0a7ed3a5dde531f3f05eaadcf5674591596f2172b3f40938e051f64b04da9c9f",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "backendTests": {
+    "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-runtime-retention-backend-20260923.trx",
+    "sha256": "bf50781c9a51505e85fa17731f54554991d634b9d8b50c0e1fabba9bd5d17ae5"
+  },
+  "backendTestCount": 34,
+  "baselineBackendTests": {
+    "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-backend-20260923.trx",
+    "sha256": "d12c91205cec65f34e2eed7fbd7daec756b6f960ea8eef2d5ff1e798e2ddea90"
+  },
+  "baselineBackendTestCount": 184,
+  "repairHandoff": {
+    "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-runtime-retention-handoff-20260923.json",
+    "sha256": "a146fe56bd0c89c3a3f52d0dede95202de706e2d664d206bd47a1de5ea9a3590"
+  },
+  "verificationFiles": [
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-runtime-retention-backend-approved-20260923.log",
+      "sha256": "333222347c5200c9ebcba3424275d4eeb2f208081706c02b9454e0d6cb9bf2f9"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-runtime-retention-owned-complete-20260923.log",
+      "sha256": "8882e62c6da48251b8d423e8f50cda20c85eaccc95dbd2829578e090869b33f3"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-runtime-retention-owned-failure-20260923.log",
+      "sha256": "8ba15cb6e7a2214d4f52a02f23223807f28766cbdf98a597bad98308c3118421"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-pilot-02-admission-tests-explicit-20260923.log",
+      "sha256": "102dd94e65045a72ec39ebd8ba57baeed3c0133ce10ff83cd3c5aa4310cd3f54"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-pilot-02-repaired-admission-tests-20260923.log",
+      "sha256": "db82224ae1e09c2485c200fc812ecaa01e22200b3be1bcb432e7f3520e04fc1a"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-pilot-02-retention-wrapper-test-20260923\\retention-qualification.json",
+      "sha256": "e91f1093e4d2f640168eb4ba13564c7619796da904cb4cc2b02e6605ed1da968"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-pilot-02-retention-wrapper-test-20260923\\retention-process.json",
+      "sha256": "b1752eb4ff1099e696c97c041eea48ba2b27d84037f77636a27dd9a23c818b92"
+    }
+  ],
+  "ownedFixtures": {
+    "complete": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-runtime-retention-20260923\\verification.json",
+      "sha256": "1ee181fb9702ccd7422724e1c597ca5d81c1a0db4a800d9d7a3b2b5d85bf7adc"
+    },
+    "failure": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-runtime-retention-failure-20260923\\verification.json",
+      "sha256": "d4ee4bdc46ed143168106d501822d0e7c9c2f569c456bd6b2a09c4ed3f92f06b"
+    }
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "a175b82fe85add547f9d57b3a0983e6ec0e4172b18e538ba3bec6c177651dbb8",
+    "Balance Harness/analysis/prepare-proposal-affinity-admission.py": "d3300ff7ec7c538ca6ac140403fcbb8c3fbe211734e626fc2eed6a3574b3c963",
+    "Balance Harness/analysis/prepare-proposal-affinity-resource-admission.py": "81d3544bb4098d330b6f91d5a3240720315915dee9461288f6a8c0777861e5eb",
+    "Balance Harness/analysis/proposal-affinity-admission-context.ps1": "6c260949a6eda0eb9dfe475cee06b43d33fa01de142edafb27171638b1e39c13",
+    "Balance Harness/analysis/test-proposal-affinity-pilot-02-admission.py": "6a90d4933fdb91a75f4bbaf4a3113e928538dbfc6d120ea2c281f3b66c4f8261",
+    "Balance Harness/analysis/test-proposal-affinity-resource-admission.py": "010a9b820cc2d3e0284a49897a162b1534fefb106dbb5886c714c5cec62d0b6a",
+    "LL/tests/BalanceHarness.ProcessFixture/ProposalStudyFixtureHost.cs": "a0d143986426ff194b25b7bbf4706d0ce027ddb9b8b467e645dc7bb58697af16",
+    "LL/tests/EssenceSystem.Tests/BalanceHarnessProposalRuntimeRetentionTests.cs": "485ad7973b69c4fe537dc08bf6c04f5ccd3a46b596c50ce6f45043cf70456f8c",
+    "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs": "6bc76bc1c2ed9f7311f421c24837facbde8994169dbc9e4b721b962a4867afa3",
+    "LL/tools/BalanceHarness/TowerProposalStudyResources.cs": "b0c44d141a6ac0e8af62008a9269e981a765b713ba25f8758ff72c839c697210",
+    "LL/tools/BalanceHarness/TowerProposalStudyRun.cs": "2cfb83bedbe2d82de6f376f41ef287db211e46a3416e9ca16ec0e24d7f66967d",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30",
+    "build/run-proposal-affinity-study.py": "ddf34416566057451c47e91a05b3d6983df07d50d5dfbad60cd56a235ac2b333",
+    "build/test-proposal-affinity-study-owned.py": "6ebd600af4e9f5ffbaddf20a6efef28b54be7c4991fd6ccaa07e5e57e0a058dc",
+    "build/test-proposal-resource-envelope.py": "8a90af6101d66107cc48dfbf374d26bbe4544ea6f4c3a6710e6655877e4b9e69"
+  },
+  "studyVersion": "tower-proposal-affinity-comparison-v1",
+  "scientificDesign": "Original frozen comparison plan; qualification changes only scope binding. Twelve roots, two arms, 528 search trials per arm, 256 held-out values per root, 3948 assigned values, one 16384-word entropy batch, all 24 outputs frozen before held-out observations, maximum 21888 fights. No replacement, refill, resume or retry. Pilot 01 remains failed and fully charged.",
+  "admissionOnly": true,
+  "qualificationRule": "Overlay only the four tested harness files onto captured gameplay dependencies. Authenticate producing PDB and all source documents; compare all 72 historical inputs and prepared participants in separate baseline/candidate processes; replay the three frozen preview arms; invoke the actual RetainRuntime method and verify every retained byte, including symbols. No scientific launch, combat or fresh values in admission. This repaired admission carries the sealed qualification from the failed wrapper pass; it may not rerun preparation or resample timing. The corrected native retention check, native input check, full-history refresh and independent auditor still run under the new admission allowance.",
+  "qualifiedAttemptReviewSha256": "642f6333b073ec35c60742ea4714bf635bd9477692a8f24b925041ac604034c0",
+  "reuseSealedQualification": true,
+  "timingResamples": 0
+}

@@ -79,7 +79,7 @@ public class StartArenaBattleCommandHandler : IRequestHandler<StartArenaBattleCo
                     result.BaseGloryEarned,
                     result.DailyFirstWinBonus,
                     0,
-                    result.DefenderGloryEarned),
+                    0),
                 new ArenaRatingChangeModel(
                     result.MatchResult.CharacterARatingBefore,
                     result.MatchResult.CharacterARatingAfter,

@@ -42,7 +42,7 @@ public static class TowerBenchmark
             || definition.Parties.Select(p => p.Id).Distinct().Count() != definition.Parties.Count)
             throw new InvalidDataException("Invalid Tower benchmark catalog, identifiers or sampling budget (maximum 10,000 battles).");
         var profiles = definition.Profiles.ToDictionary(p => p.Id, StringComparer.Ordinal);
-        var floors = new JsonWorldTowerDefinitionProvider(Path.Combine(contentRoot, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options);
+        var floors = TowerContentProviders.Floors(Path.Combine(contentRoot, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options);
         foreach (var party in definition.Parties)
         {
             bool LegalCell(IReadOnlyList<string>? cell) => cell is { Count: 5 } && cell.All(profiles.ContainsKey);

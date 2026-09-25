@@ -7,6 +7,7 @@ using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Nobility;
 using Domain.Models.RegionBosses;
 using Domain.Models.Users;
 using Domain.Models.WorldTower;
@@ -698,41 +699,36 @@ public sealed class RegionBossDevelopmentTests
     }
 
     [Fact]
-    public async Task Signup_opening_automatically_enrolls_eligible_characters_active_within_twenty_four_hours()
+    public async Task Signup_opening_automatically_enrolls_eligible_characters_with_active_noble_status()
     {
         await using var db = CreateDbContext();
         var outbox = new RecordingGameEventOutbox();
         var now = new DateTimeOffset(2026, 8, 22, 12, 0, 0, TimeSpan.Zero);
-        var recent = SeedCharacter(db, "RecentPlayer", "Recent Player", isGuest: false);
-        var boundary = SeedCharacter(db, "BoundaryPlayer", "Boundary Player", isGuest: false);
-        var stale = SeedCharacter(db, "StalePlayer", "Stale Player", isGuest: false);
-        var locked = SeedCharacter(db, "LockedPlayer", "Locked Player", isGuest: false);
+        var noble = SeedCharacter(db, "NoblePlayer", "Noble Player", isGuest: false);
+        var startingNow = SeedCharacter(db, "StartingNowPlayer", "Starting Now Player", isGuest: false);
+        var expired = SeedCharacter(db, "ExpiredPlayer", "Expired Player", isGuest: false);
+        var nonNoble = SeedCharacter(db, "NonNoblePlayer", "Non-Noble Player", isGuest: false);
+        var locked = SeedCharacter(db, "LockedNoblePlayer", "Locked Noble Player", isGuest: false);
+        var nobleAlternate = new Character
+        {
+            Id = Guid.NewGuid(),
+            UserId = noble.UserId,
+            User = noble.User,
+            Name = "Noble Alternate",
+            Level = 30
+        };
         locked.Level = 19;
-        db.CharacterActions.AddRange(
-            new CharacterAction
-            {
-                CharacterId = recent.Id,
-                UpdatedAt = now.AddHours(-2),
-                IsDeleted = true
-            },
-            new CharacterAction
-            {
-                CharacterId = boundary.Id,
-                UpdatedAt = now.AddHours(-24),
-                IsDeleted = true
-            },
-            new CharacterAction
-            {
-                CharacterId = stale.Id,
-                UpdatedAt = now.AddHours(-24).AddTicks(-1),
-                IsDeleted = true
-            },
-            new CharacterAction
-            {
-                CharacterId = locked.Id,
-                UpdatedAt = now.AddMinutes(-1),
-                IsDeleted = true
-            });
+        db.Characters.Add(nobleAlternate);
+        db.CharacterActions.Add(new CharacterAction
+        {
+            CharacterId = nonNoble.Id,
+            UpdatedAt = now,
+            IsDeleted = true
+        });
+        AddNobility(db, noble, now.AddMonths(-1), now.AddMonths(1));
+        AddNobility(db, startingNow, now, now.AddMonths(1));
+        AddNobility(db, expired, now.AddMonths(-1), now);
+        AddNobility(db, locked, now.AddMonths(-1), now.AddMonths(1));
         await db.SaveChangesAsync();
         var service = CreateService(db, now, developmentToolsEnabled: false, outbox);
         await service.EnsureScheduledEventsAsync(CancellationToken.None);
@@ -750,8 +746,10 @@ public sealed class RegionBossDevelopmentTests
             .ToArrayAsync();
         Assert.Equal(2, signups.Length);
         Assert.Equal(
-            new[] { boundary.Id, recent.Id }.Order().ToArray(),
+            new[] { noble.Id, startingNow.Id }.Order().ToArray(),
             signups.Select(signup => signup.CharacterId).Order().ToArray());
+        Assert.DoesNotContain(signups, signup => signup.CharacterId == nonNoble.Id);
+        Assert.DoesNotContain(signups, signup => signup.CharacterId == nobleAlternate.Id);
         Assert.All(signups, signup => Assert.Equal(now, signup.SignedUpAtUtc));
         Assert.Equal(2, signups.Select(signup => signup.AccountId).Distinct().Count());
         Assert.Empty(db.CharacterSnapshots);
@@ -761,7 +759,7 @@ public sealed class RegionBossDevelopmentTests
         var announcement = Assert.Single(outbox.Announcements);
         Assert.Equal(item.Id, announcement.RegionBossEventId);
         Assert.Contains("signups are now open", announcement.Body, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("last 24 hours", announcement.Body, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("active Noble status", announcement.Body, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("/game/world/shenic", announcement.TargetUrl);
         Assert.True(announcement.IsSignupInvite);
     }
@@ -1079,6 +1077,30 @@ public sealed class RegionBossDevelopmentTests
         db.Users.Add(user);
         db.Characters.Add(character);
         return character;
+    }
+
+    private static void AddNobility(
+        LLDbContext db,
+        Character rewardCharacter,
+        DateTimeOffset startsAt,
+        DateTimeOffset endsAt)
+    {
+        db.NobilityMemberships.Add(new NobilityMembership
+        {
+            AccountId = rewardCharacter.UserId,
+            RewardCharacterId = rewardCharacter.Id,
+            NextDailyRewardAt = endsAt,
+            Coverage =
+            [
+                new NobilityCoverage
+                {
+                    AccountId = rewardCharacter.UserId,
+                    StartsAt = startsAt,
+                    EndsAt = endsAt,
+                    CalendarMonths = 1
+                }
+            ]
+        });
     }
 
     private sealed class FixedDefinitionProvider(int? requiredTowerFloor = null) : IRegionBossDefinitionProvider

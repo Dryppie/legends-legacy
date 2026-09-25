@@ -80,8 +80,8 @@ public static partial class TowerPracticalReservationRecovery
         }
         var files = Inventory();
         var source = TowerContractJson.Read<TowerPracticalRequest>(P("request.json"));
-        Require(q.Version == Version ? source.Version == TowerPracticalSearch.Version && source.Allocation is null
-            : source.Version == TowerPracticalSearch.AllocationVersion && source.Allocation is not null,
+        Require(q.Version == Version ? TowerPracticalSearch.IsDeclaredVersion(source.Version) && source.Allocation is null
+            : TowerPracticalSearch.IsAllocatedVersion(source.Version) && source.Allocation is not null,
             "Practical recovery version does not match the source reservation contract.");
         TowerPracticalSearch.ValidateRequestContract(source);
         Require(Same(source.OutputRoot, q.StudyRoot) && Same(source.RegistryRoot, Path.GetDirectoryName(q.StudyRoot)!), "Recovery belongs to another study.");
@@ -120,6 +120,7 @@ public static partial class TowerPracticalReservationRecovery
         else
         {
             var definition = TowerPracticalSearch.Prepare(TowerBossDiscovery.Read(P("source-definition.json")));
+            TowerPracticalSearch.ValidateRequestDefinition(source, definition);
             historical = definition.ExcludedCombatSeeds.Order().ToArray();
             reserved = TowerPracticalSearch.Reserved(definition);
             Matches("history-input.json", new { reservationState = "Pending", reserved });

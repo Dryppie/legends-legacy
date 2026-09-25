@@ -69,6 +69,7 @@ public static partial class TowerPracticalSearch
         Require(HarnessJson.FileHash(q.DefinitionPath) == q.DefinitionHash, "Definition changed since the request was frozen.");
         var source = TowerBossDiscovery.Read(q.DefinitionPath);
         var d = q.Allocation is null ? Prepare(source) : source;
+        ValidateRequestDefinition(q, d);
         TowerBossDiscovery.Validate(q.ContentRoot, q.Allocation is null ? d : ValidateAllocationTemplate(q, d));
         Require(HarnessJson.FileHash(q.DefinitionPath) == q.DefinitionHash, "Definition changed while reading it.");
         foreach (var (path, hash) in q.RecoveryReceiptHashes ?? new Dictionary<string, string>())
@@ -81,7 +82,7 @@ public static partial class TowerPracticalSearch
     public static object Check(TowerPracticalRequest request, CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
-        Require(request.Version == Version, "Use allocation-check for an allocated-search request.");
+        Require(IsDeclaredVersion(request.Version), "Use allocation-check for an allocated-search request.");
         return CheckCore(request, token);
     }
 
@@ -104,7 +105,7 @@ public static partial class TowerPracticalSearch
     internal static void Register(TowerPracticalRequest q, TowerPracticalInputs inputs, CancellationToken ct, Action<string>? boundary = null)
     {
         ct.ThrowIfCancellationRequested();
-        var d = Prepare(inputs.Definition); var reserved = Reserved(d);
+        var d = Prepare(inputs.Definition); ValidateRequestDefinition(q, d); var reserved = Reserved(d);
         Require(inputs.History.Values.SequenceEqual(d.ExcludedCombatSeeds.Order()), "Changed reservation history.");
         ct.ThrowIfCancellationRequested();
         // Freeze the already supplied definition before Pending, so even the earliest
@@ -128,13 +129,13 @@ public static partial class TowerPracticalSearch
 
     internal sealed class Attempts : IDisposable
     {
-        private readonly FileStream stream;
+        private readonly Stream stream;
         private readonly int maximum;
         private readonly Action check;
         internal int Started { get; private set; }
         internal int Completed { get; private set; }
         internal Attempts(string path, int maximum, Action check)
-        { this.maximum = maximum; this.check = check; stream = new(path, FileMode.CreateNew, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough); }
+        { this.maximum = maximum; this.check = check; stream = TowerWorkAccounting.WriteStream(new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough), path); }
         internal void Event(bool complete)
         {
             check();
@@ -142,7 +143,7 @@ public static partial class TowerPracticalSearch
                 "Practical attempt cap, retry or unmatched completion.");
             var ordinal = complete ? Completed + 1 : Started + 1;
             var bytes = Encoding.UTF8.GetBytes($"{{\"kind\":\"{(complete ? "Completed" : "Started")}\",\"ordinal\":{ordinal}}}\n");
-            stream.Write(bytes); stream.Flush(true);
+            stream.Write(bytes); TowerWorkAccounting.FlushToDisk(stream);
             if (complete) Completed++; else Started++;
         }
         public void Dispose() => stream.Dispose();
@@ -195,7 +196,7 @@ public static partial class TowerPracticalSearch
                 && attempts.Completed == report.Accounting.Completed.Values.Sum(), "Durable attempt journal differs from study accounting.");
         }
         boundary?.Invoke("before-verification"); CheckLimits();
-        if (report.Status != "Complete") return Unverified(report.Status, "NotVerified", report.Error ?? report.Status, report);
+        if (report.Status != "Complete") return Unverified(report.Status, "NotVerified", report.Error ?? report.Status, report, ResultVersion(q));
         BossStudyReport rebuilt;
         using (new TowerPerformanceTrace(_ => throw new InvalidOperationException("Verification cannot fight.")).Activate()) rebuilt = await verify(study, token);
         CheckLimits();
@@ -252,7 +253,7 @@ public static partial class TowerPracticalSearch
 
     public static Task<TowerPracticalResult> Run(TowerPracticalRequest request, CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested(); Require(request.Version == Version, "Use allocate-run for an allocated-search request.");
+        token.ThrowIfCancellationRequested(); Require(IsDeclaredVersion(request.Version), "Use allocate-run for an allocated-search request.");
         return RunWithWorker(request, NativeWorker, token);
     }
 
@@ -323,7 +324,7 @@ public static partial class TowerPracticalSearch
 
     private static TowerPracticalResult Fail(TowerPracticalRequest q, bool cancelled, Exception error)
     {
-        var failed = Unverified(cancelled ? "Cancelled" : "Invalid", "Failed", error.Message);
+        var failed = Unverified(cancelled ? "Cancelled" : "Invalid", "Failed", error.Message, resultVersion: ResultVersion(q));
         try { HarnessJson.WriteNew(P(q, "failure.json"), failed); }
         catch (IOException) { }
         return failed;
@@ -358,6 +359,7 @@ public static partial class TowerPracticalSearch
             Require(!File.Exists(P(q, "failure.json")) && !File.Exists(P(q, "worker-failure.json")), "Failed execution cannot publish.");
             CheckEnvelope(q, elapsedSeconds(), TowerBulkCampaign.StorageBytes(q.OutputRoot, token));
             var d = TowerBossDiscovery.Read(P(q, "definition.json"));
+            ValidateRequestDefinition(q, d);
             if (q.Allocation is not null) VerifyAllocation(q.OutputRoot, q, d, token, allocationCandidate);
             var report = HarnessJson.Read<BossStudyReport>(P(q, "study/study.json"));
             var (result, teams) = VerifiedArtifacts(q.OutputRoot, d, report);
@@ -413,6 +415,7 @@ public static partial class TowerPracticalSearch
         Require(q.RequiredHistory.All(p => history.TryGetValue(p.Key, out var hash) && hash == p.Value),
             "Saved history snapshot differs from the required historical pins.");
         var d = TowerBossDiscovery.Read(Path.Combine(output, "definition.json"));
+        ValidateRequestDefinition(q, d);
         if (q.Allocation is not null) VerifyAllocation(output, q, d, token, allocationCandidate);
         Require(HarnessJson.FileHash(Path.Combine(output, "source-definition.json")) == q.DefinitionHash
             && (q.Allocation is not null || HarnessJson.Hash(Prepare(TowerBossDiscovery.Read(Path.Combine(output, "source-definition.json")))) == HarnessJson.Hash(d))
@@ -454,6 +457,10 @@ public static partial class TowerPracticalSearch
     {
         token.ThrowIfCancellationRequested();
         if (args is ["tower-practical-search-worker", var output]) return await Worker(output, token);
+        if (args is ["tower-practical-search-three-reference-preset", var threeSource, var reuse, var pin, var threeOutput])
+        { Console.WriteLine(JsonSerializer.Serialize(CreateThreeReferencePreset(threeSource, reuse, pin, threeOutput, token), HarnessJson.Options)); return 0; }
+        if (args is ["tower-practical-search-incumbent-tie-preset", var source, var primary, var presetOutput])
+        { Console.WriteLine(JsonSerializer.Serialize(CreateIncumbentTiePreset(source, primary, presetOutput, token), HarnessJson.Options)); return 0; }
         if (args is ["tower-practical-search-check", var check])
         { Console.WriteLine(JsonSerializer.Serialize(Check(TowerContractJson.Read<TowerPracticalRequest>(check), token), HarnessJson.Options)); return 0; }
         if (args is ["tower-practical-search-allocation-check", var allocationCheck])
@@ -467,7 +474,7 @@ public static partial class TowerPracticalSearch
             ["tower-practical-search-run", var request] => await Run(TowerContractJson.Read<TowerPracticalRequest>(request), token),
             ["tower-practical-search-allocate-run", var request] => await AllocateAndRun(TowerContractJson.Read<TowerPracticalRequest>(request), token),
             ["tower-practical-search-verify", var archive] => await Verify(archive, token),
-            _ => throw new InvalidDataException("Use tower-practical-search-check|run or tower-practical-search-allocation-check|allocate-run <request.json>, tower-practical-search-verify <completed-output>, tower-practical-search-recover <recovery-request.json> or tower-practical-search-recovery-verify <receipt.json>. No retries or resume.") };
+            _ => throw new InvalidDataException("Use tower-practical-search-three-reference-preset <allocation-request.json> <reuse-bundle> <manifest-sha256> <new-preset-directory>, tower-practical-search-incumbent-tie-preset <allocation-request.json> <primary-reference-id> <new-preset-directory>, tower-practical-search-check|run or tower-practical-search-allocation-check|allocate-run <request.json>, tower-practical-search-verify <completed-output>, tower-practical-search-recover <recovery-request.json> or tower-practical-search-recovery-verify <receipt.json>. No retries or resume.") };
         Console.WriteLine(JsonSerializer.Serialize(result, HarnessJson.Options));
         return result.IntegrityStatus == "Verified" ? 0 : result.ExecutionStatus == "Cancelled" ? 130 : 2;
     }

@@ -75,6 +75,8 @@
             </div>
           </div>
 
+          <ng-container *ngTemplateOutlet="masteryProgression"></ng-container>
+
           <div class="dungeon-result__actions">
             <button
               class="dungeon-button ll-button"
@@ -211,6 +213,8 @@
               >
             </div>
           </div>
+
+          <ng-container *ngTemplateOutlet="masteryProgression"></ng-container>
 
           <div
             class="dungeon-result__guidance"
@@ -694,6 +698,74 @@
       </ng-template>
     </div>
   </ng-template>
+</ng-template>
+
+<ng-template #masteryProgression>
+  <section
+    class="dungeon-result__mastery"
+    *ngIf="endedRunMastery() || endedRun()?.state?.masteryAwardReasons?.length"
+  >
+    <div class="dungeon-result__mastery-heading">
+      <span class="dungeon-sidebar__eyebrow ll-eyebrow"
+        >Mastery Progression</span
+      >
+      <strong>+{{ earnedMasteryExperience() | number }} XP</strong>
+    </div>
+    <ng-container *ngIf="endedRunMastery() as mastery; else startingMastery">
+      <div class="dungeon-result__mastery-level">
+        <strong>
+          Level {{ endedRun()?.state?.masteryLevelAtStart ?? mastery.level }}
+          <ng-container
+            *ngIf="
+              endedRun()?.state?.masteryLevelAtStart != null &&
+              endedRun()?.state?.masteryLevelAtStart !== mastery.level
+            "
+          >
+            → {{ mastery.level }}
+          </ng-container>
+        </strong>
+        <span
+          *ngIf="
+            mastery.experienceRequiredForNextLevel as next;
+            else maxMastery
+          "
+        >
+          {{ mastery.experience | number }} / {{ next | number }} XP
+        </span>
+        <ng-template #maxMastery><span>Maximum level</span></ng-template>
+      </div>
+      <div
+        class="dungeon-result__mastery-meter"
+        role="progressbar"
+        aria-label="Dungeon Mastery experience"
+        [attr.aria-valuenow]="mastery.experience"
+        [attr.aria-valuemax]="
+          mastery.experienceRequiredForNextLevel ?? mastery.experience
+        "
+      >
+        <span [style.width.%]="masteryProgressPercent()"></span>
+      </div>
+    </ng-container>
+    <ng-template #startingMastery>
+      <div class="dungeon-result__mastery-level">
+        <strong
+          >Started at level
+          {{ endedRun()?.state?.masteryLevelAtStart ?? 0 }}</strong
+        >
+      </div>
+    </ng-template>
+    <ul *ngIf="endedRun()?.state?.masteryAwardReasons?.length">
+      <li
+        *ngFor="
+          let reason of endedRun()?.state?.masteryAwardReasons;
+          trackBy: trackByIndex
+        "
+      >
+        <span>{{ reason.description }}</span>
+        <strong>+{{ reason.experience | number }}</strong>
+      </li>
+    </ul>
+  </section>
 </ng-template>
 
 <ng-template #emptyState>

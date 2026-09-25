@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Regions;
 using Domain.Helpers.Constants;
 using Domain.Models.Regions.Areas;
 using Microsoft.Extensions.Configuration;
+using Services.LL.Content;
 
 namespace Services.LL.Regions;
 
@@ -17,8 +18,9 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     public RegionCreatureScalingProvider(
         IConfiguration configuration,
         string contentRootPath,
-        JsonSerializerOptions options)
-        : this(ReadCatalog(configuration, contentRootPath, options))
+        JsonSerializerOptions options,
+        ContentJsonReader? reader = null)
+        : this(ReadCatalog(configuration, contentRootPath, options, reader ?? ContentJsonReader.Default))
     {
     }
 
@@ -192,7 +194,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     private static RegionCombatBalanceCatalog ReadCatalog(
         IConfiguration configuration,
         string contentRootPath,
-        JsonSerializerOptions options)
+        JsonSerializerOptions options,
+        ContentJsonReader reader)
     {
         var contentRoot = configuration["Content:Root"] ?? "Data";
         var path = Path.Combine(
@@ -200,8 +203,8 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             contentRoot,
             "progression",
             "region-combat-balance.json");
-        var document = JsonSerializer.Deserialize<RegionCombatBalanceDocument>(
-                           File.ReadAllText(path),
+        var document = reader.Deserialize<RegionCombatBalanceDocument>(
+                           reader.ReadAllText(path),
                            options)
                        ?? throw new InvalidOperationException(
                            "Could not deserialize region combat balance content.");

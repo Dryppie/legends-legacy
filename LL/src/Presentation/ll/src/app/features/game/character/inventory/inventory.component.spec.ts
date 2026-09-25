@@ -591,6 +591,101 @@ describe('InventoryComponent', () => {
     expect(equipmentApi.dismantle).toHaveBeenCalledTimes(1);
     expect(component.massDismantleStatus()).toBe('Dismantled 1 item.');
   });
+
+  it('filters the equipment catalogue by tier', () => {
+    const tierOne = inventoryEquipment(
+      'tier-one',
+      EquipmentType.OneHanded,
+      ItemQuality.Standard,
+      10,
+    );
+    const tierThree = inventoryEquipment(
+      'tier-three',
+      EquipmentType.Head,
+      ItemQuality.Standard,
+      30,
+    );
+    (tierThree.itemInstance as EquipmentInstance).tier = 3;
+    const component = createComponent(inventoryState([tierOne, tierThree]));
+
+    expect(
+      component.equipmentTierOptions.map((option) => option.label),
+    ).toEqual(['All tiers', 'Tier 3', 'Tier 1']);
+
+    component.selectEquipmentTierFromDropdown({ main: 3, sub: null });
+
+    expect(component.filteredItems.map((item) => item.id)).toEqual([
+      'tier-three',
+    ]);
+
+    component.clearEquipmentFilters();
+    expect(component.filteredItems).toHaveSize(2);
+  });
+
+  it('mass dismantles by maximum gear power independently of rarity', () => {
+    const lowPowerLegendary = inventoryEquipment(
+      'low-power-legendary',
+      EquipmentType.OneHanded,
+      ItemQuality.Standard,
+      8,
+    );
+    (lowPowerLegendary.itemInstance as EquipmentInstance).rarity =
+      Rarity.Legendary;
+    const highPowerCommon = inventoryEquipment(
+      'high-power-common',
+      EquipmentType.Head,
+      ItemQuality.Standard,
+      25,
+    );
+    const favorite = inventoryEquipment(
+      'favorite-low-power',
+      EquipmentType.Necklace,
+      ItemQuality.Standard,
+      4,
+    );
+    favorite.isFavorite = true;
+    const equipmentApi = jasmine.createSpyObj<EquipmentService>(
+      'EquipmentService',
+      ['previewUpgrade', 'dismantle'],
+    );
+    equipmentApi.previewUpgrade.and.callFake((itemInstanceId) =>
+      of({
+        canExecute: true,
+        request: { itemInstanceId },
+      } as EquipmentUpgradeQuote),
+    );
+    equipmentApi.dismantle.and.returnValue(
+      of({ outcome: {} } as unknown as EquipmentUpgradeMutation),
+    );
+    const component = createComponent(
+      inventoryState([lowPowerLegendary, highPowerCommon, favorite]),
+      undefined,
+      undefined,
+      equipmentApi,
+    );
+
+    component.selectMassDismantleCriterionFromDropdown({
+      main: 'Gear Power',
+      sub: null,
+    });
+    component.selectMassDismantleMaximumGearPowerFromDropdown({
+      main: 8,
+      sub: null,
+    });
+
+    expect(component.massDismantleCandidates.map((item) => item.id)).toEqual([
+      'low-power-legendary',
+    ]);
+
+    component.requestMassDismantle();
+    component.requestMassDismantle();
+
+    expect(equipmentApi.previewUpgrade).toHaveBeenCalledOnceWith(
+      lowPowerLegendary.itemInstance.id,
+      'Dismantle',
+    );
+    expect(equipmentApi.dismantle).toHaveBeenCalledTimes(1);
+  });
 });
 
 function createComponent(

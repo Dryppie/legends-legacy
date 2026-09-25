@@ -76,6 +76,7 @@ import {
 import { formatAttributeType } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 
 type InventoryCollectionView = 'Equipment' | 'Stock';
+type MassDismantleCriterion = 'Rarity' | 'Gear Power';
 type StockCategory =
   | 'Resources'
   | 'Essences'
@@ -143,7 +144,10 @@ export class InventoryComponent implements OnInit {
   readonly selectedDismantleLoading = signal(false);
   readonly selectedDismantleConfirmation = signal(false);
   readonly selectedDismantleError = signal<string | null>(null);
+  readonly selectedEquipmentTier = signal(0);
+  readonly massDismantleCriterion = signal<MassDismantleCriterion>('Rarity');
   readonly massDismantleRarity = signal<Rarity>(Rarity.Common);
+  readonly massDismantleMaximumGearPower = signal(-1);
   readonly massDismantleConfirmation = signal(false);
   readonly massDismantlePending = signal(false);
   readonly massDismantleStatus = signal<string | null>(null);
@@ -163,6 +167,11 @@ export class InventoryComponent implements OnInit {
       label: `${rarity} and below`,
       value: rarity,
     }));
+  readonly massDismantleCriterionOptions: readonly DropdownOption<MassDismantleCriterion>[] =
+    [
+      { label: 'Rarity', value: 'Rarity' },
+      { label: 'Gear Power', value: 'Gear Power' },
+    ];
 
   get inventorySort(): EquipmentInventorySort { return this.state.equipmentSort ?? 'Gear Power'; }
   set inventorySort(value: EquipmentInventorySort) { this.state.equipmentSort = value; }
@@ -429,6 +438,11 @@ export class InventoryComponent implements OnInit {
     this.clearSelectedItem();
   }
 
+  clearEquipmentFilters(): void {
+    this.selectedEquipmentTier.set(0);
+    this.clearEquipmentSlotFilter();
+  }
+
   selectStockCategory(category: StockCategory): void {
     this.stockCategory.set(category);
     this.clearSelectedItem();
@@ -436,6 +450,13 @@ export class InventoryComponent implements OnInit {
 
   get filteredItems(): InventoryItem[] {
     let items = this.state.equipment();
+
+    const selectedTier = this.selectedEquipmentTier();
+    if (selectedTier > 0) {
+      items = items.filter(
+        (item) => this.equipmentInstance(item)?.tier === selectedTier,
+      );
+    }
 
     const selectedSlot = this.selectedEquipmentSlot();
     if (selectedSlot) {
@@ -460,6 +481,8 @@ export class InventoryComponent implements OnInit {
             equipment?.equipmentBase.equipmentType,
             equipment?.rarity,
             equipment?.quality,
+            equipment ? `Tier ${equipment.tier}` : undefined,
+            equipment ? `Gear Power ${equipment.itemBudget}` : undefined,
             equipment?.progression ? `Rank ${equipment.progression.rank}` : undefined,
             equipment?.progression ? this.equipmentStyleLabel(equipment.progression.activeStyleId) : null,
           ].some((value) => value?.toString().toLowerCase().includes(query));
@@ -841,6 +864,83 @@ export class InventoryComponent implements OnInit {
     this.massDismantleStatus.set(null);
   }
 
+  selectMassDismantleCriterionFromDropdown(
+    selection: DropdownSelection<unknown>,
+  ): void {
+    const criterion = String(selection.main) as MassDismantleCriterion;
+    if (
+      !this.massDismantleCriterionOptions.some(
+        (option) => option.value === criterion,
+      )
+    ) {
+      return;
+    }
+
+    this.massDismantleCriterion.set(criterion);
+    this.resetMassDismantleConfirmation();
+  }
+
+  selectMassDismantleMaximumGearPowerFromDropdown(
+    selection: DropdownSelection<unknown>,
+  ): void {
+    const maximumGearPower = Number(selection.main);
+    if (
+      !this.massDismantleGearPowerOptions.some(
+        (option) => option.value === maximumGearPower,
+      )
+    ) {
+      return;
+    }
+
+    this.massDismantleMaximumGearPower.set(maximumGearPower);
+    this.resetMassDismantleConfirmation();
+  }
+
+  selectEquipmentTierFromDropdown(selection: DropdownSelection<unknown>): void {
+    const tier = Number(selection.main);
+    if (!this.equipmentTierOptions.some((option) => option.value === tier)) {
+      return;
+    }
+
+    this.selectedEquipmentTier.set(tier);
+    this.clearSelectedItem();
+    this.resetMassDismantleConfirmation();
+  }
+
+  get equipmentTierOptions(): readonly DropdownOption<number>[] {
+    const tiers = this.state
+      .equipment()
+      .flatMap((item) => {
+        const tier = this.equipmentInstance(item)?.tier;
+        return tier && tier > 0 ? [tier] : [];
+      })
+      .filter((tier, index, values) => values.indexOf(tier) === index)
+      .sort((a, b) => b - a);
+
+    return [
+      { label: 'All tiers', value: 0 },
+      ...tiers.map((tier) => ({ label: `Tier ${tier}`, value: tier })),
+    ];
+  }
+
+  get massDismantleGearPowerOptions(): readonly DropdownOption<number>[] {
+    const gearPowers = this.filteredItems
+      .flatMap((item) => {
+        const gearPower = this.equipmentInstance(item)?.itemBudget;
+        return gearPower !== undefined ? [gearPower] : [];
+      })
+      .filter((gearPower, index, values) => values.indexOf(gearPower) === index)
+      .sort((a, b) => a - b);
+
+    return [
+      { label: 'Choose power limit', value: -1, disabled: true },
+      ...gearPowers.map((gearPower) => ({
+        label: `${gearPower.toLocaleString()} and below`,
+        value: gearPower,
+      })),
+    ];
+  }
+
   selectMassDismantleRarityFromDropdown(
     selection: DropdownSelection<unknown>,
   ): void {
@@ -849,13 +949,16 @@ export class InventoryComponent implements OnInit {
 
   get massDismantleCandidates(): InventoryItem[] {
     const maximumRarity = this.RARITY_ORDER[this.massDismantleRarity()];
+    const maximumGearPower = this.massDismantleMaximumGearPower();
     return this.filteredItems.filter((item) => {
       const equipment = this.equipmentInstance(item);
       return (
         !!equipment &&
         this.canDismantleEquipment(item) &&
         !item.isFavorite &&
-        this.RARITY_ORDER[equipment.rarity] <= maximumRarity
+        (this.massDismantleCriterion() === 'Rarity'
+          ? this.RARITY_ORDER[equipment.rarity] <= maximumRarity
+          : maximumGearPower >= 0 && equipment.itemBudget <= maximumGearPower)
       );
     });
   }
@@ -921,6 +1024,11 @@ export class InventoryComponent implements OnInit {
 
   cancelMassDismantle(): void {
     this.massDismantleConfirmation.set(false);
+  }
+
+  private resetMassDismantleConfirmation(): void {
+    this.massDismantleConfirmation.set(false);
+    this.massDismantleStatus.set(null);
   }
 
   equipSlotOptions(item: InventoryItem): EquipmentSlotType[] {

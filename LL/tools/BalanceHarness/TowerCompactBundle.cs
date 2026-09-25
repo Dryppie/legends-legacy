@@ -353,15 +353,15 @@ public static partial class TowerCompactBundle
             throw new InvalidDataException("Compact Tower result has inconsistent outcome, duration or required statistics.");
     }
     private static string ChunkName(int index) => index.ToString("D6", System.Globalization.CultureInfo.InvariantCulture);
-    private static async Task CommitChunkAsync(string output, int index, IReadOnlyList<TowerCompactRecord> rows, CancellationToken token)
+    internal static async Task CommitChunkAsync(string output, int index, IReadOnlyList<TowerCompactRecord> rows, CancellationToken token)
     {
         using var timing = TowerPerformanceTrace.Measure("compact.commit-chunk");
         var folder = Path.Combine(output, "chunks", ".pending-" + ChunkName(index));
         Directory.CreateDirectory(folder);
         var data = Path.Combine(folder, "records.json.gz");
-        WriteGzip(data, rows);
+        WriteGzip(data, rows, scratch: true);
         var receipt = new TowerCompactChunk(1, index, rows[0].Index, rows.Count, HarnessJson.FileHash(data));
-        HarnessJson.WriteNew(Path.Combine(folder, "receipt.json"), receipt);
+        HarnessJson.WriteNew(Path.Combine(folder, "receipt.json"), receipt, scratch: true);
         await PublishChunkAsync(output, index, receipt, token);
     }
     private static string SharedPath(string output, string folder, string hash, bool gzip)
@@ -376,10 +376,10 @@ public static partial class TowerCompactBundle
         if (File.Exists(path)) return;
         if (gzip) WriteGzip(path, value); else HarnessJson.WriteNew(path, value);
     }
-    private static void WriteGzip<T>(string path, T value)
+    internal static void WriteGzip<T>(string path, T value, bool scratch = false)
     {
         using var timing = TowerPerformanceTrace.Measure("compact.serialize-compress-write");
-        using var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+        using var file = TowerWorkAccounting.OpenWrite(path, () => new FileStream(path, FileMode.CreateNew, FileAccess.Write), scratch);
         using var gzip = new GZipStream(file, CompressionLevel.Fastest);
         using var limited = new LimitedStream(gzip, MaximumJsonBytes);
         JsonSerializer.Serialize(limited, value, CompactJson);

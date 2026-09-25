@@ -1,0 +1,69 @@
+{
+  "version": "proposal-resource-admission-v2",
+  "resourceEnvelope": "tower-proposal-resource-envelope-v2",
+  "package": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-affinity-resource-admission-20260923",
+  "output": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\balance\\tower-proposal-affinity-pilot-01-20260923",
+  "chargedSeconds": 900,
+  "chargedBytes": 1073741824,
+  "harness": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-build-20260923\\bin\\BalanceHarness\\release",
+  "harnessFiles": {
+    "BalanceHarness.dll": "568158581ffb5e5f76f6fc2ea77121b73a862bcba4e9d1c28a39f09f12a74ea5",
+    "BalanceHarness.pdb": "f7734642ebdea50a65f73ef296e5887797757b0cc4f86f57fa45745e7bb90d73",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "backendTests": {
+    "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-backend-20260923.trx",
+    "sha256": "d12c91205cec65f34e2eed7fbd7daec756b6f960ea8eef2d5ff1e798e2ddea90"
+  },
+  "backendTestCount": 184,
+  "verificationFiles": [
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-backend-approved-20260923.log",
+      "sha256": "1fa9209df4e1539e8c39a900997f863dd752d57a91192b5ca6173da2421afb62"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-python-20260923.log",
+      "sha256": "a2952e94031f25ce53f53801184ae0fb9c356936a45afd3ea4995bb82e7d528b"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-study-python-20260923.log",
+      "sha256": "4d9e411ebb385119459fd79d789edcf6c59bf8fadaf93b794f48d9933aff14b8"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-admission-tests-final-20260923.log",
+      "sha256": "0d422038333878ddcc37af40539519165aa5e41897463141efb7e575e651b2a6"
+    },
+    {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-resource-legacy-admission-tests-20260923.log",
+      "sha256": "2c16c318d2f01806e1e8c498d0f83241d11ef8ab0d20adc541e6024b4acd1ca2"
+    }
+  ],
+  "ownedFixtures": {
+    "complete": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-resource-v2-20260923\\verification.json",
+      "sha256": "0e77f04e5b80489125d90a8e19ff53e0f7c4e88f8d7f5355cf453fc8a9dc7c14"
+    },
+    "failure": {
+      "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-resource-v2-failure-20260923\\verification.json",
+      "sha256": "443b39826ebbe4e7f011be088e464c7e0f349d345260a9889a32ea54ab5feaaa"
+    }
+  },
+  "implementationFiles": {
+    "LL/tools/BalanceHarness/TowerProposalStudyResources.cs": "b0c44d141a6ac0e8af62008a9269e981a765b713ba25f8758ff72c839c697210",
+    "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs": "4b9d0408130de6401daf717673faf06be6018e506ce474ac1dc09ecca0af7a42",
+    "LL/tools/BalanceHarness/TowerProposalStudyRun.cs": "679907d245a4f9aca8f484356d036984ecaeb57538333b469db93ffb7f4cec41",
+    "build/run-proposal-affinity-study.py": "ddf34416566057451c47e91a05b3d6983df07d50d5dfbad60cd56a235ac2b333",
+    "build/test-proposal-affinity-study-owned.py": "6ebd600af4e9f5ffbaddf20a6efef28b54be7c4991fd6ccaa07e5e57e0a058dc",
+    "build/test-proposal-resource-envelope.py": "8a90af6101d66107cc48dfbf374d26bbe4544ea6f4c3a6710e6655877e4b9e69",
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "a175b82fe85add547f9d57b3a0983e6ec0e4172b18e538ba3bec6c177651dbb8",
+    "Balance Harness/analysis/prepare-proposal-affinity-admission.py": "d3300ff7ec7c538ca6ac140403fcbb8c3fbe211734e626fc2eed6a3574b3c963",
+    "Balance Harness/analysis/prepare-proposal-affinity-resource-admission.py": "5b866046b76241499090066eb36565d07e5760442a1369414f605f2498035331",
+    "Balance Harness/analysis/proposal-affinity-admission-context.ps1": "07fefa68b88c9e77de8207aa92564500a9009dab4f35384f6ead403fc39c9047",
+    "Balance Harness/analysis/test-proposal-affinity-resource-admission.py": "2fac6abccc05bcbd36570943998e50cc40bdb846989975d615ab4d7a4f6b0fa6"
+  },
+  "originalPlanFileSha256": "f7840ded410c34a3283fd3424ec18af98cfc2057cee76181b02dfddf51666188",
+  "resourceProbeManifestSha256": "8929c5b94a95e717e8f7ec2ffb4d94ee01d0cbc9083e4b31873f635a5cc85cf7",
+  "scientificLaunches": 0,
+  "forecastRule": "Retain the previous native planning floor and frozen native audit probe; only increase estimates for current preparation or projected archive growth. Fixed 9000/1800 seconds, unchanged 10800 seconds and 6 GiB total; no resampling or retry."
+}

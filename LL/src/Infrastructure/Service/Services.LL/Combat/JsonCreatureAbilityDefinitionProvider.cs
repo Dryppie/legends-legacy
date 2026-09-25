@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL.Combat;
 using Microsoft.Extensions.Configuration;
+using Services.LL.Content;
 
 namespace Services.LL.Combat;
 
@@ -11,12 +12,14 @@ public sealed class JsonCreatureAbilityDefinitionProvider : ICreatureAbilityDefi
     public JsonCreatureAbilityDefinitionProvider(
         IConfiguration configuration,
         string contentRootPath,
-        JsonSerializerOptions jsonOptions)
+        JsonSerializerOptions jsonOptions,
+        ContentJsonReader? reader = null)
     {
+        reader ??= ContentJsonReader.Default;
         var contentRoot = configuration["Content:Root"] ?? "Data";
         var path = Path.Combine(contentRootPath, contentRoot, "combat", "creature-abilities.json");
-        var document = JsonSerializer.Deserialize<CreatureAbilityDocument>(
-                           File.ReadAllText(path),
+        var document = reader.Deserialize<CreatureAbilityDocument>(
+                           reader.ReadAllText(path),
                            jsonOptions)
                        ?? new CreatureAbilityDocument();
 

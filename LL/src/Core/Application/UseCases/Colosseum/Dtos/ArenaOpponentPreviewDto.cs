@@ -42,9 +42,9 @@ public class ArenaOpponentPreviewDto : IMapFrom<ArenaOpponentPreview>
             .ForMember(dto => dto.DeltaIfVictory, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfVictory))
             .ForMember(dto => dto.DeltaIfDefeat, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfDefeat))
             .ForMember(dto => dto.DeltaIfDraw, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfDraw))
-            .ForMember(dto => dto.GloryIfVictory, opt => opt.MapFrom(_ => 12))
-            .ForMember(dto => dto.GloryIfDraw, opt => opt.MapFrom(_ => 8))
-            .ForMember(dto => dto.GloryIfDefeat, opt => opt.MapFrom(_ => 5));
+            .ForMember(dto => dto.GloryIfVictory, opt => opt.MapFrom(_ => ArenaRewards.GloryPerBattle))
+            .ForMember(dto => dto.GloryIfDraw, opt => opt.MapFrom(_ => ArenaRewards.GloryPerBattle))
+            .ForMember(dto => dto.GloryIfDefeat, opt => opt.MapFrom(_ => ArenaRewards.GloryPerBattle));
             //.ForMember(dto => dto.CurrentPlayerRating, opt => opt.MapFrom(src => src.RatingDelta.CurrentRating));
     }
 }

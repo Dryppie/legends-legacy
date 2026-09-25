@@ -51,6 +51,10 @@ import {
   formatChatMention,
   insertChatMention,
 } from './chat-mentions';
+import {
+  ChatChannelVisibilityKey,
+  ChatChannelVisibilityPreferenceService,
+} from '../../../core/services/client-side/chat-channel-visibility/chat-channel-visibility-preference.service';
 
 export interface WireCommand {
   recipientName: string;
@@ -159,6 +163,7 @@ interface ChatRoom {
   label: string;
   contextKey: string;
   channelType: ChatChannelType;
+  visibilityKey?: ChatChannelVisibilityKey;
   requiresGuild?: boolean;
 }
 
@@ -276,6 +281,22 @@ export class ChatComponent implements OnInit, OnDestroy {
       offsetY: 6,
     },
   ];
+  readonly channelSettingsPositions: ConnectedPosition[] = [
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 6,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -6,
+    },
+  ];
   @Input() collapsible = false;
   @Input() collapsed = false;
   @Input() drawer = false;
@@ -309,37 +330,48 @@ export class ChatComponent implements OnInit, OnDestroy {
       label: 'General',
       contextKey: 'general',
       channelType: ChatChannelType.General,
+      visibilityKey: 'general',
     },
     {
       label: 'Invites',
       contextKey: 'invites',
       channelType: ChatChannelType.Invites,
+      visibilityKey: 'invites',
     },
     {
       label: 'Guild',
       contextKey: 'guild',
       channelType: ChatChannelType.Guild,
+      visibilityKey: 'guild',
       requiresGuild: true,
     },
     {
       label: 'Whisper',
       contextKey: 'whisper',
       channelType: ChatChannelType.Whisper,
+      visibilityKey: 'whisper',
     },
     {
       label: 'Trade',
       contextKey: 'trade',
       channelType: ChatChannelType.Trade,
+      visibilityKey: 'trade',
     },
-    { label: 'Help', contextKey: 'help', channelType: ChatChannelType.Help },
+    {
+      label: 'Help',
+      contextKey: 'help',
+      channelType: ChatChannelType.Help,
+      visibilityKey: 'help',
+    },
     {
       label: 'System',
       contextKey: 'system',
       channelType: ChatChannelType.System,
+      visibilityKey: 'system',
     },
   ];
 
-  get visibleRooms(): ChatRoom[] {
+  get channelRooms(): ChatRoom[] {
     const rooms = this.availableRooms.filter(
       (r) => !r.requiresGuild || !!this.guild(),
     );
@@ -349,9 +381,22 @@ export class ChatComponent implements OnInit, OnDestroy {
         label: 'Raid',
         contextKey: raidId,
         channelType: ChatChannelType.Raid,
+        visibilityKey: 'raid',
       });
     }
     return rooms;
+  }
+
+  get configurableRooms(): ChatRoom[] {
+    return this.channelRooms.filter((room) => !!room.visibilityKey);
+  }
+
+  get visibleRooms(): ChatRoom[] {
+    return this.channelRooms.filter(
+      (room) =>
+        !room.visibilityKey ||
+        this.channelVisibility.isVisible(room.visibilityKey),
+    );
   }
 
   trackRoom(_: number, room: ChatRoom): string {
@@ -374,6 +419,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private channelDragStartX = 0;
   private channelDragStartScrollLeft = 0;
   private channelDragMoved = false;
+  channelSettingsOpen = false;
 
   get activeRoomKey(): string {
     return this.activeChannel.contextKey;
@@ -444,6 +490,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     readonly mentions: ChatMentionSuggestionsService,
     private readonly equipmentLinks: ChatEquipmentLinkService,
+    private readonly channelVisibility: ChatChannelVisibilityPreferenceService,
   ) {
     this.guild = this.guildState.guild;
     this.raidId = this.raidService.activeRaidChatId;
@@ -570,6 +617,32 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   setChannel(type: ChatChannelType, contextKey: string): void {
     this.activeChannel = { type, contextKey };
+  }
+
+  toggleChannelSettings(): void {
+    this.channelSettingsOpen = !this.channelSettingsOpen;
+  }
+
+  isChannelVisible(room: ChatRoom): boolean {
+    return room.visibilityKey
+      ? this.channelVisibility.isVisible(room.visibilityKey)
+      : true;
+  }
+
+  setChannelVisible(room: ChatRoom, visible: boolean): void {
+    if (!room.visibilityKey) return;
+
+    this.channelVisibility.setVisible(room.visibilityKey, visible);
+    if (
+      !visible &&
+      this.activeRoomType === room.channelType &&
+      this.activeRoomKey === room.contextKey
+    ) {
+      this.activeChannel = {
+        type: ChatChannelType.General,
+        contextKey: 'all',
+      };
+    }
   }
 
   onChannelPointerDown(event: PointerEvent): void {

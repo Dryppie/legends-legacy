@@ -22,6 +22,14 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
     public IReadOnlyList<LoadoutTrial> Trials => trials;
     public int CacheHits { get; private set; }
 
+    // The adaptive runner authenticates returned trials against this archive's own
+    // captured inputs. Resource ownership and final inventory publication stay with its caller.
+    internal string OutputRoot => output;
+    internal LoadoutScope CapturedScope => scope;
+    internal int BattleLimit => maximumBattles;
+    internal TowerBattleInput Materialize(TowerScenario scenario, int seed)
+        => runner.CreateInput(scenario, seed, scope.Settings.Threat, scope.Settings.CheckpointIntervalTicks);
+
     public static string Key(LoadoutScope scope, string arm, TowerBattleInput input) => HarnessJson.Hash(new { scope, arm, input });
 
     public async Task<(LoadoutTrial Trial, TowerBattleReport Report)> EvaluateAsync(string arm, string stage,
@@ -42,7 +50,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
         var trial = new LoadoutTrial($"trial-{trials.Count + 1:D6}", stage, recipe, seed, HarnessJson.Hash(input), key);
         var report = await runner.RunAsync(input, token: token);
         WriteBattle(output, trial.Id, report, scope.ReportStorage);
-        File.AppendAllText(Path.Combine(output, "trials.jsonl"), JsonSerializer.Serialize(trial, compact) + "\n");
+        TowerWorkAccounting.AppendAllText(Path.Combine(output, "trials.jsonl"), JsonSerializer.Serialize(trial, compact) + "\n");
         trials.Add(trial); cache.Add(key, trial);
         return (trial, report);
     }
@@ -58,7 +66,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
     {
         var path = BattlePath(output, id, storage);
         if (storage is null) { HarnessJson.WriteNew(path, report); return; }
-        using var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+        using var file = TowerWorkAccounting.WriteStream(new FileStream(path, FileMode.CreateNew, FileAccess.Write), path);
         using var gzip = new GZipStream(file, CompressionLevel.Fastest);
         JsonSerializer.Serialize(gzip, report, new JsonSerializerOptions(HarnessJson.Options) { WriteIndented = false });
     }
@@ -67,9 +75,10 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
     {
         var path = BattlePath(output, id, storage);
         if (storage is null) return HarnessJson.Read<TowerBattleReport>(path);
-        using var file = File.OpenRead(path);
+        using var file = TowerWorkAccounting.ReadStream(File.OpenRead(path), path);
         using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        return JsonSerializer.Deserialize<TowerBattleReport>(gzip, HarnessJson.Options) ?? throw new InvalidDataException("Empty compressed battle.");
+        var decoded = TowerWorkAccounting.DecodeStream(gzip);
+        return TowerWorkAccounting.Parse<TowerBattleReport>(decoded, HarnessJson.Options) ?? throw new InvalidDataException("Empty compressed battle.");
     }
 
     public static IReadOnlyList<LoadoutTrial> Verify(string output, CancellationToken token = default)
@@ -88,7 +97,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
             if (HarnessJson.FileHash(Path.Combine(output, file.Key)) != file.Value) throw new InvalidDataException($"Modified archive file: {file.Key}");
         }
         var trials = File.Exists(Path.Combine(output, "trials.jsonl"))
-            ? File.ReadLines(Path.Combine(output, "trials.jsonl")).Select(s => JsonSerializer.Deserialize<LoadoutTrial>(s, HarnessJson.Options)!).ToArray() : [];
+            ? TowerWorkAccounting.ReadLines(Path.Combine(output, "trials.jsonl")).Select(s => TowerWorkAccounting.Parse<LoadoutTrial>(s, HarnessJson.Options)).ToArray() : [];
         if (!trials.Select(t => t.Id).SequenceEqual(Enumerable.Range(1, trials.Length).Select(i => $"trial-{i:D6}")))
             throw new InvalidDataException("Invalid trial ledger.");
         token.ThrowIfCancellationRequested();

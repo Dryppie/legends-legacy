@@ -1,6 +1,6 @@
 # Practical Tower selection tie audit
 
-**22 September follow-up:** The optional selector is now implemented; see [configuration, compatibility and verification](Tower-Practical-Incumbent-Tie-Implementation.md). This audit's historical evidence and conclusions are unchanged. The next step is a separately declared prospective selector comparison.
+**22 September follow-up:** The optional selector is implemented; see [configuration, compatibility and verification](Tower-Practical-Incumbent-Tie-Implementation.md). Its separately declared [prospective comparison completed](Tower-Practical-Incumbent-Tie-Comparison-Execution.md), with both audits passing and **SupportsIncumbentTieForFrozenOutputs** (+2.575 points; conditional lower bound +1.930). This retrospective audit's historical evidence and conclusions remain unchanged. Defaults remain unchanged and the prospective scope is closed.
 
 17 September 2026. Target: offline BalanceHarness. **VerifiedRetrospectiveSelectionAudit.** All **12 selected outputs** from the two completed paired comparisons, plus the earlier selection diagnostic's primary, match an independent reconstruction of the existing selector. Three comparison outputs had a tie for the highest selection win count. A hypothetical rule retaining the designated supplied primary on positive win ties would change **two outputs**, whose observed confirmation scores would improve by **7.9** and **2.8 percentage points**. This is an outcome-informed hypothesis, not prospective evidence that the rule improves future searches.
 

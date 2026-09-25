@@ -1,0 +1,72 @@
+{
+  "version": "tower-adaptive-racing-comparison-v1",
+  "baseline": "retained-composition-three-references-v1",
+  "candidate": "tower-adaptive-beam-racing-v1",
+  "selector": "tower-staged-incumbent-tie-v1",
+  "primaryParty": "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+  "benchmarkParty": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+  "roots": 12,
+  "baselineDiscovery": [
+    46,
+    8
+  ],
+  "baselineSelection": [
+    5,
+    32
+  ],
+  "adaptivePanelShapes": [
+    [
+      12,
+      8
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      15,
+      8
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      5,
+      40
+    ]
+  ],
+  "searchFightsPerPolicy": 528,
+  "valuesPerRoot": 113,
+  "heldoutSamples": 256,
+  "maximumFights": 28032,
+  "allocation": "one-16384-word-entropy-batch-reserve-all-fresh-values-no-refill",
+  "searchPairing": "shared-construction-root-disjoint-combat-panels",
+  "barrier": "all-24-outputs-freeze-before-heldout",
+  "go": {
+    "meanMethodAtLeast": 0.02,
+    "meanBenchmarkAtLeast": 0,
+    "promisingNovelRootsAtLeast": 3,
+    "promisingNovelGainAtLeast": 0.03
+  },
+  "abandon": {
+    "meanMethodAtMost": -0.02,
+    "orMeanBenchmarkAtMost": -0.02,
+    "andPromisingNovelRootsBelow": 3
+  },
+  "interpretation": "development-criteria-only-no-promotion-no-adoption",
+  "uncertainty": {
+    "root": "two-sided-95-percent-t-df11-small-sample-approximation",
+    "conditional": "separate-one-sided-95-percent-Hoeffding-with-depletion",
+    "seed": "paired-standard-errors-and-method-benchmark-covariance"
+  },
+  "resources": {
+    "maximumSeconds": 10800,
+    "maximumBytes": 6442450944,
+    "priorSeconds": 0,
+    "priorBytes": 0,
+    "nativeSeconds": 10680,
+    "nativeBytes": 6174015488
+  },
+  "failure": "retain-failed-root-no-retry-no-replacement-no-efficacy-claim"
+}

@@ -1,11 +1,13 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Common.Randomness;
 
 namespace BalanceHarness;
 
 public sealed record BossSuppliedSearchTrace(IReadOnlyList<string> PopulationIds,
-    IReadOnlyList<int> ChangedSlots, int MaximumConstructionChecks);
+    IReadOnlyList<int> ChangedSlots, int MaximumConstructionChecks,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] BossReferenceExplorationTrace? Exploration = null);
 
 /// <summary>Explicit supplied knowledge, canonical composition, and bounded complete-party search.</summary>
 public static class TowerSuppliedCompositionSearch
@@ -14,8 +16,11 @@ public static class TowerSuppliedCompositionSearch
     public const string ScheduledVersion = "supplied-composition-block-v2";
     public const string StandaloneVersion = "retained-composition-v1";
     public const string IncumbentVersion = "retained-composition-incumbents-v1";
-    public static bool IsSupported(string? version) => version is Version or ScheduledVersion or StandaloneVersion or IncumbentVersion or TowerEvaluationAllocationSearch.Version or TowerAnchoredNeighborhoodSearch.Version;
-    internal static bool PreservesIncumbents(string? version) => version is IncumbentVersion or TowerEvaluationAllocationSearch.Version or TowerAnchoredNeighborhoodSearch.Version;
+    public const string ThreeReferenceVersion = "retained-composition-three-references-v1";
+    public static bool IsSupported(string? version) => TowerReferenceExploration.IsSupported(version) || version is Version or ScheduledVersion or StandaloneVersion or IncumbentVersion or ThreeReferenceVersion or TowerEvaluationAllocationSearch.Version or TowerAnchoredNeighborhoodSearch.Version;
+    internal static bool PreservesIncumbents(string? version) => TowerReferenceExploration.IsSupported(version) || version is IncumbentVersion or ThreeReferenceVersion or TowerEvaluationAllocationSearch.Version or TowerAnchoredNeighborhoodSearch.Version;
+    internal static bool HasThreeReferences(string? version) => TowerReferenceExploration.IsSupported(version) || version is ThreeReferenceVersion;
+    internal static int ProtectedReferences(string? version) => HasThreeReferences(version) ? 3 : 2;
     public const string Baseline = "retained-composition", Block = "supplied-block";
     public static readonly string[] Methods = [Baseline, Block];
     private static IReadOnlyList<string> MethodsFor(string policyVersion) => policyVersion == StandaloneVersion || PreservesIncumbents(policyVersion) ? [Baseline] : Methods;
@@ -29,10 +34,11 @@ public static class TowerSuppliedCompositionSearch
     {
         if (!IsSupported(policyVersion)) throw new InvalidDataException("Unknown supplied composition policy.");
         TowerBossDiscovery.Validate(source);
-        if (source.Mode != TowerBossDiscovery.Independent || referenceIds is not { Count: >= 1 and <= 2 }
+        if (source.Mode != TowerBossDiscovery.Independent || referenceIds is null
+            || (HasThreeReferences(policyVersion) ? referenceIds.Count != 3 : referenceIds.Count is < 1 or > 2)
             || referenceIds.Distinct(StringComparer.Ordinal).Count() != referenceIds.Count
             || !referenceIds.Order(StringComparer.Ordinal).SequenceEqual(source.References.Select(r => r.Id).Order(StringComparer.Ordinal)))
-            throw new InvalidDataException("Declare exactly the one or two supplied references; no implicit archive import or control removal.");
+            throw new InvalidDataException("Declare every supplied reference: exactly three for the three-reference version, otherwise one or two; no implicit archive import or control removal.");
         // A new definition owns the canonical recipes; the source and its evidence remain intact.
         var references = source.References.Select(r => r with { Scenario = r.Scenario with {
             Party = r.Scenario.Party.OrderBy(p => p.PartySlot).Select(p => p with { Build = p.Build with {
@@ -52,8 +58,9 @@ public static class TowerSuppliedCompositionSearch
         && g.Methods.SequenceEqual(MethodsFor(g.PolicyVersion)) && g.CandidatesPerArm is >= 8 and <= 64
         && g.MaximumAttemptsPerArm >= g.CandidatesPerArm && g.MaximumAttemptsPerArm <= 256;
 
-    internal static int ParentCount(BossDiscoveryProvenance p) => p.Operator switch {
+    internal static int ParentCount(BossDiscoveryProvenance p, string policyVersion) => p.Operator switch {
         "supplied" => 1, "fresh-legal" => 0,
+        TowerReferenceExploration.Operator when p.Method == Baseline && TowerReferenceExploration.IsSupported(policyVersion) => 1,
         "essence-block" or "character-block" when p.Method == Block => 1,
         "donor-block" when p.Method == Block => p.ParentIds.Count is 1 or 2 ? p.ParentIds.Count : -1,
         "single" or "double" or "cross-character" or "whole-character" when p.Method == Baseline => 1,
@@ -151,6 +158,11 @@ public static class TowerSuppliedCompositionSearch
                 var scans = new Dictionary<string, SingleNeighborhood>(StringComparer.Ordinal);
                 var schedule = new BlockSchedule();
                 var starts = d.Starts.OrderBy(s => s.Id, StringComparer.Ordinal).ToArray();
+                var exploration = TowerReferenceExploration.IsSupported(d.Generation.PolicyVersion)
+                    ? new TowerReferenceExploration.Schedule(d.Starts, d.Generation.PolicyVersion == TowerReferenceExploration.OffsetVersion ? seed : null) : null;
+                // Both exploration policies retain the original construction stream; only owner offsets differ.
+                var explorationRandom = exploration is null ? null
+                    : new Random(StableRandom.Seed(TowerReferenceExploration.Version, seedText, "exploration"));
                 var armIndex = arms.Count;
                 void Snapshot(string stop)
                 {
@@ -164,6 +176,7 @@ public static class TowerSuppliedCompositionSearch
                     token.ThrowIfCancellationRequested();
                     string operation; string[] parents = [], references = [], population = [];
                     BossGeneratedChoice choice; BossGeneratedProposal? parent = null;
+                    BossReferenceExplorationTrace? explorationTrace = null;
                     var initial = starts.Length + 6;
                     var turn = attempt - initial;
                     if (attempt < starts.Length)
@@ -171,6 +184,15 @@ public static class TowerSuppliedCompositionSearch
                         var start = starts[attempt]; operation = "supplied";
                         parents = [start.Id]; references = [start.ReferenceId];
                         choice = new(start.Party, operation, null, null);
+                    }
+                    else if (attempt >= initial && turn % 4 == 3 && exploration is not null)
+                    {
+                        operation = TowerReferenceExploration.Operator;
+                        var step = exploration.Next();
+                        var start = starts.Single(s => s.ReferenceId == step.ReferenceId);
+                        parent = measured[start.Party.Id];
+                        parents = [parent.Provenance.Id]; references = [step.ReferenceId];
+                        (choice, explorationTrace) = TowerReferenceExploration.Propose(input, start.Party, step, explorationRandom!);
                     }
                     else if (attempt < initial || turn % 4 == 3 || rows.Count == 0)
                     { operation = "fresh-legal"; choice = Fresh(input, fresh); }
@@ -216,7 +238,7 @@ public static class TowerSuppliedCompositionSearch
                     var changed = choice.Party?.Builds.Where(p => parent is null || !p.Value.SequenceEqual(parent.Party!.Builds[p.Key]))
                         .Select(p => p.Key).Order().ToArray() ?? [];
                     proposals.Add(new(provenance, choice.Party, choice.Intent, choice.Interaction, rejection ?? "evaluating",
-                        Supplied: new(population, changed, ConstructionChecks)));
+                        Supplied: new(population, changed, ConstructionChecks, explorationTrace)));
                     Snapshot("Running");
                     if (rejection is not null) continue;
                     var row = await evaluate(choice.Party!, armId, token);
@@ -231,7 +253,8 @@ public static class TowerSuppliedCompositionSearch
                 Snapshot(rows.Count == d.Generation.CandidatesPerArm ? "CandidateBudgetReached" : "ProposalBudgetExhausted");
             }
             status = arms.All(a => a.StopReason == "CandidateBudgetReached") ? "Complete" : "Incomplete";
-            if (status == "Complete" && d.Generation.PolicyVersion == IncumbentVersion)
+            if (status == "Complete" && (TowerReferenceExploration.IsSupported(d.Generation.PolicyVersion)
+                || d.Generation.PolicyVersion is IncumbentVersion or ThreeReferenceVersion))
             {
                 incumbentShortlist = IncumbentShortlist(d, arms, diagnostic);
                 if (incumbentShortlist.Length != d.Stages.Shortlist) status = "Incomplete";
@@ -248,7 +271,8 @@ public static class TowerSuppliedCompositionSearch
     internal static PartyChoice[] IncumbentShortlist(TowerBossDiscoveryDefinition d, IReadOnlyList<BossGenerationArm> arms, bool diagnostic = false)
     {
         if (diagnostic) TowerSelectionDiagnostic.ValidateDefinition(d, false); else TowerBossDiscovery.Validate(d);
-        if (d.Generation.PolicyVersion is not (IncumbentVersion or TowerAnchoredNeighborhoodSearch.Version) || arms.Count != 1)
+        if ((!TowerReferenceExploration.IsSupported(d.Generation.PolicyVersion)
+            && d.Generation.PolicyVersion is not (IncumbentVersion or ThreeReferenceVersion or TowerAnchoredNeighborhoodSearch.Version)) || arms.Count != 1)
             throw new InvalidDataException("Incumbent nomination requires its single-arm contract.");
         var arm = arms[0];
         var measured = arm.Proposals.Where(p => p.Result == "evaluated").ToDictionary(p => p.Party!.Id, StringComparer.Ordinal);
@@ -408,7 +432,7 @@ public static class TowerSuppliedCompositionSearch
         return selected.Count == input.Budget.EssenceSlots ? selected.Order(StringComparer.Ordinal).ToArray() : null;
     }
 
-    private static BossGeneratedChoice Choice(BossDiscoveryInputs input, Dictionary<int, string[]> builds, string operation)
+    internal static BossGeneratedChoice Choice(BossDiscoveryInputs input, Dictionary<int, string[]> builds, string operation)
     {
         var party = TowerPartySelection.Choice("supplied-composition", TowerCompositionSearch.CanonicalBuilds(
             builds.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value)));

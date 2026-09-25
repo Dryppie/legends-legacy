@@ -1,0 +1,98 @@
+{
+  "version": "tower-loadout-placement-publication-inventory-amendment-v1",
+  "status": "ImplementationBackedProspectiveAmendmentNotQualified",
+  "priorHandoff": "TestResults/loadout-placement-publication-finalizers-handoff-20260925.json",
+  "priorHandoffSha256": "4e2d4508df0b35f9eead77c8050aee25dea28c3e827b3815a4b7f55a82d89ff2",
+  "sourceBindings": {
+    "TestResults/loadout-placement-recovery-protocol-20260924/assessment.json": "4b1d1586ed36d16456741a26e2c3bad16de5f49df937b362d6a1760d98077585",
+    "TestResults/proposal-native-audit-cost-probe-20260923/resource-assessment.json": "2e74ca5f8db64ddfb09f13ac7d9a55ca48b99827dec88990a196541e95d7074a",
+    "TestResults/proposal-native-audit-cost-probe-20260923/owner.py": "facda4f1c7a887f10cef0d6d42c4c206b0c3f4ab6e7c2644e2de6e2222177767",
+    "TestResults/loadout-placement-publication-inventory-verification-20260925/final-tests/publication-inventory-fixture/fixture.json": "7b26d9e1aae3159f04ccb618365303df673d5716146a61b4eb4148f545b8f2e5",
+    "build/run-proposal-affinity-study.py": "ddee737fd2e5c059903dac7989001a3cadaf40d8bab0465648a7f1ffc1697b36",
+    "build/test-proposal-publication-inventory.py": "d5039d7797782338a6d632c1a55e00eebe6b83d7e1dc8e0b91825eb370d986ee",
+    "Balance Harness/analysis/loadout-placement-publication-inventory.py": "282a2991ebf5c4617f61f0241f3ad46dd219ac2cd7a3c0f89c25fdfa3211df0c",
+    "build/test-loadout-placement-inventory-resource.py": "b753836efa40c44ccdea4cc1a1318f64ca983948eb106bc64c0638ffdb65a2e1"
+  },
+  "replacement": "Replace only the historical model multiplicity of two extra protected-input inventory passes with one. The historical whole worker already includes one inventory; the revised owner retains its initial inventory and combined final pass. Preserve historical per-pass coefficient and storage scaling; no compression discount.",
+  "scope": "Existing plain JSON placement comparison; unchanged 12 roots, 528 search fights per arm/root, 256 heldout samples and 21888-fight ceiling.",
+  "preserved": "Whole worker, both independent audit terms, factor two, 120-second publication reserve, inherited 1764-second audit floor, native/storage floors, failed native denominator ceilings, original failed experiment and cumulative charges.",
+  "limits": "No limit is raised; old protocols and their failed necessary checks remain immutable. This new model is source-specific and must be superseded or rejected if the eliminated pass is restored or equivalent extra work is added.",
+  "evidenceBoundary": "Exact application hash-read work and full routed owner correctness; no timing credit based on a compression ratio or synthetic test duration. The retained correctness fixture is small, not a full scientific workload measurement.",
+  "qualification": "Register the finite plain-format current-runtime qualification and resource reconciliation separately before execution, retaining the existing 900-second/1-GiB qualification ceilings. Bind runtime/PDB/source and unchanged gameplay/content, every placement/reference/control, complete plain maximum-workload coverage and both audits/publication. Reconcile missing or changed costs without treating unknown work as zero. A pass of this necessary check neither executes that work nor establishes a forecast.",
+  "actualCombat": 0,
+  "newTimingSamples": 0,
+  "qualifiedCurrentForecast": null,
+  "measurementAuthorized": false,
+  "nativePreparationAllowed": false,
+  "scientificAdmissionAllowed": false,
+  "assessment": {
+    "version": "tower-loadout-placement-publication-inventory-amendment-v1",
+    "status": "NecessaryGatePassedNotQualified",
+    "scope": "PlainJsonComparisonOnly",
+    "operationCounts": {
+      "ownerBefore": 3,
+      "ownerAfter": 2,
+      "includedInWholeWorker": 1,
+      "extraBefore": 2,
+      "extraAfter": 1
+    },
+    "limits": {
+      "nativeSeconds": 9000,
+      "auditSeconds": 1800,
+      "nativeBytes": 5905580032,
+      "auditBytes": 536870912
+    },
+    "timingMargin": 2,
+    "publicationReserveSeconds": 120,
+    "historicalUnroundedFloors": {
+      "nativeSeconds": 8019.031552734269,
+      "auditSeconds": 1805.0805223456266,
+      "nativeBytes": 5347633245.77869,
+      "auditBytes": 34989702
+    },
+    "historicalRoundedFloors": {
+      "nativeSeconds": 8020,
+      "auditSeconds": 1806,
+      "nativeBytes": 5347633246,
+      "auditBytes": 34989702
+    },
+    "retainedWholeWorkerAndIndependentAuditsWithMarginSeconds": 445.0000000001164,
+    "historicalExtraInventoriesWithMarginSeconds": 1240.0805223455102,
+    "replacementExtraInventoryWithMarginSeconds": 620.0402611727551,
+    "revisedProbePlanningSeconds": 1185.0402611728714,
+    "retainedAuditFloorSeconds": 1764,
+    "unroundedNecessaryFloors": {
+      "nativeSeconds": 8019.031552734269,
+      "auditSeconds": 1764,
+      "nativeBytes": 5347633245.77869,
+      "auditBytes": 34989702
+    },
+    "roundedNecessaryFloors": {
+      "nativeSeconds": 8020,
+      "auditSeconds": 1764,
+      "nativeBytes": 5347633246,
+      "auditBytes": 34989702
+    },
+    "exceededPartitions": [],
+    "necessaryGatePassed": true,
+    "qualificationMayBeRegistered": true,
+    "interpretation": "Operation-count amendment of the historical planning model; no measured speedup or current-runtime forecast",
+    "oldRecoveryGateUnchanged": true,
+    "historicalChargesUnchanged": true,
+    "physicalByteCompressionDiscount": false,
+    "currentRuntimeQualified": false,
+    "qualifiedCurrentForecast": null,
+    "measurementAuthorized": false,
+    "nativePreparationAllowed": false,
+    "scientificAdmissionAllowed": false,
+    "compressedPreparationAllowed": false,
+    "compressedLaunchAllowed": false,
+    "actualCombat": 0,
+    "productionEntropyDraws": 0,
+    "newScientificReservations": 0,
+    "newTimingSamples": 0,
+    "wholeProcessCoverage": false,
+    "usableForAdmission": false
+  },
+  "next": "Prioritize a separately registered plain-format current-runtime qualification for the unchanged placement comparison. The new publication inventory removes one verified protected-input hash pass and its operation-count amendment passes the necessary planning check at 1764 audit seconds. This is not a measured current-runtime forecast or admission. Preserve the original failed pair, native denominator ceilings, unchanged science design, all historical costs and the old 1806-second assessment. Keep both compressed guards closed. Do not resume general cleanup as the default next step; resolve the finite qualification and resource registration for testing placement. No combat, preparation, timing sample or production allocation was performed or authorized by this implementation."
+}

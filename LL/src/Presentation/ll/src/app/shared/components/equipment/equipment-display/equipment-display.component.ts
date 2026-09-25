@@ -101,13 +101,16 @@ export class EquipmentDisplayComponent {
   }
 
   equipmentMeta(item: EquipmentDisplay): string {
+    const style = item.progression?.activeStyleId?.split('.').pop()?.replace(/[_-]/g, ' ');
+    const styleName = style?.replace(/^blueprint\s+/i, '').trim();
+    const displayStyle = styleName && item.name.toLowerCase().includes(styleName.toLowerCase())
+      ? null
+      : styleName || 'Plain';
     return [
       this.formatDisplayLabel(item.equipmentType),
       this.formatDisplayLabel(item.rarity),
       item.progression ? `Rank ${item.progression.rank}` : null,
-      item.progression
-        ? this.formatDisplayLabel(item.progression.activeStyleId?.split('.').pop()?.replace(/[_-]/g, ' ') || 'Plain')
-        : null,
+      item.progression ? this.formatDisplayLabel(displayStyle || '') : null,
       item.progression
         ? item.progression.ownership === 'BoundPersonal'
           ? 'Bound'

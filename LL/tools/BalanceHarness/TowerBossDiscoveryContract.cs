@@ -63,7 +63,7 @@ public static class TowerBossDiscovery
     {
         var settings = TowerBundle.ReadSettings(root);
         var content = new OfflineContent(root, settings.Threat);
-        var floor = new JsonWorldTowerDefinitionProvider(Path.Combine(root, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options)
+        var floor = TowerContentProviders.Floors(Path.Combine(root, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options)
             .GetFloor(budget.PriorityFloor) ?? throw new InvalidDataException("Unknown or unreleased target floor.");
         var excluded = excludedSeeds.Distinct().Order().ToArray();
         var used = excluded.ToHashSet();
@@ -196,7 +196,7 @@ public static class TowerBossDiscovery
             || s.Shortlist is < 1 or > 64 || s.Shortlist < g.Methods.Count * g.Seeds.Count
             || diagnosticPhase != 1 && s.Shortlist > TowerBossGeneration.CandidateTotal(g)
             || s.GeneratedFinalists is < 1 or > 5 || s.GeneratedFinalists > s.Shortlist
-            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.Version or TowerBossStudyPolicy.ZeroWinVersion or TowerBossStudyPolicy.IncumbentTieVersion)
+            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.Version or TowerBossStudyPolicy.ZeroWinVersion or TowerBossStudyPolicy.IncumbentTieVersion or TowerBossStudyPolicy.ThreeReferenceTieVersion)
             || s.DiagnosticCandidates is < 0 or > 32 || s.ReplayReserve is < 0 or > 1000 || s.Schedules is null
             || !s.Schedules.Keys.Order().SequenceEqual(d.Contexts.Select(c => c.Id).Order()))
             throw new InvalidDataException("Invalid three-stage discovery allocation, objective, methods or bounded attempts.");
@@ -255,26 +255,33 @@ public static class TowerBossDiscovery
         }
         if (improvement && (d.Starts.Count > g.CandidatesPerArm || d.Starts.Select(s => s.Party.Id).Distinct().Count() != d.Starts.Count))
             throw new InvalidDataException("Each distinct supplied start must fit inside every arm's candidate budget.");
-        if (suppliedComposition && (d.Starts.Count is < 1 or > 2 || d.RequiredPartySize > 15
+        var protectedReferences = TowerSuppliedCompositionSearch.ProtectedReferences(g.PolicyVersion);
+        if (suppliedComposition && (d.Starts.Count < 1 || d.Starts.Count > protectedReferences || d.RequiredPartySize > 15
             || d.Starts.Count + 6 >= g.CandidatesPerArm || d.References.Count != d.Starts.Count
             || d.Starts.Any(start => !start.Party.Builds.Values.All(TowerCompositionSearch.IsCanonical))
             || d.References.Any(r => r.Scenario.Party.Any(p => !TowerCompositionSearch.IsCanonical(p.Build.EssenceIds)))
-            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.ZeroWinVersion or TowerBossStudyPolicy.IncumbentTieVersion)))
-            throw new InvalidDataException("Supplied composition requires one or two canonical starts, capacity beyond the shared initial batch and its explicit selection policy.");
+            || s.SelectionPolicyVersion is not (TowerBossStudyPolicy.ZeroWinVersion or TowerBossStudyPolicy.IncumbentTieVersion or TowerBossStudyPolicy.ThreeReferenceTieVersion)))
+            throw new InvalidDataException("Supplied composition requires canonical starts within its versioned reference limit, capacity beyond the shared initial batch and its explicit selection policy.");
         if (TowerSuppliedCompositionSearch.PreservesIncumbents(g.PolicyVersion)
-            && (d.Mode != Improve || g.Seeds.Count != (diagnosticPhase == 1 ? 0 : 1) || d.Contexts.Count != 1 || d.Starts.Count != 2 || d.References.Count != 2
-                || d.Starts.Select(start => start.ReferenceId).Distinct(StringComparer.Ordinal).Count() != 2
-                || s.Shortlist != 4 || s.GeneratedFinalists != 1 || s.DiagnosticCandidates != 0 || s.ReplayReserve != 0))
-            throw new InvalidDataException("Incumbent nomination requires two distinct supplied references, one root/context, four nominees, one finalist and no diagnostics or replays.");
-        if (s.SelectionPolicyVersion == TowerBossStudyPolicy.IncumbentTieVersion)
+            && (d.Mode != Improve || g.Seeds.Count != (diagnosticPhase == 1 ? 0 : 1) || d.Contexts.Count != 1
+                || d.Starts.Count != protectedReferences || d.References.Count != protectedReferences
+                || d.Starts.Select(start => start.ReferenceId).Distinct(StringComparer.Ordinal).Count() != protectedReferences
+                || s.Shortlist != protectedReferences + 2 || s.GeneratedFinalists != 1 || s.DiagnosticCandidates != 0 || s.ReplayReserve != 0))
+            throw new InvalidDataException("Incumbent nomination requires every versioned supplied reference plus two challengers, one root/context, one finalist and no diagnostics or replays.");
+        if (s.SelectionPolicyVersion is TowerBossStudyPolicy.IncumbentTieVersion or TowerBossStudyPolicy.ThreeReferenceTieVersion)
         {
             if (diagnosticPhase != 0 || !TowerSuppliedCompositionSearch.PreservesIncumbents(g.PolicyVersion)
                 || s.SelectionPrimaryReferenceId is null
                 || d.Starts.Count(start => start.ReferenceId == s.SelectionPrimaryReferenceId) != 1)
                 throw new InvalidDataException("Incumbent tie selection requires the practical supplied-team scope and one explicit supplied primary reference.");
+            if (s.SelectionPolicyVersion == TowerBossStudyPolicy.ThreeReferenceTieVersion
+                && g.PolicyVersion != TowerSuppliedCompositionSearch.ThreeReferenceVersion)
+                throw new InvalidDataException("Three-reference tie selection requires the direct three-reference generator.");
         }
         else if (s.SelectionPrimaryReferenceId is not null)
             throw new InvalidDataException("A selection primary designation requires the explicit incumbent tie selection policy.");
+        if (TowerReferenceExploration.IsSupported(g.PolicyVersion) && d.RequiredPartySize < 3)
+            throw new InvalidDataException("Reference exploration requires at least three character slots for its radius-three proposals.");
         if (g.PolicyVersion == TowerAnchoredNeighborhoodSearch.Version) TowerAnchoredNeighborhoodSearch.Validate(d);
         else if (d.PrimaryReferenceId is not null)
             throw new InvalidDataException("A primary reference designation requires the anchored-neighborhood policy.");
@@ -314,7 +321,7 @@ public static class TowerBossDiscovery
         var actual = content.Essences.GetAll().ToDictionary(e => e.Id, e => e.SourceMonsterId, StringComparer.Ordinal);
         if (d.AllowedEssences.Any(e => !actual.TryGetValue(e.Id, out var family) || !StringComparer.OrdinalIgnoreCase.Equals(family, e.Family)))
             throw new InvalidDataException("Eligible Essences or families differ from production content.");
-        var floor = new JsonWorldTowerDefinitionProvider(Path.Combine(root, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options).GetFloor(d.Budget.PriorityFloor);
+        var floor = TowerContentProviders.Floors(Path.Combine(root, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options).GetFloor(d.Budget.PriorityFloor);
         if (floor is null || floor.RequiredSlots != d.RequiredPartySize) throw new InvalidDataException("The entire production RequiredSlots party must be mutable.");
         // Validate actual equipment through production materialization, without combat or proposing a search seed team.
         foreach (var context in d.Contexts)
@@ -364,7 +371,7 @@ public static class TowerBossDiscovery
                 || p.ParentIds is null || p.ReferenceIds is null || p.ParentIds.Distinct().Count() != p.ParentIds.Count)
                 throw new InvalidDataException("Invalid proposal identity, generation provenance or duplicate parents.");
             var parents = TowerSuppliedCompositionSearch.IsSupported(d.Generation.PolicyVersion)
-                ? TowerSuppliedCompositionSearch.ParentCount(p)
+                ? TowerSuppliedCompositionSearch.ParentCount(p, d.Generation.PolicyVersion)
                 : d.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion
                 ? TowerDiscoveryRefinementSearch.ParentCount(p)
                 : d.Generation.PolicyVersion is TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion
@@ -452,6 +459,9 @@ public static class TowerBossDiscovery
                 (p.Operator == "supplied" ? !d.Starts.Any(s => s.Id == p.ParentIds.Single())
                 : p.ParentIds.Any(id => !proposals.Any(source => source.Id == id && source.Method == p.Method && source.GenerationSeed == p.GenerationSeed))))
                 throw new InvalidDataException("Supplied descendants require parents from the same arm, and roots must name declared starts.");
+            if (p.Operator == TowerReferenceExploration.Operator
+                && !proposals.Any(source => source.Id == p.ParentIds.Single() && source.Operator == "supplied"))
+                throw new InvalidDataException("Reference exploration must descend directly from a supplied reference proposal.");
             if (d.Generation.PolicyVersion is TowerBossGeneration.LoadoutCompositionVersion or TowerGenerationFeedback.Version or TowerLoadoutRetention.Version or TowerPartyLineages.Version or TowerSearchAllocation.Version or TowerLateAllocation.Version or TowerSearchPortfolio.Version or TowerDeepChallenger.Version or TowerCompositionSearch.Version or TowerJoinedMechanics.Version or TowerGroupCountSearch.Version or TowerGroupVariationSearch.Version or TowerGroupDiversitySearch.Version or TowerGroupCompletionSearch.Version or TowerGroupAllocationSearch.Version or TowerDiscoveryRefinementSearch.Version or TowerDiscoveryRefinementSearch.RoleSafeVersion or TowerDiscoveryRefinementSearch.NovelVersion or TowerDiscoveryRefinementSearch.LocalVersion or TowerDiscoveryRefinementSearch.FreshFirstVersion && p.ParentIds.Any(id =>
                 !proposals.Any(source => source.Id == id && source.Method == p.Method && source.GenerationSeed == p.GenerationSeed)))
                 throw new InvalidDataException("Loadout-composition parents must belong to the same generated arm.");
@@ -499,7 +509,7 @@ public static class TowerBossDiscovery
 
 internal static class TowerContractJson
 {
-    public static T Read<T>(string path) => JsonSerializer.Deserialize<T>(File.ReadAllText(path),
+    public static T Read<T>(string path) => TowerWorkAccounting.Parse<T>(TowerWorkAccounting.ReadAllText(path),
         new JsonSerializerOptions(HarnessJson.Options) { UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
             RespectRequiredConstructorParameters = true }) ?? throw new InvalidDataException("Empty Tower contract.");
     public static bool Hash(string? value) => value is { Length: 64 } && value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');

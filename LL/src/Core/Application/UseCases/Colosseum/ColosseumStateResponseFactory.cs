@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Colosseum.Dtos;
 using Application.UseCases.Colosseum.Models;
@@ -10,7 +11,8 @@ namespace Application.UseCases.Colosseum;
 
 public sealed class ColosseumStateResponseFactory(
     IColosseumService colosseum,
-    IMapper mapper)
+    IMapper mapper,
+    ICharacterExperienceProgressionProvider experienceProgression)
 {
     public async Task<ColosseumStateSnapshotDto> CreateAsync(
         Guid characterId,
@@ -19,6 +21,7 @@ public sealed class ColosseumStateResponseFactory(
     {
         var character = await colosseum.GetArenaCharacterAsync(characterId, cancellationToken)
             ?? throw new InvalidOperationException("Character was not found.");
+        character.ExperienceUntilNextLevel = experienceProgression.GetRequiredExperience(character.Level);
         var tickets = await colosseum.GetArenaTicketStatusAsync(characterId, cancellationToken);
         var defense = await colosseum.GetArenaDefenseSnapshotAsync(characterId, cancellationToken);
         var opponents = await colosseum.GetArenaOpponents(characterId, cancellationToken);
@@ -42,7 +45,7 @@ public sealed class ColosseumStateResponseFactory(
                 : tickets.LastTicketUpdate.AddHours(3),
             arena.CurrentAttackWinStreak,
             arena.BestAttackWinStreak,
-            arena.LastFirstWinBonusAt?.UtcDateTime.Date != DateTimeOffset.UtcNow.UtcDateTime.Date,
+            ArenaRewards.CanReceiveDailyFirstWinBonus(arena, DateTimeOffset.UtcNow),
             ArenaRewards.DailyFirstWinGlory,
             new ArenaRecordModel(arena.AttackWins, arena.AttackDraws, arena.AttackLosses),
             new ArenaRecordModel(arena.DefenseWins, arena.DefenseDraws, arena.DefenseLosses),

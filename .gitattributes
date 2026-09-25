@@ -3,3 +3,417 @@ LL/tools/BalanceHarness/Fixtures/tower-boss-validation-references.json text eol=
 
 # Keep published recipes byte-identical to their captured Tower exports.
 "Balance Harness/Boss-Expansion-Recipes-20260911/*.json" -text
+
+# This prospective protocol is bound by its exact file hash.
+"Balance Harness/Tower-Adaptive-Racing-Comparison-Plan.json" text eol=lf
+"Balance Harness/Tower-Adaptive-Racing-Pilot-02-Declaration.json" text eol=lf
+"Balance Harness/Tower-Frozen-Pool-Recognition-Plan.json" text eol=lf
+
+# Preserve the sealed affinity-recognition plan and its reproducing builder.
+"Balance Harness/Tower-Affinity-Creation-Recognition-Plan.json" text eol=lf
+"Balance Harness/analysis/affinity-creation-recognition-plan.py" text eol=lf
+"Balance Harness/analysis/test-affinity-creation-recognition-plan.py" text eol=lf
+
+# Preserve the sealed paired-pool recognition plan and its reproducing builder.
+"Balance Harness/Tower-Affinity-Preservation-Recognition-Plan.json" text eol=lf
+"Balance Harness/analysis/affinity-preservation-recognition-plan.py" text eol=lf
+"Balance Harness/analysis/test-affinity-preservation-recognition-plan.py" text eol=lf
+
+# Preserve the sealed paired-pool descriptive reviewer and its regression tests.
+"Balance Harness/analysis/affinity-preservation-recognition-review.py" text eol=lf
+"Balance Harness/analysis/test-affinity-preservation-recognition-review.py" text eol=lf
+
+# Preserve the sealed paired edit diagnosis and its regression tests.
+"Balance Harness/analysis/affinity-preservation-edit-diagnosis.py" text eol=lf
+"Balance Harness/analysis/test-affinity-preservation-edit-diagnosis.py" text eol=lf
+
+# Preserve the frozen allied-action comparison design and its deterministic verifier.
+"Balance Harness/Tower-Affinity-Allied-Action-Comparison-Design.json" text eol=lf
+"Balance Harness/analysis/affinity-allied-action-comparison-design.py" text eol=lf
+"Balance Harness/analysis/test-affinity-allied-action-comparison-design.py" text eol=lf
+
+# Preserve the implemented allied-action native plan.
+"Balance Harness/Tower-Affinity-Allied-Action-Comparison-Plan.json" text eol=lf
+
+# Preserve the separately pinned allied-action admission declaration and helpers.
+"Balance Harness/Tower-Affinity-Allied-Action-Admission-Declaration.json" text eol=lf
+"Balance Harness/analysis/prepare-affinity-allied-action-admission.py" text eol=crlf
+"Balance Harness/analysis/test-affinity-allied-action-admission.py" text eol=crlf
+"Balance Harness/analysis/affinity-allied-action-admission-context.ps1" text eol=crlf
+
+# Preserve the separately pinned allied-action publication verification helpers.
+"Balance Harness/analysis/verify-affinity-allied-action-publication.py" text eol=lf
+"Balance Harness/analysis/test-affinity-allied-action-publication.py" text eol=lf
+
+# Preserve the sealed allied-action saved-stage reviewer and its regression tests.
+"Balance Harness/analysis/affinity-allied-action-stage-review.py" text eol=lf
+"Balance Harness/analysis/test-affinity-allied-action-stage-review.py" text eol=lf
+
+# Preserve the frozen complete-neighborhood diagnostic plan and its builder.
+"Balance Harness/Tower-Affinity-Neighborhood-Recognition-Plan.json" text eol=lf
+"Balance Harness/analysis/affinity-neighborhood-recognition-plan.py" text eol=lf
+"Balance Harness/analysis/test-affinity-neighborhood-recognition-plan.py" text eol=lf
+
+# Preserve the versioned complete-neighborhood audit and owned launcher.
+"Balance Harness/analysis/audit-affinity-neighborhood-recognition.py" text eol=lf
+"build/run-affinity-neighborhood-recognition.py" text eol=lf
+"build/test-affinity-neighborhood-recognition.py" text eol=lf
+"build/test-affinity-neighborhood-recognition-owned.py" text eol=lf
+
+# Preserve the separately bounded complete-neighborhood admission contract.
+"Balance Harness/analysis/prepare-affinity-neighborhood-recognition.py" text eol=lf
+"Balance Harness/analysis/affinity-neighborhood-recognition-context.ps1" text eol=lf
+"Balance Harness/analysis/test-affinity-neighborhood-recognition-admission.py" text eol=lf
+"Balance Harness/Tower-Affinity-Neighborhood-Recognition-Admission-Declaration.json" text eol=lf
+
+# Preserve the bounded complete-neighborhood postpublication verifier.
+"Balance Harness/analysis/verify-affinity-neighborhood-recognition-publication.py" text eol=lf
+"Balance Harness/analysis/test-affinity-neighborhood-recognition-publication.py" text eol=lf
+
+# Preserve the bounded whole-loadout placement design and pure reference specification.
+"Balance Harness/analysis/loadout-placement-design.py" text eol=lf
+"Balance Harness/analysis/test-loadout-placement-design.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Design.json" text eol=lf
+
+# Preserve the bounded native placement preview and independent verifier.
+"Balance Harness/analysis/preview-loadout-placement.py" text eol=lf
+"Balance Harness/analysis/test-preview-loadout-placement.py" text eol=lf
+
+# Preserve the frozen whole-loadout placement comparison design.
+"Balance Harness/Tower-Loadout-Placement-Comparison-Design.json" text eol=lf
+"Balance Harness/analysis/loadout-placement-comparison-design.py" text eol=lf
+"Balance Harness/analysis/test-loadout-placement-comparison-design.py" text eol=lf
+
+# Preserve the native placement comparison plan and independent contract tests.
+"Balance Harness/Tower-Loadout-Placement-Comparison-Plan.json" text eol=lf
+"build/test-loadout-placement-comparison.py" text eol=lf
+
+# Preserve placement resource-readiness evidence and the prospective matched-fixture plan.
+"Balance Harness/analysis/loadout-placement-resource-precheck.py" text eol=lf
+"Balance Harness/analysis/test-loadout-placement-resource-precheck.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Matched-Fixture-Plan.json" text eol=lf
+
+# Preserve the registered matched-fixture runner and selected-team audit regressions.
+"build/test-loadout-placement-matched-owned.py" text eol=lf
+"build/test-loadout-placement-matched.py" text eol=lf
+"build/test-proposal-selected-members.py" text eol=lf
+
+# Preserve the prospective placement recovery protocol and read-only necessary gate.
+"Balance Harness/Tower-Loadout-Placement-Recovery-Protocol.json" text eol=lf
+"Balance Harness/analysis/loadout-placement-recovery-protocol.py" text eol=lf
+"Balance Harness/analysis/test-loadout-placement-recovery-protocol.py" text eol=lf
+
+# Preserve the read-only storage inventory and prospective lossless evidence design.
+"Balance Harness/Tower-Loadout-Placement-Evidence-Storage-Design.json" text eol=lf
+"Balance Harness/analysis/loadout-placement-storage-inventory.py" text eol=lf
+"Balance Harness/analysis/test-loadout-placement-storage-inventory.py" text eol=lf
+
+# Preserve the isolated evidence codec and its independent decoder/regressions.
+LL/tools/BalanceHarness/TowerProposalEvidenceCodec.cs text eol=lf
+LL/tests/EssenceSystem.Tests/BalanceHarnessEvidenceCodecTests.cs text eol=lf
+"Balance Harness/analysis/proposal_evidence_codec.py" text eol=lf
+"Balance Harness/analysis/test-proposal-evidence-codec.py" text eol=lf
+
+# Preserve the explicit study evidence-storage adapter and integration tests.
+LL/tools/BalanceHarness/TowerProposalEvidenceStorage.cs text eol=lf
+LL/tests/EssenceSystem.Tests/BalanceHarnessEvidenceStorageTests.cs text eol=lf
+"Balance Harness/analysis/proposal_evidence_storage.py" text eol=lf
+"build/test-proposal-evidence-storage.py" text eol=lf
+
+# Preserve the prospective storage resource methodology and its read-only gate.
+"Balance Harness/Tower-Loadout-Placement-Storage-Resource-Protocol.json" text eol=lf
+"Balance Harness/analysis/loadout-placement-storage-resource-protocol.py" text eol=lf
+"Balance Harness/analysis/test-loadout-placement-storage-resource-protocol.py" text eol=lf
+
+# Preserve opt-in work collectors and synthetic receipt verification.
+"LL/tools/BalanceHarness/TowerWorkAccounting.cs" text eol=lf
+"LL/tools/BalanceHarness/HarnessJson.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessWorkAccountingTests.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessProposalStudyTests.cs" text eol=lf
+"Balance Harness/analysis/proposal_work_accounting.py" text eol=lf
+"build/bounded_windows_process.py" text eol=lf
+"build/test-proposal-work-accounting.py" text eol=lf
+"build/test-proposal-study-work.py" text eol=lf
+
+# Preserve native read coverage and the retained-owner verification report.
+"LL/tools/BalanceHarness/TowerBossDiscoveryContract.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerLoadoutArchive.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerProposalStudyArchive.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerProposalRacingNative.cs" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Accounting-Coverage.md" text eol=lf
+
+# Preserve optional content read boundaries and their verification.
+"LL/src/Infrastructure/Service/Services.LL/Combat/JsonCreatureAbilityDefinitionProvider.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/CombatStyles/JsonCombatStyleCatalogProvider.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/Essences/JsonCreatureEssenceLootTableRepository.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/Essences/JsonEssenceDefinitionRepository.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/Items/JsonStarterEquipmentCatalog.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/Regions/RegionCreatureScalingProvider.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/WorldTower/JsonWorldTowerDefinitionProvider.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/Combat/Engine/JsonAbilityCatalogProvider.cs" text eol=lf
+"LL/tools/BalanceHarness/EssenceMechanicsInventory.cs" text eol=lf
+"LL/tools/BalanceHarness/OfflineContent.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerBattleRunner.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerBenchmark.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerBossInventory.cs" text eol=lf
+"LL/src/Infrastructure/Service/Services.LL/Content/ContentJsonReader.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerContentJsonReader.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessContentAccountingTests.cs" text eol=lf
+"build/test-proposal-content-work.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Content-Accounting.md" text eol=lf
+
+# Preserve native write boundaries and their verification.
+"LL/tests/EssenceSystem.Tests/BalanceHarnessEvidenceStorageTests.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerAdaptiveRacingNative.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerCompleteReservation.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerPracticalSearchRun.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerProposalEvidenceCodec.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessWriteAccountingTests.cs" text eol=lf
+"build/test-proposal-write-work.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Write-Accounting.md" text eol=lf
+
+# Preserve native file operations and their verification.
+"LL/tools/BalanceHarness/TowerBossStudyArchive.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerBundle.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerCompactBundle.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerCompactPublication.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerCompactResume.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerProposalEvidenceStorage.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerProposalPolicies.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerWorkAccounting.Files.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessFileAccountingTests.cs" text eol=lf
+"build/test-proposal-file-work.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-File-Accounting.md" text eol=lf
+
+# Preserve Python owner file-accounting verification.
+"build/test-proposal-owner-files.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-File-Accounting.md" text eol=lf
+
+# Preserve bound worker receipt implementation and verification.
+"LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs" text eol=lf
+"LL/tools/BalanceHarness/TowerProposalStudyRun.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessWorkerReceiptTests.cs" text eol=lf
+"build/test-proposal-worker-receipts.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-Receipts.md" text eol=lf
+
+# Preserve enclosing owner accounting verification.
+"build/test-proposal-owner-closeout.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Closeout.md" text eol=lf
+
+# Preserve optional scientific owner supervisor accounting.
+"Balance Harness/analysis/proposal_owner_supervisor.py" text eol=lf
+"build/test-proposal-owner-supervisor.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Supervisor.md" text eol=lf
+
+# Preserve Python worker I/O accounting verification.
+"build/test-proposal-worker-io.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-IO.md" text eol=lf
+
+# Preserve native worker authentication accounting report.
+"Balance Harness/Tower-Loadout-Placement-Native-Worker-Authentication.md" text eol=lf
+
+# Preserve terminal job I/O diagnostics and verification.
+"build/test-proposal-job-io.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Job-IO.md" text eol=lf
+
+# Preserve Python receipt publication accounting and verification.
+"build/test-proposal-receipt-publication.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Python-Receipt-Publication.md" text eol=lf
+
+# Preserve native receipt publication accounting and verification.
+"LL/tools/BalanceHarness/TowerReceiptPublication.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessReceiptPublicationTests.cs" text eol=lf
+"build/test-proposal-native-publication.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Receipt-Publication.md" text eol=lf
+
+# Preserve supervisor observation persistence and verification.
+"build/test-proposal-supervisor-persistence.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Supervisor-Persistence.md" text eol=lf
+
+# Preserve enclosing owner process observation and verification.
+"Balance Harness/analysis/proposal_owner_process.py" text eol=lf
+"build/test-proposal-owner-process.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Process-Observation.md" text eol=lf
+
+# Preserve worker observation-persistence verification.
+"build/test-proposal-observation-persistence.py" text eol=lf
+"build/test-proposal-persistence-exchange.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-Observation-Persistence.md" text eol=lf
+
+# Preserve full native audit correctness fixtures and verification.
+"LL/tests/EssenceSystem.Tests/BalanceHarnessNativeAuditSuccessTests.cs" text eol=lf
+"build/test-proposal-native-audit-success.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Audit-Success.md" text eol=lf
+
+# Preserve remaining-read accounting and boundary review sources.
+"LL/tests/EssenceSystem.Tests/BalanceHarnessRemainingReadTests.cs" text eol=lf
+"build/test-proposal-remaining-reads.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Accounting-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Remaining-Accounting.md" text eol=lf
+
+# Preserve checked lease and selected metadata accounting sources.
+"LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessLeaseAccountingTests.cs" text eol=lf
+"build/test-proposal-lease-accounting.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Lease-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Lease-Accounting.md" text eol=lf
+
+# Preserve monitor-call accounting and resource-boundary specifications.
+"build/test-proposal-monitor-boundary.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-Accounting.md" text eol=lf
+
+# Preserve opt-in diagnostic scratch declarations and their implementation.
+"Balance Harness/analysis/proposal_diagnostic_storage.py" text eol=lf
+"build/test-proposal-scratch-ownership.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v2.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Scratch-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Scratch-Ownership.md" text eol=lf
+
+# Preserve declared supervisor storage scopes and their verification.
+"build/test-proposal-supervisor-storage.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v3.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Supervisor-Storage-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Supervisor-Storage.md" text eol=lf
+
+# Preserve v4 original worker sidecar bounds and verification.
+"LL/tools/BalanceHarness/TowerWorkerSidecars.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessWorkerSidecarTests.cs" text eol=lf
+"build/test-proposal-worker-sidecars.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v4.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-Sidecar-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-Sidecars.md" text eol=lf
+
+# Preserve bounded worker log capture and verification.
+"build/test-proposal-worker-logs.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-Logs.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v5.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Worker-Log-Boundaries.json" text eol=lf
+
+# Preserve native pending storage declarations and verification.
+"LL/tools/BalanceHarness/TowerPendingStorage.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessPendingStorageTests.cs" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Pending.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v6.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Pending-Boundaries.json" text eol=lf
+
+# Preserve authenticated native pending worker contracts and verification.
+"LL/tests/EssenceSystem.Tests/BalanceHarnessPendingBindingTests.cs" text eol=lf
+"build/test-proposal-pending-binding.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Pending-Binding.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v7.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Pending-Binding-Boundaries.json" text eol=lf
+
+# Preserve per-phase native pending supervisor contracts and verification.
+"LL/tools/BalanceHarness/TowerProposalPendingPlan.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessPhasePendingTests.cs" text eol=lf
+"build/test-proposal-supervisor-pending.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Supervisor-Pending.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v8.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Supervisor-Pending-Boundaries.json" text eol=lf
+
+# Preserve bounded dynamic pending families and verification.
+"LL/tools/BalanceHarness/TowerProposalPendingFamilies.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessPendingFamilyTests.cs" text eol=lf
+"build/test-proposal-pending-families.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Pending-Families.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v9.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Pending-Family-Boundaries.json" text eol=lf
+
+# Preserve scoped read-only native leases and verification.
+"LL/tools/BalanceHarness/TowerNativeLeases.cs" text eol=lf
+"LL/tests/EssenceSystem.Tests/BalanceHarnessNativeLeaseTests.cs" text eol=lf
+"build/test-proposal-native-leases.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Leases.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v10.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Native-Lease-Boundaries.json" text eol=lf
+
+# Preserve scoped enclosing Python owner leases and verification.
+"Balance Harness/analysis/proposal_owner_leases.py" text eol=lf
+"build/test-proposal-owner-leases.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Leases.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v11.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Lease-Boundaries.json" text eol=lf
+
+# Preserve explicit runtime environment declarations and inspection evidence.
+"Balance Harness/analysis/proposal_runtime_environment.py" text eol=lf
+"build/test-proposal-runtime-environment.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Runtime-Environment.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v12.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Runtime-Environment-Boundaries.json" text eol=lf
+
+# Preserve selected monitor I/O limits and verification evidence.
+"Balance Harness/analysis/proposal_monitor_io.py" text eol=lf
+"build/test-proposal-monitor-io.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-IO.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v13.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-IO-Boundaries.json" text eol=lf
+
+# Preserve bounded monitor terminal persistence and verification evidence.
+"build/test-proposal-monitor-terminal.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-Terminal.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v14.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-Terminal-Boundaries.json" text eol=lf
+
+# Preserve opt-in kernel job resource limits and verification evidence.
+"build/test-proposal-job-limits.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Job-Limits.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v15.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Job-Limit-Boundaries.json" text eol=lf
+"build/test-proposal-process-cleanup.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Cleanup.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v16.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Cleanup-Boundaries.json" text eol=lf
+"build/test-proposal-monitor-serialization.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Serialization.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v17.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Serialization-Boundaries.json" text eol=lf
+"build/test-proposal-handle-inheritance.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Handle-Inheritance.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v18.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Handle-Inheritance-Boundaries.json" text eol=lf
+"build/test-proposal-atomic-job.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Atomic-Job.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v19.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Atomic-Job-Boundaries.json" text eol=lf
+"build/test-proposal-failure-diagnostics.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Failure-Diagnostics.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v20.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Failure-Diagnostics-Boundaries.json" text eol=lf
+"build/test-proposal-monitor-failures.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-Failures.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v21.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Monitor-Failures-Boundaries.json" text eol=lf
+"build/test-proposal-io-finalizers.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-IO-Finalizers.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v22.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-IO-Finalizers-Boundaries.json" text eol=lf
+"build/test-proposal-runtime-failures.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Runtime-Failures.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v23.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Runtime-Failures-Boundaries.json" text eol=lf
+"build/test-proposal-json-failures.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-JSON-Failures.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v24.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-JSON-Failures-Boundaries.json" text eol=lf
+"build/test-proposal-owner-finalizers.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Finalizers.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v25.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Owner-Finalizers-Boundaries.json" text eol=lf
+"build/test-proposal-read-finalizers.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Read-Finalizers.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v26.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Read-Finalizers-Boundaries.json" text eol=lf
+"build/test-proposal-publication-finalizers.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Publication-Finalizers.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v27.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Publication-Finalizers-Boundaries.json" text eol=lf
+"build/test-proposal-publication-inventory.py" text eol=lf
+"Balance Harness/analysis/loadout-placement-publication-inventory.py" text eol=lf
+"build/test-loadout-placement-inventory-resource.py" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Publication-Inventory.md" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v28.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Publication-Inventory-Boundaries.json" text eol=lf
+"Balance Harness/Tower-Loadout-Placement-Publication-Inventory-Amendment.json" text eol=lf

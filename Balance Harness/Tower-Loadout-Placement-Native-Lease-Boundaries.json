@@ -1,0 +1,1278 @@
+{
+  "version": "tower-proposal-accounting-boundaries-v12",
+  "status": "ScopedReadOnlyNativeLeasesVerified",
+  "scope": "Selected source-level boundary families; not an exhaustive static or dynamic call graph",
+  "applicationOperationCoverageComplete": false,
+  "wholeProcessCoverage": false,
+  "usableForAdmission": false,
+  "productionMeasurementAuthorized": false,
+  "scientificAdmitted": false,
+  "resourceModelStatus": "PartialCooperativeStorageAndNativeLeaseScopeBounds",
+  "sourceReferencesPinned": true,
+  "rows": [
+    {
+      "id": "native-reservation-bytes",
+      "applicationCoverage": "instrumented",
+      "observation": "One successful ReadAllBytes return counts the actual returned length; failed calls record unknown progress.",
+      "remainingGap": "Length metadata before the read is not counted; the API does not expose failed-read prefixes.",
+      "prospectiveTreatment": "Use returned-byte counters diagnostically; keep failures and metadata separate from bytes.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs",
+          "sourceSha256": "3484c9ed598ebd706b0e8b80a7ac4a827d429968592a042c000d754a131321bb",
+          "anchor": "Classify(TowerWorkAccounting.ReadAllBytes",
+          "lines": [
+            194
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Files.cs",
+          "sourceSha256": "f33d670dc804b37814539ad228b1a5156b49fe8e496aae41426cc1deba956ccd",
+          "anchor": "public static byte[] ReadAllBytes",
+          "lines": [
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "owner-result-json",
+      "applicationCoverage": "instrumented-when-active",
+      "observation": "Four result reads in the real owner use decoded-text parse counters and raw returned-byte counters.",
+      "remainingGap": "Initial request/admission reads execute before the supervisor activates FILE_WORK. They are not included merely because they share the helper.",
+      "prospectiveTreatment": "Begin any future admitting enclosing timer before admission authentication; retain the present diagnostic scope label.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def read_json(",
+          "lines": [
+            41
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "if accounting is not None: accounting.start(",
+          "lines": [
+            265
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def read_json_text(",
+          "lines": [
+            514
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-content-and-archive-reads",
+      "applicationCoverage": "selective",
+      "observation": "Harness JSON, counted streams, injected content readers, codecs and reconstruction counters cover selected reads/parses.",
+      "remainingGap": "Open/stat/close calls and all possible transitive library work are not established as an exhaustive application count.",
+      "prospectiveTreatment": "Use the enclosing time/job observation for broad scope; counters diagnose rather than replace that boundary.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/HarnessJson.cs",
+          "sourceSha256": "980061754fac9ac4f1e13a00ffe0160fb4fe26481c2279d8c633a7fcdfac1c38",
+          "anchor": "public static T Read<T>",
+          "lines": [
+            27
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.cs",
+          "sourceSha256": "5c0fd5c74e7399c155e8c3b0d57d6cb07c961ac33f1ce32f829e0e1f0cc1d816",
+          "anchor": "public static Stream ReadStream",
+          "lines": [
+            49
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerContentJsonReader.cs",
+          "sourceSha256": "6f3b085382ff08c9cdc38df3829eed53d34878da844624739478d43fd6ff37df",
+          "anchor": "class TowerContentJsonReader",
+          "lines": [
+            7
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyArchive.cs",
+          "sourceSha256": "039dff2d341203f2d7c94f69dc6833fc9dffc626b1e5638edc33aec0847beae8",
+          "anchor": "internal static async Task<ProposalStudyResult> Audit(",
+          "lines": [
+            130
+          ]
+        }
+      ]
+    },
+    {
+      "id": "independent-audit-and-codec-reads",
+      "applicationCoverage": "selective",
+      "observation": "Opt-in raw, parse, hash and decoder counters cover the independent auditor and selected compressed payload readers.",
+      "remainingGap": "Python imports, path checks, stat calls and full runtime activity are not counted as application operations.",
+      "prospectiveTreatment": "Retain raw/decoded/parser units separately and authenticate the actual modules used.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/audit-proposal-affinity-study.py",
+          "sourceSha256": "4237b97997a8ed191b4f8720884a360804e7b94f42d7952bf8842b39d9d53224",
+          "anchor": "def read(path)",
+          "lines": [
+            96
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/audit-proposal-affinity-study.py",
+          "sourceSha256": "4237b97997a8ed191b4f8720884a360804e7b94f42d7952bf8842b39d9d53224",
+          "anchor": "def parse_line(",
+          "lines": [
+            64
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_evidence_storage.py",
+          "sourceSha256": "0128bb6e6a22e9c2e1615e9eed69062dec6b549a0a811db240e7740cdec8c866",
+          "anchor": "def metadata(",
+          "lines": [
+            55
+          ]
+        }
+      ]
+    },
+    {
+      "id": "in-memory-json-and-canonicalization",
+      "applicationCoverage": "unattributed",
+      "observation": "Existing parse counters cover explicit boundaries only.",
+      "remainingGap": "Native Copy serialize/deserialize round trips and canonical SerializeToElement work bypass those parse counters.",
+      "prospectiveTreatment": "Include this CPU/allocation work in an enclosing duration/memory boundary; do not infer time from counted parses alone.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerBatchRacingContract.cs",
+          "sourceSha256": "399b3089576fa30c0776ee1724218c5218cf5f284fef03f69a310091ca7fba46",
+          "anchor": "internal static T Copy<T>",
+          "lines": [
+            46
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/HarnessJson.cs",
+          "sourceSha256": "980061754fac9ac4f1e13a00ffe0160fb4fe26481c2279d8c633a7fcdfac1c38",
+          "anchor": "JsonSerializer.SerializeToElement(value, Options)",
+          "lines": [
+            76
+          ]
+        }
+      ]
+    },
+    {
+      "id": "filesystem-metadata-and-inventory",
+      "applicationCoverage": "selective",
+      "observation": "The active Python owner counts directory-inventory calls, symlink/junction queries, storage lstat calls and final payload stat calls. Native writer leases count parent-directory ensure, exists and link-target calls.",
+      "remainingGap": "Other metadata paths remain unattributed. A completed API may return false or suppress errors; os.walk and File.Exists retain their existing behavior. These counters are neither complete enumeration nor storage peaks.",
+      "prospectiveTreatment": "Keep attempts, completed returns and thrown failures separate. Establish complete owned path and scratch domains before making a whole-process storage claim.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def inventory(",
+          "lines": [
+            102
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def storage_bytes(",
+          "lines": [
+            117
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerBulkCampaign.cs",
+          "sourceSha256": "07cfedda4bb899df16aa84f6992f7c1bcae3e60acb3bb90ac1121e72287d6abf",
+          "anchor": "private static IEnumerable<FileInfo> EnumerateFiles(",
+          "lines": [
+            224
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs",
+          "sourceSha256": "3484c9ed598ebd706b0e8b80a7ac4a827d429968592a042c000d754a131321bb",
+          "anchor": "internal static void Unlinked(",
+          "lines": [
+            28
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def unlinked(",
+          "lines": [
+            702
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def operation(self, name, action):",
+          "lines": [
+            500
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "sourceSha256": "2dbd9d74b03078179c02cc4b40021d03c45e4a701346cd4dfdd2aa7336cb6c0b",
+          "anchor": "public static T ObserveOperation<T>",
+          "lines": [
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "id": "owner-writer-leases",
+      "applicationCoverage": "instrumented-when-active",
+      "observation": "Two real exclusive DeleteOnClose handles use checked CloseHandle results in all modes. Opt-in acquisition and release counters retain their opening collector. Failure preserves a body exception with a cleanup note; success output/return follows release.",
+      "remainingGap": "A failed release leaves state unknown, never zero. A completed release is the API result, not a complete external file-lifetime or process-exit proof. Final archive receipts still precede cleanup; release failure adds failure.json and fails the supervisor.",
+      "prospectiveTreatment": "Bind cleanup outcomes and the full enclosing lifetime. Do not retry an uncertain handle release or admit an archive marked failed.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def writer_lease(",
+          "lines": [
+            161
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "close(handle)",
+          "lines": [
+            190
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "leases.enter_context(writer_lease(",
+          "lines": [
+            284,
+            285
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "if not close(handle):",
+          "lines": [
+            190
+          ]
+        },
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "with leases:",
+          "lines": [
+            301
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-writer-leases-and-probes",
+      "applicationCoverage": "selective",
+      "observation": "The same FileStream flags and contract are retained. Opt-in explicit Dispose/Close/DisposeAsync paths record release once against the acquisition collector. Expected acquisition rejection (sharing/lock violation) is a completed held-owner probe; release errors cannot satisfy the probe.",
+      "remainingGap": "Finalization is outside explicit release observations. Native using exception ordering is unchanged; failure state is unknown. Other protocols still have their own uninstrumented probe boundaries. No whole-process lease/scratch claim follows.",
+      "prospectiveTreatment": "Keep API acquisition failure separate from logical probe success. Include unresolved cleanup/finalization in a separately justified enclosing and scratch boundary.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerCompactResume.cs",
+          "sourceSha256": "62f739d0a04cda5e09b6c48b1211b3b0bd19a654d3e3486ea777cb2b4290f8b4",
+          "anchor": "internal static FileStream AcquireWriter(",
+          "lines": [
+            15
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyRun.cs",
+          "sourceSha256": "51f9d602faad68a521dc9f2ab72e865de27ddcfe05c14a3678022712a0223ba3",
+          "anchor": "private static void RequireLeases(",
+          "lines": [
+            30
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "sourceSha256": "2dbd9d74b03078179c02cc4b40021d03c45e4a701346cd4dfdd2aa7336cb6c0b",
+          "anchor": "public static FileStream OpenWriterLease",
+          "lines": [
+            20
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "sourceSha256": "2dbd9d74b03078179c02cc4b40021d03c45e4a701346cd4dfdd2aa7336cb6c0b",
+          "anchor": "internal sealed class WriterLeaseLifetime",
+          "lines": [
+            29
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "sourceSha256": "2dbd9d74b03078179c02cc4b40021d03c45e4a701346cd4dfdd2aa7336cb6c0b",
+          "anchor": "protected override void Dispose(bool disposing)",
+          "lines": [
+            51
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "sourceSha256": "2dbd9d74b03078179c02cc4b40021d03c45e4a701346cd4dfdd2aa7336cb6c0b",
+          "anchor": "public static void RequireWriterLeaseHeld",
+          "lines": [
+            60
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-pending-publication",
+      "applicationCoverage": "selected-opt-in-declared-native-writers",
+      "observation": "Selected pending JSON, gzip and reservation-storage writers use pre-create declaration checks and append caps. Move/delete/directory publication verifies closed pending content and releases live bytes without refunding cumulative writes.",
+      "remainingGap": "Selected native leases now have v8 read-only handles and scope cleanup. Direct/raw writes, metadata, enclosing Python lease lifetimes, runtime/cache, finite observer work and resource qualification remain unresolved.",
+      "prospectiveTreatment": "Resolve enclosing-owner lifetime and external/runtime/observer obligations; scientific gates stay closed.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerCompleteReservation.cs",
+          "sourceSha256": "e62955f5d97491dbea727eea6128e9fefc661f122314d8889a0db28c67aa86f8",
+          "anchor": "internal void PutBytes(",
+          "lines": [
+            26
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs",
+          "sourceSha256": "a455bafba2c974797b6550627371d06b6702273293f4629c9e36256e94328dc2",
+          "anchor": "public static void MoveFile(",
+          "lines": [
+            33
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Writes.cs",
+          "sourceSha256": "a455bafba2c974797b6550627371d06b6702273293f4629c9e36256e94328dc2",
+          "anchor": "public static void DeleteFile(",
+          "lines": [
+            60
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerPendingStorage.cs",
+          "sourceSha256": "bc87fb0a862165311b93c5d711660dfc555a587d15d8c9424a5d75fc5e5f71d4",
+          "anchor": "internal async Task<T> RunAsync<T>(",
+          "lines": [
+            95
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerPendingStorage.cs",
+          "sourceSha256": "bc87fb0a862165311b93c5d711660dfc555a587d15d8c9424a5d75fc5e5f71d4",
+          "anchor": "private Stream OpenCore(",
+          "lines": [
+            159
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerPendingStorage.cs",
+          "sourceSha256": "bc87fb0a862165311b93c5d711660dfc555a587d15d8c9424a5d75fc5e5f71d4",
+          "anchor": "internal static void PublishDirectory(",
+          "lines": [
+            225
+          ]
+        },
+        {
+          "path": "LL/tests/EssenceSystem.Tests/BalanceHarnessPendingStorageTests.cs",
+          "sourceSha256": "2606f9074b6eca7896b141bb9eee082e260a32d1936f7f29aa8d461f5b8bc4c2",
+          "anchor": "public async Task Export_literal_production_pending_boundary(",
+          "lines": [
+            300
+          ]
+        }
+      ]
+    },
+    {
+      "id": "owner-managed-and-sampled-files",
+      "applicationCoverage": "selective",
+      "observation": "ManagedStorage tracks exclusive managed-directory lengths; OwnerFileCounters observes copies, logs and lengths.",
+      "remainingGap": "SampledPeakTrackedFileBytes is a maximum of samples, not a process-wide high-water mark. Failed copies have unknown progress.",
+      "prospectiveTreatment": "Separate exclusive managed storage from sampled external storage and reject unknown members rather than assigning zero.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "class ManagedStorage:",
+          "lines": [
+            1014
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def observe_file(",
+          "lines": [
+            541
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def copyfile(",
+          "lines": [
+            563
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def snapshot(",
+          "lines": [
+            1083
+          ]
+        }
+      ]
+    },
+    {
+      "id": "external-and-transient-scratch",
+      "applicationCoverage": "unknown",
+      "observation": "Enclosing job I/O observes operations but does not enumerate live filesystem storage.",
+      "remainingGap": "Transient files can grow and disappear between scans. Inherited environment/runtime paths are not an enforced private scratch namespace.",
+      "prospectiveTreatment": "Declare retained, pending, lease, log, scratch and runtime-cache domains; establish confinement or a separate conservative bound. Redirecting TEMP alone is insufficient.",
+      "references": [
+        {
+          "path": "build/run-proposal-affinity-study.py",
+          "sourceSha256": "dca8a3ec8a83bd702af1a143b6247156be051ca3c6df10de7ed0fba6a6fdd4c3",
+          "anchor": "def storage_bytes(",
+          "lines": [
+            117
+          ]
+        },
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "e42b4557d10dd0e2afc78058360b7018dca40d1ec10106140e9ab9ea2559771e",
+          "anchor": "def run(",
+          "lines": [
+            227
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "'wholeProcessScratch'",
+          "lines": [
+            164
+          ]
+        }
+      ]
+    },
+    {
+      "id": "worker-and-supervisor-terminal-persistence",
+      "applicationCoverage": "selective",
+      "observation": "V3 observes publication-observation persistence; supervisor sidecars retain observations through their own stated boundaries.",
+      "remainingGap": "Each final receipt excludes its own persistence. Job totals overlap application counters and are not additive.",
+      "prospectiveTreatment": "Use the enclosing owner job to observe child tails; preserve self-exclusions and terminal failure semantics.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "anchor": "persistence.Persist(",
+          "lines": [
+            262
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "class PublicationObservationPersistence",
+          "lines": [
+            785
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "AfterObservationManifestCloseAndVerification",
+          "lines": [
+            388
+          ]
+        }
+      ]
+    },
+    {
+      "id": "supervisor-bootstrap",
+      "applicationCoverage": "outside-application-scope",
+      "observation": "The owner timer precedes supervisor.start, but file-accounting activation occurs after setup and initial hashes.",
+      "remainingGap": "validate/start raw reads, hashes and directory creation are not all attributed to owner application counters.",
+      "prospectiveTreatment": "A complete future outer boundary must include bootstrap work, not merely the four phase receipts.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "def validate(",
+          "lines": [
+            86
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "def start(",
+          "lines": [
+            122
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "self.file_scope.__enter__()",
+          "lines": [
+            145
+          ]
+        }
+      ]
+    },
+    {
+      "id": "runtime-loader-and-descendants",
+      "applicationCoverage": "kernel-only-within-job",
+      "observation": "Owned Windows jobs include native/Python descendants through drain, kernel transfer totals and job memory high water.",
+      "remainingGap": "Runtime/module loading and library operations lack exhaustive application attribution; monitor memory is sampled at a separate boundary.",
+      "prospectiveTreatment": "Do not add nested job totals, counters or separate lifetime memory peaks as though they were a simultaneous measured peak.",
+      "references": [
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "e42b4557d10dd0e2afc78058360b7018dca40d1ec10106140e9ab9ea2559771e",
+          "anchor": "def _job_io_observation(",
+          "lines": [
+            191
+          ]
+        },
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "e42b4557d10dd0e2afc78058360b7018dca40d1ec10106140e9ab9ea2559771e",
+          "anchor": "memoryCoverage='KernelJobHighWaterPlusOwnerLifetimeHighWater'",
+          "lines": [
+            363
+          ]
+        }
+      ]
+    },
+    {
+      "id": "monitor-preparation-and-final-tail",
+      "applicationCoverage": "selective-opt-in",
+      "observation": "The original v1 owner observation keeps its exclusions. Opt-in monitor-call accounting additionally observes per-call preparation, child console sampling, publication and verification through the point before terminal snapshot construction.",
+      "remainingGap": "Constructor/earlier imports, terminal construction/persistence, caller console/process exit, outer-monitor memory lifetime and external/transient scratch are unresolved. A complete monitor call is not complete scientific or owner-process coverage.",
+      "prospectiveTreatment": "Bind the finite monitored set and a separately justified observer bound; keep terminal self-exclusions explicit. No recursive observer stack removes the need for a final bound.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "def run(",
+          "lines": [
+            182
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "def _publish(",
+          "lines": [
+            168
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "'outerMonitorPublicationVerificationConsoleAndExit'",
+          "lines": [
+            164
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "monitor_accounting=False",
+          "lines": [
+            31
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "def _monitor_snapshot(",
+          "lines": [
+            213
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "self._phase('preparation')",
+          "lines": [
+            196
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_process.py",
+          "sourceSha256": "26cb0bb2d810b2cc6c14eea07d6680702b10160b0c4b68c6799e968f5abc8005",
+          "anchor": "self._phase('verification')",
+          "lines": [
+            175
+          ]
+        }
+      ]
+    },
+    {
+      "id": "live-history-rechecks",
+      "applicationCoverage": "not-executed-in-this-review",
+      "observation": "Production code refreshes and rechecks required registry history; file/JSON helpers cover some reads.",
+      "remainingGap": "Future study cost depends on the full pinned history and metadata workload. Current correctness fixtures do not establish that workload bound.",
+      "prospectiveTreatment": "Include the actual admitted history closure in a future resource declaration; do not rescan or allocate in this inventory task.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs",
+          "sourceSha256": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+          "anchor": "internal static TowerRefinementLiveHistory Refresh(",
+          "lines": [
+            57
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs",
+          "sourceSha256": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+          "anchor": "internal static void Recheck(",
+          "lines": [
+            86
+          ]
+        }
+      ]
+    },
+    {
+      "id": "declared-diagnostic-storage",
+      "applicationCoverage": "opt-in-cooperative-api",
+      "observation": "Predeclared leaf roles and finite byte caps; source-bound retained owner integration; accepted append and deleted scratch lifetime accounting.",
+      "remainingGap": "Default owner/supervisor/native/process paths are not migrated. No OS confinement, external runtime/cache bound or completed observer lifetime.",
+      "prospectiveTreatment": "Use only for trusted single-owner diagnostics. Keep all whole-process/admission flags false until every required domain and observer has justified coverage.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_diagnostic_storage.py",
+          "sourceSha256": "1c59960242e20ec6312fff80284323100fcbd609ce7edc68ec4bd9f9b2b7badd",
+          "anchor": "def declaration(",
+          "lines": [
+            18
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_diagnostic_storage.py",
+          "sourceSha256": "1c59960242e20ec6312fff80284323100fcbd609ce7edc68ec4bd9f9b2b7badd",
+          "anchor": "class DiagnosticStorage:",
+          "lines": [
+            40
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_diagnostic_storage.py",
+          "sourceSha256": "1c59960242e20ec6312fff80284323100fcbd609ce7edc68ec4bd9f9b2b7badd",
+          "anchor": "def _validate(",
+          "lines": [
+            106
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_diagnostic_storage.py",
+          "sourceSha256": "1c59960242e20ec6312fff80284323100fcbd609ce7edc68ec4bd9f9b2b7badd",
+          "anchor": "class _Writer:",
+          "lines": [
+            178
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "storageContractSha256=self.storage.contract_sha256",
+          "lines": [
+            1229
+          ]
+        },
+        {
+          "path": "build/test-proposal-scratch-ownership.py",
+          "sourceSha256": "f155b7bd8c1d3f9970b32b7cbeaf7e61b0d21bf32a66cd15e2a901a95d111d09",
+          "anchor": "def test_owner_opt_in_binds_contract_and_preserves_terminal_exclusion(",
+          "lines": [
+            329
+          ]
+        }
+      ]
+    },
+    {
+      "id": "supervisor-declared-storage-scopes",
+      "applicationCoverage": "opt-in-three-cooperative-directories",
+      "observation": "Retained owner, supervisor publication and terminal publication all enforce declared names/roles/caps. Owner scope includes retained worker-sidecar copies. Final observation carries separate counters and declared aggregate upper bounds.",
+      "remainingGap": "Original sidecars and worker logs require separate optional declarations. Native pending/lease, runtime/cache and final terminal persistence/exit remain outside these managed directory scopes.",
+      "prospectiveTreatment": "Keep bounds restricted to the three disjoint directories. Never treat their cap sum or peak sum as an observed whole-process high-water mark.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "storage_contracts=None",
+          "lines": [
+            15
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "modules.append(Path(self._storage_module.__file__))",
+          "lines": [
+            95
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "def set_check(",
+          "lines": [
+            156
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "def _storage_snapshot(",
+          "lines": [
+            216
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "ownership = self._storage_snapshot()",
+          "lines": [
+            370
+          ]
+        },
+        {
+          "path": "build/test-proposal-supervisor-storage.py",
+          "sourceSha256": "6e3a5fc5886e8b369e67109e83a8b6ab9989176da52bbd047390d7611475e1ad",
+          "anchor": "def success_fixture(",
+          "lines": [
+            86
+          ]
+        }
+      ]
+    },
+    {
+      "id": "original-worker-sidecar-caps",
+      "applicationCoverage": "opt-in-v4-cooperative-writers",
+      "observation": "Python/native per-file and aggregate original sidecar caps, failed-write poisoning, closed-length verification and owner-side length checks.",
+      "remainingGap": "Serialization memory, external mutations, native temporary files and remaining observer lifetime lack bounds. Worker logs have a separate opt-in contract.",
+      "prospectiveTreatment": "Use only as one named bounded domain. Keep all whole-process/admission flags false.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "class SidecarWrites:",
+          "lines": [
+            250
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "def read_sidecar(",
+          "lines": [
+            1401
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkerSidecars.cs",
+          "sourceSha256": "19d39da6b3162054f4a40d6be3ac6bfa4688d0680f86a11c3b49acdd366da13e",
+          "anchor": "internal sealed class TowerWorkerSidecars",
+          "lines": [
+            17
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "anchor": "internal const string SidecarVersion",
+          "lines": [
+            67
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "Bound all four persistent worker sidecars",
+          "lines": [
+            29
+          ]
+        },
+        {
+          "path": "build/test-proposal-worker-sidecars.py",
+          "sourceSha256": "f9c58ee65f1f4663720eef2ee61dbf2f2090625fe9ca37eeb3a90e407db212fc",
+          "anchor": "def test_v4_actual_audit_command_closes_bounded_originals(",
+          "lines": [
+            162
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bounded-worker-stdout-stderr",
+      "applicationCoverage": "opt-in-parent-writer",
+      "observation": "Combined retained byte cap enforced before each parent write; original log handle is not inherited. Success requires EOF and verified closed length. Failure retains partial evidence and drains or rejects the owned job. Supervisor binds finite phase caps and rejects reuse.",
+      "remainingGap": "No bound on other paths, external log mutations, kernel pipe memory, worker output attempts or monitor console. Truncated, interrupted and write-failed captures cannot establish complete log capture.",
+      "prospectiveTreatment": "Keep retained-byte caps separate from overlapping process I/O and memory. Complete native pending/lease/cache and observer obligations before measurement.",
+      "references": [
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "e42b4557d10dd0e2afc78058360b7018dca40d1ec10106140e9ab9ea2559771e",
+          "anchor": "class _BoundedLog:",
+          "lines": [
+            87
+          ]
+        },
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "e42b4557d10dd0e2afc78058360b7018dca40d1ec10106140e9ab9ea2559771e",
+          "anchor": "def pump(",
+          "lines": [
+            129
+          ]
+        },
+        {
+          "path": "build/bounded_windows_process.py",
+          "sourceSha256": "e42b4557d10dd0e2afc78058360b7018dca40d1ec10106140e9ab9ea2559771e",
+          "anchor": "def finish(self, path, failure):",
+          "lines": [
+            160
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "anchor": "if 'logCapture' in value:",
+          "lines": [
+            1163
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "anchor": "log_options['log_byte_limit']",
+          "lines": [
+            278
+          ]
+        },
+        {
+          "path": "build/test-proposal-worker-logs.py",
+          "sourceSha256": "6d09431a2ed76f6a2c18e4d504e9e5e38575c1b079007b67b9438042d203c325",
+          "anchor": "def test_real_native_v4_audit_with_capped_merged_log(",
+          "lines": [
+            295
+          ]
+        }
+      ]
+    },
+    {
+      "id": "authenticated-native-pending-worker",
+      "applicationCoverage": "bounded-when-explicitly-declared",
+      "observation": "Native v5 requires bounded original sidecars and a finite pending declaration before worker entry. Its v2 receipt authenticates the binding identity and embeds the scope snapshot. The owner independently checks declaration equality and counter invariants, retains valid failed work and preserves original errors.",
+      "remainingGap": "Selected native leases now have v8 read-only handles and scope cleanup. Direct/raw writes, metadata, enclosing Python lease lifetimes, runtime/cache, finite observer work and resource qualification remain unresolved.",
+      "prospectiveTreatment": "Resolve enclosing-owner lifetime and external/runtime/observer obligations; scientific gates stay closed.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "anchor": "internal const string PendingVersion",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "lines": [
+            68
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "anchor": "pending?.ProtectWorkerPaths(",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "lines": [
+            161
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "anchor": "var result = leases is null",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "lines": [
+            219
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerPendingStorage.cs",
+          "anchor": "internal void ProtectWorkerPaths(",
+          "sourceSha256": "bc87fb0a862165311b93c5d711660dfc555a587d15d8c9424a5d75fc5e5f71d4",
+          "lines": [
+            70
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def native_pending_budget(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            48
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def native_pending_observation(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            161
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "'Changed native pending binding/declaration'",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            1438
+          ]
+        },
+        {
+          "path": "LL/tests/EssenceSystem.Tests/BalanceHarnessPendingBindingTests.cs",
+          "anchor": "public async Task Authenticated_v5_bounds_replacements",
+          "sourceSha256": "f57737bbfbca602a221adb0053ca35de8af757209810c85691b7bed82138c467",
+          "lines": [
+            63
+          ]
+        },
+        {
+          "path": "build/test-proposal-pending-binding.py",
+          "anchor": "def test_real_native_audit_retains_v5_receipt_through_owner(",
+          "sourceSha256": "adce607fe5978451d4f466454bcec98aacbe024da679bcb0cd0bad5924a6e0dd",
+          "lines": [
+            173
+          ]
+        }
+      ]
+    },
+    {
+      "id": "supervisor-native-pending-phases",
+      "applicationCoverage": "bounded-for-explicit-native-phase-declarations",
+      "observation": "Three native budgets are copied, validated against phase/output restrictions and sealed before dispatch. V6 native workers publish v3 receipts; independent Python stays on its existing binding. Final observation distinguishes completed, failed, missing and not-invoked phases.",
+      "remainingGap": "Selected native leases now have v8 read-only handles and scope cleanup. Direct/raw writes, metadata, enclosing Python lease lifetimes, runtime/cache, finite observer work and resource qualification remain unresolved.",
+      "prospectiveTreatment": "Resolve enclosing-owner lifetime and external/runtime/observer obligations; scientific gates stay closed.",
+      "references": [
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "anchor": "def _pending_plan(",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "lines": [
+            172
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "anchor": "def _pending_snapshot(",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "lines": [
+            184
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "anchor": "def _verify_pending_plan_binding(",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "lines": [
+            209
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def proposal_pending_plan(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            98
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def proposal_pending_budget(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            84
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalPendingPlan.cs",
+          "anchor": "internal static void Validate(",
+          "sourceSha256": "c4476c49164e8d1c2f984626dd2282d04d0006dc2dc279c019bc0516862b4da7",
+          "lines": [
+            10
+          ]
+        },
+        {
+          "path": "LL/tests/EssenceSystem.Tests/BalanceHarnessPhasePendingTests.cs",
+          "anchor": "public async Task Undeclared_nested_Save_is_rejected",
+          "sourceSha256": "4771f9ea76bbb86067df8214a7bd0757bbfdb324bddea20029b036ebb7621224",
+          "lines": [
+            110
+          ]
+        },
+        {
+          "path": "build/test-proposal-supervisor-pending.py",
+          "anchor": "def test_complete_routed_sequence_binds_native_v6_and_independent_v4(",
+          "sourceSha256": "6d1b13a06732cab0fd01d6f85df0c1db913ccbb451169add35757e5a1eadae62",
+          "lines": [
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bounded-native-pending-families",
+      "applicationCoverage": "finite-reviewed-command-pending-names-with-caller-byte-caps",
+      "observation": "36 fixed and at most 36 dynamic paths, with 73 creates maximum. Membership and byte bounds precede factories/writes. Releases never refund member slots, creates or lifetime bytes. Failed scopes cannot complete. V7/receipt-v4 plans and observations are independently validated and retained.",
+      "remainingGap": "Selected native leases now have v8 read-only handles and scope cleanup. Direct/raw writes, metadata, enclosing Python lease lifetimes, runtime/cache, finite observer work and resource qualification remain unresolved.",
+      "prospectiveTreatment": "Resolve enclosing-owner lifetime and external/runtime/observer obligations; scientific gates stay closed.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalPendingFamilies.cs",
+          "anchor": "internal static IEnumerable<string> FixedNames(",
+          "sourceSha256": "14ee53cc6694033ee3fdf6c21064cb77650b65b36cdef3aba177e36491449e00",
+          "lines": [
+            23
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalPendingFamilies.cs",
+          "anchor": "internal PendingFileBudget Add(",
+          "sourceSha256": "14ee53cc6694033ee3fdf6c21064cb77650b65b36cdef3aba177e36491449e00",
+          "lines": [
+            44
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerPendingStorage.cs",
+          "anchor": "private Stream OpenCore(",
+          "sourceSha256": "bc87fb0a862165311b93c5d711660dfc555a587d15d8c9424a5d75fc5e5f71d4",
+          "lines": [
+            159
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "anchor": "internal const string FamilyPendingVersion",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "lines": [
+            72
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def pending_family_fixed(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            114
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def proposal_pending_families_budget(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            123
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def pending_families_observation(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            135
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "anchor": "def _pending_plan(",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "lines": [
+            172
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudy.cs",
+          "anchor": "save($\"heldout-",
+          "sourceSha256": "06491ae2ca520ef6954a74e6a4160aed764474b0a319f14ef925491d81e7e529",
+          "lines": [
+            105
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalStudyArchive.cs",
+          "anchor": "else Save(output, \"study/\"",
+          "sourceSha256": "039dff2d341203f2d7c94f69dc6833fc9dffc626b1e5638edc33aec0847beae8",
+          "lines": [
+            85
+          ]
+        },
+        {
+          "path": "LL/tests/EssenceSystem.Tests/BalanceHarnessPendingFamilyTests.cs",
+          "anchor": "public async Task V7_covers_finite_catalogue",
+          "sourceSha256": "8ce4476e8a3ba3dbbd11a7429ad880597ccd16746cf0fabe79537b1d0e8a176b",
+          "lines": [
+            54
+          ]
+        },
+        {
+          "path": "build/test-proposal-pending-families.py",
+          "anchor": "def test_real_v7_native_audit_uses_zero_writer_contract(",
+          "sourceSha256": "7e9eb28d0cf40cf321bfadfde4dab1486649fd1b90628f053e3f19e101163efe",
+          "lines": [
+            101
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bounded-native-lease-scope",
+      "applicationCoverage": "declared-read-only-native-lease-handles-through-explicit-scope-cleanup",
+      "observation": "26 fixed native operation paths (24 owned leases, two enclosing probes), one attempt per path and a finite simultaneous-handle cap. Original handles are read-only. Audit/publication prohibit leases. Authenticated v8/receipt-v5 observations validate member identity, role, attempt/release counts and unresolved state.",
+      "remainingGap": "No hard wall-clock bound, enclosing Python owner lifetime bound, filesystem confinement or complete external/metadata/alias/finalizer coverage.",
+      "prospectiveTreatment": "Bound enclosing owner leases and resolve runtime/cache and finite observer lifetimes before scientific resource qualification.",
+      "references": [
+        {
+          "path": "LL/tools/BalanceHarness/TowerNativeLeases.cs",
+          "anchor": "internal TowerNativeLeases(",
+          "sourceSha256": "bd53a56ba6b9f27d2375a704bd89e64a4d8eb2920f49379a14ca8bcdb08c5d8d",
+          "lines": [
+            28
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerNativeLeases.cs",
+          "anchor": "internal static void Probe(",
+          "sourceSha256": "bd53a56ba6b9f27d2375a704bd89e64a4d8eb2920f49379a14ca8bcdb08c5d8d",
+          "lines": [
+            107
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerNativeLeases.cs",
+          "anchor": "internal async Task<T> RunAsync<T>(",
+          "sourceSha256": "bd53a56ba6b9f27d2375a704bd89e64a4d8eb2920f49379a14ca8bcdb08c5d8d",
+          "lines": [
+            124
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerNativeLeases.cs",
+          "anchor": "private sealed class Lease(",
+          "sourceSha256": "bd53a56ba6b9f27d2375a704bd89e64a4d8eb2920f49379a14ca8bcdb08c5d8d",
+          "lines": [
+            170
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerWorkAccounting.Leases.cs",
+          "anchor": "public static FileStream OpenWriterLease(",
+          "sourceSha256": "2dbd9d74b03078179c02cc4b40021d03c45e4a701346cd4dfdd2aa7336cb6c0b",
+          "lines": [
+            20
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerCompactResume.cs",
+          "anchor": "if (TowerNativeLeases.Enabled)",
+          "sourceSha256": "62f739d0a04cda5e09b6c48b1211b3b0bd19a654d3e3486ea777cb2b4290f8b4",
+          "lines": [
+            19
+          ]
+        },
+        {
+          "path": "LL/tools/BalanceHarness/TowerProposalWorkReceipt.cs",
+          "anchor": "internal const string LeaseVersion",
+          "sourceSha256": "9aa69bf507950a28db4e3a13a4ac210975b8076040c462afbc3780689cc01c1e",
+          "lines": [
+            74
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_work_accounting.py",
+          "anchor": "def native_lease_observation(",
+          "sourceSha256": "fe87ec76476f8750ff0f4ec25fda980069cec899087de87e8368ec65c4adccf8",
+          "lines": [
+            214
+          ]
+        },
+        {
+          "path": "Balance Harness/analysis/proposal_owner_supervisor.py",
+          "anchor": "nativeLeaseBudgetsSha256=",
+          "sourceSha256": "5ae9b437e67e179b50c8b87a0e9e832462c39d81c20de7b1704f3537f2f12dba",
+          "lines": [
+            181
+          ]
+        },
+        {
+          "path": "LL/tests/EssenceSystem.Tests/BalanceHarnessNativeLeaseTests.cs",
+          "anchor": "public async Task V8_owns_native_lease_lifetimes",
+          "sourceSha256": "d428a82317e7847ecd5616fb2c4ca094912f4be8d81a75bd2e917e3b0fea6e06",
+          "lines": [
+            51
+          ]
+        },
+        {
+          "path": "build/test-proposal-native-leases.py",
+          "anchor": "def test_real_v8_audit_prohibits_native_leases(",
+          "sourceSha256": "50ab03a7194ea1e5e3549df95f2ca15fe25ffce516f4a6c08a1f9edeca57cbca",
+          "lines": [
+            112
+          ]
+        }
+      ]
+    }
+  ],
+  "prospectiveModel": {
+    "status": "DraftOnly",
+    "elapsedUnit": "EnclosingMonotonicSeconds",
+    "elapsedBoundary": "Before authentication through driver publication, verification, console and exit, with separately bounded outer-monitor work",
+    "memoryUnit": "Explicit process/job commit high-water boundary; monitor separately identified",
+    "storageUnit": "Logical retained plus scratch file bytes over declared complete lifetimes; not allocated disk blocks",
+    "ioUnit": "Kernel job transfer totals; overlapping application bytes, decoded bytes and parser bytes remain separate diagnostics",
+    "failurePolicy": "Unknown observations, failed release, missing membership, process escape or unresolved scratch prevent qualification; missing is never zero",
+    "cumulativePolicy": "Charge all admitted attempts including failed work; never rewrite the first failure or historical totals",
+    "newLimits": null,
+    "coefficients": null,
+    "qualifiedForecast": null,
+    "measurementAuthorized": false,
+    "prerequisites": [
+      "Complete the remaining metadata/path and cleanup boundaries beyond the selected instrumented owner/native lease APIs",
+      "Complete owned path/scratch-domain specification and enforcement or defensible external bounds",
+      "Finite boundary for outer-monitor work and failure cleanup",
+      "Authenticated full owner/native audit/independent audit/publication path under that boundary",
+      "Separately justified prospective resource protocol and explicit authorization before measurement"
+    ]
+  },
+  "gates": {
+    "nativeCompressedPreparation": "ClosedUnchanged",
+    "pythonCompressedLaunch": "ClosedUnchanged",
+    "existingAuditFloorSeconds": 1806,
+    "existingAuditLimitSeconds": 1800
+  },
+  "priorInventory": "Balance Harness/Tower-Loadout-Placement-Pending-Family-Boundaries.json",
+  "priorInventorySha256": "3fc99dadd1328b1b28c708c1cef699353d28a5bfbb274212bbe6a9c0e5892792",
+  "resourceBoundarySpecification": "Balance Harness/Tower-Loadout-Placement-Resource-Boundaries-v10.json",
+  "resourceBoundarySpecificationSha256": "f288eaaf2aa97f7f861253f06a6b5752506c3aded4e60cb29dbb9fe316829d5d"
+}

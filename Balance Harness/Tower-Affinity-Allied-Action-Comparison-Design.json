@@ -1,0 +1,720 @@
+{
+  "version": "tower-affinity-allied-action-comparison-design-v1",
+  "status": "FrozenProspectiveDesignNotImplementedNotAdmitted",
+  "designIdentity": "SHA256 of UTF-8 JSON with sorted keys, compact separators and literal Unicode; not a native HarnessJson plan hash",
+  "sourceFiles": {
+    "Balance Harness/Tower-Affinity-Preservation-Comparison-Plan.json": "86399e4c6cc672443d6307aaa63ab6d5bf911416f1cb6396d0e8d5bda668407b",
+    "TestResults/affinity-allied-action-preview-20260924-v2/files.json": "8301070ad78ab8ea84875faf8092c7ae5da193f1d0106245e417b70f689231b1",
+    "TestResults/affinity-allied-action-preview-20260924-v2/root-01/batches.json": "53af4d39f1caf7a33654333e70c21d8249d2217764b509634de0508895c732af",
+    "TestResults/affinity-allied-action-preview-20260924-v2/root-01/request.json": "58ad6bbc09f0a126c40c08bd07e9a0bfadf98168d7c9c180c2f2bf20bf5a9f65",
+    "TestResults/affinity-allied-action-preview-20260924-v2/summary.json": "dccacc803b873e4bd86ae4c50f581d4b782160a87286529102ec9062e9df2596",
+    "TestResults/affinity-allied-action-verification-20260924/closeout.json": "bcfb399d7b8e3757c037d909be9019895ec902c19a39240a86bac2a00458b376",
+    "TestResults/affinity-allied-action-verification-20260924/files.json": "8e2db033cba169decfa1eb4b856849ff89be02ed58f5d1e2efd5593e1d252236",
+    "TestResults/affinity-allied-action-verification-20260924/implementation.json": "aef9044b510ad469699667594d0ad64ceb392a8ddba197c15467e867ab37baf6",
+    "TestResults/affinity-creation-preservation-preview-20260924/files.json": "7b001519484ecac83fd6c3ce64085bd63cb56c595e56fa3eda5fe04427e85023",
+    "TestResults/affinity-creation-preservation-preview-20260924/root-01/request.json": "d7dc4a52569ac04351b3e7da1d0b192edc372b31351e7df02674746150a95dbb"
+  },
+  "plannedNativePlan": {
+    "version": "tower-affinity-allied-action-comparison-v1",
+    "scopeHash": "ef4a3813f849c732227c52ee4e86f7db81eab52a218487e747d0c7e14974afeb",
+    "inventoryHash": "f06496a3079c4b9aa8d3366ac94e58de994ee7317fd41996eb90905a802d45c6",
+    "benchmarkPartyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+    "control": {
+      "version": "tower-proposal-policy-v4",
+      "name": "benchmark-preserving-affinity-creation-v4",
+      "firstWave": [
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create"
+      ],
+      "secondWave": [
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create"
+      ],
+      "parentTickets": [
+        "benchmark"
+      ],
+      "preserveParentInteractions": false,
+      "preservedDamageAffinityIds": [],
+      "createdDamageAffinityIds": [
+        "09d48cd50f4fad5e7d81088514d48ac3367eb2797b20357480727f6d88d935f4",
+        "41d9b77a974edaf408edccc24c67b75c3d446d49439e8578887fcb1d27470e3e",
+        "ae4c3c8c716a80d55a689cb74f993c51f1251a4df5e3799f9557d83e3fe2cbb3"
+      ],
+      "creationRemovalRule": "preserve-completable-affinity-endpoints-v1"
+    },
+    "candidate": {
+      "version": "tower-proposal-policy-v5",
+      "name": "benchmark-allied-action-affinity-creation-v5",
+      "firstWave": [
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create"
+      ],
+      "secondWave": [
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create"
+      ],
+      "parentTickets": [
+        "benchmark"
+      ],
+      "preserveParentInteractions": false,
+      "preservedDamageAffinityIds": [],
+      "createdDamageAffinityIds": [
+        "09d48cd50f4fad5e7d81088514d48ac3367eb2797b20357480727f6d88d935f4",
+        "41d9b77a974edaf408edccc24c67b75c3d446d49439e8578887fcb1d27470e3e",
+        "ae4c3c8c716a80d55a689cb74f993c51f1251a4df5e3799f9557d83e3fe2cbb3"
+      ],
+      "creationRemovalRule": "preserve-completable-affinity-endpoints-and-allied-basic-attack-providers-v1"
+    },
+    "roots": 12,
+    "heldoutSamples": 256,
+    "searchFightsPerArm": 528,
+    "requiredFreshValues": 4380,
+    "maximumFights": 21888,
+    "maximumSeconds": 10800,
+    "maximumBytes": 6442450944,
+    "pairing": "same-proposal-root-racing-nomination-and-validation-panels-separate-charges",
+    "barrier": "freeze-all-24-outputs-before-any-heldout-observation",
+    "interpretation": "development-pilot-no-efficacy-or-adoption-claim",
+    "analysis": {
+      "primaryEndpoint": "equal-root-mean-heldout-candidate-minus-control-win-rate",
+      "guardrailEndpoint": "equal-root-mean-heldout-candidate-minus-fixed-benchmark-win-rate",
+      "identicalOutputs": "reuse-one-physical-recipe-per-root-heldout-panel-exact-zero-method-contrast-retain-absolute-benchmark-results",
+      "rootRetention": "all-12-roots-no-preview-screening-no-replacement-no-refill-any-incomplete-root-invalidates-study",
+      "rootUncertainty": "report-all-12-paired-root-contrasts-and-descriptive-95-percent-t-df11-not-a-powered-efficacy-test",
+      "conditionalUncertainty": "paired-seed-standard-errors-and-covariance-conditional-on-frozen-outputs-not-future-root-reliability",
+      "goMethodAtLeast": 0.02,
+      "goBenchmarkAtLeast": 0,
+      "goDifferingRootsAtLeast": 3,
+      "goPromisingNovelRootsAtLeast": 0,
+      "promisingNovelGainAtLeast": 0.03,
+      "abandonMethodAtMost": -0.02,
+      "abandonBenchmarkAtMost": -0.02,
+      "abandonPromisingNovelRootsBelow": 0,
+      "decisionOrder": "incomplete-then-abandon-without-novelty-gate-then-no-observed-output-differentiation-then-larger-fresh-evaluation-warranted-else-inconclusive-never-adopt"
+    },
+    "selectionContrast": {
+      "control": "tower-racing-benchmark-validation-v1",
+      "candidate": "tower-racing-benchmark-validation-v1"
+    },
+    "validationProtocol": {
+      "valuesPerPair": 109,
+      "sharedRacingValues": 32,
+      "controlSelectionValues": 16,
+      "nominationValues": 16,
+      "validationValues": 60,
+      "nominationPairing": "both-arms-share-all-16-nomination-values-in-frozen-order",
+      "validationIsolation": "both-arms-share-60-validation-values-disjoint-from-training-and-all-heldout-panels",
+      "reporting": "both-arm-all-root-gate-counts-fallback-and-novel-output-frequency-plus-paired-heldout-effects-and-costs"
+    }
+  },
+  "physicalBinding": {
+    "nativeScopeHash": "ef4a3813f849c732227c52ee4e86f7db81eab52a218487e747d0c7e14974afeb",
+    "nativeInventoryHash": "f06496a3079c4b9aa8d3366ac94e58de994ee7317fd41996eb90905a802d45c6",
+    "benchmarkPartyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+    "savedContextHash": "9354f95d7ae97f08e909b5c2091cd1c20c4de73850087f396e02f9a4a6b6b8b0",
+    "contextSource": "TestResults/affinity-allied-action-preview-20260924-v2/root-01/request.json",
+    "admissionChanges": "Episode id/start time, accumulated history exclusions and qualified harness runtime identity only; rebind scope hash explicitly, retain original design",
+    "frozen": "Captured content, gameplay dependencies, inventory, three references, floor, party, gear, styles, budgets, affinities and both policies"
+  },
+  "intendedRuntime": {
+    "controlRacingVersion": "tower-proposal-racing-v6",
+    "candidateRacingVersion": "tower-proposal-racing-v7",
+    "selectorVersion": "tower-racing-benchmark-validation-v1",
+    "currentCandidateStatus": "Generation-export only; existing racing v1-v6 and study/audit/launcher versions reject this design"
+  },
+  "feasibility": {
+    "source": "Sealed development preview only; never a fresh efficacy sample",
+    "controlLegalRecipes": 41,
+    "candidateLegalRecipes": 26,
+    "requiredUniqueRecipesPerArmRoot": 17,
+    "completedDevelopmentRoots": 12,
+    "previewMayGuaranteeFreshRootFill": false,
+    "providerRule": "tower-allied-basic-attack-protection-v1",
+    "providerDefinitionHash": "c5497fddbb26cc6cda94e7ea6620a5f17484aa6be655d760d946d7aa7dfc1134",
+    "risks": {
+      "controlAttempts": 266,
+      "candidateAttempts": 330,
+      "controlDistinctObservedRecipes": 39,
+      "candidateDistinctObservedRecipes": 26,
+      "controlRemovals": {
+        "Enchanted Fairy Essence": 62,
+        "Poisonous Rat Essence": 10,
+        "Pack Howler Essence": 74,
+        "Ravenous Ghoul Essence": 10,
+        "Flame Imp Essence": 5,
+        "Bark Golem Essence": 13,
+        "Elder Treant Essence — Thornstorm": 16,
+        "Elder Treant Essence — Ancient Sap": 10,
+        "Wood Nymph Essence": 5,
+        "Flame Harpy Essence": 5,
+        "Cinder Beetle Essence": 10,
+        "Illusion Fox Essence": 12
+      },
+      "candidateRemovals": {
+        "Enchanted Fairy Essence": 80,
+        "Poisonous Rat Essence": 12,
+        "Illusion Fox Essence": 17,
+        "Ravenous Ghoul Essence": 17,
+        "Bark Golem Essence": 22,
+        "Elder Treant Essence — Thornstorm": 19,
+        "Elder Treant Essence — Ancient Sap": 11,
+        "Cinder Beetle Essence": 18,
+        "Flame Imp Essence": 11,
+        "Wood Nymph Essence": 12,
+        "Flame Harpy Essence": 16
+      }
+    },
+    "adaptation": "No outcome-fitted removal score, owner preference, new protection class or fill relaxation in this study"
+  },
+  "allocation": {
+    "requiredFreshValues": 4380,
+    "actualValuesAllocated": 0,
+    "entropyBytes": 65536,
+    "exposedSignedInt32Words": 16384,
+    "ordering": "One post-admission draw; take first 4380 distinct nonhistorical values in exposure order, without screening",
+    "permanentExclusion": "All distinct newly exposed values, including unused tail; retain historical collisions and duplicates; no refill",
+    "liveHistory": "Complete authoritative scan and pending-recovery reconciliation at admission and launch; include all prior development roots, combat values and unused reservations",
+    "ranges": "Half-open zero-based positions in the ordered 4380-value allocation; these are indices, not seeds",
+    "pairedRoles": "Both arms share each root and the ordered 8/8/8/8/16/60 panels; every root and role is disjoint from heldout and other roots",
+    "slots": [
+      {
+        "root": 1,
+        "proposalRoot": [
+          0,
+          1
+        ],
+        "racing": [
+          [
+            1,
+            9
+          ],
+          [
+            9,
+            17
+          ],
+          [
+            17,
+            25
+          ],
+          [
+            25,
+            33
+          ]
+        ],
+        "nomination": [
+          33,
+          49
+        ],
+        "validation": [
+          49,
+          109
+        ],
+        "heldout": [
+          1308,
+          1564
+        ]
+      },
+      {
+        "root": 2,
+        "proposalRoot": [
+          109,
+          110
+        ],
+        "racing": [
+          [
+            110,
+            118
+          ],
+          [
+            118,
+            126
+          ],
+          [
+            126,
+            134
+          ],
+          [
+            134,
+            142
+          ]
+        ],
+        "nomination": [
+          142,
+          158
+        ],
+        "validation": [
+          158,
+          218
+        ],
+        "heldout": [
+          1564,
+          1820
+        ]
+      },
+      {
+        "root": 3,
+        "proposalRoot": [
+          218,
+          219
+        ],
+        "racing": [
+          [
+            219,
+            227
+          ],
+          [
+            227,
+            235
+          ],
+          [
+            235,
+            243
+          ],
+          [
+            243,
+            251
+          ]
+        ],
+        "nomination": [
+          251,
+          267
+        ],
+        "validation": [
+          267,
+          327
+        ],
+        "heldout": [
+          1820,
+          2076
+        ]
+      },
+      {
+        "root": 4,
+        "proposalRoot": [
+          327,
+          328
+        ],
+        "racing": [
+          [
+            328,
+            336
+          ],
+          [
+            336,
+            344
+          ],
+          [
+            344,
+            352
+          ],
+          [
+            352,
+            360
+          ]
+        ],
+        "nomination": [
+          360,
+          376
+        ],
+        "validation": [
+          376,
+          436
+        ],
+        "heldout": [
+          2076,
+          2332
+        ]
+      },
+      {
+        "root": 5,
+        "proposalRoot": [
+          436,
+          437
+        ],
+        "racing": [
+          [
+            437,
+            445
+          ],
+          [
+            445,
+            453
+          ],
+          [
+            453,
+            461
+          ],
+          [
+            461,
+            469
+          ]
+        ],
+        "nomination": [
+          469,
+          485
+        ],
+        "validation": [
+          485,
+          545
+        ],
+        "heldout": [
+          2332,
+          2588
+        ]
+      },
+      {
+        "root": 6,
+        "proposalRoot": [
+          545,
+          546
+        ],
+        "racing": [
+          [
+            546,
+            554
+          ],
+          [
+            554,
+            562
+          ],
+          [
+            562,
+            570
+          ],
+          [
+            570,
+            578
+          ]
+        ],
+        "nomination": [
+          578,
+          594
+        ],
+        "validation": [
+          594,
+          654
+        ],
+        "heldout": [
+          2588,
+          2844
+        ]
+      },
+      {
+        "root": 7,
+        "proposalRoot": [
+          654,
+          655
+        ],
+        "racing": [
+          [
+            655,
+            663
+          ],
+          [
+            663,
+            671
+          ],
+          [
+            671,
+            679
+          ],
+          [
+            679,
+            687
+          ]
+        ],
+        "nomination": [
+          687,
+          703
+        ],
+        "validation": [
+          703,
+          763
+        ],
+        "heldout": [
+          2844,
+          3100
+        ]
+      },
+      {
+        "root": 8,
+        "proposalRoot": [
+          763,
+          764
+        ],
+        "racing": [
+          [
+            764,
+            772
+          ],
+          [
+            772,
+            780
+          ],
+          [
+            780,
+            788
+          ],
+          [
+            788,
+            796
+          ]
+        ],
+        "nomination": [
+          796,
+          812
+        ],
+        "validation": [
+          812,
+          872
+        ],
+        "heldout": [
+          3100,
+          3356
+        ]
+      },
+      {
+        "root": 9,
+        "proposalRoot": [
+          872,
+          873
+        ],
+        "racing": [
+          [
+            873,
+            881
+          ],
+          [
+            881,
+            889
+          ],
+          [
+            889,
+            897
+          ],
+          [
+            897,
+            905
+          ]
+        ],
+        "nomination": [
+          905,
+          921
+        ],
+        "validation": [
+          921,
+          981
+        ],
+        "heldout": [
+          3356,
+          3612
+        ]
+      },
+      {
+        "root": 10,
+        "proposalRoot": [
+          981,
+          982
+        ],
+        "racing": [
+          [
+            982,
+            990
+          ],
+          [
+            990,
+            998
+          ],
+          [
+            998,
+            1006
+          ],
+          [
+            1006,
+            1014
+          ]
+        ],
+        "nomination": [
+          1014,
+          1030
+        ],
+        "validation": [
+          1030,
+          1090
+        ],
+        "heldout": [
+          3612,
+          3868
+        ]
+      },
+      {
+        "root": 11,
+        "proposalRoot": [
+          1090,
+          1091
+        ],
+        "racing": [
+          [
+            1091,
+            1099
+          ],
+          [
+            1099,
+            1107
+          ],
+          [
+            1107,
+            1115
+          ],
+          [
+            1115,
+            1123
+          ]
+        ],
+        "nomination": [
+          1123,
+          1139
+        ],
+        "validation": [
+          1139,
+          1199
+        ],
+        "heldout": [
+          3868,
+          4124
+        ]
+      },
+      {
+        "root": 12,
+        "proposalRoot": [
+          1199,
+          1200
+        ],
+        "racing": [
+          [
+            1200,
+            1208
+          ],
+          [
+            1208,
+            1216
+          ],
+          [
+            1216,
+            1224
+          ],
+          [
+            1224,
+            1232
+          ]
+        ],
+        "nomination": [
+          1232,
+          1248
+        ],
+        "validation": [
+          1248,
+          1308
+        ],
+        "heldout": [
+          4124,
+          4380
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "searchFightsPerArmRoot": 528,
+    "searchFightsTotal": 12672,
+    "heldoutSamplesPerRoot": 256,
+    "heldoutFightsMaximum": 9216,
+    "maximumFights": 21888,
+    "preflight": "Both arms preflight before either arm spends a search budget",
+    "barrier": "Freeze and authenticate all 24 complete search outputs before the first heldout observation",
+    "incomplete": "Any missing wave, root, search, validation, output, audit or publication invalidates the entire study; retain evidence, charge attempts, never replace roots or refill",
+    "searchPairing": "Shared physical recipe/panel/seed must have equal recipe and outcome; search requests remain separately charged per arm",
+    "heldoutPairing": "Within each root deduplicate physical recipes among control output, candidate output and fixed benchmark only; identical outputs have an exact zero method contrast",
+    "references": "Retain all three references in both searches; independently measure fixed benchmark with selected outputs; generated-pool efficacy is not an endpoint",
+    "selection": "Freeze one non-benchmark challenger from 16 nomination values; compare with benchmark on a complete fresh 60-value paired panel; pass iff gains exceed losses and exact one-sided discordant-pair binomial tail is at most 1/20; otherwise output benchmark",
+    "gateMeaning": "Provisional search output gate only; no team confirmation or adoption"
+  },
+  "reporting": {
+    "primary": "All twelve equal-weight heldout candidate-minus-control root win-rate differences",
+    "guardrail": "All twelve equal-weight heldout candidate-minus-fixed-benchmark root win-rate differences",
+    "uncertainty": "All root contrasts; mean, median, worst and descriptive 95-percent t interval with 11 degrees of freedom. Report paired-seed standard errors and covariance separately, conditional on frozen outputs; no pooled independent-fight inference",
+    "decisions": "Use the unchanged prior native Analysis object exactly: incomplete first; abandon at method or benchmark <= -0.02; then no differing outputs; then larger fresh evaluation warranted at method >= 0.02, benchmark >= 0 and >=3 differing roots; otherwise inconclusive; never adopt",
+    "diagnostics": [
+      "Both-arm all-root validation gains/losses/exact tails/pass/fallback and selected party",
+      "Both-arm all-root novelty, proposal attempts, rejection reasons, unique recipes and protected-effect reasons",
+      "Both-arm removals by Essence and owner, tagged descriptive only; no subgroup decisions or rescue selection",
+      "Total and per-phase elapsed time, retained and peak bytes, charged fights, exposures, used and unused permanent values"
+    ],
+    "noDifferentiation": "Retain absolute benchmark results and zero method contrasts; do not substitute best generated, ungated or retrospectively protected recipes",
+    "interpretation": "Fresh development comparison for this frozen scope; not a powered efficacy test or deployment decision"
+  },
+  "resources": {
+    "scientificMaximumSeconds": 10800,
+    "scientificMaximumBytes": 6442450944,
+    "nativeMaximumSeconds": 9000,
+    "nativeMaximumBytes": 5905580032,
+    "auditPublicationMaximumSeconds": 1800,
+    "auditPublicationMaximumBytes": 536870912,
+    "auditPublicationReserveSeconds": 120,
+    "forecastMargin": 2,
+    "qualificationMaximumSeconds": 900,
+    "qualificationMaximumBytes": 1073741824,
+    "accounting": "Qualification and execution have separate declarations; charge full allowance on start including failure; no borrowing, timing resampling or retries",
+    "forecast": "Upward-only maxima of prior admitted floors, frozen audit probe, completed preservation pilot actual phase costs scaled to the ceiling, current guarded preparation, and paired old/new owned fixtures; metadata and retention growth included before audit-byte scaling",
+    "fit": "Both forecast partitions must fit their own hard limits with unchanged margins; faster new timings never lower inherited floors. Failure remains not admitted; any resource amendment is separately versioned and reviewed before entropy",
+    "currentAdmission": "No current-runtime forecast or qualification performed; no allowance here has been spent as a campaign"
+  },
+  "admissionRequirements": [
+    "Implement the separately versioned v7 racing contract and allied-action comparison binding; leave v1-v6 behavior and hashes intact",
+    "Extend native study execution, both-gate diagnostics, archive reconstruction and publication barriers for the exact new profile",
+    "Extend independent Python audit and owned launcher with strict version/policy/panel/protection checks and allocation accounting",
+    "Pass guarded literal-evaluator fixtures for all roots, resource failures, incomplete generation, shared outcome drift and rehashed tampering; no battle execution",
+    "Authenticate the tested assembly, portable symbols, producing sources and all retained runtime dependencies against the captured gameplay runtime",
+    "Rebuild and match captured inventory; compare materialized inputs and prepared participants under a combat guard for every required saved legacy and both-arm recipe instance",
+    "Reconstruct saved legacy exports and this full two-wave preview; use saved development roots only for qualification, never screen prospective roots",
+    "Scan authoritative history and recovery receipts, qualify upward-only resource forecasts, bind the qualified context, pin and seal admission with zero entropy and zero combat",
+    "Before one owned execution, revalidate admission pins/history, acquire registry/output leases, preserve the entire single entropy exposure, and enforce process-tree/resource/publication barriers"
+  ],
+  "changesAllowedBeforeExecution": "Only implementation and independently qualified runtime/history binding; changing any scientific rule requires a new prospective design",
+  "productionDefaultsChanged": false,
+  "newFights": 0,
+  "newReservedValues": 0,
+  "newEntropyDraws": 0,
+  "implementationSourceHashes": {
+    "LL/tools/BalanceHarness/TowerAlliedActionProtection.cs": "d3ff0ac792e5660f7e13c12efb5e3f1fb6e837b903d813c4c0a654d71f1f02a1",
+    "LL/tools/BalanceHarness/TowerAffinityCreation.cs": "5755319e311d57d7e5d71c466efacdce944fb51cd85026b0bf88e6c6bfcf6adf",
+    "LL/tools/BalanceHarness/TowerAdaptiveRacingGenerator.cs": "7af14bb4a00536dd5cb470836c6eb3c8cb204cac90fd068f8a759b16609e2a0c",
+    "LL/tools/BalanceHarness/TowerProposalPolicies.cs": "c05b2f279545d34cb5959e19d6a4ae135b9cb93300a12a4eb4ddb81810b16f6f",
+    "LL/tests/EssenceSystem.Tests/BalanceHarnessAlliedActionPreservationTests.cs": "8934092bc6e72620da5876ad77b416a0daa7810f688655b64ff589b82cd07cb1"
+  }
+}

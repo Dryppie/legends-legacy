@@ -1,0 +1,64 @@
+{
+  "version": "tower-loadout-placement-matched-cost-fixtures-v1",
+  "status": "ProspectiveEngineeringPlanNotExecuted",
+  "purpose": "Repair the unmatched functional-fixture resource evidence before bounded runtime qualification; no scientific or efficacy evidence",
+  "baselineStudyVersion": "tower-affinity-allied-action-comparison-v1",
+  "candidateStudyVersion": "tower-loadout-placement-comparison-v1",
+  "baselinePolicies": ["tower-proposal-policy-v4", "tower-proposal-policy-v5"],
+  "candidatePolicies": ["tower-proposal-policy-v5", "tower-proposal-policy-v6"],
+  "physicalContextSource": "TestResults/tower-proposal-owned-fixture-loadout-placement-20260924/result/source/context.json",
+  "sourceFixtureManifestSha256": "19283ecbc0f4dc2586d4a95bb70e346949f2cc16845b916298d32ed75dcdb0a6",
+  "sourceHandoffSha256": "5cdb69339875eb84fc7861d0c676476c1200b97147ab4df9075fe19193302b20",
+  "currentHarnessSha256": "a2bd39956ffdc56c352336019960494a5c501a4afff61f4488e8b45635cceff9",
+  "sourceAuthentication": "Resolve each context/settings/plan/cost file through the externally pinned fixture manifest and implementation handoff; retain all consumed inputs",
+  "requiredPartySize": 10,
+  "essenceSlots": 5,
+  "sameBetweenFixtures": [
+    "complete physical actor and reference context",
+    "content and settings",
+    "mechanics and control affinity inventory",
+    "runtime and producing source/PDB bindings",
+    "saved synthetic roots and all panel values",
+    "literal evaluator rules",
+    "owner, audit, publication and evidence-retention paths"
+  ],
+  "literalRules": {
+    "trainingAndNominationReferences": "Draw",
+    "trainingAndNominationGeneratedParties": "Victory",
+    "validationBenchmark": "Draw",
+    "validationChallenger": "Victory on the first five ordered validation values for odd-numbered roots and first four for even-numbered roots; Draw otherwise",
+    "heldout": "Victory",
+    "combatEntry": "Throw before any real combat"
+  },
+  "allocation": {
+    "roots": 12,
+    "searchValuesPerRoot": 109,
+    "heldoutValuesPerRoot": 256,
+    "searchFightsPerArm": 528,
+    "maximumLiteralRequestsPerFixture": 21888,
+    "entropy": "Reuse the already declared synthetic fixture words; no production entropy or scientific reservation"
+  },
+  "verification": [
+    "Prove identical physical contexts and literal evaluator rules before either fixture runs",
+    "Prove the shared v5 proposal, pruning, panel and selected-output trajectories agree after normalizing only versioned evidence bindings",
+    "Retain all twelve complete placement catalogues for the candidate study",
+    "Keep both native and independent audits and post-publication verification active",
+    "Record actual request counts, deduplication and every native/audit time/storage partition"
+  ],
+  "costRule": {
+    "phaseSources": "Native phase from completion; audit/publication phase uses final closeout costs, with completion costs retained and never reduced",
+    "normalization": "No per-actor, per-slot or post-observation normalization; report counts and use the declared raw phase ratios",
+    "placementCostFloor": "For each phase, take the maximum of the retained original placement measurement and the new paired measurement; never select the faster measurement",
+    "ratios": "For each phase use max(1, placement phase floor / first matched-baseline attempt phase cost); that attempt must complete",
+    "forecast": "Apply the frozen design's completed-pilot scaling, margin two, inherited admission floors, storage-before-audit scaling and 120-second publication reserve",
+    "failedEvidence": "Keep incomplete and failed attempts; no silent replacement or timing resample",
+    "envelope": "Use existing owned v2 limits for separately declared synthetic engineering fixtures. This plan does not start or enlarge the separate 900-second/1-GiB runtime qualification or the scientific envelope."
+  },
+  "notPermitted": [
+    "real combat or production entropy",
+    "prospective-root preview or screening",
+    "retrospective changes to the cost formula, margins or resource limits",
+    "discarding existing cost evidence",
+    "publishing a scientific admission from synthetic fixture results alone"
+  ]
+}

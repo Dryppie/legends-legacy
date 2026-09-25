@@ -1,0 +1,111 @@
+{
+  "version": "tower-proposal-evidence-storage-design-v1",
+  "status": "ProspectiveEngineeringDesignOnly",
+  "targetService": "LL/tools/BalanceHarness offline proposal study archives",
+  "inventoryManifest": "TestResults/loadout-placement-storage-inventory-20260924/files.json",
+  "inventoryManifestSha256": "2fbcd48a8e2176a632a64b2921af7fddf6c3b11da4ea72353ec4b5b31e64af8b",
+  "priorHandoff": "TestResults/loadout-placement-recovery-protocol-handoff-20260924.json",
+  "priorHandoffSha256": "e757da5037272dd9d0ea67c0bcb420b938b8b76084ea4d6d58e01898e856a774",
+  "evidence": {
+    "baselineRetainedBytes": 1078787663,
+    "baselineDominantJsonBytes": 981129931,
+    "baselineExactDuplicateBytes": 25001513,
+    "placementRetainedBytes": 1131534583,
+    "placementDominantJsonBytes": 1030289784,
+    "placementExactDuplicateBytes": 18352866,
+    "crossArchiveUniqueSharedBytes": 257057253,
+    "compressionRatioMeasured": false,
+    "storageSavingsMeasured": false,
+    "auditSpeedupMeasured": false
+  },
+  "decision": {
+    "strategy": "Lossless streaming gzip of three complete JSON evidence families",
+    "reason": "These families occupy 91.05 percent of the complete placement archive; whole-file duplicates account for only 1.62 percent before reference overhead.",
+    "format": "tower-proposal-json-evidence-gzip-v1",
+    "selfContainedPerStudy": true,
+    "crossStudyBlobStore": false,
+    "wholeFileDeduplication": false,
+    "semanticRecordDeduplication": false,
+    "compactJsonReserialization": false,
+    "dropRepeatedPairReports": false,
+    "dropScenariosOrTrajectories": false,
+    "rewriteHistoricalArchives": false
+  },
+  "formatContract": {
+    "explicitSelection": "A prospective request and retained root evidence-storage.json must agree on the format. Legacy requests without this selection remain plain JSON. No extension sniffing, automatic downgrade or default change.",
+    "eligibleLogicalPaths": [
+      "search/root-{01..12}/{control|candidate}/racing/search.json",
+      "study/pair-{01..12}.json",
+      "study/heldout-{01..12}-{lowercase-sha256}.json"
+    ],
+    "eligibility": "Only exact contract-derived paths. Always encode every eligible member; no size-dependent selection or post-measurement codec choice.",
+    "physicalPath": "Append .gz to the complete logical path, preserving its owning directory.",
+    "logicalBytes": "The exact UTF-8 byte sequence emitted by the existing serializer at that call site, including its existing property order, number representation and whitespace. The codec must not change serializer options or reconstruct JSON to calculate the digest.",
+    "codec": "One gzip member with DEFLATE, no filename, comment, extra field or timestamp; native writer uses CompressionLevel.Optimal. Physical encoding may depend on the pinned runtime; cross-language equivalence is exact decoded bytes, not equal compressed bytes.",
+    "indexes": "Each of the 24 racing directories and the study directory owns one evidence-storage.json. The root evidence-storage.json declares the format and exact index paths. Each owning manifest and every ancestor manifest authenticates its physical descendants and indexes.",
+    "indexSchema": {
+      "version": "tower-proposal-json-evidence-gzip-v1",
+      "entries": "Array sorted by logicalPath ordinal; no duplicate or case-colliding logical or physical paths.",
+      "entryFields": ["logicalPath", "physicalPath", "codec", "logicalBytes", "logicalSha256", "physicalBytes", "physicalSha256"],
+      "pathScope": "Canonical relative paths within the owning evidence directory; the only permitted mapping is logicalPath plus .gz.",
+      "codecValue": "gzip-json-bytes-v1"
+    },
+    "membership": "Expected logical members are derived from the frozen study/search contract and freeze, never merely accepted from the index. Compressed and plain copies of an eligible member cannot coexist. Index entries, payloads and physical manifest members must agree exactly. Unexpected files, missing entries and mixed versions fail verification.",
+    "preservedPlainMembers": "All other evidence, including complete placement catalogues, plans, freezes, attempts, charges, input/trial journals, recipes, summaries, receipts, source bindings, executable content and manifests. Existing gzip battle reports keep their existing format.",
+    "identity": "Logical scientific hashes, study/search versions, recipes, provenance, request order, role labels, complete outcomes, validation decisions and both audit reconstructions stay unchanged. New physical manifest and execution identities are expected and must be newly pinned.",
+    "writer": "Create new files only. Stream serializer output through logical byte counting and SHA-256, then gzip and physical byte counting. Charge physical bytes while writing. Finish and flush the payload before publishing its descriptor. Retain partial files on failure, abort publication, and preserve the full declaration charge. Do not compress an already published historical file in place.",
+    "durability": "Keep existing attempt and freeze ordering. A dependent phase cannot start before its required evidence barrier is durably complete. An index is finalized once after its eligible payloads finish and before its owning manifest is sealed.",
+    "reader": "Authenticate the external physical manifest, format binding, exact membership, physical lengths and hashes; enforce trusted decoded limits while streaming; verify gzip integrity and exact logical lengths and hashes before accepting reconstructed evidence. Reject truncation, trailing data, additional gzip members, invalid UTF-8, duplicate JSON keys, unsafe paths, links/junctions, unsupported codecs and integer overflow. Recheck physical evidence before audit completion.",
+    "limits": "A decoder receives positive logical-byte and member limits from its trusted prospective execution contract, never from the index alone. These must be frozen before use; missing limits fail closed. Stream decoding without a whole-file byte buffer or an unaccounted expanded archive. Any staged decoded file must count toward scratch and peak storage and be retained/charged on failure.",
+    "legacy": "Preserve the existing plain JSON read/write path and historical manifest authentication. New-format readers select exactly the requested version; legacy verification must not silently accept compressed replacements. Nested racing audits receive the authenticated expected format explicitly."
+  },
+  "resourceModel": {
+    "version": "tower-proposal-evidence-storage-cost-separation-v1",
+    "status": "AccountingAndComparabilityContractNoAdmissibleForecast",
+    "physicalBytes": "Sum every stored payload, index, manifest, source/runtime copy, receipt and failed/partial file; also record peak concurrent scratch. Compression headers and references are charged.",
+    "logicalJsonBytes": "Sum exact decoded byte counts for every compressed logical member plus plain logical JSON. Duplicate pair/search representations each remain charged as logical work.",
+    "decodedBytesProcessed": "Record bytes actually processed on every decoding/hash/parse pass in each audit; do not substitute unique payload bytes or compressed length.",
+    "counts": "Record physical and logical file counts, index entries, decoding passes, search/held-out trial and attempt counts, complete catalogue sizes and both audit traversals. Never collapse scientific work because storage bytes repeat.",
+    "phaseTime": "Retain end-to-end native, native-audit, independent-audit and publication costs including compression, decompression, inventory, hashing, reconstruction and retained failure receipts. No compression-only microbenchmark is a study timing sample.",
+    "equivalenceBeforeMeasurement": "Use synthetic codec and archive tests to establish exact decoded bytes and unchanged complete reconstruction in both languages before any new resource experiment is considered.",
+    "prospectiveComparisonUnit": "A later cost experiment must preregister the same complete logical workload on plain and compressed paths using the same current implementation, literal inputs, request order and corrected audits. Its completion state, phase boundaries, limits, execution order, denominator rule and failure charges must be fixed before running. Compare matched whole workloads; the failed 17280-report baseline and completed 18816-report placement archive are not this pair.",
+    "prohibitedInference": "Do not scale audit time by compressed physical-byte savings, treat inventory elapsed time as an audit sample, infer a new per-report denominator, normalize by a selected post-run count, or omit index, decoding, memory or scratch cost.",
+    "forecastRule": "Until a separately reviewed prospective methodology exists, keep every inherited time/storage floor, margin, reserve and cap. A compressed-byte ratio changes no historical floor and admits no run. A future time model must account for physical I/O, repeated decoded processing, trial reconstruction and publication, and reconcile all existing probe/pilot evidence without silently replacing its coefficients.",
+    "numericForecast": null,
+    "minimumCompressionRatio": null,
+    "expectedAuditSpeedup": null,
+    "newTimingExperimentRegistered": false,
+    "oldRecoveryAuditFloorSeconds": 1806,
+    "unchangedAuditCapSeconds": 1800,
+    "oldRecoveryGateStillClosed": true
+  },
+  "implementationSequence": [
+    "Add an opt-in native streaming codec and independently implemented Python decoder with exact-byte, bound, tamper and version tests using synthetic inputs; keep the default writer unchanged.",
+    "Integrate the three eligible evidence families, nested membership checks and both audits through explicit format selection; verify complete catalogues, trajectories, attempt ordering and legacy behavior without production entropy or scientific execution.",
+    "Record the new implementation/runtime hashes and a separate prospective resource protocol with complete accounting and a justified necessary gate before requesting any measured fixture, qualification or admission. If unchanged floors still fail, stop."
+  ],
+  "acceptanceTests": [
+    "Native-write/Python-read and Python-write/native-read recover identical UTF-8 bytes for Unicode, escaping, number forms, whitespace, large and empty documents.",
+    "Every logical and physical digest/length is authenticated; any altered payload or descriptor fails.",
+    "Reject torn gzip, wrong trailer, extra members/trailing bytes, duplicate index/JSON keys, missing or unexpected members, plain/compressed collisions, traversal, links and format downgrade.",
+    "Enforce trusted decoded/member/storage limits during streaming, including a highly compressible synthetic document; cancellation or failure cannot publish completion.",
+    "Synthetic full-shape study reconstruction retains every catalogue, search/validation/held-out observation, seed, role, provenance, ordinal and hash, including identical physical teams with different source provenance.",
+    "Both audit implementations independently reconstruct the same logical result for plain and compressed synthetic archives; codec read success alone is insufficient.",
+    "All legacy verification regressions pass, including permanently failed evidence remaining failed; no historical bytes or frozen recovery rules change.",
+    "Accounting includes indexes, duplicate logical records, every decode pass, temporary files and failed attempts; no physical compression ratio is used as a time multiplier."
+  ],
+  "currentStage": {
+    "codecImplemented": false,
+    "nativeSourcesChanged": false,
+    "archiveRewrites": 0,
+    "compressionTrials": 0,
+    "newTimingSamples": 0,
+    "nativePreparation": false,
+    "qualificationStarted": false,
+    "runtimeQualified": false,
+    "admitted": false,
+    "actualCombat": 0,
+    "productionEntropyDraws": 0,
+    "newScientificReservations": 0
+  }
+}

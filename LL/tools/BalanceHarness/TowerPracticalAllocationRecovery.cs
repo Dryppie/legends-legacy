@@ -22,7 +22,7 @@ public static partial class TowerPracticalReservationRecovery
         // Atomic binding writes occur in this exact order. At most one can be
         // interrupted, and no successor exists until its predecessor is durable.
         object[] expected = [allocation.Bound,
-            new TowerPracticalAllocationReceipt(TowerPracticalSearch.AllocationVersion, HarnessJson.Hash(source),
+            new TowerPracticalAllocationReceipt(source.Version, HarnessJson.Hash(source),
                 HarnessJson.Hash(allocation.Bound), allocation.Candidates, allocation.Rejections),
             new { reservationState = "Complete", historical, reserved },
             new { reservationState = "Complete", reserved }];

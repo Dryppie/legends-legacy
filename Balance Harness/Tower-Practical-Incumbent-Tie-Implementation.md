@@ -1,6 +1,6 @@
 # Optional incumbent tie selection
 
-22 September 2026. Target: offline BalanceHarness. Implements the opt-in `tower-staged-incumbent-tie-v1` policy proposed by the [saved selection tie audit](Tower-Practical-Selection-Tie-Review.md). This is an engineering change, not a new search-quality result. The existing `tower-staged-zero-win-health-v1` remains the default for practical supplied search. The confirmed team recommendation and closed racing/anchored comparison decisions remain unchanged.
+22 September 2026. Target: offline BalanceHarness. Implements the opt-in `tower-staged-incumbent-tie-v1` policy proposed by the [saved selection tie audit](Tower-Practical-Selection-Tie-Review.md). This review documents the engineering change; the subsequent [prospective comparison](Tower-Practical-Incumbent-Tie-Comparison-Execution.md) supplies separate quality evidence and returned **SupportsIncumbentTieForFrozenOutputs**. The existing `tower-staged-zero-win-health-v1` remains the default for practical supplied search. The confirmed team recommendation and closed racing/anchored comparison decisions remain unchanged.
 
 ## Behavior
 
@@ -63,6 +63,6 @@ The first sandboxed build could not read the user's NuGet configuration. The sam
 
 ## Next step
 
-The [prospective comparison design](Tower-Practical-Incumbent-Tie-Comparison-Plan.md) declares 24 common searches, confirmation only for differing outputs, a one-point average-gain gate and a 59,904-fight /4,500-second /4-GiB ceiling. Its [separate comparison runner and verifier are implemented](Tower-Practical-Incumbent-Tie-Comparison-Implementation.md), and the [captured launch package passed no-allocation admission](Tower-Practical-Incumbent-Tie-Comparison-Admission.md). Next: recheck live history, execute the single frozen comparison and independently audit its saved outcomes. No new experiment has run. The old five-point gates remain unchanged. The retrospective +7.9 and +2.8 point contrasts remain motivation only; they do not justify promoting this policy to the default.
+The [single prospective comparison completed](Tower-Practical-Incumbent-Tie-Comparison-Execution.md) under the frozen 24-restart design. Both native and independent audits passed: four differing outputs, four positive restarts, +2.575 points over the fixed 24,000 denominator and a +1.930-point conditional lower bound. The result supports the optional rule for the captured scope and frozen outputs. The subsequent [practical-search preset](Tower-Practical-Incumbent-Tie-Preset.md) now prepares explicitly designated inputs while preserving legacy definitions and archive replay. For a separately scoped future search, prepare current inputs and pass no-allocation admission. Default promotion remains a separate reviewed decision. The experiment is closed; the old five-point gates and retrospective audit findings remain unchanged.
 
 No gameplay logic, database schema or application configuration changed. There are no migrations or deployment steps. The new settings affect only definitions that explicitly opt into this offline selector.

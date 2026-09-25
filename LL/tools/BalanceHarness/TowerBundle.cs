@@ -69,7 +69,7 @@ public static class TowerBundle
         {
             var scorecard = Summarize(planned, trials, invalid, cancelled);
             HarnessJson.WriteNew(Path.Combine(output, "scorecard.json"), scorecard);
-            File.WriteAllText(Path.Combine(output, "scorecard.md"), Markdown(scorecard));
+            TowerWorkAccounting.WriteAllText(Path.Combine(output, "scorecard.md"), Markdown(scorecard));
             HarnessJson.WriteNew(Path.Combine(output, "tower-results.json"), trials.ToDictionary(t => t.Id,
                 t => HarnessJson.FileHash(Path.Combine(output, "battles", t.Id + ".json"))));
         }
@@ -95,7 +95,7 @@ public static class TowerBundle
             token.ThrowIfCancellationRequested();
             var destination = Path.Combine(snapshotRoot, "Data", file);
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-            File.Copy(Path.Combine(apiRoot, "Data", file), destination, false);
+            TowerWorkAccounting.CopyFile(Path.Combine(apiRoot, "Data", file), destination, false);
             hashes.Add(file, HarnessJson.FileHash(destination));
         }
         return hashes;

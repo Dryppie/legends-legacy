@@ -52,7 +52,7 @@ public static partial class TowerBossStudy
             Freeze("study.json", report);
             if (report.Balance is not null) Freeze("assessment.json", report.Balance);
             Freeze("report-format.json", ReportFormat);
-            File.WriteAllText(Path.Combine(output, "study.md"), Markdown(report, d));
+            TowerWorkAccounting.WriteAllText(Path.Combine(output, "study.md"), Markdown(report, d));
             return report;
         }
         catch (Exception exception)
@@ -154,7 +154,7 @@ public static partial class TowerBossStudy
             if (!copied.Add(relative)) return;
             token.ThrowIfCancellationRequested();
             var target = Path.Combine(destination, relative); Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            if (maximumBytes == long.MaxValue) File.Copy(Path.Combine(source, relative), target, overwrite: false);
+            if (maximumBytes == long.MaxValue) TowerWorkAccounting.CopyFile(Path.Combine(source, relative), target, overwrite: false);
             else written = checked(written + CopyBounded(Path.Combine(source, relative), target, maximumBytes - written, token));
         }
         foreach (var name in new[] { "BalanceHarness.dll", "BalanceHarness.deps.json", "BalanceHarness.runtimeconfig.json" }) Copy(name);
@@ -182,8 +182,8 @@ public static partial class TowerBossStudy
 
     internal static long CopyBounded(string source, string target, long maximumBytes, CancellationToken token)
     {
-        using var input = File.OpenRead(source);
-        using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write);
+        using var input = TowerWorkAccounting.ReadStream(File.OpenRead(source), source);
+        using var output = TowerWorkAccounting.WriteStream(new FileStream(target, FileMode.CreateNew, FileAccess.Write), target);
         var buffer = new byte[65536]; long written = 0;
         while (true) {
             token.ThrowIfCancellationRequested(); var count = input.Read(buffer); if (count == 0) return written;

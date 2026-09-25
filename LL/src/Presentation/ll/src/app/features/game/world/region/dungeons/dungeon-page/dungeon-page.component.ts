@@ -1,5 +1,11 @@
 import { equipmentSourceLabel } from '../../../../../../shared/utils/equipment/acquisition-source';
-import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  DecimalPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -28,7 +34,10 @@ import { InventoryItemComponent } from '../../../../../../shared/components/inve
 import { InventoryItem } from '../../../../../../shared/models/inventoryItem';
 import { HelpLauncherComponent } from '../../../../../../shared/help/help-launcher.component';
 import { DungeonDifficulty } from '../../../../../../shared/models/enums/dungeonDifficulty';
-import { DungeonPreviewData } from '../../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import {
+  DungeonMastery,
+  DungeonPreviewData,
+} from '../../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 
 interface DungeonGraphNode extends DungeonMapNode {
   x: number;
@@ -65,6 +74,7 @@ interface DungeonVigorForecast {
     NgIf,
     NgFor,
     NgClass,
+    NgTemplateOutlet,
     DecimalPipe,
     CombatComponent,
     DungeonRoomIconComponent,
@@ -115,6 +125,37 @@ export class DungeonPageComponent {
   readonly error = this.dungeonState.error;
   readonly message = this.dungeonState.message;
   readonly claimedRewardResult = signal<DungeonRewardResult | null>(null);
+  readonly endedRun = computed(
+    () =>
+      this.claimedRewardResult()?.run ??
+      (this.activeDungeon()?.status === DungeonRunStatus.Failed
+        ? this.activeDungeon()
+        : null),
+  );
+  readonly earnedMasteryExperience = computed(
+    () =>
+      this.endedRun()?.state.masteryAwardReasons?.reduce(
+        (total, reason) => total + reason.experience,
+        0,
+      ) ?? 0,
+  );
+  readonly endedRunMastery = computed<DungeonMastery | null>(() => {
+    const definitionId = this.endedRun()?.dungeonDefinitionId.toLowerCase();
+    if (!definitionId) return null;
+    return (
+      this.dungeonState
+        .dungeons()
+        .find((dungeon) => dungeon.id.toLowerCase() === definitionId)
+        ?.mastery ?? null
+    );
+  });
+  readonly masteryProgressPercent = computed(() => {
+    const mastery = this.endedRunMastery();
+    const next = mastery?.experienceRequiredForNextLevel;
+    return next && next > 0
+      ? Math.max(0, Math.min(100, (mastery.experience / next) * 100))
+      : 100;
+  });
   readonly viewportWidth = signal(
     typeof window === 'undefined' ? 1024 : window.innerWidth,
   );

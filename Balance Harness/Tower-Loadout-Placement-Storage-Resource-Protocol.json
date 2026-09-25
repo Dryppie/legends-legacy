@@ -1,0 +1,86 @@
+{
+  "version": "tower-loadout-placement-storage-resource-protocol-v1",
+  "status": "ProspectiveAccountingContractNoMeasurementAuthorization",
+  "target": "LL/tools/BalanceHarness offline placement studies",
+  "priorHandoff": "TestResults/loadout-placement-storage-integration-handoff-20260924.json",
+  "priorHandoffSha256": "1a22b7af978898ee10243fba7dafe518a5b7736c0bffc96c271ff301772bc9fa",
+  "storageFormat": "tower-proposal-json-evidence-gzip-v1",
+  "storageDesignSha256": "b846e608887e19c34c2a6b5a065a6a7d4e06aa3c08779269828e4f5e31ef471e",
+  "resources": {
+    "envelope": "tower-proposal-resource-envelope-v2",
+    "limits": {"nativeSeconds": 9000, "auditSeconds": 1800, "nativeBytes": 5905580032, "auditBytes": 536870912},
+    "timingMargin": 2,
+    "publicationReserveSeconds": 120,
+    "qualificationMaximumSeconds": 900,
+    "qualificationMaximumBytes": 1073741824,
+    "gateMaximumSeconds": 180,
+    "gateMaximumBytes": 67108864,
+    "fullGateAllowanceChargedAtStart": true
+  },
+  "necessaryGate": {
+    "rule": "ceil(max(authenticated recovery unrounded floor, any separately justified larger floor)) < cap for every partition",
+    "retainRecoveryFloors": true,
+    "physicalByteTimeDiscount": false,
+    "postTimingNormalization": false,
+    "numericCurrentForecast": null,
+    "measurementAuthorization": false,
+    "failure": "Close before preparation or measurement. A complete pair cannot overcome this protocol's inherited necessary floor. Do not register or run one under v1.",
+    "replacementEvidence": "A later version must explicitly identify a superseded formula component, establish a comparable replacement and bound every retained component prospectively. Additional instrumentation alone cannot supersede a floor. No arbitrary subtraction, selected faster sample, margin reduction or limit increase."
+  },
+  "matchedWorkload": {
+    "unit": "One complete placement study, emitted once as plain JSON and once with explicit gzip selection by the same current implementation",
+    "comparison": "Encoding only; both sides use the identical placement policy. This is not the former common-v5 versus placement comparison.",
+    "fixedBeforeAnyLaterRegistration": ["runtime and PDB/source hashes", "owner and both auditor hashes", "settings and captured content", "ten actors and five slots", "twelve roots and both policy arms", "literal evaluator and request order", "literal value and exclusion schedules", "all logical evidence hashes and counts", "phase boundaries and accounting collectors", "storage/member/decoded/memory/scratch bounds", "output locations and execution order", "cache policy and denominator rules", "complete failure charges"],
+    "controlFormat": "plain-json",
+    "candidateFormat": "tower-proposal-json-evidence-gzip-v1",
+    "executionOrder": ["plain-json", "tower-proposal-json-evidence-gzip-v1"],
+    "attemptsPerFormat": 1,
+    "warmups": 0,
+    "retries": 0,
+    "cachePolicy": "No manual cache clearing or intentional warming. Record fixed order; one pair cannot identify an order/cache effect or prove a speedup.",
+    "requiredEquality": ["decoded eligible member bytes and SHA-256", "all twelve catalogues", "plans and complete trajectories", "freeze and attempt ordering", "provenance and request bindings", "literal observations", "native and independent reconstructed results"],
+    "allowedDifferences": ["request storage selection and retained reader modules", "encoding payloads and indexes", "physical manifests and execution receipts", "preregistered output location metadata"],
+    "normalization": "None. Compare whole matched studies. Do not divide costs by observed reports, actors, slots, catalogue entries or compressed bytes.",
+    "incomplete": "Keep all partial outputs and full predeclared allowances for both formats, including an unstarted second arm. Stop without replacements, ratios, qualification or admission.",
+    "syntheticProof": "The pinned integration proof has 18816 literal rows, 6144 held-out observations and 60 encoded logical members. It is a correctness proof, not a cost sample or a worst-case bound for the 21888-fight scientific ceiling. A later forecast must separately justify coverage of the full declared workload."
+  },
+  "accounting": {
+    "phases": ["native", "nativeAudit", "independentAudit", "publication"],
+    "phaseBoundaries": {
+      "native": "Owner start, including input capture/authentication, through native process drain and receipt checks at audit_started.",
+      "nativeAudit": "audit_started, including protected inventory, through native-audit process drain and receipt retention, immediately before independent-audit launch.",
+      "independentAudit": "Independent-audit launch through process drain, receipt retention and bound result checks, immediately before publication-check launch.",
+      "publication": "Publication-check launch through all final checks, copying, inventory, manifests, completion, closeout, owner cleanup and enclosing process drain. An enclosing owner must account for the current closeout's unmeasured serialization/cleanup tail."
+    },
+    "endToEnd": "Use nonoverlapping enclosing wall-clock intervals including controller work, startup, failed work and cleanup. Their sum must reconcile with the enclosing owner interval. Subphase timings and CPU counters overlap and are diagnostic only; do not add them to their enclosing interval. Both audits and publication share the existing 1800-second partition.",
+    "applicationReadBytes": "Count every successful byte returned to application reads, including repeated manifest, payload, index, metadata, source/runtime and journal hashing/scanning. Partition reads by file role; hash/parse/decode purposes may overlap and must not be summed as extra I/O. These are logical application reads, not physical-device I/O or cache misses.",
+    "logicalJsonBytes": "Sum exact serializer bytes by logical member, retaining repeated pair/search representations separately. Include ordinary JSON, catalogue and journal work, not just the three encoded families.",
+    "decodedBytesProcessed": "Count every full and partial inflation pass in every process. Native and Python currently require two complete passes per successful encoded read. Never substitute distinct decoded bytes or stored compressed bytes. Retain partial counters on failure.",
+    "parseAndReconstruction": "Count every parsed JSON byte/document and complete root, trajectory, catalogue, held-out member, input/cache-key/report and endpoint reconstruction by phase. Native parse and Python Unicode/object materialization costs remain even when physical payloads shrink.",
+    "storage": "Inventory every retained payload, metadata/index/manifest, copied source/runtime, receipt, log and partial file. Count unique paths once for retained bytes, even if several manifests cover them; never deduplicate equal-content files. Charge native baseline and audit increment without borrowing across partitions.",
+    "scratch": "Account for all created scratch files, including temporary expanded JSON, concurrent retained-plus-scratch high water and failed/deleted output. An after-the-fact directory size is not a scratch peak. A zero value requires proof that no scratch was created, not a missing field.",
+    "memory": "Record peak process-tree committed memory plus owner memory with an explicit aggregation method and collector identity. Endpoint samples do not bound a peak. JSON byte limits are not process-memory limits. No memory bound or qualified memory footprint is inferred from current codec buffer sizes.",
+    "coverage": "Each phase needs a bound coverage declaration for every metric and its producer. Missing, unsupported or partially observed metrics are unknown, never zero. Counters are diagnostics and completeness checks; phase costs must still be measured end to end in a separately authorized future protocol.",
+    "failureAndCharging": "Retain and charge unsuccessful preparation, timeout, decode/parse failure, ownership cleanup and sealing work. Never deduct an unused allowance or drop a slower/failed observation. Read-only gate charges are separate from implementation tests and from unstarted measurement/qualification/scientific allowances."
+  },
+  "reconciliation": {
+    "failedOriginalPair": "Permanently failed with 24420 seconds and 13019119616 bytes charged. Its 17280-row native receipt is not a complete baseline. Its native denominator ceilings stay in the old recovery calculation; its failed audit supplies no complete denominator.",
+    "completedPlacement": "Retain original placement native/completed-closeout costs, including the 18816-row archive. Do not pair it with the failed 17280-row baseline or a newly encoded copy.",
+    "completedPilot": "Retain the 16256-fight completed pilot and its final closeout, the 21888-fight scaling, timing margin two and inherited floors. It uses historical representation/runtime and is not a current compressed observation.",
+    "probe": "Retain the complete whole-worker cost, both independent audits, storage-scaled extra inventories and 120-second publication reserve. The whole-worker cost contains workload generation and reconstruction; do not discard it or infer a decompression coefficient from it. The inventory coefficient is an old archive-byte extrapolation, not an identified end-to-end compressed-time model.",
+    "integrationTests": "Exact decoded bytes and results establish correctness only. Native codec counters cover payload I/O and decoding in one synthetic audit; they omit manifests, metadata, the owner and the independent process. No test duration or compression ratio becomes a forecast input.",
+    "forecast": "A later complete measured projection may increase each floor. This v1 deliberately grants no downward credit and has no current-format numerical forecast. A replacement coefficient requires a separate justified prospective amendment before any measurement; v1 cannot bootstrap that evidence by running a blocked pair."
+  },
+  "readiness": {
+    "exactSyntheticEquivalence": "Established by the externally pinned complete integration proof",
+    "completeOwnedLifecycle": "Not exercised for the compressed format",
+    "phaseApplicationReadAccounting": "Missing outside codec payload reads",
+    "parseReconstructionAccounting": "No complete per-phase work receipt",
+    "peakMemoryAccounting": "No complete process-tree plus owner peak receipt",
+    "peakScratchAccounting": "No complete lifetime accounting",
+    "publicationTailAccounting": "Current closeout precedes its own write and owner cleanup",
+    "worstCaseWorkloadProjection": "No current-format model covering the declared scientific ceiling",
+    "numericMemoryAndScratchBounds": "Must be separately justified and fixed before a future measurement registration"
+  },
+  "nextImplementation": "Add complete work-accounting collectors and receipts with deterministic synthetic success/failure tests in fresh directories. Keep preparation/launch blocked. Review an explicit replacement model only when every affected historical term can be reconciled; do not infer that instrumentation alone permits timing."
+}

@@ -30,6 +30,11 @@ public sealed class RealtimeCharacterGameEventOutboxConsumer(
         var payload = JsonSerializer.Deserialize<CharacterLevelReachedPayload>(message.PayloadJson, jsonOptions)
             ?? throw new InvalidOperationException("Character level reached payload is invalid.");
 
+        // Legacy outbox payloads have no XP snapshot. Broadcasting their default
+        // zero would replace the client's valid next-level requirement.
+        if (payload.ExperienceUntilNextLevel <= 0)
+            return;
+
         await eventPublisher.PublishAsync(
             new Audience.Character(payload.CharacterId),
             new CharacterLevelUp(

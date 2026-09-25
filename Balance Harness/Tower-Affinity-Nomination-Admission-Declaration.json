@@ -1,0 +1,33 @@
+{
+  "version": "tower-affinity-nomination-admission-v1",
+  "qualificationManifestSha256": "7716aff915e9c807e47a885d2c8ce568ed3bbca681cf736d48143b8c02eec45d",
+  "maximumManifestSha256": "23d475110ad55ab6c580245008d0241a910bf3d4007e9958fc2c232d9c45f744",
+  "inheritedForecastSha256": "76b24b731f5f720258acefec6a93c3ecc69fc6c908ae9c7f323c9ac4ff98e3e7",
+  "previousRequestSha256": "18206052f18f233aca148f92ed9e27dd4038da06f120f09db72e26e0e134ac7e",
+  "sourcePins": {
+    "Balance Harness/analysis/admit-affinity-nomination.py": "ed6c933b2c7711ca15afe6f36678e6c4d2c85ae6350b91a91001f8567c702afa",
+    "Balance Harness/analysis/run-affinity-nomination-cycle.py": "c475ecf546add7c6bd7959078a8f759dc25e5b71ee5c796516a35834f6545e81",
+    "Balance Harness/Tower-Affinity-Search-Consolidation.md": "a9a84c32d0a8c12f15843469621cafcf87967a022be400a643c7f0924f32d156",
+    "Balance Harness/analysis/loadout-placement-admission-bind.ps1": "77a4251f0041d6147b8b93df768bb63cd6de397544aab904e1bb9e2ec1aeb954",
+    "Balance Harness/analysis/prepare-proposal-affinity-admission.py": "d3300ff7ec7c538ca6ac140403fcbb8c3fbe211734e626fc2eed6a3574b3c963",
+    "TestResults/three-reference-admission-closeout-20260922/comparison-preparation.py": "edcda4fbbc9f2c19ee9e23ce0ffb15b44f7e29c9596e63982406edd470c0224b",
+    "build/run-proposal-affinity-study.py": "9fea15452dbe5f5d771fc3546ff8ee070761060549531f0fa57dd2b32c1afba4",
+    "build/bounded_windows_process.py": "b3fd07f8f5c564bcb1c04191cf162c5a42bc0d8d6284ac603525c70e263e19e7",
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "8110d13fdd4f738ba22469dff051ba9d42605af6433c16f9e0ac4ae82672b1e9",
+    "Balance Harness/analysis/admit-loadout-placement-qualified.py": "8614c9c1d2056ccfd552ab20ef14c43b20e4a20969d5029e42c22d35d68e7a8d"
+  },
+  "attempts": 1,
+  "retryPermitted": false,
+  "chargedSeconds": 900,
+  "chargedBytes": 1073741824,
+  "scientificAttempts": 1,
+  "maximumFights": 21888,
+  "requiredFreshValues": 4380,
+  "scientificSeconds": 10800,
+  "scientificBytes": 6442450944,
+  "design": "Original affinity creation and identical training. Only generated finalists can be experimental challengers. Exact validation unchanged.",
+  "resourceRule": "No discount: retain every qualified placement floor, scale the complete current synthetic workload and postverification upward for history growth, factor two plus publication reserve. Reject any partition at its limit.",
+  "actualCombat": 0,
+  "productionEntropyDraws": 0,
+  "newReservations": 0
+}

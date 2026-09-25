@@ -1,0 +1,56 @@
+{
+  "version": "tower-affinity-creation-recognition-v1",
+  "admissionVersion": "tower-affinity-creation-recognition-admission-v1",
+  "package": "TestResults/affinity-creation-recognition-admission-20260924",
+  "output": "TestResults/balance/tower-affinity-creation-recognition-20260924",
+  "chargedSeconds": 600,
+  "chargedBytes": 536870912,
+  "scientificSeconds": 7200,
+  "scientificBytes": 3758096384,
+  "priorRecordedSeconds": 30405.312000000034,
+  "priorRecordedBytes": 25525204135,
+  "priorDeclaredMaximumSeconds": 67680,
+  "priorDeclaredMaximumBytes": 43486543872,
+  "planSha256": "170065b593a49609e72142d766443c3a47f7a271b937cc88d52436de2b4792a2",
+  "harnessSha256": "bcfd818a72244dbe3526a075627d2ba4c91d66dce9484fcc64405acdcb771811",
+  "sourceManifests": {
+    "capture": "e6fdb1369df6585fde905523e3190af221ef0dc9323e4b3ae3b1bf37659b5576",
+    "pilot": "fd96c4d21a27a32ad17ab750d2972a6b7dab54d09950661042b9f3af56859504",
+    "recognition": "5fd7e9eb38eb4319f41be7a0e874297a897c7a32a73d09030261579b2473b377",
+    "verification": "b88172e86d6565a3098bee992e8bcd9694dc88588951ac82feb22cc7290b6065",
+    "fixture": "6c03bfe9eda04a2ce54cf6ee9712c1f107df1afd4068edb371bada5cbf3b150b"
+  },
+  "populationManifests": {
+    "catalogue": "ccd05f08fda2c86ab014c12ca056d061053683d7b47c69cafee6902a08831814",
+    "sampling": "4062d335ff704b6d523dff8c2d950e1ba185a57246ec4cf6635db0decf936b63",
+    "plan": "4c7e048591ce426ea2301c2b1596ac8c61fcc2aced076b675be17027373cf7d8"
+  },
+  "closeoutPins": {
+    "pilot": "15e192e436940e9bea9df5849b0305b02b71ffc33854cf025c5edb71272c46bb",
+    "recognition": "5e0787ce6ed76435411d50532c56bd69c64797755d7ae612bb53b2b9a7d26e70"
+  },
+  "retries": 0,
+  "timingResamples": 0,
+  "scientificLaunches": 0,
+  "forecastRule": "Margin 2. Native time: maximum of completed recognition and v5 time per fight scaled to 27648, plus current context/check elapsed time. Audit time: same maximum using full closeout audit times, plus current context/check elapsed time. Native storage: 27648 times the maximum authenticated gzip report size across both studies, plus the larger of recognition non-report native bytes and current literal-fixture native bytes, plus 64 MiB. Audit storage: larger of historical/fixture audit bytes scaled for fight count plus 16 MiB. Apply margin 2 to every estimate; no downward correction or timing retry.",
+  "harnessFiles": {
+    "BalanceHarness.dll": "bcfd818a72244dbe3526a075627d2ba4c91d66dce9484fcc64405acdcb771811",
+    "BalanceHarness.pdb": "fdb14c507c3896cb04d71330e1d30ae970da096dbbef574e0b5063b07027c80b",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/prepare-affinity-creation-recognition.py": "b7bda6126f7c8846225c2729838cf4115b3b8b67392c2beb207d45d1874ff0a1",
+    "Balance Harness/analysis/affinity-creation-recognition-context.ps1": "286922b98150bd101af0ad99582547951dc9581d2dbe966139515da1d2c24881",
+    "Balance Harness/analysis/test-affinity-creation-recognition-admission.py": "0006454cd93740b87125ae00ded35967ce2acb5c9ee88810df8b82a310d54ab7",
+    "Balance Harness/analysis/audit-affinity-creation-recognition.py": "46130700d1b55246bd12ce43f9a65e7946fb96dd01d4b5fdb3333853f5a33dbe",
+    "build/run-affinity-creation-recognition.py": "6456215acb32b7fe4829d304728f5d378693dc036eae587d3e7ab53fd40e0288",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30"
+  },
+  "tests": {
+    "path": "TestResults/affinity-creation-recognition-admission-tests-final-20260924.log",
+    "sha256": "903e3a5fc3458d3480144b906127822ff7043ef80f7639061150734a13550446",
+    "passed": 19,
+    "failed": 0
+  }
+}

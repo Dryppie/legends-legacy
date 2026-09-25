@@ -1,0 +1,45 @@
+{
+  "version": "tower-adaptive-racing-study-declaration-v1",
+  "studyId": "tower-adaptive-racing-pilot-02",
+  "protocol": "tower-adaptive-racing-comparison-v1",
+  "protocolPlanSha256": "268159cb2f03a44066e76012e34591e560ce74f1d84acf79617d07503378d550",
+  "purpose": "One fresh pilot following a diagnosed launcher monitoring failure; no outcome-directed tuning.",
+  "previousStudy": {
+    "disposition": "ClosedTechnicalFailureNoEfficacyResult",
+    "executionManifestSha256": "79cae962fa8e684ffbff77fd7402008c00efd049959aa7c3aec7785c692aa7d4",
+    "failedInventorySha256": "435e31a83910280530427b8564e8c938b65794c404aa5b13a6c8def01251f5fd",
+    "completedSearchFights": 2640,
+    "heldoutFights": 0,
+    "freshValuesPermanentlyReserved": 16383,
+    "reuseRootsOrObservations": false,
+    "poolResults": false
+  },
+  "change": {
+    "launcherSha256": "4972e277baeb60afcd91532d9863e114f73fd567d07aa3d1568d1212484a9d83",
+    "description": "Live storage accounting resolves a completed atomic .pending rename without omitting temporary bytes.",
+    "searchAlgorithmChanged": false,
+    "nativeHarnessChanged": false,
+    "comparisonDesignChanged": false,
+    "capturedGameplayChanged": false
+  },
+  "history": {
+    "values": 649696,
+    "files": 242,
+    "inventorySha256": "5766bcfb3f5e36ba85833dd8404ad78ee8a48a2b9702cc9b6cb6243530c68734"
+  },
+  "allocation": "One new 16384-word entropy batch; exclude all prior values; permanently reserve every fresh value including the unused tail.",
+  "roots": 12,
+  "maximumFights": 28032,
+  "assignedValues": 4428,
+  "resources": {
+    "admissionSeconds": 600,
+    "admissionBytes": 536870912,
+    "launchSeconds": 10800,
+    "launchBytes": 6442450944,
+    "nativeSeconds": 10680,
+    "nativeBytes": 6174015488,
+    "transferUnusedPriorAllowance": false
+  },
+  "failure": "Close this study; retain all failures and reservations; no retry, resume or replacement roots.",
+  "interpretation": "Report both studies' operational outcomes. This study alone supplies any efficacy result; development criteria only, no promotion or adoption."
+}

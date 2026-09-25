@@ -38,6 +38,20 @@ describe('CharacterStateService level-up synchronization', () => {
 
     expect(updated).toBe(character);
   });
+
+  it('ignores a level-up event without a valid next-level requirement', () => {
+    const character = createCharacter();
+
+    const updated = applyCharacterLevelUp(character, {
+      characterId: character.id,
+      level: 3,
+      experience: 42,
+      experienceUntilNextLevel: 0,
+      unlockedEssenceSlots: 1,
+    });
+
+    expect(updated).toBe(character);
+  });
 });
 
 function createCharacter(

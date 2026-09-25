@@ -1,0 +1,59 @@
+{
+  "version": "tower-affinity-creation-admission-v1",
+  "studyVersion": "tower-affinity-creation-comparison-v1",
+  "scopeId": "affinity-creation-pilot-01",
+  "package": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\affinity-creation-admission-20260923",
+  "output": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\balance\\tower-affinity-creation-pilot-01-20260923",
+  "harness": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\affinity-creation-study-build-20260923\\bin\\BalanceHarness\\release",
+  "resourceEnvelope": "tower-proposal-resource-envelope-v2",
+  "chargedSeconds": 900,
+  "chargedBytes": 1073741824,
+  "scientificMaximumSeconds": 10800,
+  "scientificMaximumBytes": 6442450944,
+  "precedingChargedSeconds": 20715.17200000002,
+  "precedingChargedBytes": 15939176965,
+  "originalPlanFileSha256": "efb477737fcbc104294d7a96532ae86de4ace3ee6f23ef8d0e6e6be1d0ed6b31",
+  "harnessSha256": "bf2e5c1f283ea566184099fe1686ed8e9de1774f6ea0afdd5dd8c79a65a77cf4",
+  "backendTestCount": 140,
+  "probeRecipeInstances": 48,
+  "preparationsPerRuntime": 96,
+  "retries": 0,
+  "timingResamples": 0,
+  "scientificLaunches": 0,
+  "admissionOnly": true,
+  "sourceManifests": {
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-affinity-pilot-02-admission-repaired-20260923": "e5172f3b6b3db3ddcbe2e4a68cdd96eeb04e6822a3e65d12078676b1da7979fa",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\affinity-creation-preview-20260923": "db58d54f7a1c595e6b39995508643f16207941be9b772719ac039a9e1775ad39",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\affinity-creation-study-verification-20260923": "77101ab1174dc5cb96b464ce03e5639865c49d2882cd37f598631e27d5804aba",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\affinity-creation-native-qualification-repaired-20260923": "171d8615636b5a1b531e2f5d81f36f4e29ad61bc0764686a8250103622d405c1",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\balance\\tower-proposal-affinity-pilot-02-20260923": "f0d4d22531f4c46426c28224102d193a91c0d20318377b71b95e2fe19f4acc33",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-creation-versioned-20260923\\result": "9334cb659e5615490c1e957199264e1fee081851e9415c3f71d5e4c1f7076c06",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\tower-proposal-owned-fixture-preservation-versioned-20260923\\result": "d70d324e4ddd820c6732679b0a077c866fc2ed89519a92e923146aff2b05b36b",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\balance\\tower-frozen-pool-recognition-repaired-20260923": "5fd7e9eb38eb4319f41be7a0e874297a897c7a32a73d09030261579b2473b377",
+    "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\proposal-native-audit-cost-probe-20260923": "8929c5b94a95e717e8f7ec2ffb4d94ee01d0cbc9083e4b31873f635a5cc85cf7"
+  },
+  "forecastRule": "Upward-only maximum of prior admission, frozen native audit probe, current preparation and creation-fixture forecast, and twice the completed preservation study scaled to 21888 fights with upward-only creation/preservation fixture phase ratios. Apply all storage floors before scaling the frozen audit probe. Margin 2 and publication reserve 120 remain. No timing retry.",
+  "harnessFiles": {
+    "BalanceHarness.dll": "bf2e5c1f283ea566184099fe1686ed8e9de1774f6ea0afdd5dd8c79a65a77cf4",
+    "BalanceHarness.pdb": "f5761080ebca3bfed0570eb0b2e89742e5dd589a2847770da9834d712e5aaac8",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/prepare-affinity-creation-admission.py": "93e79ab2ad98e7f42a6477cbc6f98339eca54a1654c2e74301643c687e02c1ff",
+    "Balance Harness/analysis/test-affinity-creation-admission.py": "a12c3d6fd0473a9d1547c0e47403a8d98beada64e4d94ddecd106be489d0c303",
+    "Balance Harness/analysis/prepare-proposal-affinity-admission.py": "d3300ff7ec7c538ca6ac140403fcbb8c3fbe211734e626fc2eed6a3574b3c963",
+    "Balance Harness/analysis/prepare-proposal-affinity-resource-admission.py": "81d3544bb4098d330b6f91d5a3240720315915dee9461288f6a8c0777861e5eb",
+    "Balance Harness/analysis/proposal-affinity-admission-context.ps1": "6c260949a6eda0eb9dfe475cee06b43d33fa01de142edafb27171638b1e39c13",
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "ed1528378c9c7e7d696ebf60aa8dde931e3e82c3d093140fb6da066d64d7f703",
+    "build/run-proposal-affinity-study.py": "921d1a66e1ba38630e6a55b4db109b782a38966d499cf84ed17b397d00a6a30f",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30",
+    "TestResults\\three-reference-admission-closeout-20260922\\comparison-preparation.py": "edcda4fbbc9f2c19ee9e23ce0ffb15b44f7e29c9596e63982406edd470c0224b"
+  },
+  "tests": {
+    "path": "C:\\repos\\Legends-Legacy\\legends-legacy\\TestResults\\affinity-creation-admission-tests-20260923.log",
+    "sha256": "39ea166df13bdaee846650f27c9b14c381132f932a4f2bf32b08efff3970dea2",
+    "passed": 19,
+    "failed": 0
+  }
+}

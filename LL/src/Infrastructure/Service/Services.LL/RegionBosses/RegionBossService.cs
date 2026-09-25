@@ -38,7 +38,6 @@ public sealed class RegionBossService(
     ILogger<RegionBossService> logger) : IRegionBossService
 {
     private const int MaximumDevelopmentSignups = 95;
-    private static readonly TimeSpan AutomaticSignupActivityWindow = TimeSpan.FromHours(24);
     private static readonly RegionBossEventStatus[] VisibleStatuses =
         [RegionBossEventStatus.Scheduled, RegionBossEventStatus.SignupOpen, RegionBossEventStatus.Matching,
             RegionBossEventStatus.Resolving, RegionBossEventStatus.Playback, RegionBossEventStatus.Settled,
@@ -860,19 +859,19 @@ public sealed class RegionBossService(
             return;
         }
 
-        var activityCutoff = now.Subtract(AutomaticSignupActivityWindow);
-        var candidates = await db.CharacterActions.AsNoTracking()
-            .Where(action => action.UpdatedAt >= activityCutoff)
+        var candidates = await db.NobilityMemberships.AsNoTracking()
+            .Where(membership => membership.Coverage.Any(coverage =>
+                coverage.StartsAt <= now && now < coverage.EndsAt))
             .Join(
                 db.Characters.AsNoTracking()
                     .Where(character => character.Level >= definition.LevelRequirement),
-                action => action.CharacterId,
-                character => character.Id,
-                (action, character) => new AutomaticSignupCandidate(
+                membership => membership.AccountId,
+                character => character.UserId,
+                (membership, character) => new AutomaticSignupCandidate(
                     character.Id,
                     character.UserId,
                     character.Name,
-                    action.UpdatedAt))
+                    character.Id == membership.RewardCharacterId))
             .ToArrayAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(definition.RequiredCompletedQuestId))
@@ -896,7 +895,7 @@ public sealed class RegionBossService(
                 && !signedAccountIds.Contains(candidate.AccountId))
             .GroupBy(candidate => candidate.AccountId)
             .Select(group => group
-                .OrderByDescending(candidate => candidate.LastActivityAtUtc)
+                .OrderByDescending(candidate => candidate.IsMembershipRewardCharacter)
                 .ThenBy(candidate => candidate.CharacterId)
                 .First())
             .ToArray();
@@ -936,7 +935,7 @@ public sealed class RegionBossService(
         Guid CharacterId,
         Guid AccountId,
         string CharacterName,
-        DateTimeOffset LastActivityAtUtc);
+        bool IsMembershipRewardCharacter);
 
     private async Task<RegionBossEvent?> LoadSignupEventForUpdateAsync(
         Guid eventId,
@@ -1148,7 +1147,7 @@ public sealed class RegionBossService(
         EnqueueChatAnnouncementAsync(
             item,
             $"Region Boss signups are now open for {definition.Name}! "
-                + "Players active within the last 24 hours have been signed up automatically.",
+                + "Players with active Noble status have been signed up automatically.",
             "signup-opened",
             sentAt,
             isSignupInvite: true,

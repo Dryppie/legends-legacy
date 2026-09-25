@@ -1,0 +1,66 @@
+{
+  "version": "tower-affinity-neighborhood-recognition-v1",
+  "admissionVersion": "tower-affinity-neighborhood-recognition-admission-v1",
+  "package": "TestResults/affinity-neighborhood-recognition-admission-20260924",
+  "output": "TestResults/balance/tower-affinity-neighborhood-recognition-20260924",
+  "chargedSeconds": 1800,
+  "chargedBytes": 536870912,
+  "scientificSeconds": 18000,
+  "scientificBytes": 18253611008,
+  "postpublicationSeconds": 3600,
+  "postpublicationBytes": 268435456,
+  "priorRecordedSeconds": 41262.09795319999,
+  "priorRecordedBytes": 33519903348,
+  "priorDeclaredMaximumSeconds": 116580,
+  "priorDeclaredMaximumBytes": 72360132608,
+  "planSha256": "a0b4a5dbc8fe7c65d4df80bfcb17b8f5623343cef7e0c1a1f2506648b3e2fc2b",
+  "harnessSha256": "99fb2ec24db2a6de93b8317471a13ac53a04d3a36294708e3b405f7c4792b70f",
+  "sourceManifests": {
+    "capture": "c8eb52d39b57fc385a5e88330a8ec621908a3345ef3d12c33360cbdcb361e68d",
+    "pilot": "c9d191a8f81439d6bfa947e8c62bd74a6e35352ee5d999b8dcd9ecdfdded54ef",
+    "recognition": "dcea52f2ed251c04d3985679cfb31e71285814fa6e97199fc35379f4e82a6c39",
+    "verification": "320d6d937f9761c8331c68082c18e3edf9569a63f63d1ee3a6f4a86162cbf93a",
+    "publication": "5a1553cf3c0591086514c632ced8c0513ac31cce5ceb8d4dae559156ea8aa7dc",
+    "recognition-publication": "5fffafb823e3d17bb4bc301f51d9b691da393c8ab48a6a0d01caa1b2ddd91c2c",
+    "review": "84226a6dd0eb2087ac8df8a37fc0e90c5c4cfb990d28547ee48bdf0fa6900f1d",
+    "fixture": "f79c5ce7c8362f03be0322238467274564962093e9fe32e49660744a3ae863e7",
+    "fixture-proof": "b81b63c8ac129dbee40c5846ea5560870f2baeca092d8bc5f348520226035b52"
+  },
+  "planManifestSha256": "a86890051d8fa44f54855f9b2bde7b9435dc9f6005faad683d698d54811539be",
+  "closeoutPins": {
+    "pilot": "f58552cbd568e66f6e76090f01cd0be8d450e173b552513d445e97a73379dc82",
+    "recognition": "c7e197010b7611afc1fcd814c731faefb285834f7d170225fc95691887a714ce"
+  },
+  "retries": 0,
+  "timingResamples": 0,
+  "scientificLaunches": 0,
+  "phaseCaps": {
+    "nativeSeconds": 14400,
+    "nativeBytes": 17179869184,
+    "auditSeconds": 3600,
+    "auditBytes": 1073741824,
+    "postpublicationSeconds": 3600,
+    "postpublicationBytes": 268435456
+  },
+  "forecastRule": "Margin 2 applied independently to every estimate. Target 90112 fights. Native, audit and full postpublication time each use the maximum observed time per actual fight in the closed allied-action pilot (16256) and preservation recognition (37120), plus current preparation time. Native bytes use target times maximum authenticated gzip size plus maximum non-report native overhead from either real study or the current full literal fixture plus 64 MiB. Audit bytes use maximum scaled historical or full literal-fixture audit bytes plus 16 MiB. Postpublication bytes use maximum scaled authenticated publication package bytes plus current definition/request bytes and 16 MiB; its time also has the full literal-fixture verification floor. No downward correction, timing retry, sample reduction or transfer between caps.",
+  "harnessFiles": {
+    "BalanceHarness.dll": "99fb2ec24db2a6de93b8317471a13ac53a04d3a36294708e3b405f7c4792b70f",
+    "BalanceHarness.pdb": "7502be4a912de7c30d81fb4c1c27362fe6e9ceb44433206b455880adbf3c2c35",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/prepare-affinity-neighborhood-recognition.py": "cece756ad6fad0e1fd2454f646fe40f8c27ef74a1ead134ae5636c89b2c549ca",
+    "Balance Harness/analysis/affinity-neighborhood-recognition-context.ps1": "4c7144c9bb039042eeca2675572d75a7b3385d05005f80fe91bf47592483a51b",
+    "Balance Harness/analysis/test-affinity-neighborhood-recognition-admission.py": "be6b46c6c2f0e7e5bb2dee36364d182d2137e5483f11599cbef1eafe27167e12",
+    "Balance Harness/analysis/audit-affinity-neighborhood-recognition.py": "6542f4c58f6a1f99972ca62fe04dc3f7e37fdb43e205233b4d5f906d8ba631da",
+    "build/run-affinity-neighborhood-recognition.py": "4fe7f5bdd28abd7aef9ead52f11dd7bb58763683736dca74dd8080085ebc6553",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30"
+  },
+  "tests": {
+    "path": "TestResults/affinity-neighborhood-recognition-admission-verification-20260924/admission-tests.log",
+    "sha256": "cce3d52d1a9b49f83180d9c2335d73f42b3653af99ecd0648c57fcb65db550cb",
+    "passed": 25,
+    "failed": 0
+  }
+}

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Serialization;
 using Domain.Models.Combat;
 using Domain.Models.WorldTower;
 
@@ -11,7 +12,8 @@ public sealed record TowerPracticalResult(string Version, string ExecutionStatus
     string StrengthDecision, string? SelectedPartyId, IReadOnlyList<string> SelectedReferenceAncestry,
     IReadOnlyList<string> RecommendedPartyIds, RateEstimate? SelectedRate,
     IReadOnlyList<TowerPracticalContrast> Contrasts, GoalOutcome? BalanceAssessment,
-    string StopReason, string? StudyHash, string? ArchiveHash);
+    string StopReason, string? StudyHash, string? ArchiveHash,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<TowerDiagnosticRate>? Rates = null);
 public sealed record TowerPracticalTeam(string PartyId, string Role, bool Recommended, TowerScenario Scenario,
     IReadOnlyDictionary<int, int> Subgroups, IReadOnlyDictionary<string, int> RequiredCopies,
     IReadOnlyList<string> ReferenceIds, IReadOnlyList<string> SuppliedAncestry);
@@ -19,7 +21,7 @@ public sealed record TowerPracticalTeams(string Version, string StrengthDecision
     string StudyHash, string ArchiveHash, IReadOnlyDictionary<string, string> ContentHashes,
     string SettingsHash, string ExecutionHash, IReadOnlyList<TowerPracticalTeam> Teams);
 
-/// <summary>A practical result contract over the unchanged incumbent kernel. Never infers authentication from JSON alone.</summary>
+/// <summary>Versioned practical results over supplied-reference kernels. Never infers authentication from JSON alone.</summary>
 public static partial class TowerPracticalSearch
 {
     public const string Version = "tower-practical-search-v1";
@@ -34,7 +36,7 @@ public static partial class TowerPracticalSearch
                 TowerSuppliedCompositionSearch.IncumbentVersion) : source;
         TowerBossDiscovery.Validate(d);
         Require(d.Mode == TowerBossDiscovery.Improve && TowerSuppliedCompositionSearch.PreservesIncumbents(d.Generation.PolicyVersion),
-            "Practical search requires an incumbent, racing or anchored-neighborhood policy, or a compatible independent source definition.");
+            "Practical search requires an incumbent, three-reference, racing or anchored-neighborhood policy, or a compatible independent source definition.");
         var scheduled = Reserved(d);
         Require(scheduled.Distinct().Count() == scheduled.Length && !scheduled.Intersect(d.ExcludedCombatSeeds).Any(),
             "Construction and combat schedules must be mutually distinct and absent from the complete historical union.");
@@ -47,7 +49,7 @@ public static partial class TowerPracticalSearch
         d.Stages.Schedules.Values.SelectMany(s => s.Discovery.Concat(s.Selection).Concat(s.Confirmation))).ToArray();
 
     internal static TowerPracticalResult Unverified(string execution, string integrity, string reason,
-        BossStudyReport? report = null) => new(Version, execution, integrity,
+        BossStudyReport? report = null, string resultVersion = Version) => new(resultVersion, execution, integrity,
             execution is "Incomplete" or "Cancelled" ? "IncompleteEvidence" : "IntegrityFailure", null, [], [], null, [],
             report?.Balance?.Assessment, reason, report is null ? null : HarnessJson.Hash(report), null);
 
@@ -56,14 +58,17 @@ public static partial class TowerPracticalSearch
     {
         Prepare(d);
         Require(TowerContractJson.Hash(archiveHash), "Missing verified archive identity.");
-        if (report.Status != "Complete") return Unverified(report.Status, "NotVerified", report.Error ?? report.Status, report);
+        var resultVersion = ResultVersion(d);
+        var intervalFamily = resultVersion == ThreeReferenceVersion ? 10 : IntervalFamily;
+        if (report.Status != "Complete") return Unverified(report.Status, "NotVerified", report.Error ?? report.Status, report, resultVersion);
         Require(report.ExitCode is 0 or 1 or 3 && report.Confirmation is not null && report.Discovery?.Status == "Complete"
             && report.Balance is not null && report.Accounting.Attempted.All(p => report.Accounting.Completed[p.Key] == p.Value),
             "Incomplete practical execution cannot establish improvement.");
         var family = report.Confirmation!;
         var primary = family.Members.Single(m => m.Primary);
         var selected = primary.GeneratedIds.Single();
-        Require(family.Members.Count is 2 or 3 && family.Members.SelectMany(m => m.ReferenceIds).Order(StringComparer.Ordinal)
+        Require(family.Members.Count >= d.References.Count && family.Members.Count <= d.References.Count + 1
+            && family.Members.SelectMany(m => m.ReferenceIds).Order(StringComparer.Ordinal)
             .SequenceEqual(d.References.Select(r => r.Id).Order(StringComparer.Ordinal)), "Changed practical confirmation family.");
         var schedule = d.Stages.Schedules.Single().Value.Confirmation;
         bool[] Wins(BossConfirmationMember member)
@@ -74,13 +79,13 @@ public static partial class TowerPracticalSearch
             return evidence.Trials.Select(t => t.Outcome == BattleOutcome.Victory).ToArray();
         }
         var wins = Wins(primary); var n = wins.Length;
-        var rate = TowerBalanceEvaluator.Wilson(wins.Count(w => w), n, IntervalFamily)!;
+        var rate = TowerBalanceEvaluator.Wilson(wins.Count(w => w), n, intervalFamily)!;
         var contrasts = d.References.Select(reference => {
             var anchor = Wins(family.Members.Single(m => m.ReferenceIds.Contains(reference.Id)));
             var gained = wins.Zip(anchor).Count(p => p.First && !p.Second);
             var lost = wins.Zip(anchor).Count(p => !p.First && p.Second);
-            var g = TowerBalanceEvaluator.Wilson(gained, n, IntervalFamily)!;
-            var l = TowerBalanceEvaluator.Wilson(lost, n, IntervalFamily)!;
+            var g = TowerBalanceEvaluator.Wilson(gained, n, intervalFamily)!;
+            var l = TowerBalanceEvaluator.Wilson(lost, n, intervalFamily)!;
             return new TowerPracticalContrast(reference.Id, gained, lost, (gained - lost) / (double)n,
                 g.Lower - l.Upper, g.Upper - l.Lower);
         }).ToArray();
@@ -89,9 +94,14 @@ public static partial class TowerPracticalSearch
         var decision = !novel ? "IncumbentRetained" : improved ? "DemonstratedImprovement" : "ImprovementNotDemonstrated";
         var ancestry = Ancestry(report, selected);
         var recommended = improved ? new[] { selected } : d.Starts.Select(s => s.Party.Id).ToArray();
-        return new(Version, report.Status, "Verified", decision, selected, ancestry, recommended, rate, contrasts,
+        var rates = resultVersion == ThreeReferenceVersion ? family.Members.Select(member => {
+            var victories = Wins(member).Count(w => w);
+            var id = member.GeneratedIds.FirstOrDefault() ?? d.Starts.Single(s => member.ReferenceIds.Contains(s.ReferenceId)).Party.Id;
+            return new TowerDiagnosticRate(id, victories, TowerBalanceEvaluator.Wilson(victories, n, intervalFamily)!);
+        }).ToArray() : null;
+        return new(resultVersion, report.Status, "Verified", decision, selected, ancestry, recommended, rate, contrasts,
             report.Balance!.Assessment, string.Join(", ", report.Discovery!.Arms.Select(a => a.StopReason).Distinct()),
-            HarnessJson.Hash(report), archiveHash);
+            HarnessJson.Hash(report), archiveHash, rates);
     }
 
     private static string[] Ancestry(BossStudyReport report, string party) => report.Discovery!.Arms.SelectMany(a => a.Proposals)
@@ -114,7 +124,7 @@ public static partial class TowerPracticalSearch
                 scenario.Party.SelectMany(p => p.Build.EssenceIds).GroupBy(id => id).OrderBy(g => g.Key, StringComparer.Ordinal)
                     .ToDictionary(g => g.Key, g => g.Count()), member.ReferenceIds, Ancestry(report, party.Id));
         }).ToArray();
-        return new(Version, result.StrengthDecision, result.IntegrityStatus, result.StudyHash!, result.ArchiveHash!,
+        return new(result.Version, result.StrengthDecision, result.IntegrityStatus, result.StudyHash!, result.ArchiveHash!,
             d.ContentHashes, d.SettingsHash, d.ExecutionHash, teams);
     }
 
@@ -124,9 +134,20 @@ public static partial class TowerPracticalSearch
         var text = new StringBuilder("# Practical Tower search\n\n");
         text.AppendLine($"Execution: **{result.ExecutionStatus}**. Evidence: **{result.IntegrityStatus}**. Strength: **{result.StrengthDecision}**.");
         text.AppendLine($"\nEncounter balance: **{result.BalanceAssessment?.ToString() ?? "Unavailable"}**. Stop: {result.StopReason}.");
-        text.AppendLine("\nThis search uses two supplied references with fixed ability order. Supplied ancestry is not independent discovery. Balance and team strength are separate decisions.");
+        var three = result.Version == ThreeReferenceVersion;
+        text.AppendLine(three
+            ? "\nThis search uses three supplied references with fixed ability order. Supplied ancestry is not independent discovery. Balance and team strength are separate decisions."
+            : "\nThis search uses two supplied references with fixed ability order. Supplied ancestry is not independent discovery. Balance and team strength are separate decisions.");
         if (result.IntegrityStatus != "Verified") { text.AppendLine("\nNo team is promoted from incomplete or unverified evidence."); return text.ToString(); }
-        text.AppendLine("\nIndependent confirmation requires at least five percentage points of observed gain and a positive adjusted paired lower bound versus both references, plus supported 10% viability. The approximate Bonferroni-Wilson family contains seven quantities; failure does not prove equivalence.");
+        text.AppendLine(three
+            ? "\nIndependent confirmation requires at least five percentage points of observed gain and a positive adjusted paired lower bound versus all three references, plus supported 10% viability. The approximate Bonferroni-Wilson family contains ten quantities: four recipe rates and three gain/loss pairs; failure does not prove equivalence."
+            : "\nIndependent confirmation requires at least five percentage points of observed gain and a positive adjusted paired lower bound versus both references, plus supported 10% viability. The approximate Bonferroni-Wilson family contains seven quantities; failure does not prove equivalence.");
+        if (three)
+        {
+            text.AppendLine("\n| Recipe | Wins | Win rate | Adjusted win-rate interval |\n| --- | ---: | ---: | ---: |");
+            foreach (var r in result.Rates ?? []) text.AppendLine(string.Create(CultureInfo.InvariantCulture,
+                $"| {r.PartyId} | {r.Wins} | {100*r.Estimate.Rate:F2}% | {100*r.Estimate.Lower:F2}% to {100*r.Estimate.Upper:F2}% |"));
+        }
         text.AppendLine("\n| Reference | Gained / lost wins | Observed gain | Adjusted paired interval |\n| --- | ---: | ---: | ---: |");
         foreach (var c in result.Contrasts) text.AppendLine(string.Create(CultureInfo.InvariantCulture,
             $"| {c.ReferenceId} | {c.Gains} / {c.Losses} | {100*c.ObservedGain:F2} pp | {100*c.Lower:F2} to {100*c.Upper:F2} pp |"));

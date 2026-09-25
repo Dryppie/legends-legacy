@@ -166,36 +166,73 @@
         {{ sendError }}
       </p>
 
-      <nav
+      <div
         *ngIf="mobileDockExpanded"
-        #channelScroller
-        class="ll-chat-channel-scroller mt-2 flex min-w-0 cursor-grab touch-pan-y gap-1.5 overflow-x-auto pb-1.5 active:cursor-grabbing"
-        aria-label="Chat channels. Scroll horizontally for more."
-        (pointerdown)="onChannelPointerDown($event)"
-        (pointermove)="onChannelPointerMove($event)"
-        (pointerup)="onChannelPointerEnd($event)"
-        (pointercancel)="onChannelPointerEnd($event)"
+        class="mt-2 flex min-w-0 items-start gap-1.5"
       >
-        <button
-          *ngFor="let room of visibleRooms; trackBy: trackRoom"
-          type="button"
-          class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2 py-0.5 text-xs tracking-wide text-[var(--ll-color-text-muted)] transition-colors"
-          [ngClass]="{
-            'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
-              activeRoomKey === room.contextKey &&
-              activeRoomType === room.channelType,
-          }"
-          [attr.aria-pressed]="
-            activeRoomKey === room.contextKey &&
-            activeRoomType === room.channelType
-          "
-          (click)="
-            selectChannelFromPointer($event, room.channelType, room.contextKey)
-          "
+        <nav
+          #channelScroller
+          class="ll-chat-channel-scroller flex min-w-0 flex-1 cursor-grab touch-pan-y gap-1.5 overflow-x-auto pb-1.5 active:cursor-grabbing"
+          aria-label="Chat channels. Scroll horizontally for more."
+          (pointerdown)="onChannelPointerDown($event)"
+          (pointermove)="onChannelPointerMove($event)"
+          (pointerup)="onChannelPointerEnd($event)"
+          (pointercancel)="onChannelPointerEnd($event)"
         >
-          {{ room.label }}
+          <button
+            *ngFor="let room of visibleRooms; trackBy: trackRoom"
+            type="button"
+            class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2 py-0.5 text-xs tracking-wide text-[var(--ll-color-text-muted)] transition-colors"
+            [ngClass]="{
+              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                activeRoomKey === room.contextKey &&
+                activeRoomType === room.channelType,
+            }"
+            [attr.aria-pressed]="
+              activeRoomKey === room.contextKey &&
+              activeRoomType === room.channelType
+            "
+            (click)="
+              selectChannelFromPointer(
+                $event,
+                room.channelType,
+                room.contextKey
+              )
+            "
+          >
+            {{ room.label }}
+          </button>
+        </nav>
+        <button
+          type="button"
+          cdkOverlayOrigin
+          #mobileChannelSettingsOrigin="cdkOverlayOrigin"
+          class="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:text-primary"
+          aria-label="Choose visible chat channels"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="channelSettingsOpen"
+          title="Choose visible channels"
+          (click)="toggleChannelSettings()"
+        >
+          <ng-container *ngTemplateOutlet="channelSettingsIcon"></ng-container>
         </button>
-      </nav>
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="mobileChannelSettingsOrigin"
+          [cdkConnectedOverlayOpen]="channelSettingsOpen"
+          [cdkConnectedOverlayPositions]="channelSettingsPositions"
+          [cdkConnectedOverlayPush]="true"
+          [cdkConnectedOverlayViewportMargin]="8"
+          [cdkConnectedOverlayHasBackdrop]="true"
+          cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+          (backdropClick)="channelSettingsOpen = false"
+          (detach)="channelSettingsOpen = false"
+        >
+          <ng-container
+            *ngTemplateOutlet="channelVisibilityMenu"
+          ></ng-container>
+        </ng-template>
+      </div>
     </div>
   </div>
 </ng-container>
@@ -552,39 +589,72 @@
             [disabled]="!canWriteActiveChannel || !draft.trim() || isSending"
           />
         </div>
-        <nav
-          #channelScroller
-          class="ll-chat-channel-scroller mt-2 flex cursor-grab touch-pan-y gap-1.5 overflow-x-auto pb-1.5 active:cursor-grabbing"
-          aria-label="Chat channels. Scroll horizontally for more."
-          (pointerdown)="onChannelPointerDown($event)"
-          (pointermove)="onChannelPointerMove($event)"
-          (pointerup)="onChannelPointerEnd($event)"
-          (pointercancel)="onChannelPointerEnd($event)"
-        >
-          <button
-            *ngFor="let room of visibleRooms; trackBy: trackRoom"
-            type="button"
-            class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2.5 py-1 text-xs tracking-wide text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
-            [ngClass]="{
-              'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
-                activeRoomKey === room.contextKey &&
-                activeRoomType === room.channelType,
-            }"
-            [attr.aria-pressed]="
-              activeRoomKey === room.contextKey &&
-              activeRoomType === room.channelType
-            "
-            (click)="
-              selectChannelFromPointer(
-                $event,
-                room.channelType,
-                room.contextKey
-              )
-            "
+        <div class="mt-2 flex min-w-0 items-start gap-1.5">
+          <nav
+            #channelScroller
+            class="ll-chat-channel-scroller flex min-w-0 flex-1 cursor-grab touch-pan-y gap-1.5 overflow-x-auto pb-1.5 active:cursor-grabbing"
+            aria-label="Chat channels. Scroll horizontally for more."
+            (pointerdown)="onChannelPointerDown($event)"
+            (pointermove)="onChannelPointerMove($event)"
+            (pointerup)="onChannelPointerEnd($event)"
+            (pointercancel)="onChannelPointerEnd($event)"
           >
-            {{ room.label }}
+            <button
+              *ngFor="let room of visibleRooms; trackBy: trackRoom"
+              type="button"
+              class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2.5 py-1 text-xs tracking-wide text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
+              [ngClass]="{
+                'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+                  activeRoomKey === room.contextKey &&
+                  activeRoomType === room.channelType,
+              }"
+              [attr.aria-pressed]="
+                activeRoomKey === room.contextKey &&
+                activeRoomType === room.channelType
+              "
+              (click)="
+                selectChannelFromPointer(
+                  $event,
+                  room.channelType,
+                  room.contextKey
+                )
+              "
+            >
+              {{ room.label }}
+            </button>
+          </nav>
+          <button
+            type="button"
+            cdkOverlayOrigin
+            #channelSettingsOrigin="cdkOverlayOrigin"
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
+            aria-label="Choose visible chat channels"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="channelSettingsOpen"
+            title="Choose visible channels"
+            (click)="toggleChannelSettings()"
+          >
+            <ng-container
+              *ngTemplateOutlet="channelSettingsIcon"
+            ></ng-container>
           </button>
-        </nav>
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="channelSettingsOrigin"
+            [cdkConnectedOverlayOpen]="channelSettingsOpen"
+            [cdkConnectedOverlayPositions]="channelSettingsPositions"
+            [cdkConnectedOverlayPush]="true"
+            [cdkConnectedOverlayViewportMargin]="8"
+            [cdkConnectedOverlayHasBackdrop]="true"
+            cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+            (backdropClick)="channelSettingsOpen = false"
+            (detach)="channelSettingsOpen = false"
+          >
+            <ng-container
+              *ngTemplateOutlet="channelVisibilityMenu"
+            ></ng-container>
+          </ng-template>
+        </div>
         <p
           *ngIf="isGuestAccount"
           class="px-1 pt-2 text-xs text-[var(--ll-color-text-muted)]"
@@ -678,6 +748,52 @@
       <span class="sr-only">{{ onlinePlayerLabel }}</span>
     </button>
   </ng-template>
+</ng-template>
+
+<ng-template #channelVisibilityMenu>
+  <fieldset
+    class="w-52 max-w-[calc(100vw-1rem)] rounded border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-strong)] bg-texture p-2 text-xs text-[var(--ll-color-text)] shadow-xl shadow-black/60"
+    role="dialog"
+    aria-label="Visible chat channels"
+  >
+    <legend class="sr-only">Visible chat channels</legend>
+    <div
+      class="border-b border-[var(--ll-color-border)] px-1 pb-2 font-semibold uppercase tracking-wide text-primary"
+      aria-hidden="true"
+    >
+      Visible channels
+    </div>
+    <div class="max-h-[min(18rem,calc(100dvh-5rem))] overflow-y-auto py-1">
+      <label
+        *ngFor="let room of configurableRooms; trackBy: trackRoom"
+        class="flex cursor-pointer items-center gap-2 rounded px-1 py-1.5 transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+      >
+        <input
+          type="checkbox"
+          class="h-4 w-4 shrink-0 accent-[var(--ll-color-primary)]"
+          [checked]="isChannelVisible(room)"
+          (change)="setChannelVisible(room, $any($event.target).checked)"
+        />
+        <span>{{ room.label }}</span>
+      </label>
+    </div>
+  </fieldset>
+</ng-template>
+
+<ng-template #channelSettingsIcon>
+  <svg
+    class="h-4 w-4"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+    <circle cx="16" cy="7" r="2" />
+    <circle cx="8" cy="17" r="2" />
+  </svg>
 </ng-template>
 
 <ng-template #mentionPicker let-origin let-input="input">

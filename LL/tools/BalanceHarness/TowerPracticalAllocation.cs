@@ -17,7 +17,7 @@ public static partial class TowerPracticalSearch
     private static void ValidateAllocationContract(TowerPracticalRequest q)
     {
         var a = q.Allocation;
-        Require(q.Version == Version && a is null || q.Version == AllocationVersion && a is not null
+        Require(IsDeclaredVersion(q.Version) && a is null || IsAllocatedVersion(q.Version) && a is not null
             && a.Domain is { Length: > 0 and <= 80 } && TowerBenchmark.SafeId(a.Domain)
             && a.DiscoverySamples is >= 1 and <= 100 && a.SelectionSamples is >= 1 and <= 1000
             && a.ConfirmationSamples is >= 256 and <= 1000, "Invalid practical allocation version or sample contract.");
@@ -31,6 +31,7 @@ public static partial class TowerPracticalSearch
     internal static TowerBossDiscoveryDefinition ValidateAllocationTemplate(TowerPracticalRequest q, TowerBossDiscoveryDefinition template)
     {
         ValidateAllocationContract(q); Require(q.Allocation is not null, "Missing allocator contract.");
+        ValidateRequestDefinition(q, template);
         var requiredValues = AllocationStages(q.Allocation!).Sum(p => p.Count);
         Require(template.Generation?.Seeds is { Count: 0 } && template.Stages?.Schedules is { Count: 1 }
             && template.Stages.Schedules.Values.All(s => s is not null && s.Discovery is { Count: 0 }
@@ -52,12 +53,12 @@ public static partial class TowerPracticalSearch
                 _ => new BossDiscoverySchedule(values["discovery"], values["selection"], values["confirmation"], [])) }
         });
 
-    private static int AllocationCandidate(TowerPracticalAllocation a, string stage, int ordinal)
-        => StableRandom.Seed(AllocationVersion, a.Domain, a.Master.ToString(CultureInfo.InvariantCulture),
+    private static int AllocationCandidate(TowerPracticalAllocation a, string stage, int ordinal, string version)
+        => StableRandom.Seed(version, a.Domain, a.Master.ToString(CultureInfo.InvariantCulture),
             stage, ordinal.ToString(CultureInfo.InvariantCulture));
 
     private static TowerPracticalAllocationIntent AllocationIntent(TowerPracticalRequest q, TowerBossDiscoveryDefinition template)
-        => new(AllocationVersion, HarnessJson.Hash(q), q.DefinitionHash, HarnessJson.Hash(template.ExcludedCombatSeeds));
+        => new(q.Version, HarnessJson.Hash(q), q.DefinitionHash, HarnessJson.Hash(template.ExcludedCombatSeeds));
 
     // Runs in the watched worker while its parent holds the registry and output
     // leases. A Pending sentinel blocks every other allocator before derivation.
@@ -89,7 +90,7 @@ public static partial class TowerPracticalSearch
                 Require(candidates < MaximumAllocationCandidates, "Allocation candidate cap reached; preserve Pending and journal.");
                 storage.Append(journal, new("Start", stage, ordinal));
                 boundary?.Invoke("allocation-start"); ct.ThrowIfCancellationRequested(); check();
-                var value = candidate is null ? AllocationCandidate(q.Allocation!, stage, ordinal) : candidate(stage, ordinal);
+                var value = candidate is null ? AllocationCandidate(q.Allocation!, stage, ordinal, q.Version) : candidate(stage, ordinal);
                 var keep = used.Add(value); candidates++;
                 // No cancellation boundary between derivation and its durable result.
                 storage.Append(journal, new("Candidate", stage, ordinal, value, keep));
@@ -101,7 +102,7 @@ public static partial class TowerPracticalSearch
         boundary?.Invoke("allocation-complete"); ct.ThrowIfCancellationRequested(); check();
         var d = BindDefinition(template, values); var reserved = Reserved(d);
         storage.Put("definition.json", d);
-        storage.Put("allocation.json", new TowerPracticalAllocationReceipt(AllocationVersion, HarnessJson.Hash(q), HarnessJson.Hash(d), candidates, rejections));
+        storage.Put("allocation.json", new TowerPracticalAllocationReceipt(q.Version, HarnessJson.Hash(q), HarnessJson.Hash(d), candidates, rejections));
         storage.Put("seed-ledger.json", new { reservationState = "Complete", historical = inputs.History.Values, reserved });
         TowerRefinementComparisonLaunch.Recheck(q.RegistryRoot, q.OutputRoot, inputs.History.Files, ct);
         boundary?.Invoke("before-complete"); ct.ThrowIfCancellationRequested(); check();
@@ -121,7 +122,7 @@ public static partial class TowerPracticalSearch
         string Pinned(string name) => Path.Combine(output, name);
         Require(HarnessJson.Hash(bound) == HarnessJson.Hash(definition)
             && HarnessJson.Read<TowerPracticalAllocationReceipt>(Pinned("allocation.json"))
-                == new TowerPracticalAllocationReceipt(AllocationVersion, HarnessJson.Hash(q), HarnessJson.Hash(bound), allocation.Candidates, allocation.Rejections)
+                == new TowerPracticalAllocationReceipt(q.Version, HarnessJson.Hash(q), HarnessJson.Hash(bound), allocation.Candidates, allocation.Rejections)
             && HarnessJson.Hash(HarnessJson.Read<JsonElement>(Pinned("history-input.json"))) == HarnessJson.Hash(new { reservationState = "Complete", reserved })
             && HarnessJson.Hash(HarnessJson.Read<JsonElement>(Pinned("seed-ledger.json"))) == HarnessJson.Hash(new {
                 reservationState = "Complete", historical = bound.ExcludedCombatSeeds, reserved }), "Changed bound definition or permanent reservation.");
@@ -178,7 +179,7 @@ public static partial class TowerPracticalSearch
                 var result = Row(rows.Current);
                 Require(result is { Kind: "Candidate", Value: not null, Accepted: not null }
                     && result.Stage == stage && result.Ordinal == ordinal, "Invalid completed allocation result.");
-                var expected = candidate is null ? AllocationCandidate(q.Allocation!, stage, ordinal) : candidate(stage, ordinal);
+                var expected = candidate is null ? AllocationCandidate(q.Allocation!, stage, ordinal, q.Version) : candidate(stage, ordinal);
                 Require(result!.Value == expected, "Changed recorded allocation candidate.");
                 var keep = used.Add(expected); candidates++;
                 Require(result.Accepted == keep, "Changed historical/duplicate allocation rejection.");
@@ -193,13 +194,13 @@ public static partial class TowerPracticalSearch
 
     public static Task<TowerPracticalResult> AllocateAndRun(TowerPracticalRequest request, CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested(); Require(request.Version == AllocationVersion, "Use an allocated-search request.");
+        token.ThrowIfCancellationRequested(); Require(IsAllocatedVersion(request.Version), "Use an allocated-search request.");
         return RunWithWorker(request, NativeWorker, token);
     }
 
     public static object AllocationCheck(TowerPracticalRequest request, CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested(); Require(request.Version == AllocationVersion, "Use an allocated-search request.");
+        token.ThrowIfCancellationRequested(); Require(IsAllocatedVersion(request.Version), "Use an allocated-search request.");
         return CheckCore(request, token);
     }
 }

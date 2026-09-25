@@ -31,15 +31,16 @@ public static partial class TowerIncumbentTieComparison
     internal static void Require([System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)] bool ok, string reason)
     { if (!ok) throw new InvalidDataException(reason); }
 
-    internal static TowerBossDiscoveryDefinition Bind(TowerBossDiscoveryDefinition template, IReadOnlyList<int> values, int restart, bool candidate)
+    internal static TowerBossDiscoveryDefinition Bind(TowerBossDiscoveryDefinition template, IReadOnlyList<int> values, int restart, bool candidate, string version = Version)
     {
+        var policy = Policy(version);
         Require(values.Count == AssignedValues && values.Distinct().Count() == AssignedValues && restart is >= 0 and < Restarts
             && !values.Intersect(template.ExcludedCombatSeeds).Any(), "Invalid comparison allocation.");
         var search = values.Skip(restart * 41).Take(41).ToArray();
-        var result = template with { Id = "incumbent-tie-" + (restart + 1),
+        var result = template with { Id = (version == Version ? "incumbent-tie-" : "three-reference-tie-") + (restart + 1),
             Generation = template.Generation with { Seeds = [search[0]] },
-            Stages = template.Stages with { SelectionPolicyVersion = candidate ? TowerBossStudyPolicy.IncumbentTieVersion : TowerBossStudyPolicy.ZeroWinVersion,
-                SelectionPrimaryReferenceId = candidate ? template.Starts[0].ReferenceId : null,
+            Stages = template.Stages with { SelectionPolicyVersion = candidate ? policy.Candidate : policy.Baseline,
+                SelectionPrimaryReferenceId = candidate || version == ThreeReferenceVersion ? template.Starts[0].ReferenceId : null,
                 Schedules = template.Stages.Schedules.ToDictionary(p => p.Key, _ => new BossDiscoverySchedule(
                     search.Skip(1).Take(8).ToArray(), search.Skip(9).ToArray(), Panel(values, restart), [])) } };
         TowerBossDiscovery.Validate(result); return result;
@@ -48,15 +49,17 @@ public static partial class TowerIncumbentTieComparison
     internal static int[] Panel(IReadOnlyList<int> values, int restart) => values.Skip(SearchValues + restart * Samples).Take(Samples).ToArray();
 
     internal static IncumbentTieSearch Select(int restart, TowerBossDiscoveryDefinition baseline, TowerBossDiscoveryDefinition candidate,
-        BossGenerationMechanics mechanics, BossGenerationResult discovery, IReadOnlyList<BossDiscoveryMeasurement> selection)
+        BossGenerationMechanics mechanics, BossGenerationResult discovery, IReadOnlyList<BossDiscoveryMeasurement> selection, string version = Version)
     {
+        var policy = Policy(version);
         Require(discovery.Status == "Complete" && discovery.Arms.Count == 1 && discovery.Arms[0].Evaluations.Count == 46
-            && discovery.DiscoveryShortlist.Count == 4 && selection.Count == 4, "Incomplete search; no replacement restart.");
+            && discovery.DiscoveryShortlist.Count == policy.Nominees && selection.Count == policy.Nominees, "Incomplete search; no replacement restart.");
         Require(HarnessJson.Hash(candidate with { Stages = baseline.Stages }) == HarnessJson.Hash(baseline)
-            && baseline.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.ZeroWinVersion && baseline.Stages.SelectionPrimaryReferenceId is null
-            && candidate.Stages.SelectionPolicyVersion == TowerBossStudyPolicy.IncumbentTieVersion
+            && baseline.Stages.SelectionPolicyVersion == policy.Baseline
+            && baseline.Stages.SelectionPrimaryReferenceId == (version == Version ? null : baseline.Starts[0].ReferenceId)
+            && candidate.Stages.SelectionPolicyVersion == policy.Candidate
             && candidate.Stages.SelectionPrimaryReferenceId == baseline.Starts[0].ReferenceId
-            && HarnessJson.Hash(candidate.Stages with { SelectionPolicyVersion = baseline.Stages.SelectionPolicyVersion, SelectionPrimaryReferenceId = null })
+            && HarnessJson.Hash(candidate.Stages with { SelectionPolicyVersion = baseline.Stages.SelectionPolicyVersion, SelectionPrimaryReferenceId = baseline.Stages.SelectionPrimaryReferenceId })
                 == HarnessJson.Hash(baseline.Stages), "Selectors must receive the same search and designated primary.");
         IncumbentTieOutput Output(TowerBossDiscoveryDefinition d)
         {
@@ -70,8 +73,11 @@ public static partial class TowerIncumbentTieComparison
             var wins = selection.ToDictionary(r => r.Id, r => r.Cells.Sum(c => c.Clears.Count(w => w)));
             var maximum = wins.Values.Max();
             Require(maximum > 0 && wins.Values.Count(w => w == maximum) > 1 && wins[b.Finalist.Party.Id] == maximum
-                && wins[a.Finalist.Party.Id] == maximum && b.Finalist.Party.Id == baseline.Starts[0].Party.Id,
-                "Selector difference is not the designated positive maximum tie.");
+                && wins[a.Finalist.Party.Id] == maximum
+                && (version == Version ? b.Finalist.Party.Id == baseline.Starts[0].Party.Id
+                    : wins[baseline.Starts[0].Party.Id] < maximum && baseline.Starts.Any(s => s.Party.Id == b.Finalist.Party.Id)
+                        && baseline.Starts.All(s => s.Party.Id != a.Finalist.Party.Id)),
+                "Selector difference is not the versioned positive maximum tie.");
         }
         return new(restart + 1, discovery, selection, a, b);
     }
@@ -80,13 +86,13 @@ public static partial class TowerIncumbentTieComparison
         BossGenerationMechanics mechanics, TowerBossDiscoveryRun.Battle battle, Action<string, object> save,
         Action<bool> attempt, Func<string> attemptsHash, CancellationToken ct)
     {
-        ValidateTemplate(template);
-        Require(allocation.Version == Version, "Unknown comparison allocation.");
+        var version = allocation.Version; var policy = Policy(version);
+        ValidateTemplate(template, version);
         var searches = new List<IncumbentTieSearch>(); var completed = 0; var started = 0; var frozen = false;
         async Task<(LoadoutTrial Trial, TowerBattleReport Report)> Fight(string arm, string stage, TowerScenario scenario, int seed, CancellationToken token)
         {
-            token.ThrowIfCancellationRequested(); Require(started == completed && started < MaximumFights
-                && (stage != "confirmation" || frozen && completed >= SearchFights), "Attempt ceiling or confirmation barrier.");
+            token.ThrowIfCancellationRequested(); Require(started == completed && started < policy.MaximumFights
+                && (stage != "confirmation" || frozen && completed >= policy.SearchFights), "Attempt ceiling or confirmation barrier.");
             attempt(false); started++; var value = await battle(arm, stage, scenario, seed, token);
             Require(value.Trial.Stage == stage && value.Trial.Seed == seed && value.Trial.Recipe == HarnessJson.Hash(scenario)
                 && value.Report.Battle.Seed == seed && value.Report.Battle.ScenarioId == scenario.Id
@@ -96,21 +102,21 @@ public static partial class TowerIncumbentTieComparison
         }
         for (var restart = 0; restart < Restarts; restart++)
         {
-            var d = Bind(template, allocation.Selected, restart, false); var input = TowerBossImprovement.Inputs(d);
+            var d = Bind(template, allocation.Selected, restart, false, version); var input = TowerBossImprovement.Inputs(d);
             var discovery = await TowerBossImprovement.ExecuteBattlesAsync(d, input, mechanics, Fight, ct);
             save($"search-{restart + 1:D2}-discovery.json", discovery);
             if (discovery.Status != "Complete") throw new IncumbentTieIncompleteException("Incomplete discovery; no restart replacement.");
-            Require(completed == restart * 496 + 368, "Changed discovery accounting.");
+            Require(completed == restart * policy.FightsPerSearch + 368, "Changed discovery accounting.");
             var selectionInput = input with { DiscoverySeeds = d.Stages.Schedules.ToDictionary(p => p.Key, p => p.Value.Selection) };
             var selection = new List<BossDiscoveryMeasurement>();
             foreach (var party in discovery.DiscoveryShortlist)
                 selection.Add(await TowerBossDiscoveryRun.Measure(d, selectionInput, party, "selection", Fight, ct, "selection"));
-            var search = Select(restart, d, Bind(template, allocation.Selected, restart, true), mechanics, discovery, selection);
+            var search = Select(restart, d, Bind(template, allocation.Selected, restart, true, version), mechanics, discovery, selection, version);
             save($"search-{restart + 1:D2}.json", search); searches.Add(search);
         }
-        Require(completed == SearchFights, "Incomplete global search.");
+        Require(completed == policy.SearchFights, "Incomplete global search.");
         var active = searches.Where(s => s.Baseline.RecipeHash != s.Candidate.RecipeHash).Select(s => s.Restart).ToArray();
-        var freeze = new IncumbentTieFreeze(Version, HarnessJson.Hash(allocation), HarnessJson.Hash(searches), attemptsHash(),
+        var freeze = new IncumbentTieFreeze(version, HarnessJson.Hash(allocation), HarnessJson.Hash(searches), attemptsHash(),
             completed, searches, active);
         save("outputs-freeze.json", freeze); // Durable global barrier before the first confirmation callback.
         frozen = true;
@@ -130,14 +136,14 @@ public static partial class TowerIncumbentTieComparison
             }
             evidence.Add(new(search.Restart, await Confirm(search.Baseline, "baseline"), await Confirm(search.Candidate, "candidate")));
         }
-        Require(started == completed && completed == SearchFights + 2 * Samples * active.Length, "Incomplete paired evidence.");
-        var study = new IncumbentTieStudy(Version, freeze, evidence); save("study.json", study); return study;
+        Require(started == completed && completed == policy.SearchFights + 2 * Samples * active.Length, "Incomplete paired evidence.");
+        var study = new IncumbentTieStudy(version, freeze, evidence); save("study.json", study); return study;
     }
 
     internal static IncumbentTieResult Assess(IncumbentTieStudy study, IncumbentTieReservation allocation, int historicalCount)
     {
-        var f = study.Freeze;
-        Require(study.Version == Version && f.Version == Version && f.CompletedAttempts == SearchFights
+        var f = study.Freeze; var policy = Policy(allocation.Version);
+        Require(study.Version == allocation.Version && f.Version == allocation.Version && f.CompletedAttempts == policy.SearchFights
             && f.BindingHash == HarnessJson.Hash(allocation) && f.SearchHash == HarnessJson.Hash(f.Searches)
             && TowerContractJson.Hash(f.AttemptsHash) && f.Searches.Select(s => s.Restart).SequenceEqual(Enumerable.Range(1, Restarts))
             && f.ActiveRestarts.SequenceEqual(f.Searches.Where(s => s.Baseline.RecipeHash != s.Candidate.RecipeHash).Select(s => s.Restart))
@@ -157,11 +163,12 @@ public static partial class TowerIncumbentTieComparison
             pairs.Add(new(s.Restart, s.Baseline.Finalist.Party.Id, s.Candidate.Finalist.Party.Id, false,
                 row.Baseline.Count(t => t.Outcome == BattleOutcome.Victory), row.Candidate.Count(t => t.Outcome == BattleOutcome.Victory), gains, losses, (gains - losses) / (double)Samples));
         }
-        return Summarize(pairs, historicalCount);
+        return Summarize(pairs, historicalCount, allocation.Version);
     }
 
-    internal static IncumbentTieResult Summarize(IReadOnlyList<IncumbentTiePair> pairs, int historicalCount)
+    internal static IncumbentTieResult Summarize(IReadOnlyList<IncumbentTiePair> pairs, int historicalCount, string version = Version)
     {
+        var policy = Policy(version);
         Require(pairs.Count == Restarts && pairs.Select(p => p.Restart).SequenceEqual(Enumerable.Range(1, Restarts))
             && historicalCount is >= 0 and <= MaximumHistory && pairs.All(p => p.Identical
                 ? p.BaselineWins is null && p.CandidateWins is null && p.Gains == 0 && p.Losses == 0 && p.Difference == 0
@@ -178,7 +185,7 @@ public static partial class TowerIncumbentTieComparison
         var margin = Math.Sqrt(2d * n * Math.Log(20)) / denominator + depletion;
         var lower = Math.Max(-k / (double)Restarts, mean - margin);
         var decision = k == 0 ? "NoSelectorDifferences" : net >= 240 && lower > 0 && positive >= 3
-            ? "SupportsIncumbentTieForFrozenOutputs" : "DoNotPromoteIncumbentTie";
-        return new(Version, "Verified", decision, BoundVersion, pairs, k, net, positive, denominator, mean, depletion, margin, lower, SearchFights + 2 * n);
+            ? policy.Support : policy.Negative;
+        return new(version, "Verified", decision, BoundVersion, pairs, k, net, positive, denominator, mean, depletion, margin, lower, policy.SearchFights + 2 * n);
     }
 }

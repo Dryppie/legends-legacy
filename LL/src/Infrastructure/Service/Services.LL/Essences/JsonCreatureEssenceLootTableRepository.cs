@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
+using Services.LL.Content;
 
 namespace Services.LL.Essences;
 
@@ -15,12 +16,14 @@ public sealed class JsonCreatureEssenceLootTableRepository : ICreatureEssenceLoo
         IConfiguration config,
         string contentRootPath,
         JsonSerializerOptions options,
-        IEssenceDefinitionRepository essenceDefinitions)
+        IEssenceDefinitionRepository essenceDefinitions,
+        ContentJsonReader? reader = null)
     {
+        reader ??= ContentJsonReader.Default;
         var contentRoot = config["Content:Root"] ?? "Data";
         var path = Path.Combine(contentRootPath, contentRoot, "world", "creature-essence-loot-tables.json");
-        var json = File.ReadAllText(path);
-        var document = JsonSerializer.Deserialize<CreatureEssenceLootTableDocument>(json, options) ?? new();
+        var json = reader.ReadAllText(path);
+        var document = reader.Deserialize<CreatureEssenceLootTableDocument>(json, options) ?? new();
 
         _tables = document.Creatures
             .Select(x => new CreatureEssenceLootTableDefinition

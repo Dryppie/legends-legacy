@@ -40,7 +40,7 @@ public sealed class GetColosseumStatusQueryHandler : IRequestHandler<GetColosseu
             tickets.CurrentTickets >= tickets.MaxTickets ? null : tickets.LastTicketUpdate.AddHours(3),
             arena.CurrentAttackWinStreak,
             arena.BestAttackWinStreak,
-            !HasReceivedFirstWinBonusToday(arena.LastFirstWinBonusAt),
+            ArenaRewards.CanReceiveDailyFirstWinBonus(arena, DateTimeOffset.UtcNow),
             ArenaRewards.DailyFirstWinGlory,
             new ArenaRecordModel(
                 arena.AttackWins,
@@ -58,8 +58,4 @@ public sealed class GetColosseumStatusQueryHandler : IRequestHandler<GetColosseu
                 defense?.LoadoutHash)));
     }
 
-    private static bool HasReceivedFirstWinBonusToday(DateTimeOffset? lastFirstWinBonusAt)
-    {
-        return lastFirstWinBonusAt?.UtcDateTime.Date == DateTimeOffset.UtcNow.UtcDateTime.Date;
-    }
 }

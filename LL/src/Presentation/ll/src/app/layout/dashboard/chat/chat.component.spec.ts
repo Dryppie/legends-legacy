@@ -243,6 +243,7 @@ describe('ChatComponent raid room identity', () => {
           channelType: ChatChannelType.General,
         },
       ],
+      channelVisibility: { isVisible: () => true },
     }) as ChatComponent;
 
     const firstRaidRoom = component.visibleRooms.find(
@@ -256,6 +257,71 @@ describe('ChatComponent raid room identity', () => {
     expect(component.trackRoom(0, firstRaidRoom)).toBe(
       component.trackRoom(0, secondRaidRoom),
     );
+  });
+});
+
+describe('ChatComponent channel visibility', () => {
+  it('keeps All available while filtering hidden channels from the channel list', () => {
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      guild: signal(null),
+      raidId: signal(null),
+      availableRooms: [
+        {
+          label: 'All',
+          contextKey: 'all',
+          channelType: ChatChannelType.General,
+        },
+        {
+          label: 'General',
+          contextKey: 'general',
+          channelType: ChatChannelType.General,
+          visibilityKey: 'general',
+        },
+        {
+          label: 'Trade',
+          contextKey: 'trade',
+          channelType: ChatChannelType.Trade,
+          visibilityKey: 'trade',
+        },
+      ],
+      channelVisibility: {
+        isVisible: (key: string) => key !== 'trade',
+      },
+    }) as ChatComponent;
+
+    expect(component.visibleRooms.map((room) => room.label)).toEqual([
+      'All',
+      'General',
+    ]);
+    expect(component.configurableRooms.map((room) => room.label)).toEqual([
+      'General',
+      'Trade',
+    ]);
+  });
+
+  it('returns to All when the active channel is hidden', () => {
+    const setVisible = jasmine.createSpy('setVisible');
+    const component = Object.assign(Object.create(ChatComponent.prototype), {
+      activeChannel: {
+        type: ChatChannelType.Trade,
+        contextKey: 'trade',
+      },
+      channelVisibility: { setVisible },
+    }) as ChatComponent;
+    const tradeRoom = {
+      label: 'Trade',
+      contextKey: 'trade',
+      channelType: ChatChannelType.Trade,
+      visibilityKey: 'trade' as const,
+    };
+
+    component.setChannelVisible(tradeRoom, false);
+
+    expect(setVisible).toHaveBeenCalledOnceWith('trade', false);
+    expect(component.activeChannel).toEqual({
+      type: ChatChannelType.General,
+      contextKey: 'all',
+    });
   });
 });
 

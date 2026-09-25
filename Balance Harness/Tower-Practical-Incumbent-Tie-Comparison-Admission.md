@@ -1,12 +1,12 @@
 # Incumbent tie comparison admission
 
-22 September 2026. The offline BalanceHarness package passed the public `tower-incumbent-tie-comparison-check` with **ReadyNoReservation**. It retains the captured gameplay, content and settings, combines them with the tested comparison harness, and binds the complete live historical exclusion union. **The scientific experiment has not launched: zero new values and zero fights.** Search and selector defaults remain unchanged.
+22 September 2026. Historical preparation snapshot: the offline BalanceHarness package passed the public `tower-incumbent-tie-comparison-check` with **ReadyNoReservation**. It retained the captured gameplay, content and settings, combined them with the tested comparison harness, and bound the complete live historical exclusion union. At preparation close, no scientific launch, new values or fights had occurred. The subsequent [completed experiment](Tower-Practical-Incumbent-Tie-Comparison-Execution.md) passed both archive audits and returned **SupportsIncumbentTieForFrozenOutputs**; search and selector defaults remain unchanged.
 
 This completes the preparation requested by the [runner implementation](Tower-Practical-Incumbent-Tie-Comparison-Implementation.md). The [prospective protocol](Tower-Practical-Incumbent-Tie-Comparison-Plan.md) and its original planning package remain the scientific contract. Admission establishes compatibility and input readiness; it supplies no evidence that the candidate selector is stronger.
 
 ## Prepared inputs
 
-The sealed package is `TestResults/incumbent-tie-comparison-admission-20260922-02`, containing 260 inventoried files plus its [manifest](../TestResults/incumbent-tie-comparison-admission-20260922-02/files.json). Its [concrete request](../TestResults/incumbent-tie-comparison-admission-20260922-02/request.json) targets the still-absent output directory `TestResults/balance/tower-incumbent-tie-comparison-20260922`.
+The sealed package is `TestResults/incumbent-tie-comparison-admission-20260922-02`, containing 260 inventoried files plus its [manifest](../TestResults/incumbent-tie-comparison-admission-20260922-02/files.json). Its [concrete request](../TestResults/incumbent-tie-comparison-admission-20260922-02/request.json) targeted the then-absent output directory `TestResults/balance/tower-incumbent-tie-comparison-20260922`, which now contains the completed immutable experiment.
 
 | Check | Result |
 | --- | --- |
@@ -55,7 +55,9 @@ python -B 'Balance Harness/analysis/prepare-incumbent-tie-comparison.py' prepare
 
 The bundled Python runtime was used. `prepare` is create-only and is not a command to repeat against the completed package. The first engineering attempt stopped before admission on PowerShell reflection argument conversion. Its [failure receipt](../TestResults/incumbent-tie-comparison-admission-20260922/failure.json) and [context log](../TestResults/incumbent-tie-comparison-admission-20260922/context.log) are preserved; the corrected helper created the separate `-02` package. Neither attempt allocated values, drew production entropy or executed combat. This engineering correction is not a scientific retry.
 
-## Next execution step
+## Historical execution handoff
+
+The handoff below was consumed by the completed experiment. Do not launch it again. The prelaunch verifier now rejects the existing output; use the completed-archive verification commands in the [execution report](Tower-Practical-Incumbent-Tie-Comparison-Execution.md). The original sealed preparation package is unchanged.
 
 Recheck the pinned package and complete live history immediately before the single prospective launch. A changed registry invalidates this admission snapshot and requires a newly authenticated request before any allocation. Keep the original captured gameplay and the tested harness; rebuilding against current development gameplay would change the experiment.
 

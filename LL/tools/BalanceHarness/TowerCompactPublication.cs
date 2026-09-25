@@ -23,7 +23,8 @@ public static partial class TowerCompactBundle
                 || HarnessJson.Hash(TowerContractJson.Read<TowerCompactChunk>(Path.Combine(source, "receipt.json"))) != HarnessJson.Hash(receipt)
                 || HarnessJson.FileHash(Path.Combine(source, "records.json.gz")) != receipt.DataHash)
                 throw new InvalidDataException("Pending publication receipt or data changed.");
-            try { move(source, destination); return; }
+            foreach (var name in files) TowerWorkAccounting.ObserveExistingFile(Path.Combine(source, name), scratch: true);
+            try { TowerWorkAccounting.PublishDirectory(source, destination, move); return; }
             catch (Exception error) when (attempt < 3 && error is IOException or UnauthorizedAccessException)
             {
                 // Revalidate on each attempt; cancellation and persistent failures leave the pending files intact.

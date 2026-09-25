@@ -34,15 +34,16 @@ public sealed class BalanceHarnessPracticalAllocationRecoveryTests : IDisposable
         var json = JsonNode.Parse(File.ReadAllText(path))!; json[key] = JsonSerializer.SerializeToNode(value, HarnessJson.Options);
         File.WriteAllText(path, json.ToJsonString(HarnessJson.Options));
     }
-    private async Task<Input> Failed(string boundary = "allocation-candidate", int occurrence = 1, Func<string, int, int>? candidate = null)
+    private async Task<Input> Failed(string boundary = "allocation-candidate", int occurrence = 1, Func<string, int, int>? candidate = null, bool threeReferences = false, bool exploration = false, string explorationVersion = TowerReferenceExploration.Version)
     {
         var owners = Exited.Value;
-        var d = BalanceHarnessPracticalAllocationTests.Template(I.Definition() with { ExcludedCombatSeeds = [-987] });
+        var d = BalanceHarnessPracticalAllocationTests.Template(exploration ? BalanceHarnessReferenceExplorationTests.Definition(policyVersion: explorationVersion) : threeReferences ? BalanceHarnessThreeReferenceTests.Definition()
+            : I.Definition() with { ExcludedCombatSeeds = [-987] });
         var prior = Path.Combine(root, "prior-seed-ledger.json"); HarnessJson.WriteNew(prior, new { historical = new[] { -987 } });
         var sourcePath = Path.Combine(root, "template.json"); HarnessJson.WriteNew(sourcePath, d);
         var content = Path.Combine(root, "content"); Directory.CreateDirectory(content);
         var files = new Dictionary<string, string> { [prior] = HarnessJson.FileHash(prior) };
-        var source = new TowerPracticalRequest(TowerPracticalSearch.AllocationVersion, content, sourcePath, HarnessJson.FileHash(sourcePath),
+        var source = new TowerPracticalRequest(threeReferences ? TowerPracticalSearch.ThreeReferenceAllocationVersion : TowerPracticalSearch.AllocationVersion, content, sourcePath, HarnessJson.FileHash(sourcePath),
             root, Path.Combine(root, "failed"), files, 300, 32 * 1048576, 3, 128,
             Allocation: new(19, "literal-allocation-fixture", 8, 32, 256));
         Directory.CreateDirectory(source.OutputRoot);
@@ -66,6 +67,25 @@ public sealed class BalanceHarnessPracticalAllocationRecoveryTests : IDisposable
         => TowerPracticalReservationRecovery.RecoverCore(q, candidate: candidate ?? FixtureHost.AllocationCandidate);
     private static TowerPracticalRecoveryRecord Verify(TowerPracticalRecoveryRequest q, Func<string, int, int>? candidate = null)
         => TowerPracticalReservationRecovery.VerifyCore(q.ReceiptPath, candidate: candidate ?? FixtureHost.AllocationCandidate);
+
+    [Theory]
+    [InlineData("allocation-candidate", 1, false)]
+    [InlineData("before-complete", 297, false)]
+    [InlineData("allocation-candidate", 1, true)]
+    [InlineData("before-complete", 297, true)]
+    [InlineData("allocation-candidate", 1, true, TowerReferenceExploration.OffsetVersion)]
+    [InlineData("before-complete", 297, true, TowerReferenceExploration.OffsetVersion)]
+    public async Task Three_reference_allocations_preserve_closed_prefixes_and_versioned_receipts(string boundary, int count, bool exploration, string explorationVersion = TowerReferenceExploration.Version)
+    {
+        var input = await Failed(boundary, threeReferences: true, exploration: exploration, explorationVersion: explorationVersion);
+        var before = Json(Inventory(input.Recovery.StudyRoot));
+        var recovered = Recover(input.Recovery);
+        Assert.Equal(count, recovered.Reserved.Length);
+        Assert.Equal("AbandonedPermanentlyReserved", recovered.Status);
+        Assert.Equal(Json(recovered), Json(Verify(input.Recovery)));
+        Assert.Equal(before, Json(Inventory(input.Recovery.StudyRoot)));
+        await Assert.ThrowsAsync<InvalidDataException>(() => TowerPracticalSearch.AllocateAndRun(input.Source));
+    }
 
     [Theory]
     [InlineData("allocation-pending", 1, 0)]

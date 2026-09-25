@@ -23,6 +23,7 @@ public static class TowerBossStudyPolicy
     public const string Version = "tower-staged-confirmation-v1";
     public const string ZeroWinVersion = "tower-staged-zero-win-health-v1";
     public const string IncumbentTieVersion = "tower-staged-incumbent-tie-v1";
+    public const string ThreeReferenceTieVersion = "tower-staged-three-reference-tie-v1";
     public const double AlternativeMargin = .10;
 
     public static string BehaviorPattern(BossBehavior b)
@@ -37,7 +38,7 @@ public static class TowerBossStudyPolicy
     public static IReadOnlyList<BossFinalist> Select(BossDiscoveryInputs inputs, BossGenerationMechanics mechanics,
         IReadOnlyList<PartyChoice> shortlist, IReadOnlyList<BossDiscoveryMeasurement> selection,
         IReadOnlyDictionary<string, IReadOnlyList<int>> selectionSeeds, int maximum, string policyVersion = Version)
-        => SelectCore(inputs, mechanics, shortlist, selection, selectionSeeds, maximum, policyVersion, null);
+        => SelectCore(inputs, mechanics, shortlist, selection, selectionSeeds, maximum, policyVersion, null, null);
 
     // The new selector receives its designation only through a validated, frozen definition.
     // Generation inputs intentionally contain no reference IDs or historical fitness.
@@ -46,22 +47,28 @@ public static class TowerBossStudyPolicy
     {
         var inputs = TowerBossImprovement.Inputs(definition); // Validates reference/recipe binding and practical scope.
         var stages = definition.Stages;
-        if (stages.SelectionPolicyVersion == IncumbentTieVersion
+        if ((stages.SelectionPolicyVersion == IncumbentTieVersion
+                || TowerSuppliedCompositionSearch.HasThreeReferences(definition.Generation.PolicyVersion))
             && (shortlist.Count != stages.Shortlist || definition.Starts.Any(s => !shortlist.Any(p => p.Id == s.Party.Id))))
-            throw new InvalidDataException("Incumbent tie selection requires all four nominees, including both protected supplied teams.");
+            throw new InvalidDataException("Selection requires every versioned nominee, including all protected supplied teams.");
         var primary = stages.SelectionPrimaryReferenceId is null ? null
             : definition.Starts.Single(s => s.ReferenceId == stages.SelectionPrimaryReferenceId).Party.Id;
         return SelectCore(inputs, mechanics, shortlist, selection, stages.Schedules.ToDictionary(p => p.Key, p => p.Value.Selection),
-            stages.GeneratedFinalists, stages.SelectionPolicyVersion, primary);
+            stages.GeneratedFinalists, stages.SelectionPolicyVersion, primary,
+            stages.SelectionPolicyVersion == ThreeReferenceTieVersion ? definition.Starts.Select(s => s.Party.Id).ToHashSet(StringComparer.Ordinal) : null);
     }
 
     private static IReadOnlyList<BossFinalist> SelectCore(BossDiscoveryInputs inputs, BossGenerationMechanics mechanics,
         IReadOnlyList<PartyChoice> shortlist, IReadOnlyList<BossDiscoveryMeasurement> selection,
-        IReadOnlyDictionary<string, IReadOnlyList<int>> selectionSeeds, int maximum, string policyVersion, string? primaryPartyId)
+        IReadOnlyDictionary<string, IReadOnlyList<int>> selectionSeeds, int maximum, string policyVersion, string? primaryPartyId,
+        IReadOnlySet<string>? referenceParties)
     {
-        if (policyVersion is not (Version or ZeroWinVersion or IncumbentTieVersion)) throw new InvalidDataException("Unknown staged selection policy.");
-        if (policyVersion == IncumbentTieVersion && (primaryPartyId is null || !shortlist.Any(p => p.Id == primaryPartyId)))
+        if (policyVersion is not (Version or ZeroWinVersion or IncumbentTieVersion or ThreeReferenceTieVersion)) throw new InvalidDataException("Unknown staged selection policy.");
+        if (policyVersion is IncumbentTieVersion or ThreeReferenceTieVersion && (primaryPartyId is null || !shortlist.Any(p => p.Id == primaryPartyId)))
             throw new InvalidDataException("Incumbent tie selection requires the designated supplied primary on the frozen shortlist.");
+        if (policyVersion == ThreeReferenceTieVersion && (referenceParties is null || referenceParties.Count != 3
+            || !referenceParties.Contains(primaryPartyId!) || referenceParties.Any(id => !shortlist.Any(p => p.Id == id))))
+            throw new InvalidDataException("Three-reference tie selection requires three definition-bound supplied teams.");
         if (maximum is < 1 or > 5 || shortlist.Count == 0 || shortlist.Count != selection.Count
             || shortlist.Select(p => p.Id).Distinct().Count() != shortlist.Count || selection.Select(p => p.Id).Distinct().Count() != selection.Count
             || !shortlist.Select(p => p.Id).Order().SequenceEqual(selection.Select(p => p.Id).Order()))
@@ -76,7 +83,7 @@ public static class TowerBossStudyPolicy
                 throw new InvalidDataException("Invalid or incomplete selection measurement.");
         var parties = shortlist.ToDictionary(p => p.Id);
         var discoveryRanks = shortlist.Select((p, i) => (p.Id, Rank: i + 1)).ToDictionary(p => p.Id, p => p.Rank);
-        var winsPolicy = policyVersion is ZeroWinVersion or IncumbentTieVersion;
+        var winsPolicy = policyVersion is ZeroWinVersion or IncumbentTieVersion or ThreeReferenceTieVersion;
         var ranked = winsPolicy ? TowerZeroWinSelection.Rank(selection,
             r => r.Cells.Sum(c => c.Clears.Count(won => won)),
             r => r.Cells.OrderBy(c => c.Context, StringComparer.Ordinal).Sum(c => c.GuardianHealth * c.Clears.Count) / r.Cells.Sum(c => c.Clears.Count),
@@ -84,7 +91,7 @@ public static class TowerBossStudyPolicy
         var primary = ranked.First();
         var reason = winsPolicy ? "Primary selected by selection wins; only zero-win ties use mean guardian health, then frozen discovery rank and stable ID."
             : "Primary selected by target win rate, boss progress, survival, winning duration and stable ID.";
-        if (policyVersion == IncumbentTieVersion)
+        if (policyVersion is IncumbentTieVersion or ThreeReferenceTieVersion)
         {
             var topWins = primary.Cells.Sum(c => c.Clears.Count(won => won));
             var tied = ranked.Where(r => r.Cells.Sum(c => c.Clears.Count(won => won)) == topWins).ToArray();
@@ -93,6 +100,12 @@ public static class TowerBossStudyPolicy
             {
                 primary = incumbent;
                 reason = "Designated supplied primary retained on a positive maximum selection-win tie.";
+            }
+            else if (policyVersion == ThreeReferenceTieVersion && topWins > 0 && tied.Length > 1
+                && tied.FirstOrDefault(r => referenceParties!.Contains(r.Id)) is { } reference)
+            {
+                primary = reference;
+                reason = "Supplied reference retained on a positive maximum selection-win tie; the designated primary was below the maximum; frozen nominee order resolved tied references.";
             }
             else reason = topWins == 0 ? "All nominees had zero selection wins; mean guardian health, frozen discovery rank and stable ID selected the primary."
                 : tied.Length == 1 ? "Unique maximum selection wins selected the primary; incumbent tie preference did not apply."

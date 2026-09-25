@@ -4,20 +4,22 @@ using Domain.Models.Attributes;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Progression;
 using Domain.Models.Items.Equipments.Sets;
+using Services.LL.Content;
 
 namespace Services.LL.Items;
 
 public static class JsonStarterEquipmentCatalog
 {
-    public static StarterEquipmentCatalog Load(string path)
+    public static StarterEquipmentCatalog Load(string path, ContentJsonReader? reader = null)
     {
+        reader ??= ContentJsonReader.Default;
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         options.Converters.Add(new JsonStringEnumConverter());
-        var content = JsonSerializer.Deserialize<StarterContent>(File.ReadAllText(path), options)
+        var content = reader.Deserialize<StarterContent>(reader.ReadAllText(path), options)
             ?? throw new InvalidOperationException("Missing Equipment progression starter catalog.");
         var archetypes = content.Items.Select(x => new EquipmentArchetype(x.Id, x.ItemBaseId,
             x.EquipmentType, x.Behavior, x.StatWeights, minimumTier: 1, maximumTier: content.MaximumTier));
-        var named = JsonSerializer.Deserialize<NamedContent[]>(File.ReadAllText(
+        var named = reader.Deserialize<NamedContent[]>(reader.ReadAllText(
             Path.Combine(Path.GetDirectoryName(path)!, "equipment-named.v1.json")), options)
             ?? throw new InvalidOperationException("Missing Equipment progression named equipment.");
         var definitions = content.Items.SelectMany(x => Enum.GetValues<EquipmentRarity>().Select(rarity =>
@@ -30,17 +32,17 @@ public static class JsonStarterEquipmentCatalog
                     rarity)))
             .Concat(named.Select(x => new EquipmentDefinition(x.Id, x.Name, x.ArchetypeId,
                 EquipmentRarity.Rare, x.NativeStyleId)));
-        var styleContent = JsonSerializer.Deserialize<StyleContent[]>(File.ReadAllText(
+        var styleContent = reader.Deserialize<StyleContent[]>(reader.ReadAllText(
             Path.Combine(Path.GetDirectoryName(path)!, "equipment-styles.v1.json")), options)
             ?? throw new InvalidOperationException("Missing Equipment progression styles.");
         var styles = styleContent.Select(x => new EquipmentStyle(x.Id, x.CompatibleArchetypeIds,
             x.StatWeights, x.EquipmentSetId)).ToArray();
         var root = Path.GetDirectoryName(path)!;
-        var sets = JsonSerializer.Deserialize<EquipmentSetDefinition[]>(File.ReadAllText(
+        var sets = reader.Deserialize<EquipmentSetDefinition[]>(reader.ReadAllText(
             Path.Combine(root, "equipment-sets.v1.json")), options)
             ?? throw new InvalidOperationException("Missing equipment set definitions.");
         var equipmentBases = ReadEquipmentBases(
-            Path.Combine(Directory.GetParent(root)!.FullName, "items", "items.json"), options);
+            Path.Combine(Directory.GetParent(root)!.FullName, "items", "items.json"), options, reader);
         var evaluator = new EquipmentEvaluator(new(content.BalanceVersion, content.BaseTierBudget,
             content.StyleShare, content.RankIncrement), archetypes, styles, definitions);
         return new(evaluator, content.Items.Select(x => x.Id), styles, sets, equipmentBases);
@@ -48,16 +50,17 @@ public static class JsonStarterEquipmentCatalog
 
     private static IReadOnlyDictionary<string, EquipmentBase> ReadEquipmentBases(
         string path,
-        JsonSerializerOptions options)
+        JsonSerializerOptions options,
+        ContentJsonReader reader)
     {
-        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        using var document = reader.ParseDocument(reader.ReadAllText(path));
         return document.RootElement
             .EnumerateArray()
             .Where(element =>
                 element.TryGetProperty("itemType", out var itemType)
                 && itemType.GetString()?.Equals("Equipment", StringComparison.OrdinalIgnoreCase) == true)
             .Select(element =>
-                JsonSerializer.Deserialize<EquipmentBase>(element.GetRawText(), options)
+                reader.Deserialize<EquipmentBase>(element.GetRawText(), options)
                 ?? throw new InvalidOperationException("Unable to parse an equipment item definition."))
             .ToDictionary(equipment => equipment.Id, StringComparer.OrdinalIgnoreCase);
     }

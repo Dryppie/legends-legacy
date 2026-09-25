@@ -49,7 +49,7 @@ public static class TowerBossInventory
 
     public static TowerBossInventoryReport Create(string root, ThreatAndTankingOptions threat)
     {
-        var provider = new JsonAbilityCatalogProvider(new ConfigurationBuilder().Build(), root, HarnessJson.Options, threat);
+        var provider = TowerContentProviders.Abilities(new ConfigurationBuilder().Build(), root, HarnessJson.Options, threat);
         _ = provider.GetCompiledCatalog(); // Production validation/compiler, including cooldown/trigger and reference rules.
         var catalog = provider.GetCatalog();
         var graph = new Graph(catalog);
@@ -61,13 +61,13 @@ public static class TowerBossInventory
             return new TowerEssenceMechanics(e.Id, e.DisplayName, e.SourceMonsterId, ids,
                 graph.Closure(roots), graph.Signals(roots));
         }).ToArray();
-        var floors = new JsonWorldTowerDefinitionProvider(Path.Combine(root, "Data", SourceFiles[0]), HarnessJson.Options).GetFloors();
+        var floors = TowerContentProviders.Floors(Path.Combine(root, "Data", SourceFiles[0]), HarnessJson.Options).GetFloors();
         // This version promises all fifteen released floors; a release expansion needs an explicit contract update.
         if (!floors.Select(f => f.FloorNumber).SequenceEqual(Enumerable.Range(1, 15)))
             throw new InvalidDataException("Boss inventory schema 1 requires all 15 released Tower floors.");
         var creatures = HarnessJson.Read<JsonElement>(Path.Combine(root, "Data", "world/creatures.json"))
             .GetProperty("creatures").EnumerateArray().ToDictionary(c => c.GetProperty("id").GetGuid());
-        var profiles = new JsonCreatureAbilityDefinitionProvider(new ConfigurationBuilder().Build(), root, HarnessJson.Options);
+        var profiles = TowerContentProviders.CreatureAbilities(new ConfigurationBuilder().Build(), root, HarnessJson.Options);
         var bosses = floors.Select(floor =>
         {
             if (!creatures.TryGetValue(floor.GuardianCreatureId, out var creature))

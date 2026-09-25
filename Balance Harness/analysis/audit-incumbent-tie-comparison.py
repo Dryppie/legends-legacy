@@ -10,6 +10,7 @@ import gzip
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import struct
 
@@ -17,12 +18,44 @@ VERSION = 'tower-incumbent-tie-comparison-v1'
 CAPTURE = '1a2da312f1cb7af7867f0d173c9fcdf8f2213afc36873240ed2b0da505eec314'
 CAPTURE_TEMPLATE = 'cc0ae4e8ccacb09ad169386c3f1c25fc1de6c93f9485dd20fe59438f6122a31a'
 PRIMARY = '399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b'
+THREE_VERSION = 'tower-three-reference-tie-comparison-v1'
+THREE_PLAN = '2ae905286313000e04170f45acd849c552251954487c99186d4cea1b96fcdf24'
 SECOND = '8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50'
 
 
 def require(ok, message):
     if not ok:
         raise ValueError(message)
+
+
+def protocol(version):
+    if version == VERSION:
+        return 4, 11904, 'SupportsIncumbentTieForFrozenOutputs', 'DoNotPromoteIncumbentTie'
+    if version == THREE_VERSION:
+        return 5, 12672, 'SupportsThreeReferenceTieForFrozenOutputs', 'DoNotPromoteThreeReferenceTie'
+    raise ValueError('Unknown selector comparison protocol')
+
+
+def digest(value):
+    # Fixed ASCII metadata only; native replay checks exponent-form search-fitness hashes.
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode()).hexdigest()
+
+
+def choices(counts, health, rank, primary, references, version=VERSION):
+    nominees, _, _, _ = protocol(version)
+    require(len(rank) == nominees and counts.keys() == health.keys() == rank.keys()
+            and len(references) == nominees-2 and set(references) <= rank.keys() and primary in references,
+            'Incomplete definition-bound selection family')
+    require(all(type(w) is int and 0 <= w <= 32 for w in counts.values())
+            and all(math.isfinite(h) and h >= 0 for h in health.values()), 'Invalid selection counts or health')
+    best = min(counts, key=lambda p: (-counts[p], health[p] if counts[p] == 0 else 0, rank[p], p))
+    top = max(counts.values())
+    incumbent = primary if top > 0 and counts[primary] == top else best
+    if version == VERSION:
+        return best, incumbent
+    tied_references = [p for p in references if counts[p] == top]
+    candidate = (primary if counts[primary] == top else min(tied_references, key=lambda p: (rank[p], p))) if top > 0 and tied_references else best
+    return incumbent, candidate
 
 
 def read(path):
@@ -64,7 +97,8 @@ def classify(entropy, history):
     return fresh[:24984], sorted(fresh), collisions, duplicates
 
 
-def endpoint(pairs, historical):
+def endpoint(pairs, historical, version=VERSION):
+    _, search_fights, support, negative = protocol(version)
     require(len(pairs) == 24 and [p['restart'] for p in pairs] == list(range(1, 25)) and 0 <= historical <= 967232, 'Incomplete endpoint')
     k = sum(not p['identical'] for p in pairs)
     net = sum(p['gains'] - p['losses'] for p in pairs)
@@ -74,11 +108,11 @@ def endpoint(pairs, historical):
     margin = math.sqrt(2*n*math.log(20))/denominator + depletion
     mean = net/denominator
     lower = max(-k/24, mean-margin)
-    decision = ('NoSelectorDifferences' if k == 0 else 'SupportsIncumbentTieForFrozenOutputs'
-                if net >= 240 and lower > 0 and positive >= 3 else 'DoNotPromoteIncumbentTie')
-    return dict(version=VERSION, status='Verified', decision=decision, boundVersion='conditional-range-hoeffding-depletion-v1',
+    decision = ('NoSelectorDifferences' if k == 0 else support
+                if net >= 240 and lower > 0 and positive >= 3 else negative)
+    return dict(version=version, status='Verified', decision=decision, boundVersion='conditional-range-hoeffding-depletion-v1',
                 pairs=pairs, activeRestarts=k, netWins=net, positiveRestarts=positive, denominator=denominator,
-                meanDifference=mean, depletion=depletion, margin=margin, lowerBound=lower, fights=11904+2*n)
+                meanDifference=mean, depletion=depletion, margin=margin, lowerBound=lower, fights=search_fights+2*n)
 
 
 def same_numbers(actual, expected):
@@ -91,18 +125,19 @@ def same_numbers(actual, expected):
     return actual == expected
 
 
-def audit_rows(root, template, values, primary):
+def audit_rows(root, template, values, primary, version=VERSION):
     """The direct-row core is also exercised with literal report archives in backend tests."""
+    nominees, search_fights, _, _ = protocol(version)
     study_root = root/'study'
     study, frozen = read(study_root/'study.json'), read(study_root/'outputs-freeze.json')
-    require(study['version'] == frozen['version'] == VERSION and study['freeze'] == frozen, 'Changed global freeze')
+    require(study['version'] == frozen['version'] == version and study['freeze'] == frozen, 'Changed global freeze')
     searches = frozen['searches']
-    require([s['restart'] for s in searches] == list(range(1, 25)) and frozen['completedAttempts'] == 11904, 'Incomplete global search')
+    require([s['restart'] for s in searches] == list(range(1, 25)) and frozen['completedAttempts'] == search_fights, 'Incomplete global search')
     raw_trials = (study_root/'trials.jsonl').read_bytes()
     require(raw_trials.endswith(b'\n'), 'Torn battle ledger')
     trials = [json.loads(line) for line in raw_trials.splitlines()]
     require([t['id'] for t in trials] == [f'trial-{i+1:06d}' for i in range(len(trials))], 'Reordered battle ledger')
-    cursor, direct = 0, {}
+    cursor, direct, scenarios, recipe_names = 0, {}, {}, set()
 
     def consume(stage, seeds, scenario=None, expected_ids=None, expected_party=None):
         nonlocal cursor
@@ -116,6 +151,7 @@ def audit_rows(root, template, values, primary):
                 require(trial['id'] == expected_ids[i], 'Measurement does not refer to direct battle')
             recipe = read(study_root/'recipes'/f"{trial['recipe']}.json")
             require(recipe['seeds'] == seeds, 'Wrong physical recipe panel')
+            recipe_names.add(trial['recipe']+'.json')
             builds = {str(p['partySlot']): p['build']['essenceIds'] for p in recipe['party']}
             party_id = hashlib.sha256(json.dumps(builds, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode()).hexdigest()
             if expected_party is not None:
@@ -126,6 +162,7 @@ def audit_rows(root, template, values, primary):
                 actor['build']['identityEssenceIds'] = [f'neutral-identity-slot-{i+1}' for i in range(template['budget']['essenceSlots'])]
             require(recipe['party'] == physical and recipe['floorNumber'] == template['budget']['priorityFloor']
                     and recipe['startsAt'] == template['startsAt'], 'Changed character identities, equipment or scope')
+            scenarios[(recipe['id'], party_id)] = dict(recipe, seeds=[])
             if scenario is not None:
                 require(recipe == dict(scenario, seeds=seeds), 'Confirmed an unselected physical recipe')
             with gzip.open(study_root/'battles'/f"{trial['id']}.json.gz", 'rt', encoding='utf-8') as stream:
@@ -147,7 +184,7 @@ def audit_rows(root, template, values, primary):
         require(arm['seed'] == values[j*41] and len(arm['evaluations']) == 46 and len(arm['proposals']) <= 256, 'Wrong search width, root or attempt ceiling')
         for stage, measurements, seeds in [('discovery', arm['evaluations'], values[j*41+1:j*41+9]),
                                           ('selection', search['selection'], values[j*41+9:j*41+41])]:
-            require(len(measurements) == (46 if stage == 'discovery' else 4), 'Incomplete measurements')
+            require(len(measurements) == (46 if stage == 'discovery' else nominees), 'Incomplete measurements')
             for row in measurements:
                 require(len(row['cells']) == 1, 'Changed contexts')
                 cell = row['cells'][0]
@@ -156,20 +193,20 @@ def audit_rows(root, template, values, primary):
                 require(math.isclose(cell['guardianHealth'], sum(direct[t][1] for t in cell['trials'])/len(seeds), abs_tol=1e-10), 'Changed selection health')
         shortlist = discovery['discoveryShortlist']
         rank = {p['id']: i for i, p in enumerate(shortlist)}
-        require(len(rank) == 4 and {s['party']['id'] for s in template['starts']} <= rank.keys(), 'Missing protected teams')
+        require(len(rank) == nominees and {s['party']['id'] for s in template['starts']} <= rank.keys(), 'Missing protected teams')
         counts = {r['id']: sum(r['cells'][0]['clears']) for r in search['selection']}
         health = {r['id']: r['cells'][0]['guardianHealth'] for r in search['selection']}
         require(counts.keys() == rank.keys(), 'Selection family differs')
-        best = min(counts, key=lambda p: (-counts[p], health[p] if counts[p] == 0 else 0, rank[p], p))
-        maximum = max(counts.values())
-        chosen = primary if maximum > 0 and counts[primary] == maximum and list(counts.values()).count(maximum) > 1 else best
-        for key, party, policy in [('baseline', best, 'tower-staged-zero-win-health-v1'), ('candidate', chosen, 'tower-staged-incumbent-tie-v1')]:
+        best, chosen = choices(counts, health, rank, primary, [s['party']['id'] for s in template['starts']], version)
+        policies = ('tower-staged-zero-win-health-v1', 'tower-staged-incumbent-tie-v1') if version == VERSION else ('tower-staged-incumbent-tie-v1', 'tower-staged-three-reference-tie-v1')
+        for key, party, policy in [('baseline', best, policies[0]), ('candidate', chosen, policies[1])]:
             output = search[key]
-            require(output['selector'] == policy and output['finalist']['party']['id'] == party and output['scenario']['seeds'] == [], 'Wrong real selector choice')
+            require(output['selector'] == policy and output['finalist']['party'] == next(p for p in shortlist if p['id'] == party)
+                    and output['scenario'] == scenarios[(output['scenario']['id'], party)], 'Wrong real selector choice or physical output')
         # Exact scenario equality is sufficient here: both selectors share the same fixed context and canonical recipe construction.
         require((search['baseline']['scenario']['party'] == search['candidate']['scenario']['party'])
                 == (search['baseline']['recipeHash'] == search['candidate']['recipeHash']), 'Changed physical recipe identity')
-    require(cursor == 11904, 'Shared search accounting mismatch')
+    require(cursor == search_fights, 'Shared search accounting mismatch')
     active = [s['restart'] for s in searches if s['baseline']['recipeHash'] != s['candidate']['recipeHash']]
     require(frozen['activeRestarts'] == active and [e['restart'] for e in study['evidence']] == active, 'Changed active confirmation family')
     pairs = []
@@ -186,17 +223,22 @@ def audit_rows(root, template, values, primary):
             gains, losses = sum(y and not x for x, y in zip(a, b)), sum(x and not y for x, y in zip(a, b))
             pair.update(baselineWins=sum(a), candidateWins=sum(b), gains=gains, losses=losses, difference=(gains-losses)/1000)
         pairs.append(pair)
-    require(cursor == len(trials) == 11904+2000*len(active), 'Extra controls, repeated search, unselected or missing fights')
+    require(cursor == len(trials) == search_fights+2000*len(active), 'Extra controls, repeated search, unselected or missing fights')
     raw_attempts = (root/'attempts.jsonl').read_bytes()
     require(raw_attempts.endswith(b'\n'), 'Torn attempt ledger')
     lines = raw_attempts.splitlines(keepends=True)
-    require(len(lines) == 2*len(trials) and hashlib.sha256(b''.join(lines[:23808])).hexdigest() == frozen['attemptsHash'], 'Invalid global barrier')
+    require(len(lines) == 2*len(trials) and hashlib.sha256(b''.join(lines[:search_fights*2])).hexdigest() == frozen['attemptsHash'], 'Invalid global barrier')
     for i, line in enumerate(lines):
         require(json.loads(line) == dict(kind='Started' if i % 2 == 0 else 'Completed', ordinal=i//2+1), 'Reordered attempt ledger')
-    return endpoint(pairs, len(template['excludedCombatSeeds']))
+    require({p.name for p in (study_root/'recipes').iterdir()} == recipe_names
+            and {p.name for p in (study_root/'battles').iterdir()} == {t['id']+'.json.gz' for t in trials}, 'Extra or missing physical archive')
+    return endpoint(pairs, len(template['excludedCombatSeeds']), version)
 
 
-def audit(root, pin):
+def audit(root, pin=None):
+    if read(root/'request.json')['version'] == THREE_VERSION:
+        return audit_three(root, pin)
+    require(pin, 'Legacy audit requires a completed archive pin')
     files = authenticate(root, pin)
     require(not (root/'failure.json').exists(), 'Failed comparison')
     q, template = read(root/'request.json'), read(root/'template.json')
@@ -239,9 +281,108 @@ def audit(root, pin):
     return dict(status='IndependentSavedRowsVerified', manifestSha256=pin, result=result, newFights=0, newValues=0)
 
 
+THREE_CAPTURE = '001eb3e1a8642f3168f15f4ebc81ec65f33235cbae8ae1e2bc5104c61646142d'
+THREE_CAPTURE_TEMPLATE = 'cd12abf230a8244170aac3b059daf016dae3f2fccdf3cd2dfa3de2add7741f83'
+THREE_CAPTURE_FAILURE = '8e277d2ad609fe1dd00063f6a9b27930ee15f6a82389e07d933c907613be762e'
+THREE_CLOSEOUT = '65cde20aabb7deaffcd889b0e685a9bd26830d63be4678db75a2f4506956d213'
+THREE_PARTIES = ['399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b',
+           '8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50',
+           '96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c']
+
+
+def audit_three(root, pin=None):
+    if pin:
+        authenticate(root, pin)
+    require(not (root/'failure.json').exists(), 'Failed comparison')
+    q, template = read(root/'request.json'), read(root/'template.json')
+    version = q['version']
+    require(version == THREE_VERSION, 'Unknown three-reference comparison')
+    plan = THREE_PLAN
+    require(q.get('maximumSeconds') == 10800 and q.get('maximumBytes') == 6442450944
+            and q.get('priorSeconds') == 600 and q.get('priorBytes') == 536870912, 'Changed or missing cumulative envelope')
+    require(sha(root/'plan.json') == q['planHash'] == plan and sha(root/'auditor.py') == q['auditorHash']
+            and sha(Path(__file__)) == q['auditorHash'] and sha(root/'template.json') == q['templateHash'], 'Unbound plan, template or auditor')
+    pins = {'capture/files.json': THREE_CAPTURE, 'capture/preset/template.json': THREE_CAPTURE_TEMPLATE,
+            'capture/failure.json': THREE_CAPTURE_FAILURE, 'capture/closeout/files.json': THREE_CLOSEOUT}
+    for name, value in pins.items():
+        require(sha(root/name) == value, 'Changed source capture')
+    closeout = read(root/'capture/closeout/files.json')
+    require(sha(root/'capture/closeout/receipt.json') == closeout['receipt.json'], 'Changed reconciliation receipt')
+    reconciliation = read(root/'capture/closeout/receipt.json')
+    require(reconciliation['manifestSha256'] == THREE_CAPTURE and reconciliation['reconciledCloseoutFailureSha256'] == THREE_CAPTURE_FAILURE
+            and reconciliation['closeoutStatus'] == 'ReadOnlyReconciled', 'Source failure not reconciled')
+    expected = copy.deepcopy(read(root/'capture/preset/template.json'))
+    expected.update(id='three-reference-tie-template', executionHash=template['executionHash'], excludedCombatSeeds=template['excludedCombatSeeds'], maximumBattles=4528)
+    expected.pop('primaryReferenceId', None)
+    expected['generation'].update(policyVersion='retained-composition-three-references-v1', seeds=[])
+    require(template == expected and [s['party']['id'] for s in template['starts']] == THREE_PARTIES, 'Changed captured search or scope')
+    receipt, launch = read(root/'native-receipt.json'), read(root/'launch.json')
+    request_hash = sha(root/'request.json')
+    require(receipt['version'] == launch['version'] == version and receipt['status'] == 'Verified'
+            and receipt['requestFileHash'] == launch['requestFileHash'] == request_hash and receipt['newAuditFights'] == 0
+            and 0 <= receipt['measuredSeconds'] < 10080 and 0 <= receipt['observedBytes'] < 5637144576, 'Invalid native receipt')
+    require(launch['maximumSeconds'] == 10200 and launch['maximumBytes'] == 5905580032
+            and launch['nativeMaximumSeconds'] == 10080 and launch['nativeMaximumBytes'] == 5637144576
+            and launch['mechanism'] == 'suspended-owned-job-v1', 'Changed launch allowance')
+    if pin:
+        completion = read(root/'completion.json')
+        require(completion['version'] == version and completion['status'] == 'Complete' and completion['requestFileHash'] == request_hash
+                and completion['retries'] == 0 and 0 <= completion['seconds'] < 10200 and 0 <= completion['observedBytes'] <= 5905580032
+                and completion['chargedSeconds'] == completion['seconds']+600
+                and completion['chargedBytes'] == completion['observedBytes']+536870912, 'Invalid publication accounting')
+        require(sum(p.stat().st_size for p in root.rglob('*') if p.is_file()) <= completion['observedBytes'], 'Uncharged retained bytes')
+        for p in [completion['process'], read(root/'independent-audit-process.json')]:
+            require(p['exitCode'] == 0 and not p['timedOut'] and p['activeProcesses'] == 0
+                    and p['totalProcesses'] >= 1 and p['mechanism'] == 'suspended-owned-job-v1', 'Incomplete process tree')
+    process = read(root/'native-audit-process.json')
+    require(process['mechanism'] == 'suspended-owned-job-v1' and process['exitCode'] == 0
+            and not process['timedOut'] and process['activeProcesses'] == 0 and process['totalProcesses'] >= 1, 'Native audit did not finish')
+    inputs = ['request.json', 'template.json', 'plan.json', 'auditor.py', 'native-receipt.json', 'launch.json', 'native-audit-process.json',
+              'capture/closeout/receipt.json', 'entropy.bin', 'entropy-intent.json', 'allocation.json', 'history-files.json',
+              'history-input.json', 'seed-ledger.json', 'attempts.jsonl', 'result.json'] + list(pins)
+    input_pins = {name: sha(root/name) for name in inputs}
+    authenticate(root/'study', receipt['archiveHash'])
+    scope = read(root/'study/scope.json')
+    require(scope['algorithm'] == version and scope['contentHashes'] == template['contentHashes']
+            and scope['reportStorage'] == 'gzip-json-v1' and digest(scope['settings']) == template['settingsHash']
+            and digest(scope['execution']) == template['executionHash'], 'Changed archive scope')
+    for name, value in read(root/'capture/files.json').items():
+        if name.startswith('runtime/') and not Path(name).name.startswith('BalanceHarness'):
+            require(sha(root/'study/executable'/name[8:]) == value, 'Changed captured runtime dependency')
+    for name, value in template['contentHashes'].items():
+        require(sha(root/'study/content/Data'/name) == value, 'Changed captured content')
+    values, reserved, collisions, duplicates = classify((root/'entropy.bin').read_bytes(), template['excludedCombatSeeds'])
+    history = read(root/'history-files.json')
+    require(all(history.get(name) == value for name, value in q['requiredHistory'].items()), 'Changed authoritative history pins')
+    require(read(root/'entropy-intent.json') == dict(version=version, words=32768, assignedValues=24984,
+            historicalHash=digest(template['excludedCombatSeeds']), retries=0), 'Changed reservation intent')
+    require(read(root/'allocation.json') == dict(version=version, entropyHash=sha(root/'entropy.bin'), historicalHash=digest(template['excludedCombatSeeds']),
+            selected=values, reserved=reserved, historicalCollisions=collisions, duplicates=duplicates), 'Changed entropy allocation')
+    require(read(root/'history-input.json') == dict(reservationState='Complete', reserved=reserved)
+            and read(root/'seed-ledger.json') == dict(reservationState='Complete', historical=template['excludedCombatSeeds'], reserved=reserved), 'Lost reservations')
+    computed, native = audit_rows(root, template, values, THREE_PARTIES[0], version), read(root/'result.json')
+    require(same_numbers(native, computed) and receipt['fights'] == computed['fights'], 'Independent arithmetic disagreement')
+    authenticate(root/'study', receipt['archiveHash'])
+    require(all(sha(root/name) == value for name, value in input_pins.items()), 'Audit input changed while reading')
+    if pin:
+        authenticate(root, pin)
+    return dict(status='Passed', requestFileHash=request_hash, manifestSha256=pin, result=native, inputHashes=input_pins,
+                primaryTolerance=1e-12, newFights=0, newValues=0)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('archive', type=Path)
-    parser.add_argument('--manifest-sha256', required=True)
+    parser.add_argument('archive', nargs='?', type=Path)
+    parser.add_argument('--manifest-sha256')
+    parser.add_argument('--working', type=Path)
+    parser.add_argument('--output', type=Path)
     args = parser.parse_args()
-    print(json.dumps(audit(args.archive, args.manifest_sha256), indent=2))
+    require(bool(args.working) != bool(args.archive), 'Supply one working or completed archive')
+    require(bool(args.working) or bool(args.manifest_sha256), 'Completed archive needs a manifest pin')
+    result = audit(args.working or args.archive, args.manifest_sha256)
+    if args.output:
+        with args.output.open('x', encoding='utf-8', newline='\n') as stream:
+            json.dump(result, stream, indent=2)
+            stream.flush()
+            os.fsync(stream.fileno())
+    print(json.dumps(result, indent=2))

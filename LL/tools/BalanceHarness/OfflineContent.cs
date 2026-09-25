@@ -40,12 +40,12 @@ public sealed class OfflineContent
         using var timing = TowerPerformanceTrace.Measure("content.load");
         _root = root;
         _threat = JsonSerializer.Deserialize<ThreatAndTankingOptions>(JsonSerializer.SerializeToUtf8Bytes(threat, HarnessJson.Options), HarnessJson.Options)!;
-        Essences = new(_configuration, root, HarnessJson.Options, new EssenceDefinitionValidator());
-        _creatureEssences = new(_configuration, root, HarnessJson.Options, Essences);
-        _creatureAbilities = new(_configuration, root, HarnessJson.Options);
-        _scaling = new(_configuration, root, HarnessJson.Options);
-        _abilities = new(_configuration, root, HarnessJson.Options, _threat);
-        Equipment = JsonStarterEquipmentCatalog.Load(Path.Combine(root, "Data", "equipment", "equipment-starters.v1.json"));
+        Essences = TowerContentProviders.Essences(_configuration, root, HarnessJson.Options, new EssenceDefinitionValidator());
+        _creatureEssences = TowerContentProviders.Loot(_configuration, root, HarnessJson.Options, Essences);
+        _creatureAbilities = TowerContentProviders.CreatureAbilities(_configuration, root, HarnessJson.Options);
+        _scaling = TowerContentProviders.Scaling(_configuration, root, HarnessJson.Options);
+        _abilities = TowerContentProviders.Abilities(_configuration, root, HarnessJson.Options, _threat);
+        Equipment = TowerContentProviders.Equipment(Path.Combine(root, "Data", "equipment", "equipment-starters.v1.json"));
     }
 
     public CanonicalEquipmentBuild CreateStarter()
@@ -147,7 +147,7 @@ public sealed class OfflineContent
     {
         if (recipe.Level is < 0 or > 10)
             throw new InvalidDataException("Combat Style fixture levels must be 0–10.");
-        var catalog = new JsonCombatStyleCatalogProvider(Path.Combine(_root, "Data", "combat-styles", "combat-styles.v1.json")).Catalog;
+        var catalog = TowerContentProviders.Styles(Path.Combine(_root, "Data", "combat-styles", "combat-styles.v1.json")).Catalog;
         var definition = catalog.Styles.SingleOrDefault(x => x.Id == recipe.Id)
             ?? throw new InvalidDataException($"Unknown Combat Style '{recipe.Id}'.");
         var ownedEssences = character.MaterializeEssences();

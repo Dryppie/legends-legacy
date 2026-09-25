@@ -13,19 +13,19 @@ public static partial class TowerIncumbentTieComparison
         foreach (var folder in new[] { "recipes", "battles" }) Directory.CreateDirectory(Path.Combine(output, folder));
         void Save(string name, object value) { check(); Storage(q).Put("study/" + name, value); }
         var settings = TowerBundle.ReadSettings(q.ContentRoot);
-        var scope = new LoadoutScope(Version, settings, ExecutionIdentity.Current(),
+        var scope = new LoadoutScope(q.Version, settings, ExecutionIdentity.Current(),
             TowerBundle.CopyContent(q.ContentRoot, Path.Combine(output, "content"), ct), "gzip-json-v1");
         Require(HarnessJson.Hash(settings) == template.SettingsHash && HarnessJson.Hash(scope.Execution) == template.ExecutionHash
             && HarnessJson.Hash(scope.ContentHashes) == HarnessJson.Hash(template.ContentHashes), "Runtime or content changed after admission.");
         Save("scope.json", scope);
         var inventory = TowerBossInventory.Create(Path.Combine(output, "content"), settings.Threat);
-        var inputs = TowerBossImprovement.Inputs(Bind(template, allocation.Selected, 0, false));
+        var inputs = TowerBossImprovement.Inputs(Bind(template, allocation.Selected, 0, false, q.Version));
         var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
         Save("boss-profiles.json", inventory); Save("generation-mechanics.json", mechanics);
         Save("executable-files.json", TowerBossStudy.RetainExecutable(output, scope.Execution,
-            NativeBytes - 4 * 1048576 - TowerBulkCampaign.StorageBytes(q.OutputRoot, ct), ct));
-        var archive = new TowerLoadoutArchive(output, scope, MaximumFights);
-        using (var attempts = new TowerPracticalSearch.Attempts(P(q, "attempts.jsonl"), MaximumFights, check))
+            Policy(q.Version).NativeBytes - 4 * 1048576 - TowerBulkCampaign.StorageBytes(q.OutputRoot, ct), ct));
+        var archive = new TowerLoadoutArchive(output, scope, Policy(q.Version).MaximumFights);
+        using (var attempts = new TowerPracticalSearch.Attempts(P(q, "attempts.jsonl"), Policy(q.Version).MaximumFights, check))
         {
             var study = await Execute(template, allocation, mechanics, async (arm, stage, scenario, seed, token) => {
                 var value = await archive.EvaluateAsync(arm, stage, scenario, seed, token);
@@ -38,10 +38,10 @@ public static partial class TowerIncumbentTieComparison
         return TowerContractJson.Read<IncumbentTieStudy>(Path.Combine(output, "study.json"));
     }
 
-    internal static string AttemptPrefix(string path)
+    internal static string AttemptPrefix(string path, string version = Version)
     {
-        var lines = File.ReadLines(path).Take(SearchFights * 2).ToArray();
-        Require(lines.Length == SearchFights * 2, "Incomplete search attempt journal.");
+        var lines = File.ReadLines(path).Take(Policy(version).SearchFights * 2).ToArray();
+        Require(lines.Length == Policy(version).SearchFights * 2, "Incomplete search attempt journal.");
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n")));
     }
 
@@ -49,7 +49,7 @@ public static partial class TowerIncumbentTieComparison
     {
         var lines = File.ReadAllLines(path);
         Require(lines.Length == 2 * fights && File.ReadAllText(path).EndsWith('\n')
-            && AttemptPrefix(path) == study.Freeze.AttemptsHash, "Incomplete attempts or changed global freeze boundary.");
+            && AttemptPrefix(path, study.Version) == study.Freeze.AttemptsHash, "Incomplete attempts or changed global freeze boundary.");
         for (var i = 0; i < fights; i++)
         for (var offset = 0; offset < 2; offset++)
             Require(HarnessJson.Hash(JsonSerializer.Deserialize<JsonElement>(lines[2 * i + offset]))
@@ -62,7 +62,7 @@ public static partial class TowerIncumbentTieComparison
         Func<LoadoutScope, IReadOnlyList<LoadoutTrial>, (BossGenerationMechanics Mechanics, TowerBossDiscoveryRun.Battle Battle)>? fixture = null)
     {
         using var guard = new TowerPerformanceTrace(_ => throw new InvalidOperationException("Comparison verification cannot fight.")).Activate();
-        var template = TowerBossDiscovery.Read(P(q, "template.json")); ValidateTemplate(template);
+        var template = TowerBossDiscovery.Read(P(q, "template.json")); ValidateTemplate(template, q.Version);
         Require(HarnessJson.FileHash(P(q, "template.json")) == q.TemplateHash, "Changed saved template.");
         var allocation = VerifyReservation(q, template); var output = P(q, "study");
         TowerBulkCampaign.VerifyFiles(output, "files.json", true, ct);
@@ -73,14 +73,14 @@ public static partial class TowerIncumbentTieComparison
         Require(trials.Count == result.Fights, "Missing or extra fights.");
         VerifyAttempts(P(q, "attempts.jsonl"), saved, result.Fights);
         var scope = TowerContractJson.Read<LoadoutScope>(Path.Combine(output, "scope.json"));
-        Require(scope.Algorithm == Version && scope.ReportStorage == "gzip-json-v1"
+        Require(saved.Version == q.Version && scope.Algorithm == q.Version && scope.ReportStorage == "gzip-json-v1"
             && HarnessJson.Hash(scope.Execution) == template.ExecutionHash && HarnessJson.Hash(scope.Settings) == template.SettingsHash
             && HarnessJson.Hash(scope.ContentHashes) == HarnessJson.Hash(template.ContentHashes), "Changed saved scope.");
         BossGenerationMechanics mechanics; TowerBossDiscoveryRun.Battle battle;
         if (fixture is not null) (mechanics, battle) = fixture(scope, trials);
         else
         {
-            ValidateCapture(P(q, "capture"), template, scope.Execution);
+            ValidateCapture(P(q, "capture"), template, scope.Execution, q.Version, P(q, "capture/closeout"));
             Require(template.ExecutionHash == HarnessJson.Hash(ExecutionIdentity.Current()), "Use the retained producing runtime for native verification.");
             var content = Path.Combine(output, "content");
             foreach (var p in template.ContentHashes) Require(HarnessJson.FileHash(Path.Combine(content, "Data", p.Key)) == p.Value, "Changed retained content.");
@@ -95,7 +95,7 @@ public static partial class TowerIncumbentTieComparison
                 && !Path.GetFileName(p.Key).StartsWith("BalanceHarness", StringComparison.Ordinal))
                 .All(p => actual.GetValueOrDefault(p.Key[8..]) == p.Value), "Changed captured runtime dependency.");
             var inventory = TowerBossInventory.Create(content, scope.Settings.Threat); Match(output, "boss-profiles.json", inventory);
-            mechanics = TowerBossPartyGenerator.FromInventory(TowerBossImprovement.Inputs(Bind(template, allocation.Selected, 0, false)), inventory);
+            mechanics = TowerBossPartyGenerator.FromInventory(TowerBossImprovement.Inputs(Bind(template, allocation.Selected, 0, false, q.Version)), inventory);
             var runner = new TowerBattleRunner(content, new OfflineContent(content, scope.Settings.Threat)); var index = 0;
             battle = (arm, stage, scenario, seed, token) => {
                 token.ThrowIfCancellationRequested(); Require(index < trials.Count, "Missing saved battle."); var trial = trials[index++];
@@ -107,7 +107,7 @@ public static partial class TowerIncumbentTieComparison
         }
         Match(output, "generation-mechanics.json", mechanics);
         var rebuilt = await Execute(template, allocation, mechanics, battle, (name, value) => Match(output, name, value),
-            _ => { }, () => AttemptPrefix(P(q, "attempts.jsonl")), ct);
+            _ => { }, () => AttemptPrefix(P(q, "attempts.jsonl"), q.Version), ct);
         Require(HarnessJson.Hash(saved) == HarnessJson.Hash(rebuilt), "Native saved reconstruction differs.");
         Require(Directory.EnumerateFiles(Path.Combine(output, "recipes")).Select(Path.GetFileName).Order()
             .SequenceEqual(trials.Select(t => t.Recipe + ".json").Distinct().Order())

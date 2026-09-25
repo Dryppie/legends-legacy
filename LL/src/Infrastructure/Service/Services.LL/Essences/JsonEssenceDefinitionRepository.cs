@@ -3,6 +3,7 @@ using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
+using Services.LL.Content;
 
 namespace Services.LL.Essences;
 
@@ -16,15 +17,17 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
         IConfiguration config,
         string contentRootPath,
         JsonSerializerOptions options,
-        IEssenceDefinitionValidator essenceValidator)
+        IEssenceDefinitionValidator essenceValidator,
+        ContentJsonReader? reader = null)
     {
+        reader ??= ContentJsonReader.Default;
         var contentRoot = config["Content:Root"] ?? "Data";
         var essencePath = Path.Combine(contentRootPath, contentRoot, "essences", "essences.json");
         var abilityPath = Path.Combine(contentRootPath, contentRoot, "combat", "abilities.json");
-        var essenceJson = File.ReadAllText(essencePath);
-        var abilityJson = File.ReadAllText(abilityPath);
-        var document = JsonSerializer.Deserialize<EssenceDefinitionDocument>(essenceJson, options) ?? new();
-        var abilitySpecs = JsonSerializer.Deserialize<List<AbilitySpec>>(abilityJson, options) ?? [];
+        var essenceJson = reader.ReadAllText(essencePath);
+        var abilityJson = reader.ReadAllText(abilityPath);
+        var document = reader.Deserialize<EssenceDefinitionDocument>(essenceJson, options) ?? new();
+        var abilitySpecs = reader.Deserialize<List<AbilitySpec>>(abilityJson, options) ?? [];
 
         ThrowIfDuplicateAbilityIds(abilitySpecs);
         _abilities = abilitySpecs.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);

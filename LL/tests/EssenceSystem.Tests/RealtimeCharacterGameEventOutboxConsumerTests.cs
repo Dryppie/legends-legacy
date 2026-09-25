@@ -37,7 +37,7 @@ public sealed class RealtimeCharacterGameEventOutboxConsumerTests
     }
 
     [Fact]
-    public async Task Outbox_rows_queued_before_the_payload_grew_still_deserialize()
+    public async Task Legacy_payload_without_xp_requirement_is_not_broadcast()
     {
         var characterId = Guid.NewGuid();
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
@@ -52,10 +52,7 @@ public sealed class RealtimeCharacterGameEventOutboxConsumerTests
             },
             CancellationToken.None);
 
-        var message = Assert.IsType<CharacterLevelUp>(publisher.Message);
-        Assert.Equal(characterId, message.CharacterId);
-        Assert.Equal(7, message.Level);
-        Assert.Equal(0, message.UnlockedEssenceSlots);
+        Assert.Null(publisher.Message);
     }
 
     [Fact]

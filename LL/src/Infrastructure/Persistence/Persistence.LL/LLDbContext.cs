@@ -27,6 +27,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Nobility;
 using Domain.Models.Outbox;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
@@ -764,6 +765,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<MarketPlaceListing> MarketPlaceListings => Set<MarketPlaceListing>();
     public DbSet<MarketPlaceBuyOrder> MarketPlaceBuyOrders => Set<MarketPlaceBuyOrder>();
     public DbSet<MarketPlaceOrder> MarketPlaceOrders => Set<MarketPlaceOrder>();
+    public DbSet<NobilityMembership> NobilityMemberships => Set<NobilityMembership>();
     public DbSet<GameEventOutboxMessage> GameEventOutboxMessages => Set<GameEventOutboxMessage>();
     public DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries => Set<GameEventOutboxDelivery>();
     public DbSet<StateSyncRevision> StateSyncRevisions => Set<StateSyncRevision>();

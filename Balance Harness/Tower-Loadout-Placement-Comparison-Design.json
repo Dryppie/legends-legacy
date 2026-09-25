@@ -1,0 +1,936 @@
+{
+  "version": "tower-loadout-placement-comparison-design-v1",
+  "status": "FrozenProspectiveComparisonNotImplementedNotAdmitted",
+  "designIdentity": "SHA256 of sorted compact UTF-8 JSON with literal Unicode; not a native plan hash",
+  "sourceFiles": {
+    "Balance Harness/Tower-Affinity-Allied-Action-Comparison-Plan.json": "907a31ea88910dad1f1d5a6d50c6a15e8077ccb5bc5e7c27a9b7099f75daf147",
+    "TestResults/affinity-allied-action-admission-20260924/resource-forecast.json": "a0053d2579db16bda205c134e41ee56d28d208329c0b49e68795fd80c4e0d373",
+    "TestResults/affinity-allied-action-pilot-01-execution-handoff-20260924.json": "f22769ca548cea2d700cbb28cee990f8096f587a6327e23b640c09fbb2a7b155",
+    "TestResults/affinity-allied-action-preview-20260924-v2/files.json": "8301070ad78ab8ea84875faf8092c7ae5da193f1d0106245e417b70f689231b1",
+    "TestResults/affinity-allied-action-preview-20260924-v2/root-01/request.json": "58ad6bbc09f0a126c40c08bd07e9a0bfadf98168d7c9c180c2f2bf20bf5a9f65",
+    "TestResults/loadout-placement-native-implementation-handoff-20260924.json": "8ecd2ba3875f0ec8cee3302b8abfe46cd4340381dd5e52d868f152074a52ab02",
+    "TestResults/loadout-placement-native-preview-20260924-v4/declaration.json": "174152878054b0f7d40f3a710faceed4d2d73d74ed21dd5d60f4018afc424b7c",
+    "TestResults/loadout-placement-native-preview-20260924-v4/files.json": "d677fb08736797adcc88704793332a3c77e1c8f046902e7ae1eb353f78e713d0",
+    "TestResults/loadout-placement-native-preview-20260924-v4/input-01.json": "64f97e3d1010f3da8edd224399ececbc1d36f6117c07cf09a062edf5b8cbf58a",
+    "TestResults/loadout-placement-native-preview-20260924-v4/physical-hash-bindings.json": "62fe258eece3a22e68c79e11df520862b46fddde2d6ed3a46609ae58c8845cff",
+    "TestResults/loadout-placement-native-preview-20260924-v4/root-01/batches.json": "ea860c7c6039fb34fdbfb3da429203b2a5206a5a8e98548a99be4b489505dfe8",
+    "TestResults/loadout-placement-native-preview-20260924-v4/summary.json": "45d1cc2667ac60d404a883d8422e78f535727edc26750fc216a7f5e043950c9c"
+  },
+  "plannedNativePlan": {
+    "version": "tower-loadout-placement-comparison-v1",
+    "scopeHash": "8cd7fdb0049b1e05320ae7921e1895703272a9951e5f2d171006eb458bd68b86",
+    "inventoryHash": "f06496a3079c4b9aa8d3366ac94e58de994ee7317fd41996eb90905a802d45c6",
+    "benchmarkPartyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+    "control": {
+      "version": "tower-proposal-policy-v5",
+      "name": "benchmark-allied-action-affinity-creation-v5",
+      "firstWave": [
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create"
+      ],
+      "secondWave": [
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create",
+        "affinity-create"
+      ],
+      "parentTickets": [
+        "benchmark"
+      ],
+      "preserveParentInteractions": false,
+      "preservedDamageAffinityIds": [],
+      "createdDamageAffinityIds": [
+        "09d48cd50f4fad5e7d81088514d48ac3367eb2797b20357480727f6d88d935f4",
+        "41d9b77a974edaf408edccc24c67b75c3d446d49439e8578887fcb1d27470e3e",
+        "ae4c3c8c716a80d55a689cb74f993c51f1251a4df5e3799f9557d83e3fe2cbb3"
+      ],
+      "creationRemovalRule": "preserve-completable-affinity-endpoints-and-allied-basic-attack-providers-v1"
+    },
+    "candidate": {
+      "version": "tower-proposal-policy-v6",
+      "name": "benchmark-subgroup-loadout-placement-v6",
+      "firstWave": [
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement"
+      ],
+      "secondWave": [
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement",
+        "subgroup-loadout-placement"
+      ],
+      "parentTickets": [
+        "benchmark"
+      ],
+      "preserveParentInteractions": false
+    },
+    "roots": 12,
+    "heldoutSamples": 256,
+    "searchFightsPerArm": 528,
+    "requiredFreshValues": 4380,
+    "maximumFights": 21888,
+    "maximumSeconds": 10800,
+    "maximumBytes": 6442450944,
+    "pairing": "same-proposal-root-racing-nomination-and-validation-panels-separate-charges",
+    "barrier": "freeze-all-24-outputs-before-any-heldout-observation",
+    "interpretation": "development-pilot-no-efficacy-or-adoption-claim",
+    "analysis": {
+      "primaryEndpoint": "equal-root-mean-heldout-candidate-minus-control-win-rate",
+      "guardrailEndpoint": "equal-root-mean-heldout-candidate-minus-fixed-benchmark-win-rate",
+      "identicalOutputs": "reuse-one-physical-recipe-per-root-heldout-panel-exact-zero-method-contrast-retain-absolute-benchmark-results",
+      "rootRetention": "all-12-roots-no-preview-screening-no-replacement-no-refill-any-incomplete-root-invalidates-study",
+      "rootUncertainty": "report-all-12-paired-root-contrasts-and-descriptive-95-percent-t-df11-not-a-powered-efficacy-test",
+      "conditionalUncertainty": "paired-seed-standard-errors-and-covariance-conditional-on-frozen-outputs-not-future-root-reliability",
+      "goMethodAtLeast": 0.02,
+      "goBenchmarkAtLeast": 0.02,
+      "goDifferingRootsAtLeast": 3,
+      "goPromisingNovelRootsAtLeast": 3,
+      "promisingNovelGainAtLeast": 0.03,
+      "abandonMethodAtMost": -0.02,
+      "abandonBenchmarkAtMost": -0.02,
+      "abandonPromisingNovelRootsBelow": 0,
+      "decisionOrder": "incomplete-then-abandon-either-endpoint-then-no-differentiation-then-relative-and-absolute-gain-with-novelty-else-inconclusive-never-adopt"
+    },
+    "selectionContrast": {
+      "control": "tower-racing-benchmark-validation-v1",
+      "candidate": "tower-racing-benchmark-validation-v1"
+    },
+    "validationProtocol": {
+      "valuesPerPair": 109,
+      "sharedRacingValues": 32,
+      "controlSelectionValues": 16,
+      "nominationValues": 16,
+      "validationValues": 60,
+      "nominationPairing": "both-arms-share-all-16-nomination-values-in-frozen-order",
+      "validationIsolation": "both-arms-share-60-validation-values-disjoint-from-training-and-all-heldout-panels",
+      "reporting": "both-arm-all-root-gate-counts-fallback-and-novel-output-frequency-plus-paired-heldout-effects-and-costs"
+    }
+  },
+  "physicalBinding": {
+    "contextSource": "TestResults/loadout-placement-native-preview-20260924-v4/input-01.json",
+    "contextDesignHash": "35207b32e116e9ff910f27c5da57be63dc491c517e71c68db0d053c98d2b2c98",
+    "nativeScopeHash": "8cd7fdb0049b1e05320ae7921e1895703272a9951e5f2d171006eb458bd68b86",
+    "nativeInventoryHash": "f06496a3079c4b9aa8d3366ac94e58de994ee7317fd41996eb90905a802d45c6",
+    "benchmarkPartyId": "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c",
+    "referencePartyIds": [
+      "399bc7760fb0cf790a5d8ac4272b607a440d5f982a17333842f9b3e79f680d5b",
+      "8287f77974c8c94e8af2fbcdb1b0e42911721d5fb1738fd8f24c5cccfc01ae50",
+      "96b943571150684df3a5be5352c94d60b32485b5797bb7b763b74f73faead78c"
+    ],
+    "frozen": "Captured content, gameplay dependencies, inventory, actor identities, gear, styles, floor, budgets, references, selected control affinities and both exact policies",
+    "allowedQualificationChanges": "Episode id/start time, accumulated exclusions and qualified harness execution identity only; preserve original design and rebind native scope explicitly",
+    "scopeHashMeaning": "Normalized comparison scope hash differs from full per-root placement catalogue scope hash; full catalogue hash remains in the unchanged root-derived shuffle"
+  },
+  "runtime": {
+    "controlRacingVersion": "tower-proposal-racing-v7",
+    "candidateRacingVersion": "tower-proposal-racing-v8",
+    "selectorVersion": "tower-racing-benchmark-validation-v1",
+    "inventoryBinding": "Shared captured context retains inventory; control racing binds it, placement racing MUST carry null inventory and no affinity metadata",
+    "comparisonImplemented": false,
+    "qualificationPerformed": false,
+    "priorAdmissionReusable": false
+  },
+  "hypothesis": {
+    "target": "Selected-output improvement at matched search cost on this captured floor-5 scenario",
+    "contrast": "Entire proposer package: whole-loadout placement and distinct-recipe shuffle versus allied-action affinity insertion and its existing sampling law",
+    "causalLimit": "Not an isolated causal estimate of bundle conservation, edit radius, neighborhood size or uniform sampling",
+    "controlStatus": "Existing development comparator, not a promoted or proven optimal baseline"
+  },
+  "feasibility": {
+    "controlRecipes": 26,
+    "candidateRecipes": 238,
+    "requiredUniquePerRoot": 17,
+    "savedRoots": 12,
+    "candidateDeterministicCapacity": true,
+    "controlFreshRootFillGuaranteed": false,
+    "noRootScreening": true,
+    "noOutcomeFittedWeights": true,
+    "noUnderfillFallback": true
+  },
+  "allocation": {
+    "requiredFreshValues": 4380,
+    "actualValuesAllocated": 0,
+    "entropyBytes": 65536,
+    "exposedSignedInt32Words": 16384,
+    "slots": [
+      {
+        "root": 1,
+        "proposalRoot": [
+          0,
+          1
+        ],
+        "racing": [
+          [
+            1,
+            9
+          ],
+          [
+            9,
+            17
+          ],
+          [
+            17,
+            25
+          ],
+          [
+            25,
+            33
+          ]
+        ],
+        "nomination": [
+          33,
+          49
+        ],
+        "validation": [
+          49,
+          109
+        ],
+        "heldout": [
+          1308,
+          1564
+        ]
+      },
+      {
+        "root": 2,
+        "proposalRoot": [
+          109,
+          110
+        ],
+        "racing": [
+          [
+            110,
+            118
+          ],
+          [
+            118,
+            126
+          ],
+          [
+            126,
+            134
+          ],
+          [
+            134,
+            142
+          ]
+        ],
+        "nomination": [
+          142,
+          158
+        ],
+        "validation": [
+          158,
+          218
+        ],
+        "heldout": [
+          1564,
+          1820
+        ]
+      },
+      {
+        "root": 3,
+        "proposalRoot": [
+          218,
+          219
+        ],
+        "racing": [
+          [
+            219,
+            227
+          ],
+          [
+            227,
+            235
+          ],
+          [
+            235,
+            243
+          ],
+          [
+            243,
+            251
+          ]
+        ],
+        "nomination": [
+          251,
+          267
+        ],
+        "validation": [
+          267,
+          327
+        ],
+        "heldout": [
+          1820,
+          2076
+        ]
+      },
+      {
+        "root": 4,
+        "proposalRoot": [
+          327,
+          328
+        ],
+        "racing": [
+          [
+            328,
+            336
+          ],
+          [
+            336,
+            344
+          ],
+          [
+            344,
+            352
+          ],
+          [
+            352,
+            360
+          ]
+        ],
+        "nomination": [
+          360,
+          376
+        ],
+        "validation": [
+          376,
+          436
+        ],
+        "heldout": [
+          2076,
+          2332
+        ]
+      },
+      {
+        "root": 5,
+        "proposalRoot": [
+          436,
+          437
+        ],
+        "racing": [
+          [
+            437,
+            445
+          ],
+          [
+            445,
+            453
+          ],
+          [
+            453,
+            461
+          ],
+          [
+            461,
+            469
+          ]
+        ],
+        "nomination": [
+          469,
+          485
+        ],
+        "validation": [
+          485,
+          545
+        ],
+        "heldout": [
+          2332,
+          2588
+        ]
+      },
+      {
+        "root": 6,
+        "proposalRoot": [
+          545,
+          546
+        ],
+        "racing": [
+          [
+            546,
+            554
+          ],
+          [
+            554,
+            562
+          ],
+          [
+            562,
+            570
+          ],
+          [
+            570,
+            578
+          ]
+        ],
+        "nomination": [
+          578,
+          594
+        ],
+        "validation": [
+          594,
+          654
+        ],
+        "heldout": [
+          2588,
+          2844
+        ]
+      },
+      {
+        "root": 7,
+        "proposalRoot": [
+          654,
+          655
+        ],
+        "racing": [
+          [
+            655,
+            663
+          ],
+          [
+            663,
+            671
+          ],
+          [
+            671,
+            679
+          ],
+          [
+            679,
+            687
+          ]
+        ],
+        "nomination": [
+          687,
+          703
+        ],
+        "validation": [
+          703,
+          763
+        ],
+        "heldout": [
+          2844,
+          3100
+        ]
+      },
+      {
+        "root": 8,
+        "proposalRoot": [
+          763,
+          764
+        ],
+        "racing": [
+          [
+            764,
+            772
+          ],
+          [
+            772,
+            780
+          ],
+          [
+            780,
+            788
+          ],
+          [
+            788,
+            796
+          ]
+        ],
+        "nomination": [
+          796,
+          812
+        ],
+        "validation": [
+          812,
+          872
+        ],
+        "heldout": [
+          3100,
+          3356
+        ]
+      },
+      {
+        "root": 9,
+        "proposalRoot": [
+          872,
+          873
+        ],
+        "racing": [
+          [
+            873,
+            881
+          ],
+          [
+            881,
+            889
+          ],
+          [
+            889,
+            897
+          ],
+          [
+            897,
+            905
+          ]
+        ],
+        "nomination": [
+          905,
+          921
+        ],
+        "validation": [
+          921,
+          981
+        ],
+        "heldout": [
+          3356,
+          3612
+        ]
+      },
+      {
+        "root": 10,
+        "proposalRoot": [
+          981,
+          982
+        ],
+        "racing": [
+          [
+            982,
+            990
+          ],
+          [
+            990,
+            998
+          ],
+          [
+            998,
+            1006
+          ],
+          [
+            1006,
+            1014
+          ]
+        ],
+        "nomination": [
+          1014,
+          1030
+        ],
+        "validation": [
+          1030,
+          1090
+        ],
+        "heldout": [
+          3612,
+          3868
+        ]
+      },
+      {
+        "root": 11,
+        "proposalRoot": [
+          1090,
+          1091
+        ],
+        "racing": [
+          [
+            1091,
+            1099
+          ],
+          [
+            1099,
+            1107
+          ],
+          [
+            1107,
+            1115
+          ],
+          [
+            1115,
+            1123
+          ]
+        ],
+        "nomination": [
+          1123,
+          1139
+        ],
+        "validation": [
+          1139,
+          1199
+        ],
+        "heldout": [
+          3868,
+          4124
+        ]
+      },
+      {
+        "root": 12,
+        "proposalRoot": [
+          1199,
+          1200
+        ],
+        "racing": [
+          [
+            1200,
+            1208
+          ],
+          [
+            1208,
+            1216
+          ],
+          [
+            1216,
+            1224
+          ],
+          [
+            1224,
+            1232
+          ]
+        ],
+        "nomination": [
+          1232,
+          1248
+        ],
+        "validation": [
+          1248,
+          1308
+        ],
+        "heldout": [
+          4124,
+          4380
+        ]
+      }
+    ],
+    "ranges": "Zero-based half-open allocation positions, not seed values",
+    "rule": "One post-admission draw; first 4380 distinct nonhistorical values in exposure order, no refill or replacement",
+    "permanentExclusion": "Every distinct newly exposed value including unused tail; retain collisions and duplicates",
+    "history": "Reconcile full authoritative registry and pending recoveries at admission and launch, including previews and all unused reservations",
+    "isolation": "Both arms share root and ordered 8/8/8/8/16/60 panels; all roles and roots disjoint, including heldout"
+  },
+  "evaluation": {
+    "searchFightsPerArmRoot": 528,
+    "searchFightsTotal": 12672,
+    "heldoutPerRoot": 256,
+    "heldoutFightsMinimum": 3072,
+    "heldoutFightsMaximum": 9216,
+    "maximumFights": 21888,
+    "preflight": "Both policies before either search, no prospective root preview; any incomplete root invalidates entire study",
+    "barrier": "Freeze all 24 complete outputs before any heldout observation",
+    "gate": "Existing selector unchanged: one challenger from 16 nomination values; 60 paired validation values; gains > losses and exact one-sided discordant-binomial tail <= 1/20, otherwise benchmark",
+    "pairedSearch": "Equal physical recipe and seed on same panel must have equal outcomes; separately charge both arms",
+    "heldout": "Per root evaluate selected control, selected candidate and benchmark on same 256 values; deduplicate only identical physical recipes within that root",
+    "failure": "Retain all evidence, full charges and reservations; no sample-size extension, root replacement, retry or outcome-driven rescue"
+  },
+  "reporting": {
+    "replicationUnit": "Paired search root; all twelve retained equally",
+    "uncertainty": "All root contrasts, mean, median, worst, SD and descriptive t interval df11; paired-seed SE and covariance conditional on frozen outputs; do not pool battles as independent search replications",
+    "rootIntervalFormula": "mean +/- 2.200985160082949 * sampleSD / sqrt(12); existing descriptive convention, no power or coverage guarantee for this small mixture",
+    "decisionRule": "incomplete-then-abandon-either-endpoint-then-no-differentiation-then-relative-and-absolute-gain-with-novelty-else-inconclusive-never-adopt",
+    "practicalEffects": "Both mean gains >= 2 percentage points, >=3 differing outputs, >=3 reference-relative novel candidate outputs each >=3 points over benchmark; larger fresh evaluation only",
+    "harmfulRule": "Either mean <= -2 points abandons regardless of promising-root count",
+    "novelty": "Not equal to any of the three fixed physical reference recipes; not global or previously-unseen novelty",
+    "exactThresholds": {
+      "meanGainNetWinsAtLeast": 62,
+      "meanLossNetWinsAtMost": -62,
+      "novelRootBenchmarkNetWinsAtLeast": 8
+    },
+    "diagnostics": [
+      "Both-arm gates, exact tails, fallbacks, selected identities and all 12 root contrasts",
+      "Generation fill, attempts/rejections, duplicate rates, catalogue/assignment provenance and unique physical recipes",
+      "Distinct candidate outputs, reference-relative novelty, regressions, complete-loadout/Essence/subgroup invariants",
+      "Elapsed and retained/peak bytes by phase, charged/physical fights, used/exposed/unused permanent values"
+    ],
+    "prohibited": "No best-pool substitution, ungated nominee rescue, favorable-root subset, repeated looks, automatic adoption or individual-team confirmation"
+  },
+  "resources": {
+    "envelope": "tower-proposal-resource-envelope-v2",
+    "qualificationMaximumSeconds": 900,
+    "qualificationMaximumBytes": 1073741824,
+    "scientificMaximumSeconds": 10800,
+    "scientificMaximumBytes": 6442450944,
+    "nativeMaximumSeconds": 9000,
+    "nativeMaximumBytes": 5905580032,
+    "auditPublicationMaximumSeconds": 1800,
+    "auditPublicationMaximumBytes": 536870912,
+    "margin": 2,
+    "publicationReserveSeconds": 120,
+    "inheritedForecastFloors": {
+      "nativeSeconds": 6694,
+      "auditSeconds": 1764,
+      "nativeBytes": 5168096099,
+      "auditBytes": 34989702
+    },
+    "forecast": "Upward-only maximum of inherited admitted floors, frozen audit probe, completed pilot phase costs scaled to 21888 fights, current guarded preparation, and paired old/new owned fixture ratios; apply metadata/storage growth before audit scaling",
+    "additionalCosts": "Full placement catalogue, derivations, physical-hash bindings, source/runtime retention, repeated export reconstruction, both audits and publication",
+    "limits": "Each partition must fit separately with margin and reserve; no borrowing, timing retries or reduction of inherited floors",
+    "failure": "Not admitted if any forecast fails; separately version a prospective resource amendment before entropy",
+    "accounting": "Separate qualification/execution declarations, full allowances charged at start including failure; neither started here"
+  },
+  "implementationRequirements": [
+    "Add an exact separately versioned comparison profile; preserve all existing policy, racing, comparison and default behavior",
+    "Bind v7 control with inventory and v8 candidate with null inventory to identical racing scope/panels; do not weaken old equal-inventory pair validation",
+    "Register fresh-value count, version dispatch, paired reconstruction, study runner, both-arm gate reports, archive and publication for the new version",
+    "Implement the new decision order explicitly in native and independent Python audit; legacy selector branch ignores novelty and legacy other branch conditionally abandons benchmark harm",
+    "Audit all 238 recipes, source maps, physical scenarios and both waves; verify scope-bound hash separately from root-invariant recipes and preserve both historical/native hash encodings",
+    "Extend owned launcher and versioned resource admission; current preview is not scientific qualification",
+    "Test 12-root literal evaluator fixtures, integer decision boundaries, zero-contrast/fallback cases, mixed inventory rules, tampering, disjointness, early-heldout rejection and failure retention",
+    "Qualify producing PDB/source/runtime and captured gameplay; rebuild inventory and compare materialized/prepared participants under combat guard for all 238 placements, three references, saved control waves and required legacy coverage",
+    "Use saved development values only for qualification; reconcile history, freeze resource forecast and seal new admission before one separately declared owned launch"
+  ],
+  "currentImplementationSourcePins": {
+    "LL/tools/BalanceHarness/BalanceGoals.cs": "170049c80a9066d8c54bd4e0803fba7ebf2ae86daecd529c16d4b493e6a63cd0",
+    "LL/tools/BalanceHarness/BaselineManifest.cs": "8a3a2c9dd0c8d5e71ae69d8aaafb151b531d556468f136043d94ae7f065a38b8",
+    "LL/tools/BalanceHarness/BloodGroveEntryExperiment.cs": "9f9e5fd347f891490ca44a20ed421140299f4d1ada204acec9ff083fb6d0899a",
+    "LL/tools/BalanceHarness/BloodGroveLocalValidation.cs": "6b4f51f916ae7d936133efeb4ad30d82454662ac1401bf0de87335cc3aa75fc6",
+    "LL/tools/BalanceHarness/BloodGrovePressureExperiment.cs": "cf0f9de2c0d64615bcb42b782e05b86495a6f523477a3f7739a4e56a98f149f8",
+    "LL/tools/BalanceHarness/ComparisonMarkdown.cs": "5f582bdd297c64b503ae226d506c38e569152c51014d2a720b641a37efb42c7a",
+    "LL/tools/BalanceHarness/ContentSnapshotContract.cs": "1f45df0ca18786dae51345cdb7f7e3c15d1b671bef382b656f5329a248a1ebfa",
+    "LL/tools/BalanceHarness/CrystalCreekHandoff.cs": "67dae8604f9781c5bd9c0e721a1e4f486a04060d67f84cf6e3dc2a69f42eca6d",
+    "LL/tools/BalanceHarness/CrystalCreekPressureExperiment.cs": "0fcea511a5ee5c4fba7916c7b01c65002967baad92c3705c2314add73e8b0828",
+    "LL/tools/BalanceHarness/EssenceMechanicsInventory.cs": "a308e41d2176a2efc7cbd5da6603e3694bc3ac7f829776d8aba1cb438ab1dc6d",
+    "LL/tools/BalanceHarness/GoalEvaluationBundle.cs": "4ace07accf9258dce08da75fb92ec04ecf978f105ce85a146d4e5f5da8e81b69",
+    "LL/tools/BalanceHarness/GoalEvaluationMarkdown.cs": "680aca099f0eac440e900e68e578a7e18506139e8f48573356e6b72de6d9a32d",
+    "LL/tools/BalanceHarness/GoalEvaluator.cs": "f2d9fbe3ecb2c19645f695eb0073e591b11c213f8db415522630105929fbf484",
+    "LL/tools/BalanceHarness/HarnessJson.cs": "eb350bb592e7bb88685a7d69bce7f59a64efeb40ae737ca7f06c4d65578ea7fa",
+    "LL/tools/BalanceHarness/IdleBattleInput.cs": "a1a7603cb5c1c8ddf9f9de7e7d39967fdf77b583a486fe272f6397bcfe95bbf9",
+    "LL/tools/BalanceHarness/IdleBattleRunner.cs": "d7ffebb3c017306924723cd9743bef4820976a04846ec0961d857b34a649b77b",
+    "LL/tools/BalanceHarness/IdleSuite.cs": "1c857ff1c4d32c6afb376d90d272b479ceb6bc65abc2335be9c007ec537a3e66",
+    "LL/tools/BalanceHarness/LoadoutSearch.cs": "5f3ca8888f7b03768b5bdc729e50e92ef47ce79fbe29f709906933ca6b674841",
+    "LL/tools/BalanceHarness/OfflineContent.cs": "67ce7413314a0c7cc93f2d3cd236b72f3144aaca44acd9b3ad03e4ae4037ca21",
+    "LL/tools/BalanceHarness/PairedStatistics.cs": "4222f73dac218ac0bcab11e32adfed111e0454d33a2fddf800c6c94ea5a115ed",
+    "LL/tools/BalanceHarness/Program.cs": "b5386907e53dd7874b4295c19fc4c887e67275cc02840bc07322237fa32dd90f",
+    "LL/tools/BalanceHarness/RunBundle.cs": "e7db47108e8975081e964356dfabe728c058cf80366db5bc2efdfb45b877a7a2",
+    "LL/tools/BalanceHarness/SampleStatistics.cs": "16080411d8da0a91ebefe5211d79cd5b2984d2859bc7413840d77a2d11914ee1",
+    "LL/tools/BalanceHarness/SavedSuite.cs": "56ea54508c88570b95881615c163157840696fd594c38a9bedb77a175b763262",
+    "LL/tools/BalanceHarness/SuiteBundle.cs": "b4d0232ffa8fd549c3bb780b989858e7006ed39d325096eadbfa8017ce3bb6ca",
+    "LL/tools/BalanceHarness/SuiteComparison.cs": "dbd02b6c4ff0a6e13527e6e02d97a2077108bca0af9c239277b2f706fe05e5c7",
+    "LL/tools/BalanceHarness/SuiteScorecard.cs": "73cc5923031c27eec9cba0898719181890bf5389583025a1c441a61a46833f44",
+    "LL/tools/BalanceHarness/TowerAdaptiveRacing.cs": "cc31be26ff0413c87f07d16fba282903f40ace47f4eb891cd42c7c758ee4e2a6",
+    "LL/tools/BalanceHarness/TowerAdaptiveRacingComparison.cs": "e3b91a5546610a1dd7fc1c04cf4db36cfec1ebaa528e102057a38e6ec2836c90",
+    "LL/tools/BalanceHarness/TowerAdaptiveRacingGenerator.cs": "70150452b6099f7a7da671189aa021225ab920edfe0ed3d1725b512cbae5f884",
+    "LL/tools/BalanceHarness/TowerAdaptiveRacingNative.cs": "cf1cf14d1bf363fba7711bb50228e1701653388aedc9540f9dc00f401241a1fb",
+    "LL/tools/BalanceHarness/TowerAffinityCreation.cs": "5755319e311d57d7e5d71c466efacdce944fb51cd85026b0bf88e6c6bfcf6adf",
+    "LL/tools/BalanceHarness/TowerAffinityCreationRecognition.cs": "3cf06b4df88eb563213ef2cb2faa17d48d2ad0ba61208f818b9f72bd28724650",
+    "LL/tools/BalanceHarness/TowerAffinityNeighborhoodRecognition.cs": "aa863a57b2fc7094057b5bad47c6576723435055e7c1b7bf9f5a608562516cb3",
+    "LL/tools/BalanceHarness/TowerAffinityPreservationComparison.cs": "da6eef5bed93c2cef476a282d7ee8a1229af9deb506060dccfd4b2cdbfa2956a",
+    "LL/tools/BalanceHarness/TowerAffinityPreservationRecognition.cs": "91259e491824172ce2e0b3dcbecbee208b69e0147c73cd1ba96993e57685de4d",
+    "LL/tools/BalanceHarness/TowerAlliedActionComparison.cs": "65e7b8e0a7658f598d11b17815869e3c1ac061e20e283e1650fbdc0513e887b8",
+    "LL/tools/BalanceHarness/TowerAlliedActionProtection.cs": "d3ff0ac792e5660f7e13c12efb5e3f1fb6e837b903d813c4c0a654d71f1f02a1",
+    "LL/tools/BalanceHarness/TowerAllocationComparison.cs": "6115a4b9ef5021dc3868de4574468d825151d1ffb93c9570cecfa1fc2724ba2f",
+    "LL/tools/BalanceHarness/TowerAllocationConfirmation.cs": "fb7b6e64ebfab72bd1c51492e1d356e3344a3a26698f20741b5433af660ddb93",
+    "LL/tools/BalanceHarness/TowerAllocationConfirmationRun.cs": "91344f8bce6ee58513ce7b5933ca90c40527dad5a4c1817476a8b9f9e21520e2",
+    "LL/tools/BalanceHarness/TowerAnchoredComparison.cs": "fd64782e25610659653b65edaaaa465bfb7cffb65c99d0427395c2772eeaddd1",
+    "LL/tools/BalanceHarness/TowerAnchoredNeighborhoodSearch.cs": "73dc8f3edfc70328c538654d939a8b958e92a873fe23a92f56c3a849a00b7d53",
+    "LL/tools/BalanceHarness/TowerAttributeDefense.cs": "b23a57c3b1c9a011a3978985e0a3bcef3b8142f3e8d914585d1f21d51e726b7d",
+    "LL/tools/BalanceHarness/TowerBalanceEvaluator.cs": "1614b92f07d944a1408a88496ce6d9262a4146965847c922a2fb8f165cc23690",
+    "LL/tools/BalanceHarness/TowerBalanceRuns.cs": "4f11b29a3810e94492ce4b348fc600e0ce5d11af1da4ebbf9b063c9fbd4e73d0",
+    "LL/tools/BalanceHarness/TowerBatchRacing.cs": "cfd0fbb8b9ff5bb322a5c55a146b49b3657ebe35e8d0ab263c09a5e643a3f381",
+    "LL/tools/BalanceHarness/TowerBatchRacingContract.cs": "399b3089576fa30c0776ee1724218c5218cf5f284fef03f69a310091ca7fba46",
+    "LL/tools/BalanceHarness/TowerBattleRunner.cs": "5ca9d52bd850163e00a201b3f13e75fa925e196e64294c42d9253a85bb3b1278",
+    "LL/tools/BalanceHarness/TowerBehaviorArchive.cs": "acd9ffc4666de13951b4d48d45e65fe0e7dd3cc626d327490600b7c5a8fe617a",
+    "LL/tools/BalanceHarness/TowerBenchmark.cs": "13d0c899e756a68a5737d6b8714fadb65e13eb063dfe34db4cb52e18969a6f1a",
+    "LL/tools/BalanceHarness/TowerBenchmarkComparison.cs": "0f173b787c2475cad1d83ebd0b0be273ee129344e869ddabbdb2d7fe2d9ec023",
+    "LL/tools/BalanceHarness/TowerBenchmarkValidation.cs": "081edda1df6993405dc77cfe85cedc73a2c6cf82744822217737893b73f215cd",
+    "LL/tools/BalanceHarness/TowerBenchmarkValidationComparison.cs": "89a42da436bb195a8d1e101458915ec64c7dd50f9ac506a8b4f5fbc82c9f16b8",
+    "LL/tools/BalanceHarness/TowerBossDiagnostics.cs": "90cd9fc7435527cf87ffaee5e644a94b653a2cdd2f7023c8b4465f446a2c4dfa",
+    "LL/tools/BalanceHarness/TowerBossDiscoveryContract.cs": "1f1dbd440549d644055da03504e053c864895f0d884ac6f53734be5c05f59d5c",
+    "LL/tools/BalanceHarness/TowerBossDiscoveryRun.cs": "e7f218a01731b61c089047b205b7735e6aeb2f13a914986a12d7c33946e157af",
+    "LL/tools/BalanceHarness/TowerBossGeneration.cs": "ad5d013cfb4b61a826d793d59f06ddd2d94202007d91448839b143301feccc81",
+    "LL/tools/BalanceHarness/TowerBossImprovement.cs": "8c3fb03059199bb1a9e642e06d62f388a3624d728c78948ebbdbd2cf1f838c01",
+    "LL/tools/BalanceHarness/TowerBossInventory.cs": "8cff2941df9f581f1500faa814f170934e99c1ce6b8a26e94ddae445dceaf6fa",
+    "LL/tools/BalanceHarness/TowerBossOptimization.cs": "dde9eea475d4064d65a19c4669fa17127989fdb15f87bcb4ffc755d26c989600",
+    "LL/tools/BalanceHarness/TowerBossPartyGenerator.cs": "64880717f57aa619550ab8e68cad0c6423788df16bbed28ac2de415714ff035e",
+    "LL/tools/BalanceHarness/TowerBossReferences.cs": "57779481a59094919a6f6739c9b879514734c3becd991d1576a4156b7262b320",
+    "LL/tools/BalanceHarness/TowerBossSearch.cs": "6ebf5a463e0c507e034b829f5d3883c7cdbf4a86f7c1e20250ccacd4bfaf85bc",
+    "LL/tools/BalanceHarness/TowerBossSearchContract.cs": "81634e13fc963dd2f9bb9f39403d4b606667d51d0da183ea0f3991a6f5f16d6e",
+    "LL/tools/BalanceHarness/TowerBossSearchMarkdown.cs": "6da9e6970868db08e1355f17a235a24952c3591ef752671726189600fe541419",
+    "LL/tools/BalanceHarness/TowerBossStudy.cs": "2837dcd964891d64b2601a6cf787809e404477136a52ae3fa9dee1aa1ea97ce1",
+    "LL/tools/BalanceHarness/TowerBossStudyArchive.cs": "6ec6de3c1ad0c3a0ee63cd424a04fa9feb43a9970be3a1aa653788069335bc75",
+    "LL/tools/BalanceHarness/TowerBossStudyMarkdown.cs": "2d90f7d7de5ceb98453e86d9ac169d762113abf76b03f19b036eb7c31362f379",
+    "LL/tools/BalanceHarness/TowerBossStudyPolicy.cs": "fce589bc1b881e8ad15deb646a341b39f0ac921e39e9e7c8f15475fd813ed896",
+    "LL/tools/BalanceHarness/TowerBossValidationReferences.cs": "a016cce4e29ff3f4737dad1a7e06f38e4f22d622198c3273ad485ede07d1ad7d",
+    "LL/tools/BalanceHarness/TowerBulkCampaign.cs": "07cfedda4bb899df16aa84f6992f7c1bcae3e60acb3bb90ac1121e72287d6abf",
+    "LL/tools/BalanceHarness/TowerBundle.cs": "13c27e9d7d47dbdb310f0d9caea3b59dfe255090601d62f63523c42769c07ba4",
+    "LL/tools/BalanceHarness/TowerCeilingScreenCommand.cs": "f03d72676b4db4735250dcfd1277695914d13d7811335a54c1a0e5cd7fb4ee49",
+    "LL/tools/BalanceHarness/TowerCeilingScreenInputs.cs": "7047cfb0d97174eaeb0f3ce212c4e4bf23e0b2e85990d2ec2177a5bb655a4aba",
+    "LL/tools/BalanceHarness/TowerCeilingScreenPreparation.cs": "97248b6829109dc29c9c7fb23d562e9e43d621463f8068446ae7b6eafcea9696",
+    "LL/tools/BalanceHarness/TowerCeilingScreenRun.cs": "e4bd9b087dee5b42266433b40c5fdf132adc43851c67f8272990ddde5cd5c441",
+    "LL/tools/BalanceHarness/TowerCompactBalanceRun.cs": "7857726f7aa2848a914e234f9869eea09035d53470cc582a091955cb235d6a5a",
+    "LL/tools/BalanceHarness/TowerCompactBundle.cs": "8ef696fd0073d4e6bc2571dd4aa07f617b36a406343e3f413da80e6b2b127f59",
+    "LL/tools/BalanceHarness/TowerCompactDiscovery.cs": "44197689dbd4e8edc124c175ad51554006bc8d49c218713e917c4fce57834d2c",
+    "LL/tools/BalanceHarness/TowerCompactPublication.cs": "dc7e1a1cbbba68a6ab734ccc8288bcb5268328b7212d1c687d3508fdec34af2c",
+    "LL/tools/BalanceHarness/TowerCompactResume.cs": "f54a08c3cd4807b4e7884931a6a378fbdf2dbd1c72f0f8a8d2a61faad795621a",
+    "LL/tools/BalanceHarness/TowerCompleteFamily.cs": "29417bab77f2f9c07f21377ebce86a5f6ffabab45be55f44103e0835cf1ec11a",
+    "LL/tools/BalanceHarness/TowerCompleteFamilyBinding.cs": "b518620af6ed97c6b1eedc3c50d5e26aeb8d570db51d5a1c04b1b1a225f172a8",
+    "LL/tools/BalanceHarness/TowerCompleteFamilyInputs.cs": "0e836eb9863c28bf7a0111136b17ac311a690f8ee979bf18485edf22863b8ab8",
+    "LL/tools/BalanceHarness/TowerCompleteFamilyLaunch.cs": "e9a9e463198de75c10c54c212d6f95d32baa0b1472972b792dcaea2f49e74c0d",
+    "LL/tools/BalanceHarness/TowerCompleteFamilyRun.cs": "3546974283bef985f2878763da9476653216639a9d3034052c21a92944e25616",
+    "LL/tools/BalanceHarness/TowerCompleteFamilySetup.cs": "d49787d686e11ef89a48d7b5f95e0ebb5f7e6d75efbab82508588ffc8b21d822",
+    "LL/tools/BalanceHarness/TowerCompleteReservation.cs": "535fb9b8844461b9c7abcfd49a1f8930ed15ff9ab5963c2aa77bfc5b91f8c997",
+    "LL/tools/BalanceHarness/TowerCompositionOrderDiagnostic.cs": "3e88441196a5c0019f48c1cb74e362c8444c51040376d091a88194a9f3bf1461",
+    "LL/tools/BalanceHarness/TowerCompositionSearch.cs": "f7c5c00bdd212cdae91ddd50ac911b8f1d880773bf9077c6007348eacef33810",
+    "LL/tools/BalanceHarness/TowerConfirmationContext.cs": "1f4c5ea81581d9771b3d9e1f7ac3d5389fffc937ddf2e13a21d41d51e0a82da5",
+    "LL/tools/BalanceHarness/TowerCorePortfolioSearch.cs": "06666607ff60740f5931b6d027c3aaaa067b0c97ea4b9a59eb8c1c6d11d67cad",
+    "LL/tools/BalanceHarness/TowerCoverageDiagnosticMechanics.cs": "560a25ba0b40e7d37810cfd87ef82732a4494aa9ba9fa62949700d682f10cfb5",
+    "LL/tools/BalanceHarness/TowerCoverageDiagnosticReplay.cs": "ad7f56eeb47a20ed6e8cbe4cf7f544cce3dc2badd078396fb2ab07f1eb86a12d",
+    "LL/tools/BalanceHarness/TowerCoverageDiagnostics.cs": "7fe1d13067bf0d3db91ab19d1c524aeee2ea051d07327afda3b9f5004e88b6e2",
+    "LL/tools/BalanceHarness/TowerCoverageProvider.cs": "c4b3cbd523779c6cbfc179f34c37fa5eb4d257895a89225bdc45f2cb55e1f705",
+    "LL/tools/BalanceHarness/TowerCurrentFamilyAdmission.cs": "20e8393b495acd7e9425b4156378aa9d688717d0af5edb6095b7b4c41a5089a1",
+    "LL/tools/BalanceHarness/TowerCurrentFamilyAdmissionRun.cs": "1372eb83aa4642b18ac4bd0550626da80c5e31cf6ef6016c2eca19aef736b256",
+    "LL/tools/BalanceHarness/TowerDamageSourceAffinities.cs": "45306fa1be0eaf5492dca7b3d72d8d2f7774417cb080c54c23220811f5f99334",
+    "LL/tools/BalanceHarness/TowerDashboardBosses.cs": "955799db3d2782eb1f9bb10b79553cb5b54594c0af05b75626c01e566d9161a1",
+    "LL/tools/BalanceHarness/TowerDashboardBossReferences.cs": "e12ad02599e739474f747a8cb0a8df6c8d6901c4c04cb38e3d1faf45fcf50ce3",
+    "LL/tools/BalanceHarness/TowerDashboardBossValidations.cs": "87e0ac63dfb0a472e78cca9fade8f7707d0b69304ae928fafc3599b18b642485",
+    "LL/tools/BalanceHarness/TowerDashboardLoadouts.cs": "ea304bccde99fd3302c2a39913410538934de1f3b440f82df7f871a11755358e",
+    "LL/tools/BalanceHarness/TowerDashboardServer.cs": "d58332c60bb238315d1c962993569735b4854ce91b91d3b184dae75bc1765bd7",
+    "LL/tools/BalanceHarness/TowerDashboardService.cs": "97a05b6f18ad74c5ce96593737ba5872fb8ed67754ac046c56863da627154a90",
+    "LL/tools/BalanceHarness/TowerDashboardStudies.cs": "6ba43e2bac5626466f77278bac5683daf6aacea2956787e7388653eadede5cfb",
+    "LL/tools/BalanceHarness/TowerDashboardStudySeeds.cs": "d448cc79934bd49445458402a3e498ce66f7543d48980805b2647ec9df85e6dd",
+    "LL/tools/BalanceHarness/TowerDeepChallenger.cs": "78987354444ef528e31ad95a8c941abd77429072d787dea522703390d625f63a",
+    "LL/tools/BalanceHarness/TowerDeepChallengerRun.cs": "1e577e5c01f4a4a4678259df5e888c4f722cf3f3c03d892c275b69ac75e23ab1",
+    "LL/tools/BalanceHarness/TowerDiscoveryComparisonGate.cs": "434657e1d94feda28cb3e14c35a08376c4f36513be86a4d3a0f1c9beb185b2d5",
+    "LL/tools/BalanceHarness/TowerDiscoveryParity.cs": "9d1abce513fd97ac4fa253e682dcdc8e358fe85ebdab3456828a3c672447a5f1",
+    "LL/tools/BalanceHarness/TowerDiscoveryPerformance.cs": "09be6c060291cc740f11d6f28973987f6522c61664e78bc7827756801360a06d",
+    "LL/tools/BalanceHarness/TowerDiscoveryRefinementSearch.cs": "6edd83dac5b9c2a60a9eeb6a40416edad06ba4c928cc27afc4673fb3c9e293c6",
+    "LL/tools/BalanceHarness/TowerEssenceSearch.cs": "78ffc4f74a95e029627792d20932029d41324329e27d787a34a53c47f3c99c59",
+    "LL/tools/BalanceHarness/TowerEvaluationAllocationSearch.cs": "c29e74419dd1da59394ccdccaf0842170a7775a7531a7792aacd2b0820fc148c",
+    "LL/tools/BalanceHarness/TowerFeedbackBenchmark.cs": "0e855500695031029bd8b994c03d598091626bf4a7481838826b765d0d749f93",
+    "LL/tools/BalanceHarness/TowerFeedbackBenchmarkRun.cs": "43577706c79ec8d353dd175580fc2b7601a3ce5d0482ca0620228a7d2345f166",
+    "LL/tools/BalanceHarness/TowerFillerDiversitySearch.cs": "4ae8da04a0a23bead80a243cb5af8455e42a708aa0880ae5d2a6a1c4e84f48a6",
+    "LL/tools/BalanceHarness/TowerFinalistRescreen.cs": "d8bfc619c48551ae8b1f24aa1305ac9ab86f6f683fcbdaffc7ab592e70b709e3",
+    "LL/tools/BalanceHarness/TowerFinalistRescreenStudy.cs": "b8cf930858604d8d772ef7370129304ad85082e9efc29eac9653bd7659f9e273",
+    "LL/tools/BalanceHarness/TowerFixedFamilyConfirmation.cs": "970e84a2182d622d0ccb2366766e1b09968bdcc4a2e7f549d96e740ea97be0f2",
+    "LL/tools/BalanceHarness/TowerFixedFamilyConfirmationArchive.cs": "948fb06b9e1cd5ab019177b6483188137075749824400a7bec98b2489fafb1c3",
+    "LL/tools/BalanceHarness/TowerFixedFamilyConfirmationProtocol.cs": "99738177f69c4a8b9981caae0f0d5078d6724001cd1fcfa5693f305a76496855",
+    "LL/tools/BalanceHarness/TowerFixedFamilyConfirmationReservation.cs": "b765fdd466a0cb18365c0fcdbf6411ee916b8d6435ac4827f69bedbd63d409d2",
+    "LL/tools/BalanceHarness/TowerFixedFamilyConfirmationRun.cs": "8ac62c1c85a2c9e92d1d56726baf452330271db32b38dd46cef0b0904ad1f094",
+    "LL/tools/BalanceHarness/TowerFixedFamilyConfirmationWorker.cs": "648742a259ad50d87098aaa310853f392fd98df88ed01e362ee2fee9d570850d",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmation.cs": "68c6e75e3eebd2841280af3f3b5b89633173e9b0a7a059500041f3268a80fbb0",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationArchive.cs": "9b8b26fd2972ecef5b132e95b7dcd7ad5891f2edb11ebc695833696d88072454",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationReservation.cs": "6739768fe9f751a5f5d288eeb5f4a8d5a4ea567852cf5a5d573b53fe1711cd95",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationRun.cs": "3df4cacb9c4ee046e9495c83fe2841cb0b1d1abb558cca532ed8c19e74d84dff",
+    "LL/tools/BalanceHarness/TowerFixedTeamConfirmationWorker.cs": "2b246bef0e94e0f54d504048670eb417b4700c9d900053c378c011fb57c7c7e2",
+    "LL/tools/BalanceHarness/TowerFrozenPoolRecognition.cs": "4453024daad2a86e5e206b9462b44ed0eb378f0422b4da1ac75f8b311d36fe2b",
+    "LL/tools/BalanceHarness/TowerFrozenPoolRecognitionRun.cs": "26632128c9916808541b23ee51d67f5b536c8006a4b70841842fe953e86732fe",
+    "LL/tools/BalanceHarness/TowerGenerationComparisonDesign.cs": "01d7408cc13bb3087d9c131eb2addbb9f35303c02cf2a5c007ca2b45264c56c3",
+    "LL/tools/BalanceHarness/TowerGenerationFeedback.cs": "71f3e811e0870fb676ae188eebfb6a89db634e48118f141313ee2fc3705a9b4d",
+    "LL/tools/BalanceHarness/TowerGroupAllocationSearch.cs": "f9595903f5b3d49201c2fa178632153fefe4d74c6b3cc1fbc3ad3d6fe2e8fdf2",
+    "LL/tools/BalanceHarness/TowerGroupCompletionSearch.cs": "aeb80210c3f442830332bef923137ee6ef1f3e1c03ca04451f54323a5261d976",
+    "LL/tools/BalanceHarness/TowerGroupCountSearch.cs": "2040b54bef1d010f7a7539a865cb2572236237ee40eb8cfcaef298fd15ad6c89",
+    "LL/tools/BalanceHarness/TowerGroupDiversitySearch.cs": "8451799399a3ae290e320446b6d4b7e78c9d6c0616e119f50e5e3d84350d9f49",
+    "LL/tools/BalanceHarness/TowerGroupVariationSearch.cs": "d0385647e7d3e1c35aabc91b268fffe0ac5404c47c1c4b7652d640719f278fa3",
+    "LL/tools/BalanceHarness/TowerHistoryRegistry.cs": "2fb79cec7d63860a86135a2148604941636bc7fc3e296d7a3a82811d78b5b87d",
+    "LL/tools/BalanceHarness/TowerIncumbentTieArchive.cs": "d35b1b04f661eb27c0d8141d3a131e8542be1c5fc6fb902295f734320d1287e2",
+    "LL/tools/BalanceHarness/TowerIncumbentTieComparison.cs": "b4335e907a192cf87f75e0796d91a864381eac7e5d7d2711a533fc1091b11435",
+    "LL/tools/BalanceHarness/TowerIncumbentTieProtocol.cs": "e684d1a1ab6c2e6374bdf972418db06741fd45921cf99a10f9b4ea41ec55749f",
+    "LL/tools/BalanceHarness/TowerIncumbentTieReservation.cs": "fba32aa6f84a48c094653b0bb568146a01f6ca00ca885d69986629ca60818ea6",
+    "LL/tools/BalanceHarness/TowerIncumbentTieRun.cs": "2ad2a5ae19948ab1028c267bd30f5f47965464879b47d191611d9802950bfc81",
+    "LL/tools/BalanceHarness/TowerJoinedMechanics.cs": "3a4d43190a9b554699b0a3547de999b24a80baa7f5d282ebbae8543ef860dcc4",
+    "LL/tools/BalanceHarness/TowerJointLoadoutConstructor.cs": "01e2ecd0f9d45685eb6e02223511a06e60e4e171bfd2cfded3bb8642b4667666",
+    "LL/tools/BalanceHarness/TowerJointPartyAllocator.cs": "e5f7f22c3b6df8ef83a4eaf2019b01ff82d2398f7bd1620ad44b48cb070b53bd",
+    "LL/tools/BalanceHarness/TowerJointStructuralDiversity.cs": "e3fc7cac0e32201356333a98027836b27013050dca94f733e82ff00e5523c2ba",
+    "LL/tools/BalanceHarness/TowerJointStructuralSearch.cs": "231b2d3a812de95c7c58a86cb4a7dab953eeff27c3e02d8fc78ff6449b96549a",
+    "LL/tools/BalanceHarness/TowerLateAllocation.cs": "30e1efca4d825632b73c06aee6557323fff033f3091f70a3e9e67b71b33790e2",
+    "LL/tools/BalanceHarness/TowerLoadoutArchive.cs": "ed27cb4e5e537a157c8f4fe19a78458cb49c056ef7fddd6869072a086ce666f2",
+    "LL/tools/BalanceHarness/TowerLoadoutComposition.cs": "7f5ee14883114e46ed291aaee9b50276c5c8731c280ac7394dd084aa54838efe",
+    "LL/tools/BalanceHarness/TowerLoadoutDiversity.cs": "2a60fc1a80f52065735b41384dcf5bf48c681c3b92ec2d2d995aa134341d83d3",
+    "LL/tools/BalanceHarness/TowerLoadoutFoundation.cs": "25262bc304f2db8c91de7835f7047d088b098657b9926adda6fb16ee6e34c9e1",
+    "LL/tools/BalanceHarness/TowerLoadoutPilot.cs": "8844e211589f426b390a57d3d20bce8791872ba17fbc48792d98fa6f09b7305b",
+    "LL/tools/BalanceHarness/TowerLoadoutPlacement.cs": "b697573981a497779bd1f11efde43875d733dc8dbd14b4f431c133eab48d8a39",
+    "LL/tools/BalanceHarness/TowerLoadoutReliability.cs": "73243cd5d8862d5f0346f3d87cc778fbda1c3471c554e7cfd5f9613337e8a960",
+    "LL/tools/BalanceHarness/TowerLoadoutRetention.cs": "f94ef2b675f5e5e8c0bdd52a9aa9141cb6fa494122a1fc9761a83b74b753b85e",
+    "LL/tools/BalanceHarness/TowerLocalRefinement.cs": "423bab1ab9e0406ea55b85206c182f6264963adc6c66baf39ac70864202f8a0d",
+    "LL/tools/BalanceHarness/TowerMechanicCores.cs": "253b5836802729526a3485ebf2dcb9729e2eea9237e6149e638204e145ceb28f",
+    "LL/tools/BalanceHarness/TowerMidpointRun.cs": "3b6cd57b5cabfe0695f0794c9d152e459abe4191dc8ff4ca08fc7d1958425b3d",
+    "LL/tools/BalanceHarness/TowerMidpointStudy.cs": "63c98c0b5123e12fe6a5fd3639489e0f8f237ff2207219285b77081153cb5f69",
+    "LL/tools/BalanceHarness/TowerPartyCoverage.cs": "f0a25d926354bb7cbe67b61d403643ceced600ff6594ade1526ad39d77a9fc24",
+    "LL/tools/BalanceHarness/TowerPartyLineages.cs": "3dc6396f4783646d6014bcaf738952e9a575e8af7d8bf899dc4178a3a05d6209",
+    "LL/tools/BalanceHarness/TowerPartyProgression.cs": "3cc5d1ccc4e54652154762ace1e0d483314c61571917a20b8794b9cc3d520ff2",
+    "LL/tools/BalanceHarness/TowerPartySearch.cs": "0d507392d5f98466984a7819b586cbba7e7f22e519fe5a704974d8bef09c5711",
+    "LL/tools/BalanceHarness/TowerPartySelection.cs": "5fd889642f5b5f24517854bda7f3a5f09b2c798f7b62df818170db86680ae8a1",
+    "LL/tools/BalanceHarness/TowerPerformanceBenchmark.cs": "4fd960990dcd5ff0f07b7409233819acb7c07b1cd0fc6e130e1b1ea5bb4e1846",
+    "LL/tools/BalanceHarness/TowerPerformanceComparison.cs": "513a3e6e4eceaf74c8ca85535ed33402e7f2bcec25b54d978f32ef77c867f1e5",
+    "LL/tools/BalanceHarness/TowerPerformanceTrace.cs": "2a0184e4a5e64a1105aab8297d8e8f81c7d103aa3ad93539660d7d966d41175a",
+    "LL/tools/BalanceHarness/TowerPortfolioConfirmation.cs": "aa61d1d0e24dfdb7937c40e097768fdf1b90d8fe2f45734e2ce9b7e6ab2d5164",
+    "LL/tools/BalanceHarness/TowerPortfolioConfirmationArchive.cs": "abf99bd8c6a38607380a48f3061dfd733d3eaf328fc4da3b171533f6766fc261",
+    "LL/tools/BalanceHarness/TowerPortfolioConfirmationRun.cs": "6b3aeeaaab6dda1ea99944dcd011807d9ae316070ca50399b836183214dedece",
+    "LL/tools/BalanceHarness/TowerPracticalAllocation.cs": "e94e5a0705fb234ae6515830715d4e19e70de39c20d0f6c506bbe60c4991bb82",
+    "LL/tools/BalanceHarness/TowerPracticalAllocationRecovery.cs": "417c662b0f8d24fa339ed8828d03ea38fced977ef7ef745a567e390f80ca0ed9",
+    "LL/tools/BalanceHarness/TowerPracticalPreset.cs": "bdf27d77673c80e2468ebc7093a1fa3244f4f99418c8544efee3453dbf7aff2e",
+    "LL/tools/BalanceHarness/TowerPracticalReservationRecovery.cs": "61f99ed661ae473d49948a8cb03b54d226992c42fbc83642a572c78191b7c8a9",
+    "LL/tools/BalanceHarness/TowerPracticalScreening.cs": "c6b5d4f6f5d65d97f8e9b87ed1fa2a6fc990ca30dcc6eaaadc3f02dddc4effb7",
+    "LL/tools/BalanceHarness/TowerPracticalSearch.cs": "2f649c2afb65dfd834237aad0bf7401076410c42866530b957d68271ac834a58",
+    "LL/tools/BalanceHarness/TowerPracticalSearchRun.cs": "5fb534c85217cb2111bda0ef221618acc83d6fa80319bc70564c63ed2fe564cc",
+    "LL/tools/BalanceHarness/TowerPracticalThreeReference.cs": "ca3726b0c0ee243e38ef899ad9ff6e96fd76784f4d5cdb34e4ec0342db22ca61",
+    "LL/tools/BalanceHarness/TowerPrecisionBalance.cs": "52d927416553da00e8897de6da5f3a79f3a33bfcf9105871d0817b90a4b7c5bc",
+    "LL/tools/BalanceHarness/TowerPrecisionBalanceRun.cs": "a7d709b5e1bb5ec5bfdbd5a6eaba2ec75d33d9cc8fe43eac6d30198dfdbf24a2",
+    "LL/tools/BalanceHarness/TowerPreparedBattle.cs": "72b8042507b54a3608d77203e2f423773cbc1edb2588c3ffbf128f1eea650581",
+    "LL/tools/BalanceHarness/TowerProposalComparison.cs": "50ce5d1b0c6d33561d82db529028f857481c083c9f8724e3b4addfffceba4d75",
+    "LL/tools/BalanceHarness/TowerProposalPolicies.cs": "9d170a3816bf2bb121a3daf10425dd05e1867659a648a9b006fcca649d95ddfe",
+    "LL/tools/BalanceHarness/TowerProposalRacingNative.cs": "b0af855002ae564ee53a1a92e3d54222efeb3dfa0414e1622cbc4d1560b3e574",
+    "LL/tools/BalanceHarness/TowerProposalStudy.cs": "0b31c5a37e3eb81dd53c16f78c0d5c6379328550bec401cc49b1c686cace8179",
+    "LL/tools/BalanceHarness/TowerProposalStudyArchive.cs": "dd68ebf8c4b28711c35d9f65a78d3a0b9f48c329d90c03d67964992c3d05cd39",
+    "LL/tools/BalanceHarness/TowerProposalStudyProtocol.cs": "3a1b50e6dd9b2f1271272de59269c5d67bbeb58ece187f6957e08a892a88f731",
+    "LL/tools/BalanceHarness/TowerProposalStudyResources.cs": "b0c44d141a6ac0e8af62008a9269e981a765b713ba25f8758ff72c839c697210",
+    "LL/tools/BalanceHarness/TowerProposalStudyRun.cs": "7cc163e4b165c94a67962fada2afe181e5ea38a8905a17f6d8c962003b20b7fa",
+    "LL/tools/BalanceHarness/TowerProtectionCompatibility.cs": "93476499f296074121679b6600fb17232cd60027d6d7248757382bb14bcfb4c0",
+    "LL/tools/BalanceHarness/TowerReferenceExploration.cs": "0683278988898c399eb6d00ce3e2149b7a7dc311317b8410a4086641398302a3",
+    "LL/tools/BalanceHarness/TowerReferenceExplorationComparison.cs": "f94a865beff0f4d49fa2ece1c7c199fbb54cdefaf1af164173a21cbb82c9d480",
+    "LL/tools/BalanceHarness/TowerReferenceExplorationComparisonArchive.cs": "b492ad46a8dd8884840fb40857624f71ae19fe629661939018109aa116dbf1b1",
+    "LL/tools/BalanceHarness/TowerReferenceExplorationComparisonRun.cs": "a019b58ddcf0c8e4e1686bebf3000c79bc02ecd26df75df0af58fa42f084f402",
+    "LL/tools/BalanceHarness/TowerReferenceExplorationReservation.cs": "bf3f85f53b5c531ebf4b2c61ff17d31faa09bcf8a091473fa0d7163376a87b3d",
+    "LL/tools/BalanceHarness/TowerRefinementComparisonLaunch.cs": "fab490adbc22964f808e0185ea954dfd637edab1e8a0b8e6c352df55c698842f",
+    "LL/tools/BalanceHarness/TowerRefinementComparisonModel.cs": "7176ad70e563d663f62d1ef6af27004086ffe9cdc9641a830dd54aab4fdd56db",
+    "LL/tools/BalanceHarness/TowerRefinementComparisonPreflight.cs": "b82df8e153ee192f9ab8b78d41cc6f365feb14603f9c39941df2578f1c6a16b7",
+    "LL/tools/BalanceHarness/TowerRefinementComparisonRun.cs": "f9ef2ef208c4b60e70f683b3db3d0a6cfe6de0d7ad2e7927e4cf72c42ce229b3",
+    "LL/tools/BalanceHarness/TowerRefinementReservation.cs": "dde99163e8cb8ed4a54018eb8700e9d3047635159c1b2ab3d5de41116f55a3df",
+    "LL/tools/BalanceHarness/TowerRefinementReservationRecovery.cs": "db004093142d2e9fa33985300c22181815e5ad6a8edc07d400d6ef2c640f34ab",
+    "LL/tools/BalanceHarness/TowerRetainedBuilds.cs": "189580a46b7e3a9f63d27b27daf79ecc793b83eed7ccc0abaab82a9f71f7cd7d",
+    "LL/tools/BalanceHarness/TowerRetainedFamilyAudit.cs": "d212b5d19916589f1783a74c3394a79b90db84edab3eab5169294b7fa1b005f6",
+    "LL/tools/BalanceHarness/TowerRuntimeComparison.cs": "7c1821dad7460bb17cbe7a3f46a25937e864892bf09ada910098154a0346a50b",
+    "LL/tools/BalanceHarness/TowerSearchAllocation.cs": "3ae674c2ddb4e11abf4ccc7625124a2681535430919eae59a69b03e4a5f02079",
+    "LL/tools/BalanceHarness/TowerSearchBenchmark.cs": "6fa43cb96d610e158781f94ee1a638c55f50ef77a5b6a158fd43fc8aadd35fd6",
+    "LL/tools/BalanceHarness/TowerSearchBenchmarkResults.cs": "e2d5dfeda3b333bc8e99aef65849bc961f215ff4ca64d546c5a32495d1d7bbfc",
+    "LL/tools/BalanceHarness/TowerSearchPortfolio.cs": "0cee4809782540fc2542af5fdb357f99c02ad394372558a78b30d98121f43f53",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnostic.cs": "705a97e068f4fdb4166c8ea265e947f311a056a33d0baf4101332b2863b488ab",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnosticArchive.cs": "7d213be6a9989709fae1176a05ec376d12e1aefde531493a3a5eddbd600f4cb1",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnosticReservation.cs": "4bd51c3e403bfc5a56c6ee7f68cfdef6fa8c66d1f21d690e4955b6f397153337",
+    "LL/tools/BalanceHarness/TowerSelectionDiagnosticRun.cs": "4a8c9c0d7b29f42234f8ca2a7a95e57cb13863556ffbe92c40d46a4a65473231",
+    "LL/tools/BalanceHarness/TowerSharedExecutable.cs": "b4fd96622073afd478c896b9cef018c03bb497aed2a548e251e5139bffc37778",
+    "LL/tools/BalanceHarness/TowerStagedBalance.cs": "ea4d547402f00b4b5dcbe92006a619f24ccc4fbcac2be6130d31c52917a20cd7",
+    "LL/tools/BalanceHarness/TowerStagedBalanceRun.cs": "37cf7ee91ea827e3f2f45383b486a68c760a03a848ea666eeff65b14cd9c6377",
+    "LL/tools/BalanceHarness/TowerStaggerReservation.cs": "42fcc6824ae20af4c757047b4dbd35c4fe8739055cce66ef1b3f101346abd749",
+    "LL/tools/BalanceHarness/TowerStorageAccountant.cs": "76691cf1b2316467d3ef2649c3074ac1ef0b878bf3ea05a1b25d95a5bd0dd03a",
+    "LL/tools/BalanceHarness/TowerStudyLimits.cs": "54fb94c0779be8c514721f6a10d978bbd7b3e8079bc10bdeef34edfbeeaaeaca",
+    "LL/tools/BalanceHarness/TowerSuppliedCompositionSearch.cs": "3fd14d55914cdb0902140f3e6f1821a464b89ae9f88afcdca6b065b2c55a44f6",
+    "LL/tools/BalanceHarness/TowerTeamCoverageSearch.cs": "9be6b00cd7e5e9a63c442aa9e64bffe4e9ab4f101da0d718f615fa146ac2227b",
+    "LL/tools/BalanceHarness/TowerThreeReferenceConfirmationRun.cs": "b1df527a5e141821684bd43128bbb600e87747183c267aa489972c41ffb2be9c",
+    "LL/tools/BalanceHarness/TowerWholeParty.cs": "0d134b526506ba1339f462c81843489994f04c08924116d755ebc074f4761611",
+    "LL/tools/BalanceHarness/TowerZeroWinSelection.cs": "9ce6d7845416c541160ac8ce78d8023eabe3997ecb80855e62f1116c8485d511",
+    "LL/tests/EssenceSystem.Tests/BalanceHarnessLoadoutPlacementTests.cs": "cd1f35991b44f39a9e5f614c8b861e718860ce599dbe9501fb0f61d2d9b3e551",
+    "Balance Harness/analysis/preview-loadout-placement.py": "32be81d9878b8f6bef0ec137a562156a8ee5b9e7cfbff5976a0d89448de781fe"
+  },
+  "productionDefaultsChanged": false,
+  "newFights": 0,
+  "newReservedValues": 0,
+  "newEntropyDraws": 0
+}

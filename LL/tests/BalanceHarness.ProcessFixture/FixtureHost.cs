@@ -34,9 +34,16 @@ public static class FixtureHost
         try
         {
             if (args.Length != 2) throw new InvalidDataException("Use this test host with a generated process fixture.");
+            if (args[0] == "proposal-audit-cost-probe") return await ProposalAuditCostProbe.Run(args[1]);
             if (args[0].StartsWith("resource-probe-", StringComparison.Ordinal)) return await ResourceProbeHost.Command(args[0], args[1]);
             if (args[0].StartsWith("diagnostic-", StringComparison.Ordinal)) return await DiagnosticFixtureHost.Run(args[0], args[1]);
             if (args[0].StartsWith("fixed-team-", StringComparison.Ordinal)) return await FixedTeamFixtureHost.Run(args[0], args[1]);
+            if (args[0].StartsWith("recognition-fixture-", StringComparison.Ordinal)) return await FrozenPoolRecognitionFixtureHost.Run(args[0], args[1]);
+            if (args[0].StartsWith("affinity-recognition-fixture-", StringComparison.Ordinal)) return await FrozenPoolRecognitionFixtureHost.Run(args[0], args[1], TowerFixedFamilyConfirmation.AffinityRecognitionVersion);
+            if (args[0].StartsWith("preservation-recognition-fixture-", StringComparison.Ordinal)) return await FrozenPoolRecognitionFixtureHost.Run(args[0], args[1], TowerFixedFamilyConfirmation.PreservationRecognitionVersion);
+            if (args[0].StartsWith("neighborhood-recognition-fixture-", StringComparison.Ordinal)) return await FrozenPoolRecognitionFixtureHost.Run(args[0], args[1], TowerFixedFamilyConfirmation.NeighborhoodRecognitionVersion);
+            if (args[0].StartsWith("proposal-fixture-", StringComparison.Ordinal)) return await ProposalStudyFixtureHost.Run(args[0], args[1]);
+            if (args[0].StartsWith("fixed-family-", StringComparison.Ordinal)) return await FixedFamilyFixtureHost.Run(args[0], args[1]);
             var fixture = HarnessJson.Read<ProcessFixture>(args[1]); var q = fixture.Request;
             if (fixture.Version != Version || !Path.GetFileName(q.RegistryRoot).StartsWith("tower-practical-process-fixture-", StringComparison.Ordinal)
                 || !string.Equals(Path.GetDirectoryName(q.RegistryRoot), Path.TrimEndingDirectorySeparator(Path.GetTempPath()), StringComparison.OrdinalIgnoreCase))

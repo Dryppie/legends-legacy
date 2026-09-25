@@ -43,7 +43,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
             || scenario.Seeds.Count is < 1 or > 1000 || scenario.Seeds.Distinct().Count() != scenario.Seeds.Count
             || !scenario.Seeds.Contains(seed) || checkpointIntervalTicks is < 1 or > 6000)
             throw new InvalidDataException("Tower requires schema 1, distinct declared seeds and an uncleared floor without contributions.");
-        var floor = new JsonWorldTowerDefinitionProvider(Path.Combine(root, "Data", FloorFile), HarnessJson.Options)
+        var floor = TowerContentProviders.Floors(Path.Combine(root, "Data", FloorFile), HarnessJson.Options)
             .GetFloor(scenario.FloorNumber) ?? throw new InvalidDataException("Unknown or unreleased Tower floor.");
         if (scenario.Party.Count != floor.RequiredSlots
             || !scenario.Party.Select(p => p.PartySlot).Order().SequenceEqual(Enumerable.Range(1, floor.RequiredSlots))

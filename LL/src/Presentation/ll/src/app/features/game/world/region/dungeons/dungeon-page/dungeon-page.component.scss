@@ -227,6 +227,57 @@
   white-space: nowrap;
 }
 
+.dungeon-result__mastery {
+  margin-top: var(--ll-space-5);
+  padding: var(--ll-space-4);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-surface-soft);
+}
+
+.dungeon-result__mastery-heading,
+.dungeon-result__mastery-level,
+.dungeon-result__mastery li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+}
+
+.dungeon-result__mastery-heading strong {
+  color: var(--ll-color-primary);
+}
+
+.dungeon-result__mastery-level {
+  margin-top: var(--ll-space-3);
+  color: var(--ll-color-text);
+  font-size: var(--ll-text-xs);
+}
+
+.dungeon-result__mastery-meter {
+  height: 0.375rem;
+  margin-top: var(--ll-space-2);
+  overflow: hidden;
+  border-radius: var(--ll-radius-full);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dungeon-result__mastery-meter span {
+  display: block;
+  height: 100%;
+  background: var(--ll-color-primary);
+}
+
+.dungeon-result__mastery ul {
+  display: grid;
+  gap: var(--ll-space-1);
+  margin: var(--ll-space-3) 0 0;
+  padding: 0;
+  color: var(--ll-color-text-muted);
+  font-size: var(--ll-text-xs);
+  list-style: none;
+}
+
 .dungeon-result__actions {
   display: grid;
   margin-top: var(--ll-space-3);

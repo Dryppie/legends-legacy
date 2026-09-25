@@ -1,6 +1,6 @@
 # Strongholds Game-Design Review
 
-> **Direction update — 14 September 2026:** The recommendation in this review overcorrected toward a cosmetic legacy estate. The revised direction makes the Stronghold a bounded, mechanical progression and loot-direction system, and moves the standalone Soulstones experience into its buildings. See [Strongholds Mechanical Progression Revision](strongholds-mechanical-progression-revision.md). Where the two documents conflict on direct/reward benefits, building activation, the Arsenal, Essence integration, Soulstones, or the MVP, the revision supersedes this review.
+> **Superseded direction:** Use the concise [Mechanical Progression Revision](strongholds-mechanical-progression-revision.md) for power, buildings, Soulstones, and the MVP. This older review remains as the detailed audit.
 
 Review date: 2026-09-14
 Reviewed proposal: `LegendsLegacy_Strongholds_Game_Design.md`

@@ -31,18 +31,26 @@ public static class HarnessJson
         string json;
         using (TowerPerformanceTrace.Measure("io.read-json"))
         {
-            using var reader = new StreamReader(path, Encoding.UTF8, true, ReadBufferSize);
+            using var file = TowerWorkAccounting.ReadStream(File.OpenRead(path), path);
+            using var reader = new StreamReader(file, Encoding.UTF8, true, ReadBufferSize);
             json = reader.ReadToEnd();
         }
         using var timing = TowerPerformanceTrace.Measure("json.deserialize");
-        return JsonSerializer.Deserialize<T>(json, Options)
+        TowerWorkAccounting.Add("jsonParseAttempts");
+        if (TowerWorkAccounting.Enabled) TowerWorkAccounting.Add("jsonInputBytes", Encoding.UTF8.GetByteCount(json));
+        var result = JsonSerializer.Deserialize<T>(json, Options)
             ?? throw new InvalidDataException($"Empty JSON document: {path}");
+        TowerWorkAccounting.Add("jsonParseCompleted");
+        return result;
     }
 
     public static void WriteNew<T>(string path, T value)
+        => WriteNew(path, value, scratch: false);
+
+    internal static void WriteNew<T>(string path, T value, bool scratch)
     {
         using var timing = TowerPerformanceTrace.Measure("json.serialize-write");
-        using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+        using var stream = TowerWorkAccounting.OpenWrite(path, () => new FileStream(path, FileMode.CreateNew, FileAccess.Write), scratch);
         if (TowerPerformanceTrace.Enabled)
         {
             using var measured = new TowerPerformanceTrace.WriteStream(stream);
@@ -54,8 +62,8 @@ public static class HarnessJson
     public static string FileHash(string path)
     {
         using var timing = TowerPerformanceTrace.Measure("hash.file-read");
-        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            ReadBufferSize, FileOptions.SequentialScan);
+        using var stream = TowerWorkAccounting.ReadStream(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+            ReadBufferSize, FileOptions.SequentialScan), path);
         return Convert.ToHexStringLower(SHA256.HashData(stream));
     }
 

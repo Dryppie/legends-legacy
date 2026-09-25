@@ -19,6 +19,7 @@ describe('DungeonPageComponent', () => {
   let dungeonState: jasmine.SpyObj<DungeonStateService>;
   let router: jasmine.SpyObj<Router>;
   const activeDungeon = signal<DungeonRun | null>(null);
+  const previews = signal<DungeonPreviewData[]>([]);
   const combatActive = signal(false);
 
   beforeEach(() => {
@@ -38,29 +39,30 @@ describe('DungeonPageComponent', () => {
       ],
       {
         activeDungeon: activeDungeon.asReadonly(),
-        dungeons: signal([
-          {
-            id: 'goblin_mines_Normal',
-            region: 1,
-            difficulty: DungeonDifficulty.Normal,
-            canEnter: true,
-            sigilItemId: 'sigil_goblin_mines',
-            entryRequirements: [
-              {
-                itemId: 'sigil_goblin_mines',
-                name: 'Goblin Sigil',
-                requiredAmount: 1,
-                ownedAmount: 2,
-              },
-            ],
-          },
-          { id: 'hives_abyss_Normal', region: 2 },
-        ] as DungeonPreviewData[]).asReadonly(),
+        dungeons: previews.asReadonly(),
         loading: signal(false).asReadonly(),
         error: signal<string | null>(null).asReadonly(),
         message: signal<string | null>(null).asReadonly(),
       },
     );
+    previews.set([
+      {
+        id: 'goblin_mines_Normal',
+        region: 1,
+        difficulty: DungeonDifficulty.Normal,
+        canEnter: true,
+        sigilItemId: 'sigil_goblin_mines',
+        entryRequirements: [
+          {
+            itemId: 'sigil_goblin_mines',
+            name: 'Goblin Sigil',
+            requiredAmount: 1,
+            ownedAmount: 2,
+          },
+        ],
+      },
+      { id: 'hives_abyss_Normal', region: 2 },
+    ] as DungeonPreviewData[]);
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
     router.navigate.and.resolveTo(true);
 
@@ -396,6 +398,39 @@ describe('DungeonPageComponent', () => {
 
     expect(component.claimedRewardResult()).toBeNull();
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world/shenic']);
+  });
+
+  it('shows earned Mastery XP and the updated progression after a run ends', () => {
+    const run = createRun(RoomType.Boss);
+    run.status = DungeonRunStatus.Completed;
+    run.state.masteryLevelAtStart = 2;
+    run.state.masteryAwardReasons = [
+      { id: 'completion', description: 'Dungeon completed', experience: 120 },
+      { id: 'boss', description: 'Boss defeated', experience: 50 },
+    ];
+    previews.update((dungeons) =>
+      dungeons.map((dungeon) =>
+        dungeon.id === run.dungeonDefinitionId
+          ? {
+              ...dungeon,
+              mastery: {
+                level: 3,
+                experience: 570,
+                experienceRequiredForNextLevel: 800,
+                completionCount: 4,
+              },
+            }
+          : dungeon,
+      ),
+    );
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+    component.claimedRewardResult.set({ run, claimedLoot: [] });
+
+    expect(component.earnedMasteryExperience()).toBe(170);
+    expect(component.endedRunMastery()?.level).toBe(3);
+    expect(component.masteryProgressPercent()).toBe(71.25);
   });
 
   it('returns to the region where the completed dungeon was started', () => {

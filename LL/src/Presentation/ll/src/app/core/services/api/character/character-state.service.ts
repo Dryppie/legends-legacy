@@ -17,7 +17,11 @@ export function applyCharacterLevelUp(
   character: CharacterDto,
   levelUp: CharacterLevelUp,
 ): CharacterDto {
-  if (character.id !== levelUp.characterId || levelUp.level < character.level) {
+  if (
+    character.id !== levelUp.characterId ||
+    levelUp.level < character.level ||
+    levelUp.experienceUntilNextLevel <= 0
+  ) {
     return character;
   }
 
@@ -109,6 +113,17 @@ export class CharacterStateService {
         untracked(() => {
           const current = this.currentCharacter();
           if (!current) return;
+
+          if (
+            levelUp.characterId === current.id &&
+            levelUp.level >= current.level &&
+            levelUp.experienceUntilNextLevel <= 0
+          ) {
+            // An invalid realtime requirement must not replace the current
+            // value. Reload the authoritative character summary instead.
+            this.refreshCurrentCharacter();
+            return;
+          }
 
           const updated = applyCharacterLevelUp(current, levelUp);
           if (updated === current) return;

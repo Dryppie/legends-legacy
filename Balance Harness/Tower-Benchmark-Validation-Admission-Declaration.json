@@ -1,0 +1,61 @@
+{
+  "version": "tower-benchmark-validation-admission-v1",
+  "studyVersion": "tower-benchmark-validation-comparison-v1",
+  "scopeId": "benchmark-validation-pilot-01",
+  "package": "TestResults/benchmark-validation-admission-20260924",
+  "output": "TestResults/balance/tower-benchmark-validation-pilot-01-20260924",
+  "harness": ".artifacts/benchmark-validation-study-20260924/bin/BalanceHarness/release",
+  "resourceEnvelope": "tower-proposal-resource-envelope-v2",
+  "chargedSeconds": 900,
+  "chargedBytes": 1073741824,
+  "scientificMaximumSeconds": 10800,
+  "scientificMaximumBytes": 6442450944,
+  "precedingChargedSeconds": 27191.67100000009,
+  "precedingChargedBytes": 22349413892,
+  "originalPlanFileSha256": "f03380b48885af9a9051d3e712d378eb76affdab8d8ae2e6575fb115afb5c7ae",
+  "harnessSha256": "24e20a6f46d17ed14f53f72d1ff9cccbc3db1782f38d8e12ca67b91ac1c76cb6",
+  "backendTestCount": 132,
+  "probeRecipeInstances": 48,
+  "preparationsPerRuntime": 96,
+  "retries": 0,
+  "timingResamples": 0,
+  "scientificLaunches": 0,
+  "admissionOnly": true,
+  "sourceManifests": {
+    "TestResults/proposal-affinity-pilot-02-admission-repaired-20260923": "e5172f3b6b3db3ddcbe2e4a68cdd96eeb04e6822a3e65d12078676b1da7979fa",
+    "TestResults/affinity-creation-preview-20260923": "db58d54f7a1c595e6b39995508643f16207941be9b772719ac039a9e1775ad39",
+    "TestResults/benchmark-validation-study-verification-20260924": "4b370920f0d82d98ae2d86599d1fa61a74cbc4121d41b0ca14f8ac78ebb98aae",
+    "TestResults/benchmark-tie-stage-review-20260923": "13b860996ca4c31561aea0a3ac9f0252c6e0a98d904b3d85e48d214de58be023",
+    "TestResults/benchmark-tie-admission-20260923": "80c8b6023642b75c7802cf0cc8b8f56d2becb4e14d1e09f847a43d5d073c189c",
+    "TestResults/balance/tower-benchmark-tie-pilot-01-20260923": "e7c1ddff081e3f895b6d96c0cf1067b10d5b08c1376d6fe2682619467858c643",
+    "TestResults/tower-proposal-owned-fixture-benchmark-validation-20260924/result": "6912ed31819b3904058b8b4e7de3b75a5450fdb1f62119030529f417a2e1c962",
+    "TestResults/tower-proposal-owned-fixture-benchmark-tie-20260923/result": "e367bfbb85cd64cba547e33c39c609a87fe027d18e01acd48431ef186344101f",
+    "TestResults/balance/tower-frozen-pool-recognition-repaired-20260923": "5fd7e9eb38eb4319f41be7a0e874297a897c7a32a73d09030261579b2473b377",
+    "TestResults/proposal-native-audit-cost-probe-20260923": "8929c5b94a95e717e8f7ec2ffb4d94ee01d0cbc9083e4b31873f635a5cc85cf7"
+  },
+  "forecastRule": "Upward-only maximum of prior admission, frozen native audit probe, current preparation and validation-fixture forecast, and twice the completed selector study scaled from 17792 to 21888 fights with upward-only validation/selector fixture phase ratios. Apply all storage floors before scaling the frozen audit probe. Margin 2 and publication reserve 120 remain. No timing retry.",
+  "harnessFiles": {
+    "BalanceHarness.dll": "24e20a6f46d17ed14f53f72d1ff9cccbc3db1782f38d8e12ca67b91ac1c76cb6",
+    "BalanceHarness.pdb": "e9e453d2dd2dd294c7bfee9b838dc026a5da7546553e6ed53f3e8cff9de9893e",
+    "BalanceHarness.deps.json": "76137682e9fa47ebcbdddd68545f54f2c38517286770322a94621cd5050e334c",
+    "BalanceHarness.runtimeconfig.json": "8cfba0672dbfced94e75ab40bc1bcf26868dfce981aa96fc1739bdb81478e2ca"
+  },
+  "implementationFiles": {
+    "Balance Harness/analysis/prepare-benchmark-validation-admission.py": "9fcb3eabebd82a3585ab0ca3f0b8c7d1cff44efedf34181371a27db2fb13f9a6",
+    "Balance Harness/analysis/test-benchmark-validation-admission.py": "88391b2cd1d49feb5477bf7684b7049605332b88b5f097c4f3180612dee3ab48",
+    "Balance Harness/analysis/prepare-affinity-creation-admission.py": "93e79ab2ad98e7f42a6477cbc6f98339eca54a1654c2e74301643c687e02c1ff",
+    "Balance Harness/analysis/prepare-proposal-affinity-admission.py": "d3300ff7ec7c538ca6ac140403fcbb8c3fbe211734e626fc2eed6a3574b3c963",
+    "Balance Harness/analysis/prepare-proposal-affinity-resource-admission.py": "81d3544bb4098d330b6f91d5a3240720315915dee9461288f6a8c0777861e5eb",
+    "Balance Harness/analysis/benchmark-validation-admission-context.ps1": "063067d12878fc702457d5bdc7c2ec6bbcd417c84ef66e69b4c2a89931effd7e",
+    "Balance Harness/analysis/audit-proposal-affinity-study.py": "793dad0d2fbcf2b2be739e6ac6e6df9ff0b044cb5b59ebd31f4b0973d9711062",
+    "build/run-proposal-affinity-study.py": "1400e00a9f0db19beb8318d45abef42ef7a6f89650fefd928ac5368f0904fe57",
+    "build/bounded_windows_process.py": "0efe39bcabf3ac3665988a9c38185938b77f97585ecf4d7dc22b4a6deb691d30",
+    "TestResults\\three-reference-admission-closeout-20260922\\comparison-preparation.py": "edcda4fbbc9f2c19ee9e23ce0ffb15b44f7e29c9596e63982406edd470c0224b"
+  },
+  "tests": {
+    "path": "TestResults/benchmark-validation-admission-tests-20260924.log",
+    "sha256": "2fcb786ed32409726105d0d6c30452df50225ff9e505d5ddfc64fe3891f5dcab",
+    "passed": 23,
+    "failed": 0
+  }
+}
