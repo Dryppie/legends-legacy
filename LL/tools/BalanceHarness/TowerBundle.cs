@@ -13,7 +13,10 @@ public sealed record TowerTrial(string Id, int Seed, TowerBattleReport Report);
 public sealed record TowerScorecard(string Status, int Planned, int Valid, int Invalid, int Cancelled, int NotRun,
     int Wins, int Defeats, int Draws, int TickLimits, RateEstimate? ClearRate,
     NumericDistribution WinDurationSeconds, NumericDistribution NonWinDurationSeconds, IReadOnlyList<TowerTrial> Trials);
-public sealed record TowerSettings(ThreatAndTankingOptions Threat, int CheckpointIntervalTicks);
+public sealed record TowerBalanceSelection(int AttributeRulesVersion, int EquipmentBalanceVersion, string? AbilityBalanceProfile);
+public sealed record TowerSettings(ThreatAndTankingOptions Threat, int CheckpointIntervalTicks,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    TowerBalanceSelection? Balance = null);
 public sealed record SavedTower(TowerManifest Manifest, IReadOnlyList<TowerBattleInput> Inputs, TowerScorecard Scorecard);
 
 /// <summary>Separate versioned Tower envelope; historical idle contracts are unchanged.</summary>
@@ -41,7 +44,7 @@ public static class TowerBundle
             var interval = settings.CheckpointIntervalTicks;
             var scenario = HarnessJson.Read<TowerScenario>(scenarioPath);
             planned = scenario.Seeds.Count;
-            var runner = new TowerBattleRunner(snapshotRoot, new OfflineContent(snapshotRoot, threat));
+            var runner = new TowerBattleRunner(snapshotRoot, OfflineContent.ForTower(snapshotRoot, settings));
             var inputs = scenario.Seeds.Select(seed => runner.CreateInput(scenario, seed, threat, interval)).ToArray();
             // Complete validation and freeze the whole schedule before the first battle.
             HarnessJson.WriteNew(Path.Combine(output, "tower-input.json"), inputs);
@@ -83,7 +86,17 @@ public static class TowerBundle
             new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
         var interval = settings.RootElement.TryGetProperty("WorldTower", out var tower)
             && tower.TryGetProperty("CombatTicksPerFrame", out var value) ? value.GetInt32() : new WorldTowerOptions().CombatTicksPerFrame;
-        return new(threat, interval);
+        var root = settings.RootElement;
+        var attribute = root.TryGetProperty("AttributeRedesign", out var attributes)
+            && attributes.TryGetProperty("LiveVersion", out var attributeVersion) ? attributeVersion.GetInt32() : (int?)null;
+        var equipment = root.TryGetProperty("EquipmentBalance", out var releases)
+            && releases.TryGetProperty("LiveVersion", out var equipmentVersion) ? equipmentVersion.GetInt32() : (int?)null;
+        var profile = root.TryGetProperty("Combat", out var combat)
+            && combat.TryGetProperty("AbilityBalanceProfile", out var abilityProfile) ? abilityProfile.GetString() : null;
+        // Settings captured before the rollout retain the original implicit catalog behavior and hash.
+        if (attribute is null && equipment is null && profile is null) return new(threat, interval);
+        var selection = new Domain.Models.Attributes.AttributeRulesSelection(attribute ?? 17, equipment);
+        return new(threat, interval, new(selection.Version, selection.EquipmentBalanceVersion, profile));
     }
 
     internal static IReadOnlyDictionary<string, string> CopyContent(string apiRoot, string snapshotRoot, CancellationToken token)
@@ -99,6 +112,22 @@ public static class TowerBundle
             hashes.Add(file, HarnessJson.FileHash(destination));
         }
         return hashes;
+    }
+
+    // Copy only the settings consumed by offline readers, never application secrets.
+    internal static void WriteSettings(string path, TowerSettings settings, double idleCadence = 1)
+    {
+        var combat = new Dictionary<string, object?> { ["ThreatAndTanking"] = settings.Threat,
+            ["IdleProgression"] = new Dictionary<string, object> { ["EncounterCadenceSeconds"] = idleCadence } };
+        var captured = new Dictionary<string, object> { ["Combat"] = combat,
+            ["WorldTower"] = new Dictionary<string, object> { ["CombatTicksPerFrame"] = settings.CheckpointIntervalTicks } };
+        if (settings.Balance is { } balance)
+        {
+            captured["AttributeRedesign"] = new Dictionary<string, object> { ["LiveVersion"] = balance.AttributeRulesVersion };
+            captured["EquipmentBalance"] = new Dictionary<string, object> { ["LiveVersion"] = balance.EquipmentBalanceVersion };
+            combat["AbilityBalanceProfile"] = balance.AbilityBalanceProfile;
+        }
+        HarnessJson.WriteNew(path, captured);
     }
 
     internal static void VerifySnapshot(string run, TowerManifest manifest, string inputHash, CancellationToken token)
@@ -173,7 +202,8 @@ public static class TowerBundle
         if (!results.TryGetValue(battleId, out var hash) || !File.Exists(resultPath) || HarnessJson.FileHash(resultPath) != hash)
             throw new InvalidDataException("Missing or modified saved Tower result.");
         var input = inputs[index];
-        var content = new OfflineContent(Path.Combine(run, "content"), input.ThreatAndTanking);
+        var content = OfflineContent.ForTower(Path.Combine(run, "content"),
+            new(input.ThreatAndTanking, input.CheckpointIntervalTicks, input.Balance));
         var report = await new TowerBattleRunner(Path.Combine(run, "content"), content).RunAsync(input, detailed, token);
         var original = HarnessJson.Read<TowerBattleReport>(resultPath);
         RunBundle.VerifyResult(original.Battle, report.Battle);

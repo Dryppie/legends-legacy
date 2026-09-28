@@ -248,6 +248,7 @@ public static class StateSyncCommandScopeCatalog
         Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Character], [],
             refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
             typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentMigration.ApplyEquipmentMigrationCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.ConvertEquipmentOnStartup.ConvertEquipmentOnStartupCommand),
             typeof(global::Application.UseCases.Equipments.Commands.RollbackEquipmentMigration.RollbackEquipmentMigrationCommand),
             typeof(global::Application.UseCases.Equipments.Commands.ChooseMigratedSpecialization.ChooseMigratedSpecializationCommand),
             typeof(global::Application.UseCases.Equipments.Commands.ReinforceEquipment.ReinforceEquipmentCommand),

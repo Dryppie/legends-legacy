@@ -20,7 +20,7 @@ public static partial class TowerFixedFamilyConfirmation
         Storage(q).Put("study/executable-files.json", TowerBossStudy.RetainExecutable(root, scope.Execution,
             AvailableBytes(q)-TowerBulkCampaign.StorageBytes(q.OutputRoot, ct), ct));
         // Preparation uses a local literal label only. It never executes combat or reserves a value.
-        var runner = new TowerBattleRunner(Path.Combine(root, "content"), new OfflineContent(Path.Combine(root, "content"), settings.Threat));
+        var runner = new TowerBattleRunner(Path.Combine(root, "content"), OfflineContent.ForTower(Path.Combine(root, "content"), settings));
         foreach (var team in freeze.Definition.Teams)
         {
             check(); var scenario = team.Scenario with { Seeds = new[] { 0 } };
@@ -79,7 +79,7 @@ public static partial class TowerFixedFamilyConfirmation
             var actual = TowerBulkCampaign.Paths(Path.Combine(root, "executable")).ToDictionary(p => Path.GetRelativePath(Path.Combine(root, "executable"), p).Replace('\\', '/'), HarnessJson.FileHash);
             Require(HarnessJson.Hash(executable) == HarnessJson.Hash(actual)
                 && scope.Execution.AssemblyHashes.All(p => executable.GetValueOrDefault(p.Key+".dll") == p.Value), "Changed producing executable.");
-            var runner = new TowerBattleRunner(content, new OfflineContent(content, scope.Settings.Threat));
+            var runner = new TowerBattleRunner(content, OfflineContent.ForTower(content, scope.Settings));
             prepare = (scenario, seed) => runner.CreateInput(scenario, seed, scope.Settings.Threat, scope.Settings.CheckpointIntervalTicks);
         }
         Require(File.ReadAllText(Path.Combine(root, "trials.jsonl")).EndsWith('\n'), "Torn trial journal.");

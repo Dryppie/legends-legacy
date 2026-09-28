@@ -39,11 +39,7 @@ public static class TowerPortfolioConfirmationRun
         File.Copy(historyPath, P("history-input.json")); File.Copy(planPath, P("study-plan.md"));
         var settings = TowerBundle.ReadSettings(content);
         TowerPortfolioConfirmation.Equal(source.Definition.ContentHashes, TowerBundle.CopyContent(content, P("content"), token), "unchanged content");
-        HarnessJson.WriteNew(P("content/appsettings.json"), new Dictionary<string, object> {
-            ["Combat"] = new Dictionary<string, object> { ["ThreatAndTanking"] = settings.Threat,
-                ["IdleProgression"] = new Dictionary<string, object> { ["EncounterCadenceSeconds"] = RunBundle.ReadCombatSettings(content).Cadence } },
-            ["WorldTower"] = new Dictionary<string, object> { ["CombatTicksPerFrame"] = settings.CheckpointIntervalTicks }
-        });
+        TowerBundle.WriteSettings(P("content/appsettings.json"), settings, RunBundle.ReadCombatSettings(content).Cadence);
         HarnessJson.WriteNew(P("seed-ledger.json"), seeds);
         HarnessJson.WriteNew(P("definition.json"), TowerPortfolioConfirmation.Definition(source, seeds, HarnessJson.Hash(ExecutionIdentity.Current())));
         HarnessJson.WriteNew(P("executable-files.json"), TowerBossStudy.RetainExecutable(output, ExecutionIdentity.Current()));

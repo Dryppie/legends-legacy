@@ -11,7 +11,7 @@ public static class TowerStagedBalanceRun
         var d=JsonSerializer.Deserialize<TowerStagedDefinition>(JsonSerializer.SerializeToUtf8Bytes(definition,HarnessJson.Options),HarnessJson.Options)!;
         var maximum=TowerStagedBalance.Validate(d);
         using var campaign=TowerBulkCampaign.Open(root,output,Kind,d,d.ContentHashes,d.SettingsHash,d.ExecutionHash,maximum,d.MaximumBattles,options,resume,verifyOnly,token,progress);
-        var runner=new TowerBattleRunner(campaign.Root,new OfflineContent(campaign.Root,campaign.Contract.Scope.Settings.Threat));
+        var runner=new TowerBattleRunner(campaign.Root,OfflineContent.ForTower(campaign.Root, campaign.Contract.Scope.Settings));
         foreach(var cell in d.Cells)
         {
             campaign.Token.ThrowIfCancellationRequested();

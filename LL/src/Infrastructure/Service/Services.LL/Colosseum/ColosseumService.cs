@@ -4,6 +4,7 @@ using Domain.Models.Items.Equipments.Progression;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
+using Domain.Models.Attributes;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
@@ -40,6 +41,7 @@ public class ColosseumService : IColosseumService
     private readonly IAchievementService? _achievementService;
     private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
     private readonly TimeProvider _time;
+    private readonly int _attributeVersion;
 
     public ColosseumService(
         IEntityService es,
@@ -56,7 +58,8 @@ public class ColosseumService : IColosseumService
         IInventoryItemFactory inventoryItemFactory,
         IAchievementService? achievementService = null,
         Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null,
-        TimeProvider? time = null)
+        TimeProvider? time = null,
+        AttributeRulesSelection? attributeRules = null)
     {
         _entityService = es;
         _characterService = cs;
@@ -73,6 +76,7 @@ public class ColosseumService : IColosseumService
         _achievementService = achievementService;
         _nobility = nobility;
         _time = time ?? TimeProvider.System;
+        _attributeVersion = attributeRules?.Version ?? AttributeRules.CurrentVersion;
     }
 
     public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -102,7 +106,9 @@ public class ColosseumService : IColosseumService
             enemyId,
             now);
         CombatantPreparationSource hostileSource;
-        if (defenderSnapshot is { IsValid: true, IsOutdated: false })
+        // Saved defenses retain their original attribute units across rules rollouts.
+        if (defenderSnapshot is { IsValid: true, IsOutdated: false }
+            && defenderSnapshot.CharacterSnapshot.AttributeRulesVersion == _attributeVersion)
         {
             hostileSource = new SnapshotCombatantPreparationSource(defenderSnapshot.CharacterSnapshot);
         }

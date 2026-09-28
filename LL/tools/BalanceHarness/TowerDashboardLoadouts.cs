@@ -108,7 +108,7 @@ public sealed partial class TowerDashboardService
         var recipe = Path.Combine(path, "recipes", trial.Recipe + ".json");
         var scenario = HarnessJson.Read<TowerScenario>(recipe);
         var root = Path.Combine(path, "content");
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         if (HarnessJson.Hash(scenario) != trial.Recipe || HarnessJson.Hash(runner.CreateInput(scenario, trial.Seed, scope.Settings.Threat, scope.Settings.CheckpointIntervalTicks)) != trial.InputHash)
             throw new InvalidDataException("Export recipe differs from its recorded input.");
         return recipe;

@@ -216,7 +216,7 @@ public static class TowerCompleteFamilyRun
     {
         using var phase = TowerPerformanceTrace.Measure("complete.prepare-family");
         var settings = TowerBundle.ReadSettings(source.ContentRoot);
-        var runner = new TowerBattleRunner(source.ContentRoot, new OfflineContent(source.ContentRoot, settings.Threat));
+        var runner = new TowerBattleRunner(source.ContentRoot, OfflineContent.ForTower(source.ContentRoot, settings));
         var preparation = new List<object>();
         foreach (var cell in source.Cells)
         {

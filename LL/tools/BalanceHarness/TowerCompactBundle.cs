@@ -87,7 +87,7 @@ public static partial class TowerCompactBundle
             HarnessJson.WriteNew(Path.Combine(output, "bulk-scope.json"), scope);
             if (retainExecutable) HarnessJson.WriteNew(Path.Combine(output, "executable-files.json"), TowerBossStudy.RetainExecutable(output, scope.Execution));
             foreach (var name in new[] { "recipes", "inputs", "prepared", "chunks" }) Directory.CreateDirectory(Path.Combine(output, name));
-            var runner = new TowerBattleRunner(root, new OfflineContent(root, settings.Threat));
+            var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, settings));
             var references = new List<TowerCompactCaseReference>();
             // No fight starts until every case has been legally materialized and its schedule frozen.
             foreach (var item in d.Cases)
@@ -169,7 +169,7 @@ public static partial class TowerCompactBundle
             throw new InvalidDataException("Compact Tower scope, recipe or input index is invalid.");
         var scenarios = new Dictionary<string, TowerScenario>(StringComparer.Ordinal);
         var inputs = new Dictionary<string, TowerCompactInput>(StringComparer.Ordinal);
-        var runner = new TowerBattleRunner(contentRoot, new OfflineContent(contentRoot, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(contentRoot, OfflineContent.ForTower(contentRoot, scope.Settings));
         foreach (var item in plan.Cases)
         {
             token.ThrowIfCancellationRequested();
@@ -316,7 +316,7 @@ public static partial class TowerCompactBundle
             throw new InvalidDataException("Compact replay requires original assemblies, runtime and platform.");
         if (original is null) throw new InvalidDataException("Unknown compact replay case or trial.");
         var root = ContentRoot(output, saved.Plan.SharedContentPath);
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, saved.Scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, saved.Scope.Settings));
         var input = runner.CreateInput(saved.Scenarios[caseId], original.Seed, saved.Scope.Settings.Threat, saved.Scope.Settings.CheckpointIntervalTicks);
         var report = await runner.RunAsync(input, detailed, token);
         RunBundle.VerifyResult(original.Report.Battle, report.Battle);

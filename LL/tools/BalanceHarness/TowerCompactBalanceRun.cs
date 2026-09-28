@@ -16,7 +16,7 @@ public static class TowerCompactBalanceRun
         using var campaign = TowerBulkCampaign.Open(root, output, Kind, d, d.ContentHashes, d.SettingsHash, d.ExecutionHash,
             d.Cells.Sum(c => c.Scenario.Seeds.Count), d.MaximumBattles, options, resume, verifyOnly, token, progress);
         // Check the entire family before any fight, including cells assigned to later batches.
-        var runner = new TowerBattleRunner(campaign.Root, new OfflineContent(campaign.Root, campaign.Contract.Scope.Settings.Threat));
+        var runner = new TowerBattleRunner(campaign.Root, OfflineContent.ForTower(campaign.Root, campaign.Contract.Scope.Settings));
         foreach (var cell in d.Cells)
         {
             campaign.Token.ThrowIfCancellationRequested();

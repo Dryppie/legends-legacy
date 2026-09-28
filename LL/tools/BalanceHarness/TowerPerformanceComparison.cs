@@ -93,7 +93,7 @@ public static class TowerPerformanceComparison
                     digest = HarnessJson.Hash(HarnessJson.Read<Dictionary<string, string>>(Path.Combine(path, "tower-results.json")));
                     var input = saved.Inputs[0];
                     evidence = new(item.Id, saved.Scorecard.Status, HarnessJson.Hash(input.Scenario), HarnessJson.Hash(saved.Manifest.ContentHashes),
-                        HarnessJson.Hash(new TowerSettings(input.ThreatAndTanking, input.CheckpointIntervalTicks)), HarnessJson.Hash(saved.Manifest.Execution),
+                        HarnessJson.Hash(new TowerSettings(input.ThreatAndTanking, input.CheckpointIntervalTicks, input.Balance)), HarnessJson.Hash(saved.Manifest.Execution),
                         input.Party.Count, trials.Select(t => new TowerBalanceTrial(t.Seed, t.Report.Battle.Summary.ContentOutcome)).ToArray(), digest);
                 }
                 if (evidence.Status != "Complete" || evidence.ScenarioHash != HarnessJson.Hash(item.Scenario)

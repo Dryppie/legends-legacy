@@ -32,12 +32,12 @@ public static partial class TowerBossStudy
             Freeze("generation-inputs.json", inputs);
             if (d.Mode == TowerBossDiscovery.Improve) Freeze("improvement-starts.json", d.Starts);
             Freeze("seed-ledger.json", new { d.ExcludedCombatSeeds, Generation = d.Generation.Seeds, d.Stages.Schedules });
-            var inventory = TowerBossInventory.Create(frozen, settings.Threat);
+            var inventory = TowerBossInventory.CreateForTower(frozen, settings);
             var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
             Freeze("boss-profiles.json", inventory); Freeze("generation-mechanics.json", mechanics);
             Freeze("executable-files.json", RetainExecutable(output, scope.Execution));
             var archive = new TowerLoadoutArchive(output, scope, cost.Total - cost.ReplayReserve);
-            var runner = new TowerBattleRunner(frozen, new OfflineContent(frozen, settings.Threat));
+            var runner = new TowerBattleRunner(frozen, OfflineContent.ForTower(frozen, settings));
             report = await ExecuteAsync(d, mechanics, async (arm, stage, scenario, seed, ct) => {
                 var result = await archive.EvaluateAsync(arm, stage, scenario, seed, ct);
                 if (archive.CacheHits != 0) throw new InvalidDataException("Unexpected study cache reuse; combat counts must remain exact.");
@@ -101,10 +101,10 @@ public static partial class TowerBossStudy
         if (HarnessJson.Hash(executable) != HarnessJson.Hash(actualExecutable)
             || scope.Execution.AssemblyHashes.Any(p => !executable.TryGetValue(p.Key + ".dll", out var hash) || hash != p.Value))
             throw new InvalidDataException("Retained producing executable changed.");
-        var inventory = TowerBossInventory.Create(root, scope.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(root, scope.Settings);
         var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
         Match("boss-profiles.json", inventory); Match("generation-mechanics.json", mechanics);
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         var index = 0; var replayIds = new List<string>();
         TowerScenario? lastScenario = null; TowerBattleInput? template = null; string? recipeHash = null;
         var rebuilt = await ExecuteAsync(d, mechanics, (arm, stage, scenario, seed, ct) => {

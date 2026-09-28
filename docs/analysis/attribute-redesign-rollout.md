@@ -2,6 +2,28 @@
 
 ## Selected release and manual deployment
 
+### Automatic conversion on game API startup
+
+The game API now ships with `EquipmentConversion:RunOnStartup=true` and `EquipmentConversion:TargetBalanceVersion=4`.
+After its normal schema migrations, seeding and content validation, it converts older referenced equipment through
+transactional commands, refreshes outdated Arena defenses and verifies the remaining live population before serving requests.
+Deploying the rebuilt API runs this automatically; no per-item operator calls are required. Existing receipt tables provide
+durable progress, so restarting skips committed conversions. No new EF migration is needed for this startup runner.
+
+This path implements conversion and verification only. It does not pause other hosts or player activity, settle outstanding
+combat, stop schedules, or restore them. Pending combat will use whichever build and rules are active when it is resolved.
+All combat hosts still need matching release selectors and binaries. The runner serializes concurrent API conversion runs
+and uses character command locks plus item/dungeon row locks, but does not make overlapping old and new deployments a single
+atomic game-wide cutover.
+
+Unknown owned equipment, unsupported unversioned pending rewards or active legacy tournament snapshots produce an explicit
+startup error. Committed conversions remain intact for retry. Arena refresh creates new snapshots and preserves old ones;
+frozen tournament snapshots are not rewritten or tournaments silently cancelled. Unreferenced legacy item rows are retained
+and counted separately. See [startup conversion details](equipment-startup-conversion.md).
+
+Environment overrides must retain `18 / 4 / healing-v1` and allow startup conversion. Set
+`EquipmentConversion__RunOnStartup=false` only when deliberately using the older operator-controlled procedure below.
+
 The 28 September [Tenacity follow-up](tenacity-resistance-2026-09-28.md) changes rules-18 Tenacity from duration reduction to a chance to ignore harmful applications. Rebuild all combat hosts together; earlier duration-based balance evidence does not validate this changed mechanic. It adds no database migration, equipment conversion or configuration selector.
 
 The user selected the new attributes **and healing changes** for local development and the ongoing alpha, then clarified that they will deploy alpha manually. The checked-in settings for the game API, worker, LiveOps and development Admin dashboard now select this release:
@@ -12,7 +34,7 @@ The user selected the new attributes **and healing changes** for local developme
 | `EquipmentBalance:LiveVersion` | `4` |
 | `Combat:AbilityBalanceProfile` | `healing-v1` |
 
-This selects the 40-percentage-point penetration cap, penetration price 4, Restoration price 1.5, Herb Mixture at 105% Power and Sprouting Surge at 125% Power. The game API, background worker and LiveOps host must use this same combination. The selectors are read when services are constructed, so a running host needs a rebuild/restart. Environment variables can override the JSON settings; check all three selectors when manually deploying. Changing configuration does not convert existing items or refresh competitive snapshots.
+This selects the 40-percentage-point penetration cap, penetration price 4, Restoration price 1.5, Herb Mixture at 105% Power and Sprouting Surge at 125% Power. The game API, background worker and LiveOps host must use this same combination. The selectors are read when services are constructed, so a running host needs a rebuild/restart. Environment variables can override the JSON settings; check all three selectors when manually deploying. Selector changes alone do not convert existing items or refresh competitive snapshots; the API startup conversion described above performs that work.
 
 Migration previews without an explicit target now use the host's configured equipment release, so the selected hosts preview release 4 rather than silently converting to release 2. Legacy staging at rules 17/equipment 1 retains target 2 for compatibility; pass `targetBalanceVersion: 4` explicitly during the alpha migration. The existing rehearsal script also requires `-TargetBalanceVersion 4` because its legacy default remains 2.
 
@@ -34,7 +56,8 @@ Verification: **119 focused equipment/registration/healing/penetration regressio
 
 `ReferencedItemConversionComplete` now reports readiness for the referenced population of an audited source release; the strict `ItemConversionComplete` deliberately remains false for the retained 408 unversioned records. The cutover verification checked every release below 4, unclaimed rewards and active competitive snapshots. Alpha still needs its own audit and manual deployment.
 
-For manual alpha deployment, use this order:
+The following optional full cutover procedure predates automatic startup conversion and includes combat settlement. Disable
+`EquipmentConversion:RunOnStartup` while staging legacy selectors if choosing this procedure instead:
 
 1. Back up the alpha database; enable maintenance and stop all combat/reward writers, including the worker. Preserve the prior image versions and selectors.
 2. Stage the code with environment overrides `AttributeRedesign__LiveVersion=17`, `EquipmentBalance__LiveVersion=1`, and an empty `Combat__AbilityBalanceProfile`. The API runs EF migrations at startup, including the receipt revision migration. Keep this staging deployment inaccessible to players.

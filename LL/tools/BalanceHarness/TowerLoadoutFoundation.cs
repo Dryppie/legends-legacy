@@ -29,7 +29,7 @@ public static class TowerLoadoutFoundation
 
     public static TowerLoadoutDefinition Default(string root, string catalogs)
     {
-        var pool = new OfflineContent(root, TowerBundle.ReadSettings(root).Threat).Essences.GetAll()
+        var pool = OfflineContent.ForTower(root, TowerBundle.ReadSettings(root)).Essences.GetAll()
             .Select(e => e.Id).Order(StringComparer.Ordinal).ToArray();
         var contexts = new List<TowerLoadoutContext>();
         void Add(string file, string prefix, bool allRoles)
@@ -150,7 +150,7 @@ public static class TowerLoadoutFoundation
             HarnessJson.WriteNew(Path.Combine(output, "definition.json"), definition);
             HarnessJson.WriteNew(Path.Combine(output, "settings.json"), settings);
             HarnessJson.WriteNew(Path.Combine(output, "scope.json"), new { Content = hashes, Execution = execution, Identity = scope });
-            var content = new OfflineContent(snapshot, settings.Threat);
+            var content = OfflineContent.ForTower(snapshot, settings);
             var runner = new TowerBattleRunner(snapshot, content);
             var mechanics = EssenceMechanicsInventory.Create(snapshot, settings.Threat);
             HarnessJson.WriteNew(Path.Combine(output, "mechanics.json"), mechanics);

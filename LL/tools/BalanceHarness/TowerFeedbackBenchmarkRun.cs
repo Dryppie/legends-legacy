@@ -67,11 +67,7 @@ public static class TowerFeedbackBenchmarkRun
         Directory.CreateDirectory(output); string P(string n) => Path.Combine(output, n);
         if (HarnessJson.Hash(TowerBundle.CopyContent(root, P("content"), CancellationToken.None)) != HarnessJson.Hash(d.ContentHashes))
             throw new InvalidDataException("Content changed during preparation.");
-        HarnessJson.WriteNew(P("content/appsettings.json"), new Dictionary<string, object> {
-            ["Combat"] = new Dictionary<string, object> { ["ThreatAndTanking"] = settings.Threat,
-                ["IdleProgression"] = new Dictionary<string, object> { ["EncounterCadenceSeconds"] = RunBundle.ReadCombatSettings(root).Cadence } },
-            ["WorldTower"] = new Dictionary<string, object> { ["CombatTicksPerFrame"] = settings.CheckpointIntervalTicks }
-        });
+        TowerBundle.WriteSettings(P("content/appsettings.json"), settings, RunBundle.ReadCombatSettings(root).Cadence);
         File.Copy(planPath, P("study-plan.md"));
         HarnessJson.WriteNew(P("definition.json"), d); HarnessJson.WriteNew(P("controls.json"), controls);
         HarnessJson.WriteNew(P("seed-ledger.json"), new { historical, generation, discovery = schedule.Discovery,
@@ -84,7 +80,7 @@ public static class TowerFeedbackBenchmarkRun
         });
         var inputs = TowerBossDiscovery.GenerationInputs(d);
         HarnessJson.WriteNew(P("generation-inputs.json"), inputs);
-        HarnessJson.WriteNew(P("generation-mechanics.json"), TowerBossPartyGenerator.FromInventory(inputs, TowerBossInventory.Create(root, settings.Threat)));
+        HarnessJson.WriteNew(P("generation-mechanics.json"), TowerBossPartyGenerator.FromInventory(inputs, TowerBossInventory.CreateForTower(root, settings)));
         HarnessJson.WriteNew(P("executable-files.json"), TowerBossStudy.RetainExecutable(output, ExecutionIdentity.Current()));
         var protocol = new TowerFeedbackProtocol(storageAccounting is null ? 1 : 2, design.Policy, anchorId, strongControlId, DateTimeOffset.UtcNow,
             HarnessJson.FileHash(typeof(TowerFeedbackBenchmarkRun).Assembly.Location), design.MaximumFights,

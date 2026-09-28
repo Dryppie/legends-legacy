@@ -1,0 +1,18 @@
+{
+  "version": "tower-progression-budget-preview-v1",
+  "equipmentStatus": "Provisional",
+  "assumptions": "Working interpolation: four Essences on floors 1–4, five on 5–9, six on 10, seven on 11. Minimum unlock levels; existing provisional gear curve. Uncommon equipment, baseline rolls, no styles; level-1 unascended/unevolved Essences; hypothetical ownership of all required items and Essence copies. Reinforcement costs exclude acquisition, training and time. This does not define a player gear cap or establish balance acceptance.",
+  "budgets": [
+    { "essenceSlots": 4, "characterLevel": 30, "tier": 1, "rank": 1, "quality": "Standard", "priorityFloor": 1 },
+    { "essenceSlots": 4, "characterLevel": 30, "tier": 1, "rank": 1, "quality": "Standard", "priorityFloor": 2 },
+    { "essenceSlots": 4, "characterLevel": 30, "tier": 1, "rank": 1, "quality": "Standard", "priorityFloor": 3 },
+    { "essenceSlots": 4, "characterLevel": 30, "tier": 1, "rank": 1, "quality": "Standard", "priorityFloor": 4 },
+    { "essenceSlots": 5, "characterLevel": 40, "tier": 1, "rank": 2, "quality": "Standard", "priorityFloor": 5 },
+    { "essenceSlots": 5, "characterLevel": 40, "tier": 1, "rank": 2, "quality": "Standard", "priorityFloor": 6 },
+    { "essenceSlots": 5, "characterLevel": 40, "tier": 1, "rank": 2, "quality": "Standard", "priorityFloor": 7 },
+    { "essenceSlots": 5, "characterLevel": 40, "tier": 1, "rank": 2, "quality": "Standard", "priorityFloor": 8 },
+    { "essenceSlots": 5, "characterLevel": 40, "tier": 1, "rank": 2, "quality": "Standard", "priorityFloor": 9 },
+    { "essenceSlots": 6, "characterLevel": 50, "tier": 2, "rank": 2, "quality": "Standard", "priorityFloor": 10 },
+    { "essenceSlots": 7, "characterLevel": 60, "tier": 2, "rank": 3, "quality": "Fine", "priorityFloor": 11 }
+  ]
+}

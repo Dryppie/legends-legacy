@@ -40,7 +40,7 @@ public static class TowerAdaptiveRacing
             throw new InvalidDataException("Adaptive racing requires two owners/slots, an exact benchmark reference and a separate proposal seed.");
         var inputs = TowerBossDiscovery.CopyGenerationInputs(d);
         _ = new TowerBossPartyGenerator(inputs, plan.Mechanics); // Existing family/interaction validation, zero preparation.
-        if (HarnessJson.Hash(plan.Mechanics.SourceHashes) != HarnessJson.Hash(TowerBossInventory.SourceFiles
+        if (HarnessJson.Hash(plan.Mechanics.SourceHashes) != HarnessJson.Hash(plan.Mechanics.SourceHashes.Keys
                 .ToDictionary(f => f, f => d.ContentHashes[f])))
             throw new InvalidDataException("Generation mechanics must bind the scope's captured content.");
     }

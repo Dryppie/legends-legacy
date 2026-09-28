@@ -32,6 +32,31 @@ public static class TowerAffinitySearch
             throw new InvalidDataException("Supported affinity search requires original affinity creation and unchanged benchmark validation.");
     }
 
+    public static TowerProposalRacingPlan WithGearProfile(TowerProposalRacingPlan source,
+        TowerGearProfile profile, string contentRoot, TowerSettings settings)
+    {
+        var plan = TowerBatchRacing.Copy(source);
+        Validate(plan);
+        var scope = plan.Racing.Scope;
+        if (scope.SettingsHash != HarnessJson.Hash(settings) || scope.ExecutionHash != HarnessJson.Hash(ExecutionIdentity.Current()))
+            throw new InvalidDataException("Gear selection requires the current admitted settings and executable.");
+        var captured = new LoadoutScope(TowerProposalRacingNative.ArchiveAlgorithm(plan), settings,
+            ExecutionIdentity.Current(), scope.ContentHashes);
+        TowerProposalRacingNative.ValidateContent(plan, contentRoot, captured, CancellationToken.None);
+        var content = OfflineContent.ForTower(contentRoot, settings);
+        scope = scope with {
+            Contexts = scope.Contexts.Select(c => c with {
+                CharacterTemplates = TowerGearProfiles.Apply(c.CharacterTemplates, profile, content) }).ToArray(),
+            References = scope.References.Select(r => r with {
+                Scenario = TowerGearProfiles.Apply(r.Scenario, profile, content),
+                Source = $"Gear profile {profile.Id} applied to reference {r.Id}; previous strength claims do not transfer.",
+                EvidenceHash = HarnessJson.Hash(new { source = r, gearProfile = profile }) }).ToArray()
+        };
+        var racing = plan.Racing with { Scope = scope,
+            Mechanics = TowerBossPartyGenerator.FromInventory(TowerBossDiscovery.CopyGenerationInputs(scope), plan.DamageAffinityInventory!) };
+        return CreatePlan(racing, plan.DamageAffinityInventory!, plan.Policy.CreatedDamageAffinityIds!);
+    }
+
     public static async Task<TowerAffinitySearchSummary> RunAsync(TowerProposalRacingPlan plan,
         TowerLoadoutArchive archive, long maximumEvidenceBytes, Action checkLimits,
         CancellationToken token = default, Action<bool>? attempt = null)
@@ -63,6 +88,16 @@ public static class TowerAffinitySearch
 
     public static async Task<int> Command(string[] args, CancellationToken token)
     {
+        if (args is ["tower-affinity-search-gear", var source, var catalog, var profileId, var root, var output])
+        {
+            token.ThrowIfCancellationRequested();
+            var plan = WithGearProfile(TowerContractJson.Read<TowerProposalRacingPlan>(source),
+                TowerGearProfiles.Select(TowerGearProfiles.Read(catalog), profileId), root, TowerBundle.ReadSettings(root));
+            HarnessJson.WriteNew(output, plan);
+            Console.WriteLine(JsonSerializer.Serialize(new { profile = Profile, gearProfile = profileId, status = "ValidPlan",
+                planHash = HarnessJson.Hash(plan), plannedFights = 528, admissionRequired = true, newFights = 0 }, HarnessJson.Options));
+            return 0;
+        }
         if (args is ["tower-affinity-search-check", var path])
         {
             token.ThrowIfCancellationRequested();
@@ -78,6 +113,6 @@ public static class TowerAffinitySearch
             Console.WriteLine(JsonSerializer.Serialize(Summarize(plan, report), HarnessJson.Options));
             return 0;
         }
-        throw new InvalidDataException("Use tower-affinity-search-check <plan.json> or tower-affinity-search-verify <archive> <manifest-sha256>. Execution uses TowerAffinitySearch.RunAsync inside an admitted archive owner.");
+        throw new InvalidDataException("Use tower-affinity-search-check <plan.json>, tower-affinity-search-gear <plan.json> <catalog.json> <profile-id> <content-root> <new-plan.json>, or tower-affinity-search-verify <archive> <manifest-sha256>. Execution uses TowerAffinitySearch.RunAsync inside an admitted archive owner.");
     }
 }

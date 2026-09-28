@@ -173,7 +173,7 @@ public static class TowerProposalPolicies
             || d.Starts.Count(s => s.ReferenceId == context.BenchmarkReferenceId) != 1)
             throw new InvalidDataException("Proposals require two owners/slots and an exact benchmark reference.");
         _ = new TowerBossPartyGenerator(TowerBossDiscovery.CopyGenerationInputs(d), context.Mechanics);
-        if (HarnessJson.Hash(context.Mechanics.SourceHashes) != HarnessJson.Hash(TowerBossInventory.SourceFiles.ToDictionary(f => f, f => d.ContentHashes[f])))
+        if (HarnessJson.Hash(context.Mechanics.SourceHashes) != HarnessJson.Hash(context.Mechanics.SourceHashes.Keys.ToDictionary(f => f, f => d.ContentHashes[f])))
             throw new InvalidDataException("Generation mechanics differ from the declared content hashes.");
     }
 

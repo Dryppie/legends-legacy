@@ -66,7 +66,7 @@ public static class TowerProposalRacingNative
         // settings were bound above; never re-read live/default settings here.
         if (HarnessJson.Hash(TowerCompactBundle.ContentHashes(root, token)) != HarnessJson.Hash(plan.Racing.Scope.ContentHashes))
             throw new InvalidDataException("Proposal captured content changed.");
-        var inventory = TowerBossInventory.Create(root, scope.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(root, scope.Settings);
         var mechanics = TowerBossPartyGenerator.FromInventory(TowerBossDiscovery.CopyGenerationInputs(plan.Racing.Scope), inventory);
         ValidateInventory(plan, inventory);
         if (HarnessJson.Hash(mechanics) != HarnessJson.Hash(plan.Racing.Mechanics))
@@ -177,7 +177,7 @@ public static class TowerProposalRacingNative
         var scope = HarnessJson.Read<LoadoutScope>(Path.Combine(output, "scope.json"));
         ValidateBinding(plan, scope, TowerBatchRacing.PlannedEvaluations, 0, 0);
         ValidateContent(plan, Path.Combine(output, "content"), scope, token);
-        var runner = new TowerBattleRunner(Path.Combine(output, "content"), new OfflineContent(Path.Combine(output, "content"), scope.Settings.Threat));
+        var runner = new TowerBattleRunner(Path.Combine(output, "content"), OfflineContent.ForTower(Path.Combine(output, "content"), scope.Settings));
         var recipeFiles = trials.Select(t => t.Recipe + ".json").Distinct().Order(StringComparer.Ordinal);
         var battleFiles = trials.Select(t => t.Id + (scope.ReportStorage is null ? ".json" : ".json.gz")).Order(StringComparer.Ordinal);
         if (!Directory.EnumerateFileSystemEntries(Path.Combine(output, "recipes")).Select(Path.GetFileName).Order(StringComparer.Ordinal).SequenceEqual(recipeFiles)

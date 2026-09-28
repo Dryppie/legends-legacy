@@ -123,8 +123,8 @@ public static class TowerMidpointStudy
         var template = captured with { Id = Version, ContentHashes = hashes, ExecutionHash = HarnessJson.Hash(ExecutionIdentity.Current()),
             MaximumBattles = MaximumFights, Cells = captured.Cells.Select(c => c with { MinimumSamples = Samples, Scenario = c.Scenario with { Seeds = [] } }).ToArray() };
         HarnessJson.WriteNew(Path.Combine(target, "template.json"), template);
-        var baselineRunner = new TowerBattleRunner(baselineContent, new OfflineContent(baselineContent, settings.Threat));
-        var runner = new TowerBattleRunner(content, new OfflineContent(content, settings.Threat));
+        var baselineRunner = new TowerBattleRunner(baselineContent, OfflineContent.ForTower(baselineContent, settings));
+        var runner = new TowerBattleRunner(content, OfflineContent.ForTower(content, settings));
         var cells = new List<TowerCeilingPreparedCell>(); var probe = captured.Cells[0].Scenario.Seeds[0];
         foreach (var cell in captured.Cells)
         {
@@ -220,7 +220,7 @@ public static class TowerMidpointStudy
         if (File.Exists(Path.Combine(root, "protocol.json")) || File.Exists(Path.Combine(root, "started.json"))) throw new InvalidDataException("No bind retry.");
         HarnessJson.WriteNew(Path.Combine(root, "binding-started.json"), new { utc = DateTimeOffset.UtcNow });
         var d = BoundInputs(root, true, ct); var settings = TowerBundle.ReadSettings(Path.Combine(root, "materialized/content"));
-        var runner = new TowerBattleRunner(Path.Combine(root, "materialized/content"), new OfflineContent(Path.Combine(root, "materialized/content"), settings.Threat));
+        var runner = new TowerBattleRunner(Path.Combine(root, "materialized/content"), OfflineContent.ForTower(Path.Combine(root, "materialized/content"), settings));
         var materialized = HarnessJson.Read<TowerMidpointMaterialization>(Path.Combine(root, "materialized/materialization.json"));
         foreach (var cell in d.Cells)
         {

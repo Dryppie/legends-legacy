@@ -18,7 +18,7 @@ public static partial class TowerReferenceExplorationComparison
         Require(HarnessJson.Hash(settings) == template.SettingsHash && HarnessJson.Hash(scope.Execution) == template.ExecutionHash
             && HarnessJson.Hash(scope.ContentHashes) == HarnessJson.Hash(template.ContentHashes), "Runtime or content changed after admission.");
         Save("scope.json", scope);
-        var inventory = TowerBossInventory.Create(Path.Combine(output, "content"), settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(Path.Combine(output, "content"), settings);
         var inputs = TowerBossImprovement.Inputs(Bind(template, allocation.Selected, 0, false, q.Version));
         var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
         Save("boss-profiles.json", inventory); Save("generation-mechanics.json", mechanics);
@@ -94,9 +94,9 @@ public static partial class TowerReferenceExplorationComparison
             Require(captureFiles.Where(p => p.Key.StartsWith("runtime/", StringComparison.Ordinal)
                 && !Path.GetFileName(p.Key).StartsWith("BalanceHarness", StringComparison.Ordinal))
                 .All(p => actual.GetValueOrDefault(p.Key[8..]) == p.Value), "Changed captured runtime dependency.");
-            var inventory = TowerBossInventory.Create(content, scope.Settings.Threat); Match(output, "boss-profiles.json", inventory);
+            var inventory = TowerBossInventory.CreateForTower(content, scope.Settings); Match(output, "boss-profiles.json", inventory);
             mechanics = TowerBossPartyGenerator.FromInventory(TowerBossImprovement.Inputs(Bind(template, allocation.Selected, 0, false, q.Version)), inventory);
-            var runner = new TowerBattleRunner(content, new OfflineContent(content, scope.Settings.Threat)); var index = 0;
+            var runner = new TowerBattleRunner(content, OfflineContent.ForTower(content, scope.Settings)); var index = 0;
             TowerScenario? lastScenario = null; TowerBattleInput? prepared = null;
             battle = (arm, stage, scenario, seed, token) => {
                 token.ThrowIfCancellationRequested(); Require(index < trials.Count, "Missing saved battle."); var trial = trials[index++];

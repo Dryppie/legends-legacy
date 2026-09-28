@@ -79,7 +79,7 @@ public static class TowerPerformanceBenchmark
                 var contentRoot = Path.Combine(output, "content");
                 var hashes = TowerBundle.CopyContent(apiRoot, contentRoot, token);
                 var execution = ExecutionIdentity.Current();
-                var runner = new TowerBattleRunner(contentRoot, new OfflineContent(contentRoot, settings.Threat));
+                var runner = new TowerBattleRunner(contentRoot, OfflineContent.ForTower(contentRoot, settings));
                 // Materialize every complete scenario before the first combat, including late cases.
                 foreach (var item in definition.Cases)
                 {

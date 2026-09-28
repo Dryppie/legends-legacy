@@ -107,7 +107,7 @@ public static class TowerBenchmark
             if (samples.HasValue) definition = definition with { SamplesPerCell = samples.Value };
             var scenarios = Expand(definition, root, masterSeed);
             input = new(1, definition, masterSeed, settings, scenarios);
-            var runner = new TowerBattleRunner(root, new OfflineContent(root, settings.Threat));
+            var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, settings));
             // Validate every generated profile/floor before any battle; child bundles freeze all seeds.
             foreach (var scenario in scenarios)
             {

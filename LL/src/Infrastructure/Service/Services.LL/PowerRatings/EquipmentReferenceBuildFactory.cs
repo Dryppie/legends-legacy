@@ -21,7 +21,9 @@ public sealed record EquipmentReferenceBuildDefinition(
     ItemQuality Quality = ItemQuality.Standard,
     double AttributeRollMultiplier = 1d,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    IReadOnlyList<string>? IdentityEssenceIds = null);
+    IReadOnlyList<string>? IdentityEssenceIds = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<EquipmentReferenceEquipmentSelection>? IdentityEquipment = null);
 
 public sealed record EquipmentReferenceBuild(
     EquipmentReferenceBuildDefinition Definition, Character Character,
@@ -65,8 +67,15 @@ public sealed class EquipmentReferenceBuildFactory(
         if (definition.IdentityEssenceIds is { } identityEssences
             && (identityEssences.Count != essenceIds.Length || identityEssences.Any(string.IsNullOrWhiteSpace)))
             throw new ArgumentException("Identity Essence slots must match the equipped slot count.", nameof(definition));
+        // Gear experiments can retain the reference actors and item/Essence instances.
+        // These selections affect identity only; actual Equipment still drives every stat and legality check.
+        var identityEquipment = definition.IdentityEquipment?.OrderBy(x => x.Slot).ToArray();
+        if (identityEquipment is not null && (identityEquipment.Any(x => string.IsNullOrWhiteSpace(x.DefinitionId))
+            || !identityEquipment.Select(x => x.Slot).SequenceEqual(selections.Select(x => x.Slot))))
+            throw new ArgumentException("Identity equipment must match the occupied reference slots.", nameof(definition));
         var identity = JsonSerializer.Serialize(definition with
-            { EssenceIds = definition.IdentityEssenceIds ?? definition.EssenceIds, IdentityEssenceIds = null });
+            { EssenceIds = definition.IdentityEssenceIds ?? definition.EssenceIds, IdentityEssenceIds = null,
+                Equipment = identityEquipment ?? definition.Equipment, IdentityEquipment = null });
         var character = new Character
         {
             Id = StableRandom.Guid(EquipmentKeys.ReferenceCharacterIdentity, identity),

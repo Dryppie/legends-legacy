@@ -374,19 +374,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             factory);
     }
 
-    private static string FindApiContentRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(directory.FullName, "src", "API", "API.LL");
-            if (Directory.Exists(Path.Combine(candidate, "Data")))
-                return candidate;
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Could not locate API.LL content root.");
-    }
+    private static string FindApiContentRoot() => TestContentPaths.FindApiRoot();
 
     private sealed record TestServices(
         IConfiguration Configuration,

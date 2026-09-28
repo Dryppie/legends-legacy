@@ -22,7 +22,7 @@ public static class TowerDamageSourceAffinities
     {
         if (inventory is null || inventory.SchemaVersion != 1 || inventory.Nodes is null || inventory.Essences is null
             || inventory.SourceHashes is null || inventory.SourceHashes.Values.Any(h => !TowerContractJson.Hash(h))
-            || !inventory.SourceHashes.Keys.Order(StringComparer.Ordinal).SequenceEqual(TowerBossInventory.SourceFiles.Order(StringComparer.Ordinal))
+            || !TowerBossInventory.IsKnownSources(inventory.SourceHashes.Keys)
             || inventory.Nodes.Select(n => n.Key).Distinct(StringComparer.Ordinal).Count() != inventory.Nodes.Count
             || inventory.Essences.Select(e => e.Id).Distinct(StringComparer.Ordinal).Count() != inventory.Essences.Count)
             throw new InvalidDataException("Invalid source-bound affinity inventory.");

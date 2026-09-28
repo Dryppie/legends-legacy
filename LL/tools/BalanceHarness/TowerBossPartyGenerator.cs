@@ -55,7 +55,7 @@ public sealed partial class TowerBossPartyGenerator
             || mechanics.Essences.Select(e => e.Id).Distinct().Count() != mechanics.Essences.Count
             || !mechanics.Essences.Select(e => e.Id).Order(StringComparer.Ordinal).SequenceEqual(input.AllowedEssences.Select(e => e.Id).Order(StringComparer.Ordinal))
             || mechanics.CounterIntents is null || mechanics.CounterIntents.Any(string.IsNullOrWhiteSpace)
-            || mechanics.SourceHashes is null || !mechanics.SourceHashes.Keys.Order().SequenceEqual(TowerBossInventory.SourceFiles.Order())
+            || mechanics.SourceHashes is null || !TowerBossInventory.IsKnownSources(mechanics.SourceHashes.Keys)
             || mechanics.SourceHashes.Any(p => input.ContentHashes.GetValueOrDefault(p.Key) != p.Value)
             || mechanics.Interactions is null)
             throw new InvalidDataException("Generation mechanics must match the frozen target and eligible content.");

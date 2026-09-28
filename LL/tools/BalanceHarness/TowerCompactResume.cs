@@ -206,7 +206,7 @@ public static partial class TowerCompactBundle
         try
         {
             var root = ContentRoot(output, plan.SharedContentPath);
-            await ContinueAsync(output, d, new(root, new OfflineContent(root, settings.Threat)), settings, mode,
+            await ContinueAsync(output, d, new(root, OfflineContent.ForTower(root, settings)), settings, mode,
                 completed, committedChunks, token, progress, (count, chunks) => { completed = count; committedChunks = chunks; }, beforeAttempt);
             Complete(output, Validate(d), completed, committedChunks, token);
         }

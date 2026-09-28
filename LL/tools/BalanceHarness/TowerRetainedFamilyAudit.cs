@@ -145,7 +145,7 @@ public static class TowerRetainedFamilyAudit
             var reference = materialized.Variant.Cells.ToDictionary(c => c.Id);
             var required = d.Cells.ToDictionary(c => Identity(c.Scenario).CellHash, c => (c.Id, reference[c.Id].ParticipantsHash));
             var contentRoot = Path.Combine(request.MidpointRoot, "materialized/content"); var settings = TowerBundle.ReadSettings(contentRoot);
-            var content = new OfflineContent(contentRoot, settings.Threat); var runner = new TowerBattleRunner(contentRoot, content);
+            var content = OfflineContent.ForTower(contentRoot, settings); var runner = new TowerBattleRunner(contentRoot, content);
             var probe = d.Cells[0].Scenario.Seeds[0]; // Existing reserved value, preparation only. Never allocate a schedule.
             TowerRetainedAuditResult result;
             using (TowerPerformanceTrace.Measure("audit.materialize-all"))

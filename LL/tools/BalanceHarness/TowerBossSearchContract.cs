@@ -53,7 +53,7 @@ public static partial class TowerBossSearch
         var controls = historical.WholeParty!.Controls.Select(p => TowerPartySelection.Choice(p.Source,
             TowerWholeParty.Deploy(p.Builds, p.Builds, "repeat", mutable.Length))).DistinctBy(p => p.Id).ToArray();
         int Seed(string label) => StableRandom.Seed(Version, seed.ToString(CultureInfo.InvariantCulture), label);
-        var content = new OfflineContent(root, TowerBundle.ReadSettings(root).Threat);
+        var content = OfflineContent.ForTower(root, TowerBundle.ReadSettings(root));
         var contexts = BuildContexts(root, catalogs, budget, mutable);
         var aliases = Aliases(contexts, controls[0]);
         var counts = aliases.GroupBy(a => a.Floor).ToDictionary(g => g.Key, g => g.Select(a => a.EvaluatedContext).Distinct().Count());

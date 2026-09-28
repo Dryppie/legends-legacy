@@ -93,7 +93,7 @@ public static partial class TowerProposalStudy
     {
         Require(inputs.Context.Scope.ExecutionHash == HarnessJson.Hash(ExecutionIdentity.Current()), "Use the qualified producing runtime.");
         Require(HarnessJson.Hash(TowerCompactBundle.ContentHashes(content, ct)) == HarnessJson.Hash(inputs.Context.Scope.ContentHashes), "Changed captured content.");
-        var inventory = TowerBossInventory.Create(content, inputs.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(content, inputs.Settings);
         Require(HarnessJson.Hash(inventory) == HarnessJson.Hash(inputs.Context.DamageAffinityInventory), "Changed full affinity inventory.");
         var mechanics = TowerBossPartyGenerator.FromInventory(TowerBossDiscovery.CopyGenerationInputs(inputs.Context.Scope), inventory);
         Require(HarnessJson.Hash(mechanics) == HarnessJson.Hash(inputs.Context.Mechanics), "Changed native generation mechanics.");

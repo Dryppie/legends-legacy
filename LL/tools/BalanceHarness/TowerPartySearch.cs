@@ -134,7 +134,7 @@ public static class TowerPartySearch
             var contexts = TowerPartySelection.Targets(d).Prepend(0).ToDictionary(slot => slot, slot => Contexts(frozen, catalogs, slot, d));
             HarnessJson.WriteNew(Path.Combine(output, "contexts.json"), contexts);
             HarnessJson.WriteNew(Path.Combine(output, "seed-ledger.json"), Ledger(d));
-            var validator = new TowerBattleRunner(frozen, new OfflineContent(frozen, settings.Threat));
+            var validator = new TowerBattleRunner(frozen, OfflineContent.ForTower(frozen, settings));
             foreach (var scenario in contexts.Values.SelectMany(c => c.Values).SelectMany(s => s))
                 await validator.PrepareAsync(validator.CreateInput(scenario, scenario.Seeds[0], settings.Threat, settings.CheckpointIntervalTicks), token);
             archive = new(output, scope, d.MaximumBattles);
@@ -187,7 +187,7 @@ public static class TowerPartySearch
         ValidateContexts(contexts, d);
         Snapshot("contexts.json", TowerPartySelection.Targets(d).Prepend(0).ToDictionary(slot => slot,
             slot => Contexts(root, Path.Combine(output, "catalogs"), slot, d)));
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         var index = 0;
         var proposals = new Dictionary<string, List<LoadoutProposal>>();
         var rebuilt = await Execute(d, contexts, mechanics.Essences.ToDictionary(e => e.Id, e => e.SourceMonsterId),

@@ -19,7 +19,8 @@ public static class TowerBalanceRuns
             var saved = TowerBundle.ReadSaved(directory, token);
             var first = saved.Inputs[0];
             var contentRoot = Path.Combine(directory, "content");
-            var runner = new TowerBattleRunner(contentRoot, new OfflineContent(contentRoot, first.ThreatAndTanking));
+            var settings = new TowerSettings(first.ThreatAndTanking, first.CheckpointIntervalTicks, first.Balance);
+            var runner = new TowerBattleRunner(contentRoot, OfflineContent.ForTower(contentRoot, settings));
             var expected = runner.CreateInput(first.Scenario, first.Rules.RandomSeed, first.ThreatAndTanking, first.CheckpointIntervalTicks);
             // Reconstruct the seed-independent preparation once. The remaining inputs
             // must match it exactly, apart from their declared random seed.
@@ -31,7 +32,7 @@ public static class TowerBalanceRuns
                     throw new InvalidDataException("Saved Tower preparation or rules differ from the frozen production recipe.");
             }
             return new(cellId, saved.Scorecard.Status, HarnessJson.Hash(first.Scenario), HarnessJson.Hash(saved.Manifest.ContentHashes),
-                HarnessJson.Hash(new TowerSettings(first.ThreatAndTanking, first.CheckpointIntervalTicks)),
+                HarnessJson.Hash(settings),
                 HarnessJson.Hash(saved.Manifest.Execution), first.Floor.RequiredSlots,
                 saved.Scorecard.Trials.Select(t => new TowerBalanceTrial(t.Seed, t.Report.Battle.Summary.ContentOutcome)).ToArray(),
                 HarnessJson.Hash(new { saved.Manifest, Results = HarnessJson.Read<Dictionary<string, string>>(Path.Combine(directory, "tower-results.json")) }));

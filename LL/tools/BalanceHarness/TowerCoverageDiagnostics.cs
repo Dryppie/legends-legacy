@@ -88,7 +88,7 @@ public static class TowerCoverageDiagnostics
         var discoveryDefinition = discovery[0].Value.Definition.Deserialize<TowerBossDiscoveryDefinition>(HarnessJson.Options)!;
         var inputs = TowerBossDiscovery.GenerationInputs(discoveryDefinition); // Detached metadata only; no generator construction.
         var contentRoot = Path.Combine(archiveRoots[discovery[0].Key], "content");
-        var inventory = TowerBossInventory.Create(contentRoot, discovery[0].Value.Scope.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(contentRoot, discovery[0].Value.Scope.Settings);
         var baseline = TowerAttributeDefense.Create(inputs, inventory);
         var compatible = TowerProtectionCompatibility.Create(inputs, inventory);
         var routes = TowerCoverageDiagnosticMechanics.Routes(inventory, baseline, compatible.Coverage);

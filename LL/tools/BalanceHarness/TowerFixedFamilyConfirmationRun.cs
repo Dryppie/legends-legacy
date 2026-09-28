@@ -100,7 +100,7 @@ public static partial class TowerFixedFamilyConfirmation
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(ct); stop.CancelAfter(TimeSpan.FromSeconds(q.Version == NeighborhoodRecognitionVersion ? 1800 : (q.Version == ThreeReferenceVersion || IsRecognition(q.Version) ? 600 : q.Phases["admission"].Seconds)));
         using var guard = new TowerPerformanceTrace(_ => throw new InvalidOperationException("Admission cannot fight.")).Activate();
         var input = Inspect(q, stop.Token); var settings = TowerBundle.ReadSettings(q.ContentRoot);
-        var runner = new TowerBattleRunner(q.ContentRoot, new OfflineContent(q.ContentRoot, settings.Threat));
+        var runner = new TowerBattleRunner(q.ContentRoot, OfflineContent.ForTower(q.ContentRoot, settings));
         foreach (var team in input.Definition.Teams)
         {
             var scenario = team.Scenario with { Seeds = new[] { 0 } };

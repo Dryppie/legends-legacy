@@ -117,6 +117,7 @@ public static class DependencyInjection
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentUpgradeRepository, EquipmentUpgradeRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentMigrationRepository, EquipmentMigrationRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentStartupConversionRepository, EquipmentStartupConversionRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentBlueprintRepository, EquipmentBlueprintRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IStarterEquipmentRepository, StarterEquipmentRepository>();
         services.AddScoped<IEssenceRepository, EssenceRepository>();

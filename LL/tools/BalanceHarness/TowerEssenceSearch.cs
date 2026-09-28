@@ -100,12 +100,7 @@ public static class TowerEssenceSearch
             var source = Path.Combine(output, "source");
             TowerBundle.CopyContent(apiRoot, source, token);
             var settings = TowerBundle.ReadSettings(apiRoot);
-            HarnessJson.WriteNew(Path.Combine(source, "appsettings.json"), new Dictionary<string, object>
-            {
-                ["Combat"] = new Dictionary<string, object> { ["ThreatAndTanking"] = settings.Threat,
-                    ["IdleProgression"] = new Dictionary<string, object> { ["EncounterCadenceSeconds"] = 1 } },
-                ["WorldTower"] = new Dictionary<string, object> { ["CombatTicksPerFrame"] = settings.CheckpointIntervalTicks }
-            });
+            TowerBundle.WriteSettings(Path.Combine(source, "appsettings.json"), settings, 1);
             var discoveryScenarios = TowerBenchmark.Expand(candidates, source, search.DiscoverySeed);
             var heldOut = TowerBenchmark.Expand(candidates with { Parties = [candidates.Parties[0]] }, source, search.ConfirmationSeed, search.ConfirmationSamples);
             if (discoveryScenarios.SelectMany(s => s.Seeds).Intersect(heldOut.SelectMany(s => s.Seeds)).Any())

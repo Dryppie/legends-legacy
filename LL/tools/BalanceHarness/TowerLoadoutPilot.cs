@@ -246,7 +246,7 @@ public static class TowerLoadoutPilot
                 Note = "Confirmation is unused until global selection.json is saved. Search-seed restarts share discovery combat seeds; do not pool them as independent samples." });
             var cohorts = TowerLoadoutReliability.Contexts(definition, frozen, catalogs);
             HarnessJson.WriteNew(Path.Combine(output, "contexts.json"), cohorts);
-            var validator = new TowerBattleRunner(frozen, new OfflineContent(frozen, settings.Threat));
+            var validator = new TowerBattleRunner(frozen, OfflineContent.ForTower(frozen, settings));
             foreach (var scenario in cohorts.Values.SelectMany(s => s))
                 await validator.PrepareAsync(validator.CreateInput(scenario, scenario.Seeds[0], settings.Threat, settings.CheckpointIntervalTicks), token);
             archive = new(output, scope, definition.MaximumBattles);

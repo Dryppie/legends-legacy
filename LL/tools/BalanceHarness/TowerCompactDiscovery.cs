@@ -19,7 +19,7 @@ public static class TowerCompactDiscovery
         using var campaign = TowerBulkCampaign.Open(root, output, Kind, d, d.ContentHashes, d.SettingsHash, d.ExecutionHash,
             cost.Discovery, d.MaximumBattles, options, resume, verifyOnly, token, progress);
         var inputs = TowerBossImprovement.Inputs(d);
-        var inventory = TowerBossInventory.Create(campaign.Root, campaign.Contract.Scope.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(campaign.Root, campaign.Contract.Scope.Settings);
         var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
         campaign.Result("generation-inputs.json", inputs);
         campaign.Result("generation-mechanics.json", mechanics);

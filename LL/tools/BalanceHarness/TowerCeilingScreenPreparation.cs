@@ -138,7 +138,7 @@ public static class TowerCeilingScreenPreparation
                     if ((ordinal == 0 || name != TowerBattleRunner.FloorFile) && hashes[name] != hash) throw new InvalidDataException("Unexpected content change: " + name);
                 var settings = TowerBundle.ReadSettings(contentRoot);
                 if (HarnessJson.Hash(settings) != captured.SettingsHash) throw new InvalidDataException("Settings differ.");
-                var runner = new TowerBattleRunner(contentRoot, new OfflineContent(contentRoot, settings.Threat));
+                var runner = new TowerBattleRunner(contentRoot, OfflineContent.ForTower(contentRoot, settings));
                 var directory = Path.Combine(output, variant.Id); Directory.CreateDirectory(directory);
                 var template = TowerCeilingScreenContract.Template(captured, variant.Id, hashes, captured.SettingsHash, HarnessJson.Hash(ExecutionIdentity.Current()));
                 // Include the entire unchanged exclusion ledger even though templates have no executable seeds.

@@ -16,6 +16,10 @@ public static class Program
                 return await AttributeAllocationStudy.RunAsync(HarnessJson.Read<AttributeAllocationRequest>(attributeRequest), cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-affinity-search-", StringComparison.Ordinal))
                 return await TowerAffinitySearch.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0] == "tower-gear-profile-apply")
+                return TowerGearProfiles.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0] == "tower-progression-budget-preview")
+                return await TowerProgressionPreview.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-proposal-study-", StringComparison.Ordinal))
                 return await TowerProposalStudy.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-proposal-racing-", StringComparison.Ordinal))
@@ -92,6 +96,7 @@ public static class Program
                 return await TowerCeilingScreenCommand.ExecuteAsync(args, cancellation.Token);
             if (args.Length == 0 || args[0] is "--help" or "-h")
             {
+                Console.WriteLine("BalanceHarness tower-progression-budget-preview <draft.json> <content-root> <fixtures-root> <gear-profiles.json> <new-preview.json> (prepare provisional floors 1–11 and whole-party upgrade costs; zero combat)");
                 Console.WriteLine("BalanceHarness tower-reference-exploration-comparison-check <request.json>; tower-reference-exploration-comparison-verify <completed-output> (12 paired searches, shared controls; owned build/run-reference-exploration-comparison.py; no retry/resume/default change)");
                 Console.WriteLine("BalanceHarness tower-incumbent-tie-comparison-check <request.json>; tower-incumbent-tie-comparison-verify <completed-output> (24 shared searches; versioned two/three-reference selectors; run through build/run-incumbent-tie-comparison.py or build/run-three-reference-tie-comparison.py; no retry/resume/default change)");
                 Console.WriteLine("BalanceHarness tower-fixed-team-confirmation-check|run <request.json>; tower-fixed-team-confirmation-verify <completed-output> (three exact teams; 5500 paired trials; family-seven strength gate; one entropy batch; no retry/replay/resume)");
@@ -617,7 +622,7 @@ public static class Program
                 if (command == "tower-boss-inventory")
                 {
                     if (Path.Exists(output)) throw new IOException("Choose a new inventory directory.");
-                    var inventory = TowerBossInventory.Create(contentRoot, TowerBundle.ReadSettings(contentRoot).Threat);
+                    var inventory = TowerBossInventory.CreateForTower(contentRoot, TowerBundle.ReadSettings(contentRoot));
                     Directory.CreateDirectory(output);
                     HarnessJson.WriteNew(Path.Combine(output, "boss-profiles.json"), inventory);
                     File.WriteAllText(Path.Combine(output, "boss-profiles.md"), TowerBossInventory.Markdown(inventory));

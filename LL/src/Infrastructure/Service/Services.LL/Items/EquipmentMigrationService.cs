@@ -9,8 +9,25 @@ namespace Services.LL.Items;
 public sealed class EquipmentMigrationService(IEquipmentMigrationRepository repository,
     EquipmentMigrationCatalog catalog, IGameEventOutbox outbox,
     TimeProvider time, IEquipmentUpgradeRepository upgrades, ICombatStyleMutationBoundary? boundary = null,
-    Domain.Models.Attributes.AttributeRulesSelection? liveRules = null) : IEquipmentMigrationService
+    Domain.Models.Attributes.AttributeRulesSelection? liveRules = null,
+    IEquipmentStartupConversionRepository? startup = null) : IEquipmentMigrationService
 {
+    public async Task<bool> ConvertOnStartupAsync(Guid operationId, EquipmentMigrationTarget target, int targetBalanceVersion, CancellationToken ct)
+    {
+        var conversion = startup ?? throw new InvalidOperationException("Startup conversion repository is required.");
+        await conversion.LockCharactersAsync(target, ct);
+        var current = await repository.LoadAsync(target, true, ct);
+        if (current?.State.BalanceVersion >= targetBalanceVersion
+            || !await conversion.IsCandidateAsync(target, targetBalanceVersion, ct)) return false;
+
+        // This deployment path deliberately leaves scheduled combat alone. The preview, item,
+        // receipt and invalidations are all protected by the same command transaction.
+        var preview = await PreviewAsync(target, null, ct, targetBalanceVersion);
+        await ApplyCoreAsync(operationId, target, preview.SourceHash, preview.After.State.DefinitionId,
+            $"startup-equipment-release-{targetBalanceVersion}", ct, targetBalanceVersion, preview.ResultHash, false);
+        return true;
+    }
+
     public async Task<EquipmentMigrationChoice?> GetChoiceAsync(Guid characterId, Guid itemId, CancellationToken ct)
     {
         if (liveRules?.Version == Domain.Models.Attributes.AttributeRules.LegacyVersion) return null;
@@ -53,14 +70,19 @@ public sealed class EquipmentMigrationService(IEquipmentMigrationRepository repo
         || (previous is { RespecializationAllowance: > 0, ChoiceUsedAtUtc: null }
             && proposal.Before?.State.ActiveStyleId == EquipmentData.Deserialize(previous.AfterJson).State.ActiveStyleId) ? 1 : 0;
 
-    public async Task<EquipmentMigrationReceipt> ApplyAsync(Guid operationId, EquipmentMigrationTarget target,
+    public Task<EquipmentMigrationReceipt> ApplyAsync(Guid operationId, EquipmentMigrationTarget target,
         string sourceHash, string definitionId, string actorId, CancellationToken ct,
-        int? targetBalanceVersion = null, string? expectedResultHash = null)
+        int? targetBalanceVersion = null, string? expectedResultHash = null) =>
+        ApplyCoreAsync(operationId, target, sourceHash, definitionId, actorId, ct, targetBalanceVersion, expectedResultHash, true);
+
+    private async Task<EquipmentMigrationReceipt> ApplyCoreAsync(Guid operationId, EquipmentMigrationTarget target,
+        string sourceHash, string definitionId, string actorId, CancellationToken ct,
+        int? targetBalanceVersion, string? expectedResultHash, bool prepareCombat)
     {
         if (operationId == Guid.Empty || string.IsNullOrWhiteSpace(actorId)) throw new InvalidOperationException("An operation and actor are required.");
         var completed = await repository.GetReceiptAsync(operationId, ct);
         if (completed is not null) return MatchReceipt(completed, target, sourceHash, definitionId, targetBalanceVersion, expectedResultHash);
-        await PrepareAsync(target, ct);
+        if (prepareCombat) await PrepareAsync(target, ct);
         // Lock before rechecking the idempotency key, including unversioned imports.
         await repository.LoadAsync(target, true, ct);
         var existing = await repository.GetReceiptAsync(operationId, ct);

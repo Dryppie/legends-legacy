@@ -59,6 +59,30 @@ public sealed class BalanceHarnessTowerLoadoutFoundationTests
     }
 
     [Fact]
+    public void Gear_identity_pin_preserves_instances_while_actual_gear_controls_stats_and_legality()
+    {
+        var recipe = Definition.Contexts[0].Scenario.Party[0].Build;
+        var content = OfflineContent.ForTower(Root, TowerBundle.ReadSettings(Root));
+        var original = content.CreateBuild(recipe);
+        var pinned = content.CreateBuild(recipe with { IdentityEquipment = recipe.Equipment.Reverse().ToArray() });
+        Assert.Equal(HarnessJson.Hash(FixtureCharacter.From(original)), HarnessJson.Hash(FixtureCharacter.From(pinned)));
+        var weapon = recipe.Equipment.Single(e => e.Slot == Domain.Models.Items.Equipments.Slots.EquipmentSlotType.MainHand);
+        var definition = content.Equipment.Evaluator.GetDefinition(weapon.DefinitionId);
+        var changedRecipe = recipe with { IdentityEquipment = recipe.Equipment, Equipment = recipe.Equipment.Select(e => e == weapon
+            ? e with { DefinitionId = definition.ArchetypeId + ".spec.haste.rarity." + definition.Rarity.ToString().ToLowerInvariant() } : e).ToArray() };
+        var changed = content.CreateBuild(changedRecipe);
+        Assert.Equal(original.Character.Id, changed.Character.Id);
+        Assert.Equal(original.Equipment.Select(e => e.Id), changed.Equipment.Select(e => e.Id));
+        Assert.Equal(original.EquippedEssences.Select(e => e.Id), changed.EquippedEssences.Select(e => e.Id));
+        Assert.Equal(original.EquippedEssences.Select(e => e.EssenceDefinitionId), changed.EquippedEssences.Select(e => e.EssenceDefinitionId));
+        Assert.NotEqual(HarnessJson.Hash(FixtureCharacter.From(original).Equipment), HarnessJson.Hash(FixtureCharacter.From(changed).Equipment));
+        Assert.NotEqual(original.Character.Id, content.CreateBuild(changedRecipe with { IdentityEquipment = null }).Character.Id);
+        Assert.Throws<ArgumentException>(() => content.CreateBuild(recipe with { IdentityEquipment = [] }));
+        Assert.Throws<ArgumentException>(() => content.CreateBuild(changedRecipe with { Equipment = changedRecipe.Equipment.Select(e => e == changedRecipe.Equipment[0]
+            ? e with { DefinitionId = "unknown" } : e).ToArray() }));
+    }
+
+    [Fact]
     public void Ordered_candidates_have_scoped_identity_and_record_pins_and_family_rejections()
     {
         var context = Definition.Contexts[0];

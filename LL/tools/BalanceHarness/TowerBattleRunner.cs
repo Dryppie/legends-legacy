@@ -26,7 +26,9 @@ public sealed record TowerScenario(int SchemaVersion, string Id, int FloorNumber
 public sealed record TowerPartyMember(int PartySlot, int PartyNumber, FixtureCharacter Character);
 public sealed record TowerBattleInput(int SchemaVersion, TowerScenario Scenario, TowerFloorDefinition Floor,
     JsonElement Guardian, IReadOnlyList<TowerPartyMember> Party, ThreatAndTankingOptions ThreatAndTanking,
-    int CheckpointIntervalTicks, CombatRuleset Rules);
+    int CheckpointIntervalTicks, CombatRuleset Rules,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    TowerBalanceSelection? Balance = null);
 public sealed record TowerBattleReport(BattleReport Battle, bool Succeeded, decimal GuardianHealthRemainingPercent,
     int DisplayDurationSeconds);
 public sealed record TowerObservedBattle(TowerBattleReport Battle, CombatMechanicTrace Diagnostics);
@@ -66,7 +68,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         if (guardian.ValueKind == JsonValueKind.Undefined)
             throw new InvalidDataException("Tower guardian is missing from content.");
         return new(1, scenario, floor, guardian, party, threat, checkpointIntervalTicks,
-            new(seed, MaxTicks: 6000, StartActiveAbilitiesOnCooldown: true, CaptureEventLog: false));
+            new(seed, MaxTicks: 6000, StartActiveAbilitiesOnCooldown: true, CaptureEventLog: false), content.Balance);
     }
 
     public async Task<CombatEncounterRuntime> PrepareAsync(TowerBattleInput input, CancellationToken token = default)
@@ -158,7 +160,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         return new()
         {
             Id = id, CharacterId = fixture.Id, Name = fixture.Name, Level = fixture.Level,
-            AttributeRulesVersion = content.Equipment.Evaluator.Balance.AttributeVersion,
+            AttributeRulesVersion = content.AttributeRulesVersion,
             CombatStyle = fixture.CombatStyle,
             BaseAttributes = character.BaseAttributes.Select(a => new EntityAttributeSnapshot
                 { CharacterSnapshotId = id, AttributeType = a.AttributeType, Value = a.Value }).ToArray(),

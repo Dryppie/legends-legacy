@@ -18,7 +18,7 @@ public sealed partial class TowerDashboardService
     private (string Path, string Hash, string Json)? _studyRead;
     public static bool IsStudy(string path) => File.Exists(Path.Combine(path, "study.json"));
 
-    public object StudyOptions() => new { Pool = new OfflineContent(apiRoot, TowerBundle.ReadSettings(apiRoot).Threat).Essences.GetAll()
+    public object StudyOptions() => new { Pool = OfflineContent.ForTower(apiRoot, TowerBundle.ReadSettings(apiRoot)).Essences.GetAll()
         .OrderBy(e => e.Id, StringComparer.Ordinal).Select(e => new { e.Id, e.Name, Family = e.SourceMonsterId }).ToArray(),
         Note = "Compatible saved builds are included as benchmark controls. New teams are generated independently for every character. Import additional historical seed exclusions for campaigns outside the configured results folder." };
 

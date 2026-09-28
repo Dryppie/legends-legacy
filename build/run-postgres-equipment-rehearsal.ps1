@@ -37,7 +37,7 @@ try {
     $started = $true
     $env:LL_REHEARSAL_POSTGRES_CONNECTION = "Host=127.0.0.1;Port=$Port;Database=postgres;Username=postgres;Password=$password"
     $env:LL_TEST_API_ROOT = Join-Path $repository "LL/src/API/API.LL"
-    & (Join-Path $repository "build/run-tests.ps1") -Filter "FullyQualifiedName~EquipmentPostgresRehearsalTests" `
+    & (Join-Path $repository "build/run-tests.ps1") -Filter "FullyQualifiedName~EquipmentPostgresRehearsalTests|FullyQualifiedName~EquipmentStartupPostgresRehearsalTests" `
         -ArtifactsPath (Join-Path $rehearsalRoot "build")
 }
 finally {

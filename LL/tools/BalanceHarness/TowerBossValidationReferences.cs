@@ -70,7 +70,7 @@ public static class TowerBossValidationReferences
         var executionMatches = HarnessJson.Hash(provenance.Scope.Execution) == HarnessJson.Hash(execution ?? ExecutionIdentity.Current());
         settings ??= File.Exists(Path.Combine(root, "appsettings.json")) ? TowerBundle.ReadSettings(root) : null;
         bool? settingsMatch = settings is null ? null : HarnessJson.Hash(settings) == HarnessJson.Hash(provenance.Scope.Settings);
-        var families = new OfflineContent(root, (settings ?? provenance.Scope.Settings).Threat).Essences.GetAll()
+        var families = OfflineContent.ForTower(root, (settings ?? provenance.Scope.Settings)).Essences.GetAll()
             .ToDictionary(e => e.Id, e => e.SourceMonsterId, StringComparer.Ordinal);
         if (catalog.Evidence.Any(row => row.TargetRecipe.Party.Any(member => member.Build.EssenceIds.Any(id => !families.ContainsKey(id))
             || member.Build.EssenceIds.Select(id => families[id]).Distinct(StringComparer.OrdinalIgnoreCase).Count() != catalog.Budget.EssenceSlots)))

@@ -47,13 +47,27 @@ public static class TowerBossInventory
     ["world-tower/tower-floors.json", "world/creatures.json", "combat/creature-abilities.json",
         "combat/abilities.json", "combat/statuses.json", "combat/summons.json", "essences/essences.json"];
 
-    public static TowerBossInventoryReport Create(string root, ThreatAndTankingOptions threat)
+    internal static bool IsKnownSources(IEnumerable<string> files)
     {
-        var provider = TowerContentProviders.Abilities(new ConfigurationBuilder().Build(), root, HarnessJson.Options, threat);
+        var actual = files.Order(StringComparer.Ordinal).ToArray();
+        return actual.SequenceEqual(SourceFiles.Order(StringComparer.Ordinal))
+            || actual.SequenceEqual(SourceFiles.Append("combat/ability-balance.healing-v1.json").Order(StringComparer.Ordinal));
+    }
+
+    public static TowerBossInventoryReport Create(string root, ThreatAndTankingOptions threat)
+        => CreateForTower(root, new(threat, 10));
+
+    public static TowerBossInventoryReport CreateForTower(string root, TowerSettings settings)
+    {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+            ["Combat:AbilityBalanceProfile"] = settings.Balance?.AbilityBalanceProfile,
+            ["AttributeRedesign:LiveVersion"] = settings.Balance?.AttributeRulesVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        }).Build();
+        var provider = TowerContentProviders.Abilities(config, root, HarnessJson.Options, settings.Threat);
         _ = provider.GetCompiledCatalog(); // Production validation/compiler, including cooldown/trigger and reference rules.
         var catalog = provider.GetCatalog();
         var graph = new Graph(catalog);
-        var content = new OfflineContent(root, threat);
+        var content = OfflineContent.ForTower(root, settings);
         var essences = content.Essences.GetAll().OrderBy(e => e.Id, StringComparer.Ordinal).Select(e =>
         {
             var ids = new[] { e.ActiveAbility.Id, e.PassiveAbility.Id };
@@ -102,7 +116,9 @@ public static class TowerBossInventory
                  "Phase timing, barrier waste, boss healing caused by each recovery path and deaths prevented require separate diagnostic trials."],
                 CounterIntents(signals));
         }).ToArray();
-        return new(1, SourceFiles.ToDictionary(p => p, p => HarnessJson.FileHash(Path.Combine(root, "Data", p))),
+        var files = settings.Balance?.AbilityBalanceProfile is { Length: > 0 } profile
+            ? SourceFiles.Append(JsonAbilityCatalogProvider.ProfileRelativePath(profile).Replace('\\', '/')) : SourceFiles;
+        return new(1, files.ToDictionary(p => p, p => HarnessJson.FileHash(Path.Combine(root, "Data", p))),
             bosses, essences, graph.Nodes.Values.OrderBy(n => n.Key, StringComparer.Ordinal).ToArray(),
             graph.References.OrderBy(r => r.SourceKey, StringComparer.Ordinal).ThenBy(r => r.Field, StringComparer.Ordinal)
                 .ThenBy(r => r.TargetKey, StringComparer.Ordinal).ToArray(),

@@ -9,10 +9,10 @@ public static class AttributeCatalog
                 "Increases active ability frequency: cooldown / (1 + haste / 100). Does not affect passive internal cooldowns.",
                 AttributeRules.AbilityHasteCap, Scenarios(AttributeBenchmarkScenario.PhysicalOffense, AttributeBenchmarkScenario.HealingSustain)),
             [AttributeType.Tenacity] = Percent(AttributeType.Tenacity, "Tenacity",
-                "Chance to ignore each incoming harmful condition or status, up to 80%. Effects that land retain their full duration and strength. Does not affect beneficial effects, boss Stagger or guaranteed applications.",
+                "Chance to ignore each incoming harmful condition or status, up to 80%.",
                 AttributeRules.TenacityCap, Scenarios(AttributeBenchmarkScenario.StatusResilience, AttributeBenchmarkScenario.CrowdControlResilience)),
             [AttributeType.Restoration] = Percent(AttributeType.Restoration, "Restoration",
-                "Increases authored healing and barriers. Does not increase regeneration, life steal, transfers or health-cost refunds.",
+                "Increases healing and barriers. Does not increase regeneration or life steal.",
                 AttributeCombatRules.HealingPowerCapPercent, Scenarios(AttributeBenchmarkScenario.HealingSustain)),
             [AttributeType.ArmorRating] = Rating(AttributeType.ArmorRating, "Normalized Armor",
                 "Finite physical defense rating after normalizing each item's rating by its own tier. Physical reduction = 80 × rating / (rating + 165).",
@@ -43,21 +43,21 @@ public static class AttributeCatalog
             [AttributeType.Armor] = Percent(
                 AttributeType.Armor,
                 "Physical Damage Reduction",
-                "Effective physical damage reduction derived from the character's combined Armor rating.",
+                "Physical damage reduction based on Armor rating.",
                 AttributeCombatRules.TypedMitigationCapPercent,
                 Scenarios(AttributeBenchmarkScenario.PhysicalPressure, AttributeBenchmarkScenario.MixedPressure),
                 "Armor Rating",
-                "Armor rating. The character's combined Armor determines effective physical damage reduction.",
+                "Armor rating. The character's Armor determines physical damage reduction.",
                 AttributeUnit.Rating,
                 string.Empty),
             [AttributeType.Resistance] = Percent(
                 AttributeType.Resistance,
                 "Magical Damage Reduction",
-                "Effective magical damage reduction derived from the character's combined Resistance rating.",
+                "Magical damage reduction based on Resistance rating.",
                 AttributeCombatRules.TypedMitigationCapPercent,
                 Scenarios(AttributeBenchmarkScenario.MagicalPressure, AttributeBenchmarkScenario.MixedPressure),
                 "Resistance Rating",
-                "Resistance rating. The character's combined Resistance determines effective magical damage reduction.",
+                "Resistance rating. The character's Resistance determines magical damage reduction.",
                 AttributeUnit.Rating,
                 string.Empty),
             [AttributeType.CritChance] = Percent(
@@ -227,7 +227,7 @@ public static class AttributeCatalog
             && attributeType is AttributeType.ArmorPenetration or AttributeType.MagicPenetration)
         {
             var damageType = attributeType == AttributeType.ArmorPenetration ? "physical" : "magical";
-            var description = $"Subtracts percentage points from the target's {damageType} damage reduction after defense and Corrosion, down to zero. Capped at 40 points; block and general damage reduction are unaffected.";
+            var description = $"Flat decrease to the target's {damageType} damage reduction after defense and Corrosion, down to zero. Block and general damage reduction are unaffected.";
             definition = definition with { MaximumValue = AttributeRules.TypedPenetrationCap,
                 Description = description, EquipmentDescription = description };
         }

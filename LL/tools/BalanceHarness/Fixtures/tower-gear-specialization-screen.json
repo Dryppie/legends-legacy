@@ -1,0 +1,41 @@
+{
+  "version": "tower-gear-specialization-screen-v1",
+  "profiles": [
+    {
+      "id": "precision",
+      "description": "Precision weapons and rings on every character.",
+      "partySlots": [],
+      "specializations": { "MainHand": "precision", "Ring": "precision" }
+    },
+    {
+      "id": "ability-haste",
+      "description": "Haste weapons on every character; all other equipment unchanged.",
+      "partySlots": [],
+      "specializations": { "MainHand": "haste" }
+    },
+    {
+      "id": "restorer-specialization",
+      "description": "Restoration specializations on the three authored Restorer positions.",
+      "partySlots": [2, 7, 12],
+      "specializations": { "MainHand": "restoration", "Head": "restoration", "Chest": "restoration", "Ring": "restoration", "Necklace": "restoration", "Relic": "restoration" }
+    },
+    {
+      "id": "armor-and-health",
+      "description": "Armor specialization on head, chest and legs; health necklaces throughout the party.",
+      "partySlots": [],
+      "specializations": { "Head": "armor", "Chest": "armor", "Legs": "armor", "Necklace": "health" }
+    },
+    {
+      "id": "resistance-and-health",
+      "description": "Resistance specialization on head, chest and legs; health necklaces throughout the party.",
+      "partySlots": [],
+      "specializations": { "Head": "resistance", "Chest": "resistance", "Legs": "resistance", "Necklace": "health" }
+    },
+    {
+      "id": "health-and-regeneration",
+      "description": "Regeneration heads and health chests/necklaces throughout the party.",
+      "partySlots": [],
+      "specializations": { "Head": "regeneration", "Chest": "health", "Necklace": "health" }
+    }
+  ]
+}

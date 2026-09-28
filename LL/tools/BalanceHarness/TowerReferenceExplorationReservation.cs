@@ -108,7 +108,7 @@ public static partial class TowerReferenceExplorationComparison
             var labels = Enumerable.Range(int.MinValue, AssignedCount(q.Version)).ToArray();
             var bound = Bind(d with { ExcludedCombatSeeds = [] }, labels, 0, false, q.Version);
             var mechanics = TowerBossPartyGenerator.FromInventory(TowerBossImprovement.Inputs(bound),
-                TowerBossInventory.Create(q.ContentRoot, TowerBundle.ReadSettings(q.ContentRoot).Threat));
+                TowerBossInventory.CreateForTower(q.ContentRoot, TowerBundle.ReadSettings(q.ContentRoot)));
             _ = TowerAdaptiveRacingComparison.Bind(bound, new(q.Version, "", "", labels, [], 0, 0), 0, mechanics);
         }
         // Include dependencies outside ExecutionIdentity's five gameplay assemblies in the capture check.

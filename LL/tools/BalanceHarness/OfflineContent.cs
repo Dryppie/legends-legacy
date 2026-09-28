@@ -35,20 +35,31 @@ public sealed class OfflineContent
 
     public StarterEquipmentCatalog Equipment { get; }
     public JsonEssenceDefinitionRepository Essences { get; }
+    public int AttributeRulesVersion { get; }
+    internal TowerBalanceSelection? Balance { get; private init; }
+
+    public static OfflineContent ForTower(string root, TowerSettings settings) => new(root, settings.Threat,
+        equipmentBalanceVersion: settings.Balance?.EquipmentBalanceVersion,
+        abilityBalanceProfile: settings.Balance?.AbilityBalanceProfile,
+        attributeRulesVersion: settings.Balance?.AttributeRulesVersion) { Balance = settings.Balance };
 
     public OfflineContent(string root, ThreatAndTankingOptions threat, bool allowFutureProjection = false, int? equipmentBalanceVersion = null,
-        string? abilityBalanceProfile = null)
+        string? abilityBalanceProfile = null, int? attributeRulesVersion = null)
     {
         using var timing = TowerPerformanceTrace.Measure("content.load");
         _root = root;
         _allowFutureProjection = allowFutureProjection;
         var equipmentPath = Path.Combine(root, "Data", "equipment", "equipment-starters.v1.json");
-        Equipment = equipmentBalanceVersion.HasValue ? JsonStarterEquipmentCatalog.Load(equipmentPath, equipmentBalanceVersion.Value)
+        Equipment = equipmentBalanceVersion.HasValue ? JsonStarterEquipmentCatalog.Load(equipmentPath, TowerContentJsonReader.Instance, equipmentBalanceVersion.Value)
             : TowerContentProviders.Equipment(equipmentPath);
+        AttributeRulesVersion = attributeRulesVersion ?? Equipment.Evaluator.Balance.AttributeVersion;
+        _ = new Domain.Models.Attributes.AttributeRulesSelection(AttributeRulesVersion, equipmentBalanceVersion);
+        if (AttributeRulesVersion != Equipment.Evaluator.Balance.AttributeVersion)
+            throw new InvalidDataException("Selected combat rules and equipment catalog are incompatible.");
         _configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Combat:AbilityBalanceProfile"] = abilityBalanceProfile,
-            ["AttributeRedesign:LiveVersion"] = Equipment.Evaluator.Balance.AttributeVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            ["AttributeRedesign:LiveVersion"] = AttributeRulesVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)
         }).Build();
         _threat = JsonSerializer.Deserialize<ThreatAndTankingOptions>(JsonSerializer.SerializeToUtf8Bytes(threat, HarnessJson.Options), HarnessJson.Options)!;
         Essences = TowerContentProviders.Essences(_configuration, root, HarnessJson.Options, new EssenceDefinitionValidator());
@@ -143,7 +154,7 @@ public sealed class OfflineContent
     public CombatSetupService CreateSetup(Character character, IReadOnlyList<PlayerEssence> essences) => new(
         new CreatureScaler(_scaling), new SelectedEssenceResolver(Essences, character.Id, essences),
         Essences, _creatureEssences, _creatureAbilities, Equipment,
-        attributeRules: new Domain.Models.Attributes.AttributeRulesSelection(Equipment.Evaluator.Balance.AttributeVersion));
+        attributeRules: new Domain.Models.Attributes.AttributeRulesSelection(AttributeRulesVersion, Balance?.EquipmentBalanceVersion));
 
     public CombatEngineExecutor CreateExecutor() => new(_abilities, Essences, Equipment, Options.Create(_threat));
 

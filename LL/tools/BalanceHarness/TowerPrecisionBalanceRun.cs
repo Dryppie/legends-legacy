@@ -97,7 +97,7 @@ public static class TowerPrecisionBalanceRun
             resume: verifyOnly, verifyOnly: verifyOnly, token, progress);
         var ids = d.FreshCellIds.ToHashSet(StringComparer.Ordinal);
         var cells = source.Definition.Cells.Where(c => ids.Contains(c.Id)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
-        var runner = new TowerBattleRunner(campaign.Root, new OfflineContent(campaign.Root, campaign.Contract.Scope.Settings.Threat));
+        var runner = new TowerBattleRunner(campaign.Root, OfflineContent.ForTower(campaign.Root, campaign.Contract.Scope.Settings));
         foreach (var c in cells)
             runner.CreateInput(TowerPrecisionBalance.Scenario(d, c), d.FreshSeeds[0], campaign.Contract.Scope.Settings.Threat, campaign.Contract.Scope.Settings.CheckpointIntervalTicks);
         try

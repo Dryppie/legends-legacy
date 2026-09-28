@@ -12,12 +12,14 @@ public sealed class BalanceHarnessComparisonTests
     [InlineData(1, true)]
     [InlineData(1, false)]
     [InlineData(2, false)]
+    [InlineData(3, false)]
     public async Task Archived_catalog_versions_can_be_read_and_compared_without_old_execution(int version, bool legacy)
     {
         using var workspace = new Workspace();
         var run = await workspace.Run("archive");
-        Assert.Equal(3, run.Manifest.SchemaVersion);
-        var hashes = run.Manifest.ContentHashes.Where(x => !x.Key.Contains(".legacy-v1.", StringComparison.Ordinal)).ToDictionary();
+        Assert.Equal(4, run.Manifest.SchemaVersion);
+        var files = version == 3 ? ContentSnapshotContract.VersionThreeFiles : ContentSnapshotContract.VersionTwoFiles;
+        var hashes = files.ToDictionary(f => f, f => run.Manifest.ContentHashes[f]);
         const string styles = "combat-styles/combat-styles.v1.json";
         if (legacy)
         {
@@ -30,7 +32,7 @@ public sealed class BalanceHarnessComparisonTests
             Execution = run.Manifest.Execution with { Runtime = "Archived runtime" }
         });
         var archived = SavedSuite.Read(run.Directory);
-        Assert.Equal(legacy ? 14 : 15, archived.Manifest.ContentHashes.Count);
+        Assert.Equal(version == 3 ? 18 : legacy ? 14 : 15, archived.Manifest.ContentHashes.Count);
         var baseline = Path.Combine(workspace.Path, "baseline.json");
         BaselineManifest.Accept(run.Directory, baseline, "Archive compatibility test only.");
         var comparison = SuiteComparison.Create(baseline, run.Directory, Path.Combine(workspace.Path, "comparison"));

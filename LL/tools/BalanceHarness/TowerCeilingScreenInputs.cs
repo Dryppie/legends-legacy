@@ -117,7 +117,7 @@ public static class TowerCeilingScreenInputs
             var settings = TowerBundle.ReadSettings(variant.ContentRoot);
             TowerPortfolioConfirmation.Equal(d.ContentHashes, TowerCompactBundle.ContentHashes(variant.ContentRoot, token), "prepared content");
             if (HarnessJson.Hash(settings) != d.SettingsHash) throw new InvalidDataException("Changed prepared settings.");
-            var runner = new TowerBattleRunner(variant.ContentRoot, new OfflineContent(variant.ContentRoot, settings.Threat));
+            var runner = new TowerBattleRunner(variant.ContentRoot, OfflineContent.ForTower(variant.ContentRoot, settings));
             foreach (var cell in d.Cells)
             {
                 token.ThrowIfCancellationRequested();
@@ -197,7 +197,7 @@ public static class TowerCeilingScreenInputs
                 var d = BindDefinition(template, seeds); templates.Add(template); definitions.Add(d);
                 HarnessJson.WriteNew(P(id + "-definition.json"), d);
                 // Verify seed binding cannot change the production prepared roster.
-                var settings = TowerBundle.ReadSettings(content); var runner = new TowerBattleRunner(content, new OfflineContent(content, settings.Threat));
+                var settings = TowerBundle.ReadSettings(content); var runner = new TowerBattleRunner(content, OfflineContent.ForTower(content, settings));
                 foreach (var cell in d.Cells)
                 {
                     ct.ThrowIfCancellationRequested();

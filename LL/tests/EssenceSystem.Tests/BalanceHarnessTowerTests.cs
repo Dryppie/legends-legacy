@@ -151,7 +151,7 @@ public sealed class BalanceHarnessTowerTests
             var second = first.ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Value.Reverse().ToArray());
             scenario = TowerPartySelection.Apply(scenario, TowerWholeParty.Deploy(first, second, wholeDeployment, d.WholeParty!.MaximumPartySlots), [seed]);
         }
-        var content = new OfflineContent(Root, Threat);
+        var content = OfflineContent.ForTower(Root, TowerBundle.ReadSettings(Root));
         var runner = new TowerBattleRunner(Root, content);
         var input = runner.CreateInput(scenario, seed, Threat, 10);
         var harnessRuntime = await runner.PrepareAsync(input);
@@ -169,7 +169,7 @@ public sealed class BalanceHarnessTowerTests
         {
             var snapshotId = Guid.NewGuid();
             db.CharacterSnapshots.Add(new CharacterSnapshot {
-                AttributeRulesVersion = Domain.Models.Attributes.AttributeRules.CurrentVersion,
+                AttributeRulesVersion = content.AttributeRulesVersion,
                 Id = snapshotId, CharacterId = build.Character.Id, Name = build.Character.Name, Level = build.Character.Level,
                 BaseAttributes = build.Character.BaseAttributes.Select(a => new EntityAttributeSnapshot
                     { CharacterSnapshotId = snapshotId, AttributeType = a.AttributeType, Value = a.Value }).ToArray(),

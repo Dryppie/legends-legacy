@@ -45,11 +45,7 @@ public static class TowerAllocationConfirmationRun
         ValidateAudit(output);
         var settings = TowerBundle.ReadSettings(root);
         TowerAllocationConfirmation.Equal(source.Definition.ContentHashes, TowerBundle.CopyContent(root, P("content"), CancellationToken.None), "unchanged content");
-        HarnessJson.WriteNew(P("content/appsettings.json"), new Dictionary<string, object> {
-            ["Combat"] = new Dictionary<string, object> { ["ThreatAndTanking"] = settings.Threat,
-                ["IdleProgression"] = new Dictionary<string, object> { ["EncounterCadenceSeconds"] = RunBundle.ReadCombatSettings(root).Cadence } },
-            ["WorldTower"] = new Dictionary<string, object> { ["CombatTicksPerFrame"] = settings.CheckpointIntervalTicks }
-        });
+        TowerBundle.WriteSettings(P("content/appsettings.json"), settings, RunBundle.ReadCombatSettings(root).Cadence);
         HarnessJson.WriteNew(P("seed-ledger.json"), allocation);
         HarnessJson.WriteNew(P("definition.json"), TowerAllocationConfirmation.Definition(source, allocation, HarnessJson.Hash(ExecutionIdentity.Current())));
         HarnessJson.WriteNew(P("input-provenance.json"), new { SourceRun = Path.GetFullPath(sourceRun), SourceWork = Path.GetFullPath(sourceWork),

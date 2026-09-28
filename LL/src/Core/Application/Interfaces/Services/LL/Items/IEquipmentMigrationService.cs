@@ -4,6 +4,7 @@ namespace Application.Interfaces.Services.LL.Items;
 
 public interface IEquipmentMigrationService
 {
+    Task<bool> ConvertOnStartupAsync(Guid operationId, EquipmentMigrationTarget target, int targetBalanceVersion, CancellationToken ct);
     Task<EquipmentMigrationChoice?> GetChoiceAsync(Guid characterId, Guid itemId, CancellationToken ct);
     Task<EquipmentMigrationPreview> PreviewAsync(EquipmentMigrationTarget target, string? definitionId, CancellationToken ct, int? targetBalanceVersion = null);
     Task<EquipmentMigrationReceipt> ApplyAsync(Guid operationId, EquipmentMigrationTarget target, string sourceHash, string definitionId, string actorId, CancellationToken ct, int? targetBalanceVersion = null, string? expectedResultHash = null);

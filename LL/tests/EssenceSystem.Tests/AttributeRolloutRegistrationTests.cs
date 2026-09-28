@@ -37,6 +37,11 @@ public sealed class AttributeRolloutRegistrationTests
         var abilities = provider.GetRequiredService<IAbilityCatalogProvider>().GetCatalog();
         Assert.Equal(18, rules.Version);
         Assert.Equal(4, rules.EquipmentBalanceVersion);
+        if (host == "API/API.LL")
+        {
+            Assert.True(configuration.GetValue<bool>("EquipmentConversion:RunOnStartup"));
+            Assert.Equal(4, configuration.GetValue<int>("EquipmentConversion:TargetBalanceVersion"));
+        }
         Assert.Equal(4, catalog.Evaluator.Balance.Version);
         Assert.Equal(4, provider.GetRequiredService<EquipmentMigrationCatalog>().Get(null).Evaluator.Balance.Version);
         Assert.Equal(1.5, catalog.Evaluator.Balance.GetMaterializedCostPerPoint(AttributeType.Restoration, 1));

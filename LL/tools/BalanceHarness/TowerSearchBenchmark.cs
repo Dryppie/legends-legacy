@@ -131,11 +131,7 @@ public static partial class TowerSearchBenchmark
         var copied = TowerBundle.CopyContent(root, P("content"), CancellationToken.None);
         if (HarnessJson.Hash(copied) != HarnessJson.Hash(d.ContentHashes)) throw new InvalidDataException("Content changed during preparation.");
         // Preserve only the non-secret settings consumed by offline combat readers.
-        HarnessJson.WriteNew(P("content/appsettings.json"), new Dictionary<string, object> {
-            ["Combat"] = new Dictionary<string, object> { ["ThreatAndTanking"] = settings.Threat,
-                ["IdleProgression"] = new Dictionary<string, object> { ["EncounterCadenceSeconds"] = RunBundle.ReadCombatSettings(root).Cadence } },
-            ["WorldTower"] = new Dictionary<string, object> { ["CombatTicksPerFrame"] = settings.CheckpointIntervalTicks }
-        });
+        TowerBundle.WriteSettings(P("content/appsettings.json"), settings, RunBundle.ReadCombatSettings(root).Cadence);
         HarnessJson.WriteNew(P("definition.json"), d);
         HarnessJson.WriteNew(P("seed-ledger.json"), new { historical, generation, discovery = schedule.Discovery,
             screen = schedule.Selection, validation = schedule.Confirmation });
@@ -146,7 +142,7 @@ public static partial class TowerSearchBenchmark
         if (HarnessJson.Hash(inputs) != HarnessJson.Hash(TowerBossDiscovery.GenerationInputs(d with { References = [] })))
             throw new InvalidDataException("References crossed the independent generation boundary.");
         HarnessJson.WriteNew(P("generation-inputs.json"), inputs);
-        HarnessJson.WriteNew(P("generation-mechanics.json"), TowerBossPartyGenerator.FromInventory(inputs, TowerBossInventory.Create(root, settings.Threat)));
+        HarnessJson.WriteNew(P("generation-mechanics.json"), TowerBossPartyGenerator.FromInventory(inputs, TowerBossInventory.CreateForTower(root, settings)));
         HarnessJson.WriteNew(P("executable-files.json"), TowerBossStudy.RetainExecutable(output, ExecutionIdentity.Current()));
         Directory.CreateDirectory(P("parity"));
         var retainedParity = parity.Select((p, i) => {
@@ -252,7 +248,7 @@ public static partial class TowerSearchBenchmark
         try
         {
             var settings = TowerBundle.ReadSettings(P("content"));
-            var runner = new TowerBattleRunner(P("content"), new OfflineContent(P("content"), settings.Threat));
+            var runner = new TowerBattleRunner(P("content"), OfflineContent.ForTower(P("content"), settings));
             foreach (var check in protocol.Parity)
             {
                 var report = await Phase("parity-" + check.Id, () => runner.RunAsync(runner.CreateInput(

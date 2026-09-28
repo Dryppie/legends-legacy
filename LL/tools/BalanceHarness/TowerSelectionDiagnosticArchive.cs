@@ -25,7 +25,7 @@ public static partial class TowerSelectionDiagnostic
             Save("definition.json", d); Save("scope.json", scope); Save("search-binding.json", binding);
             var inputs = TowerBossDiscovery.CopyGenerationInputs(d);
             Save("generation-inputs.json", inputs);
-            var inventory = TowerBossInventory.Create(Path.Combine(output, "content"), settings.Threat);
+            var inventory = TowerBossInventory.CreateForTower(Path.Combine(output, "content"), settings);
             var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
             Save("boss-profiles.json", inventory); Save("generation-mechanics.json", mechanics);
             Save("executable-files.json", TowerBossStudy.RetainExecutable(output, scope.Execution,
@@ -110,9 +110,9 @@ public static partial class TowerSelectionDiagnostic
             var executable = HarnessJson.Read<Dictionary<string, string>>(Path.Combine(output, "executable-files.json"));
             var actual = TowerBulkCampaign.Paths(Path.Combine(output, "executable")).ToDictionary(p => Path.GetRelativePath(Path.Combine(output, "executable"), p).Replace('\\', '/'), HarnessJson.FileHash);
             Require(HarnessJson.Hash(executable) == HarnessJson.Hash(actual) && scope.Execution.AssemblyHashes.All(p => executable.GetValueOrDefault(p.Key+".dll") == p.Value), "Changed producing executable.");
-            var inventory = TowerBossInventory.Create(root, scope.Settings.Threat); Match(q, "study/boss-profiles.json", inventory);
+            var inventory = TowerBossInventory.CreateForTower(root, scope.Settings); Match(q, "study/boss-profiles.json", inventory);
             mechanics = TowerBossPartyGenerator.FromInventory(input, inventory);
-            var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat)); var index = 0;
+            var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings)); var index = 0;
             battle = (arm, stage, scenario, seed, token) => {
                 token.ThrowIfCancellationRequested(); Require(index < trials.Count, "Missing trial."); var trial = trials[index++];
                 var prepared = runner.CreateInput(scenario, seed, scope.Settings.Threat, scope.Settings.CheckpointIntervalTicks);

@@ -260,6 +260,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 await app.Services.ValidateCreatureBuildProfilesAsync();
+await Services.LL.Items.EquipmentStartupConversionExtensions.ConvertExistingEquipmentAsync(
+    app.Services, app.Lifetime.ApplicationStopping);
 
 // Configure the HTTP request pipeline.
 app.UseMiddleware<RequestLoggingMiddleware>();

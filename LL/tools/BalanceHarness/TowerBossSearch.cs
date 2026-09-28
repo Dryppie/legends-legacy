@@ -199,7 +199,7 @@ public static partial class TowerBossSearch
                 File.Copy(TowerBossReferences.CatalogPath(catalogs), Path.Combine(output, "catalogs/tower-boss-references.json"));
                 ValidateReferences(frozen, Path.Combine(output, "catalogs"), d, scope);
             }
-            var inventory = TowerBossInventory.Create(frozen, settings.Threat);
+            var inventory = TowerBossInventory.CreateForTower(frozen, settings);
             HarnessJson.WriteNew(Path.Combine(output, "boss-profiles.json"), inventory);
             File.WriteAllText(Path.Combine(output, "boss-profiles.md"), TowerBossInventory.Markdown(inventory));
             var contexts = Contexts(frozen, Path.Combine(output, "catalogs"), d);
@@ -245,7 +245,7 @@ public static partial class TowerBossSearch
         if (d.AllowedEssences.Except(families.Keys).Any() || d.Controls.Any(c => c.Builds.Values.Any(ids =>
             ids.Select(id => families[id]).Distinct(StringComparer.OrdinalIgnoreCase).Count() != ids.Count)))
             throw new InvalidDataException("Unknown allowed Essence or duplicate source family in a control.");
-        var validator = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var validator = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         foreach (var control in d.Controls)
             foreach (var scenario in contexts.Values.SelectMany(s => s))
             {
@@ -299,13 +299,13 @@ public static partial class TowerBossSearch
             if (HarnessJson.FileHash(Path.Combine(root, "Data", content.Key)) != content.Value) throw new InvalidDataException("Frozen boss search content changed.");
         ValidateValidationReferences(Path.Combine(output, "catalogs"), d);
         if (d.Refinement?.ReferenceSetId is not null) ValidateReferences(root, Path.Combine(output, "catalogs"), d, scope);
-        var inventory = TowerBossInventory.Create(root, scope.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(root, scope.Settings);
         Snapshot("boss-profiles.json", inventory);
         if (File.ReadAllText(Path.Combine(output, "boss-profiles.md")) != TowerBossInventory.Markdown(inventory)) throw new InvalidDataException("Boss profile Markdown changed.");
         var contexts = Contexts(root, Path.Combine(output, "catalogs"), d);
         Snapshot("contexts.json", contexts); Snapshot("seed-ledger.json", Ledger(d));
         await ValidateContent(root, d, scope, contexts, inventory, token);
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         var index = 0; var proposals = new Dictionary<string, List<BossProposal>>();
         TowerScenario? previousScenario = null;
         TowerBattleInput? preparedInput = null;

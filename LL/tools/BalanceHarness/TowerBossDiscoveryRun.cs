@@ -63,7 +63,7 @@ public static class TowerBossDiscoveryRun
             HarnessJson.WriteNew(Path.Combine(output, "cost.json"), cost);
             HarnessJson.WriteNew(Path.Combine(output, "generation-inputs.json"), inputs);
             if (definition.Mode == TowerBossDiscovery.Improve) HarnessJson.WriteNew(Path.Combine(output, "improvement-starts.json"), definition.Starts);
-            var inventory = TowerBossInventory.Create(frozen, settings.Threat);
+            var inventory = TowerBossInventory.CreateForTower(frozen, settings);
             var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
             HarnessJson.WriteNew(Path.Combine(output, "boss-profiles.json"), inventory);
             HarnessJson.WriteNew(Path.Combine(output, "generation-mechanics.json"), mechanics);
@@ -130,10 +130,10 @@ public static class TowerBossDiscoveryRun
             throw new InvalidDataException("Discovery frozen content changed.");
         Match("cost.json", cost); Match("generation-inputs.json", inputs);
         if (d.Mode == TowerBossDiscovery.Improve) Match("improvement-starts.json", d.Starts);
-        var inventory = TowerBossInventory.Create(root, scope.Settings.Threat);
+        var inventory = TowerBossInventory.CreateForTower(root, scope.Settings);
         var mechanics = TowerBossPartyGenerator.FromInventory(inputs, inventory);
         Match("boss-profiles.json", inventory); Match("generation-mechanics.json", mechanics);
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         var index = 0;
         TowerScenario? lastScenario = null; TowerBattleInput? template = null; string? recipeHash = null;
         var result = await TowerBossImprovement.ExecuteBattlesAsync(d, inputs, mechanics,

@@ -62,7 +62,7 @@ public static class TowerBossDiscovery
         IReadOnlyList<BossBenchmarkReference>? references = null, string budgetPurpose = "intended-progression")
     {
         var settings = TowerBundle.ReadSettings(root);
-        var content = new OfflineContent(root, settings.Threat);
+        var content = OfflineContent.ForTower(root, settings);
         var floor = TowerContentProviders.Floors(Path.Combine(root, "Data", TowerBattleRunner.FloorFile), HarnessJson.Options)
             .GetFloor(budget.PriorityFloor) ?? throw new InvalidDataException("Unknown or unreleased target floor.");
         var excluded = excludedSeeds.Distinct().Order().ToArray();
@@ -317,7 +317,7 @@ public static class TowerBossDiscovery
         if (HarnessJson.Hash(settings) != d.SettingsHash || HarnessJson.Hash(ExecutionIdentity.Current()) != d.ExecutionHash
             || d.ContentHashes.Any(p => HarnessJson.FileHash(Path.Combine(root, "Data", p.Key)) != p.Value))
             throw new InvalidDataException("Discovery content, settings or executable differ from the frozen contract.");
-        var content = new OfflineContent(root, settings.Threat);
+        var content = OfflineContent.ForTower(root, settings);
         var actual = content.Essences.GetAll().ToDictionary(e => e.Id, e => e.SourceMonsterId, StringComparer.Ordinal);
         if (d.AllowedEssences.Any(e => !actual.TryGetValue(e.Id, out var family) || !StringComparer.OrdinalIgnoreCase.Equals(family, e.Family)))
             throw new InvalidDataException("Eligible Essences or families differ from production content.");

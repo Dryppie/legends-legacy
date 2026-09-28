@@ -18,7 +18,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
     private readonly List<LoadoutTrial> trials = [];
     private readonly JsonSerializerOptions compact = new(HarnessJson.Options) { WriteIndented = false };
     private readonly TowerBattleRunner runner = new(Path.Combine(output, "content"),
-        new OfflineContent(Path.Combine(output, "content"), scope.Settings.Threat));
+        OfflineContent.ForTower(Path.Combine(output, "content"), scope.Settings));
     public IReadOnlyList<LoadoutTrial> Trials => trials;
     public int CacheHits { get; private set; }
 
@@ -114,7 +114,7 @@ public sealed class TowerLoadoutArchive(string output, LoadoutScope scope, int m
             throw new InvalidDataException("Replay requires the original assemblies, runtime and platform.");
         var recipe = HarnessJson.Read<TowerScenario>(Path.Combine(output, "recipes", trial.Recipe + ".json"));
         var root = Path.Combine(output, "content");
-        var runner = new TowerBattleRunner(root, new OfflineContent(root, scope.Settings.Threat));
+        var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, scope.Settings));
         var input = runner.CreateInput(recipe, trial.Seed, scope.Settings.Threat, scope.Settings.CheckpointIntervalTicks);
         if (HarnessJson.Hash(recipe) != trial.Recipe || HarnessJson.Hash(input) != trial.InputHash)
             throw new InvalidDataException("Reconstructed trial differs from its saved input.");

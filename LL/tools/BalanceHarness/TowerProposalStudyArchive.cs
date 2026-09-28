@@ -144,7 +144,7 @@ public static partial class TowerProposalStudy
             && HarnessJson.Hash(scope.Settings) == inputs.Context.Scope.SettingsHash && HarnessJson.Hash(scope.Execution) == inputs.Context.Scope.ExecutionHash
             && HarnessJson.Hash(scope.ContentHashes) == HarnessJson.Hash(inputs.Context.Scope.ContentHashes), "Changed held-out scope.");
         Require(HarnessJson.Hash(TowerCompactBundle.ContentHashes(P(archive, "content"), ct)) == HarnessJson.Hash(scope.ContentHashes), "Changed held-out content.");
-        var runner = new TowerBattleRunner(P(archive, "content"), new OfflineContent(P(archive, "content"), scope.Settings.Threat));
+        var runner = new TowerBattleRunner(P(archive, "content"), OfflineContent.ForTower(P(archive, "content"), scope.Settings));
         var index = 0;
         var result = await AuditStudy(output, inputs, allocation, (root, arm) => {
             var folder = SearchRoot(output, root, arm);

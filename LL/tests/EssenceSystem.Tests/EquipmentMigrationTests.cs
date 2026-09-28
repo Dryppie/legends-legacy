@@ -8,6 +8,43 @@ namespace EssenceSystem.Tests;
 public sealed class EquipmentMigrationTests
 {
     [Fact]
+    public async Task Startup_conversion_keeps_scheduled_combat_and_retries_without_a_second_receipt()
+    {
+        var fixture = ServiceFixture();
+        var releases = Releases();
+        fixture.Store.ScheduledCombat = true;
+        var before = fixture.Store.Item!;
+        var service = new EquipmentMigrationService(fixture.Store, new(releases.Get(4), releases),
+            new RecordingItemizationOutbox(), TimeProvider.System, fixture.Store, startup: fixture.Store);
+        var preview = await service.PreviewAsync(new(before.State.Id), null, default, 4);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.ApplyAsync(Guid.NewGuid(), preview.Target,
+            preview.SourceHash, preview.After.State.DefinitionId, "operator", default, 4, preview.ResultHash));
+
+        Assert.True(await service.ConvertOnStartupAsync(Guid.NewGuid(), preview.Target, 4, default));
+        Assert.False(await service.ConvertOnStartupAsync(Guid.NewGuid(), preview.Target, 4, default));
+        Assert.True(fixture.Store.ScheduledCombat);
+        Assert.Equal(2, fixture.Store.StartupLocks);
+        Assert.Equal(1, fixture.Store.Saves);
+        Assert.Equal(4, fixture.Store.Item!.State.BalanceVersion);
+        Assert.Equal(before.State.Ownership, fixture.Store.Item.State.Ownership);
+        Assert.Equal(before.State.Id, fixture.Store.Item.State.Id);
+    }
+
+    [Fact]
+    public async Task Startup_conversion_skips_an_item_that_lost_its_live_reference()
+    {
+        var fixture = ServiceFixture();
+        var releases = Releases();
+        fixture.Store.Referenced = false;
+        var original = fixture.Store.Item!;
+        var service = new EquipmentMigrationService(fixture.Store, new(releases.Get(4), releases),
+            new RecordingItemizationOutbox(), TimeProvider.System, fixture.Store, startup: fixture.Store);
+        Assert.False(await service.ConvertOnStartupAsync(Guid.NewGuid(), new(original.State.Id), 4, default));
+        Assert.Equal(0, fixture.Store.Saves);
+        Assert.Same(original, fixture.Store.Item);
+    }
+
+    [Fact]
     public void Referenced_readiness_keeps_unreferenced_records_visible_and_pending_rewards_blocking()
     {
         var audit = new EquipmentMigrationAudit(0, 100, 558, 0, 408, 0, 1082, [])
@@ -452,13 +489,23 @@ public sealed class EquipmentMigrationTests
         return (new EquipmentMigrationService(store, new(current), new RecordingItemizationOutbox(), TimeProvider.System, store), store, owner);
     }
 
-    private sealed class MigrationStore(EquipmentData item, StarterEquipmentCatalog catalog) : IEquipmentMigrationRepository, IEquipmentUpgradeRepository
+    private sealed class MigrationStore(EquipmentData item, StarterEquipmentCatalog catalog) : IEquipmentMigrationRepository, IEquipmentUpgradeRepository, IEquipmentStartupConversionRepository
     {
         public EquipmentData? Item = item;
         public LegacyEquipmentSnapshot? Legacy;
         public int Saves;
+        public bool ScheduledCombat;
+        public bool Referenced = true;
+        public int StartupLocks;
         private readonly Dictionary<Guid, EquipmentMigrationReceipt> _receipts = [];
-        public Task AssertNoScheduledCombatAsync(IReadOnlyList<Guid> ids, CancellationToken ct) => Task.CompletedTask;
+        public Task AssertNoScheduledCombatAsync(IReadOnlyList<Guid> ids, CancellationToken ct) => ScheduledCombat
+            ? throw new InvalidOperationException("Scheduled combat") : Task.CompletedTask;
+        public Task LockCharactersAsync(EquipmentMigrationTarget target, CancellationToken ct) { StartupLocks++; return Task.CompletedTask; }
+        public Task<bool> IsCandidateAsync(EquipmentMigrationTarget target, int version, CancellationToken ct) => Task.FromResult(Referenced);
+        public Task<IAsyncDisposable> AcquireRunnerLockAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<IReadOnlyList<EquipmentMigrationTarget>> GetTargetsAsync(int version, int limit, CancellationToken ct) => throw new NotSupportedException();
+        public Task<IReadOnlyList<Guid>> GetArenaDefensesAsync(int version, int limit, CancellationToken ct) => throw new NotSupportedException();
+        public Task<EquipmentStartupConversionAudit> AuditAsync(int version, CancellationToken ct) => throw new NotSupportedException();
         public Task<EquipmentMigrationAudit> AuditAsync(int page, int pageSize, CancellationToken ct, int sourceBalanceVersion = 1) => throw new NotSupportedException();
         public Task<EquipmentData?> LoadAsync(EquipmentMigrationTarget target, bool mutation, CancellationToken ct) => Task.FromResult(Item);
         public Task<LegacyEquipmentSnapshot?> LoadLegacyAsync(EquipmentMigrationTarget target, CancellationToken ct) => Task.FromResult(Legacy);

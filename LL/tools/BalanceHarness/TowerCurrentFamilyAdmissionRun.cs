@@ -155,7 +155,7 @@ public static partial class TowerCurrentFamilyAdmission
             Save("producing.json",Producer(request));
             var inventory=await Load(output,()=>Check(),ct);
             var settings=TowerBundle.ReadSettings(request.ContentRoot);
-            var runner=new TowerBattleRunner(request.ContentRoot,new OfflineContent(request.ContentRoot,settings.Threat));
+            var runner=new TowerBattleRunner(request.ContentRoot,OfflineContent.ForTower(request.ContentRoot, settings));
             TowerCurrentAdmissionResult result; var preparations=0;
             var rowLimit=request.MaximumBytes-65536-Directory.GetFiles(output).Sum(p=>new FileInfo(p).Length);
             using(var file=new FileStream(Path.Combine(output,"rows.jsonl.gz"),FileMode.CreateNew,FileAccess.Write,FileShare.Read))
