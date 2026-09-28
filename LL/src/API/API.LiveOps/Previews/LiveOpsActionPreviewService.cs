@@ -16,9 +16,74 @@ public sealed class LiveOpsActionPreviewService(
     ILiveOpsService liveOps,
     IChatModerationGateway chat,
     IOptions<LiveOpsOptions> options,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ICompensationPackageService? packages = null)
 {
     private readonly LiveOpsOptions _options = options.Value;
+
+    public async Task<Response<ActionPreviewDto>> CreatePackageGrantAsync(Guid operationId, Guid characterId,
+        Guid packageId, int version, AdministrationActor actor, string reason, string? notes, CancellationToken ct)
+    {
+        var validation = ValidateCommon(operationId, reason, notes);
+        if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
+        var prepared = await packages!.PrepareAsync(operationId, characterId, packageId, version, ct);
+        if (!prepared.IsSuccess || prepared.Data is null) return Response<ActionPreviewDto>.Fail(prepared.ErrorMessage);
+        var plan = prepared.Data;
+        var fields = new List<ActionPreviewField> { new("Package", $"{plan.Package.Name} · version {version}"), new("Purpose", plan.Package.Purpose), new("Reason", reason.Trim()), new("Internal notes", Normalize(notes) ?? "None") };
+        for (var i = 0; i < plan.Items.Count; i++)
+        {
+            var item = plan.Items[i]; var line = plan.Package.Items[i]; var data = item.Equipment;
+            fields.Add(new($"Item {i + 1}", $"{line.Quantity} × {item.ItemBase.Name} ({item.ItemBase.Id}) · {(data is not null || item.ItemBase.IsBound ? "Bound" : "Unbound")}"));
+            if (data is not null)
+            {
+                fields.Add(new($"Equipment {i + 1}", $"{data.DisplayName} · Tier {data.State.Tier} / Rank {data.State.Rank} · {data.State.ActiveStyleId ?? "Plain"} · Balance version {data.State.BalanceVersion}"));
+                fields.Add(new($"Stats {i + 1}", string.Join(", ", data.Stats.OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture)}"))));
+            }
+        }
+        return await PersistAsync(operationId, AdminActionPreviewKinds.CompensationPackage, actor, characterId,
+            PackageRequestHash(characterId, packageId, version, reason, notes), PackageStateHash(plan),
+            new PreviewContext(characterId, null, PackageId: packageId, PackageVersion: version),
+            "Grant compensation package", plan.Player.CharacterName, "HighValue", plan.Player.CharacterName, fields,
+            ["All item lines are granted in one transaction. This creates compensation; it does not replay a missing reward entitlement.",
+             "Equipment is bound to the recipient. Granted ranks carry no refundable investment; base salvage is zero."], ct);
+    }
+    public Task<PreviewSubmissionResult> BeginPackageGrantAsync(Guid token, Guid operationId, Guid characterId,
+        Guid packageId, int version, AdministrationActor actor, string reason, string? notes, CancellationToken ct) =>
+        BeginAsync(token, operationId, AdminActionPreviewKinds.CompensationPackage, characterId, actor,
+            PackageRequestHash(characterId, packageId, version, reason, notes), ct);
+    private static string PackageRequestHash(Guid characterId, Guid packageId, int version, string reason, string? notes) =>
+        RequestHash(AdminActionPreviewKinds.CompensationPackage, new { CharacterId = characterId, PackageId = packageId,
+            Version = version, Reason = NormalizeRequired(reason), Notes = Normalize(notes) });
+    private static string PackageStateHash(CompensationPackagePlan plan) => StateHash(new { plan.Package,
+        plan.Player.AccountId, plan.Player.CharacterId, Items = plan.Items.Select(x => new { x.ItemBase.Id, x.ItemBase.Name,
+            x.ItemBase.Stackable, x.ItemBase.IsBound, x.ItemBase.Rarity, x.Equipment }).ToArray() });
+
+    public async Task<Response<ActionPreviewDto>> CreateAlphaSignetGrantAsync(Guid operationId, Guid characterId,
+        AdministrationActor actor, int quantity, string reason, CancellationToken ct)
+    {
+        var validation = ValidateCommon(operationId, reason, null);
+        if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
+        if (quantity is < 1 or > 1200 || reason.Trim().Length < 3)
+            return Response<ActionPreviewDto>.Fail("Supply 1–1200 Signets and a reason of at least three characters.");
+        var player = await liveOps.GetPlayerAsync(characterId, ct);
+        if (player is null) return Response<ActionPreviewDto>.Fail("The character is unavailable.");
+        await using var database = await contextFactory.CreateDbContextAsync(ct);
+        if (!await database.Users.AnyAsync(x => x.Id == player.AccountId && !x.IsGuest, ct))
+            return Response<ActionPreviewDto>.Fail("Signets require a registered account.");
+        return await PersistAsync(operationId, AdminActionPreviewKinds.AlphaSignetGrant, actor, characterId,
+            SignetRequestHash(characterId, quantity, reason), StateHash(new { player.AccountId, player.CharacterId }),
+            new PreviewContext(characterId, null, quantity), "Grant Alpha Signets", player.CharacterName,
+            "HighValue", player.CharacterName,
+            [new("Quantity", quantity.ToString()), new("Item", "Alpha Signets"), new("Reason", reason.Trim())],
+            ["Creates tradable Signets for alpha testing. This is compensation, not restoration of a previous issuance."], ct);
+    }
+
+    public Task<PreviewSubmissionResult> BeginAlphaSignetGrantAsync(Guid token, Guid operationId, Guid characterId,
+        AdministrationActor actor, int quantity, string reason, CancellationToken ct) => BeginAsync(token, operationId,
+            AdminActionPreviewKinds.AlphaSignetGrant, characterId, actor, SignetRequestHash(characterId, quantity, reason), ct);
+
+    private static string SignetRequestHash(Guid characterId, int quantity, string reason) =>
+        RequestHash(AdminActionPreviewKinds.AlphaSignetGrant, new { CharacterId = characterId, Quantity = quantity, Reason = NormalizeRequired(reason) });
 
     public async Task<Response<ActionPreviewDto>> CreateAccountBanAsync(
         Guid operationId,
@@ -27,8 +92,14 @@ public sealed class LiveOpsActionPreviewService(
         string reason,
         string? internalNotes,
         DateTimeOffset? expiresAt,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, int? durationMinutes = null)
     {
+        if (durationMinutes.HasValue)
+        {
+            if (durationMinutes is < 1 or > 43200 || expiresAt.HasValue)
+                return Response<ActionPreviewDto>.Fail("Choose a duration of 1–43,200 minutes or an explicit expiry, not both.");
+            expiresAt = timeProvider.GetUtcNow().AddMinutes(durationMinutes.Value);
+        }
         var validation = ValidateCommon(operationId, reason, internalNotes);
         if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
         var now = timeProvider.GetUtcNow();
@@ -77,7 +148,7 @@ public sealed class LiveOpsActionPreviewService(
             expiresAt.HasValue
                 ? ["Active sessions will be revoked immediately."]
                 : ["This ban is permanent until explicitly revoked.", "Active sessions will be revoked immediately."],
-            cancellationToken);
+            cancellationToken, expiresAt);
     }
 
     public async Task<Response<ActionPreviewDto>> CreateAccountBanRevokeAsync(
@@ -138,8 +209,14 @@ public sealed class LiveOpsActionPreviewService(
         string reason,
         string? internalNotes,
         DateTimeOffset? expiresAt,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, int? durationMinutes = null)
     {
+        if (durationMinutes.HasValue)
+        {
+            if (durationMinutes is < 1 or > 43200 || expiresAt.HasValue)
+                return Response<ActionPreviewDto>.Fail("Choose a duration of 1–43,200 minutes or an explicit expiry, not both.");
+            expiresAt = timeProvider.GetUtcNow().AddMinutes(durationMinutes.Value);
+        }
         var validation = ValidateCommon(operationId, reason, internalNotes);
         if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
         var now = timeProvider.GetUtcNow();
@@ -193,7 +270,7 @@ public sealed class LiveOpsActionPreviewService(
             expiresAt.HasValue
                 ? ["Trading, transfers, competition, guild mutations, rankings, and server-event participation will be blocked."]
                 : ["This restriction is permanent until explicitly revoked.", "Trading, transfers, competition, guild mutations, rankings, and server-event participation will be blocked."],
-            cancellationToken);
+            cancellationToken, expiresAt);
     }
 
     public async Task<Response<ActionPreviewDto>> CreateMultiplayerRestrictionRevokeAsync(
@@ -253,8 +330,14 @@ public sealed class LiveOpsActionPreviewService(
         AdministrationActor actor,
         string reason,
         DateTimeOffset? expiresAt,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, int? durationMinutes = null)
     {
+        if (durationMinutes.HasValue)
+        {
+            if (durationMinutes is < 1 or > 43200 || expiresAt.HasValue)
+                return Response<ActionPreviewDto>.Fail("Choose a duration of 1–43,200 minutes or an explicit expiry, not both.");
+            expiresAt = timeProvider.GetUtcNow().AddMinutes(durationMinutes.Value);
+        }
         var validation = ValidateCommon(operationId, reason, null);
         if (validation is not null) return Response<ActionPreviewDto>.Fail(validation);
         var now = timeProvider.GetUtcNow();
@@ -296,7 +379,7 @@ public sealed class LiveOpsActionPreviewService(
             expiresAt.HasValue
                 ? ["The player will be unable to send Chat messages until expiry."]
                 : ["This mute is permanent until explicitly removed."],
-            cancellationToken);
+            cancellationToken, expiresAt);
     }
 
     public async Task<Response<ActionPreviewDto>> CreateChatUnmuteAsync(
@@ -549,7 +632,10 @@ public sealed class LiveOpsActionPreviewService(
             return PreviewSubmissionResult.Fail("The submitted operation does not match its preview.", true);
         }
 
-        if (preview.SubmittedAt.HasValue && (preview.CompletedAt.HasValue || preview.ActionKind != AdminActionPreviewKinds.CompensationGrant))
+        if (preview.SubmittedAt.HasValue && await database.AdminActions.AsNoTracking().AnyAsync(
+            x => x.Id == operationId && x.ActorSubject == actor.Subject, cancellationToken))
+            return PreviewSubmissionResult.Success();
+        if (preview.SubmittedAt.HasValue && (preview.CompletedAt.HasValue || preview.ActionKind is not (AdminActionPreviewKinds.CompensationGrant or AdminActionPreviewKinds.CompensationPackage)))
             return PreviewSubmissionResult.Success();
         var currentState = await CurrentStateHashAsync(preview, cancellationToken);
         if (!currentState.IsSuccess)
@@ -636,6 +722,18 @@ public sealed class LiveOpsActionPreviewService(
                     ? StateResult.Success(ChatStateHash(context.CharacterId.Value, state.ActiveMute))
                     : StateResult.Fail(state.ErrorMessage);
             }
+            case AdminActionPreviewKinds.CompensationPackage:
+            {
+                if (!context.PackageId.HasValue) return StateResult.Fail("Package preview context is missing.");
+                var plan = await packages!.PrepareAsync(preview.OperationId, preview.TargetId, context.PackageId.Value, context.PackageVersion, cancellationToken);
+                return plan.IsSuccess && plan.Data is not null ? StateResult.Success(PackageStateHash(plan.Data)) : StateResult.Fail(plan.ErrorMessage);
+            }
+            case AdminActionPreviewKinds.AlphaSignetGrant:
+            {
+                var player = await liveOps.GetPlayerAsync(preview.TargetId, cancellationToken);
+                return player is null ? StateResult.Fail("The character is unavailable.")
+                    : StateResult.Success(StateHash(new { player.AccountId, player.CharacterId }));
+            }
             case AdminActionPreviewKinds.CompensationGrant:
             {
                 if (!context.CharacterId.HasValue || string.IsNullOrWhiteSpace(context.ItemBaseId))
@@ -671,7 +769,7 @@ public sealed class LiveOpsActionPreviewService(
         string? confirmationText,
         IReadOnlyList<ActionPreviewField> fields,
         IReadOnlyList<string> warnings,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, DateTimeOffset? effectExpiresAt = null)
     {
         var now = timeProvider.GetUtcNow();
         var expiresAt = now.AddSeconds(Math.Clamp(_options.PreviewLifetimeSeconds, 60, 600));
@@ -708,7 +806,7 @@ public sealed class LiveOpsActionPreviewService(
             expiresAt,
             confirmationText,
             fields,
-            warnings));
+            warnings, effectExpiresAt, now));
     }
 
     private static string? ValidateCommon(Guid operationId, string reason, string? internalNotes)
@@ -775,7 +873,7 @@ public sealed class LiveOpsActionPreviewService(
     private static string NormalizeRequired(string? value) =>
         value?.Trim() ?? string.Empty;
 
-    private sealed record PreviewContext(Guid? CharacterId, string? ItemBaseId, int Quantity = 1, EquipmentGrantRequest? Equipment = null);
+    private sealed record PreviewContext(Guid? CharacterId, string? ItemBaseId, int Quantity = 1, EquipmentGrantRequest? Equipment = null, Guid? PackageId = null, int PackageVersion = 0);
     private sealed record StateResult(bool IsSuccess, string Hash, string ErrorMessage)
     {
         public static StateResult Success(string hash) => new(true, hash, string.Empty);

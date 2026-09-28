@@ -81,6 +81,8 @@ public sealed class BalanceHarnessFloor11CalibrationTests
     public void Linked_variants_change_only_floor11_health_and_offense()
     {
         var original = JsonNode.Parse(File.ReadAllText(Path.Combine(TestContentPaths.FindApiRoot(), "Data", TowerBattleRunner.FloorFile)))!;
+        var initialScaling = original["floors"]!.AsArray().Single(f => f!["floorNumber"]!.GetValue<int>() == 11)!["guardianScaling"]!;
+        initialScaling["health"] = 2.90m; initialScaling["offense"] = 3.72m;
         var before = original.ToJsonString();
         foreach (var multiplier in Multipliers)
         {

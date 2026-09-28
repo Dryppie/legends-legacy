@@ -30,11 +30,12 @@
         <div><span>Legends Legacy</span><strong>Live Operations</strong></div>
       </div>
       <nav class="primary-nav" aria-label="LiveOps areas">
-        <a routerLink="/dashboard" routerLinkActive="active">Status</a>
+        <a routerLink="/dashboard" routerLinkActive="active">Overview</a>
         <a routerLink="/analytics" routerLinkActive="active">Analytics</a>
         <a routerLink="/players" routerLinkActive="active">Players</a>
-        <a routerLink="/account-risk" routerLinkActive="active">Transfer review</a>
-        <a routerLink="/audit" routerLinkActive="active">Global audit</a>
+        <a routerLink="/account-risk" routerLinkActive="active">Investigations</a>
+        <a routerLink="/cases" routerLinkActive="active">Cases</a>
+        <a routerLink="/audit" routerLinkActive="active">Activity log</a>
       </nav>
       <div class="operator">
         <div><span>{{ session.environment }}</span><strong>{{ session.displayName }}</strong></div>
@@ -42,7 +43,21 @@
       </div>
     </header>
 
+    <app-global-search />
+    @if (workspace.draft?.error) { <div class="shell-message"><app-draft-status [draft]="workspace.draft" (restored)="restoreWorkspace()" /></div> }
+    @if (drafts.unsaved.length) { <p class="shell-message" role="status">{{ drafts.unsaved.length }} private draft(s) still need saving. <button class="secondary" (click)="drafts.flush()">Save drafts now</button></p> }
+
     @if (shellError) { <div class="message error shell-message" role="alert">{{ shellError }}</div> }
+    @if (unsavedLogout) { <button class="secondary shell-message" (click)="logout(true)">Sign out without saving unsaved drafts</button> }
+    @if (operator.sessionExpired) {
+      <div class="message error shell-message" role="alert">Your session has expired. Submitted operations remain in the operation journal. <button class="secondary" type="button" (click)="login()">Sign in again</button></div>
+    }
+    @if (journal.unresolved.length) {
+      <section class="message shell-message" aria-label="Operation recovery"><p>{{ journal.unresolved.length }} operation(s) need a result check. An absent receipt does not prove failure.</p><button class="secondary" [disabled]="journal.checking" (click)="checkOperations()">{{ journal.checking ? 'Checking receipts' : 'Check receipts now' }}</button><ul>@for (entry of journal.unresolved; track entry.operationId) { <li><a routerLink="/audit" [queryParams]="{ operationId: entry.operationId, source: entry.source || 'All' }">{{ entry.action }} · {{ entry.operationId }}</a></li> }</ul></section>
+    }
+    @if (journal.checkMessage && journal.receipts.length) { <p class="shell-message" role="status">{{ journal.checkMessage }}</p> }
     <router-outlet />
+  } @else {
+    <main class="center-state" role="alert"><h1>LiveOps could not connect</h1><p>{{ shellError }}</p><button class="primary" type="button" (click)="ngOnInit()">Retry connection</button><button class="secondary" type="button" (click)="login()">Sign in</button></main>
   }
 </div>

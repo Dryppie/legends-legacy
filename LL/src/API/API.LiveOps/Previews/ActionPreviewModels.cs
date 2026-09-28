@@ -13,7 +13,9 @@ public sealed record ActionPreviewDto(
     DateTimeOffset ExpiresAt,
     string? ConfirmationText,
     IReadOnlyList<ActionPreviewField> Fields,
-    IReadOnlyList<string> Warnings);
+    IReadOnlyList<string> Warnings,
+    DateTimeOffset? EffectExpiresAt = null,
+    DateTimeOffset? ServerTimeUtc = null);
 
 public sealed record PreviewSubmissionResult(
     bool IsSuccess,

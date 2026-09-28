@@ -216,6 +216,9 @@ public static class DependencyInjection
             sp.GetRequiredService<AccountRestrictionIndex>());
         services.AddScoped<IAccountAccessPolicy, AccountAccessPolicy>();
         services.AddScoped<ILiveOpsService, LiveOpsService>();
+        services.AddScoped<ISupportCaseService, SupportCaseService>();
+        services.AddScoped<IOperatorDraftService, OperatorDraftService>();
+        services.AddScoped<ICompensationPackageService, CompensationPackageService>();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.AddScoped<IAccountTemporalCorrelationService, AccountTemporalCorrelationService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();

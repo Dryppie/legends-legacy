@@ -10,7 +10,13 @@ public enum AdminActionType
     AccountRiskNoteAdded,
     MultiplayerRestricted,
     MultiplayerRestrictionRevoked,
-    AlphaSignetsGranted
+    AlphaSignetsGranted,
+    SupportCaseCreated,
+    SupportCaseUpdated,
+    SupportCaseNoteAdded,
+    SupportCaseOperationLinked,
+    CompensationPackageSaved,
+    CompensationPackageGranted
 }
 
 public enum AdministrationRiskLevel

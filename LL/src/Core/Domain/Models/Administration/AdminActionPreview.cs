@@ -8,6 +8,8 @@ public static class AdminActionPreviewKinds
     public const string MultiplayerRestrictionRevoke = "MultiplayerRestrictionRevoke";
     public const string ChatMute = "ChatMute";
     public const string ChatUnmute = "ChatUnmute";
+    public const string CompensationPackage = "CompensationPackage";
+    public const string AlphaSignetGrant = "AlphaSignetGrant";
     public const string CompensationGrant = "CompensationGrant";
 }
 

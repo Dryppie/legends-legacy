@@ -334,6 +334,8 @@ export interface ActionPreviewField {
 }
 
 export interface ActionPreview {
+  effectExpiresAt?: string | null;
+  serverTimeUtc?: string;
   previewToken: string;
   operationId: string;
   actionKind: string;
@@ -439,8 +441,8 @@ export interface OperationalStatus {
   dependencies: OperationalDependencyStatus[];
   outbox: OperationalOutboxStatus;
   restrictions: OperationalRestrictionStatus;
-  permanentActionsLast24Hours: number;
-  highValueActionsLast24Hours: number;
+  permanentActionsLast24Hours: number | null;
+  highValueActionsLast24Hours: number | null;
   recentActions: AdministrationAuditEntry[];
   warnings: string[];
 }
@@ -691,3 +693,20 @@ export interface CompensationEquipmentOptions {
   maximumQuantity: number;
   options: CompensationEquipmentOption[];
 }
+
+export type SupportCaseStatus = 'Open' | 'Waiting' | 'Resolved' | 'Closed';
+export interface OperatorDraft { key: string; version: string; content: string; updatedAt: string; }
+export interface SupportCase { id: string; accountId: string; characterId: string; characterName: string; title: string; category: string; externalReference: string | null; status: SupportCaseStatus; resolution: string | null; version: number; createdAt: string; updatedAt: string; }
+export interface SupportCaseEntry { id: string; caseId: string; sequence: number; kind: string; actorDisplayName: string; body: string; evidenceReference: string | null; linkedOperationId: string | null; linkedSource: string | null; createdAt: string; }
+export interface SupportCasePage { cases: SupportCase[]; total: number; page: number; pageSize: number; }
+export interface SupportCaseDetails { case: SupportCase; entries: SupportCaseEntry[]; nextBeforeSequence: number | null; }
+
+export interface OperationalDetailRow { id: string; kind: string; status: string; at: string; nextAt: string | null; attempts: number; characterId: string | null; characterName: string | null; }
+export interface OperationalDetailPage { view: string; asOf: string; total: number; rows: OperationalDetailRow[]; impact: string; nextStep: string; }
+
+export interface ItemizationDistribution { attribute: string; count: number; p10: number; p50: number; p90: number; p99: number; }
+export interface ItemizationCohort { context: string; rulesVersion: number; slot: string; tier: number; doctrine: string; essenceCount: number; offered: number; equipped: number; dismantled: number; battles: number; distinctCharacters: number; wins: number; draws: number; winRateLower95: number | null; winRateUpper95: number | null; normalizedSpend: ItemizationDistribution[]; capWaste: ItemizationDistribution[]; effectiveAttributes: ItemizationDistribution[]; comparisons: number; combinations: { attributes: string[]; builds: number; distinctCharacters: number }[]; essenceUsage: { id: string; ascension: number; slotOrder: number; distinctCharacters: number; battles: number; wins: number }[]; attributeOutcomes: { attribute: string; minimumInclusive: number; maximumExclusive: number | null; distinctCharacters: number; battles: number; characterMeanWinRate: number; lower95: number | null; upper95: number | null }[]; }
+export interface ItemizationReport { day: string; interpretation: string; cohorts: ItemizationCohort[]; choices: { context: string; kind: string; slot: string; tier: number; rulesVersion: number; decisions: number; missingOrIncomplete: number; eligibleDecisions: number; decisionsWithAlternatives: number; distinctCharacters: number; interpretation: string; attributes: { attribute: string; availableDecisions: number; selectedDecisions: number; decisionsWithStatFreeAlternative: number }[] }[]; sevenDayOpportunities: { source: string; slot: string; tier: number; statVersion: number; awarded: number; distinctRecipients: number; equippedWithinSevenDays: number; sustainedUse: number; dismantledWithinSevenDays: number; medianHoursToFirstEquip: number | null; eligibleAwards: number; eligibleAwardsEquipped: number; denominator: string }[]; }
+
+export interface CompensationPackageLine { itemBaseId: string; quantity: number; equipment: { definitionId: string; tier: number; rank: number; activeStyleId: string | null } | null; }
+export interface CompensationPackage { packageId: string; version: number; name: string; purpose: string; archived: boolean; items: CompensationPackageLine[]; createdAt: string; }

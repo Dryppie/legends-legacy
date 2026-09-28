@@ -15,7 +15,8 @@ namespace Services.LL.PowerRatings;
 public sealed record EquipmentReferenceEquipmentSelection(
     EquipmentSlotType Slot, string DefinitionId, string? ActiveStyleId = null, bool UseNativeStyle = true);
 
-public sealed record EquipmentReferenceProgressionIdentity(int CharacterLevel, IReadOnlyList<string> EssenceIds);
+public sealed record EquipmentReferenceProgressionIdentity(int CharacterLevel, IReadOnlyList<string> EssenceIds,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Tier = null);
 
 public sealed record EquipmentReferenceBuildDefinition(
     string Id, int CharacterLevel, int Tier, int Rank,
@@ -27,7 +28,9 @@ public sealed record EquipmentReferenceBuildDefinition(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<EquipmentReferenceEquipmentSelection>? IdentityEquipment = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    EquipmentReferenceProgressionIdentity? IdentityProgression = null);
+    EquipmentReferenceProgressionIdentity? IdentityProgression = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<int>? IdentityEssenceIndices = null);
 
 public sealed record EquipmentReferenceBuild(
     EquipmentReferenceBuildDefinition Definition, Character Character,
@@ -77,9 +80,18 @@ public sealed class EquipmentReferenceBuildFactory(
         if (progression is not null && (definition.IdentityEssenceIds is not null
             || progression.CharacterLevel < 1 || progression.CharacterLevel > (allowFutureProjection ? 500 : 100)
             || progression.EssenceIds is null
+            || progression.Tier is < 1
+            || (progression.Tier.HasValue && progression.CharacterLevel < EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(progression.Tier.Value))
             || progression.EssenceIds.Count > EssenceSlotProgression.GetUnlockedSlotCount(progression.CharacterLevel)
             || progression.EssenceIds.Any(string.IsNullOrWhiteSpace)))
             throw new ArgumentException("Progression identity needs a legal reference level/slot count and cannot combine Essence identity pins.", nameof(definition));
+        // Removal experiments keep each surviving Essence's original instance index.
+        // Omitting the map preserves historical identities and serialized recipes.
+        var identityIndices = definition.IdentityEssenceIndices;
+        if (identityIndices is not null && (progression is null || identityIndices.Count != essenceIds.Length
+            || identityIndices.Distinct().Count() != identityIndices.Count
+            || identityIndices.Any(i => i < 0 || i >= progression.EssenceIds.Count)))
+            throw new ArgumentException("Essence identity indices require distinct original progression slots for every equipped Essence.", nameof(definition));
         // Gear experiments can retain the reference actors and item/Essence instances.
         // These selections affect identity only; actual Equipment still drives every stat and legality check.
         var identityEquipment = definition.IdentityEquipment?.OrderBy(x => x.Slot).ToArray();
@@ -88,8 +100,9 @@ public sealed class EquipmentReferenceBuildFactory(
             throw new ArgumentException("Identity equipment must match the occupied reference slots.", nameof(definition));
         var identity = JsonSerializer.Serialize(definition with
             { CharacterLevel = progression?.CharacterLevel ?? definition.CharacterLevel,
+                Tier = progression?.Tier ?? definition.Tier,
                 EssenceIds = progression?.EssenceIds ?? definition.IdentityEssenceIds ?? definition.EssenceIds,
-                IdentityEssenceIds = null, IdentityProgression = null,
+                IdentityEssenceIds = null, IdentityProgression = null, IdentityEssenceIndices = null,
                 Equipment = identityEquipment ?? definition.Equipment, IdentityEquipment = null });
         var character = new Character
         {
@@ -143,7 +156,8 @@ public sealed class EquipmentReferenceBuildFactory(
             throw new ArgumentException("Reference builds require all eight combat slots.", nameof(definition));
         var essences = essenceContent.Select((content, index) => new PlayerEssence
         {
-            Id = StableRandom.Guid(EquipmentKeys.ReferenceEssenceIdentity, identity, index.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+            Id = StableRandom.Guid(EquipmentKeys.ReferenceEssenceIdentity, identity,
+                (identityIndices?[index] ?? index).ToString(System.Globalization.CultureInfo.InvariantCulture)),
             CharacterId = character.Id, EssenceDefinitionId = content.Id, Level = 1,
             AbsorbedAt = DateTimeOffset.UnixEpoch, UpdatedAt = DateTimeOffset.UnixEpoch
         }).ToArray();

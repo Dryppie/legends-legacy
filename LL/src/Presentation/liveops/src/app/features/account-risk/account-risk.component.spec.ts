@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { AccountRiskPage } from '../../liveops.models';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import { AccountRiskListStateService } from './account-risk-list-state.service';
@@ -13,6 +13,7 @@ describe('AccountRiskComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AccountRiskComponent],
       providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
         { provide: LiveOpsApiService, useValue: api },
         { provide: Router, useValue: { navigate: jasmine.createSpy().and.resolveTo(true) } },
       ],
@@ -39,6 +40,7 @@ describe('AccountRiskComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AccountRiskComponent],
       providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
         { provide: LiveOpsApiService, useValue: api },
         { provide: Router, useValue: router },
       ],

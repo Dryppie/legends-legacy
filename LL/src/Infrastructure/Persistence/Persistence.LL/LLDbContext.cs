@@ -83,6 +83,10 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         await CaptureDungeonAttemptHistoryAsync(cancellationToken);
         NormalizeIdentityFields();
         EnforceAppendOnlyAdminActions();
+        if (ChangeTracker.Entries<CompensationPackageVersion>().Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Compensation package versions are immutable.");
+        if (ChangeTracker.Entries<SupportCaseEntry>().Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Support case entries are append-only.");
         EnforceAppendOnlyEconomyLedger();
         EnforceAppendOnlyRiskEvidence();
         if (ChangeTracker.Entries().Any(x => x.State is EntityState.Modified or EntityState.Deleted &&

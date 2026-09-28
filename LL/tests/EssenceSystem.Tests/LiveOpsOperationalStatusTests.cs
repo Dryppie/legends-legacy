@@ -3,6 +3,7 @@ using Application.UseCases.Administration.Dtos;
 using Common.Primitives;
 using Domain.Models.Administration;
 using Domain.Models.Outbox;
+using Domain.Models.BackgroundJobs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,38 @@ public sealed class LiveOpsOperationalStatusTests
 {
     private static readonly DateTimeOffset Now =
         new(2026, 8, 18, 7, 0, 0, TimeSpan.Zero);
+
+    [Fact]
+    public async Task Detail_queues_bound_results_and_use_server_time_for_actionable_exceptions()
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        await using (var db = new LLDbContext(options))
+        {
+            for (var i = 0; i < 55; i++)
+            {
+                var message = new GameEventOutboxMessage { Id = Guid.NewGuid(), PayloadJson = "{\"private\":true}", CreatedAt = Now.AddMinutes(-i) };
+                db.GameEventOutboxDeliveries.Add(new GameEventOutboxDelivery { Id = Guid.NewGuid(), MessageId = message.Id, Message = message,
+                    Consumer = "Inventory", Status = GameEventOutboxDeliveryStatus.Failed, CreatedAt = message.CreatedAt, Attempts = 2 });
+            }
+            foreach (var days in new[] { -1, 1, 8 })
+                db.AccountRestrictions.Add(new AccountRestriction { Id = Guid.NewGuid(), AccountId = Guid.NewGuid(), Reason = "Fixture",
+                    CreatedBySubject = "staff", CreatedAt = Now.AddDays(-2), ExpiresAt = Now.AddDays(days) });
+            foreach (var (status, hours) in new[] { (BackgroundJobExecutionStatus.Failed, 2), (BackgroundJobExecutionStatus.Failed, 200),
+                (BackgroundJobExecutionStatus.Running, 2), (BackgroundJobExecutionStatus.Running, 0) })
+                db.Set<BackgroundJobExecution>().Add(new BackgroundJobExecution { Id = Guid.NewGuid(), JobName = "Daily reports", BusinessKey = Guid.NewGuid().ToString(),
+                    Status = status, StartedAt = Now.AddHours(-hours), CreatedAt = Now.AddHours(-hours), UpdatedAt = Now.AddHours(-hours) });
+            await db.SaveChangesAsync();
+        }
+        var services = new ServiceCollection(); services.AddLogging(); services.AddHealthChecks();
+        await using var provider = services.BuildServiceProvider();
+        var service = new LiveOpsOperationalStatusService(provider.GetRequiredService<HealthCheckService>(), new TestContextFactory(options),
+            new TestRecentActivityReader(null!), new TestEnvironment(), new ConfigurationBuilder().Build(), new FixedTimeProvider(Now));
+        var deliveries = (await service.GetDetailsAsync("deliveries", default))!;
+        Assert.Equal(55, deliveries.Total); Assert.Equal(50, deliveries.Rows.Count); Assert.Equal(Now, deliveries.AsOf);
+        Assert.Equal(1, (await service.GetDetailsAsync("restrictions", default))!.Total);
+        Assert.Equal(2, (await service.GetDetailsAsync("jobs", default))!.Total);
+        Assert.Null(await service.GetDetailsAsync("unrecognized", default));
+    }
 
     [Fact]
     public async Task Status_summarizes_dependencies_backlog_risk_and_expiring_restrictions()

@@ -53,7 +53,7 @@ public sealed class LiveOpsApplicationRegistrationTests
             typeof(Application.UseCases.Equipments.Commands.RollbackEquipmentMigration.RollbackEquipmentMigrationCommandHandler),
             typeof(Application.UseCases.Analytics.Queries.GetItemizationTelemetry.GetItemizationTelemetryQueryHandler)
         ];
-        Assert.Equal(25, handlers.Count);
+        Assert.Equal(36, handlers.Count);
         foreach (var handlerType in additionalOperatorHandlers)
             Assert.Single(handlers, descriptor => descriptor.ImplementationType == handlerType);
         Assert.Contains(handlers, descriptor => descriptor.ImplementationType == typeof(Application.UseCases.Administration.Queries.GetCompensationEquipmentOptions.GetCompensationEquipmentOptionsQueryHandler));

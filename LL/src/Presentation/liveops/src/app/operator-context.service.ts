@@ -12,6 +12,7 @@ export class OperatorContextService {
   };
 
   session: OperatorSession | null = null;
+  sessionExpired = false;
 
   hasPermission(permission: string): boolean {
     if (!this.session) return false;

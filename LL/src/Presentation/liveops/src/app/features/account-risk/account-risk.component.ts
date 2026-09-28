@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import { AccountRiskFilters, AccountRiskPage, AccountRiskSeverity } from '../../liveops.models';
 import { AccountRiskListStateService } from './account-risk-list-state.service';
@@ -30,10 +30,15 @@ export class AccountRiskComponent implements OnInit {
     private readonly api: LiveOpsApiService,
     private readonly router: Router,
     private readonly listState: AccountRiskListStateService,
+    private readonly route?: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     const restored = this.listState.restore();
+    const requested = this.route?.snapshot.queryParamMap.get('status');
+    if (requested && ['Unreviewed', 'Investigating', 'Watchlisted', 'Cleared', 'ConfirmedAbuse', 'Actioned'].includes(requested)) {
+      this.status = requested; void this.load(); return;
+    }
     if (!restored) {
       void this.load();
       return;

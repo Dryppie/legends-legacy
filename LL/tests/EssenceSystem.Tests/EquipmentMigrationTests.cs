@@ -1,12 +1,67 @@
+using Application;
+using Application.UseCases.Equipments.Queries.GetMigratedSpecializationChoice;
+using AutoMapper;
 using Domain.Models.Analytics;
 using Domain.Models.Attributes;
 using Domain.Models.Items.Equipments.Progression;
+using Microsoft.Extensions.DependencyInjection;
 using Services.LL.Items;
 
 namespace EssenceSystem.Tests;
 
 public sealed class EquipmentMigrationTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Choice_query_maps_migration_options_and_preserves_no_choice_response(bool migrated)
+    {
+        var fixture = ServiceFixture();
+        var itemId = fixture.Store.Item!.State.Id;
+        var migrationId = Guid.NewGuid();
+        if (migrated)
+        {
+            var preview = await fixture.Service.PreviewAsync(new(itemId), null, default);
+            await fixture.Service.ApplyAsync(migrationId, preview.Target, preview.SourceHash,
+                preview.After.State.DefinitionId, "test", default);
+        }
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddApplication();
+        using var provider = services.BuildServiceProvider();
+        var handler = new GetMigratedSpecializationChoiceQueryHandler(
+            fixture.Service, provider.GetRequiredService<IMapper>());
+
+        var response = await handler.Handle(new(fixture.Owner, itemId), default);
+
+        Assert.True(response.IsSuccess);
+        if (!migrated)
+        {
+            Assert.Null(response.Data);
+            return;
+        }
+
+        Assert.NotNull(response.Data);
+        Assert.Equal(migrationId, response.Data.MigrationId);
+        var choice = await fixture.Service.GetChoiceAsync(fixture.Owner, itemId, default);
+        Assert.NotNull(choice);
+        Assert.NotEmpty(choice.Options);
+        Assert.Equal(choice.Options.Select(option => option.State.DefinitionId),
+            response.Data.Options.Select(option => option.DefinitionId));
+        foreach (var (expected, actual) in choice.Options.Zip(response.Data.Options))
+        {
+            Assert.Equal(itemId, actual.Id);
+            Assert.Equal(expected.DisplayName, actual.DisplayName);
+            Assert.Equal(expected.State.Tier, actual.Tier);
+            Assert.Equal(expected.State.Rank, actual.Rank);
+            Assert.Equal(expected.State.BalanceVersion, actual.BalanceVersion);
+            Assert.Equal(expected.State.Quality, actual.Quality);
+            Assert.Equal(expected.State.Ownership.Kind, actual.Ownership);
+            Assert.Equal(expected.Stats, actual.Stats);
+        }
+    }
+
     [Fact]
     public async Task Startup_conversion_keeps_scheduled_combat_and_retries_without_a_second_receipt()
     {

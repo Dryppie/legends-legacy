@@ -19,6 +19,8 @@
       <div class="message error" role="alert">This evaluation hit an evidence safety cap. Its score can understate or mischaracterize the account; review the underlying records before using it.</div>
     }
 
+    <div class="workspace-tools"><button type="button" class="secondary" (click)="openPlayer(view.account.characterId)">Open player</button><button type="button" class="secondary" [disabled]="!nextAccountId || saving" (click)="nextAccount()">Next unreviewed account</button><span>Times: {{ timeZone }}</span></div>
+    <nav class="section-tabs" aria-label="Investigation sections">@for (tab of ['summary', 'transfers', 'conversation', 'timing', 'notes']; track tab) { <button type="button" [class.active]="section === tab" (click)="setSection(tab)">{{ tab | titlecase }}</button> }</nav>
     <section class="risk-context-strip">
       <div><span>Account created</span><strong>{{ view.account.accountCreatedUtc | date: 'mediumDate' }}</strong></div>
       <div><span>Last session issued</span><strong>{{ view.account.lastSessionUtc ? (view.account.lastSessionUtc | date: 'medium') : 'Unavailable' }}</strong></div>
@@ -28,7 +30,7 @@
       <div><span>Direct transfers</span><strong>{{ view.account.transferCount }}</strong></div>
     </section>
 
-    <section class="risk-panel why-flagged">
+    <section class="risk-panel why-flagged" [hidden]="section !== 'summary'">
       <header><div><p class="eyebrow">Evidence and interpretation</p><h2>Why this account was flagged</h2></div><small>Overlapping evidence contributes once within each scoring family. Window starts {{ view.account.analysisWindowStart | date: 'medium' }}.</small></header>
       <div class="risk-signal-list">
         @for (signal of view.signals; track signal.type) {
@@ -38,7 +40,7 @@
     </section>
 
     <div class="risk-detail-grid">
-      <section class="risk-panel risk-connections">
+      <section class="risk-panel risk-connections" [hidden]="section !== 'summary'">
         <header><div><p class="eyebrow">Direct relationships</p><h2>Connected accounts</h2></div><span>{{ view.relationships.length }} shown</span></header>
         <div class="risk-connection-table">
           <div class="risk-connection-head"><span>Account</span><span>Relationship</span><span>To subject</span><span>From subject</span><span>Risk</span></div>
@@ -54,7 +56,7 @@
         </div>
       </section>
 
-      <section class="risk-panel risk-history-panel">
+      <section class="risk-panel risk-history-panel" [hidden]="section !== 'summary'">
         <header><div><p class="eyebrow">Sparse snapshots</p><h2>Risk history</h2></div><span>Stored on meaningful change</span></header>
         <div class="risk-history-list">
           @for (point of view.history; track point.id) {
@@ -64,7 +66,7 @@
       </section>
     </div>
 
-    <section class="risk-panel transfer-chat-correlation-panel">
+    <section class="risk-panel transfer-chat-correlation-panel" [hidden]="section !== 'conversation'">
       <header>
         <div><p class="eyebrow">Direct transfers + in-game Chat · supporting context only</p><h2>Transfer and conversation cross-reference</h2></div>
         @if (transferConversationReport) { <small>{{ transferConversationReport.windowStart | date: 'mediumDate' }} to {{ transferConversationReport.evaluatedAt | date: 'mediumDate' }}</small> }
@@ -112,7 +114,7 @@
               <details class="temporal-evidence">
                 <summary>Review {{ entry.supportingTransferIds.length }} supporting transfer ID(s)</summary>
                 <div class="supporting-transfer-ids">
-                  @for (transferId of entry.supportingTransferIds; track transferId) { <code>{{ transferId }}</code> }
+                  @for (transferId of entry.supportingTransferIds; track transferId) { <button class="text-link" type="button" (click)="inspectTransfer(transferId)">Inspect transfer {{ transferId }}</button> }
                 </div>
               </details>
             </article>
@@ -123,7 +125,7 @@
       }
     </section>
 
-    <section class="risk-panel temporal-correlation-panel">
+    <section class="risk-panel temporal-correlation-panel" [hidden]="section !== 'timing'">
       <header>
         <div><p class="eyebrow">Token-chain timing · supporting context only</p><h2>Possible account correlation</h2></div>
         @if (temporalReport) { <small>v{{ temporalReport.analysisVersion }} · {{ temporalReport.windowStart | date: 'mediumDate' }} to {{ temporalReport.evaluatedAt | date: 'mediumDate' }}</small> }
@@ -192,7 +194,7 @@
       }
     </section>
 
-    <section class="risk-panel risk-transfers">
+    <section class="risk-panel risk-transfers" [hidden]="section !== 'transfers'">
       <header><div><p class="eyebrow">Underlying records</p><h2>Transaction timeline</h2></div><small>Items are shown as quantities and are not converted into cinders.</small></header>
       <div class="risk-transfer-filters">
         <label>Direction<select [(ngModel)]="direction"><option value="">Both</option><option value="Incoming">Incoming</option><option value="Outgoing">Outgoing</option></select></label>
@@ -202,7 +204,7 @@
       </div>
       <div class="risk-transfer-list">
         @for (transfer of filteredTransfers; track transfer.transferId) {
-          <article>
+          <article [id]="'transfer-' + transfer.transferId">
             <time>{{ transfer.occurredAt | date: 'medium' }}</time>
             <span class="transfer-direction" [class.incoming]="transfer.direction === 'Incoming'">{{ transfer.direction === 'Incoming' ? '→' : '←' }} {{ transfer.direction }}</span>
             <button type="button" (click)="openPlayer(transfer.counterpartyCharacterId)"><strong>{{ transfer.counterpartyCharacterName }}</strong><small>{{ transfer.counterpartyAccountId }}</small></button>
@@ -212,7 +214,7 @@
       </div>
     </section>
 
-    <section class="risk-panel investigation-workflow">
+    <section class="risk-panel investigation-workflow" [hidden]="section !== 'notes'">
       <header><div><p class="eyebrow">Human review · separately audited</p><h2>Investigation</h2></div><span class="investigation-pill">{{ view.account.investigationStatus }}</span></header>
       @if (canModerate) {
         <div class="investigation-actions">

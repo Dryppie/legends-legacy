@@ -12,6 +12,7 @@ import { ActionPreviewComponent } from './shared/action-preview/action-preview.c
 describe('LiveOps routed frontend', () => {
   it('loads authentication once in the shared operator shell', async () => {
     const api = {
+      operatorDraft: jasmine.createSpy().and.resolveTo({ isSuccess: true, data: { key: 'workspace', version: '00000000-0000-0000-0000-000000000000', content: '{}', updatedAt: '' } }),
       session: jasmine.createSpy().and.resolveTo(session()),
       initializeAntiforgery: jasmine.createSpy().and.resolveTo(),
     };
@@ -33,11 +34,12 @@ describe('LiveOps routed frontend', () => {
       (link) => ({ label: link.textContent?.trim(), href: link.getAttribute('href') }),
     );
     expect(navigationLinks).toEqual([
-      { label: 'Status', href: '/dashboard' },
+      { label: 'Overview', href: '/dashboard' },
       { label: 'Analytics', href: '/analytics' },
       { label: 'Players', href: '/players' },
-      { label: 'Transfer review', href: '/account-risk' },
-      { label: 'Global audit', href: '/audit' },
+      { label: 'Investigations', href: '/account-risk' },
+      { label: 'Cases', href: '/cases' },
+      { label: 'Activity log', href: '/audit' },
     ]);
   });
 
@@ -60,7 +62,7 @@ describe('LiveOps routed frontend', () => {
     fixture.detectChanges();
 
     expect(api.operationalStatus).toHaveBeenCalledOnceWith();
-    expect(fixture.nativeElement.textContent).toContain('LiveOps status');
+    expect(fixture.nativeElement.textContent).toContain('Administrator overview');
     expect(fixture.nativeElement.textContent).toContain('Game database');
     fixture.destroy();
   });
@@ -78,7 +80,7 @@ describe('LiveOps routed frontend', () => {
       providers: [
         provideRouter([]),
         { provide: LiveOpsApiService, useValue: api },
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
+        { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})), snapshot: { queryParamMap: convertToParamMap({}) } } },
       ],
     }).compileComponents();
     TestBed.inject(OperatorContextService).session = session();
@@ -89,7 +91,7 @@ describe('LiveOps routed frontend', () => {
     fixture.detectChanges();
 
     expect(api.audit).toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('Global audit explorer');
+    expect(fixture.nativeElement.textContent).toContain('Activity log');
   });
 
   it('loads a routed player and preserves partial support snapshot results', async () => {

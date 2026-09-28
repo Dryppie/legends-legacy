@@ -1,3 +1,4 @@
+import { CompensationPackage, ItemizationReport, OperationalDetailPage, SupportCasePage, SupportCaseDetails, OperatorDraft } from './liveops.models';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -32,6 +33,10 @@ export class LiveOpsApiService {
 
   constructor(private readonly http: HttpClient) {}
 
+  itemizationReports(days: number): Promise<ApiResponse<ItemizationReport[]>> {
+    return firstValueFrom(this.http.get<ApiResponse<ItemizationReport[]>>('/api/liveops/analytics/itemization', { params: new HttpParams().set('days', days) }));
+  }
+
   analyticsOverview(days: number): Promise<ApiResponse<TelemetrySnapshot[]>> {
     return firstValueFrom(this.http.get<ApiResponse<TelemetrySnapshot[]>>(
       '/api/liveops/analytics/overview', { params: new HttpParams().set('days', days) }));
@@ -39,6 +44,13 @@ export class LiveOpsApiService {
 
   session(): Promise<OperatorSession> {
     return firstValueFrom(this.http.get<OperatorSession>('/auth/session'));
+  }
+
+  operatorDraft(key: string): Promise<ApiResponse<OperatorDraft>> {
+    return firstValueFrom(this.http.get<ApiResponse<OperatorDraft>>('/api/liveops/drafts/' + key.replace(':', '/')));
+  }
+  saveOperatorDraft(key: string, expectedVersion: string, content: string): Promise<ApiResponse<OperatorDraft>> {
+    return this.post('/api/liveops/drafts/' + key.replace(':', '/'), { expectedVersion, content });
   }
 
   async initializeAntiforgery(): Promise<void> {
@@ -116,6 +128,10 @@ export class LiveOpsApiService {
         { params },
       ),
     );
+  }
+
+  operationalDetails(view: string): Promise<ApiResponse<OperationalDetailPage>> {
+    return firstValueFrom(this.http.get<ApiResponse<OperationalDetailPage>>('/api/liveops/status/details', { params: new HttpParams().set('view', view) }));
   }
 
   operationalStatus(): Promise<ApiResponse<OperationalStatus>> {
@@ -303,7 +319,11 @@ export class LiveOpsApiService {
     );
   }
 
-  grantAlphaSignets(characterId: string, body: { operationId: string; quantity: number; reason: string }): Promise<ApiResponse<unknown>> {
+  previewAlphaSignets(characterId: string, body: object): Promise<ApiResponse<ActionPreview>> {
+    return this.post(`/api/liveops/characters/${characterId}/signets/preview`, body);
+  }
+
+  grantAlphaSignets(characterId: string, body: { previewToken: string; operationId: string; quantity: number; reason: string }): Promise<ApiResponse<unknown>> {
     return this.post(`/api/liveops/characters/${characterId}/signets`, body);
   }
 
@@ -314,9 +334,26 @@ export class LiveOpsApiService {
     );
   }
 
+  cases(filters: Record<string, string>): Promise<ApiResponse<SupportCasePage>> {
+    return firstValueFrom(this.http.get<ApiResponse<SupportCasePage>>('/api/liveops/cases', { params: new HttpParams({ fromObject: filters }) }));
+  }
+  supportCase(caseId: string, beforeSequence?: number): Promise<ApiResponse<SupportCaseDetails>> {
+    return firstValueFrom(this.http.get<ApiResponse<SupportCaseDetails>>(`/api/liveops/cases/${caseId}`, {
+      params: beforeSequence ? new HttpParams().set('beforeSequence', beforeSequence) : new HttpParams() }));
+  }
+  createCase(body: object): Promise<ApiResponse<SupportCaseDetails>> { return this.post('/api/liveops/cases', body); }
+  changeCase(caseId: string, action: 'notes' | 'status' | 'operations', body: object): Promise<ApiResponse<SupportCaseDetails>> {
+    return this.post(`/api/liveops/cases/${caseId}/${action}`, body);
+  }
+
+  compensationPackages(): Promise<ApiResponse<CompensationPackage[]>> { return firstValueFrom(this.http.get<ApiResponse<CompensationPackage[]>>('/api/liveops/compensation-packages')); }
+  saveCompensationPackage(body: object): Promise<ApiResponse<CompensationPackage>> { return this.post('/api/liveops/compensation-packages', body); }
+  previewCompensationPackage(body: object): Promise<ApiResponse<ActionPreview>> { return this.post('/api/liveops/compensation-packages/preview', body); }
+  grantCompensationPackage(body: object): Promise<ApiResponse<unknown>> { return this.post('/api/liveops/compensation-packages/grant', body); }
+
   logout(): Promise<unknown> {
     return firstValueFrom(
-      this.http.post('/auth/logout', {}, { headers: this.mutationHeaders() }),
+      this.http.post('/auth/logout', {}, { headers: this.mutationHeaders(), responseType: 'text' }),
     );
   }
 

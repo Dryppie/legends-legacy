@@ -16,6 +16,8 @@ import {
   templateUrl: './support-snapshot.component.html',
 })
 export class SupportSnapshotComponent {
+  @Input() view: 'all' | 'summary' | 'inventory' | 'activity' = 'all';
+  readonly timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   readonly acquisitionSourceLabel = equipmentSourceLabel;
   @Input() snapshot: PlayerSupportSnapshot | null = null;
   @Input() loading = false;

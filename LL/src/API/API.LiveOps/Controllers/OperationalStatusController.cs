@@ -10,6 +10,17 @@ namespace API.LiveOps.Controllers;
 public sealed class OperationalStatusController(
     LiveOpsOperationalStatusService statusService) : LiveOpsControllerBase
 {
+    [HttpGet("details")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<IActionResult> Details([FromQuery] string view, CancellationToken ct)
+    {
+        if (view is not ("deliveries" or "restrictions" or "jobs"))
+            return BadRequest(Response<OperationalDetailPage>.Fail("Choose deliveries, restrictions or jobs."));
+        try { return Ok(Response<OperationalDetailPage>.Success((await statusService.GetDetailsAsync(view, ct))!)); }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+        catch (Exception) { return StatusCode(503, Response<OperationalDetailPage>.Fail("Operational details are unavailable. Retry when the Game database is reachable.")); }
+    }
+
     [HttpGet]
     [Authorize(Policy = AdministrationPermissions.Read)]
     public async Task<ActionResult<Response<OperationalStatusDto>>> Get(

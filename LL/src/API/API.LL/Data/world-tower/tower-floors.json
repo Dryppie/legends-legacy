@@ -341,8 +341,8 @@
       "recommendedPowerRating": 196,
       "progressionPosition": 10,
       "guardianScaling": {
-        "health": 1.64,
-        "offense": 0.92,
+        "health": 12.71,
+        "offense": 7.13,
         "defense": 2.29,
         "resistance": 2.29,
         "penetration": 1.0,
@@ -383,8 +383,8 @@
       "recommendedPowerRating": 233,
       "progressionPosition": 11,
       "guardianScaling": {
-        "health": 2.90,
-        "offense": 3.72,
+        "health": 17.94375,
+        "offense": 23.0175,
         "defense": 3.25,
         "resistance": 3.25,
         "penetration": 1.0,

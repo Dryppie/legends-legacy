@@ -21,6 +21,8 @@ export class AccountRiskListStateService {
     this.state = state;
   }
 
+  nextAccount(currentId: string): string | null { return this.state?.data.entries.find(x => x.accountId !== currentId && x.investigationStatus === 'Unreviewed')?.accountId ?? null; }
+
   restore(): AccountRiskListState | null {
     const state = this.state;
     this.state = null;

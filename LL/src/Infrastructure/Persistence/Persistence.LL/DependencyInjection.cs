@@ -91,6 +91,9 @@ public static class DependencyInjection
         services.AddScoped<IItemizationChoiceRepository, Repositories.Analytics.ItemizationChoiceRepository>();
         services.AddScoped<Domain.Models.Nobility.INobilityRepository, Repositories.Nobility.NobilityRepository>();
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
+        services.AddScoped<ISupportCaseRepository, SupportCaseRepository>();
+        services.AddScoped<IOperatorDraftRepository, OperatorDraftRepository>();
+        services.AddScoped<ICompensationPackageRepository, CompensationPackageRepository>();
         services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();
         services.AddScoped<IAccountTemporalCorrelationRepository, AccountTemporalCorrelationRepository>();
         // Related to regions

@@ -51,7 +51,8 @@ public sealed class NobilityRepository(LLDbContext db) : INobilityRepository
                 Permission = Application.UseCases.Administration.AdministrationPermissions.EconomyCompensation, ActorSubject = issuance.ActorSubject!, ActorDisplayName = issuance.ActorSubject!,
                 TargetAccountId = issuance.AccountId, TargetCharacterId = issuance.CharacterId,
                 Reason = issuance.Reason, OccurredAt = issuance.IssuedAt,
-                DetailsJson = System.Text.Json.JsonSerializer.Serialize(new { issuance.Quantity, itemBaseId = NobilityBenefits.SignetItemId })
+                TargetResourceId = issuance.Id, RiskLevel = Domain.Models.Administration.AdministrationRiskLevel.HighValue,
+                DetailsJson = System.Text.Json.JsonSerializer.Serialize(new { issuance.Quantity, ItemName = "Alpha Signets", itemBaseId = NobilityBenefits.SignetItemId })
             });
     }
     public void AddMovement(SignetMovement movement) => db.Set<SignetMovement>().Add(movement);

@@ -2,13 +2,15 @@
   <section class="status-heading">
     <div>
       <p class="eyebrow">Operational readiness</p>
-      <h1>LiveOps status</h1>
+      <h1>Administrator overview</h1>
       <p>Dependency health, delayed work, recent privileged activity, and deployed release identity.</p>
     </div>
     <button class="secondary" type="button" [disabled]="statusLoading" (click)="loadOperationalStatus()">
       {{ statusLoading ? 'Refreshing' : 'Refresh status' }}
     </button>
   </section>
+
+  <app-work-queue />
 
   @if (statusError) { <div class="message error" role="alert">{{ statusError }}</div> }
   @if (statusLoading && !operationalStatus) {
@@ -27,6 +29,7 @@
       </div>
     </section>
 
+    <div class="workspace-tools"><a routerLink="/players">Find a player</a><a routerLink="/cases">Resume a case</a><a routerLink="/account-risk">Review investigations</a><button type="button" class="secondary" (click)="openDetails('jobs')">Inspect job exceptions</button><span>Times: {{ timeZone }}</span></div>
     @if (status.warnings.length || absoluteSkewSeconds() > 30) {
       <section class="status-warnings" aria-label="Operational warnings">
         @if (absoluteSkewSeconds() > 30) { <p>Your browser clock differs from the server by more than 30 seconds.</p> }
@@ -52,19 +55,28 @@
       <div class="signal-grid">
         <article class="signal-card" [class.alert]="status.outbox.status !== 'Healthy'">
           <span>Realtime outbox</span><strong>{{ status.outbox.isAvailable ? status.outbox.pendingDeliveries : '—' }}</strong>
-          <small>pending · {{ status.outbox.failedDeliveries }} failed</small>
+          <small>pending · {{ status.outbox.isAvailable ? status.outbox.failedDeliveries : 'Unknown' }} failed</small>
+          <button class="text-link" type="button" (click)="openDetails('deliveries')">Inspect deliveries</button>
           @if (status.outbox.oldestPendingAtUtc) { <time>Oldest {{ status.outbox.oldestPendingAtUtc | date: 'medium' }}</time> }
         </article>
         <article class="signal-card">
-          <span>Bans expiring in 7 days</span><strong>{{ status.restrictions.isAvailable ? status.restrictions.expiringWithinSevenDays : '—' }}</strong>
+          <span>Restrictions expiring in 7 days</span><strong>{{ status.restrictions.isAvailable ? status.restrictions.expiringWithinSevenDays : '—' }}</strong>
           <small>active Game account restrictions</small>
+          <button class="text-link" type="button" (click)="openDetails('restrictions')">Review expiring restrictions</button>
           @if (status.restrictions.nextExpiryAtUtc) { <time>Next {{ status.restrictions.nextExpiryAtUtc | date: 'medium' }}</time> }
         </article>
-        <button class="signal-card action-signal" type="button" (click)="openRiskAudit('Permanent')"><span>Permanent actions · 24h</span><strong>{{ status.permanentActionsLast24Hours }}</strong><small>Open filtered audit →</small></button>
-        <button class="signal-card action-signal" type="button" (click)="openRiskAudit('HighValue')"><span>High-value grants · 24h</span><strong>{{ status.highValueActionsLast24Hours }}</strong><small>Open filtered audit →</small></button>
+        <button class="signal-card action-signal" type="button" (click)="openRiskAudit('Permanent')"><span>Permanent actions · 24h</span><strong>{{ status.permanentActionsLast24Hours ?? 'Unknown' }}</strong><small>Open filtered audit →</small></button>
+        <button class="signal-card action-signal" type="button" (click)="openRiskAudit('HighValue')"><span>High-value actions · 24h</span><strong>{{ status.highValueActionsLast24Hours ?? 'Unknown' }}</strong><small>Open filtered audit →</small></button>
       </div>
     </section>
 
+    @if (detailLoading) { <p role="status">Loading operational details…</p> }
+    @if (detailError) { <div class="message error" role="alert">{{ detailError }}</div> }
+    @if (detail; as page) {
+      <section class="risk-panel"><header><h2>{{ page.view | titlecase }}</h2><span>{{ page.rows.length }} of {{ page.total }} records · {{ page.asOf | date:'medium' }}</span></header><div class="case-history"><p>{{ page.impact }}</p><p>{{ page.nextStep }}</p>
+      @for (row of page.rows; track row.id) { <article><strong>{{ row.kind }} · {{ row.status }}</strong><p>{{ row.at | date:'medium' }} @if (row.nextAt) { · Next/event time {{ row.nextAt | date:'medium' }} } @if (row.attempts) { · {{ row.attempts }} attempts }</p>@if (row.characterId) { <button class="text-link" type="button" (click)="openPlayer(row.characterId)">{{ row.characterName || 'Open player' }}</button> }<details><summary>Diagnostic reference</summary><code>{{ row.id }}</code></details></article> }@empty { <p>No matching records at the time of this check.</p> }
+      @if (page.total > page.rows.length) { <p>Showing the first 50 records. Use the owning service's diagnostics for the complete queue.</p> }</div></section>
+    }
     <div class="status-lower-grid">
       <section class="status-section recent-status-actions">
         <div class="status-section-heading"><div><p class="eyebrow">Audit</p><h2>Recent privileged activity</h2></div><button class="text-link" type="button" (click)="openAudit()">Open explorer</button></div>
@@ -72,7 +84,7 @@
           @for (entry of status.recentActions; track entry.operationId) {
             <article>
               <span class="source-pill" [class.chat]="entry.source === 'Chat'">{{ entry.source }}</span>
-              <div><strong>{{ entry.actionType }}</strong><p>{{ entry.reason }}</p><small>{{ entry.actorDisplayName }} · {{ entry.occurredAt | date: 'medium' }}</small></div>
+              <div><strong>{{ actionLabel(entry.actionType) }}</strong><p>{{ entry.reason }}</p><small>{{ entry.actorDisplayName }} · {{ entry.occurredAt | date: 'medium' }}</small></div>
               @if (entry.targetCharacterId) { <button class="text-link" type="button" (click)="openPlayer(entry.targetCharacterId!)">Player</button> }
             </article>
           } @empty { <div class="status-empty">No recent privileged activity was returned.</div> }
@@ -80,13 +92,13 @@
       </section>
       <section class="status-section release-status">
         <div class="status-section-heading"><div><p class="eyebrow">Release</p><h2>Deployed identity</h2></div></div>
-        <dl>
+        <details><summary>Show deployment details</summary><dl>
           <div><dt>LiveOps API</dt><dd>{{ status.build.releaseVersion }}</dd></div><div><dt>LiveOps UI</dt><dd>{{ status.build.frontendVersion }}</dd></div>
           <div><dt>Game</dt><dd>{{ status.build.gameVersion }}</dd></div><div><dt>Chat</dt><dd>{{ status.build.chatVersion }}</dd></div>
           <div><dt>Commit</dt><dd><code>{{ status.build.commitSha || 'not reported' }}</code></dd></div>
           <div><dt>Deployed</dt><dd>{{ status.build.deployedAtUtc ? (status.build.deployedAtUtc | date: 'medium') : 'not reported' }}</dd></div>
           <div><dt>LiveOps started</dt><dd>{{ status.build.processStartedAtUtc | date: 'medium' }}</dd></div>
-        </dl>
+        </dl></details>
       </section>
     </div>
   }

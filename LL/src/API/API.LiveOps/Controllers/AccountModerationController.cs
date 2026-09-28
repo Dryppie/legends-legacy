@@ -19,7 +19,7 @@ public sealed class AccountModerationController(
         Guid OperationId,
         string Reason,
         string? InternalNotes,
-        DateTimeOffset? ExpiresAt);
+        DateTimeOffset? ExpiresAt, int? DurationMinutes = null);
 
     public sealed record BanAccountRequest(
         Guid PreviewToken,
@@ -41,7 +41,7 @@ public sealed class AccountModerationController(
         Guid OperationId,
         string Reason,
         string? InternalNotes,
-        DateTimeOffset? ExpiresAt);
+        DateTimeOffset? ExpiresAt, int? DurationMinutes = null);
 
     public sealed record MultiplayerRestrictionRequest(
         Guid PreviewToken,
@@ -64,7 +64,7 @@ public sealed class AccountModerationController(
             request.Reason,
             request.InternalNotes,
             request.ExpiresAt,
-            cancellationToken);
+            cancellationToken, request.DurationMinutes);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
@@ -158,7 +158,7 @@ public sealed class AccountModerationController(
             request.Reason,
             request.InternalNotes,
             request.ExpiresAt,
-            cancellationToken);
+            cancellationToken, request.DurationMinutes);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 

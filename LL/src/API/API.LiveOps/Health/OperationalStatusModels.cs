@@ -38,7 +38,12 @@ public sealed record OperationalStatusDto(
     IReadOnlyList<OperationalDependencyStatus> Dependencies,
     OperationalOutboxStatus Outbox,
     OperationalRestrictionStatus Restrictions,
-    int PermanentActionsLast24Hours,
-    int HighValueActionsLast24Hours,
+    int? PermanentActionsLast24Hours,
+    int? HighValueActionsLast24Hours,
     IReadOnlyList<AdministrationAuditEntryDto> RecentActions,
     IReadOnlyList<string> Warnings);
+
+public sealed record OperationalDetailRow(Guid Id, string Kind, string Status, DateTimeOffset At,
+    DateTimeOffset? NextAt, int Attempts, Guid? CharacterId, string? CharacterName);
+public sealed record OperationalDetailPage(string View, DateTimeOffset AsOf, int Total,
+    IReadOnlyList<OperationalDetailRow> Rows, string Impact, string NextStep);

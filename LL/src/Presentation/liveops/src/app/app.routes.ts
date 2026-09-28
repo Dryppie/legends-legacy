@@ -1,6 +1,11 @@
-import { Routes } from '@angular/router';
+import { Routes, CanDeactivateFn } from '@angular/router';
+
+const finishSubmission: CanDeactivateFn<{ previewSubmitting?: boolean; busyAction?: string; saving?: boolean }> = component =>
+  !component.previewSubmitting && !component.busyAction && !component.saving;
 
 export const routes: Routes = [
+  { path: 'cases', canDeactivate: [finishSubmission], loadComponent: () => import('./features/cases/cases.component').then(c => c.CasesComponent), title: 'Support cases' },
+  { path: 'cases/:caseId', canDeactivate: [finishSubmission], loadComponent: () => import('./features/cases/cases.component').then(c => c.CasesComponent), title: 'Support case' },
   {
     path: 'analytics',
     loadComponent: () => import('./features/analytics/analytics.component')
@@ -20,13 +25,13 @@ export const routes: Routes = [
     title: 'LiveOps audit',
   },
   {
-    path: 'players',
+    path: 'players', canDeactivate: [finishSubmission],
     loadComponent: () => import('./features/players/player-workspace.component')
       .then((component) => component.PlayerWorkspaceComponent),
     title: 'LiveOps players',
   },
   {
-    path: 'players/:characterId',
+    path: 'players/:characterId', canDeactivate: [finishSubmission],
     loadComponent: () => import('./features/players/player-workspace.component')
       .then((component) => component.PlayerWorkspaceComponent),
     title: 'LiveOps player',
@@ -38,7 +43,7 @@ export const routes: Routes = [
     title: 'LiveOps direct-transfer review',
   },
   {
-    path: 'account-risk/:accountId',
+    path: 'account-risk/:accountId', canDeactivate: [finishSubmission],
     loadComponent: () => import('./features/account-risk/account-risk-detail.component')
       .then((component) => component.AccountRiskDetailComponent),
     title: 'LiveOps account investigation',

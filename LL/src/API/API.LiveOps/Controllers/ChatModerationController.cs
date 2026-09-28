@@ -16,7 +16,7 @@ public sealed class ChatModerationController(
     public sealed record MutePreviewRequest(
         Guid OperationId,
         string Reason,
-        DateTimeOffset? ExpiresAt);
+        DateTimeOffset? ExpiresAt, int? DurationMinutes = null);
 
     public sealed record MuteRequest(
         Guid PreviewToken,
@@ -48,7 +48,7 @@ public sealed class ChatModerationController(
             CurrentActor,
             request.Reason,
             request.ExpiresAt,
-            cancellationToken);
+            cancellationToken, request.DurationMinutes);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
