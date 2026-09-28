@@ -2,6 +2,8 @@
 
 ## Selected release and manual deployment
 
+The 28 September [Tenacity follow-up](tenacity-resistance-2026-09-28.md) changes rules-18 Tenacity from duration reduction to a chance to ignore harmful applications. Rebuild all combat hosts together; earlier duration-based balance evidence does not validate this changed mechanic. It adds no database migration, equipment conversion or configuration selector.
+
 The user selected the new attributes **and healing changes** for local development and the ongoing alpha, then clarified that they will deploy alpha manually. The checked-in settings for the game API, worker, LiveOps and development Admin dashboard now select this release:
 
 | Setting | Value |

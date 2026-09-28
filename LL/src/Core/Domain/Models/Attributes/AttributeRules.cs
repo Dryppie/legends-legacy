@@ -51,8 +51,8 @@ public static class AttributeRules
         return Math.Max(1, (int)Math.Ceiling(authoredTicks / (1d + Math.Clamp(haste, 0f, AbilityHasteCap) / 100d) - 1e-9d));
     }
 
-    public static int HarmfulDurationTicks(int authoredTicks, float tenacity) =>
-        AttributeCombatRules.CalculateStatusDurationTicks(authoredTicks, Math.Clamp(tenacity, 0f, TenacityCap));
+    public static float TenacityResistanceChance(float tenacity) =>
+        Effective(AttributeType.Tenacity, tenacity) / 100f;
 
     public static float Effective(AttributeType attribute, float raw)
     {

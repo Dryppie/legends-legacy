@@ -103,7 +103,7 @@ public sealed partial class FastCombatEngine
     private readonly Dictionary<RuntimeCombatant, int> _downedTicks = [];
     private readonly Dictionary<RuntimeCombatant, int> _actionDeniedTicks = [];
     private readonly Dictionary<RuntimeCombatant, int> _firstActionTicks = [];
-    private readonly Dictionary<RuntimeCombatant, int> _harmfulTicksPrevented = [];
+    private readonly Dictionary<RuntimeCombatant, int> _harmfulApplicationsResisted = [];
     private readonly Dictionary<RuntimeCombatant, int> _directHealthDamage = [];
     private readonly Dictionary<RuntimeCombatant, int> _periodicHealthDamage = [];
     private readonly Dictionary<RuntimeCombatant, int> _healingPotential = [];
@@ -597,7 +597,7 @@ public sealed partial class FastCombatEngine
                 Revivals = Math.Max(result[index].Revivals, _revivalCounts.GetValueOrDefault(combatant)),
                 DownedTicks = _downedTicks.GetValueOrDefault(combatant),
                 FirstActionTick = _firstActionTicks.TryGetValue(combatant, out var firstAction) ? firstAction : null,
-                HarmfulDurationTicksPrevented = _harmfulTicksPrevented.GetValueOrDefault(combatant),
+                HarmfulApplicationsResisted = _harmfulApplicationsResisted.GetValueOrDefault(combatant),
                 DirectHealthDamage = _directHealthDamage.GetValueOrDefault(combatant),
                 PeriodicHealthDamage = _periodicHealthDamage.GetValueOrDefault(combatant),
                 HealingPotential = _healingPotential.GetValueOrDefault(combatant),
@@ -2974,7 +2974,8 @@ public sealed partial class FastCombatEngine
         IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource = null,
         bool countStatsActivation = false,
-        double castDamageMultiplier = 1d)
+        double castDamageMultiplier = 1d,
+        string? previousStatusId = null)
     {
         if (!_statusesById.TryGetValue(statusId, out var statusDefinition))
             throw new InvalidOperationException($"Status '{statusId}' has not been compiled.");
@@ -2989,6 +2990,14 @@ public sealed partial class FastCombatEngine
 
         if (isHarmful && TryConsumeConditionCharge(target, StandardConditionType.Ward, source, combatants))
             return;
+
+        if (isHarmful && TryResistHarmfulApplication(source, target, statusId, statusDefinition.Name,
+                statsSource, countStatsActivation))
+            return;
+
+        // A resisted toggle must leave its previous state intact.
+        if (previousStatusId is not null)
+            RemoveStatus(source, target, previousStatusId, combatants);
 
         var existing = target.Statuses.FirstOrDefault(x => x.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase));
         if (existing is not null)
@@ -3076,6 +3085,11 @@ public sealed partial class FastCombatEngine
                 combatants);
             return;
         }
+
+        if (!guaranteedApplication && IsHarmfulCondition(type)
+            && TryResistHarmfulApplication(source, target, GetConditionId(type), type.ToString(),
+                statsSource, countStatsActivation))
+            return;
 
         var normalizedValue = Math.Max(1, value);
         switch (type)
@@ -3250,7 +3264,7 @@ public sealed partial class FastCombatEngine
         }
 
         existing.ReplaceValue(value);
-        existing.RefreshDuration(ResistedConditionDuration(target, type, durationTicks));
+        existing.RefreshDuration(durationTicks);
     }
 
     private void ApplyOrStackSharedCondition(
@@ -3277,7 +3291,7 @@ public sealed partial class FastCombatEngine
 
         existing.AddValue(value, maximum);
         if (durationTicks > 0)
-            existing.RefreshDuration(ResistedConditionDuration(target, type, durationTicks));
+            existing.RefreshDuration(durationTicks);
     }
 
     private void AddIndependentCondition(
@@ -3291,13 +3305,6 @@ public sealed partial class FastCombatEngine
         double? storedDamage = null,
         double damageMultiplier = 1d)
     {
-        durationTicks = ResistedConditionDuration(target, type, durationTicks);
-        if (target.UsesCurrentAttributeRules && ConditionResistanceRules.For(type) == ConditionResistancePolicy.ExpiryDamage)
-        {
-            var factor = 1d - target.GetAttribute(AttributeType.Tenacity) / 100d;
-            if (storedDamage.HasValue) storedDamage *= factor;
-            else damageMultiplier *= factor;
-        }
         target.Conditions.Add(
             new RuntimeCondition(
                 type,
@@ -3311,38 +3318,32 @@ public sealed partial class FastCombatEngine
                 intervalTicks, storedDamage, damageMultiplier));
     }
 
-    private int ResistedConditionDuration(RuntimeCombatant target, StandardConditionType type, int ticks) =>
-        target.UsesCurrentAttributeRules && ConditionResistanceRules.For(type) == ConditionResistancePolicy.Duration
-            ? ResistDuration(target, ticks) : ticks;
-
-    private int ResistDuration(RuntimeCombatant target, int ticks)
+    private bool TryResistHarmfulApplication(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        string effectId,
+        string effectName,
+        string? statsSource,
+        bool countStatsActivation)
     {
-        var effective = AttributeRules.HarmfulDurationTicks(ticks, target.GetAttribute(AttributeType.Tenacity));
-        _harmfulTicksPrevented[target] = _harmfulTicksPrevented.GetValueOrDefault(target) + Math.Max(0, ticks - effective);
-        return effective;
+        if (!target.UsesCurrentAttributeRules)
+            return false;
+
+        var chance = AttributeRules.TenacityResistanceChance(target.GetAttribute(AttributeType.Tenacity));
+        if (chance <= 0 || _random.NextDouble() >= chance)
+            return false;
+
+        _harmfulApplicationsResisted[target] = _harmfulApplicationsResisted.GetValueOrDefault(target) + 1;
+        Log(source, target, effectId, EventType.StatusEffectResisted, 1,
+            $"{target.Name} resisted {effectName}.", statsSource, countStatsActivation);
+        return true;
     }
 
     private static bool IsControlCondition(StandardConditionType type) =>
         type is StandardConditionType.Freeze or StandardConditionType.Stun;
 
     private static bool IsHarmfulCondition(StandardConditionType type) =>
-        type is StandardConditionType.Slow
-            or StandardConditionType.Weaken
-            or StandardConditionType.Vulnerable
-            or StandardConditionType.Wound
-            or StandardConditionType.Decay
-            or StandardConditionType.Poison
-            or StandardConditionType.Burn
-            or StandardConditionType.Bleed
-            or StandardConditionType.Stun
-            or StandardConditionType.Chill
-            or StandardConditionType.Freeze
-            or StandardConditionType.Corrosion
-            or StandardConditionType.Doom
-            or StandardConditionType.Mark
-            or StandardConditionType.Silence
-            or StandardConditionType.Soaked
-            or StandardConditionType.Exposed;
+        ConditionResistanceRules.For(type) == ConditionResistancePolicy.Application;
 
     private static bool IsBeneficialCondition(StandardConditionType type) =>
         !IsHarmfulCondition(type);
@@ -3389,9 +3390,7 @@ public sealed partial class FastCombatEngine
             return statusDefinition.DurationTicks;
 
         if (target.UsesCurrentAttributeRules)
-            return ConditionResistanceRules.IsHarmfulStatus(statusDefinition.Tags)
-                ? ResistDuration(target, statusDefinition.DurationTicks)
-                : statusDefinition.DurationTicks;
+            return statusDefinition.DurationTicks;
 
         var isCrowdControl = statusDefinition.Tags.Any(tag =>
             tag.StartsWith("Control.", StringComparison.OrdinalIgnoreCase));
@@ -3896,7 +3895,6 @@ public sealed partial class FastCombatEngine
             ? alternativeStatusId
             : statusId;
 
-        RemoveStatus(source, target, previousStatusId, combatants);
         ApplyStatus(
             source,
             target,
@@ -3904,7 +3902,8 @@ public sealed partial class FastCombatEngine
             1,
             combatants,
             statsSource,
-            countStatsActivation);
+            countStatsActivation,
+            previousStatusId: previousStatusId);
     }
 
     private int CleanseStatuses(

@@ -11,6 +11,24 @@ namespace EssenceSystem.Tests;
 public sealed class EquipmentComparisonProjectorTests
 {
     [Fact]
+    public void Tenacity_comparison_shows_capped_resistance_chance_instead_of_shorter_duration()
+    {
+        var character = CharacterWithSlots(level: 1);
+        character.AttributeRulesVersion = AttributeRules.CurrentVersion;
+        character.BaseAttributes.Add(new EntityAttribute { AttributeType = AttributeType.Tenacity, Value = 20 });
+        var candidate = ProgressionTestEquipment.Create(equipmentType: EquipmentType.Head,
+            stats: new Dictionary<AttributeType, float> { [AttributeType.Tenacity] = 90 });
+
+        Assert.True(EquipmentComparisonProjector.TryProject(character, candidate, EquipmentSlotType.Head, [], out var comparison));
+
+        var metric = Assert.Single(comparison!.Metrics, x => x.Id == "tenacity-resist");
+        Assert.Equal(20, metric.Before, 4);
+        Assert.Equal(80, metric.After, 4);
+        Assert.Equal("%", metric.Unit);
+        Assert.DoesNotContain(comparison.Metrics, x => x.Id == "tenacity-duration");
+    }
+
+    [Fact]
     public void Projection_aggregates_complete_rating_before_applying_diminishing_returns()
     {
         var character = CharacterWithSlots(level: 1);

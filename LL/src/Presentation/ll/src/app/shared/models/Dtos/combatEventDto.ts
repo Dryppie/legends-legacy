@@ -31,6 +31,7 @@ export enum EventType {
   StatusEffectRemoved = 'StatusEffectRemoved',
   StatusEffectCleansed = 'StatusEffectCleansed',
   StatusEffectDispelled = 'StatusEffectDispelled',
+  StatusEffectResisted = 'StatusEffectResisted',
   StaggerApplied = 'StaggerApplied',
   StaggerBroken = 'StaggerBroken',
   StaggerRecovered = 'StaggerRecovered',

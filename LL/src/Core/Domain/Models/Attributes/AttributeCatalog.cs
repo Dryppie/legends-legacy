@@ -9,7 +9,7 @@ public static class AttributeCatalog
                 "Increases active ability frequency: cooldown / (1 + haste / 100). Does not affect passive internal cooldowns.",
                 AttributeRules.AbilityHasteCap, Scenarios(AttributeBenchmarkScenario.PhysicalOffense, AttributeBenchmarkScenario.HealingSustain)),
             [AttributeType.Tenacity] = Percent(AttributeType.Tenacity, "Tenacity",
-                "Shortens harmful timed conditions and statuses. Doom damage is reduced without accelerating its countdown. Does not affect boss Stagger or permanent charges.",
+                "Chance to ignore each incoming harmful condition or status, up to 80%. Effects that land retain their full duration and strength. Does not affect beneficial effects, boss Stagger or guaranteed applications.",
                 AttributeRules.TenacityCap, Scenarios(AttributeBenchmarkScenario.StatusResilience, AttributeBenchmarkScenario.CrowdControlResilience)),
             [AttributeType.Restoration] = Percent(AttributeType.Restoration, "Restoration",
                 "Increases authored healing and barriers. Does not increase regeneration, life steal, transfers or health-cost refunds.",

@@ -95,14 +95,17 @@ public sealed class AttributeRedesignTests
     }
 
     [Fact]
-    public void Tenacity_policy_distinguishes_harmful_timers_expiry_damage_and_charges()
+    public void Tenacity_policy_covers_harmful_applications_including_doom_and_charges()
     {
-        Assert.Equal(ConditionResistancePolicy.Duration, ConditionResistanceRules.For(StandardConditionType.Stun));
-        Assert.Equal(ConditionResistancePolicy.ExpiryDamage, ConditionResistanceRules.For(StandardConditionType.Doom));
+        Assert.Equal(ConditionResistancePolicy.Application, ConditionResistanceRules.For(StandardConditionType.Stun));
+        Assert.Equal(ConditionResistancePolicy.Application, ConditionResistanceRules.For(StandardConditionType.Doom));
+        Assert.Equal(ConditionResistancePolicy.Application, ConditionResistanceRules.For(StandardConditionType.Vulnerable));
+        Assert.Equal(ConditionResistancePolicy.Application, ConditionResistanceRules.For(StandardConditionType.Soaked));
         Assert.Equal(ConditionResistancePolicy.Unaffected, ConditionResistanceRules.For(StandardConditionType.Guard));
         Assert.Equal(ConditionResistancePolicy.Unaffected, ConditionResistanceRules.For(StandardConditionType.Empower));
-        Assert.Equal(24, AttributeRules.HarmfulDurationTicks(30, 20));
-        Assert.Equal(1, AttributeRules.HarmfulDurationTicks(1, 80));
+        Assert.Equal(.2f, AttributeRules.TenacityResistanceChance(20));
+        Assert.Equal(.8f, AttributeRules.TenacityResistanceChance(1000));
+        Assert.Equal(0, AttributeRules.TenacityResistanceChance(-10));
         Assert.True(ConditionResistanceRules.IsHarmfulStatus(["Status.Debuff"]));
         Assert.False(ConditionResistanceRules.IsHarmfulStatus(["Status.Buff"]));
     }
@@ -141,11 +144,11 @@ public sealed class AttributeRedesignTests
     }
 
     [Theory]
-    [InlineData(StandardConditionType.Stun, 3, 24)]
-    [InlineData(StandardConditionType.Poison, 1, 96)]
+    [InlineData(StandardConditionType.Stun, 3, 30)]
+    [InlineData(StandardConditionType.Poison, 1, 120)]
     [InlineData(StandardConditionType.Empower, 1, 100)]
     [InlineData(StandardConditionType.Doom, 1, 150)]
-    public void Production_engine_applies_condition_specific_tenacity(StandardConditionType condition, int value, int ticks)
+    public void Guaranteed_conditions_keep_their_full_duration_and_damage(StandardConditionType condition, int value, int ticks)
     {
         var ability = Active("condition", new AbilityEffectSpec { Id = "apply", Operation = AbilityEffectOperation.ApplyCondition,
             Condition = condition, Target = AbilityTargetSelector.CurrentTarget, BaseValue = value, GuaranteedConditionApplication = true });
@@ -154,7 +157,7 @@ public sealed class AttributeRedesignTests
         Run(actor, target);
         var applied = Assert.Single(target.Conditions);
         Assert.Equal(ticks, applied.DurationTicks);
-        if (condition == StandardConditionType.Doom) Assert.Equal(.8, applied.DamageMultiplier, 6);
+        Assert.Equal(1, applied.DamageMultiplier);
     }
 
     [Fact]

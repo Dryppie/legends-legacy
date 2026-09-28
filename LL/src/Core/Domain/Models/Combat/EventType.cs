@@ -36,4 +36,5 @@ public enum EventType
     Revive,
     WaveStarted,
     FuryIncreased,
+    StatusEffectResisted,
 }
