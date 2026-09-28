@@ -28,7 +28,17 @@ describe('LiveOps routed frontend', () => {
     expect(api.session).toHaveBeenCalledOnceWith();
     expect(api.initializeAntiforgery).toHaveBeenCalledOnceWith();
     expect(fixture.nativeElement.textContent).toContain('Test Operator');
-    expect(fixture.nativeElement.querySelectorAll('.primary-nav a').length).toBe(4);
+    const navigationLinks = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.primary-nav a'),
+      (link) => ({ label: link.textContent?.trim(), href: link.getAttribute('href') }),
+    );
+    expect(navigationLinks).toEqual([
+      { label: 'Status', href: '/dashboard' },
+      { label: 'Analytics', href: '/analytics' },
+      { label: 'Players', href: '/players' },
+      { label: 'Transfer review', href: '/account-risk' },
+      { label: 'Global audit', href: '/audit' },
+    ]);
   });
 
   it('loads operational status inside the dashboard route component', async () => {
