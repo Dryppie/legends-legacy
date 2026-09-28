@@ -15,6 +15,8 @@ namespace Services.LL.PowerRatings;
 public sealed record EquipmentReferenceEquipmentSelection(
     EquipmentSlotType Slot, string DefinitionId, string? ActiveStyleId = null, bool UseNativeStyle = true);
 
+public sealed record EquipmentReferenceProgressionIdentity(int CharacterLevel, IReadOnlyList<string> EssenceIds);
+
 public sealed record EquipmentReferenceBuildDefinition(
     string Id, int CharacterLevel, int Tier, int Rank,
     IReadOnlyList<EquipmentReferenceEquipmentSelection> Equipment, IReadOnlyList<string> EssenceIds,
@@ -23,7 +25,9 @@ public sealed record EquipmentReferenceBuildDefinition(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<string>? IdentityEssenceIds = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    IReadOnlyList<EquipmentReferenceEquipmentSelection>? IdentityEquipment = null);
+    IReadOnlyList<EquipmentReferenceEquipmentSelection>? IdentityEquipment = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    EquipmentReferenceProgressionIdentity? IdentityProgression = null);
 
 public sealed record EquipmentReferenceBuild(
     EquipmentReferenceBuildDefinition Definition, Character Character,
@@ -67,6 +71,15 @@ public sealed class EquipmentReferenceBuildFactory(
         if (definition.IdentityEssenceIds is { } identityEssences
             && (identityEssences.Count != essenceIds.Length || identityEssences.Any(string.IsNullOrWhiteSpace)))
             throw new ArgumentException("Identity Essence slots must match the equipped slot count.", nameof(definition));
+        // A progression comparison can add a slot or change level without replacing the
+        // original actors/items. Actual level and equipped Essences were validated above.
+        var progression = definition.IdentityProgression;
+        if (progression is not null && (definition.IdentityEssenceIds is not null
+            || progression.CharacterLevel < 1 || progression.CharacterLevel > (allowFutureProjection ? 500 : 100)
+            || progression.EssenceIds is null
+            || progression.EssenceIds.Count > EssenceSlotProgression.GetUnlockedSlotCount(progression.CharacterLevel)
+            || progression.EssenceIds.Any(string.IsNullOrWhiteSpace)))
+            throw new ArgumentException("Progression identity needs a legal reference level/slot count and cannot combine Essence identity pins.", nameof(definition));
         // Gear experiments can retain the reference actors and item/Essence instances.
         // These selections affect identity only; actual Equipment still drives every stat and legality check.
         var identityEquipment = definition.IdentityEquipment?.OrderBy(x => x.Slot).ToArray();
@@ -74,7 +87,9 @@ public sealed class EquipmentReferenceBuildFactory(
             || !identityEquipment.Select(x => x.Slot).SequenceEqual(selections.Select(x => x.Slot))))
             throw new ArgumentException("Identity equipment must match the occupied reference slots.", nameof(definition));
         var identity = JsonSerializer.Serialize(definition with
-            { EssenceIds = definition.IdentityEssenceIds ?? definition.EssenceIds, IdentityEssenceIds = null,
+            { CharacterLevel = progression?.CharacterLevel ?? definition.CharacterLevel,
+                EssenceIds = progression?.EssenceIds ?? definition.IdentityEssenceIds ?? definition.EssenceIds,
+                IdentityEssenceIds = null, IdentityProgression = null,
                 Equipment = identityEquipment ?? definition.Equipment, IdentityEquipment = null });
         var character = new Character
         {

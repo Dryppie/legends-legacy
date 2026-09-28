@@ -1,5 +1,9 @@
 # Concrete progression budget draft — 28 September 2026
 
+Superseded equipment intent: the user subsequently specified the [repeating ten-floor rarity/quality/rank curve](Tower-Repeating-Equipment-Curve-20260928.md). Use its version-2 fixture for new intended-budget work. The original draft and recorded observations below remain historical.
+
+Follow-up: the user proceeded with the recommended existing curve for the [completed floor-10/11 offline screen](Tower-Progression-Checkpoint-Screen-20260928.md). Its 4,256 diagnostic fights preserve intended and lower-budget cohorts. The original draft and preview below retain their provisional ownership assumptions; the follow-up does not define a maximum gear budget for real players.
+
 **Recommendation: keep the supported search and use the existing equipment curve as the next explicit test budget.** The [floor-13 geared search](Tower-Floor13-Geared-Search-Evaluation-20260928.md) did not establish an improvement. The useful next decision is which player resources the Tower should be balanced around. This draft makes the existing assumptions executable and reviewable without declaring them approved.
 
 The offline preview prepared **77 complete parties: 11 floors × original gear plus six specialization alternatives**, using current attributes 18, equipment release 4 and healing-v1. It ran **zero fights**, reserved **zero seeds**, and made no balance or search-quality claim. The parties are authored starting compositions; known retained specialists must be added before evaluating balance.

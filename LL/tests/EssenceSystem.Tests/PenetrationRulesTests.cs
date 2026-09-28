@@ -69,7 +69,8 @@ public sealed class PenetrationRulesTests
         {
             var metadata = AttributeCatalog.GetAll(version).Single(x => x.AttributeType == attribute);
             Assert.Equal(cap, metadata.MaximumValue);
-            Assert.Contains(version == 18 ? "percentage points" : "rating ignored", metadata.Description);
+            Assert.Equal(AttributeUnit.PercentagePoints, metadata.Unit);
+            Assert.Equal(AttributeCapKind.Fixed, metadata.CapKind);
             Assert.Equal(cap, AttributeCalculator.CalculateProjectedAttributes(
                 new Dictionary<AttributeType, float> { [attribute] = 85 }, [], version)[attribute]);
             Assert.Equal(cap, EquipmentStatBudgetCatalog.GetForVersion(attribute, version).PerItemHardCap);

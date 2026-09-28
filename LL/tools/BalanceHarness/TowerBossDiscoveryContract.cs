@@ -475,7 +475,7 @@ public static class TowerBossDiscovery
     internal static bool LegalBudget(TowerSearchBudget? b) => b is not null && b.PriorityFloor is >= 1 and <= 15
         && b.EssenceSlots is >= 4 and <= 10 && b.CharacterLevel is >= 1 and <= 100
         && b.EssenceSlots <= EssenceSlotProgression.GetUnlockedSlotCount(b.CharacterLevel)
-        && b.Tier is >= 1 and <= 2 && b.Rank is >= 0 and <= 4 && Enum.IsDefined(b.Quality);
+        && b.Tier is >= 1 and <= 2 && b.Rank is >= 0 and <= Domain.Models.Items.Equipments.Progression.EquipmentBalance.MaximumRank && Enum.IsDefined(b.Quality);
 
     internal static bool LegalPurpose(TowerSearchBudget budget, string purpose) => purpose == "diagnostic"
         || purpose == "intended-progression" && (budget.PriorityFloor switch {
