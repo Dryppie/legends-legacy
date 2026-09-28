@@ -162,7 +162,7 @@ public static class TowerBossGeneration
             || d.EquipmentContexts.Values.Any(c => c is null || c.Count != d.RequiredPartySize
                 || c.Any(p => p is null || p.Equipment is null || !double.IsFinite(p.AttributeRollMultiplier) || p.AttributeRollMultiplier <= 0)
                 || !c.Select(p => p.PartySlot).SequenceEqual(Enumerable.Range(1, d.RequiredPartySize)))
-            || d.ContentHashes is null || !d.ContentHashes.Keys.Order().SequenceEqual(TowerBundle.Files.Order())
+            || d.ContentHashes is null || !ContentSnapshotContract.IsKnownTowerFiles(d.ContentHashes.Keys)
             || d.ContentHashes.Values.Any(h => !TowerContractJson.Hash(h)))
             throw new InvalidDataException("Invalid independent generation input boundary.");
         var g = d.Generation;

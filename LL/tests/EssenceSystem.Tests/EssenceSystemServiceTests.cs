@@ -433,7 +433,8 @@ public sealed partial class EssenceSystemServiceTests
         Assert.Equal(15, projected[AttributeType.Power]);
         Assert.Equal(110, projected[AttributeType.MaxHealth]);
         Assert.Equal(0, projected[AttributeType.Armor]);
-        Assert.Equal(4, projected[AttributeType.Resistance]);
+        Assert.Equal(4, projected[AttributeType.ResistanceRating]);
+        Assert.Equal(100 * AttributeRules.Mitigation(4), projected[AttributeType.Resistance], 4);
         Assert.Equal(3, projected[AttributeType.DodgeChance]);
     }
 

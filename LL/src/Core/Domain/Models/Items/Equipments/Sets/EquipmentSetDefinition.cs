@@ -8,11 +8,14 @@ public sealed class EquipmentSetDefinition
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
+    // Authoring-budget validation only; unlocked bonuses always grant their authored amount.
+    public bool UsesReservedIdentity { get; init; }
     public IReadOnlyList<EquipmentSetBonusDefinition> Bonuses { get; init; } = [];
 }
 
 public sealed class EquipmentSetBonusDefinition
 {
+    public double IdentityBudgetCost { get; init; }
     public string Id { get; init; } = string.Empty;
     public int RequiredEquippedItems { get; init; }
     public string Description { get; init; } = string.Empty;

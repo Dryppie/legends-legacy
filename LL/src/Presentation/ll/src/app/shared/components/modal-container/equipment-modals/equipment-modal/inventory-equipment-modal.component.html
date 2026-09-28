@@ -46,6 +46,8 @@
       </aside>
 
       <main class="min-w-0 p-4 lg:overflow-y-auto" aria-label="Manage item">
+        <app-migrated-specialization *ngIf="equipmentInstance.progression && !equipmentInstance.isGuildBorrowed"
+          [itemId]="equipmentInstance.id" (completed)="onClose()"></app-migrated-specialization>
         <app-equipment-upgrade-panel
           *ngIf="
             equipmentInstance.progression && !equipmentInstance.isGuildBorrowed
@@ -90,6 +92,14 @@
         [fitComparisonToContainer]="true"
       ></app-equipment-display>
 
+      <label class="mt-4 flex flex-wrap items-center gap-2 text-xs text-zinc-300">
+        Compare for
+        <select class="rounded border border-light_gray bg-black/40 px-2 py-1 text-white focus:border-primary"
+          [value]="selectedActivity" (change)="selectActivity($event)" aria-label="Comparison activity">
+          <option *ngFor="let activity of comparisonActivities" [value]="activity.id">{{ activity.label }}</option>
+        </select>
+      </label>
+
       <section
         *ngIf="characterComparison as comparison"
         class="mt-4 rounded border border-primary/20 bg-black/20 p-3"
@@ -98,8 +108,27 @@
         <div class="ll-item-meta text-primary">Complete character result</div>
         <p class="mt-1 text-xs text-secondary">
           Server-calculated at level {{ comparison.characterLevel }}, including
-          all equipped ratings and diminishing returns.
+          all equipped ratings and set bonuses.
+          <span *ngIf="comparison.doctrine">Doctrine: {{ comparison.doctrine }}.</span>
+          Temporary effects and Doctrine triggers are excluded from these stat projections.
         </p>
+
+        <div *ngIf="comparison.metrics?.length" class="mt-3 space-y-2">
+          <div *ngFor="let metric of comparison.metrics" class="border-b border-light_gray/30 pb-2 text-xs last:border-0">
+            <div class="flex flex-wrap justify-between gap-x-3 gap-y-1">
+              <span class="text-zinc-300">{{ metric.label }}</span>
+              <span class="tabular-nums text-white">{{ metric.before | number:'1.0-2' }} &rarr; {{ metric.after | number:'1.0-2' }} {{ metric.unit }}</span>
+            </div>
+            <p class="mt-1 text-zinc-400">{{ metric.assumption }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="comparison.setChanges?.length" class="mt-3 rounded border border-light_gray p-2 text-xs">
+          <div class="text-primary">Set bonuses changed</div>
+          <p *ngFor="let change of comparison.setChanges" class="mt-1 text-zinc-300">
+            {{ change.name }}: {{ change.activeAfter ? 'Activated' : 'Lost' }} — {{ change.description }}
+          </p>
+        </div>
 
         <div *ngIf="comparison.ratings.length" class="mt-3">
           <div class="mb-1 text-xs font-medium text-primary">Ratings</div>
@@ -168,7 +197,21 @@
             </span>
           </div>
         </div>
+        <details *ngIf="comparison.breakdown?.length" class="mt-3 border-t border-light_gray pt-2 text-xs">
+          <summary class="cursor-pointer text-primary">After equipping: stat sources and caps</summary>
+          <p class="mt-2 text-zinc-400">Base &rarr; with equipment &rarr; with sets and loadout &rarr; effective.</p>
+          <div *ngFor="let stat of comparison.breakdown" class="flex flex-wrap justify-between gap-2 border-b border-white/5 py-1">
+            <span class="text-zinc-300">{{ stat.attributeType | attributeTypeFormat }}</span>
+            <span class="tabular-nums text-white">{{ stat.base | number:'1.0-2' }} &rarr; {{ stat.withEquipment | number:'1.0-2' }} &rarr; {{ stat.withSetsAndLoadout | number:'1.0-2' }} &rarr; {{ stat.effective | attributeValueFormat:stat.attributeType }}</span>
+            <span *ngIf="stat.unusedAtCap > 0" class="w-full text-amber-300">{{ stat.unusedAtCap | number:'1.0-2' }} unused at the current cap.</span>
+          </div>
+        </details>
       </section>
+
+      <div *ngIf="comparisonError" class="mt-3 flex items-center gap-2 text-xs text-rose-300" role="alert">
+        Comparison could not be loaded.
+        <button type="button" class="ll-button" (click)="loadCharacterComparison()">Retry</button>
+      </div>
 
       <p *ngIf="comparisonLoading" class="mt-3 text-xs text-secondary">
         Calculating complete character result&hellip;

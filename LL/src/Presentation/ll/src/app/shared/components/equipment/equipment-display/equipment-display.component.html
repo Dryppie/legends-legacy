@@ -32,7 +32,7 @@
 
       <div class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
-          <span class="ll-item-meta text-primary">Gear Value</span>
+          <span class="ll-item-meta text-primary">Gear Power</span>
           <span class="font-serif text-xl tabular-nums text-primary">{{ data.itemBudget | number: "1.0-2" }}</span>
         </div>
       </div>
@@ -70,7 +70,7 @@
 
       <div class="mt-3 border-t border-primary/20 pt-3">
         <div class="flex items-end justify-between gap-4">
-          <span class="ll-item-meta">Gear Value</span>
+          <span class="ll-item-meta">Gear Power</span>
           <span class="flex items-baseline gap-2 tabular-nums">
             <span class="font-serif text-xl text-white">{{ equipped.data.itemBudget | number: "1.0-2" }}</span>
             <span class="text-xs font-semibold" [ngClass]="comparisonClass(data.itemBudget - equipped.data.itemBudget)">
@@ -145,7 +145,7 @@
 
     <div *ngIf="data.itemBudget > 0" class="equipment-detail-section text-xs">
       <div class="flex items-end justify-between gap-4">
-        <span class="ll-item-meta">Gear Value</span>
+        <span class="ll-item-meta">Gear Power</span>
         <span class="font-medium tabular-nums text-primary">
           {{ data.itemBudget | number: "1.0-2" }}
           <span *ngIf="inlineComparison && comparisonData" data-testid="inline-gear-value-difference" class="equipment-inline-delta ml-2" [ngClass]="comparisonClass(data.itemBudget - comparisonData.itemBudget)">
@@ -172,7 +172,7 @@
         </span>
       </div>
       <div *ngIf="data.itemBudget > 0 || equipped.itemBudget > 0" class="ll-item-stat-row mt-1">
-        <span>Gear Value</span>
+        <span>Gear Power</span>
         <span class="flex gap-3 tabular-nums">
           <span class="text-white">{{ equipped.itemBudget | number: "1.0-2" }}</span>
           <span [ngClass]="comparisonClass(data.itemBudget - equipped.itemBudget)">{{ data.itemBudget - equipped.itemBudget > 0 ? "+" : "" }}{{ data.itemBudget - equipped.itemBudget | number: "1.0-2" }}</span>

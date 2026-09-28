@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "healing-v1",
+  "attributeRulesVersion": 18,
+  "abilities": [
+    {
+      "id": "ability.creature.treant_sapling.sprouting_surge",
+      "kind": "Active",
+      "name": "Sprouting Surge",
+      "description": "Heal yourself for {scaling} Power.",
+      "cooldownTicks": 160,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        {
+          "id": "effect.creature.treant_sapling.sprouting_surge.heal",
+          "operation": "Heal",
+          "target": "Self",
+          "scalingAttribute": "Power",
+          "scalingCoefficient": 1.25,
+          "procCoefficient": 1
+        }
+      ],
+      "owningEssenceId": "essence.treant_sapling"
+    },
+    {
+      "id": "ability.creature.lizardfolk_shaman.herb_mixture",
+      "kind": "Active",
+      "name": "Herb Mixture",
+      "description": "Heal the ally with the least current Health, including yourself and summons, for {scaling} Power.",
+      "cooldownTicks": 140,
+      "tags": [
+        "Healing",
+        "Support"
+      ],
+      "owningEssenceId": "essence.lizardfolk_shaman",
+      "effects": [
+        {
+          "id": "effect.creature.lizardfolk_shaman.herb_mixture.0",
+          "procCoefficient": 1,
+          "operation": "Heal",
+          "target": "LowestHealthAlly",
+          "scalingAttribute": "Power",
+          "scalingCoefficient": 1.05
+        }
+      ]
+    }
+  ]
+}

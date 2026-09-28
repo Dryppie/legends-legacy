@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "contentRoot": "LL/src/API/API.LL",
+  "outputDirectory": "TestResults/equipment-release-comparison-20260927",
+  "explorationSeeds": [
+    10101,
+    10102
+  ],
+  "confirmationSeeds": [
+    20101,
+    20102
+  ],
+  "cells": [
+    {
+      "id": "release-physical",
+      "reference": {
+        "id": "maul-basic-light-penetration",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.spec.armor.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.epic",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": []
+      },
+      "candidate": {
+        "id": "maul-basic-light-penetration",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.spec.armor.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.rarity.epic",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": []
+      },
+      "doctrine": {
+        "id": "duelist"
+      },
+      "opponent": {
+        "id": "maul-basic-light-opponent",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.maul.spec.precision.rarity.epic",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": []
+      },
+      "opponentDoctrine": {
+        "id": "duelist"
+      }
+    },
+    {
+      "id": "release-magical",
+      "reference": {
+        "id": "staff-dot-light-penetration",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.epic",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.venomous_snake",
+          "essence.giant_spider",
+          "essence.blood_zombie",
+          "essence.flame_imp"
+        ]
+      },
+      "candidate": {
+        "id": "staff-dot-light-penetration",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.epic",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.venomous_snake",
+          "essence.giant_spider",
+          "essence.blood_zombie",
+          "essence.flame_imp"
+        ]
+      },
+      "doctrine": {
+        "id": "reaper"
+      },
+      "opponent": {
+        "id": "staff-dot-light-opponent",
+        "characterLevel": 90,
+        "tier": 2,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.light_hood.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.light_vest.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.light_leggings.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.epic",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.precision.rarity.epic",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.venomous_snake",
+          "essence.giant_spider",
+          "essence.blood_zombie",
+          "essence.flame_imp"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "reaper"
+      }
+    }
+  ],
+  "maximumBattles": 32,
+  "referenceRulesVersion": 18,
+  "referenceEquipmentBalanceVersion": 2,
+  "candidateEquipmentBalanceVersion": 3,
+  "allowBudgetChanges": false
+}

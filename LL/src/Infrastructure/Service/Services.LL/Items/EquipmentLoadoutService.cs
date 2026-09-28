@@ -1,5 +1,8 @@
 using Application.Interfaces.Services.LL.Items;
+using Application.Interfaces.Outbox;
+using Services.LL.Analytics;
 using Domain.Models.Essences;
+using Domain.Models.Analytics;
 using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Loadouts;
@@ -10,7 +13,7 @@ namespace Services.LL.Items;
 public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository repository, IEquipmentSlotRepository equipment,
     ICombatStyleMutationBoundary? buildBoundary = null,
     Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null,
-    TimeProvider? time = null) : IEquipmentLoadoutService
+    TimeProvider? time = null, IGameEventOutbox? outbox = null, IItemizationChoiceRepository? choices = null) : IEquipmentLoadoutService
 {
     public async Task<List<EquipmentLoadout>> GetAsync(Guid characterId, CancellationToken ct)
     {
@@ -118,6 +121,9 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
         if (buildBoundary is not null && await buildBoundary.PrepareMutationAsync(characterId, ct) is { } blocked)
             return EquipmentEquipResult.Fail(blocked);
         var current = await equipment.GetEquipmentSlotsByEntityIdAsync(characterId, ct);
+        var before = current.Where(x => x.EquipmentInstance?.ProgressionData is not null)
+            .Select(x => x.EquipmentInstance!.ProgressionData!).DistinctBy(x => x.State.Id).ToArray();
+        var alternatives = outbox is not null && choices is not null ? await choices.CaptureAsync(characterId, ct) : null;
         foreach (var slot in current.Where(x => x.EquipmentInstanceId.HasValue).ToList())
             if (slot.EquipmentInstanceId.HasValue)
                 await equipment.UnequipEquipmentAsync(characterId, slot.EquipmentSlotType, ct);
@@ -125,6 +131,16 @@ public sealed class EquipmentLoadoutService(IEquipmentLoadoutRepository reposito
         {
             var result = await equipment.EquipEquipmentAsync(characterId, slot.EquipmentInstanceId!.Value, slot.SlotType, ct);
             if (!result.Succeeded) throw new InvalidOperationException(result.ErrorMessage ?? "Equipment changed while applying the loadout.");
+        }
+        if (outbox is not null)
+        {
+            var after = (await equipment.GetEquipmentSlotsByEntityIdAsync(characterId, ct)).Where(x => x.EquipmentInstance?.ProgressionData is not null)
+                .Select(x => x.EquipmentInstance!.ProgressionData!).DistinctBy(x => x.State.Id).ToArray();
+            var operation = Guid.NewGuid().ToString("N");
+            foreach (var item in before.Where(x => after.All(y => y.State.Id != x.State.Id)))
+                await outbox.RecordEquipmentAsync("unequipped", operation, characterId, item, "loadout", ct);
+            foreach (var item in after.Where(x => before.All(y => y.State.Id != x.State.Id)))
+                await outbox.RecordEquipmentAsync("equipped", operation, characterId, item, "loadout", ct, choices: alternatives?.ForItem(item.State.Id));
         }
         return EquipmentEquipResult.Success();
     }

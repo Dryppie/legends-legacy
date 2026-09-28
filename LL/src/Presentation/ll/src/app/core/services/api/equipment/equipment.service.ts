@@ -7,13 +7,18 @@ import {
 } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { HttpParams } from '@angular/common/http';
 import { AttributeType } from '../../../../shared/models/enums/attributeType';
 import { EquipmentProgressionItem } from '../../../../shared/models/equipment-progression';
+import { EssenceCombatActivity } from '../../../../shared/models/essence-system';
 
 export interface EquipmentChangeResponse {
   equipmentSlots: EquipmentSlot[];
   inventoryItems: InventoryItem[];
+}
+
+export interface MigratedSpecializationChoice {
+  migrationId: string;
+  options: EquipmentProgressionItem[];
 }
 
 export interface EquipmentComparisonValue {
@@ -24,6 +29,12 @@ export interface EquipmentComparisonValue {
 }
 
 export interface EquipmentComparison {
+  activity?: EssenceCombatActivity | 'None';
+  doctrine?: string | null;
+  essenceIds?: string[];
+  metrics?: { id: string; label: string; before: number; after: number; unit: string; assumption: string }[];
+  setChanges?: { setId: string; name: string; bonusId: string; description: string; activeBefore: boolean; activeAfter: boolean }[];
+  breakdown?: { attributeType: AttributeType; base: number; withEquipment: number; withSetsAndLoadout: number; effective: number; unusedAtCap: number }[];
   equipmentInstanceId: string;
   characterLevel: number;
   slotType: EquipmentSlotType;
@@ -97,6 +108,14 @@ export interface EquipmentUpgradeMutation {
 export class EquipmentService {
   constructor(private apiService: ApiService) {}
 
+  getMigratedSpecializationChoice(itemId: string): Observable<MigratedSpecializationChoice | null> {
+    return this.apiService.get(`equipment/migration/choice/${itemId}`);
+  }
+
+  chooseMigratedSpecialization(migrationId: string, operationId: string, definitionId: string): Observable<unknown> {
+    return this.apiService.post('equipment/migration/specialization', { migrationId, operationId, definitionId });
+  }
+
   public getLinkedEquipment(id: string): Observable<EquipmentInstance> {
     return this.apiService.get(`equipment/linked/${id}`);
   }
@@ -108,12 +127,11 @@ export class EquipmentService {
   public compareEquipment(
     equipmentInstanceId: string,
     slotType: EquipmentSlotType,
+    activity: EssenceCombatActivity | 'None' = 'None',
   ): Observable<EquipmentComparison> {
-    const params = new HttpParams().set('slotType', slotType);
-    return this.apiService.get(
-      `equipment/comparison/${equipmentInstanceId}`,
-      params,
-    );
+    return this.apiService.post('equipment/compare/observe', {
+      requestId: crypto.randomUUID(), equipmentInstanceId, slotType, activity,
+    });
   }
 
   public previewUpgrade(

@@ -268,8 +268,12 @@ public sealed class AbilityCostSpec
     public float ScalingCoefficient { get; set; }
 }
 
+public enum ProcScope { RootAction, PerTarget, PerTick }
+
 public sealed class AbilityTriggerSpec
 {
+    public ProcScope ProcScope { get; set; }
+    public bool AllowPeriodicProcs { get; set; }
     public bool ChooseOneEffect { get; set; }
     public bool SnapshotEffectConditions { get; set; }
     public AbilityTriggerEvent Event { get; set; }
@@ -350,6 +354,7 @@ public sealed class AbilityEffectSpec
     public float LifeStealPercentage { get; set; }
     public StandardConditionType? LifeStealTargetCondition { get; set; }
     public decimal ProcCoefficient { get; set; } = 1m;
+    public bool AllowSecondaryProcs { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<AbilityConditionSpec> Conditions { get; set; } = [];
 }

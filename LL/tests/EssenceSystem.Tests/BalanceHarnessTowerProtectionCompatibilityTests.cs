@@ -30,7 +30,7 @@ public sealed class BalanceHarnessTowerProtectionCompatibilityTests
         Assert.True(c.Threat.Complete, string.Join("; ", c.Threat.Limitations)); Assert.Empty(c.Threat.Limitations);
         Assert.Equal(new[] { DamageType.Physical, DamageType.Magical }.Order(), c.Threat.DamageTypes);
         Assert.Equal(2, c.Excluded.Count); Assert.Equal(14, c.Coverage.Count(f => f.Kind == "protection"));
-        Assert.Equal(71, m.DefenseCoverage!.Count); Assert.Equal(69, c.Coverage.Count);
+        Assert.Equal(m.DefenseCoverage!.Count - c.Excluded.Count, c.Coverage.Count);
         Assert.All(c.Excluded, f => { Assert.Equal("protection", f.Kind); Assert.Contains(input.AllowedEssences, e => e.Id == f.EssenceId); });
         Assert.Equal(HarnessJson.Hash(m.DefenseCoverage.Where(f => f.Kind != "protection")), HarnessJson.Hash(c.Coverage.Where(f => f.Kind != "protection")));
         Assert.Equal(hash, HarnessJson.Hash(inventory));

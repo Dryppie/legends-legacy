@@ -106,14 +106,20 @@ public static class DependencyInjection
         IConfiguration config)
     {
         services.AddLiveOpsAdministrationServices(config);
+        services.TryAddScoped<IEquipmentMigrationService, EquipmentMigrationService>();
+        services.TryAddSingleton<IEquipmentCatalogProvider>(_ => new JsonEquipmentCatalogProvider(Path.Combine(AppContext.BaseDirectory, config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.TryAddSingleton(sp => new EquipmentMigrationCatalog(sp.GetRequiredService<IEquipmentCatalogProvider>()
+            .Get(Math.Max(2, sp.GetRequiredService<Domain.Models.Attributes.AttributeRulesSelection>().EquipmentBalanceVersion)), sp.GetRequiredService<IEquipmentCatalogProvider>()));
         services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.INobilityService, Nobility.NobilityService>();
         services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.ISignetTradingService, Nobility.SignetTradingService>();
         services.TryAddScoped<Application.Interfaces.Services.LL.Nobility.INobilityPurchaseGateway, Nobility.DisabledNobilityPurchaseGateway>();
         AddDungeonCatalogReader(services, config, AppContext.BaseDirectory);
         // The standalone operator host needs the same equipment rules as the game.
         services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
-        services.TryAddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(AppContext.BaseDirectory,
-            config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.TryAddSingleton(new Domain.Models.Attributes.AttributeRulesSelection(config.GetValue<int?>("AttributeRedesign:LiveVersion") ?? 17,
+            config.GetValue<int?>("EquipmentBalance:LiveVersion")));
+        services.TryAddSingleton(sp => JsonStarterEquipmentCatalog.Load(Path.Combine(AppContext.BaseDirectory,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json"), balanceVersion: sp.GetRequiredService<Domain.Models.Attributes.AttributeRulesSelection>().EquipmentBalanceVersion));
         services.TryAddSingleton<IQuestDefinitionProvider>(sp => new JsonQuestDefinitionProvider(config,
             AppContext.BaseDirectory, sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IInventoryService, InventoryService>();
@@ -250,6 +256,10 @@ public static class DependencyInjection
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
         services.AddLiveOpsAdministrationServices(config);
+        services.TryAddScoped<IEquipmentMigrationService, EquipmentMigrationService>();
+        services.TryAddSingleton<IEquipmentCatalogProvider>(_ => new JsonEquipmentCatalogProvider(Path.Combine(AppContext.BaseDirectory, config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.TryAddSingleton(sp => new EquipmentMigrationCatalog(sp.GetRequiredService<IEquipmentCatalogProvider>()
+            .Get(Math.Max(2, sp.GetRequiredService<Domain.Models.Attributes.AttributeRulesSelection>().EquipmentBalanceVersion)), sp.GetRequiredService<IEquipmentCatalogProvider>()));
         services.Configure<AchievementSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
         services.AddSingleton<HttpClient>();
         services.AddScoped<IAchievementSystemChatPublisher, AchievementSystemChatPublisher>();
@@ -374,8 +384,10 @@ public static class DependencyInjection
         services.AddScoped<IEquipmentLoadoutService, EquipmentLoadoutService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
         services.Configure<EquipmentProgressionOptions>(config.GetSection(EquipmentProgressionOptions.SectionName));
-        services.AddSingleton(_ => JsonStarterEquipmentCatalog.Load(Path.Combine(contentRootPath,
-            config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.TryAddSingleton(new Domain.Models.Attributes.AttributeRulesSelection(config.GetValue<int?>("AttributeRedesign:LiveVersion") ?? 17,
+            config.GetValue<int?>("EquipmentBalance:LiveVersion")));
+        services.AddSingleton(sp => JsonStarterEquipmentCatalog.Load(Path.Combine(contentRootPath,
+            config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json"), balanceVersion: sp.GetRequiredService<Domain.Models.Attributes.AttributeRulesSelection>().EquipmentBalanceVersion));
         services.AddSingleton<EquipmentCatalog>(sp => sp.GetRequiredService<StarterEquipmentCatalog>());
         services.AddScoped<IStarterEquipmentService, StarterEquipmentService>();
         services.AddSingleton(sp => JsonStarterEquipmentCatalog.LoadOrdinary(sp.GetRequiredService<StarterEquipmentCatalog>(),
@@ -384,6 +396,10 @@ public static class DependencyInjection
         services.AddSingleton(_ => JsonEquipmentUpgradePrices.Load(Path.Combine(contentRootPath,
             config["Content:Root"] ?? "Data", "equipment", "equipment-upgrades.v1.json")));
         services.AddScoped<IEquipmentUpgradeService, EquipmentUpgradeService>();
+        services.AddScoped<IEquipmentMigrationService, EquipmentMigrationService>();
+        services.AddSingleton<IEquipmentCatalogProvider>(_ => new JsonEquipmentCatalogProvider(Path.Combine(contentRootPath, config["Content:Root"] ?? "Data", "equipment", "equipment-starters.v1.json")));
+        services.AddSingleton(sp => new EquipmentMigrationCatalog(sp.GetRequiredService<IEquipmentCatalogProvider>()
+            .Get(Math.Max(2, sp.GetRequiredService<Domain.Models.Attributes.AttributeRulesSelection>().EquipmentBalanceVersion)), sp.GetRequiredService<IEquipmentCatalogProvider>()));
         services.AddSingleton(sp => JsonEquipmentBlueprintCatalog.Load(Path.Combine(contentRootPath,
             config["Content:Root"] ?? "Data", "equipment", "equipment-blueprints.v1.json"), sp.GetRequiredService<StarterEquipmentCatalog>()));
         services.AddScoped<ICombatAcquisitionRewardProcessor, CombatAcquisitionRewardProcessor>();
@@ -633,6 +649,7 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, RealtimeCharacterGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeGuildMissionGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeInventoryGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, ItemizationGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeTournamentGroundsGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeWorldTowerGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, RealtimeRaidGameEventOutboxConsumer>();

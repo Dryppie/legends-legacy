@@ -1,3 +1,6 @@
+import { TestBed } from '@angular/core/testing';
+import { NobilityService } from '../../../core/services/api/nobility/nobility.service';
+import { provideFreeNobilityForTests } from '../../../core/services/api/nobility/nobility.testing';
 import { SessionSummaryService } from '../../../core/services/client-side/session-summary/session-summary.service';
 import {
   BattleOutcome,
@@ -11,8 +14,12 @@ import { SessionSummaryPopupComponent } from './session-summary-popup.component'
 
 describe('SessionSummaryPopupComponent', () => {
   it('presents combat drops in their current reward buckets', () => {
+    TestBed.configureTestingModule({
+      providers: provideFreeNobilityForTests(),
+    });
     const component = new SessionSummaryPopupComponent(
       new SessionSummaryService(),
+      TestBed.inject(NobilityService),
     );
 
     const sections = component.rewardSections(combatSession());

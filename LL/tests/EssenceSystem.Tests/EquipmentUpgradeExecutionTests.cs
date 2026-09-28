@@ -14,6 +14,24 @@ public sealed class EquipmentUpgradeExecutionTests
 {
     [Theory]
     [InlineData(EquipmentUpgradeOperationKind.Reinforce)]
+    [InlineData(EquipmentUpgradeOperationKind.ApplyVariant)]
+    public async Task Changing_the_live_release_does_not_reprice_existing_items_during_upgrades(EquipmentUpgradeOperationKind kind)
+    {
+        await using var fixture = await Fixture.Create(liveVersion: 3);
+        var before = fixture.Equipment.ProgressionData!;
+        var result = await fixture.Service.ExecuteAsync(fixture.Character.Id, Guid.NewGuid(), fixture.Request(kind), default);
+        Assert.NotNull(result.Outcome);
+        var after = result.Outcome.After!;
+        Assert.Equal(2, after.State.BalanceVersion);
+        var versions = new JsonEquipmentCatalogProvider(Path.Combine(TestContentPaths.FindApiRoot(), "Data", "equipment", "equipment-starters.v1.json"));
+        var expected = kind == EquipmentUpgradeOperationKind.Reinforce
+            ? EquipmentData.Create(before.EquipmentState.Reinforce(versions.Get(2).Evaluator), versions.Get(2).Evaluator)
+            : before.ApplyVariant(versions.Get(2).Evaluator, "blueprint_fury");
+        Assert.Equal(EquipmentMigrationPolicy.Hash(expected), EquipmentMigrationPolicy.Hash(after));
+    }
+
+    [Theory]
+    [InlineData(EquipmentUpgradeOperationKind.Reinforce)]
     [InlineData(EquipmentUpgradeOperationKind.Dismantle)]
     [InlineData(EquipmentUpgradeOperationKind.ApplyVariant)]
     public async Task Actions_execute_without_a_preview_and_retries_apply_only_once(EquipmentUpgradeOperationKind kind)
@@ -156,7 +174,7 @@ public sealed class EquipmentUpgradeExecutionTests
         public EquipmentUpgradeRequest Request(EquipmentUpgradeOperationKind kind) =>
             new(kind, Equipment.Id, BlueprintStyleId: kind == EquipmentUpgradeOperationKind.ApplyVariant ? "blueprint_fury" : null);
 
-        public static async Task<Fixture> Create()
+        public static async Task<Fixture> Create(int liveVersion = 2)
         {
             var fixture = new Fixture();
             var root = Path.Combine(TestContentPaths.FindApiRoot(), "Data", "equipment");
@@ -177,8 +195,9 @@ public sealed class EquipmentUpgradeExecutionTests
             fixture.Blueprint = fixture.Add(new ItemBase { Id = "item.blueprint_fury", Name = "Blueprint: Fury", Stackable = true }, 2);
             fixture.Db.Characters.Add(fixture.Character);
             await fixture.Db.SaveChangesAsync();
-            fixture.Service = new EquipmentUpgradeService(catalog, prices,
-                new EquipmentUpgradeRepository(fixture.Db, blueprints), null!, null!, fixture.Clock, null!, blueprints);
+            var versions = new JsonEquipmentCatalogProvider(Path.Combine(root, "equipment-starters.v1.json"));
+            fixture.Service = new EquipmentUpgradeService(versions.Get(liveVersion), prices,
+                new EquipmentUpgradeRepository(fixture.Db, blueprints), null!, new RecordingItemizationOutbox(), fixture.Clock, null!, blueprints, versions: versions);
             return fixture;
         }
 

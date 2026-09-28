@@ -31,6 +31,9 @@ public sealed class EquipmentEvaluator
             if (!_archetypes.ContainsKey(definition.ArchetypeId))
                 throw new ArgumentException($"Unknown archetype '{definition.ArchetypeId}'.");
             ResolveStyle(definition.ArchetypeId, definition.NativeStyleId);
+            if (Balance.UsesSpecializations)
+                EquipmentSpecializationRules.Validate(_archetypes[definition.ArchetypeId],
+                    definition.SpecializationWeights ?? _archetypes[definition.ArchetypeId].SpecializationWeights);
         }
     }
 
@@ -98,8 +101,10 @@ public sealed class EquipmentEvaluator
             * (1d + rank * Balance.RankBudgetIncrement)
             * attributeRollMultiplier;
         EquipmentValidation.PositiveFinite(targetBudget);
+        if (Balance.UsesSpecializations)
+            return EvaluateSpecialized(definition, archetype, style, tier, rank, quality, attributeRollMultiplier, baselineBudget, targetBudget, additiveVariantBonus);
         var allocation = EquipmentBudgetAllocator.AllocateConstrained(
-            tier, targetBudget, weights, [], archetype.OverflowWeights);
+            tier, targetBudget, weights, [], archetype.OverflowWeights, statVersion: Balance.AttributeVersion, balance: Balance);
         if (allocation.UnspentBudget > Math.Max(0.000001d, targetBudget * 0.00000001d))
             throw new InvalidOperationException($"Equipment '{definitionId}' cannot spend its budget. Author overflow weights or revise its stat profile.");
 
@@ -109,7 +114,7 @@ public sealed class EquipmentEvaluator
             // Allocate the base first. Caps on the bonus must never take points from it.
             var bonus = EquipmentBudgetAllocator.AllocateConstrained(
                 tier, targetBudget * Balance.StyleBudgetShare, style.StatWeights, [],
-                archetype.StatWeights, currentPoints: points);
+                archetype.StatWeights, currentPoints: points, statVersion: Balance.AttributeVersion, balance: Balance);
             if (bonus.UnspentBudget > Math.Max(0.000001d, targetBudget * 0.00000001d))
                 throw new InvalidOperationException($"Variant '{style.Id}' cannot spend its bonus budget.");
             foreach (var (attribute, amount) in bonus.AddedPoints)
@@ -123,7 +128,7 @@ public sealed class EquipmentEvaluator
         if (stats.Values.Any(value => !float.IsFinite(value) || value < 0) || !stats.Values.Any(value => value > 0))
             throw new InvalidOperationException("Equipment has no representable usable stats.");
         foreach (var (attribute, amount) in stats)
-            if (amount > EquipmentStatBudgetCatalog.Get(attribute).PerItemHardCap)
+            if (amount > EquipmentStatBudgetCatalog.GetForVersion(attribute, Balance.AttributeVersion).PerItemHardCap)
                 throw new InvalidOperationException($"Quantized equipment exceeds the cap for '{attribute}'.");
 
         return new EquipmentEvaluation(
@@ -139,6 +144,40 @@ public sealed class EquipmentEvaluator
             throw new ArgumentException($"Style '{styleId}' is unknown or incompatible with '{archetypeId}'.", nameof(styleId));
         return style;
     }
+
+    private EquipmentEvaluation EvaluateSpecialized(EquipmentDefinition definition, EquipmentArchetype archetype,
+        EquipmentStyle? style, int tier, int rank, ItemQuality quality, double roll, double baseline, double budget, bool additiveVariantBonus)
+    {
+        if (style is not null && !additiveVariantBonus) budget /= 1d + Balance.StyleBudgetShare;
+        var specialty = definition.SpecializationWeights ?? archetype.SpecializationWeights;
+        EquipmentSpecializationRules.Validate(archetype, specialty);
+        var points = new Dictionary<AttributeType, double>();
+        Allocate(budget * Balance.CoreShare, archetype.StatWeights, archetype.StatWeights);
+        // Cap overflow retains the item's core, while the nominal specialization spend stays explicit.
+        Allocate(budget * Balance.SpecializationShare, specialty, archetype.StatWeights);
+        var identity = style?.EquipmentSetId is not null ? budget * Balance.IdentityShare : 0d;
+        var styleBudget = style is null ? 0d : budget * Balance.StyleBudgetShare - identity;
+        if (style is not null)
+            Allocate(styleBudget, EquipmentSpecializationRules.CompatibleStyle(archetype, style, specialty.Keys), archetype.StatWeights);
+        EquipmentSpecializationRules.ValidateCombination(points.Keys);
+        var stats = points.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => AttributeValueQuantizer.Quantize(x.Key, x.Value));
+        return new EquipmentEvaluation(definition, archetype, tier, rank, Balance.Version, style?.Id, style?.EquipmentSetId,
+            quality, roll, baseline, budget + styleBudget + identity, stats.ToDictionary(x => x.Key, x => (float)x.Value).ToFrozenDictionary())
+        {
+            Allocation = new EquipmentBudgetBreakdown(Balance.AttributeVersion, budget * Balance.CoreShare, budget * Balance.SpecializationShare,
+                styleBudget, identity, definition.SpecializationId)
+        };
+
+        void Allocate(double amount, IReadOnlyDictionary<AttributeType, double> weights, IReadOnlyDictionary<AttributeType, double> overflow)
+        {
+            var allocation = EquipmentBudgetAllocator.AllocateConstrained(tier, amount, weights, [], overflow, points,
+                statVersion: Balance.AttributeVersion, balance: Balance);
+            if (allocation.UnspentBudget > Math.Max(.000001d, amount * 1e-8d))
+                throw new InvalidOperationException($"Equipment '{definition.Id}' cannot spend its allocation.");
+            foreach (var (attribute, value) in allocation.AddedPoints)
+                points[attribute] = points.GetValueOrDefault(attribute) + value;
+        }
+    }
 }
 
 public sealed record EquipmentEvaluation(
@@ -153,4 +192,7 @@ public sealed record EquipmentEvaluation(
     double AttributeRollMultiplier,
     double BaselineBudget,
     double TargetBudget,
-    IReadOnlyDictionary<AttributeType, float> Stats);
+    IReadOnlyDictionary<AttributeType, float> Stats)
+{
+    public EquipmentBudgetBreakdown? Allocation { get; init; }
+}

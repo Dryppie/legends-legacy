@@ -47,11 +47,11 @@ public sealed class EquipmentBlueprintMetadataDtoMappingTests : IDisposable
             [
                 AttributeType.Power,
                 AttributeType.MagicPenetration,
-                AttributeType.Cooldown,
+                AttributeType.AbilityHaste,
                 AttributeType.CritChance
             ],
             item.Blueprint.Attributes);
-        Assert.Equal("set_arcane", item.Blueprint.EquipmentSet?.Id);
+        Assert.Equal("set_arcane.v2", item.Blueprint.EquipmentSet?.Id);
         Assert.Collection(
             item.Blueprint.EquipmentSet!.Bonuses,
             bonus =>

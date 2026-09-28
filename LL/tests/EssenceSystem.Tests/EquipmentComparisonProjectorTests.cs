@@ -32,11 +32,11 @@ public sealed class EquipmentComparisonProjectorTests
         Assert.Equal(150, rating.After);
         var effective = Assert.Single(comparison.EffectiveAttributes, value => value.AttributeType == AttributeType.Armor);
         Assert.Equal(
-            EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(AttributeType.Armor, 100, 1),
+            100f * AttributeRules.Mitigation(100),
             effective.Before,
             precision: 3);
         Assert.Equal(
-            EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(AttributeType.Armor, 150, 1),
+            100f * AttributeRules.Mitigation(150),
             effective.After,
             precision: 3);
     }

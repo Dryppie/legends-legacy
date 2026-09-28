@@ -29,7 +29,7 @@ internal static class BalanceHarnessCompositionSearchFixture
             new Dictionary<string, IReadOnlyList<int>> { ["fixture"] = new[] { 101, 102 } },
             new Dictionary<string, IReadOnlyList<BossDiscoveryCharacterBudget>> { ["fixture"] = Enumerable.Range(1, owners)
                 .Select(slot => new BossDiscoveryCharacterBudget(slot, template.Party[(slot - 1) % 5].Build.Equipment, 1)).ToArray() },
-            TowerBundle.Files.ToDictionary(f => f, _ => new string('a', 64)), Math.Min(8, candidates));
+            TowerBundle.Files.Where(f => !f.Contains(".legacy-v1.", StringComparison.Ordinal)).ToDictionary(f => f, _ => new string('a', 64)), Math.Min(8, candidates));
     }
 
     internal static TowerBossDiscoveryDefinition Definition(BossDiscoveryInputs input)

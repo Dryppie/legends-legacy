@@ -9,6 +9,7 @@ using I = EssenceSystem.Tests.BalanceHarnessIncumbentSelectionTests;
 namespace EssenceSystem.Tests;
 
 [Trait("Category", "BalanceHarness")]
+[Collection("Exclusive archive resource tests")]
 public sealed class BalanceHarnessPracticalProcessTests : IAsyncLifetime
 {
     private readonly string root = Path.Combine(Path.GetTempPath(), "tower-practical-process-fixture-" + Guid.NewGuid().ToString("N"));
@@ -113,7 +114,10 @@ public sealed class BalanceHarnessPracticalProcessTests : IAsyncLifetime
     [InlineData("incumbent", "IncumbentRetained", 2, true)]
     public async Task Separate_parent_and_worker_publish_and_audit_all_synthetic_decisions(string outcome, string decision, int recommendations, bool allocated)
     {
-        var input = await Fixture(outcome: outcome, allocated: allocated); var owner = Start("parent", input); await Exit(owner, 0);
+        var input = await Fixture(outcome: outcome, allocated: allocated); var owner = Start("parent", input);
+        // Allow the worker's declared 60-second budget plus bounded shutdown/publication time.
+        // The former 25-second test timeout killed valid allocation work before its own deadline.
+        await Exit(owner, 0, input.Request.MaximumSeconds + 15);
         var output = input.Request.OutputRoot; var result = HarnessJson.Read<TowerPracticalResult>(Path.Combine(output, "result.json"));
         Assert.Equal("Verified", result.IntegrityStatus); Assert.Equal(decision, result.StrengthDecision);
         Assert.Equal(recommendations, result.RecommendedPartyIds.Count); Assert.Equal(GoalOutcome.Fail, result.BalanceAssessment);

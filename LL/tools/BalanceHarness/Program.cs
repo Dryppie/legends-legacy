@@ -12,6 +12,8 @@ public static class Program
         Console.CancelKeyPress += cancelHandler;
         try
         {
+            if (args is ["attribute-allocation-study", var attributeRequest])
+                return await AttributeAllocationStudy.RunAsync(HarnessJson.Read<AttributeAllocationRequest>(attributeRequest), cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-affinity-search-", StringComparison.Ordinal))
                 return await TowerAffinitySearch.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0].StartsWith("tower-proposal-study-", StringComparison.Ordinal))

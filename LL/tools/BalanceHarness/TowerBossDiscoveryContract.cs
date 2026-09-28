@@ -161,7 +161,7 @@ public static class TowerBossDiscovery
             || d.ExcludedCombatSeeds.Distinct().Count() != d.ExcludedCombatSeeds.Count
             || d.References is null || d.References.Count > (d.Generation?.PolicyVersion == TowerSearchPortfolio.Version ? 112 : 96) || d.Starts is null || d.Starts.Count > 64
             || (d.MaximumBattles < 1 || d.MaximumBattles > (d.Generation?.PolicyVersion == TowerDeepChallenger.Version ? TowerDeepChallenger.MaximumFights : d.Generation?.PolicyVersion == TowerSearchPortfolio.Version ? TowerSearchPortfolio.MaximumFights : d.Generation?.PolicyVersion == TowerLateAllocation.Version ? TowerLateAllocation.MaximumFights : d.Generation?.PolicyVersion == TowerSearchAllocation.Version ? TowerSearchAllocation.MaximumFights : 100000)) || !TowerContractJson.Hash(d.SettingsHash) || !TowerContractJson.Hash(d.ExecutionHash)
-            || d.ContentHashes is null || !d.ContentHashes.Keys.Order().SequenceEqual(TowerBundle.Files.Order())
+            || d.ContentHashes is null || !ContentSnapshotContract.IsKnownTowerFiles(d.ContentHashes.Keys)
             || d.ContentHashes.Values.Any(h => !TowerContractJson.Hash(h)))
             throw new InvalidDataException("Invalid independent boss-search scope, pool, budget or frozen content.");
         var pool = d.AllowedEssences.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);

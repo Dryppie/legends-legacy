@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 namespace Domain.Models.Combat;
 public class CombatResult
 {
+    // Missing on historical results means version 17.
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<int>? AttributeRulesVersions { get; set; }
     private BattleOutcome _engineOutcome;
     private BattleOutcome _contentOutcome;
     private bool _hasExplicitEngineOutcome;

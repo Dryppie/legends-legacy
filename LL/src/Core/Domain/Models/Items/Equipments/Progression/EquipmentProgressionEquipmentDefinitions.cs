@@ -25,7 +25,8 @@ public sealed class EquipmentArchetype
         IReadOnlyDictionary<AttributeType, double> statWeights,
         IReadOnlyDictionary<AttributeType, double>? overflowWeights = null,
         int minimumTier = 1,
-        int maximumTier = EquipmentTierBudgetCurve.MaximumSupportedTier)
+        int maximumTier = EquipmentTierBudgetCurve.MaximumSupportedTier,
+        IReadOnlyDictionary<AttributeType, double>? specializationWeights = null)
     {
         Id = EquipmentValidation.Id(id);
         ItemBaseId = EquipmentValidation.Id(itemBaseId);
@@ -44,6 +45,7 @@ public sealed class EquipmentArchetype
         EquipmentType = equipmentType;
         Behavior = behavior;
         StatWeights = EquipmentValidation.Weights(statWeights);
+        SpecializationWeights = EquipmentValidation.Weights(specializationWeights ?? new Dictionary<AttributeType, double>(), allowEmpty: true);
         OverflowWeights = EquipmentValidation.Weights(overflowWeights ?? new Dictionary<AttributeType, double>(), allowEmpty: true);
         MinimumTier = minimumTier;
         MaximumTier = maximumTier;
@@ -54,6 +56,7 @@ public sealed class EquipmentArchetype
     public EquipmentType EquipmentType { get; }
     public EquipmentBehaviorDefinition Behavior { get; }
     public IReadOnlyDictionary<AttributeType, double> StatWeights { get; }
+    public IReadOnlyDictionary<AttributeType, double> SpecializationWeights { get; }
     public IReadOnlyDictionary<AttributeType, double> OverflowWeights { get; }
     public int MinimumTier { get; }
     public int MaximumTier { get; }
@@ -90,7 +93,9 @@ public sealed class EquipmentDefinition
         string name,
         string archetypeId,
         EquipmentRarity rarity,
-        string? nativeStyleId = null)
+        string? nativeStyleId = null,
+        string? specializationId = null,
+        IReadOnlyDictionary<AttributeType, double>? specializationWeights = null)
     {
         Id = EquipmentValidation.Id(id);
         Name = EquipmentValidation.Id(name);
@@ -99,6 +104,8 @@ public sealed class EquipmentDefinition
             throw new ArgumentOutOfRangeException(nameof(rarity));
         Rarity = rarity;
         NativeStyleId = nativeStyleId is null ? null : EquipmentValidation.Id(nativeStyleId);
+        SpecializationId = specializationId ?? "default";
+        SpecializationWeights = specializationWeights is null ? null : EquipmentValidation.Weights(specializationWeights);
     }
 
     public string Id { get; }
@@ -106,6 +113,8 @@ public sealed class EquipmentDefinition
     public string ArchetypeId { get; }
     public EquipmentRarity Rarity { get; }
     public string? NativeStyleId { get; }
+    public string SpecializationId { get; }
+    public IReadOnlyDictionary<AttributeType, double>? SpecializationWeights { get; }
 }
 
 internal static class EquipmentValidation

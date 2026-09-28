@@ -2,6 +2,7 @@ namespace Application.UseCases.Outbox;
 
 public static class GameEventTypes
 {
+    public const string ItemizationObserved = "itemization.observed.v1";
     public const string EquipmentChanged = "equipment.changed";
     public const string EquipmentSecured = "equipment.model_e_secured";
     public const string EquipmentFound = "equipment.found";

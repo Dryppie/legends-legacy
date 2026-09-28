@@ -11,6 +11,7 @@ using C = BalanceHarness.TowerFixedFamilyConfirmation;
 namespace EssenceSystem.Tests;
 
 [Trait("Category", "BalanceHarness")]
+[Collection("Exclusive archive resource tests")]
 public sealed partial class BalanceHarnessFixedFamilyConfirmationTests : IDisposable
 {
     private readonly string root = Path.Combine(Path.GetTempPath(), "tower-fixed-family-fixture-"+Guid.NewGuid().ToString("N"));

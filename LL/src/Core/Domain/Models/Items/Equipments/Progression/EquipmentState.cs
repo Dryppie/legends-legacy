@@ -5,7 +5,8 @@ public enum EquipmentAwardKind
     RandomDiscovery = 0,
     ProtectedReward = 1,
     QuestReward = 2,
-    Administrative = 5
+    Administrative = 5,
+    LegacyImport = 6
 }
 
 public enum EquipmentOwnershipKind
@@ -61,8 +62,9 @@ public sealed class EquipmentState
         Guid id, string definitionId, string archetypeId, int tier, int rank, int balanceVersion,
         string? nativeStyleId, string? activeStyleId, EquipmentProvenance provenance,
         EquipmentOwnership ownership, ItemQuality quality, double attributeRollMultiplier,
-        bool additiveVariantBonus)
+        bool additiveVariantBonus, int modelVersion = EquipmentBalance.ModelVersion)
     {
+        ModelVersion = modelVersion;
         Id = id;
         DefinitionId = definitionId;
         ArchetypeId = archetypeId;
@@ -78,7 +80,7 @@ public sealed class EquipmentState
         AdditiveVariantBonus = additiveVariantBonus;
     }
 
-    public int ModelVersion => EquipmentBalance.ModelVersion;
+    public int ModelVersion { get; }
     public Guid Id { get; }
     public string DefinitionId { get; }
     public string ArchetypeId { get; }
@@ -111,7 +113,7 @@ public sealed class EquipmentState
         if (snapshot.ActiveStyleId is not null) EquipmentValidation.Id(snapshot.ActiveStyleId);
         ArgumentNullException.ThrowIfNull(snapshot.Provenance);
         ArgumentNullException.ThrowIfNull(snapshot.Ownership);
-        if (snapshot.Provenance.Kind != EquipmentAwardKind.RandomDiscovery
+        if (snapshot.Provenance.Kind is not (EquipmentAwardKind.RandomDiscovery or EquipmentAwardKind.LegacyImport)
             && snapshot.Ownership.Kind == EquipmentOwnershipKind.UnboundPersonal)
             throw new InvalidOperationException("A guaranteed award cannot regain unbound ownership.");
         var quality = snapshot.ModelVersion == 1 ? ItemQuality.Standard : snapshot.Quality;
@@ -119,7 +121,7 @@ public sealed class EquipmentState
         ValidateRoll(quality, attributeRollMultiplier);
         var result = new EquipmentState(snapshot.Id, snapshot.DefinitionId, snapshot.ArchetypeId,
             snapshot.Tier, snapshot.Rank, snapshot.BalanceVersion, snapshot.NativeStyleId, snapshot.ActiveStyleId,
-            snapshot.Provenance, snapshot.Ownership, quality, attributeRollMultiplier, snapshot.AdditiveVariantBonus);
+            snapshot.Provenance, snapshot.Ownership, quality, attributeRollMultiplier, snapshot.AdditiveVariantBonus, snapshot.ModelVersion);
         return result;
     }
 
@@ -181,7 +183,7 @@ public sealed class EquipmentState
             new EquipmentOwnership(EquipmentOwnershipKind.BoundPersonal, Ownership.OwnerId),
             Quality,
             AttributeRollMultiplier,
-            AdditiveVariantBonus);
+            AdditiveVariantBonus, ModelVersion);
     }
 
     public EquipmentState DonateToGuild(Guid guildId)
@@ -206,10 +208,12 @@ public sealed class EquipmentState
 
     private EquipmentState Copy(EquipmentOwnership ownership) =>
         new(Id, DefinitionId, ArchetypeId, Tier, Rank, BalanceVersion, NativeStyleId, ActiveStyleId,
-            Provenance, ownership, Quality, AttributeRollMultiplier, AdditiveVariantBonus);
+            Provenance, ownership, Quality, AttributeRollMultiplier, AdditiveVariantBonus, ModelVersion);
 
     public EquipmentState ApplyVariant(EquipmentEvaluator evaluator, string styleId)
     {
+        if (BalanceVersion != evaluator.Balance.Version)
+            throw new InvalidOperationException("Use the evaluator matching the stored equipment version.");
         RequirePersonalOwnership();
         if (ActiveStyleId == styleId)
             throw new InvalidOperationException("This variant is already applied.");

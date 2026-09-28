@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using BalanceHarness;
 using Domain.Models.Combat;
 
@@ -135,23 +136,36 @@ public sealed class BalanceHarnessTowerPrecisionTests
     {
         using var temp = new DiscoveryTemp(); var sourcePath = Path.Combine(temp.Path, "source"); var output = Path.Combine(temp.Path, "precision");
         var plan = Plan(1) with { FirstSeeds = [71001], SecondSeeds = [72001, 72002] };
+        // This tests archive reconstruction, not the live party's win rate. Freeze an
+        // overwhelming guardian so content tuning cannot turn the source into a ceiling breach.
+        var content = Path.Combine(temp.Path, "content");
+        var apiRoot = TestContentPaths.FindApiRoot();
+        TowerBundle.CopyContent(apiRoot, content, default);
+        File.Copy(Path.Combine(apiRoot, "appsettings.json"), Path.Combine(content, "appsettings.json"));
+        var floorPath = Path.Combine(content, "Data", TowerBattleRunner.FloorFile);
+        var floors = JsonNode.Parse(File.ReadAllText(floorPath))!;
+        var scaling = floors["floors"]!.AsArray().Single(f => f!["floorNumber"]!.GetValue<int>() == 1)!["guardianScaling"]!;
+        scaling["health"] = 1000; scaling["offense"] = 1000;
+        File.WriteAllText(floorPath, floors.ToJsonString(HarnessJson.Options));
+        plan = plan with { ContentHashes = TowerBundle.Files.ToDictionary(f => f, f => HarnessJson.FileHash(Path.Combine(content, "Data", f))) };
         var options = new TowerBulkOptions(ChunkSize: 1, RetryReserve: 0);
-        await TowerStagedBalanceRun.RunAsync(TestContentPaths.FindApiRoot(), sourcePath, plan, options);
+        await TowerStagedBalanceRun.RunAsync(content, sourcePath, plan, options);
         var manifest = HarnessJson.FileHash(Path.Combine(sourcePath, "campaign-manifest.json"));
         TowerPrecisionSource source;
         using (new TowerPerformanceTrace(_ => throw new InvalidOperationException("Source verification must not fight")).Activate())
             source = TowerPrecisionBalanceRun.VerifySource(sourcePath, manifest);
+        Assert.All(source.Second.SelectMany(e => e.Trials), t => Assert.NotEqual(BattleOutcome.Victory, t.Outcome));
         var ledger = Ledger(source); var d = Definition(source, ledger, manifest, samples: 4);
         var starts = 0;
         using (new TowerPerformanceTrace(done => { if (!done) starts++; }).Activate())
-            await TowerPrecisionBalanceRun.RunAsync(TestContentPaths.FindApiRoot(), output, d, sourcePath, ledger, options);
+            await TowerPrecisionBalanceRun.RunAsync(content, output, d, sourcePath, ledger, options);
         Assert.Equal(4, starts);
         using (new TowerPerformanceTrace(_ => throw new InvalidOperationException("Verification must not fight")).Activate())
         {
             var result = await TowerPrecisionBalanceRun.VerifyAsync(output, sourcePath);
             Assert.Equal(4, result.FreshTrials);
-            await Assert.ThrowsAsync<IOException>(() => TowerPrecisionBalanceRun.RunAsync(TestContentPaths.FindApiRoot(), output, d, sourcePath, ledger, options));
-            await Assert.ThrowsAsync<InvalidDataException>(() => TowerPrecisionBalanceRun.RunAsync(TestContentPaths.FindApiRoot(), output + "-retry", d, sourcePath, ledger, options with { RetryReserve = 1 }));
+            await Assert.ThrowsAsync<IOException>(() => TowerPrecisionBalanceRun.RunAsync(content, output, d, sourcePath, ledger, options));
+            await Assert.ThrowsAsync<InvalidDataException>(() => TowerPrecisionBalanceRun.RunAsync(content, output + "-retry", d, sourcePath, ledger, options with { RetryReserve = 1 }));
             File.AppendAllText(Path.Combine(sourcePath, "stage-2-evidence.json"), " ");
             await Assert.ThrowsAsync<InvalidDataException>(() => TowerPrecisionBalanceRun.VerifyAsync(output, sourcePath));
         }

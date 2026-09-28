@@ -688,6 +688,7 @@ public sealed class CanonicalEquipmentBuildFactory
     private string GetDefinitionId(string archetypeId, Rarity rarity) =>
         _equipment.Evaluator.Definitions.Single(definition =>
             definition.ArchetypeId == archetypeId
+            && definition.SpecializationId == "default"
             && definition.NativeStyleId is null
             && definition.Rarity == (EquipmentRarity)rarity).Id;
 

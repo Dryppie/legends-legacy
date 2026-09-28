@@ -1,13 +1,16 @@
+using System.Collections.Frozen;
+using Domain.Models.Attributes;
+
 namespace Domain.Models.Items.Equipments.Progression;
 
 /// <summary>
 /// Immutable balance inputs. A changed configuration requires a new version;
-/// historical versions must remain resolvable by the eventual catalog provider.
-/// Tier scaling and stat exchange rates deliberately remain on v17 together.
+/// historical versions remain resolvable by the catalog provider.
 /// </summary>
 public sealed class EquipmentBalance
 {
-    public const int ModelVersion = 2;
+    public const int ModelVersion = 3;
+    public const int SpecializationBalanceVersion = 2;
     public const int MaximumRank = 5;
     public const double MinimumSupportedBasicAttackIntervalMultiplier = 0.75d;
     public const int StatUnitVersion = EquipmentStatBudgetCatalog.BalanceVersion;
@@ -16,7 +19,8 @@ public sealed class EquipmentBalance
         int version,
         double baseTierBudget = 100d,
         double styleBudgetShare = 0.15d,
-        double rankBudgetIncrement = 0.04d)
+        double rankBudgetIncrement = 0.04d,
+        EquipmentBalanceSettings? settings = null)
     {
         if (version < 1)
             throw new ArgumentOutOfRangeException(nameof(version));
@@ -28,12 +32,42 @@ public sealed class EquipmentBalance
         BaseTierBudget = baseTierBudget;
         StyleBudgetShare = styleBudgetShare;
         RankBudgetIncrement = rankBudgetIncrement;
+        AttributeVersion = settings?.AttributeVersion ?? (version == 1 ? 17 : 18);
+        AttributeRules.ValidateVersion(AttributeVersion);
+        if ((version == 1) != (AttributeVersion == AttributeRules.LegacyVersion))
+            throw new ArgumentException("Equipment release 1 requires combat 17; later releases require combat 18.");
+        CoreShare = settings?.CoreShare ?? .7d;
+        IdentityShare = settings?.IdentityShare ?? .1d;
+        if (!double.IsFinite(CoreShare) || CoreShare <= 0 || CoreShare >= 1
+            || !double.IsFinite(IdentityShare) || IdentityShare < 0 || (UsesSpecializations && IdentityShare > StyleBudgetShare))
+            throw new ArgumentException("Allocation shares must leave positive core and specialization budgets and a nonnegative style budget.");
+        var costs = settings?.AttributeCosts ?? new Dictionary<AttributeType, double>();
+        foreach (var (attribute, cost) in costs)
+        {
+            if (!EquipmentStatBudgetCatalog.IsKnown(attribute)) throw new ArgumentException($"Unknown equipment attribute '{attribute}'.");
+            EquipmentValidation.PositiveFinite(cost);
+        }
+        AttributeCosts = costs.ToFrozenDictionary();
     }
 
     public int Version { get; }
+    public int AttributeVersion { get; }
+    public bool UsesSpecializations => Version >= SpecializationBalanceVersion;
     public double BaseTierBudget { get; }
     public double StyleBudgetShare { get; }
     public double RankBudgetIncrement { get; }
+    public double CoreShare { get; }
+    public double SpecializationShare => Math.Round(1d - CoreShare, 12);
+    public double IdentityShare { get; }
+    public IReadOnlyDictionary<AttributeType, double> AttributeCosts { get; }
+
+    public double GetMaterializedCostPerPoint(AttributeType attribute, int tier)
+    {
+        var defaultCost = EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier, AttributeVersion);
+        return AttributeCosts.TryGetValue(attribute, out var cost)
+            ? defaultCost * cost / EquipmentStatBudgetCatalog.GetForVersion(attribute, AttributeVersion).CostPerPoint
+            : defaultCost;
+    }
 
     public double GetBaselineBudget(int tier, EquipmentType type)
     {

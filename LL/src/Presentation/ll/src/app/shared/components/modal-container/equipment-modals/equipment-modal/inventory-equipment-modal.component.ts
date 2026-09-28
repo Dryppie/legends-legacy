@@ -1,4 +1,6 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { EssenceCombatActivity } from '../../../../models/essence-system';
 import {
   Component,
   DestroyRef,
@@ -32,6 +34,7 @@ import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-
 import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 import { EquipmentUpgradePanelComponent } from '../../../equipment/equipment-upgrade-panel/equipment-upgrade-panel.component';
+import { MigratedSpecializationComponent } from '../../../equipment/migrated-specialization/migrated-specialization.component';
 
 @Component({
   selector: 'app-inventory-equipment-modal',
@@ -41,9 +44,11 @@ import { EquipmentUpgradePanelComponent } from '../../../equipment/equipment-upg
     NgClass,
     NgFor,
     NgIf,
+    DecimalPipe,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
     EquipmentUpgradePanelComponent,
+    MigratedSpecializationComponent,
   ],
   templateUrl: './inventory-equipment-modal.component.html',
 })
@@ -57,6 +62,15 @@ export class InventoryEquipmentModalComponent implements OnInit {
   equippedComparisons: EquippedComparison[] = [];
   characterComparison: EquipmentComparison | null = null;
   comparisonLoading = false;
+  comparisonError = false;
+  selectedActivity: EssenceCombatActivity | 'None' = 'None';
+  readonly comparisonActivities: { id: EssenceCombatActivity | 'None'; label: string }[] = [
+    { id: 'None', label: 'Current equipment' }, { id: 'IdleCombat', label: 'Idle combat' },
+    { id: 'Dungeon', label: 'Dungeon' }, { id: 'Raid', label: 'Raid' },
+    { id: 'WorldTower', label: 'World Tower' }, { id: 'Arena', label: 'Arena' },
+    { id: 'Tournament', label: 'Tournament' }, { id: 'RegionBoss', label: 'Region boss' },
+  ];
+  private comparisonRequest?: Subscription;
   @Output() close = new EventEmitter<void>();
 
   constructor(
@@ -166,11 +180,20 @@ export class InventoryEquipmentModalComponent implements OnInit {
     this.close.emit();
   }
 
-  private loadCharacterComparison(): void {
+  selectActivity(event: Event): void {
+    const activity = this.comparisonActivities.find(x => x.id === (event.target as HTMLSelectElement).value);
+    if (!activity) return;
+    this.selectedActivity = activity.id;
+    this.loadCharacterComparison();
+  }
+
+  loadCharacterComparison(): void {
+    this.comparisonRequest?.unsubscribe();
     this.comparisonLoading = true;
+    this.comparisonError = false;
     this.characterComparison = null;
-    this.equipmentApi
-      .compareEquipment(this.equipmentInstance.id, this.selectedSlotType)
+    this.comparisonRequest = this.equipmentApi
+      .compareEquipment(this.equipmentInstance.id, this.selectedSlotType, this.selectedActivity)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (comparison) => {
@@ -179,6 +202,7 @@ export class InventoryEquipmentModalComponent implements OnInit {
         },
         error: () => {
           this.comparisonLoading = false;
+          this.comparisonError = true;
         },
       });
   }

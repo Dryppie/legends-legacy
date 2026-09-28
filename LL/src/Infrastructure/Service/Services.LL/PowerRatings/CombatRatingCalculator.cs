@@ -83,7 +83,7 @@ public static class CombatRatingCalculator
             .ToDictionary(group => group.Key, group => group.Sum(attribute => attribute.Value));
         return AttributeCalculator.CalculateProjectedAttributes(
             baseValues,
-            equipmentModifiers);
+            equipmentModifiers, AttributeRules.LegacyVersion);
     }
 
     public static CombatRatingBreakdown Calculate(
@@ -97,7 +97,7 @@ public static class CombatRatingCalculator
             ?? EquipmentTierBudgetCurve.GetFirstCharacterLevelForTier(
                 Math.Max(1, equipmentList.Select(item => item.Tier).DefaultIfEmpty(1).Max()));
         var modifiers = AttributeCalculator
-            .ProjectEquipmentModifiers(equipmentList, resolvedCharacterLevel)
+            .ProjectEquipmentModifiers(equipmentList, resolvedCharacterLevel, AttributeRules.LegacyVersion)
             .Concat((additionalAttributeSources ?? []).SelectMany(source => source.Modifiers));
         var projected = ProjectDirectAttributes(baseAttributes, modifiers);
 
@@ -166,14 +166,14 @@ public static class CombatRatingCalculator
                     if (!AttributeCatalog.TryGetEffectiveCharacterCap(
                             entry.Key,
                             EquipmentBalance.MinimumSupportedBasicAttackIntervalMultiplier,
-                            out var cap))
+                            out var cap, AttributeRules.LegacyVersion))
                     {
                         cap = float.MaxValue;
                     }
 
                     return Math.Min(usefulPoints, cap)
                            * EquipmentStatBudgetCatalog
-                               .Get(entry.Key)
+                               .GetForVersion(entry.Key, AttributeRules.LegacyVersion)
                                .CostPerPoint;
                 });
     }

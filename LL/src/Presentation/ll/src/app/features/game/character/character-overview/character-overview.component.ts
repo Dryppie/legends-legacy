@@ -213,6 +213,7 @@ export class CharacterOverviewComponent implements OnDestroy {
       {
         title: 'Recovery',
         attributes: [
+          AttributeType.Restoration,
           AttributeType.HealingPowerPercent,
           AttributeType.HealthRegeneration,
           AttributeType.LifeSteal,
@@ -221,6 +222,8 @@ export class CharacterOverviewComponent implements OnDestroy {
       {
         title: 'Utility',
         attributes: [
+          AttributeType.AbilityHaste,
+          AttributeType.Tenacity,
           AttributeType.Cooldown,
           AttributeType.StatusResistance,
           AttributeType.CrowdControlResistance,
@@ -449,7 +452,17 @@ export class CharacterOverviewComponent implements OnDestroy {
   }
 
   getSectionAttributes(attributes: AttributeType[]): AttributeDto[] {
-    return attributes.map((type) => this.getAttribute(type));
+    const current = this.character();
+    // Projected keys identify the active rules. Raw bases can still contain
+    // retired aliases that the server has already combined into the new stats.
+    const available = current?.baseCombatAttributes.length
+      ? current.baseCombatAttributes
+      : (current?.baseAttributes ?? []);
+    const byType = new Map(available.map((attribute) => [attribute.attributeType, attribute]));
+    return attributes.flatMap((type) => {
+      const attribute = byType.get(type);
+      return attribute ? [attribute] : [];
+    });
   }
 
   getEquipmentRating(type: AttributeType): AttributeDto | null {

@@ -9,6 +9,11 @@ namespace API.LiveOps.Controllers;
 [Route("api/liveops/analytics")]
 public sealed class AnalyticsController(ITelemetryRepository telemetry) : LiveOpsControllerBase
 {
+    [HttpGet("itemization")]
+    [Authorize(Policy = AdministrationPermissions.Read)]
+    public async Task<IActionResult> GetItemization([FromQuery] int days = 30, CancellationToken ct = default) =>
+        Ok(await Mediator.Send(new Application.UseCases.Analytics.Queries.GetItemizationTelemetry.GetItemizationTelemetryQuery(days), ct));
+
     [HttpGet("overview")]
     [Authorize(Policy = AdministrationPermissions.Read)]
     public async Task<ActionResult<Response<IReadOnlyList<TelemetrySnapshot>>>> GetOverview(

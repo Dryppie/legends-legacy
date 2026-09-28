@@ -138,6 +138,8 @@ public static class AbilityCompiler
 
         return new CompiledTrigger
         {
+            ProcScope = trigger.ProcScope,
+            AllowPeriodicProcs = trigger.AllowPeriodicProcs,
             ChooseOneEffect = trigger.ChooseOneEffect,
             SnapshotEffectConditions = trigger.SnapshotEffectConditions,
             Event = trigger.Event,
@@ -249,7 +251,8 @@ public static class AbilityCompiler
             ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
             LifeStealPercentage = effect.LifeStealPercentage,
             LifeStealTargetCondition = effect.LifeStealTargetCondition,
-            ProcCoefficient = effect.ProcCoefficient <= 0 ? 1m : effect.ProcCoefficient,
+            ProcCoefficient = effect.ProcCoefficient,
+            AllowSecondaryProcs = effect.AllowSecondaryProcs,
             AbilityKind = abilityKind,
             AbilityTags = new HashSet<string>(abilityTags, StringComparer.OrdinalIgnoreCase),
             Tags = new HashSet<string>(effect.Tags, StringComparer.OrdinalIgnoreCase),

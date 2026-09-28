@@ -2,6 +2,11 @@ using Application.Common.Mappings;
 using Application.MediatR.Behaviors;
 using Application.MediatR.Synchronization;
 using Application.UseCases.Administration;
+using Application.UseCases.Analytics.Queries.GetItemizationTelemetry;
+using Application.UseCases.Equipments.Commands.ApplyEquipmentMigration;
+using Application.UseCases.Equipments.Commands.RollbackEquipmentMigration;
+using Application.UseCases.Equipments.Queries.AuditEquipmentMigration;
+using Application.UseCases.Equipments.Queries.PreviewEquipmentMigration;
 using Application.UseCases.Nobility.Commands.GrantAlphaSignets;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,6 +17,16 @@ public static class LiveOpsApplication
 {
     private const string AdministrationNamespace =
         "Application.UseCases.Administration";
+
+    private static readonly HashSet<Type> AdditionalOperatorHandlers =
+    [
+        typeof(GrantAlphaSignetsCommandHandler),
+        typeof(AuditEquipmentMigrationQueryHandler),
+        typeof(PreviewEquipmentMigrationQueryHandler),
+        typeof(ApplyEquipmentMigrationCommandHandler),
+        typeof(RollbackEquipmentMigrationCommandHandler),
+        typeof(GetItemizationTelemetryQueryHandler)
+    ];
 
     public static IServiceCollection AddLiveOpsApplication(
         this IServiceCollection services)
@@ -34,7 +49,7 @@ public static class LiveOpsApplication
         var handlerRegistrations = applicationAssembly.DefinedTypes
             .Where(type =>
                 !type.IsAbstract &&
-                (type.AsType() == typeof(GrantAlphaSignetsCommandHandler) || type.Namespace?.StartsWith(
+                (AdditionalOperatorHandlers.Contains(type.AsType()) || type.Namespace?.StartsWith(
                     AdministrationNamespace,
                     StringComparison.Ordinal) == true))
             .SelectMany(type => type.ImplementedInterfaces

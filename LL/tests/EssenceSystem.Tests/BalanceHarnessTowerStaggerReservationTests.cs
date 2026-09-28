@@ -32,9 +32,14 @@ public sealed class BalanceHarnessTowerStaggerReservationTests
     {
         var input = TowerBossDiscovery.GenerationInputs(Definition()); var inventory = Inventory.Value; var before = HarnessJson.Hash(inventory);
         var m = TowerBossPartyGenerator.FromInventory(input, inventory); var r = m.StaggerReservations!;
-        Assert.Equal(250, r.FirstThreshold); Assert.Equal(80, m.Essences.Count); Assert.Equal(71, m.DefenseCoverage!.Count); Assert.Equal(69, m.CompatibleDefense!.Coverage.Count);
-        Assert.Equal(new[] { (25, 10), (35, 8), (40, 7), (50, 5) }, r.Providers.OrderBy(p => p.StaggerPower).Select(p => (p.StaggerPower!.Value, p.MinimumCount!.Value)));
-        Assert.All(r.Providers, p => { Assert.Null(p.FallbackReason); var route = Assert.Single(p.Routes); Assert.NotEmpty(route.SelectedTriggers); Assert.Equal(80, route.SeparateRuntimeControlChancePercent); });
+        Assert.Equal(250, r.FirstThreshold);
+        Assert.Equal(input.AllowedEssences.Count, m.Essences.Count);
+        Assert.Equal(m.CompatibleDefense!.Coverage.Count(f => f.Kind == "recurring-control"), r.Providers.Count);
+        var supported = r.Providers.Where(p => p.FallbackReason is null).ToArray();
+        Assert.NotEmpty(supported);
+        Assert.All(r.Providers.Where(p => p.FallbackReason is not null), p => Assert.Null(p.MinimumCount));
+        Assert.Equal(new[] { (25, 10), (35, 8), (40, 7), (50, 5) }, supported.OrderBy(p => p.StaggerPower).Select(p => (p.StaggerPower!.Value, p.MinimumCount!.Value)));
+        Assert.All(supported, p => { Assert.Null(p.FallbackReason); var route = Assert.Single(p.Routes); Assert.NotEmpty(route.SelectedTriggers); Assert.Equal(80, route.SeparateRuntimeControlChancePercent); });
         Assert.Contains(r.Providers, p => p.Routes[0].Effect!.Conditions.Any(c => c.Type == AbilityConditionType.HealthBelowPercent && c.Value == 30));
         var oldInput = input with { Generation = input.Generation with { PolicyVersion = TowerBossGeneration.CompatibleDefenseVersion, Methods = TowerBossGeneration.CompatibleDefenseMethods } };
         var old = TowerBossPartyGenerator.FromInventory(oldInput, inventory);
@@ -73,7 +78,7 @@ public sealed class BalanceHarnessTowerStaggerReservationTests
     public void Every_supported_provider_uses_one_bounded_count_draw_and_records_actual_satisfaction()
     {
         var input = TowerBossDiscovery.GenerationInputs(Definition()); var m = TowerBossPartyGenerator.FromInventory(input, Inventory.Value);
-        foreach (var p in m.StaggerReservations!.Providers)
+        foreach (var p in m.StaggerReservations!.Providers.Where(p => p.FallbackReason is null))
         foreach (var upper in new[] { false, true })
         {
             var feature = m.Coverage!.Single(f => f.Kind == "recurring-control" && f.EssenceId == p.EssenceId);
@@ -99,9 +104,13 @@ public sealed class BalanceHarnessTowerStaggerReservationTests
         {
             var actual = g.FreshCoverage(new Random(seed)); var expected = old.FreshCoverage(new Random(seed));
             Assert.Equal(HarnessJson.Hash(expected), HarnessJson.Hash(actual with { Reservations = null }));
-            if (actual.Reservations is not null) Assert.Equal(reason, Assert.Single(actual.Reservations, r => r.Kind == "recurring-control").FallbackReason);
+            if (actual.Reservations is not null) {
+                var reservation = Assert.Single(actual.Reservations, r => r.Kind == "recurring-control");
+                var provider = m.StaggerReservations!.Providers.Single(p => p.EssenceId == reservation.EssenceId);
+                Assert.Equal(provider.StaggerPower.HasValue || reason != "unattainable-minimum" ? reason : provider.FallbackReason, reservation.FallbackReason);
+            }
         }
-        if (reason == "unattainable-minimum") Assert.All(m.StaggerReservations!.Providers, p => Assert.True(p.MinimumCount > input.RequiredPartySize));
+        if (reason == "unattainable-minimum") Assert.All(m.StaggerReservations!.Providers.Where(p => p.StaggerPower.HasValue), p => Assert.True(p.MinimumCount > input.RequiredPartySize));
     }
 
     [Theory]
@@ -113,7 +122,8 @@ public sealed class BalanceHarnessTowerStaggerReservationTests
         if (threshold == 5) input = input with { RequiredPartySize = 1 };
         var m = TowerStaggerReservation.Create(input, WithStagger(new() { Enabled = true, BaseThreshold = threshold, ReferenceParticipantCount = reference }), TowerPartyCoverage.Create(input, Inventory.Value));
         Assert.Equal(expected, m.FirstThreshold);
-        Assert.All(m.Providers, p => Assert.Equal((expected + p.StaggerPower!.Value - 1) / p.StaggerPower, p.MinimumCount));
+        Assert.All(m.Providers.Where(p => p.StaggerPower.HasValue), p => Assert.Equal((expected + p.StaggerPower!.Value - 1) / p.StaggerPower, p.MinimumCount));
+        Assert.All(m.Providers.Where(p => !p.StaggerPower.HasValue), p => { Assert.Null(p.MinimumCount); Assert.NotNull(p.FallbackReason); });
     }
 
     [Theory]

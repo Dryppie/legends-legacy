@@ -1,0 +1,26 @@
+{
+  "1": {
+    "starters": "equipment-starters.legacy-v1.json",
+    "styles": "equipment-styles.legacy-v1.json",
+    "sets": "equipment-sets.legacy-v1.json",
+    "named": "equipment-named.v1.json"
+  },
+  "2": {
+    "starters": "equipment-starters.v1.json",
+    "styles": "equipment-styles.v1.json",
+    "sets": "equipment-sets.v1.json",
+    "named": "equipment-named.v1.json"
+  },
+  "3": {
+    "starters": "equipment-starters.v3.json",
+    "styles": "equipment-styles.v3.json",
+    "sets": "equipment-sets.v3.json",
+    "named": "equipment-named.v3.json"
+  },
+  "4": {
+    "starters": "equipment-starters.v4.json",
+    "styles": "equipment-styles.v4.json",
+    "sets": "equipment-sets.v4.json",
+    "named": "equipment-named.v4.json"
+  }
+}

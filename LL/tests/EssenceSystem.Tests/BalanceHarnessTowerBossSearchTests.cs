@@ -222,6 +222,7 @@ public sealed class BalanceHarnessTowerBossSearchTests
         {
             var id = Guid.NewGuid();
             db.CharacterSnapshots.Add(new CharacterSnapshot {
+                AttributeRulesVersion = Domain.Models.Attributes.AttributeRules.CurrentVersion,
                 Id = id, CharacterId = build.Character.Id, Name = build.Character.Name, Level = build.Character.Level,
                 BaseAttributes = build.Character.BaseAttributes.Select(a => new EntityAttributeSnapshot {
                     CharacterSnapshotId = id, AttributeType = a.AttributeType, Value = a.Value }).ToArray(),

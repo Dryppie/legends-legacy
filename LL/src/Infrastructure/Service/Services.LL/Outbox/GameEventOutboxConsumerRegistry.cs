@@ -8,6 +8,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
     private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> ConsumersByEvent =
         new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
         {
+            [GameEventTypes.ItemizationObserved] = ["itemization"],
             [GameEventTypes.EquipmentChanged] = [GameEventOutboxConsumerNames.Quests],
             [GameEventTypes.EquipmentFound] = [GameEventOutboxConsumerNames.EventQuests],
             [GameEventTypes.EssenceAbsorbed] =

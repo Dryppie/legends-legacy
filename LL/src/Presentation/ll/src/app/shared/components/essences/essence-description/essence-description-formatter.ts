@@ -190,6 +190,11 @@ export class EssenceDescriptionFormatter {
     text: string,
     protect: (html: string) => string,
   ): string {
+    // The Ability Haste attribute is separate from the Haste condition.
+    text = text.replace(/\bAbility\s+Haste\b/gi, (attribute) =>
+      protect(this.escapeHtml(attribute)),
+    );
+
     return text.replace(
       this.keywordPattern,
       (_match, prefix: string, alias: string, value: string | undefined) => {

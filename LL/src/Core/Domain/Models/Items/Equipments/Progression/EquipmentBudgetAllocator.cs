@@ -11,7 +11,9 @@ public static class EquipmentBudgetAllocator
         double budget,
         IReadOnlyDictionary<AttributeType, double> weights,
         IReadOnlyDictionary<AttributeType, double>? currentPoints = null,
-        bool roundToWholePoints = true)
+        bool roundToWholePoints = true,
+        int statVersion = EquipmentStatBudgetCatalog.BalanceVersion,
+        EquipmentBalance? balance = null)
     {
         ValidateTier(tier);
         var targetBudget = Math.Max(0d, budget);
@@ -27,10 +29,10 @@ public static class EquipmentBudgetAllocator
             attribute => attribute,
             attribute =>
             {
-                var rule = EquipmentStatBudgetCatalog.Get(attribute);
+                var rule = EquipmentStatBudgetCatalog.GetForVersion(attribute, statVersion);
                 var current = Math.Clamp(currentPoints?.GetValueOrDefault(attribute) ?? 0d, 0d, rule.PerItemHardCap);
                 return Math.Max(0d, rule.PerItemHardCap - current)
-                    * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier);
+                    * (balance?.GetMaterializedCostPerPoint(attribute, tier) ?? EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier, statVersion));
             });
         var active = normalizedWeights.Keys
             .Where(attribute => remainingCapacityBudget[attribute] > Epsilon)
@@ -76,10 +78,10 @@ public static class EquipmentBudgetAllocator
         var addedPoints = new Dictionary<AttributeType, double>();
         foreach (var attribute in normalizedWeights.Keys)
         {
-            var rule = EquipmentStatBudgetCatalog.Get(attribute);
+            var rule = EquipmentStatBudgetCatalog.GetForVersion(attribute, statVersion);
             var current = Math.Clamp(currentPoints?.GetValueOrDefault(attribute) ?? 0d, 0d, rule.PerItemHardCap);
             var points = allocatedBudget[attribute]
-                / EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier);
+                / (balance?.GetMaterializedCostPerPoint(attribute, tier) ?? EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier, statVersion));
             if (roundToWholePoints && points > Epsilon)
                 points = Math.Max(1d, Math.Round(points, MidpointRounding.AwayFromZero));
             points = Math.Clamp(points, 0d, rule.PerItemHardCap - current);
@@ -88,7 +90,7 @@ public static class EquipmentBudgetAllocator
         }
 
         var spentBudget = addedPoints.Sum(x =>
-            x.Value * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(x.Key, tier));
+            x.Value * (balance?.GetMaterializedCostPerPoint(x.Key, tier) ?? EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(x.Key, tier, statVersion)));
         return new EquipmentBudgetAllocation(
             targetBudget,
             spentBudget,
@@ -104,7 +106,9 @@ public static class EquipmentBudgetAllocator
         IReadOnlyList<EquipmentLinearBudgetConstraint> constraints,
         IReadOnlyDictionary<AttributeType, double>? overflowWeights = null,
         IReadOnlyDictionary<AttributeType, double>? currentPoints = null,
-        double perItemCapMultiplier = 1d)
+        double perItemCapMultiplier = 1d,
+        int statVersion = EquipmentStatBudgetCatalog.BalanceVersion,
+        EquipmentBalance? balance = null)
     {
         ValidateTier(tier);
         var targetBudget = Math.Max(0d, budget);
@@ -151,7 +155,7 @@ public static class EquipmentBudgetAllocator
                     remainingBudget
                     * entry.Value
                     / totalWeight
-                    / EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(entry.Key, tier));
+                    / (balance?.GetMaterializedCostPerPoint(entry.Key, tier) ?? EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(entry.Key, tier, statVersion)));
             var scale = 1d;
 
             foreach (var (attribute, proposedPointDelta) in proposedPoints)
@@ -200,7 +204,7 @@ public static class EquipmentBudgetAllocator
                 points[attribute] += pointIncrement;
                 spentThisIteration +=
                     pointIncrement
-                    * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier);
+                    * (balance?.GetMaterializedCostPerPoint(attribute, tier) ?? EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(attribute, tier, statVersion));
             }
 
             remainingBudget = Math.Max(0d, remainingBudget - spentThisIteration);
@@ -257,7 +261,7 @@ public static class EquipmentBudgetAllocator
             .Where(x => x.Value > Epsilon)
             .ToDictionary(x => x.Key, x => x.Value);
         var spentBudget = addedPoints.Sum(x =>
-            x.Value * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(x.Key, tier));
+            x.Value * (balance?.GetMaterializedCostPerPoint(x.Key, tier) ?? EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(x.Key, tier, statVersion)));
         return new EquipmentConstrainedBudgetAllocation(
             targetBudget,
             spentBudget,
@@ -271,7 +275,7 @@ public static class EquipmentBudgetAllocator
             + points.GetValueOrDefault(attribute);
 
         double GetPerItemCap(AttributeType attribute) =>
-            EquipmentStatBudgetCatalog.Get(attribute).PerItemHardCap
+            EquipmentStatBudgetCatalog.GetForVersion(attribute, statVersion).PerItemHardCap
             * Math.Max(1d, perItemCapMultiplier);
     }
 

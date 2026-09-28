@@ -25,7 +25,8 @@ public sealed class OfflineContent
     public static IReadOnlyList<string> Files => ContentSnapshotContract.CurrentFiles;
 
     private readonly string _root;
-    private readonly IConfiguration _configuration = new ConfigurationBuilder().Build();
+    private readonly bool _allowFutureProjection;
+    private readonly IConfiguration _configuration;
     private readonly JsonCreatureEssenceLootTableRepository _creatureEssences;
     private readonly JsonCreatureAbilityDefinitionProvider _creatureAbilities;
     private readonly RegionCreatureScalingProvider _scaling;
@@ -35,17 +36,26 @@ public sealed class OfflineContent
     public StarterEquipmentCatalog Equipment { get; }
     public JsonEssenceDefinitionRepository Essences { get; }
 
-    public OfflineContent(string root, ThreatAndTankingOptions threat)
+    public OfflineContent(string root, ThreatAndTankingOptions threat, bool allowFutureProjection = false, int? equipmentBalanceVersion = null,
+        string? abilityBalanceProfile = null)
     {
         using var timing = TowerPerformanceTrace.Measure("content.load");
         _root = root;
+        _allowFutureProjection = allowFutureProjection;
+        var equipmentPath = Path.Combine(root, "Data", "equipment", "equipment-starters.v1.json");
+        Equipment = equipmentBalanceVersion.HasValue ? JsonStarterEquipmentCatalog.Load(equipmentPath, equipmentBalanceVersion.Value)
+            : TowerContentProviders.Equipment(equipmentPath);
+        _configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Combat:AbilityBalanceProfile"] = abilityBalanceProfile,
+            ["AttributeRedesign:LiveVersion"] = Equipment.Evaluator.Balance.AttributeVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        }).Build();
         _threat = JsonSerializer.Deserialize<ThreatAndTankingOptions>(JsonSerializer.SerializeToUtf8Bytes(threat, HarnessJson.Options), HarnessJson.Options)!;
         Essences = TowerContentProviders.Essences(_configuration, root, HarnessJson.Options, new EssenceDefinitionValidator());
         _creatureEssences = TowerContentProviders.Loot(_configuration, root, HarnessJson.Options, Essences);
         _creatureAbilities = TowerContentProviders.CreatureAbilities(_configuration, root, HarnessJson.Options);
         _scaling = TowerContentProviders.Scaling(_configuration, root, HarnessJson.Options);
         _abilities = TowerContentProviders.Abilities(_configuration, root, HarnessJson.Options, _threat);
-        Equipment = TowerContentProviders.Equipment(Path.Combine(root, "Data", "equipment", "equipment-starters.v1.json"));
     }
 
     public CanonicalEquipmentBuild CreateStarter()
@@ -93,12 +103,12 @@ public sealed class OfflineContent
 
     public EquipmentReferenceBuild CreateBuild(EquipmentReferenceBuildDefinition build) =>
         new EquipmentReferenceBuildFactory(Equipment, Essences, new SelectedEssenceResolver(Essences))
-            .Create(build, requireCompleteLoadout: false);
+            .Create(build, requireCompleteLoadout: false, allowFutureProjection: _allowFutureProjection);
 
     public void Validate(IdleBattleInput input)
     {
         ValidateEncounter(input);
-        if (input.Character.Id == Guid.Empty || input.Character.Level is < 1 or > 100
+        if (input.Character.Id == Guid.Empty || (input.Character.Level < 1 || input.Character.Level > (_allowFutureProjection ? 500 : 100))
             || input.Character.BaseAttributes.Count == 0
             || input.Character.BaseAttributes.Values.Any(x => !float.IsFinite(x) || x < 0))
             throw new InvalidDataException("Invalid character identity, level, or base attributes.");
@@ -132,7 +142,8 @@ public sealed class OfflineContent
 
     public CombatSetupService CreateSetup(Character character, IReadOnlyList<PlayerEssence> essences) => new(
         new CreatureScaler(_scaling), new SelectedEssenceResolver(Essences, character.Id, essences),
-        Essences, _creatureEssences, _creatureAbilities, Equipment);
+        Essences, _creatureEssences, _creatureAbilities, Equipment,
+        attributeRules: new Domain.Models.Attributes.AttributeRulesSelection(Equipment.Evaluator.Balance.AttributeVersion));
 
     public CombatEngineExecutor CreateExecutor() => new(_abilities, Essences, Equipment, Options.Create(_threat));
 
@@ -143,7 +154,7 @@ public sealed class OfflineContent
         return CreateExecutor();
     }
 
-    private CombatStyleSnapshot FreezeCombatStyle(FixtureCharacter character, FixtureCombatStyle recipe)
+    public CombatStyleSnapshot FreezeCombatStyle(FixtureCharacter character, FixtureCombatStyle recipe)
     {
         if (recipe.Level is < 0 or > 10)
             throw new InvalidDataException("Combat Style fixture levels must be 0–10.");

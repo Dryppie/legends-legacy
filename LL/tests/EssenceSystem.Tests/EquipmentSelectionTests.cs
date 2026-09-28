@@ -64,11 +64,11 @@ public sealed class EquipmentSelectionTests
         var definitions = BaseDefinitions();
         var expected = definitions.Where(definition =>
             _equipment.Evaluator.GetArchetype(definition.ArchetypeId).EquipmentType
-                is EquipmentType.OneHanded or EquipmentType.OffHand).ToArray();
+                is EquipmentType.OneHanded or EquipmentType.OffHand).DistinctBy(x => x.ArchetypeId).ToArray();
         var selected = Enumerable.Range(0, expected.Length).Select(index =>
             Weights.Roll(definitions, _equipment.Evaluator, new FixedRandom(0, 0, index, expected.Length))).ToArray();
 
-        Assert.Equal(expected.Select(definition => definition.Id).Order(), selected.Select(definition => definition.Id).Order());
+        Assert.Equal(expected.Select(definition => definition.ArchetypeId).Order(), selected.Select(definition => definition.ArchetypeId).Order());
         Assert.Contains(selected, definition => definition.ArchetypeId == "plain.towershield");
         Assert.Contains(selected, definition => definition.ArchetypeId == "plain.spiritward");
         Assert.Contains(selected, definition => definition.ArchetypeId == "plain.grimoire");
@@ -135,10 +135,13 @@ public sealed class EquipmentSelectionTests
 
     private sealed class FixedRandom(double categoryRoll, double handednessRoll = 0, int itemIndex = 0, int? expectedPoolSize = null) : Random
     {
+        private bool _selectedArchetype;
         private readonly Queue<double> _rolls = new([categoryRoll, handednessRoll]);
         public override double NextDouble() => _rolls.Dequeue();
         public override int Next(int maxValue)
         {
+            if (_selectedArchetype) return 0;
+            _selectedArchetype = true;
             if (expectedPoolSize.HasValue) Assert.Equal(expectedPoolSize.Value, maxValue);
             Assert.InRange(itemIndex, 0, maxValue - 1);
             return itemIndex;

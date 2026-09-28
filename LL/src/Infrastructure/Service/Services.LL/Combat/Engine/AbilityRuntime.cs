@@ -42,6 +42,8 @@ public sealed class CompiledCost
 
 public sealed class CompiledTrigger
 {
+    public ProcScope ProcScope { get; init; }
+    public bool AllowPeriodicProcs { get; init; }
     public bool ChooseOneEffect { get; init; }
     public bool SnapshotEffectConditions { get; init; }
     public AbilityTriggerEvent Event { get; init; }
@@ -124,6 +126,7 @@ public sealed class CompiledEffect
     public float LifeStealPercentage { get; init; }
     public StandardConditionType? LifeStealTargetCondition { get; init; }
     public decimal ProcCoefficient { get; init; }
+    public bool AllowSecondaryProcs { get; init; }
     public AbilitySpecKind AbilityKind { get; init; }
     public required IReadOnlySet<string> AbilityTags { get; init; }
     public required IReadOnlySet<string> Tags { get; init; }
@@ -202,13 +205,13 @@ public sealed class RuntimeAbility
     public int RemainingCooldownTicks { get; private set; }
     public bool IsReady => RemainingCooldownTicks <= 0;
 
-    public void StartInitialCooldown(float cooldownReductionPercent) =>
-        RemainingCooldownTicks = AttributeCombatRules.CalculateCooldownTicks(
+    public void StartInitialCooldown(float cooldownReductionPercent, bool isHaste = false) =>
+        RemainingCooldownTicks = isHaste ? AttributeRules.CooldownTicks(Definition.CooldownTicks, cooldownReductionPercent) : AttributeCombatRules.CalculateCooldownTicks(
             Definition.CooldownTicks,
             cooldownReductionPercent);
 
-    public void StartCooldown(float cooldownReductionPercent, int additionalTicks = 0) =>
-        RemainingCooldownTicks = AttributeCombatRules.CalculateCooldownTicks(
+    public void StartCooldown(float cooldownReductionPercent, int additionalTicks = 0, bool isHaste = false) =>
+        RemainingCooldownTicks = isHaste ? AttributeRules.CooldownTicks(Definition.CooldownTicks + additionalTicks, cooldownReductionPercent) : AttributeCombatRules.CalculateCooldownTicks(
             Definition.CooldownTicks + additionalTicks,
             cooldownReductionPercent);
 
@@ -314,7 +317,7 @@ public sealed class RuntimeStatus
     private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<string>> _effectTargets = new(StringComparer.OrdinalIgnoreCase);
-    private readonly int _durationTicks;
+    private int _durationTicks;
 
     public RuntimeStatus(
         CompiledStatus definition,
@@ -355,6 +358,12 @@ public sealed class RuntimeStatus
         HasReachedLockedMaximum |= Definition.LockAtMaxStacks && Stacks >= Definition.MaxStacks;
         if (_durationTicks > 0)
             RemainingDurationTicks = _durationTicks;
+    }
+
+    public void ResetDuration(int ticks)
+    {
+        _durationTicks = Math.Max(0, ticks);
+        RemainingDurationTicks = _durationTicks;
     }
 
     public void Refresh(int stacks)
@@ -804,14 +813,30 @@ public sealed class RuntimeCombatant
         int staggerParticipantCount = 1,
         int level = 1,
         CombatStyleSnapshot? combatStyle = null,
-        IReadOnlyDictionary<string, Guid>? essenceOrigins = null)
+        IReadOnlyDictionary<string, Guid>? essenceOrigins = null,
+        int attributeRulesVersion = AttributeRules.LegacyVersion)
     {
+        AttributeRules.ValidateVersion(attributeRulesVersion);
+        AttributeRulesVersion = attributeRulesVersion;
         Id = id;
         Name = name;
         Team = team;
         Level = Math.Max(1, level);
         PartyNumber = partyNumber;
         Attributes = new Dictionary<AttributeType, float>(attributes);
+        if (UsesCurrentAttributeRules)
+        {
+            Attributes.TryAdd(AttributeType.ArmorRating, AttributeRules.RatingFromLegacyPercent(Attributes.GetValueOrDefault(AttributeType.Armor)));
+            Attributes.TryAdd(AttributeType.ResistanceRating, AttributeRules.RatingFromLegacyPercent(Attributes.GetValueOrDefault(AttributeType.Resistance)));
+            if (Attributes.Remove(AttributeType.Cooldown, out var cooldown))
+                Attributes[AttributeType.AbilityHaste] = Attributes.GetValueOrDefault(AttributeType.AbilityHaste) + AttributeRules.HasteFromCooldownReduction(cooldown);
+            if (Attributes.Remove(AttributeType.HealingPowerPercent, out var healing))
+                Attributes[AttributeType.Restoration] = Attributes.GetValueOrDefault(AttributeType.Restoration) + healing;
+            var tenacity = Math.Max(Attributes.GetValueOrDefault(AttributeType.StatusResistance), Attributes.GetValueOrDefault(AttributeType.CrowdControlResistance));
+            Attributes.Remove(AttributeType.StatusResistance);
+            Attributes.Remove(AttributeType.CrowdControlResistance);
+            Attributes[AttributeType.Tenacity] = Attributes.GetValueOrDefault(AttributeType.Tenacity) + tenacity;
+        }
         Attributes.TryAdd(AttributeType.Threat, BaseThreat);
         InitialAttributes = new Dictionary<AttributeType, float>(Attributes);
         Health = GetAttribute(AttributeType.MaxHealth);
@@ -839,6 +864,8 @@ public sealed class RuntimeCombatant
     }
 
     public string Id { get; }
+    public int AttributeRulesVersion { get; }
+    public bool UsesCurrentAttributeRules => AttributeRulesVersion == AttributeRules.CurrentVersion;
     public string Name { get; }
     public string ImagePath { get; }
     public CombatTeam Team { get; }
@@ -886,14 +913,26 @@ public sealed class RuntimeCombatant
     public RuntimeStaggerState? Stagger { get; }
     public bool IsAlive => Health > 0;
 
-    public float GetAttribute(AttributeType attributeType) =>
-        Attributes.GetValueOrDefault(attributeType);
+    public float GetAttribute(AttributeType attributeType)
+    {
+        var runtimeAttribute = ResolveRuntimeAttribute(attributeType);
+        var value = Attributes.GetValueOrDefault(runtimeAttribute);
+        return UsesCurrentAttributeRules ? AttributeRules.Effective(runtimeAttribute, value) : value;
+    }
 
     public float GetInitialAttribute(AttributeType attributeType) =>
-        InitialAttributes.GetValueOrDefault(attributeType);
+        InitialAttributes.GetValueOrDefault(ResolveRuntimeAttribute(attributeType));
+
+    private AttributeType ResolveRuntimeAttribute(AttributeType attribute) => !UsesCurrentAttributeRules ? attribute : attribute switch
+    {
+        AttributeType.HealingPowerPercent => AttributeType.Restoration,
+        AttributeType.StatusResistance or AttributeType.CrowdControlResistance => AttributeType.Tenacity,
+        _ => AttributeRules.RatingAttribute(attribute)
+    };
 
     public void AdjustAttribute(AttributeType attributeType, float amount)
     {
+        attributeType = ResolveRuntimeAttribute(attributeType);
         var oldMaxHealth = GetAttribute(AttributeType.MaxHealth);
         var oldBaseThreat = attributeType == AttributeType.Threat ? GetBaseThreat() : 0;
         Attributes[attributeType] = Attributes.GetValueOrDefault(attributeType) + amount;
@@ -1211,7 +1250,7 @@ public sealed class RuntimeCombatant
         if (ability is null)
             return 0;
 
-        ability.StartInitialCooldown(GetAttribute(AttributeType.Cooldown));
+        ability.StartInitialCooldown(GetAttribute(UsesCurrentAttributeRules ? AttributeType.AbilityHaste : AttributeType.Cooldown), UsesCurrentAttributeRules);
         return ability.RemainingCooldownTicks;
     }
 

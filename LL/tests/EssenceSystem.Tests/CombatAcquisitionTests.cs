@@ -24,7 +24,8 @@ public sealed class CombatAcquisitionTests
         var catalog = Catalog();
 
         Assert.Equal(2, catalog.Pools.Count);
-        Assert.Equal(28, catalog.DropDefinitions(EquipmentRarity.Common).Count);
+        Assert.Equal(28, catalog.DropDefinitions(EquipmentRarity.Common).Select(x => x.ArchetypeId).Distinct().Count());
+        Assert.True(catalog.DropDefinitions(EquipmentRarity.Common).Count > 28);
         Assert.All(Enum.GetValues<EquipmentRarity>(), rarity =>
             Assert.True(catalog.DropDefinitions(rarity).Count >= 28));
         Assert.Equal(catalog.Equipment.Evaluator.Definitions.Count,

@@ -129,8 +129,8 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         await using var db = CreateDbContext();
         db.ItemBases.AddRange(services.EquipmentCatalog.EquipmentBases.Values);
         var snapshotId = Guid.NewGuid();
-        var snapshot = new CharacterSnapshot
-        {
+        var snapshot = new CharacterSnapshot {
+                AttributeRulesVersion = Domain.Models.Attributes.AttributeRules.CurrentVersion,
             Id = snapshotId,
             CharacterId = build.Character.Id,
             Name = build.Character.Name,
@@ -266,8 +266,8 @@ public sealed class CanonicalEquipmentBuildFactoryTests
 
     private static IReadOnlyDictionary<AttributeType, float> ProjectAttributes(
         CanonicalEquipmentBuild build) =>
-        CombatRatingCalculator.ProjectDirectAttributes(
-            build.Character.BaseAttributes,
+        AttributeCalculator.CalculateProjectedAttributes(
+            build.Character.BaseAttributes.ToDictionary(x => x.AttributeType, x => x.Value),
             AttributeCalculator.ProjectEquipmentModifiers(
                 build.Equipment,
                 build.Character.Level));

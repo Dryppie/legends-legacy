@@ -8,6 +8,8 @@ export type EquipmentOwnership =
   | 'GuildOwned';
 
 export interface EquipmentProgression {
+  statVersion?: number;
+  allocation?: EquipmentBudgetAllocation | null;
   modelVersion: number;
   balanceVersion: number;
   definitionId: string;
@@ -18,6 +20,16 @@ export interface EquipmentProgression {
   nativeStyleId: string | null;
   activeStyleId: string | null;
   ownership: EquipmentOwnership;
+}
+
+export interface EquipmentBudgetAllocation {
+  statVersion: number;
+  core: number;
+  specialization: number;
+  styleStats: number;
+  reservedIdentity: number;
+  total: number;
+  specializationId: string;
 }
 
 export interface StarterEquipmentOption {
@@ -58,6 +70,7 @@ export function hasEquipmentProgressionAccess(
 }
 
 export interface EquipmentProgressionItem {
+  allocation?: EquipmentBudgetAllocation | null;
   id: string;
   definitionId: string;
   nativeStyleId: string | null;

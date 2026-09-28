@@ -27,8 +27,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="..\API.LL\Data\combat\abilities.json">
-      <Link>Data\combat\abilities.json</Link>
+    <Content Include="..\API.LL\Data\combat\*.json">
+      <Link>Data\combat\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

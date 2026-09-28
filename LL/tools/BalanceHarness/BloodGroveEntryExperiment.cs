@@ -64,9 +64,9 @@ public static class BloodGroveEntryExperiment
         if (copies != 1 || cinders < blueprints.CindersPerTier || armorGrant.GetProperty("quantity").GetInt32() != 1
             || reward.Quantity != 1 || reward.Tier != 1 || reward.Rank != 0 || reward.Rarity != EquipmentRarity.Common)
             throw new InvalidDataException("The guaranteed entry reward budget changed; review the experiment.");
-        // Exactly the production SelectionCrateService candidate filter. These are alternatives,
+        // Default-profile controls from the production SelectionCrateService pool. Specialization exchanges use the attribute study. These are alternatives,
         // not nine items awarded to one character. Award defaults fix Standard quality / 1.0 rolls.
-        var armors = acquisition.BaseDropDefinitions(reward.Rarity).Where(d => reward.EquipmentTypes!.Contains(
+        var armors = acquisition.BaseDropDefinitions(reward.Rarity).Where(d => d.SpecializationId == "default").Where(d => reward.EquipmentTypes!.Contains(
             content.Equipment.Evaluator.GetArchetype(d.ArchetypeId).EquipmentType)).ToArray();
         if (armors.Length != 9 || !armors.Any(a => a.Id == "plain.medium_mail")
             || !armors.Any(a => a.Id == "plain.heavy_breastplate"))

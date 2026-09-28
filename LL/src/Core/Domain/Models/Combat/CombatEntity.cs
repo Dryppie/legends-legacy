@@ -13,6 +13,7 @@ namespace Domain.Models.Combat;
 [NotMapped]
 public class CombatEntity
 {
+    public int AttributeRulesVersion { get; set; } = AttributeRules.CurrentVersion;
     // This is only set to ensure it's possible to compare a CombatEntity with the LocationCreature
     public Guid OriginalId { get; set; }
     public string Id { get; set; }
@@ -51,6 +52,7 @@ public class CombatEntity
 
     public CombatEntity(Entity entity)
     {
+        AttributeRulesVersion = entity.AttributeRulesVersion;
         IsPlayerCharacter = entity is Domain.Models.Entities.Characters.Character;
         OriginalId = entity.Id;
         Id = entity.Id.ToString();

@@ -12,6 +12,7 @@ using I = EssenceSystem.Tests.BalanceHarnessIncumbentSelectionTests;
 namespace EssenceSystem.Tests;
 
 [Trait("Category", "BalanceHarness")]
+[Collection("Exclusive archive resource tests")]
 public sealed class BalanceHarnessSelectionDiagnosticTests : IDisposable
 {
     private readonly string root = Path.Combine(Path.GetTempPath(), "tower-diagnostic-fixture-"+Guid.NewGuid().ToString("N"));
@@ -255,7 +256,7 @@ public sealed class BalanceHarnessSelectionDiagnosticTests : IDisposable
         var fixture=Path.Combine(root,"process.json");HarnessJson.WriteNew(fixture,new DiagnosticFixture(DiagnosticFixtureHost.Version,mode,q,mechanics));
         var start=FixtureHost.Start("diagnostic-parent",fixture);start.RedirectStandardOutput=true;start.RedirectStandardError=true;
         using var process=Process.Start(start)!;var stdout=process.StandardOutput.ReadToEndAsync();var stderr=process.StandardError.ReadToEndAsync();
-        try {await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(100));}
+        try {await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(q.Operation.MaximumSeconds-q.Operation.PriorSeconds+15));}
         finally {if(!process.HasExited){process.Kill(entireProcessTree:true);await process.WaitForExitAsync();}}
         var output=await stdout;var error=await stderr;
         Assert.True(mode=="complete" ? process.ExitCode==0 : process.ExitCode!=0,output+error);

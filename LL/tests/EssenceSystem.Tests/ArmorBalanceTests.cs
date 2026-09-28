@@ -14,7 +14,7 @@ public sealed class ArmorBalanceTests
     public void Armor_catalog_materializes_the_three_profiles_in_every_slot(
         int tier, int rank, ItemQuality quality)
     {
-        var catalog = LoadCatalog();
+        var catalog = LoadLegacyCatalog();
         var armor = catalog.Options.Where(option => option.EquipmentType is
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs).ToArray();
         Assert.Equal(9, armor.Length);
@@ -58,7 +58,7 @@ public sealed class ArmorBalanceTests
     [Fact]
     public void Cloth_is_absent_from_bases_definitions_options_and_variant_compatibility()
     {
-        var catalog = LoadCatalog();
+        var catalog = LoadLegacyCatalog();
         Assert.DoesNotContain(catalog.EquipmentBases.Keys, id => id.Contains("cloth", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(catalog.Evaluator.Definitions, definition =>
             definition.ArchetypeId.Contains("cloth", StringComparison.OrdinalIgnoreCase));
@@ -97,7 +97,7 @@ public sealed class ArmorBalanceTests
     [Fact]
     public void Premium_heavy_armor_still_benefits_from_a_third_piece()
     {
-        var catalog = LoadCatalog();
+        var catalog = LoadLegacyCatalog();
         var piece = catalog.Evaluator.Evaluate(
             "plain.heavy_breastplate.rarity.legendary",
             tier: 1,
@@ -131,6 +131,6 @@ public sealed class ArmorBalanceTests
         }
     }
 
-    private static StarterEquipmentCatalog LoadCatalog() => JsonStarterEquipmentCatalog.Load(
-        Path.Combine(TestContentPaths.FindApiRoot(), "Data", "equipment", "equipment-starters.v1.json"));
+    private static StarterEquipmentCatalog LoadLegacyCatalog() => JsonStarterEquipmentCatalog.Load(
+        Path.Combine(TestContentPaths.FindApiRoot(), "Data", "equipment", "equipment-starters.v1.json"), balanceVersion: 1);
 }

@@ -22,4 +22,9 @@ export enum AttributeType {
   CrowdControlResistance = 'CrowdControlResistance',
 
   AttackSpeed = 'AttackSpeed',
+  AbilityHaste = 'AbilityHaste',
+  Tenacity = 'Tenacity',
+  Restoration = 'Restoration',
+  ArmorRating = 'ArmorRating',
+  ResistanceRating = 'ResistanceRating',
 }

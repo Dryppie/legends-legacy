@@ -321,9 +321,7 @@ public class GuildMissionService : IGuildMissionService
             expired.CompletedAt ??= expired.Status == GuildMissionStatus.Completed ? expired.EndsAt : null;
         }
 
-        var currentOptions = await _context.GuildMissionOptions
-            .Where(x => x.GuildId == guild.Id && x.WeekKey == week.Key)
-            .ToListAsync(cancellationToken);
+        var currentOptions = await _guildRepository.GetWeeklyMissionOptionsAsync(guild.Id, week.Key, cancellationToken);
         var obsoleteOptions = currentOptions
             .Where(x => !_allDefinitions.ContainsKey(x.MissionDefinitionId))
             .ToList();

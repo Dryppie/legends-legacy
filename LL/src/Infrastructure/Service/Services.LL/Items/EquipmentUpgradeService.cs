@@ -1,4 +1,5 @@
 using Application.Interfaces.Outbox;
+using Services.LL.Analytics;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Items;
@@ -18,9 +19,10 @@ public sealed class EquipmentUpgradeService(
     TimeProvider timeProvider,
     IStateSyncService stateSync,
     EquipmentBlueprintCatalog? blueprints = null,
-    IEquipmentBlueprintRepository? blueprintRepository = null) : IEquipmentUpgradeService
+    IEquipmentBlueprintRepository? blueprintRepository = null,
+    IEquipmentCatalogProvider? versions = null) : IEquipmentUpgradeService
 {
-    private readonly EquipmentUpgradePolicy _policy = new(catalog, prices, blueprints);
+    private readonly EquipmentUpgradePolicy _policy = new(catalog, prices, blueprints, versions);
 
     public async Task<IReadOnlyList<EquipmentBlueprintOption>> GetBlueprintsAsync(Guid characterId, Guid itemInstanceId, CancellationToken ct)
     {
@@ -28,7 +30,7 @@ public sealed class EquipmentUpgradeService(
         var state = context?.Equipment?.ProgressionData?.State;
         if (state is null || context!.UnavailableReason is not null || blueprints is null) return [];
         var progress = blueprintRepository is null ? [] : await blueprintRepository.GetProgressAsync(characterId, ct);
-        return blueprints.Blueprints.Where(x => catalog.Styles.Any(style => style.Id == x.StyleId
+        return blueprints.Blueprints.Where(x => (versions?.Get(state.BalanceVersion) ?? catalog).Styles.Any(style => style.Id == x.StyleId
                 && style.CompatibleArchetypeIds.Contains(state.ArchetypeId)))
             .Select(x => new EquipmentBlueprintOption(x.StyleId, x.Name, x.ItemId,
                 context.BlueprintStacks?.Where(stack => stack.ItemInstance.ItemBaseId == x.ItemId).Sum(stack => (long)stack.Quantity) ?? 0,
@@ -143,6 +145,8 @@ public sealed class EquipmentUpgradeService(
                 cancellationToken);
         }
 
+        await outbox.RecordEquipmentAsync(request.Kind.ToString(), operationId.ToString("N"), characterId,
+            quote.After ?? quote.Before!, "upgrade", cancellationToken);
         return new(outcome, null);
     }
 

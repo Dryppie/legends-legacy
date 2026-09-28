@@ -50,6 +50,7 @@ public sealed class TelemetryRepository(LLDbContext db) : ITelemetryRepository
             await db.SaveChangesAsync(ct);
         }
 
+        await new ItemizationTelemetryRepository(db).GenerateDailyReportsAsync(yesterdayUtc, ct);
         var expiredBefore = yesterdayUtc.AddMonths(-13);
         await db.AccountActivityDays.Where(x => x.ActivityDateUtc < expiredBefore).ExecuteDeleteAsync(ct);
     }

@@ -16,8 +16,8 @@ public sealed class BalanceHarnessComparisonTests
     {
         using var workspace = new Workspace();
         var run = await workspace.Run("archive");
-        Assert.Equal(2, run.Manifest.SchemaVersion);
-        var hashes = run.Manifest.ContentHashes.ToDictionary();
+        Assert.Equal(3, run.Manifest.SchemaVersion);
+        var hashes = run.Manifest.ContentHashes.Where(x => !x.Key.Contains(".legacy-v1.", StringComparison.Ordinal)).ToDictionary();
         const string styles = "combat-styles/combat-styles.v1.json";
         if (legacy)
         {

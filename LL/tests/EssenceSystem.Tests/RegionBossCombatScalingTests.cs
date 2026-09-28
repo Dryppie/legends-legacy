@@ -59,7 +59,7 @@ public sealed class RegionBossCombatScalingTests
 
     private static CombatEntity Combatant()
     {
-        var source = new Creature { Name = "Scaling target" };
+        var source = new Creature { Name = "Scaling target", AttributeRulesVersion = AttributeRules.LegacyVersion };
         foreach (var attribute in new[]
                  {
                      AttributeType.MaxHealth,

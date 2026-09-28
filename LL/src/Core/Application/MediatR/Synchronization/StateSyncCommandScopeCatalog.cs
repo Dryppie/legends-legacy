@@ -82,6 +82,8 @@ public static class StateSyncCommandScopeCatalog
     private static IReadOnlyDictionary<Type, StateSyncCommandScopeProfile> BuildProfiles()
     {
         var profiles = new Dictionary<Type, StateSyncCommandScopeProfile>();
+        profiles[typeof(global::Application.UseCases.Equipments.Commands.ObserveEquipmentComparison.ObserveEquipmentComparisonCommand)] =
+            new([], [], RefreshCharacterOverview: false, RefreshCharacterSummaryWhenChanged: false);
         var nobilityProfile = new StateSyncCommandScopeProfile(
             [StateSyncScopes.Nobility, StateSyncScopes.Inventory, StateSyncScopes.Essences, StateSyncScopes.Equipment,
                 StateSyncScopes.Colosseum, StateSyncScopes.Prophecies, StateSyncScopes.Soulstones], [],
@@ -245,6 +247,9 @@ public static class StateSyncCommandScopeCatalog
             typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentLoadout.ApplyEquipmentLoadoutCommand));
         Register(profiles, [StateSyncScopes.Inventory, StateSyncScopes.Equipment, StateSyncScopes.Character], [],
             refreshCharacterOverview: true, inventoryWhenChanged: false, refreshCharacterSummaryWhenChanged: true,
+            typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentMigration.ApplyEquipmentMigrationCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.RollbackEquipmentMigration.RollbackEquipmentMigrationCommand),
+            typeof(global::Application.UseCases.Equipments.Commands.ChooseMigratedSpecialization.ChooseMigratedSpecializationCommand),
             typeof(global::Application.UseCases.Equipments.Commands.ReinforceEquipment.ReinforceEquipmentCommand),
             typeof(global::Application.UseCases.Equipments.Commands.DismantleEquipment.DismantleEquipmentCommand),
             typeof(global::Application.UseCases.Equipments.Commands.ApplyEquipmentVariant.ApplyEquipmentVariantCommand));

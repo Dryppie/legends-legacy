@@ -12,7 +12,8 @@ public sealed class EquipmentData
     public EquipmentData(EquipmentStateSnapshot state, string itemBaseId, string displayName,
         EquipmentRarity rarity, EquipmentType equipmentType, EquipmentBehaviorDefinition behavior,
         IReadOnlyDictionary<AttributeType, float> stats, string? equipmentSetId,
-        IReadOnlyDictionary<AttributeType, float>? baseStats = null)
+        IReadOnlyDictionary<AttributeType, float>? baseStats = null,
+        EquipmentBudgetBreakdown? allocation = null)
     {
         EquipmentState = EquipmentState.Restore(state);
         State = EquipmentState.ToSnapshot();
@@ -41,6 +42,18 @@ public sealed class EquipmentData
             throw new InvalidOperationException("Invalid frozen equipment base stats.");
         BaseStats = baseStats?.ToFrozenDictionary();
         EquipmentSetId = equipmentSetId is null ? null : EquipmentValidation.Id(equipmentSetId);
+        Allocation = allocation;
+        if (StatVersion == AttributeRules.CurrentVersion)
+        {
+            if (allocation is null || allocation.StatVersion != StatVersion
+                || new[] { allocation.Core, allocation.Specialization, allocation.StyleStats, allocation.ReservedIdentity }.Any(x => !double.IsFinite(x) || x < 0)
+                || allocation.Total <= 0 || string.IsNullOrWhiteSpace(allocation.SpecializationId)
+                || Stats.Keys.Any(x => !AttributeRules.IsOrdinaryEquipmentAttribute(x)))
+                throw new InvalidOperationException("Current equipment requires a valid allocation and ordinary stat pool.");
+            EquipmentSpecializationRules.ValidateCombination(Stats.Keys);
+            if (EquipmentSetId is not null && allocation.ReservedIdentity <= 0)
+                throw new InvalidOperationException("Set identity must reserve item budget.");
+        }
     }
 
     public EquipmentStateSnapshot State { get; }
@@ -55,6 +68,9 @@ public sealed class EquipmentData
     public IReadOnlyDictionary<AttributeType, float> Stats { get; }
     public string? EquipmentSetId { get; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public EquipmentBudgetBreakdown? Allocation { get; }
+    [JsonIgnore] public int StatVersion => State.BalanceVersion >= EquipmentBalance.SpecializationBalanceVersion ? AttributeRules.CurrentVersion : AttributeRules.LegacyVersion;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<AttributeType, float>? BaseStats { get; }
 
     public static EquipmentData Create(EquipmentState state, EquipmentEvaluator evaluator)
@@ -64,7 +80,7 @@ public sealed class EquipmentData
             evaluated.Definition.Rarity, evaluated.Archetype.EquipmentType, evaluated.Archetype.Behavior,
             evaluated.Stats, evaluated.EquipmentSetId,
             state.AdditiveVariantBonus ? evaluator.Evaluate(state.DefinitionId, state.Tier, state.Rank,
-                null, state.Quality, state.AttributeRollMultiplier).Stats : null);
+                null, state.Quality, state.AttributeRollMultiplier).Stats : null, evaluated.Allocation);
     }
 
     /// <summary>Replaces only the variant contribution, retaining the frozen base across switches.</summary>
@@ -93,19 +109,19 @@ public sealed class EquipmentData
                 - baseline.Stats.GetValueOrDefault(attribute));
             return bonus == 0 ? baseValue : (float)Math.Max(baseValue, Math.Min(
                 AttributeValueQuantizer.Quantize(attribute, baseValue + bonus),
-                EquipmentStatBudgetCatalog.Get(attribute).PerItemHardCap));
+                EquipmentStatBudgetCatalog.GetForVersion(attribute, StatVersion).PerItemHardCap));
         }).Where(stat => stat.Value > 0).ToDictionary(stat => stat.Key, stat => stat.Value);
         return new(nextState.ToSnapshot(), ItemBaseId, evaluator.GetDisplayName(nextState),
-            Rarity, EquipmentType, Behavior, stats, next.EquipmentSetId, baseStats);
+            Rarity, EquipmentType, Behavior, stats, next.EquipmentSetId, baseStats, next.Allocation);
     }
 
     public EquipmentData BindForPersonalUse() => new(
         EquipmentState.BindForPersonalUse().ToSnapshot(), ItemBaseId, DisplayName, Rarity,
-        EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats);
+        EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats, Allocation);
 
     public EquipmentData TransferToCharacter(Guid expectedOwnerId, Guid recipientId) => new(
         EquipmentState.TransferToCharacter(expectedOwnerId, recipientId).ToSnapshot(), ItemBaseId, DisplayName, Rarity,
-        EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats);
+        EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats, Allocation);
 
     internal bool MatchesEvaluation(EquipmentData evaluated) =>
         State == evaluated.State && ItemBaseId == evaluated.ItemBaseId
@@ -138,7 +154,7 @@ public sealed class EquipmentData
             stat => stat.Key,
             stat => Math.Min(
                 (float)AttributeValueQuantizer.Quantize(stat.Key, stat.Value * scale),
-                EquipmentStatBudgetCatalog.Get(stat.Key).PerItemHardCap));
+                EquipmentStatBudgetCatalog.GetForVersion(stat.Key, StatVersion).PerItemHardCap));
         if (nextStats.Any(stat => stat.Value < Stats.GetValueOrDefault(stat.Key))
             || !nextStats.Any(stat => stat.Value > Stats.GetValueOrDefault(stat.Key)))
             throw new InvalidOperationException("The next rank does not provide a representable improvement.");
@@ -161,7 +177,9 @@ public sealed class EquipmentData
             EquipmentSetId,
             BaseStats?.ToDictionary(stat => stat.Key, stat => Math.Min(
                 (float)AttributeValueQuantizer.Quantize(stat.Key, stat.Value * scale),
-                nextStats.GetValueOrDefault(stat.Key))));
+                nextStats.GetValueOrDefault(stat.Key))), Allocation is null ? null : Allocation with
+                { Core = Allocation.Core * scale, Specialization = Allocation.Specialization * scale,
+                    StyleStats = Allocation.StyleStats * scale, ReservedIdentity = Allocation.ReservedIdentity * scale });
     }
 
     public EquipmentData DonateToGuild(Guid expectedOwnerId, Guid guildId)
@@ -169,7 +187,7 @@ public sealed class EquipmentData
         if (State.Ownership.OwnerId != expectedOwnerId)
             throw new InvalidOperationException("This equipment is not owned by the donor.");
         return new(EquipmentState.DonateToGuild(guildId).ToSnapshot(), ItemBaseId, DisplayName, Rarity,
-            EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats);
+            EquipmentType, Behavior, Stats, EquipmentSetId, BaseStats, Allocation);
     }
 
     public string Serialize() => JsonSerializer.Serialize(this);

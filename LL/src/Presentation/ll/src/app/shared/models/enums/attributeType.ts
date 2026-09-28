@@ -24,4 +24,9 @@ export enum AttributeType {
   Threat = 'Threat',
 
   AttackSpeed = 'AttackSpeed',
+  AbilityHaste = 'AbilityHaste',
+  Tenacity = 'Tenacity',
+  Restoration = 'Restoration',
+  ArmorRating = 'ArmorRating',
+  ResistanceRating = 'ResistanceRating',
 }

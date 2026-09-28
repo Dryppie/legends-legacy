@@ -1,0 +1,12 @@
+{
+  "empty": {
+    "hash": "da97b87d6f1386f8750d6a598eeab169f8524f218f110850292adcaf72c48d06",
+    "evaluations": 128,
+    "proposals": 165
+  },
+  "mechanics": {
+    "hash": "1eb08897d95e4ba189a2c965dc4314a7fd9390f8238b1ab02a9174b261df3255",
+    "evaluations": 128,
+    "proposals": 155
+  }
+}

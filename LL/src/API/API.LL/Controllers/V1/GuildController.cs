@@ -123,8 +123,8 @@ public class GuildController : BaseController
         await Mediator.Send(new SetGuildBuildingTargetCommand(CurrentCharacterGuid, buildingType));
 
     [HttpGet("GetMissions")]
-    public async Task<GuildMissionOverviewDto?> GetMissions() =>
-        await Mediator.Send(new GetGuildMissionsQuery(CurrentCharacterGuid));
+    public async Task<GuildMissionOverviewDto?> GetMissions(CancellationToken cancellationToken) =>
+        await Mediator.Send(new GetGuildMissionsQuery(CurrentCharacterGuid), cancellationToken);
 
     [HttpPost("SelectMission")]
     public async Task<ActionResult<Response<GuildMissionOverviewDto>>> SelectMission([FromBody] string missionOptionId) =>

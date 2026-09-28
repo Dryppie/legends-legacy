@@ -25,5 +25,15 @@ public enum AttributeType
     Threat = 17,
 
     // Value 18 was retired with the dedicated summon attributes.
-    AttackSpeed = 19
+    AttackSpeed = 19,
+
+    // Persisted identifiers are never reused when units or consumers change.
+    AbilityHaste = 20,
+    Tenacity = 21,
+    Restoration = 22,
+
+    // Finite normalized defense retained through combat. Armor/Resistance on
+    // items remain raw ratings; their character-facing values remain percentages.
+    ArmorRating = 23,
+    ResistanceRating = 24
 }

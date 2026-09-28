@@ -1,0 +1,2225 @@
+{
+  "schemaVersion": 1,
+  "contentRoot": "LL/src/API/API.LL",
+  "outputDirectory": "TestResults/attribute-allocation-future-20260925-release-screen",
+  "explorationSeeds": [
+    92001,
+    92002,
+    92003,
+    92004,
+    92005,
+    92006,
+    92007,
+    92008
+  ],
+  "confirmationSeeds": [
+    95001,
+    95002,
+    95003,
+    95004,
+    95005,
+    95006,
+    95007,
+    95008,
+    95009,
+    95010,
+    95011,
+    95012,
+    95013,
+    95014,
+    95015,
+    95016,
+    95017,
+    95018,
+    95019,
+    95020,
+    95021,
+    95022,
+    95023,
+    95024,
+    95025,
+    95026,
+    95027,
+    95028,
+    95029,
+    95030,
+    95031,
+    95032
+  ],
+  "cells": [
+    {
+      "id": "synthetic-tier-3-precision",
+      "comparisonGroup": "synthetic-tier-3",
+      "reference": {
+        "id": "synthetic-tier-3-base",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-3-precision",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.precision.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-3-opponent",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-3-speed",
+      "comparisonGroup": "synthetic-tier-3",
+      "reference": {
+        "id": "synthetic-tier-3-base",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-3-speed",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.speed.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-3-opponent",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-3-haste",
+      "comparisonGroup": "synthetic-tier-3",
+      "reference": {
+        "id": "synthetic-tier-3-base",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-3-haste",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.haste.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-3-opponent",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-3-restoration",
+      "comparisonGroup": "synthetic-tier-3",
+      "reference": {
+        "id": "synthetic-tier-3-base",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-3-restoration",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.restoration.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-3-opponent",
+        "characterLevel": 101,
+        "tier": 3,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-6-precision",
+      "comparisonGroup": "synthetic-tier-6",
+      "reference": {
+        "id": "synthetic-tier-6-base",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-6-precision",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.precision.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-6-opponent",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-6-speed",
+      "comparisonGroup": "synthetic-tier-6",
+      "reference": {
+        "id": "synthetic-tier-6-base",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-6-speed",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.speed.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-6-opponent",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-6-haste",
+      "comparisonGroup": "synthetic-tier-6",
+      "reference": {
+        "id": "synthetic-tier-6-base",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-6-haste",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.haste.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-6-opponent",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-6-restoration",
+      "comparisonGroup": "synthetic-tier-6",
+      "reference": {
+        "id": "synthetic-tier-6-base",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-6-restoration",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.restoration.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-6-opponent",
+        "characterLevel": 251,
+        "tier": 6,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-10-precision",
+      "comparisonGroup": "synthetic-tier-10",
+      "reference": {
+        "id": "synthetic-tier-10-base",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-10-precision",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.precision.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-10-opponent",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-10-speed",
+      "comparisonGroup": "synthetic-tier-10",
+      "reference": {
+        "id": "synthetic-tier-10-base",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-10-speed",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.speed.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-10-opponent",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-10-haste",
+      "comparisonGroup": "synthetic-tier-10",
+      "reference": {
+        "id": "synthetic-tier-10-base",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-10-haste",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.haste.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-10-opponent",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    },
+    {
+      "id": "synthetic-tier-10-restoration",
+      "comparisonGroup": "synthetic-tier-10",
+      "reference": {
+        "id": "synthetic-tier-10-base",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "candidate": {
+        "id": "synthetic-tier-10-restoration",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.spec.restoration.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "doctrine": {
+        "id": "conduit"
+      },
+      "opponent": {
+        "id": "synthetic-tier-10-opponent",
+        "characterLevel": 451,
+        "tier": 10,
+        "rank": 0,
+        "quality": "Standard",
+        "attributeRollMultiplier": 1,
+        "equipment": [
+          {
+            "slot": "Head",
+            "definitionId": "plain.medium_helm.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Chest",
+            "definitionId": "plain.medium_mail.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Legs",
+            "definitionId": "plain.medium_greaves.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Ring",
+            "definitionId": "plain.band.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Necklace",
+            "definitionId": "plain.amulet.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "Relic",
+            "definitionId": "plain.vial.rarity.legendary",
+            "useNativeStyle": false
+          },
+          {
+            "slot": "MainHand",
+            "definitionId": "plain.staff.rarity.legendary",
+            "useNativeStyle": false
+          }
+        ],
+        "essenceIds": [
+          "essence.goblin_warrior",
+          "essence.goblin",
+          "essence.vampire_bat",
+          "essence.frost_imp",
+          "essence.pixie",
+          "essence.venomous_snake",
+          "essence.wood_nymph",
+          "essence.raven",
+          "essence.lumo_sentinel",
+          "essence.goblin_shaman"
+        ]
+      },
+      "opponentDoctrine": {
+        "id": "bastion"
+      }
+    }
+  ],
+  "maximumBattles": 4500,
+  "syntheticFutureProjection": true
+}

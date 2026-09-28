@@ -1,3 +1,5 @@
+using Application.Interfaces.Outbox;
+using Services.LL.Analytics;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
@@ -18,6 +20,7 @@ namespace Services.LL.Combat.Engine;
 public sealed class CombatEngineExecutor : ICombatEngineExecutor
 {
     private readonly IAbilityCatalogProvider _catalogProvider;
+    private readonly IGameEventOutbox? _itemizationOutbox;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
     private readonly EquipmentCatalog? _equipmentCatalog;
     private readonly ThreatAndTankingOptions _threatAndTankingOptions;
@@ -28,9 +31,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         IAbilityCatalogProvider catalogProvider,
         IEssenceDefinitionRepository? essenceDefinitions = null,
         EquipmentCatalog? equipmentCatalog = null,
-        IOptions<ThreatAndTankingOptions>? threatAndTankingOptions = null)
+        IOptions<ThreatAndTankingOptions>? threatAndTankingOptions = null,
+        IGameEventOutbox? itemizationOutbox = null)
     {
         _catalogProvider = catalogProvider;
+        _itemizationOutbox = itemizationOutbox;
         _essenceDefinitions = essenceDefinitions;
         _equipmentCatalog = equipmentCatalog;
         _threatAndTankingOptions = threatAndTankingOptions?.Value ?? new ThreatAndTankingOptions();
@@ -59,6 +64,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
+        if (_itemizationOutbox is not null)
+            await _itemizationOutbox.RecordBattleAsync(runtime, execution.Result, cancellationToken);
         return execution.Result;
     }
 
@@ -81,6 +88,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
+        if (_itemizationOutbox is not null)
+            await _itemizationOutbox.RecordBattleAsync(runtime, execution.Result, cancellationToken);
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
 
@@ -136,6 +145,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
+        if (_itemizationOutbox is not null)
+            await _itemizationOutbox.RecordBattleAsync(runtime, execution.Result, cancellationToken);
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
 
@@ -170,6 +181,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         SyncCombatEntityState(runtime.AllHostileParticipants, execution.Hostile);
         PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
         execution.Result.StartedAt = runtime.Plan.StartsAt;
+        if (_itemizationOutbox is not null)
+            await _itemizationOutbox.RecordBattleAsync(runtime, execution.Result, cancellationToken);
         return new CombatExecutionWithCheckpoints(execution.Result, checkpoints);
     }
 
@@ -225,6 +238,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatMechanicDiagnostics? diagnostics = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (runtime.Plan.Mode == Services.LL.Combat.Layers.Orchestration.Models.CombatMode.Pvp
+            && runtime.AllCombatants.Select(x => x.AttributeRulesVersion).Distinct().Skip(1).Any())
+            throw new InvalidOperationException("Competitive combat requires one attribute rules version. Refresh legacy defenses before activation.");
 
         var catalog = _catalogProvider.GetCatalog();
         var precompiledCatalog = (_catalogProvider as ICompiledAbilityCatalogProvider)?.GetCompiledCatalog();
@@ -443,7 +460,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             staggerParticipantCount: combatant.StaggerParticipantCount,
             level: combatant.Level,
             combatStyle: combatant.CombatStyle,
-            essenceOrigins: essenceOrigins);
+            essenceOrigins: essenceOrigins,
+            attributeRulesVersion: combatant.AttributeRulesVersion);
     }
 
     private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)
@@ -938,6 +956,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             InternalCooldownTicks = trigger.InternalCooldownTicks,
             InitialDelayTicks = trigger.InitialDelayTicks,
             EveryNthOccurrence = trigger.EveryNthOccurrence,
+            ProcScope = trigger.ProcScope,
+            AllowPeriodicProcs = trigger.AllowPeriodicProcs,
             Conditions = [.. trigger.Conditions.Select(CloneCondition)],
             EffectIds = [.. trigger.EffectIds]
         };
@@ -1006,6 +1026,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
             LifeStealPercentage = effect.LifeStealPercentage,
             ProcCoefficient = effect.ProcCoefficient,
+            AllowSecondaryProcs = effect.AllowSecondaryProcs,
             Tags = [.. effect.Tags],
             Conditions = [.. effect.Conditions.Select(CloneCondition)]
         };

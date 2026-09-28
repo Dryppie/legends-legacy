@@ -4,8 +4,8 @@ namespace Domain.Models.Items.Equipments.Progression;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 17;
-    public const int PreviousBalanceVersion = 16;
+    public const int BalanceVersion = 18;
+    public const int PreviousBalanceVersion = 17;
     public const int LegacyBalanceVersion = 15;
     public const int MinimumTier = 1;
 
@@ -37,7 +37,10 @@ public static class EquipmentStatBudgetCatalog
             [AttributeType.Cooldown] = Percentage(7.5d, AttributeCombatRules.CooldownReductionCapPercent),
             [AttributeType.StatusResistance] = Percentage(0.82d, AttributeCombatRules.StatusResistanceCapPercent),
             [AttributeType.CrowdControlResistance] = Percentage(0.82d, AttributeCombatRules.CrowdControlResistanceCapPercent),
-            [AttributeType.AttackSpeed] = Percentage(1d, AttributeCombatRules.AttackSpeedCapPercent)
+            [AttributeType.AttackSpeed] = Percentage(1d, AttributeCombatRules.AttackSpeedCapPercent),
+            [AttributeType.AbilityHaste] = Percentage(4d, AttributeRules.AbilityHasteCap),
+            [AttributeType.Tenacity] = Percentage(1.5d, AttributeRules.TenacityCap),
+            [AttributeType.Restoration] = Percentage(3d, AttributeCombatRules.HealingPowerCapPercent)
         };
 
     private static readonly IReadOnlyDictionary<AttributeType, EquipmentStatBudgetRule> Rules =
@@ -50,14 +53,30 @@ public static class EquipmentStatBudgetCatalog
                 pair.Value.EffectiveCap,
                 pair.Value.HalfCapNormalizedRating));
 
-    public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.ToArray();
+    public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.Where(AttributeRules.IsOrdinaryEquipmentAttribute).ToArray();
 
     public static EquipmentStatBudgetRule Get(AttributeType stat)
+        => GetForVersion(stat, BalanceVersion);
+
+    public static EquipmentStatBudgetRule GetForVersion(AttributeType stat, int statVersion)
     {
         if (!Rules.TryGetValue(stat, out var rule))
             throw new InvalidOperationException($"No equipment budget rule exists for '{stat}'.");
 
-        return rule;
+        if (statVersion < BalanceVersion) return rule;
+        var cost = stat switch
+        {
+            AttributeType.CritChance => 4d,
+            AttributeType.CritDamage => 2d,
+            AttributeType.ArmorPenetration or AttributeType.MagicPenetration => 1.5d,
+            AttributeType.AttackSpeed => 2d,
+            AttributeType.BlockChance => 3d,
+            _ => rule.CostPerPoint
+        };
+        return stat is AttributeType.ArmorPenetration or AttributeType.MagicPenetration
+            ? rule with { CostPerPoint = cost, PerItemHardCap = AttributeRules.TypedPenetrationCap,
+                EffectiveCap = AttributeRules.TypedPenetrationCap }
+            : rule with { CostPerPoint = cost };
     }
 
     /// <summary>The normalized v17 exchange rate is independent of tier.</summary>
@@ -95,12 +114,12 @@ public static class EquipmentStatBudgetCatalog
     /// Direct percentages buy normalized value, while flats and opposed ratings
     /// materialize with the tier scale.
     /// </summary>
-    public static double GetMaterializedCostPerPoint(AttributeType stat, int tier)
+    public static double GetMaterializedCostPerPoint(AttributeType stat, int tier, int statVersion = BalanceVersion)
     {
         if (tier < MinimumTier)
             throw new ArgumentOutOfRangeException(nameof(tier), tier, "Equipment tier must be positive.");
 
-        var rule = Get(stat);
+        var rule = GetForVersion(stat, statVersion);
         return rule.ScalingKind == EquipmentStatScalingKind.DirectPercentage
             ? rule.CostPerPoint * EquipmentTierBudgetCurve.GetScale(tier)
             : rule.CostPerPoint;

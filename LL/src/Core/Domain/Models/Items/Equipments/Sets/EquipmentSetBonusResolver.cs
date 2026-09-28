@@ -29,14 +29,13 @@ public static class EquipmentSetBonusResolver
         IEnumerable<EquipmentInstance> equipment,
         IEnumerable<EquipmentSetDefinition> definitions) =>
         Resolve(equipment, definitions)
-            .SelectMany(state => state.ActiveBonuses)
-            .SelectMany(active => active.Bonus.AttributeModifiers.Select(modifier =>
+            .SelectMany(state => state.ActiveBonuses.SelectMany(active => active.Bonus.AttributeModifiers.Select(modifier =>
                 (AttributeModifierBase)new EquipmentSetAttributeModifier(
                     active.SetId,
                     active.Bonus.Id,
                     modifier.AttributeType,
                     modifier.Amount,
-                    modifier.ModifierType)))
+                    modifier.ModifierType))))
             .ToArray();
 
     public static IReadOnlyList<string> ResolveGrantedAbilityIds(
@@ -66,6 +65,9 @@ public static class EquipmentSetBonusResolver
             .ThenBy(bonus => bonus.Id, StringComparer.OrdinalIgnoreCase)
             .Select(bonus => new ActiveEquipmentSetBonus(definition.Id, bonus))
             .ToArray();
+
+        if (definition.UsesReservedIdentity && activeBonuses.Sum(x => x.Bonus.IdentityBudgetCost) > equippedCount * 10d + 1e-6)
+            throw new InvalidOperationException($"Set '{setId}' exceeds its cumulative identity reservation.");
 
         return new EquipmentSetState(
             definition,

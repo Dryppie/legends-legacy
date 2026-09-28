@@ -10,15 +10,18 @@ namespace Persistence.LL.Repositories.Snapshots;
 public class CharacterSnapshotRepository : ICharacterSnapshotRepository
 {
     private readonly IDbContext _dbContext;
+    private readonly int _attributeVersion;
     private readonly IEquipmentLoadoutService? _equipmentLoadouts;
     private readonly ICombatStyleService? _combatStyles;
     private readonly Application.Interfaces.Services.LL.Essences.IEssenceLoadoutLimitService? _essenceLimits;
 
     public CharacterSnapshotRepository(IDbContext dbContext, IEquipmentLoadoutService? equipmentLoadouts = null,
         ICombatStyleService? combatStyles = null,
-        Application.Interfaces.Services.LL.Essences.IEssenceLoadoutLimitService? essenceLimits = null)
+        Application.Interfaces.Services.LL.Essences.IEssenceLoadoutLimitService? essenceLimits = null,
+        Domain.Models.Attributes.AttributeRulesSelection? attributeRules = null)
     {
         _dbContext = dbContext;
+        _attributeVersion = attributeRules?.Version ?? Domain.Models.Attributes.AttributeRules.CurrentVersion;
         _equipmentLoadouts = equipmentLoadouts;
         _combatStyles = combatStyles;
         _essenceLimits = essenceLimits;
@@ -67,6 +70,7 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
 
         var snapshot = new CharacterSnapshot
         {
+            AttributeRulesVersion = _attributeVersion,
             Id = snapshotId,
             CharacterId = character.Id,
             Name = character.Name,

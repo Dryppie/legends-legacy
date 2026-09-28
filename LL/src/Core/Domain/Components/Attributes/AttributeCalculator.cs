@@ -6,6 +6,7 @@ using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Progression;
+using Domain.Models.Items.Equipments.Slots;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator
@@ -39,11 +40,20 @@ public static class AttributeCalculator
             .Select(es => es.EquipmentInstance!)
             .DistinctBy(equipment => equipment.Id)
             .ToList();
-        var equipmentModifiers = ProjectEquipmentModifiers(equipment, entity.Level);
+        var equipmentModifiers = ProjectEquipmentModifiers(equipment, entity.Level, entity.AttributeRulesVersion);
         var modifiers = equipmentModifiers.Concat(additionalModifiers ?? []).ToList();
 
-        foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, modifiers))
+        foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, modifiers, entity.AttributeRulesVersion))
             entity.BaseCombatAttributes[attributeType] = attributeValue;
+
+        if (entity.AttributeRulesVersion == AttributeRules.CurrentVersion)
+        {
+            var raw = CalculateUncappedProjectedAttributes(baseAttributes, modifiers, entity.AttributeRulesVersion);
+            var interval = entity.EquipmentSlots.FirstOrDefault(x => x.EquipmentSlotType == EquipmentSlotType.MainHand)
+                ?.EquipmentInstance?.ProgressionData?.Behavior.BasicAttackIntervalMultiplier ?? 1d;
+            entity.BaseCombatAttributes[AttributeType.AttackSpeed] = Math.Clamp(raw.GetValueOrDefault(AttributeType.AttackSpeed),
+                0, AttributeCombatRules.CalculateUsefulAttackSpeedCapPercent(interval));
+        }
 
         SyncBaseResources(entity.BaseCombatAttributes);
     }
@@ -58,11 +68,11 @@ public static class AttributeCalculator
         // Convert raw attributes to a dictionary for quick access
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
         AddUniversalBaseAttributes(baseAttributes);
-        var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level)
+        var equipmentModifiers = ProjectEquipmentModifiers(entity.Equipment, entity.Level, entity.AttributeRulesVersion)
             .Concat(additionalBaseModifiers ?? [])
             .ToArray();
 
-        foreach (var (attributeType, attributeValue) in CalculateUncappedProjectedAttributes(baseAttributes, equipmentModifiers))
+        foreach (var (attributeType, attributeValue) in CalculateUncappedProjectedAttributes(baseAttributes, equipmentModifiers, entity.AttributeRulesVersion))
             entity.BaseCombatAttributes[attributeType] = attributeValue;
 
         SyncBaseResources(entity.BaseCombatAttributes);
@@ -76,6 +86,18 @@ public static class AttributeCalculator
     // Recalculate a specific attribute for the entity by attribute type
     public static void CalculateCombatAttributeByType(CombatEntity entity, AttributeType attributeType)
     {
+        if (entity.AttributeRulesVersion == AttributeRules.CurrentVersion)
+        {
+            // Retired aliases and derived defense values can affect more than one key.
+            // Reproject from the unchanged base so removal restores overcap contributions.
+            var previousHealth = entity.CombatAttributes.GetValueOrDefault(AttributeType.MaxHealth);
+            var projected = CalculateRuntimeAttributes(entity);
+            entity.CombatAttributes.Clear();
+            foreach (var pair in projected) entity.CombatAttributes[pair.Key] = pair.Value;
+            if (attributeType == AttributeType.MaxHealth)
+                entity.SyncCurrentHealthAfterMaxHealthChange(previousHealth, projected.GetValueOrDefault(AttributeType.MaxHealth));
+            return;
+        }
         var attribute = entity.BaseCombatAttributes.GetValueOrDefault(attributeType);
 
         var oldMaxHealth = entity.CombatAttributes.GetValueOrDefault(AttributeType.MaxHealth);
@@ -96,7 +118,7 @@ public static class AttributeCalculator
 
         return ClampAttributeValue(
             attributeType,
-            CalculateModifiedValue(baseValue, validModifiers));
+            CalculateModifiedValue(baseValue, validModifiers), entity.AttributeRulesVersion);
     }
 
     public static float CalculateModifiedValue(float baseValue, IEnumerable<AttributeModifierBase> modifiers)
@@ -129,8 +151,10 @@ public static class AttributeCalculator
 
     public static IReadOnlyList<AttributeModifierBase> ProjectEquipmentModifiers(
         IEnumerable<EquipmentInstance> equipment,
-        int characterLevel)
+        int characterLevel,
+        int rulesVersion = AttributeRules.CurrentVersion)
     {
+        AttributeRules.ValidateVersion(rulesVersion);
         var directModifiers = new List<AttributeModifierBase>();
         var rawRatings = new Dictionary<AttributeType, double>();
 
@@ -144,7 +168,9 @@ public static class AttributeCalculator
                 {
                     rawRatings[modifier.AttributeType] =
                         rawRatings.GetValueOrDefault(modifier.AttributeType)
-                        + modifier.Amount;
+                        + (rulesVersion == AttributeRules.CurrentVersion
+                            ? modifier.Amount / EquipmentTierBudgetCurve.GetScale(Math.Max(1, item.Tier))
+                            : modifier.Amount);
                     continue;
                 }
 
@@ -157,8 +183,8 @@ public static class AttributeCalculator
         foreach (var (attribute, rawRating) in rawRatings.OrderBy(entry => entry.Key))
         {
             directModifiers.Add(new InstanceAttributeModifier(
-                attribute,
-                EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
+                rulesVersion == AttributeRules.CurrentVersion ? AttributeRules.RatingAttribute(attribute) : attribute,
+                rulesVersion == AttributeRules.CurrentVersion ? (float)rawRating : EquipmentStatBudgetCatalog.ConvertRatingToEffectiveValue(
                     attribute,
                     rawRating,
                     progressionTier),
@@ -198,46 +224,89 @@ public static class AttributeCalculator
         IReadOnlyDictionary<AttributeType, float> baseAttributes,
         IEnumerable<EquipmentInstance> equipment,
         int characterLevel,
-        IEnumerable<AttributeModifierBase>? additionalModifiers = null) =>
+        IEnumerable<AttributeModifierBase>? additionalModifiers = null, int rulesVersion = AttributeRules.CurrentVersion) =>
         CalculateProjectedAttributes(
             baseAttributes,
-            ProjectEquipmentModifiers(equipment, characterLevel)
-                .Concat(additionalModifiers ?? []));
+            ProjectEquipmentModifiers(equipment, characterLevel, rulesVersion)
+                .Concat(additionalModifiers ?? []), rulesVersion);
+
+    public static Dictionary<AttributeType, float> CalculateUncappedEquipmentAttributes(
+        IReadOnlyDictionary<AttributeType, float> baseAttributes, IEnumerable<EquipmentInstance> equipment,
+        int characterLevel, IEnumerable<AttributeModifierBase>? additionalModifiers = null, int rulesVersion = AttributeRules.CurrentVersion) =>
+        CalculateUncappedProjectedAttributes(baseAttributes,
+            ProjectEquipmentModifiers(equipment, characterLevel, rulesVersion).Concat(additionalModifiers ?? []), rulesVersion);
 
     public static Dictionary<AttributeType, float> CalculateProjectedAttributes(
         IReadOnlyDictionary<AttributeType, float> baseAttributes,
-        IEnumerable<AttributeModifierBase> modifiers)
+        IEnumerable<AttributeModifierBase> modifiers,
+        int rulesVersion = AttributeRules.CurrentVersion)
     {
-        var projected = CalculateUncappedProjectedAttributes(baseAttributes, modifiers);
+        var projected = CalculateUncappedProjectedAttributes(baseAttributes, modifiers, rulesVersion);
 
         foreach (var attribute in projected.Keys.ToArray())
-            projected[attribute] = ClampAttributeValue(attribute, projected[attribute]);
+            projected[attribute] = ClampAttributeValue(attribute, projected[attribute], rulesVersion);
 
         return projected;
     }
 
     private static Dictionary<AttributeType, float> CalculateUncappedProjectedAttributes(
         IReadOnlyDictionary<AttributeType, float> baseAttributes,
-        IEnumerable<AttributeModifierBase> modifiers)
+        IEnumerable<AttributeModifierBase> modifiers,
+        int rulesVersion = AttributeRules.CurrentVersion)
     {
+        AttributeRules.ValidateVersion(rulesVersion);
         var modifierList = modifiers.ToList();
-        return baseAttributes.Keys
+        var values = baseAttributes.ToDictionary(x => x.Key, x => x.Value);
+        if (rulesVersion == AttributeRules.CurrentVersion)
+        {
+            foreach (var defense in new[] { AttributeType.Armor, AttributeType.Resistance })
+            {
+                var rating = AttributeRules.RatingAttribute(defense);
+                // Authored creature/legacy bases are effective percentages; items already
+                // enter as normalized ratings. Do not invert the derived display twice.
+                if (values.GetValueOrDefault(rating) == 0)
+                    values[rating] = AttributeRules.RatingFromLegacyPercent(values.GetValueOrDefault(defense));
+                values.Remove(defense);
+            }
+            modifierList = modifierList.Select(modifier => (AttributeModifierBase)new InstanceAttributeModifier(
+                AttributeRules.RatingAttribute(modifier.AttributeType), modifier.Amount, modifier.ModifierType)).ToList();
+        }
+        var projected = values.Keys
             .Concat(modifierList.Select(x => x.AttributeType))
             .Distinct()
             .ToDictionary(
                 attributeType => attributeType,
                 attributeType => CalculateModifiedValue(
-                    baseAttributes.GetValueOrDefault(attributeType),
+                    values.GetValueOrDefault(attributeType),
                     modifierList.Where(x => x.AttributeType == attributeType)));
+        if (rulesVersion == AttributeRules.CurrentVersion)
+        {
+            // Convert the complete old allocation once: per-item CDR conversion is nonlinear.
+            Move(AttributeType.Cooldown, AttributeType.AbilityHaste, AttributeRules.HasteFromCooldownReduction);
+            Move(AttributeType.HealingPowerPercent, AttributeType.Restoration, value => value);
+            var oldResistance = Math.Max(projected.GetValueOrDefault(AttributeType.StatusResistance),
+                projected.GetValueOrDefault(AttributeType.CrowdControlResistance));
+            projected.Remove(AttributeType.StatusResistance);
+            projected.Remove(AttributeType.CrowdControlResistance);
+            projected[AttributeType.Tenacity] = projected.GetValueOrDefault(AttributeType.Tenacity) + oldResistance;
+            projected[AttributeType.Armor] = 100f * AttributeRules.Mitigation(projected.GetValueOrDefault(AttributeType.ArmorRating));
+            projected[AttributeType.Resistance] = 100f * AttributeRules.Mitigation(projected.GetValueOrDefault(AttributeType.ResistanceRating));
+        }
+        return projected;
 
+        void Move(AttributeType from, AttributeType to, Func<float, float> convert)
+        {
+            if (projected.Remove(from, out var value))
+                projected[to] = projected.GetValueOrDefault(to) + convert(value);
+        }
     }
 
-    private static float ClampAttributeValue(AttributeType attribute, float value)
+    private static float ClampAttributeValue(AttributeType attribute, float value, int rulesVersion)
     {
         if (!AttributeCatalog.IsKnown(attribute))
             return Math.Max(0f, value);
 
-        var definition = AttributeCatalog.Get(attribute);
+        var definition = AttributeCatalog.Get(attribute, rulesVersion);
         return definition.MaximumValue is { } maximum
                && definition.CapKind is AttributeCapKind.Fixed
                    or AttributeCapKind.ContextDependent
@@ -247,9 +316,12 @@ public static class AttributeCalculator
 
     private static Dictionary<AttributeType, float> CalculateRuntimeAttributes(CombatEntity entity)
     {
+        if (entity.AttributeRulesVersion == AttributeRules.CurrentVersion)
+            return CalculateUncappedProjectedAttributes(entity.BaseCombatAttributes, entity.TemporaryModifiers, entity.AttributeRulesVersion);
         return CalculateProjectedAttributes(
             entity.BaseCombatAttributes,
-            entity.TemporaryModifiers);
+            entity.TemporaryModifiers,
+            entity.AttributeRulesVersion);
     }
 
     private static void SyncBaseResources(Dictionary<AttributeType, float> attributes)

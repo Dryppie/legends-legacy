@@ -237,7 +237,7 @@ public sealed partial class GuildMissionServiceTests
     }
 
     [Fact]
-    public async Task Repeated_contributions_before_save_do_not_duplicate_daily_orders()
+    public async Task Repeated_contributions_before_save_do_not_duplicate_mission_state()
     {
         await using var db = CreateDbContext();
         var characterId = SeedGuild(db);
@@ -254,6 +254,7 @@ public sealed partial class GuildMissionServiceTests
                 OccurredAt: now,
                 IdempotencyKey: "tempering:first"),
             CancellationToken.None);
+        var originalOptionIds = db.GuildMissionOptions.Local.Select(x => x.Id).Order().ToList();
         await service.RecordContributionAsync(
             new GuildContributionEvent(
                 characterId,
@@ -264,6 +265,8 @@ public sealed partial class GuildMissionServiceTests
                 IdempotencyKey: "crafting:second"),
             CancellationToken.None);
 
+        Assert.Equal(3, db.GuildMissionOptions.Local.Count);
+        Assert.Equal(originalOptionIds, db.GuildMissionOptions.Local.Select(x => x.Id).Order());
         Assert.Equal(3, db.PersonalGuildOrders.Local.Count);
         Assert.Equal(
             8,
@@ -271,6 +274,10 @@ public sealed partial class GuildMissionServiceTests
                 x.MissionDefinitionId == Guid.Parse("8d7a12db-39eb-44f0-8c66-3ba79b606ca2")).CurrentAmount);
 
         await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var options = await db.GuildMissionOptions.ToListAsync();
+        Assert.Equal(3, options.Count);
+        Assert.Equal(3, options.Select(x => (x.GuildId, x.WeekKey, x.MissionDefinitionId)).Distinct().Count());
         Assert.Equal(3, await db.PersonalGuildOrders.CountAsync());
     }
 

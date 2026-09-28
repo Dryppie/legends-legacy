@@ -38,9 +38,10 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
             .ForMember(
                 destination => destination.ItemBudget,
                 options => options.MapFrom(source =>
-                    EquipmentBudgetEvaluator.Evaluate(
+                    source.ProgressionData != null && source.ProgressionData.Allocation != null
+                    ? source.ProgressionData.Allocation.Total : EquipmentBudgetEvaluator.Evaluate(
                         source.AttributeModifiers,
-                        source.Tier)))
+                        source.Tier, source.ProgressionData == null ? AttributeRules.LegacyVersion : source.ProgressionData.StatVersion)))
             .ForMember(
                 destination => destination.ItemBudgetTier,
                 options => options.MapFrom(source => source.Tier))

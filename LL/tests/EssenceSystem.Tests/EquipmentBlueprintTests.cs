@@ -120,7 +120,7 @@ public sealed class EquipmentBlueprintTests
         stats[AttributeType.MaxHealth] = stats.GetValueOrDefault(AttributeType.MaxHealth) + 123;
         var frozen = EquipmentData.Deserialize(new EquipmentData(original.State, original.ItemBaseId,
             original.DisplayName, original.Rarity, original.EquipmentType, original.Behavior,
-            stats, original.EquipmentSetId).Serialize());
+            stats, original.EquipmentSetId, allocation: original.Allocation).Serialize());
         var instance = new EquipmentInstance { Id = state.Id, ItemBaseId = frozen.ItemBaseId };
         instance.ApplyProgressionData(frozen);
         var context = new EquipmentUpgradeContext(new Character { Id = state.Ownership.OwnerId, Cinders = 1000 },
@@ -136,7 +136,7 @@ public sealed class EquipmentBlueprintTests
             null, state.Quality, state.AttributeRollMultiplier);
         Assert.Equal(baseline.Stats.GetValueOrDefault(AttributeType.MaxHealth) + 123,
             converted.BaseStats![AttributeType.MaxHealth]);
-        Assert.Equal("set_arcane", converted.EquipmentSetId);
+        Assert.Equal("set_arcane.v2", converted.EquipmentSetId);
         Assert.Equal(state.ToSnapshot() with { ActiveStyleId = "blueprint_arcane", AdditiveVariantBonus = true }, converted.State);
         Assert.Equal(frozen.Rarity, converted.Rarity);
         Assert.Equal(JsonSerializer.Serialize(frozen.Behavior), JsonSerializer.Serialize(converted.Behavior));
@@ -159,7 +159,7 @@ public sealed class EquipmentBlueprintTests
         stats[AttributeType.MaxHealth] = stats.GetValueOrDefault(AttributeType.MaxHealth) + 123;
         baseStats[AttributeType.MaxHealth] = baseStats.GetValueOrDefault(AttributeType.MaxHealth) + 123;
         var frozen = new EquipmentData(original.State, original.ItemBaseId, original.DisplayName, original.Rarity,
-            original.EquipmentType, original.Behavior, stats, original.EquipmentSetId, baseStats);
+            original.EquipmentType, original.Behavior, stats, original.EquipmentSetId, baseStats, original.Allocation);
         var transferred = frozen.TransferToCharacter(frozen.State.Ownership.OwnerId, Guid.NewGuid());
         Assert.Equal(baseStats.OrderBy(x => x.Key), transferred.BaseStats!.OrderBy(x => x.Key));
         var bound = transferred.BindForPersonalUse();
@@ -210,7 +210,7 @@ public sealed class EquipmentBlueprintTests
         Assert.Equal(1, quote.RequiredBlueprints);
         Assert.Equal("Fury Shortsword", quote.After!.DisplayName);
         Assert.Equal(0, quote.PartsCost);
-        Assert.Equal("set_fury", quote.After.EquipmentSetId);
+        Assert.Equal("set_fury.v2", quote.After.EquipmentSetId);
         stack.Quantity = 0;
         var missing = policy.Quote(context, request, operation);
         Assert.False(missing.CanExecute);
@@ -352,8 +352,9 @@ public sealed class EquipmentBlueprintTests
             new InventoryItem { InventoryId = character.Id, ItemInstanceId = blueprintInstance.Id, ItemInstance = blueprintInstance, Quantity = 2 });
         await db.SaveChangesAsync();
         var repository = new EquipmentUpgradeRepository(db, blueprints);
-        // Unequipped conversion does not settle combat or enqueue equipment-change events.
-        var service = new EquipmentUpgradeService(equipment, prices, repository, null!, null!, TimeProvider.System, null!, blueprints);
+        // Unequipped conversion records analytics but does not settle combat.
+        var outbox = new RecordingItemizationOutbox();
+        var service = new EquipmentUpgradeService(equipment, prices, repository, null!, outbox, TimeProvider.System, null!, blueprints);
         var request = new EquipmentUpgradeRequest(EquipmentUpgradeOperationKind.ApplyVariant, instance.Id, BlueprintStyleId: "blueprint_fury");
         var quote = await service.PreviewAsync(character.Id, request, default);
         Assert.True(quote.CanExecute, quote.UnavailableReason);

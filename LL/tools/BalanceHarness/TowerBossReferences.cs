@@ -85,7 +85,10 @@ public static class TowerBossReferences
         // Frozen content snapshots omit appsettings. Unknown settings remain unknown, not an assumed match.
         settings ??= File.Exists(Path.Combine(root, "appsettings.json")) ? TowerBundle.ReadSettings(root) : null;
         bool? settingsMatch = settings is null ? null : HarnessJson.Hash(settings) == HarnessJson.Hash(provenance.Scope.Settings);
-        var families = new OfflineContent(root, (settings ?? provenance.Scope.Settings).Threat).Essences.GetAll()
+        // Reference legality only requires Essence families. Loading current equipment here
+        // would require files that do not belong to a historical content snapshot.
+        var families = TowerContentProviders.Essences(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build(),
+                root, HarnessJson.Options, new Services.LL.Essences.EssenceDefinitionValidator()).GetAll()
             .ToDictionary(e => e.Id, e => e.SourceMonsterId, StringComparer.Ordinal);
         if (entry.Controls.Any(c => c.Builds.Values.Any(ids => ids.Any(id => !families.ContainsKey(id))
             || ids.Select(id => families[id]).Distinct(StringComparer.OrdinalIgnoreCase).Count() != ids.Count)))

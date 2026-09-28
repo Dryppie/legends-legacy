@@ -50,6 +50,31 @@ describe('EssenceDescriptionFormatter target explanations', () => {
   });
 });
 
+describe('EssenceDescriptionFormatter attribute and condition names', () => {
+  const formatter = new EssenceDescriptionFormatter();
+
+  it('keeps Ability Haste as plain attribute text', () => {
+    for (const attribute of ['Ability Haste', 'ability haste', 'Ability\nHaste']) {
+      const description = `+5% ${attribute} and +10% total Resistance rating.`;
+
+      expect(formatter.format(description, [], () => 0)).toBe(description);
+    }
+  });
+
+  it('still decorates the Haste condition alongside Ability Haste', () => {
+    const html = formatter.format(
+      '+5% Ability Haste. Gain Haste(8) and Renewal.',
+      [],
+      () => 0,
+    );
+
+    expect(html).toContain('+5% Ability Haste.');
+    expect(html.match(/data-title="Haste"/g)?.length).toBe(1);
+    expect(html).toContain('>Haste(8)</span>');
+    expect(html).toContain('data-title="Renewal"');
+  });
+});
+
 describe('EssenceDescriptionFormatter magnitude coefficients', () => {
   const formatter = new EssenceDescriptionFormatter();
 

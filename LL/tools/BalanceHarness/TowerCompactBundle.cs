@@ -160,7 +160,7 @@ public static partial class TowerCompactBundle
         var contentRoot = ContentRoot(output, plan.SharedContentPath);
         var sharedHashes = plan.SharedContentPath is null ? null : ContentHashes(contentRoot, token);
         if (scope.Algorithm != Format || scope.ReportStorage != Format || scope.ContentHashes is null
-            || !scope.ContentHashes.Keys.Order(StringComparer.Ordinal).SequenceEqual(TowerBundle.Files.Order(StringComparer.Ordinal))
+            || !ContentSnapshotContract.IsKnownTowerFiles(scope.ContentHashes.Keys)
             || scope.ContentHashes.Any(p => plan.SharedContentPath is null
                 ? !manifest.Files.TryGetValue("content/Data/" + p.Key, out var hash) || hash != p.Value
                 : sharedHashes!.GetValueOrDefault(p.Key) != p.Value)

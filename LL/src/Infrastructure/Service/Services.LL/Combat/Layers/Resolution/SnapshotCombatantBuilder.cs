@@ -41,6 +41,7 @@ public sealed class SnapshotCombatantBuilder(
         {
             var source = Rehydrate(request.Snapshot, itemBases);
             var combatant = combatSetup.CreatePlayerCombatEntities([source]).Single();
+            combatant.AttributeRulesVersion = request.Snapshot.AttributeRulesVersion;
             combatant.EquippedEssences = request.Snapshot.EquippedEssences
                 .OrderBy(x => x.SlotIndex)
                 .Select(x => x.ToPlayerEssence(request.Snapshot.CharacterId))

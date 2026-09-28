@@ -17,6 +17,8 @@ public sealed class EquipmentDto : IMapFrom<EquipmentData>
     public string? NativeStyleId { get; set; }
     public string? ActiveStyleId { get; set; }
     public EquipmentOwnershipKind Ownership { get; set; }
+    public int StatVersion { get; set; }
+    public EquipmentBudgetBreakdown? Allocation { get; set; }
 
     public void Mapping(Profile profile) => profile.CreateMap<EquipmentData, EquipmentDto>()
         .ForMember(x => x.ModelVersion, o => o.MapFrom(x => x.State.ModelVersion))

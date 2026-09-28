@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments.Sets;
@@ -12,6 +13,7 @@ namespace Services.LL.Entities.Characters;
 public class CharacterService : ICharacterService
 {
     private readonly ICharacterRepository _characterRepository;
+    private readonly int _attributeVersion;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
     private readonly ICharacterExperienceProgressionProvider _experienceProgression;
     private readonly EquipmentCatalog? _equipmentCatalog;
@@ -22,9 +24,10 @@ public class CharacterService : ICharacterService
         IEssenceCombatLoadoutResolver essenceLoadouts,
         ICharacterExperienceProgressionProvider experienceProgression,
         EquipmentCatalog? equipmentCatalog = null,
-        IEssenceLoadoutLimitService? essenceLimits = null)
+        IEssenceLoadoutLimitService? essenceLimits = null, AttributeRulesSelection? attributeRules = null)
     {
         _characterRepository = characterRepository;
+        _attributeVersion = attributeRules?.Version ?? AttributeRules.CurrentVersion;
         _essenceLoadouts = essenceLoadouts;
         _experienceProgression = experienceProgression;
         _equipmentCatalog = equipmentCatalog;
@@ -142,6 +145,7 @@ public class CharacterService : ICharacterService
     {
         if (character is not null)
         {
+            character.AttributeRulesVersion = _attributeVersion;
             character.ExperienceUntilNextLevel = _experienceProgression.GetRequiredExperience(character.Level);
         }
     }

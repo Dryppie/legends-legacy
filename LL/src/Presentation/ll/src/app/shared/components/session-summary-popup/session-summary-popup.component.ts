@@ -1,5 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { NobilityService } from '../../../core/services/api/nobility/nobility.service';
 import { SessionSummaryService } from '../../../core/services/client-side/session-summary/session-summary.service';
 import { CombatSessionDto } from '../../models/Dtos/combatResultDto';
 import { InventoryItem } from '../../models/inventoryItem';
@@ -34,7 +35,10 @@ interface RewardSection {
   templateUrl: './session-summary-popup.component.html',
 })
 export class SessionSummaryPopupComponent {
-  constructor(public svc: SessionSummaryService) {}
+  constructor(
+    public svc: SessionSummaryService,
+    private readonly nobility: NobilityService,
+  ) {}
 
   getDuration(from: string | Date, to: string | Date): string {
     const fromDate = new Date(from);
@@ -52,7 +56,10 @@ export class SessionSummaryPopupComponent {
     if (minutes || parts.length === 0)
       parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
     let joinedDuration = parts.join(', ');
-    if (days || hours >= 16) joinedDuration += ' (Rewards stop after 24 hours)';
+    const offlineHours = this.nobility.status()?.benefits.offlineHours;
+    if (offlineHours && (days || hours >= 16)) {
+      joinedDuration += ` (Rewards stop after ${offlineHours} hours)`;
+    }
     return joinedDuration;
   }
 

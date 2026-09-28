@@ -1,0 +1,831 @@
+{
+  "balanceVersion": 3,
+  "baseTierBudget": 100,
+  "styleShare": 0.15,
+  "rankIncrement": 0.04,
+  "items": [
+    {
+      "id": "plain.heavy_helm",
+      "itemBaseId": "heavy_helm",
+      "name": "Heavy Helm",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Heavy"
+      },
+      "statWeights": {
+        "MaxHealth": 0.4,
+        "Armor": 0.3,
+        "Resistance": 0.3
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.medium_helm",
+      "itemBaseId": "medium_helm",
+      "name": "Medium Helm",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Medium"
+      },
+      "statWeights": {
+        "Power": 0.35,
+        "MaxHealth": 0.25,
+        "Armor": 0.2,
+        "Resistance": 0.2
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.light_hood",
+      "itemBaseId": "light_hood",
+      "name": "Light Hood",
+      "equipmentType": "Head",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Light"
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "MaxHealth": 0.1,
+        "Armor": 0.1,
+        "Resistance": 0.1
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.heavy_breastplate",
+      "itemBaseId": "heavy_breastplate",
+      "name": "Heavy Breastplate",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Heavy"
+      },
+      "statWeights": {
+        "MaxHealth": 0.4,
+        "Armor": 0.3,
+        "Resistance": 0.3
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "health",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.medium_mail",
+      "itemBaseId": "medium_mail",
+      "name": "Medium Mail",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Medium"
+      },
+      "statWeights": {
+        "Power": 0.35,
+        "MaxHealth": 0.25,
+        "Armor": 0.2,
+        "Resistance": 0.2
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "health",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.light_vest",
+      "itemBaseId": "light_vest",
+      "name": "Light Vest",
+      "equipmentType": "Chest",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Light"
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "MaxHealth": 0.1,
+        "Armor": 0.1,
+        "Resistance": 0.1
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "health",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.heavy_legplates",
+      "itemBaseId": "heavy_legplates",
+      "name": "Heavy Legplates",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Heavy"
+      },
+      "statWeights": {
+        "MaxHealth": 0.4,
+        "Armor": 0.3,
+        "Resistance": 0.3
+      },
+      "specializationWeights": {
+        "HealthRegeneration": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
+    },
+    {
+      "id": "plain.medium_greaves",
+      "itemBaseId": "medium_greaves",
+      "name": "Medium Greaves",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Medium"
+      },
+      "statWeights": {
+        "Power": 0.35,
+        "MaxHealth": 0.25,
+        "Armor": 0.2,
+        "Resistance": 0.2
+      },
+      "specializationWeights": {
+        "HealthRegeneration": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
+    },
+    {
+      "id": "plain.light_leggings",
+      "itemBaseId": "light_leggings",
+      "name": "Light Legwraps",
+      "equipmentType": "Legs",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Light"
+      },
+      "statWeights": {
+        "Power": 0.7,
+        "MaxHealth": 0.1,
+        "Armor": 0.1,
+        "Resistance": 0.1
+      },
+      "specializationWeights": {
+        "HealthRegeneration": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
+    },
+    {
+      "id": "plain.band",
+      "itemBaseId": "band",
+      "name": "Ring",
+      "equipmentType": "Ring",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 1
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "physical_penetration",
+        "magical_penetration",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.amulet",
+      "itemBaseId": "amulet",
+      "name": "Amulet",
+      "equipmentType": "Necklace",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "MaxHealth": 1
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "health",
+        "restoration"
+      ]
+    },
+    {
+      "id": "plain.vial",
+      "itemBaseId": "vial",
+      "name": "Relic",
+      "equipmentType": "Relic",
+      "behavior": {
+        "handedness": "",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "HealthRegeneration": 1
+      },
+      "specializationWeights": {
+        "AbilityHaste": 1.0
+      },
+      "specializationIds": [
+        "restoration",
+        "tenacity"
+      ]
+    },
+    {
+      "id": "plain.shortsword",
+      "itemBaseId": "shortsword",
+      "name": "Shortsword",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.dagger",
+      "itemBaseId": "dagger",
+      "name": "Dagger",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AttackSpeed": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.hatchet",
+      "itemBaseId": "hatchet",
+      "name": "Hand Axe",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 0.6,
+        "CritDamage": 0.4
+      },
+      "specializationIds": [
+        "critical",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.mace",
+      "itemBaseId": "mace",
+      "name": "Mace",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "ArmorPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.wand",
+      "itemBaseId": "wand",
+      "name": "Wand",
+      "equipmentType": "OneHanded",
+      "behavior": {
+        "handedness": "OneHanded",
+        "attackCategory": "Magical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "MagicPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.greatsword",
+      "itemBaseId": "greatsword",
+      "name": "Greatsword",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.battle_axe",
+      "itemBaseId": "battle_axe",
+      "name": "Battle Axe",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 0.6,
+        "CritDamage": 0.4
+      },
+      "specializationIds": [
+        "critical",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.maul",
+      "itemBaseId": "maul",
+      "name": "Maul",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "ArmorPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.spear",
+      "itemBaseId": "spear",
+      "name": "Spear",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AttackSpeed": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.staff",
+      "itemBaseId": "staff",
+      "name": "Staff",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Magical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "MagicPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.longbow",
+      "itemBaseId": "longbow",
+      "name": "Longbow",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.crossbow",
+      "itemBaseId": "crossbow",
+      "name": "Crossbow",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Ranged",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "ArmorPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.gauntlets",
+      "itemBaseId": "gauntlets",
+      "name": "Gauntlets",
+      "equipmentType": "TwoHanded",
+      "behavior": {
+        "handedness": "TwoHanded",
+        "attackCategory": "Physical",
+        "rangeCategory": "Melee",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": ""
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AttackSpeed": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
+    },
+    {
+      "id": "plain.towershield",
+      "itemBaseId": "towershield",
+      "name": "Towershield",
+      "equipmentType": "OffHand",
+      "behavior": {
+        "handedness": "OffHand",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Towershield"
+      },
+      "statWeights": {
+        "MaxHealth": 0.35,
+        "Armor": 0.3
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
+    },
+    {
+      "id": "plain.spiritward",
+      "itemBaseId": "Spiritward",
+      "name": "Spiritward",
+      "equipmentType": "OffHand",
+      "behavior": {
+        "handedness": "OffHand",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Spiritward"
+      },
+      "statWeights": {
+        "MaxHealth": 0.35,
+        "Resistance": 0.3
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
+    },
+    {
+      "id": "plain.grimoire",
+      "itemBaseId": "grimoire",
+      "name": "Grimoire",
+      "equipmentType": "OffHand",
+      "behavior": {
+        "handedness": "OffHand",
+        "attackCategory": "",
+        "rangeCategory": "",
+        "basicAttackIntervalMultiplier": 1,
+        "basicAttackDamageMultiplier": 1,
+        "role": "Grimoire"
+      },
+      "statWeights": {
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AbilityHaste": 1.0
+      },
+      "specializationIds": [
+        "restoration",
+        "magical_penetration"
+      ]
+    }
+  ],
+  "maximumTier": 2,
+  "specializations": {
+    "precision": {
+      "CritChance": 0.6,
+      "CritDamage": 0.4
+    },
+    "critical": {
+      "CritChance": 1
+    },
+    "speed": {
+      "AttackSpeed": 1
+    },
+    "physical_penetration": {
+      "ArmorPenetration": 1
+    },
+    "magical_penetration": {
+      "MagicPenetration": 1
+    },
+    "restoration": {
+      "Restoration": 1
+    },
+    "haste": {
+      "AbilityHaste": 1
+    },
+    "tenacity": {
+      "Tenacity": 1
+    },
+    "regeneration": {
+      "HealthRegeneration": 1
+    },
+    "armor": {
+      "Armor": 1
+    },
+    "resistance": {
+      "Resistance": 1
+    },
+    "health": {
+      "MaxHealth": 1
+    },
+    "block": {
+      "BlockChance": 1
+    }
+  },
+  "balance": {
+    "attributeVersion": 18,
+    "coreShare": 0.7,
+    "identityShare": 0.1,
+    "attributeCosts": {
+      "Power": 22.5,
+      "MaxHealth": 0.185,
+      "Armor": 0.9,
+      "Resistance": 0.9,
+      "CritChance": 4,
+      "CritDamage": 2,
+      "ArmorPenetration": 4,
+      "MagicPenetration": 4,
+      "BlockChance": 3,
+      "HealthRegeneration": 3,
+      "AttackSpeed": 2,
+      "AbilityHaste": 4,
+      "Tenacity": 1.5,
+      "Restoration": 3
+    }
+  }
+}

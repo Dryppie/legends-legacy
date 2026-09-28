@@ -36,6 +36,20 @@ public class EquipmentInstance : ItemInstance
             throw new InvalidOperationException("This Equipment progression equipment is not owned by the character.");
         ProgressionData = data.BindForPersonalUse();
     }
+
+    public void RestoreLegacyMigration(LegacyEquipmentSnapshot original)
+    {
+        if (original.Id != Id || original.ItemBaseId != ItemBaseId || original.EquipmentType != EquipmentBase.EquipmentType)
+            throw new InvalidOperationException("The legacy snapshot does not belong to this equipment.");
+        ProgressionData = null;
+        Tier = original.Tier;
+        Rarity = original.Rarity;
+        Quality = original.Quality;
+        InstanceModifiers = original.InstanceModifiers.Select(x => new InstanceAttributeModifier(x.Attribute, x.Amount, x.ModifierType)
+        {
+            Id = x.Id, ItemInstanceId = Id, RarityBonusAmount = x.RarityBonusAmount
+        }).ToList();
+    }
     public void DonateEquipmentProgressionToGuild(Guid expectedOwnerId, Guid guildId)
     {
         if (ProgressionData is { } data) ProgressionData = data.DonateToGuild(expectedOwnerId, guildId);
@@ -121,7 +135,9 @@ public class EquipmentInstance : ItemInstance
         float amount,
         Rarity rarity)
     {
-        var definition = AttributeCatalog.Get(attribute);
+        // Authored base modifiers are a legacy path. Current progression items
+        // receive their complete budget through the frozen instance descriptor.
+        var definition = AttributeCatalog.Get(attribute, AttributeRules.LegacyVersion);
         if (definition.Unit == AttributeUnit.PercentagePoints
             && definition.CapKind == AttributeCapKind.Fixed)
         {

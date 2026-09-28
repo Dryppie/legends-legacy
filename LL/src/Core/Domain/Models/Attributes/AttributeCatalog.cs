@@ -5,6 +5,21 @@ public static class AttributeCatalog
     private static readonly IReadOnlyDictionary<AttributeType, AttributeDefinition> Definitions =
         new Dictionary<AttributeType, AttributeDefinition>
         {
+            [AttributeType.AbilityHaste] = Percent(AttributeType.AbilityHaste, "Ability Haste",
+                "Increases active ability frequency: cooldown / (1 + haste / 100). Does not affect passive internal cooldowns.",
+                AttributeRules.AbilityHasteCap, Scenarios(AttributeBenchmarkScenario.PhysicalOffense, AttributeBenchmarkScenario.HealingSustain)),
+            [AttributeType.Tenacity] = Percent(AttributeType.Tenacity, "Tenacity",
+                "Shortens harmful timed conditions and statuses. Doom damage is reduced without accelerating its countdown. Does not affect boss Stagger or permanent charges.",
+                AttributeRules.TenacityCap, Scenarios(AttributeBenchmarkScenario.StatusResilience, AttributeBenchmarkScenario.CrowdControlResilience)),
+            [AttributeType.Restoration] = Percent(AttributeType.Restoration, "Restoration",
+                "Increases authored healing and barriers. Does not increase regeneration, life steal, transfers or health-cost refunds.",
+                AttributeCombatRules.HealingPowerCapPercent, Scenarios(AttributeBenchmarkScenario.HealingSustain)),
+            [AttributeType.ArmorRating] = Rating(AttributeType.ArmorRating, "Normalized Armor",
+                "Finite physical defense rating after normalizing each item's rating by its own tier. Physical reduction = 80 × rating / (rating + 165).",
+                Scenarios(AttributeBenchmarkScenario.PhysicalPressure)) with { IsEquipmentEligible = false, IsContentFacing = false },
+            [AttributeType.ResistanceRating] = Rating(AttributeType.ResistanceRating, "Normalized Resistance",
+                "Finite magical defense rating after normalizing each item's rating by its own tier. Magical reduction = 80 × rating / (rating + 165).",
+                Scenarios(AttributeBenchmarkScenario.MagicalPressure)) with { IsEquipmentEligible = false, IsContentFacing = false },
             [AttributeType.Power] = Flat(
                 AttributeType.Power,
                 "Power",
@@ -198,9 +213,26 @@ public static class AttributeCatalog
                 "%")
         };
 
-    public static IReadOnlyCollection<AttributeDefinition> All => [.. Definitions.Values];
+    public static IReadOnlyCollection<AttributeDefinition> All => GetAll(AttributeRules.CurrentVersion);
 
-    public static AttributeDefinition Get(AttributeType attributeType) => Definitions[attributeType];
+    public static IReadOnlyCollection<AttributeDefinition> GetAll(int rulesVersion) =>
+        [.. Definitions.Keys.Select(attribute => Get(attribute, rulesVersion))];
+
+    public static AttributeDefinition Get(AttributeType attributeType, int rulesVersion = AttributeRules.CurrentVersion)
+    {
+        AttributeRules.ValidateVersion(rulesVersion);
+        var definition = Definitions[attributeType] with
+            { IsEquipmentEligible = AttributeRules.IsOrdinaryEquipmentAttribute(attributeType) };
+        if (rulesVersion == AttributeRules.CurrentVersion
+            && attributeType is AttributeType.ArmorPenetration or AttributeType.MagicPenetration)
+        {
+            var damageType = attributeType == AttributeType.ArmorPenetration ? "physical" : "magical";
+            var description = $"Subtracts percentage points from the target's {damageType} damage reduction after defense and Corrosion, down to zero. Capped at 40 points; block and general damage reduction are unaffected.";
+            definition = definition with { MaximumValue = AttributeRules.TypedPenetrationCap,
+                Description = description, EquipmentDescription = description };
+        }
+        return definition;
+    }
 
     public static bool IsKnown(AttributeType attributeType) => Definitions.ContainsKey(attributeType);
 
@@ -208,11 +240,11 @@ public static class AttributeCatalog
         Definitions.TryGetValue(attributeType, out var definition) && definition.IsContentFacing;
 
     public static bool IsEquipmentEligible(AttributeType attributeType) =>
-        Definitions.TryGetValue(attributeType, out var definition) && definition.IsEquipmentEligible;
+        AttributeRules.IsOrdinaryEquipmentAttribute(attributeType);
 
-    public static float GetFixedCap(AttributeType attributeType)
+    public static float GetFixedCap(AttributeType attributeType, int rulesVersion = AttributeRules.CurrentVersion)
     {
-        var definition = Get(attributeType);
+        var definition = Get(attributeType, rulesVersion);
         if (definition.CapKind != AttributeCapKind.Fixed || definition.MaximumValue is not { } maximum)
             throw new InvalidOperationException($"Attribute '{attributeType}' does not have a fixed cap.");
 
@@ -222,9 +254,9 @@ public static class AttributeCatalog
     public static bool TryGetEffectiveCharacterCap(
         AttributeType attributeType,
         double basicAttackIntervalMultiplier,
-        out float cap)
+        out float cap, int rulesVersion = AttributeRules.CurrentVersion)
     {
-        var definition = Get(attributeType);
+        var definition = Get(attributeType, rulesVersion);
         if (definition.CapKind == AttributeCapKind.Fixed && definition.MaximumValue is { } maximum)
         {
             cap = maximum;

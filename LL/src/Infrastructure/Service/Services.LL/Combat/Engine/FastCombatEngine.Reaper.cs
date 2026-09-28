@@ -73,7 +73,7 @@ public sealed partial class FastCombatEngine
         if (style.RefinementId == CombatStyleIds.SoulSiphon)
         {
             var healing = ApplyHealingReceivedModifier(source, Math.Max(0, (int)Math.Round(amount
-                * Math.Max(0, 1 + source.GetAttribute(AttributeType.HealingPowerPercent) / 100d))));
+                * (source.UsesCurrentAttributeRules ? 1d : Math.Max(0, 1 + source.GetAttribute(AttributeType.HealingPowerPercent) / 100d)))));
             var restored = ApplyCombatStyleRecovery(source, healing, combatants);
             context.State.HealthRestored += restored;
             context.State.HealthRecoveryWasted += Math.Max(0, healing - restored);

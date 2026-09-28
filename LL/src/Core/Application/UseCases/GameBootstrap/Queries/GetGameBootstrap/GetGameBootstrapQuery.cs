@@ -25,6 +25,7 @@ public sealed class GetGameBootstrapQueryHandler
     private readonly IAccountRestrictionIndex _accountRestrictions;
     private readonly IStateSyncService _stateSync;
     private readonly Application.Interfaces.Services.LL.Nobility.INobilityService? _nobility;
+    private readonly AttributeRulesSelection _attributeRules;
 
     public GetGameBootstrapQueryHandler(
         IMapper mapper,
@@ -32,13 +33,15 @@ public sealed class GetGameBootstrapQueryHandler
         IAccountRestrictionIndex accountRestrictions,
         IStateSyncService stateSync,
         TimeProvider? timeProvider = null,
-        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null)
+        Application.Interfaces.Services.LL.Nobility.INobilityService? nobility = null,
+        AttributeRulesSelection? attributeRules = null)
     {
         _mapper = mapper;
         _sender = sender;
         _accountRestrictions = accountRestrictions;
         _stateSync = stateSync;
         _nobility = nobility;
+        _attributeRules = attributeRules ?? new(AttributeRules.LegacyVersion);
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
@@ -91,7 +94,7 @@ public sealed class GetGameBootstrapQueryHandler
             AreaAccess = areaAccess,
             CurrentAction = currentActionResponse.Data,
             ServerTimeUtc = _timeProvider.GetUtcNow(),
-            AttributeDefinitions = AttributeCatalog.All,
+            AttributeDefinitions = AttributeCatalog.GetAll(_attributeRules.Version),
             AccountAccess = AccountAccessDto.From(
                 _accountRestrictions.Get(request.UserId)),
             StateVersions = stateVersions.Revisions,

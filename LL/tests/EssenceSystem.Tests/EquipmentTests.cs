@@ -193,7 +193,7 @@ public sealed class EquipmentTests
 
         Assert.Equal(ItemQuality.Standard, restored.Quality);
         Assert.Equal(1d, restored.AttributeRollMultiplier);
-        Assert.Equal(EquipmentBalance.ModelVersion, restored.ToSnapshot().ModelVersion);
+        Assert.Equal(1, restored.ToSnapshot().ModelVersion);
     }
 
     [Fact]
@@ -272,7 +272,7 @@ public sealed class EquipmentTests
         new(balance ?? new EquipmentBalance(1),
             [new EquipmentArchetype("sword", "shortsword", EquipmentType.OneHanded,
                 new EquipmentBehaviorDefinition { Handedness = "OneHanded", AttackCategory = "Physical", RangeCategory = "Melee" },
-                Weights(AttributeType.Power))],
+                Weights(AttributeType.Power), specializationWeights: Weights(AttributeType.CritChance))],
             [new EquipmentStyle("fury", ["sword"], Weights(AttributeType.CritChance), "set.fury")],
             [new EquipmentDefinition("plain", "Sword", "sword", rarity, nativeStyle)]);
 

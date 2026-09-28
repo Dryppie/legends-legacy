@@ -15,6 +15,7 @@ public sealed class EquipmentProgressionItemDto : IMapFrom<EquipmentData>
     public int Tier { get; set; }
     public int Rank { get; set; }
     public int BalanceVersion { get; set; }
+    public EquipmentBudgetBreakdown? Allocation { get; set; }
     public EquipmentRarity Rarity { get; set; }
     public ItemQuality Quality { get; set; }
     public double AttributeRollMultiplier { get; set; }

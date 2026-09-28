@@ -19,7 +19,7 @@ public static class EquipmentBudgetEvaluator
 
     public static double Evaluate(
         IEnumerable<AttributeModifierBase> modifiers,
-        int tier)
+        int tier, int statVersion = EquipmentStatBudgetCatalog.BalanceVersion)
     {
         ValidateTier(tier);
         return Math.Round(
@@ -29,7 +29,7 @@ public static class EquipmentBudgetEvaluator
                     modifier.Amount
                     * EquipmentStatBudgetCatalog.GetMaterializedCostPerPoint(
                         modifier.AttributeType,
-                        tier)),
+                        tier, statVersion)),
             2,
             MidpointRounding.AwayFromZero);
     }

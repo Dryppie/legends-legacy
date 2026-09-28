@@ -41,7 +41,7 @@ public static class TowerBalanceEvaluator
         using var timing = TowerPerformanceTrace.Measure("balance.validate");
         var portfolio = d is { SchemaVersion: 2, Id: TowerPortfolioConfirmation.Policy };
         if (d is null || (d.SchemaVersion != 1 && !portfolio) || !TowerBenchmark.SafeId(d.Id) || d.IntervalPolicy != IntervalPolicy
-            || d.ContentHashes is null || !d.ContentHashes.Keys.Order().SequenceEqual(TowerBundle.Files.Order())
+            || d.ContentHashes is null || !ContentSnapshotContract.IsKnownTowerFiles(d.ContentHashes.Keys)
             || d.ContentHashes.Values.Any(h => !TowerContractJson.Hash(h))
             || !TowerContractJson.Hash(d.SettingsHash) || !TowerContractJson.Hash(d.ExecutionHash)
             || d.Cohorts is not { Count: > 0 and <= 100 } || d.Cells is not { Count: > 0 and <= 1000 }

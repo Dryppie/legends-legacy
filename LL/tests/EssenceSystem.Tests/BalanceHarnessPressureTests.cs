@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Application.Interfaces.Services.LL.Regions;
 using BalanceHarness;
 
 namespace EssenceSystem.Tests;
@@ -129,7 +130,9 @@ public sealed class BalanceHarnessPressureTests
         Assert.Equal(16, report.UnchangedOpeningControlCells);
         Assert.Equal(48, report.Controls.Values.Sum(c => c.Cells.Count));
         Assert.All(report.Controls.Values, c => Assert.Equal("Complete", c.Status));
-        Assert.Equal(14, report.AreaEffects.Count);
+        var expectedAreas = HarnessJson.Read<RegionCombatBalanceCatalog>(Path.Combine(workspace.OriginalRoot, "Data", BloodGrovePressureExperiment.BalancePath))
+            .Regions.SelectMany(r => r.AreaIds).Order(StringComparer.Ordinal);
+        Assert.Equal(expectedAreas, report.AreaEffects.Select(x => x.AreaId).Order(StringComparer.Ordinal));
         Assert.Equal(4, report.Replays.Count);
         Assert.All(report.Replays, file => Assert.True(File.Exists(Path.Combine(output, file))));
         Assert.False(File.Exists(Path.Combine(output, "baseline.json")));

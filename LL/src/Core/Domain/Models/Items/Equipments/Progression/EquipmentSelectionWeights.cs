@@ -41,7 +41,11 @@ public sealed record EquipmentSelectionWeights(
             Category.Jewelry => jewelry,
             _ => throw new InvalidOperationException("Unknown equipment drop category.")
         };
-        return candidates[random.Next(candidates.Length)];
+        if (!evaluator.Balance.UsesSpecializations) return candidates[random.Next(candidates.Length)];
+        // Adding a specialization must not silently increase that archetype's drop frequency.
+        var archetypes = candidates.GroupBy(x => x.ArchetypeId).OrderBy(x => x.Key, StringComparer.Ordinal).ToArray();
+        var options = archetypes[random.Next(archetypes.Length)].OrderBy(x => x.Id, StringComparer.Ordinal).ToArray();
+        return options[random.Next(options.Length)];
     }
 
     private static T RollWeighted<T>(Random random, params (T Value, double Weight)[] entries)

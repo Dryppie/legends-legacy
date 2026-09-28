@@ -17,7 +17,10 @@ public sealed partial class BalanceHarnessFixedFamilyConfirmationTests
         var fixture = Path.Combine(root, "process.json"); HarnessJson.WriteNew(fixture, new FixedFamilyFixture(FixedFamilyFixtureHost.Version, mode, q, Settings));
         var start = FixtureHost.Start("fixed-family-parent", fixture); start.RedirectStandardOutput = true; start.RedirectStandardError = true;
         using var process = Process.Start(start)!; var stdout = process.StandardOutput.ReadToEndAsync(); var stderr = process.StandardError.ReadToEndAsync();
-        try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(550)); }
+        // The owned worker enforces its phase and cumulative limits. Let it finish
+        // within that contract before the test's bounded shutdown deadline.
+        var timeout = mode == "negative" ? q.MaximumSeconds - q.PriorSeconds + 15 : q.Phases["admission"].Seconds + 15;
+        try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(timeout)); }
         finally { if (!process.HasExited) { process.Kill(entireProcessTree: true); await process.WaitForExitAsync(); } }
         var text = await stdout; var error = await stderr; Assert.True(mode == "negative" ? process.ExitCode == 0 : process.ExitCode != 0, text+error);
         Assert.Equal(mode == "negative", File.Exists(C.P(q, "closeout.json")));

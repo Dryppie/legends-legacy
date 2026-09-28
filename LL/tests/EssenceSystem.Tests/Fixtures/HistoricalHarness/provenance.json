@@ -1,0 +1,30 @@
+[
+  {
+    "file": "reference.json",
+    "source": "TestResults/balance/tower-joined-mechanics-implementation-20260915/reference.json",
+    "sha256": "7ba3fb83af4cf110c181efa0a3ae1b672219159c1c95914eebba637592a9fa29",
+    "sourceSeal": "TestResults/balance/tower-joined-mechanics-implementation-20260915/files.json",
+    "sealEntryVerified": true
+  },
+  {
+    "file": "group-reference.json",
+    "source": "TestResults/balance/tower-group-count-implementation-20260915/group-reference.json",
+    "sha256": "3345fdaa146ffcdbad928423450dfe322af473b4ac40d6cf7f08f9e16ae25ba8",
+    "sourceSeal": "TestResults/balance/tower-group-count-implementation-20260915/files.json",
+    "sealEntryVerified": true
+  },
+  {
+    "file": "variation-reference.json",
+    "source": "TestResults/balance/tower-group-variation-implementation-20260915/variation-reference.json",
+    "sha256": "91800d56d021c95c60d5974f27d014e3c487d8ac608b8163d91e75871e0a38ab",
+    "sourceSeal": "TestResults/balance/tower-group-variation-implementation-20260915/files.json",
+    "sealEntryVerified": true
+  },
+  {
+    "file": "diversity-reference.json",
+    "source": "TestResults/balance/tower-group-diversity-implementation-20260915/diversity-reference.json",
+    "sha256": "f4ce06942685464ef264a95c1cb97e29d216c8ade617f04ce648fe0040eb6d8b",
+    "sourceSeal": "TestResults/balance/tower-group-diversity-implementation-20260915/files.json",
+    "sealEntryVerified": true
+  }
+]

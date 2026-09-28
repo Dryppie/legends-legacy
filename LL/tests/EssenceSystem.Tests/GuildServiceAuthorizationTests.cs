@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Guilds;
+using Domain.Models.Guilds.Missions;
 using Services.LL.Guilds;
 
 public sealed class GuildServiceAuthorizationTests
@@ -313,6 +314,9 @@ public sealed class GuildServiceAuthorizationTests
             throw new NotSupportedException();
 
         public Task<Guild?> GetGuildForMissionsAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<List<GuildMissionOption>> GetWeeklyMissionOptionsAsync(Guid guildId, string weekKey, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
         public Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken) =>

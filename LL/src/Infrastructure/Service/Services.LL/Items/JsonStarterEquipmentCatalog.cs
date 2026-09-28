@@ -10,17 +10,42 @@ namespace Services.LL.Items;
 
 public static class JsonStarterEquipmentCatalog
 {
-    public static StarterEquipmentCatalog Load(string path, ContentJsonReader? reader = null)
+    // Preserve the two-argument entry point used by archived harness providers.
+    public static StarterEquipmentCatalog Load(string path, ContentJsonReader? reader = null) => Load(path, reader, null);
+
+    public static StarterEquipmentCatalog Load(string path, int balanceVersion) => Load(path, null, balanceVersion);
+
+    public static StarterEquipmentCatalog Load(string path, ContentJsonReader? reader, int? balanceVersion)
     {
         reader ??= ContentJsonReader.Default;
+        var root = Path.GetDirectoryName(path)!;
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         options.Converters.Add(new JsonStringEnumConverter());
+        ReleaseFiles? release = null;
+        // Old archived captures predate the registry. Releases 1 and 2 have fixed filenames.
+        if (balanceVersion is > 2)
+        {
+            var releases = reader.Deserialize<Dictionary<int, ReleaseFiles>>(reader.ReadAllText(
+                Path.Combine(root, "equipment-releases.json")), options)
+                ?? throw new InvalidOperationException("Missing equipment release registry.");
+            if (!releases.TryGetValue(balanceVersion.Value, out release))
+                throw new InvalidOperationException($"Unknown equipment balance release {balanceVersion}.");
+            path = ReleasePath(release.Starters);
+        }
+        else if (balanceVersion == 1) path = Path.Combine(root, "equipment-starters.legacy-v1.json");
+        else if (balanceVersion is < 1) throw new InvalidOperationException("Equipment balance versions must be positive.");
         var content = reader.Deserialize<StarterContent>(reader.ReadAllText(path), options)
             ?? throw new InvalidOperationException("Missing Equipment progression starter catalog.");
+        if (balanceVersion.HasValue && content.BalanceVersion != balanceVersion.Value)
+            throw new InvalidOperationException("Equipment release content does not match its requested version.");
+        if (content.BalanceVersion > 2 && (content.Balance?.AttributeCosts is null
+            || EquipmentStatBudgetCatalog.Attributes.Any(attribute => !content.Balance.AttributeCosts.ContainsKey(attribute))))
+            throw new InvalidOperationException("New equipment releases must explicitly price every ordinary equipment attribute.");
         var archetypes = content.Items.Select(x => new EquipmentArchetype(x.Id, x.ItemBaseId,
-            x.EquipmentType, x.Behavior, x.StatWeights, minimumTier: 1, maximumTier: content.MaximumTier));
+            x.EquipmentType, x.Behavior, x.StatWeights, minimumTier: 1, maximumTier: content.MaximumTier,
+            specializationWeights: x.SpecializationWeights));
         var named = reader.Deserialize<NamedContent[]>(reader.ReadAllText(
-            Path.Combine(Path.GetDirectoryName(path)!, "equipment-named.v1.json")), options)
+            ReleasePath(release?.Named ?? "equipment-named.v1.json")), options)
             ?? throw new InvalidOperationException("Missing Equipment progression named equipment.");
         var definitions = content.Items.SelectMany(x => Enum.GetValues<EquipmentRarity>().Select(rarity =>
                 new EquipmentDefinition(
@@ -31,22 +56,42 @@ public static class JsonStarterEquipmentCatalog
                     x.Id,
                     rarity)))
             .Concat(named.Select(x => new EquipmentDefinition(x.Id, x.Name, x.ArchetypeId,
-                EquipmentRarity.Rare, x.NativeStyleId)));
+                EquipmentRarity.Rare, x.NativeStyleId))).ToList();
+        foreach (var item in content.Items)
+            foreach (var specializationId in item.SpecializationIds ?? [])
+                foreach (var rarity in Enum.GetValues<EquipmentRarity>())
+                {
+                    if (content.Specializations is null || !content.Specializations.TryGetValue(specializationId, out var weights))
+                        throw new InvalidOperationException($"Unknown specialization '{specializationId}'.");
+                    definitions.Add(new EquipmentDefinition($"{item.Id}.spec.{specializationId}.rarity.{rarity.ToString().ToLowerInvariant()}",
+                        item.Name, item.Id, rarity, specializationId: specializationId, specializationWeights: weights));
+                }
         var styleContent = reader.Deserialize<StyleContent[]>(reader.ReadAllText(
-            Path.Combine(Path.GetDirectoryName(path)!, "equipment-styles.v1.json")), options)
+            ReleasePath(release?.Styles ?? (balanceVersion == 1 ? "equipment-styles.legacy-v1.json" : "equipment-styles.v1.json"))), options)
             ?? throw new InvalidOperationException("Missing Equipment progression styles.");
         var styles = styleContent.Select(x => new EquipmentStyle(x.Id, x.CompatibleArchetypeIds,
             x.StatWeights, x.EquipmentSetId)).ToArray();
-        var root = Path.GetDirectoryName(path)!;
         var sets = reader.Deserialize<EquipmentSetDefinition[]>(reader.ReadAllText(
-            Path.Combine(root, "equipment-sets.v1.json")), options)
+            ReleasePath(release?.Sets ?? (balanceVersion == 1 ? "equipment-sets.legacy-v1.json" : "equipment-sets.v1.json"))), options)
             ?? throw new InvalidOperationException("Missing equipment set definitions.");
+        if (content.BalanceVersion != 1)
+            sets = sets.Concat(reader.Deserialize<EquipmentSetDefinition[]>(reader.ReadAllText(
+                Path.Combine(root, "equipment-sets.legacy-v1.json")), options) ?? []).ToArray();
         var equipmentBases = ReadEquipmentBases(
             Path.Combine(Directory.GetParent(root)!.FullName, "items", "items.json"), options, reader);
         var evaluator = new EquipmentEvaluator(new(content.BalanceVersion, content.BaseTierBudget,
-            content.StyleShare, content.RankIncrement), archetypes, styles, definitions);
+            content.StyleShare, content.RankIncrement, content.Balance), archetypes, styles, definitions);
         return new(evaluator, content.Items.Select(x => x.Id), styles, sets, equipmentBases);
+
+        string ReleasePath(string file)
+        {
+            if (Path.GetFileName(file) != file || string.IsNullOrWhiteSpace(file))
+                throw new InvalidOperationException("Release content must use filenames within the equipment directory.");
+            return Path.Combine(root, file);
+        }
     }
+
+    public sealed record ReleaseFiles(string Starters, string Styles, string Sets, string Named);
 
     private static IReadOnlyDictionary<string, EquipmentBase> ReadEquipmentBases(
         string path,
@@ -75,7 +120,11 @@ public static class JsonStarterEquipmentCatalog
         IReadOnlyDictionary<AttributeType, double> StatWeights, string? EquipmentSetId);
 
     private sealed record StarterContent(int BalanceVersion, double BaseTierBudget, double StyleShare,
-        double RankIncrement, int MaximumTier, IReadOnlyList<StarterItem> Items);
+        double RankIncrement, int MaximumTier, IReadOnlyList<StarterItem> Items,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<AttributeType, double>>? Specializations = null,
+        EquipmentBalanceSettings? Balance = null);
     private sealed record StarterItem(string Id, string ItemBaseId, string Name, EquipmentType EquipmentType,
-        EquipmentBehaviorDefinition Behavior, IReadOnlyDictionary<AttributeType, double> StatWeights);
+        EquipmentBehaviorDefinition Behavior, IReadOnlyDictionary<AttributeType, double> StatWeights,
+        IReadOnlyDictionary<AttributeType, double>? SpecializationWeights = null,
+        IReadOnlyList<string>? SpecializationIds = null);
 }

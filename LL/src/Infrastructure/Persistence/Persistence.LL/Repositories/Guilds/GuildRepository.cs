@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
+using Domain.Models.Guilds.Missions;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -310,6 +311,23 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Resources)
             .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Members.Any(member => member.CharacterId == characterId), cancellationToken);
+
+    public async Task<List<GuildMissionOption>> GetWeeklyMissionOptionsAsync(
+        Guid guildId,
+        string weekKey,
+        CancellationToken cancellationToken)
+    {
+        await _context.GuildMissionOptions
+            .AsTracking()
+            .Where(x => x.GuildId == guildId && x.WeekKey == weekKey)
+            .LoadAsync(cancellationToken);
+
+        // Contributions can initialize the week several times before the command saves.
+        // Local includes pending inserts and loaded rows, and excludes pending deletions.
+        return _context.GuildMissionOptions.Local
+            .Where(x => x.GuildId == guildId && x.WeekKey == weekKey)
+            .ToList();
+    }
 
     public Task<Guild?> GetGuildForBuildingsAsync(Guid characterId, CancellationToken cancellationToken) =>
         _context.Guilds

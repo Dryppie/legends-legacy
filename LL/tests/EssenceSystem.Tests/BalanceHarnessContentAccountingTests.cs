@@ -29,7 +29,7 @@ public sealed class BalanceHarnessContentAccountingTests : IDisposable
         ["scaling"] = ["progression/region-combat-balance.json"],
         ["abilities"] = ["combat/abilities.json", "combat/statuses.json", "combat/summons.json"],
         ["equipment"] = ["equipment/equipment-starters.v1.json", "equipment/equipment-named.v1.json",
-            "equipment/equipment-styles.v1.json", "equipment/equipment-sets.v1.json", "items/items.json"],
+            "equipment/equipment-styles.v1.json", "equipment/equipment-sets.v1.json", "equipment/equipment-sets.legacy-v1.json", "items/items.json"],
         ["styles"] = ["combat-styles/combat-styles.v1.json"],
         ["floors"] = [TowerBattleRunner.FloorFile]
     };
@@ -169,7 +169,7 @@ public sealed class BalanceHarnessContentAccountingTests : IDisposable
         Assert.Equal(2, names.Count(name => name == "combat/abilities.json"));
         Assert.Equal(FileBytes(names), work.Snapshot()["applicationReadBytes.json"]);
         Assert.Equal(TextBytes(names) + fragments.Sum(s => (long)Encoding.UTF8.GetByteCount(s)), work.Snapshot()["jsonInputBytes"]);
-        Assert.Equal(13 + fragments.Length, work.Snapshot()["jsonParseCompleted"]);
+        Assert.Equal(14 + fragments.Length, work.Snapshot()["jsonParseCompleted"]);
         if (Environment.GetEnvironmentVariable("LL_CONTENT_ACCOUNTING_EXPORT") is { Length: > 0 } export)
         {
             Assert.False(Path.Exists(export)); Directory.CreateDirectory(export);
@@ -180,7 +180,7 @@ public sealed class BalanceHarnessContentAccountingTests : IDisposable
             }
             HarnessJson.WriteNew(Path.Combine(export, "expected.json"), new { filesRead = names, equipmentFragments = fragments,
                 applicationReadBytes = FileBytes(names), jsonInputBytes = TextBytes(names) + fragments.Sum(s => (long)Encoding.UTF8.GetByteCount(s)),
-                completedParses = 13 + fragments.Length, starterHash = HarnessJson.Hash(FixtureCharacter.From(actual.CreateStarter())) });
+                completedParses = 14 + fragments.Length, starterHash = HarnessJson.Hash(FixtureCharacter.From(actual.CreateStarter())) });
             HarnessJson.WriteNew(Path.Combine(export, "native-work.json"), work.Receipt("nativeAudit", new('a', 64), new('b', 64), true));
             TowerProposalStudy.Seal(export, default);
         }
@@ -237,8 +237,8 @@ public sealed class BalanceHarnessContentAccountingTests : IDisposable
             Assert.Equal(expected.GetType(), actual.GetType()); Assert.Equal(expected.Message, actual.Message);
         }
         Assert.Equal(FileBytes(Inputs["equipment"]), work.Snapshot()["applicationReadBytes.json"]);
-        Assert.Equal(5, work.Snapshot()["jsonParseAttempts"]);
-        Assert.Equal(4, work.Snapshot()["jsonParseCompleted"]);
+        Assert.Equal(6, work.Snapshot()["jsonParseAttempts"]);
+        Assert.Equal(5, work.Snapshot()["jsonParseCompleted"]);
     }
 
     [Fact]

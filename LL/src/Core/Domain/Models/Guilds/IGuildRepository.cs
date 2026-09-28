@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Guilds;
+﻿using Domain.Models.Guilds.Missions;
+
+namespace Domain.Models.Guilds;
 public interface IGuildRepository
 {
     Task<bool> CreateAsync(Guid characterId, string name, CancellationToken cancellationToken);
@@ -19,6 +21,8 @@ public interface IGuildRepository
     Task<Guild?> GetGuildForShopAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Guild?> GetGuildForBuildingsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Guild?> GetGuildForMissionsAsync(Guid characterId, CancellationToken cancellationToken);
+    /// <summary>Returns persisted and pending options for the week, excluding pending deletions.</summary>
+    Task<List<GuildMissionOption>> GetWeeklyMissionOptionsAsync(Guid guildId, string weekKey, CancellationToken cancellationToken);
     Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken);
     Task<bool> KickMemberAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken);
     Task<bool> UpdateRolePermissionsAsync(Guid guildId, GuildRolePermission permissions, CancellationToken cancellationToken);

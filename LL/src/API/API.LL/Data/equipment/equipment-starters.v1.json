@@ -1,5 +1,5 @@
 {
-  "balanceVersion": 1,
+  "balanceVersion": 2,
   "baseTierBudget": 100,
   "styleShare": 0.15,
   "rankIncrement": 0.04,
@@ -21,7 +21,16 @@
         "MaxHealth": 0.4,
         "Armor": 0.3,
         "Resistance": 0.3
-      }
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
     },
     {
       "id": "plain.medium_helm",
@@ -41,7 +50,16 @@
         "MaxHealth": 0.25,
         "Armor": 0.2,
         "Resistance": 0.2
-      }
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
     },
     {
       "id": "plain.light_hood",
@@ -61,7 +79,16 @@
         "MaxHealth": 0.1,
         "Armor": 0.1,
         "Resistance": 0.1
-      }
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
     },
     {
       "id": "plain.heavy_breastplate",
@@ -80,7 +107,16 @@
         "MaxHealth": 0.4,
         "Armor": 0.3,
         "Resistance": 0.3
-      }
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "health",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
     },
     {
       "id": "plain.medium_mail",
@@ -100,7 +136,16 @@
         "MaxHealth": 0.25,
         "Armor": 0.2,
         "Resistance": 0.2
-      }
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "health",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
     },
     {
       "id": "plain.light_vest",
@@ -120,7 +165,16 @@
         "MaxHealth": 0.1,
         "Armor": 0.1,
         "Resistance": 0.1
-      }
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "health",
+        "armor",
+        "resistance",
+        "restoration"
+      ]
     },
     {
       "id": "plain.heavy_legplates",
@@ -139,7 +193,15 @@
         "MaxHealth": 0.4,
         "Armor": 0.3,
         "Resistance": 0.3
-      }
+      },
+      "specializationWeights": {
+        "HealthRegeneration": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
     },
     {
       "id": "plain.medium_greaves",
@@ -159,7 +221,15 @@
         "MaxHealth": 0.25,
         "Armor": 0.2,
         "Resistance": 0.2
-      }
+      },
+      "specializationWeights": {
+        "HealthRegeneration": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
     },
     {
       "id": "plain.light_leggings",
@@ -179,7 +249,15 @@
         "MaxHealth": 0.1,
         "Armor": 0.1,
         "Resistance": 0.1
-      }
+      },
+      "specializationWeights": {
+        "HealthRegeneration": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
     },
     {
       "id": "plain.band",
@@ -196,7 +274,16 @@
       },
       "statWeights": {
         "Power": 1
-      }
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "physical_penetration",
+        "magical_penetration",
+        "restoration"
+      ]
     },
     {
       "id": "plain.amulet",
@@ -213,7 +300,15 @@
       },
       "statWeights": {
         "MaxHealth": 1
-      }
+      },
+      "specializationWeights": {
+        "Tenacity": 1.0
+      },
+      "specializationIds": [
+        "regeneration",
+        "health",
+        "restoration"
+      ]
     },
     {
       "id": "plain.vial",
@@ -230,7 +325,14 @@
       },
       "statWeights": {
         "HealthRegeneration": 1
-      }
+      },
+      "specializationWeights": {
+        "AbilityHaste": 1.0
+      },
+      "specializationIds": [
+        "restoration",
+        "tenacity"
+      ]
     },
     {
       "id": "plain.shortsword",
@@ -246,9 +348,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "CritChance": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.dagger",
@@ -264,9 +375,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "AttackSpeed": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AttackSpeed": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.hatchet",
@@ -282,9 +402,19 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "CritDamage": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 0.6,
+        "CritDamage": 0.4
+      },
+      "specializationIds": [
+        "critical",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.mace",
@@ -300,9 +430,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "ArmorPenetration": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "ArmorPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.wand",
@@ -318,9 +457,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "MagicPenetration": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "MagicPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.greatsword",
@@ -336,9 +484,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "CritChance": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.battle_axe",
@@ -354,9 +511,19 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "CritDamage": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 0.6,
+        "CritDamage": 0.4
+      },
+      "specializationIds": [
+        "critical",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.maul",
@@ -372,9 +539,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "ArmorPenetration": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "ArmorPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.spear",
@@ -390,9 +566,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "AttackSpeed": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AttackSpeed": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.staff",
@@ -408,9 +593,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "MagicPenetration": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "MagicPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.longbow",
@@ -426,9 +620,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "CritChance": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "CritChance": 1.0
+      },
+      "specializationIds": [
+        "precision",
+        "speed",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.crossbow",
@@ -444,9 +647,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "ArmorPenetration": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "ArmorPenetration": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "speed",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.gauntlets",
@@ -462,9 +674,18 @@
         "role": ""
       },
       "statWeights": {
-        "Power": 0.7,
-        "AttackSpeed": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AttackSpeed": 1.0
+      },
+      "specializationIds": [
+        "critical",
+        "precision",
+        "physical_penetration",
+        "restoration",
+        "haste"
+      ]
     },
     {
       "id": "plain.towershield",
@@ -481,9 +702,16 @@
       },
       "statWeights": {
         "MaxHealth": 0.35,
-        "BlockChance": 0.35,
         "Armor": 0.3
-      }
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
     },
     {
       "id": "plain.spiritward",
@@ -500,9 +728,16 @@
       },
       "statWeights": {
         "MaxHealth": 0.35,
-        "BlockChance": 0.35,
         "Resistance": 0.3
-      }
+      },
+      "specializationWeights": {
+        "BlockChance": 1.0
+      },
+      "specializationIds": [
+        "tenacity",
+        "armor",
+        "resistance"
+      ]
     },
     {
       "id": "plain.grimoire",
@@ -518,10 +753,58 @@
         "role": "Grimoire"
       },
       "statWeights": {
-        "Power": 0.7,
-        "Cooldown": 0.3
-      }
+        "Power": 0.7
+      },
+      "specializationWeights": {
+        "AbilityHaste": 1.0
+      },
+      "specializationIds": [
+        "restoration",
+        "magical_penetration"
+      ]
     }
   ],
-  "maximumTier": 2
+  "maximumTier": 2,
+  "specializations": {
+    "precision": {
+      "CritChance": 0.6,
+      "CritDamage": 0.4
+    },
+    "critical": {
+      "CritChance": 1
+    },
+    "speed": {
+      "AttackSpeed": 1
+    },
+    "physical_penetration": {
+      "ArmorPenetration": 1
+    },
+    "magical_penetration": {
+      "MagicPenetration": 1
+    },
+    "restoration": {
+      "Restoration": 1
+    },
+    "haste": {
+      "AbilityHaste": 1
+    },
+    "tenacity": {
+      "Tenacity": 1
+    },
+    "regeneration": {
+      "HealthRegeneration": 1
+    },
+    "armor": {
+      "Armor": 1
+    },
+    "resistance": {
+      "Resistance": 1
+    },
+    "health": {
+      "MaxHealth": 1
+    },
+    "block": {
+      "BlockChance": 1
+    }
+  }
 }

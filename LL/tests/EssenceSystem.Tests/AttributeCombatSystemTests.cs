@@ -28,7 +28,7 @@ public sealed class AttributeCombatSystemTests
             Assert.True(definition.MinimumValue >= 0);
             Assert.InRange(definition.DisplayPrecision, 0, 4);
             Assert.Equal(
-                definition.AttributeType != AttributeType.Threat,
+                AttributeRules.IsOrdinaryEquipmentAttribute(definition.AttributeType),
                 definition.IsEquipmentEligible);
             Assert.NotEmpty(definition.RelevantBenchmarkScenarios);
             Assert.Equal(
@@ -56,7 +56,7 @@ public sealed class AttributeCombatSystemTests
         Assert.True(threat.IsContentFacing);
 
         Assert.Equal(
-            EquipmentStatBudgetCatalog.Attributes.Order(),
+            EquipmentStatBudgetCatalog.Attributes.Where(AttributeRules.IsOrdinaryEquipmentAttribute).Order(),
             definitions
                 .Where(x => x.IsEquipmentEligible)
                 .Select(x => x.AttributeType)
@@ -75,8 +75,8 @@ public sealed class AttributeCombatSystemTests
             [AttributeType.DamageReduction] = AttributeCombatRules.DamageReductionCapPercent,
             [AttributeType.Armor] = AttributeCombatRules.TypedMitigationCapPercent,
             [AttributeType.Resistance] = AttributeCombatRules.TypedMitigationCapPercent,
-            [AttributeType.ArmorPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
-            [AttributeType.MagicPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
+            [AttributeType.ArmorPenetration] = AttributeRules.TypedPenetrationCap,
+            [AttributeType.MagicPenetration] = AttributeRules.TypedPenetrationCap,
             [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent,
             [AttributeType.HealingPowerPercent] = AttributeCombatRules.HealingPowerCapPercent,
             [AttributeType.LifeSteal] = AttributeCombatRules.LifeStealCapPercent,

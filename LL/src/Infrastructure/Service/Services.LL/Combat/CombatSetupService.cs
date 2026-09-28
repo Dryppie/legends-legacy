@@ -20,6 +20,7 @@ namespace Services.LL.Combat;
 public class CombatSetupService : ICombatSetupService
 {
     private readonly ICreatureScaler _creatureScaler;
+    private readonly int _attributeVersion;
     private readonly IEssenceCombatLoadoutResolver _essenceCombatLoadoutResolver;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
@@ -36,9 +37,10 @@ public class CombatSetupService : ICombatSetupService
         ICreatureAbilityDefinitionProvider? creatureAbilities = null,
         EquipmentCatalog? equipmentCatalog = null,
         IEquipmentLoadoutService? equipmentLoadouts = null,
-        ICombatStyleService? combatStyles = null)
+        ICombatStyleService? combatStyles = null, AttributeRulesSelection? attributeRules = null)
     {
         _creatureScaler = creatureScaler;
+        _attributeVersion = attributeRules?.Version ?? AttributeRules.CurrentVersion;
         _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
         _essenceDefinitions = essenceDefinitions;
         _creatureEssenceLootTables = creatureEssenceLootTables;
@@ -130,6 +132,7 @@ public class CombatSetupService : ICombatSetupService
     {
         foreach (var entity in entities)
         {
+            if (!entity.HasEquipmentSnapshot) entity.AttributeRulesVersion = _attributeVersion;
             if (entity.IsPlayerCharacter && !entity.HasEquipmentSnapshot && _equipmentLoadouts is not null &&
                 await _equipmentLoadouts.ResolveAsync(entity.OriginalId, activity, CancellationToken.None) is { } slots)
             {

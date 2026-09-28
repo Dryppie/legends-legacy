@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { AppUpdateService } from './core/services/client-side/app-update/app-update.service';
 import { ToastService } from './core/services/client-side/components/toast/toast.service';
 import { AppComponent } from './app.component';
+import { ActivityDayService } from './core/services/api/activity-day.service';
 
 describe('AppComponent', () => {
   const toastService = jasmine.createSpyObj<ToastService>('ToastService', [
@@ -20,6 +21,7 @@ describe('AppComponent', () => {
       providers: [
         { provide: ToastService, useValue: toastService },
         { provide: AppUpdateService, useValue: appUpdate },
+        { provide: ActivityDayService, useValue: {} },
       ],
     })
       .overrideComponent(AppComponent, {

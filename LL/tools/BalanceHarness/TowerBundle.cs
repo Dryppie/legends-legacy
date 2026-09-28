@@ -104,9 +104,9 @@ public static class TowerBundle
     internal static void VerifySnapshot(string run, TowerManifest manifest, string inputHash, CancellationToken token)
     {
         if (manifest.SchemaVersion != 1 || inputHash != manifest.InputHash
-            || !manifest.ContentHashes.Keys.Order(StringComparer.Ordinal).SequenceEqual(Files.Order(StringComparer.Ordinal)))
+            || !ContentSnapshotContract.IsKnownTowerFiles(manifest.ContentHashes.Keys))
             throw new InvalidDataException("Unsupported or modified Tower inputs/content manifest.");
-        foreach (var file in Files)
+        foreach (var file in manifest.ContentHashes.Keys)
         {
             token.ThrowIfCancellationRequested();
             if (HarnessJson.FileHash(Path.Combine(run, "content", "Data", file)) != manifest.ContentHashes[file])
@@ -155,9 +155,9 @@ public static class TowerBundle
         var inputs = HarnessJson.Read<TowerBattleInput[]>(Path.Combine(run, "tower-input.json"));
         var manifest = HarnessJson.Read<TowerManifest>(Path.Combine(run, "tower-manifest.json"));
         if (manifest.SchemaVersion != 1 || HarnessJson.Hash(inputs) != manifest.InputHash
-            || inputs.Length == 0 || !manifest.ContentHashes.Keys.Order(StringComparer.Ordinal).SequenceEqual(Files.Order(StringComparer.Ordinal)))
+            || inputs.Length == 0 || !ContentSnapshotContract.IsKnownTowerFiles(manifest.ContentHashes.Keys))
             throw new InvalidDataException("Unsupported or modified Tower inputs/content manifest.");
-        foreach (var file in Files)
+        foreach (var file in manifest.ContentHashes.Keys)
         {
             token.ThrowIfCancellationRequested();
             if (HarnessJson.FileHash(Path.Combine(run, "content", "Data", file)) != manifest.ContentHashes[file])

@@ -24,6 +24,26 @@ public sealed class JsonAbilityCatalogProvider : ICompiledAbilityCatalogProvider
         var summonPath = Path.Combine(contentRootPath, contentRoot, "combat", "summons.json");
 
         var abilities = ReadList<AbilitySpec>(abilityPath, options, reader);
+        if (config["Combat:AbilityBalanceProfile"] is { Length: > 0 } profileId)
+        {
+            var profilePath = Path.Combine(contentRootPath, contentRoot, ProfileRelativePath(profileId));
+            var profile = reader.Deserialize<AbilityBalanceProfile>(reader.ReadAllText(profilePath), options)
+                ?? throw new InvalidOperationException("Missing ability balance profile.");
+            Domain.Models.Attributes.AttributeRules.ValidateVersion(profile.AttributeRulesVersion);
+            if (profile.SchemaVersion != 1 || profile.Id != profileId
+                || profile.AttributeRulesVersion != (config.GetValue<int?>("AttributeRedesign:LiveVersion") ?? 17))
+                throw new InvalidOperationException("Ability balance profile metadata or combat rules do not match the selected release.");
+            if (profile.Abilities is null || profile.Abilities.Any(x => x is null)
+                || profile.Abilities.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() != profile.Abilities.Count)
+                throw new InvalidOperationException("Ability balance profiles must contain unique ability replacements.");
+            var replacements = profile.Abilities.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+            if (replacements.Count == 0 || replacements.Keys.Except(abilities.Select(x => x.Id), StringComparer.OrdinalIgnoreCase).Any())
+                throw new InvalidOperationException("Ability balance profiles must replace existing abilities.");
+            foreach (var original in abilities.Where(x => replacements.ContainsKey(x.Id)))
+                if (replacements[original.Id].OwningEssenceId != original.OwningEssenceId || replacements[original.Id].Kind != original.Kind)
+                    throw new InvalidOperationException("Ability balance profiles must preserve ability ownership and kind.");
+            abilities = abilities.Select(x => replacements.GetValueOrDefault(x.Id, x)).ToArray();
+        }
         var statuses = ReadList<StatusSpec>(statusPath, options, reader);
         var summons = ReadList<SummonSpec>(summonPath, options, reader);
         var owningEssences = abilities
@@ -42,6 +62,15 @@ public sealed class JsonAbilityCatalogProvider : ICompiledAbilityCatalogProvider
     public AbilityCatalog GetCatalog() => _catalog;
 
     public CompiledAbilityCatalog GetCompiledCatalog() => _compiledCatalog.Value;
+
+    public static string ProfileRelativePath(string profileId)
+    {
+        if (string.IsNullOrWhiteSpace(profileId) || profileId.Any(c => !char.IsAsciiLetterOrDigit(c) && c != '-'))
+            throw new InvalidOperationException("Ability balance profile IDs must contain only ASCII letters, digits and hyphens.");
+        return Path.Combine("combat", $"ability-balance.{profileId}.json");
+    }
+
+    private sealed record AbilityBalanceProfile(int SchemaVersion, string Id, int AttributeRulesVersion, IReadOnlyList<AbilitySpec> Abilities);
 
     private static IReadOnlyList<T> ReadList<T>(string path, JsonSerializerOptions options, ContentJsonReader reader)
     {

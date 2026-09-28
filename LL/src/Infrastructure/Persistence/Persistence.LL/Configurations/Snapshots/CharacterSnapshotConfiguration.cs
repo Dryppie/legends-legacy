@@ -11,6 +11,7 @@ public sealed class CharacterSnapshotConfiguration : IEntityTypeConfiguration<Ch
 {
     public void Configure(EntityTypeBuilder<CharacterSnapshot> builder)
     {
+        builder.Property(x => x.AttributeRulesVersion).HasDefaultValue(Domain.Models.Attributes.AttributeRules.LegacyVersion);
         var property = builder.Property(x => x.CombatStyle)
             .HasColumnType("jsonb")
             .HasConversion(

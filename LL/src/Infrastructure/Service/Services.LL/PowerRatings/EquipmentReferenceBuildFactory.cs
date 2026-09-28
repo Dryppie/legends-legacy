@@ -37,14 +37,14 @@ public sealed class EquipmentReferenceBuildFactory(
     IEssenceDefinitionRepository essenceDefinitions,
     IEssenceCombatLoadoutResolver essenceLoadouts)
 {
-    public EquipmentReferenceBuild Create(EquipmentReferenceBuildDefinition definition, bool requireCompleteLoadout = true)
+    public EquipmentReferenceBuild Create(EquipmentReferenceBuildDefinition definition, bool requireCompleteLoadout = true, bool allowFutureProjection = false)
     {
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentException.ThrowIfNullOrWhiteSpace(definition.Id);
         ArgumentNullException.ThrowIfNull(definition.Equipment);
         ArgumentNullException.ThrowIfNull(definition.EssenceIds);
-        if (definition.CharacterLevel is < 1 or > 100)
-            throw new ArgumentOutOfRangeException(nameof(definition), "Reference character levels must be 1-100.");
+        if (definition.CharacterLevel < 1 || definition.CharacterLevel > (allowFutureProjection ? 500 : 100))
+            throw new ArgumentOutOfRangeException(nameof(definition), "Reference level exceeds the explicitly selected projection range.");
         if (definition.CharacterLevel < EquipmentTierBudgetCurve.GetRequiredCharacterLevelForTier(definition.Tier))
             throw new ArgumentException("The reference level cannot equip this tier.", nameof(definition));
         var selections = definition.Equipment.OrderBy(x => x.Slot).ToArray();
@@ -131,7 +131,7 @@ public sealed class EquipmentReferenceBuildFactory(
     }
 
     public static void ValidateEquipmentSlots(
-        IReadOnlyList<(EquipmentSlotType Slot, EquipmentType Type)> slots, bool requireCompleteLoadout = true)
+        IReadOnlyList<(EquipmentSlotType Slot, EquipmentType Type)> slots, bool requireCompleteLoadout = true, bool allowFutureProjection = false)
     {
         if (slots.Count is < 1 or > 8 || slots.Select(x => x.Slot).Distinct().Count() != slots.Count)
             throw new ArgumentException("Equipment slots must be distinct.", nameof(slots));

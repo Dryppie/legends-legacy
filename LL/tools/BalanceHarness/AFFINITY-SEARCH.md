@@ -88,6 +88,12 @@ Omit `--execute` to freeze inputs without combat. Run from the repository root o
 
 The screen preserves ordered recipes, authored allies and producing runtime/content. Its output includes all cells and a seed-free follow-up export. The export removes an order-only duplicate among the floor-3 controls by taking the next distinct composition in saved catalog order; this third composition is not covered by the completed screen's results. Floor 15's stronger existing controls must remain visible in any subsequent search evaluation. Neither the screen nor its export confirms a team or approves a progression target.
 
+## Current-runtime floor-3 evaluation
+
+The [completed floor-3 evaluation](../../../Balance%20Harness/Tower-Affinity-Floor3-Evaluation.md) ran the unchanged 528-fight search and measured both generated finalists plus all three references on 128 separate seeds each. All five won 0/128 on the current build, so the benchmark was retained. A matched 128-fight earlier-runtime check gave that same benchmark 88/128 wins with identical recipe, seeds, content and settings. Re-establish a viable current-runtime reference before treating this progression case as evidence of search quality.
+
+`BalanceHarnessAffinityFloorEvaluationTests` is opt-in via `LL_AFFINITY_FLOOR_EVALUATION`, a pinned request file. Build and run deterministic checks through `build/run-tests.ps1` with an isolated `-ArtifactsPath` first. `Balance Harness/analysis/run-affinity-floor-evaluation.py` prepares the fixed request and owns the no-build test process; it requires new `--package` and `--output` paths plus the tested `--artifacts` directory. This command allocates 237 fresh values against the complete balance registry and allows one 1,168-fight evaluation. It does not retry, confirm teams or modify search policy. The linked execution record contains the commands, pins and limitations.
+
 ## One explicit experiment
 
 `tower-affinity-nomination-comparison-v1` compares the supported profile with experimental `tower-proposal-racing-v9`. The experiment permits only the two generated finalists to challenge the benchmark. Its proposer, all first 408 observations and the final validation gate remain identical to the supported arm. Native and independent Python audits enforce those constraints.

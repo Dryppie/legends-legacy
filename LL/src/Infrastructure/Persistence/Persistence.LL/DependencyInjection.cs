@@ -87,6 +87,8 @@ public static class DependencyInjection
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<ITelemetryRepository, Repositories.Analytics.TelemetryRepository>();
+        services.AddScoped<IItemizationTelemetryRepository, Repositories.Analytics.ItemizationTelemetryRepository>();
+        services.AddScoped<IItemizationChoiceRepository, Repositories.Analytics.ItemizationChoiceRepository>();
         services.AddScoped<Domain.Models.Nobility.INobilityRepository, Repositories.Nobility.NobilityRepository>();
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
         services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();
@@ -114,6 +116,7 @@ public static class DependencyInjection
         services.AddScoped<Domain.Models.Items.Equipments.Loadouts.IEquipmentLoadoutRepository, EquipmentLoadoutRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentUpgradeRepository, EquipmentUpgradeRepository>();
+        services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentMigrationRepository, EquipmentMigrationRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IEquipmentBlueprintRepository, EquipmentBlueprintRepository>();
         services.AddScoped<Domain.Models.Items.Equipments.Progression.IStarterEquipmentRepository, StarterEquipmentRepository>();
         services.AddScoped<IEssenceRepository, EssenceRepository>();

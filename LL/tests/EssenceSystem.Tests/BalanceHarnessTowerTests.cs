@@ -168,8 +168,8 @@ public sealed class BalanceHarnessTowerTests
         foreach (var build in builds)
         {
             var snapshotId = Guid.NewGuid();
-            db.CharacterSnapshots.Add(new CharacterSnapshot
-            {
+            db.CharacterSnapshots.Add(new CharacterSnapshot {
+                AttributeRulesVersion = Domain.Models.Attributes.AttributeRules.CurrentVersion,
                 Id = snapshotId, CharacterId = build.Character.Id, Name = build.Character.Name, Level = build.Character.Level,
                 BaseAttributes = build.Character.BaseAttributes.Select(a => new EntityAttributeSnapshot
                     { CharacterSnapshotId = snapshotId, AttributeType = a.AttributeType, Value = a.Value }).ToArray(),

@@ -9,7 +9,8 @@ namespace Domain.Models.Items.Equipments.Progression;
 public sealed class EquipmentUpgradePolicy(
     EquipmentCatalog catalog,
     EquipmentUpgradePrices prices,
-    EquipmentBlueprintCatalog? blueprints = null)
+    EquipmentBlueprintCatalog? blueprints = null,
+    IEquipmentCatalogProvider? versions = null)
 {
     public EquipmentUpgradeQuote Quote(
         EquipmentUpgradeContext? context,
@@ -44,6 +45,7 @@ public sealed class EquipmentUpgradePolicy(
             if (context.InventoryItem is { Quantity: not 1 })
                 throw new InvalidOperationException("Equipment must be an individual inventory item.");
 
+            var itemCatalog = versions?.Get(before.State.BalanceVersion) ?? catalog;
             var slotCount = before.EquipmentType.OccupiedSlotCount();
 
             if (request.Kind == EquipmentUpgradeOperationKind.Dismantle)
@@ -71,7 +73,7 @@ public sealed class EquipmentUpgradePolicy(
                     .Sum(x => (long)x.Quantity) ?? 0;
                 requiredBlueprints = slotCount;
                 cinderCost = checked(blueprints!.CindersPerTier * before.State.Tier * slotCount);
-                after = before.ApplyVariant(catalog.Evaluator, blueprint.StyleId);
+                after = before.ApplyVariant(itemCatalog.Evaluator, blueprint.StyleId);
                 if (availableBlueprints < requiredBlueprints)
                     throw new InvalidOperationException(requiredBlueprints == 1
                         ? "You need one matching blueprint."
@@ -81,7 +83,7 @@ public sealed class EquipmentUpgradePolicy(
             {
                 // Current descriptors use authored allocation. Older frozen descriptors
                 // retain and scale their existing stats instead of being silently rerolled.
-                var evaluated = EquipmentData.Create(before.EquipmentState, catalog.Evaluator);
+                var evaluated = EquipmentData.Create(before.EquipmentState, itemCatalog.Evaluator);
                 if (before.State.Rank >= EquipmentBalance.MaximumRank)
                     throw new InvalidOperationException(
                         $"Equipment is already at rank {EquipmentBalance.MaximumRank}.");
@@ -90,8 +92,8 @@ public sealed class EquipmentUpgradePolicy(
                 partsCost = checked(tierPrices.RankPartCosts[before.State.Rank] * slotCount);
                 cinderCost = checked(tierPrices.RankCinderCosts[before.State.Rank] * slotCount);
                 after = before.MatchesEvaluation(evaluated)
-                    ? EquipmentData.Create(before.EquipmentState.Reinforce(catalog.Evaluator), catalog.Evaluator)
-                    : before.ReinforceFrozen(catalog.Evaluator.Balance);
+                    ? EquipmentData.Create(before.EquipmentState.Reinforce(itemCatalog.Evaluator), itemCatalog.Evaluator)
+                    : before.ReinforceFrozen(itemCatalog.Evaluator.Balance);
             }
 
             if (context.Character.Cinders < cinderCost)

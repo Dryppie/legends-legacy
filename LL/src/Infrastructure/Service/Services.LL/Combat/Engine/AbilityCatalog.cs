@@ -259,7 +259,7 @@ public static class AbilityCatalogValidator
             if (effect.ChancePercent is < 0 or > 100)
                 errors.Add($"{label}: chance must be between 0 and 100.");
 
-            if (effect.ProcCoefficient is <= 0 or > 2)
+            if (effect.ProcCoefficient is < 0 or > 2)
                 errors.Add($"{label}: procCoefficient must be greater than 0 and no more than 2.");
 
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
@@ -643,6 +643,7 @@ public static class AbilityCatalogValidator
 
         foreach (var trigger in triggers)
         {
+            if (!Enum.IsDefined(trigger.ProcScope)) errors.Add($"{ownerId}: unsupported proc scope.");
             if (trigger.ChooseOneEffect && (trigger.EffectIds.Count == 0 ? effects.Count : trigger.EffectIds.Count) < 2)
                 errors.Add($"{ownerId}: chooseOneEffect requires at least two effects.");
             if (trigger.InternalCooldownTicks < 0)

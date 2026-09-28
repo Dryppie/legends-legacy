@@ -29,7 +29,7 @@ namespace EssenceSystem.Tests;
 public sealed class LiveOpsApplicationRegistrationTests
 {
     [Fact]
-    public void LiveOps_registers_only_administration_and_alpha_grant_request_handlers()
+    public void LiveOps_registers_administration_and_explicit_operator_request_handlers()
     {
         var services = new ServiceCollection();
 
@@ -44,10 +44,20 @@ public sealed class LiveOpsApplicationRegistrationTests
                     typeof(IRequestHandler<,>)))
             .ToList();
 
-        Assert.Equal(20, handlers.Count);
-        Assert.Contains(handlers, descriptor => descriptor.ImplementationType == typeof(Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommandHandler));
+        Type[] additionalOperatorHandlers =
+        [
+            typeof(Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommandHandler),
+            typeof(Application.UseCases.Equipments.Queries.AuditEquipmentMigration.AuditEquipmentMigrationQueryHandler),
+            typeof(Application.UseCases.Equipments.Queries.PreviewEquipmentMigration.PreviewEquipmentMigrationQueryHandler),
+            typeof(Application.UseCases.Equipments.Commands.ApplyEquipmentMigration.ApplyEquipmentMigrationCommandHandler),
+            typeof(Application.UseCases.Equipments.Commands.RollbackEquipmentMigration.RollbackEquipmentMigrationCommandHandler),
+            typeof(Application.UseCases.Analytics.Queries.GetItemizationTelemetry.GetItemizationTelemetryQueryHandler)
+        ];
+        Assert.Equal(25, handlers.Count);
+        foreach (var handlerType in additionalOperatorHandlers)
+            Assert.Single(handlers, descriptor => descriptor.ImplementationType == handlerType);
         Assert.Contains(handlers, descriptor => descriptor.ImplementationType == typeof(Application.UseCases.Administration.Queries.GetCompensationEquipmentOptions.GetCompensationEquipmentOptionsQueryHandler));
-        Assert.All(handlers.Where(descriptor => descriptor.ImplementationType != typeof(Application.UseCases.Nobility.Commands.GrantAlphaSignets.GrantAlphaSignetsCommandHandler)), descriptor => Assert.StartsWith(
+        Assert.All(handlers.Where(descriptor => !additionalOperatorHandlers.Contains(descriptor.ImplementationType)), descriptor => Assert.StartsWith(
             "Application.UseCases.Administration",
             descriptor.ImplementationType?.Namespace,
             StringComparison.Ordinal));

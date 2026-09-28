@@ -16,6 +16,54 @@ import {
 } from './character-overview.component';
 
 describe('CharacterOverviewComponent', () => {
+  it('shows current projected stats without repeating retired raw aliases', () => {
+    const overview = createOverview();
+    overview.baseAttributes = [
+      { attributeType: AttributeType.HealingPowerPercent, value: 30 },
+      { attributeType: AttributeType.Cooldown, value: 20 },
+      { attributeType: AttributeType.StatusResistance, value: 15 },
+      { attributeType: AttributeType.CrowdControlResistance, value: 10 },
+    ];
+    overview.baseCombatAttributes = [
+      { attributeType: AttributeType.Restoration, value: 75 },
+      { attributeType: AttributeType.AbilityHaste, value: 25 },
+      { attributeType: AttributeType.Tenacity, value: 0 },
+    ];
+    const component = createComponent(undefined, undefined, overview);
+    const displayed = component.attributeSections.flatMap((section) =>
+      component.getSectionAttributes(section.attributes),
+    );
+
+    expect(displayed).toEqual(overview.baseCombatAttributes);
+    component.ngOnDestroy();
+  });
+
+  it('keeps legacy projected attributes readable before activation', () => {
+    const overview = createOverview();
+    overview.baseCombatAttributes = [
+      { attributeType: AttributeType.HealingPowerPercent, value: 30 },
+      { attributeType: AttributeType.Cooldown, value: 20 },
+      { attributeType: AttributeType.StatusResistance, value: 15 },
+      { attributeType: AttributeType.CrowdControlResistance, value: 10 },
+    ];
+    const component = createComponent(undefined, undefined, overview);
+    const displayed = component.attributeSections.flatMap((section) =>
+      component.getSectionAttributes(section.attributes),
+    );
+
+    expect(displayed).toEqual(overview.baseCombatAttributes);
+    component.ngOnDestroy();
+  });
+
+  it('uses available base attributes when no combat projection was returned', () => {
+    const overview = createOverview();
+    overview.baseAttributes = [{ attributeType: AttributeType.Power, value: 10 }];
+    const component = createComponent(undefined, undefined, overview);
+
+    expect(component.getSectionAttributes([AttributeType.Power])).toEqual(overview.baseAttributes);
+    component.ngOnDestroy();
+  });
+
   it('recognizes the current profile and keeps perks collapsed initially', () => {
     const component = createComponent();
     expect(component.isOwnProfile()).toBeTrue();
@@ -101,10 +149,11 @@ function createComponent(
     { currentCharacter: signal(createCharacter()).asReadonly() },
   ),
   initialCharacterName?: string,
+  overview = createOverview(),
 ): CharacterOverviewComponent {
   return new CharacterOverviewComponent(characterService,
 {
-      overview: signal(createOverview()).asReadonly(),
+      overview: signal(overview).asReadonly(),
       currentCharacter: signal(createCharacter()).asReadonly(),
       loading: signal(false).asReadonly(),
       error: signal(null).asReadonly(),

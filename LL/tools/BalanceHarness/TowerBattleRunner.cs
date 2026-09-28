@@ -17,7 +17,9 @@ using Services.LL.WorldTower;
 
 namespace BalanceHarness;
 
-public sealed record TowerPartyRecipe(int PartySlot, EquipmentReferenceBuildDefinition Build);
+public sealed record TowerPartyRecipe(int PartySlot, EquipmentReferenceBuildDefinition Build,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    FixtureCombatStyle? Doctrine = null);
 public sealed record TowerScenario(int SchemaVersion, string Id, int FloorNumber, DateTimeOffset StartsAt,
     string PreparationState, IReadOnlyList<string> Assumptions, IReadOnlyList<int> Seeds,
     IReadOnlyList<TowerPartyRecipe> Party);
@@ -51,7 +53,12 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
             throw new InvalidDataException("Tower party must fill RequiredSlots with distinct characters and unique legal slots.");
         var party = scenario.Party.OrderBy(p => p.PartySlot).Select(p => new TowerPartyMember(
             p.PartySlot, WorldTowerPartyRules.GetPartyNumber(p.PartySlot),
-            FixtureCharacter.From(content.CreateBuild(p.Build)))).ToArray();
+            FreezePartyMember(p))).ToArray();
+        FixtureCharacter FreezePartyMember(TowerPartyRecipe recipe)
+        {
+            var fixture = FixtureCharacter.From(content.CreateBuild(recipe.Build));
+            return recipe.Doctrine is null ? fixture : fixture with { CombatStyle = content.FreezeCombatStyle(fixture, recipe.Doctrine) };
+        }
         if (party.Select(p => p.Character.Id).Distinct().Count() != floor.RequiredSlots)
             throw new InvalidDataException("Duplicate Tower character identity.");
         var guardian = HarnessJson.Read<JsonElement>(Path.Combine(root, "Data", "world", "creatures.json"))
@@ -151,6 +158,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         return new()
         {
             Id = id, CharacterId = fixture.Id, Name = fixture.Name, Level = fixture.Level,
+            AttributeRulesVersion = content.Equipment.Evaluator.Balance.AttributeVersion,
             CombatStyle = fixture.CombatStyle,
             BaseAttributes = character.BaseAttributes.Select(a => new EntityAttributeSnapshot
                 { CharacterSnapshotId = id, AttributeType = a.AttributeType, Value = a.Value }).ToArray(),
@@ -159,7 +167,7 @@ public sealed class TowerBattleRunner(string root, OfflineContent content)
         };
     }
 
-    private sealed class FileSnapshotBuilder(OfflineContent content, ICombatSetupService setup) : ISnapshotCombatantBuilder
+    internal sealed class FileSnapshotBuilder(OfflineContent content, ICombatSetupService setup) : ISnapshotCombatantBuilder
     {
         public Task<IReadOnlyList<CombatRuntimeParticipant>> BuildAsync(IReadOnlyList<SnapshotCombatantRequest> requests,
             CancellationToken cancellationToken)

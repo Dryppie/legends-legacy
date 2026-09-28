@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Domain.Models.Entities;
 public abstract class Entity
 {
+    [NotMapped] public int AttributeRulesVersion { get; set; } = AttributeRules.CurrentVersion;
     /// <summary>
     /// This does not need to be hidden
     /// </summary>

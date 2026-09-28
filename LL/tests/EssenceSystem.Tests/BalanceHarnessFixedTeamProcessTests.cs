@@ -17,7 +17,9 @@ public sealed partial class BalanceHarnessFixedTeamConfirmationTests
         var fixture = Path.Combine(root, "process.json"); HarnessJson.WriteNew(fixture, new FixedTeamFixture(FixedTeamFixtureHost.Version, mode, q, Settings));
         var start = FixtureHost.Start("fixed-team-parent", fixture); start.RedirectStandardOutput = true; start.RedirectStandardError = true;
         using var process = Process.Start(start)!; var stdout = process.StandardOutput.ReadToEndAsync(); var stderr = process.StandardError.ReadToEndAsync();
-        try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(550)); }
+        // Preserve the worker's deadline and allow a bounded shutdown afterward.
+        var timeout = mode == "negative" ? q.MaximumSeconds - q.PriorSeconds + 15 : q.Phases["admission"].Seconds + 15;
+        try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(timeout)); }
         finally { if (!process.HasExited) { process.Kill(entireProcessTree: true); await process.WaitForExitAsync(); } }
         var text = await stdout; var error = await stderr; Assert.True(mode == "negative" ? process.ExitCode == 0 : process.ExitCode != 0, text+error);
         Assert.Equal(mode == "negative", File.Exists(C.P(q, "closeout.json")));

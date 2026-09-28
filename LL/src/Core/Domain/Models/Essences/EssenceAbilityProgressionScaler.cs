@@ -185,6 +185,8 @@ public static class EssenceAbilityProgressionScaler
     private static AbilityTriggerSpec CloneTrigger(AbilityTriggerSpec trigger) =>
         new()
         {
+            ProcScope = trigger.ProcScope,
+            AllowPeriodicProcs = trigger.AllowPeriodicProcs,
             ChooseOneEffect = trigger.ChooseOneEffect,
             SnapshotEffectConditions = trigger.SnapshotEffectConditions,
             Event = trigger.Event,
@@ -263,6 +265,7 @@ public static class EssenceAbilityProgressionScaler
             LifeStealPercentage = effect.LifeStealPercentage,
             LifeStealTargetCondition = effect.LifeStealTargetCondition,
             ProcCoefficient = effect.ProcCoefficient,
+            AllowSecondaryProcs = effect.AllowSecondaryProcs,
             Tags = [.. effect.Tags],
             Conditions = [.. effect.Conditions.Select(CloneCondition)]
         };

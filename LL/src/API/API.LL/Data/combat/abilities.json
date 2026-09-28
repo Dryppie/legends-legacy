@@ -1891,7 +1891,7 @@
     "id": "ability.creature.treant_sapling.sprouting_surge",
     "kind": "Active",
     "name": "Sprouting Surge",
-    "description": "Heal yourself for 300% Power.",
+    "description": "Heal yourself for {scaling} Power.",
     "cooldownTicks": 160,
     "tags": [
       "Healing"
@@ -9231,7 +9231,7 @@
     "id": "ability.creature.lizardfolk_shaman.herb_mixture",
     "kind": "Active",
     "name": "Herb Mixture",
-    "description": "Heal the ally with the least current Health, including yourself and summons, for 210% Power.",
+    "description": "Heal the ally with the least current Health, including yourself and summons, for {scaling} Power.",
     "cooldownTicks": 140,
     "tags": [
       "Healing",

@@ -13,6 +13,11 @@ interface AttributeWithType {
 }
 
 const ATTRIBUTE_CATEGORIES: Record<AttributeType, AttributeCategory> = {
+  [AttributeType.AbilityHaste]: AttributeCategory.Utility,
+  [AttributeType.Tenacity]: AttributeCategory.Utility,
+  [AttributeType.Restoration]: AttributeCategory.Recovery,
+  [AttributeType.ArmorRating]: AttributeCategory.Defense,
+  [AttributeType.ResistanceRating]: AttributeCategory.Defense,
   [AttributeType.Power]: AttributeCategory.Offense,
   [AttributeType.CritChance]: AttributeCategory.Offense,
   [AttributeType.CritDamage]: AttributeCategory.Offense,

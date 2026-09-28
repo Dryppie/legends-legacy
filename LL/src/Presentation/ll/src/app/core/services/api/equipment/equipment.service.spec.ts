@@ -5,6 +5,17 @@ import { ApiService } from '../api.service';
 import { EquipmentService, EquipmentUpgradeQuote } from './equipment.service';
 
 describe('EquipmentService', () => {
+  it('records a comparison with a request identity and the selected activity', () => {
+    const api = jasmine.createSpyObj<ApiService>('ApiService', ['post']);
+    api.post.and.returnValue(of({}));
+    const service = new EquipmentService(api);
+    service.compareEquipment('sword-1', EquipmentSlotType.MainHand, 'None').subscribe();
+    expect(api.post).toHaveBeenCalledOnceWith('equipment/compare/observe', {
+      requestId: jasmine.stringMatching(/^[0-9a-f-]{36}$/i),
+      equipmentInstanceId: 'sword-1', slotType: EquipmentSlotType.MainHand, activity: 'None',
+    });
+  });
+
   it('reinforces with only the item and operation IDs', () => {
     const api = jasmine.createSpyObj<ApiService>('ApiService', ['post']);
     api.post.and.returnValue(of({ outcome: {} }));

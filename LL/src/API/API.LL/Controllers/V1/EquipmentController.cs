@@ -24,6 +24,21 @@ using Domain.Models.Items.Equipments.Progression;
 namespace API.LL.Controllers.V1;
 public class EquipmentController : BaseController
 {
+    public sealed record ObserveComparisonRequest(Guid RequestId, Guid EquipmentInstanceId, EquipmentSlotType? SlotType, EssenceCombatActivity Activity);
+    [HttpPost("compare/observe")]
+    public async Task<IActionResult> ObserveComparison(ObserveComparisonRequest request, CancellationToken ct) =>
+        Ok(await Mediator.Send(new Application.UseCases.Equipments.Commands.ObserveEquipmentComparison.ObserveEquipmentComparisonCommand(
+            CurrentCharacterGuid, request.RequestId, request.EquipmentInstanceId, request.SlotType, request.Activity), ct));
+
+    [HttpGet("migration/choice/{itemId:guid}")]
+    public async Task<IActionResult> MigrationChoice(Guid itemId, CancellationToken ct) =>
+        Ok(await Mediator.Send(new Application.UseCases.Equipments.Queries.GetMigratedSpecializationChoice.GetMigratedSpecializationChoiceQuery(CurrentCharacterGuid, itemId), ct));
+    public sealed record MigratedSpecializationRequest(Guid MigrationId, Guid OperationId, string DefinitionId);
+    [HttpPost("migration/specialization")]
+    public async Task<IActionResult> ChooseMigratedSpecialization(MigratedSpecializationRequest request, CancellationToken ct) =>
+        Ok(await Mediator.Send(new Application.UseCases.Equipments.Commands.ChooseMigratedSpecialization.ChooseMigratedSpecializationCommand(
+            CurrentCharacterGuid, request.MigrationId, request.OperationId, request.DefinitionId), ct));
+
     public sealed record SaveEquipmentLoadoutRequest(Guid? Id, string Name);
     public sealed record CopyEquipmentLoadoutRequest(Guid TargetId);
     [HttpPost("loadouts/{sourceId:guid}/copy")]
@@ -89,11 +104,12 @@ public class EquipmentController : BaseController
     [HttpGet("comparison/{equipmentInstanceId:guid}")]
     public async Task<ActionResult<Response<EquipmentComparisonDto>>> Compare(
         Guid equipmentInstanceId,
-        [FromQuery] EquipmentSlotType? slotType) =>
+        [FromQuery] EquipmentSlotType? slotType,
+        [FromQuery] Domain.Models.Essences.EssenceCombatActivity activity = Domain.Models.Essences.EssenceCombatActivity.None) =>
         await Mediator.Send(new CompareEquipmentQuery(
             CurrentCharacterGuid,
             equipmentInstanceId,
-            slotType));
+            slotType, activity));
 
     [HttpPost("Equip")]
     public async Task<ActionResult<Response<EquipmentChangeResponseDto>>> Equip([FromBody] EquipEquipmentRequestDto equipmentRequestDto) =>
