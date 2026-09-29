@@ -8,8 +8,8 @@ namespace EssenceSystem.Tests;
 public sealed class BalanceHarnessAffinityFloorEvaluationTests
 {
     private static string VersionFor(int floor) => floor switch {
-        >= 1 and <= 9 or >= 12 and <= 15 => $"affinity-floor{floor}-baseline-evaluation-v1",
-        _ => throw new InvalidDataException("This bounded evaluation supports floors 1–9 and 12–15.") };
+        >= 1 and <= 10 or >= 12 and <= 15 => $"affinity-floor{floor}-baseline-evaluation-v1",
+        _ => throw new InvalidDataException("This bounded evaluation supports floors 1–10 and 12–15.") };
     private const int SearchValues = 109; // root + 8/8/8/8/16/60
     private const int HeldoutSamples = 128;
     private const int MaximumFights = 528 + 5 * HeldoutSamples;
@@ -123,6 +123,7 @@ public sealed class BalanceHarnessAffinityFloorEvaluationTests
     [InlineData(1, 4, 5, 1)] [InlineData(2, 4, 5, 1)] [InlineData(3, 4, 5, 1)]
     [InlineData(4, 4, 5, 1)] [InlineData(5, 5, 10, 1)] [InlineData(6, 5, 5, 1)]
     [InlineData(7, 5, 5, 1)] [InlineData(8, 5, 10, 1)] [InlineData(9, 5, 10, 1)]
+    [InlineData(10, 6, 15, 1)] [InlineData(10, 6, 15, 2)]
     [InlineData(12, 7, 10, 1)] [InlineData(13, 7, 10, 1)]
     [InlineData(14, 7, 10, 1)] [InlineData(15, 8, 15, 1)] [InlineData(15, 10, 15, 2)]
     public async Task Floor_projection_prepares_the_complete_party_and_uses_the_explicit_benchmark(int floor, int slots, int partySize, int benchmarkReference)
@@ -132,6 +133,17 @@ public sealed class BalanceHarnessAffinityFloorEvaluationTests
         var catalogs = Path.GetFullPath(Path.Combine(root, "../../../tools/BalanceHarness/Fixtures"));
         var budget = TowerPartyProgression.Budget(slots) with { PriorityFloor = floor };
         var baseline = TowerPartyProgression.Scenarios(root, catalogs, budget).Single(s => s.FloorNumber == floor);
+        if (floor == 10)
+        {
+            budget = BalanceHarnessTowerBalancePassTests.Budget(catalogs, floor);
+            baseline = BalanceHarnessTowerBalancePassTests.Family(root, catalogs, floor, null)
+                .First(c => c.Gear == "armor-and-health").Scenario;
+            Assert.Equal(50, budget.CharacterLevel); Assert.Equal(2, budget.Tier);
+            Assert.Equal(5, budget.Rank); Assert.Equal(Domain.Models.Items.ItemQuality.Masterpiece, budget.Quality);
+            var content = OfflineContent.ForTower(root, TowerBundle.ReadSettings(root));
+            Assert.All(baseline.Party, p => Assert.All(content.CreateBuild(p.Build).Equipment,
+                e => Assert.Equal(Domain.Models.Items.Equipments.Progression.EquipmentRarity.Legendary, e.ProgressionData!.Rarity)));
+        }
         var controls = HarnessJson.Read<TowerWholePartyHistory>(Path.Combine(catalogs, TowerWholeParty.Fixture));
         var recipes = controls.Parties[slots].Take(3).Select(p => TowerPartySelection.Apply(baseline, p.Builds, [])).ToArray();
         var settings = TowerBundle.ReadSettings(root);

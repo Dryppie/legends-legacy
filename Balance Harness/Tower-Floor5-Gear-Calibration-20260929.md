@@ -1,0 +1,29 @@
+# Floor 5: gear-coverage calibration — 29 September 2026
+
+## Prospective scope
+
+Target: primary LL World Tower guardian data and the offline Balance Harness. The [alternate-gear challenge](Tower-Floor5-Alternate-Gear-Challenge-20260929.md) found two new compositions but closed without confirmation: their resistance-and-health variants won 54/96 and 41/96, while health-and-regeneration won 35/96 and 25/96. Test whether a bounded health increase can control the strongest recipe while retaining both equipment options. This is a separately declared calibration, not an extension or retry of that closed search.
+
+Retain all **103 exact recipes / fourteen actual compositions / seven gear profiles** from `TestResults/tower-balance-pass-floor5-alternate-gear-expanded-screen-study-20260929`, manifest **`46d30356581049e9e95528739ce3291dbc4caa13ff85b8f185e41d4da77a4f80`**. Preserve all originals, exact finalists and references, raw Essence order, actor/item/Essence identities and unsuccessful gear variants. Count actual compositions by per-slot Essence sets without changing raw scenarios. No search runs or reimports occur.
+
+Budget: ten level-40 characters, five level-1 unascended/unevolved Essences each, tier-1 Epic/Fine/rank-3 gear, baseline rolls and no styles. Ownership is hypothetical. Keep the repeating progression curve, stronger retained equipment policy and withdrawn supplies unchanged. No dungeon or acquisition work enters this scope.
+
+Current floor-5 health is **3.3102803755**; offense **4.4702934848**, defense/resistance **2.65**, penetration/regeneration **1**. Whole-Tower SHA **`aebb3e9e342b777883e7a7f2642f0078f5685108a91747d85f32beb6bacf87c2`**. Initial seed exclusions: **910,007**. Preserve the preceding floor-10 change and every other guardian field.
+
+## Frozen protocol
+
+1. Authenticate the source, every recorded current input/runtime pin, the preceding challenge's closed evidence and verification receipts. Use preserved runtime `TestResults/tower-floor10-diversity-supported-build-20260929`. Reuse the authenticated **91 passed backend regressions / four opt-in skips** and **14 Python tests** at entry; do not claim they were rerun. Prepare the entire current family without fights/seeds. Freeze this protocol and driver/application/collector/selection-check hashes before allocation.
+2. Run three complete-family **64-seed** screens, at **+2%, +3%, +4% health**, each relative to the unchanged starting value and rounded to ten decimal places. Offense and every other field remain unchanged. Each screen is **6,592 fights**, all with fresh seeds. Eligibility requires every recipe at most **26/64**, at least two actual compositions with a recipe at least **13/64**, and at least one such recipe on **each of health-and-regeneration and resistance-and-health**.
+3. Freeze at most two eligible settings. Rank by the minimum of the two required profiles' best win counts descending, then qualifying-composition count descending, second composition's best wins descending, strongest win rate's distance from 30% ascending, health change ascending, label ascending. Evaluate each nominee on a fresh **128-seed / 13,184-fight** complete-family stability panel. Require every recipe at most **44/128**, at least two compositions with a recipe at least **26/128**, and at least one such recipe on both required profiles. Rank eligible settings by the same rule and freeze the first. Never substitute an unselected setting after confirmation.
+4. Run one independent **184-seed / 18,952-fight** complete-family confirmation if a stable setting exists. Compute approximate simultaneous 95% Bonferroni-Wilson intervals over all **103 exact cells**. Require every upper bound at most 50%, at least two actual compositions with a lower bound at least 10%, and at least one qualifying recipe on both required gear profiles. Native `Pass` alone is insufficient. Gear variants never inflate composition counts. No observations are pooled, extended or replaced.
+5. Apply **only the confirmed floor-5 health scalar** locally if all gates pass. Verify all **18,952 native inputs and 103 complete replays** against the accepted archived content using its confirmation seeds and zero fresh values. Run the relevant 91-test backend regression suite through `build/run-tests.ps1` after application; preserve its TRX separately. Report any verification failure without retrying or silently treating the application as verified.
+
+Before entry, project the 128-seed stability workload from the saved 96-seed screen. Before each stability panel, recheck its projection from its own 64-seed screen. Before confirmation, project from the chosen 128-seed panel. Admission requires no more than **80% of 840 native seconds / 2 GiB**. Scientific phase ceilings remain **20,000 fights / 840 native seconds / 900 process seconds / 2 GiB**; application parity uses **600 native / 660 owner seconds**. If a selected phase cannot be admitted, close without replacing it.
+
+Maximum **65,096 study fights + 103 conditional replays = 65,199 executions**, **632 fresh reservations** (3 × 64 + at most 2 × 128 + 184). Technical failures, no eligible grid/stability setting, resource stops or failed confirmation close this scope. No retries, extra settings, further searches, dropped recipes, permutations, identity optimization or relaxed gear gates. All historical failed/unused reservations remain excluded.
+
+Driver: `TestResults/tower-floor5-gear-calibration-driver-20260929.py`. Evidence in ignored `TestResults` is local and must be preserved separately. No production algorithm or ability changes, migrations, database operations or deployment. No pacing target is inferred; broad non-poison archetypes and ordinary-player acquisition remain unestablished.
+
+## Execution record
+
+Results and continuation will be recorded after the frozen scope closes.
