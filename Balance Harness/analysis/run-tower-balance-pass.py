@@ -132,12 +132,18 @@ def main():
     p.add_argument('--source', type=Path)
     p.add_argument('--samples', type=int, default=32)
     p.add_argument('--floor', type=int, default=5)
+    p.add_argument('--native-seconds', type=int, choices=[840, 1140], default=840,
+                   help='1140 requires a separately declared floor-15 confirmation; process allowance adds 60 seconds')
     p.add_argument('--add-search', type=Path, action='append', default=[], help='Add generated finalists at every frozen gear profile; repeat for multiple completed searches')
+    p.add_argument('--retain-search-references', action='store_true', help='Also retain exact projected reference recipes at their evaluated profile')
     p.add_argument('--health-factor', type=float, default=1.0, help='Multiply boss health in an isolated content copy only')
     p.add_argument('--offense-factor', type=float, default=1.0, help='Multiply boss offense in the same isolated copy')
     a = p.parse_args()
     check(a.name.replace('-', '').isalnum(), 'Unsafe phase name')
     check(16 <= a.samples <= 512, 'Bounded panel required')
+    check(not a.retain_search_references or a.add_search, 'Reference retention requires a completed search')
+    check(a.native_seconds == 840 or a.mode == 'confirm' and a.floor == 15,
+          'Larger predeclared envelope is only for floor-15 confirmation')
     scaled_guardian({'health': 1, 'offense': 1}, a.health_factor, a.offense_factor)
     owner = ROOT / f'TestResults/tower-balance-pass-{a.name}-owner-20260929'
     output = ROOT / f'TestResults/tower-balance-pass-{a.name}-study-20260929'
@@ -178,18 +184,27 @@ def main():
         check(a.mode in ('screen', 'confirm') and source_cells is not None, 'Only fixed-family evaluations may add finalists')
         search_root = added.resolve()
         authenticate(search_root)
+        check(read(search_root / 'completion.json')['status'] == 'Complete', 'Incomplete added search')
         pins[str(search_root / 'files.json')] = sha(search_root / 'files.json')
         # Gear definitions come from the frozen screen; positions and instance
         # identities remain those of each finalist. No reordered Essence variants.
         profiles = {c['gear']: c for c in source_cells if c['composition'] == source_cells[0]['composition']}
         for cell in read(search_root / 'evaluation-cells.json'):
             if cell['origin'] != 'generated-finalist':
+                if a.retain_search_references:
+                    clone = json.loads(json.dumps(cell))
+                    clone.update(id=cell['id']+'/projected-reference', origin='projected-reference')
+                    source_cells.append(clone)
                 continue
             for gear, template in profiles.items():
                 clone = json.loads(json.dumps(cell))
                 clone.update(id=cell['id']+'/'+gear, gear=gear)
                 for member, gear_member in zip(clone['scenario']['party'], template['scenario']['party'], strict=True):
-                    member['build']['equipment'] = gear_member['build']['equipment']
+                    build, frozen = member['build'], gear_member['build']
+                    check(all(build[k] == frozen[k] for k in ('characterLevel', 'tier', 'attributeRollMultiplier')),
+                          'Gear projection cannot change level, tier or rolls')
+                    for key in ('equipment', 'rank', 'quality'):
+                        build[key] = frozen[key]
                 source_cells.append(clone)
     if a.health_factor != 1 or a.offense_factor != 1:
         check(a.mode in ('screen', 'confirm'), 'Boss variants are fixed-family studies only')
@@ -238,13 +253,15 @@ def main():
              searchSeeds=search, cells=str(owner/'cells.json') if source_cells else None,
              earned=str(EARNED) if a.mode == 'prepare' and a.floor == 5 else None,
              history=str(owner/'history.json'), benchmark=benchmark, maximumFights=maximum, inputHashes=pins)
+    if a.native_seconds != 840:
+        q['nativeSeconds'] = a.native_seconds
     write(owner / 'request.json', q)
     spec = importlib.util.spec_from_file_location('balance_pass_owner', ROOT / 'build/bounded_windows_process.py')
     process = importlib.util.module_from_spec(spec); sys.modules[spec.name] = process; spec.loader.exec_module(process)
     command = [shutil.which('pwsh'), '-NoProfile', '-File', str(ROOT/'build/run-tests.ps1'), '-NoBuild',
                '-ArtifactsPath', str(artifacts), '-Filter', 'FullyQualifiedName~BalanceHarnessTowerBalancePassTests.Frozen_tower_balance_pass']
     os.environ['LL_TOWER_BALANCE_PASS'] = str(owner / 'request.json')
-    receipt = process.run(command, ROOT, owner/'execution.log', time.monotonic()+900, log_byte_limit=1048576)
+    receipt = process.run(command, ROOT, owner/'execution.log', time.monotonic()+a.native_seconds+60, log_byte_limit=1048576)
     write(owner / 'process.json', receipt)
     check(receipt['exitCode'] == 0 and not receipt['timedOut'] and receipt['activeProcesses'] == 0, 'Bounded operation failed; preserve outputs')
     verified = audit(output)

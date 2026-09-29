@@ -12,9 +12,52 @@ public sealed class BalanceHarnessTowerBalancePassTests
     internal sealed record Cell(string Id, string Composition, string Gear, string Origin, TowerScenario Scenario);
     private sealed record Request(string Mode, string ApiRoot, string Fixtures, string Output, int Floor,
         int[] Seeds, int[] SearchSeeds, string? Cells, string? Earned, string? History,
-        int Benchmark, int MaximumFights, IReadOnlyDictionary<string, string> InputHashes);
+        int Benchmark, int MaximumFights, IReadOnlyDictionary<string, string> InputHashes, int NativeSeconds = 840);
     private sealed record Score(string Id, string Composition, string Gear, string Origin, int Wins,
         int Samples, decimal MeanGuardianHealth, double MeanSeconds);
+    private sealed record LaterBudgets(string Version, string Assumptions, TowerSearchBudget[] Budgets);
+
+    internal static int DeadlineSeconds(string mode, int floor, int requested)
+    {
+        if (requested == 840 || requested == 1140 && mode == "confirm" && floor == 15) return requested;
+        throw new InvalidDataException("The larger predeclared envelope is only for floor-15 confirmation.");
+    }
+
+    [Theory]
+    [InlineData("screen", 15, 840, true)]
+    [InlineData("confirm", 15, 1140, true)]
+    [InlineData("screen", 15, 1140, false)]
+    [InlineData("confirm", 14, 1140, false)]
+    [InlineData("confirm", 15, 3000, false)]
+    public void Larger_envelope_requires_explicit_floor15_confirmation(string mode, int floor, int seconds, bool allowed)
+    {
+        if (allowed) Assert.Equal(seconds, DeadlineSeconds(mode, floor, seconds));
+        else Assert.Throws<InvalidDataException>(() => DeadlineSeconds(mode, floor, seconds));
+    }
+
+    internal static TowerSearchBudget Budget(string fixtures, int floor)
+    {
+        var draft = HarnessJson.Read<TowerProgressionDraft>(Path.Combine(fixtures, TowerProgressionPreview.CycleFixture));
+        TowerProgressionPreview.Validate(draft);
+        if (floor <= 11) return draft.Budgets.Single(b => b.PriorityFloor == floor);
+        var later = TowerContractJson.Read<LaterBudgets>(Path.Combine(fixtures, "tower-later-floor-balance-budgets.json"));
+        Assert.Equal("tower-later-floor-balance-budgets-v1", later.Version); Assert.NotEmpty(later.Assumptions);
+        Assert.Equal(Enumerable.Range(12, 4), later.Budgets.Select(b => b.PriorityFloor));
+        Assert.All(later.Budgets, b => {
+            Assert.True(TowerBossDiscovery.LegalBudget(b));
+            var band = TowerProgressionEquipment.ForFloor(draft.EquipmentCycle!, b.PriorityFloor);
+            Assert.Equal(band.Rank, b.Rank); Assert.Equal(band.Quality, b.Quality);
+        });
+        return later.Budgets.Single(b => b.PriorityFloor == floor);
+    }
+
+    internal static TowerSearchBudget SearchBudget(TowerSearchBudget declared, TowerScenario scenario)
+    {
+        var build = scenario.Party[0].Build;
+        var budget = declared with { Rank = build.Rank, Quality = build.Quality };
+        TowerBossDiscovery.ValidateEquipment(scenario.Party, budget, scenario.Party.Count);
+        return budget;
+    }
 
     internal static TowerScenario Canonical(TowerScenario scenario) => scenario with {
         Seeds = [], Party = scenario.Party.Select(p => p with { Build = p.Build with {
@@ -24,7 +67,7 @@ public sealed class BalanceHarnessTowerBalancePassTests
     {
         var draft = HarnessJson.Read<TowerProgressionDraft>(Path.Combine(fixtures, TowerProgressionPreview.CycleFixture));
         TowerProgressionPreview.Validate(draft);
-        var budget = draft.Budgets.Single(b => b.PriorityFloor == floor);
+        var budget = Budget(fixtures, floor);
         var content = OfflineContent.ForTower(root, TowerBundle.ReadSettings(root));
         var template = TowerProgressionEquipment.Apply(TowerPartyProgression.Scenarios(root, fixtures, budget)
             .Single(s => s.FloorNumber == floor), draft.EquipmentCycle!, content);
@@ -50,9 +93,59 @@ public sealed class BalanceHarnessTowerBalancePassTests
         // Fixed ordinal ordering and identical actor identities: permutations are never candidates.
         var unique = compositions.DistinctBy(p => HarnessJson.Hash(p.Scenario.Party.Select(m => m.Build.EssenceIds))).ToArray();
         var profiles = TowerGearProfiles.Read(Path.Combine(fixtures, "tower-gear-specialization-screen.json"));
-        return unique.SelectMany(p => new[] { new Cell(p.Id + "/baseline", p.Id, "baseline", p.Origin, p.Scenario) }
+        var cycle = unique.SelectMany(p => new[] { new Cell(p.Id + "/baseline", p.Id, "baseline", p.Origin, p.Scenario) }
             .Concat(profiles.Profiles.Select(g => new Cell(p.Id + "/" + g.Id, p.Id, g.Id, p.Origin,
                 TowerGearProfiles.Apply(p.Scenario, g, content))))).ToArray();
+        if (floor <= 11) return cycle;
+        var retained = new TowerProgressionEquipmentCycle(10, [new(1, 10,
+            Domain.Models.Items.Equipments.Progression.EquipmentRarity.Legendary, Domain.Models.Items.ItemQuality.Masterpiece, 5)]);
+        return cycle.Select(c => c with { Id = c.Id + "/cycle", Gear = "cycle-" + c.Gear })
+            .Concat(cycle.Select(c => c with { Id = c.Id + "/retained", Gear = "retained-" + c.Gear,
+                Scenario = TowerProgressionEquipment.Apply(c.Scenario, retained, content) })).ToArray();
+    }
+
+    [Theory]
+    [InlineData(12, 60, 7, 10, 2, "Rare", "Standard")]
+    [InlineData(13, 60, 7, 10, 2, "Rare", "Standard")]
+    [InlineData(14, 60, 7, 10, 3, "Epic", "Fine")]
+    [InlineData(15, 70, 8, 15, 3, "Epic", "Fine")]
+    public async Task Later_floors_keep_both_cycle_and_retained_equipment(
+        int floor, int level, int slots, int partySize, int rank, string rarity, string quality)
+    {
+        using var guard = new TowerPerformanceTrace(_ => throw new InvalidOperationException("Preparation cannot fight.")).Activate();
+        var root = TestContentPaths.FindApiRoot(); var fixtures = Path.GetFullPath(Path.Combine(root, "../../../tools/BalanceHarness/Fixtures"));
+        var cells = Family(root, fixtures, floor, null); Assert.Equal(42, cells.Length);
+        var settings = TowerBundle.ReadSettings(root); var content = OfflineContent.ForTower(root, settings);
+        var runner = new TowerBattleRunner(root, content);
+        foreach (var cell in cells)
+        {
+            var retained = cell.Gear.StartsWith("retained-", StringComparison.Ordinal);
+            var budget = SearchBudget(Budget(fixtures, floor), cell.Scenario);
+            Assert.Equal(retained ? 5 : rank, budget.Rank); Assert.Equal(partySize, cell.Scenario.Party.Count);
+            foreach (var member in cell.Scenario.Party)
+            {
+                var b = member.Build; Assert.Equal(level, b.CharacterLevel); Assert.Equal(2, b.Tier);
+                Assert.Equal(slots, b.EssenceIds.Count); Assert.Equal(b.EssenceIds.Order(StringComparer.Ordinal), b.EssenceIds);
+                var actual = content.CreateBuild(b);
+                Assert.All(actual.Equipment, e => {
+                    Assert.Equal(retained ? "Legendary" : rarity, e.ProgressionData!.Rarity.ToString());
+                    Assert.Equal(retained ? "Masterpiece" : quality, e.ProgressionData.State.Quality.ToString());
+                });
+                Assert.All(actual.EquippedEssences, e => { Assert.Equal(0, e.AscensionTier); Assert.False(e.IsEvolved); });
+            }
+            _ = await runner.PrepareAsync(runner.CreateInput(cell.Scenario with { Seeds = [0] }, 0, settings.Threat, settings.CheckpointIntervalTicks));
+        }
+        foreach (var original in cells.Take(21))
+        {
+            var carried = cells.Single(c => c.Composition == original.Composition && c.Gear == original.Gear.Replace("cycle-", "retained-"));
+            Assert.Equal(HarnessJson.Hash(original.Scenario.Party.Select(p => p.Build.EssenceIds)),
+                HarnessJson.Hash(carried.Scenario.Party.Select(p => p.Build.EssenceIds)));
+            // Native reference GUIDs include rank/quality. Preserve recipe positions and
+            // identity equipment, without pretending different power budgets share GUIDs.
+            Assert.Equal(original.Scenario.Party.Select(p => p.Build.Id), carried.Scenario.Party.Select(p => p.Build.Id));
+            Assert.Equal(HarnessJson.Hash(original.Scenario.Party.Select(p => p.Build.IdentityEquipment)),
+                HarnessJson.Hash(carried.Scenario.Party.Select(p => p.Build.IdentityEquipment)));
+        }
     }
 
     [Theory]
@@ -108,7 +201,7 @@ public sealed class BalanceHarnessTowerBalancePassTests
         Assert.Empty(q.Seeds.Intersect(q.SearchSeeds));
         void Pins() { foreach (var pin in q.InputHashes) Assert.Equal(pin.Value, HarnessJson.FileHash(pin.Key)); }
         Pins(); Directory.CreateDirectory(q.Output);
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(840)); var token = deadline.Token;
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(DeadlineSeconds(q.Mode, q.Floor, q.NativeSeconds))); var token = deadline.Token;
         var watch = System.Diagnostics.Stopwatch.StartNew(); var attempts = 0; var completed = 0; var success = false;
         void Save<T>(string name, T value) => HarnessJson.WriteNew(Path.Combine(q.Output, name), value);
         void Check() { token.ThrowIfCancellationRequested(); Assert.True(attempts <= q.MaximumFights);
@@ -146,9 +239,8 @@ public sealed class BalanceHarnessTowerBalancePassTests
                     source = source with { Racing = source.Racing with { Scope = source.Racing.Scope with {
                         AllowedEssences = inventory.Essences.Select(e => new BossDiscoveryEssence(e.Id, e.SourceMonsterId)).ToArray(), OwnedCopies = null } },
                         Policy = TowerProposalPolicies.BenchmarkAffinityCreation(TowerDamageSourceAffinities.Create(inventory).Affinities.Select(a => a.Id)) };
-                    var draft = HarnessJson.Read<TowerProgressionDraft>(Path.Combine(q.Fixtures, TowerProgressionPreview.CycleFixture));
                     var plan = F.Project(source, cells.Select(c => c.Scenario).ToArray(), inventory, scope, q.SearchSeeds,
-                        HarnessJson.Read<int[]>(q.History!), q.Seeds, draft.Budgets.Single(b => b.PriorityFloor == q.Floor), cells[0].Scenario.Party.Count, q.Benchmark);
+                        HarnessJson.Read<int[]>(q.History!), q.Seeds, SearchBudget(Budget(q.Fixtures, q.Floor), cells[0].Scenario), cells[0].Scenario.Party.Count, q.Benchmark);
                     Save("plan.json", plan);
                     var searchRoot = Path.Combine(q.Output, "search");
                     var search = F.Archive(searchRoot, scope with { Algorithm = TowerProposalRacingNative.ArchiveAlgorithm(plan) }, 528, q.Output, token);

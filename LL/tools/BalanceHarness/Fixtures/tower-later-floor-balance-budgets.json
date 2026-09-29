@@ -1,0 +1,10 @@
+{
+  "version": "tower-later-floor-balance-budgets-v1",
+  "assumptions": "User-selected gradual progression: seven Essences on floors 12–14, eight on floor 15. Minimum unlock levels, tier 2, baseline rolls, no styles, level-1 unascended/unevolved Essences. Evaluate the repeating cycle budget AND retained Legendary/Masterpiece/rank-5 equipment at every profile. Complete ownership is hypothetical; this does not establish acquisition or impose an equipment reset.",
+  "budgets": [
+    { "essenceSlots": 7, "characterLevel": 60, "tier": 2, "rank": 2, "quality": "Standard", "priorityFloor": 12 },
+    { "essenceSlots": 7, "characterLevel": 60, "tier": 2, "rank": 2, "quality": "Standard", "priorityFloor": 13 },
+    { "essenceSlots": 7, "characterLevel": 60, "tier": 2, "rank": 3, "quality": "Fine", "priorityFloor": 14 },
+    { "essenceSlots": 8, "characterLevel": 70, "tier": 2, "rank": 3, "quality": "Fine", "priorityFloor": 15 }
+  ]
+}
