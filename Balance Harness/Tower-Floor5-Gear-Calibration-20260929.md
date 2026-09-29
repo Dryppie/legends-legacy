@@ -1,5 +1,7 @@
 # Floor 5: gear-coverage calibration — 29 September 2026
 
+**Closed: source-byte integrity failure.** The +2% screen completed and failed its ceiling at **30/64**, while health-and-regeneration reached **20/64**. The +3% panel completed all fights but failed its final source-pin check when a concurrent repository operation converted the pinned affinity-test source from LF to CRLF. Its normalized-LF SHA exactly matches the original; all executable/runtime inputs remain unchanged. The failed panel is inadmissible for selection. No +4% screen, confirmation or application ran. Preserve **13,184 fights / 128 reservations**, with **910,135 exclusions**. Continue only through the separately declared [recovery calibration](Tower-Floor5-Gear-Recovery-20260929.md); this scope is not resumed.
+
 ## Prospective scope
 
 Target: primary LL World Tower guardian data and the offline Balance Harness. The [alternate-gear challenge](Tower-Floor5-Alternate-Gear-Challenge-20260929.md) found two new compositions but closed without confirmation: their resistance-and-health variants won 54/96 and 41/96, while health-and-regeneration won 35/96 and 25/96. Test whether a bounded health increase can control the strongest recipe while retaining both equipment options. This is a separately declared calibration, not an extension or retry of that closed search.
@@ -26,4 +28,12 @@ Driver: `TestResults/tower-floor5-gear-calibration-driver-20260929.py`. Evidence
 
 ## Execution record
 
-Results and continuation will be recorded after the frozen scope closes.
+The frozen protocol and driver/application/collector/check hashes remain unchanged in `TestResults/tower-floor5-gear-calibration-driver-20260929`. Native preparation and the +2% screen passed. The +3% native fixture returned exit 1 after all **6,592 fights** and its final raw-source check; its completion is `Failed`, and it has no successful independent audit. It contributes no selection evidence. Its process owner confirms no timeout and zero active descendants. The +4% command was never created. No confirmation values or parity replays were allocated, and no production content changed.
+
+The completed +2% screen's strongest composition won **30/64**, exceeding the **26/64 ceiling**; its best health-and-regeneration recipe won **20/64**. Three compositions met the minimum screen count. This rejected result is not pooled with later studies.
+
+The sole changed input is `LL/tests/EssenceSystem.Tests/BalanceHarnessAffinityFloorEvaluationTests.cs`: raw SHA **`f4208838729140a10ad2d40966e7b69ba58c68b708d05652da49313c9d7c3843`** became **`3dc9001877a27ec0df1bb0c74c8e908d74cae1d0b4684c6bae321f937388f4db`**. Replacing CRLF with LF reproduces the original SHA exactly. No source text was altered by this task to restore a pin. A new current-input receipt records this verified conversion for a future scope; all historical raw pins and the failed archive remain intact. A concurrent commit `b9a66b35d` captured in-progress repository work; it was not created by this calibration driver.
+
+Failure evidence: `TestResults/tower-floor5-gear-calibration-failure-evidence-20260929.json`, SHA **`be4093cf382e93d2b5c01311278a4f5290a85b771086a8ec416d920126559d65`**. It authenticates **13,561 archived members**, **684 unchanged input pins**, the single exact line-ending conversion, all **13,184 attempts/completions**, and the two 64-value reservations. **19 seed-free safeguards passed** before launch. Preserve the failed TRX, logs and archive. The usual successful-scope collector, application and final regression were not run because this scope failed technically; a dedicated read-only failure collector reconciled it instead.
+
+Whole-Tower SHA remains **`aebb3e9e342b777883e7a7f2642f0078f5685108a91747d85f32beb6bacf87c2`**. The separately declared recovery uses fresh seeds, fresh outputs and the unchanged 103-recipe family, after verifying the current raw source and preserved executable hashes. No results from this failed scope can select its setting.
