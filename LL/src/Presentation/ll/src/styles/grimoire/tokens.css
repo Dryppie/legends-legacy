@@ -1,0 +1,108 @@
+/* ============================================================
+   Grimoire tokens — Legend's Legacy design system.
+   Generated from the Grimoire design-system artifact (tokens.json).
+   Fonts load from Google Fonts in src/index.html.
+   ============================================================ */
+:root, [data-theme="grimoire"] {
+  --ground: #15100c;
+  --ground-deep: #0b0806;
+  --surface: #1f1812;
+  --surface-raised: #2a2019;
+  --folio: #22160f;
+  --scrim: #0b0806cc;
+  --line: #46372a;
+  --line-strong: #8c7358;
+  --ink: #f0e6d2;
+  --ink-muted: #bba98c;
+  --ink-disabled: #7a6a56;
+  --gilt: #dcb872;
+  --gilt-soft: #3a2b17;
+  --on-gilt: #1a1109;
+  --arcana: #6fcab9;
+  --arcana-soft: #163833;
+  --arcana-glow: #86e6d2;
+  --sigil-fill: #1d4b45;
+  --sigil-edge: #7fc9b8;
+  --on-sigil: #f0e6d2;
+  --tile: #261d16;
+  --on-tile: #f0e6d2;
+  --on-tile-muted: #bba98c;
+  --meter-track: #2e241c;
+  --meter-hp: #d0443f;
+  --meter-sp: #4f9fd6;
+  --meter-xp: var(--gilt);
+  --danger: #f2837a;
+  --danger-soft: #3d1715;
+  --success: #74c6d6;
+  --warning: #f0b35a;
+  --info: #9ccaf0;
+  --focus: #f5d48f;
+  --channel-general: var(--ink);
+  --channel-trade: var(--warning);
+  --channel-help: var(--info);
+  --channel-guild: var(--arcana);
+  --channel-whisper: #e39be2;
+  --channel-raid: var(--danger);
+  --channel-invites: var(--success);
+  --channel-system: var(--ink-muted);
+  --channel-loot: var(--gilt);
+  --rarity-common: #d4d4d8;
+  --rarity-uncommon: #41f1b6;
+  --rarity-rare: #7cb7ff;
+  --rarity-epic: #e879f9;
+  --rarity-unique: #facc15;
+  --rarity-legendary: #fb923c;
+  --rarity-legacy: #fb7185;
+  --damage-physical: #e6e2d9;
+  --damage-magical: #9d86ef;
+  --damage-bleed: #d94d5c;
+  --damage-burn: #ef8a3c;
+  --damage-poison: #82b94b;
+  --damage-shadow: #69b6dd;
+  --damage-none: #8d8991;
+  --shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080;
+  --shadow-float: 0 12px 28px -8px #000000cc;
+  --glow-selected: 0 0 0 1px #86e6d2, 0 0 28px 2px #86e6d259;
+  --glow-gilt: 0 0 18px #dcb87247;
+  --shadow-text-art: 0 1px 14px #0b0806, 0 0 3px #0b0806;
+  --focus-ring: 0 0 0 2px #15100c, 0 0 0 4px #f5d48f;
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+  --rail-width: 224px;
+  --folio-width: 360px;
+  --topbar-height: 56px;
+  --hintbar-height: 40px;
+  --sigil-size: 52px;
+  --chronicle-width: 384px;
+  --chronicle-strip: 48px;
+  --chronicle-height: 320px;
+  --chronicle-collapsed: 44px;
+  --chronicle-float-width: 352px;
+  --chronicle-float-width-wide: 384px;
+  --chronicle-float-height: 448px;
+  --chronicle-float-tall: 896px;
+  --shell-max: 1920px;
+  --z-overlay: 50;
+  --z-popover: 100;
+  --z-modal: 200;
+  --z-popover-detached: 300;
+  --font-display: Marcellus, "Cormorant Garamond", Georgia, serif;
+  --font-lore: "EB Garamond", Garamond, Georgia, serif;
+  --font-ui: Barlow, "Helvetica Neue", Arial, sans-serif;
+  --font-numeral: "Barlow Condensed", Barlow, "Arial Narrow", sans-serif;
+  --font-readable: "Atkinson Hyperlegible", Arial, sans-serif;
+}
