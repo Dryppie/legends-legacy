@@ -25,7 +25,11 @@
                 "input": "src/assets"
               }
             ],
-            "styles": ["src/styles.css"],
+            "styles": [
+              "src/styles.css",
+              "src/styles/grimoire/tokens.css",
+              "src/styles/grimoire/components.css"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -89,7 +93,11 @@
                 "input": "src/assets"
               }
             ],
-            "styles": ["src/styles.css"],
+            "styles": [
+              "src/styles.css",
+              "src/styles/grimoire/tokens.css",
+              "src/styles/grimoire/components.css"
+            ],
             "scripts": []
           }
         },
