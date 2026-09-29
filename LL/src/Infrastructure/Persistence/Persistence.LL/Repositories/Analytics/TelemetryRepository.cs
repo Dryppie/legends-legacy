@@ -1,11 +1,14 @@
 using System.Text.Json;
+using Application.Interfaces.Services.LL.CombatStyles;
+using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Analytics;
 using Domain.Models.WorldTower;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Analytics;
 
-public sealed class TelemetryRepository(LLDbContext db) : ITelemetryRepository
+public sealed class TelemetryRepository(LLDbContext db, IEssenceDefinitionRepository essences,
+    ICombatStyleCatalogProvider combatStyles) : ITelemetryRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -32,7 +35,8 @@ public sealed class TelemetryRepository(LLDbContext db) : ITelemetryRepository
             var economy = captureSnapshot ? await EconomyAsync(day, ct) : previous!.Economy;
             var report = new TelemetrySnapshot(day, DateTimeOffset.UtcNow,
                 captureSnapshot ? DateTimeOffset.UtcNow : previous!.SnapshotAtUtc,
-                population, outcomes, adoption, economy);
+                population, outcomes, adoption, economy,
+                captureSnapshot || previous!.AdoptionIncludesZeroObservations);
             if (existing is null)
             {
                 db.DailyTelemetryReports.Add(new DailyTelemetryReport
@@ -208,6 +212,20 @@ public sealed class TelemetryRepository(LLDbContext db) : ITelemetryRepository
             foreach (var group in selected.GroupBy(x => (Style: x.CombatStyleId!, Band: bands[x.CharacterId])))
                 result.Add(new AdoptionMetric(window, "style-selected", group.Key.Style,
                     group.Key.Band, denominators[group.Key.Band], group.Select(x => x.CharacterId).Distinct().Count()));
+
+            // Capture the catalog alongside this snapshot, never infer historical zeros from today's catalog.
+            // Retain observed retired definitions and include their owned/saved counterparts.
+            var essenceKeys = essences.GetAll().Select(x => x.Id)
+                .Concat(owned.Select(x => x.EssenceDefinitionId)).Distinct().ToArray();
+            var styleKeys = combatStyles.Catalog.Styles.Select(x => x.Id)
+                .Concat(selected.Select(x => x.CombatStyleId!)).Distinct().ToArray();
+            var present = result.Where(x => x.CohortDays == window)
+                .Select(x => (x.Kind, x.Key, x.LevelBand)).ToHashSet();
+            foreach (var (kind, keys) in new[] { ("essence-owned", essenceKeys), ("essence-saved", essenceKeys), ("style-selected", styleKeys) })
+                foreach (var key in keys)
+                    foreach (var (band, count) in denominators)
+                        if (!present.Contains((kind, key, band)))
+                            result.Add(new AdoptionMetric(window, kind, key, band, count, 0));
         }
         return result;
     }

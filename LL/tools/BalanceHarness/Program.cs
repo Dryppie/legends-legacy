@@ -18,6 +18,8 @@ public static class Program
                 return await TowerAffinitySearch.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0] == "tower-gear-profile-apply")
                 return TowerGearProfiles.Command(args, cancellation.Token);
+            if (args.Length > 0 && args[0] == "tower-acquisition-study")
+                return await TowerAcquisitionStudy.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0] == "tower-progression-budget-preview")
                 return await TowerProgressionPreview.Command(args, cancellation.Token);
             if (args.Length > 0 && args[0] == "tower-progression-gear-apply")

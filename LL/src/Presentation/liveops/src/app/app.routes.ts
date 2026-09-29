@@ -4,12 +4,14 @@ const finishSubmission: CanDeactivateFn<{ previewSubmitting?: boolean; busyActio
   !component.previewSubmitting && !component.busyAction && !component.saving;
 
 export const routes: Routes = [
+  { path: 'operations/deliveries/:deliveryId', canDeactivate: [finishSubmission], loadComponent: () => import('./features/operations/delivery-recovery.component').then(c => c.DeliveryRecoveryComponent), title: 'Retry player state refresh' },
+  { path: 'operations', loadComponent: () => import('./features/operations/operations.component').then(c => c.OperationsComponent), title: 'Operations & recovery' },
   { path: 'cases', canDeactivate: [finishSubmission], loadComponent: () => import('./features/cases/cases.component').then(c => c.CasesComponent), title: 'Support cases' },
   { path: 'cases/:caseId', canDeactivate: [finishSubmission], loadComponent: () => import('./features/cases/cases.component').then(c => c.CasesComponent), title: 'Support case' },
   {
     path: 'analytics',
-    loadComponent: () => import('./features/analytics/analytics.component')
-      .then((component) => component.AnalyticsComponent),
+    loadChildren: () => import('./features/analytics/analytics.routes')
+      .then((routes) => routes.ANALYTICS_ROUTES),
     title: 'LiveOps analytics',
   },
   {

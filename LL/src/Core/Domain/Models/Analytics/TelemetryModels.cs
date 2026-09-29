@@ -36,7 +36,8 @@ public sealed record EconomyMetric(int CohortDays, string Resource, string Level
 public sealed record TelemetrySnapshot(DateOnly ReportDateUtc, DateTimeOffset GeneratedAtUtc,
     DateTimeOffset SnapshotAtUtc,
     PopulationMetrics Population, IReadOnlyList<ContentOutcomeMetric> Outcomes,
-    IReadOnlyList<AdoptionMetric> Adoption, IReadOnlyList<EconomyMetric> Economy);
+    IReadOnlyList<AdoptionMetric> Adoption, IReadOnlyList<EconomyMetric> Economy,
+    bool AdoptionIncludesZeroObservations = false);
 
 public interface ITelemetryRepository
 {

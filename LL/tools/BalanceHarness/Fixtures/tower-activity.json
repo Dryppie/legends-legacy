@@ -1,0 +1,9 @@
+{
+  "version": "tower-joint-activity-v1",
+  "checkpoints": [2160, 8640, 25920, 86400],
+  "paths": 4,
+  "maximumDungeonAttempts": 12,
+  "idleOutcomes": ["perfect", "four-of-five"],
+  "selection": "highest-materialized-stat-budget-v1",
+  "assumptions": "Conditional level-30 entry at the Restless Dead quest gate, with preceding quest victories/leveling supplied and no retained ordinary loot or sigils from that earlier activity. One quest mace, one unconditioned random Armor Chest, First Hunt/Lumo/Crystal Essences and one Catacombs quest sigil. Idle victory patterns are supplied scenarios, not measured combat. Equip the first earned ordinary drop, then count five Moonlit victories and five Twilight victories before granting the Twilight token and Goblin quest sigil. Farm Twilight thereafter. Production equipment and sigils share each activity history, including failures. At each fixed checkpoint spend available Goblin sigils until seven target supply items have been earned, stock is exhausted or twelve cumulative attempts are reached. Retain all loot; equip the legal hand combination and other slots with highest materialized stat budget, without claiming combat optimality. No reinforcement, donations, XP/level/mastery growth, ordinary dungeon rewards, purchased/assembled sigils or prior-activity credits. Checkpoint hours are idle encounter-cadence equivalents plus separately recorded combat seconds, not measured elapsed acquisition time. Rare controls use supplied inventory and entry and are excluded from acquisition accounting."
+}

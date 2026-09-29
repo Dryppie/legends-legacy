@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 import { actionLabel } from '../../shared/admin-presentation';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -6,16 +7,19 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import { OperationalStatus, OperationalDetailPage } from '../../liveops.models';
 import { WorkQueueComponent } from './work-queue.component';
+import { JobSchedulesComponent } from './job-schedules.component';
+import { OperatorContextService } from '../../operator-context.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, WorkQueueComponent],
+  imports: [CommonModule, RouterLink, WorkQueueComponent, JobSchedulesComponent, FormsModule],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   readonly actionLabel = actionLabel;
   readonly timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  detailPage = 1; detailStatus = ''; detailView = ''; diagnosticMessage = '';
   detail: OperationalDetailPage | null = null; detailError = ''; detailLoading = false;
   private detailGeneration = 0; private statusGeneration = 0; private statusPending = false;
   operationalStatus: OperationalStatus | null = null;
@@ -29,7 +33,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly ngZone: NgZone,
     private readonly route: ActivatedRoute,
+    readonly operator: OperatorContextService = new OperatorContextService(),
   ) {}
+  get canRepair(): boolean { return this.operator.hasPermission(this.operator.permissions.superadmin); }
 
   ngOnInit(): void {
     void this.loadOperationalStatus();
@@ -77,12 +83,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private localDate(value: Date): string { return new Date(value.getTime() - value.getTimezoneOffset() * 60000).toISOString().slice(0, -1); }
-  async openDetails(view: string): Promise<void> {
+  async openDetails(view: string, page = 1): Promise<void> {
+    if (view !== this.detailView) this.detailStatus = '';
+    this.detailView = view; this.detailPage = page;
     const generation = ++this.detailGeneration;
     this.detail = null; this.detailError = ''; this.detailLoading = true;
     void this.router.navigate([], { relativeTo: this.route, queryParams: { view }, replaceUrl: true });
     try {
-      const result = await this.api.operationalDetails(view);
+      const result = await this.api.operationalDetails(view, page, this.detailStatus);
       if (generation !== this.detailGeneration) return;
       if (!result.isSuccess || !result.data) throw new Error(result.errorMessage);
       this.detail = result.data;
@@ -90,6 +98,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     finally { if (generation === this.detailGeneration) this.detailLoading = false; }
   }
 
+  async copyDiagnostics(): Promise<void> {
+    if (!this.detail) return;
+    const bundle = { audience: 'Internal support', environment: this.operationalStatus?.environment,
+      build: this.operationalStatus?.build, coverage: 'Only the displayed page; recorded states are not proof of reward loss or delivery.', filter: this.detailStatus, ...this.detail };
+    try { await navigator.clipboard.writeText(JSON.stringify(bundle, null, 2)); this.diagnosticMessage = 'Internal diagnostic page copied with its time, filter and coverage.'; }
+    catch { this.diagnosticMessage = 'Clipboard unavailable. Copy the displayed diagnostic references.'; }
+  }
   openAudit(): void {
     void this.router.navigate(['/audit']);
   }

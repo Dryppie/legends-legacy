@@ -54,6 +54,7 @@ public sealed class ChatModerationController(
 
     [HttpPost("characters/{characterId:guid}/mutes")]
     [Authorize(Policy = AdministrationPermissions.ChatModeration)]
+    [API.LiveOps.Operations.TrackOperation("mute", "characterId", "character", "Chat")]
     public async Task<ActionResult<Response<ChatModerationResultDto>>> Mute(
         Guid characterId,
         [FromBody] MuteRequest request,
@@ -101,6 +102,7 @@ public sealed class ChatModerationController(
 
     [HttpPost("mutes/{restrictionId:guid}/revoke")]
     [Authorize(Policy = AdministrationPermissions.ChatModeration)]
+    [API.LiveOps.Operations.TrackOperation("unmute", "CharacterId", "character", "Chat")]
     public async Task<ActionResult<Response<ChatModerationResultDto>>> Unmute(
         Guid restrictionId,
         [FromBody] UnmuteRequest request,

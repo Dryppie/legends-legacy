@@ -125,6 +125,7 @@ public static class DependencyInjection
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
+        services.TryAddScoped<AdministrationOperationContext>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
         services.AddScoped<IStateSyncService, StateSyncService>();
@@ -136,6 +137,9 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
         services.TryAddScoped<IEssenceProgressionService, EssenceProgressionService>();
+        services.TryAddSingleton<Application.Interfaces.Services.LL.CombatStyles.ICombatStyleCatalogProvider>(_ =>
+            new Services.LL.CombatStyles.JsonCombatStyleCatalogProvider(Path.Combine(AppContext.BaseDirectory,
+                config["Content:Root"] ?? "Data", "combat-styles", "combat-styles.v1.json")));
         services.TryAddSingleton<IAbilityCatalogProvider>(sp => new JsonAbilityCatalogProvider(
             config, AppContext.BaseDirectory, sp.GetRequiredService<JsonSerializerOptions>()));
         services.TryAddScoped<Application.Interfaces.Services.LL.CombatStyles.IChanneledEssenceResolver,
@@ -219,6 +223,7 @@ public static class DependencyInjection
         services.AddScoped<ISupportCaseService, SupportCaseService>();
         services.AddScoped<IOperatorDraftService, OperatorDraftService>();
         services.AddScoped<ICompensationPackageService, CompensationPackageService>();
+        services.AddScoped<IStateRefreshRecoveryService, StateRefreshRecoveryService>();
         services.AddScoped<ILiveOpsAccountRiskService, LiveOpsAccountRiskService>();
         services.AddScoped<IAccountTemporalCorrelationService, AccountTemporalCorrelationService>();
         services.TryAddScoped<IChatModerationGateway, UnavailableChatModerationGateway>();
@@ -633,6 +638,7 @@ public static class DependencyInjection
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
+        services.TryAddScoped<AdministrationOperationContext>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddScoped<IGameRealtimeBroadcaster, OutboxGameRealtimeBroadcaster>();
         services.AddScoped<IStateSyncService, StateSyncService>();

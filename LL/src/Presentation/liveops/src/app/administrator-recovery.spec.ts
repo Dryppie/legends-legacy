@@ -6,7 +6,7 @@ import { PlayerWorkspaceComponent } from './features/players/player-workspace.co
 import { AccountRiskDetailComponent } from './features/account-risk/account-risk-detail.component';
 import { AccountRiskListStateService } from './features/account-risk/account-risk-list-state.service';
 import { ActionPreviewComponent } from './shared/action-preview/action-preview.component';
-import { AnalyticsComponent } from './features/analytics/analytics.component';
+import { AnalyticsState } from './features/analytics/analytics-state.service';
 import { CasesComponent } from './features/cases/cases.component';
 import { AuditComponent } from './features/audit/audit.component';
 import { LiveOpsApiService } from './liveops-api.service';
@@ -129,13 +129,13 @@ describe('Accessible operation reviews', () => {
 
 describe('Analytics comparison semantics', () => {
   it('marks missing reports as gaps and suppresses incomplete period percentage changes', () => {
-    const component = new AnalyticsComponent({} as never); component.days = 7;
+    const component = new AnalyticsState({} as never); component.days = 7;
     component.reports = [{ reportDateUtc: '2026-09-28', population: { dau: 10 } }, { reportDateUtc: '2026-09-26', population: { dau: 0 } }] as TelemetrySnapshot[];
     expect(component.trend.find(x => x.date === '2026-09-27')?.dau).toBeNull();
     expect(component.trend.find(x => x.date === '2026-09-26')?.dau).toBe(0); expect(component.comparison.delta).toBeNull();
   });
   it('compares equal calendar windows using mean daily active accounts', () => {
-    const component = new AnalyticsComponent({} as never); component.days = 7;
+    const component = new AnalyticsState({} as never); component.days = 7;
     component.reports = Array.from({ length: 14 }, (_, i) => ({ reportDateUtc: new Date(Date.UTC(2026, 8, 28 - i)).toISOString().slice(0, 10), population: { dau: i < 7 ? 20 : 10 } })) as TelemetrySnapshot[];
     expect(component.comparison.delta).toBe(100); expect(component.comparison.currentCount).toBe(7);
   });

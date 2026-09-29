@@ -46,6 +46,7 @@ export class AppComponent implements OnInit {
       this.journal.initialize(this.operator.session.subject, this.operator.session.environment);
       this.drafts.initialize(session.subject, session.environment);
       await this.workspace.initialize(this.drafts);
+      await this.journal.restoreServer(this.api);
       void this.checkOperations();
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 401) {
@@ -58,12 +59,20 @@ export class AppComponent implements OnInit {
     }
   }
 
+  focusWorkspace(): void {
+    requestAnimationFrame(() => { const heading = document.querySelector<HTMLElement>('#main-content h1') ?? document.getElementById('main-content');
+      if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); } });
+  }
   login(): void {
     const returnUrl = this.router.url || '/dashboard';
     window.location.assign(`/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`);
   }
 
-  checkOperations(): Promise<void> { return this.operator.session ? this.journal.reconcile(this.api, this.operator.session.subject) : Promise.resolve(); }
+  async checkOperations(): Promise<void> {
+    if (!this.operator.session) return;
+    if (this.journal.recoveryIncomplete) await this.journal.restoreServer(this.api);
+    await this.journal.reconcile(this.api, this.operator.session.subject);
+  }
   @HostListener('window:beforeunload', ['$event'])
   protectUnsavedDrafts(event: BeforeUnloadEvent): void {
     if (this.drafts.unsaved.length) { event.preventDefault(); event.returnValue = ''; }

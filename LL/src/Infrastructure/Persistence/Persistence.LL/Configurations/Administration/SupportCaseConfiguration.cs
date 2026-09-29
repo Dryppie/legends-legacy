@@ -15,6 +15,8 @@ public sealed class SupportCaseConfiguration : IEntityTypeConfiguration<SupportC
         b.Property(x => x.ExternalReference).HasMaxLength(300);
         b.Property(x => x.Resolution).HasMaxLength(4000);
         b.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        b.Property(x => x.NextAction).HasMaxLength(500);
+        b.HasIndex(x => new { x.Status, x.FollowUpAt });
         b.Property(x => x.Version).IsConcurrencyToken();
         b.HasIndex(x => new { x.CharacterId, x.UpdatedAt });
         b.HasIndex(x => new { x.Status, x.UpdatedAt });

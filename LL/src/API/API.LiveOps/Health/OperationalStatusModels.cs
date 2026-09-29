@@ -46,4 +46,4 @@ public sealed record OperationalStatusDto(
 public sealed record OperationalDetailRow(Guid Id, string Kind, string Status, DateTimeOffset At,
     DateTimeOffset? NextAt, int Attempts, Guid? CharacterId, string? CharacterName);
 public sealed record OperationalDetailPage(string View, DateTimeOffset AsOf, int Total,
-    IReadOnlyList<OperationalDetailRow> Rows, string Impact, string NextStep);
+    IReadOnlyList<OperationalDetailRow> Rows, string Impact, string NextStep, int Page = 1, int PageSize = 50);

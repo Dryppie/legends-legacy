@@ -1,0 +1,7 @@
+{
+  "version": "tower-prophecy-offers-v1",
+  "policies": ["no-prophecy-credit", "offered-kills-no-reroll"],
+  "panelIndex": "family-attempt-ordinal",
+  "activityVersion": "tower-joint-activity-v1",
+  "assumptions": "Both arms retain ordinary dungeon equipment, personal blueprints, full-slot readiness and Mines-first-either-family spending. The native-offer arm adds only funded whole Mines sigils from the fixed tower-prophecy-offers declaration at existing checkpoints. Frozen personal identities and idle rewards; fresh matched family-ordinal dungeon panels; twelve attempts or seven supplies maximum. Prophecies receive idle-supported events only. Currency and XP do not improve loadouts. No search, retuning, measured acquisition time, donated resources or free cache/purchase credit."
+}

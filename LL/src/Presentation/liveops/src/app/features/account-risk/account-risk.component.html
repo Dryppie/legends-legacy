@@ -28,7 +28,7 @@
     <button type="button" class="critical" (click)="quickFilter('critical')"><span>Critical</span><strong>{{ count('Critical') }}</strong></button>
     <button type="button" class="high" (click)="quickFilter('high')"><span>High</span><strong>{{ count('High') }}</strong></button>
     <button type="button" class="moderate" (click)="quickFilter('moderate')"><span>Moderate</span><strong>{{ count('Moderate') }}</strong></button>
-    <button type="button" (click)="quickFilter('all')"><span>Low / evaluated</span><strong>{{ count('Low') }} / {{ data?.evaluatedAccountCount ?? 0 }}</strong></button>
+    <button type="button" (click)="quickFilter('all')"><span>Low / evaluated</span><strong>{{ count('Low') }} / {{ data?.evaluatedAccountCount ?? '—' }}</strong></button>
   </section>
 
   <div class="risk-quick-filters">
@@ -56,14 +56,14 @@
   @if (message) { <div class="message error" role="alert">{{ message }}</div> }
 
   <section class="risk-table-wrap" [attr.aria-busy]="loading">
-    <div class="risk-table-head"><span>{{ data?.total ?? 0 }} matching accounts</span><span>Automated direct-transfer priority and moderator state are intentionally separate</span></div>
+    <div class="risk-table-head"><span>{{ data?.total ?? '—' }} matching accounts</span><span>Automated direct-transfer priority and moderator state are intentionally separate</span></div>
     <div class="risk-table-scroll">
       <table class="risk-table">
         <thead><tr><th>Player</th><th>Priority</th><th>Primary evidence</th><th>Connections</th><th>Direct cinder flow</th><th>Context</th><th>Review</th></tr></thead>
         <tbody>
           @for (entry of data?.entries ?? []; track entry.accountId) {
-            <tr tabindex="0" (click)="open(entry.accountId)" (keydown.enter)="open(entry.accountId)">
-              <td><strong>{{ entry.characterName }}</strong><small>{{ entry.accountLabel }} · Lv {{ entry.characterLevel }}</small><code>{{ entry.accountId }}</code></td>
+            <tr>
+              <td><a [routerLink]="['/account-risk', entry.accountId]" (click)="rememberQueue()"><strong>{{ entry.characterName }}</strong></a><small>{{ entry.accountLabel }} · Lv {{ entry.characterLevel }}</small><code>{{ entry.accountId }}</code></td>
               <td><span class="risk-severity" [class]="'risk-severity ' + entry.severity.toLowerCase()">{{ entry.severity }}</span><strong class="risk-score">{{ entry.score }}</strong><small>/ 100</small></td>
               <td><strong>{{ entry.primarySignalType || 'No material signal' }}</strong><small>{{ entry.primaryReason }}</small></td>
               <td><strong>{{ entry.connectedAccountCount }}</strong><small>{{ entry.transferCount }} transfers</small></td>

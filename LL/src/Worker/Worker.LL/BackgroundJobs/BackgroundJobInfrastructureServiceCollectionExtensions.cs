@@ -5,7 +5,7 @@ namespace Worker.LL.BackgroundJobs;
 
 public static class BackgroundJobInfrastructureServiceCollectionExtensions
 {
-    private const string SchedulerName = "LegendsLegacy.Background";
+    private const string SchedulerName = EssentialBackgroundJobs.Scheduler;
 
     public static IServiceCollection AddBackgroundJobInfrastructure(
         this IServiceCollection services,

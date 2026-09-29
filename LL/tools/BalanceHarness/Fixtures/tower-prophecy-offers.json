@@ -1,0 +1,8 @@
+{
+  "version": "tower-prophecy-offers-v1",
+  "policy": "offered-kills-no-reroll",
+  "epoch": "2026-09-28T00:00:00+00:00",
+  "cadenceSeconds": 10,
+  "checkpoints": [2160,8640,25920,86400],
+  "assumptions": "Native initial offers at fixed owner, level 30 and supplied Monday epoch. Read and choose at each UTC day start; highest-fragment offered KillCreatures daily, then lowest target and ordinal definition ID; abstain when absent; no rerolls. Weekly is automatically accepted. Only idle-supported kill and unfiltered win objectives progress: one creature per assumed victory, zero credit on defeats, no fabricated dungeon/Essence/treasure events. One continuous encounter per ten seconds, immediate claims, whole-fragment Mines assembly at existing checkpoints. Unopened caches and blueprint stock, unspent Soulstones/Fate Echo and unapplied XP remain recorded; no leveling, purchases or measured player pace."
+}

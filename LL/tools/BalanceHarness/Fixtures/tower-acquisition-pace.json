@@ -1,0 +1,9 @@
+{
+  "version": "tower-acquisition-study-v1",
+  "assumptions": "Sensitivity examples, not telemetry or a desired farming-time target. Zero starting stock; all regional grade-I sigils usable with identical assumed run performance. Absolute party-slot cohorts retain personal items while absent. Daily.Common credit assumes exactly one completed claim per day; no credit for other prophecy rewards or their activity time. Idle hours mean retained, resolved eligible activity, not time logged out past the offline cap. Level and Essence acquisition remain separate.",
+  "paces": [
+    { "id": "optimistic", "dungeonSuccessProbability": 1.0, "successfulRunMinutes": 5, "failedRunMinutes": 3, "idleVictoryProbability": 1.0, "eligibleIdleHoursPerDay": 24, "dailyProphecyProfile": null, "dailyProphecyClaims": 0 },
+    { "id": "illustrative", "dungeonSuccessProbability": 0.8, "successfulRunMinutes": 15, "failedRunMinutes": 8, "idleVictoryProbability": 0.8, "eligibleIdleHoursPerDay": 8, "dailyProphecyProfile": "Daily.Common", "dailyProphecyClaims": 1 },
+    { "id": "constrained", "dungeonSuccessProbability": 0.5, "successfulRunMinutes": 30, "failedRunMinutes": 20, "idleVictoryProbability": 0.5, "eligibleIdleHoursPerDay": 4, "dailyProphecyProfile": "Daily.Common", "dailyProphecyClaims": 1 }
+  ]
+}

@@ -1,3 +1,6 @@
+import { OperatorDraftService } from '../../operator-draft.service';
+import { PreparationDraft } from '../../shared/preparation-draft';
+import { DraftStatusComponent } from '../../shared/draft-status.component';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -13,10 +16,11 @@ import { AccountRiskListStateService } from './account-risk-list-state.service';
 @Component({
   selector: 'app-account-risk-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DraftStatusComponent],
   templateUrl: './account-risk-detail.component.html',
 })
 export class AccountRiskDetailComponent implements OnInit, OnDestroy {
+  readonly preparation: PreparationDraft;
   private generation = 0;
   private subscription?: Subscription;
   private pending = new Map<string, string>();
@@ -47,16 +51,31 @@ export class AccountRiskDetailComponent implements OnInit, OnDestroy {
     private readonly listState: AccountRiskListStateService,
     readonly operator: OperatorContextService,
     private readonly journal: OperationJournalService = new OperationJournalService(),
-  ) {}
+    drafts?: OperatorDraftService,
+  ) { this.preparation = new PreparationDraft(drafts, this, ['note', 'statusReason', 'selectedStatus']); }
 
   ngOnInit(): void {
     this.subscription = this.route.paramMap.subscribe(() => void this.load());
   }
 
-  ngOnDestroy(): void { this.generation++; this.subscription?.unsubscribe(); }
-  setSection(section: string): void { this.section = section; }
+  ngOnDestroy(): void { this.preparation.detach(); this.generation++; this.subscription?.unsubscribe(); }
+  setSection(section: string): void {
+    this.section = section;
+    const id = this.details?.account.accountId; if (!id) return;
+    if (section === 'timing' && !this.temporalLoading && !this.temporalReport) void this.loadTemporalCorrelations(id, this.generation);
+    if (section === 'conversation' && !this.transferConversationLoading && !this.transferConversationReport) void this.loadTransferConversationCorrelations(id, this.generation);
+  }
   get nextAccountId(): string | null { return this.listState.nextAccount(this.details?.account.accountId ?? ''); }
-  nextAccount(): void { const id = this.nextAccountId; if (id) this.openAccount(id); }
+  advancing = false;
+  get queueMessage(): string { return !this.listState.hasContext ? 'This direct link has no active queue. Open the review queue to choose an order.' : this.listState.exhausted ? 'End of the current queue. Return to the list to refresh it.' : 'Next skips forward without changing review status. Your private notes are retained.'; }
+  get canAdvance(): boolean { return this.listState.hasContext && !this.listState.exhausted; }
+  async nextAccount(): Promise<void> {
+    if (!this.details || this.advancing) return;
+    const generation = this.generation; this.advancing = true; this.preparation.save();
+    try { const id = await this.listState.advance(this.api, this.details.account.accountId); if (id && generation === this.generation) this.openAccount(id); }
+    catch (error) { if (generation === this.generation) this.showError(this.errorMessage(error)); }
+    finally { this.advancing = false; }
+  }
   inspectTransfer(id: string): void { this.section = 'transfers'; this.counterparty = ''; this.direction = ''; this.kind = ''; requestAnimationFrame(() => document.getElementById('transfer-' + id)?.scrollIntoView({ block: 'center' })); }
   private operationId(kind: string, payload: object): string { const key = JSON.stringify([this.details?.account.accountId, kind, payload]); const id = this.pending.get(key) ?? this.journal.unresolved.find(x => x.targetId === this.details?.account.accountId && x.kind === 'risk-' + kind)?.operationId ?? crypto.randomUUID(); this.pending.set(key, id); return id; }
 
@@ -85,7 +104,8 @@ export class AccountRiskDetailComponent implements OnInit, OnDestroy {
 
   async updateStatus(): Promise<void> {
     if (!this.details || !this.statusReason.trim()) { this.showError('Add a reason for the review-state change.'); return; }
-    if (this.saving) return;
+    if (this.saving || this.preparation.blocked) return;
+    if (this.journal.recoveryIncomplete) { this.showError(this.journal.recoveryMessage); return; }
     const generation = this.generation;
     const accountId = this.details.account.accountId;
     const payload = { status: this.selectedStatus, reason: this.statusReason.trim() };
@@ -100,7 +120,7 @@ export class AccountRiskDetailComponent implements OnInit, OnDestroy {
       this.details!.account.investigationStatus = payload.status;
       this.listState.updateInvestigationStatus(accountId, payload.status);
       this.pending.delete(JSON.stringify([accountId, 'status', payload]));
-      this.statusReason = '';
+      this.statusReason = ''; this.preparation.save();
       this.showSuccess('Investigation status updated and recorded in the global audit.');
     } catch (error) { this.journal.record(operationId, accountId, 'Investigation update', error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500 ? 'Rejected' : 'Unknown'); if (generation === this.generation) this.showError(`${this.errorMessage(error)} Check operation ${operationId} or retry the unchanged request.`); }
     finally { if (generation === this.generation) this.saving = false; }
@@ -108,7 +128,8 @@ export class AccountRiskDetailComponent implements OnInit, OnDestroy {
 
   async addNote(): Promise<void> {
     if (!this.details || !this.note.trim()) { this.showError('Enter an investigation note.'); return; }
-    if (this.saving) return;
+    if (this.saving || this.preparation.blocked) return;
+    if (this.journal.recoveryIncomplete) { this.showError(this.journal.recoveryMessage); return; }
     const generation = this.generation;
     const accountId = this.details.account.accountId;
     const payload = { note: this.note.trim() };
@@ -122,13 +143,14 @@ export class AccountRiskDetailComponent implements OnInit, OnDestroy {
       if (!response.isSuccess || !response.data) { this.showError(response.errorMessage); return; }
       if (response.data.note && !this.details!.notes.some(note => note.id === response.data!.note!.id)) this.details!.notes.unshift(response.data.note);
       this.pending.delete(JSON.stringify([accountId, 'note', payload]));
-      this.note = '';
+      this.note = ''; this.preparation.save();
       this.showSuccess('Investigation note added to the append-only audit trail.');
     } catch (error) { this.journal.record(operationId, accountId, 'Investigation update', error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500 ? 'Rejected' : 'Unknown'); if (generation === this.generation) this.showError(`${this.errorMessage(error)} Check operation ${operationId} or retry the unchanged request.`); }
     finally { if (generation === this.generation) this.saving = false; }
   }
 
   private async load(): Promise<void> {
+    this.preparation.detach();
     const accountId = this.route.snapshot.paramMap.get('accountId');
     if (!accountId) { this.showError('The account ID is missing.'); this.loading = false; return; }
     const generation = ++this.generation;
@@ -146,8 +168,7 @@ export class AccountRiskDetailComponent implements OnInit, OnDestroy {
       if (!response.isSuccess || !response.data) { this.showError(response.errorMessage || 'The investigation could not be loaded.'); return; }
       this.details = response.data;
       this.selectedStatus = response.data.account.investigationStatus;
-      void this.loadTemporalCorrelations(accountId, generation);
-      void this.loadTransferConversationCorrelations(accountId, generation);
+      if (this.canModerate) void this.preparation.open('investigation:' + accountId);
     } catch (error) { if (generation === this.generation) this.showError(this.errorMessage(error)); }
     finally { if (generation === this.generation) this.loading = false; }
   }

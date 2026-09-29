@@ -17,7 +17,7 @@ using Services.LL.Combat.Layers.Rewards.Dungeon;
 
 namespace EssenceSystem.Tests;
 
-public sealed class EquipmentAcquisitionTests
+public sealed partial class EquipmentAcquisitionTests
 {
     [Theory]
     [InlineData("forgotten_catacombs", 1)]

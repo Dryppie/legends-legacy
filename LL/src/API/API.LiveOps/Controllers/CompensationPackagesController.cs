@@ -17,6 +17,7 @@ public sealed class CompensationPackagesController(LiveOpsActionPreviewService p
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct) => Ok(await Mediator.Send(new ListCompensationPackagesQuery(), ct));
     [HttpPost]
+    [API.LiveOps.Operations.TrackOperation("save-package", "PackageId", "package")]
     public async Task<IActionResult> Save([FromBody] CompensationPackageEdit edit, CancellationToken ct)
     {
         var result = await Mediator.Send(new SaveCompensationPackageCommand(edit, CurrentActor), ct);
@@ -29,6 +30,7 @@ public sealed class CompensationPackagesController(LiveOpsActionPreviewService p
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpPost("grant")]
+    [API.LiveOps.Operations.TrackOperation("package", "CharacterId")]
     public async Task<IActionResult> Grant([FromBody] GrantRequest r, CancellationToken ct)
     {
         var validation = await previews.BeginPackageGrantAsync(r.PreviewToken, r.OperationId, r.CharacterId, r.PackageId,

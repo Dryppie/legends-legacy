@@ -50,11 +50,7 @@ public sealed class DungeonRunFactoryLayoutTests
     [Fact]
     public void Every_catalog_difficulty_generates_the_advertised_route_lengths()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "src", "API", "API.LL", "Data")))
-            directory = directory.Parent;
-        Assert.NotNull(directory);
-        var contentRoot = Path.Combine(directory.FullName, "src", "API", "API.LL");
+        var contentRoot = TestContentPaths.FindApiRoot();
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         options.Converters.Add(new JsonStringEnumConverter());
         var catalog = JsonSerializer.Deserialize<DungeonCatalogDocument>(

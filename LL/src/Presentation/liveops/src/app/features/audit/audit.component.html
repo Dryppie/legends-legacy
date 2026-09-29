@@ -7,7 +7,7 @@
   <div class="audit-toolbar">
     <span>Quick views</span>
     <button type="button" (click)="applyQuickFilter('permanent')">Permanent bans</button>
-    <button type="button" (click)="applyQuickFilter('large-grants')">Large grants</button>
+    <button type="button" (click)="applyQuickFilter('large-grants')">High-value actions</button>
     <button type="button" (click)="applyQuickFilter('exports')">Audit exports</button>
     @if (hasPermission(permissions.superadmin)) {
       <button class="audit-export" type="button" [disabled]="exporting" (click)="exportAudit()">{{ exporting ? 'Preparing export' : 'Export filtered CSV' }}</button>
@@ -16,6 +16,7 @@
 
   <p>Times shown in {{ timeZone }}. Completed operations only; an absent receipt does not prove an uncertain request failed.</p>
   <button class="secondary" type="button" (click)="advanced = !advanced" [attr.aria-expanded]="advanced">{{ advanced ? 'Hide advanced filters' : 'Advanced filters' }}</button> <button class="secondary" type="button" (click)="resetFilters()">Reset filters</button>
+  @if (operationId && !loading) { <div class="message" role="status"><strong>{{ loaded && entries.length ? 'Server receipt found' : 'Operation outcome unknown' }}</strong><p>{{ loaded && entries.length ? 'The recorded operation is shown below. Player delivery is not correlated by this view.' : 'No completed receipt could be established for this reference and source. Absence is not proof of failure; do not issue another grant based on it.' }}</p></div> }
   <form class="audit-filters" (ngSubmit)="searchAudit()">
     <label>Source<select name="audit-source" [(ngModel)]="source"><option value="All">All systems</option><option value="Game">Game</option><option value="Chat">Chat</option></select></label>
     <label>Action<select name="audit-action" [(ngModel)]="actionType"><option value="">All actions</option>@for (action of actions; track action.value) { <option [value]="action.value">{{ action.label }}</option> }</select></label>
@@ -51,9 +52,9 @@
               <dl>
                 <div><dt>Operation</dt><dd><code>{{ entry.operationId }}</code> <button class="text-link" type="button" (click)="copy(entry.operationId)">Copy</button></dd></div><div><dt>Permission</dt><dd><code>{{ entry.permission }}</code></dd></div>
                 <div><dt>Outcome</dt><dd>{{ entry.outcome }}</dd></div><div><dt>Risk</dt><dd>{{ entry.riskLevel }}</dd></div>
-                <div><dt>Support summary</dt><dd><button class="text-link" type="button" (click)="copySummary(entry)">Copy operation summary</button></dd></div>
+                <div><dt>Support summary</dt><dd><button class="text-link" type="button" (click)="copySummary(entry)">Copy internal summary</button></dd></div>
                 @if (entry.targetAccountId) { <div><dt>Account</dt><dd><code>{{ entry.targetAccountId }}</code></dd></div> }
-                @if (entry.targetCharacterId) { <div><dt>Character</dt><dd><button class="text-link" type="button" (click)="openPlayer(entry.targetCharacterId!)">{{ entry.targetCharacterId }}</button></dd></div> }
+                @if (entry.targetCharacterId) { <div><dt>Character</dt><dd><button class="text-link" type="button" (click)="openPlayer(entry.targetCharacterId!)">{{ targetNames[entry.targetCharacterId!] || entry.targetCharacterId }}</button> <code>{{ entry.targetCharacterId }}</code></dd></div> }
                 @if (entry.targetResourceId) { <div><dt>Resource</dt><dd><code>{{ entry.targetResourceId }}</code></dd></div> }
               </dl>
               @if (entry.internalNotes) { <div class="internal-notes"><strong>Internal notes</strong><p>{{ entry.internalNotes }}</p></div> }
@@ -61,7 +62,7 @@
             </div>
           }
         </article>
-      } @empty { <div class="audit-empty">No administration actions matched these filters.</div> }
+      } @empty { <div class="audit-empty">{{ loaded ? 'No administration actions matched these filters.' : 'Activity could not be loaded. Use Search to retry.' }}</div> }
     }
     <div class="audit-pagination"><button class="secondary" type="button" [disabled]="loading || previousCursors.length === 0" (click)="previousPage()">Previous</button><button class="secondary" type="button" [disabled]="loading || !nextCursor" (click)="nextPage()">Next</button></div>
   </section>

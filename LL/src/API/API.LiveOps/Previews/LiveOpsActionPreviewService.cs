@@ -11,13 +11,14 @@ using Services.LL.Administration;
 
 namespace API.LiveOps.Previews;
 
-public sealed class LiveOpsActionPreviewService(
+public sealed partial class LiveOpsActionPreviewService(
     IDbContextFactory<LLDbContext> contextFactory,
     ILiveOpsService liveOps,
     IChatModerationGateway chat,
     IOptions<LiveOpsOptions> options,
     TimeProvider timeProvider,
-    ICompensationPackageService? packages = null)
+    ICompensationPackageService? packages = null,
+    IStateRefreshRecoveryService? recovery = null)
 {
     private readonly LiveOpsOptions _options = options.Value;
 
@@ -664,6 +665,12 @@ public sealed class LiveOpsActionPreviewService(
             ?? new PreviewContext(null, null);
         switch (preview.ActionKind)
         {
+            case AdminActionPreviewKinds.StateRefreshRecovery:
+            {
+                var plan = await recovery!.PrepareAsync(preview.OperationId, preview.TargetId,
+                    new AdministrationActor(preview.ActorSubject, preview.ActorSubject), cancellationToken);
+                return plan.IsSuccess && plan.Data is not null ? StateResult.Success(StateHash(plan.Data)) : StateResult.Fail(plan.ErrorMessage);
+            }
             case AdminActionPreviewKinds.AccountBan:
             {
                 var player = await liveOps.GetPlayerByAccountIdAsync(

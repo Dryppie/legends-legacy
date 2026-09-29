@@ -60,6 +60,15 @@ describe('InventoryItemModalComponent selection containers', () => {
     } as InventoryItem;
   });
 
+  it('does not open the previous choice after changing the equipment filter', () => {
+    component.selectCrateOption({ id: 'wand', name: 'Wand', quantity: 1 });
+    component.searchCrateOptions('head');
+    component.openSelectionCrate();
+    expect(component.selectedCrateOptionId()).toBe('');
+    expect(component.crateSearch()).toBe('head');
+    expect(inventoryService.openSelectionContainer).not.toHaveBeenCalled();
+  });
+
   it('starts without a selected Essence and does not redeem until one is chosen', () => {
     component.ngOnInit();
 

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LiveOpsApiService } from '../../liveops-api.service';
 import { AccountRiskFilters, AccountRiskPage, AccountRiskSeverity } from '../../liveops.models';
 import { AccountRiskListStateService } from './account-risk-list-state.service';
@@ -10,10 +10,11 @@ import { AccountRiskListStateService } from './account-risk-list-state.service';
 @Component({
   selector: 'app-account-risk',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './account-risk.component.html',
 })
-export class AccountRiskComponent implements OnInit {
+export class AccountRiskComponent implements OnInit, OnDestroy {
+  private generation = 0;
   data: AccountRiskPage | null = null;
   search = '';
   minimumSeverity = 'Low';
@@ -78,7 +79,9 @@ export class AccountRiskComponent implements OnInit {
     await this.load();
   }
 
-  open(accountId: string): void {
+  ngOnDestroy(): void { this.generation++; }
+
+  rememberQueue(): void {
     if (this.data) {
       this.listState.save({
         data: this.data,
@@ -92,14 +95,16 @@ export class AccountRiskComponent implements OnInit {
         page: this.page,
       });
     }
-    void this.router.navigate(['/account-risk', accountId]);
   }
 
-  count(severity: AccountRiskSeverity): number { return this.data?.counts[severity] ?? 0; }
+  open(accountId: string): void { this.rememberQueue(); void this.router.navigate(['/account-risk', accountId]); }
+
+  count(severity: AccountRiskSeverity): number | string { return this.data ? this.data.counts[severity] ?? 0 : '—'; }
 
   get emptyMessage(): string {
     if (this.loading) return 'Loading risk summaries…';
-    if (!this.data || (!this.data.directTransferCount && !this.data.directItemTransferCount)) {
+    if (!this.data) return 'Investigation data is unavailable. Apply the filters to retry.';
+    if (!this.data.directTransferCount && !this.data.directItemTransferCount) {
       return 'No retained direct cinder or item transfers are available to evaluate.';
     }
     if (this.minimumSeverity !== 'Low' && this.data.evaluatedAccountCount > 0) {
@@ -113,19 +118,22 @@ export class AccountRiskComponent implements OnInit {
   }
 
   private async load(): Promise<void> {
+    const generation = ++this.generation;
     this.loading = true;
+    this.data = null;
     this.message = '';
     try {
       const response = await this.api.accountRisks(this.filters(), this.page);
+      if (generation !== this.generation) return;
       if (!response.isSuccess || !response.data) {
         this.message = response.errorMessage || 'Account-risk summaries could not be loaded.';
         return;
       }
       this.data = response.data;
     } catch (error) {
-      this.message = this.errorMessage(error);
+      if (generation === this.generation) this.message = this.errorMessage(error);
     } finally {
-      this.loading = false;
+      if (generation === this.generation) this.loading = false;
     }
   }
 

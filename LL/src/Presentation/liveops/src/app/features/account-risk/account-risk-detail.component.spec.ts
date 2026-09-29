@@ -31,6 +31,10 @@ describe('AccountRiskDetailComponent', () => {
     fixture.detectChanges();
 
     expect(api.accountRiskDetails).toHaveBeenCalled();
+    expect(api.accountTemporalCorrelations).not.toHaveBeenCalled();
+    expect(api.accountTransferConversationCorrelations).not.toHaveBeenCalled();
+    fixture.componentInstance.setSection('timing'); fixture.componentInstance.setSection('conversation');
+    await fixture.whenStable(); fixture.detectChanges();
     expect(api.accountTemporalCorrelations).toHaveBeenCalledOnceWith('11111111-1111-1111-1111-111111111111');
     expect(api.accountTransferConversationCorrelations).toHaveBeenCalledOnceWith('11111111-1111-1111-1111-111111111111');
     expect(fixture.nativeElement.textContent).toContain('Possible account correlation');

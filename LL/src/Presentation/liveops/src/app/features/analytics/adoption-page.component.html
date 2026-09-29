@@ -1,0 +1,8 @@
+@if (state.selected; as report) {
+<div class="controls filters">
+  <label>Level band<select [(ngModel)]="state.levelBand"><option value="">All levels</option>@for (band of state.levelBands; track band) { <option>{{ band }}</option> }</select></label>
+  <label>Snapshot cohort<select [(ngModel)]="state.cohortDays"><option value="">All cohorts</option><option value="7">7 days</option><option value="30">30 days</option></select></label>
+  <label>Definition filter<input [(ngModel)]="state.adoptionDefinition" placeholder="Name or identifier" /></label>
+</div>
+<app-adoption-table [report]="report" [reports]="state.reports" [definitionFilter]="state.adoptionDefinition" [levelBand]="state.levelBand" [cohortDays]="state.cohortDays" [preferences]="state.adoptionPreferences" />
+}

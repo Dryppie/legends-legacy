@@ -8,10 +8,10 @@ namespace EssenceSystem.Tests;
 public sealed class BalanceHarnessAffinityFloorEvaluationTests
 {
     private static string VersionFor(int floor) => floor switch {
-        3 => "affinity-floor3-baseline-evaluation-v1",
+        >= 1 and <= 9 => $"affinity-floor{floor}-baseline-evaluation-v1",
         13 => "affinity-floor13-baseline-evaluation-v1",
         15 => "affinity-floor15-baseline-evaluation-v1",
-        _ => throw new InvalidDataException("This bounded evaluation supports floors 3, 13 and 15.") };
+        _ => throw new InvalidDataException("This bounded evaluation supports floors 1–9, 13 and 15.") };
     private const int SearchValues = 109; // root + 8/8/8/8/16/60
     private const int HeldoutSamples = 128;
     private const int MaximumFights = 528 + 5 * HeldoutSamples;
@@ -122,6 +122,9 @@ public sealed class BalanceHarnessAffinityFloorEvaluationTests
     }
 
     [Theory]
+    [InlineData(1, 4, 5, 1)] [InlineData(2, 4, 5, 1)] [InlineData(3, 4, 5, 1)]
+    [InlineData(4, 4, 5, 1)] [InlineData(5, 5, 10, 1)] [InlineData(6, 5, 5, 1)]
+    [InlineData(7, 5, 5, 1)] [InlineData(8, 5, 10, 1)] [InlineData(9, 5, 10, 1)]
     [InlineData(13, 7, 10, 1)] [InlineData(15, 10, 15, 2)]
     public async Task Floor_projection_prepares_the_complete_party_and_uses_the_explicit_benchmark(int floor, int slots, int partySize, int benchmarkReference)
     {

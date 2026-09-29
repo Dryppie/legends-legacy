@@ -14,6 +14,7 @@ import { DefaultHeaderComponent } from '../../../../shared/components/default-he
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import {
   initialSelectionContainerOptionId,
+  filterSelectionOptions,
   selectionContainerMetadata,
 } from '../../../../shared/utils/inventory/selection-container.utils';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
@@ -132,6 +133,8 @@ export class InventoryComponent implements OnInit {
   readonly blueprintAttributeLabel = (attribute: AttributeType) =>
     formatAttributeType(attribute, true);
   readonly selectedContainerOptionId = signal('');
+  readonly containerSearch = signal('');
+  readonly filterSelectionOptions = filterSelectionOptions;
   readonly isOpeningContainer = signal(false);
   readonly containerActionError = signal<string | null>(null);
   readonly favoritePendingItemId = signal<string | null>(null);
@@ -644,6 +647,11 @@ export class InventoryComponent implements OnInit {
   selectContainerOption(option: SelectionCrateOption): void {
     this.selectedContainerOptionId.set(option.id);
     this.containerActionError.set(null);
+  }
+
+  searchContainerOptions(search: string): void {
+    this.containerSearch.set(search);
+    this.selectedContainerOptionId.set('');
   }
 
   isSelectionEssenceAbsorbed(option: SelectionCrateOption): boolean {
@@ -1276,6 +1284,7 @@ export class InventoryComponent implements OnInit {
   }
 
   private resetContainerAction(item?: InventoryItem): void {
+    this.containerSearch.set('');
     this.selectedContainerOptionId.set(
       initialSelectionContainerOptionId(
         item?.itemInstance.itemBase,

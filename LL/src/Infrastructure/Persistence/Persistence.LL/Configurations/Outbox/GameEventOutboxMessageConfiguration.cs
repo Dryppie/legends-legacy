@@ -18,6 +18,7 @@ public sealed class GameEventOutboxMessageConfiguration : IEntityTypeConfigurati
 
         builder.HasIndex(x => new { x.AvailableAt, x.CreatedAt });
         builder.HasIndex(x => new { x.CharacterId, x.CreatedAt });
+        builder.HasIndex(x => x.AdministrationOperationId);
         builder.HasIndex(x => x.IdempotencyKey)
             .IsUnique()
             .HasFilter("\"IdempotencyKey\" IS NOT NULL");

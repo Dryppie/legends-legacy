@@ -1,0 +1,9 @@
+{
+  "version": "tower-earned-expansion-v1",
+  "eligibleServers": 15,
+  "targetFloor": 5,
+  "partySize": 10,
+  "attemptsPerServer": 4,
+  "maximumFights": 150,
+  "policy": "First ten seats of the existing earned roster, original rotations and separate model accounts, all sixteen owners preserved. No personal activity, grants or inventory transfer. Native rally applications and ordered two-party layout are checked on a disposable server with rating availability explicitly assumed at raw rating 1; live accounts are unverified. Actual four-Essence parties and supplied Epic candidates at actual growth use paired fresh seeds. Only actual outcomes finalize, stopping at first victory or four attempts on floor 5 only; first attempt of each arm is replayed. No search, boss changes, five-Essence grant or measured acquisition-time claim. Seventeen earlier stopped servers receive no new attempts."
+}

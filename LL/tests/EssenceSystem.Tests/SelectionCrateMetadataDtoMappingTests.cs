@@ -33,6 +33,7 @@ public sealed class SelectionCrateMetadataDtoMappingTests : IDisposable
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddSingleton<IEssenceDefinitionRepository>(definitions);
+        services.AddSingleton(EquipmentAcquisitionTests.SupplyCatalog());
         services.AddApplication();
         _provider = services.BuildServiceProvider();
         _mapper = _provider.GetRequiredService<IMapper>();
@@ -74,6 +75,27 @@ public sealed class SelectionCrateMetadataDtoMappingTests : IDisposable
         Assert.NotNull(item.SelectionCrate);
         Assert.NotEmpty(item.SelectionCrate.Options);
         Assert.All(item.SelectionCrate.Options, option => Assert.Null(option.Essence));
+    }
+
+    [Fact]
+    public void Tower_supply_metadata_exposes_only_valid_choices_with_distinguishable_specializations()
+    {
+        var catalog = EquipmentAcquisitionTests.SupplyCatalog();
+        foreach (var supply in catalog.Supplies)
+        {
+            var metadata = _mapper.Map<ItemBaseDto>(new ItemBase { Id = supply.ItemBaseId }).SelectionCrate;
+            Assert.NotNull(metadata);
+            Assert.False(metadata.IsRandom);
+            Assert.Equal("Equipment", metadata.SelectionLabel);
+            Assert.Equal(catalog.Choices(supply.ItemBaseId).Select(x => x.Id), metadata.Options.Select(x => x.Id));
+            Assert.Equal(metadata.Options.Count, metadata.Options.Select(x => x.Name).Distinct().Count());
+            Assert.All(metadata.Options, x =>
+            {
+                Assert.Contains($"Rank {supply.Band.Rank}", x.Description);
+                Assert.Equal(1, x.Quantity);
+                Assert.Null(x.Essence);
+            });
+        }
     }
 
     public void Dispose() => _provider.Dispose();

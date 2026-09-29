@@ -1,0 +1,9 @@
+{
+  "version": "tower-old-forest-growth-v2",
+  "targetLevel": 40,
+  "area": "region_01_area_08",
+  "maximumIdleEncounters": 86400,
+  "cadenceSeconds": 10,
+  "maximumOwners": 240,
+  "assumptions": "Continue the fifteen floor-5 servers and all sixteen personal states per server. Old Forest is available from level 25. One creature per encounter; carry the declared perfect/four-of-five outcome sequence and absolute encounter ordinal. Idle rewards occur at the start of each ten-second cadence; native XP, four owned Essence training, daily offers/claims, ordinary equipment and sigils apply. Stop each owner immediately after reaching level 40, or the original absolute 86400 encounter cap. Assemble whole Mines sigils at the stopping point. Align the sixteen personal clocks with waiting only. No navigation, attendance or live player time is measured. Ordinary Essence drops/resonance, previously omitted quest tokens, cores, ordinary currencies, caches, purchases and ascension receive no new credit. The Roots Remember is a prospective unclaimed quest scenario, with its existing Between Day and Night prerequisite witnessed by the archived fourth Essence/quest sigil gate; old dungeon results receive no retrospective quest credit. New Old Forest victories can meet its six-win objective, but a fresh paid successful Mines run is still required. Disposable native quest/absorption probes do not earn a token, fifth Essence, training or combat result. Preserve all gear, source stock, server history and the seventeen held paths. Zero combat/search/seeds."
+}

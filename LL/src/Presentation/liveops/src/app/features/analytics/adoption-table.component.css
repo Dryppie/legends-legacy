@@ -1,0 +1,28 @@
+:host { display: block; min-width: 0; }
+h2 { margin-top: 2rem; }
+.note, .result-count { color: #aab5c2; line-height: 1.5; }
+.controls { display: flex; gap: .85rem; align-items: end; flex-wrap: wrap; }
+.controls label { display: flex; flex-direction: column; gap: .4rem; color: #c3cddd; font-size: .85rem; }
+select, input { background: #1c2632; color: #e9e4d8; border: 1px solid #425063; border-radius: .4rem; padding: .55rem .65rem; max-width: 100%; }
+input[type=number] { width: 9rem; }
+.controls .group-toggle { flex-direction: row; align-items: center; padding: .6rem 0; white-space: nowrap; }
+.group-toggle input { width: auto; flex: 0 0 auto; }
+summary { cursor: pointer; color: #c3cddd; }
+.coverage { border-left: 3px solid #c9a153; padding: .65rem .85rem; background: #282316; color: #e6d4af; line-height: 1.5; }
+.panel { overflow-x: auto; background: #111923; border: 1px solid #2c3948; border-radius: .6rem; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: .65rem .75rem; border-bottom: 1px solid #293644; font-variant-numeric: tabular-nums; }
+td { white-space: nowrap; }
+thead th { color: #aab5c2; background: #141e29; }
+.column-heading { display: inline-flex; align-items: center; gap: .45rem; }
+thead button { padding: .3rem 0; border: 0; background: transparent; color: inherit; text-align: left; font-weight: 500; min-width: 3.2rem; }
+thead th[aria-sort=ascending], thead th[aria-sort=descending] { color: #e9c27a; }
+button:focus-visible, .panel:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #e9c27a; outline-offset: 3px; }
+.definition { min-width: 12rem; font-weight: 500; }
+.adoption-rate { min-width: 6rem; }
+small { display: block; margin-top: .2rem; font-size: .75rem; color: #aab5c2; }
+.small-sample { color: #e9c27a; }
+.group-heading th { background: #1c2632; color: #d8e1ed; font-size: .85rem; }
+.group-heading span { color: #aab5c2; font-weight: 400; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (max-width: 640px) { .controls label { width: 100%; } input[type=number] { width: 100%; } }

@@ -17,6 +17,10 @@ public sealed class OperatorDraftsController : LiveOpsControllerBase
     public async Task<IActionResult> Workspace(CancellationToken ct) => Ok(await Mediator.Send(new GetOperatorDraftQuery(CurrentActor.Subject, "workspace"), ct));
     [HttpPost("workspace")]
     public Task<IActionResult> SaveWorkspace(SaveRequest request, CancellationToken ct) => Save("workspace", request, ct);
+    [HttpGet("player/{target:guid}")]
+    public async Task<IActionResult> Player(Guid target, CancellationToken ct) => Ok(await Mediator.Send(new GetOperatorDraftQuery(CurrentActor.Subject, $"player:{target:D}"), ct));
+    [HttpPost("player/{target:guid}")]
+    public Task<IActionResult> SavePlayer(Guid target, SaveRequest request, CancellationToken ct) => Save($"player:{target:D}", request, ct);
     [HttpGet("{scope}/{target:guid}")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
     public async Task<IActionResult> Get(string scope, Guid target, CancellationToken ct)

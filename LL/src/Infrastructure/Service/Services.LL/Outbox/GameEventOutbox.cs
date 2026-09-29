@@ -10,7 +10,8 @@ public sealed class GameEventOutbox(
     IDbContext context,
     IGameEventOutboxConsumerRegistry consumerRegistry,
     JsonSerializerOptions jsonOptions,
-    TimeProvider timeProvider) : IGameEventOutbox
+    TimeProvider timeProvider,
+    AdministrationOperationContext? operation = null) : IGameEventOutbox
 {
     public Task EnqueueAsync<TPayload>(
         string eventType,
@@ -29,7 +30,8 @@ public sealed class GameEventOutbox(
             PayloadJson = JsonSerializer.Serialize(payload, jsonOptions),
             CreatedAt = now,
             AvailableAt = now,
-            CorrelationId = Activity.Current?.TraceId.ToString()
+            CorrelationId = Activity.Current?.TraceId.ToString(),
+            AdministrationOperationId = operation?.OperationId
         };
 
         context.GameEventOutboxMessages.Add(message);

@@ -61,6 +61,7 @@ public sealed class CompensationController(
 
     [HttpPost("{characterId:guid}/item-grants")]
     [Authorize(Policy = AdministrationPermissions.EconomyCompensation)]
+    [API.LiveOps.Operations.TrackOperation("grant", "characterId")]
     public async Task<ActionResult<Response<CompensationItemGrantResultDto>>> GrantItems(
         Guid characterId,
         [FromBody] GrantItemsRequest request,

@@ -1738,5 +1738,59 @@
     "essenceDefinitionId": "essence.lizardfolk_warrior",
     "equipmentType": "Head",
     "attributeModifiers": []
+  },
+  {
+    "id": "item.tower_supply.v1.floor_01",
+    "name": "Rare Tower Supply Chest",
+    "description": "Complete a region 1 dungeon at level 30 or higher from the start to earn one chest. Choose one bound Tier 1 Rare / Standard / Rank 2 equipment piece and its specialization. Baseline attribute roll; no style. Stronger unlocked supply chests replace this reward.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "stackable": true,
+    "isBound": true
+  },
+  {
+    "id": "item.tower_supply.v1.floor_04",
+    "name": "Epic Tower Supply Chest",
+    "description": "Complete a region 1 dungeon at level 30 or higher after the server clears Tower floor 3 to earn one chest. Choose one bound Tier 1 Epic / Fine / Rank 3 equipment piece and its specialization. Baseline attribute roll; no style. Stronger unlocked supply chests replace this reward.",
+    "itemType": "Resource",
+    "rarity": "Epic",
+    "stackable": true,
+    "isBound": true
+  },
+  {
+    "id": "item.tower_supply.v1.floor_07",
+    "name": "Unique Tower Supply Chest",
+    "description": "Complete a region 1 dungeon at level 40 or higher after the server clears Tower floor 6 to earn one chest. Choose one bound Tier 1 Unique / Exceptional / Rank 4 equipment piece and its specialization. Baseline attribute roll; no style. Stronger unlocked supply chests replace this reward.",
+    "itemType": "Resource",
+    "rarity": "Unique",
+    "stackable": true,
+    "isBound": true
+  },
+  {
+    "id": "item.tower_supply.v1.floor_10",
+    "name": "Legendary Tower Supply Chest",
+    "description": "Complete a region 1 dungeon at level 50 or higher after the server clears Tower floor 9 to earn one chest. Choose one bound Tier 2 Legendary / Masterpiece / Rank 5 equipment piece and its specialization. Baseline attribute roll; no style. Stronger unlocked supply chests replace this reward.",
+    "itemType": "Resource",
+    "rarity": "Legendary",
+    "stackable": true,
+    "isBound": true
+  },
+  {
+    "id": "item.tower_supply.v1.floor_11",
+    "name": "Rare Tower Supply Chest II",
+    "description": "Complete a region 2 dungeon at level 60 or higher after the server clears Tower floor 10 to earn one chest. Choose one bound Tier 2 Rare / Standard / Rank 2 equipment piece and its specialization. Baseline attribute roll; no style. Stronger unlocked supply chests replace this reward.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "stackable": true,
+    "isBound": true
+  },
+  {
+    "id": "item.tower_supply.v1.floor_14",
+    "name": "Epic Tower Supply Chest II",
+    "description": "Complete a region 2 dungeon at level 60 or higher after the server clears Tower floor 13 to earn one chest. Choose one bound Tier 2 Epic / Fine / Rank 3 equipment piece and its specialization. Baseline attribute roll; no style. Stronger unlocked supply chests replace this reward.",
+    "itemType": "Resource",
+    "rarity": "Epic",
+    "stackable": true,
+    "isBound": true
   }
 ]

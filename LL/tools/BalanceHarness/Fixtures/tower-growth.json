@@ -1,0 +1,11 @@
+{
+  "version": "tower-growth-qualification-v1",
+  "creaturesPerEncounter": 1,
+  "startingCharacterExperience": 0,
+  "startingEssenceExperience": 0,
+  "startingMasteryExperience": 0,
+  "characterExperienceBonusBps": 0,
+  "essenceExperienceBonusBps": 0,
+  "defeatRetentionBps": 0,
+  "assumptions": "Seed-free dependency qualification, not a complete growth combat comparison. Replay supplied idle victories with one creature per encounter, one personal XP recipient, zero XP bonuses/defeat retention and zero within-level starting XP. Apply native character and Essence progression; three supplied quest Essences at level 1, fourth earned at the existing quest gate and attuned for subsequent encounters. No ascension, dust, donated Essences or new loadout filling. Native prophecy offers use the current level at each UTC reset; fixed offered-kills-no-reroll choice, shared kill/win and earned Essence-XP events, immediate claims, unopened caches. Stop before the first archived dungeon entry; retain only items earned before it and transfer zero dungeon outcomes to changed characters. Separately qualify mastery-only against archived outcomes until the first changed mastery benefit before another entry, with character/Essence growth withheld in that isolated branch. No measured player pace, new combat or seed allocation."
+}

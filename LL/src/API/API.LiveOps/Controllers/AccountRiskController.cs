@@ -92,6 +92,7 @@ public sealed class AccountRiskController(
 
     [HttpPost("{accountId:guid}/status")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
+    [API.LiveOps.Operations.TrackOperation("risk-status", "accountId", "account")]
     public async Task<ActionResult<Response<AccountRiskOperationDto>>> UpdateStatus(
         Guid accountId,
         [FromBody] UpdateStatusRequest request)
@@ -107,6 +108,7 @@ public sealed class AccountRiskController(
 
     [HttpPost("{accountId:guid}/notes")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
+    [API.LiveOps.Operations.TrackOperation("risk-note", "accountId", "account")]
     public async Task<ActionResult<Response<AccountRiskOperationDto>>> AddNote(
         Guid accountId,
         [FromBody] AddNoteRequest request)

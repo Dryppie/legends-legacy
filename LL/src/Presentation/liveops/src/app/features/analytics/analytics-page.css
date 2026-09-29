@@ -1,0 +1,16 @@
+:host { display: block; min-width: 0; }
+h2 { margin-top: 1.5rem; }
+.controls { display: flex; gap: .85rem; align-items: end; flex-wrap: wrap; }
+.controls label { display: grid; gap: .4rem; }
+.filters { margin: 1.25rem 0; padding: 1rem; border: 1px solid #2c3948; border-radius: .6rem; background: #111923; }
+select, input, button { background: #1c2632; color: #e9e4d8; border: 1px solid #425063; border-radius: .4rem; padding: .55rem .8rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); gap: .75rem; margin: 1.5rem 0; }
+.card, .panel { background: #111923; border: 1px solid #2c3948; border-radius: .6rem; padding: 1rem; }
+.card span { display: block; color: #aab5c2; font-size: .8rem; } .card strong { font-size: 1.6rem; }
+.panel { overflow-x: auto; margin-top: .75rem; } table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: .55rem .7rem; border-bottom: 1px solid #293644; white-space: nowrap; }
+th { color: #aab5c2; font-weight: 500; } .note { color: #aab5c2; line-height: 1.5; }
+.error { color: #ffc2ba; }
+.trend-bars { overflow-x: auto; }
+.trend-bars button { padding: 0; min-width: 8px; }
+@media (max-width: 640px) { .controls label { width: 100%; } }

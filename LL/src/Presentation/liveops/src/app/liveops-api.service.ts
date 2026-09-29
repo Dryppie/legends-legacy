@@ -1,5 +1,6 @@
-import { CompensationPackage, ItemizationReport, OperationalDetailPage, SupportCasePage, SupportCaseDetails, OperatorDraft } from './liveops.models';
+import { CompensationPackage, ItemizationReport, OperationalDetailPage, SupportCasePage, SupportCaseDetails, OperatorDraft, ServerOperationPage, ServerOperationStatus, JobScheduleHealth } from './liveops.models';
 import { Injectable } from '@angular/core';
+import { StateRefreshRecoveryResult } from './liveops.models';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -32,6 +33,17 @@ export class LiveOpsApiService {
   private antiforgeryToken = '';
 
   constructor(private readonly http: HttpClient) {}
+  previewStateRefresh(deliveryId: string, body: object): Promise<ApiResponse<ActionPreview>> { return this.post(`/api/liveops/deliveries/${deliveryId}/state-refresh/preview`, body); }
+  retryStateRefresh(deliveryId: string, body: object): Promise<ApiResponse<StateRefreshRecoveryResult>> { return this.post(`/api/liveops/deliveries/${deliveryId}/state-refresh`, body); }
+  operations(page = 1, unresolvedOnly = true): Promise<ApiResponse<ServerOperationPage>> {
+    return firstValueFrom(this.http.get<ApiResponse<ServerOperationPage>>('/api/liveops/operations', { params: new HttpParams().set('page', page).set('unresolvedOnly', unresolvedOnly) }));
+  }
+  operationStatus(id: string): Promise<ApiResponse<ServerOperationStatus>> {
+    return firstValueFrom(this.http.get<ApiResponse<ServerOperationStatus>>('/api/liveops/operations/' + id));
+  }
+  jobSchedules(): Promise<ApiResponse<JobScheduleHealth[]>> {
+    return firstValueFrom(this.http.get<ApiResponse<JobScheduleHealth[]>>('/api/liveops/status/job-schedules'));
+  }
 
   itemizationReports(days: number): Promise<ApiResponse<ItemizationReport[]>> {
     return firstValueFrom(this.http.get<ApiResponse<ItemizationReport[]>>('/api/liveops/analytics/itemization', { params: new HttpParams().set('days', days) }));
@@ -130,8 +142,8 @@ export class LiveOpsApiService {
     );
   }
 
-  operationalDetails(view: string): Promise<ApiResponse<OperationalDetailPage>> {
-    return firstValueFrom(this.http.get<ApiResponse<OperationalDetailPage>>('/api/liveops/status/details', { params: new HttpParams().set('view', view) }));
+  operationalDetails(view: string, page = 1, status = ''): Promise<ApiResponse<OperationalDetailPage>> {
+    return firstValueFrom(this.http.get<ApiResponse<OperationalDetailPage>>('/api/liveops/status/details', { params: new HttpParams().set('view', view).set('page', page).set('status', status) }));
   }
 
   operationalStatus(): Promise<ApiResponse<OperationalStatus>> {
@@ -342,7 +354,7 @@ export class LiveOpsApiService {
       params: beforeSequence ? new HttpParams().set('beforeSequence', beforeSequence) : new HttpParams() }));
   }
   createCase(body: object): Promise<ApiResponse<SupportCaseDetails>> { return this.post('/api/liveops/cases', body); }
-  changeCase(caseId: string, action: 'notes' | 'status' | 'operations', body: object): Promise<ApiResponse<SupportCaseDetails>> {
+  changeCase(caseId: string, action: 'notes' | 'status' | 'operations' | 'follow-up', body: object): Promise<ApiResponse<SupportCaseDetails>> {
     return this.post(`/api/liveops/cases/${caseId}/${action}`, body);
   }
 

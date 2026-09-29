@@ -109,6 +109,9 @@ public sealed class GameEventOutboxWorker(
         // A delivery is its own unit of work. Sharing a scope would also share EF tracking
         // and rolled-back entity state between otherwise independent consumers.
         using var scope = scopeFactory.CreateScope();
+        // Follow-on state-sync messages retain the originating administrative operation.
+        var operationContext = scope.ServiceProvider.GetService<AdministrationOperationContext>();
+        if (operationContext is not null) operationContext.OperationId = delivery.Message.AdministrationOperationId;
         var repository = scope.ServiceProvider.GetRequiredService<IGameEventOutboxRepository>();
         var consumers = scope.ServiceProvider
             .GetRequiredService<IEnumerable<IGameEventOutboxConsumer>>()

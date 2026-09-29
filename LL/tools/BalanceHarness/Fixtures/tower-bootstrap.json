@@ -1,0 +1,16 @@
+{
+  "version": "tower-first-supply-v1",
+  "level": 30,
+  "maximumAttempts": 12,
+  "pathsPerSource": 4,
+  "essenceLevels": [1, 10],
+  "gearConditions": ["quest-and-drop", "common", "uncommon", "common-rank1", "rare-control"],
+  "purchaseOrder": ["MainHand", "Chest", "Head", "Legs", "Necklace", "Ring", "Relic"],
+  "recipes": [
+    {"id": "guardian", "starter": "goblin_warrior", "lumo": "lumo_wisp", "crystal": "transparent_slime", "twilight": "wood_nymph"},
+    {"id": "restorer", "starter": "hollow_stag", "lumo": "lumo_wisp", "crystal": "blue_slime", "twilight": "wood_nymph"},
+    {"id": "striker", "starter": "goblin_warrior", "lumo": "goblin_archer", "crystal": "frost_imp", "twilight": "pixie"},
+    {"id": "controller", "starter": "skeleton", "lumo": "goblin", "crystal": "frost_imp", "twilight": "enchanted_fairy"}
+  ],
+  "assumptions": "Fixed diagnostic recipes, not searched or optimized. Server cleared floor zero; level 30 and prerequisite quest victories supplied. Exact plain default archetypes conditioned on legal area drops; Standard quality and minimum 0.95 random rolls are conservative descriptors. One matching quest Armor Chest outcome; all other outcomes excluded. Rank-1 condition explicitly supplies the additional earned Cinders/Parts budget. Essence levels 1 and 10 are separate matched training conditions, with production XP costs recorded and no ascension. No acquisition time or population representativeness asserted. One quest sigil per family is unspent at entry; further sigils require separately accounted source activity. No donated items, post-dungeon quest tokens, mastery growth or ordinary dungeon loot credit. Reuse production full-run route policy and retain every earned item. Stop each acquisition path at the complete seven-item Rare-or-stronger set or twelve attempts; never extend based on results. Rare-control starts with the complete target set, performs one fixed attempt per path, earns no study items and is not acquisition evidence."
+}

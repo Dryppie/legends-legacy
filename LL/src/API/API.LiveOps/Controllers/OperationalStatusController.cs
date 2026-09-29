@@ -12,11 +12,11 @@ public sealed class OperationalStatusController(
 {
     [HttpGet("details")]
     [Authorize(Policy = AdministrationPermissions.Read)]
-    public async Task<IActionResult> Details([FromQuery] string view, CancellationToken ct)
+    public async Task<IActionResult> Details([FromQuery] string view, CancellationToken ct, [FromQuery] int page = 1, [FromQuery] string? status = null)
     {
         if (view is not ("deliveries" or "restrictions" or "jobs"))
             return BadRequest(Response<OperationalDetailPage>.Fail("Choose deliveries, restrictions or jobs."));
-        try { return Ok(Response<OperationalDetailPage>.Success((await statusService.GetDetailsAsync(view, ct))!)); }
+        try { return Ok(Response<OperationalDetailPage>.Success((await statusService.GetDetailsAsync(view, ct, page, status))!)); }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception) { return StatusCode(503, Response<OperationalDetailPage>.Fail("Operational details are unavailable. Retry when the Game database is reachable.")); }
     }

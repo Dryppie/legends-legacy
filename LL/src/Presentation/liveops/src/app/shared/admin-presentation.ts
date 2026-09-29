@@ -14,6 +14,7 @@ export const administrationActions = [
   { value: 'SupportCaseNoteAdded', label: 'Support note added' },
   { value: 'SupportCaseOperationLinked', label: 'Operation linked to case' },
   { value: 'AuditExported', label: 'Activity log exported' },
+  { value: 'StateRefreshDeliveryRetried', label: 'Player state refresh queued again' },
   { value: 'Muted', label: 'Chat muted' },
   { value: 'Unmuted', label: 'Chat mute removed' },
 ];
@@ -30,6 +31,7 @@ export function actionEffect(detailsJson: string): string {
   try {
     const raw = JSON.parse(detailsJson || '{}');
     const details = Object.fromEntries(Object.entries(raw).map(([key, value]) => [key.toLowerCase(), value]));
+    if (details['replacementmessageid']) return 'Replacement state-refresh notification queued; player receipt is not confirmed.';
     if (details['packageid']) return `${details['name'] ?? 'Compensation package'} · version ${details['version']}`;
     if (details['quantity'] != null) return `${details['quantity']} × ${details['itemname'] ?? details['itembaseid'] ?? 'Signets'}`;
     if (details['expiresat']) return `Until ${new Date(String(details['expiresat'])).toUTCString()}`;
@@ -39,7 +41,7 @@ export function actionEffect(detailsJson: string): string {
 }
 
 export function operationSummary(entry: import('../liveops.models').AdministrationAuditEntry, environment: string): string {
-  return [actionLabel(entry.actionType), `Environment: ${environment}`, `Outcome: ${entry.outcome}`,
+  return ['INTERNAL SUPPORT SUMMARY — review before sharing', actionLabel(entry.actionType), `Environment: ${environment}`, `Outcome: ${entry.outcome}`,
     `Effect: ${actionEffect(entry.detailsJson) || 'See the recorded action in LiveOps.'}`, `Reason: ${entry.reason}`,
     `Operation: ${entry.operationId}`, `Source: ${entry.source}`,
     ...(entry.targetCharacterId ? [`Character: ${entry.targetCharacterId}`] : []),

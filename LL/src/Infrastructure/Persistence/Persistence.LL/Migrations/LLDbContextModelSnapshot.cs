@@ -765,6 +765,58 @@ namespace Persistence.LL.Migrations
                     b.ToTable("OperatorDrafts", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Administration.OperatorOperation", b =>
+                {
+                    b.Property<string>("ActorSubject")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<string>("Environment")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TargetKind")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ActorSubject", "Environment", "OperationId");
+
+                    b.HasIndex("ActorSubject", "Environment", "UpdatedAt", "OperationId");
+
+                    b.ToTable("OperatorOperations", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Administration.SupportCase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -794,6 +846,16 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<DateTimeOffset?>("FollowUpAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NextAction")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Resolution")
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)");
@@ -818,6 +880,8 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CharacterId", "UpdatedAt");
+
+                    b.HasIndex("Status", "FollowUpAt");
 
                     b.HasIndex("Status", "UpdatedAt");
 
@@ -4056,6 +4120,9 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid?>("AccountId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AdministrationOperationId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTimeOffset?>("AvailableAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -4083,6 +4150,8 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdministrationOperationId");
 
                     b.HasIndex("IdempotencyKey")
                         .IsUnique()

@@ -18,19 +18,22 @@ public sealed class SelectionCrateService : ISelectionCrateService
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IStarterEquipmentService? _starterEquipment;
     private readonly CombatAcquisitionCatalog? _equipmentCatalog;
+    private readonly TowerEquipmentSupplyCatalog? _towerSupplies;
 
     public SelectionCrateService(
         IInventoryService inventory,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
         IStarterEquipmentService? starterEquipment = null,
-        CombatAcquisitionCatalog? equipmentCatalog = null)
+        CombatAcquisitionCatalog? equipmentCatalog = null,
+        TowerEquipmentSupplyCatalog? towerSupplies = null)
     {
         _inventory = inventory;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _starterEquipment = starterEquipment;
         _equipmentCatalog = equipmentCatalog;
+        _towerSupplies = towerSupplies;
     }
 
     public async Task<SelectionCrateOpenResult> OpenSelectionContainerAsync(
@@ -47,6 +50,9 @@ public sealed class SelectionCrateService : ISelectionCrateService
         {
             return Fail("The selection container was not found in your inventory.");
         }
+
+        if (_towerSupplies?.Find(container.ItemInstance.ItemBaseId) is { } supply)
+            return await OpenTowerSupplyAsync(characterId, container, supply, optionId, cancellationToken);
 
         var definition = SelectionContainerCatalog.Find(container.ItemInstance.ItemBaseId);
         if (definition is null)
@@ -111,6 +117,38 @@ public sealed class SelectionCrateService : ISelectionCrateService
             cancellationToken);
 
         return new SelectionCrateOpenResult(true, null, rewards, definition.DisplayName);
+    }
+
+    private async Task<SelectionCrateOpenResult> OpenTowerSupplyAsync(Guid characterId,
+        InventoryItem container, TowerEquipmentSupply supply, string optionId, CancellationToken ct)
+    {
+        if (!_towerSupplies!.Choices(supply.ItemBaseId).Any(x => x.Id == optionId))
+            return Fail("Choose equipment from this chest's available options.");
+
+        // Each opening needs a new identity, including when multiple chests share one inventory stack.
+        var openingId = Guid.NewGuid();
+        var data = _towerSupplies.Award(supply.ItemBaseId, optionId, characterId, openingId,
+            $"{container.ItemInstanceId:N}:{openingId:N}");
+        var bases = await _itemBases.GetItemBasesByIdsAsync([data.ItemBaseId], ct);
+        if (!bases.TryGetValue(data.ItemBaseId, out var itemBase) || itemBase is not EquipmentBase equipmentBase
+            || itemBase.Stackable || equipmentBase.EquipmentType != data.EquipmentType)
+            return Fail("The selected equipment is currently unavailable.");
+        if (!await _inventory.TryConsumeInventoryItemAsync(characterId, container.ItemInstanceId, ct))
+            return Fail("The Tower supply chest could not be consumed.");
+
+        var instance = new EquipmentInstance
+        {
+            Id = data.State.Id, ItemBaseId = data.ItemBaseId, ItemBase = itemBase,
+            AcquiredAtUtc = DateTimeOffset.UtcNow, AcquisitionSource = ItemAcquisitionSources.SelectionContainer
+        };
+        instance.ApplyProgressionData(data);
+        var reward = new InventoryItem
+        {
+            InventoryId = characterId, ItemInstanceId = instance.Id, ItemInstance = instance, Quantity = 1
+        };
+        // The existing opening ICommand holds the character lock and commits consumption and award together.
+        await _inventory.AddItemsToInventory(characterId, [reward], ItemAcquisitionSources.SelectionContainer, ct);
+        return new(true, null, [reward], supply.Name);
     }
 
     private async Task<SelectionCrateOpenResult> OpenRandomEquipmentBoxAsync(

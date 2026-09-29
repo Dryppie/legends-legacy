@@ -1,0 +1,8 @@
+[
+  { "itemBaseId": "item.tower_supply.v1.floor_01", "name": "Rare Tower Supply Chest", "targetFloor": 1, "sourceRegion": 1, "tier": 1, "minimumLevel": 30 },
+  { "itemBaseId": "item.tower_supply.v1.floor_04", "name": "Epic Tower Supply Chest", "targetFloor": 4, "sourceRegion": 1, "tier": 1, "minimumLevel": 30 },
+  { "itemBaseId": "item.tower_supply.v1.floor_07", "name": "Unique Tower Supply Chest", "targetFloor": 7, "sourceRegion": 1, "tier": 1, "minimumLevel": 40 },
+  { "itemBaseId": "item.tower_supply.v1.floor_10", "name": "Legendary Tower Supply Chest", "targetFloor": 10, "sourceRegion": 1, "tier": 2, "minimumLevel": 50 },
+  { "itemBaseId": "item.tower_supply.v1.floor_11", "name": "Rare Tower Supply Chest II", "targetFloor": 11, "sourceRegion": 2, "tier": 2, "minimumLevel": 60 },
+  { "itemBaseId": "item.tower_supply.v1.floor_14", "name": "Epic Tower Supply Chest II", "targetFloor": 14, "sourceRegion": 2, "tier": 2, "minimumLevel": 60 }
+]

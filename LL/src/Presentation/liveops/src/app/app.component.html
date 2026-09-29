@@ -24,18 +24,19 @@
       <div class="environment-warning development">Local development operator</div>
     }
 
+    <a class="skip-link" href="#main-content">Skip to workspace</a>
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark">LL</div>
         <div><span>Legends Legacy</span><strong>Live Operations</strong></div>
       </div>
       <nav class="primary-nav" aria-label="LiveOps areas">
-        <a routerLink="/dashboard" routerLinkActive="active">Overview</a>
-        <a routerLink="/analytics" routerLinkActive="active">Analytics</a>
-        <a routerLink="/players" routerLinkActive="active">Players</a>
-        <a routerLink="/account-risk" routerLinkActive="active">Investigations</a>
-        <a routerLink="/cases" routerLinkActive="active">Cases</a>
-        <a routerLink="/audit" routerLinkActive="active">Activity log</a>
+        <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page">Overview</a>
+        <a routerLink="/analytics" routerLinkActive="active" ariaCurrentWhenActive="page">Analytics</a>
+        <a routerLink="/players" routerLinkActive="active" ariaCurrentWhenActive="page">Players</a>
+        <a routerLink="/account-risk" routerLinkActive="active" ariaCurrentWhenActive="page">Investigations</a>
+        <a routerLink="/cases" routerLinkActive="active" ariaCurrentWhenActive="page">Cases</a>
+        <a routerLink="/audit" routerLinkActive="active" ariaCurrentWhenActive="page">Activity log</a>
       </nav>
       <div class="operator">
         <div><span>{{ session.environment }}</span><strong>{{ session.displayName }}</strong></div>
@@ -44,6 +45,7 @@
     </header>
 
     <app-global-search />
+    @if (journal.recoveryMessage) { <p class="shell-message" role="status">{{ journal.recoveryMessage }} <button class="secondary" (click)="checkOperations()">Refresh recovery</button> <a routerLink="/operations">Operations &amp; recovery</a></p> }
     @if (workspace.draft?.error) { <div class="shell-message"><app-draft-status [draft]="workspace.draft" (restored)="restoreWorkspace()" /></div> }
     @if (drafts.unsaved.length) { <p class="shell-message" role="status">{{ drafts.unsaved.length }} private draft(s) still need saving. <button class="secondary" (click)="drafts.flush()">Save drafts now</button></p> }
 
@@ -56,7 +58,7 @@
       <section class="message shell-message" aria-label="Operation recovery"><p>{{ journal.unresolved.length }} operation(s) need a result check. An absent receipt does not prove failure.</p><button class="secondary" [disabled]="journal.checking" (click)="checkOperations()">{{ journal.checking ? 'Checking receipts' : 'Check receipts now' }}</button><ul>@for (entry of journal.unresolved; track entry.operationId) { <li><a routerLink="/audit" [queryParams]="{ operationId: entry.operationId, source: entry.source || 'All' }">{{ entry.action }} · {{ entry.operationId }}</a></li> }</ul></section>
     }
     @if (journal.checkMessage && journal.receipts.length) { <p class="shell-message" role="status">{{ journal.checkMessage }}</p> }
-    <router-outlet />
+    <div id="main-content" tabindex="-1"><router-outlet (activate)="focusWorkspace()" /></div>
   } @else {
     <main class="center-state" role="alert"><h1>LiveOps could not connect</h1><p>{{ shellError }}</p><button class="primary" type="button" (click)="ngOnInit()">Retry connection</button><button class="secondary" type="button" (click)="login()">Sign in</button></main>
   }

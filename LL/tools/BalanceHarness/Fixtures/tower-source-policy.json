@@ -1,0 +1,7 @@
+{
+  "version": "tower-two-source-v1",
+  "policies": ["mines-only", "mines-first-either"],
+  "panelIndex": "family-attempt-ordinal",
+  "activityVersion": "tower-joint-activity-v1",
+  "assumptions": "Paired conditional source-policy comparison, not measured player pace. Reuse the joint-activity study's pinned owners, starting gear, random Armor Chest seeds, ordered Essence recipes and idle reward identities. Rebuild histories from their initial state, not by extending censored archives. Run a fresh Mines-only baseline and a Mines-first policy that spends Catacombs sigils when no Goblin sigil remains. Both wait for the four-Essence quest gate, use the existing 6/24/72/240 cadence-hour checkpoints, retain every earned item, buy the same seven selected supply items and stop at the same twelve total dungeon attempts or activity cap. New panels are indexed by source and within-source attempt ordinal, shared between policy arms. Source choice never examines hidden encounters or combat outcomes. Failures consume that family's actual sigil. Controls have supplied Rare gear and entry; exclude them from acquisition accounting. All joint-activity fixed-level, idle-success, prior-activity and excluded-reward assumptions still apply. No search, boss changes, cadence changes, sample extension, leveling, mastery, ordinary dungeon loot, purchases or sigil conversion."
+}

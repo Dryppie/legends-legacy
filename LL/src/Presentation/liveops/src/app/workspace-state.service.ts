@@ -20,14 +20,19 @@ export class WorkspaceStateService {
     this.drafts = drafts; this.draft = await drafts.open('workspace');
     const data = this.draft.data;
     this.search = { query: data['playerQuery'] ?? '', results: [], message: '', searched: false };
-    this.cases = { search: data['caseSearch'] ?? '', status: data['caseStatus'] ?? '' };
+    this.cases = {};
+    for (const key of ['search', 'status', 'category', 'sort', 'overdue', 'page']) this.cases[key] = data['case' + key[0].toUpperCase() + key.slice(1)] ?? '';
     this.audit = {};
     for (const key of ['source', 'actionType', 'actor', 'permission', 'reference', 'riskLevel', 'target', 'operationId', 'from', 'to'])
       this.audit[key] = data['audit' + key[0].toUpperCase() + key.slice(1)] ?? '';
   }
+  get analyticsPreferences(): string { return this.draft?.data['analyticsPreferences'] ?? '{}'; }
+  set analyticsPreferences(value: string) { if (this.draft && this.drafts) this.drafts.update(this.draft, { ...this.draft.data, analyticsPreferences: value }); }
   private persist(): void {
     if (!this.draft || !this.drafts) return;
     const data: Record<string, string> = { playerQuery: this.search.query, caseSearch: this.cases['search'] ?? '', caseStatus: this.cases['status'] ?? '' };
+    for (const key of ['category', 'sort', 'overdue', 'page']) data['case' + key[0].toUpperCase() + key.slice(1)] = this.cases[key] ?? '';
+    if (this.draft.data['analyticsPreferences']) data['analyticsPreferences'] = this.draft.data['analyticsPreferences'];
     for (const [key, value] of Object.entries(this.audit)) data['audit' + key[0].toUpperCase() + key.slice(1)] = value;
     this.drafts.update(this.draft, data);
   }

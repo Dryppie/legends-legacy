@@ -1,0 +1,11 @@
+{
+  "version": "tower-entry-sources-v1",
+  "epoch": "2026-09-28T00:00:00+00:00",
+  "cadenceSeconds": 10,
+  "checkpoints": [2160, 8640, 25920, 86400],
+  "policies": ["daily-common", "daily-common-weekly-kills"],
+  "dailyDefinition": "daily.combat.kills.common",
+  "weeklyDefinition": "weekly.combat.kills",
+  "assemblyDungeon": "goblin_mines",
+  "assumptions": "Conditional offers: the named daily is offered and accepted at each UTC day start; the named weekly is offered and accepted at Monday start only in the weekly arm. Continuous ten-second idle cadence from a supplied Monday epoch; one eligible creature defeat per assumed idle victory, no kill credit on defeat, no prior progress. Claim immediately on completion. Daily and weekly share the same kills. Only guaranteed claimed fragments fund assembly at existing checkpoints. Caches and blueprints remain unopened/unspent. Native XP rewards are recorded but not applied to levels; level 30 remains a supplied accounting condition. No Guild Favor, Glory, guild membership/buildings or arena history is supplied; purchases grant nothing. This is source affordability, not an offer probability, player-time forecast or a new combat result."
+}

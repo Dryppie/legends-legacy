@@ -1,0 +1,8 @@
+{
+  "version": "tower-early-unlock-v1",
+  "checkpoint": 25920,
+  "pathsPerParty": 4,
+  "maximumFloor": 3,
+  "attemptsPerFloor": 4,
+  "assumptions": "Continue all eight earned 72-hour checkpoint party alternatives on four separately seeded paths each. No historical wins are imported. Start with only floor one unlocked on each isolated model server. Stop on four unsuccessful attempts at one floor or the first floor-three clear. No idle activity, shopping, donations, new XP or Essence acquisitions between attempts. Native Tower first-clear finalization grants tokens and titles, never equipment or XP. Tokens remain unspent and titles unequipped. All owners are modeled as separate eligible accounts; recruitment and concurrent-server contention are excluded. Start the next attempt immediately after native playback duration, excluding attendance, polling, simulation latency and coordination. Supply probes qualify a hypothetical next successful dungeon completion and do not charge resources or award owned gear. An older pending supply decision stays fixed across server unlocks. No contributions, boss edits, tuning, search, extension, player-time forecast or later-floor progression claim."
+}

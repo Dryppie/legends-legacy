@@ -22,7 +22,10 @@ export class CasesComponent implements OnInit, OnDestroy {
   list: SupportCasePage | null = null; detail: SupportCaseDetails | null = null;
   loading = false; saving = false; message = ''; failed = false; conflict = false;
   caseId = ''; characterId = ''; playerName = ''; query = ''; status = ''; page = 1;
+  filterCategory = ''; sort = 'follow-up'; overdue = false;
+  priority = 'Normal'; followUpAt = ''; nextAction = '';
   title = ''; category = 'Other'; description = ''; externalReference = '';
+  playerResponse = '';
   note = ''; evidence = ''; resolution = ''; nextStatus: SupportCaseStatus = 'Resolved';
   linkedOperation = ''; linkedSource = 'Game'; linkReason = '';
   playerQuery = ''; players: PlayerSummary[] = []; playerSearchMessage = '';
@@ -38,13 +41,27 @@ export class CasesComponent implements OnInit, OnDestroy {
     this.query = this.state.caseFilters['search'] ?? ''; this.status = this.route.snapshot?.queryParamMap.get('status') ?? this.state.caseFilters['status'] ?? '';
     this.subscription = combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
       this.saveDraft(); this.caseId = params.get('caseId') ?? '';
+      const queueLink = query.has('status') || query.has('sort') || query.has('overdue');
+      if (query.has('lookup')) this.query = this.state.caseFilters['search'] ?? '';
+      else if (queueLink) this.query = '';
+      this.status = query.get('status') ?? (queueLink ? '' : this.state.caseFilters['status']) ?? '';
+      this.sort = query.get('sort') || (queueLink ? 'follow-up' : this.state.caseFilters['sort']) || 'follow-up';
+      this.overdue = (query.get('overdue') ?? (queueLink ? 'false' : this.state.caseFilters['overdue'])) === 'true';
+      this.filterCategory = queueLink ? '' : this.state.caseFilters['category'] ?? '';
+      this.priority = 'Normal'; this.followUpAt = this.nextAction = '';
       const characterId = query.get('characterId') ?? '';
       if (this.characterId !== characterId) { this.title = ''; this.description = ''; this.externalReference = ''; this.playerName = ''; this.players = []; this.playerSearchMessage = ''; }
       this.characterId = characterId;
       this.linkedOperation = query.get('operationId') ?? ''; this.linkedSource = query.get('source') === 'Chat' ? 'Chat' : 'Game';
       this.detail = null; this.message = ''; this.conflict = false; this.saving = false;
       const draft = this.state.caseDrafts[this.caseId]; this.note = draft?.note ?? ''; this.evidence = draft?.evidence ?? '';
-      this.resolution = ''; this.linkReason = ''; this.pending.clear(); this.page = 1;
+      this.resolution = ''; this.linkReason = ''; this.pending.clear(); this.page = this.characterId || query.has('lookup') || queueLink ? 1 : Math.max(1, Number(this.state.caseFilters['page']) || 1);
+      // Consume a queue shortcut into the private saved view, so Back resumes subsequent filtering/pagination.
+      if (queueLink && !this.caseId && !this.characterId) {
+        this.rememberFilters();
+        void this.router.navigate(['/cases'], { replaceUrl: true });
+        return;
+      }
       if (this.canManage) { void this.load(); void this.openDraft(); }
     });
   }
@@ -59,8 +76,9 @@ export class CasesComponent implements OnInit, OnDestroy {
   }
   restoreDraft(useOperationLink = true): void {
     if (!this.draft?.loaded) return;
-    for (const key of ['title', 'description', 'externalReference', 'note', 'evidence', 'resolution', 'linkReason'] as const) this[key] = this.draft.data[key] ?? '';
+    for (const key of ['title', 'description', 'externalReference', 'note', 'evidence', 'resolution', 'linkReason', 'playerResponse', 'followUpAt', 'nextAction'] as const) this[key] = this.draft.data[key] ?? '';
     this.category = this.draft.data['category'] || 'Other';
+    this.priority = this.draft.data['priority'] || 'Normal';
     const status = this.draft.data['nextStatus'] as SupportCaseStatus;
     this.nextStatus = this.statuses.includes(status) ? status : 'Resolved';
     // An explicit completed-operation link takes precedence over an earlier draft.
@@ -71,13 +89,26 @@ export class CasesComponent implements OnInit, OnDestroy {
     if (this.caseId) this.state.caseDrafts[this.caseId] = { note: this.note, evidence: this.evidence };
     if (!this.draft?.loaded || this.draftLoading || !this.drafts) return;
     const data: Record<string, string> = {};
-    for (const key of ['title', 'category', 'description', 'externalReference', 'note', 'evidence', 'resolution', 'nextStatus', 'linkedOperation', 'linkedSource', 'linkReason'] as const)
+    for (const key of ['title', 'category', 'description', 'externalReference', 'note', 'evidence', 'resolution', 'nextStatus', 'linkedOperation', 'linkedSource', 'linkReason', 'playerResponse', 'priority', 'followUpAt', 'nextAction'] as const)
       if (this[key] && !(key === 'category' && this[key] === 'Other') && !(key === 'nextStatus' && this[key] === 'Resolved') && !(key === 'linkedSource' && this[key] === 'Game')) data[key] = this[key];
     this.drafts.update(this.draft, data);
   }
   discardDraft(): void {
     if (!this.draft || !this.drafts || this.draftBlocked || this.saving) return;
     this.drafts.update(this.draft, {}); this.restoreDraft(false); void this.drafts.save(this.draft);
+  }
+  preparePlayerResponse(): void {
+    if (this.detail && !this.playerResponse) { this.playerResponse = `Hello ${this.detail.case.characterName},
+
+We have reviewed your support request.
+
+[Describe the finding and any next steps you intend to share.]
+
+Reference: ${this.detail.case.id}`; this.saveDraft(); }
+  }
+  async copyPlayerResponse(): Promise<void> {
+    try { await navigator.clipboard.writeText(this.playerResponse); this.summaryMessage = 'Reviewed response copied. Nothing has been sent.'; }
+    catch { this.summaryMessage = 'Clipboard unavailable. Select the response text to copy it.'; }
   }
   async copySummary(): Promise<void> {
     if (!this.detail) return;
@@ -87,7 +118,7 @@ export class CasesComponent implements OnInit, OnDestroy {
       ...(c.externalReference ? [`External reference: ${c.externalReference}`] : []), `Resolution: ${c.resolution || 'Not yet recorded'}`,
       `Updated: ${new Date(c.updatedAt).toISOString()}`, ...(operations.length ? ['Linked operations in loaded history:', ...operations] : []),
       ...(this.detail.nextBeforeSequence ? ['Older history is available in LiveOps.'] : [])].join('\n');
-    try { await navigator.clipboard.writeText(summary); this.summaryMessage = 'Support summary copied. Internal notes and evidence text are excluded.'; }
+    try { await navigator.clipboard.writeText(summary); this.summaryMessage = 'Internal case summary copied. It includes the recorded resolution; review it before sharing.'; }
     catch { this.summaryMessage = 'Clipboard unavailable. Select the visible case details to copy them.'; }
   }
   async load(older = false): Promise<void> {
@@ -104,9 +135,9 @@ export class CasesComponent implements OnInit, OnDestroy {
         } else this.detail = result.data;
         this.conflict = false;
       } else {
-        this.state.caseFilters = { search: this.query, status: this.status };
+        this.rememberFilters();
         const result = await this.api.cases({ ...(this.characterId ? { characterId: this.characterId } : {}),
-          ...(this.status ? { status: this.status } : {}), search: this.query, page: String(this.page) });
+          ...(this.status ? { status: this.status } : {}), search: this.query, page: String(this.page), category: this.filterCategory, sort: this.sort, overdue: String(this.overdue) });
         if (generation !== this.generation) return;
         if (!result.isSuccess || !result.data) throw new Error(result.errorMessage);
         this.list = result.data;
@@ -119,6 +150,7 @@ export class CasesComponent implements OnInit, OnDestroy {
     finally { if (generation === this.generation) this.loading = false; }
   }
   filter(): void { this.page = 1; void this.load(); }
+  private rememberFilters(): void { this.state.caseFilters = { search: this.query, status: this.status, category: this.filterCategory, sort: this.sort, overdue: String(this.overdue), page: String(this.page) }; }
   changePage(delta: number): void { this.page += delta; void this.load(); }
   async findPlayer(): Promise<void> {
     if (!this.playerQuery.trim()) { this.playerSearchMessage = 'Enter a character name, account email or identifier.'; return; }
@@ -145,7 +177,23 @@ export class CasesComponent implements OnInit, OnDestroy {
   addNote(): void { this.change('notes', { body: this.note.trim(), evidenceReference: this.evidence.trim() || null }); }
   updateStatus(): void { this.change('status', { status: this.nextStatus, body: this.resolution.trim() }); }
   link(): void { this.change('operations', { linkedOperationId: this.linkedOperation.trim(), source: this.linkedSource, body: this.linkReason.trim() }); }
-  private change(action: 'notes' | 'status' | 'operations', payload: Record<string, unknown>): void {
+  useCurrentPlan(): void {
+    if (!this.detail) return;
+    const c = this.detail.case;
+    this.priority = c.priority || 'Normal'; this.nextAction = c.nextAction || '';
+    const date = c.followUpAt ? new Date(c.followUpAt) : null;
+    this.followUpAt = date ? new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+    this.saveDraft();
+  }
+  planFollowUp(): void {
+    const date = this.followUpAt ? new Date(this.followUpAt) : null;
+    if (!this.nextAction.trim() || (date && !Number.isFinite(date.getTime()))) { this.failed = true; this.message = 'Enter a next action and a valid follow-up time.'; return; }
+    this.change('follow-up', { priority: this.priority, followUpAt: date?.toISOString() ?? null, nextAction: this.nextAction.trim(),
+      body: `${this.priority} priority. Follow-up: ${date?.toISOString() ?? 'Unscheduled'}. Next action: ${this.nextAction.trim()}` });
+  }
+  isOverdue(date?: string | null): boolean { return !!date && Date.parse(date) <= Date.now(); }
+  resetFilters(): void { this.query = this.status = this.filterCategory = ''; this.overdue = false; this.sort = 'follow-up'; this.filter(); }
+  private change(action: 'notes' | 'status' | 'operations' | 'follow-up', payload: Record<string, unknown>): void {
     if (!this.detail || !payload['body']) { this.failed = true; this.message = 'Explain the note, decision or operation link before saving.'; return; }
     const caseId = this.caseId;
     const body = { expectedVersion: this.detail.case.version, ...payload };
@@ -153,6 +201,7 @@ export class CasesComponent implements OnInit, OnDestroy {
   }
   private async mutate(kind: string, payload: object, submit: (operationId: string) => Promise<ApiResponse<SupportCaseDetails>>): Promise<void> {
     if (this.saving || this.loading || this.conflict || this.draftBlocked || this.operator.sessionExpired) return;
+    if (this.journal.recoveryIncomplete) { this.failed = true; this.message = this.journal.recoveryMessage; return; }
     const key = JSON.stringify([kind, payload]); const operationId = this.pending.get(key) ?? this.journal.unresolved.find(x => x.targetId === (this.caseId || this.characterId) && x.kind === 'case-' + kind)?.operationId ?? crypto.randomUUID(); this.pending.set(key, operationId);
     const generation = this.generation; const target = this.caseId || this.characterId;
     this.saving = true; this.failed = false; this.message = ''; this.journal.record(operationId, target, 'Support case ' + kind, 'Submitting', 'case-' + kind, 'Game');
@@ -167,6 +216,7 @@ export class CasesComponent implements OnInit, OnDestroy {
         void this.router.navigate(['/cases', result.data.case.id]); return;
       }
       if (kind === 'notes') { this.note = ''; this.evidence = ''; this.saveDraft(); }
+      if (kind === 'follow-up') { this.nextAction = this.followUpAt = ''; this.priority = 'Normal'; }
       if (kind === 'status') this.resolution = '';
       if (kind === 'operations') { this.linkedOperation = ''; this.linkReason = ''; }
       this.saveDraft();

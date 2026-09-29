@@ -16,7 +16,8 @@ public enum AdminActionType
     SupportCaseNoteAdded,
     SupportCaseOperationLinked,
     CompensationPackageSaved,
-    CompensationPackageGranted
+    CompensationPackageGranted,
+    StateRefreshDeliveryRetried
 }
 
 public enum AdministrationRiskLevel

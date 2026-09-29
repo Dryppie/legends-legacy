@@ -10,6 +10,7 @@ public sealed class GameEventOutboxMessage
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? AvailableAt { get; set; }
     public string? CorrelationId { get; set; }
+    public Guid? AdministrationOperationId { get; set; }
     public string? IdempotencyKey { get; set; }
     public List<GameEventOutboxDelivery> Deliveries { get; set; } = [];
 }

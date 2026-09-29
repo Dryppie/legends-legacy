@@ -70,6 +70,7 @@ public sealed class AccountModerationController(
 
     [HttpPost("{accountId:guid}/bans")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
+    [API.LiveOps.Operations.TrackOperation("ban", "accountId", "account")]
     public async Task<ActionResult<Response<AccountBanResultDto>>> Ban(
         Guid accountId,
         [FromBody] BanAccountRequest request,
@@ -118,6 +119,7 @@ public sealed class AccountModerationController(
 
     [HttpPost("bans/{restrictionId:guid}/revoke")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
+    [API.LiveOps.Operations.TrackOperation("unban", "restrictionId", "restriction")]
     public async Task<ActionResult<Response<AccountBanResultDto>>> RevokeBan(
         Guid restrictionId,
         [FromBody] RevokeBanRequest request,
@@ -164,6 +166,7 @@ public sealed class AccountModerationController(
 
     [HttpPost("{accountId:guid}/multiplayer-restrictions")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
+    [API.LiveOps.Operations.TrackOperation("multiplayer-restriction", "accountId", "account")]
     public async Task<ActionResult<Response<MultiplayerRestrictionResultDto>>> RestrictMultiplayer(
         Guid accountId,
         [FromBody] MultiplayerRestrictionRequest request,
@@ -212,6 +215,7 @@ public sealed class AccountModerationController(
 
     [HttpPost("multiplayer-restrictions/{restrictionId:guid}/revoke")]
     [Authorize(Policy = AdministrationPermissions.AccountModeration)]
+    [API.LiveOps.Operations.TrackOperation("multiplayer-restriction-revoke", "restrictionId", "restriction")]
     public async Task<ActionResult<Response<MultiplayerRestrictionResultDto>>> RevokeMultiplayerRestriction(
         Guid restrictionId,
         [FromBody] RevokeBanRequest request,

@@ -1,0 +1,49 @@
+# Old Forest growth and fifth-Essence source qualification — 29 September 2026
+
+The fifteen servers stopped at floor 5 now have a qualified **conditional level-40 continuation**. All 240 owner/server states reach level 40 with their four actually owned Essences at level 8. All fifteen ten-member parties pass production Tower preparation. No new combat outcome, fifth Essence, Tower reward or floor unlock is granted.
+
+These are sixteen personal identities repeated across server/outcome alternatives, not 240 sampled players. The seventeen other server paths remain pinned to their previous continuations. All 512 personal alternatives survive.
+
+## Forward activity and retained ownership
+
+The new `tower-old-forest-growth-v2` fixture continues each saved mutable journey: character XP, four individual Essence identities and training, selected daily and weekly prophecy instances, claimed rewards, currencies, remaining item stock, mastery, blueprint state and serial clocks. Old Forest requires level 25 **and completion of Between Day and Night**. The model's existing fourth-Essence/quest-sigil gate supplies that prerequisite; level alone is insufficient.
+
+Each new idle encounter uses the existing one-creature assumption, ten-second cadence and original perfect/four-of-five sequence at its absolute encounter ordinal. Native Old Forest XP is **22 per modeled victory**. Defeats grant no XP or equipment under the unchanged zero-retention scenario. Production XP/leveling, Essence training, offers and claims apply. Production ordinary equipment and sigil rewards use new encounter identities; splitting each reward interval in two reproduces the whole interval exactly. Each owner stops immediately after reaching level 40, bounded by the original absolute 86,400-encounter cap. Whole Mines sigils are assembled from actual fragments at that stop.
+
+| Conditional idle outcome | Owner/server states | Additional cadence hours, min / median / max |
+| --- | ---: | ---: |
+| Perfect | 128 | 54.51 / 61.15 / 71.03 |
+| Four of five | 112 | 87.02 / 95.03 / 104.29 |
+
+These are **scenario clock equivalents**, not measured acquisition time, attendance or a forecast. One creature per encounter, sustained cadence, assumed wins, immediate claims and no navigation time remain conditions. The processor's reproducible reward identity clock remains the established Unix-epoch/absolute-ordinal convention; the journey calendar includes the archived dungeon/Tower time and waiting. The two clocks serve different purposes. No live telemetry was used.
+
+Across the alternatives, the study applies 6,681,447 additional encounters, 130,166,564 idle character XP and 4,667,758 prophecy character XP from 1,046 new claims. Prophecy character XP does not train Essences. The four existing Essences reach level 8 without ascension. It earns 6,870 ordinary items and 1,222 random sigils, and assembles 364 Mines sigils. All 240 states retain **2–11 Mines sigils** at the end; none is spent here.
+
+All **8,915 earlier owned equipment references** on these servers are retained, including stronger supply gear. The existing production-stat-cost selection policy changes 164 loadouts; it is not a combat build search. The held servers preserve another 9,897 references. All 18,812 historical references survive, with 25,682 references after the new awards. Mastery, old blueprint progress and old claim/offer/event histories remain intact. Sixteen owners per server align to the latest personal finishing clock with waiting only; earlier finishers gain no activity while waiting.
+
+## A concrete fifth-Essence source
+
+Production **The Roots Remember** awards one Old Forest Essence token after six Old Forest encounter victories, level 30 and a Goblin Mines completion. Its prerequisite is Between Day and Night. Native quest progression, turn-in and duplicate turn-in are exercised against a **prospective unclaimed-quest scenario**: new Old Forest victories satisfy the first objective, actual character level satisfies the level objective, and historical dungeon completion receives zero credit in this scenario. A wrong-family completion does not satisfy Mines, and premature turn-in fails.
+
+The hypothetical Mines completion is a disposable source probe. It awards a token only inside that probe. Native token opening consumes one token, native absorption consumes its selected unbound Essence, and duplicate opening/absorption are rejected. Native loadout saving rejects the fifth slot at 39 and accepts a newly absorbed, unique-creature fifth at 40; a one-XP disposable training check passes. **None of those probe tokens, Essences, XP or completions is retained.** There are 1,140 valid option probes: five options for each guardian, striker and controller state; four for each restorer because Hollow Stag is already owned. Candidate options are not optimized or searched builds.
+
+This establishes a deterministic quest route that avoids relying on unknown historical resonance. It does **not** establish the earliest fifth-Essence acquisition time or prove that another Mines run is always necessary. Earlier quest-token stock was omitted, and archived successful Mines runs may support quest reconstruction if activation and event order are proven. A fresh paid successful Mines run is the explicit conservative fallback in the prospective scenario, not an additional production rule. Past ordinary Essence drops/resonance remain unknown and are neither reset nor credited. Other omitted rewards, ordinary currencies, cores, caches, shops and ascension remain outside the spendable model.
+
+## Evidence and verification
+
+- Corrected study: `TestResults/tower-level40-corrected-study-20260929`; manifest **`aabe1e35cfc93c8ea4e4f290b531a8d2975da379a0bd0f37e7701afc1f67736f`**; result **`064376a1803c3e11d565145ab2a7e7a276eed9477d699c597b2052c9f6696e09`**.
+- Frozen inputs, executable bindings, declaration, process receipt, study TRX, audit and amendments: `TestResults/tower-level40-corrected-owner-20260929`. The owned process finished in **62.672 seconds**, with zero active children and **15,365,496 bytes** of output against 900-second / 256-MiB caps.
+- Independent audit: `VerifiedLevel40Growth`, **3,331 input hashes**, chronological XP/offer/claim/training replay, inventory/resource conservation, native source gates, fifteen preparations, historical attempts and held-path pins. Twelve deliberately corrupted copies are rejected without editing study artifacts.
+- Regression: **802 passed, 24 intentional opt-in skips**, plus the owned study passed separately. Tests ran through `build/run-tests.ps1`; exact filter and TRX are recorded in closeout. The initial sandbox build could not read the user's NuGet configuration; the same wrapper with approved filesystem access built successfully. No verification remains blocked.
+
+The first v1 attempt failed at Tower preparation because it changed each point's `Horizon`, which identifies the original cohort, to its new personal encounter count. Its request, log, failed TRX, frozen inputs and original build remain in `tower-level40-owner-20260929` / `tower-level40-build-20260929`; it produced no study output files or combat. The separately built v2 keeps `Horizon`, advances `Encounter`/`AvailableAt`, and preserves the original party guard. `correction.json` pins the failed request and explains the change.
+
+The original frozen independent auditor also remains intact. Its preflight incorrectly interpreted Unix-relative ticks as year-1 ticks and restored the selected daily from the nullable overview pointer captured before acceptance. The separate `audit-amendment.json` binds the correction to the Unix epoch and persisted selected instance. Reproduce the passing audit with `TestResults/tower-level40-corrected-owner-20260929/audit-amendment/verify-tower-level40.py`; amended SHA **`944a5eca92ecf07fb07fb3e82efaf47193430b66f99ef40fdab06a50ba64125c`**. No native output or executable was changed for this audit repair.
+
+The latest combat exclusion ledger remains `tower-expansion-combat-owner-20260929/seed-ledger.json`, SHA **`7473b0172d868e81d872d8caffb0bdf33fab41986c4ae4cc79720e4ec27a8fa2`**, union **878,799**, including all earlier unused reservations. This phase reserves zero combat seeds and performs zero search. The repeating gear curve and `affinity-creation-with-benchmark-validation-v1` remain unchanged. No production source, dependencies, configuration, migrations, shared databases or deployment changed.
+
+## Continuation boundary
+
+Use each corrected `*--growth.json.gz`: `owners` contains all sixteen aligned personal runtimes; `growth` contains their individual activity endpoints, reward windows and source witnesses; `party`/`prepared` contains the retained ten-person roster. `server` remains the exact native state at the last failed floor-5 attempt. `historicalAttempts` includes those ten-person failures and all earlier five-person history. `personalRefreshBefore` preserves the earlier refresh boundary; `nextPersonalRefreshBefore` identifies where the new XP/time refresh belongs. Future native server restoration must apply that refresh without replaying tokens/titles or losing the weekly scouting cap.
+
+Next, reconstruct the relevant quest prefix from the existing gate and paid successful Mines receipts where provable; otherwise qualify and run the conservative fresh paid Mines entry under the bounded workflow. Then retain the actual token opening and absorption receipt, extend the currently four-Essence runtime with ownership and persistent-ID checks, and account for any subsequent fifth-Essence training. Prepare the changed party before new floor-5 combat. Earlier 0/60 actual and 0/60 supplied floor-5 results stay historical; these changed loadouts inherit no win rate. Later floor-10→11 progression must continue to retain stronger individually owned gear.

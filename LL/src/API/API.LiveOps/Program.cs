@@ -27,8 +27,9 @@ ValidateProductionConfiguration(
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CookieAntiforgeryFilter>();
+builder.Services.AddScoped<API.LiveOps.Operations.OperationTrackingFilter>();
 builder.Services.AddControllers(options =>
-    options.Filters.AddService<CookieAntiforgeryFilter>())
+    { options.Filters.AddService<CookieAntiforgeryFilter>(); options.Filters.AddService<API.LiveOps.Operations.OperationTrackingFilter>(); })
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddProblemDetails(options =>
@@ -90,6 +91,7 @@ builder.Services.AddHealthChecks()
         failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
         tags: ["ready"]);
 builder.Services.AddScoped<LiveOpsOperationalStatusService>();
+builder.Services.AddScoped<Persistence.LL.BackgroundJobs.BackgroundJobScheduleReader>();
 builder.Services.AddScoped<ILiveOpsRecentActivityReader, LiveOpsRecentActivityReader>();
 builder.Services.AddScoped<LiveOpsActionPreviewService>();
 builder.Services.AddScoped<LiveOpsPlayerSupportSnapshotService>();

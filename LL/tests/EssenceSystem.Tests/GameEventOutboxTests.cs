@@ -167,10 +167,12 @@ public sealed class GameEventOutboxTests
         services.AddScoped<IGameEventOutboxRepository, GameEventOutboxRepository>();
         services.AddScoped<IGameEventOutboxConsumer, ScopedContextRecordingConsumer>();
         services.AddScoped<IStateSyncService, StubStateSyncService>();
+        services.AddScoped<AdministrationOperationContext>();
         services.AddSingleton(recorder);
         services.AddSingleton<TimeProvider>(timeProvider);
         await using var provider = services.BuildServiceProvider();
 
+        var operationId = Guid.NewGuid();
         using (var seedScope = provider.CreateScope())
         {
             var db = seedScope.ServiceProvider.GetRequiredService<LLDbContext>();
@@ -180,6 +182,7 @@ public sealed class GameEventOutboxTests
                 {
                     Id = Guid.NewGuid(),
                     EventType = GameEventTypes.CharacterCreated,
+                    AdministrationOperationId = index == 0 ? operationId : null,
                     PayloadJson = "{}",
                     CreatedAt = Now,
                     AvailableAt = Now
@@ -215,6 +218,8 @@ public sealed class GameEventOutboxTests
 
         Assert.Equal(2, recorder.ContextIds.Count);
         Assert.Equal(2, recorder.ContextIds.Distinct().Count());
+        Assert.Contains(operationId, recorder.OperationIds);
+        Assert.Contains(null, recorder.OperationIds);
     }
 
     [Fact]
@@ -728,14 +733,16 @@ public sealed class GameEventOutboxTests
         private readonly object _gate = new();
 
         public List<Guid> ContextIds { get; } = [];
+        public List<Guid?> OperationIds { get; } = [];
         public TaskCompletionSource TwoDeliveriesProcessed { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public void Record(Guid contextId)
+        public void Record(Guid contextId, Guid? operationId)
         {
             lock (_gate)
             {
                 ContextIds.Add(contextId);
+                OperationIds.Add(operationId);
                 if (ContextIds.Count == 2)
                 {
                     TwoDeliveriesProcessed.TrySetResult();
@@ -746,6 +753,7 @@ public sealed class GameEventOutboxTests
 
     private sealed class ScopedContextRecordingConsumer(
         LLDbContext db,
+        AdministrationOperationContext operationContext,
         ScopedContextRecorder recorder) : IGameEventOutboxConsumer
     {
         public const string ConsumerName = "scope-recorder";
@@ -755,7 +763,7 @@ public sealed class GameEventOutboxTests
 
         public Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
         {
-            recorder.Record(db.ContextId.InstanceId);
+            recorder.Record(db.ContextId.InstanceId, operationContext.OperationId);
             return Task.CompletedTask;
         }
     }

@@ -47,7 +47,7 @@ public sealed partial class LiveOpsAdministrationTests
         var history = db.GetService<IHistoryRepository>();
         await db.Database.ExecuteSqlRawAsync(history.GetCreateIfNotExistsScript());
         var migrationId = Assert.Single(db.Database.GetMigrations(), x => x.EndsWith("_ImproveLiveOpsAdministration"));
-        foreach (var migration in db.Database.GetMigrations().Where(x => x != migrationId))
+        foreach (var migration in db.Database.GetMigrations().Where(x => x != migrationId && !x.EndsWith("_ScheduleSupportCaseFollowUps")))
             await db.Database.ExecuteSqlRawAsync(history.GetInsertScript(new HistoryRow(migration, "10.0.8")));
         await db.Database.MigrateAsync();
         await db.Database.MigrateAsync();

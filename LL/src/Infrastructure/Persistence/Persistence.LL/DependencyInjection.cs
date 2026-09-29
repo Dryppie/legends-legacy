@@ -93,6 +93,8 @@ public static class DependencyInjection
         services.AddScoped<IAdministrationRepository, AdministrationRepository>();
         services.AddScoped<ISupportCaseRepository, SupportCaseRepository>();
         services.AddScoped<IOperatorDraftRepository, OperatorDraftRepository>();
+        services.AddScoped<IOperatorOperationRepository, OperatorOperationRepository>();
+        services.AddScoped<IStateRefreshRecoveryRepository, StateRefreshRecoveryRepository>();
         services.AddScoped<ICompensationPackageRepository, CompensationPackageRepository>();
         services.AddScoped<IAccountRiskRepository, AccountRiskRepository>();
         services.AddScoped<IAccountTemporalCorrelationRepository, AccountTemporalCorrelationRepository>();

@@ -11,6 +11,7 @@ public static class AdminActionPreviewKinds
     public const string CompensationPackage = "CompensationPackage";
     public const string AlphaSignetGrant = "AlphaSignetGrant";
     public const string CompensationGrant = "CompensationGrant";
+    public const string StateRefreshRecovery = "StateRefreshRecovery";
 }
 
 /// <summary>

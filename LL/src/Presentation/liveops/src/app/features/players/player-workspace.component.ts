@@ -1,3 +1,7 @@
+import { SupportEvidenceComponent } from '../../shared/support-evidence.component';
+import { OperatorDraftService } from '../../operator-draft.service';
+import { PreparationDraft } from '../../shared/preparation-draft';
+import { DraftStatusComponent } from '../../shared/draft-status.component';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -32,7 +36,7 @@ type DurationOption = '1h' | '24h' | '7d' | 'permanent';
 @Component({
   selector: 'app-player-workspace',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ActionPreviewComponent, SupportSnapshotComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ActionPreviewComponent, SupportSnapshotComponent, DraftStatusComponent, SupportEvidenceComponent],
   templateUrl: './player-workspace.component.html',
 })
 export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
@@ -44,7 +48,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   finderCollapsed = false;
   receipt: OperationReceipt | null = null;
   issue = '';
-  caseId = '';
+  caseId = ''; caseTitle = ''; caseStatus = '';
+  readonly preparation: PreparationDraft;
   private targetId: string | null = null;
   private generation = 0;
   private searchGeneration = 0;
@@ -125,7 +130,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     readonly operator: OperatorContextService,
     private readonly workspace: WorkspaceStateService = new WorkspaceStateService(),
     readonly journal: OperationJournalService = new OperationJournalService(),
-  ) {}
+    drafts?: OperatorDraftService,
+  ) { this.preparation = new PreparationDraft(drafts, this, ["usePackageId", "compensationMode", "banReason", "banNotes", "banDuration", "unbanReason", "multiplayerRestrictionReason", "multiplayerRestrictionNotes", "multiplayerRestrictionDuration", "multiplayerRestrictionRevokeReason", "muteReason", "muteDuration", "unmuteReason", "itemQuery", "selectedItem", "grantQuantity", "equipmentDefinitionId", "equipmentTier", "equipmentRank", "equipmentStyleId", "grantReason", "grantNotes", "signetReason", "signetQuantity", "packageId", "packageVersion", "packageName", "packagePurpose", "packageArchived", "packageLines"]); }
 
   ngOnInit(): void {
     const search = this.workspace.playerSearch;
@@ -134,11 +140,14 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.searchMessage = search.message;
     this.searched = search.searched;
     this.querySubscription = this.route.queryParamMap?.subscribe(params => {
+      if (params.has('lookup')) { this.searchQuery = this.workspace.playerSearch.query; this.searchResults = []; this.searchMessage = this.workspace.playerSearch.message; this.finderCollapsed = false; }
       const section = params.get('section');
       if (section && ['support', 'inventory', 'activity', 'account', 'chat', 'grant', 'signets', 'audit'].includes(section)) {
         this.activeSection = section as WorkspaceSection;
       }
       this.caseId = params.get('case') ?? '';
+      if (this.caseId) this.finderCollapsed = true;
+      void this.loadCaseContext();
       if (this.activeSection === 'chat' && this.selectedPlayer && !this.playerMessagesLoaded) void this.loadPlayerMessages();
     });
     this.routeSubscription = this.route.paramMap.subscribe((params) => {
@@ -149,6 +158,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.preparation.detach();
     this.generation++;
     this.searchGeneration++;
     this.snapshotGeneration++;
@@ -381,6 +391,26 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     catch { this.showError(`Could not copy the ${label.toLowerCase()}.`); }
   }
 
+  async restorePreparation(characterId: string): Promise<void> {
+    await this.preparation.open('player:' + characterId);
+    if (this.targetId !== characterId || !this.selectedItem || this.selectedItem.itemType !== 'Equipment') return;
+    const itemId = this.selectedItem.id, generation = this.generation;
+    try { const result = await this.api.compensationEquipmentOptions(characterId, itemId);
+      if (generation === this.generation && this.selectedItem?.id === itemId) this.equipmentOptions = result.data;
+    } catch { if (generation === this.generation) this.showInfo('Equipment options could not be refreshed. Select the item again before reviewing a grant.'); }
+  }
+  private async loadCaseContext(): Promise<void> {
+    const caseId = this.caseId, generation = this.generation;
+    this.caseTitle = ''; this.caseStatus = '';
+    if (!caseId || !this.selectedPlayer || !this.hasPermission(this.permissions.account)) return;
+    try {
+      const result = await this.api.supportCase(caseId);
+      if (generation !== this.generation || caseId !== this.caseId) return;
+      if (result.data?.case.characterId === this.selectedPlayer?.player.characterId) {
+        this.caseTitle = result.data.case.title; this.caseStatus = result.data.case.status;
+      } else { this.caseId = ''; this.showInfo('The linked case could not be verified for this player. Open the correct case before recording findings.'); }
+    } catch { if (generation === this.generation && caseId === this.caseId) this.caseTitle = 'Case unavailable — open to retry'; }
+  }
   async copyReceiptSummary(): Promise<void> {
     const receipt = this.receipt, generation = this.generation;
     if (!receipt) return;
@@ -390,7 +420,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
       const entry = result.data?.entries.find(x => x.operationId === receipt.operationId);
       if (!result.isSuccess || !entry) throw new Error('Receipt is unavailable. Open the activity log before copying a summary.');
       await navigator.clipboard.writeText(operationSummary(entry, this.operator.session?.environment ?? 'Unknown'));
-      this.showSuccess('Operation summary copied. Internal notes and technical JSON are excluded.');
+      this.showSuccess('Internal operation summary copied. It includes the recorded reason; review it before sharing.');
     } catch (error) { if (generation === this.generation) this.showError(this.errorMessage(error)); }
   }
 
@@ -529,6 +559,16 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     );
   }
 
+  readonly packageItemNames: Record<string, string> = {};
+  async resolvePackageItems(lines: CompensationPackageLine[]): Promise<void> {
+    const generation = this.generation;
+    await Promise.all([...new Set(lines.map(x => x.itemBaseId))].filter(id => !this.packageItemNames[id]).map(async id => {
+      try { const result = await this.api.searchItems(id); const item = result.data?.find(x => x.id === id); if (generation === this.generation && item) this.packageItemNames[id] = item.name; } catch { /* The final server review remains authoritative. */ }
+    }));
+  }
+  compensationMode = 'use'; packageSearch = ''; usePackageId = '';
+  get filteredPackages() { const q = this.packageSearch.trim().toLowerCase(); return this.packages.filter(x => !x.archived && (!q || `${x.name} ${x.purpose}`.toLowerCase().includes(q))); }
+  get usePackage() { return this.packages.find(x => x.packageId === this.usePackageId && !x.archived); }
   packages: CompensationPackage[] = []; packagesLoading = false; packageError = ''; packageLoaded = false;
   packageId = ''; packageVersion = 0; packageName = ''; packagePurpose = ''; packageArchived = false;
   packageLines: CompensationPackageLine[] = [];
@@ -540,7 +580,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
       const result = await this.api.compensationPackages();
       if (generation !== this.generation) return;
       if (!result.isSuccess || !result.data) throw new Error(result.errorMessage);
-      this.packages = result.data; this.packageLoaded = true;
+      this.packages = result.data; this.packageLoaded = true; if (this.usePackage) void this.resolvePackageItems(this.usePackage.items);
     } catch (error) { if (generation === this.generation) this.packageError = this.errorMessage(error); }
     finally { if (generation === this.generation) this.packagesLoading = false; }
   }
@@ -549,6 +589,23 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.packageId = value?.packageId ?? ''; this.packageVersion = value?.version ?? 0;
     this.packageName = value?.name ?? ''; this.packagePurpose = value?.purpose ?? ''; this.packageArchived = value?.archived ?? false;
     this.packageLines = structuredClone(value?.items ?? []); this.packageSaveOperation = null;
+    if (value) void this.resolvePackageItems(value.items);
+  }
+  get packageHasEdits(): boolean {
+    const saved = this.packages.find(x => x.packageId === this.packageId && x.version === this.packageVersion);
+    return saved ? saved.name !== this.packageName || saved.purpose !== this.packagePurpose || saved.archived !== this.packageArchived || JSON.stringify(saved.items) !== JSON.stringify(this.packageLines) : !!(this.packageName || this.packagePurpose || this.packageLines.length);
+  }
+  editPackage(id: string): void {
+    if (this.packageHasEdits) { this.showInfo('Save the package draft or discard its edits before selecting a different package.'); return; }
+    this.selectPackage(id); this.preparation.save();
+  }
+  discardPackageEdits(): void { this.selectPackage(this.packageId); this.preparation.save(); }
+  async grantSavedPackage(): Promise<void> {
+    const player = this.selectedPlayer?.player, saved = this.usePackage;
+    if (!player || !saved || !this.requireReason(this.grantReason)) return;
+    const body = { characterId: player.characterId, packageId: saved.packageId, version: saved.version, reason: this.grantReason.trim(), internalNotes: this.cleanOptional(this.grantNotes) };
+    await this.openActionPreview('package', id => this.api.previewCompensationPackage({ operationId: id, ...body }),
+      (previewToken, operationId) => this.api.grantCompensationPackage({ previewToken, operationId, ...body }));
   }
   addPackageLine(): void {
     if (!this.selectedItem || !Number.isInteger(this.grantQuantity) || this.grantQuantity < 1 || this.packageLines.length >= 10) { this.showError('Select an item and whole positive quantity; a package supports at most 10 lines.'); return; }
@@ -559,14 +616,15 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   removePackageLine(index: number): void { this.packageLines = this.packageLines.filter((_, i) => i !== index); }
   async savePackage(): Promise<void> {
     const player = this.selectedPlayer?.player;
-    if (!player || this.busyAction || this.operator.sessionExpired) return;
+    if (!player || this.preparation.blocked || this.busyAction || this.operator.sessionExpired) return;
+    if (this.journal.recoveryIncomplete) { this.showError(this.journal.recoveryMessage); return; }
     if (!this.packageId) this.packageId = crypto.randomUUID();
     const payload = { packageId: this.packageId, expectedVersion: this.packageVersion, characterId: player.characterId,
       name: this.packageName.trim(), purpose: this.packagePurpose.trim(), archived: this.packageArchived, items: this.packageLines };
     const key = JSON.stringify(payload);
-    if (this.packageSaveOperation?.key !== key) this.packageSaveOperation = { key, id: crypto.randomUUID() };
+    if (this.packageSaveOperation?.key !== key) this.packageSaveOperation = { key, id: this.journal.unresolved.find(x => x.targetId === this.packageId && x.kind === 'save-package')?.operationId ?? crypto.randomUUID() };
     const operationId = this.packageSaveOperation.id; const generation = this.generation;
-    this.busyAction = 'save-package'; this.journal.record(operationId, this.packageId, 'Save compensation package', 'Submitting');
+    this.busyAction = 'save-package'; this.journal.record(operationId, this.packageId, 'Save compensation package', 'Submitting', 'save-package', 'Game');
     try {
       const result = await this.api.saveCompensationPackage({ operationId, ...payload });
       this.journal.record(operationId, payload.packageId, 'Save compensation package', result.isSuccess ? 'Completed' : 'Rejected');
@@ -630,7 +688,9 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
 
   async refreshActionPreview(): Promise<void> { if (!this.previewSubmitting) await this.previewRefresh?.(); }
 
+  savePreparationAfterClick(): void { queueMicrotask(() => this.preparation.save()); }
   setSection(section: WorkspaceSection): void {
+    this.preparation.save();
     if (section === 'grant' && !this.packageLoaded && this.hasPermission(this.permissions.economy)) void this.loadPackages();
     this.activeSection = section;
     this.message = '';
@@ -648,6 +708,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private async loadPlayer(characterId: string): Promise<void> {
+    this.preparation.detach();
     const generation = ++this.generation;
     this.targetId = characterId;
     this.resetDrafts();
@@ -671,6 +732,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
       if (generation !== this.generation) return;
       if (!response.isSuccess || !response.data) { this.playerError = response.errorMessage || 'The player could not be loaded.'; return; }
       this.selectedPlayer = response.data;
+      void this.restorePreparation(characterId);
+      void this.loadCaseContext();
       void this.loadSupportSnapshot(characterId);
       if (this.activeSection === 'chat') void this.loadPlayerMessages();
       if (this.activeSection === 'grant' && this.hasPermission(this.permissions.economy)) void this.loadPackages();
@@ -682,6 +745,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private clearPlayer(): void {
+    this.preparation.detach();
     this.generation++;
     this.targetId = null;
     this.playerError = '';
@@ -704,7 +768,7 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     this.banReason = this.banNotes = this.unbanReason = this.multiplayerRestrictionReason = this.multiplayerRestrictionNotes = this.multiplayerRestrictionRevokeReason = '';
     this.muteReason = this.unmuteReason = this.grantReason = this.grantNotes = this.signetReason = this.itemQuery = '';
     this.banDuration = this.multiplayerRestrictionDuration = '24h'; this.muteDuration = '1h';
-    this.selectPackage(''); this.packages = []; this.packageLoaded = false; this.packagesLoading = false; this.packageError = '';
+    this.compensationMode = 'use'; this.usePackageId = ''; this.selectPackage(''); this.packages = []; this.packageLoaded = false; this.packagesLoading = false; this.packageError = '';
     this.grantQuantity = this.signetQuantity = 1; this.signetConfirmation = false; this.signetOperation = null;
     this.loadingItems = false; this.itemResults = []; this.pendingOperationIds.clear(); this.receipt = null;
     this.actionPreview = null; this.previewSubmit = null; this.previewRefresh = null; this.previewKind = ''; this.previewConfirmation = '';
@@ -732,7 +796,8 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
     previewRequest: (operationId: string) => Promise<ApiResponse<ActionPreview>>,
     submitRequest: (previewToken: string, operationId: string) => Promise<ApiResponse<unknown>>,
   ): Promise<void> {
-    if (this.busyAction || this.previewSubmitting || this.operator.sessionExpired) return;
+    if (this.preparation.blocked || this.busyAction || this.previewSubmitting || this.operator.sessionExpired) return;
+    if (this.journal.recoveryIncomplete) { this.showError(this.journal.recoveryMessage); return; }
     const generation = this.generation;
     this.busyAction = kind;
     this.message = '';
@@ -769,6 +834,9 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
       }
       this.journal.record(operationId, targetId, title, 'Completed');
       if (generation !== this.generation) return true;
+      const completedFields: Record<string, string[]> = { ban: ['banReason', 'banNotes'], unban: ['unbanReason'], 'multiplayer-restriction': ['multiplayerRestrictionReason', 'multiplayerRestrictionNotes'], 'multiplayer-restriction-revoke': ['multiplayerRestrictionRevokeReason'], mute: ['muteReason'], unmute: ['unmuteReason'], grant: ['grantReason', 'grantNotes'], package: ['grantReason', 'grantNotes'], signets: ['signetReason'] };
+      for (const field of completedFields[kind] ?? []) Reflect.set(this, field, '');
+      this.preparation.save();
       this.receipt = this.journal.receipts[0];
       this.pendingOperationIds.delete(kind);
       this.showSuccess(`Operation completed. Reference: ${operationId}`);
@@ -799,7 +867,9 @@ export class PlayerWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private operationId(kind: string): string {
-    const existing = this.pendingOperationIds.get(kind) ?? this.journal.unresolved.find(x => x.targetId === this.selectedPlayer?.player.characterId && x.kind === kind)?.operationId;
+    const player = this.selectedPlayer?.player;
+    const targets = [player?.characterId, player?.accountId, player?.activeBanId, player?.activeMultiplayerRestrictionId];
+    const existing = this.pendingOperationIds.get(kind) ?? this.journal.unresolved.find(x => targets.includes(x.targetId) && x.kind === kind)?.operationId;
     if (existing) return existing;
     const created = crypto.randomUUID();
     this.pendingOperationIds.set(kind, created);

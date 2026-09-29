@@ -68,6 +68,7 @@ export interface SelectionCrateOption {
   id: string;
   name: string;
   quantity: number;
+  description?: string | null;
   essence?: EssenceDefinitionDto | null;
 }
 

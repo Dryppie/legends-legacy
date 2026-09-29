@@ -11,15 +11,18 @@ public sealed class OperatorDraftService(IOperatorDraftRepository repository, Ti
     {
         ["title"] = 160, ["category"] = 40, ["description"] = 4000, ["externalReference"] = 300,
         ["note"] = 4000, ["evidence"] = 500, ["resolution"] = 4000, ["nextStatus"] = 32,
-        ["linkedOperation"] = 36, ["linkedSource"] = 16, ["linkReason"] = 4000
+        ["playerResponse"] = 4000, ["priority"] = 16, ["followUpAt"] = 40, ["nextAction"] = 500, ["linkedOperation"] = 36, ["linkedSource"] = 16, ["linkReason"] = 4000
     };
     private static readonly Dictionary<string, int> WorkspaceFields = new()
     {
-        ["playerQuery"] = 160, ["caseSearch"] = 160, ["caseStatus"] = 32,
+        ["analyticsPreferences"] = 6000, ["casePage"] = 8, ["caseCategory"] = 40, ["caseSort"] = 24, ["caseOverdue"] = 5, ["playerQuery"] = 160, ["caseSearch"] = 160, ["caseStatus"] = 32,
         ["auditSource"] = 16, ["auditActionType"] = 80, ["auditActor"] = 320,
         ["auditPermission"] = 80, ["auditReference"] = 500, ["auditRiskLevel"] = 24,
         ["auditTarget"] = 320, ["auditOperationId"] = 36, ["auditFrom"] = 40, ["auditTo"] = 40
     };
+    private static readonly Dictionary<string, int> PlayerFields = new() { ["usePackageId"] = 40, ["compensationMode"] = 16, ["banReason"] = 2200, ["banNotes"] = 4200, ["banDuration"] = 1000, ["unbanReason"] = 2200, ["multiplayerRestrictionReason"] = 2200, ["multiplayerRestrictionNotes"] = 4200, ["multiplayerRestrictionDuration"] = 1000, ["multiplayerRestrictionRevokeReason"] = 2200, ["muteReason"] = 2200, ["muteDuration"] = 1000, ["unmuteReason"] = 2200, ["itemQuery"] = 1000, ["selectedItem"] = 8000, ["grantQuantity"] = 1000, ["equipmentDefinitionId"] = 1000, ["equipmentTier"] = 1000, ["equipmentRank"] = 1000, ["equipmentStyleId"] = 1000, ["grantReason"] = 2200, ["grantNotes"] = 4200, ["signetReason"] = 2200, ["signetQuantity"] = 1000, ["packageId"] = 1000, ["packageVersion"] = 1000, ["packageName"] = 1000, ["packagePurpose"] = 2200, ["packageArchived"] = 1000, ["packageLines"] = 8000 };
+    private static readonly Dictionary<string, int> InvestigationFields = new() { ["note"] = 8200, ["statusReason"] = 1200, ["selectedStatus"] = 64 };
+    private static readonly Dictionary<string, int> RecoveryFields = new() { ["reason"] = 2200 };
     public async Task<Response<OperatorDraft>> GetAsync(string actor, string key, CancellationToken ct)
     {
         if (!ValidKey(actor, key)) return Response<OperatorDraft>.Fail("Invalid draft reference.");
@@ -41,7 +44,7 @@ public sealed class OperatorDraftService(IOperatorDraftRepository repository, Ti
         return Response<OperatorDraft>.Success(draft);
     }
     private static bool ValidKey(string actor, string key) => !string.IsNullOrWhiteSpace(actor) && actor.Length <= 320 &&
-        (key == "workspace" || (key?.Split(':') is ["case" or "new-case", var id] && Guid.TryParse(id, out var target) && target != Guid.Empty));
+        (key == "workspace" || (key?.Split(':') is ["case" or "new-case" or "player" or "investigation" or "delivery", var id] && Guid.TryParse(id, out var target) && target != Guid.Empty));
     private static bool ValidContent(string key, string? content)
     {
         if (content is null || content.Length > 24000) return false;
@@ -49,7 +52,7 @@ public sealed class OperatorDraftService(IOperatorDraftRepository repository, Ti
         {
             using var document = JsonDocument.Parse(content, new JsonDocumentOptions { MaxDepth = 2 });
             if (document.RootElement.ValueKind != JsonValueKind.Object) return false;
-            var fields = key == "workspace" ? WorkspaceFields : CaseFields;
+            var fields = key == "workspace" ? WorkspaceFields : key.StartsWith("player:") ? PlayerFields : key.StartsWith("investigation:") ? InvestigationFields : key.StartsWith("delivery:") ? RecoveryFields : CaseFields;
             var seen = new HashSet<string>();
             foreach (var property in document.RootElement.EnumerateObject())
                 if (!seen.Add(property.Name) || !fields.TryGetValue(property.Name, out var limit) ||

@@ -33,6 +33,14 @@ import { GuildStateService } from '../../../../core/services/api/guild/guild-sta
 import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
 
 describe('InventoryComponent', () => {
+  it('clears the prior reward choice when filtering equipment options', () => {
+    const component = createComponent(inventoryState([]));
+    component.selectContainerOption({ id: 'wand', name: 'Wand', quantity: 1 });
+    component.searchContainerOptions('head');
+    expect(component.selectedContainerOptionId()).toBe('');
+    expect(component.containerSearch()).toBe('head');
+  });
+
   it('clears the old equipped-item inspection when switching loadouts', () => {
     const selectedId = signal<string | null>('starter');
     const component = createComponent(

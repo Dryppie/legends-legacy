@@ -1,0 +1,21 @@
+@if (state.selected; as report) {
+    <p class="note">UTC calendar days. Activity means the visible game was opened or refocused.</p>
+    <section class="cards" aria-label="Daily users">
+      <div class="card"><span><app-column-help label="DAU" [description]="help.dau" /></span><strong>{{ report.population.dau }}</strong></div>
+      <div class="card"><span><app-column-help label="WAU · rolling 7d" [description]="help.wau" /></span><strong>{{ report.population.wau }}</strong></div>
+      <div class="card"><span><app-column-help label="MAU · rolling 30d" [description]="help.mau" /></span><strong>{{ report.population.mau }}</strong></div>
+      <div class="card"><span><app-column-help label="New active" [description]="help.newActive" /></span><strong>{{ report.population.newActive }}</strong></div>
+      <div class="card"><span><app-column-help label="Returning active" [description]="help.returningActive" /></span><strong>{{ report.population.returningActive }}</strong></div>
+      <div class="card"><span><app-column-help label="D1 return" [description]="help.d1" /></span><strong>{{ state.percent(report.population.d1Returned, report.population.d1Cohort) }}</strong><small> {{ report.population.d1Returned }}/{{ report.population.d1Cohort }}</small></div>
+      <div class="card"><span><app-column-help label="D7 return" [description]="help.d7" /></span><strong>{{ state.percent(report.population.d7Returned, report.population.d7Cohort) }}</strong><small> {{ report.population.d7Returned }}/{{ report.population.d7Cohort }}</small></div>
+    </section>
+    <h2>Daily active account trend</h2>
+    <p class="note">{{ state.days }} calendar days ending {{ state.selectedDate }}. Missing reports are gaps, never zero. WAU and MAU are rolling counts and must not be summed.</p>
+    <div class="trend-bars" aria-label="Daily active account trend">@for (point of state.trend; track point.date) { <button type="button" [disabled]="point.dau === null" [class.missing]="point.dau === null" [class.selected]="point.date === state.selectedDate" [attr.aria-pressed]="point.date === state.selectedDate" [attr.aria-label]="point.date + ': ' + (point.dau ?? 'missing report')" [title]="point.date + ': ' + (point.dau ?? 'missing report')" (click)="state.selectedDate = point.date; state.savePreferences()"><span [style.height.%]="point.height"></span></button> }</div>
+    <p class="note">{{ state.trend[0]?.date }} → {{ state.selectedDate }} · Height: daily active accounts · Gold outline: selected report</p>
+    @if (state.comparison; as period) { <p class="note">Mean DAU: {{ period.current === null ? 'Unavailable' : (period.current | number:'1.0-1') }} across {{ period.currentCount }}/{{ state.days }} reports. Previous period: {{ period.previous === null ? 'Unavailable' : (period.previous | number:'1.0-1') }} across {{ period.previousCount }}/{{ state.days }} reports. @if (period.delta !== null) { Change: {{ period.delta | number:'1.0-1' }}%. } @else { A percentage comparison requires two complete periods and a nonzero baseline. } @if (state.days === 90) { The API retains at most 90 days; a previous 90-day comparison is unavailable. }</p> }
+    <details><summary>Daily values and retention denominators</summary><p class="note">D1 and D7 use accounts created one or seven UTC days before the report day.</p>
+    <div class="panel"><table><thead><tr>@for (column of columns; track column.label) { <th scope="col"><app-column-help [label]="column.label" [description]="column.description" /></th> }</tr></thead>
+      <tbody><tr *ngFor="let day of state.dailyReports"><td>{{ day.reportDateUtc }}</td><td>{{ day.population.dau }}</td><td>{{ day.population.wau }}</td><td>{{ day.population.mau }}</td><td>{{ day.population.newActive }}</td><td>{{ state.percent(day.population.d1Returned, day.population.d1Cohort) }} ({{ day.population.d1Returned }}/{{ day.population.d1Cohort }})</td><td>{{ state.percent(day.population.d7Returned, day.population.d7Cohort) }} ({{ day.population.d7Returned }}/{{ day.population.d7Cohort }})</td></tr></tbody></table></div>
+    </details>
+}

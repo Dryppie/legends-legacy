@@ -1,0 +1,14 @@
+{
+  "version": "tower-core-source-v1",
+  "historicalDrawsRecorded": false,
+  "projection": "Conditional grade-I production rewards from proven paid successes; zero omitted-channel spending and no prior family completion before the declared history. Correlated server alternatives are not independent players.",
+  "repeatCoreDistribution": { "3": 0.25, "4": 0.3333333333333333, "5": 0.3333333333333333, "6": 0.08333333333333333 },
+  "firstCompletionAdditionalCores": 6,
+  "probabilityAssumption": "Independent uniform integer base draws and independent 25% bonus draws; analytic distribution, not measured player frequencies. Additional-run ranges apply only to repeats of already completed families and exclude future failure/entry/time costs.",
+  "historicalCredit": "None. Exact old Random.Shared draws and associated completion TreasureProgress were not captured. Existing claim flags, XP, prophecies, mastery, clocks and inventories remain unchanged.",
+  "training": "Native exact-XP and ascension probes are disposable controls. Forward earned activity must be run before any stronger retained loadout is admitted.",
+  "maximumOwners": 240,
+  "newFights": 0,
+  "newSeeds": 0,
+  "maximumOutputBytes": 268435456
+}

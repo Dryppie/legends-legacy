@@ -30,7 +30,8 @@ public sealed record IdleScenario(
 }
 
 public sealed record FixtureEquipment(EquipmentSlotType Slot, EquipmentData Data);
-public sealed record FixtureEssence(string DefinitionId, int Level, int AscensionTier, bool IsEvolved);
+public sealed record FixtureEssence(string DefinitionId, int Level, int AscensionTier, bool IsEvolved,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? OwnedId = null);
 public sealed record FixtureCombatStyle(string Id, int Level = 0, string? RefinementId = null,
     // Retired recipe field keeps its historical serialized name for frozen input hashes.
     IReadOnlyList<string>? UpgradeIds = null, string? FocusEssenceDefinitionId = null,
@@ -100,7 +101,7 @@ public sealed record FixtureCharacter(
 
     public IReadOnlyList<PlayerEssence> MaterializeEssences() => Essences.Select((x, index) => new PlayerEssence
     {
-        Id = Common.Randomness.StableRandom.Guid("balance-essence-v1", Id.ToString("N"),
+        Id = x.OwnedId ?? Common.Randomness.StableRandom.Guid("balance-essence-v1", Id.ToString("N"),
             index.ToString(System.Globalization.CultureInfo.InvariantCulture)),
         CharacterId = Id, EssenceDefinitionId = x.DefinitionId,
         Level = x.Level, AscensionTier = x.AscensionTier, IsEvolved = x.IsEvolved,

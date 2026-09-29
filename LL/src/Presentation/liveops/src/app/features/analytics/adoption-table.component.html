@@ -1,0 +1,48 @@
+<button class="secondary" type="button" (click)="exportRows()">Export filtered comparison CSV</button><p class="note">{{ rows.length }} matching definitions · {{ baseline ? 'Compared with ' + baseline.reportDateUtc : 'No baseline selected' }} · Minimum cohort {{ minimumCohort || 0 }} characters</p>
+<section aria-labelledby="adoption-heading">
+  <h2 id="adoption-heading">Essence and Combat Style adoption</h2>
+  <p class="note">Characters of recently active accounts, by level at snapshot time. Ownership, saved loadouts and selected styles do not measure combat usage.</p>
+  <div class="controls">
+    <label>Measure<select [(ngModel)]="measure" (ngModelChange)="measureChanged()"><option value="essence-owned">Essence owned</option><option value="essence-saved">Essence saved in loadout</option><option value="style-selected">Combat style selected</option></select></label>
+    <label>Sort by<select [(ngModel)]="sort">@for (option of sortOptions; track option.value) { <option [value]="option.value" [disabled]="measure === 'style-selected' && option.value.startsWith('gap-')">{{ option.label }}</option> }</select></label>
+    <label>Compare with<select [(ngModel)]="comparisonDate"><option value="">No comparison</option>@for (day of earlierReports; track day.reportDateUtc) { <option [value]="day.reportDateUtc">{{ day.reportDateUtc }}</option> }</select></label>
+    <label>Minimum cohort size<input type="number" min="0" step="1" placeholder="Any size" [(ngModel)]="minimumCohort" /></label>
+    <label class="group-toggle"><input type="checkbox" [(ngModel)]="grouped" />Group by cohort and level</label>
+  </div>
+  <p class="note">{{ grouped ? 'Sorting within each cohort and level group.' : 'Sorting across all matching rows.' }} Adoption = observed ÷ cohort characters.</p>
+  @if (!report.adoptionIncludesZeroObservations) { <p class="coverage" role="status">This older report contains observed definitions only. Completely unused definitions are absent, so least-adopted results do not include every zero. Missing rows stay unavailable.</p> }
+  @if (baseline; as previous) {
+    <p class="note">Change: {{ report.reportDateUtc }} vs {{ previous.reportDateUtc }}, in percentage points (pp). Cohort membership can change.</p>
+  } @else { <p class="note">Select an earlier report to rank increases or decreases. Missing comparisons appear last and are never treated as zero.</p> }
+  <details class="note"><summary>How to read these metrics</summary>
+    <p>The cohort includes characters belonging to accounts active in the selected 7- or 30-day window. Cohorts under 10 characters are marked as small samples, including the comparison baseline.</p>
+    @if (report.adoptionIncludesZeroObservations) { <p>Includes zero observations for definitions in the catalog when this snapshot was taken. Cohorts without characters have no rows. Rates are not adjusted for unlock requirements or content availability.</p> }
+    @if (measure !== 'style-selected') { <p>Gap = ownership rate minus saved-loadout rate, using the same cohort. A large gap means many owners have no copy in their usable saved loadouts.</p> }
+    @if (baseline; as previous) { <p>Change uses the same definition, measure, cohort window and level band. Baseline snapshot: {{ previous.snapshotAtUtc | date:'medium':'UTC' }} UTC. Missing pairs are unavailable and sort last; a missing row never means zero.</p> }
+  </details>
+  @if (groups; as view) {
+    <p class="result-count" role="status">{{ rows.length }} matching definitions and cohorts</p>
+    <div class="panel" tabindex="0" role="region" aria-label="Adoption results, horizontally scrollable">
+      <table>
+        <caption class="sr-only">{{ measure === 'essence-owned' ? 'Essence ownership' : measure === 'essence-saved' ? 'Saved essence loadouts' : 'Selected combat styles' }} adoption. Sort using column header buttons.</caption>
+        <thead><tr>@for (column of columns; track column.key) { <th scope="col" [attr.aria-sort]="ariaSort(column.key)"><span class="column-heading"><button type="button" (click)="sortBy(column.key)">{{ column.label }}{{ arrow(column.key) }}</button><app-column-help [label]="column.label" [description]="columnHelp[column.key]" [iconOnly]="true" /></span></th> }</tr></thead>
+        @for (group of view; track group.key) {
+          <tbody>
+            @if (group.label) { <tr class="group-heading"><th scope="rowgroup" [attr.colspan]="columns.length">{{ group.label }} <span>· {{ group.rows.length }} definitions</span></th></tr> }
+            @for (row of group.rows; track row.kind + ':' + row.key + ':' + row.cohortDays + ':' + row.levelBand) {
+              <tr>
+                <th scope="row" class="definition">{{ row.name }}</th><td>{{ row.cohortDays }}d</td><td>{{ row.levelBand }}</td>
+                <td class="adoption-rate">@if (row.rate !== null) { <strong>{{ row.rate | number:'1.0-1' }}%</strong><small>{{ row.observedCharacters }}/{{ row.cohortCharacters }}</small> } @else { — }</td>
+                <td>{{ row.observedCharacters | number }}</td>
+                <td>{{ row.cohortCharacters | number }} @if (row.cohortCharacters < 10) { <small class="small-sample">Small sample</small> }</td>
+                @if (measure !== 'style-selected') { <td>{{ row.gap === null ? '—' : (row.gap | number:'1.0-1') + ' pp' }}</td> }
+                <td>@if (row.change !== null) { <span>{{ row.change > 0 ? '+' : '' }}{{ row.change | number:'1.0-1' }} pp</span><small>Was {{ row.baseline!.observedCharacters }}/{{ row.baseline!.cohortCharacters }}</small>@if (row.baseline!.cohortCharacters < 10) { <small class="small-sample">Small baseline</small> } } @else { <span title="No matching comparison with a nonzero denominator">—</span> }</td>
+              </tr>
+            }
+          </tbody>
+        }
+        @if (!rows.length) { <tbody><tr><td [attr.colspan]="columns.length">No adoption rows match these filters. Try another measure, cohort, level band or minimum cohort size.</td></tr></tbody> }
+      </table>
+    </div>
+  }
+</section>

@@ -17,11 +17,11 @@ interface WorkGroup { title: string; status: string; route: string; total: numbe
           @if (group.error) { <p class="message error" role="status">{{ group.error }} {{ group.asOf ? 'Showing the last successful results.' : '' }}</p> }
           <ul class="work-list">@for (item of group.items; track item.id) { <li><a [routerLink]="item.route"><strong>{{ item.title }}</strong><span>{{ item.context }}</span></a>@if (item.updatedAt) { <small>Updated {{ item.updatedAt | date:'medium' }}</small> }</li> }
           @empty { @if (group.total === 0 && !group.error) { <li>No work in this queue.</li> } }</ul>
-          <footer><a [routerLink]="group.route" [queryParams]="{ status: group.status }">Open full queue</a>@if (group.asOf) { <small>Checked {{ group.asOf | date:'shortTime' }}</small> }</footer>
+          <footer><a [routerLink]="group.route" [queryParams]="{ status: group.status || null, sort: group.route === '/cases' ? 'follow-up' : null, overdue: group.title === 'Due follow-ups' ? 'true' : null }">Open full queue</a>@if (group.asOf) { <small>Checked {{ group.asOf | date:'shortTime' }}</small> }</footer>
         </section>
       }
     </div>
-    <p class="support-note">Up to five records per queue: cases most recently updated, investigations by risk. Full queues provide pagination. Times: {{ timeZone }}.</p>
+    <p class="support-note">Up to five records per queue: cases by next follow-up (unscheduled last), investigations by risk. Full queues provide pagination. Times: {{ timeZone }}.</p>
   </section>
 ` })
 export class WorkQueueComponent implements OnInit, OnDestroy {
@@ -30,7 +30,7 @@ export class WorkQueueComponent implements OnInit, OnDestroy {
   constructor(private api: LiveOpsApiService, private operator: OperatorContextService) {}
   ngOnInit(): void {
     if (this.operator.hasPermission(this.operator.permissions.account)) {
-      this.groups.push(this.group('Open cases', 'Open', '/cases'), this.group('Waiting for follow-up', 'Waiting', '/cases'));
+      this.groups.push(this.group('Due follow-ups', '', '/cases'), this.group('Open cases', 'Open', '/cases'), this.group('Waiting for follow-up', 'Waiting', '/cases'));
     }
     if (this.operator.hasPermission(this.operator.permissions.read)) {
       this.groups.push(this.group('Unreviewed investigations', 'Unreviewed', '/account-risk'), this.group('Investigations in progress', 'Investigating', '/account-risk'));
@@ -46,9 +46,9 @@ export class WorkQueueComponent implements OnInit, OnDestroy {
       try {
         let items: WorkItem[], total: number;
         if (group.route === '/cases') {
-          const result = await this.api.cases({ status: group.status, page: '1' });
+          const result = await this.api.cases({ status: group.status, page: '1', sort: 'follow-up', overdue: String(group.title === 'Due follow-ups') });
           if (!result.isSuccess || !result.data) throw new Error(result.errorMessage || 'Cases are unavailable.');
-          total = result.data.total; items = result.data.cases.slice(0, 5).map(x => ({ id: x.id, title: x.title, context: `${x.characterName} · ${x.category}`, updatedAt: x.updatedAt, route: ['/cases', x.id] }));
+          total = result.data.total; items = result.data.cases.slice(0, 5).map(x => ({ id: x.id, title: x.title, context: `${x.characterName} · ${x.priority || 'Normal'} · ${x.nextAction || x.category}${x.followUpAt ? ' · Due ' + new Date(x.followUpAt).toLocaleString() : ''}`, updatedAt: x.updatedAt, route: ['/cases', x.id] }));
         } else {
           const result = await this.api.accountRisks({ status: group.status, sort: 'risk' }, 1, 5);
           if (!result.isSuccess || !result.data) throw new Error(result.errorMessage || 'Investigations are unavailable.');

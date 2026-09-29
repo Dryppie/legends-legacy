@@ -19,6 +19,7 @@ import { InventoryService } from '../../../../../core/services/api/inventory/inv
 import { SelectionCrateOption } from '../../../../models/item';
 import {
   initialSelectionContainerOptionId,
+  filterSelectionOptions,
   selectionContainerMetadata,
 } from '../../../../utils/inventory/selection-container.utils';
 import { InventoryTransferComponent } from '../../../inventory-transfer/inventory-transfer.component';
@@ -42,6 +43,8 @@ export class InventoryItemModalComponent implements OnInit {
   readonly isOpeningCrate = signal(false);
   readonly error = signal<string | null>(null);
   readonly selectedCrateOptionId = signal('');
+  readonly crateSearch = signal('');
+  readonly filterSelectionOptions = filterSelectionOptions;
 
   readonly itemDescription = itemDescription;
 
@@ -83,6 +86,11 @@ export class InventoryItemModalComponent implements OnInit {
 
   selectCrateOption(option: SelectionCrateOption): void {
     this.selectedCrateOptionId.set(option.id);
+  }
+
+  searchCrateOptions(search: string): void {
+    this.crateSearch.set(search);
+    this.selectedCrateOptionId.set('');
   }
 
   openSelectionCrate(): void {

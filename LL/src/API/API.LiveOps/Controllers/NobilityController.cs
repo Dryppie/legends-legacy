@@ -22,6 +22,7 @@ public sealed class NobilityController(LiveOpsActionPreviewService previews) : L
     }
 
     [HttpPost]
+    [API.LiveOps.Operations.TrackOperation("signets", "characterId")]
     public async Task<IActionResult> Grant(Guid characterId, [FromBody] GrantRequest request, CancellationToken ct)
     {
         var validation = await previews.BeginAlphaSignetGrantAsync(request.PreviewToken, request.OperationId,

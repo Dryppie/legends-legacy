@@ -7,5 +7,5 @@ public interface ISupportCaseService
 {
     Task<Response<SupportCaseDetails>> ApplyAsync(SupportCaseChange change, AdministrationActor actor, CancellationToken ct);
     Task<Response<SupportCaseDetails>> GetAsync(Guid id, int? beforeSequence, CancellationToken ct);
-    Task<SupportCasePage> SearchAsync(Guid? characterId, SupportCaseStatus? status, string? search, int page, CancellationToken ct);
+    Task<SupportCasePage> SearchAsync(Guid? characterId, SupportCaseStatus? status, string? search, int page, CancellationToken ct, string? category = null, string sort = "recent", bool overdue = false);
 }

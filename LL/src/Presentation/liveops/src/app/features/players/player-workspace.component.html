@@ -1,4 +1,4 @@
-<main class="workspace" [class.finder-collapsed]="finderCollapsed">
+<main (click)="savePreparationAfterClick()" (input)="preparation.save()" (change)="preparation.save()" class="workspace" [class.finder-collapsed]="finderCollapsed">
   <aside class="finder" [hidden]="finderCollapsed">
     <div class="section-heading"><p class="eyebrow">Player finder</p><h2>Choose an exact target</h2><p>Name, account, email, or ID</p></div>
     <form class="search" (ngSubmit)="searchPlayers()">
@@ -43,17 +43,17 @@
       </div>
 
       <nav class="section-tabs" aria-label="Player operations">
-        <button type="button" [class.active]="activeSection === 'support'" (click)="setSection('support')">Summary</button>
-        <button type="button" [class.active]="activeSection === 'inventory'" (click)="setSection('inventory')">Inventory and rewards</button>
-        <button type="button" [class.active]="activeSection === 'activity'" (click)="setSection('activity')">Activity and transfers</button>
-        <button type="button" [class.active]="activeSection === 'account'" (click)="setSection('account')">Restrictions</button>
-        <button type="button" [class.active]="activeSection === 'chat'" (click)="setSection('chat')">Chat</button>
-        <button type="button" [class.active]="activeSection === 'grant'" (click)="setSection('grant')">Compensation</button>
-        <button type="button" [class.active]="activeSection === 'audit'" (click)="setSection('audit')">Support history</button>
-        <button type="button" [class.active]="activeSection === 'signets'" (click)="setSection('signets')">Signets</button>
+        <button type="button" [class.active]="activeSection === 'support'" [attr.aria-pressed]="activeSection === 'support'" [attr.aria-pressed]="activeSection === 'support'" (click)="setSection('support')">Summary</button>
+        <button type="button" [class.active]="activeSection === 'inventory'" [attr.aria-pressed]="activeSection === 'inventory'" [attr.aria-pressed]="activeSection === 'inventory'" (click)="setSection('inventory')">Inventory and rewards</button>
+        <button type="button" [class.active]="activeSection === 'activity'" [attr.aria-pressed]="activeSection === 'activity'" [attr.aria-pressed]="activeSection === 'activity'" (click)="setSection('activity')">Activity and transfers</button>
+        <button type="button" [class.active]="activeSection === 'account'" [attr.aria-pressed]="activeSection === 'account'" [attr.aria-pressed]="activeSection === 'account'" (click)="setSection('account')">Restrictions</button>
+        <button type="button" [class.active]="activeSection === 'chat'" [attr.aria-pressed]="activeSection === 'chat'" [attr.aria-pressed]="activeSection === 'chat'" (click)="setSection('chat')">Chat</button>
+        <button type="button" [class.active]="activeSection === 'grant'" [attr.aria-pressed]="activeSection === 'grant'" [attr.aria-pressed]="activeSection === 'grant'" (click)="setSection('grant')">Compensation</button>
+        <button type="button" [class.active]="activeSection === 'audit'" [attr.aria-pressed]="activeSection === 'audit'" [attr.aria-pressed]="activeSection === 'audit'" (click)="setSection('audit')">Support history</button>
+        <button type="button" [class.active]="activeSection === 'signets'" [attr.aria-pressed]="activeSection === 'signets'" [attr.aria-pressed]="activeSection === 'signets'" (click)="setSection('signets')">Signets</button>
       </nav>
 
-      @if (receipt) { <section class="operation-receipt" role="status"><strong>{{ receipt.action }} · {{ receipt.outcome }}</strong><p>The operation was accepted. Player update delivery is shown separately in the support snapshot.</p><a routerLink="/audit" [queryParams]="{ operationId: receipt.operationId, source: receipt.source || 'All' }">Open operation receipt</a><button class="text-link" type="button" (click)="copyIdentifier(receipt.operationId, 'Operation ID')">Copy reference</button><button class="text-link" type="button" (click)="copyReceiptSummary()">Copy operation summary</button>@if (caseId) { <a [routerLink]="['/cases', caseId]" [queryParams]="{ operationId: receipt.operationId, source: receipt.source || 'Game' }">Link this operation to the case</a> }</section> }
+      @if (receipt) { <section class="operation-receipt" role="status"><strong>{{ receipt.action }} · {{ receipt.outcome }}</strong><p>The operation was accepted. Player update delivery is shown separately in the support snapshot.</p><a routerLink="/audit" [queryParams]="{ operationId: receipt.operationId, source: receipt.source || 'All' }">Open operation receipt</a><button class="text-link" type="button" (click)="copyIdentifier(receipt.operationId, 'Operation ID')">Copy reference</button><button class="text-link" type="button" (click)="copyReceiptSummary()">Copy internal summary</button>@if (caseId) { <a [routerLink]="['/cases', caseId]" [queryParams]="{ operationId: receipt.operationId, source: receipt.source || 'Game' }">Link this operation to the case</a> }</section> }
       @if (activeSection === 'support') {
         <section class="issue-shortcuts"><h2>Investigate an issue</h2><p>Open the relevant retained evidence, then record a resolution or prepare an action.</p>
           <button class="secondary" type="button" (click)="investigate('reward')">Missing reward or item</button>
@@ -64,12 +64,16 @@
           <a routerLink="/cases" [queryParams]="{ characterId: selectedPlayer.player.characterId, create: true }">Open a support case</a>
         </section>
       }
-      @if (issue === 'reward') { <section class="receipt"><h2>Missing reward investigation</h2><ol><li>Identify the reported run, item and approximate time.</li><li>Compare saved rewards and claim status with equipment holdings and recent acquisitions below.</li><li>Review recent compensation and transfers before issuing another replacement.</li><li>Record your finding and its evidence limits in a support case.</li></ol><button class="secondary" (click)="setSection('activity')">Review transfers</button> <a routerLink="/cases" [queryParams]="{ characterId: selectedPlayer.player.characterId, create: true }">Record finding in a case</a></section><p class="message">Compare the retained run's saved rewards and claim timestamp with holdings and recent acquisitions. Truncated evidence cannot establish every historical entitlement. Compensation is a replacement grant, not a claim of the original reward.</p> }
-      @if (issue === 'activity') { <section class="receipt"><h2>Activity investigation</h2><ol><li>Check the current action, expected resolution and blocked-until time.</li><li>Compare account restrictions and dependency availability.</li><li>Inspect retained reward and delivery evidence for completed work.</li><li>Record the finding. A repair or retry requires a supported Game command.</li></ol><button class="secondary" (click)="setSection('account')">Review restrictions</button> <a routerLink="/cases" [queryParams]="{ characterId: selectedPlayer.player.characterId, create: true }">Record finding in a case</a></section><p class="message">Compare the expected resolution, last recorded change, restrictions and update delivery. An old timestamp alone does not establish that an action is stuck.</p> }
-      @if (caseId) { <p class="message">Working with support case <a [routerLink]="['/cases', caseId]">{{ caseId }}</a>. Completed operations can be linked from the case.</p> }
+      @if (issue === 'reward' && ['support', 'inventory', 'activity'].includes(activeSection)) { <section class="receipt"><h2>Missing reward investigation</h2><ol><li>Identify the reported run, item and approximate time.</li><li>Compare saved rewards and claim status with equipment holdings and recent acquisitions below.</li><li>Review recent compensation and transfers before issuing another replacement.</li><li>Record your finding and its evidence limits in a support case.</li></ol><button class="secondary" (click)="setSection('activity')">Review transfers</button> <a [routerLink]="caseId ? ['/cases', caseId] : ['/cases']" [queryParams]="caseId ? {} : { characterId: selectedPlayer.player.characterId, create: true }">{{ caseId ? 'Record finding in this case' : 'Record finding in a case' }}</a></section><p class="message">Compare the retained run's saved rewards and claim timestamp with holdings and recent acquisitions. Truncated evidence cannot establish every historical entitlement. Compensation is a replacement grant, not a claim of the original reward.</p> }
+      @if (issue === 'activity' && ['support', 'inventory', 'activity'].includes(activeSection)) { <section class="receipt"><h2>Activity investigation</h2><ol><li>Check the current action, expected resolution and blocked-until time.</li><li>Compare account restrictions and dependency availability.</li><li>Inspect retained reward and delivery evidence for completed work.</li><li>Record the finding. A repair or retry requires a supported Game command.</li></ol><button class="secondary" (click)="setSection('account')">Review restrictions</button> <a [routerLink]="caseId ? ['/cases', caseId] : ['/cases']" [queryParams]="caseId ? {} : { characterId: selectedPlayer.player.characterId, create: true }">{{ caseId ? 'Record finding in this case' : 'Record finding in a case' }}</a></section><p class="message">Compare the expected resolution, last recorded change, restrictions and update delivery. An old timestamp alone does not establish that an action is stuck.</p> }
+      @if (caseId) { <p class="message">Working with support case <a [routerLink]="['/cases', caseId]">{{ caseTitle || caseId }}</a> {{ caseStatus }}. Completed operations can be linked from the case.</p> }
       @if (message) { <div class="message" [class]="'message ' + messageTone" role="status">{{ message }}</div> }
-      <div class="operation-panel" [class.support-active]="['support', 'inventory', 'activity'].includes(activeSection)">
+      <app-draft-status [draft]="preparation.handle" (restored)="preparation.restore()" />
+      @if (preparation.loading) { <p role="status">Loading private action preparation…</p> }
+      @if (preparation.handle?.loaded) { <button type="button" class="quiet" [disabled]="preparation.blocked || !!busyAction" (click)="preparation.discard()">Discard action preparation</button> }
+      <fieldset class="preparation-fields" [disabled]="preparation.blocked && ['account', 'grant', 'chat', 'signets'].includes(activeSection)"><div class="operation-panel" [class.support-active]="['support', 'inventory', 'activity'].includes(activeSection)">
         @if (activeSection === 'support' || activeSection === 'inventory' || activeSection === 'activity') {
+          <app-support-evidence [snapshot]="supportSnapshot" [caseId]="caseId" />
           <app-support-snapshot
             [view]="activeSection === 'support' ? 'summary' : activeSection"
             [snapshot]="supportSnapshot"
@@ -171,7 +175,9 @@
           }
         }
 
-        @if (activeSection === 'grant') {
+        @if (activeSection === 'grant') { <nav class="section-tabs" aria-label="Compensation tasks"><button (click)="compensationMode = 'use'" [attr.aria-pressed]="compensationMode === 'use'">Use saved package</button><button (click)="compensationMode = 'single'" [attr.aria-pressed]="compensationMode === 'single'">Grant individual item</button><button (click)="compensationMode = 'edit'" [attr.aria-pressed]="compensationMode === 'edit'">Create or edit package</button></nav> }
+        @if (activeSection === 'grant' && compensationMode === 'use' && hasPermission(permissions.economy)) { <section class="case-form"><h2>Use a saved package</h2><p>Target: {{ selectedPlayer.player.characterName }}. All package grants require high-value review, regardless of quantity.</p><label>Search library<input [(ngModel)]="packageSearch" /></label><label>Active package<select [(ngModel)]="usePackageId" (ngModelChange)="resolvePackageItems(usePackage?.items || [])"><option value="">Choose a saved package</option>@for (value of filteredPackages; track value.packageId) { <option [value]="value.packageId">{{ value.name }} · v{{ value.version }}</option> }</select></label>@if (usePackage; as value) { <p>{{ value.purpose }}</p><ul>@for (line of value.items; track $index) { <li>{{ line.quantity }} × {{ packageItemNames[line.itemBaseId] || line.itemBaseId }}</li> }</ul><p>{{ value.items.length }} item lines · Saved version {{ value.version }}. The review resolves exact item names, quantities and equipment stats.</p> }@if (packageError) { <p class="error">{{ packageError }}</p> }<button class="secondary" (click)="loadPackages()" [disabled]="packagesLoading">Refresh library</button><label>Compensation reason<textarea [(ngModel)]="grantReason" maxlength="1000"></textarea></label><label>Internal notes<textarea [(ngModel)]="grantNotes" maxlength="4000"></textarea></label><button class="primary" (click)="grantSavedPackage()" [disabled]="!usePackage || !!busyAction || packagesLoading">Review saved package for {{ selectedPlayer.player.characterName }}</button></section> }
+        @if (activeSection === 'grant' && compensationMode !== 'use') {
           @if (!hasPermission(permissions.economy)) {
             <div class="permission-note">Your staff role cannot grant compensation items.</div>
           } @else {
@@ -197,21 +203,21 @@
               <label>Quantity<input type="number" min="1" step="1" [(ngModel)]="grantQuantity" /></label>
               <label class="wide">Reason or support reference<textarea [(ngModel)]="grantReason" placeholder="Required compensation justification"></textarea></label>
               <label class="wide">Internal notes<textarea [(ngModel)]="grantNotes" placeholder="Optional bug or incident context"></textarea></label>
-              <button class="secondary" type="button" [disabled]="!!busyAction || !selectedItem || loadingEquipmentOptions" (click)="addPackageLine()">Add selected item to package draft</button>
-              <button class="primary" type="button" [disabled]="!!busyAction || !selectedItem || loadingEquipmentOptions || (selectedItem.itemType === 'Equipment' && !equipmentOptions) || (equipmentOptions?.usesEquipmentProgression && !selectedEquipmentDefinition)" (click)="grantItems()">Preview and grant items</button>
+              <button [hidden]="compensationMode !== 'edit'" class="secondary" type="button" [disabled]="!!busyAction || !selectedItem || loadingEquipmentOptions" (click)="addPackageLine()">Add selected item to package draft</button>
+              <button class="primary" type="button" [disabled]="!!busyAction || !selectedItem || loadingEquipmentOptions || (selectedItem.itemType === 'Equipment' && !equipmentOptions) || (equipmentOptions?.usesEquipmentProgression && !selectedEquipmentDefinition)" [hidden]="compensationMode === 'edit'" (click)="grantItems()">Preview and grant items</button>
             </div>
           }
         }
 
-        @if (activeSection === 'grant' && hasPermission(permissions.economy)) {
+        @if (activeSection === 'grant' && compensationMode === 'edit' && hasPermission(permissions.economy)) {
           <section class="case-form"><h2>Compensation packages</h2><p>Save repeatable item selections as versioned packages. The server expands every item and its current equipment stats for review before any grant.</p>
             <button type="button" class="secondary" (click)="loadPackages()" [disabled]="packagesLoading || !!busyAction">{{ packagesLoading ? 'Loading packages…' : 'Refresh package library' }}</button>
             @if (packageError) { <p class="message error">{{ packageError }}</p> }
-            <label>Package<select [ngModel]="packageId" (ngModelChange)="selectPackage($event)" [disabled]="!!busyAction"><option value="">New package</option>@for (value of packages; track value.packageId) { <option [value]="value.packageId">{{ value.name }} · v{{ value.version }}{{ value.archived ? ' · archived' : '' }}</option> }</select></label>
+            <label>Package<select [ngModel]="packageId" (ngModelChange)="editPackage($event)" [disabled]="!!busyAction"><option value="">New package</option>@for (value of packages; track value.packageId) { <option [value]="value.packageId">{{ value.name }} · v{{ value.version }}{{ value.archived ? ' · archived' : '' }}</option> }</select></label>
             @if (packageLoaded && !packages.length) { <p>No packages have been saved. Add items from the catalog above to create one.</p> }
             @if (packages.length === 100) { <p>The library shows the first 100 current definitions, with active packages first.</p> }
-            <label>Package name<input maxlength="120" [(ngModel)]="packageName" [disabled]="!!busyAction" /></label><label>When to use this package<textarea maxlength="1000" [(ngModel)]="packagePurpose" [disabled]="!!busyAction"></textarea></label>
-            @for (line of packageLines; track $index) { <div class="package-line"><strong>{{ line.quantity }} × {{ line.itemBaseId }}</strong>@if (line.equipment) { <span>{{ line.equipment.definitionId }} · Tier {{ line.equipment.tier }} / Rank {{ line.equipment.rank }} · {{ line.equipment.activeStyleId || 'Plain' }}</span> }<button class="secondary" type="button" [disabled]="!!busyAction" (click)="removePackageLine($index)">Remove line {{ $index + 1 }}</button></div> }
+            <p role="status">{{ packageHasEdits ? 'Unsaved package edits' : 'Saved package version' }}</p><button class="secondary" (click)="discardPackageEdits()" [disabled]="!!busyAction">Discard package edits</button><label>Package name<input maxlength="120" [(ngModel)]="packageName" [disabled]="!!busyAction" /></label><label>When to use this package<textarea maxlength="1000" [(ngModel)]="packagePurpose" [disabled]="!!busyAction"></textarea></label>
+            @for (line of packageLines; track $index) { <div class="package-line"><strong>{{ line.quantity }} × {{ packageItemNames[line.itemBaseId] || line.itemBaseId }}</strong>@if (line.equipment) { <span>{{ line.equipment.definitionId }} · Tier {{ line.equipment.tier }} / Rank {{ line.equipment.rank }} · {{ line.equipment.activeStyleId || 'Plain' }}</span> }<button class="secondary" type="button" [disabled]="!!busyAction" (click)="removePackageLine($index)">Remove line {{ $index + 1 }}</button></div> }
             <label><input type="checkbox" [(ngModel)]="packageArchived" [disabled]="!!busyAction" /> Archive this package when saving</label>
             <div class="workspace-tools"><button type="button" class="secondary" [disabled]="!!busyAction || !packageLines.length" (click)="savePackage()">Save {{ packageVersion ? 'new version' : 'package' }}</button><button type="button" class="primary" [disabled]="!!busyAction || !packageVersion || packageArchived" (click)="grantPackage()">Review saved package for this player</button></div><p class="support-note">The grant uses the compensation reason and internal notes above. Editing or archiving creates a new version and invalidates older unsubmitted previews.</p>
           </section>
@@ -239,7 +245,7 @@
             } @empty { <div class="permission-note">No administration actions have been recorded for this player.</div> }
           </div>
         }
-      </div>
+      </div></fieldset>
     }
   </section>
 </main>

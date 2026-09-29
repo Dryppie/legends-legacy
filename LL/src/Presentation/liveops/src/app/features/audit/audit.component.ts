@@ -48,6 +48,7 @@ export class AuditComponent implements OnInit, OnDestroy {
   message = '';
   messageTone: 'success' | 'error' | 'info' = 'info';
   expandedOperations = new Set<string>();
+  targetNames: Record<string, string> = {};
 
   constructor(
     private readonly api: LiveOpsApiService,
@@ -82,7 +83,7 @@ export class AuditComponent implements OnInit, OnDestroy {
   }
 
   async copySummary(entry: AdministrationAuditEntry): Promise<void> {
-    try { await navigator.clipboard.writeText(operationSummary(entry, this.operator.session?.environment ?? 'Unknown')); this.message = 'Operation summary copied. Internal notes and technical JSON are excluded.'; this.messageTone = 'success'; }
+    try { await navigator.clipboard.writeText(operationSummary(entry, this.operator.session?.environment ?? 'Unknown')); this.message = 'Internal operation summary copied. It includes the recorded reason; review it before sharing.'; this.messageTone = 'success'; }
     catch { this.showError('Clipboard unavailable. Select the visible receipt to copy it.'); }
   }
 
@@ -101,6 +102,9 @@ export class AuditComponent implements OnInit, OnDestroy {
   }
 
   async applyQuickFilter(filter: 'permanent' | 'large-grants' | 'exports'): Promise<void> {
+    this.actor = this.reference = this.target = this.operationId = this.from = this.to = '';
+    this.expandedOperations.clear();
+    this.advanced = false;
     this.source = 'Game';
     this.permission = '';
     if (filter === 'permanent') {
@@ -158,9 +162,19 @@ export class AuditComponent implements OnInit, OnDestroy {
 
   toggle(operationId: string): void {
     if (this.expandedOperations.has(operationId)) this.expandedOperations.delete(operationId);
-    else this.expandedOperations.add(operationId);
+    else {
+      this.expandedOperations.add(operationId);
+      const id = this.entries.find(x => x.operationId === operationId)?.targetCharacterId;
+      if (id && !this.targetNames[id]) void this.resolveTarget(id);
+    }
   }
 
+  private async resolveTarget(id: string): Promise<void> {
+    const generation = this.requestGeneration;
+    try { const response = await this.api.searchPlayers(id); const player = response.data?.find(x => x.characterId === id);
+      if (player && generation === this.requestGeneration) this.targetNames[id] = player.characterName;
+    } catch { /* Keep the verified identifier if its current name is unavailable. */ }
+  }
   openPlayer(characterId: string): void {
     void this.router.navigate(['/players', characterId]);
   }
@@ -192,6 +206,7 @@ export class AuditComponent implements OnInit, OnDestroy {
         return;
       }
       this.entries = response.data.entries;
+      for (const entry of this.entries) if (this.expandedOperations.has(entry.operationId) && entry.targetCharacterId) void this.resolveTarget(entry.targetCharacterId);
       for (const entry of this.entries) {
         if (this.journal.receipts.some(x => x.operationId === entry.operationId)) this.journal.record(entry.operationId, entry.targetCharacterId ?? entry.targetAccountId ?? '', actionLabel(entry.actionType), 'Completed');
       }

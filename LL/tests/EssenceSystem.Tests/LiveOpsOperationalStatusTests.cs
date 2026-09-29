@@ -47,6 +47,10 @@ public sealed class LiveOpsOperationalStatusTests
             new TestRecentActivityReader(null!), new TestEnvironment(), new ConfigurationBuilder().Build(), new FixedTimeProvider(Now));
         var deliveries = (await service.GetDetailsAsync("deliveries", default))!;
         Assert.Equal(55, deliveries.Total); Assert.Equal(50, deliveries.Rows.Count); Assert.Equal(Now, deliveries.AsOf);
+        var next = (await service.GetDetailsAsync("deliveries", default, 2))!;
+        Assert.Equal(5, next.Rows.Count); Assert.Equal(2, next.Page);
+        Assert.Equal(55, deliveries.Rows.Concat(next.Rows).Select(x => x.Id).Distinct().Count());
+        Assert.Empty((await service.GetDetailsAsync("deliveries", default, 1, "Processing"))!.Rows);
         Assert.Equal(1, (await service.GetDetailsAsync("restrictions", default))!.Total);
         Assert.Equal(2, (await service.GetDetailsAsync("jobs", default))!.Total);
         Assert.Null(await service.GetDetailsAsync("unrecognized", default));
@@ -143,6 +147,18 @@ public sealed class LiveOpsOperationalStatusTests
         Assert.Equal(recent.OperationId, Assert.Single(result.RecentActions).OperationId);
         Assert.Contains(result.Dependencies, x =>
             x.Key == "chat_moderation" && x.Status == "Degraded");
+
+        await using (var database = new LLDbContext(options))
+        {
+            var failed = await database.GameEventOutboxDeliveries.SingleAsync(x => x.Status == GameEventOutboxDeliveryStatus.Failed);
+            var repair = Action(AdministrationRiskLevel.Normal);
+            repair.ActionType = AdminActionType.StateRefreshDeliveryRetried; repair.TargetResourceId = failed.Id;
+            database.AdminActions.Add(repair); await database.SaveChangesAsync();
+        }
+        var afterRepair = await service.GetAsync(default);
+        Assert.Equal(0, afterRepair.Outbox.FailedDeliveries);
+        Assert.Equal(1, afterRepair.Outbox.PendingDeliveries);
+        Assert.Equal("Degraded", afterRepair.Outbox.Status); // The delayed replacement still needs attention.
     }
 
     private static AdminAction Action(AdministrationRiskLevel riskLevel) => new()

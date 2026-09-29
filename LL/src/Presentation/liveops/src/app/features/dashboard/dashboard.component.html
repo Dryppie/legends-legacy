@@ -10,7 +10,10 @@
     </button>
   </section>
 
+  @if (operationalStatus; as readiness) { <div class="message"><strong>Readiness: {{ readiness.overallStatus }}</strong> · Checked {{ readiness.serverTimeUtc | date:'shortTime' }} · Status refreshes every 30 seconds; work queues refresh separately.</div> }
   <app-work-queue />
+  <div class="workspace-tools"><a routerLink="/operations">Operations &amp; recovery across browsers</a></div>
+  <app-job-schedules (showExceptions)="openDetails('jobs')" />
 
   @if (statusError) { <div class="message error" role="alert">{{ statusError }}</div> }
   @if (statusLoading && !operationalStatus) {
@@ -55,7 +58,7 @@
       <div class="signal-grid">
         <article class="signal-card" [class.alert]="status.outbox.status !== 'Healthy'">
           <span>Realtime outbox</span><strong>{{ status.outbox.isAvailable ? status.outbox.pendingDeliveries : '—' }}</strong>
-          <small>pending · {{ status.outbox.isAvailable ? status.outbox.failedDeliveries : 'Unknown' }} failed</small>
+          <small>pending · {{ status.outbox.isAvailable ? status.outbox.failedDeliveries : 'Unknown' }} failed without replacement</small>
           <button class="text-link" type="button" (click)="openDetails('deliveries')">Inspect deliveries</button>
           @if (status.outbox.oldestPendingAtUtc) { <time>Oldest {{ status.outbox.oldestPendingAtUtc | date: 'medium' }}</time> }
         </article>
@@ -72,10 +75,11 @@
 
     @if (detailLoading) { <p role="status">Loading operational details…</p> }
     @if (detailError) { <div class="message error" role="alert">{{ detailError }}</div> }
+    @if (detailView) { <div class="workspace-tools"><label>Recorded status<select [(ngModel)]="detailStatus" (change)="openDetails(detailView)" [disabled]="detailLoading"><option value="">All in this view</option>@if (detailView === 'deliveries') { <option>Pending</option><option>Processing</option><option>Failed</option> } @if (detailView === 'jobs') { <option>Running</option><option>Failed</option> }</select></label><button class="secondary" (click)="openDetails(detailView, detailPage)" [disabled]="detailLoading">Refresh details</button><button class="secondary" (click)="copyDiagnostics()" [disabled]="!detail">Copy internal diagnostics</button><span role="status">{{ diagnosticMessage }}</span></div> }
     @if (detail; as page) {
       <section class="risk-panel"><header><h2>{{ page.view | titlecase }}</h2><span>{{ page.rows.length }} of {{ page.total }} records · {{ page.asOf | date:'medium' }}</span></header><div class="case-history"><p>{{ page.impact }}</p><p>{{ page.nextStep }}</p>
-      @for (row of page.rows; track row.id) { <article><strong>{{ row.kind }} · {{ row.status }}</strong><p>{{ row.at | date:'medium' }} @if (row.nextAt) { · Next/event time {{ row.nextAt | date:'medium' }} } @if (row.attempts) { · {{ row.attempts }} attempts }</p>@if (row.characterId) { <button class="text-link" type="button" (click)="openPlayer(row.characterId)">{{ row.characterName || 'Open player' }}</button> }<details><summary>Diagnostic reference</summary><code>{{ row.id }}</code></details></article> }@empty { <p>No matching records at the time of this check.</p> }
-      @if (page.total > page.rows.length) { <p>Showing the first 50 records. Use the owning service's diagnostics for the complete queue.</p> }</div></section>
+      @for (row of page.rows; track row.id) { <article><strong>{{ row.kind }} · {{ row.status }}</strong><p>{{ row.at | date:'medium' }} @if (row.nextAt) { · Next/event time {{ row.nextAt | date:'medium' }} } @if (row.attempts) { · {{ row.attempts }} attempts }</p>@if (row.characterId) { <button class="text-link" type="button" (click)="openPlayer(row.characterId)">{{ row.characterName || 'Open player' }}</button> · <a routerLink="/cases" [queryParams]="{ characterId: row.characterId }">Player cases</a> }@if (canRepair && page.view === 'deliveries' && row.status === 'Failed' && row.kind === 'realtime-delivery') { <p><a [routerLink]="['/operations/deliveries', row.id]">Review state-refresh recovery</a> · The server checks whether this notification is eligible.</p> }<details><summary>Diagnostic reference</summary><code>{{ row.id }}</code></details></article> }@empty { <p>No matching records at the time of this check.</p> }
+      <div class="workspace-tools"><button class="secondary" (click)="openDetails(page.view, detailPage - 1)" [disabled]="detailLoading || detailPage <= 1">Previous</button><span>Page {{ page.page || detailPage }} · {{ page.pageSize || 50 }} per page</span><button class="secondary" (click)="openDetails(page.view, detailPage + 1)" [disabled]="detailLoading || detailPage * (page.pageSize || 50) >= page.total">Next</button></div></div></section>
     }
     <div class="status-lower-grid">
       <section class="status-section recent-status-actions">

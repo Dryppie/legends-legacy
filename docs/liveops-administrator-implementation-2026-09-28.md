@@ -171,3 +171,76 @@ Verification for this follow-up: 59 frontend tests, 118 filtered backend tests (
 Additional changed files include the draft domain/service/repository/CQRS/controller/mapping/configuration and migration, `operator-draft.service.ts`, `shared/draft-status.component.ts`, `shared/global-search.component.ts`, `features/dashboard/work-queue.component.ts`, case/shell/audit/player integration, `administrator-daily-work.spec.ts`, and `LiveOpsOperatorDraftTests.cs`. Existing deployment configuration and unrelated balance work were preserved.
 
 The published follow-up was also exercised in the browser against the isolated preview database: case note and decision drafts survived a full reload and a completed sign-out/sign-in cycle; case global search and exact operation lookup returned typed results; unavailable Chat coverage was stated alongside the Game receipt; the Overview listed the existing open case; and the case-summary copy action succeeded. At a 390-pixel viewport the new search and work queue reflowed without horizontal document overflow. The viewport override was reset and the updated Overview was left open. This remains layout verification, not a timed administrator study or a screen-reader assessment.
+
+## Adoption sorting follow-up
+
+The adoption table now defaults to a seven-day cohort, Essence owned, numeric ascending level groups, and descending adoption rate within each group. Measure selection separates ownership, usable saved loadouts and selected combat styles. The existing definition, level and cohort filters remain shared with their relevant analytics sections. A minimum current-cohort size filter and optional grouping support broader comparisons. Samples below ten characters are labeled, including small comparison baselines; this threshold is a visibility aid, not a statistical confidence claim.
+
+The new `features/analytics/adoption-table.component.ts`, `.html` and `.css` implement percentage and count sorting, alphabetical names, numeric levels, cohort window/population, ownership-to-saved-loadout gaps, and dated increases/decreases. Column buttons toggle direction and expose `aria-sort`. Sorting uses unrounded rates, alphabetical ties, and always places unavailable values last. A measured zero remains distinct from missing evidence. Rate cells show both the percentage and the observed/cohort counts. The explanatory text and economy cohort label now accurately describe characters belonging to recently active accounts.
+
+The ownership/loadout gap is a percentage-point difference using equal denominators for the same definition, cohort and level. Dated change uses the same definition, measure, cohort window and band in both reports, with each report's own denominator. The baseline defaults to seven days earlier when available, otherwise the closest earlier report; its date is visible and selectable. Cohort membership can change, so these comparisons do not claim a fixed panel of players. Missing historical definitions and zero denominators produce unavailable comparisons, never an inferred zero.
+
+`TelemetryRepository.cs` now records zero observations for catalog definitions in every populated cohort/band at initial snapshot capture. Observed retired definitions are retained. `TelemetryModels.cs` adds the optional JSON field `AdoptionIncludesZeroObservations`; historical JSON defaults to false. Refreshing existing reports preserves both their original adoption rows and their coverage flag, rather than applying today's catalog to yesterday's data. Older reports display an explicit limited-coverage notice. These denominators are not adjusted for unlock requirements or content availability.
+
+Other changed files are the parent analytics component/template, `liveops.models.ts`, the LiveOps-only Combat Style catalog registration in `Services.LL/DependencyInjection.cs`, and `API.LiveOps.csproj` so its published output includes that catalog. The new `adoption-table.component.spec.ts` and `LiveOpsAdoptionTelemetryTests.cs` cover sorting, precise rates, ties, filtering, grouping, missing pairs, historical compatibility, keyboard-accessible headers, catalog zeros, distinct-character saved counts, inactive-account exclusion, and immutable historical snapshots.
+
+Verification:
+
+- `npm run build` and `npm test`: production build passed; **68 frontend tests passed**.
+- Isolated Release backend build and API publish: passed using the cached restore and temporary-artifacts approach described above. Existing unrelated compiler warnings remain.
+- `build/run-tests.ps1 -NoBuild -ArtifactsPath <temporary artifacts> -Filter 'FullyQualifiedName~LiveOps|FullyQualifiedName~TelemetryHistory'`: 94 checks passed on the broad run. The new PostgreSQL adoption fixture initially failed due to duplicate test loadout names and an incorrect empty-window assertion; these test setup errors were corrected. The final focused run with `FullyQualifiedName~LiveOps_adoption|FullyQualifiedName~LiveOps_legacy_adoption` passed **2/2**, including the previously failing integration check. In total, **95 distinct targeted backend checks were verified**, with no skipped PostgreSQL checks.
+- Browser against the published local API: verified most/least adopted, gaps, dated decrease, measure switching, legacy coverage notice, empty results, cohort-size filtering, keyboard header toggling, and responsive controls. At 390 pixels the document stayed within the viewport while the table scrolled inside its container. No browser console errors were recorded. The viewport override was reset.
+- Scoped `git diff --check`: passed.
+
+No database migration, new configuration key, or permission change is required for this follow-up. Release the updated frontend and API together, and update the daily-report worker to start capturing catalog-complete adoption snapshots. Older snapshots remain limited; they are not backfilled or silently rewritten. No service was deployed externally and no shared database was modified.
+
+The local preview now runs from `%TEMP%/ll-liveops-adoption-preview` at `http://127.0.0.1:4411/analytics`. Three synthetic report fixtures were inserted into the isolated preview database for UI verification; their definition names begin with `preview-`. They are demonstration data, not measured player activity. The PostgreSQL integration test separately verifies real snapshot generation. The preview start/stop scripts refer to the updated artifact.
+
+## Economy column explanations
+
+The Analytics template now uses `shared/column-help.component.ts` for all seven Economy health column headers. Plain-language descriptions in `analytics.component.ts` explain the account-activity window, currency, snapshot level, character denominator, exact-zero count, P50 lower-middle median and P90 nearest-rank percentile. The definitions were checked against `TelemetryRepository.Distribution`; report calculations are unchanged.
+
+Each header has a visible question-mark hint. Its explanation opens on hover or focus, can be pinned with a click/tap, and dismisses with Escape, another click or an outside click. Native popovers keep explanations above the horizontally scrolling table; positioning follows the header on scroll and stays inside the viewport. Buttons expose their explanation through `aria-describedby`. Browser verification covered keyboard navigation, click toggling, Escape, outside dismissal, and the P90 explanation at a 390-pixel viewport; the temporary viewport was reset afterward.
+
+Production frontend build and the existing 68 frontend tests passed. No backend code changed, so backend tests were not rerun for this presentation-only follow-up. The local preview assets were refreshed and its synthetic fixtures received example economy rows. No new dependencies, migrations, configuration or permissions are required; only the LiveOps frontend needs rebuilding. No external deployment was performed.
+
+## Analytics subpages
+
+Analytics is now a routed workspace with five separate pages:
+
+| Page | Route | Contents |
+|---|---|---|
+| Activity & retention | `/analytics/activity` | DAU/WAU/MAU, new/returning accounts, return rates, daily trend and calendar comparisons |
+| Content outcomes | `/analytics/content` | Starts, completions, failures and unique characters, with content/name filters |
+| Adoption | `/analytics/adoption` | Essence ownership/loadouts and combat styles, existing sorting/comparisons, cohort/level/name filters |
+| Economy | `/analytics/economy` | Currency distributions, cohort/level filters and all seven column explanations |
+| Itemization | `/analytics/itemization` | Equipment cohorts, detailed build evidence, choice context and seven-day outcomes |
+
+The existing `/analytics` link redirects to Activity & retention. Each page has a distinct browser title and URL, and the navigation marks the current page with `aria-current`. Browser Back/Forward work normally. Moving between pages focuses the new page heading and returns to the top. Navigation wraps on narrow screens.
+
+`analytics.component.ts/.html/.css` now contain the shared heading, date/range controls, navigation and status messages. `analytics.routes.ts` supplies child routes through the updated `app.routes.ts`. The five `*-page.component.ts/.html` pairs contain their respective sections, using `analytics-page.css`. The former component's report calculations and tooltip definitions moved to `analytics-state.service.ts`, provided by the Analytics shell. Dates, shared cohort/level filters and page-specific filter text remain in memory while navigating within Analytics. `adoption-preferences.ts` and the adoption table's preferences input preserve sorting, measure, grouping, minimum size and comparison choices across component recreation. Leaving Analytics or reloading starts a fresh workspace; report-page URLs do not encode filter selections.
+
+Each page renders only its own report content. The four daily-report pages share one cached report request for the chosen range. Itemization loads its own endpoint only when opened, with its own date, loading and error state. A failure in one source does not replace the other page's data. Refresh and range changes load the relevant source; request-generation checks reject stale responses. All existing report calculations, unavailable-value handling, detailed itemization sections and Economy tooltips are preserved. Content and Economy now also show explicit empty-filter results.
+
+Verification: `npm run build` passed with separate page bundles, and `npm test` passed **72 tests**. `analytics-navigation.spec.ts` checks the legacy redirect, five direct routes, active links, one-page rendering, shared-state preservation, independent data loading/errors, changed ranges and out-of-order responses. The existing comparison tests now exercise the extracted state service. Browser checks against the isolated local preview verified child-route reloads, Back/Forward, retained adoption sorting/report date/level, Economy tooltips, and Itemization's independent empty state. At 390 pixels all five navigation links remained inside the viewport with no document overflow; the viewport was reset. Scoped `git diff --check` passed.
+
+No backend, API contract, database schema, dependency or configuration changes are required for this split. Backend tests were not rerun because this follow-up changes only the frontend. Rebuild and release the LiveOps frontend through the existing process; direct URLs use the existing SPA fallback, verified in the local published host. No external deployment or production interaction was performed. The local preview continues to use synthetic data.
+
+## Explanations across Analytics
+
+All Analytics table columns now have question-mark explanations, including the daily activity table, Content outcomes, Adoption, the existing Economy table and every expanded Itemization table. The seven activity summary cards also explain their metrics. Definitions were checked against `TelemetryRepository`, `ItemizationCohortReport`, `ItemizationChoiceSummary` and build snapshot capture rather than inferred from labels.
+
+The help describes account versus character counts, exact-day retention, rolling windows, event versus unique-character denominators, snapshot timing, percentage-point changes, distribution percentiles, and character-weighted win intervals. It calls out mode-specific content results: Colosseum losses are included in both Completed and Failed, while group modes count participant entries. Itemization distribution help distinguishes repeated equipment/build observations from deduplicated character/build snapshots. Choice help explains that comparisons only inspect an item and that a stat-free alternative lacks the particular stat, not all stats. No report calculations changed.
+
+Changed files in `LL/src/Presentation/liveops/src/app`:
+
+- `features/analytics/analytics-column-help.ts`: centralized descriptions and column lists, with separate definitions for each Itemization distribution.
+- `features/analytics/activity-page.component.ts/.html`, `content-page.component.ts/.html` and `itemization-page.component.ts/.html`: reuse the help component in table headers and activity cards.
+- `features/analytics/adoption-table.component.ts/.html/.css`: separate help icons beside the existing sort buttons, preserving sorting and `aria-sort`.
+- `shared/column-help.component.ts`: optional icon-only display for sortable headers and wrapping labels for long headings. Existing hover, focus, pin, Escape and outside-dismissal behavior is retained.
+- `features/analytics/adoption-table.component.spec.ts`: regression coverage that opening help does not change sorting, that its description is linked to the trigger, and that Escape closes it.
+- This implementation document records scope, verification and release implications.
+
+Verification: `npm run build` passed; `npm test` passed **72 tests**. The new popover assertion initially clicked a header outside the headless viewport; the fixture now scrolls it into view before clicking, matching browser interaction. Browser checks on the isolated local preview covered activity cards and keyboard-focused daily headings, Content definitions, independent Adoption help/sorting, Economy help, Itemization win intervals, three different observation denominators, essence slots and choice semantics. At a 390-pixel viewport the choice tooltip stayed within the viewport and the document had no horizontal overflow; the override was reset. No browser console errors were recorded. A screenshot was saved as `liveops-analytics-column-help.png` in the task's visualization directory.
+
+The local preview received one synthetic Itemization report with `preview-` contexts to exercise expanded tables; these are demonstration values, not measured game activity. Backend tests were not rerun because no backend code changed in this follow-up. No new dependencies, migrations, configuration or permission changes are required. Only the LiveOps frontend needs rebuilding and release through the existing process; no external deployment or shared database change was performed.

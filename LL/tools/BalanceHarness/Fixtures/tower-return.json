@@ -1,0 +1,8 @@
+{
+  "version": "tower-earned-return-v1",
+  "servers": 32,
+  "ownersPerServer": 16,
+  "attemptsPerServer": 4,
+  "maximumFights": 480,
+  "policy": "One next legal floor per existing server; retain the original five-owner roster. Wait for all sixteen independently modeled owners to finish the funded wave, without idle gains or new offers. Retain native runtime, inventory, blueprint pity, previous Tower failures, tokens, titles and unlocks. Compare the actual earned party with its pre-wave party and a diagnostic full floor-4 Epic supply set at actual growth, retaining stronger owned items. Pair all three arms on fresh seeds; stop each server on its first actual success or four actual attempts. Replay the first attempt of every arm. Controls are unearned and never finalize or grant rewards. No search, contributions, title equip, additional dungeon, XP, Essence, currency spending or player-time estimate."
+}

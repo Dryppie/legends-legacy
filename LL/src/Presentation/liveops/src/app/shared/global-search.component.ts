@@ -1,3 +1,4 @@
+import { WorkspaceStateService } from '../workspace-state.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,18 +16,26 @@ interface SearchResult { kind: 'Player' | 'Case' | 'Operation'; id: string; labe
       @for (warning of warnings; track warning) { <p class="message error" role="status">{{ warning }}</p> }
       <ul class="work-list">@for (result of results; track result.kind + result.id) { <li><a [routerLink]="result.route" [queryParams]="result.params" (click)="close()"><span class="source-pill">{{ result.kind }}</span><strong>{{ result.label }}</strong><span>{{ result.context }}</span></a></li> }</ul>
       @if (!loading && !results.length && !warnings.length) { <p>No matching player or case. Operations require their complete reference.</p> }
+      <div class="workspace-tools"><a routerLink="/players" [queryParams]="{ lookup: lookup }" (click)="viewAll('players')">Refine player search</a><a routerLink="/cases" [queryParams]="{ lookup: lookup }" (click)="viewAll('cases')">View all matching cases</a></div>
       <p class="support-note">Up to 20 players and 10 cases are shown. Opening a result never performs an action.</p>
     </div> }
   </section>
 ` })
 export class GlobalSearchComponent implements OnDestroy {
+  lookup = '';
   query = ''; searched = false; loading = false; results: SearchResult[] = []; warnings: string[] = []; private generation = 0;
-  constructor(private api: LiveOpsApiService, private operator: OperatorContextService) {}
+  constructor(private api: LiveOpsApiService, private operator: OperatorContextService, private workspace: WorkspaceStateService = new WorkspaceStateService()) {}
+  viewAll(kind: string): void {
+    if (kind === 'cases') this.workspace.caseFilters = { search: this.query.trim(), status: '' };
+    else this.workspace.playerSearch = { query: this.query.trim(), results: [], message: 'Select Search to load this query.', searched: false };
+    this.close();
+  }
   ngOnDestroy(): void { this.generation++; }
   invalidate(): void { this.generation++; this.loading = false; this.searched = false; this.results = []; this.warnings = []; }
   close(): void { this.invalidate(); }
   async search(): Promise<void> {
     const query = this.query.trim(), generation = ++this.generation;
+    this.lookup = crypto.randomUUID();
     this.results = []; this.warnings = []; this.searched = true;
     if (query.length < 2) { this.warnings = ['Enter at least two characters, or paste a complete reference.']; return; }
     this.loading = true;
@@ -48,6 +57,6 @@ export class GlobalSearchComponent implements OnDestroy {
       return response.data.entries.filter(x => x.operationId.toLowerCase() === query.toLowerCase()).map(x => ({ kind: 'Operation', id: x.source + x.operationId, label: actionLabel(x.actionType), context: `${x.source} · ${actionEffect(x.detailsJson)} · ${new Date(x.occurredAt).toLocaleString()}`, route: ['/audit'], params: { operationId: x.operationId, source: x.source } }));
     }));
     await Promise.all(jobs);
-    if (generation === this.generation) { this.results.sort((a, b) => a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label)); this.loading = false; }
+    if (generation === this.generation) { this.results.sort((a, b) => Number(b.id.toLowerCase().endsWith(query.toLowerCase()) || b.label.toLowerCase() === query.toLowerCase()) - Number(a.id.toLowerCase().endsWith(query.toLowerCase()) || a.label.toLowerCase() === query.toLowerCase()) || a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label)); this.loading = false; }
   }
 }

@@ -8,6 +8,8 @@ public sealed class EquipmentProgressionOptions
     public const string SectionName = "EquipmentProgression";
     public bool StarterAcquisitionEnabled { get; set; } = true;
     public bool ProtectedAcquisitionEnabled { get; set; } = true;
+    // Retained for explicit historical harness scenarios; the game does not register or issue Tower supplies.
+    public bool TowerSupplyAcquisitionEnabled { get; set; } = false;
     public bool OrdinaryAcquisitionEnabled { get; set; } = true;
 }
 

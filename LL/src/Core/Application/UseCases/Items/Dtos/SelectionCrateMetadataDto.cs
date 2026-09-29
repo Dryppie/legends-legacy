@@ -3,6 +3,7 @@ using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Inventories.SelectionCrates;
 using AutoMapper;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Progression;
 
 namespace Application.UseCases.Items.Dtos;
 
@@ -17,6 +18,7 @@ public sealed class SelectionCrateOptionDto
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
     public int Quantity { get; init; }
     public EssenceDefinitionDto? Essence { get; init; }
 }
@@ -25,14 +27,17 @@ public sealed class SelectionCrateMetadataResolver
     : IValueResolver<ItemBase, ItemBaseDto, SelectionCrateMetadataDto?>
 {
     private readonly IEssenceDefinitionRepository? _definitions;
+    private readonly TowerEquipmentSupplyCatalog? _towerSupplies;
 
     public SelectionCrateMetadataResolver()
     {
     }
 
-    public SelectionCrateMetadataResolver(IEssenceDefinitionRepository definitions)
+    public SelectionCrateMetadataResolver(IEssenceDefinitionRepository definitions,
+        TowerEquipmentSupplyCatalog? towerSupplies = null)
     {
         _definitions = definitions;
+        _towerSupplies = towerSupplies;
     }
 
     public SelectionCrateMetadataDto? Resolve(
@@ -41,6 +46,15 @@ public sealed class SelectionCrateMetadataResolver
         SelectionCrateMetadataDto? destinationMember,
         ResolutionContext context)
     {
+        if (_towerSupplies?.Find(source.Id) is not null)
+            return new SelectionCrateMetadataDto
+            {
+                SelectionLabel = "Equipment",
+                Options = _towerSupplies.Choices(source.Id).Select(choice => new SelectionCrateOptionDto
+                {
+                    Id = choice.Id, Name = choice.Name, Description = choice.Description, Quantity = 1
+                }).ToArray()
+            };
         var definition = SelectionContainerCatalog.Find(source.Id);
         if (definition is null) return null;
 

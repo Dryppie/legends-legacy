@@ -5,6 +5,7 @@ export interface ApiResponse<T> {
 }
 
 export interface TelemetrySnapshot {
+  adoptionIncludesZeroObservations?: boolean;
   reportDateUtc: string;
   generatedAtUtc: string;
   snapshotAtUtc: string;
@@ -696,13 +697,13 @@ export interface CompensationEquipmentOptions {
 
 export type SupportCaseStatus = 'Open' | 'Waiting' | 'Resolved' | 'Closed';
 export interface OperatorDraft { key: string; version: string; content: string; updatedAt: string; }
-export interface SupportCase { id: string; accountId: string; characterId: string; characterName: string; title: string; category: string; externalReference: string | null; status: SupportCaseStatus; resolution: string | null; version: number; createdAt: string; updatedAt: string; }
+export interface SupportCase { priority?: string; followUpAt?: string | null; nextAction?: string | null; id: string; accountId: string; characterId: string; characterName: string; title: string; category: string; externalReference: string | null; status: SupportCaseStatus; resolution: string | null; version: number; createdAt: string; updatedAt: string; }
 export interface SupportCaseEntry { id: string; caseId: string; sequence: number; kind: string; actorDisplayName: string; body: string; evidenceReference: string | null; linkedOperationId: string | null; linkedSource: string | null; createdAt: string; }
 export interface SupportCasePage { cases: SupportCase[]; total: number; page: number; pageSize: number; }
 export interface SupportCaseDetails { case: SupportCase; entries: SupportCaseEntry[]; nextBeforeSequence: number | null; }
 
 export interface OperationalDetailRow { id: string; kind: string; status: string; at: string; nextAt: string | null; attempts: number; characterId: string | null; characterName: string | null; }
-export interface OperationalDetailPage { view: string; asOf: string; total: number; rows: OperationalDetailRow[]; impact: string; nextStep: string; }
+export interface OperationalDetailPage { page?: number; pageSize?: number; view: string; asOf: string; total: number; rows: OperationalDetailRow[]; impact: string; nextStep: string; }
 
 export interface ItemizationDistribution { attribute: string; count: number; p10: number; p50: number; p90: number; p99: number; }
 export interface ItemizationCohort { context: string; rulesVersion: number; slot: string; tier: number; doctrine: string; essenceCount: number; offered: number; equipped: number; dismantled: number; battles: number; distinctCharacters: number; wins: number; draws: number; winRateLower95: number | null; winRateUpper95: number | null; normalizedSpend: ItemizationDistribution[]; capWaste: ItemizationDistribution[]; effectiveAttributes: ItemizationDistribution[]; comparisons: number; combinations: { attributes: string[]; builds: number; distinctCharacters: number }[]; essenceUsage: { id: string; ascension: number; slotOrder: number; distinctCharacters: number; battles: number; wins: number }[]; attributeOutcomes: { attribute: string; minimumInclusive: number; maximumExclusive: number | null; distinctCharacters: number; battles: number; characterMeanWinRate: number; lower95: number | null; upper95: number | null }[]; }
@@ -710,3 +711,16 @@ export interface ItemizationReport { day: string; interpretation: string; cohort
 
 export interface CompensationPackageLine { itemBaseId: string; quantity: number; equipment: { definitionId: string; tier: number; rank: number; activeStyleId: string | null } | null; }
 export interface CompensationPackage { packageId: string; version: number; name: string; purpose: string; archived: boolean; items: CompensationPackageLine[]; createdAt: string; }
+export interface ServerOperation {
+  operationId: string; targetId: string; targetKind: string; kind: string; source: 'Game' | 'Chat';
+  outcome: 'Unknown' | 'Committed' | 'Rejected'; attempts: number; receivedAt: string; updatedAt: string;
+}
+export interface ServerOperationPage { entries: ServerOperation[]; total: number; page: number; pageSize: number; }
+export interface ServerOperationStatus {
+  operation: ServerOperation; coverage: string;
+  chat?: { state: string; restrictionId: string | null; expiresAt: string | null; checkedAt: string; message: string } | null;
+  delivery: null | { pending: number; processing: number; processed: number; failed: number;
+    entries: { id: string; consumer: string; status: string; attempts: number; createdAt: string; recoveryOperationId?: string | null }[]; };
+}
+export interface StateRefreshRecoveryResult { operationId: string; deliveryId: string; characterId: string; replacementMessageId: string; wasAlreadyProcessed: boolean; }
+export interface JobScheduleHealth { jobName: string; state: string; message: string; schedule: string; nextFireAt: string | null; lastStartedAt: string | null; lastCompletedAt: string | null; workerCheckInAt: string | null; }

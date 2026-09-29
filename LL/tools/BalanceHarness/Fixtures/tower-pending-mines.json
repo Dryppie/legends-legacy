@@ -1,0 +1,10 @@
+{
+  "version": "tower-pending-mines-v1",
+  "maximumAttemptsPerState": 1,
+  "owners": 97,
+  "controls": 97,
+  "replays": 97,
+  "reservedSeeds": 6305,
+  "maximumFights": 18624,
+  "assumptions": "Exactly one paid grade-I Goblin Mines attempt for each of the 97 pending level-40 states, after seed-free native access and actual/supplied preparation qualification. Retain full-slot readiness, existing fixed route, stronger owned gear and repeating supply curve. Each owner/server state has its own fresh 65-seed panel paired only with its supplied full-Epic control and exact full-run replay. Correlated scenario alternatives are not independent player samples. Consume one existing Mines sigil on success or failure; retain native XP/training/prophecy/mastery, ordinary equipment/pity and supply claims. Restore the pending Roots Remember quest and credit only a newly paid successful run. Turn in/open/absorb immediately after completion; retain real IDs, zero retrospective fifth training and the fixed fifth choices. Failed quests remain pending with no retry. Completed 143 quests and seventeen held server paths are preserved. No extra idle, assembly, cache, currency purchase, unrecorded Essence drop/resonance credit, Tower combat or measured navigation/attendance time. Align personal clocks by waiting only. The supported affinity-creation-with-benchmark-validation-v1 search is unchanged and no new search is performed. Owner/native time bounds 900/840 seconds, 256 MiB output and 1 MiB log. No retries, panel extension, production retuning or shared database."
+}

@@ -1,4 +1,4 @@
-<main class="risk-detail-workspace">
+<main (input)="preparation.save()" (change)="preparation.save()" class="risk-detail-workspace">
   <button class="risk-back" type="button" (click)="back()">← Direct-transfer review queue</button>
   @if (message) { <div class="message" [class]="'message ' + messageTone" role="status">{{ message }}</div> }
   @if (loading) {
@@ -19,8 +19,8 @@
       <div class="message error" role="alert">This evaluation hit an evidence safety cap. Its score can understate or mischaracterize the account; review the underlying records before using it.</div>
     }
 
-    <div class="workspace-tools"><button type="button" class="secondary" (click)="openPlayer(view.account.characterId)">Open player</button><button type="button" class="secondary" [disabled]="!nextAccountId || saving" (click)="nextAccount()">Next unreviewed account</button><span>Times: {{ timeZone }}</span></div>
-    <nav class="section-tabs" aria-label="Investigation sections">@for (tab of ['summary', 'transfers', 'conversation', 'timing', 'notes']; track tab) { <button type="button" [class.active]="section === tab" (click)="setSection(tab)">{{ tab | titlecase }}</button> }</nav>
+    <div class="workspace-tools"><button type="button" class="secondary" (click)="openPlayer(view.account.characterId)">Open player</button><button type="button" class="secondary" [disabled]="!canAdvance || saving || advancing" (click)="nextAccount()">{{ advancing ? 'Loading next account…' : 'Next unreviewed account' }}</button><span>Times: {{ timeZone }}</span></div>
+    <p class="support-note" role="status">{{ queueMessage }}</p><nav class="section-tabs" aria-label="Investigation sections">@for (tab of ['summary', 'transfers', 'conversation', 'timing', 'notes']; track tab) { <button type="button" [class.active]="section === tab" [attr.aria-pressed]="section === tab" (click)="setSection(tab)">{{ tab | titlecase }}</button> }</nav>
     <section class="risk-context-strip">
       <div><span>Account created</span><strong>{{ view.account.accountCreatedUtc | date: 'mediumDate' }}</strong></div>
       <div><span>Last session issued</span><strong>{{ view.account.lastSessionUtc ? (view.account.lastSessionUtc | date: 'medium') : 'Unavailable' }}</strong></div>
@@ -218,8 +218,8 @@
       <header><div><p class="eyebrow">Human review · separately audited</p><h2>Investigation</h2></div><span class="investigation-pill">{{ view.account.investigationStatus }}</span></header>
       @if (canModerate) {
         <div class="investigation-actions">
-          <form (ngSubmit)="updateStatus()"><label>Review status<select name="review-status" [(ngModel)]="selectedStatus"><option value="Unreviewed">Unreviewed</option><option value="Investigating">Investigating</option><option value="Watchlisted">Watchlisted</option><option value="Cleared">Cleared</option><option value="ConfirmedAbuse">Confirmed abuse</option><option value="Actioned">Actioned</option></select></label><label>Reason<input name="status-reason" [(ngModel)]="statusReason" maxlength="500" placeholder="Case/reference and rationale" /></label><button class="primary" type="submit" [disabled]="saving">Update status</button></form>
-          <form (ngSubmit)="addNote()"><label>Append-only investigation note<textarea name="risk-note" [(ngModel)]="note" maxlength="4000" placeholder="Record what was reviewed and why…"></textarea></label><button class="secondary" type="submit" [disabled]="saving">Add note</button></form>
+          <app-draft-status [draft]="preparation.handle" (restored)="preparation.restore()" /><fieldset [disabled]="preparation.blocked" class="preparation-fields"><form (ngSubmit)="updateStatus()"><label>Review status<select name="review-status" [(ngModel)]="selectedStatus"><option value="Unreviewed">Unreviewed</option><option value="Investigating">Investigating</option><option value="Watchlisted">Watchlisted</option><option value="Cleared">Cleared</option><option value="ConfirmedAbuse">Confirmed abuse</option><option value="Actioned">Actioned</option></select></label><label>Reason<input name="status-reason" [(ngModel)]="statusReason" maxlength="500" placeholder="Case/reference and rationale" /></label><button class="primary" type="submit" [disabled]="saving">Update status</button></form>
+          <form (ngSubmit)="addNote()"><label>Append-only investigation note<textarea name="risk-note" [(ngModel)]="note" maxlength="4000" placeholder="Record what was reviewed and why…"></textarea></label><button class="secondary" type="submit" [disabled]="saving">Add note</button></form></fieldset>
         </div>
       } @else { <div class="permission-note">You have read access. Account-moderation permission is required to change review state or add notes.</div> }
       <div class="investigation-notes">

@@ -1,5 +1,7 @@
 # Checked local application of carried-equipment floor 11 — 28 September 2026
 
+**Current progression follow-up:** the [supply-chest path](Tower-Equipment-Supplies-Implementation-20260928.md) is implemented locally. Continue with acquisition pace and earned-inventory validation using the [handoff](Tower-Continuation-Handoff-20260928.md). The application evidence below retains its original scope and pins.
+
 **Applied locally and independently verified.** Floor 11 now uses **Health 17.94375 / Power 23.0175**. The current build matches all **88,064 confirmed inputs** and **470 complete reports**, covering every one of the 344 recipes and both observed outcomes where available. Only the two intended floor-11 fields changed.
 
 Target: the primary game's Tower content and offline Balance Harness. Apply the [freshly confirmed carried-equipment setting](Tower-Carried-Equipment-Confirmation-20260928.md) to the local checkout, preserving the supported search and repeating ten-floor equipment curve.
@@ -69,7 +71,7 @@ Both new values multiply the previous floor-11 Health/Power by **2.75**, retaini
 
 The fresh confirmation supplies the balance evidence: the strongest intended combination won **93/256 (36.33%)**, with simultaneous adjusted bounds **25.92–48.19%**; the strongest lower-Essence control won **1/256**, upper bound **6.05%**. Seven related combinations established 10% viability. This application adds integration evidence only. It does not establish broad build diversity, universal seven-Essence necessity, equipment acquisition feasibility or balance in subsequent ten-floor blocks.
 
-The next useful work is progression coverage with feasible acquisition assumptions and floor-10 lower-Essence controls, retaining the confirmed builds as references. Another scalar sweep or search-algorithm experiment is not required to close this local application.
+The subsequent [floor-10 lower-Essence screen and acquisition audit](Tower-Floor10-Lower-Essence-Controls-20260928.md) completed **8,736 historical fights**. Every one of the **252 five-Essence controls won 0/32**, including 126 at the same level and tier as the six-Essence references. The strongest references won 6/32 and 5/32. Independent audit preserved all recipes and verified the acquisition arithmetic: the full 105-item party costs **36,000 Parts and 80.28 million Cinders** to reinforce from dungeon rank 1 to rank 5. Gear availability is now the main unresolved progression assumption. These are historical diagnostics, not universal Essence necessity or new balance acceptance. Another scalar sweep or search-algorithm experiment is not indicated by these results.
 
 No dependency, application configuration or migration changed. No database operation, deployment or restart occurred. The Tower definition provider loads content into a singleton; a running service needs its normal restart/reload as part of a separately authorized deployment to observe this edit. No such operation was performed.
 

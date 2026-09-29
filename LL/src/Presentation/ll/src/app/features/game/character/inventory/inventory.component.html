@@ -914,9 +914,14 @@
               Select the reward you want before opening this container.
             </p>
 
-            <div class="selection-container-options mt-3">
+              <input *ngIf="container.options.length > 12" type="search"
+                aria-label="Filter equipment choices" placeholder="Filter by item, slot or specialization"
+                class="mt-3 w-full rounded border border-light_gray bg-black/40 p-2 text-white focus:border-primary"
+                [value]="containerSearch()" (input)="searchContainerOptions($any($event.target).value)" />
+              <p *ngIf="filterSelectionOptions(container.options, containerSearch()).length === 0" class="ll-copy mt-2">No matching choices.</p>
+              <div class="selection-container-options mt-3 max-h-80 overflow-y-auto">
               <app-essence-preview
-                *ngFor="let option of container.options"
+                  *ngFor="let option of filterSelectionOptions(container.options, containerSearch())"
                 [definition]="option.essence"
                 originClass="relative block"
               >
@@ -930,7 +935,7 @@
                   (click)="selectContainerOption(option)"
                 >
                   <span class="selection-container-option-label">
-                    <span>{{ option.name }}</span>
+                      <span>{{ option.name }}<span *ngIf="option.description" class="mt-1 block text-xs text-zinc-400">{{ option.description }}</span></span>
                     <span
                       *ngIf="isSelectionEssenceAbsorbed(option)"
                       class="selection-container-option-status"

@@ -1,0 +1,22 @@
+{
+  "version": "tower-earned-party-v1",
+  "checkpoints": [2160, 8640, 25920, 86400],
+  "roster": [
+    {"recipe": "guardian", "pathOffset": 0},
+    {"recipe": "restorer", "pathOffset": 0},
+    {"recipe": "striker", "pathOffset": 0},
+    {"recipe": "striker", "pathOffset": 1},
+    {"recipe": "controller", "pathOffset": 0},
+    {"recipe": "guardian", "pathOffset": 1},
+    {"recipe": "restorer", "pathOffset": 1},
+    {"recipe": "striker", "pathOffset": 2},
+    {"recipe": "striker", "pathOffset": 3},
+    {"recipe": "controller", "pathOffset": 1},
+    {"recipe": "guardian", "pathOffset": 2},
+    {"recipe": "restorer", "pathOffset": 2},
+    {"recipe": "controller", "pathOffset": 2},
+    {"recipe": "guardian", "pathOffset": 3},
+    {"recipe": "restorer", "pathOffset": 3}
+  ],
+  "assumptions": "Four overlapping alternative rosters rotate the same 16 personal owners, each on a separate account. Two five-person cells keep the existing role order; a third uses remaining owners without cloning scarce strikers. Ordered Essences, training, attributes and retained equipment come unchanged from the pinned history checkpoint after its attempts. Completed histories stop activity and wait without gaining XP or rewards. Assembly occurs when all selected checkpoints are available, excluding player coordination and noncombat attendance time. Fixed and earned arms and idle-outcome scenarios are alternatives, never pooled. Later-floor preparation assumes server unlocks only to inspect party-size and budget dependencies; no later floor is claimed reached. Recommended balance budgets are not production entry gates. Seven purchases are a censoring rule, not required entry equipment. No contributions, no search, no boss edits, no live account eligibility or measured acquisition pace claim. Floor-one diagnostics use 16 fresh paired seeds for each outcome/rotation/horizon, one replay per party, no extension or tuning."
+}

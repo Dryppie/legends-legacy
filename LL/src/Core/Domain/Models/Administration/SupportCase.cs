@@ -1,7 +1,8 @@
 namespace Domain.Models.Administration;
 
 public enum SupportCaseStatus { Open, Waiting, Resolved, Closed }
-public enum SupportCaseEntryKind { Created, Note, StatusChanged, OperationLinked }
+public enum SupportCaseEntryKind { Created, Note, StatusChanged, OperationLinked, FollowUpChanged }
+public enum SupportCasePriority { Normal, High, Urgent }
 
 public sealed class SupportCase
 {
@@ -14,6 +15,9 @@ public sealed class SupportCase
     public string? ExternalReference { get; set; }
     public SupportCaseStatus Status { get; set; }
     public string? Resolution { get; set; }
+    public SupportCasePriority Priority { get; set; }
+    public DateTimeOffset? FollowUpAt { get; set; }
+    public string? NextAction { get; set; }
     public int Version { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
