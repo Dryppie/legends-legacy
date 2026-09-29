@@ -1,6 +1,8 @@
 # Floor-10 five-Essence controls and acquisition audit — 28 September 2026
 
-**Subsequent implementation:** the [Tower supply path](Tower-Equipment-Supplies-Implementation-20260928.md) now supplies selectable preparation gear. See the [current continuation handoff](Tower-Continuation-Handoff-20260928.md) for resource/time and earned-inventory validation. This screen's results, hashes and no-gameplay-change scope remain historical.
+**29 September follow-up:** the [consolidated balance review](Tower-Balance-Status-20260929.md) preserves this historical evidence and identifies floor 10 as the next diversity priority. Its accepted family has one viable composition; floor 11 has four across seven qualifying recipes. The review adds no fights or current-runtime replay claim. The [current handoff](Tower-Continuation-Handoff-20260928.md) supersedes older queues and supply recommendations.
+
+**Supply recommendation withdrawn:** selectable supplies are no longer issued on normal dungeon completion. See [Tower Supply Withdrawal](Tower-Supply-Withdrawal-20260929.md). The diagnostic below remains historical and does not establish ordinary acquisition.
 
 **Completed and independently verified.** All **252 five-Essence controls won 0/32**, including all 126 level-50/tier-2 controls. The two strongest six-Essence references won **6/32** and **5/32**. All **8,736 fights** completed, with no new seeds or gameplay changes. This is a historical diagnostic, not fresh balance acceptance.
 

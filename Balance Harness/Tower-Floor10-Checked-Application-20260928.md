@@ -1,5 +1,7 @@
 # Floor-10 checked local application — 28 September 2026
 
+**29 September follow-up:** the [consolidated balance review](Tower-Balance-Status-20260929.md) preserves this historical evidence and identifies floor 10 as the next diversity priority. Its accepted family has one viable composition; floor 11 has four across seven qualifying recipes. The review adds no fights or current-runtime replay claim. The [current handoff](Tower-Continuation-Handoff-20260928.md) supersedes older queues and supply recommendations.
+
 **Applied locally: Health 12.71 / Power 7.13**, the exact 7.75× setting from the [passing fresh confirmation](Tower-Floor10-Family-Confirmation-20260928.md). The current build prepared all **21** confirmed recipes, matched **all 5,376** archived input hashes and reproduced **23 complete battle reports**. The independent audit verified the application. No deployment or service restart occurred.
 
 ## Content change

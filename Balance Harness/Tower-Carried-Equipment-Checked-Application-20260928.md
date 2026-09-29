@@ -1,5 +1,7 @@
 # Checked local application of carried-equipment floor 11 — 28 September 2026
 
+**29 September follow-up:** the [consolidated balance review](Tower-Balance-Status-20260929.md) preserves this historical evidence and identifies floor 10 as the next diversity priority. Its accepted family has one viable composition; floor 11 has four across seven qualifying recipes. The review adds no fights or current-runtime replay claim. The [current handoff](Tower-Continuation-Handoff-20260928.md) supersedes older queues and supply recommendations.
+
 **Current progression follow-up:** the [supply-chest path](Tower-Equipment-Supplies-Implementation-20260928.md) is implemented locally. Continue with acquisition pace and earned-inventory validation using the [handoff](Tower-Continuation-Handoff-20260928.md). The application evidence below retains its original scope and pins.
 
 **Applied locally and independently verified.** Floor 11 now uses **Health 17.94375 / Power 23.0175**. The current build matches all **88,064 confirmed inputs** and **470 complete reports**, covering every one of the 344 recipes and both observed outcomes where available. Only the two intended floor-11 fields changed.

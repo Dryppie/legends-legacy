@@ -1,5 +1,9 @@
 # Tower floors 12–15 — calibration, 29 September 2026
 
+**Later floor-13 result:** the [complete 130-cell confirmation](Tower-Floor13-Search-Challenge-20260929.md) establishes **5 viable compositions**, including **4 new ones**, at **42/140 (30.00%)**, **38/140 (27.14%)**, **31/140 (22.14%)**, **30/140 (21.43%)**, **30/140 (21.43%)**. Health/offense stays **13.180078125 / 12.83625**. All 18,200 inputs and 130 replays match. This report retains its earlier family/results; use the [current handoff](Tower-Continuation-Handoff-20260928.md) for the latest accepted sources and review queue.
+
+**Later floor-12 result:** the [expanded-family calibration](Tower-Floor12-Expanded-Calibration-20260929.md) applies health **9.414125 (+1.5%)**, preserving offense/regeneration. Its complete 131-cell confirmation establishes **53/152 (34.87%)**, **36/152 (23.68%)**; all 19,912 inputs and 131 replays match. This report retains its historical settings/results. That scope ended at **907,658 exclusions**; see the [current handoff](Tower-Continuation-Handoff-20260928.md) for the latest ledger, accepted sources and remaining work.
+
 **Completed: all four floors are applied locally and verified.** Target: primary LL Tower guardian data and offline Balance Harness. The user selected seven Essences on floors 12–14 and eight on floor 15. Earlier ten-Essence floor-15 diagnostics are not the intended budget for this pass.
 
 All four applied settings passed their own fresh **73-cell confirmations**. Application matched **74,752 native inputs and 292 complete reports**. The final content comparison verifies **only eight health/offense fields changed**, all on floors 12–15; floors 1–11 and the repeating gear fixture are preserved.
