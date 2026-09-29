@@ -59,6 +59,118 @@ def authenticate(root):
     return files
 
 
+def append_references(cells, evaluated, source):
+    """Keep exact recipes, including identity fields; merge only identical scenarios."""
+    references = [c for c in evaluated if c['origin'] == 'retained-reference']
+    check(len(references) == 3, 'Expected all three saved search references')
+    check(all(c['origin'] in ('retained-reference', 'generated-finalist') for c in evaluated),
+          'Unknown search nominee origin')
+    def key(cell):
+        return json.dumps(cell['scenario'], sort_keys=True, separators=(',', ':'))
+    existing = {key(c): c['id'] for c in cells}
+    coverage = []
+    for cell in references:
+        scenario = cell['scenario']
+        check(scenario['floorNumber'] == cells[0]['scenario']['floorNumber'] and not scenario['seeds'],
+              'Reference must be seed-free and from the same floor')
+        signature = key(cell)
+        added = signature not in existing
+        if added:
+            clone = json.loads(json.dumps(cell))
+            clone.update(id='projected-reference/' + hashlib.sha256(signature.encode()).hexdigest(),
+                         origin='projected-reference')
+            check(all(c['id'] != clone['id'] for c in cells), 'Reference identifier collision')
+            cells.append(clone)
+            existing[signature] = clone['id']
+        coverage.append(dict(source=str(source), sourceId=cell['id'], cellId=existing[signature], added=added))
+    return coverage
+
+
+def composition_key(cell):
+    """Count actual slot builds, ignoring labels, identities and Essence ordering."""
+    return tuple(sorted((m['partySlot'], tuple(sorted(m['build']['essenceIds'])))
+                        for m in cell['scenario']['party']))
+
+
+def select_search_references(cells, rows, gear=None):
+    lookup = {c['id']: c for c in cells}
+    check(len(lookup) == len(cells) and len({r['id'] for r in rows}) == len(rows)
+          and set(lookup) == {r['id'] for r in rows}, 'Measured cells and rows must match uniquely')
+    check(all(r['gear'] == lookup[r['id']]['gear'] for r in rows), 'Measured gear differs from recipe')
+    ranked = sorted(rows, key=lambda r: (-r['wins'], r['meanGuardianHealth'], r['id']))
+    check(bool(ranked), 'Measured references required')
+    selected_gear = gear if gear is not None else ranked[0]['gear']
+    chosen, seen = [], set()
+    for row in ranked:
+        if row['gear'] != selected_gear:
+            continue
+        cell = lookup[row['id']]
+        key = composition_key(cell)
+        if key not in seen:
+            seen.add(key)
+            chosen.append(cell)
+        if len(chosen) == 3:
+            break
+    check(len(chosen) == 3, 'Three distinct measured reference compositions required at selected gear')
+    return chosen, 1
+
+
+def append_search_finalists(cells, evaluated, source):
+    """Preserve exact nominees plus gear projections; deduplicate only exact recipes."""
+    finalists = [c for c in evaluated if c['origin'] == 'generated-finalist']
+    check(len(finalists) == 2, 'Expected both generated search finalists')
+    templates = [c for c in cells if c['composition'] == cells[0]['composition']]
+    profiles = {c['gear']: c for c in templates}
+    check(len(profiles) == len(templates), 'Ambiguous frozen gear templates')
+    def key(cell):
+        return json.dumps(cell['scenario'], sort_keys=True, separators=(',', ':'))
+    existing = {key(c): c['id'] for c in cells}
+    coverage = []
+    def append(cell, source_id, kind):
+        scenario = cell['scenario']
+        check(scenario['floorNumber'] == cells[0]['scenario']['floorNumber'] and not scenario['seeds'],
+              'Finalist must be seed-free and from the same floor')
+        signature = key(cell)
+        added = signature not in existing
+        if added:
+            clone = json.loads(json.dumps(cell))
+            clone['id'] = 'generated-finalist/' + hashlib.sha256(signature.encode()).hexdigest()
+            check(all(c['id'] != clone['id'] for c in cells), 'Finalist identifier collision')
+            cells.append(clone)
+            existing[signature] = clone['id']
+        coverage.append(dict(source=str(source), sourceId=source_id, cellId=existing[signature],
+                             kind=kind, gear=cell['gear'], added=added))
+    for cell in finalists:
+        append(cell, cell['id'], 'exact-finalist')
+        for gear, template in profiles.items():
+            clone = json.loads(json.dumps(cell))
+            clone['gear'] = gear
+            for member, gear_member in zip(clone['scenario']['party'], template['scenario']['party'], strict=True):
+                build, frozen = member['build'], gear_member['build']
+                check(member['partySlot'] == gear_member['partySlot'] and
+                      all(build[k] == frozen[k] for k in ('characterLevel', 'tier', 'attributeRollMultiplier')),
+                      'Gear projection cannot change positions, level, tier or rolls')
+                for field in ('equipment', 'rank', 'quality'):
+                    build[field] = frozen[field]
+            append(clone, cell['id'], 'gear-projection')
+    return coverage
+
+
+def validate_current_content(source, api, floor):
+    """Refresh other floors without silently changing the studied floor or catalogs."""
+    for path in (source / 'content/Data').rglob('*.json'):
+        relative = path.relative_to(source / 'content/Data')
+        current = api / 'Data' / relative
+        if relative.as_posix() == 'world-tower/tower-floors.json':
+            before, after = read(path), read(current)
+            check({k: v for k, v in before.items() if k != 'floors'} ==
+                  {k: v for k, v in after.items() if k != 'floors'}, 'Tower metadata changed')
+            check(next(f for f in before['floors'] if f['floorNumber'] == floor) ==
+                  next(f for f in after['floors'] if f['floorNumber'] == floor), 'Target floor changed')
+        else:
+            check(sha(path) == sha(current), 'Current catalog differs: ' + str(relative))
+
+
 def history():
     check(sha(BASE_LEDGER) == BASE_PIN, 'Changed predecessor ledger')
     ledger = read(BASE_LEDGER)
@@ -130,18 +242,28 @@ def main():
     p.add_argument('--name', required=True, help='Unique phase identifier')
     p.add_argument('--artifacts', type=Path, required=True)
     p.add_argument('--source', type=Path)
+    p.add_argument('--search-gear', help='Search at this measured gear profile; default selects the strongest measured cell')
     p.add_argument('--samples', type=int, default=32)
     p.add_argument('--floor', type=int, default=5)
     p.add_argument('--native-seconds', type=int, choices=[840, 1140], default=840,
                    help='1140 requires a separately declared floor-15 confirmation; process allowance adds 60 seconds')
     p.add_argument('--add-search', type=Path, action='append', default=[], help='Add generated finalists at every frozen gear profile; repeat for multiple completed searches')
     p.add_argument('--retain-search-references', action='store_true', help='Also retain exact projected reference recipes at their evaluated profile')
+    p.add_argument('--add-references', type=Path, action='append', default=[],
+                   help='Import only the three exact saved references; retain the existing family unchanged')
+    p.add_argument('--current-content', action='store_true',
+                   help='Seed-free preparation from saved cells and current content; target floor and catalogs must match')
     p.add_argument('--health-factor', type=float, default=1.0, help='Multiply boss health in an isolated content copy only')
     p.add_argument('--offense-factor', type=float, default=1.0, help='Multiply boss offense in the same isolated copy')
     a = p.parse_args()
     check(a.name.replace('-', '').isalnum(), 'Unsafe phase name')
     check(16 <= a.samples <= 512, 'Bounded panel required')
+    check(a.search_gear is None or a.mode == 'search', 'Search gear is only valid in search mode')
     check(not a.retain_search_references or a.add_search, 'Reference retention requires a completed search')
+    check(not a.current_content or a.mode == 'prepare' and a.source is not None,
+          'Current-content refresh requires seed-free preparation from a completed source')
+    check(not a.add_references or a.mode in ('prepare', 'screen', 'confirm') and a.source is not None,
+          'Reference-only import requires a saved family and a fixed-family mode')
     check(a.native_seconds == 840 or a.mode == 'confirm' and a.floor == 15,
           'Larger predeclared envelope is only for floor-15 confirmation')
     scaled_guardian({'health': 1, 'offense': 1}, a.health_factor, a.offense_factor)
@@ -156,7 +278,7 @@ def main():
     fixtures = ROOT / 'LL/tools/BalanceHarness/Fixtures'
     source_cells = None
     benchmark = 1
-    if a.mode != 'prepare':
+    if a.mode != 'prepare' or a.source is not None:
         check(a.source is not None, 'A completed source is required')
         source = a.source.resolve()
         authenticate(source)
@@ -164,13 +286,12 @@ def main():
         pins[str(source / 'files.json')] = sha(source / 'files.json')
         api = source / 'content'
         source_cells = read(source / ('evaluation-cells.json' if (source / 'evaluation-cells.json').exists() else 'cells.json'))
+        if a.current_content:
+            api = ROOT / 'LL/src/API/API.LL'
+            validate_current_content(source, api, a.floor)
         if a.mode == 'search':
             rows = read(source / 'result.json')['rows']
-            best = sorted(rows, key=lambda r: (-r['wins'], r['meanGuardianHealth'], r['id']))[0]
-            ranked = sorted([r for r in rows if r['gear'] == best['gear']], key=lambda r: (-r['wins'], r['meanGuardianHealth'], r['id']))[:3]
-            source_cells = [next(c for c in source_cells if c['id'] == r['id']) for r in ranked]
-            check(len(source_cells) == 3, 'Three distinct measured reference compositions required')
-            benchmark = next(i + 1 for i, c in enumerate(source_cells) if c['id'] == best['id'])
+            source_cells, benchmark = select_search_references(source_cells, rows, a.search_gear)
     elif a.floor == 5:
         check(sha(EARNED / 'files.json') == EARNED_PIN, 'Changed earned archive')
         manifest = read(EARNED / 'files.json')
@@ -180,32 +301,32 @@ def main():
         pins[str(EARNED / 'files.json')] = EARNED_PIN
     owner.mkdir()
     shutil.copy2(Path(__file__), owner / 'owner-source.py')
+    reference_coverage = []
+    for added in a.add_references:
+        search_root = added.resolve()
+        authenticate(search_root)
+        check(read(search_root / 'completion.json')['status'] == 'Complete' and
+              read(search_root / 'request.json')['mode'] == 'search', 'Completed search required')
+        pins[str(search_root / 'files.json')] = sha(search_root / 'files.json')
+        reference_coverage.extend(append_references(source_cells, read(search_root / 'evaluation-cells.json'), search_root))
+    if a.add_references:
+        write(owner / 'reference-coverage.json', reference_coverage)
+        pins[str(owner / 'reference-coverage.json')] = sha(owner / 'reference-coverage.json')
+    finalist_coverage = []
     for added in a.add_search:
         check(a.mode in ('screen', 'confirm') and source_cells is not None, 'Only fixed-family evaluations may add finalists')
         search_root = added.resolve()
         authenticate(search_root)
-        check(read(search_root / 'completion.json')['status'] == 'Complete', 'Incomplete added search')
+        check(read(search_root / 'completion.json')['status'] == 'Complete' and
+              read(search_root / 'request.json')['mode'] == 'search', 'Completed search required')
         pins[str(search_root / 'files.json')] = sha(search_root / 'files.json')
-        # Gear definitions come from the frozen screen; positions and instance
-        # identities remain those of each finalist. No reordered Essence variants.
-        profiles = {c['gear']: c for c in source_cells if c['composition'] == source_cells[0]['composition']}
-        for cell in read(search_root / 'evaluation-cells.json'):
-            if cell['origin'] != 'generated-finalist':
-                if a.retain_search_references:
-                    clone = json.loads(json.dumps(cell))
-                    clone.update(id=cell['id']+'/projected-reference', origin='projected-reference')
-                    source_cells.append(clone)
-                continue
-            for gear, template in profiles.items():
-                clone = json.loads(json.dumps(cell))
-                clone.update(id=cell['id']+'/'+gear, gear=gear)
-                for member, gear_member in zip(clone['scenario']['party'], template['scenario']['party'], strict=True):
-                    build, frozen = member['build'], gear_member['build']
-                    check(all(build[k] == frozen[k] for k in ('characterLevel', 'tier', 'attributeRollMultiplier')),
-                          'Gear projection cannot change level, tier or rolls')
-                    for key in ('equipment', 'rank', 'quality'):
-                        build[key] = frozen[key]
-                source_cells.append(clone)
+        evaluated = read(search_root / 'evaluation-cells.json')
+        finalist_coverage.extend(append_search_finalists(source_cells, evaluated, search_root))
+        if a.retain_search_references:
+            reference_coverage.extend(append_references(source_cells, evaluated, search_root))
+    if a.add_search:
+        write(owner / 'search-coverage.json', dict(finalists=finalist_coverage, references=reference_coverage))
+        pins[str(owner / 'search-coverage.json')] = sha(owner / 'search-coverage.json')
     if a.health_factor != 1 or a.offense_factor != 1:
         check(a.mode in ('screen', 'confirm'), 'Boss variants are fixed-family studies only')
         isolated = owner / 'candidate-content'
@@ -251,7 +372,7 @@ def main():
     maximum = 0 if a.mode == 'prepare' else 528 + 5*a.samples if a.mode == 'search' else len(source_cells)*a.samples
     q = dict(mode=a.mode, apiRoot=str(api), fixtures=str(fixtures), output=str(output), floor=a.floor, seeds=seeds,
              searchSeeds=search, cells=str(owner/'cells.json') if source_cells else None,
-             earned=str(EARNED) if a.mode == 'prepare' and a.floor == 5 else None,
+             earned=str(EARNED) if a.mode == 'prepare' and a.floor == 5 and source_cells is None else None,
              history=str(owner/'history.json'), benchmark=benchmark, maximumFights=maximum, inputHashes=pins)
     if a.native_seconds != 840:
         q['nativeSeconds'] = a.native_seconds
@@ -265,6 +386,9 @@ def main():
     write(owner / 'process.json', receipt)
     check(receipt['exitCode'] == 0 and not receipt['timedOut'] and receipt['activeProcesses'] == 0, 'Bounded operation failed; preserve outputs')
     verified = audit(output)
+    if a.current_content:
+        check(read(source / 'scope.json')['settings'] == read(output / 'scope.json')['settings'],
+              'Current native combat settings differ; preparation preserved, no fights permitted')
     write(owner / 'independent-audit.json', verified)
     write(owner / 'completion.json', dict(status='Complete', manifestPin=sha(output/'files.json'), result=read(output/'result.json')))
     summary = {k: v for k, v in verified.items() if k != 'assessment'}

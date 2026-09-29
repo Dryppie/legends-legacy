@@ -1,5 +1,13 @@
 # Floor 5 Tower calibration — 29 September 2026
 
+**Current floor-5 setting:** the later [expanded-family calibration](Tower-Floor5-Expanded-Calibration-20260929.md) applied health **3.3102803755**, offense **4.4702934848** unchanged, after fresh confirmation of all 89 recipes. Two distinct compositions qualify at 70/200 and 43/200; all inputs/replays matched. This report preserves the earlier calibration. Follow the [current handoff](Tower-Continuation-Handoff-20260928.md) for the 903,652-value exclusion union and floor-7 queue.
+
+**Latest floor-5 result:** the [supported-search challenge](Tower-Floor5-Search-Challenge-20260929.md) expanded the family to 89 recipes / twelve compositions. Its strongest new lineup won 80/128 in the fresh family screen. The guardian values below remain applied, but the earlier 60-cell acceptance does not establish the ceiling for these new builds. Use the [current handoff](Tower-Continuation-Handoff-20260928.md) for the next calibration and 903,004-value exclusion union.
+
+**Later diversity result:** the [complete-family diversity sweep](Tower-Floor5-Diversity-20260929.md) ran 61,440 fights, but none of its bounded health/offense settings qualified for confirmation. Floor-5 values remain those applied below; no new content change or confirmation followed. Keep its 60-cell family and the 902,402-value exclusion history, and use the [current handoff](Tower-Continuation-Handoff-20260928.md) for the next supported-search challenge.
+
+**Later coverage verification:** the [complete reference-coverage pass](Tower-Reference-Coverage-20260929.md) retained these families, added the omitted exact search references and confirmed all floors 1–9 at their applied settings. Every expanded family passed; 93,184 inputs and 364 full replays matched. Guardian values stayed unchanged. This report preserves the original calibration; its earlier next-work recommendations and exclusion counts are historical. Follow the [current handoff](Tower-Continuation-Handoff-20260928.md) for the latest exclusion union and the next build-diversity pass.
+
 **Applied locally after fresh confirmation:** floor-5 Kharad health is **3.1829618995**, down 10% from **3.5366243328**. Offense remains **4.4702934848** and all other boss fields are unchanged. The strongest tested combination won **56/256 (21.88%)**, with an approximate simultaneous interval of **14.55–31.52%**. This passes the existing fixed-family target; it does not establish broad composition viability or ordinary-player acquisition feasibility.
 
 Target: the primary game's offline Balance Harness and floor-5 guardian content. Acquisition studies remain preserved; this continuation prioritizes Tower difficulty rather than expanding dungeon simulation.

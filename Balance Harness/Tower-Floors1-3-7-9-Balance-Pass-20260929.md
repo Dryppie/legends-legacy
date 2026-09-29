@@ -1,5 +1,13 @@
 # Tower floors 1–3 and 7–9 — calibration, 29 September 2026
 
+**Later floor-8 result:** the [midpoint refinement](Tower-Floor8-Health-Refinement-20260929.md) applies health **9.9064526367 (+5%)**, preserving offense and regeneration. The complete 67-cell confirmation establishes **47/160 (29.38%)** and **33/160 (20.62%)**; all 10,720 inputs and 67 full replays match. The report below retains its own historical setting and results. Use the [current handoff](Tower-Continuation-Handoff-20260928.md) for **906,552 exclusions**, current content and the floor-12 queue.
+
+**Later floor-7 result:** the [expanded-family refinement](Tower-Floor7-Diversity-Refinement-20260929.md) applies health **4.4454238281 (+5.5%)**, with offense and regeneration unchanged. Fresh confirmation across **60 exact recipes / eight compositions** establishes two new lineups at **95/256 and 82/256**; 15,360 inputs and 60 full replays match. The results below remain historical at their stated settings. Use the [current handoff](Tower-Continuation-Handoff-20260928.md) for **905,278 exclusions**, the current Tower hash and the floor-8 queue.
+
+**Later floor-3 tuning:** the [confirmed diversity pass](Tower-Floor3-Diversity-20260929.md) supersedes this report's floor-3 health value with **1.5047963378**; offense is unchanged. Two closely related compositions qualify at 90/256 and 56/256. Other floors and the historical evidence below remain unchanged.
+
+**Later coverage verification:** the [complete reference-coverage pass](Tower-Reference-Coverage-20260929.md) retained these families, added the omitted exact search references and confirmed all floors 1–9 at their applied settings. Every expanded family passed; 93,184 inputs and 364 full replays matched. Guardian values stayed unchanged. This report preserves the original calibration; its earlier next-work recommendations and exclusion counts are historical. Follow the [current handoff](Tower-Continuation-Handoff-20260928.md) for the latest exclusion union and the next build-diversity pass.
+
 **Completed: all six floors are applied locally and verified.** Each applied setting passed a separate fresh 35-cell, 8,960-fight confirmation. Application checks matched **53,760 native inputs and 210 complete battle reports**. Earlier floor-4/5/6 changes are preserved. These are fixed-budget benchmark results, not a claim that ordinary parties or the entire Tower are balanced.
 
 | Floor | Applied health / offense | Strongest confirmation | Adjusted interval | Viable compositions / gear profiles | Mean seconds, strongest team |

@@ -1,6 +1,19 @@
 # Tower floors 12–15 — calibration, 29 September 2026
 
-**Floors 12–14 are applied locally and verified; floor 15 is in progress.** Target: primary LL Tower guardian data and offline Balance Harness. The user selected seven Essences on floors 12–14 and eight on floor 15. Earlier ten-Essence floor-15 diagnostics are not the intended budget for this pass.
+**Completed: all four floors are applied locally and verified.** Target: primary LL Tower guardian data and offline Balance Harness. The user selected seven Essences on floors 12–14 and eight on floor 15. Earlier ten-Essence floor-15 diagnostics are not the intended budget for this pass.
+
+All four applied settings passed their own fresh **73-cell confirmations**. Application matched **74,752 native inputs and 292 complete reports**. The final content comparison verifies **only eight health/offense fields changed**, all on floors 12–15; floors 1–11 and the repeating gear fixture are preserved.
+
+| Floor | Applied health / offense | Strongest fresh result | Adjusted interval | Distinct viable compositions | Mean engine seconds, strongest |
+| --- | --- | --- | --- | ---: | ---: |
+| 12 | 9.275 / 11.9 | 61/256 (23.83%) | 16.04–33.87% | 1 | 70.58 |
+| 13 | 13.180078125 / 12.83625 | 54/256 (21.09%) | 13.78–30.90% | 1 | 91.35 |
+| 14 | 12.68625 / 10.933125 | 91/256 (35.55%) | 26.21–46.13% | 3 | 132.44 |
+| 15 | 15.275 / 10.28125 | 75/256 (29.30%) | 20.70–39.68% | 3 | 108.31 |
+
+Intervals are approximate simultaneous 95% Bonferroni-Wilson intervals **within each floor's 73-cell family**, not a joint whole-Tower guarantee. Every upper bound is at most 50%; at least one lower bound reaches 10%. All viable cells use retained Legendary gear: resistance-and-health on floors 12–13, armor-and-health on 14–15. **Every cycle-only cell won 0/256**. These results establish neither Rare/Epic-only viability nor ordinary-player acquisition. Floors 12–13 have narrow composition viability; floor 14's roughly 132-second battles add a pacing concern alongside floor 8's earlier 196-second result.
+
+The approved budgets remain:
 
 | Floor | Characters | Level / Essences | Tier | Cycle gear | Retained gear |
 | --- | ---: | --- | ---: | --- | --- |
@@ -73,8 +86,32 @@ Declare one separate, larger confirmation envelope **before launch**: **1,140 na
 
 Rebuild the native deadline guard through the required test wrapper, verify all **70 non-test assembly hashes** still match the selected runtime, then launch one fresh `floor15-later-complete-large-confirmation` owner. Do not apply unless it independently passes and the usual 18,688-input / 73-replay application check succeeds. This is a prospective resource allocation after a zero-confirmation preflight stop, not a retry of combat or an extension of an observed confirmation result.
 
+The deadline guard passed **82 regressions**, three intentional opt-in skips; all 70 non-test assembly hashes remained identical. The [larger-envelope driver](../TestResults/tower-floor15-large-confirmation-driver-20260929.py) froze the source manifest, cells, limits and exact command before allocation. The first floor-15 confirmation then **passed**, completing all 18,688 fights in **721.04 native seconds**, with zero retries. The strongest generated armor-and-health team won **75/256 (29.30%)**, adjusted interval **20.70–39.68%**, averaging **108.31 seconds**. The second generated team won 73/256; a retained composition's original/projected representations each won 64/256. Four viable cells therefore represent **three distinct Essence compositions**, all with retained armor-and-health gear. Every upper bound stays below 50%; all 35 cycle-budget cells won zero. Application matched **18,688 native inputs and 73 complete reports**. Floor 15 now uses health **15.275**, offense **10.28125**, preserving every other guardian field and earlier floors. Application receipt SHA-256: `83faae307949ad245d88e46883e72e6feab6b085ea16b4ec4079beeb708fcf6a`.
+
 ### Earlier-family coverage follow-up
 
 A [read-only coverage audit](../TestResults/tower-earlier-reference-coverage-audit-complete-20260929.json) authenticated the saved recipe/result members for the earlier floor-1–9 searches and final confirmations. All **30 projected-reference entries** (including both floor-5 searches) lack an exact party representation in those final captured families. This is an entry count, not a claim of 30 distinct new compositions. No fights or seeds were used. Audit SHA-256: `1297cd6fe3041b98b9a68fc311fcffe0c904ebbfc883211d29349bc9ec46ebc6`.
 
-The search observations were made at their own captured settings; absence does **not** establish an upper-bound breach at the applied settings. The earlier family-specific claims retain their scope. The next Tower verification should retain those evaluated reference recipes at the currently applied settings, alongside the previously confirmed families, before strengthening whole-Tower claims. Keep this ahead of another search-algorithm campaign or unrelated dungeon work. Broader composition viability and floor-8 pacing remain separate unfinished concerns.
+The search observations were made at their own captured settings; absence did not establish an upper-bound breach at the applied settings. The subsequent [complete reference-coverage pass](Tower-Reference-Coverage-20260929.md) has now retained the exact recipes alongside all earlier confirmed cells and independently confirmed all nine expanded families at unchanged settings. All passed; 93,184 inputs and 364 complete replays matched. Broader composition viability and floor-8 pacing remain unfinished. The subsequent [floor-3 diversity pass](Tower-Floor3-Diversity-20260929.md) now confirms two closely related compositions after a 2.25% health reduction. Continue on floor 5 under a new bounded declaration; keep the supported search and do not divert to dungeon work.
+
+## Final verification and evidence
+
+The [evidence index](../TestResults/tower-floors12-15-evidence-20260929.json) authenticates completion/manifest receipts for **55 phases**, records all five confirmation results (including the unapplied preliminary floor-12 family), and verifies each applied family's gear, level, tier and ordinal Essence encoding against its frozen preparation. Actual distinct Essence compositions are counted from their vectors, merging original/projected representations. All native operations completed with zero retries and drained processes; the orchestration and resource-preflight stops above remain preserved.
+
+Total work: **164,160 study fights + 292 application replays = 164,452 fights**. The four accepted confirmations account for 74,752 fights. The original 70-cell floor-12 confirmation is not pooled with them. [Final regression log](../TestResults/tower-floors12-15-final-regression-20260929.log): **82 passed**, three intentional opt-in skips, no failures. The owned experiments and application checks ran separately. A final [zero-combat preparation](../TestResults/tower-balance-pass-floor15-later-complete-default-envelope-preparation-study-20260929/result.json) verifies that requests omitting the optional deadline still use the ordinary envelope; it ran zero fights and reserved no seeds. Python parsing, Markdown link checks and `git diff --check` passed. No required command remains blocked.
+
+- Evidence index SHA-256: `6de109c4855f7fab69fa51fb5a96b32aff932f076f39f7a22aecde01d81bd4a9`.
+- Final Tower SHA-256: `87a374fb1ff1ae0a822d055c661527e5fb479ec82f54aa46f5fab4022b337c9e`.
+- Exclusion union at this pass's close: **897,186**. Ledger: `TestResults/tower-balance-pass-floor15-later-complete-large-confirmation-owner-20260929/seed-ledger.json`; SHA-256 `742287ea06eb77aad7b84ee1676be31dc76d34caa7f81bf25a7be16cfdb30db5`. The later reference-coverage pass raised this union to **899,778**. Follow the current handoff for subsequent diversity-pass exclusions and import all later balance-pass ledgers, including unused reservations.
+
+Changed [guardian data](../LL/src/API/API.LL/Data/world-tower/tower-floors.json), the [explicit later-floor budgets](../LL/tools/BalanceHarness/Fixtures/tower-later-floor-balance-budgets.json), [native family/deadline fixture](../LL/tests/EssenceSystem.Tests/BalanceHarnessTowerBalancePassTests.cs), [floor projection support](../LL/tests/EssenceSystem.Tests/BalanceHarnessAffinityFloorEvaluationTests.cs), and [bounded owner](analysis/run-tower-balance-pass.py). Updated this report, the continuation handoff, search guide, README and the stale supply-status header in the equipment-cycle baseline. The larger deadline is an explicit offline experiment option; no production runtime configuration, schema migration, database action or deployment was performed. The supported search policy and reward sources are unchanged.
+
+Verification commands (the phase owners require fresh names and must not be rerun into existing paths):
+
+```powershell
+./build/run-tests.ps1 -NoBuild -ArtifactsPath 'TestResults/tower-floors12-15-build-20260929' -Filter 'FullyQualifiedName~BalanceHarnessTowerBalancePassTests|FullyQualifiedName~BalanceHarnessAffinityFloorEvaluationTests|FullyQualifiedName~BalanceHarnessTowerBalanceApplicationTests|FullyQualifiedName~BalanceHarnessProgressionEquipmentTests|FullyQualifiedName~BalanceHarnessGearProfileTests|FullyQualifiedName~BalanceHarnessTowerBossDiscoveryContractTests'
+python -B -X utf8 'TestResults/tower-floors12-15-collect-evidence-20260929.py'
+git -c core.safecrlf=false diff --check
+```
+
+The index collector writes a fresh receipt and refuses overwrite. Python denotes the bundled runtime. The one-command Git option suppresses line-ending notices without changing repository configuration or disabling whitespace validation. The earlier-family coverage follow-up is now complete; the later floor-3 diversity pass is also applied and verified. Continue build viability on floor 5, then review pacing. Acquisition modeling and another search-algorithm campaign are not prerequisites.

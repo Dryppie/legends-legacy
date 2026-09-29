@@ -215,7 +215,7 @@ public sealed class BalanceHarnessTowerBalancePassTests
             var hashes = TowerBundle.CopyContent(q.ApiRoot, root, token);
             TowerBundle.WriteSettings(Path.Combine(root, "appsettings.json"), settings);
             var scope = new LoadoutScope(Version, settings, ExecutionIdentity.Current(), hashes, "gzip-json-v1"); Save("scope.json", scope);
-            var cells = q.Mode == "prepare" ? Family(root, q.Fixtures, q.Floor, q.Earned)
+            var cells = q.Mode == "prepare" && q.Cells is null ? Family(root, q.Fixtures, q.Floor, q.Earned)
                 : HarnessJson.Read<Cell[]>(q.Cells!);
             Assert.NotEmpty(cells); Assert.Equal(cells.Length, cells.Select(c => c.Id).Distinct().Count());
             Assert.All(cells, c => { Assert.Equal(q.Floor, c.Scenario.FloorNumber); Assert.Empty(c.Scenario.Seeds); });
