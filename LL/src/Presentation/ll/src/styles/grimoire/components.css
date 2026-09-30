@@ -116,7 +116,7 @@ lg-top-bar, lg-track, lg-chronicle { display: block; }
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 .lg-btn:not(:has(.lg-key)) { padding: 0 var(--space-5); }
-.lg-btn:hover:not(:disabled) { border-color: var(--gilt); box-shadow: var(--glow-gilt); }
+.lg-btn:hover:not(:disabled) { border-color: var(--gilt); }
 .lg-btn--solid { background: var(--gilt); border-color: var(--gilt); color: var(--on-gilt); }
 .lg-btn--solid .lg-key { background: transparent; border-color: currentColor; color: inherit; }
 .lg-btn--solid:hover:not(:disabled) { filter: brightness(1.06); }
@@ -195,7 +195,7 @@ button.lg-sigil:disabled { cursor: not-allowed; }
 .lg-sigil--lg .lg-sigil__label { font-size: 36px; line-height: 40px; }
 button.lg-sigil:hover:not(:disabled) .lg-sigil__badge { transform: scale(1.06); }
 .lg-sigil.is-selected .lg-sigil__outer { stroke: var(--arcana-glow); }
-.lg-sigil.is-selected .lg-sigil__badge { filter: drop-shadow(0 0 10px var(--arcana-glow)); transform: scale(1.08); }
+.lg-sigil.is-selected .lg-sigil__badge { transform: scale(1.08); }
 .lg-sigil.is-ready .lg-sigil__badge::after {
   content: ""; position: absolute; top: 2px; right: 0;
   width: 11px; height: 11px; transform: rotate(45deg);
@@ -253,7 +253,7 @@ button.lg-sigil:focus-visible .lg-sigil__badge { border-radius: var(--radius-sm)
   background: var(--ground); border: 1.5px solid var(--line-strong);
 }
 .lg-track__node.is-done { background: var(--lg-track); border-color: var(--lg-track); }
-.lg-track__node.is-current { width: 16px; height: 16px; margin: -8px 0 0 -8px; background: var(--ground); border: 2px solid var(--lg-track); box-shadow: 0 0 12px var(--lg-track); }
+.lg-track__node.is-current { width: 16px; height: 16px; margin: -8px 0 0 -8px; background: var(--ground); border: 2px solid var(--lg-track); }
 .lg-track__node.is-current::after { content: ""; position: absolute; inset: 3px; background: var(--lg-track); }
 
 /* ---------- LevelPlate ---------- */
@@ -341,7 +341,6 @@ button.lg-sigil:focus-visible .lg-sigil__badge { border-radius: var(--radius-sm)
 .lg-emblem__inner { stroke-width: 1; opacity: 0.8; }
 .lg-emblem__core { stroke-width: 1.2; }
 .lg-emblem__heart, .lg-emblem__dot { fill: currentColor; stroke: none; }
-.lg-emblem { filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gilt) 28%, transparent)); }
 
 /* ---------- Folio ---------- */
 .lg-folio {
@@ -438,14 +437,14 @@ button.lg-slot { cursor: pointer; }
   aspect-ratio: 1 / 1; width: 100%;
   border-radius: var(--radius-sm);
   background: var(--ground-deep);
-  box-shadow: inset 0 0 0 1px var(--lg-rarity), inset 0 -22px 26px -18px var(--lg-rarity);
+  box-shadow: inset 0 0 0 1px var(--lg-rarity);
   color: var(--ink-muted); overflow: hidden;
 }
 .lg-slot--wide .lg-slot__frame { aspect-ratio: 16 / 9; }
 .lg-slot__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .lg-slot.is-empty .lg-slot__frame { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
 .lg-slot.is-empty .lg-slot__frame::after { content: ""; position: absolute; inset: 6px; border: 1px dashed var(--line); border-radius: 2px; }
-.lg-slot.is-selected .lg-slot__frame { box-shadow: inset 0 0 0 2px var(--arcana-glow), var(--glow-selected); }
+.lg-slot.is-selected .lg-slot__frame { box-shadow: inset 0 0 0 2px var(--arcana-glow); }
 .lg-slot__code {
   position: absolute; top: 4px; left: 4px; min-width: 18px; height: 16px; padding: 0 4px;
   display: grid; place-items: center;
@@ -490,9 +489,6 @@ button.lg-currency:hover { border-color: var(--line-strong); }
   background: var(--surface);
   overflow: auto;
 }
-.lg-rail {
-  background: linear-gradient(to right, var(--ground-deep), var(--ground) 70%, var(--ground));
-}
 .lg-rail__header { display: flex; align-items: center; gap: var(--space-3); padding-left: var(--space-1); }
 .lg-rail__sections { display: flex; flex-direction: column; gap: var(--space-4); }
 .lg-rail__group {
@@ -518,7 +514,7 @@ button.lg-currency:hover { border-color: var(--line-strong); }
   font-family: var(--lg-rail-active-family);
 }
 .lg-rail__item.is-active {
-  font-size: 13px; letter-spacing: 0.16em; text-shadow: 0 0 14px color-mix(in srgb, var(--gilt) 45%, transparent);
+  font-size: 13px; letter-spacing: 0.16em;
 }
 .lg-rail__item.is-active .lg-icon { color: var(--gilt); opacity: 1; }
 .lg-rail__item.is-active::before {
@@ -726,7 +722,7 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
   font-family: var(--font-ui); font-size: 14px; line-height: 20px;
 }
 .lg-chronicle {
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--ground) 92%, transparent), var(--ground) 40px);
+  background: var(--ground);
   border-top-color: color-mix(in srgb, var(--gilt) 30%, transparent);
 }
 .lg-chronicle.is-collapsed { height: var(--chronicle-collapsed); }
@@ -793,8 +789,6 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
   display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0;
   list-style: none; margin: 0; padding: var(--space-2) var(--space-5);
   overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 18px);
 }
 .lg-chronicle__log:focus-visible { outline: 2px solid transparent; box-shadow: inset 0 0 0 2px var(--focus); }
 .lg-chronicle__line { position: relative; padding: 1px 6px 1px 50px; border-radius: 2px; overflow-wrap: anywhere; }
@@ -843,9 +837,7 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
   position: absolute; inset: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent;
   container-type: inline-size;
   padding: calc(var(--topbar-height) + var(--space-3)) var(--space-8) var(--space-12);
-  background:
-    radial-gradient(90% 50% at 30% 0%, color-mix(in srgb, var(--gilt) 7%, transparent), transparent 70%),
-    var(--ground);
+  background: var(--ground);
 }
 .lg-page::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; opacity: var(--lg-grain-opacity); mix-blend-mode: overlay;
@@ -910,7 +902,7 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
 /* ---------- StatFigure ---------- */
 .lg-figure { display: grid; gap: 2px; justify-items: start; }
 .lg-figure__label { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-muted); }
-.lg-figure__value { font-family: var(--font-display); font-size: 64px; line-height: 64px; letter-spacing: -0.01em; color: var(--gilt); font-variant-numeric: lining-nums; text-shadow: 0 0 22px color-mix(in srgb, var(--gilt) 30%, transparent); }
+.lg-figure__value { font-family: var(--font-display); font-size: 64px; line-height: 64px; letter-spacing: -0.01em; color: var(--gilt); font-variant-numeric: lining-nums; }
 .lg-figure--sm .lg-figure__value { font-size: 36px; line-height: 40px; }
 .lg-figure__caption { max-width: 22ch; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
 
@@ -999,7 +991,7 @@ button.lg-loadout:focus-visible { outline: 2px solid transparent; box-shadow: va
 .lg-presence { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-muted); }
 .lg-presence__dot { width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid var(--ink-muted); }
 .lg-presence.is-online { color: var(--arcana); }
-.lg-presence.is-online .lg-presence__dot { background: var(--arcana-glow); border-color: var(--arcana-glow); box-shadow: 0 0 8px var(--arcana-glow); }
+.lg-presence.is-online .lg-presence__dot { background: var(--arcana-glow); border-color: var(--arcana-glow); }
 
 /* ---------- Angular additions ---------- */
 /* A Page placed in normal flow (outside a GameShell stage). */
