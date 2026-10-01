@@ -62,8 +62,6 @@
   --damage-none: #8d8991;
   --shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080;
   --shadow-float: 0 12px 28px -8px #000000cc;
-  --glow-selected: 0 0 0 1px #86e6d2, 0 0 28px 2px #86e6d259;
-  --glow-gilt: 0 0 18px #dcb87247;
   --shadow-text-art: 0 1px 14px #0b0806, 0 0 3px #0b0806;
   --focus-ring: 0 0 0 2px #15100c, 0 0 0 4px #f5d48f;
 }
