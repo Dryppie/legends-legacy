@@ -4,7 +4,7 @@ import { CharacterOverviewGrimoireComponent } from './character-overview-grimoir
 import { CharacterOverviewComponent } from './character-overview/character-overview.component';
 
 /**
- * The Character Overview route: the current page, or the Grimoire one when the player has turned on its preview in
+ * The Character Overview route: the current page, or the Grimoire one when the player has turned on the new look in
  * Settings → Interface. Goes away once the Grimoire Overview replaces the current one.
  */
 @Component({
@@ -13,7 +13,7 @@ import { CharacterOverviewComponent } from './character-overview/character-overv
   // No box of its own, so either page sits in the frame exactly as the current one always has.
   host: { style: 'display: contents' },
   template: `
-    @if (preview.characterOverview()) {
+    @if (preview.newLook()) {
       <app-character-overview-grimoire />
     } @else {
       <app-character-overview />

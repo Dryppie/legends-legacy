@@ -2,21 +2,33 @@ import { LocalStorageService } from '../local-storage/local-storage.service';
 import { GrimoirePreviewPreferenceService } from './grimoire-preview-preference.service';
 
 describe('GrimoirePreviewPreferenceService', () => {
-  it('keeps the current Character Overview until the preview is turned on', () => {
+  it('keeps the current look until the new look is turned on', () => {
     const { storage } = createStorage();
 
-    expect(new GrimoirePreviewPreferenceService(storage).characterOverview()).toBeFalse();
+    expect(new GrimoirePreviewPreferenceService(storage).newLook()).toBeFalse();
   });
 
-  it('restores and persists the Character Overview preview', () => {
-    const { storage, set } = createStorage({ 'grimoirePreview.characterOverview': true });
+  it('restores and persists the new look', () => {
+    const { storage, set } = createStorage({ 'grimoirePreview.newLook': true });
     const service = new GrimoirePreviewPreferenceService(storage);
 
-    expect(service.characterOverview()).toBeTrue();
-    service.setCharacterOverview(false);
+    expect(service.newLook()).toBeTrue();
+    service.setNewLook(false);
 
-    expect(service.characterOverview()).toBeFalse();
-    expect(set).toHaveBeenCalledOnceWith('grimoirePreview.characterOverview', false);
+    expect(service.newLook()).toBeFalse();
+    expect(set).toHaveBeenCalledOnceWith('grimoirePreview.newLook', false);
+  });
+
+  it('carries over the earlier Character Overview preview', () => {
+    const { storage } = createStorage({ 'grimoirePreview.characterOverview': true });
+
+    expect(new GrimoirePreviewPreferenceService(storage).newLook()).toBeTrue();
+  });
+
+  it('prefers the single switch over the earlier one', () => {
+    const { storage } = createStorage({ 'grimoirePreview.newLook': false, 'grimoirePreview.characterOverview': true });
+
+    expect(new GrimoirePreviewPreferenceService(storage).newLook()).toBeFalse();
   });
 });
 

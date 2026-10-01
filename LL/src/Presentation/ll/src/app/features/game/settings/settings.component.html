@@ -205,27 +205,27 @@
         class="grid gap-3 border-t border-light_gray/40 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
       >
         <div class="min-w-0">
-          <h3 class="font-semibold text-white">Character Overview</h3>
+          <h3 class="font-semibold text-white">New look</h3>
           <p class="ll-copy mt-1">
-            Try the new look of the Character Overview. You can switch back at
-            any time.
+            Try the game's new look. Screens move to it one at a time; the rest
+            keep the current look. You can switch back at any time.
           </p>
         </div>
 
         <div
           class="flex w-fit rounded border border-[var(--ll-color-border)] bg-black/20 p-1"
           role="group"
-          aria-label="Character Overview look"
+          aria-label="Game look"
         >
           <button
             type="button"
             class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
             [ngClass]="{
               'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
-                !characterOverviewPreview(),
+                !newLook(),
             }"
-            [attr.aria-pressed]="!characterOverviewPreview()"
-            (click)="setCharacterOverviewPreview(false)"
+            [attr.aria-pressed]="!newLook()"
+            (click)="setNewLook(false)"
           >
             Current
           </button>
@@ -234,10 +234,10 @@
             class="rounded border border-transparent px-4 py-2 text-sm text-zinc-300 transition hover:text-primary"
             [ngClass]="{
               'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
-                characterOverviewPreview(),
+                newLook(),
             }"
-            [attr.aria-pressed]="characterOverviewPreview()"
-            (click)="setCharacterOverviewPreview(true)"
+            [attr.aria-pressed]="newLook()"
+            (click)="setNewLook(true)"
           >
             New look (preview)
           </button>

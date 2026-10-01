@@ -21,6 +21,10 @@ class NiGridTests(unittest.TestCase):
         self.source=Path(self.temp.name)/'source';self.candidate=Path(self.temp.name)/'candidate'
         api=io.ROOT/'LL/src/API/API.LL'
         shutil.copytree(api/'Data',self.source/'Data');shutil.copy2(api/'appsettings.json',self.source/'appsettings.json')
+        # Model the frozen pre-candidate catalog explicitly, independent of later live tuning.
+        tower=n.h.read(self.source/n.TOWER)
+        n.h.unique(tower['floors'],'floorNumber',9)['guardianScaling'].update(health=2.970703125,offense=4.7036132812,penetration=1)
+        (self.source/n.TOWER).write_text(json.dumps(tower,indent=2)+'\n',encoding='utf-8')
         shutil.copytree(self.source,self.candidate)
         self.plan={**n.VALUES,**{k:n.h.sha(self.source/v) for k,v in n.HASHES.items()}}
 

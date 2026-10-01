@@ -312,7 +312,7 @@
         "offense": 4.7036132812,
         "defense": 2.55,
         "resistance": 2.55,
-        "penetration": 1.0,
+        "penetration": 40.0,
         "regeneration": 1.0
       },
       "stagger": {

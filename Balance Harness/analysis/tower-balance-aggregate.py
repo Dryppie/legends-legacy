@@ -475,7 +475,7 @@ def applied_catalog(plan):
     summary = validate_applied_parity(receipts, phases['confirm']['batches'], io.sha(phase_paths['confirm']), d['runtime'], d['version'])
     completion = io.read(completion_path)
     validate_applied_completion(completion, summary, d['candidateContentHashes'], len(excluded),
-                                tower_changed=candidate_kind(d) in ('penetration', 'health-pressure', 'recovery-pressure') or version in (SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS),
+                                tower_changed=candidate_kind(d) in ('penetration', 'health-pressure', 'recovery-pressure') or version in (NI_RESTORATION_VERSION, SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS),
                                 summons_changed=version in (SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS))
     return Path(phases['confirm']['batches'][0]['source']), summary
 

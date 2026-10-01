@@ -1,26 +1,28 @@
 import { Injectable, signal } from '@angular/core';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 
-const CHARACTER_OVERVIEW_STORAGE_KEY = 'grimoirePreview.characterOverview';
+const NEW_LOOK_STORAGE_KEY = 'grimoirePreview.newLook';
+/** The first preview's key, from when each screen had its own switch; read once so that choice carries over. */
+const LEGACY_CHARACTER_OVERVIEW_KEY = 'grimoirePreview.characterOverview';
 
 /**
- * Screens moving to the Grimoire design system can be tried before they replace the current ones. Each preview is
- * off until the player turns it on in Settings → Interface, and is remembered on this device.
+ * The game is moving to the Grimoire design system one screen at a time. One switch in Settings → Interface shows
+ * every screen that has moved in its new look; screens that haven't moved keep the current one. Off until the player
+ * turns it on, and remembered on this device. Goes away once the new look replaces the old.
  */
 @Injectable({ providedIn: 'root' })
 export class GrimoirePreviewPreferenceService {
-  private readonly _characterOverview = signal(false);
-  /** Show the Grimoire Character Overview instead of the current one. */
-  readonly characterOverview = this._characterOverview.asReadonly();
+  private readonly _newLook = signal(false);
+  /** Show the new look wherever a screen has one. */
+  readonly newLook = this._newLook.asReadonly();
 
   constructor(private readonly storage: LocalStorageService) {
-    if (this.storage.get<boolean>(CHARACTER_OVERVIEW_STORAGE_KEY) === true) {
-      this._characterOverview.set(true);
-    }
+    const saved = this.storage.get<boolean>(NEW_LOOK_STORAGE_KEY) ?? this.storage.get<boolean>(LEGACY_CHARACTER_OVERVIEW_KEY);
+    if (saved === true) this._newLook.set(true);
   }
 
-  setCharacterOverview(enabled: boolean): void {
-    this._characterOverview.set(enabled);
-    this.storage.set(CHARACTER_OVERVIEW_STORAGE_KEY, enabled);
+  setNewLook(enabled: boolean): void {
+    this._newLook.set(enabled);
+    this.storage.set(NEW_LOOK_STORAGE_KEY, enabled);
   }
 }

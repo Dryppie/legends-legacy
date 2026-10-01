@@ -1,5 +1,7 @@
 # Floor 9: Restoration offense calibration — 1 October 2026
 
+**Follow-up completed:** [The nominated setting passed both full acceptance phases and was applied locally](Tower-Floor9-Restoration-Acceptance-20261001.md). The diagnostic and its earlier next-step text below remain historical.
+
 ## Completed result
 
 **All six panels completed: 15,648 fresh fights / 96 reservations, independently audited. Original offense ×1.00 with penetration ×40 is the sole nominated setting. Floor 9 is not yet accepted or applied.**

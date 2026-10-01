@@ -56,7 +56,7 @@ export class SettingsComponent {
   public readonly guild;
   readonly chatLayout;
   readonly sidebarLayout;
-  readonly characterOverviewPreview;
+  readonly newLook;
   readonly readingFont;
   readonly readingFontSize;
   readonly readingFontOptions: ReadonlyArray<{
@@ -107,7 +107,7 @@ export class SettingsComponent {
     this.currentCharacter = this.authService.currentCharacter;
     this.chatLayout = this.chatLayoutPreference.layout;
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
-    this.characterOverviewPreview = this.grimoirePreview.characterOverview;
+    this.newLook = this.grimoirePreview.newLook;
     this.readingFont = this.typographyPreference.readingFont;
     this.readingFontSize = this.typographyPreference.readingFontSize;
 
@@ -132,8 +132,8 @@ export class SettingsComponent {
     this.chatLayoutPreference.setLayout(layout);
   }
 
-  setCharacterOverviewPreview(enabled: boolean): void {
-    this.grimoirePreview.setCharacterOverview(enabled);
+  setNewLook(enabled: boolean): void {
+    this.grimoirePreview.setNewLook(enabled);
   }
 
   setSidebarLayout(layout: SidebarLayout): void {
