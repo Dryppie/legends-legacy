@@ -50,6 +50,7 @@
     "components/SearchField/README.md",
     "components/SectionRule/README.md",
     "components/ShapeSpecimen/README.md",
+    "components/StateCombinationSpecimen/README.md",
     "components/Sigil/README.md",
     "components/Stage/README.md",
     "components/StatFigure/README.md",
@@ -81,6 +82,7 @@
     "docs/02-foundations/12-iconography.md",
     "docs/03-standards.md",
     "docs/03-standards/01-states.md",
+    "docs/03-standards/02-state-combinations.md",
     "docs/04-registries.md",
     "docs/05-components.md",
     "docs/07-patterns.md",
@@ -89,6 +91,7 @@
     "docs/10-governance/01-governance.md",
     "docs/10-governance/02-decision-log.md",
     "docs/10-governance/03-audit-and-consolidation-map.md",
+    "docs/10-governance/04-code-parity.md",
     "fonts/AtkinsonHyperlegible-Bold.woff2",
     "fonts/AtkinsonHyperlegible-BoldItalic.woff2",
     "fonts/AtkinsonHyperlegible-Italic.woff2",
@@ -319,6 +322,11 @@
       "name": "LinesSpecimen",
       "group": "Foundations",
       "summary": "The line types, the ladder and the rhythms, drawn both ways."
+    },
+    {
+      "name": "StateCombinationSpecimen",
+      "group": "Standards",
+      "summary": "Several states on one thing, resolved."
     },
     {
       "name": "MotionSpecimen",

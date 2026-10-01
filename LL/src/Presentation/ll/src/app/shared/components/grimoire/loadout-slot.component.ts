@@ -11,7 +11,7 @@ import { LgRarity, lgCx } from './grimoire-core';
 import { LgItemSlotComponent } from './item-slot.component';
 import { LgTagComponent } from './tag.component';
 import { LgIconName } from './grimoire-icons';
-import { LG_STATES, lgStateWarn } from './grimoire-states';
+import { LG_STATES, lgReadyWords, lgStateWarn } from './grimoire-states';
 import { LgWhyDirective, LgWhyOptions } from './grimoire-a11y';
 
 export type LgLoadoutSlotState = 'attuned' | 'open' | 'locked';
@@ -47,6 +47,11 @@ export interface LgLoadoutAbility {
             <lg-tag state="attuned" />
           } @else if (currentState() === 'locked') {
             <lg-tag state="locked" />
+          }
+          <!-- The Tag, then the attention diamond, at the head's end (Standards · State combinations). -->
+          @if (readyWord() && currentState() !== 'locked') {
+            <span class="lg-attention lg-loadout__attention" aria-hidden="true"></span>
+            <span class="lg-sr">{{ readyWord() }}</span>
           }
         </div>
         <div [class]="nameClass()">{{ nameText() }}</div>
@@ -97,10 +102,13 @@ export class LgLoadoutSlotComponent {
   readonly unlockLabel = input<string>();
   /** Open slots: a short prompt. */
   readonly hint = input<string>();
+  /** The attention diamond at the end of the head, after the Tag: true, or the words ("Essence ready to attune"). */
+  readonly ready = input<boolean | string>();
   /** Renders a button that emits `activate` (React's onClick). */
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly activate = output<void>();
 
+  protected readonly readyWord = computed(() => lgReadyWords(this.ready()));
   protected readonly currentState = computed<LgLoadoutSlotState>(() => this.state() || (this.name() ? 'attuned' : 'open'));
   private readonly unlock = computed(() => {
     if (this.currentState() !== 'locked') return '';

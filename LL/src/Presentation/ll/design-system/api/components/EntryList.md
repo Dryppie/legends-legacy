@@ -38,6 +38,7 @@ locked (Standards · States): Up and Down still land on it and its `reason` — 
 | `tagTone` | `TagProps['tone']` |  |
 | `locked` | `boolean` |  |
 | `reason` | `string` |  |
+| `ready` | `boolean \| string` | The attention diamond at the row's end: true, or the words screen readers hear ("1 point to spend"). Not on a locked entry. |
 
 ## More
 

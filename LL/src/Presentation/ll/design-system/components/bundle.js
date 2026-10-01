@@ -247,7 +247,7 @@
     pending: st('data', 'Saving…', null, 'busy'), stale: st('data', 'Updated', null, null),
     error: st('data', null, 'danger', null, { glyph: '✕' }), empty: st('data', null), offline: st('data', 'Reconnecting…', 'warning', null)
   };
-  // The one Tag on a row, first to last (Standards · States · Combining states).
+  // The one Tag on a row, first to last (Standards · State combinations).
   var TAG_ORDER = ['failed', 'claimable', 'expiring', 'locked', 'listed', 'escrow', 'borrowed', 'equipped', 'attuned', 'assigned', 'captured', 'in-progress', 'new', 'completed', 'claimed', 'expired', 'opened'];
   function firstState(list) {
     var best = null, at = Infinity;
@@ -256,6 +256,10 @@
   }
   var stateWarned = {};
   function stateWarn(key, msg) { if (stateWarned[key] || typeof console === 'undefined') return; stateWarned[key] = true; console.warn('LL: ' + msg + ' (Standards · States).'); }
+  // The attention mark (Standards · State combinations): the arcana-glow diamond for Ready, in a fixed place. `ready` is
+  // true or the words ("Upgrade available"); the words are what screen readers hear and what the Folio says.
+  function readyWords(ready) { return ready ? (typeof ready === 'string' ? ready : STATES.ready.word) : null; }
+  function attention(cls) { return h('span', { className: cx('lg-attention', cls), 'aria-hidden': 'true' }); }
 
   /* ---------- The reason tip (Standards · States · The reason tip) ----------
      A blocked control stays focusable and says why. One tip serves the page, drawn on the body so no scrolling region
@@ -1062,10 +1066,13 @@
         onClick: it.locked || !p.onSelect ? undefined : function () { p.onSelect(it.id); }
       };
       if (w) props = chain(props, w.props);
-      // One Tag per row: Locked comes before New (Standards · States · Combining states).
+      // One Tag per row: Locked comes before New (Standards · State combinations).
       return h('li', props,
         h('span', { className: 'lg-entrylist__name' }, it.name),
         it.locked ? h(Tag, { state: 'locked', 'aria-hidden': 'true' }) : it.tag ? h(Tag, { tone: it.tagTone || 'new' }, it.tag) : null,
+        // The attention diamond at the row's end; a locked entry isn't waiting for the player, so it takes none.
+        it.ready && !it.locked ? attention('lg-entrylist__attention') : null,
+        it.ready && !it.locked ? h('span', { className: 'lg-sr' }, ', ' + readyWords(it.ready)) : null,
         w ? w.desc : null);
     }));
   }
@@ -1074,7 +1081,10 @@
   var RARITY_CODES = { Common: 'C', Uncommon: 'UC', Rare: 'R', Epic: 'E', Unique: 'U', Legendary: 'L', Legacy: 'LG' };
   // States (Standards · States): a blocked slot (locked, unavailable, restricted, insufficient, cooldown) gives its
   // reason; `not-owned` fades the art; `undiscovered` withholds the name and art; any other state with a word
-  // (equipped, listed, borrowed…) leads the meta line. `favourite` is the ribbon marker, or its word until it is drawn.
+  // (equipped, listed, borrowed…) leads the meta line. Marks keep fixed corners (Standards · State combinations): the
+  // rarity code top start; the attention diamond top end (`ready`, or Claimable); the ownership mark bottom start — the
+  // in-use square for Equipped and Attuned, else the favourite ribbon (or its word until it is drawn); the quantity
+  // bottom end. A blocked or undiscovered slot takes no attention mark.
   function ItemSlot(p) {
     var id = useId('lgi');
     var state = p.state && p.state !== 'available' && p.state !== 'default' ? p.state : null;
@@ -1088,8 +1098,11 @@
     var br = blocked ? blockedReason(state, p, 'ItemSlot "' + (label || '') + '"') : null;
     // With a caption the reason is printed under the name and is the description; without one it is the reason tip.
     var w = blocked && interactive ? why(id + '-why', br.reason, Object.assign({}, br, { printed: captioned })) : null;
-    var ribbon = p.favourite && ICONS.favourite;
+    var inUse = state === 'equipped' || state === 'attuned';
+    var ribbon = p.favourite && !inUse && ICONS.favourite;
     var stateWord = s && !blocked && !undiscovered ? s.word : null;
+    var attn = !blocked && !undiscovered && (!!p.ready || state === 'claimable');
+    var readyWord = !blocked && !undiscovered ? readyWords(p.ready) : null;
     var meta = [stateWord, p.favourite && !ribbon ? STATES.favourite.word : null, p.meta].filter(Boolean);
     var hasArt = !undiscovered && (p.image || p.icon);
     var props = {
@@ -1098,7 +1111,7 @@
         blocked && 'is-blocked', state && 'is-' + state, p.className),
       onClick: interactive && !blocked ? p.onClick : undefined,
       'aria-pressed': interactive && !blocked ? !!p.selected : undefined,
-      'aria-label': interactive ? [label, r, p.quantity > 1 ? 'quantity ' + fmt(p.quantity) : null, stateWord ? stateWord.toLowerCase() : null, p.favourite ? 'favourite' : null].filter(Boolean).join(', ') : undefined
+      'aria-label': interactive ? [label, r, p.quantity > 1 ? 'quantity ' + fmt(p.quantity) : null, stateWord ? stateWord.toLowerCase() : null, readyWord ? readyWord.toLowerCase() : null, p.favourite ? 'favourite' : null].filter(Boolean).join(', ') : undefined
     };
     if (w) props = chain(props, w.props);
     var reasonLine = blocked && captioned ? h('span', { id: id + '-why', className: cx('lg-slot__reason', br.tone === 'warning' && 'is-warning') },
@@ -1112,8 +1125,11 @@
           p.icon ? h(Icon, { name: p.icon, size: 24 }) : null,
         r ? h('span', { className: 'lg-slot__code', title: r, 'aria-hidden': 'true' }, RARITY_CODES[r] || r) : null,
         r && !interactive ? h('span', { className: 'lg-sr' }, r) : null,
+        attn ? attention('lg-slot__attention') : null,
+        inUse ? h('span', { className: 'lg-slot__mark lg-slot__mark--inuse', 'aria-hidden': 'true' }) : null,
         ribbon ? h('span', { className: 'lg-slot__mark', 'aria-hidden': 'true' }, h(Icon, { name: 'favourite', size: 12 })) : null,
         ribbon && !interactive ? h('span', { className: 'lg-sr' }, STATES.favourite.word) : null,
+        readyWord && !interactive ? h('span', { className: 'lg-sr' }, readyWord) : null,
         p.quantity > 1 ? h('span', { className: 'lg-slot__qty' }, '\u00D7' + fmt(p.quantity)) : null),
       captioned ? h('span', { className: 'lg-slot__caption' },
         h('span', { className: 'lg-slot__name' }, label),
@@ -1235,8 +1251,12 @@
                   it.icon ? h(Icon, { name: it.icon, size: 20 }) : null,
                   h('span', { className: 'lg-rail__title' }, it.title),
                   // The 12px lock marker once it is drawn (Foundations · Iconography); until then the word.
+                  // One mark at the item's end (Standards · State combinations): Locked, else a count badge, else the
+                  // attention diamond for something waiting with nothing to count.
                   it.locked ? h('span', { className: 'lg-rail__lock', 'aria-hidden': 'true' }, ICONS.lock ? h(Icon, { name: 'lock', size: 12 }) : STATES.locked.word)
-                    : it.badge ? h('span', { className: 'lg-rail__badge', 'aria-label': it.badgeLabel || undefined }, it.badge) : null,
+                    : it.badge ? h('span', { className: 'lg-rail__badge', 'aria-label': it.badgeLabel || undefined }, it.badge)
+                    : it.ready ? attention('lg-rail__attention') : null,
+                  !it.locked && !it.badge && it.ready ? h('span', { className: 'lg-sr' }, ', ' + (it.badgeLabel || readyWords(it.ready))) : null,
                   w ? w.desc : null));
             })));
         })),
@@ -1483,7 +1503,10 @@
     return h(interactive ? 'button' : 'div', props,
       h(ItemSlot, { icon: state === 'attuned' ? (p.icon || 'essences') : undefined, image: state === 'attuned' ? p.image : undefined, rarity: state === 'attuned' ? p.rarity : undefined, caption: false, size: 'sm' }),
       h('div', { className: 'lg-loadout__body' },
-        h('div', { className: 'lg-loadout__head' }, h('span', { className: 'lg-loadout__slot' }, 'Slot ' + (p.index != null ? p.index + 1 : '')), tag),
+        // The head: "Slot 3" at the start; the Tag, then the attention diamond, at the end (Standards · State combinations).
+        h('div', { className: 'lg-loadout__head' }, h('span', { className: 'lg-loadout__slot' }, 'Slot ' + (p.index != null ? p.index + 1 : '')), tag,
+          p.ready && !locked ? attention('lg-loadout__attention') : null,
+          p.ready && !locked ? h('span', { className: 'lg-sr' }, readyWords(p.ready)) : null),
         h('div', { className: cx('lg-loadout__name', p.rarity && state === 'attuned' && 'lg-itemlink--' + String(p.rarity).toLowerCase()) },
           state === 'attuned' ? p.name : state === 'open' ? 'Empty' : (unlock || STATES.locked.word)),
         state === 'attuned' && (p.active || p.passive) ? h('div', { className: 'lg-loadout__abilities' },

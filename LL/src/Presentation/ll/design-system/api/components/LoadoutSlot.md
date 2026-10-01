@@ -19,11 +19,19 @@ An Essence loadout slot.
 
 | prop | type | note |
 | --- | --- | --- |
-| `index` | `number; state?: 'attuned' \| 'open' \| 'locked'; name?: React.ReactNode; rarity?: Rarity` |  |
-| `active` | `{ name: React.ReactNode; cooldown?: string }; passive?: { name: React.ReactNode }` |  |
-| `icon` | `"overview" \| "inventory" \| "essences" \| "combat-styles" \| "achievements" \| "soulstones" \| "world-map" \| "legacy-ascension" \| "quest-journal" \| "prophecies" \| "guild" \| "colosseum" \| "cinder-bazaar" \| "leaderboard" \| "settings" \| "nobility" \| string` |  |
-| `reason` | `string; unlockLabel?: React.ReactNode` | locked: how it unlocks, printed as the slot's name ("Unlocks at level 20") and read as its description. `unlockLabel` is the older name. |
-| `hint` | `React.ReactNode; onClick?: () => void; className?: string` |  |
+| `index` | `number` | Zero-based; shown as "Slot 1". |
+| `state` | `'attuned' \| 'open' \| 'locked'` |  |
+| `name` | `React.ReactNode` |  |
+| `rarity` | `Rarity` |  |
+| `active` | `{ name: React.ReactNode; cooldown?: string }` |  |
+| `passive` | `{ name: React.ReactNode }` |  |
+| `icon` | `IconName` |  |
+| `image` | `string` |  |
+| `reason` | `string` | locked: how it unlocks, printed as the slot's name ("Unlocks at level 20") and read as its description. |
+| `unlockLabel` | `React.ReactNode` | The older name for `reason`. |
+| `hint` | `React.ReactNode` | An open slot: what fills it. |
+| `ready` | `boolean \| string` | The attention diamond at the end of the head, after the Tag: true, or the words ("Essence ready to attune"). Not on a locked slot. |
+| `onClick` | `() => void` |  |
 
 ## More
 

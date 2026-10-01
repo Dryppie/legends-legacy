@@ -19,7 +19,7 @@ body { background: var(--ground); }
 var L = window.LL, h = React.createElement, F = React.Fragment;
 ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { padding: 24, width: 320, display: 'grid', gap: 8 } },
   h(L.LoadoutSlot, { index: 0, state: 'attuned', name: 'Ember Wolf Essence', rarity: 'Rare', active: { name: 'Cinder Bite', cooldown: '12s' }, passive: { name: 'Pack Instinct' }, onClick: function () {} }),
-  h(L.LoadoutSlot, { index: 1, state: 'open', hint: 'Choose an Essence to attune', onClick: function () {} }),
+  h(L.LoadoutSlot, { index: 1, state: 'open', hint: 'Choose an Essence to attune', ready: 'Essence ready to attune', onClick: function () {} }),
   h(L.LoadoutSlot, { index: 2, state: 'locked', reason: 'Unlocks at level 20', onClick: function () {} })));
 </script>
 </body>

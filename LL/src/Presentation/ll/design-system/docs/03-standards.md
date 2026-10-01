@@ -1,10 +1,10 @@
 # Standards
 
-Standards are what every part must do, whichever layer it sits in: how it shows its states, where it sits in the hierarchy, what it discloses on demand, how it works without art, and how it speaks. Each part below follows the section template. States has a page of its own, Standards · States.
+Standards are what every part must do, whichever layer it sits in: how it shows its states, where it sits in the hierarchy, what it discloses on demand, how it works without art, and how it speaks. Each part below follows the section template. States has a page of its own, Standards · States, and how several states meet on one thing has another, Standards · State combinations.
 
 ## States
 
-Every part shows its state in the same way everywhere, by a channel other than colour and in the same words. The full model — six families, each state's meaning, channel, tokens, words and announcement, and which parts take which states — is in Standards · States (D-086).
+Every part shows its state in the same way everywhere, by a channel other than colour and in the same words. The full model — six families, each state's meaning, channel, tokens, words and announcement, and which parts take which states — is in Standards · States (D-086). Which marks show when several states meet, how many and where, is in Standards · State combinations (D-094).
 
 **Must**
 - Show `focus-ring` on every interactive element, over every other state. Never remove it.

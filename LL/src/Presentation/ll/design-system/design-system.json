@@ -268,6 +268,7 @@
       "docs/02-foundations/12-iconography.md",
       "docs/03-standards.md",
       "docs/03-standards/01-states.md",
+      "docs/03-standards/02-state-combinations.md",
       "docs/04-registries.md",
       "docs/05-components.md",
       "docs/07-patterns.md",
@@ -288,9 +289,9 @@
     "Cards"
   ],
   "lastChange": {
-    "at": "2026-10-01T07:17:51Z",
+    "at": "2026-10-01T12:18:10Z",
     "by": "Martin",
-    "note": "States: a six-family state model on Standards · States, with channels, words, announcements and a matrix; blocked controls stay focusable with a reason tip; Button, Tag, ItemSlot, LoadoutSlot, EntryList, NavRail and Sigil on it; Start here folded into the README (D-086 to D-089).",
+    "note": "DS-020 State combinations: one state per channel, at most four marks on one thing, the drop order beside the Tag order, one colour per object, fixed marker positions and seven worked examples on Standards · State combinations; ItemSlot, EntryList, NavRail and LoadoutSlot take the attention diamond, ItemSlot the in-use square, and StateCombinationSpecimen draws the examples (D-094, D-095).",
     "via": "Claude (Cowork)"
   },
   "layout": "files",

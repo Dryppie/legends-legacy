@@ -9,6 +9,20 @@
       { "id": "guild", "title": "Guild", "icon": "guild", "href": "/guild" }
     ]}
   ],
+  "navReady": [
+    { "label": "World", "items": [
+      { "id": "quests", "title": "Quests", "icon": "quest-journal", "badge": 2, "badgeLabel": "2 quests ready", "ready": true },
+      { "id": "prophecies", "title": "Prophecies", "icon": "prophecies", "ready": "Daily cache ready" },
+      { "id": "tower", "title": "World Tower", "icon": "legacy-ascension", "ready": true, "badgeLabel": "Floor reward waiting" },
+      { "id": "arena", "title": "Colosseum", "icon": "colosseum", "locked": true, "reason": "Unlocks at level 20", "ready": true }
+    ]}
+  ],
+  "entriesReady": [
+    { "id": "wolf", "name": "Ember Wolf", "tag": "New", "ready": "1 point to spend" },
+    { "id": "slime", "name": "Blue Slime", "ready": true },
+    { "id": "drake", "name": "Ash Drake", "locked": true, "reason": "Defeat the Ash Drake in Shenic", "ready": true },
+    { "id": "bat", "name": "Undiscovered", "tag": "Creature Focus", "tagTone": "neutral" }
+  ],
   "tabs": [ { "id": "all", "label": "All", "count": 12 }, { "id": "weapons", "label": "Weapons" }, { "id": "armor", "label": "Armor", "count": 0 } ],
   "entries": [
     { "id": "wolf", "name": "Ember Wolf", "tag": "New" },

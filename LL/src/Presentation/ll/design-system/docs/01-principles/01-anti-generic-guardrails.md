@@ -48,7 +48,7 @@ These guardrails turn the Principles into limits. Every rule here is a *must*.
 - Feature-card triplets: three equal cards, each with an icon, a title and a line.
 - Gradient text.
 - Sparkle or wand icons.
-- Badge soup: more than one Tag or badge on a row, or badges that repeat what the row already says. When several states apply, the first in Standards · States · Combining states is the row's one Tag.
+- Badge soup: more than one Tag or badge on a row, or badges that repeat what the row already says. When several states apply, the first in the Tag order is the row's one Tag, and markers keep their fixed places (Standards · State combinations).
 - Emoji.
 - Cheerful copy: "Welcome back, hero!", "Awesome!".
 - The same padding at every nesting level. Padding steps down as you go in: `space-6` in a Panel, `space-3` in a tile.

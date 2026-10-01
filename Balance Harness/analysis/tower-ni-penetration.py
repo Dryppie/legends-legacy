@@ -28,7 +28,8 @@ def expected(api, plan, floor):
     scaling = guardian['guardianScaling']
     h.check(scaling['health'] == 2.970703125 and scaling['offense'] == plan['originalOffense'] and
             scaling['penetration'] == plan['originalPenetration'], 'Original Ni scaling changed')
-    scaling['offense'] = plan['offense']; scaling['penetration'] = plan['penetration']
+    # Match argparse's float-valued scalar owner, including JSON byte hashes.
+    scaling['offense'] = plan['offense']; scaling['penetration'] = float(plan['penetration'])
     return tower
 
 

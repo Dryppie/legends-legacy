@@ -1,5 +1,7 @@
 # Floor 9: corrected-runtime Ni gear diagnosis — 1 October 2026
 
+**Follow-up completed:** The [full Ni penetration trial](Tower-Floor9-Ni-Penetration-20261001.md) rejected the proposed setting after 18,944 fights. No confirmation or live application. Next is a separately proposed limited-Restoration diagnostic; see the current handoff. The diagnosis and original proposal below remain historical evidence.
+
 ## Completed findings
 
 **96/96 exact historical replays completed, with 199,589 independently audited events.** All complete reports match their saved inputs and outcomes after removing only the event log. No new seeds, acceptance fights or gameplay edits. Floor 9 remains unresolved.

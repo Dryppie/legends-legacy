@@ -10,7 +10,7 @@ import {
 import { LgDensity, lgCx, lgUniqueId } from './grimoire-core';
 import { LgTagComponent, LgTagTone } from './tag.component';
 import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from './grimoire-a11y';
-import { lgBlockedReason } from './grimoire-states';
+import { lgBlockedReason, lgReadyWords } from './grimoire-states';
 
 export interface LgEntry {
   id: string;
@@ -20,6 +20,8 @@ export interface LgEntry {
   locked?: boolean;
   /** Locked: how it unlocks. */
   reason?: string;
+  /** The attention diamond at the row's end: true, or the words ("1 point to spend"). Not on a locked entry. */
+  ready?: boolean | string;
 }
 
 /**
@@ -59,6 +61,11 @@ export interface LgEntry {
           } @else if (entry.item.tag) {
             <lg-tag [tone]="entry.item.tagTone || 'new'">{{ entry.item.tag }}</lg-tag>
           }
+          <!-- The attention diamond at the row's end; a locked entry isn't waiting for the player, so it takes none. -->
+          @if (entry.item.ready && !entry.item.locked) {
+            <span class="lg-attention lg-entrylist__attention" aria-hidden="true"></span>
+            <span class="lg-sr">, {{ readyWords(entry.item.ready) }}</span>
+          }
           @if (entry.why; as w) {
             <span class="lg-sr lg-why__desc" [id]="entry.whyId" aria-hidden="true">{{ spoken(w) }}</span>
           }
@@ -77,6 +84,7 @@ export class LgEntryListComponent {
 
   protected readonly focused = signal<number | null>(null);
   protected readonly spoken = lgWhySpoken;
+  protected readonly readyWords = lgReadyWords;
   private readonly base = lgUniqueId('lge');
 
   protected readonly classes = computed(() => lgCx('lg-entrylist', this.fade() !== false && 'lg-entrylist--fade'));

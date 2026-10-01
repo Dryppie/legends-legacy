@@ -1,4 +1,4 @@
-<!-- @dsCard group="Game Components · Items & economy" height=430 -->
+<!-- @dsCard group="Game Components · Items & economy" height=640 -->
 <!doctype html>
 <html>
 <head>
@@ -10,6 +10,7 @@ html, body { margin: 0; }
 body { background: var(--ground); }
 .pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
 .pv-col { display: grid; gap: 16px; }
+.pv-h { flex-basis: 100%; margin: 0; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
 
 </style>
 </head>
@@ -35,7 +36,17 @@ function App() {
       h(L.ItemSlot, { icon: 'soulstones', name: 'Healing Draught', quantity: 4, state: 'cooldown', remaining: 12, onClick: sel('d') }),
       h(L.ItemSlot, { slotLabel: 'Bag slot 9', state: 'locked', reason: 'Unlocks at level 20', onClick: sel('b') }),
       h(L.ItemSlot, { icon: 'achievements', rarity: 'Epic', name: 'Crown of Ash', state: 'not-owned' }),
-      h(L.ItemSlot, { state: 'undiscovered', meta: 'Floors 10\u201320' })));
+      h(L.ItemSlot, { state: 'undiscovered', meta: 'Floors 10\u201320' })),
+    // Marks in fixed corners (Standards · State combinations): code top start, attention top end, ownership bottom start,
+    // quantity bottom end. The last three are an uncaptioned grid, where the marks carry what the caption would say.
+    h('div', { className: 'pv', style: { alignItems: 'flex-start', gap: 16, paddingTop: 0 } },
+      h('p', { className: 'pv-h' }, 'Marks in fixed corners'),
+      h(L.ItemSlot, { icon: 'combat-styles', rarity: 'Epic', name: 'Ashen Blade', state: 'equipped', meta: 'Main hand', ready: 'Upgrade available', onClick: sel('u'), selected: s[0] === 'u' }),
+      h(L.ItemSlot, { icon: 'inventory', rarity: 'Rare', name: 'Warded Pack', state: 'listed', meta: '1,200 Cinders', favourite: true, onClick: sel('f'), selected: s[0] === 'f' }),
+      h(L.ItemSlot, { icon: 'prophecies', rarity: 'Unique', name: 'Prophecy Cache', state: 'claimable', quantity: 3, onClick: sel('p'), selected: s[0] === 'p' }),
+      h(L.ItemSlot, { icon: 'essences', rarity: 'Rare', name: 'Ember Wolf Essence', caption: false, size: 'sm', state: 'attuned', ready: 'Can be raised', onClick: sel('g1'), selected: s[0] === 'g1' }),
+      h(L.ItemSlot, { icon: 'soulstones', rarity: 'Epic', name: 'Soul Prism', caption: false, size: 'sm', ready: true, quantity: 2, onClick: sel('g2'), selected: s[0] === 'g2' }),
+      h(L.ItemSlot, { icon: 'inventory', rarity: 'Common', name: 'Frayed Satchel', caption: false, size: 'sm', state: 'locked', reason: 'Unlocks at level 20', ready: true, onClick: sel('g3') })));
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
 </script>

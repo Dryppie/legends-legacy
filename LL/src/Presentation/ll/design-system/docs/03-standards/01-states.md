@@ -15,7 +15,7 @@ States come in six families. Each family answers one question about a part, and 
 | Knowledge | What does the player know about it? | Discovered, Undiscovered, Hidden, Unknown |
 | Data | How complete and how fresh is what is shown? | Loading, Refreshing, Pending save, Stale, Error, Empty, Offline |
 
-Families combine. An entry can be selected (Interaction), locked (Availability) and new (Lifecycle) at once, and each family uses its own channel, so all three can be seen. Combining states says what wins when two want the same place.
+Families combine. An entry can be selected (Interaction), locked (Availability) and new (Lifecycle) at once, and each family uses its own channel, so all three can be seen. Standards · State combinations says what wins when two want the same place, how many marks one thing shows, and where each mark sits.
 
 ## Rules
 
@@ -30,7 +30,7 @@ Families combine. An entry can be selected (Interaction), locked (Availability) 
 
 **Should**
 - Prefer Unavailable with a reason to plain Disabled. Plain Disabled is for a control whose limit is obvious from what sits beside it: Previous on the first page, − at a stepper's minimum.
-- Show one Tag per row (Principles · Anti-generic guardrails). When several states apply, show the first in Precedence and list the rest in the Folio.
+- Show one Tag per row (Principles · Anti-generic guardrails). When several states apply, show the first in the Tag order (Standards · State combinations) and list the rest in the Folio.
 - Reserve room for words that come and go ("Saving…", "Updating…"), so nothing shifts (Foundations · Motion).
 
 **Never**
@@ -47,7 +47,7 @@ A state uses one or two channels: one to be seen at a glance (an edge, a marker,
 | --- | --- | --- | --- |
 | Edge | A line on or around the part: a bar, an underline, a ring, a frame. Solid, dashed or cut | Selected (solid bar or underline), focus (the ring), locked (dashed frame), harmful conditions (cut corners), a valid drop target | `arcana-glow`, `focus-ring`, `line`, `line-strong`, `border-hairline`, `border-emphasis` |
 | Fill | A wash or block behind the part, or the part's own fill emptying | Hover (a neutral wash), the live-update mark, loading blocks, a locked Sigil's empty hex | `surface-raised`, `surface`, `changed` |
-| Marker | A small solid shape in a fixed place | Current (gilt diamond), ready (arcana-glow diamond), unread (a count badge), favourite (the ribbon) | `gilt`, `arcana-glow`, `arcana`, `arcana-soft`, `icon-marker` |
+| Marker | A small solid shape in a fixed place (Standards · State combinations) | Current (gilt diamond), ready and claimable (arcana-glow diamond), unread (a count badge), equipped and attuned on a slot (the in-use square), favourite (the ribbon) | `gilt`, `arcana-glow`, `arcana`, `arcana-soft`, `ink`, `icon-marker` |
 | Text | A word or phrase: a Tag, a label, a meta line, the reason tip | Most states. The only channel that can say why | `ink`, `ink-muted`, `ink-disabled`, `warning`, `danger`, `success` |
 | Icon | A drawn sign beside the word: ✓, ✕, the lock, the Nobility crown. Never alone (Foundations · Iconography) | Completed, failed, error, locked, restricted to Nobility | `icon-marker`, `icon-sm` |
 | Opacity | Art faded. Never text, edges or the focus ring | Art of a thing not owned; the place a dragged thing left | `opacity-unowned`, `opacity-drag-origin` |
@@ -95,7 +95,7 @@ Whether the player can do it now, and if not, what stands in the way. Every stat
 | State | Means | Channel | Tokens | Words | Screen readers hear |
 | --- | --- | --- | --- | --- | --- |
 | Available | It can be done now. | None — the default look | The part's own | None | Its name and role |
-| Ready | It is available and waiting for the player: a point to spend, a stat that can be raised, an Essence that can be attuned. | Marker: a small `arcana-glow` diamond (Sigil) or an `arcana` count badge (NavRail) | `arcana-glow`, `arcana`, `arcana-soft` | "Can be raised", "1 point to spend"; a count in the rail | "Strength 24, can be raised"; "Character, 1 point to spend" |
+| Ready | It is available and waiting for the player: a point to spend, a stat that can be raised, an Essence that can be attuned. | Marker: a small `arcana-glow` diamond — on a Sigil, and in the attention place of a slot, row or rail item (Standards · State combinations) — or an `arcana` count badge (NavRail) | `arcana-glow`, `arcana`, `arcana-soft` | "Can be raised", "1 point to spend"; a count in the rail | "Strength 24, can be raised"; "Character, 1 point to spend" |
 | Unavailable | It can't be done right now, for a reason that will pass or that the player can change, and it says which. | Text: the label in `ink-muted`. Edge: `line`. No hover layer and no press. The reason in the reason tip | `ink-muted`, `line`; the tip's float tokens | The reason, as a short phrase: "Not while in a dungeon", "Already listed", "Inventory full", "Choose a target first" | "Sell, button, unavailable. Not while in a dungeon." |
 | Locked | A progression gate: the player hasn't reached it yet, and it says how to unlock it. | Text: "Locked" and the condition. Edge: a dashed `line` on framed parts. Icon: the 12px lock marker once it is drawn — until then the word stands alone | `ink-disabled` for its name; `ink-muted`, `line`, `icon-marker` | "Locked", then the condition: "Unlocks at level 20", "Clear Floor 10 to unlock", "Unlocks after The Ashen Gate" | "Arena, link, unavailable. Locked. Unlocks at level 20." |
 | Restricted | The player's account or guild role doesn't allow it, and playing on won't change that. | Text: the label in `ink-muted`; who may, in the tip. Edge: `line`. Icon: the crown, for Nobility only | `ink-muted`, `line`; the Nobility mark's tokens | Who may: "Officers only", "Leader only", "Requires Nobility" | "Withdraw, button, unavailable. Officers only." |
@@ -116,7 +116,7 @@ Where a thing is in its life, from arriving to ending.
 | Unread | Messages or entries the player hasn't read, counted. | Marker: a count badge. Typeface: an unread thread's name at 600 | `arcana` on `arcana-soft` in the rail; `ink` on `surface-raised` in the Chronicle, where channels own hue | The count: "3"; above 99, "99+" | "Mail, 3 unread" |
 | In progress | Started and not finished. | Fill: a Meter or Track. Text: the progress as a fraction | `meter-xp`, `meter-track`, `ink-muted` | "In progress", with the fraction "3 / 5" | "In progress, 3 of 5" |
 | Completed | Its goal is met, and nothing is waiting to be collected. | Text and icon: ✓ and the word in `ink` (a `success` Tag) | `success` | "✓ Completed", or the game's own verb: "✓ Floor cleared", "✓ Upgraded" | "…, completed" |
-| Claimable | Its goal is met and a reward is waiting for the player to collect. | Text: a `new` Tag, with "Claim" as the row's committing action. Marker: an `arcana` badge where claimables are counted | `arcana`, `arcana-soft` | "Claimable"; the action, "Claim" or "Claim all" | "…, claimable". Once claimed: "Claimed 120 Cinders" |
+| Claimable | Its goal is met and a reward is waiting for the player to collect. | Text: a `new` Tag, with "Claim" as the row's committing action. Marker: an `arcana` badge where claimables are counted; on a slot, the attention diamond | `arcana`, `arcana-soft` | "Claimable"; the action, "Claim" or "Claim all" | "…, claimable". Once claimed: "Claimed 120 Cinders" |
 | Claimed | Its reward has been collected; the record stays. | Text: a neutral Tag, and the reward in `ink-muted` | `ink-muted`, `line` | "Claimed" | "…, claimed" |
 | Opened | A container or message that has been opened, so what is inside is known. | Text: a neutral Tag, or the name in `ink-muted` with its contents listed | `ink-muted` | "Opened" | "…, opened" |
 | Expiring soon | It will end, or be lost, within a short and known time: under a day, unless the screen sets its own threshold. | Text: the time left in `warning` | `warning` (`ink` inside item, combat and chat contexts) | "Expires in 2h", "Ends in 14m" | "…, expires in 2 hours" |
@@ -133,14 +133,14 @@ Whose a thing is and what it is doing. These states belong to items, Essences an
 | --- | --- | --- | --- | --- | --- |
 | Owned | The player has it. It is marked only where things they don't have also appear: a collection, a codex, a shop. | Text: a neutral word or count. Nothing in the player's own inventory | `ink-muted` | "Owned", "Owned ×3" | "…, owned" |
 | Not owned | The player doesn't have it; seen in collections, codices and shops. | Opacity: its art at `opacity-unowned`. Text: its name in `ink-muted` | `opacity-unowned`, `ink-muted` | "Not owned" | "…, not owned" |
-| Equipped | Worn or wielded by the player's character now, so it counts in their stats. | Text: a neutral Tag, or the meta line in a slot grid | `ink-muted`, `line` | "Equipped" | "…, equipped" |
-| Attuned | An Essence bound to a loadout slot; its abilities are active. Equipped, for Essences. | Text: a neutral Tag | `ink-muted`, `line` | "Attuned" | "…, attuned" |
+| Equipped | Worn or wielded by the player's character now, so it counts in their stats. | Text: a neutral Tag, or the meta line in a slot grid. Marker: on a slot, the in-use square in the bottom start corner, where equipped and unequipped things appear together | `ink-muted`, `line` | "Equipped" | "…, equipped" |
+| Attuned | An Essence bound to a loadout slot; its abilities are active. Equipped, for Essences. | Text: a neutral Tag. Marker: on a slot, the in-use square, as for Equipped | `ink-muted`, `line` | "Attuned" | "…, attuned" |
 | Assigned | Spoken for by a preset or an activity, though it is still the player's. | Text: a neutral Tag or a meta line naming what holds it | `ink-muted`, `line` | "In Preset 2", "On expedition", "Assigned to Mining" | "…, assigned to Mining" |
 | Captured | Copied into an activity's snapshot, such as a defence team or an arena entry, so changing it now doesn't change the snapshot. | Text: a neutral Tag, and when it was captured | `ink-muted` | "In defence snapshot"; in the Folio, "Snapshot from 14:02. Changes apply at the next snapshot." | "…, in defence snapshot" |
 | Listed | On sale on the Cinder Bazaar until it sells or is withdrawn. | Text: a neutral Tag with the price | `ink-muted`, `line` | "Listed", with the price "1,200 Cinders" | "…, listed for 1,200 Cinders" |
 | In escrow | Held by a pending trade, order or bid; neither side can use it until it settles. | Text: a neutral Tag | `ink-muted`, `line` | "In escrow"; for Signets or Cinders held by an open order, "Reserved" | "…, in escrow" |
 | Borrowed | Taken from the guild Vault: the player may use it, but it belongs to the guild and goes back. | Text: a neutral Tag; the Vault in the meta line | `ink-muted`, `line` | "Borrowed"; the meta, "From the Ashen Order Vault" | "…, borrowed from the Ashen Order Vault" |
-| Favourite | Marked by the player to keep, so bulk sell, salvage and discard pass over it. Also called protected. | Marker: the 12px bookmark ribbon at the slot's top end, in `ink`. Until it is drawn, the word in the meta line | `ink`, `icon-marker` | "Favourite". A bulk action reports it: "3 favourites kept" | "…, favourite" |
+| Favourite | Marked by the player to keep, so bulk sell, salvage and discard pass over it. Also called protected. | Marker: the 12px bookmark ribbon in the slot's bottom start corner, in `ink` (Standards · State combinations). Until it is drawn, the word in the meta line | `ink`, `icon-marker` | "Favourite". A bulk action reports it: "3 favourites kept" | "…, favourite" |
 
 **What these states block.** Listed, In escrow and Borrowed stop the item being sold or listed again. Listed and In escrow stop it being equipped too. Assigned to an activity stops anything else using it until the activity ends. The blocked actions are Unavailable, with the state as the reason: "Listed on the Bazaar", "In escrow", "Borrowed from the guild Vault", "Assigned to Mining". A preset only points at an item, so being in a preset blocks nothing.
 
@@ -231,9 +231,8 @@ Attuned is Equipped, for Essences. Listed, In escrow and Borrowed are about who 
 
 ## Combining states
 
-- **One state per family, and one state per channel.** If two states want the same channel, the first in precedence takes it and the other moves to text or to the Folio.
-- **The one Tag on a row,** in this order: Failed, Claimable, Expiring soon, Locked, Listed, In escrow, Borrowed, Equipped, Attuned, Assigned, Captured, In progress, New, Completed, Claimed, Expired, Opened. The order puts what the player must act on first, then what blocks them, then what describes the thing, then history.
-- **Markers sit beside that Tag**: the favourite ribbon, an unread count, the current diamond, the ready diamond. Unlike Tags, markers do not compete with each other.
+Standards · State combinations holds these rules (D-094): which channel each kind of state takes, at most four marks on one thing, where each mark sits on slots, rows and rail items, the Tag order, and what drops first when there is no room. Two rules stay here because they are about single states:
+
 - **Blocked and selected.** A blocked thing can't become selected. A screen that needs to show a locked thing's details, such as a dungeon's floors before it opens, makes the entry available with a "Locked" Tag, and makes the Folio's committing action the blocked control.
 - **Blocked and focused.** The focus ring draws as usual, and the reason tip opens beside it.
 - **Pending and anything.** The new value shows at once, with "Saving…" beside it. If the save fails, the old value returns, with an Error that says so.
@@ -336,14 +335,14 @@ Labels show their states only as words, and Values show theirs only as figures, 
 | `opacity-unowned` | 0.4. The art of a thing the player doesn't own. Art only, never text |
 | `opacity-drag-origin` | 0.4. The place a dragged thing left, which keeps its room while the copy moves |
 | `LL.states` | Every state on this page with its family, word, Tag tone and what screen readers hear. Tag's `state` reads it, so a state's words are the same everywhere |
-| `LL.topState(states)` | The one Tag a row shows when several states apply, by the order in Combining states |
+| `LL.topState(states)` | The one Tag a row shows when several states apply, by the Tag order in Standards · State combinations |
 | `LL.why(id, reason, options)` | The reason tip for any focusable element. It returns the props to spread on the element and the description node to render beside it. `options.word` is the state word ("Locked"); `options.tone: 'warning'` is for a shortfall |
 | `LL.format.duration(seconds)` | "4m 12s", in two units at most (Foundations · Numerals) |
 | `LL.format.spokenDuration(seconds)` | "4 minutes 12 seconds", for screen readers |
 | Button `state`, `reason`, `shortfall`, `remaining`, `pendingLabel` | `unavailable`, `locked`, `restricted`, `insufficient`, `cooldown` or `pending`. `shortfall` writes "Short by 250 Cinders"; `remaining` writes "Ready in 4m 12s" |
 | Tag `state` | Any state with a word, such as `locked`, `claimable`, `equipped` or `expiring` |
-| ItemSlot `state`, `reason`, `favourite` | A blocked state with its reason printed under the name, Not owned, Undiscovered, or a word state that leads the meta line; `favourite` is the ribbon marker, or its word until it is drawn |
-| EntryList and NavRail items `locked`, `reason` | A locked entry or rail item, with how it unlocks |
+| ItemSlot `state`, `reason`, `favourite`, `ready` | A blocked state with its reason printed under the name, Not owned, Undiscovered, or a word state that leads the meta line; Equipped and Attuned also take the in-use square; `favourite` is the ribbon marker, or its word until it is drawn; `ready` is the attention diamond (Standards · State combinations) |
+| EntryList and NavRail items `locked`, `reason`, `ready` | A locked entry or rail item, with how it unlocks; `ready`, the attention diamond |
 | LoadoutSlot `reason` | A locked slot's condition, printed as its name |
 | Sigil `reason` | The unlock condition of a locked stat |
 

@@ -64,8 +64,10 @@ class NiPenetrationTests(unittest.TestCase):
         self.assertEqual(dict(source=str(self.source),sourceManifestSha256='a'*64,floor=9,offenseFactor=.95,penetrationFactor=40),flat)
         a.io.verify_penetration_candidate(self.source,self.candidate,flat)
         tower=n.h.read(self.source/n.TOWER);floor=n.h.unique(tower['floors'],'floorNumber',9)
-        floor['guardianScaling']=a.io.scaled_guardian(floor['guardianScaling'],1,.95,40)
+        floor['guardianScaling']=a.io.scaled_guardian(floor['guardianScaling'],1.0,.95,40.0)
         self.assertEqual(tower,n.h.read(self.candidate/n.TOWER))
+        owner_catalog=Path(self.temp.name)/'owner-tower.json';a.io.write(owner_catalog,tower)
+        self.assertEqual(owner_catalog.read_bytes(),(self.candidate/n.TOWER).read_bytes())
 
     def test_version_family_and_full_panel_required(self):
         a.validate_layout(self.d);self.assertEqual('penetration',a.candidate_kind(self.d))

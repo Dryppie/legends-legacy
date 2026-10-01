@@ -311,9 +311,17 @@ def audit(output):
     files = authenticate(output)
     q, result = read(output / 'request.json'), read(output / 'result.json')
     diagnostic_paths = [p for p in q['inputHashes'] if Path(p).name in
-        ('eight-item-diagnostic-provenance.json', 'kodoku-offense-diagnostic-provenance.json', 'kodoku-offense-refinement-diagnostic-provenance.json', 'kodoku-midpoint-diagnostic-provenance.json')]
+        ('eight-item-diagnostic-provenance.json', 'kodoku-offense-diagnostic-provenance.json', 'kodoku-offense-refinement-diagnostic-provenance.json', 'kodoku-midpoint-diagnostic-provenance.json', 'ni-restoration-diagnostic-provenance.json')]
     check(bool(diagnostic_paths) == bool(q.get('diagnosticVersion')) and len(diagnostic_paths) <= 1, 'Diagnostic marker/provenance mismatch')
     diagnostic_module(q.get('diagnosticVersion')).audit_request(SimpleNamespace(authenticate=authenticate, ability_module=ability_module), output, q)
+    ni_family = [Path(p) for p in q['inputHashes'] if Path(p).name == 'ni-restoration-family-provenance.json']
+    check(len(ni_family) <= 1, 'Ambiguous Ni family provenance')
+    if ni_family:
+        p = read(ni_family[0]); source = Path(p['source']); proposal = Path(p['proposal'])
+        check(q['mode'] == 'prepare' and sha(ni_family[0]) == q['inputHashes'][str(ni_family[0])] and
+              sha(source/'files.json') == p['sourceManifestSha256'] and sha(proposal) == p['proposalSha256'], 'Changed Ni preparation provenance')
+        authenticate(source)
+        check(read(output/'cells.json') == ni_restoration_module().admit(proposal, source), 'Ni preparation changed raw recipes or controls')
     eight_provenance = [Path(p) for p in q['inputHashes'] if Path(p).name == 'eight-item-family-provenance.json']
     check(len(eight_provenance) <= 1, 'Ambiguous eight-item family provenance')
     if eight_provenance:
@@ -501,9 +509,17 @@ def eight_item_module():
     return value
 
 
+def ni_restoration_module():
+    spec = importlib.util.spec_from_file_location('tower_ni_restoration', Path(__file__).with_name('tower-ni-limited-restoration.py'))
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
+
+
 def diagnostic_module(version=None):
     if version is None or version == 'floor8-two-healer-eight-item-diagnostic-v1':
         return eight_item_module()
+    if version == 'floor9-limited-restoration-diagnostic-v1':
+        return ni_restoration_module()
     modules = {'floor8-kodoku-offense-diagnostic-v1': 'tower-kodoku-offense-diagnostic.py',
                'floor8-kodoku-offense-refinement-diagnostic-v1': 'tower-kodoku-offense-refinement-diagnostic.py',
                'floor8-kodoku-midpoint-diagnostic-v1': 'tower-kodoku-midpoint-diagnostic.py'}
@@ -556,7 +572,8 @@ def main():
                    help='Seed-free preparation with pinned accepted-catalog replay qualification and an exact supported gear proposal')
     p.add_argument('--one-healer-family', type=Path, help='Seed-free exact six-variant floor-eight extension from the unchanged original source')
     p.add_argument('--eight-item-family', type=Path, help='Seed-free exact three-variant two-healer extension')
-    p.add_argument('--diagnostic-contract', type=Path, help='Pinned two-by-eight floor-eight diagnostic; never acceptance')
+    p.add_argument('--ni-restoration-family', type=Path, help='Seed-free exact fifteen-variant floor-nine Restoration extension')
+    p.add_argument('--diagnostic-contract', type=Path, help='Pinned versioned diagnostic; never acceptance')
     p.add_argument('--diagnostic-sha256')
     p.add_argument('--diagnostic-batch', type=int, choices=[0, 1, 2, 3])
     p.add_argument('--gear-reference', nargs=2, metavar=('SOURCE_ID', 'TEMPLATE_ID'),
@@ -565,6 +582,12 @@ def main():
                    metavar=('SOURCE_ID', 'DONOR_ID', 'PARTY_SLOT'),
                    help='Seed-free preparation: copy only a saved donor slot\'s ordered Essences; repeat for declared recipes')
     a = p.parse_args()
+    if a.ni_restoration_family:
+        ni_restoration_module().validate_mode(a.mode, a.floor, a.source, [a.current_content, a.qualified_family,
+            a.add_search, a.add_references, a.gear_reference, a.fixed_support_reference, a.ability_candidate,
+            a.health_pressure_candidate, a.recovery_pressure_candidate, a.health_factor != 1,
+            a.offense_factor != 1, a.penetration_factor != 1, a.search_gear, a.retain_search_references,
+            a.one_healer_family, a.eight_item_family, a.diagnostic_contract])
     if a.one_healer_family:
         one_healer_module().validate_mode(a.mode, a.floor, a.source, [a.current_content, a.qualified_family,
             a.add_search, a.add_references, a.gear_reference, a.fixed_support_reference, a.ability_candidate,
@@ -620,13 +643,16 @@ def main():
     output = ROOT / f'TestResults/tower-balance-pass-{a.name}-study-20260929'
     diagnostic = None
     if a.diagnostic_contract:
-        diagnostic = diagnostic_module(read(a.diagnostic_contract)['version']).admit_batch(
+        diagnostic_version = read(a.diagnostic_contract)['version']
+        ni_diagnostic = diagnostic_version == 'floor9-limited-restoration-diagnostic-v1'
+        diagnostic = diagnostic_module(diagnostic_version).admit_batch(
             SimpleNamespace(authenticate=authenticate, ability_module=ability_module, audit=audit, history=history),
             a.diagnostic_contract.resolve(), a.diagnostic_sha256, a.diagnostic_batch, a.source, output,
             a.mode, a.floor, a.samples, a.ability_candidate,
-            [a.current_content,a.qualified_family,a.one_healer_family,a.eight_item_family,a.add_search,a.add_references,
+            [a.current_content,a.qualified_family,a.one_healer_family,a.eight_item_family,a.ni_restoration_family,a.add_search,a.add_references,
              a.gear_reference,a.fixed_support_reference,a.health_pressure_candidate,a.recovery_pressure_candidate,
-             a.health_factor != 1,a.offense_factor != 1,a.penetration_factor != 1,a.search_gear,a.retain_search_references],a.native_seconds)
+             a.health_factor != 1,not ni_diagnostic and a.offense_factor != 1,not ni_diagnostic and a.penetration_factor != 1,a.search_gear,a.retain_search_references],a.native_seconds,
+            **({'scalar_factors': (a.health_factor,a.offense_factor,a.penetration_factor)} if ni_diagnostic else {}))
     artifacts = a.artifacts.resolve()
     check(not owner.exists() and not output.exists(), 'Fresh phase paths required; no retries or overwrite')
     tests = artifacts / 'bin/EssenceSystem.Tests/release'
@@ -651,6 +677,8 @@ def main():
             source_cells = one_healer_module().admit(a.one_healer_family.resolve(), source)
         if a.eight_item_family:
             source_cells = eight_item_module().admit(a.eight_item_family.resolve(), source)
+        if a.ni_restoration_family:
+            source_cells = ni_restoration_module().admit(a.ni_restoration_family.resolve(), source)
         if a.current_content:
             api = ROOT / 'LL/src/API/API.LL'
             validate_current_content(source, api, a.floor)
@@ -692,6 +720,14 @@ def main():
         pins[str(helper)] = sha(helper)
     owner.mkdir()
     shutil.copy2(Path(__file__), owner / 'owner-source.py')
+    if a.ni_restoration_family:
+        proposal = a.ni_restoration_family.resolve(); provenance = owner/'ni-restoration-family-provenance.json'
+        write(provenance, dict(source=str(source),sourceManifestSha256=sha(source/'files.json'),proposal=str(proposal),proposalSha256=sha(proposal)))
+        for path in (proposal, provenance): pins[str(path)] = sha(path)
+    if a.ni_restoration_family or diagnostic and diagnostic['version'] == 'floor9-limited-restoration-diagnostic-v1':
+        for name in ('tower-ni-limited-restoration.py','tower-ni-penetration.py','tower-one-healer-family.py','tower-kodoku-shared-penetration.py'):
+            helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
+            for path in (helper,owner/name): pins[str(path)] = sha(path)
     if a.eight_item_family:
         proposal = a.eight_item_family.resolve(); provenance = owner/'eight-item-family-provenance.json'
         write(provenance, dict(source=str(source),sourceManifestSha256=sha(source/'files.json'),proposal=str(proposal),proposalSha256=sha(proposal)))

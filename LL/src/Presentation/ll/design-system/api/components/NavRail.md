@@ -38,6 +38,22 @@ Hover fades the surface-raised wash in over duration-fast; the active item and i
 | `label` * | `string` |  |
 | `items` * | `NavItem[]` |  |
 
+### NavItem
+
+locked (Standards · States): stays in the Tab order (aria-disabled), says "Locked" where the badge goes, shows `reason` — how it unlocks — in the reason tip beside it, and a click or Enter shows the reason instead of navigating.
+
+| prop | type | note |
+| --- | --- | --- |
+| `id` * | `string` |  |
+| `title` * | `string` |  |
+| `icon` | `IconName` |  |
+| `href` | `string` |  |
+| `badge` | `React.ReactNode` | A count: unread, ready. |
+| `badgeLabel` | `string` | What screen readers hear for the badge or the diamond: "3 new items". |
+| `locked` | `boolean` |  |
+| `reason` | `string` |  |
+| `ready` | `boolean \| string` | Something waiting with nothing to count: the attention diamond at the item's end. true, or the words ("Quest ready"). A count `badge` comes first, and Locked before both (Standards · State combinations). |
+
 ## More
 
 Long-form usage: `components/NavRail/README.md`.

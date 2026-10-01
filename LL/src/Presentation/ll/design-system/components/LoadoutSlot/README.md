@@ -6,13 +6,14 @@ An Essence loadout slot.
 
 One Essence loadout slot: the Essence, its rarity and its two abilities — or an open or locked slot.
 
-**Provide:** `index` (zero-based), `state` (`attuned`, `open`, `locked`), `name`, `rarity`, `active` (`{ name, cooldown }`), `passive` (`{ name }`), `icon` or `image`, `reason` for locked slots — how it unlocks, "Unlocks at level 20" (`unlockLabel` is the older name) — `hint` for open ones and `onClick` to open the Essence preview.
+**Provide:** `index` (zero-based), `state` (`attuned`, `open`, `locked`), `name`, `rarity`, `active` (`{ name, cooldown }`), `passive` (`{ name }`), `icon` or `image`, `reason` for locked slots — how it unlocks, "Unlocks at level 20" (`unlockLabel` is the older name) — `hint` for open ones, `ready` when something waits for the player, and `onClick` to open the Essence preview.
 
 - Attuned (Standards · States · Ownership and use): rarity-edged ItemSlot, the name in `name-row` (Marcellus 17px) in its `rarity-*` colour, ability labels in `label` and ability names in `caption`, and an Attuned Tag in `neutral` — an attuned Essence is not waiting for the player, so it takes no arcana, and in an item context only rarity takes a hue (D-087).
 - Open (Data · Empty): the empty ItemSlot frame and "Empty" in `ink-muted`, with the `hint` saying what fills it. No Tag: "Empty" says it.
 - Locked (Availability · Locked): a dashed frame, a Locked Tag (dashed) and the unlock condition printed as the name — so players see what is coming. With `onClick` it stays a focusable button (`aria-disabled`): the printed condition is part of its name, and a press announces it instead of opening anything.
 - It is an inner surface, so it pads with its region's inner inset (12px in a Standard Panel), one step less than the Panel around it (Foundations · Space & Density).
 - It is a well and a bounded object: opaque `ground` with a full edge, one enclosed level inside its Panel (Foundations · Surfaces & Layering). A slot that opens something (`onClick`) is a control, so its edge is `line-strong` and hover is the `surface-raised` wash; otherwise the edge is `line`. Locked slots are dashed (Foundations · Lines).
+- **Attention:** `ready` draws the `arcana-glow` diamond at the end of the head, after the Tag — an open slot with an Essence to attune, say. True, or the words ("Essence ready to attune"). A locked slot takes none (Standards · State combinations).
 - Stack slots in a column with `stack-sm` gaps.
 
 ## Supported states
@@ -23,6 +24,7 @@ One Essence loadout slot: the Essence, its rarity and its two abilities — or a
 | Hover (with `onClick`) | Fill: the `surface-raised` wash | — | Nothing |
 | Focus-visible | Edge: `focus-ring` | — | Its contents |
 | Empty (Open) | Edge: the slot's dashed inner frame | "Empty", and the hint | "Slot 2 Empty Choose an Essence to attune" |
+| Ready | Marker: the `arcana-glow` diamond at the head's end | `ready`'s words, in the name | "Slot 2 Essence ready to attune Empty…" |
 | Locked | Edge: a dashed frame; Text: a Locked Tag and the condition | "Locked", "Unlocks at level 20" | "Slot 3 Locked Unlocks at level 20, button, unavailable" |
 
 ## Accessibility notes

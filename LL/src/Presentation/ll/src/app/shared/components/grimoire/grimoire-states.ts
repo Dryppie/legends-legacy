@@ -118,7 +118,7 @@ export const LG_STATES: Readonly<Record<LgStateName, LgStateInfo>> = {
   offline: st('data', 'Reconnecting…', 'warning', null),
 };
 
-/** The one Tag on a row, first to last (Standards · States · Combining states). */
+/** The one Tag on a row, first to last (Standards · State combinations). */
 export const LG_TAG_ORDER: readonly LgStateName[] = [
   'failed', 'claimable', 'expiring', 'locked', 'listed', 'escrow', 'borrowed', 'equipped', 'attuned',
   'assigned', 'captured', 'in-progress', 'new', 'completed', 'claimed', 'expired', 'opened',
@@ -200,4 +200,12 @@ export function lgBlockedReason(state: LgBlockedState, p: LgBlockedInput, who: s
     word: state === 'locked' ? 'Locked' : null,
     tone: state === 'insufficient' ? 'warning' : null,
   };
+}
+
+/**
+ * The attention mark's words (Standards · State combinations): `ready` is true or the words ("Upgrade available").
+ * Mirrors readyWords in bundle.js.
+ */
+export function lgReadyWords(ready: boolean | string | null | undefined): string | null {
+  return ready ? (typeof ready === 'string' ? ready : LG_STATES.ready.word) : null;
 }

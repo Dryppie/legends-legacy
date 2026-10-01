@@ -10,7 +10,7 @@ The game uses the Angular edition of Grimoire: the `lg-*` components in `src/app
 - **The same markup.** Each Angular component renders the DOM its reference component renders: the same elements, classes, ARIA attributes and text. Component hosts use `display: contents`, so they add no box; attribute components (`button[lgButton]`, `h2[lgHeading]`, `li[lgListRow]`) render on the element they sit on.
 - **The same behaviour.** Keyboard models, the reason tip, the layer stack, the announcer and live values are ported as shared helpers (below), not rewritten per component.
 - **The parity check** (`design-system/parity/`, its README says how to run it) renders every case in both editions on one page and compares them:
-  - **Static:** 107 cases across every component and variant, plus the format and state helpers against `LL.format`, `LL.states` and `LL.topState` — 403 comparisons. The DOM is normalised first (attribute and class order, Angular host elements and comments, generated ids).
+  - **Static:** 119 cases across every component and variant, plus the format and state helpers against `LL.format`, `LL.states` and `LL.topState` — 415 comparisons. The DOM is normalised first (attribute and class order, Angular host elements and comments, generated ids).
   - **Behaviour:** 22 scenarios play the same clicks and keys on both sides and compare the DOM, the focused element, the reason tip, handler calls, scroll position, the top layer and every announcement.
 
   A change to a component is not done until both pass (Checks in `AGENTS.md`).

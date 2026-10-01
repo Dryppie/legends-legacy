@@ -17,7 +17,10 @@ export type Density = 'comfortable' | 'standard' | 'compact';
 
 /** locked (Standards · States): stays in the Tab order (aria-disabled), says "Locked" where the badge goes, shows `reason` —
  *  how it unlocks — in the reason tip beside it, and a click or Enter shows the reason instead of navigating. */
-export interface NavItem { id: string; title: string; icon?: IconName; href?: string; badge?: React.ReactNode; badgeLabel?: string; locked?: boolean; reason?: string }
+export interface NavItem { id: string; title: string; icon?: IconName; href?: string; badge?: React.ReactNode; badgeLabel?: string; locked?: boolean; reason?: string;
+  /** Something waiting with nothing to count: the attention diamond at the item's end. true, or the words ("Quest ready").
+   *  A count `badge` comes first, and Locked before both (Standards · State combinations). */
+  ready?: boolean | string }
 export interface NavSection { label: string; items: NavItem[] }
 
 /** Renders a "Skip to content" link as the first tab stop. Under 60rem the rail becomes a drawer: opening it moves focus
@@ -262,7 +265,9 @@ export declare function Delta(props: DeltaProps): React.ReactElement;
 
 /** locked (Standards · States): Up and Down still land on it and its `reason` — how it unlocks — opens beside it; it is never
  *  selected, and Enter or a click shows the reason. A locked entry shows the Locked Tag in place of its own tag. */
-export interface EntryListItem { id: string; name: React.ReactNode; tag?: React.ReactNode; tagTone?: TagProps['tone']; locked?: boolean; reason?: string }
+export interface EntryListItem { id: string; name: React.ReactNode; tag?: React.ReactNode; tagTone?: TagProps['tone']; locked?: boolean; reason?: string;
+  /** The attention diamond at the row's end: true, or the words screen readers hear ("1 point to spend"). Not on a locked entry. */
+  ready?: boolean | string }
 export interface EntryListProps {
   items: EntryListItem[];
   activeId?: string;
@@ -291,7 +296,8 @@ export interface ItemSlotProps {
   caption?: boolean;
   /** Standards · States. Blocked (locked, unavailable, restricted, insufficient, cooldown): no press, the reason printed under
    *  the name (or, with no caption, in the reason tip). not-owned: the art at opacity-unowned. undiscovered: no art, no name.
-   *  Any other state with a word (equipped, attuned, assigned, captured, listed, escrow, borrowed…) leads the meta line. */
+   *  Any other state with a word (equipped, attuned, assigned, captured, listed, escrow, borrowed…) leads the meta line;
+   *  equipped and attuned also take the in-use square in the bottom start corner. */
   state?: StateName;
   /** A blocked slot's reason: "Unlocks at level 20", "Inventory full". */
   reason?: string;
@@ -299,8 +305,13 @@ export interface ItemSlotProps {
   shortfall?: { amount: number; name: string }[];
   /** cooldown: seconds left, as "Ready in 12s". */
   remaining?: number;
-  /** The player's favourite (protected): the 12px ribbon marker once it is drawn; until then the word in the meta line. */
+  /** The player's favourite (protected): the 12px ribbon in the bottom start corner once it is drawn, unless the in-use square
+   *  (equipped, attuned) holds that corner; otherwise the word in the meta line. */
   favourite?: boolean;
+  /** Something waiting for the player: the attention diamond in the top end corner. true, or the words ("Upgrade available"),
+   *  which join the accessible name. The claimable state draws it too; a blocked or undiscovered slot never does
+   *  (Standards · State combinations). */
+  ready?: boolean | string;
   onClick?: () => void;
   className?: string;
 }
@@ -447,7 +458,10 @@ export interface LoadoutSlotProps {
   icon?: IconName; image?: string;
   /** locked: how it unlocks, printed as the slot's name ("Unlocks at level 20") and read as its description. `unlockLabel` is the older name. */
   reason?: string; unlockLabel?: React.ReactNode;
-  hint?: React.ReactNode; onClick?: () => void; className?: string;
+  hint?: React.ReactNode;
+  /** The attention diamond at the end of the head, after the Tag: true, or the words ("Essence ready to attune"). Not on a locked slot. */
+  ready?: boolean | string;
+  onClick?: () => void; className?: string;
 }
 export declare function LoadoutSlot(props: LoadoutSlotProps): React.ReactElement;
 
@@ -670,7 +684,7 @@ declare global {
       };
       /** Standards · States: every state's family, word, Tag tone and what screen readers hear. */
       states: Record<StateName, StateInfo>;
-      /** The one Tag a row shows when several states apply (Standards · States · Combining states), or null. */
+      /** The one Tag a row shows when several states apply (the Tag order in Standards · State combinations), or null. */
       topState(states: StateName[]): StateName | null;
       /** The reason tip for any focusable element (Standards · States · The reason tip). Spread `props` on the element and render
        *  `desc` inside it. word: the state's word ("Locked"); tone: 'warning' for a shortfall; place: 'end' to open beside

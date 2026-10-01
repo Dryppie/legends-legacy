@@ -17,6 +17,7 @@ import {
   LgStateName,
   lgBlockedReason,
   lgIsBlocked,
+  lgReadyWords,
   lgStateWarn,
 } from './grimoire-states';
 import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from './grimoire-a11y';
@@ -25,7 +26,10 @@ import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from './grimoire-a11y';
  * The item frame: a square for an item, Essence or equipment slot, edged in its rarity, with the rarity code in its
  * corner. States (Standards · States): a blocked slot (locked, unavailable, restricted, insufficient, cooldown) gives
  * its reason; `not-owned` fades the art; `undiscovered` withholds the name and art; any other state with a word
- * (equipped, listed, borrowed…) leads the meta line. `favourite` is the ribbon marker, or its word until it is drawn.
+ * (equipped, listed, borrowed…) leads the meta line. Marks keep fixed corners (Standards · State combinations): the
+ * rarity code top start; the attention diamond top end (`ready`, or Claimable); the ownership mark bottom start — the
+ * in-use square for Equipped and Attuned, else the favourite ribbon (or its word until it is drawn); the quantity
+ * bottom end. A blocked or undiscovered slot takes no attention mark.
  */
 @Component({
   selector: 'lg-item-slot',
@@ -41,9 +45,17 @@ import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from './grimoire-a11y';
               [size]="24"
             />}
         }@if (shownRarity(); as r) {<span class="lg-slot__code" [attr.title]="r" aria-hidden="true">{{ codes[r] || r }}</span
-          >@if (!interactive()) {<span class="lg-sr">{{ r }}</span>}}@if (ribbon()) {<span class="lg-slot__mark" aria-hidden="true"
+          >@if (!interactive()) {<span class="lg-sr">{{ r }}</span>}}@if (attention()) {<span
+            class="lg-attention lg-slot__attention"
+            aria-hidden="true"
+          ></span
+          >}@if (inUse()) {<span class="lg-slot__mark lg-slot__mark--inuse" aria-hidden="true"></span
+          >}@if (ribbon()) {<span class="lg-slot__mark" aria-hidden="true"
             ><lg-icon [name]="favouriteIcon" [size]="12" /></span
-          >@if (!interactive()) {<span class="lg-sr">{{ favouriteWord }}</span>}}@if ((quantity() ?? 0) > 1) {<span class="lg-slot__qty"
+          >@if (!interactive()) {<span class="lg-sr">{{ favouriteWord }}</span>}}@if (readyWord() && !interactive()) {<span
+            class="lg-sr"
+            >{{ readyWord() }}</span
+          >}@if ((quantity() ?? 0) > 1) {<span class="lg-slot__qty"
             >×{{ format(quantity()) }}</span
           >}</span
       >@if (captioned()) {<span class="lg-slot__caption"
@@ -96,6 +108,9 @@ export class LgItemSlotComponent {
   /** Cooldown: seconds left. */
   readonly remaining = input<number>();
   readonly favourite = input(false, { transform: booleanAttribute });
+  /** Something waiting for the player: the attention diamond in the top end corner. true, or the words ("Upgrade
+   *  available"), which join the accessible name. The claimable state draws it too. */
+  readonly ready = input<boolean | string>();
   /** Renders a toggle button and emits `activate` on a press (React's onClick). */
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly activate = output<void>();
@@ -121,7 +136,14 @@ export class LgItemSlotComponent {
     this.undiscovered() ? LG_STATES.undiscovered.word : this.name() || this.slotLabel(),
   );
   protected readonly captioned = computed(() => !!this.label() && this.caption() !== false);
-  protected readonly ribbon = computed(() => this.favourite() && 'favourite' in LG_ICONS);
+  protected readonly inUse = computed(() => this.stateName() === 'equipped' || this.stateName() === 'attuned');
+  protected readonly ribbon = computed(() => this.favourite() && !this.inUse() && 'favourite' in LG_ICONS);
+  protected readonly attention = computed(
+    () => !this.blocked() && !this.undiscovered() && (!!this.ready() || this.stateName() === 'claimable'),
+  );
+  protected readonly readyWord = computed(() =>
+    !this.blocked() && !this.undiscovered() ? lgReadyWords(this.ready()) : null,
+  );
   protected readonly reasonInfo = computed(() => {
     const s = this.stateName();
     if (!lgIsBlocked(s)) return null;
@@ -172,6 +194,7 @@ export class LgItemSlotComponent {
       this.shownRarity(),
       (this.quantity() ?? 0) > 1 ? 'quantity ' + lgFormatNumber(this.quantity()) : null,
       this.stateWord() ? this.stateWord()!.toLowerCase() : null,
+      this.readyWord() ? this.readyWord()!.toLowerCase() : null,
       this.favourite() ? 'favourite' : null,
     ]
       .filter(Boolean)

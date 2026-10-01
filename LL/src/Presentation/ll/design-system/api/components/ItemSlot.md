@@ -33,7 +33,8 @@ The item frame.
 | `reason` | `string` | A blocked slot's reason: "Unlocks at level 20", "Inventory full". |
 | `shortfall` | `{ amount: number; name: string }[]` | insufficient: what is missing, as "Short by 250 Cinders". |
 | `remaining` | `number` | cooldown: seconds left, as "Ready in 12s". |
-| `favourite` | `boolean` | The player's favourite (protected): the 12px ribbon marker once it is drawn; until then the word in the meta line. |
+| `favourite` | `boolean` | The player's favourite (protected): the 12px ribbon in the bottom start corner once it is drawn, unless the in-use square (equipped, attuned) holds that corner; otherwise the word in the meta line. |
+| `ready` | `boolean \| string` | Something waiting for the player: the attention diamond in the top end corner. true, or the words ("Upgrade available"), which join the accessible name. The claimable state draws it too; a blocked or undiscovered slot never does. |
 | `onClick` | `() => void` |  |
 
 ## More

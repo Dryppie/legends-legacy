@@ -11,6 +11,7 @@ Start here. This page says how the documentation is organised, which way to read
 | Foundations · Colour … Iconography | What is the raw material, and what is each token for? |
 | Standards | What must every part do — hierarchy, disclosure, art-optional, content? |
 | Standards · States | Which states can a part be in, and how does each one look, read and sound? |
+| Standards · State combinations | When a thing is in several states at once, which marks show, where, and what is said in words? |
 | Registries | What are the game's canonical lists, and how is each one shown? |
 | Components | Which parts exist — generic and game-specific — and what state are they in? |
 | Patterns | Which compositions recur, and how are they built? |
@@ -31,7 +32,7 @@ The system is built in layers. Each layer draws only on the layers above it in t
 | --- | --- | --- |
 | Principles | The beliefs every decision answers to | Principles |
 | Tokens and Foundations | The raw material: colour, type, numerals, space, layout, surfaces, lines, shape, ornament, motion, icons | `tokens.json`, Foundations · … |
-| Standards | What every part must do: states, hierarchy, disclosure, art-optional, content | Standards, Standards · States |
+| Standards | What every part must do: states, hierarchy, disclosure, art-optional, content | Standards, Standards · States, Standards · State combinations |
 | Registries | The game's canonical lists: rarities, damage types, channels, resources, attributes, conditions, slots, glyphs, marks | Registries |
 | Components | Generic interface parts | Components |
 | Game Components | Parts that carry the game's own vocabulary | Components |
@@ -122,5 +123,6 @@ Follow Governance. Change the highest layer in the table that solves the problem
 - **Components · Lists & labels**: `EntryList` — The browsable name list · `ListRow` — The list row · `Tag` — The status label · `Presence` — The online status
 - **Components · Type & ornament**: `Heading` — The titles · `SectionRule` — The dividers · `Icon` — The game's icon set
 - **Foundations**: `AccessibilitySpecimen` — The accessibility rules on real parts · `DensitySpecimen` — The three densities side by side · `LayeringSpecimen` — The levels, the stack and four layered scenes · `LayoutGridSpecimen` — The attribute grid at three region widths · `LayoutSpecimen` — The list and inspector at three region widths · `LinesSpecimen` — The line types, the ladder and the rhythms, drawn both ways · `MotionSpecimen` — The motion tokens, and every motion category beside its reduced twin · `NumeralSpecimen` — The numeral rules in use · `OrnamentSpecimen` — The decorative devices and the budget, counted on the Creature Archive · `ShapeSpecimen` — The shape vocabulary, the Button's two shapes and the radius roles · `TypeRamp` — Every type style, by role · `TypeSpecimen` — The type ramp in use
+- **Standards**: `StateCombinationSpecimen` — Several states on one thing, resolved
 - **Patterns**: `PatternFeedback` — Whether a change, an effect or a cost works for the player or against them
 - **Page Archetypes**: `ScreenArchive` (showcase page) — The showcase for ArchetypeArchive: the Creature Archive · `ScreenOverview` (showcase page) — The showcase for ArchetypeInformation: the Character Overview

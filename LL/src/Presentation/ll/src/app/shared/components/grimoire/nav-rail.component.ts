@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
 import { LgSlotDirective, lgCx, lgHasSlot, lgUniqueId } from './grimoire-core';
 import { LgIconComponent } from './icon.component';
 import { LG_ICONS, LgIconName } from './grimoire-icons';
-import { LG_STATES, lgBlockedReason } from './grimoire-states';
+import { LG_STATES, lgBlockedReason, lgReadyWords } from './grimoire-states';
 import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from './grimoire-a11y';
 
 export interface LgNavItem {
@@ -28,6 +28,9 @@ export interface LgNavItem {
   locked?: boolean;
   /** Locked: how it unlocks. */
   reason?: string;
+  /** Something waiting with nothing to count: the attention diamond at the item's end. true, or the words ("Quest
+   *  ready"). A count `badge` comes first, and Locked before both (Standards · State combinations). */
+  ready?: boolean | string;
 }
 
 export interface LgNavSection {
@@ -67,6 +70,8 @@ export interface LgNavSection {
                         class="lg-rail__badge"
                         [attr.aria-label]="row.item.badgeLabel || null"
                         >{{ row.item.badge }}</span
+                      >} @else if (row.item.ready) {<span class="lg-attention lg-rail__attention" aria-hidden="true"></span
+                        ><span class="lg-sr">, {{ row.item.badgeLabel || readyWords(row.item.ready) }}</span
                       >}@if (row.why; as w) {<span class="lg-sr lg-why__desc" [id]="row.whyId" aria-hidden="true">{{
                         spoken(w)
                       }}</span>}</ng-template
@@ -115,6 +120,7 @@ export class LgNavRailComponent {
   private readonly slots = contentChildren(LgSlotDirective);
   private readonly base = lgUniqueId('lgr');
   protected readonly spoken = lgWhySpoken;
+  protected readonly readyWords = lgReadyWords;
   protected readonly lockedWord = LG_STATES.locked.word;
   /** The 12px lock marker once it is drawn (Foundations · Iconography); until then the word. */
   protected readonly lockIcon = ('lock' in LG_ICONS ? 'lock' : null) as LgIconName | null;

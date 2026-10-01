@@ -33,10 +33,12 @@ var NAV = [
     { id: 'world-map', title: 'World Map', icon: 'world-map' },
     { id: 'world-tower', title: 'World Tower', icon: 'legacy-ascension' },
     { id: 'quests', title: 'Quests', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
-    { id: 'prophecies', title: 'Prophecies', icon: 'prophecies' } ] },
+    // Something waiting with nothing to count: the attention diamond in the badge's place.
+    { id: 'prophecies', title: 'Prophecies', icon: 'prophecies', ready: 'Daily cache ready' } ] },
   { label: 'City', items: [
     { id: 'guild', title: 'Guild', icon: 'guild' },
-    { id: 'colosseum', title: 'Colosseum', icon: 'colosseum', locked: true, reason: 'Unlocks at level 20' },
+    // Locked comes before the attention mark: no diamond on a locked item.
+    { id: 'colosseum', title: 'Colosseum', icon: 'colosseum', locked: true, reason: 'Unlocks at level 20', ready: true },
     { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' },
     { id: 'leaderboard', title: 'Leaderboard', icon: 'leaderboard' } ] },
   { label: 'System', items: [

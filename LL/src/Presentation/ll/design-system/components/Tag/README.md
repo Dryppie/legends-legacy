@@ -9,7 +9,7 @@ A short all-caps label beside a name: "+ New quest", "Equipped", "Weaken", a rar
 **Provide:** a `state` from Standards · States, or `children` (one to three words) and a `tone`; for a number or a time, `value`.
 
 - **States come with their words.** `state` takes the word, tone and glyph from `LL.states`, so a state reads the same on every screen: `locked` → "Locked" with a dashed edge; `claimable` → "Claimable" in `new`; `completed` → "✓ Completed"; `failed` → "✕ Failed" in `danger`; `expiring` with `value: '2h'` → "Expires in 2h" in `warning`; `in-progress` with `value: '3 / 5'`; `equipped`, `attuned`, `listed`, `borrowed`, `escrow` and `claimed` in `neutral`. Children replace the word where the state names something: `state: 'assigned'` with "In Preset 2".
-- **One Tag per row.** When several states apply, show the first in Standards · States · Combining states (`LL.topState` picks it) and list the rest in the Folio.
+- **One Tag per row.** When several states apply, show the first in the Tag order in Standards · State combinations (`LL.topState` picks it) and list the rest in the Folio.
 - `locked` is outlined in `ink-muted` with a dashed edge — the same dash as a locked slot's frame: a gate the player will pass.
 - `neutral` (the default) is outlined in `ink-muted`: states and facts with no colour of their own — "Equipped", "Relic", a guild tag, a count.
 - `new` = `arcana` on `arcana-soft`, for new, ready, claimable or actionable things only — "+ New quest", "Claimable".

@@ -22,10 +22,11 @@ public sealed class BalanceHarnessTowerBalancePassTests
     internal const string KodokuOffenseDiagnostic = "floor8-kodoku-offense-diagnostic-v1";
     internal const string KodokuRefinementDiagnostic = "floor8-kodoku-offense-refinement-diagnostic-v1";
     internal const string KodokuMidpointDiagnostic = "floor8-kodoku-midpoint-diagnostic-v1";
+    internal const string NiRestorationDiagnostic = "floor9-limited-restoration-diagnostic-v1";
 
     internal static int DiagnosticBatchCount(string version) => version switch {
         KodokuMidpointDiagnostic => 4,
-        EightItemDiagnostic or KodokuOffenseDiagnostic or KodokuRefinementDiagnostic => 2,
+        EightItemDiagnostic or KodokuOffenseDiagnostic or KodokuRefinementDiagnostic or NiRestorationDiagnostic => 2,
         _ => throw new InvalidDataException("Unknown diagnostic version.")
     };
 
@@ -34,6 +35,11 @@ public sealed class BalanceHarnessTowerBalancePassTests
         if (diagnosticVersion is null)
         {
             if (samples is < 16 or > 512) throw new InvalidDataException("Ordinary panels require 16–512 seeds.");
+        }
+        else if (diagnosticVersion == NiRestorationDiagnostic)
+        {
+            if (mode != "screen" || floor != 9 || samples != 16 || familySize != 163)
+                throw new InvalidDataException("Ni Restoration requires the complete 163-recipe, sixteen-seed floor-nine diagnostic.");
         }
         else if (diagnosticVersion is not (EightItemDiagnostic or KodokuOffenseDiagnostic or KodokuRefinementDiagnostic or KodokuMidpointDiagnostic)
                  || mode != "screen" || floor != 8 || samples != (diagnosticVersion is KodokuRefinementDiagnostic or KodokuMidpointDiagnostic ? 16 : 8) || familySize != 186)
@@ -260,6 +266,7 @@ public sealed class BalanceHarnessTowerBalancePassTests
                     Assert.Equal(840, q.NativeSeconds);
                     Assert.Equal(cells.Length * q.Seeds.Length, q.MaximumFights);
                     var provenanceName = q.DiagnosticVersion switch {
+                        NiRestorationDiagnostic => "ni-restoration-diagnostic-provenance.json",
                         KodokuMidpointDiagnostic => "kodoku-midpoint-diagnostic-provenance.json",
                         KodokuRefinementDiagnostic => "kodoku-offense-refinement-diagnostic-provenance.json",
                         KodokuOffenseDiagnostic => "kodoku-offense-diagnostic-provenance.json",
@@ -276,6 +283,8 @@ public sealed class BalanceHarnessTowerBalancePassTests
                     Assert.False(limits.GetProperty("usedForAcceptance").GetBoolean());
                     Assert.False(limits.GetProperty("confirmation").GetBoolean());
                     Assert.False(limits.GetProperty("application").GetBoolean());
+                    if (q.DiagnosticVersion == NiRestorationDiagnostic)
+                        NiPenetrationTests.ValidatePlan(contract.GetProperty("candidatePlan"));
                     var batches = DiagnosticBatchCount(q.DiagnosticVersion);
                     Assert.Equal(batches, limits.GetProperty("batches").GetInt32());
                     Assert.Equal(q.Seeds.Length, limits.GetProperty("seedsPerBatch").GetInt32());

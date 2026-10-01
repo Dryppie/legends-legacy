@@ -102,6 +102,26 @@ interface ParityWindow {
     </div>
     <div class="case" data-case="itemslot-locked-static"><lg-item-slot icon="essences" [caption]="false" state="locked" reason="Clear floor 10" /></div>
     <div class="case" data-case="itemslot-equipped"><lg-item-slot name="Ember Fang" state="equipped" favourite /></div>
+    <div class="case" data-case="itemslot-ready-equipped">
+      <lg-item-slot name="Ashen Blade" rarity="Epic" icon="combat-styles" state="equipped" meta="Main hand" ready="Upgrade available" selected interactive />
+    </div>
+    <div class="case" data-case="itemslot-claimable"><lg-item-slot name="Prophecy Cache" rarity="Unique" icon="prophecies" state="claimable" [quantity]="3" /></div>
+    <div class="case" data-case="itemslot-ready-locked">
+      <lg-item-slot name="Ember Hoard" icon="prophecies" state="locked" reason="Clear Floor 10 to unlock" [ready]="true" [caption]="false" interactive />
+    </div>
+    <div class="case" data-case="itemslot-attuned-grid">
+      <lg-item-slot name="Ember Wolf Essence" rarity="Rare" icon="essences" state="attuned" favourite [ready]="true" [caption]="false" size="sm" />
+    </div>
+    <div class="case" data-case="itemslot-listed-fav">
+      <lg-item-slot name="Warded Pack" rarity="Rare" icon="inventory" state="listed" meta="1,200 Cinders" favourite interactive />
+    </div>
+    <div class="case" data-case="itemslot-undiscovered-ready"><lg-item-slot state="undiscovered" [ready]="true" /></div>
+    <div class="case" data-case="entrylist-ready"><lg-entry-list [items]="entriesReady" activeId="slime" label="Creatures" /></div>
+    <div class="case" data-case="navrail-ready"><lg-nav-rail [sections]="navReady" activeId="quests" /></div>
+    <div class="case" data-case="navrail-ready-compact"><lg-nav-rail [sections]="navReady" compact /></div>
+    <div class="case" data-case="loadout-ready-open"><lg-loadout-slot [index]="1" hint="Choose an Essence" ready="Essence ready to attune" interactive /></div>
+    <div class="case" data-case="loadout-ready-attuned"><lg-loadout-slot [index]="0" name="Ember Wolf Essence" rarity="Rare" [ready]="true" /></div>
+    <div class="case" data-case="loadout-ready-locked"><lg-loadout-slot [index]="2" state="locked" reason="Unlocks at level 20" [ready]="true" /></div>
     <div class="case" data-case="itemslot-undiscovered"><lg-item-slot state="undiscovered" rarity="Epic" icon="inventory" /></div>
     <div class="case" data-case="list">
       <lg-list label="Inventory" rhythm="zebra">
@@ -406,6 +426,8 @@ export class ParityComponent {
   protected readonly entries = data.entries as LgEntry[];
   protected readonly ledger = data.ledger as LgLedgerRow[];
   protected readonly nav = data.nav as unknown as LgNavSection[];
+  protected readonly navReady = data.navReady as unknown as LgNavSection[];
+  protected readonly entriesReady = data.entriesReady as LgEntry[];
   protected readonly messages = data.messages as LgChronicleMessage[];
   protected readonly effects = data.effects as (string | LgFolioEffect)[];
   protected readonly aside = data.aside as LgLevelPlateStat[];
