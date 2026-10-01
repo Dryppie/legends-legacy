@@ -5,26 +5,37 @@ import {
   computed,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { lgFormatNumber, lgFormatShort } from './grimoire-core';
+import { lgFormatNumber, lgFormatShort } from './grimoire-format';
 
-/** Cinders or Soulstones with their art and amount. */
+/**
+ * The currency amount: Cinders or Soulstones with their art. An abbreviated pill (`short`) is always a button: without
+ * `interactive` it toggles between 12.5k and 12,480 itself, so the full figure is one click, tap or key away. Screen
+ * readers hear the full amount. A live amount reserves its widest width, so the TopBar does not reflow as it ticks.
+ */
 @Component({
   selector: 'lg-currency-pill',
   imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: {
+    style: 'display: contents',
+    // `title` is an input here; keep the static attribute from becoming a native tooltip.
+    '[attr.title]': 'null',
+  },
   template: `
-    <ng-template #body>
-      @if (iconSrc(); as src) {
-        <img class="lg-currency__icon" [src]="src" alt="" width="18" height="18" />
-      }
-      <span class="lg-currency__amount">{{ display() }}</span>
-      <span class="lg-currency__name">{{ name() }}</span>
-    </ng-template>
-    @if (interactive()) {
-      <button type="button" class="lg-currency" [attr.title]="tooltip()" (click)="activate.emit()">
+    <ng-template #body
+      >@if (iconSrc(); as src) {<img [src]="src" alt="" width="18" height="18" class="lg-currency__icon" />}<span
+        class="lg-currency__amount"
+        [style.min-width]="reserveCh() + 'ch'"
+        aria-hidden="true"
+        >{{ amountText() }}</span
+      ><span class="lg-currency__name" aria-hidden="true">{{ name() }}</span
+      ><span class="lg-sr">{{ fullText() }}</span></ng-template
+    >
+    @if (isButton()) {
+      <button type="button" class="lg-currency" [attr.title]="tooltip()" (click)="press()">
         <ng-container [ngTemplateOutlet]="body" />
       </button>
     } @else {
@@ -35,18 +46,33 @@ import { lgFormatNumber, lgFormatShort } from './grimoire-core';
 export class LgCurrencyPillComponent {
   readonly name = input.required<string>();
   readonly amount = input.required<number>();
-  /** core/currencies/Coins.svg for Cinders, Diamonds.svg for Soulstones. */
+  /** assets/Currency/Coins.svg for Cinders, Diamonds.svg for Soulstones. */
   readonly iconSrc = input<string>();
-  /** Abbreviate (12.5k); the full amount stays in the tooltip. */
+  /** Abbreviate (12.5k). */
   readonly short = input(false, { transform: booleanAttribute });
-  /** Renders a button, e.g. to toggle the number format. */
+  /** Characters of width to reserve from the start. */
+  readonly reserve = input<number>(0);
+  readonly title = input<string>();
+  /** Renders a button that emits `activate` (React's onClick), instead of toggling the format itself. */
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly activate = output<void>();
 
-  protected readonly display = computed(() =>
-    this.short() ? lgFormatShort(this.amount()) : lgFormatNumber(this.amount()),
+  private readonly full = signal(false);
+  private widest = 0;
+  private readonly ownToggle = computed(() => this.short() && !this.interactive());
+  protected readonly isButton = computed(() => this.interactive() || this.ownToggle());
+  protected readonly amountText = computed(() =>
+    this.short() && !this.full() ? lgFormatShort(this.amount()) : lgFormatNumber(this.amount()),
   );
-  protected readonly tooltip = computed(
-    () => `${lgFormatNumber(this.amount())} ${this.name()}`,
-  );
+  protected readonly reserveCh = computed(() => {
+    this.widest = Math.max(this.widest, this.amountText().length);
+    return Math.max(this.widest, this.reserve() || 0);
+  });
+  protected readonly fullText = computed(() => `${lgFormatNumber(this.amount())} ${this.name()}`);
+  protected readonly tooltip = computed(() => this.title() || this.fullText());
+
+  protected press(): void {
+    if (this.ownToggle()) this.full.update((f) => !f);
+    else this.activate.emit();
+  }
 }

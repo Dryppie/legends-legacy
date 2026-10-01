@@ -17,25 +17,9 @@ export function lgHasSlot(
   return slots.some((slot) => slot.lgSlot() === name);
 }
 
-const NUMBER_FORMAT = new Intl.NumberFormat('en-US');
-
-/** 12480 → "12,480". Strings pass through unchanged. */
-export function lgFormatNumber(
-  value: number | string | null | undefined,
-): string {
-  if (value === null || value === undefined) return '';
-  return typeof value === 'number' ? NUMBER_FORMAT.format(value) : value;
-}
-
-/** 12480 → "12.5k", 3200000 → "3.2M". */
-export function lgFormatShort(value: number): string {
-  const abs = Math.abs(value);
-  const trim = (n: number, whole: boolean) =>
-    (whole ? n.toFixed(0) : n.toFixed(1)).replace(/\.0$/, '');
-  if (abs >= 1e9) return `${trim(value / 1e9, abs >= 1e10)}B`;
-  if (abs >= 1e6) return `${trim(value / 1e6, abs >= 1e7)}M`;
-  if (abs >= 1e4) return `${trim(value / 1e3, abs >= 1e5)}k`;
-  return NUMBER_FORMAT.format(value);
+/** Joins class names, skipping empty ones: lgCx('lg-btn', blocked && 'is-blocked'). */
+export function lgCx(...names: (string | false | null | undefined)[]): string {
+  return names.filter(Boolean).join(' ');
 }
 
 export type LgPoint = readonly [number, number];
@@ -72,7 +56,7 @@ export type LgRarity =
   | 'Legendary'
   | 'Legacy';
 
-/** The game's rarity codes (see shared/models/enums/rarity.ts). */
+/** The game's rarity codes (see shared/models/enums/rarity.ts). Mirrors LL.RARITY_CODES. */
 export const LG_RARITY_CODES: Record<LgRarity, string> = {
   Common: 'C',
   Uncommon: 'UC',
@@ -82,6 +66,8 @@ export const LG_RARITY_CODES: Record<LgRarity, string> = {
   Legendary: 'L',
   Legacy: 'LG',
 };
+
+export type LgDensity = 'comfortable' | 'standard' | 'compact';
 
 export type LgChatLayout = 'docked' | 'floating';
 
@@ -95,6 +81,8 @@ export interface LgChroniclePosition {
 /** What a GameShell offers the Chronicle projected into it. */
 export interface LgShellApi {
   readonly chatLayout: Signal<LgChatLayout>;
+  /** Opens the rail drawer (narrow screens). */
+  openRail(): void;
   setChatCollapsed(collapsed: boolean): void;
   startChronicleDrag(event: PointerEvent): void;
   nudgeChronicle(event: KeyboardEvent): void;

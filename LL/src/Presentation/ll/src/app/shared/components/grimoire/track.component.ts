@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 export type LgTrackTone = 'gilt' | 'hp' | 'arcana';
 
@@ -11,65 +6,56 @@ export type LgTrackTone = 'gilt' | 'hp' | 'arcana';
 @Component({
   selector: 'lg-track',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class]': "'lg-track lg-track--' + tone()" },
+  host: { style: 'display: contents' },
   template: `
-    @if (startLabel()) {
-      <span class="lg-track__end">{{ startLabel() }}</span>
-    }
-    <div
-      class="lg-track__rail"
-      role="progressbar"
-      aria-valuemin="1"
-      [attr.aria-valuemax]="stepCount()"
-      [attr.aria-valuenow]="currentStep() + 1"
-      [attr.aria-valuetext]="valueText()"
-      [attr.aria-label]="label()"
-    >
-      <span class="lg-track__fill" [style.width.%]="fillPercent()"></span>
-      @for (node of nodes(); track node.index) {
-        <span
-          class="lg-track__node"
-          [class]="node.state"
-          [style.left.%]="node.left"
-          [attr.title]="node.title"
-        ></span>
+    <div [class]="'lg-track lg-track--' + (tone() || 'gilt')">
+      @if (startLabel()) {
+        <span class="lg-track__end">{{ startLabel() }}</span>
+      }
+      <div
+        class="lg-track__rail"
+        role="progressbar"
+        aria-valuemin="1"
+        [attr.aria-valuemax]="stepCount()"
+        [attr.aria-valuenow]="currentStep() + 1"
+        [attr.aria-valuetext]="valueText()"
+        [attr.aria-label]="label() || 'Progress'"
+      >
+        <span class="lg-track__fill" [style.width.%]="fillPercent()"></span>
+        @for (node of nodes(); track node.index) {
+          <span [class]="'lg-track__node ' + node.state" [style.left.%]="node.left" [attr.title]="node.title"></span>
+        }
+      </div>
+      @if (endLabel()) {
+        <span class="lg-track__end">{{ endLabel() }}</span>
       }
     </div>
-    @if (endLabel()) {
-      <span class="lg-track__end">{{ endLabel() }}</span>
-    }
   `,
 })
 export class LgTrackComponent {
-  readonly steps = input.required<number>();
+  readonly steps = input<number>(5);
   /** Zero-based current step; earlier steps are done. */
-  readonly current = input.required<number>();
+  readonly current = input<number>(0);
   readonly startLabel = input<string>();
   readonly endLabel = input<string>();
-  readonly labels = input<readonly string[]>([]);
+  readonly labels = input<readonly string[]>();
   readonly tone = input<LgTrackTone>('gilt');
-  readonly label = input('Progress');
+  readonly label = input<string>('Progress');
 
-  protected readonly stepCount = computed(() => Math.max(2, this.steps()));
-  protected readonly currentStep = computed(() =>
-    Math.max(0, Math.min(this.current(), this.stepCount() - 1)),
-  );
-  protected readonly fillPercent = computed(
-    () => (this.currentStep() / (this.stepCount() - 1)) * 100,
-  );
+  protected readonly stepCount = computed(() => Math.max(2, this.steps() || 5));
+  protected readonly currentStep = computed(() => Math.max(0, Math.min(this.current() || 0, this.stepCount() - 1)));
+  protected readonly fillPercent = computed(() => (this.currentStep() / (this.stepCount() - 1)) * 100);
   protected readonly valueText = computed(
-    () =>
-      this.labels()[this.currentStep()] ??
-      `Step ${this.currentStep() + 1} of ${this.stepCount()}`,
+    () => this.labels()?.[this.currentStep()] || `Step ${this.currentStep() + 1} of ${this.stepCount()}`,
   );
   protected readonly nodes = computed(() => {
-    const count = this.stepCount();
-    const current = this.currentStep();
-    return Array.from({ length: count }, (_, index) => ({
+    const n = this.stepCount();
+    const cur = this.currentStep();
+    return Array.from({ length: n }, (_, index) => ({
       index,
-      left: (index / (count - 1)) * 100,
-      state: index < current ? 'is-done' : index === current ? 'is-current' : 'is-todo',
-      title: this.labels()[index] ?? null,
+      left: (index / (n - 1)) * 100,
+      state: index < cur ? 'is-done' : index === cur ? 'is-current' : 'is-todo',
+      title: this.labels()?.[index] || null,
     }));
   });
 }

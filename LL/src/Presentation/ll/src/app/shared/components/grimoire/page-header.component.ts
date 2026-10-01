@@ -1,36 +1,43 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { LG_HEX_OUTER } from './grimoire-core';
+import { ChangeDetectionStrategy, Component, contentChildren, input } from '@angular/core';
+import { LgSlotDirective, lgHasSlot } from './grimoire-core';
 import { LgHeadingComponent } from './heading.component';
 import { LgIconComponent } from './icon.component';
 import { LgIconName } from './grimoire-icons';
 
-/** Heading row of an information screen; the screen's actions are its content. */
+/**
+ * The information screen heading. The current section's icon sits in a diamond (the current location). The screen's
+ * actions go in `lgSlot="actions"`.
+ */
 @Component({
   selector: 'lg-page-header',
   imports: [LgHeadingComponent, LgIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'lg-pagehead',
+    style: 'display: contents',
     // `title` is an input here; keep the static attribute from becoming a native tooltip.
     '[attr.title]': 'null',
   },
   template: `
-    @if (icon(); as iconName) {
-      <span class="lg-pagehead__icon" aria-hidden="true">
-        <svg viewBox="0 0 100 100" class="lg-pagehead__hex"><polygon [attr.points]="hex" /></svg>
-        <lg-icon [name]="iconName" [size]="22" />
-      </span>
-    }
-    <div class="lg-pagehead__text">
-      @if (eyebrow()) {
-        <span class="lg-pagehead__eyebrow">{{ eyebrow() }}</span>
+    <header class="lg-pagehead">
+      @if (icon(); as iconName) {
+        <span class="lg-pagehead__icon" aria-hidden="true"
+          ><svg viewBox="0 0 100 100" class="lg-pagehead__mark"><polygon points="50,1.5 98.5,50 50,98.5 1.5,50" /></svg
+          ><lg-icon [name]="iconName" [size]="24"
+        /></span>
       }
-      <h1 lgHeading="screen">{{ title() }}</h1>
-      @if (summary()) {
-        <p class="lg-pagehead__summary">{{ summary() }}</p>
+      <div class="lg-pagehead__text">
+        @if (eyebrow()) {
+          <span class="lg-pagehead__eyebrow">{{ eyebrow() }}</span>
+        }
+        <h1 lgHeading="screen">{{ title() }}</h1>
+        @if (summary()) {
+          <p class="lg-pagehead__summary">{{ summary() }}</p>
+        }
+      </div>
+      @if (has('actions')) {
+        <div class="lg-pagehead__actions"><ng-content select="[lgSlot=actions]" /></div>
       }
-    </div>
-    <div class="lg-pagehead__actions"><ng-content /></div>
+    </header>
   `,
 })
 export class LgPageHeaderComponent {
@@ -39,5 +46,9 @@ export class LgPageHeaderComponent {
   readonly eyebrow = input<string>();
   readonly summary = input<string>();
   readonly icon = input<LgIconName>();
-  protected readonly hex = LG_HEX_OUTER;
+
+  private readonly slots = contentChildren(LgSlotDirective);
+  protected has(name: string): boolean {
+    return lgHasSlot(this.slots(), name);
+  }
 }

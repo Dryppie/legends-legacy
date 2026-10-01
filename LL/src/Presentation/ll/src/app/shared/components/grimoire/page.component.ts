@@ -1,32 +1,22 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
- * Scrolling frame for information screens without scene art (Overview, Settings,
- * Leaderboard). Fills its positioned parent and pads for the floating TopBar;
- * set `embedded` to use it inside the current dashboard layout.
+ * The information screen frame: a scrolling screen without scene art (Overview, Settings, Leaderboard). It fills its
+ * positioned parent and pads for the floating TopBar.
  */
 @Component({
   selector: 'lg-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[class]': "embedded() ? 'lg-page lg-page--embedded' : 'lg-page'",
-    '[attr.aria-label]': 'label() ?? null',
-    '[attr.role]': "label() ? 'region' : null",
-  },
+  host: { style: 'display: contents' },
   template: `
-    <div class="lg-page__inner" [style.max-width]="maxWidth() ?? null">
-      <ng-content />
+    <div class="lg-page" [attr.role]="role() ?? null" [attr.aria-label]="label() ?? null">
+      <div class="lg-page__inner" [style.max-width]="maxWidth() ?? null"><ng-content /></div>
     </div>
   `,
 })
 export class LgPageComponent {
   readonly label = input<string>();
+  /** Defaults to page-max (80rem). */
   readonly maxWidth = input<string>();
-  /** Flow in the parent (no absolute fill, no TopBar padding). */
-  readonly embedded = input(false, { transform: booleanAttribute });
+  readonly role = input<string>();
 }

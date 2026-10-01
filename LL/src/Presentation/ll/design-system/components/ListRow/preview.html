@@ -1,0 +1,50 @@
+<!-- @dsCard group="Components · Lists & labels" height=380 width=1000 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ListRow — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv-cap { margin: var(--stack-sm) 0 0; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--section-sm); padding: var(--section-sm); align-items: start; }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+var ITEMS = [
+  { id: 'fang', title: 'Ember Fang', rarity: 'Epic', icon: 'colosseum', meta: 'Weapon · Sword · Lv 18', quantity: 1, value: '9,400', equipped: true },
+  { id: 'crown', title: 'Crown of Cinders', rarity: 'Legendary', icon: 'overview', meta: 'Helm · Lv 20', quantity: 1, value: '48,000' },
+  { id: 'wolf', title: 'Dire Wolf Essence', rarity: 'Rare', icon: 'essences', meta: 'Essence · Lv 12', quantity: 3, value: '1,250' },
+  { id: 'prism', title: 'Soul Prism', rarity: 'Epic', icon: 'soulstones', meta: 'Material', quantity: 7, value: '2,100' },
+  { id: 'sabre', title: 'Iron Sabre', rarity: 'Common', icon: 'colosseum', meta: 'Weapon · Sword · Lv 4', quantity: 2, value: '85' }
+];
+var MEMBERS = [
+  { name: 'Aldric Vane', rank: 'Guild master', score: '12,480', online: true },
+  { name: 'Maren', rank: 'Officer', score: '9,915', online: true },
+  { name: 'Kaelen', rank: 'Officer', score: '8,204', online: false, seen: '2h ago' },
+  { name: 'Tamsin', rank: 'Member', score: '4,310', online: false, seen: '1d ago' },
+  { name: 'Pip', rank: 'Recruit', score: '0', online: true }
+];
+function App() {
+  var s = React.useState('wolf');
+  return h('div', { className: 'pv-grid' },
+    h('div', null, h(L.Panel, { title: 'Inventory', flush: true, aside: h('span', null, '5 of 60') },
+      h(L.List, { label: 'Inventory' }, ITEMS.map(function (it) {
+        return h(L.ListRow, { key: it.id, title: it.title, rarity: it.rarity, icon: it.icon, meta: it.meta, quantity: it.quantity, value: it.value,
+          tags: it.equipped ? h(L.Tag, null, 'Equipped') : null, selected: s[0] === it.id, onClick: function () { s[1](it.id); } });
+      }))), h('p', { className: 'pv-cap' }, 'Standard. Values are sell prices in Cinders.')),
+    h('div', null, h(L.Panel, { title: 'Guild members', flush: true, density: 'compact', aside: h('span', null, '5 of 24') },
+      h(L.List, { label: 'Guild members' }, MEMBERS.map(function (m) {
+        return h(L.ListRow, { key: m.name, title: m.name, meta: m.rank, value: m.score, onClick: function () {},
+          trailing: h(L.Presence, { online: m.online, lastSeen: m.seen, compact: true }) });
+      }))), h('p', { className: 'pv-cap' }, 'Compact. Values are contribution this season.')));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

@@ -20,7 +20,7 @@ What stays the same: the backlog, the item order, the paste-ready prompts, the d
 
 **The design system.** The live artifact is at decision D-089 (1 October 2026). Phase 0 (DS-001 to DS-004) is done. Phase 1 is done through DS-019 (State Model), including colour, type, numerals, density, accessibility, layout, surfaces, lines, shape, ornament, motion and iconography. It holds 52 component folders, 24 documentation pages, a 44 KB `tokens.css`, a 72 KB `tokens.json`, a React reference bundle and 28 image assets.
 
-**The Angular port.** `LL/src/Presentation/ll/src/app/shared/components/grimoire/` holds 32 `lg-*` components, with `src/styles/grimoire/tokens.css` (108 lines) and `components.css` (1,010 lines). They were generated from the Grimoire version that existed before the implementation plan started, so none of D-001 to D-089 is in the code yet. The port's README says nothing in the app uses these components yet. That keeps the catch-up in Phase C low-risk: no screen changes until a screen is migrated on purpose.
+**The Angular port.** `LL/src/Presentation/ll/src/app/shared/components/grimoire/` holds 32 `lg-*` components, with `src/styles/grimoire/tokens.css` (108 lines) and `components.css` (1,010 lines). They were generated from the Grimoire version that existed before the implementation plan started, so none of D-001 to D-089 is in the code yet. The `feature/grimoire-design-system` branch, which holds the port, was merged into `main` on 1 October 2026. Both Grimoire stylesheets are now in `angular.json` → `styles`, so they ship with every build. They only define custom properties and `lg-*` classes, and no screen uses an `lg-*` component yet, so the live app looks the same. That keeps the catch-up in Phase C low-risk: no screen changes until a screen is migrated on purpose.
 
 **Conflicting guidance.** Three styling layers exist side by side: the `--ll-*` tokens (`src/styles/tokens.css`, described in `frontend-design-system.md`), Tailwind classes, and Grimoire. The frontend `AGENTS.md` still says to use `text-primary` for headings, labels, selected states and resource values, which is the gilt-overuse problem DS-006 fixed. Agents will follow those instructions unless they are updated (Phase B).
 
@@ -135,7 +135,7 @@ If you want a link to browse or share, publish the catalog as an artifact on thi
 
 1. **Folder.** `LL/src/Presentation/ll/design-system/` (recommended: next to the code it governs) or a top-level `design-system/` beside `docs/`.
 2. **React reference bundle.** Keep it as the preview implementation and update it with each item (recommended: the plan's prompts and previews keep working unchanged), or drop the React previews and preview Angular components directly (more setup, one implementation).
-3. **Branch.** Work on a `design-system` branch and merge per phase, or commit directly to `main`.
+3. **Branch.** Keep using `feature/grimoire-design-system` and merge it into `main` after each phase, as you did with the port (recommended: balance work on `main` stays separate), or commit directly to `main`.
 4. **The artifact on the other account.** Leave it untouched as an archive (recommended), or keep editing it, which would split the system in two.
 5. **Section 6 of the implementation plan.** Confirm or change the "Needed Soon" assumptions, especially colour latitude (4) and target viewport (6), before DS-020 onward relies on them.
 

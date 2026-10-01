@@ -1,0 +1,10 @@
+/* Page chrome for the parity check only. */
+body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font-ui); }
+.report { padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--line); }
+.report h1 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; margin: 0 0 var(--space-2); }
+.report .good { color: var(--ink); }
+.report .bad { color: var(--danger); }
+.report pre { white-space: pre-wrap; font-size: 0.75rem; background: var(--surface); padding: var(--space-2); }
+.side { padding: var(--space-4) var(--space-6); }
+.side h2 { font-family: var(--font-display); font-weight: 400; }
+.case { margin: 0 0 var(--space-4); max-width: 75rem; position: relative; }

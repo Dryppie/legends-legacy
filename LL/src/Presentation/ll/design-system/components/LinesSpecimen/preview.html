@@ -1,0 +1,310 @@
+<!-- @dsCard group="Foundations" height=2680 width=1480 subtitle="The five line types, the decision ladder, the three row rhythms, and do-and-don't pairs on a guild member list, an inventory list, a Folio and a form." -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>LinesSpecimen — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); color: var(--ink); font-family: var(--font-ui); }
+.pv { display: grid; gap: var(--section-lg); padding: var(--section-md); }
+.pv-sec { display: grid; gap: var(--stack-lg); align-content: start; }
+.pv-sec > header { display: grid; gap: var(--stack-xs); }
+.pv-h { margin: 0; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-note { margin: 0; max-width: var(--lg-measure); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-note b, .pv-spec dd b { font-weight: 600; color: var(--ink); }
+.pv-t { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--text-title-sm); line-height: var(--leading-title-sm); letter-spacing: var(--tracking-display); color: var(--ink); }
+
+/* The five types, the ladder and the rhythms: cells with a sample on a Level 1 surface, then what it means. */
+.pv-cells { display: grid; gap: var(--section-sm); }
+.pv-cells--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.pv-cells--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pv-cell { display: grid; gap: var(--stack-md); align-content: start; min-width: 0; }
+.pv-sample { display: grid; align-content: center; min-height: 8.5rem; padding: var(--inset-lg); container: lg-region / inline-size; }
+.pv-sample--flush { padding: 0; align-content: start; }
+.pv-spec { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--stack-xs) var(--inline-md); font-size: var(--text-caption); line-height: var(--leading-caption); }
+.pv-spec dt { color: var(--ink-muted); }
+.pv-spec dd { margin: 0; color: var(--ink); }
+.pv-spec code, .pv-note code, .pv-mean code { font: inherit; font-weight: 600; color: var(--ink); }
+.pv-mean { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); }
+
+/* A sample of the gilt frame, drawn the way the Folio and the Banner draw it. */
+.pv-gilt { position: relative; display: grid; place-items: center; min-height: 6rem; padding: var(--inset-xl); background: var(--folio); }
+.pv-gilt::before { content: ""; position: absolute; inset: 0.375rem; border: var(--border-hairline) solid var(--gilt); opacity: var(--lg-frame-opacity); pointer-events: none; }
+.pv-gilt::after { content: ""; position: absolute; inset: 0.625rem; border: var(--border-hairline) solid var(--gilt); opacity: calc(var(--lg-frame-opacity) * 0.6); pointer-events: none; }
+.pv-gilt .lg-rule { width: 100%; }
+
+.pv-field { display: grid; gap: var(--stack-xs); min-width: 0; }
+.pv-field label, .pv-field .pv-lab { font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-field .lg-input { width: 100%; box-sizing: border-box; }
+.pv-inline { display: flex; flex-wrap: wrap; align-items: end; gap: var(--inline-md); }
+.pv-inline .pv-field { flex: 1 1 8rem; }
+
+/* The ladder */
+.pv-step { display: flex; align-items: baseline; gap: var(--inline-md); }
+.pv-step b { font-family: var(--font-numeral); font-size: var(--text-numeral-row); line-height: var(--leading-numeral-row); font-weight: 600; color: var(--ink-muted); }
+.pv-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--section-sm); }
+.pv-groups > div { display: grid; gap: 2px; font-size: var(--text-body-compact); line-height: var(--leading-body-compact-row); }
+.pv-groups > div > span:first-child { margin-bottom: var(--stack-xs); font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-stack { display: grid; gap: var(--stack-md); font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); }
+.pv-stack p { margin: 0; }
+.pv-objects { display: flex; align-items: center; gap: var(--inline-lg); }
+.pv-objects .pv-field { flex: 1; }
+
+/* A data table, drawn on lg-tablewrap. The rhythm is the wrapper's; the cells only pad. */
+.pv-table { font-size: var(--text-body-compact); line-height: var(--leading-body-compact-row); }
+.pv-table th { padding: var(--stack-sm) var(--inline-md); text-align: left; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); white-space: nowrap; }
+.pv-table td { padding: var(--stack-sm) var(--inline-md); white-space: nowrap; }
+.pv-table .n { text-align: right; font-family: var(--font-numeral); font-size: var(--text-numeral-compact); line-height: var(--leading-numeral-compact); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+.pv-table th.n { font-family: var(--font-ui); font-size: var(--text-label); line-height: var(--leading-label); }
+.pv-table .nm { font-family: var(--font-display); font-size: var(--text-name-row); line-height: var(--leading-name-row); }
+
+/* Do and don't */
+.pv-pairs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 40rem), 1fr)); gap: var(--section-lg) var(--section-md); align-items: start; }
+.pv-pair { display: grid; gap: var(--stack-lg); align-content: start; min-width: 0; }
+.pv-dd { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--section-sm); align-items: start; }
+.pv-side { display: grid; gap: var(--stack-md); align-content: start; min-width: 0; container: lg-region / inline-size; }
+.pv-verdict { display: flex; align-items: center; gap: var(--inline-sm); font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink); }
+.pv-verdict i { font-style: normal; font-size: var(--text-body); line-height: 1; }
+.pv-why { margin: 0; padding-left: 1.125rem; list-style-type: "\2013\00a0"; display: grid; gap: 2px; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-why code { font: inherit; font-weight: 600; color: var(--ink); }
+.pv-folio { height: 47rem; }
+.pv-form { display: grid; gap: var(--section-sm); }
+.pv-form .lg-panel__body { display: grid; gap: var(--section-sm); }
+.pv-grp { display: grid; gap: var(--stack-md); margin: 0; padding: 0; border: 0; min-width: 0; }
+.pv-grp > legend, .pv-grp > h4 { padding: 0; margin: 0 0 var(--stack-xs); font-family: var(--font-display); font-weight: 400; font-size: var(--text-title-sm); line-height: var(--leading-title-sm); color: var(--ink); }
+.pv-item { display: flex; align-items: center; gap: var(--inline-md); }
+.pv-item > div { display: grid; min-width: 0; }
+.pv-item strong { font-family: var(--font-display); font-weight: 400; font-size: var(--text-name-row); line-height: var(--leading-name-row); color: var(--rarity-rare); }
+.pv-item span { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-actions { display: flex; flex-wrap: wrap; gap: var(--inline-sm); }
+select.lg-input { appearance: none; -webkit-appearance: none; padding-right: 2.25rem; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%), linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%);
+  background-position: calc(100% - 1.125rem) 50%, calc(100% - 0.8125rem) 50%; background-size: 0.3125rem 0.3125rem; background-repeat: no-repeat; }
+
+/* The don'ts, drawn on the same components with the lines the rules forbid. They are specimens of mistakes, not styles to copy. */
+.pv-x-framed { border: 1px solid var(--line); }
+.pv-x-cards { row-gap: 0.25rem; padding: 0.375rem; border: 1px solid var(--line); }
+.pv-x-cards .lg-listrow { border: 1px solid var(--line); border-radius: var(--radius-container); }
+.pv-x-cards .lg-listrow:has(.is-online) { border-color: var(--arcana-glow); }
+.pv-x-inv .lg-listrow { box-shadow: inset 0 0 0 1px var(--line); }
+.pv-x-inv .lg-listrow:nth-child(even) { background: var(--row-stripe); }
+.pv-x-inv .lg-listrow.is-selected { background: transparent; box-shadow: inset 0 0 0 1px var(--gilt); }
+.pv-x-folio .lg-folio__effects { padding: var(--inset-md); border: 1px solid var(--line); }
+.pv-x-folio .lg-panel { border: 1px solid var(--line); text-align: left; }
+.pv-x-form .pv-grp { padding: var(--inset-md); border: 1px solid var(--line); }
+.pv-x-form .pv-grp > legend { padding: 0 var(--inline-sm); margin: 0; }
+.pv-x-form .lg-input { border-color: var(--line); }
+.pv-x-form .lg-ledger__row + .lg-ledger__row { box-shadow: inset 0 1px 0 var(--line); }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment, f = L.format;
+var CORNER = '../../assets/Ornaments/CornerOrnament.svg';
+
+var MEMBERS = [
+  { name: 'Aldric Vane', rank: 'Guild master', score: 12480, online: true },
+  { name: 'Maren', rank: 'Officer', score: 9915, online: true },
+  { name: 'Kaelen', rank: 'Officer', score: 8204, online: false, seen: '2h ago' },
+  { name: 'Tamsin', rank: 'Member', score: 4310, online: false, seen: '1d ago' },
+  { name: 'Oswin', rank: 'Member', score: 2760, online: true },
+  { name: 'Pip', rank: 'Recruit', score: 0, online: false, seen: '5d ago' }
+];
+var ITEMS = [
+  { id: 'fang', title: 'Ember Fang', rarity: 'Epic', icon: 'colosseum', meta: 'Sword · Lv 18', quantity: 1, value: 9400, equipped: true },
+  { id: 'crown', title: 'Crown of Cinders', rarity: 'Legendary', icon: 'achievements', meta: 'Helm · Lv 20', quantity: 1, value: 48000 },
+  { id: 'wolf', title: 'Dire Wolf Essence', rarity: 'Rare', icon: 'essences', meta: 'Essence · Lv 12', quantity: 3, value: 1250 },
+  { id: 'prism', title: 'Soul Prism', rarity: 'Epic', icon: 'soulstones', meta: 'Material', quantity: 7, value: 2100 },
+  { id: 'tonic', title: 'Glowcap Tonic', rarity: 'Uncommon', icon: 'quest-journal', meta: 'Consumable', quantity: 12, value: 40 }
+];
+var RANKS = [
+  { rank: 1, name: 'Seraphine', guild: 'EMB', level: 142, rating: 18420, wins: 312 },
+  { rank: 2, name: 'Corvin Ashe', guild: 'NTH', level: 140, rating: 17985, wins: 298 },
+  { rank: 3, name: 'Aldric Vane', guild: 'EMB', level: 138, rating: 17240, wins: 287 },
+  { rank: 4, name: 'Ysolde', guild: 'GRV', level: 139, rating: 16902, wins: 275 },
+  { rank: 5, name: 'Brannoc', guild: 'NTH', level: 135, rating: 16511, wins: 264 }
+];
+
+function Section(p) {
+  return h('section', { className: 'pv-sec', 'aria-labelledby': p.id },
+    h('header', null, h('h2', { className: 'pv-h', id: p.id }, p.title), p.note ? h('p', { className: 'pv-note' }, p.note) : null),
+    p.children);
+}
+function Cell(p) {
+  return h('div', { className: 'pv-cell' },
+    h('div', { className: cx('pv-sample', p.flush && 'pv-sample--flush', p.plain ? null : 'lg-level-1') }, p.sample),
+    h('h3', { className: 'pv-t' }, p.name),
+    p.mean ? h('p', { className: 'pv-mean' }, p.mean) : null,
+    p.spec ? h('dl', { className: 'pv-spec' }, p.spec.map(function (s) { return h(F, { key: s[0] }, h('dt', null, s[0]), h('dd', null, s[1])); })) : null);
+}
+function cx() { return Array.prototype.filter.call(arguments, Boolean).join(' '); }
+function c(t) { return h('code', null, t); }
+
+/* ---------- 1 · The five line types ---------- */
+function Types() {
+  var tab = React.useState('bags');
+  return h(Section, { id: 'pv-types', title: 'Five line types', note: h(F, null, 'Each line has one meaning, carried by its colour, width and style. Every line is ', c('border-hairline'), ' (1px) at rest; only a selection edge is ', c('border-emphasis'), ' (2px).') },
+    h('div', { className: 'pv-cells pv-cells--5' },
+      h(Cell, { name: 'Separation', mean: 'These are distinct but belong together.', flush: true,
+        sample: h(L.List, { label: 'Officers', density: 'compact' }, MEMBERS.slice(0, 4).map(function (m) { return h(L.ListRow, { key: m.name, title: m.name, meta: m.rank }); })),
+        spec: [['Colour', c('line')], ['Width', c('border-hairline')], ['Style', 'Solid'], ['Where', 'Between rows; a Panel head; the PageHeader; SectionRule hairline']] }),
+      h(Cell, { name: 'Interactive edge', mean: 'You can press, type into or open this.',
+        sample: h('div', { className: 'pv-stack' },
+          h('div', { className: 'pv-field' }, h('label', { htmlFor: 'pv-t-price' }, 'Price each'), h('input', { id: 'pv-t-price', className: 'lg-input', defaultValue: '1,250' })),
+          h('div', { className: 'pv-actions' }, h(L.Button, { size: 'sm' }, 'Sell'), h(L.CurrencyPill, { amount: 12480, name: 'Cinders', short: true }))),
+        spec: [['Colour', h(F, null, c('line-strong'), ', 3:1 on every level')], ['Width', c('border-hairline')], ['Style', 'Solid'], ['Where', 'Inputs, outline Buttons, a pill or slot that opens']] }),
+      h(Cell, { name: 'Selection edge', mean: 'This is the one chosen.', flush: true,
+        sample: h(F, null,
+          h('div', { style: { padding: '0.5rem 1rem 0' } }, h(L.TabStrip, { level: 'secondary', label: 'Inventory', activeId: tab[0], onChange: tab[1], tabs: [{ id: 'bags', label: 'Bags' }, { id: 'vault', label: 'Vault' }] })),
+          h(L.List, { label: 'Bags', density: 'compact' }, ITEMS.slice(1, 4).map(function (it) {
+            return h(L.ListRow, { key: it.id, title: it.title, rarity: it.rarity, selected: it.id === 'wolf', onClick: function () {} });
+          }))),
+        spec: [['Colour', h(F, null, c('arcana-glow'), '; ', c('ink'), ' in item rows and chat')], ['Width', c('border-emphasis')], ['Style', 'A solid bar or ring, always with a wash']] }),
+      h(Cell, { name: 'Decorative ornament', mean: 'Brand: this surface is the special one.', plain: true,
+        sample: h('div', { className: 'pv-gilt' }, h(L.SectionRule, { variant: 'ornament', label: 'Effects' })),
+        spec: [['Colour', c('gilt')], ['Width', c('border-hairline')], ['Style', 'The double frame; the diamond chain'], ['Where', 'The Folio and the Banner; the ornament once per surface']] }),
+      h(Cell, { name: 'Dotted leader', mean: 'This label’s value is at the end of the row.',
+        sample: h(L.Ledger, { title: 'Fees', density: 'compact', rows: [{ label: 'Listing fee', value: f.unit(75, 'Cinders') }, { label: 'Sales tax', value: f.unit(188, 'Cinders') }] }),
+        spec: [['Colour', c('line-strong')], ['Width', c('border-hairline')], ['Style', 'Dotted, on the baseline'], ['Where', 'Ledger rows and rows built like them']] })));
+}
+
+/* ---------- 2 · The decision ladder ---------- */
+function Ladder() {
+  function Step(p) { return h('div', { className: 'pv-step' }, h('b', null, p.n), h('h3', { className: 'pv-t' }, p.name)); }
+  return h(Section, { id: 'pv-ladder', title: 'Decision ladder', note: 'Set two things apart with the first of these that works, and stop there.' },
+    h('div', { className: 'pv-cells pv-cells--3' },
+      h('div', { className: 'pv-cell' },
+        h('div', { className: 'pv-sample lg-level-1' }, h('div', { className: 'pv-groups' },
+          h('div', null, h('span', null, 'Offense'), h('span', null, 'Power 142'), h('span', null, 'Crit Chance 9.5%')),
+          h('div', null, h('span', null, 'Defense'), h('span', null, 'Armor 38%'), h('span', null, 'Dodge 6%')))),
+        h(Step, { n: '1', name: 'Space' }),
+        h('p', { className: 'pv-mean' }, 'A wider gap between groups than inside them, and a label to name each. Most groups need nothing more.')),
+      h('div', { className: 'pv-cell' },
+        h('div', { className: 'pv-sample lg-level-1' }, h('div', { className: 'pv-stack' },
+          h('p', null, 'Retreat now and you keep what you carry. Die and the pending loot is lost.'),
+          h(L.SectionRule, { variant: 'hairline', label: 'Rewards', aside: '3 of 5' }),
+          h('p', null, 'Soul Prism ×2 · 1,200 Cinders · Glowcap Tonic ×5'))),
+        h(Step, { n: '2', name: 'A divider' }),
+        h('p', { className: 'pv-mean' }, 'A separation hairline or a SectionRule, when space alone would let two groups read as one.')),
+      h('div', { className: 'pv-cell' },
+        h('div', { className: 'pv-sample lg-level-1' }, h('div', { className: 'pv-objects' },
+          h(L.ItemSlot, { icon: 'essences', rarity: 'Rare', size: 'sm', caption: false }),
+          h('div', { className: 'pv-field' }, h('label', { htmlFor: 'pv-l-qty' }, 'Quantity'), h('input', { id: 'pv-l-qty', className: 'lg-input', defaultValue: '3' })))),
+        h(Step, { n: '3', name: 'A full border' }),
+        h('p', { className: 'pv-mean' }, 'Only for an interactive edge — an input, an outline Button — or a bounded object: an item slot, an opponent’s card. A Panel is a region, told apart by its fill.'))));
+}
+
+/* ---------- 3 · Row rhythm ---------- */
+function Rhythm() {
+  return h(Section, { id: 'pv-rhythm', title: 'Row rhythm', note: h(F, null, 'One per list or table, never two, and never inside a bordered container. Hover and selection wash over the rhythm. ', c('row-stripe'), ' needs a surface under it: on ', c('ground'), ' use separators.') },
+    h('div', { className: 'pv-cells pv-cells--3' },
+      h('div', { className: 'pv-cell' },
+        h(L.Panel, { title: 'Guild members', flush: true, density: 'compact', aside: h('span', null, f.fraction(5, 24)) },
+          h(L.List, { label: 'Guild members' }, MEMBERS.slice(0, 5).map(function (m) {
+            return h(L.ListRow, { key: m.name, title: m.name, meta: m.rank, value: m.score, trailing: h(L.Presence, { online: m.online, lastSeen: m.seen, compact: true }) });
+          }))),
+        h('h3', { className: 'pv-t' }, 'Separators'),
+        h('p', { className: 'pv-mean' }, 'The default. A hairline between rows read one by one: inventory, members, orders.')),
+      h('div', { className: 'pv-cell' },
+        h('div', { className: 'lg-level-1' },
+          h('div', { className: 'lg-tablewrap lg-tablewrap--zebra', role: 'region', 'aria-label': 'Arena rankings', tabIndex: 0 },
+            h('table', { className: 'pv-table' },
+              h('thead', null, h('tr', null, h('th', { className: 'n' }, 'Rank'), h('th', null, 'Name'), h('th', null, 'Guild'), h('th', { className: 'n' }, 'Level'), h('th', { className: 'n' }, 'Rating'), h('th', { className: 'n' }, 'Wins'))),
+              h('tbody', null, RANKS.map(function (r) {
+                return h('tr', { key: r.rank }, h('td', { className: 'n' }, r.rank), h('td', { className: 'nm' }, r.name), h('td', null, '[' + r.guild + ']'),
+                  h('td', { className: 'n' }, r.level), h('td', { className: 'n' }, f.number(r.rating)), h('td', { className: 'n' }, r.wins));
+              }))))),
+        h('h3', { className: 'pv-t' }, 'Zebra'),
+        h('p', { className: 'pv-mean' }, h(F, null, 'Every second row on ', c('row-stripe'), ', no separators, for wide rows read across: rankings, a combat log. The header keeps its one rule.'))),
+      h('div', { className: 'pv-cell' },
+        h(L.Panel, { title: 'Rewards', flush: true, density: 'comfortable' },
+          h(L.List, { label: 'Rewards', rhythm: 'spacing' },
+            h(L.ListRow, { title: 'Soul Prism', rarity: 'Epic', icon: 'soulstones', quantity: 2 }),
+            h(L.ListRow, { title: 'Cinders', icon: 'cinder-bazaar', quantity: 1200 }),
+            h(L.ListRow, { title: 'Glowcap Tonic', rarity: 'Uncommon', icon: 'quest-journal', quantity: 5 }))),
+        h('h3', { className: 'pv-t' }, 'Spacing'),
+        h('p', { className: 'pv-mean' }, 'Nothing: the row height sets them apart. For short lists of about five rows.'))));
+}
+
+/* ---------- 4 · Do and don't ---------- */
+function Pair(p) {
+  return h('div', { className: 'pv-pair' },
+    h('h3', { className: 'pv-t' }, p.title),
+    h('div', { className: 'pv-dd' },
+      h('div', { className: 'pv-side' }, h('div', { className: 'pv-verdict' }, h('i', { 'aria-hidden': 'true' }, '✓'), 'Do'), p.good, h('ul', { className: 'pv-why' }, p.goodWhy.map(function (t, i) { return h('li', { key: i }, t); }))),
+      h('div', { className: 'pv-side' }, h('div', { className: 'pv-verdict' }, h('i', { 'aria-hidden': 'true' }, '✕'), 'Don’t'), p.bad, h('ul', { className: 'pv-why' }, p.badWhy.map(function (t, i) { return h('li', { key: i }, t); })))));
+}
+
+function Guild(p) {
+  return h(L.Panel, { title: 'Guild members', flush: true, density: 'compact', aside: h('span', null, f.fraction(6, 24)), className: p.bad ? 'pv-x-framed' : null },
+    h(L.List, { label: p.bad ? 'Guild members, framed' : 'Guild members', className: p.bad ? 'pv-x-cards' : null }, MEMBERS.map(function (m) {
+      return h(L.ListRow, { key: m.name, title: m.name, meta: m.rank, value: m.score, onClick: function () {}, trailing: h(L.Presence, { online: m.online, lastSeen: m.seen, compact: true }) });
+    })));
+}
+function Bags(p) {
+  var s = React.useState('wolf');
+  return h(L.Panel, { title: 'Bags', flush: true, aside: h('span', null, f.fraction(ITEMS.length, 60)), className: p.bad ? 'pv-x-framed' : null },
+    h(L.List, { label: p.bad ? 'Bags, framed' : 'Bags', className: p.bad ? 'pv-x-inv' : null }, ITEMS.map(function (it) {
+      return h(L.ListRow, { key: it.id, title: it.title, rarity: it.rarity, icon: it.icon, quantity: it.quantity, value: it.value,
+        selected: s[0] === it.id, onClick: function () { s[1](it.id); } });
+    })));
+}
+// A static copy of the ornament's markup, so the don't shows three ornaments without the component's own warning firing in the catalogue.
+function FakeOrnament() {
+  return h('div', { className: 'lg-rule lg-rule--ornament', 'aria-hidden': 'true' }, h('span', { className: 'lg-rule__lattice' }));
+}
+function Essence(p) {
+  var stats = [{ label: 'Magic Power', value: '+14' }, { label: 'Crit Chance', value: '+3%' }];
+  return h('div', { className: cx('pv-folio', p.bad && 'pv-x-folio') }, h(L.Folio, {
+    cornerSrc: CORNER, rarity: 'Epic', ariaLabel: p.bad ? 'Soul Prism, framed' : 'Soul Prism',
+    eyebrow: 'Essence', title: 'Soul Prism',
+    lore: h(F, null, 'A shard of a warden’s heart, still humming with the ', h('b', null, 'Prism'), ' it once guarded.'),
+    effects: [{ value: '+14', text: 'Power' }, { value: '+6%', text: 'magical damage' }],
+    actions: h(L.Button, { variant: 'solid' }, 'Attune'),
+    footer: h(L.Track, { steps: 5, current: 2, startLabel: 'Bond I', endLabel: 'Bond V', label: 'Essence bond' })
+  },
+    p.bad ? h(F, null, h(FakeOrnament), h(L.Panel, { title: 'Stats' }, h(L.Ledger, { title: 'Item stats', rows: stats })), h(FakeOrnament))
+      : h(L.Ledger, { title: 'Item stats', rows: stats })));
+}
+function Listing(p) {
+  var id = p.bad ? 'pv-fx' : 'pv-fo';
+  function G(q) { return p.bad ? h('fieldset', { className: 'pv-grp' }, h('legend', null, q.title), q.children) : h('div', { className: 'pv-grp', role: 'group', 'aria-labelledby': id + q.k }, h('h4', { id: id + q.k }, q.title), q.children); }
+  return h('div', { className: cx('pv-form', p.bad && 'pv-x-form') },
+    h(L.Panel, { title: 'New listing', className: p.bad ? 'pv-x-framed' : null },
+      h(G, { k: 'i', title: 'Item' }, h('div', { className: 'pv-item' },
+        h(L.ItemSlot, { icon: 'essences', rarity: 'Rare', size: 'sm', caption: false }),
+        h('div', null, h('strong', null, 'Dire Wolf Essence'), h('span', null, 'Rare · 3 in your bags')))),
+      h(G, { k: 'p', title: 'Price' },
+        h('div', { className: 'pv-inline' },
+          h('div', { className: 'pv-field' }, h('label', { htmlFor: id + 'q' }, 'Quantity'), h('input', { id: id + 'q', className: 'lg-input', inputMode: 'numeric', defaultValue: '3' })),
+          h('div', { className: 'pv-field' }, h('label', { htmlFor: id + 'e' }, 'Price each'), h('input', { id: id + 'e', className: 'lg-input', inputMode: 'numeric', defaultValue: '1,250' }))),
+        h('div', { className: 'pv-field' }, h('label', { htmlFor: id + 'd' }, 'Duration'),
+          h('select', { id: id + 'd', className: 'lg-input', defaultValue: '24' }, h('option', { value: '12' }, '12 hours'), h('option', { value: '24' }, '24 hours'), h('option', { value: '48' }, '48 hours')))),
+      h(L.Ledger, { title: 'Fees', rows: [{ label: 'Listing fee (2%)', value: f.unit(75, 'Cinders') }, { label: 'Sales tax (5%)', value: f.unit(188, 'Cinders') }, { label: 'You receive', value: f.unit(3487, 'Cinders') }] }),
+      h('div', { className: 'pv-actions' }, h(L.Button, { variant: 'solid' }, 'List item'), h(L.Button, null, 'Cancel'))));
+}
+
+function Pairs() {
+  return h(Section, { id: 'pv-pairs', title: 'Do and don’t', note: 'The same content drawn both ways. Each don’t is the same components with the lines the rules forbid.' },
+    h('div', { className: 'pv-pairs' },
+      h(Pair, { title: 'A guild member list',
+        good: h(Guild), goodWhy: ['Separators between rows, in a Panel with no border', 'Online is the Presence dot and its word'],
+        bad: h(Guild, { bad: true }), badWhy: ['A framed Panel, a framed list and a card per member', 'Separators as well: three lines between two names', 'Online shown as a coloured border'] }),
+      h(Pair, { title: 'An inventory list',
+        good: h(Bags), goodWhy: [h(F, { key: 1 }, 'The thumbnail is a bounded object: its rarity edge stays'), h(F, { key: 2 }, 'Selection is the wash and a 2px ', c('ink'), ' bar')],
+        bad: h(Bags, { bad: true }), badWhy: ['Every row boxed', 'Stripes and separators together', 'Selection as a 1px gilt outline'] }),
+      h(Pair, { title: 'A Folio',
+        good: h(Essence), goodWhy: ['The double gilt frame is its only edge', 'One ornament, between lore and effects', 'Stats in a Ledger with leaders and no box'],
+        bad: h(Essence, { bad: true }), badWhy: ['Three ornaments on one surface', 'A Panel inside the Folio, framed', 'A box around the effects'] }),
+      h(Pair, { title: 'A form',
+        good: h(Listing), goodWhy: [h(F, { key: 1 }, 'Inputs edged in ', c('line-strong')), 'Groups set apart by space and a heading', 'Fees as Ledger rows with leaders'],
+        bad: h(Listing, { bad: true }), badWhy: ['A fieldset border around every group', h(F, { key: 2 }, 'Inputs edged in ', c('line'), ', too faint to find'), 'Leaders and separators on the same rows'] })));
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'pv' }, h(Types), h(Ladder), h(Rhythm), h(Pairs)));
+</script>
+</body>
+</html>

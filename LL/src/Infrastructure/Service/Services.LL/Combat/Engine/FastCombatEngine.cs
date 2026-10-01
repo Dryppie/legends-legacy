@@ -3804,15 +3804,32 @@ public sealed partial class FastCombatEngine
         CompiledEffect effect,
         CompiledSummon summonDefinition)
     {
-        var attributes = summonDefinition.Attributes.ToDictionary(
-            attribute => attribute.Attribute,
-            attribute => (float)Math.Max(
-                attribute.MinimumValue,
-                (int)Math.Round(
-                    (attribute.BaseValue + (attribute.ScalingAttribute is { } scalingAttribute
-                        ? GetEffectiveAttributeWithoutOvertime(source, scalingAttribute) * attribute.ScalingCoefficient
-                        : 0))
-                    * GetSummonAttributeMultiplier(attribute.Attribute, effect))));
+        var attributes = new Dictionary<AttributeType, float>();
+        foreach (var attribute in summonDefinition.Attributes)
+        {
+            // Current-rule defense getters return ratings. Preserve that unit when
+            // inheriting defenses so the summon constructor cannot convert the
+            // rating a second time as an authored legacy percentage.
+            var inheritsDefenseRating = source.UsesCurrentAttributeRules
+                && (attribute.Attribute is AttributeType.Armor or AttributeType.Resistance)
+                && (attribute.ScalingAttribute is AttributeType.Armor or AttributeType.Resistance
+                    or AttributeType.ArmorRating or AttributeType.ResistanceRating)
+                && attribute.ScalingCoefficient != 0;
+            var targetAttribute = inheritsDefenseRating
+                ? AttributeRules.RatingAttribute(attribute.Attribute)
+                : attribute.Attribute;
+            var baseValue = inheritsDefenseRating
+                ? AttributeRules.RatingFromLegacyPercent(attribute.BaseValue)
+                : attribute.BaseValue;
+            var minimumValue = inheritsDefenseRating
+                ? AttributeRules.RatingFromLegacyPercent(attribute.MinimumValue)
+                : attribute.MinimumValue;
+            var value = (float)Math.Max(minimumValue, (int)Math.Round(
+                (baseValue + (attribute.ScalingAttribute is { } scalingAttribute
+                    ? GetEffectiveAttributeWithoutOvertime(source, scalingAttribute) * attribute.ScalingCoefficient
+                    : 0)) * GetSummonAttributeMultiplier(attribute.Attribute, effect)));
+            attributes.Add(targetAttribute, value);
+        }
 
         attributes.TryAdd(AttributeType.MaxHealth, 1);
         attributes.TryAdd(AttributeType.Power, 0);

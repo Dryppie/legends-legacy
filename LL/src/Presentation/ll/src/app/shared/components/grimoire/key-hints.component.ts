@@ -9,18 +9,13 @@ export interface LgKeyHint {
 @Component({
   selector: 'lg-key-hints',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'lg-keyhints',
-    role: 'group',
-    '[attr.aria-label]': 'label()',
-  },
+  host: { style: 'display: contents' },
   template: `
-    @for (hint of hints(); track hint.label + hint.key) {
-      <span class="lg-keyhints__item">
-        <span>{{ hint.label }}</span>
-        <kbd class="lg-key">{{ hint.key }}</kbd>
-      </span>
-    }
+    <div class="lg-keyhints" role="group" [attr.aria-label]="label()">
+      @for (hint of hints(); track hint.label + hint.key) {
+        <span class="lg-keyhints__item"><span>{{ hint.label }}</span><kbd class="lg-key">{{ hint.key }}</kbd></span>
+      }
+    </div>
   `,
 })
 export class LgKeyHintsComponent {

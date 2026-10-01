@@ -1,5 +1,13 @@
 # Frontend Design System
 
+> **Status: legacy.** This page describes the `--ll-*` tokens and the `ll-*` shared classes. They stay only for screens not yet migrated. New and migrated screens use **Grimoire**:
+>
+> - the `lg-*` components in `src/app/shared/components/grimoire/`;
+> - the tokens and styles in `src/styles/grimoire/`;
+> - the design system itself in `design-system/` (start with its `README.md`, and read its `AGENTS.md` before changing it).
+>
+> Don't add new `--ll-*` tokens or `ll-*` classes. When a screen moves to Grimoire, its `ll-*` and Tailwind colour classes go with it. The frontend `AGENTS.md` says which rules apply where.
+
 This Angular frontend uses a small internal design foundation instead of a third-party UI library. Keep new UI work incremental, standalone-component friendly, and close to the existing fantasy RPG identity.
 
 ## Tokens

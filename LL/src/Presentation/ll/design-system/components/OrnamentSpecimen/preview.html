@@ -1,0 +1,252 @@
+<!-- @dsCard group="Foundations" height=2820 width=1480 subtitle="Every decorative device with its purpose and place, then the Creature Archive twice: within the ornament budget, and over-decorated, each counted by LL.ornament.audit." -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>OrnamentSpecimen — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground-deep); color: var(--ink); font-family: var(--font-ui); }
+.pv { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--section-lg); padding: var(--section-md); }
+.pv-sec { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--stack-lg); align-content: start; }
+.pv-sec > header { display: grid; gap: var(--stack-xs); }
+.pv-h { margin: 0; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-note { margin: 0; max-width: var(--lg-measure); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-note b, .pv-note code, .pv-mean code, .pv-spec code { font: inherit; font-weight: 600; color: var(--ink); }
+.pv-t { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--text-title-sm); line-height: var(--leading-title-sm); letter-spacing: var(--tracking-display); color: var(--ink); }
+.pv-mean { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); }
+
+/* Devices */
+.pv-cells { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--section-md) var(--section-sm); }
+.pv-cell { display: grid; gap: var(--stack-md); align-content: start; min-width: 0; }
+.pv-sample { position: relative; height: 7.5rem; overflow: hidden; display: grid; place-items: center; background: var(--ground); container: lg-region / inline-size; }
+.pv-sample--folio { background: var(--folio); }
+.pv-head { display: flex; align-items: baseline; gap: var(--inline-sm); flex-wrap: wrap; }
+.pv-status { font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-status.is-retired { color: var(--ink-disabled); }
+.pv-spec { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--stack-xs) var(--inline-md); font-size: var(--text-caption); line-height: var(--leading-caption); }
+.pv-spec dt { color: var(--ink-muted); }
+.pv-spec dd { margin: 0; color: var(--ink); }
+.pv-corners { position: absolute; inset: 0.75rem; }
+.pv-corners .lg-folio__corner { width: 2.25rem; height: 2.25rem; }
+.pv-gilt { position: absolute; inset: 0.75rem; }
+.pv-gilt::before { content: ""; position: absolute; inset: 0; border: var(--border-hairline) solid var(--gilt); opacity: var(--lg-frame-opacity); }
+.pv-gilt::after { content: ""; position: absolute; inset: 0.25rem; border: var(--border-hairline) solid var(--gilt); opacity: calc(var(--lg-frame-opacity) * 0.6); }
+.pv-grainzoom { position: absolute; inset: 0; background-color: var(--line); }
+.pv-grainzoom::after { content: ""; position: absolute; inset: 0; opacity: 0.5; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 60px 60px; }
+.pv-grainzoom span, .pv-caption { position: absolute; left: var(--inset-md); bottom: var(--inset-sm); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-sample .lg-stage { position: absolute; inset: 0; }
+.pv-overart { position: absolute; inset: 0; display: grid; place-items: center; }
+.pv-overart span { font-family: var(--font-display); font-size: var(--text-title-md); line-height: var(--leading-title-md); color: var(--ink); text-shadow: var(--shadow-text-art); }
+.pv-flat { display: flex; align-items: center; gap: var(--inline-lg); }
+.pv-divider { width: 80%; height: auto; }
+
+/* Screens */
+.pv-screen { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--stack-md); }
+.pv-screen > header { display: flex; align-items: baseline; gap: var(--inline-md); flex-wrap: wrap; }
+.pv-frame { width: 80rem; max-width: 100%; }
+.pv-tally { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--stack-sm); max-width: 80rem; }
+.pv-count { display: grid; gap: 2px; padding: var(--inset-sm) var(--inset-md); background: var(--surface); border-radius: var(--radius-container); }
+.pv-count span { font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-count b { font-family: var(--font-numeral); font-size: var(--text-numeral-row); line-height: var(--leading-numeral-row); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+.pv-count i { font-style: normal; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-count.is-over { box-shadow: inset var(--border-emphasis) 0 0 var(--danger); }
+.pv-count.is-over i { color: var(--danger); }
+.pv-verdict { margin: 0; padding-left: 1.125rem; list-style-type: "\2013\00a0"; display: grid; gap: 2px; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); max-width: 80rem; }
+.pv-ok { font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink); }
+
+/* The Archive, as ScreenArchive composes it */
+.pv-brand { font-family: var(--font-display); font-size: var(--text-name-row); line-height: var(--leading-name-row); letter-spacing: var(--tracking-display); color: var(--gilt); }
+.pv-logo { display: grid; place-items: center; width: 44px; height: 44px; }
+.pv-logo img { display: block; }
+.pv-archive { position: absolute; inset: 0; display: grid; grid-template-columns: 300px 1fr; grid-template-rows: auto minmax(0, 1fr) auto; padding: 72px 0 24px 24px; }
+.pv-tabs { grid-column: 1 / -1; display: grid; gap: 8px; margin-bottom: 8px; }
+.pv-list { grid-column: 1; min-height: 0; padding-left: 8px; }
+.pv-lore { grid-column: 1; max-width: 300px; position: relative; }
+.pv-lorep { margin: 0; font-family: var(--font-lore); font-style: italic; font-size: var(--text-lore-sm); line-height: var(--leading-lore-sm); color: var(--ink-muted); }
+.pv-col { display: grid; gap: 16px; }
+.pv-ess { display: flex; align-items: center; gap: 12px; }
+.pv-essname { font-weight: 600; color: var(--rarity-rare); }
+.pv-essmeta { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.lg-folio--start .lg-folio__scroll { gap: 20px; padding-top: 32px; }
+
+/* The over-decorated Archive: every rule the budget forbids, added in the preview's own styles. A specimen of the mistakes, not styles to copy.
+   Its extra devices are static markup tagged data-ornament, so the audit counts them and the components' own warnings stay quiet in the catalogue. */
+.pv-x .lg-entrylist__item.is-active { box-shadow: 0 0 18px 2px var(--arcana-glow); }
+.pv-x .lg-slot { box-shadow: 0 0 16px 3px var(--rarity-rare); border-radius: var(--radius-control); }
+.pv-x .lg-levelplate__num { text-shadow: 0 0 18px var(--gilt), 0 0 3px var(--gilt); }
+.pv-x .lg-tabs__count { animation: pv-pulse 1.4s ease-in-out infinite; }
+@keyframes pv-pulse { 50% { opacity: 0.35; } }
+.pv-x-banner { position: absolute; left: 324px; right: 24px; top: 176px; }
+.pv-x-banner .pv-x-bannerbox { position: relative; isolation: isolate; overflow: hidden; background: var(--ground-deep); }
+.pv-x-bannerbox .lg-banner__art { inset: 0; }
+.pv-x-bannerbox .lg-folio__corner { width: 2.25rem; height: 2.25rem; }
+.pv-x-bannerbox .lg-banner__main { text-shadow: var(--shadow-text-art); }
+.pv-x-banner .lg-banner__body { padding: var(--space-6) var(--space-8); }
+.pv-x-banner h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--text-title-lg); line-height: var(--leading-title-lg); color: var(--ink); }
+.pv-x-banner p { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); }
+.pv-x-parchment { position: absolute; inset: 1px; pointer-events: none; opacity: 0.55; mix-blend-mode: soft-light;
+  background:
+    radial-gradient(120% 90% at 30% 20%, #e8d3a4 0%, transparent 60%),
+    radial-gradient(90% 80% at 80% 90%, #9a7648 0%, transparent 70%),
+    repeating-linear-gradient(12deg, rgba(90, 60, 30, 0.18) 0 2px, transparent 2px 7px); }
+.pv-x-grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.pv-x-corner { position: absolute; width: 1.75rem; height: 1.75rem; pointer-events: none; }
+.pv-x .lg-panel { position: relative; }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+var LOGO = '../../assets/Logos/Logo.svg';
+var COINS = '../../assets/Currency/Coins.svg';
+var DIAMONDS = '../../assets/Currency/Diamonds.svg';
+var CARD_COMBAT = '../../assets/Cards/combatArea.webp';
+var CORNER = '../../assets/Ornaments/CornerOrnament.svg';
+var DIVIDER = '../../assets/Ornaments/Divider.svg';
+var BG_TEMPLE = '../../assets/Backgrounds/temple.webp';
+function cx() { return Array.prototype.filter.call(arguments, Boolean).join(' '); }
+function c(t) { return h('code', null, t); }
+function Corners(p) {
+  var m = { WebkitMaskImage: 'url(' + CORNER + ')', maskImage: 'url(' + CORNER + ')' };
+  return h(F, null, ['tl', 'tr', 'bl', 'br'].map(function (k) { return h('span', { key: k, className: cx('lg-folio__corner lg-folio__corner--' + k, p.className), style: m, 'aria-hidden': 'true', 'data-ornament': p.tag }); }));
+}
+function FakeOrnament(p) {
+  return h('div', { className: 'lg-rule lg-rule--ornament', 'aria-hidden': 'true' }, h('span', { className: 'lg-rule__lattice' }), p.label ? h('span', { className: 'lg-rule__label' }, p.label) : null, p.label ? h('span', { className: 'lg-rule__lattice' }) : null);
+}
+
+/* ---------- 1 · The devices ---------- */
+var DEVICES = [
+  { name: 'CornerOrnament', status: 'In use', purpose: 'Brand: marks the one special surface', where: 'The four corners of the Folio or the Banner', sample: function () { return h('div', { className: 'pv-sample pv-sample--folio' }, h('div', { className: 'pv-corners' }, h(Corners))); } },
+  { name: 'Divider', status: 'Asset only', purpose: 'The game’s engraved flourish, a bronze gradient', where: 'In place of the ornament rule’s lattice, counted as one of the two rules; no component draws it', sample: function () { return h('div', { className: 'pv-sample' }, h('img', { className: 'pv-divider', src: DIVIDER, alt: '' })); } },
+  { name: 'Diamond-chain rule', status: 'In use', purpose: 'Brand: the break between lore and effects', where: 'SectionRule ornament: once per surface, two per screen', sample: function () { return h('div', { className: 'pv-sample pv-sample--folio' }, h('div', { style: { width: '80%' } }, h(L.SectionRule, { variant: 'ornament', label: 'Effects' }))); } },
+  { name: 'Double gilt frame', status: 'In use', purpose: 'Brand: the one special surface’s edge', where: 'The Folio or the Banner, never both on one screen', sample: function () { return h('div', { className: 'pv-sample pv-sample--folio' }, h('div', { className: 'pv-gilt', 'aria-hidden': 'true' })); } },
+  { name: 'Film grain', status: 'In use', purpose: 'Photographic: settles art so it reads as one picture', where: 'Over art only: the Stage and the Banner, at its set strength', sample: function () { return h('div', { className: 'pv-sample' }, h('div', { className: 'pv-grainzoom', 'aria-hidden': 'true' }), h('span', { className: 'pv-caption' }, 'Magnified, at 3.5× its strength')); } },
+  { name: 'Vignette', status: 'In use', purpose: 'Frames art and darkens it where text sits', where: 'The Stage and Banner veils, only with art', sample: function () { return h('div', { className: 'pv-sample' }, h(L.Stage, { image: BG_TEMPLE, label: 'Vignette' })); } },
+  { name: 'glow-selected', status: 'Retired', purpose: 'Was an arcana halo around the selection', where: 'Nowhere (D-012). Selection is a flat 2px arcana-glow ring, bar or edge', sample: function () { return h('div', { className: 'pv-sample' }, h('div', { className: 'pv-flat' }, h(L.ItemSlot, { icon: 'essences', rarity: 'Rare', size: 'sm', caption: false, selected: true }), h(L.Sigil, { value: 3, state: 'ready', size: 'sm' }))); } },
+  { name: 'glow-gilt', status: 'Retired', purpose: 'Was a gilt halo on brand marks and the solid Button', where: 'Nowhere (D-012). The solid Button brightens 6% on hover, flat', sample: function () { return h('div', { className: 'pv-sample' }, h(L.Button, { variant: 'solid' }, 'Attune')); } },
+  { name: 'shadow-text-art', status: 'In use', purpose: 'Legibility: a dark shadow that lifts a label off art', where: 'Labels set over Stage or Banner art only; never a light colour', sample: function () { return h('div', { className: 'pv-sample' }, h(L.Stage, { image: CARD_COMBAT, label: 'Text over art' }), h('div', { className: 'pv-overart' }, h('span', null, 'Ember Wolf'))); } },
+  { name: 'Emblem', status: 'A sign', purpose: 'The sign of an attribute, school or region, not an ornament', where: 'Crowning a Folio, one per Folio; it counts with the Folio', sample: function () { return h('div', { className: 'pv-sample pv-sample--folio' }, h(L.Emblem, { points: 7, size: 84 })); } }
+];
+function Devices() {
+  return h('section', { className: 'pv-sec', 'aria-labelledby': 'pv-dev' },
+    h('header', null, h('h2', { className: 'pv-h', id: 'pv-dev' }, 'Decorative devices'),
+      h('p', { className: 'pv-note' }, 'Every device the system has, what it is for and where it may go. Two are retired: nothing glows, and the four lit states are drawn flat (D-012, D-071).')),
+    h('div', { className: 'pv-cells' }, DEVICES.map(function (d) {
+      return h('div', { className: 'pv-cell', key: d.name },
+        d.sample(),
+        h('div', { className: 'pv-head' }, h('h3', { className: 'pv-t' }, d.name), h('span', { className: cx('pv-status', d.status === 'Retired' && 'is-retired') }, d.status)),
+        h('dl', { className: 'pv-spec' }, h('dt', null, 'For'), h('dd', null, d.purpose), h('dt', null, 'Where'), h('dd', null, d.where)));
+    })));
+}
+
+/* ---------- 2 · The Creature Archive, twice ---------- */
+var NAV = [
+  { label: 'Character', items: [
+    { id: 'overview', title: 'Overview', icon: 'overview' }, { id: 'inventory', title: 'Inventory', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
+    { id: 'essences', title: 'Essences', icon: 'essences' }, { id: 'combat-styles', title: 'Combat Styles', icon: 'combat-styles' },
+    { id: 'achievements', title: 'Achievements', icon: 'achievements' }, { id: 'soulstones', title: 'Soulstones', icon: 'soulstones' } ] },
+  { label: 'World', items: [
+    { id: 'world-map', title: 'World Map', icon: 'world-map' }, { id: 'world-tower', title: 'World Tower', icon: 'legacy-ascension' },
+    { id: 'quests', title: 'Quests', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' }, { id: 'prophecies', title: 'Prophecies', icon: 'prophecies' } ] },
+  { label: 'City', items: [
+    { id: 'guild', title: 'Guild', icon: 'guild' }, { id: 'colosseum', title: 'Colosseum', icon: 'colosseum' },
+    { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' }, { id: 'leaderboard', title: 'Leaderboard', icon: 'leaderboard' } ] }
+];
+var CHANNELS = [{ id: 'all', label: 'All' }, { id: 'general', label: 'General' }, { id: 'trade', label: 'Trade' }, { id: 'guild', label: 'Guild', unread: 3 }, { id: 'loot', label: 'Loot' }];
+var MESSAGES = [
+  { id: 1, channel: 'general', channelLabel: 'General', time: '21:02', author: 'Maren', text: 'Anyone seen the Ember Knight near Shenic tonight?' },
+  { id: 2, channel: 'system', channelLabel: 'System', kind: 'system', time: '21:03', text: 'The World Tower resets in 2 hours.' },
+  { id: 3, channel: 'guild', channelLabel: 'Guild', time: '21:05', author: 'Kaelen', text: 'Raid at 22:00. Bring resist gear, the boss burns.' }
+];
+var NAMES = ['Alpha Wolf', 'Bloodfang Wolf', 'Dire Wolf', 'Ember Wolf', 'Horned Wolf', 'Blackjaw Spider', 'Giant Spider', 'Cave Bat', 'Giant Bat', 'Blue Slime', 'Ember Knight'];
+var ITEMS = NAMES.map(function (n) { return { id: n, name: n, tag: n === 'Blackjaw Spider' ? '+ New' : undefined, locked: n === 'Ember Knight', reason: n === 'Ember Knight' ? 'Clear Floor 10 to unlock' : undefined }; });
+function stats(i) { return { level: 8 + i * 2, hp: 1200 + i * 330, power: 90 + i * 17, armor: 20 + i * 3, res: 12 + i * 2, crit: 5 + (i % 4) * 2, dodge: 3 + (i % 5), block: i % 3 * 4, haste: 4 + i, ess: (i * 3) % 10 }; }
+
+function Archive(p) {
+  var bad = p.bad;
+  var s = React.useState('Ember Wolf'), sel = s[0];
+  var tab = React.useState('creatures'), filt = React.useState('all'), chatOpen = React.useState(false), chan = React.useState('all');
+  var i = NAMES.indexOf(sel), st = stats(i), parts = sel.split(' ');
+  var rule = function (label) { return bad ? h(FakeOrnament, { label: label }) : h(L.SectionRule, { label: label }); };
+  return h('div', { className: cx('pv-frame', bad && 'pv-x') }, h(L.GameShell, {
+    height: 760, chatLayout: 'docked',
+    chronicle: h(L.Chronicle, { open: chatOpen[0], onToggle: function () { chatOpen[1](!chatOpen[0]); }, channels: CHANNELS, activeChannel: chan[0], onChannelChange: chan[1], messages: MESSAGES,
+      composer: { channel: 'general', channelLabel: 'General', value: '', onChange: function () {}, onSend: function () {} } }),
+    rail: h(L.NavRail, { sections: NAV, activeId: 'essences', header: h(F, null, h('span', { className: 'pv-logo' }, h('img', { src: LOGO, width: 36, height: 36, alt: '' })), h('span', { className: 'pv-brand' }, "Legend's", h('br'), 'Legacy')) }),
+    top: function (api) {
+      return h(L.TopBar, { title: 'Creature Archive', eyebrow: 'Essences', onMenu: api.openRail },
+        h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: COINS, short: true }), h(L.CurrencyPill, { name: 'Soulstones', amount: 36, iconSrc: DIAMONDS }));
+    },
+    folio: h(L.Folio, { align: 'start', title: parts.slice(1).join(' '), titleSub: parts[0], ariaLabel: sel, cornerSrc: CORNER },
+      bad ? h('span', { className: 'pv-x-grain', 'data-ornament': 'grain', 'aria-hidden': 'true' }) : null,
+      h(L.LevelPlate, { level: st.level, xp: st.ess, xpMax: 10, xpUnit: 'Essence', aside: [{ icon: 'colosseum', label: 'Power', value: st.power }, { icon: 'overview', label: 'Armor', value: st.armor }] }),
+      h('div', { className: 'pv-col' }, h(L.Meter, { tone: 'hp', label: 'HP', value: st.hp, max: st.hp })),
+      h('div', { className: 'pv-col' }, rule('Status'),
+        h('div', { className: 'lg-statgrid' },
+          h(L.StatTile, { label: 'Resist', value: st.res }), h(L.StatTile, { label: 'Crit', value: st.crit, suffix: '%' }),
+          h(L.StatTile, { label: 'Dodge', value: st.dodge, suffix: '%' }), h(L.StatTile, { label: 'Block', value: st.block, suffix: '%' }))),
+      h('div', { className: 'pv-col' }, rule('Essence'),
+        h('div', { className: 'pv-ess' }, h(L.ItemSlot, { icon: 'essences', rarity: 'Rare', caption: false, size: 'sm' }),
+          h('div', null, h('div', { className: 'pv-essname' }, sel + ' Essence'), h('div', { className: 'pv-essmeta' }, st.ess + ' of 10 collected')))))
+  },
+    h(L.Stage, { image: CARD_COMBAT, focus: 'center', label: 'Creature Archive' },
+      h('div', { className: 'pv-archive' },
+        h('div', { className: 'pv-tabs' },
+          h(L.TabStrip, { label: 'Archive', tabs: [{ id: 'creatures', label: 'Creatures' }, { id: 'regions', label: 'Regions' }, { id: 'dungeons', label: 'Dungeons' }], activeId: tab[0], onChange: tab[1] }),
+          h(L.TabStrip, { level: 'secondary', label: 'Filter', tabs: [{ id: 'all', label: 'All' }, { id: 'disc', label: 'Discovered' }, { id: 'ready', label: 'Essence ready', count: 2 }], activeId: filt[0], onChange: filt[1] })),
+        h('div', { className: 'pv-list' }, h(L.EntryList, { items: ITEMS, activeId: sel, onSelect: s[1], label: 'Creatures' })),
+        h('div', { className: 'pv-lore' }, h(L.Panel, { title: bad ? 'Drops' : 'Lore', titleAlign: 'end', flush: bad },
+          bad ? h(F, null,
+              h('span', { className: 'pv-x-parchment', 'data-ornament': 'texture', 'aria-hidden': 'true' }),
+              h(Corners, { className: 'pv-x-corner', tag: 'corner' }),
+              h(FakeOrnament),
+              h(L.List, { label: 'Drops', density: 'compact' },
+                h(L.ListRow, { title: 'Ember Pelt', meta: 'Material', quantity: 2 }),
+                h(L.ListRow, { title: sel + ' Essence', rarity: 'Rare', quantity: 1 })))
+            : h('p', { className: 'pv-lorep' }, 'The ' + sel + ' is found in the ash fields east of Shenic. It hunts in pairs and circles the weakest traveller first.'))),
+        bad ? h('div', { className: 'pv-x-banner' },
+          h('section', { className: 'pv-x-bannerbox', 'data-ornament': 'frame', 'aria-label': 'Ember Wolf' },
+            h('div', { className: 'lg-banner__art', 'aria-hidden': 'true', style: { backgroundImage: 'url(' + BG_TEMPLE + ')' } }),
+            h('div', { className: 'lg-banner__veil', 'aria-hidden': 'true' }),
+            h('span', { className: 'lg-banner__frame', 'aria-hidden': 'true' }), h(Corners),
+            h('div', { className: 'lg-banner__body' }, h('div', { className: 'lg-banner__main' }, h('h3', null, sel), h('p', null, 'Ash fields · Shenic · Hunts in pairs'))))) : null))));
+}
+
+var LABELS = [['framed', 'Framed surfaces', 1], ['rules', 'Ornament rules', 2], ['corners', 'Corner sets', 1], ['grain', 'Film grain', null], ['textures', 'Textures', 0], ['halos', 'Halos', 0], ['loops', 'Loops', 0]];
+function Screen(p) {
+  var ref = React.useRef(null), r = React.useState(null);
+  React.useEffect(function () {
+    var t = setTimeout(function () { var sh = ref.current && ref.current.querySelector('.lg-shell'); if (sh) r[1](L.ornament.audit(sh)); }, 150);
+    return function () { clearTimeout(t); };
+  }, []);
+  var a = r[0];
+  return h('section', { className: 'pv-screen', 'aria-labelledby': p.id },
+    h('header', null, h('h3', { className: 'pv-t', id: p.id }, p.title), h('span', { className: 'pv-note' }, p.sub)),
+    h('div', { ref: ref }, h(Archive, { bad: p.bad })),
+    a ? h('div', { className: 'pv-tally', role: 'list', 'aria-label': 'Audit of ' + p.title }, LABELS.map(function (l) {
+      var n = a.counts[l[0]], lim = l[2];
+      var over = lim != null && n > lim;
+      if (l[0] === 'grain' && a.problems.some(function (x) { return /grain/i.test(x); })) over = true;
+      if (l[0] === 'corners' && a.problems.some(function (x) { return /Corner/.test(x); })) over = true;
+      return h('div', { key: l[0], role: 'listitem', className: cx('pv-count', over && 'is-over') },
+        h('span', null, l[1]), h('b', null, n), h('i', null, over ? 'Over' : lim != null ? 'Budget ' + lim : 'Over art only'));
+    })) : null,
+    a ? (a.ok ? h('p', { className: 'pv-ok' }, 'Within the budget: one framed surface (the Folio, with its corners), no ornament rule, grain and a vignette over the Stage’s art, nothing lit but the selection.')
+      : h('ul', { className: 'pv-verdict' }, a.problems.map(function (x, k) { return h('li', { key: k }, x); }))) : null);
+}
+function Budget() {
+  return h('section', { className: 'pv-sec', 'aria-labelledby': 'pv-bud' },
+    h('header', null, h('h2', { className: 'pv-h', id: 'pv-bud' }, 'Budget per screen'),
+      h('p', { className: 'pv-note' }, h(F, null, 'The Creature Archive twice. Under each, ', c('LL.ornament.audit'), ' counts the devices on the screen and lists what is over: one framed surface, two ornament rules, grain only over art, no halo and no loop.'))),
+    h(Screen, { id: 'pv-ok', title: 'Within the budget', sub: 'ScreenArchive as the system builds it' }),
+    h(Screen, { id: 'pv-bad', bad: true, title: 'Over-decorated', sub: 'The same screen with the devices the budget forbids' }));
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'pv' }, h(Devices), h(Budget)));
+</script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+{
+  "v": 3,
+  "assetGroups": {
+    "Backgrounds": {
+      "files": {
+        "background.webp": {
+          "blob": "assets/Backgrounds/background.webp",
+          "name": "background.webp",
+          "size": 25726,
+          "type": "image/webp"
+        },
+        "colosseum.webp": {
+          "blob": "assets/Backgrounds/colosseum.webp",
+          "name": "colosseum.webp",
+          "size": 13014,
+          "type": "image/webp"
+        },
+        "market-place.webp": {
+          "blob": "assets/Backgrounds/market-place.webp",
+          "name": "market-place.webp",
+          "size": 11714,
+          "type": "image/webp"
+        },
+        "tavern.webp": {
+          "blob": "assets/Backgrounds/tavern.webp",
+          "name": "tavern.webp",
+          "size": 9708,
+          "type": "image/webp"
+        },
+        "temple.webp": {
+          "blob": "assets/Backgrounds/temple.webp",
+          "name": "temple.webp",
+          "size": 11758,
+          "type": "image/webp"
+        }
+      },
+      "name": "Backgrounds",
+      "order": [
+        "background.webp",
+        "colosseum.webp",
+        "market-place.webp",
+        "tavern.webp",
+        "temple.webp"
+      ],
+      "tile": "l"
+    },
+    "Cards": {
+      "files": {
+        "combatArea.webp": {
+          "blob": "assets/Cards/combatArea.webp",
+          "name": "combatArea.webp",
+          "size": 16704,
+          "type": "image/webp"
+        },
+        "mining.webp": {
+          "blob": "assets/Cards/mining.webp",
+          "name": "mining.webp",
+          "size": 10328,
+          "type": "image/webp"
+        },
+        "woodcutting.webp": {
+          "blob": "assets/Cards/woodcutting.webp",
+          "name": "woodcutting.webp",
+          "size": 30050,
+          "type": "image/webp"
+        }
+      },
+      "name": "Cards",
+      "order": [
+        "combatArea.webp",
+        "mining.webp",
+        "woodcutting.webp"
+      ]
+    },
+    "Currency": {
+      "files": {
+        "Coins.svg": {
+          "blob": "assets/Currency/Coins.svg",
+          "name": "Coins.svg",
+          "size": 8349,
+          "type": "image/svg+xml"
+        },
+        "Diamonds.svg": {
+          "blob": "assets/Currency/Diamonds.svg",
+          "name": "Diamonds.svg",
+          "size": 42241,
+          "type": "image/svg+xml"
+        }
+      },
+      "name": "Currency",
+      "order": [
+        "Coins.svg",
+        "Diamonds.svg"
+      ],
+      "tile": "s"
+    },
+    "Icons": {
+      "files": {
+        "achievements.svg": {
+          "blob": "assets/Icons/achievements.svg",
+          "name": "achievements.svg",
+          "size": 582,
+          "type": "image/svg+xml"
+        },
+        "cinder-bazaar.svg": {
+          "blob": "assets/Icons/cinder-bazaar.svg",
+          "name": "cinder-bazaar.svg",
+          "size": 617,
+          "type": "image/svg+xml"
+        },
+        "colosseum.svg": {
+          "blob": "assets/Icons/colosseum.svg",
+          "name": "colosseum.svg",
+          "size": 565,
+          "type": "image/svg+xml"
+        },
+        "combat-styles.svg": {
+          "blob": "assets/Icons/combat-styles.svg",
+          "name": "combat-styles.svg",
+          "size": 8301,
+          "type": "image/svg+xml"
+        },
+        "essences.svg": {
+          "blob": "assets/Icons/essences.svg",
+          "name": "essences.svg",
+          "size": 533,
+          "type": "image/svg+xml"
+        },
+        "guild.svg": {
+          "blob": "assets/Icons/guild.svg",
+          "name": "guild.svg",
+          "size": 520,
+          "type": "image/svg+xml"
+        },
+        "inventory.svg": {
+          "blob": "assets/Icons/inventory.svg",
+          "name": "inventory.svg",
+          "size": 596,
+          "type": "image/svg+xml"
+        },
+        "leaderboard.svg": {
+          "blob": "assets/Icons/leaderboard.svg",
+          "name": "leaderboard.svg",
+          "size": 466,
+          "type": "image/svg+xml"
+        },
+        "legacy-ascension.svg": {
+          "blob": "assets/Icons/legacy-ascension.svg",
+          "name": "legacy-ascension.svg",
+          "size": 611,
+          "type": "image/svg+xml"
+        },
+        "overview.svg": {
+          "blob": "assets/Icons/overview.svg",
+          "name": "overview.svg",
+          "size": 558,
+          "type": "image/svg+xml"
+        },
+        "prophecies.svg": {
+          "blob": "assets/Icons/prophecies.svg",
+          "name": "prophecies.svg",
+          "size": 554,
+          "type": "image/svg+xml"
+        },
+        "quest-journal.svg": {
+          "blob": "assets/Icons/quest-journal.svg",
+          "name": "quest-journal.svg",
+          "size": 832,
+          "type": "image/svg+xml"
+        },
+        "settings.svg": {
+          "blob": "assets/Icons/settings.svg",
+          "name": "settings.svg",
+          "size": 556,
+          "type": "image/svg+xml"
+        },
+        "soulstones.svg": {
+          "blob": "assets/Icons/soulstones.svg",
+          "name": "soulstones.svg",
+          "size": 497,
+          "type": "image/svg+xml"
+        },
+        "world-map.svg": {
+          "blob": "assets/Icons/world-map.svg",
+          "name": "world-map.svg",
+          "size": 559,
+          "type": "image/svg+xml"
+        }
+      },
+      "name": "Icons",
+      "order": [
+        "overview.svg",
+        "inventory.svg",
+        "essences.svg",
+        "combat-styles.svg",
+        "achievements.svg",
+        "soulstones.svg",
+        "world-map.svg",
+        "legacy-ascension.svg",
+        "quest-journal.svg",
+        "prophecies.svg",
+        "guild.svg",
+        "colosseum.svg",
+        "cinder-bazaar.svg",
+        "leaderboard.svg",
+        "settings.svg"
+      ],
+      "tile": "xs"
+    },
+    "Logos": {
+      "files": {
+        "Logo.svg": {
+          "blob": "assets/Logos/Logo.svg",
+          "name": "Logo.svg",
+          "size": 24688,
+          "type": "image/svg+xml"
+        }
+      },
+      "name": "Logos",
+      "order": [
+        "Logo.svg"
+      ],
+      "tile": "l"
+    },
+    "Ornaments": {
+      "files": {
+        "CornerOrnament.svg": {
+          "blob": "assets/Ornaments/CornerOrnament.svg",
+          "name": "CornerOrnament.svg",
+          "size": 41209,
+          "type": "image/svg+xml"
+        },
+        "Divider.svg": {
+          "blob": "assets/Ornaments/Divider.svg",
+          "name": "Divider.svg",
+          "size": 6458,
+          "type": "image/svg+xml"
+        }
+      },
+      "name": "Ornaments",
+      "order": [
+        "CornerOrnament.svg",
+        "Divider.svg"
+      ]
+    }
+  },
+  "blobs": {},
+  "createdOnFiles": {
+    "at": "2026-09-29T07:48:55Z",
+    "v": 1
+  },
+  "docs": {
+    "readme": "README.md",
+    "sections": [
+      "docs/01-principles.md",
+      "docs/01-principles/01-anti-generic-guardrails.md",
+      "docs/02-foundations/01-colour.md",
+      "docs/02-foundations/02-typography.md",
+      "docs/02-foundations/03-numerals.md",
+      "docs/02-foundations/04-space-and-density.md",
+      "docs/02-foundations/05-accessibility.md",
+      "docs/02-foundations/06-layout.md",
+      "docs/02-foundations/07-surfaces-and-layering.md",
+      "docs/02-foundations/08-lines.md",
+      "docs/02-foundations/09-shape.md",
+      "docs/02-foundations/10-ornament.md",
+      "docs/02-foundations/11-motion.md",
+      "docs/02-foundations/12-iconography.md",
+      "docs/03-standards.md",
+      "docs/03-standards/01-states.md",
+      "docs/04-registries.md",
+      "docs/05-components.md",
+      "docs/07-patterns.md",
+      "docs/08-shell.md",
+      "docs/09-page-archetypes.md",
+      "docs/10-governance/01-governance.md",
+      "docs/10-governance/02-decision-log.md",
+      "docs/10-governance/03-audit-and-consolidation-map.md",
+      "docs/10-governance/04-code-parity.md"
+    ]
+  },
+  "groups": [
+    "Logos",
+    "Icons",
+    "Currency",
+    "Ornaments",
+    "Backgrounds",
+    "Cards"
+  ],
+  "lastChange": {
+    "at": "2026-10-01T07:17:51Z",
+    "by": "Martin",
+    "note": "States: a six-family state model on Standards · States, with channels, words, announcements and a matrix; blocked controls stay focusable with a reason tip; Button, Tag, ItemSlot, LoadoutSlot, EntryList, NavRail and Sigil on it; Start here folded into the README (D-086 to D-089).",
+    "via": "Claude (Cowork)"
+  },
+  "layout": "files",
+  "libraries": [
+    {
+      "file": "components/lib/react.production.min.js",
+      "global": "React",
+      "name": "react",
+      "version": "18"
+    },
+    {
+      "file": "components/lib/react-dom.production.min.js",
+      "global": "ReactDOM",
+      "name": "react-dom",
+      "version": "18"
+    }
+  ],
+  "namespace": "LL",
+  "sections": {},
+  "title": "Legend's Legacy"
+}

@@ -1,106 +1,500 @@
-/* ============================================================
-   Grimoire tokens — Legend's Legacy design system.
-   Generated from the Grimoire design-system artifact (tokens.json).
-   Fonts load from Google Fonts in src/index.html.
-   ============================================================ */
+/* Generated from design-system/tokens.css by design-system/scripts/sync-styles.mjs. Do not edit: change the design system and run the script. */
+/* Legend's Legacy — generated from tokens.json */
 :root, [data-theme="grimoire"] {
-  --ground: #15100c;
-  --ground-deep: #0b0806;
-  --surface: #1f1812;
-  --surface-raised: #2a2019;
-  --folio: #22160f;
-  --scrim: #0b0806cc;
-  --line: #46372a;
-  --line-strong: #8c7358;
-  --ink: #f0e6d2;
-  --ink-muted: #bba98c;
-  --ink-disabled: #7a6a56;
-  --gilt: #dcb872;
-  --gilt-soft: #3a2b17;
-  --on-gilt: #1a1109;
-  --arcana: #6fcab9;
-  --arcana-soft: #163833;
-  --arcana-glow: #86e6d2;
-  --sigil-fill: #1d4b45;
-  --sigil-edge: #7fc9b8;
-  --on-sigil: #f0e6d2;
-  --tile: #261d16;
-  --on-tile: #f0e6d2;
-  --on-tile-muted: #bba98c;
-  --meter-track: #2e241c;
-  --meter-hp: #d0443f;
-  --meter-sp: #4f9fd6;
-  --meter-xp: var(--gilt);
-  --danger: #f2837a;
-  --danger-soft: #3d1715;
-  --success: #74c6d6;
-  --warning: #f0b35a;
-  --info: #9ccaf0;
-  --focus: #f5d48f;
-  --channel-general: var(--ink);
-  --channel-trade: var(--warning);
-  --channel-help: var(--info);
-  --channel-guild: var(--arcana);
-  --channel-whisper: #e39be2;
-  --channel-raid: var(--danger);
-  --channel-invites: var(--success);
-  --channel-system: var(--ink-muted);
-  --channel-loot: var(--gilt);
-  --rarity-common: #d4d4d8;
-  --rarity-uncommon: #41f1b6;
-  --rarity-rare: #7cb7ff;
-  --rarity-epic: #e879f9;
-  --rarity-unique: #facc15;
-  --rarity-legendary: #fb923c;
-  --rarity-legacy: #fb7185;
-  --damage-physical: #e6e2d9;
-  --damage-magical: #9d86ef;
-  --damage-bleed: #d94d5c;
-  --damage-burn: #ef8a3c;
-  --damage-poison: #82b94b;
-  --damage-shadow: #69b6dd;
-  --damage-none: #8d8991;
-  --shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080;
-  --shadow-float: 0 12px 28px -8px #000000cc;
-  --shadow-text-art: 0 1px 14px #0b0806, 0 0 3px #0b0806;
-  --focus-ring: 0 0 0 2px #15100c, 0 0 0 4px #f5d48f;
+  --umber-950: #0b0806; /* Tier 1 · palette. umber-950 — the brown-black ramp for grounds, surfaces and lines. Aliased by ground-deep. Never referenced by a component. */
+  --umber-950-a80: #0b0806cc; /* Tier 1 · palette. umber-950 at 80% opacity, for scrims. Aliased by scrim. Never referenced by a component. */
+  --umber-900: #15100c; /* Tier 1 · palette. umber-900 — the brown-black ramp for grounds, surfaces and lines. Aliased by ground. Never referenced by a component. */
+  --umber-875: #1a1109; /* Tier 1 · palette. umber-875 — the brown-black ramp for grounds, surfaces and lines. Aliased by on-gilt and row-stripe. Never referenced by a component. */
+  --umber-850: #22160f; /* Tier 1 · palette. umber-850 — the brown-black ramp for grounds, surfaces and lines. Aliased by folio. Never referenced by a component. */
+  --umber-825: #1f1812; /* Tier 1 · palette. umber-825 — the brown-black ramp for grounds, surfaces and lines. Aliased by surface. Never referenced by a component. */
+  --umber-800: #261d16; /* Tier 1 · palette. umber-800 — the brown-black ramp for grounds, surfaces and lines. Aliased by tile. Never referenced by a component. */
+  --umber-775: #2a2019; /* Tier 1 · palette. umber-775 — the brown-black ramp for grounds, surfaces and lines. Aliased by surface-raised. Never referenced by a component. */
+  --umber-750: #2e241c; /* Tier 1 · palette. umber-750 — the brown-black ramp for grounds, surfaces and lines. Aliased by meter-track. Never referenced by a component. */
+  --umber-650: #46372a; /* Tier 1 · palette. umber-650 — the brown-black ramp for grounds, surfaces and lines. Aliased by line and changed. Never referenced by a component. */
+  --umber-450: #8c7358; /* Tier 1 · palette. umber-450 — the brown-black ramp for grounds, surfaces and lines. Aliased by line-strong. Never referenced by a component. */
+  --bone-100: #f0e6d2; /* Tier 1 · palette. bone-100 — the parchment ramp for ink. Aliased by ink, success, channel-general, channel-help. Never referenced by a component. */
+  --bone-300: #bba98c; /* Tier 1 · palette. bone-300 — the parchment ramp for ink. Aliased by ink-muted, channel-system, channel-loot, delta-neutral. Never referenced by a component. */
+  --bone-500: #7a6a56; /* Tier 1 · palette. bone-500 — the parchment ramp for ink. Aliased by ink-disabled. Never referenced by a component. */
+  --brass-200: #f5d48f; /* Tier 1 · palette. brass-200 — the gold ramp for gilt and focus. Aliased by focus. Never referenced by a component. */
+  --brass-300: #dcb872; /* Tier 1 · palette. brass-300 — the gold ramp for gilt and focus. Aliased by gilt, meter-xp. Never referenced by a component. */
+  --brass-900: #3a2b17; /* Tier 1 · palette. brass-900 — the gold ramp for gilt and focus. Aliased by gilt-soft. Never referenced by a component. */
+  --verdigris-200: #86e6d2; /* Tier 1 · palette. verdigris-200 — the green-teal ramp for arcana and sigils. Aliased by arcana-glow. Never referenced by a component. */
+  --verdigris-250: #7fc9b8; /* Tier 1 · palette. verdigris-250 — the green-teal ramp for arcana and sigils. Aliased by sigil-edge. Never referenced by a component. */
+  --verdigris-300: #6fcab9; /* Tier 1 · palette. verdigris-300 — the green-teal ramp for arcana and sigils. Aliased by arcana, channel-guild. Never referenced by a component. */
+  --verdigris-800: #1d4b45; /* Tier 1 · palette. verdigris-800 — the green-teal ramp for arcana and sigils. Aliased by sigil-fill. Never referenced by a component. */
+  --verdigris-900: #163833; /* Tier 1 · palette. verdigris-900 — the green-teal ramp for arcana and sigils. Aliased by arcana-soft. Never referenced by a component. */
+  --ember-300: #f2837a; /* Tier 1 · palette. ember-300 — the red ramp for danger and health. Aliased by danger, channel-raid. Never referenced by a component. */
+  --ember-500: #d0443f; /* Tier 1 · palette. ember-500 — the red ramp for danger and health. Aliased by meter-hp. Never referenced by a component. */
+  --ember-900: #3d1715; /* Tier 1 · palette. ember-900 — the red ramp for danger and health. Aliased by danger-soft. Never referenced by a component. */
+  --amber-300: #f0b35a; /* Tier 1 · palette. amber-300 — the orange-gold ramp for warnings. Aliased by warning, channel-trade. Never referenced by a component. */
+  --azure-200: #9ccaf0; /* Tier 1 · palette. azure-200 — the blue ramp for info and stamina. Aliased by info, channel-invites. Never referenced by a component. */
+  --azure-500: #4f9fd6; /* Tier 1 · palette. azure-500 — the blue ramp for info and stamina. Aliased by meter-sp. Never referenced by a component. */
+  --orchid-100: #f6cbf1; /* Tier 1 · palette. orchid-100 — the pale pink-violet ramp for whispers. Aliased by channel-whisper. Never referenced by a component. */
+  --lichen-200: #b5ea99; /* Tier 1 · palette. lichen-200 — the pale green ramp for what is better or beneficial for the player. Aliased by delta-better, effect-beneficial. Never referenced by a component. */
+  --madder-400: #d671a7; /* Tier 1 · palette. madder-400 — the rose ramp for what is worse or harmful for the player. Aliased by delta-worse, effect-harmful. Never referenced by a component. */
+  --hue-rarity-common: #d4d4d8; /* Tier 1 · palette. The game's Common rarity hue — learned by players; never changes. Aliased by rarity-common. Never referenced by a component. */
+  --hue-rarity-uncommon: #41f1b6; /* Tier 1 · palette. The game's Uncommon rarity hue — learned by players; never changes. Aliased by rarity-uncommon. Never referenced by a component. */
+  --hue-rarity-rare: #7cb7ff; /* Tier 1 · palette. The game's Rare rarity hue — learned by players; never changes. Aliased by rarity-rare. Never referenced by a component. */
+  --hue-rarity-epic: #e879f9; /* Tier 1 · palette. The game's Epic rarity hue — learned by players; never changes. Aliased by rarity-epic. Never referenced by a component. */
+  --hue-rarity-unique: #facc15; /* Tier 1 · palette. The game's Unique rarity hue — learned by players; never changes. Aliased by rarity-unique. Never referenced by a component. */
+  --hue-rarity-legendary: #fb923c; /* Tier 1 · palette. The game's Legendary rarity hue — learned by players; never changes. Aliased by rarity-legendary. Never referenced by a component. */
+  --hue-rarity-legacy: #fb7185; /* Tier 1 · palette. The game's Legacy rarity hue — learned by players; never changes. Aliased by rarity-legacy. Never referenced by a component. */
+  --hue-damage-physical: #e6e2d9; /* Tier 1 · palette. The game's Physical damage hue — learned by players; never changes. Aliased by damage-physical. Never referenced by a component. */
+  --hue-damage-magical: #9d86ef; /* Tier 1 · palette. The game's Magical damage hue — learned by players; never changes. Aliased by damage-magical. Never referenced by a component. */
+  --hue-damage-bleed: #d94d5c; /* Tier 1 · palette. The game's Bleed damage hue — learned by players; never changes. Aliased by damage-bleed. Never referenced by a component. */
+  --hue-damage-burn: #ef8a3c; /* Tier 1 · palette. The game's Burn damage hue — learned by players; never changes. Aliased by damage-burn. Never referenced by a component. */
+  --hue-damage-poison: #82b94b; /* Tier 1 · palette. The game's Poison damage hue — learned by players; never changes. Aliased by damage-poison. Never referenced by a component. */
+  --hue-damage-shadow: #69b6dd; /* Tier 1 · palette. The game's Shadow damage hue — learned by players; never changes. Aliased by damage-shadow. Never referenced by a component. */
+  --hue-damage-none: #8d8991; /* Tier 1 · palette. The game's None damage hue — learned by players; never changes. Aliased by damage-none. Never referenced by a component. */
+  --ground: var(--umber-900); /* Tier 2 · role. Level 0: the page ground behind everything, the shell's base colour, the Page and the docked Chronicle. The stage paints a vignette of ground-deep over it. */
+  --ground-deep: var(--umber-950); /* Tier 2 · role. Below Level 0: wells (inputs, item slots, the inventory grid's gutters), the stage's vignette edges and the letterbox behind stage art. */
+  --surface: var(--umber-825); /* Tier 2 · role. Level 1: the NavRail, Panels, lists and the JourneyCard on ground, and the floating Chronicle drawer. */
+  --surface-raised: var(--umber-775); /* Tier 2 · role. Level 2, one step above surface: hover, selected and pinned washes; popovers, tooltips, hover cards, menus and toasts. */
+  --folio: var(--umber-850); /* Tier 2 · role. Level 3: the Folio, dialog sheets, confirmations and the tour's coach mark. Not lighter than surface-raised: its height reads from shadow-panel. */
+  --scrim: var(--umber-950-a80); /* Tier 2 · role. Above the levels: the flat dimmer behind a dialog, a confirmation, the rail drawer and the tour's spotlight. Never blurred. */
+  --line: var(--umber-650); /* Tier 2 · role. Separation and decoration, never an edge that must be seen: row and group separators, the Panel head rule, orbit rings, bounded objects that are not controls. Never the only edge of a control (Foundations · Lines). */
+  --line-strong: var(--umber-450); /* Tier 2 · role. Interactive edges: inputs, outline buttons, clickable pills and slots, tab separators; floating surfaces; dotted Ledger leaders. Holds 3:1 on ground, surface, surface-raised and folio (Foundations · Lines). */
+  --row-stripe: var(--umber-875); /* Tier 2 · role. The zebra rhythm: every second row of a dense List or table set to zebra, on Level 1 or the Folio (Foundations · Lines). Never with row separators or a container edge; hover and selection wash over it. */
+  --ink: var(--bone-100); /* Tier 2 · role. Primary text and numerals on ground, surface, surface-raised and folio. */
+  --ink-muted: var(--bone-300); /* Tier 2 · role. Secondary text, inactive nav and list items, captions; on ground, surface, surface-raised and folio. */
+  --ink-disabled: var(--bone-500); /* Tier 2 · role. Plain disabled controls and the names of locked things only (inactive, so exempt from contrast minimums); a locked name always has a lock or the word 'Locked' beside it in ink-muted (Standards · States). */
+  --gilt: var(--brass-300); /* Tier 2 · role. Brand brass, with four jobs only: brand and current location (logo, frames, ornament, the active rail diamond, the Nobility mark); the one committing action (solid button fill); the screen's one headline figure; effect magnitudes inside descriptions. */
+  --gilt-soft: var(--brass-900); /* Tier 2 · role. Former hover and selected-row wash. No new uses (D-015): hover is surface-raised. Still read by SearchField and JourneyCard, queued in the audit; EntryList left it in D-087. */
+  --on-gilt: var(--umber-875); /* Tier 2 · role. Text and icons on a gilt fill (the solid button). */
+  --arcana: var(--verdigris-300); /* Tier 2 · role. Means ready, new, actionable or selected — nothing else: '+ New' tags, 'Ready', 'Claimable', rail badges. Not in item, combat or chat contexts. */
+  --arcana-soft: var(--verdigris-900); /* Tier 2 · role. Wash behind arcana text on small marks only: the new Tag and rail badges — never a row, list item or card. */
+  --arcana-glow: var(--verdigris-200); /* Tier 2 · role. Fill-only mark for selected and ready: the active-tab bar, the selected ring or edge, the ready diamond. A flat fill, never a halo, never text. In item contexts selection is a shape instead. */
+  --danger: var(--ember-300); /* Tier 2 · role. Loss, destruction and failure — what has happened or cannot be undone: Pending Loot lost, abandoning a dungeon run, a failed save, 'Defeated'. Always with a word or icon; in shell, control and data contexts. */
+  --danger-soft: var(--ember-900); /* Tier 2 · role. The wash behind an inline alert about a loss or failure. Inline alerts only — never rows, list items, cards or Tags. */
+  --success: var(--bone-100); /* Tier 2 · role. A confirmed outcome only — 'Upgrade succeeded', 'Saved', 'Floor cleared': ink with the ✓ glyph and the word. Not 'Ready' or 'Claimable', which are arcana. No hue of its own (D-016). */
+  --warning: var(--amber-300); /* Tier 2 · role. Attention: a reversible risk, insufficient resources, something expiring soon — what can still be avoided. Always with a word or icon, in shell and data contexts; never in descriptions or beside gilt in the same form. */
+  --info: var(--azure-200); /* Tier 2 · role. Neutral notices, as text with their word or icon, in shell and data contexts only. */
+  --focus: var(--brass-200); /* Tier 2 · role. Keyboard focus ring colour (see shadow focus-ring). */
+  --changed: var(--umber-650); /* Tier 2 · role. The live-update mark only: a flat wash behind a value that changed by itself — a Bazaar price, a roster status, a payout — on at once, held for duration-reveal, then faded over duration-slow (Foundations · Motion). It says the value changed, never whether that helps the player; never a hover, selected, row or rarity wash. ink holds 9.21:1 on it, ink-muted 4.98:1. The same umber as line, doing a second job as a fill. */
+  --meter-track: var(--umber-750); /* Tier 3 · domain. Empty part of every Meter and Track. */
+  --meter-hp: var(--ember-500); /* Tier 3 · domain. Health fill. Pair with the 'HP' label; never colour alone. */
+  --meter-sp: var(--azure-500); /* Tier 3 · domain. Stamina/mana fill (SP). */
+  --meter-xp: var(--brass-300); /* Tier 3 · domain. Experience fill (EXP) and level progress — brass's one job among meters. */
+  --channel-general: var(--bone-100); /* Tier 3 · domain. Chronicle: General channel tag and speaker names. Neutral. */
+  --channel-trade: var(--amber-300); /* Tier 3 · domain. Chronicle: Trade channel — amber's one job in chat. */
+  --channel-help: var(--bone-100); /* Tier 3 · domain. Chronicle: Help channel. Neutral like General; the tag word tells them apart (D-016). */
+  --channel-guild: var(--verdigris-300); /* Tier 3 · domain. Chronicle: Guild channel — verdigris's one job in chat. */
+  --channel-whisper: var(--orchid-100); /* Tier 3 · domain. Chronicle: Whispers to and from you, on the tag and speaker name only. Pale orchid, moved from #e39be2, which was near-identical to rarity-epic (D-016). */
+  --channel-raid: var(--ember-300); /* Tier 3 · domain. Chronicle: Raid channel — ember's one job in chat. */
+  --channel-invites: var(--azure-200); /* Tier 3 · domain. Chronicle: guild, party and raid invites — azure's one job in chat (D-016). */
+  --channel-system: var(--bone-300); /* Tier 3 · domain. Chronicle: System lines (set in lore italic). Neutral. */
+  --channel-loot: var(--bone-300); /* Tier 3 · domain. Chronicle: Loot lines. Neutral: the tag word marks the line and the item links in it carry the rarity hues (D-016). */
+  --rarity-common: var(--hue-rarity-common); /* Tier 3 · domain. Item name / edge for Common. Text on ground, surface, folio. */
+  --rarity-uncommon: var(--hue-rarity-uncommon); /* Tier 3 · domain. Uncommon. */
+  --rarity-rare: var(--hue-rarity-rare); /* Tier 3 · domain. Rare. */
+  --rarity-epic: var(--hue-rarity-epic); /* Tier 3 · domain. Epic. */
+  --rarity-unique: var(--hue-rarity-unique); /* Tier 3 · domain. Unique. */
+  --rarity-legendary: var(--hue-rarity-legendary); /* Tier 3 · domain. Legendary. */
+  --rarity-legacy: var(--hue-rarity-legacy); /* Tier 3 · domain. Legacy. */
+  --damage-physical: var(--hue-damage-physical); /* Tier 3 · domain. Physical damage numbers and tags. */
+  --damage-magical: var(--hue-damage-magical); /* Tier 3 · domain. Magical damage. */
+  --damage-bleed: var(--hue-damage-bleed); /* Tier 3 · domain. Bleed. Kept from the game's current palette: 4.3:1 on surface and folio, 3.9:1 on surface-raised — set bleed numbers on ground, or at 19px bold and up. */
+  --damage-burn: var(--hue-damage-burn); /* Tier 3 · domain. Burn. */
+  --damage-poison: var(--hue-damage-poison); /* Tier 3 · domain. Poison. */
+  --damage-shadow: var(--hue-damage-shadow); /* Tier 3 · domain. Shadow. */
+  --damage-none: var(--hue-damage-none); /* Tier 3 · domain. Untyped / true damage. */
+  --delta-better: var(--lichen-200); /* Tier 3 · domain. A change that is better for the player — judged by benefit, not the number's sign (a cooldown from 8s to 6.8s is better). Always with ▲ or ▼ and a sign: ▲ +12, ▼ −1.2s. */
+  --delta-worse: var(--madder-400); /* Tier 3 · domain. A change that is worse for the player, judged by benefit, not sign. Always with ▲ or ▼ and a sign. Not danger: a worse stat is not a loss or a failure. */
+  --delta-neutral: var(--bone-300); /* Tier 3 · domain. No change (◇ 0), or a change the game does not judge. Muted ink, always with its glyph. */
+  --effect-beneficial: var(--lichen-200); /* Tier 3 · domain. A beneficial effect or condition — Empower, Haste — on its Tag, always with the effect's name. Shares lichen with delta-better: both mean good for the player. */
+  --effect-harmful: var(--madder-400); /* Tier 3 · domain. A harmful effect or condition — Weaken, Slow — on its Tag, always with the effect's name. Shares madder with delta-worse: both mean bad for the player. */
+  --condition-beneficial: var(--effect-beneficial); /* Deprecated (D-023) — use effect-beneficial. A placeholder that was never read; remove after the next release. */
+  --condition-harmful: var(--effect-harmful); /* Deprecated (D-023) — use effect-harmful. A placeholder that was never read; remove after the next release. */
+  --sigil-fill: var(--verdigris-800); /* Component token (Sigil). Hexagon stat badge fill. PageHeader's hex icon also reads it — a known exception (Foundations · Colour). */
+  --sigil-edge: var(--verdigris-250); /* Component token (Sigil). Sigil outline; 3:1 against sigil-fill and the grounds. PageHeader's hex icon also reads it — a known exception. */
+  --on-sigil: var(--ink); /* Component token (Sigil). Numerals inside a sigil, on sigil-fill; follows ink. PageHeader's hex icon also reads it — a known exception. */
+  --tile: var(--umber-800); /* Component token (StatTile). Stat tile fill. TabStrip's active primary tab also reads it — a known exception (Foundations · Colour). */
+  --on-tile: var(--ink); /* Component token (StatTile). Values on tile; follows ink. TabStrip's active primary tab also reads it — a known exception. */
+  --on-tile-muted: var(--ink-muted); /* Component token (StatTile). Tile labels (STR, Armor) and units on tile; follows ink-muted. */
+  --shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080; /* Level 3: the Folio, dialog sheets, confirmations, the tour's coach mark and the rail drawer. */
+  --shadow-float: 0 12px 28px -8px #000000cc; /* Floating Levels 1 and 2: the Chronicle drawer, popovers, tooltips, hover cards, menus and toasts. */
+  --shadow-text-art: 0 1px 14px #0b0806, 0 0 3px #0b0806; /* text-shadow for any label set over Stage art (Sigil labels, stage captions). */
+  --focus-ring: 0 0 0 2px #15100c, 0 0 0 4px #f5d48f; /* Keyboard focus on every interactive element (box-shadow, so it follows the radius). */
 }
 :root {
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-full: 999px;
-  --rail-width: 224px;
-  --folio-width: 360px;
-  --topbar-height: 56px;
-  --hintbar-height: 40px;
-  --sigil-size: 52px;
-  --chronicle-width: 384px;
-  --chronicle-strip: 48px;
-  --chronicle-height: 320px;
-  --chronicle-collapsed: 44px;
-  --chronicle-float-width: 352px;
-  --chronicle-float-width-wide: 384px;
-  --chronicle-float-height: 448px;
-  --chronicle-float-tall: 896px;
-  --shell-max: 1920px;
-  --z-overlay: 50;
-  --z-popover: 100;
-  --z-modal: 200;
-  --z-popover-detached: 300;
+  --space-1: 0.25rem; /* Icon-to-label gap, keycap padding. (4px at the default text size.) */
+  --space-2: 0.5rem; /* Inside tags and small controls; gap between stat tiles. (8px at the default text size.) */
+  --space-3: 0.75rem; /* Between related rows; tile padding. (12px at the default text size.) */
+  --space-4: 1rem; /* Panel padding on small screens; rail item padding. (16px at the default text size.) */
+  --space-5: 1.25rem; /* Top bar horizontal padding. (20px at the default text size.) */
+  --space-6: 1.5rem; /* Folio and panel padding; gap between sections. (24px at the default text size.) */
+  --space-8: 2rem; /* Between major blocks in the Folio. (32px at the default text size.) */
+  --space-10: 2.5rem; /* Stage inset from the rail and folio. (40px at the default text size.) */
+  --space-12: 3rem; /* Rail top padding; space above screen titles. (48px at the default text size.) */
+  --space-16: 4rem; /* Stage breathing room around a Constellation. (64px at the default text size.) */
+  --inset-xs: 0.25rem; /* Inset · padding inside the smallest parts: key caps, badges, counts. Aliases space-1. (4px at the default text size.) */
+  --inset-sm: 0.5rem; /* Inset · tags and small controls; a Compact cell’s horizontal padding; the inner surface in a Compact region. Aliases space-2. (8px at the default text size.) */
+  --inset-md: 0.75rem; /* Inset · tiles and inner surfaces in a Standard region (StatTile, LoadoutSlot); a Standard cell’s horizontal padding; a Compact container. Aliases space-3. (12px at the default text size.) */
+  --inset-lg: 1rem; /* Inset · a Standard container: Panel body and head; a Comfortable cell’s horizontal padding; the inner surface in a Comfortable region. Aliases space-4. (16px at the default text size.) */
+  --inset-xl: 1.5rem; /* Inset · a Comfortable container: dialogs and identity blocks. Aliases space-6. (24px at the default text size.) */
+  --stack-xs: 0.25rem; /* Stack · label to value, eyebrow to title; a Compact cell’s vertical padding. Aliases space-1. (4px at the default text size.) */
+  --stack-sm: 0.5rem; /* Stack · rows of one group; a Standard cell’s vertical padding; the gap between elements in a Compact region. Aliases space-2. (8px at the default text size.) */
+  --stack-md: 0.75rem; /* Stack · related blocks in a Panel; a Comfortable cell’s vertical padding; the gap in a Standard region. Aliases space-3. (12px at the default text size.) */
+  --stack-lg: 1rem; /* Stack · groups inside a container; the gap in a Comfortable region. Aliases space-4. (16px at the default text size.) */
+  --inline-xs: 0.25rem; /* Inline · icon to label, value to unit. Aliases space-1. (4px at the default text size.) */
+  --inline-sm: 0.5rem; /* Inline · tags in a row, a Button’s icon and label; the gap between a row’s parts in a Compact region. Aliases space-2. (8px at the default text size.) */
+  --inline-md: 0.75rem; /* Inline · controls in a toolbar; the gap between a row’s parts in a Standard region. Aliases space-3. (12px at the default text size.) */
+  --inline-lg: 1rem; /* Inline · control groups; the gap between a row’s parts in a Comfortable region. Aliases space-4. (16px at the default text size.) */
+  --section-sm: 1.5rem; /* Section · between Panels on a Page, between blocks in the Folio. Aliases space-6. (24px at the default text size.) */
+  --section-md: 2rem; /* Section · the Page’s side padding; between major regions of a screen. Aliases space-8. (32px at the default text size.) */
+  --section-lg: 3rem; /* Section · above a screen title; the rail’s top padding. Aliases space-12. (48px at the default text size.) */
+  --radius-container: 2px; /* Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions). Regions — the Folio, Banner, Stage, rail and Page — are square. */
+  --radius-control: 4px; /* Controls, tags and slots: Buttons, inputs, tabs, key caps and clickable CurrencyPills; Tags, count badges and rarity codes; ItemSlots, thumbnails, LoadoutSlots and StatTiles. Focus rings on links and icon buttons follow it. */
+  --radius-float: 8px; /* Popovers and drawers: tooltips, hover cards, menus, suggestion lists, toasts and the floating chat drawer. Only what floats. */
+  --radius-circle: 50%; /* The Presence dot, and nothing else: the circle means presence (Foundations · Shape). Never a count badge, an icon button, a bullet or a portrait. */
+  --text-level-numeral: 5.25rem; /* Size of level-numeral. (84px at the default text size.) */
+  --text-title-xl: 3.5rem; /* Size of title-xl. (56px at the default text size.) */
+  --text-title-lg: 2.25rem; /* Size of title-lg; StatFigure sm; a large Sigil label. (36px at the default text size.) */
+  --text-title-md: 1.5rem; /* Size of title-md. (24px at the default text size.) */
+  --text-title-sm: 1.25rem; /* Size of title-sm; a small Sigil label. (20px at the default text size.) */
+  --text-name-header: 1.5rem; /* Size of name-header. (24px at the default text size.) */
+  --text-name-row: 1.0625rem; /* Size of name-row. (17px at the default text size.) */
+  --text-body: 0.9375rem; /* Size of body, body-strong. (15px at the default text size.) */
+  --text-body-compact: 0.875rem; /* Size of body-compact, body-compact-strong. (14px at the default text size.) */
+  --text-lore: 1.125rem; /* Size of lore. (18px at the default text size.) */
+  --text-lore-sm: 1rem; /* Size of lore-sm. (16px at the default text size.) */
+  --text-label: 0.75rem; /* Size of label. (12px at the default text size.) */
+  --text-caption: 0.75rem; /* Size of caption, caption-strong. (12px at the default text size.) */
+  --text-code: 0.6875rem; /* Size of code: rarity codes and key caps only. (11px at the default text size.) */
+  --text-tab: 1.0625rem; /* Size of tab. (17px at the default text size.) */
+  --text-nav: 0.8125rem; /* Size of nav, nav-active. (13px at the default text size.) */
+  --text-numeral-headline: 4rem; /* Size of numeral-headline. (64px at the default text size.) */
+  --text-numeral-stat: 1.375rem; /* Size of numeral-stat. (22px at the default text size.) */
+  --text-numeral-row: 1.125rem; /* Size of numeral-row. (18px at the default text size.) */
+  --text-numeral-compact: 0.875rem; /* Size of numeral-compact. (14px at the default text size.) */
+  --text-sigil-label: 1.875rem; /* Size of sigil-label. (30px at the default text size.) */
+  --text-body-readable: 1rem; /* Size of body-readable. (16px at the default text size.) */
+  --leading-level-numeral: 4.75rem; /* Line height of level-numeral. (76px at the default text size.) */
+  --leading-title-xl: 3.75rem; /* Line height of title-xl. (60px at the default text size.) */
+  --leading-title-lg: 2.5rem; /* Line height of title-lg. (40px at the default text size.) */
+  --leading-title-md: 1.875rem; /* Line height of title-md. (30px at the default text size.) */
+  --leading-title-sm: 1.625rem; /* Line height of title-sm. (26px at the default text size.) */
+  --leading-name-header: 1.875rem; /* Line height of name-header. (30px at the default text size.) */
+  --leading-name-row: 1.375rem; /* Line height of name-row. (22px at the default text size.) */
+  --leading-body: 1.375rem; /* Line height of body and body-strong in prose. (22px at the default text size.) */
+  --leading-body-row: 1.25rem; /* Line height of body in a dense row. (20px at the default text size.) */
+  --leading-body-compact: 1.25rem; /* Line height of body-compact in prose. (20px at the default text size.) */
+  --leading-body-compact-row: 1.125rem; /* Line height of body-compact in a dense row: tables, lists, Ledger labels. (18px at the default text size.) */
+  --leading-lore: 1.75rem; /* Line height of lore. (28px at the default text size.) */
+  --leading-lore-sm: 1.5rem; /* Line height of lore-sm in prose. (24px at the default text size.) */
+  --leading-lore-sm-row: 1.25rem; /* Line height of lore-sm in a row: the Chronicle's system and loot lines. (20px at the default text size.) */
+  --leading-label: 1rem; /* Line height of label. (16px at the default text size.) */
+  --leading-caption: 1rem; /* Line height of caption, caption-strong. (16px at the default text size.) */
+  --leading-code: 0.75rem; /* Line height of code. (12px at the default text size.) */
+  --leading-mark: 1; /* Line height of Text centred in a fixed-height box: tags, badges, key caps. */
+  --leading-tab: 1.5rem; /* Line height of tab. (24px at the default text size.) */
+  --leading-nav: 1.125rem; /* Line height of nav. (18px at the default text size.) */
+  --leading-numeral-headline: 4rem; /* Line height of numeral-headline. (64px at the default text size.) */
+  --leading-numeral-stat: 1.5rem; /* Line height of numeral-stat. (24px at the default text size.) */
+  --leading-numeral-row: 1.25rem; /* Line height of numeral-row. (20px at the default text size.) */
+  --leading-numeral-compact: 1.125rem; /* Line height of numeral-compact. (18px at the default text size.) */
+  --leading-sigil-label: 2.125rem; /* Line height of sigil-label. (34px at the default text size.) */
+  --leading-body-readable: 1.5rem; /* Line height of body-readable. (24px at the default text size.) */
+  --tracking-display: 0.01em; /* Marcellus titles and names. */
+  --tracking-hero: -0.02em; /* level-numeral. */
+  --tracking-headline: -0.01em; /* numeral-headline. */
+  --tracking-caps: 0.14em; /* Tracked capitals: label, tab, tags, secondary tabs — three words at most. */
+  --tracking-nav: 0.16em; /* nav and nav-active. */
+  --tracking-code: 0.06em; /* code. */
+  --tracking-button: 0.02em; /* Button labels. */
+  --row-comfortable: 3rem; /* Comfortable · Minimum height of a one-line row in a list, a Ledger or a table: 48px at the default text size. */
+  --row-standard: 2.5rem; /* Standard · Minimum height of a one-line row in a list, a Ledger or a table: 40px at the default text size. */
+  --row-compact: 2rem; /* Compact · Minimum height of a one-line row in a list, a Ledger or a table: 32px at the default text size. */
+  --control-comfortable: 2.75rem; /* Comfortable · Height of a Button, an input and a primary tab: 44px at the default text size. */
+  --control-standard: 2.5rem; /* Standard · Height of a Button, an input and a primary tab: 40px at the default text size. */
+  --control-compact: 2rem; /* Compact · Height of a Button, an input and a primary tab: 32px at the default text size. */
+  --icon-comfortable: 1.25rem; /* Comfortable · Icon size in rows and controls: 20px at the default text size (icon-md). */
+  --icon-standard: 1.25rem; /* Standard · Icon size in rows and controls: 20px at the default text size, the same as Comfortable (icon-md). It was 18px, off the icon scale. */
+  --icon-compact: 1rem; /* Compact · Icon size in rows and controls: 16px at the default text size (icon-sm). */
+  --thumb-comfortable: 2.5rem; /* Comfortable · The framed thumbnail at the start of a list row (an item, an Essence, a player): 40px at the default text size. */
+  --thumb-standard: 2rem; /* Standard · The framed thumbnail at the start of a list row (an item, an Essence, a player): 32px at the default text size. */
+  --thumb-compact: 1.5rem; /* Compact · The framed thumbnail at the start of a list row (an item, an Essence, a player): 24px at the default text size. */
+  --target-min: 1.5rem; /* Accessibility · the smallest target for anything a player clicks or taps: 24 × 24px at the default size (WCAG 2.2 AA 2.5.8). Inline links in text are exempt. */
+  --target-primary: 2rem; /* Accessibility · the recommended target for primary actions: 32 × 32px at the default size, the Compact control height. */
+  --icon-marker: 0.75rem; /* 12px · inline markers only: a solid sign beside a name or on a slot's corner — the Nobility crown beside a body-size name, a locked or favourite marker. Never a line icon: at 12px its 1.6 stroke falls to 0.8px. */
+  --icon-sm: 1rem; /* 16px · inline with text and in Compact rows and controls: cost lists, Ledger and ListRow labels, sm Buttons, a condition's icon inside its Tag, the search field, the Chronicle's controls. The smallest size for a line icon. */
+  --icon-md: 1.25rem; /* 20px · the default: NavRail items, Standard and Comfortable rows and controls, the TopBar's menu. */
+  --icon-lg: 1.5rem; /* 24px · the drawing's own size, for display: the PageHeader's section mark, an empty ItemSlot's slot icon, a JourneyCard's unlock, a reveal's heading. */
+  --border-hairline: 1px; /* Every line at rest: separators, interactive edges, floating-surface edges, the gilt frames, dotted leaders and dashed empty or locked edges. */
+  --border-emphasis: 2px; /* Selection edges only: the selected row’s start bar, the selected slot ring, the active tab and channel bars, the current entry; and Track diamonds, drawn at a size they need. Never a resting edge, and not the focus ring (shadow focus-ring). */
+  --opacity-unowned: 0.4; /* Not owned (Standards · States · Ownership and use): the art of a thing the player doesn't have, in a collection, codex or shop. Its name drops to ink-muted and says "Not owned"; the art alone never carries it. */
+  --opacity-drag-origin: 0.4; /* Dragging (Standards · States · Interaction): the place a dragged thing left. It keeps its room, so nothing reflows, while the copy under the pointer lifts with shadow-float on z-drag. */
+  --rail-width: 14rem; /* NavRail column. (224px at the default text size.) */
+  --folio-width: 22.5rem; /* Folio column. (360px at the default text size.) */
+  --topbar-height: 3.5rem; /* TopBar height. (56px at the default text size.) */
+  --hintbar-height: 2.5rem; /* KeyHints strip at the stage's foot. (40px at the default text size.) */
+  --sigil-size: 3.25rem; /* Default Sigil (md); sm is 40px, lg 68px. (52px at the default text size.) */
+  --chronicle-width: 24rem; /* Chat layout Docked, 1536px and wider: the Chronicle's own column at the far right (the game's current docked-chat width). (384px at the default text size.) */
+  --chronicle-strip: 3rem; /* Docked Chronicle collapsed to a vertical strip at the right edge. (48px at the default text size.) */
+  --chronicle-height: 20rem; /* Docked Chronicle, open, when it shares the right column under the Folio (960-1535px); also the open bottom dock on small screens. (320px at the default text size.) */
+  --chronicle-collapsed: 2.75rem; /* Collapsed Chronicle as a one-line ticker: under the Folio, as a floating bar and in the bottom dock. (44px at the default text size.) */
+  --chronicle-float-width: 22rem; /* Chat layout Floating drawer: drawer width (the game's current 22rem). (352px at the default text size.) */
+  --chronicle-float-width-wide: 24rem; /* Floating drawer width at 1536px and wider. (384px at the default text size.) */
+  --chronicle-float-height: 28rem; /* Floating drawer, open (28rem). (448px at the default text size.) */
+  --chronicle-float-tall: 56rem; /* Floating drawer, tall (56rem); never taller than the screen. (896px at the default text size.) */
+  --shell-max: 120rem; /* Widest the shell grows; beyond it the ground-deep letterbox shows. (1920px at the default text size.) */
+  --page-max: 80rem; /* The widest a Page's content grows; beyond it the Page centres its content. Full-bleed art may pass it. (1280px at the default text size.) */
+  --content-wide: 68rem; /* Content tier Wide starts here: a region this wide holds four Ledgers side by side, or a list and its inspector at 3 : 2. Container breakpoint; the stylesheet repeats the value. (1088px at the default text size.) */
+  --content-medium: 44rem; /* Content tier Medium starts here: the narrowest region that holds a list beside its inspector. Below it the inspector replaces the list. Container breakpoint. (704px at the default text size.) */
+  --content-narrow: 32rem; /* Content tier Narrow starts here: two Ledgers side by side. Below it, Stacked: one column. Container breakpoint. (512px at the default text size.) */
+  --ledger-min: 15rem; /* The narrowest a Ledger gets in a grid before the grid drops a column, so labels such as Magic Penetration never truncate. (240px at the default text size.) */
+  --stat-min: 8.5rem; /* The narrowest a StatTile gets in a stat grid before the grid drops a column. A tile with a Delta needs more room: give it a one-word label. (136px at the default text size.) */
+  --inspector-min: 20rem; /* The narrowest an inspector gets beside its list; the list gives way first. (320px at the default text size.) */
+  --z-content: 0; /* Layer 0 · content: the stage, the Page and everything in flow. The default; written only to reset a layer. */
+  --z-raised: 1; /* A focused row, or the region the pointer or focus is in, rises above its neighbours inside its own stacking context. Never used across regions. */
+  --z-sticky: 10; /* Sticky table headers, a table's held first column and sticky section heads, over the content that scrolls beneath them. */
+  --z-chrome: 20; /* The shell's chrome over the stage: the TopBar and KeyHints, and the NavRail column. */
+  --z-folio: 30; /* The Folio column, which lays its shadow over the stage, and the docked Chronicle beside or under it. */
+  --z-chat-float: 40; /* The floating Chronicle drawer, which may be dragged over the Folio, and the Chronicle's bottom dock on small screens. */
+  --z-overlay: 50; /* The rail drawer on small screens and its scrim (one below). The game's value. */
+  --z-popover: 100; /* Popovers, tooltips, hover cards, menus and suggestion lists opened from the page. The game's value. */
+  --z-modal: 200; /* A dialog and its scrim (one below). Only one at a time. The game's value. */
+  --z-confirm: 250; /* A confirmation and its scrim, over the dialog that opened it. One at a time; it opens nothing else. */
+  --z-popover-detached: 300; /* Popovers portaled to the body from inside a dialog or a confirmation, so they sit above it and are never clipped by it. The game's value. */
+  --z-toast: 400; /* Toasts: brief outcomes, over every page layer and dialog. They never take focus. */
+  --z-tour: 500; /* The guided tour (First Steps): its spotlight scrim and coach mark, over everything it may point at. */
+  --z-drag: 600; /* A drag preview under the pointer, over everything, the tour included. */
+  --duration-instant: 0ms; /* No transition. A press going down, a selection or toggle landing, the current location moving, a drag following the pointer (the floating Chronicle), a drawer that collapses into its bar. And what every category becomes under reduced motion. */
+  --duration-fast: 140ms; /* Feedback and state: a hover wash fading in and out, a press releasing, a Sigil settling at its selected size, a tooltip or hover card, a live Meter following combat ticks, and anything leaving — a drawer closing, a popover going. */
+  --duration-base: 220ms; /* Spatial, arriving: the rail drawer sliding in and its scrim, the Chronicle's body rising in as it opens, a sheet, content a toggle opens. */
+  --duration-slow: 400ms; /* Value change: a Meter filling to a new step, a number counting to a value the player caused (after combat, after a purchase). Also the live mark fading out. */
+  --duration-reveal: 600ms; /* Reveal: a reward or result appearing — victory, loot, a craft, a level — once per result. Also how long the live mark holds before it fades. The longest duration: no transition runs longer. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* Something changing where it stands: hover and press washes, a selection settling, a Meter's fill, a count, the live mark's fade. */
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1); /* Something arriving: a drawer sliding in, a popover, a reveal. Decelerates into place and never overshoots. */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* Something leaving: a drawer closing, a popover fading out, always at duration-fast. Accelerates away. */
   --font-display: Marcellus, "Cormorant Garamond", Georgia, serif;
   --font-lore: "EB Garamond", Garamond, Georgia, serif;
   --font-ui: Barlow, "Helvetica Neue", Arial, sans-serif;
   --font-numeral: "Barlow Condensed", Barlow, "Arial Narrow", sans-serif;
   --font-readable: "Atkinson Hyperlegible", Arial, sans-serif;
+  --font-system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --text-body-strong: 600 0.9375rem/1.375rem var(--font-ui); /* Emphasis in running text; Button labels. */
+  --text-body-compact-strong: 600 0.875rem/1.25rem var(--font-ui); /* Emphasis in dense text; small Button labels, names under an item slot, meter labels. */
+  --text-caption-strong: 600 0.75rem/1rem var(--font-ui); /* Emphasised small text: counts in badges, footnotes, Presence. */
+  --text-nav-active: 600 0.8125rem/1.125rem var(--font-ui); /* The current NavRail item: nav at weight 600 beside the gilt diamond (Barlow since D-030). */
+  --text-sigil-numeral: 700 1.375rem/1.5rem var(--font-numeral); /* The number inside a Sigil, in Barlow Condensed 700 with tabular figures (D-034). It scales with the Sigil (0.42 of its size), 22px at the default size. */
+}
+.level-numeral {
+  font-family: var(--font-display);
+  font-size: 5.25rem;
+  line-height: 4.75rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.title-xl {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 3.75rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.title-lg {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.title-md {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.title-sm {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.625rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.name-header {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.name-row {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.375rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-strong {
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.body-compact {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-compact-strong {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.lore {
+  font-family: var(--font-lore);
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-style: italic;
+}
+.lore-sm {
+  font-family: var(--font-lore);
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-style: italic;
+}
+.label {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+.caption {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.caption-strong {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.code {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  line-height: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.tab {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+.nav {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+}
+.nav-active {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+.numeral-headline {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  line-height: 4rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.numeral-stat {
+  font-family: var(--font-numeral);
+  font-size: 1.375rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.numeral-row {
+  font-family: var(--font-numeral);
+  font-size: 1.125rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.numeral-compact {
+  font-family: var(--font-numeral);
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.sigil-label {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  line-height: 2.125rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.sigil-numeral {
+  font-family: var(--font-numeral);
+  font-size: 1.375rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.body-readable {
+  font-family: var(--font-readable);
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
 }

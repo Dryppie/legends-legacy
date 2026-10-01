@@ -1,5 +1,15 @@
 # Floor 9: limited Resistance + Health equipment — 1 October 2026
 
+**Latest follow-on:** The [corrected Ni replay diagnosis](Tower-Floor9-Corrected-Ni-Diagnostic-20261001.md) completed **96 exact replays**, with zero new seeds. Limited gear now removes most copies but still trails full resistance sharply. Next is the proposed, unimplemented **offense ×0.95 / penetration ×40** candidate, with full-family fresh testing and independent confirmation required. No live edit; exclusions remain **926,348**. The results and next actions below preserve their historical checkpoint meaning.
+
+**Latest follow-on:** The [corrected-runtime offense calibration](Tower-Floor9-Offense-Calibration-20261001.md) is complete: **14,208 fresh fights**, no selected setting and no live edit. At ×1.25, limited routes win 10/32 and 9/32 but full-resistance counterparts win 29/32 and 30/32; ×1.5 eliminates all limited-route wins. Exclusions are **926,348**. Next is the proposed, unexecuted 96-replay diagnosis of that corrected-runtime gear gap. All results and proposed actions below retain their historical checkpoint meaning.
+
+**Latest follow-on:** The [defense-unit correction](Tower-Floor9-Summon-Defense-20261001.md) is now implemented and verified at the original 10% copy Health. A fresh complete screen still fails all 148 difficulty ceilings; exclusions are 926,252. Next is numerical damage tuning on the corrected runtime. References below to fixing the conversion describe the previous checkpoint.
+
+**Follow-on result:** The [5% copy-Health trial](Tower-Floor9-Ni-Copy-Health-20261001.md) completed and failed all 148 adjusted ceilings. No live edit. Exclusions are now 926,124. Next is the discovered summon defense-unit correction at the original 10% Health, before further tuning. The proposed experiment described below is historical and has been executed.
+
+**Latest floor-9 diagnosis (1 October):** The [paired Ni replay diagnosis](Tower-Floor9-Ni-Diagnostic-20261001.md) completed **96 exact historical replays / 244,278 audited events**, with **zero new seeds or acceptance fights**. All nine copies survived to every first party casualty. Baselines killed zero copies; eight-item setups killed nine across 32 replays; full specialization killed 225. Ninth Seal caused about **62%** of limited-equipment Health damage. No health swaps occurred. **58 fresh Python checks and five fresh native Ni tests pass**; the unchanged **442 backend passes / four skips** were authenticated and reused. Next is one frozen, unimplemented/unallocated **copy-Health 10% → 5%** candidate, preserving the rest of Ni's kit and all 148 recipes, with fresh complete-family screening and independent confirmation required. **No gameplay change; floor 9 remains unresolved.** Exclusions remain **925,996**. Floor 8 remains accepted/applied; floors 9–10 and 12–15 and the final 1–15 sweep remain.
+
 Target: the primary LL game's World Tower and offline Balance Harness. Test expected-progression equipment against unchanged **Ni, the Ninefold**, carrying forward the accepted floor-8 catalog.
 
 ## Completed result
@@ -27,7 +37,7 @@ Executed verification wrappers are `TestResults/tower-floor9-limited-resistance-
 
 The initial read-only review encountered a missing reviewer-source pin in the predecessor publication before creating output. It was resolved by explicitly binding the current reviewer and passing its six safeguards. No combat retry or replacement seed was used. All required checks completed. There are **no migrations, application configuration changes or deployment implications** from this step.
 
-## Next Tower work
+## Historical next step (diagnosis completed above)
 
 Run one **96-historical-replay Ni diagnostic**, proposed and not executed: both original leader compositions, each with baseline, selected eight-item pair and original forty-item equipment, across the first sixteen declared seeds of the first completed screening batch. Use every selected seed regardless of outcome; verify complete saved-report parity after removing the added event log. Preserve all 148 recipes for any later acceptance study.
 

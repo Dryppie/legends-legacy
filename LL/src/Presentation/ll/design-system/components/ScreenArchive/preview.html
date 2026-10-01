@@ -1,0 +1,140 @@
+<!-- @dsCard group="Page Archetypes" height=760 width=1280 subtitle="Creature Archive at 1280px — tabs, a fading name list over the scene, and a stat column in the Folio; docked chat collapsed under the Folio." page -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ScreenArchive — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.pv-col { display: grid; gap: 16px; }
+.pv-brand { font-family: var(--font-display); font-size: var(--text-name-row); line-height: var(--leading-name-row); letter-spacing: var(--tracking-display); color: var(--gilt); }
+.pv-logo { display: grid; place-items: center; width: 44px; height: 44px; }
+.pv-logo img { display: block; }
+.pv-archive { position: absolute; inset: 0; display: grid; grid-template-columns: 300px 1fr; grid-template-rows: auto minmax(0, 1fr) auto; padding: 72px 0 24px 24px; }
+.pv-tabs { grid-column: 1 / -1; display: grid; gap: 8px; margin-bottom: 8px; }
+.pv-list { grid-column: 1; min-height: 0; padding-left: 8px; }
+.pv-lore { grid-column: 1; max-width: 300px; }
+.pv-lorep { font-family: var(--font-lore); font-style: italic; font-size: var(--text-lore-sm); line-height: var(--leading-lore-sm); color: var(--ink-muted); }
+.pv-ess { display: flex; align-items: center; gap: 12px; }
+.pv-essname { font-weight: 600; color: var(--rarity-rare); }
+.pv-essmeta { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.lg-folio--start .lg-folio__scroll { gap: 20px; padding-top: 32px; }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+var LOGO = '../../assets/Logos/Logo.svg';
+var COINS = '../../assets/Currency/Coins.svg';
+var DIAMONDS = '../../assets/Currency/Diamonds.svg';
+var CARD_COMBAT = '../../assets/Cards/combatArea.webp';
+var NAV = [
+  { label: 'Character', items: [
+    { id: 'overview', title: 'Overview', icon: 'overview' },
+    { id: 'inventory', title: 'Inventory', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
+    { id: 'essences', title: 'Essences', icon: 'essences' },
+    { id: 'combat-styles', title: 'Combat Styles', icon: 'combat-styles' },
+    { id: 'achievements', title: 'Achievements', icon: 'achievements' },
+    { id: 'soulstones', title: 'Soulstones', icon: 'soulstones' } ] },
+  { label: 'World', items: [
+    { id: 'world-map', title: 'World Map', icon: 'world-map' },
+    { id: 'world-tower', title: 'World Tower', icon: 'legacy-ascension' },
+    { id: 'quests', title: 'Quests', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
+    { id: 'prophecies', title: 'Prophecies', icon: 'prophecies' } ] },
+  { label: 'City', items: [
+    { id: 'guild', title: 'Guild', icon: 'guild' },
+    { id: 'colosseum', title: 'Colosseum', icon: 'colosseum' },
+    { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' },
+    { id: 'leaderboard', title: 'Leaderboard', icon: 'leaderboard' } ] },
+  { label: 'System', items: [
+    { id: 'settings', title: 'Settings', icon: 'settings' } ] }
+];
+var CHANNELS = [
+  { id: 'all', label: 'All' }, { id: 'general', label: 'General' }, { id: 'trade', label: 'Trade' }, { id: 'help', label: 'Help' },
+  { id: 'guild', label: 'Guild', unread: 3 }, { id: 'whisper', label: 'Whispers', unread: 1 }, { id: 'raid', label: 'Raid' }, { id: 'loot', label: 'Loot' }
+];
+function chatMessages() {
+  return [
+    { id: 1, channel: 'general', channelLabel: 'General', time: '21:02', author: 'Maren', text: 'Anyone seen the Ember Knight near Shenic tonight?' },
+    { id: 2, channel: 'system', channelLabel: 'System', kind: 'system', time: '21:03', text: 'The World Tower resets in 2 hours.' },
+    { id: 3, channel: 'trade', channelLabel: 'Trade', time: '21:04', author: 'Oswin', text: h(F, null, 'WTS ', h(L.ItemLink, { rarity: 'Rare', onClick: function () {} }, 'Ember Wolf Essence'), ' ×3 — 400 Cinders each') },
+    { id: 4, channel: 'guild', channelLabel: 'Guild', time: '21:05', author: 'Kaelen', text: 'Raid at 22:00. Bring resist gear, the boss burns.' },
+    { id: 5, channel: 'loot', channelLabel: 'Loot', kind: 'loot', time: '21:06', text: h(F, null, 'You found ', h(L.ItemLink, { rarity: 'Epic', onClick: function () {} }, 'Soul Prism'), ' and 120 Cinders.') },
+    { id: 6, channel: 'general', channelLabel: 'General', time: '21:07', author: 'Tamsin', mention: true, text: h(F, null, h('span', { className: 'lg-mention' }, '@Aldric'), ' that crown is ridiculous. Where from?') },
+    { id: 7, channel: 'whisper', channelLabel: 'Whisper', time: '21:08', author: 'Kaelen', direction: 'from', text: 'Can you tank tonight?' },
+    { id: 8, channel: 'help', channelLabel: 'Help', time: '21:09', author: 'Pip', text: 'How do Essences drop? Is it per kill?' }
+  ];
+}
+function useChat(initialOpen) {
+  var o = React.useState(initialOpen), c = React.useState('all'), v = React.useState(''), m = React.useState(null);
+  var msgs = m[0] || chatMessages();
+  return {
+    open: o[0], onToggle: function () { o[1](!o[0]); },
+    channels: CHANNELS, activeChannel: c[0], onChannelChange: c[1], messages: msgs,
+    composer: { channel: 'general', channelLabel: 'General', value: v[0], onChange: v[1], onSend: function (t) {
+      m[1](msgs.concat([{ id: Date.now(), channel: 'general', channelLabel: 'General', time: '21:10', author: 'Aldric', text: t }])); v[1]('');
+    } }
+  };
+}
+
+var NAMES = ['Alpha Wolf', 'Bloodfang Wolf', 'Dire Wolf', 'Ember Wolf', 'Horned Wolf', 'Blackjaw Spider', 'Giant Spider', 'Cave Bat', 'Giant Bat', 'Blue Slime', 'Green Slime', 'Ember Knight'];
+var ITEMS = NAMES.map(function (n, i) {
+  return { id: n, name: n, tag: n === 'Blackjaw Spider' ? '+ New' : undefined, locked: n === 'Ember Knight', reason: n === 'Ember Knight' ? 'Clear Floor 10 to unlock' : undefined };
+});
+function stats(i) {
+  return { level: 8 + i * 2, hp: 1200 + i * 330, power: 90 + i * 17, armor: 20 + i * 3, res: 12 + i * 2, crit: 5 + (i % 4) * 2, dodge: 3 + (i % 5), block: i % 3 * 4, haste: 4 + i, ess: (i * 3) % 10 };
+}
+function App() {
+  var s = React.useState('Ember Wolf'), sel = s[0], setSel = s[1];
+  var tab = React.useState('creatures'), filt = React.useState('all');
+  var i = NAMES.indexOf(sel), st = stats(i);
+  var parts = sel.split(' ');
+  var chat = useChat(false);
+  return h(L.GameShell, {
+    height: 760,
+    chatLayout: 'docked',
+    chronicle: h(L.Chronicle, chat),
+    rail: h(L.NavRail, { sections: NAV, activeId: 'essences',
+      header: h(F, null, h('span', { className: 'pv-logo' }, h('img', { src: LOGO, width: 36, height: 36, alt: '' })), h('span', { className: 'pv-brand' }, "Legend's", h('br'), 'Legacy')) }),
+    top: function (api) {
+      return h(L.TopBar, { title: 'Creature Archive', eyebrow: 'Essences', onMenu: api.openRail },
+        h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: COINS, short: true }),
+        h(L.CurrencyPill, { name: 'Soulstones', amount: 36, iconSrc: DIAMONDS }));
+    },
+    folio: h(L.Folio, { align: 'start', title: parts.slice(1).join(' '), titleSub: parts[0], ariaLabel: sel },
+      h(L.LevelPlate, { level: st.level, xp: st.ess, xpMax: 10, xpUnit: 'Essence', aside: [{ icon: 'colosseum', label: 'Power', value: st.power }, { icon: 'overview', label: 'Armor', value: st.armor }] }),
+      h('div', { className: 'pv-col' },
+        h(L.Meter, { tone: 'hp', label: 'HP', value: st.hp, max: st.hp })),
+      h('div', { className: 'pv-col' },
+        h(L.SectionRule, { label: 'Status' }),
+        h('div', { className: 'lg-statgrid' },
+          h(L.StatTile, { label: 'Resist', value: st.res }),
+          h(L.StatTile, { label: 'Crit', value: st.crit, suffix: '%' }),
+          h(L.StatTile, { label: 'Dodge', value: st.dodge, suffix: '%' }),
+          h(L.StatTile, { label: 'Block', value: st.block, suffix: '%' }),
+          h(L.StatTile, { label: 'Haste', value: st.haste }),
+          h(L.StatTile, { label: 'Threat', value: 'High' }))),
+      h('div', { className: 'pv-col' },
+        h(L.SectionRule, { label: 'Essence' }),
+        h('div', { className: 'pv-ess' },
+          h(L.ItemSlot, { icon: 'essences', rarity: 'Rare', caption: false, size: 'sm' }),
+          h('div', null, h('div', { className: 'pv-essname' }, sel + ' Essence'), h('div', { className: 'pv-essmeta' }, st.ess + ' of 10 collected'))))),
+  },
+    h(L.Stage, { image: CARD_COMBAT, focus: 'center', label: 'Creature Archive' },
+      h('div', { className: 'pv-archive' },
+        h('div', { className: 'pv-tabs' },
+          h(L.TabStrip, { label: 'Archive', tabs: [{ id: 'creatures', label: 'Creatures' }, { id: 'regions', label: 'Regions' }, { id: 'dungeons', label: 'Dungeons' }, { id: 'tower', label: 'World Tower' }], activeId: tab[0], onChange: tab[1] }),
+          h(L.TabStrip, { level: 'secondary', label: 'Filter', tabs: [{ id: 'all', label: 'All' }, { id: 'disc', label: 'Discovered' }, { id: 'ready', label: 'Essence ready', count: 2 }, { id: 'unseen', label: 'Unseen' }], activeId: filt[0], onChange: filt[1] })),
+        h('div', { className: 'pv-list' }, h(L.EntryList, { items: ITEMS, activeId: sel, onSelect: setSel, label: 'Creatures' })),
+        h('div', { className: 'pv-lore' }, h(L.Panel, { title: 'Lore', titleAlign: 'end' },
+          h('p', { className: 'pv-lorep' }, 'The ' + sel + ' is found in the ash fields east of Shenic. It hunts in pairs and circles the weakest traveller first.')))
+      )));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

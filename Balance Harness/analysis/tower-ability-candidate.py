@@ -18,6 +18,7 @@ SHARED_PENETRATION_VERSION = 'tower-kodoku-shared-penetration-v1'
 KODOKU_OFFENSE_VERSION = 'tower-kodoku-eight-item-pressure-v1'
 KODOKU_REFINEMENT_VERSION = 'tower-kodoku-eight-item-pressure-refinement-v1'
 KODOKU_MIDPOINT_VERSION = 'tower-kodoku-eight-item-pressure-midpoint-v1'
+NI_COPY_HEALTH_VERSION = 'tower-ni-copy-health-v1'
 ABILITIES = Path('Data/combat/abilities.json')
 TOWER = Path('Data/world-tower/tower-floors.json')
 
@@ -72,7 +73,15 @@ def kodoku_midpoint_module():
     return value
 
 
+def ni_copy_health_module():
+    spec = importlib.util.spec_from_file_location('tower_ni_copy_health', Path(__file__).with_name('tower-ni-copy-health.py'))
+    value = importlib.util.module_from_spec(spec); spec.loader.exec_module(value)
+    return value
+
+
 def validate(api, plan, floor):
+    if plan.get('version') == NI_COPY_HEALTH_VERSION:
+        return ni_copy_health_module().expected(api, plan, floor)
     if plan.get('version') == KODOKU_MIDPOINT_VERSION:
         return kodoku_midpoint_module().expected(api, plan, floor)
     if plan.get('version') == KODOKU_REFINEMENT_VERSION:
@@ -181,6 +190,8 @@ def validate(api, plan, floor):
 
 
 def materialize(api, isolated, plan, floor):
+    if plan.get('version') == NI_COPY_HEALTH_VERSION:
+        return ni_copy_health_module().materialize(api, isolated, plan, floor)
     if plan.get('version') == KODOKU_MIDPOINT_VERSION:
         return kodoku_midpoint_module().materialize(api, isolated, plan, floor)
     if plan.get('version') == KODOKU_REFINEMENT_VERSION:
@@ -228,6 +239,8 @@ def materialize(api, isolated, plan, floor):
 
 
 def verify(api, candidate, plan, floor):
+    if plan.get('version') == NI_COPY_HEALTH_VERSION:
+        return ni_copy_health_module().verify(api, candidate, plan, floor)
     if plan.get('version') == KODOKU_MIDPOINT_VERSION:
         return kodoku_midpoint_module().verify(api, candidate, plan, floor)
     if plan.get('version') == KODOKU_REFINEMENT_VERSION:

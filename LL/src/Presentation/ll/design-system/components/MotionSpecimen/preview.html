@@ -1,0 +1,411 @@
+<!-- @dsCard group="Foundations" height=3370 width=1480 subtitle="The motion tokens, then every category played beside its reduced-motion twin; a Bazaar list held under the pointer, the Chronicle reading back, and the only two loops allowed." -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MotionSpecimen — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground-deep); color: var(--ink); font-family: var(--font-ui); }
+.pv { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--section-lg); padding: var(--section-md); }
+.pv-sec { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--stack-lg); align-content: start; }
+.pv-sec > header { display: grid; gap: var(--stack-xs); }
+.pv-h { margin: 0; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-note { margin: 0; max-width: var(--lg-measure); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-note b, .pv-note code, .pv-mean code, .pv-rules code { font: inherit; font-weight: 600; color: var(--ink); }
+.pv-t { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--text-title-sm); line-height: var(--leading-title-sm); letter-spacing: var(--tracking-display); color: var(--ink); }
+.pv-mean { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); }
+.pv-num { font-family: var(--font-numeral); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; color: var(--ink); }
+.pv-tok { font-weight: 600; color: var(--ink); }
+.pv-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: var(--inline-md); }
+
+/* Tokens */
+.pv-tokens { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--section-md); align-items: start; }
+.pv-durs, .pv-eases { display: grid; gap: var(--stack-md); }
+.pv-dur { display: grid; grid-template-columns: 10.5rem 4rem minmax(0, 1fr); align-items: center; gap: var(--inline-md); font-size: var(--text-body-compact); line-height: var(--leading-body-compact); }
+.pv-dur > p { grid-column: 1 / -1; margin: calc(-1 * var(--stack-xs)) 0 0; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-lane { position: relative; height: 1.5rem; background: var(--surface); }
+.pv-span { position: absolute; left: 0; top: 50%; height: var(--border-hairline); background: var(--line-strong); }
+.pv-mover { position: absolute; inset: 0; transform: translateX(var(--to, 0)); transition: transform var(--d) var(--e, var(--ease-standard)); }
+.pv-mover::before { content: ""; position: absolute; left: 0; top: -0.5rem; width: var(--border-emphasis); height: 1rem; background: var(--ink); }
+.is-idle .pv-mover { transition: none; transform: none; }
+.pv-eases { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--inline-lg); }
+.pv-ease { display: grid; gap: var(--stack-sm); align-content: start; }
+.pv-curve { display: block; width: 100%; height: auto; background: var(--surface); }
+.pv-curve .pv-axis { stroke: var(--line); stroke-width: 1; fill: none; }
+.pv-curve .pv-path { stroke: var(--ink); stroke-width: 2; fill: none; }
+.pv-curve .pv-cp { stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+.pv-ease .pv-lane { height: 1.25rem; }
+.pv-spec { margin: 0; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+
+/* Categories: the category, its motion, its reduced twin */
+.pv-cats { display: grid; grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) minmax(0, 1fr); gap: var(--stack-lg) var(--section-sm); align-items: stretch; }
+.pv-cats > .pv-h { align-self: end; }
+.pv-cat { display: grid; gap: var(--stack-sm); align-content: start; }
+.pv-rules { margin: 0; padding-left: 1.125rem; list-style-type: "\2013\00a0"; display: grid; gap: 2px; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-demo { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--stack-md); align-content: start; padding: var(--inset-lg); background: var(--ground); container: lg-region / inline-size; }
+.pv-rail { width: 14rem; }
+.pv-rail .lg-rail { height: auto; padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5); }
+.pv-sigils { display: flex; gap: var(--inline-lg); align-items: flex-start; }
+.pv-perks { margin: 0; padding-left: 1.125rem; list-style-type: "\2013\00a0"; display: grid; gap: 2px; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink); }
+.pv-value { display: grid; gap: var(--stack-md); max-width: 26rem; }
+.pv-mini { contain: layout paint; height: 13.75rem; }
+.pv-mini .lg-shellhost { height: 100% !important; }
+.pv-mini .lg-shell { min-height: 0; height: 100%; overflow: hidden; }
+.pv-mini .lg-shell__main { min-height: 0; }
+.pv-mini .lg-stage__content { display: grid; place-items: center; height: 100%; padding: var(--space-8) var(--space-5) var(--space-5); }
+.pv-chat { height: 12.5rem; display: flex; align-items: flex-end; }
+.pv-chat > .lg-chronicle { width: 100%; }
+.pv-chat { position: relative; }
+.pv-chat__hint { position: absolute; left: 0; top: 0; }
+.pv-chat .lg-chronicle--floating:not(.is-collapsed) { height: 12.5rem; }
+.pv-result { min-height: 8.5rem; }
+.pv-result .lg-panel__body { display: grid; gap: var(--stack-xs); padding: var(--inset-md) var(--lg-inset); font-size: var(--text-body-compact); line-height: var(--leading-body-compact); }
+.pv-empty { margin: 0; padding: var(--inset-md) 0; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+
+/* Live updates */
+.pv-live { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--section-sm); align-items: start; }
+.pv-bazaar { display: grid; gap: var(--stack-md); }
+.pv-pending { display: flex; align-items: center; height: 2rem; }
+.pv-pending > span { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-status { margin: 0; min-height: calc(2 * var(--leading-body-compact)); font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink-muted); }
+.pv-status b { font-weight: 600; color: var(--ink); }
+.pv-read { display: grid; gap: var(--stack-md); }
+.pv-read .lg-chronicle { height: 16.25rem; border: var(--border-hairline) solid var(--line); }
+
+/* Loops: the two allowed, in the preview's own styles (neither is a component). */
+.pv-wait { display: grid; gap: var(--stack-sm); max-width: 24rem; }
+.pv-wait__label { margin: 0; min-height: var(--leading-body-compact); font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink); }
+.pv-indet { position: relative; height: 0.25rem; background: var(--meter-track); overflow: hidden; }
+.pv-indet__seg { position: absolute; inset: 0 auto 0 0; width: 30%; background: var(--ink-muted); animation: pv-sweep calc(var(--duration-reveal) * 2) linear infinite; }
+@keyframes pv-sweep { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+.pv-fight { position: relative; display: grid; gap: var(--stack-sm); max-width: 24rem; }
+.pv-swing { position: relative; height: 0.25rem; background: var(--meter-track); overflow: hidden; }
+.pv-swing__fill { position: absolute; inset: 0; background: var(--ink-muted); transform-origin: left center; transform: scaleX(0); }
+.is-fighting .pv-swing__fill { animation: pv-swing calc(var(--duration-reveal) * 2) linear infinite; }
+@keyframes pv-swing { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.pv-hits { position: relative; height: var(--leading-numeral-row); }
+.pv-dmg { position: absolute; right: 0; bottom: 0; font-family: var(--font-numeral); font-weight: 700; font-size: var(--text-numeral-row); line-height: var(--leading-numeral-row); font-variant-numeric: tabular-nums lining-nums; color: var(--damage-physical); animation: pv-float var(--duration-reveal) var(--ease-exit) forwards; }
+@keyframes pv-float { to { opacity: 0; transform: translateY(-1.5rem); } }
+/* Reduced: the sweeps stop and the damage numbers land in place. */
+[data-motion="reduced"] .pv-indet__seg, [data-motion="reduced"] .pv-swing__fill { display: none; }
+[data-motion="reduced"] .pv-dmg { animation: none; }
+@media (prefers-reduced-motion: reduce) { .pv-indet__seg, .pv-swing__fill { display: none; } .pv-dmg { animation: none; } }
+
+.pv-audit { display: grid; gap: var(--stack-xs); }
+.pv-audit p { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink); }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment, M = L.motion, fmt = L.format.number;
+var COINS = '../../assets/Currency/Coins.svg';
+var MINUS = '−';
+
+function useReplay() {
+  // idle → run on the next frame, so the markers start from zero each time.
+  var s = React.useState('idle');
+  return { phase: s[0], play: function () { s[1]('idle'); requestAnimationFrame(function () { requestAnimationFrame(function () { s[1]('run'); }); }); } };
+}
+
+/* ---------- Tokens ---------- */
+var DURS = [
+  ['duration-instant', 'instant', 'A press going down, a selection landing, a drag, the current location.'],
+  ['duration-fast', 'fast', 'Hover, a press releasing, a Sigil settling, a tooltip, anything leaving.'],
+  ['duration-base', 'base', 'A drawer arriving and its scrim; the Chronicle opening; toggled content.'],
+  ['duration-slow', 'slow', 'A Meter’s step, a count after combat or a purchase, the live mark’s fade.'],
+  ['duration-reveal', 'reveal', 'A reward or result appearing; how long the live mark holds.']
+];
+var EASES = [
+  ['ease-standard', 'standard', [0.4, 0, 0.2, 1], 'Changing in place'],
+  ['ease-enter', 'enter', [0, 0, 0.2, 1], 'Arriving'],
+  ['ease-exit', 'exit', [0.4, 0, 1, 1], 'Leaving']
+];
+function Curve(p) {
+  var c = p.cp, X = function (x) { return 8 + x * 104; }, Y = function (y) { return 112 - y * 104; };
+  return h('svg', { className: 'pv-curve', viewBox: '0 0 120 120', role: 'img', 'aria-label': p.label + ': cubic-bezier(' + c.join(', ') + ')' },
+    h('path', { className: 'pv-axis', d: 'M8 8V112H112' }),
+    h('path', { className: 'pv-cp', d: 'M' + X(0) + ' ' + Y(0) + 'L' + X(c[0]) + ' ' + Y(c[1]) + 'M' + X(1) + ' ' + Y(1) + 'L' + X(c[2]) + ' ' + Y(c[3]) }),
+    h('path', { className: 'pv-path', d: 'M' + X(0) + ' ' + Y(0) + 'C' + X(c[0]) + ' ' + Y(c[1]) + ' ' + X(c[2]) + ' ' + Y(c[3]) + ' ' + X(1) + ' ' + Y(1) }));
+}
+function Tokens() {
+  var r = useReplay(), max = M.duration.reveal;
+  return h('div', { className: 'pv-tokens' + (r.phase === 'idle' ? ' is-idle' : '') },
+    h('div', { className: 'pv-durs' },
+      DURS.map(function (d) {
+        var ms = M.duration[d[1]], w = ms / max * 100;
+        return h('div', { key: d[0], className: 'pv-dur' },
+          h('span', { className: 'pv-tok' }, d[0]),
+          h('span', { className: 'pv-num' }, fmt(ms) + 'ms'),
+          h('div', { className: 'pv-lane', 'aria-hidden': 'true' },
+            h('span', { className: 'pv-span', style: { width: w + '%' } }),
+            h('span', { className: 'pv-mover', style: { width: w + '%', '--d': 'var(--' + d[0] + ')', '--to': '100%' } })),
+          h('p', null, d[2]));
+      }),
+      h('div', { className: 'pv-ctl' }, h(L.Button, { size: 'sm', onClick: r.play }, 'Play the durations'),
+        h('span', { className: 'pv-mean' }, 'Each mark crosses its line in its duration; the lines are drawn to the same scale.'))),
+    h('div', { className: 'pv-durs' },
+      h('div', { className: 'pv-eases' },
+        EASES.map(function (e) {
+          return h('div', { key: e[0], className: 'pv-ease' },
+            h(Curve, { cp: e[2], label: e[0] }),
+            h('div', { className: 'pv-lane', 'aria-hidden': 'true' },
+              h('span', { className: 'pv-span', style: { width: '100%' } }),
+              h('span', { className: 'pv-mover', style: { '--d': 'var(--duration-reveal)', '--e': 'var(--' + e[0] + ')', '--to': 'calc(100% - var(--border-emphasis))' } })),
+            h('span', { className: 'pv-tok' }, e[0]),
+            h('p', { className: 'pv-spec' }, e[3] + '.', h('br'), 'cubic-bezier(' + e[2].join(', ') + ')'));
+        })),
+      h('p', { className: 'pv-note' }, 'Time runs left to right, progress bottom to top. Every control point sits inside the square, so no curve passes its end and comes back. Played over ', h('code', null, 'duration-reveal'), ' to be seen.')));
+}
+
+/* ---------- Categories ---------- */
+var CITY = [{ label: 'City', items: [
+  { id: 'guild', title: 'Guild', icon: 'guild' },
+  { id: 'colosseum', title: 'Colosseum', icon: 'colosseum' },
+  { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar', badge: 2, badgeLabel: '2 sales completed' }] }];
+function FeedbackDemo(p) {
+  var act = React.useState('colosseum');
+  return h(F, null,
+    h('div', { className: 'pv-ctl' },
+      h(L.Button, null, 'Challenge'), h(L.Button, { variant: 'solid' }, 'Enter dungeon'), h(L.Button, { variant: 'danger' }, 'Abandon'), h(L.Button, { variant: 'quiet' }, 'Cancel')),
+    h('div', { className: 'pv-rail' }, h(L.NavRail, { sections: CITY, activeId: act[0], onNavigate: act[1], label: 'City' + p.suffix })),
+    h('p', { className: 'pv-mean' }, 'Hover and press each. Choosing a rail item moves the current location at once.'));
+}
+var ATTRS = [{ id: 'str', label: 'Strength', value: 42 }, { id: 'agi', label: 'Agility', value: 38 }, { id: 'arc', label: 'Arcana', value: 51, state: 'ready' }];
+function StateDemo(p) {
+  var sel = React.useState('agi'), perks = React.useState(false);
+  return h(F, null,
+    h('div', { className: 'pv-sigils', role: 'group', 'aria-label': 'Attributes' + p.suffix },
+      ATTRS.map(function (a) {
+        return h(L.Sigil, { key: a.id, size: 'sm', label: a.label, value: a.value, labelPosition: 'bottom', state: sel[0] === a.id ? 'selected' : (a.state || 'default'), onClick: function () { sel[1](a.id); } });
+      })),
+    h('div', { className: 'pv-ctl' }, h(L.Button, { size: 'sm', 'aria-pressed': perks[0], onClick: function () { perks[1](!perks[0]); } }, perks[0] ? 'Hide perks' : 'Show perks')),
+    perks[0] ? h('ul', { className: 'pv-perks lg-enter' },
+      h('li', null, 'Every point of Agility adds 0.4% attack speed.'),
+      h('li', null, 'At 40 Agility, Evasion rises by 5%.')) : null);
+}
+function ValueDemo(p) {
+  var xp = React.useState(2480), cin = React.useState(12480);
+  var shown = M.useLive(cin[0], { cause: 'player', reduced: p.reduced });
+  return h('div', { className: 'pv-value' },
+    h(L.Meter, { tone: 'xp', size: 'bar', label: 'Experience', unit: 'EXP', value: xp[0], max: 4150 }),
+    h('div', null, h(L.CurrencyPill, { name: 'Cinders', amount: shown.value, iconSrc: COINS, reserve: 6 })),
+    h('div', { className: 'pv-ctl' },
+      h(L.Button, { size: 'sm', onClick: function () { xp[1](Math.min(4150, xp[0] + 640)); cin[1](cin[0] + 380); } }, 'Win the fight'),
+      h(L.Button, { size: 'sm', onClick: function () { cin[1](cin[0] - 1250); } }, 'Buy an Essence'),
+      h(L.Button, { size: 'sm', variant: 'quiet', onClick: function () { xp[1](2480); cin[1](12480); } }, 'Reset')),
+    h('p', { className: 'pv-mean' }, p.reduced ? 'The fill and the Cinders change at once.' : 'The fill scales over 400ms; the Cinders count, since you caused the change.'));
+}
+var NAV_MINI = [{ label: 'City', items: [
+  { id: 'guild', title: 'Guild', icon: 'guild' }, { id: 'colosseum', title: 'Colosseum', icon: 'colosseum' }, { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' }] }];
+var CHAT = [{ id: 'all', label: 'All' }, { id: 'trade', label: 'Trade' }, { id: 'guild', label: 'Guild' }];
+var LINES = [
+  { id: 1, channel: 'trade', channelLabel: 'Trade', author: 'Oswin', text: 'WTS Ember Wolf Essence, 400 each' },
+  { id: 2, channel: 'guild', channelLabel: 'Guild', author: 'Kaelen', text: 'Raid at 22:00. Bring resist gear.' },
+  { id: 3, channel: 'system', channelLabel: 'System', kind: 'system', text: 'The World Tower resets in 2 hours.' }
+];
+function SpatialDemo(p) {
+  var open = React.useState(false);
+  return h(F, null,
+    h('div', { className: 'pv-mini' },
+      h(L.GameShell, {
+        height: '100%',
+        rail: h(L.NavRail, { sections: NAV_MINI, activeId: 'cinder-bazaar', label: 'Game' + p.suffix }),
+        top: function (api) { return h(L.TopBar, { title: 'Cinder Bazaar', eyebrow: 'City', onMenu: api.openRail }); }
+      }, h(L.Stage, { label: 'Cinder Bazaar' + p.suffix }, h('p', { className: 'pv-mean' }, 'Open the rail from the menu button; Escape or the scrim closes it.')))),
+    h('div', { className: 'pv-chat' },
+      open[0] ? null : h('p', { className: 'pv-mean pv-chat__hint' }, 'The floating Chronicle, collapsed to its bar. Open it from the arrow.'),
+      h(L.Chronicle, { floating: true, channels: CHAT, activeChannel: 'all', messages: LINES, open: open[0], onToggle: function () { open[1](!open[0]); }, label: 'Chronicle' + p.suffix })));
+}
+function RevealDemo(p) {
+  var n = React.useState(0);
+  return h(F, null,
+    h('div', { className: 'pv-ctl' }, h(L.Button, { size: 'sm', onClick: function () { n[1](n[0] + 1); } }, 'Finish the fight')),
+    h('div', { className: 'pv-result' },
+      n[0] ? h(L.Panel, { key: n[0], className: 'lg-reveal', title: 'Victory' },
+        h('span', null, 'Ashen Wolf defeated in 14s.'),
+        h('span', null, h('span', { className: 'pv-num' }, '240'), ' EXP · ', h('span', { className: 'pv-num' }, '380'), ' Cinders'),
+        h('span', null, 'Loot: ', h(L.ItemLink, { rarity: 'Rare', onClick: function () {} }, 'Ember Wolf Essence'))) :
+        h('p', { className: 'pv-empty' }, 'The result appears here, once per fight.')));
+}
+var PRICES = [{ id: 'p1', title: 'Ember Wolf Essence', rarity: 'Rare', price: 400 }, { id: 'p2', title: 'Soul Prism', rarity: 'Epic', price: 2250 }, { id: 'p3', title: 'Ashen Pelt', rarity: 'Common', price: 35 }];
+function MarkDemo(p) {
+  var rows = React.useState(PRICES), step = React.useState(0), pay = React.useState(12480);
+  var gold = M.useLive(pay[0], { reduced: p.reduced });
+  function change() {
+    var i = step[0] % 3, d = [20, -150, 5][i];
+    rows[1](rows[0].map(function (r, k) { return k === i ? Object.assign({}, r, { price: r.price + d }) : r; }));
+    step[1](step[0] + 1);
+  }
+  return h(F, null,
+    h(L.List, { label: 'Prices each, in Cinders' + p.suffix, density: 'compact' },
+      rows[0].map(function (r) { return h(L.ListRow, { key: r.id, title: r.title, rarity: r.rarity, value: fmt(r.price), live: true }); })),
+    h('div', null, h('span', { className: gold.className }, h(L.CurrencyPill, { name: 'Cinders', amount: gold.value, iconSrc: COINS, reserve: 6 }))),
+    h('div', { className: 'pv-ctl' },
+      h(L.Button, { size: 'sm', onClick: change }, 'A price changes'),
+      h(L.Button, { size: 'sm', onClick: function () { pay[1](pay[0] + 500); } }, 'Guild payout')),
+    h('p', { className: 'pv-mean' }, p.reduced ? 'The mark shows at once and goes at once, after 600ms.' : 'The mark shows at once, holds 600ms and fades over 400ms. The payout is marked, not counted.'));
+}
+var CATS = [
+  { name: 'Feedback', tokens: [['duration-fast', 'ease-standard'], ['duration-instant', 'a press going down']], rules: ['Hover fades a layer’s opacity: a wash, an edge, a brighter fill.', 'Text changes colour at once; focus is never animated.'], reduced: 'The wash, edge and press at once.', Demo: FeedbackDemo },
+  { name: 'State change', tokens: [['duration-instant', 'the mark'], ['duration-fast', 'a Sigil’s scale']], rules: ['The mark lands in the frame of the press, and the old one clears.', 'Toggled content is placed at once and rises in over duration-base.'], reduced: 'The mark and the size at once.', Demo: StateDemo },
+  { name: 'Value change', tokens: [['duration-slow', 'a step, a count'], ['duration-fast', 'a live Meter']], rules: ['A fill is scaled, never resized; the printed value is the truth.', 'Count only what the player caused, inside the reserved width.'], reduced: 'The fill and the number at once.', Demo: ValueDemo },
+  { name: 'Spatial', tokens: [['duration-base', 'ease-enter, arriving'], ['duration-fast', 'ease-exit, leaving']], rules: ['The rail drawer slides by its own width, and hides once gone.', 'The Chronicle’s body rises in; it closes at once into its bar.'], reduced: 'The drawer and scrim at once, in place.', Demo: SpatialDemo },
+  { name: 'Reveal', tokens: [['duration-reveal', 'ease-enter']], rules: ['What the player waited for, once per result, as one piece.', 'It never holds up input.'], reduced: 'The whole result at once.', Demo: RevealDemo },
+  { name: 'Live-update highlight', tokens: [['duration-reveal', 'the hold'], ['duration-slow', 'the fade']], rules: ['The changed wash, behind a value that changed by itself.', 'It says that it changed, not whether it helps.'], reduced: 'On at once, off at once.', Demo: MarkDemo }
+];
+function Categories() {
+  return h('div', { className: 'pv-cats' },
+    h('span', { className: 'pv-h' }, 'Category'), h('span', { className: 'pv-h' }, 'Motion'), h('span', { className: 'pv-h' }, 'Reduced motion'),
+    CATS.map(function (c) {
+      return h(F, { key: c.name },
+        h('div', { className: 'pv-cat' },
+          h('h3', { className: 'pv-t' }, c.name),
+          h('p', { className: 'pv-mean' }, c.tokens.map(function (t, i) { return h(F, { key: i }, i ? ' · ' : '', h('code', { className: 'pv-tok' }, t[0]), ' ', t[1]); })),
+          h('ul', { className: 'pv-rules' }, c.rules.map(function (r) { return h('li', { key: r }, r); }), h('li', null, h('b', { className: 'pv-tok' }, 'Reduced: '), c.reduced))),
+        h('div', { className: 'pv-demo' }, h(c.Demo, { reduced: false, suffix: '' })),
+        h('div', { className: 'pv-demo', 'data-motion': 'reduced' }, h(c.Demo, { reduced: true, suffix: ', reduced motion' })));
+    }));
+}
+
+/* ---------- Live updates ---------- */
+var LISTINGS = [
+  { id: 'l1', seller: 'Oswin', price: 380 }, { id: 'l2', seller: 'Maren', price: 395 }, { id: 'l3', seller: 'Pip', price: 400 },
+  { id: 'l4', seller: 'Tamsin', price: 420 }, { id: 'l5', seller: 'Kaelen', price: 460 }
+];
+var SELLERS = ['Aldric', 'Brannoc', 'Ysolde', 'Corwin', 'Ilse', 'Fenn'];
+function refresh(list, n) {
+  // One market tick: a price moves, the cheapest sells, a new listing arrives — then the market sorts by price.
+  var out = list.map(function (x, i) { return i === (n % list.length) ? Object.assign({}, x, { price: x.price + (n % 2 ? 30 : -45) }) : x; });
+  out = out.filter(function (x, i) { return i !== 0; });
+  out.push({ id: 'n' + n, seller: SELLERS[n % SELLERS.length], price: 370 + (n * 37) % 90 });
+  return out.sort(function (a, b) { return a.price - b.price; });
+}
+function Bazaar() {
+  var data = React.useState(LISTINGS), n = React.useState(1), sel = React.useState('l3'), auto = React.useState(false), bought = React.useState(null);
+  var ll = M.useLiveList(data[0], { keep: sel[0] });
+  var tick = React.useRef(); tick.current = function () { data[1](function (d) { return refresh(d, n[0]); }); n[1](n[0] + 1); };
+  React.useEffect(function () { if (!auto[0]) return; var t = setInterval(function () { tick.current(); }, 2000); return function () { clearInterval(t); }; }, [auto[0]]);
+  var aside = h('span', { className: 'pv-pending' }, ll.pending
+    ? h(L.Button, { size: 'sm', variant: 'quiet', onClick: ll.release }, ll.pending + ' new ' + (ll.pending === 1 ? 'listing' : 'listings'))
+    : h('span', null, 'In Cinders'));
+  return h('div', { className: 'pv-bazaar' },
+    h('div', { ref: ll.ref },
+      h(L.Panel, { title: 'Ember Wolf Essence', flush: true, aside: aside },
+        h(L.List, { label: 'Listings', density: 'compact' },
+          ll.rows.map(function (r) {
+            var x = r.item;
+            return h(L.ListRow, {
+              key: r.key, title: x.seller, value: fmt(x.price), live: true, muted: r.gone, meta: r.gone ? 'Sold' : undefined,
+              selected: sel[0] === r.key, onClick: function () { sel[1](r.key); },
+              trailing: h(L.Button, { size: 'sm', disabled: r.gone, 'aria-label': 'Buy from ' + x.seller, onClick: function () { bought[1](x.seller + ' at ' + fmt(x.price)); } }, 'Buy')
+            });
+          })))),
+    h('div', { className: 'pv-ctl' },
+      h(L.Button, { size: 'sm', onClick: function () { tick.current(); } }, 'Refresh now'),
+      h(L.Button, { size: 'sm', 'aria-pressed': auto[0], onClick: function () { auto[1](!auto[0]); } }, auto[0] ? 'Stop refreshing' : 'Refresh every 2 seconds')),
+    h('p', { className: 'pv-status', role: 'status' },
+      ll.held ? h(F, null, h('b', null, 'Held.'), ' The pointer or focus is on the list: rows keep their order, prices change in place, sold rows stay, new listings wait.')
+        : h(F, null, h('b', null, 'Free.'), ' The next refresh sorts the list by price. Turn on the refresh and rest the pointer on a Buy button.'),
+      bought[0] ? ' Bought from ' + bought[0] + '.' : null));
+}
+function ReadBack() {
+  var msgs = React.useState(function () {
+    var a = []; for (var i = 1; i <= 14; i++) a.push({ id: 'r' + i, channel: i % 3 ? 'trade' : 'guild', channelLabel: i % 3 ? 'Trade' : 'Guild', author: ['Oswin', 'Maren', 'Kaelen', 'Pip'][i % 4], text: ['WTS Soul Prism, 2,250', 'Anyone for the Ember Knight?', 'Raid at 22:00.', 'LF tank for the World Tower', 'WTB Ashen Pelt ×20'][i % 5] });
+    return a;
+  }), n = React.useState(15);
+  function arrive() {
+    var add = [0, 1, 2].map(function (k) { var i = n[0] + k; return { id: 'r' + i, channel: 'general', channelLabel: 'General', author: ['Tamsin', 'Fenn', 'Ilse'][k], text: ['Did anyone see the drop rates change?', 'Bazaar prices are wild tonight', 'gz on the Legendary!'][k] }; });
+    msgs[1](msgs[0].concat(add).slice(-24)); n[1](n[0] + 3);
+  }
+  return h('div', { className: 'pv-read' },
+    h(L.Chronicle, { channels: [{ id: 'all', label: 'All' }, { id: 'trade', label: 'Trade' }, { id: 'guild', label: 'Guild' }], activeChannel: 'all', messages: msgs[0], label: 'Chronicle, reading back' }),
+    h('div', { className: 'pv-ctl' }, h(L.Button, { size: 'sm', onClick: arrive }, '3 lines arrive')),
+    h('p', { className: 'pv-status' }, 'Scroll the log up, then let lines arrive: the line you are reading stays put while old lines leave the top, and the count waits at the foot.'));
+}
+
+/* ---------- Loops ---------- */
+function WaitDemo(p) {
+  var st = React.useState('idle');
+  React.useEffect(function () { if (st[0] !== 'run') return; var t = setTimeout(function () { st[1]('done'); }, 3200); return function () { clearTimeout(t); }; }, [st[0]]);
+  return h('div', { className: 'pv-wait' },
+    h('p', { className: 'pv-wait__label' }, st[0] === 'run' ? 'Searching the Bazaar…' : st[0] === 'done' ? '12 listings found.' : 'No search running.'),
+    st[0] === 'run' ? h('div', { className: 'pv-indet', role: 'progressbar', 'aria-label': 'Searching the Bazaar' + p.suffix }, h('span', { className: 'pv-indet__seg' })) : h('div', { className: 'pv-indet', 'aria-hidden': 'true' }),
+    h('div', { className: 'pv-ctl' }, h(L.Button, { size: 'sm', disabled: st[0] === 'run', onClick: function () { st[1]('run'); } }, 'Search the Bazaar')));
+}
+var HITS = [184, 212, 176, 240, 198, 221];
+function FightDemo(p) {
+  var hp = React.useState(1500), hits = React.useState([]), on = React.useState(false), k = React.useRef(0);
+  React.useEffect(function () {
+    if (!on[0]) return;
+    var i = 0, t = setInterval(function () {
+      var d = HITS[i % HITS.length], id = ++k.current;
+      hp[1](function (x) { return Math.max(0, x - d); });
+      hits[1](function (a) { return a.concat([{ id: id, d: d }]).slice(-3); });
+      setTimeout(function () { hits[1](function (a) { return a.filter(function (x) { return x.id !== id; }); }); }, M.ms('reveal'));
+      if (++i >= HITS.length) { clearInterval(t); on[1](false); }
+    }, M.ms('reveal') * 2);
+    return function () { clearInterval(t); };
+  }, [on[0]]);
+  return h('div', { className: 'pv-fight' + (on[0] ? ' is-fighting' : ''), 'data-motion': p.reduced ? 'reduced' : 'playback' },
+    h('div', { className: 'pv-hits', 'aria-hidden': 'true' }, hits[0].map(function (x) { return h('span', { key: x.id, className: 'pv-dmg' }, MINUS + fmt(x.d)); })),
+    h(L.Meter, { tone: 'hp', size: 'bar', label: 'Ashen Wolf', unit: 'HP', value: hp[0], max: 1500, live: true }),
+    h('div', { className: 'pv-swing', 'aria-hidden': 'true' }, h('span', { className: 'pv-swing__fill' })),
+    h('div', { className: 'pv-ctl' },
+      h(L.Button, { size: 'sm', disabled: on[0], onClick: function () { hp[1](1500); on[1](true); } }, 'Fight'),
+      h('span', { className: 'pv-mean' }, 'The swing timer loops while the fight runs.')));
+}
+function Loops() {
+  return h('div', { className: 'pv-cats' },
+    h('span', { className: 'pv-h' }, 'Loop'), h('span', { className: 'pv-h' }, 'Motion'), h('span', { className: 'pv-h' }, 'Reduced motion'),
+    h('div', { className: 'pv-cat' }, h('h3', { className: 'pv-t' }, 'Indeterminate progress'),
+      h('ul', { className: 'pv-rules' }, h('li', null, 'A progressbar with no value, named by what is happening.'), h('li', null, 'Only while the wait is real; a measurable wait is a Meter.'), h('li', null, h('b', { className: 'pv-tok' }, 'Reduced: '), 'the sweep stops; the label stays.'))),
+    h('div', { className: 'pv-demo' }, h(WaitDemo, { suffix: '' })),
+    h('div', { className: 'pv-demo', 'data-motion': 'reduced' }, h(WaitDemo, { suffix: ', reduced motion' })),
+    h('div', { className: 'pv-cat' }, h('h3', { className: 'pv-t' }, 'Live combat playback'),
+      h('ul', { className: 'pv-rules' }, h('li', null, 'Its container carries data-motion="playback".'), h('li', null, 'A live Meter follows each hit over duration-fast.'), h('li', null, h('b', { className: 'pv-tok' }, 'Reduced: '), 'hits land in place, and nothing drifts or sweeps.'))),
+    h('div', { className: 'pv-demo' }, h(FightDemo, { reduced: false })),
+    h('div', { className: 'pv-demo', 'data-motion': 'reduced' }, h(FightDemo, { reduced: true })));
+}
+
+function Audit(p) {
+  var r = React.useState(null);
+  function run() { r[1](M.audit(document.getElementById('root'))); }
+  React.useEffect(function () { var t = setTimeout(run, 200); return function () { clearTimeout(t); }; }, []);
+  var a = r[0];
+  return h('div', { className: 'pv-audit' },
+    h('p', null, a ? (a.ok ? 'No problems. ' : a.problems.length + ' problems: ' + a.problems.join('; ') + '. ') : 'Auditing…',
+      a ? h(F, null, h('span', { className: 'pv-num' }, fmt(a.counts.transitions)), ' elements with a transition, ', h('span', { className: 'pv-num' }, fmt(a.counts.animations)), ' animating, ', h('span', { className: 'pv-num' }, fmt(a.counts.loops)), ' looping.') : null),
+    h('div', { className: 'pv-ctl' }, h(L.Button, { size: 'sm', onClick: run }, 'Audit again'),
+      h('span', { className: 'pv-mean' }, 'Run it while the fight or the search runs: their loops are the two allowed.')));
+}
+
+function App() {
+  return h('div', { className: 'pv' },
+    h('section', { className: 'pv-sec', 'aria-labelledby': 'h-tokens' },
+      h('header', null, h('h2', { className: 'pv-h', id: 'h-tokens' }, 'Tokens'),
+        h('p', { className: 'pv-note' }, 'Five durations and three easings, ', h('code', null, 'tokens.json'), ' · ', h('code', null, 'motion'), '. Nothing runs longer than ', h('code', null, 'duration-reveal'), ', and leaving is quicker than arriving.')),
+      h(Tokens)),
+    h('section', { className: 'pv-sec', 'aria-labelledby': 'h-cats' },
+      h('header', null, h('h2', { className: 'pv-h', id: 'h-cats' }, 'Categories'),
+        h('p', { className: 'pv-note' }, 'Each category beside its reduced twin, which sits under ', h('code', null, 'data-motion="reduced"'), ' — the same as the operating system’s setting. Only ', h('b', null, 'transform'), ' and ', h('b', null, 'opacity'), ' move.')),
+      h(Categories)),
+    h('section', { className: 'pv-sec', 'aria-labelledby': 'h-live' },
+      h('header', null, h('h2', { className: 'pv-h', id: 'h-live' }, 'Live updates'),
+        h('p', { className: 'pv-note' }, 'A live update never shifts the layout and never moves the control the player is about to click. The Bazaar list is held by ', h('code', null, 'LL.motion.useLiveList'), '; the Chronicle keeps the line you are reading.')),
+      h('div', { className: 'pv-live' }, h(Bazaar), h(ReadBack))),
+    h('section', { className: 'pv-sec', 'aria-labelledby': 'h-loops' },
+      h('header', null, h('h2', { className: 'pv-h', id: 'h-loops' }, 'Loops'),
+        h('p', { className: 'pv-note' }, 'Only two things loop, and only while what they show is happening. Neither is a component; both are drawn here in the preview’s own styles.')),
+      h(Loops)),
+    h('section', { className: 'pv-sec', 'aria-labelledby': 'h-audit' },
+      h('header', null, h('h2', { className: 'pv-h', id: 'h-audit' }, 'Audit'),
+        h('p', { className: 'pv-note' }, h('code', null, 'LL.motion.audit'), ' on this page: transitions and animations on anything but transform and opacity, durations past ', h('code', null, 'duration-reveal'), ', and loops other than the two allowed.')),
+      h(Audit)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

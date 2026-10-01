@@ -1,0 +1,163 @@
+<!-- @dsCard group="Foundations" height=1710 width=1480 subtitle="An inventory and its inspector in regions 1,248, 864 and 507px wide: side by side at 3 : 2, side by side with the inspector at its minimum, and one column where the inspector takes the list's place." -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>LayoutSpecimen — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground-deep); color: var(--ink); font-family: var(--font-ui); }
+.pv { display: grid; gap: var(--section-md); padding: var(--section-md); }
+.pv-row { display: flex; flex-wrap: wrap; gap: var(--section-md); align-items: start; }
+.pv-case { display: grid; gap: var(--stack-lg); align-content: start; }
+.pv-cap { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--inline-xs) var(--inline-md); max-width: 100%; }
+.pv-tier { font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink); }
+.pv-size { font-family: var(--font-numeral); font-size: var(--text-numeral-compact); line-height: var(--leading-numeral-compact); font-weight: 600; color: var(--ink-muted); }
+.pv-where { flex: 1 0 100%; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+/* The frame is the region: its content box is exactly the stated width, and its dashed edge is drawn outside it. */
+.pv-frame { box-sizing: content-box; max-width: 100%; background: var(--ground); outline: 1px dashed var(--line-strong); outline-offset: 0.5rem; container: lg-region / inline-size; }
+.pv-slots { font-size: var(--text-caption); line-height: var(--leading-caption); font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink-muted); }
+.pv-insp { display: grid; gap: var(--stack-lg); }
+.pv-insp:focus { outline: none; }
+.pv-top { display: flex; align-items: center; gap: var(--inline-md); }
+.pv-top > div { display: grid; gap: var(--stack-xs); min-width: 0; }
+.pv-name { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--text-title-sm); line-height: var(--leading-title-sm); letter-spacing: var(--tracking-display); color: var(--pv-rar); }
+.pv-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--inline-sm); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-lore { margin: 0; max-width: var(--lg-measure); font-family: var(--font-lore); font-style: italic; font-size: var(--text-lore-sm); line-height: var(--leading-lore-sm); color: var(--ink-muted); }
+.pv-actions { display: flex; flex-wrap: wrap; gap: var(--inline-sm); }
+.pv-note { margin: 0; max-width: var(--lg-measure); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.pv-note b { font-weight: 600; color: var(--ink); }
+.r-common { --pv-rar: var(--rarity-common); } .r-uncommon { --pv-rar: var(--rarity-uncommon); } .r-rare { --pv-rar: var(--rarity-rare); }
+.r-epic { --pv-rar: var(--rarity-epic); } .r-legendary { --pv-rar: var(--rarity-legendary); }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment, f = L.format;
+
+var ITEMS = [
+  { id: 'crown', title: 'Crown of Cinders', rarity: 'Legendary', icon: 'achievements', meta: 'Helm · Lv 20', kind: 'Helm', level: 20, quantity: 1, value: 48000,
+    lore: 'Worn by the last Warden of the Ember Gate. It still smells of smoke.',
+    stats: [{ label: 'Max Health', value: '+620' }, { label: 'Armor', value: '+48' }, { label: 'Resistance', value: '+22' }, { label: 'Ability Haste', value: '+12' }],
+    compare: [{ label: 'Health', value: 4770, delta: 620, deltaPolarity: 'better' }, { label: 'Armor', value: 41, suffix: '%', delta: 3, deltaPolarity: 'better' }, { label: 'Haste', value: 27, delta: 12, deltaPolarity: 'better' }, { label: 'Power', value: 142, delta: 0 }] },
+  { id: 'fang', title: 'Ember Fang', rarity: 'Epic', icon: 'colosseum', meta: 'Sword · Lv 18', kind: 'Sword', level: 18, quantity: 1, value: 9400,
+    lore: 'Forged in the ash fields east of Shenic. It never quite cools.',
+    stats: [{ label: 'Power', value: '+42' }, { label: 'Attack Speed', value: '1.30' }, { label: 'Crit Chance', value: '+4.5%' }, { label: 'Fire Damage', value: f.range(18, 24) }],
+    compare: [{ label: 'Power', value: 184, delta: 42, deltaPolarity: 'better' }, { label: 'Speed', value: '1.30', delta: 0.18, deltaText: '0.18', deltaPolarity: 'better' }, { label: 'Crit', value: 14, suffix: '%', delta: 4.5, deltaPolarity: 'better' }, { label: 'Armor', value: 36, suffix: '%', delta: -2, deltaPolarity: 'worse' }] },
+  { id: 'plate', title: "Warden's Plate", rarity: 'Rare', icon: 'combat-styles', meta: 'Chest · Lv 16', kind: 'Chest', level: 16, quantity: 1, value: 3800,
+    lore: 'Plate hammered thin enough to run in, thick enough to matter.',
+    stats: [{ label: 'Armor', value: '+96' }, { label: 'Max Health', value: '+310' }, { label: 'Block', value: '+3%' }],
+    compare: [{ label: 'Armor', value: 44, suffix: '%', delta: 6, deltaPolarity: 'better' }, { label: 'Health', value: 4460, delta: 310, deltaPolarity: 'better' }, { label: 'Block', value: 7, suffix: '%', delta: 3, deltaPolarity: 'better' }, { label: 'Dodge', value: 4, suffix: '%', delta: -2, deltaPolarity: 'worse' }] },
+  { id: 'wolf', title: 'Dire Wolf Essence', rarity: 'Rare', icon: 'essences', meta: 'Essence · Lv 12', kind: 'Essence', level: 12, quantity: 3, value: 1250,
+    lore: 'Found in the ash fields east of Shenic.',
+    stats: [{ label: 'Cooldown', value: '6.8s' }, { label: 'Damage', value: '54' }, { label: 'SP Cost', value: '12' }, { label: 'Duration', value: '4s' }] },
+  { id: 'prism', title: 'Soul Prism', rarity: 'Epic', icon: 'soulstones', meta: 'Material', kind: 'Material', quantity: 7, value: 2100,
+    lore: 'Attunes an Essence at Ascension II and above.',
+    stats: [{ label: 'In your bags', value: f.fraction(7, 20) }, { label: 'Used for', value: 'Attunement' }] },
+  { id: 'bow', title: 'Ashwood Bow', rarity: 'Uncommon', icon: 'colosseum', meta: 'Bow · Lv 9', kind: 'Bow', level: 9, quantity: 1, value: 310,
+    lore: 'Light, forgiving, and a little warped.',
+    stats: [{ label: 'Power', value: '+14' }, { label: 'Attack Speed', value: '1.05' }] },
+  { id: 'tonic', title: 'Glowcap Tonic', rarity: 'Uncommon', icon: 'quest-journal', meta: 'Consumable', kind: 'Consumable', quantity: 12, value: 40,
+    lore: 'Tastes of moss and regret.',
+    stats: [{ label: 'Restores', value: f.unit(400, 'HP') }, { label: 'Cooldown', value: '30s' }] },
+  { id: 'sabre', title: 'Iron Sabre', rarity: 'Common', icon: 'colosseum', meta: 'Sword · Lv 4', kind: 'Sword', level: 4, quantity: 2, value: 85,
+    lore: 'Every recruit carries one. Most keep it.',
+    stats: [{ label: 'Power', value: '+6' }, { label: 'Attack Speed', value: '1.10' }] }
+];
+
+var TIERS = [[68, 'Wide'], [44, 'Medium'], [32, 'Narrow'], [0, 'Stacked']];
+function tierOf(rem) { for (var i = 0; i < TIERS.length; i++) if (rem >= TIERS[i][0]) return TIERS[i][1]; }
+
+// A frame is a region of a set width. Its caption reads the width live, so at Large and Extra large text it shows the tier the region reaches sooner.
+function Frame(p) {
+  var ref = React.useRef(null), st = React.useState(null);
+  React.useEffect(function () {
+    var el = ref.current;
+    function measure() {
+      var w = el.getBoundingClientRect().width, rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      st[1]({ px: Math.round(w), rem: Math.round(w / rem * 10) / 10 });
+    }
+    measure();
+    var ro = new ResizeObserver(measure); ro.observe(el);
+    var mo = new MutationObserver(measure); mo.observe(document.documentElement, { attributes: true });
+    return function () { ro.disconnect(); mo.disconnect(); };
+  }, []);
+  var m = st[0];
+  return h('div', { className: 'pv-case', style: { width: p.width, maxWidth: '100%' } },
+    h('div', { className: 'pv-cap' },
+      h('span', { className: 'pv-tier' }, m ? tierOf(m.rem) : ' '),
+      h('span', { className: 'pv-size' }, m ? f.number(m.px) + 'px · ' + m.rem + 'rem' : ' '),
+      h('span', { className: 'pv-where' }, p.where)),
+    h('div', { className: 'pv-frame', ref: ref, style: { width: p.width } }, p.children));
+}
+
+function Inspector(p) {
+  var it = p.item;
+  return h('div', { className: 'pv-insp r-' + it.rarity.toLowerCase() },
+    h(L.Panel, null, h('div', { className: 'pv-insp' },
+      h('div', { className: 'pv-top' },
+        h(L.ItemSlot, { icon: it.icon, rarity: it.rarity, size: 'sm', caption: false }),
+        h('div', null,
+          h('h3', { className: 'pv-name', id: p.headingId }, it.title),
+          h('div', { className: 'pv-meta' }, h(L.Tag, { tone: it.rarity.toLowerCase() }, it.rarity), it.meta, it.quantity > 1 ? h('span', null, f.times(it.quantity) + ' in your bags') : null))),
+      h('p', { className: 'pv-lore' }, it.lore),
+      h(L.Ledger, { title: 'Item stats', rows: it.stats.concat([{ label: 'Sell value', value: f.unit(it.value, 'Cinders') }]) }),
+      it.compare ? h(F, null,
+        h(L.SectionRule, { label: 'Versus equipped' }),
+        h('div', { className: 'lg-statgrid' }, it.compare.map(function (c) { return h(L.StatTile, Object.assign({ key: c.label }, c)); }))) : null,
+      h('div', { className: 'pv-actions' },
+        it.compare ? h(L.Button, { variant: 'solid' }, 'Equip') : null,
+        h(L.Button, null, 'Sell'),
+        h(L.Button, { variant: 'quiet' }, it.compare ? 'Salvage' : 'Split stack')))));
+}
+
+var uid = 0;
+function Inventory(p) {
+  var sel = React.useState(p.selected || 'fang'), view = React.useState(p.view || 'list');
+  var id = React.useRef('pv-inv' + (++uid)).current;
+  var splitRef = React.useRef(null), inspRef = React.useRef(null), lastRow = React.useRef(null);
+  var item = ITEMS.filter(function (x) { return x.id === sel[0]; })[0];
+  function oneColumn() { var l = splitRef.current && splitRef.current.querySelector('.lg-split__list'); return !l || getComputedStyle(l).display === 'none'; }
+  function open(it, i) { lastRow.current = i; sel[1](it.id); view[1]('inspector'); }
+  function back() {
+    view[1]('list');
+    setTimeout(function () {
+      var i = lastRow.current != null ? lastRow.current : ITEMS.indexOf(item);
+      var b = splitRef.current && splitRef.current.querySelector('.lg-listrow[data-index="' + i + '"] .lg-listrow__hit');
+      if (b) b.focus();
+    }, 0);
+  }
+  // In one column, opening a row moves focus into the inspector; Back and Escape return it to the row.
+  React.useEffect(function () {
+    if (view[0] === 'inspector' && lastRow.current != null && oneColumn() && inspRef.current) inspRef.current.focus();
+  }, [view[0], sel[0]]);
+  function onKey(e) { if (e.key === 'Escape' && view[0] === 'inspector' && oneColumn()) { e.stopPropagation(); back(); } }
+
+  return h('div', { className: 'lg-split', 'data-view': view[0], ref: splitRef },
+    h('div', { className: 'lg-split__list' },
+      h(L.Panel, { title: 'Bags', flush: true, aside: h('span', { className: 'pv-slots' }, f.fraction(ITEMS.length, 60) + ' slots · value in Cinders') },
+        h(L.List, { label: 'Bags' }, ITEMS.map(function (it, i) {
+          return h(L.ListRow, { key: it.id, title: it.title, rarity: it.rarity, icon: it.icon, meta: it.meta, quantity: it.quantity, value: f.number(it.value),
+            tags: it.id === 'plate' ? [h(L.Tag, { key: 'e' }, 'Equipped')] : null,
+            selected: sel[0] === it.id, onClick: function () { open(it, i); } });
+        })))),
+    h('section', { className: 'lg-split__inspector', 'aria-labelledby': id + '-h', tabIndex: -1, ref: inspRef, onKeyDown: onKey, style: { outline: 'none' } },
+      h('div', { className: 'pv-insp' },
+        h(L.Button, { variant: 'link', className: 'lg-split__back', onClick: back }, '← Back to Bags'),
+        h(Inspector, { item: item, headingId: id + '-h' }))));
+}
+
+function App() {
+  return h('div', { className: 'pv' },
+    h(Frame, { width: '1248px', where: 'The stage content at 1920px with no Folio and the Chronicle docked. List and inspector at 3 : 2.' }, h(Inventory, { selected: 'fang' })),
+    h('div', { className: 'pv-row' },
+      h(Frame, { width: '864px', where: 'At 1536px, no Folio, docked. The inspector holds its 20rem minimum.' }, h(Inventory, { selected: 'crown' })),
+      h(Frame, { width: '507px', where: 'At 1280px with Large text. One column: the inspector takes the list’s place.' }, h(Inventory, { selected: 'fang', view: 'inspector' }))),
+    h('p', { className: 'pv-note' }, h('b', null, 'Try it:'), ' in the one-column region, Back or Esc returns to the list and to the row you came from. Each inspector is a region of its own: the widest is about 30rem, so its stat grid is Stacked and holds two tiles a row, whatever the page’s tier. At Large and Extra large text each region reaches a smaller tier sooner; the captions read the tier live.'));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

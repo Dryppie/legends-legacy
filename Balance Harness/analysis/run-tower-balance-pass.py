@@ -771,6 +771,10 @@ def main():
             for name in (candidate_helper, 'tower-kodoku-shared-penetration.py'):
                 helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
                 for path in (helper,owner/name): pins[str(path)] = sha(path)
+        if ability_plan['version'] == 'tower-ni-copy-health-v1':
+            for name in ('tower-ni-copy-health.py', 'tower-kodoku-shared-penetration.py'):
+                helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
+                for path in (helper, owner/name): pins[str(path)] = sha(path)
         for path in (api / 'Data').rglob('*.json'):
             pins[str(path)] = sha(path)
         api = isolated

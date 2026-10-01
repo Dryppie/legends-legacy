@@ -8,6 +8,15 @@ This is a backlog, a roadmap and a prompt library. It does not design the system
 
 **How to use the prompts.** Paste them in backlog order, or follow Section 5 for the first fifteen. Each prompt assumes the earlier items it depends on are finished. After Claude Design completes an item, check it against DS-132 (the acceptance checklist) once that exists. Until then, check it against DS-003 (guardrails). Record any deviation Claude Design proposes in the decision log from DS-001. The prompts name existing Grimoire components and tokens on purpose, so that Claude Design extends the system rather than building a second one next to it.
 
+**Working in the repository (since 1 October 2026).** The design system moved from Claude Design to `LL/src/Presentation/ll/design-system/` (D-090, D-091; see `DESIGN_SYSTEM_REPO_MIGRATION_PLAN.md`). Paste this preamble before each prompt, in a Cowork session with the Legends-Legacy folder connected:
+
+```text
+Work on the Grimoire design system in LL/src/Presentation/ll/design-system/ in the Legends-Legacy folder,
+following design-system/AGENTS.md. Port the result to the lg-* components in the same step.
+```
+
+Where a prompt or this plan says Claude Design, the page or the artifact, read the repository instead: `design-system/AGENTS.md` maps the terms. Its definition of done applies to every item, alongside the DS-003 guardrails until DS-132 exists.
+
 ---
 
 ## 1. Design System Goals

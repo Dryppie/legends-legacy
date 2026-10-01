@@ -1,0 +1,28 @@
+<!-- @dsCard group="Components · Type & ornament" height=180 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SectionRule — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.pv-col { display: grid; gap: 16px; }
+
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+// One ornament per surface (Foundations · Lines): the ornament appears once here, and the other groups use a band or a hairline.
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'pv-col', style: { padding: 24, maxWidth: 420 } },
+  h(L.SectionRule, { label: 'Status' }),
+  h(L.SectionRule, { label: 'Biography', align: 'end' }),
+  h(L.SectionRule, { variant: 'hairline', label: 'Rewards', aside: '3 of 5' }),
+  h(L.SectionRule, { variant: 'ornament', label: 'Effects' })));
+</script>
+</body>
+</html>

@@ -7,10 +7,12 @@ import {
   output,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { LgRarity } from './grimoire-core';
-import { LgIconName } from './grimoire-icons';
+import { LgRarity, lgCx } from './grimoire-core';
 import { LgItemSlotComponent } from './item-slot.component';
 import { LgTagComponent } from './tag.component';
+import { LgIconName } from './grimoire-icons';
+import { LG_STATES, lgStateWarn } from './grimoire-states';
+import { LgWhyDirective, LgWhyOptions } from './grimoire-a11y';
 
 export type LgLoadoutSlotState = 'attuned' | 'open' | 'locked';
 
@@ -19,55 +21,58 @@ export interface LgLoadoutAbility {
   cooldown?: string;
 }
 
-/** One Essence loadout slot: the Essence, its rarity and abilities, or an open/locked slot. */
+/**
+ * An Essence loadout slot, in three states: attuned (a neutral Attuned Tag), open (an empty frame and "Empty") and
+ * locked (a dashed frame, a Locked Tag and the unlock condition printed as the name). A locked slot that would be a
+ * button stays one, aria-disabled, its printed condition part of its name.
+ */
 @Component({
   selector: 'lg-loadout-slot',
-  imports: [LgItemSlotComponent, LgTagComponent, NgTemplateOutlet],
+  imports: [LgItemSlotComponent, LgTagComponent, NgTemplateOutlet, LgWhyDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
     <ng-template #body>
       <lg-item-slot
-        size="sm"
+        [icon]="currentState() === 'attuned' ? icon() || 'essences' : undefined"
+        [image]="currentState() === 'attuned' ? image() : undefined"
+        [rarity]="currentState() === 'attuned' ? rarity() : undefined"
         [caption]="false"
-        [icon]="state() === 'locked' ? undefined : icon()"
-        [image]="state() === 'locked' ? undefined : image()"
-        [rarity]="state() === 'attuned' ? rarity() : undefined"
+        size="sm"
       />
       <div class="lg-loadout__body">
         <div class="lg-loadout__head">
-          <span class="lg-loadout__slot">Slot {{ index() + 1 }}</span>
-          @switch (state()) {
-            @case ('attuned') { <lg-tag tone="new">Attuned</lg-tag> }
-            @case ('open') { <lg-tag>Open</lg-tag> }
-            @default { <lg-tag>Locked</lg-tag> }
+          <span class="lg-loadout__slot">Slot {{ index() != null ? index()! + 1 : '' }}</span>
+          @if (currentState() === 'attuned') {
+            <lg-tag state="attuned" />
+          } @else if (currentState() === 'locked') {
+            <lg-tag state="locked" />
           }
         </div>
-        <div class="lg-loadout__name" [class]="nameClass()">
-          @switch (state()) {
-            @case ('attuned') { {{ name() }} }
-            @case ('open') { Empty }
-            @default { {{ unlockLabel() ?? 'Locked' }} }
-          }
-        </div>
-        @if (state() === 'attuned' && (active() || passive())) {
+        <div [class]="nameClass()">{{ nameText() }}</div>
+        @if (currentState() === 'attuned' && (active() || passive())) {
           <div class="lg-loadout__abilities">
             @if (active(); as ability) {
-              <span><b>Active</b> {{ ability.name }}@if (ability.cooldown) { · {{ ability.cooldown }} }</span>
+              <span><b>Active</b> {{ ability.name }}{{ ability.cooldown ? ' · ' + ability.cooldown : '' }}</span>
             }
             @if (passive(); as ability) {
               <span><b>Passive</b> {{ ability.name }}</span>
             }
           </div>
         }
-        @if (state() === 'open' && hint()) {
+        @if (currentState() === 'open' && hint()) {
           <div class="lg-loadout__abilities">{{ hint() }}</div>
         }
       </div>
     </ng-template>
 
-    @if (interactive() && state() !== 'locked') {
-      <button type="button" [class]="classes()" (click)="activate.emit()">
+    @if (interactive()) {
+      <button
+        type="button"
+        [class]="classes()"
+        [lgWhy]="why()"
+        (click)="currentState() === 'locked' ? null : activate.emit()"
+      >
         <ng-container [ngTemplateOutlet]="body" />
       </button>
     } @else {
@@ -77,25 +82,48 @@ export interface LgLoadoutAbility {
 })
 export class LgLoadoutSlotComponent {
   /** Zero-based slot index. */
-  readonly index = input(0);
-  readonly state = input<LgLoadoutSlotState>('open');
+  readonly index = input<number>();
+  /** Defaults to attuned when there is a name, else open. */
+  readonly state = input<LgLoadoutSlotState>();
   readonly name = input<string>();
   readonly rarity = input<LgRarity>();
   readonly active = input<LgLoadoutAbility>();
   readonly passive = input<LgLoadoutAbility>();
-  readonly icon = input<LgIconName>('essences');
+  readonly icon = input<LgIconName>();
   readonly image = input<string>();
-  /** Locked slots: "Unlocks at level 20". */
+  /** Locked: how it unlocks ("Unlocks at level 20"). */
+  readonly reason = input<string>();
+  /** Older name for `reason`. */
   readonly unlockLabel = input<string>();
   /** Open slots: a short prompt. */
   readonly hint = input<string>();
-  /** Renders a button (e.g. to open the Essence preview). */
+  /** Renders a button that emits `activate` (React's onClick). */
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly activate = output<void>();
 
-  protected readonly classes = computed(() => `lg-loadout is-${this.state()}`);
+  protected readonly currentState = computed<LgLoadoutSlotState>(() => this.state() || (this.name() ? 'attuned' : 'open'));
+  private readonly unlock = computed(() => {
+    if (this.currentState() !== 'locked') return '';
+    const u = this.reason() || this.unlockLabel() || '';
+    if (!u) {
+      const i = this.index();
+      lgStateWarn('loadout:' + i, `LoadoutSlot ${i != null ? i + 1 : ''} is locked with no reason; say how it unlocks`);
+    }
+    return u;
+  });
+  /** The condition is printed inside the button, so it is already in the name ("Slot 3 Locked Unlocks at level 20"). */
+  protected readonly why = computed<LgWhyOptions | null>(() =>
+    this.currentState() === 'locked' && this.interactive()
+      ? { reason: this.unlock(), word: 'Locked', printed: true, describe: false }
+      : null,
+  );
+  protected readonly classes = computed(() => lgCx('lg-loadout', 'is-' + this.currentState()));
   protected readonly nameClass = computed(() => {
-    const rarity = this.rarity();
-    return this.state() === 'attuned' && rarity ? `lg-itemlink--${rarity.toLowerCase()}` : '';
+    const r = this.rarity();
+    return lgCx('lg-loadout__name', r && this.currentState() === 'attuned' && 'lg-itemlink--' + r.toLowerCase());
+  });
+  protected readonly nameText = computed(() => {
+    const s = this.currentState();
+    return s === 'attuned' ? this.name() : s === 'open' ? 'Empty' : this.unlock() || LG_STATES.locked.word;
   });
 }

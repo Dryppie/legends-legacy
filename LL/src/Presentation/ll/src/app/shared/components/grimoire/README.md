@@ -1,16 +1,24 @@
 # Grimoire components
 
 Angular edition of the **Grimoire** design system (the dark, gilt-and-arcana look
-from the Legend's Legacy design-system artifact). Every component is standalone,
+whose source of truth is `design-system/`, two folders up from `src/`). Every component is standalone,
 OnPush and signal-based, and carries the `lg-` prefix so it can live next to the
 current `ll-` UI while screens are moved over one at a time.
 
 Nothing in the app uses these yet — adding them changes no existing screen.
 
+**Same as the design system.** Each component renders the markup of its React
+reference component in `design-system/components/bundle.js` and shares its
+stylesheet, and the parity check in `design-system/parity/` proves it (D-093).
+Every design-system change ports here in the same step (`design-system/AGENTS.md`).
+
 ## Setup (already done on this branch)
 
-- `src/styles/grimoire/tokens.css` — colour, type, spacing and layout tokens.
-- `src/styles/grimoire/components.css` — all `lg-*` component styles.
+- `src/styles/grimoire/tokens.css` and `fonts/` — every token and the bundled
+  font, copied from `design-system/` by `design-system/scripts/sync-styles.mjs`.
+- `src/styles/grimoire/components.css` — all `lg-*` component styles: a copy of
+  `design-system/components/bundle.css`, made by the same script (D-092).
+  Never edit these copies; change `design-system/` and run the script.
 - Both are listed in `angular.json` → `styles`, after `src/styles.css`, so they
   win over Tailwind's preflight.
 - `src/index.html` loads Barlow, Barlow Condensed, EB Garamond and Atkinson
@@ -84,24 +92,37 @@ Custom message rendering (item links, player names) goes in an
 
 ## Mapping from the design-system docs
 
-The artifact documents the React versions. The Angular ones keep the same names
-and props, with these conventions:
+`design-system/` documents the React reference versions (`components/bundle.js`,
+`components/index.d.ts`). The Angular ones keep the same names and props, with
+these conventions (Governance · Code parity has the full table, component by
+component):
 
 | React | Angular |
 | --- | --- |
 | `<Button variant="quiet">` | `<button lgButton="quiet">` (also on `<a>`) |
 | `<Heading level="screen">` | `<h2 lgHeading="screen">` |
-| `aside={…}`, `footer={…}` props | projected content with `lgSlot="aside"` / `lgSlot="footer"` |
-| `onSelect`, `onChange` callbacks | outputs (`(select)`, `(pick)`, `(navigate)`) |
+| `<List>` with `<ListRow>` | `<lg-list>` with `<li lgListRow>` |
+| ReactNode props (`aside`, `footer`, `actions`, `thumb`, …) | projected content with `lgSlot="aside"`, `lgSlot="footer"`, … |
+| `onClick` that makes a part a control | `interactive` input plus `(activate)` output |
+| other callbacks (`onSelect`, `onNavigate`, `onSend`, …) | outputs (`(select)`, `(navigate)`, `(send)`; SearchField: `(pick)`, `(submitted)`) |
 | controlled `value` + `onChange` | `model()` inputs — use `[(value)]`, `[(activeId)]` |
 | `renderText` | `ng-template lgChronicleText` |
+| `LL.motion.useLive` | `lgLive()` in a field initializer |
+| `LL.motion.useLiveList` | `[lgLiveList]` directive (`#live="lgLiveList"`, then `live.rows()`) |
+| `LL.layers.use` | `lgOpenLayer()`, closing the handle when the layer goes |
+| the reason tip | `[lgWhy]` directive, built into Button, EntryList, ItemSlot, Sigil, LoadoutSlot and NavRail |
 
-Components: Banner, Button, Chronicle, Constellation, CurrencyPill, Emblem,
-EntryList, Folio, GameShell, Heading, Icon, ItemLink, ItemSlot, JourneyCard,
-KeyHints, Ledger, LevelPlate, LoadoutSlot, Meter, NavRail, Page, PageHeader,
-Panel, Presence, SearchField, SectionRule, Sigil, Stage, StatFigure, StatTile,
-TabStrip, Tag, TopBar, Track.
+Components: Banner, Button, Chronicle, Constellation, CurrencyPill, Delta,
+Emblem, EntryList, Folio, GameShell, Heading, Icon, ItemLink, ItemSlot,
+JourneyCard, Key, KeyHints, Ledger, LevelPlate, List and ListRow, LoadoutSlot,
+Meter, NavRail, Num, Page, PageHeader, Panel, Presence, SearchField,
+SectionRule, Sigil, Stage, StatFigure, StatTile, TabStrip, Tag, TopBar, Track.
 
-Helpers in `grimoire-core.ts`: `lgFormatNumber`, `lgFormatShort`, `lgPolygon`,
-`LG_RARITY_CODES`, the `LgRarity` type and the `LG_SHELL` token.
-Icons live in `grimoire-icons.ts` (`LgIconName` lists the names).
+Helpers:
+
+- `grimoire-format.ts` — numerals (`LG_FORMAT`, `lgFormatNumber`, `lgFormatShort`, …).
+- `grimoire-states.ts` — Standards · States (`LG_STATES`, `lgTopState`, `lgBlockedReason`, …).
+- `grimoire-a11y.ts` — the announcer, the layer stack, roving focus and the reason tip.
+- `grimoire-motion.ts` — motion tokens, reduced motion, live values and live lists.
+- `grimoire-ornament.ts`, `grimoire-icons.ts` (`LgIconName` lists the names),
+  and `grimoire-core.ts` (`lgSlot`, `lgCx`, `LG_RARITY_CODES`, the `LG_SHELL` token).

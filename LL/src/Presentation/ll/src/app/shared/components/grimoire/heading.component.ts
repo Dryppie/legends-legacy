@@ -5,11 +5,14 @@ import {
   input,
 } from '@angular/core';
 
-export type LgHeadingLevel = 'folio' | 'screen' | 'section';
+export type LgHeadingLevel = 'folio' | 'screen' | 'section' | 'subsection';
 
-/** Engraved Marcellus title: `<h1 lgHeading="screen" sub="Ember">Wolf</h1>`. */
+/**
+ * A title from the type ramp: `<h1 lgHeading="screen" sub="Ember">Wolf</h1>`. The element is the heading level
+ * (React's `as`): screen is usually h1, folio h2, section h3, subsection h4.
+ */
 @Component({
-  selector: 'h1[lgHeading], h2[lgHeading], h3[lgHeading], h4[lgHeading]',
+  selector: 'h1[lgHeading], h2[lgHeading], h3[lgHeading], h4[lgHeading], h5[lgHeading], h6[lgHeading]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClass()' },
   template: `

@@ -4,6 +4,7 @@ import {
   ElementRef,
   computed,
   contentChildren,
+  effect,
   forwardRef,
   input,
   model,
@@ -16,60 +17,61 @@ import {
   LgChroniclePosition,
   LgShellApi,
   LgSlotDirective,
+  lgCx,
   lgHasSlot,
+  lgUniqueId,
 } from './grimoire-core';
 
 /**
- * The full-screen frame for every in-game screen.
+ * The screen frame for every in-game screen.
  *
- * Slots: `lgSlot="rail"` (NavRail), `lgSlot="top"` (TopBar), `lgSlot="folio"`,
- * `lgSlot="hints"` (KeyHints), `lgSlot="chronicle"` (Chronicle); the default
- * content is the stage (a Stage or a Page).
+ * Slots: `lgSlot="rail"` (NavRail), `lgSlot="top"` (TopBar), `lgSlot="folio"`, `lgSlot="hints"` (KeyHints),
+ * `lgSlot="chronicle"` (Chronicle); the default content is the stage (a Stage or a Page).
  *
- * `chatLayout` is the player's Chat layout setting: `docked` puts the Chronicle on
- * the right (its own column at 1536px+, under the Folio below that); `floating`
- * makes it a draggable drawer over the stage. Under 960px both become a bottom dock.
+ * `chatLayout` is the player's Chat layout setting: `docked` puts the Chronicle on the right (its own column at
+ * 96rem+, under the Folio below that); `floating` makes it a draggable drawer over the stage. Under 60rem both become
+ * a bottom dock, and the rail becomes a drawer: a TopBar with `showMenu` inside the shell opens it. The drawer takes
+ * focus when it opens, makes the rest inert, closes on Escape and returns focus.
  */
 @Component({
   selector: 'lg-game-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    { provide: LG_SHELL, useExisting: forwardRef(() => LgGameShellComponent) },
-  ],
-  host: {
-    class: 'lg-shellhost',
-    '[style.height]': 'height() ?? null',
-  },
+  providers: [{ provide: LG_SHELL, useExisting: forwardRef(() => LgGameShellComponent) }],
+  host: { style: 'display: contents' },
   template: `
-    <div #shell [class]="shellClass()">
-      @if (has('rail')) {
-        <div class="lg-shell__rail"><ng-content select="[lgSlot=rail]" /></div>
-      }
-      <div class="lg-shell__scrim" aria-hidden="true" (click)="closeRail()"></div>
-      <main class="lg-shell__main">
-        @if (has('top')) {
-          <div class="lg-shell__top"><ng-content select="[lgSlot=top]" /></div>
+    <div class="lg-shellhost" [style.height]="cssHeight()">
+      <div #shell [class]="shellClass()">
+        <a class="lg-skip" [attr.href]="'#' + mainId">Skip to content</a>
+        @if (has('rail')) {
+          <div #rail class="lg-shell__rail"><ng-content select="[lgSlot=rail]" /></div>
         }
-        <div class="lg-shell__stage">
-          <ng-content />
-          @if (has('hints')) {
-            <div class="lg-shell__hints"><ng-content select="[lgSlot=hints]" /></div>
+        <div class="lg-shell__scrim" aria-hidden="true" (click)="closeRail()"></div>
+        <main class="lg-shell__main" [id]="mainId" tabindex="-1" [attr.inert]="railOpen() ? '' : null">
+          @if (has('top')) {
+            <div class="lg-shell__top"><ng-content select="[lgSlot=top]" /></div>
           }
-        </div>
-      </main>
-      @if (has('folio')) {
-        <div class="lg-shell__folio"><ng-content select="[lgSlot=folio]" /></div>
-      }
-      @if (has('chronicle')) {
-        <div
-          #chronicleWrap
-          [class]="chronicleClass()"
-          [style.--lg-float-left]="floatLeft()"
-          [style.--lg-float-bottom]="floatBottom()"
-        >
-          <ng-content select="[lgSlot=chronicle]" />
-        </div>
-      }
+          <div class="lg-shell__stage">
+            <ng-content />
+            @if (has('hints')) {
+              <div class="lg-shell__hints"><ng-content select="[lgSlot=hints]" /></div>
+            }
+          </div>
+        </main>
+        @if (has('folio')) {
+          <div class="lg-shell__folio" [attr.inert]="railOpen() ? '' : null"><ng-content select="[lgSlot=folio]" /></div>
+        }
+        @if (has('chronicle')) {
+          <div
+            #chronicleWrap
+            [class]="chronicleClass()"
+            [style.--lg-float-left]="floatLeft()"
+            [style.--lg-float-bottom]="floatBottom()"
+            [attr.inert]="railOpen() ? '' : null"
+          >
+            <ng-content select="[lgSlot=chronicle]" />
+          </div>
+        }
+      </div>
     </div>
   `,
 })
@@ -77,50 +79,70 @@ export class LgGameShellComponent implements LgShellApi {
   readonly chatLayout = input<LgChatLayout>('docked');
   /** Floating drawer position (px from the shell's bottom-left). Two-way bindable to persist it. */
   readonly chroniclePosition = model<LgChroniclePosition | null>(null);
-  /** CSS height; defaults to 100vh. */
-  readonly height = input<string>();
+  /** CSS height (a number is px); defaults to 100vh. */
+  readonly height = input<string | number>();
 
   private readonly slots = contentChildren(LgSlotDirective);
   private readonly shellRef = viewChild.required<ElementRef<HTMLElement>>('shell');
+  private readonly railRef = viewChild<ElementRef<HTMLElement>>('rail');
   private readonly chronicleRef = viewChild<ElementRef<HTMLElement>>('chronicleWrap');
 
+  protected readonly mainId = lgUniqueId('lgmain');
   protected readonly railOpen = signal(false);
   private readonly chatCollapsed = signal(false);
+  private opener: HTMLElement | null = null;
 
-  protected readonly floatingPlaced = computed(
-    () => this.chatLayout() === 'floating' && !!this.chroniclePosition(),
-  );
-
-  protected readonly floatLeft = computed(() => {
-    const position = this.chroniclePosition();
-    return this.floatingPlaced() && position ? `${position.left}px` : null;
+  protected readonly cssHeight = computed(() => {
+    const h = this.height();
+    return h == null ? null : typeof h === 'number' ? h + 'px' : h;
   });
-  protected readonly floatBottom = computed(() => {
-    const position = this.chroniclePosition();
-    return this.floatingPlaced() && position ? `${position.bottom}px` : null;
-  });
-
+  private readonly placed = computed(() => this.chatLayout() === 'floating' && !!this.chroniclePosition());
+  protected readonly floatLeft = computed(() => (this.placed() ? this.chroniclePosition()!.left + 'px' : null));
+  protected readonly floatBottom = computed(() => (this.placed() ? this.chroniclePosition()!.bottom + 'px' : null));
   protected readonly shellClass = computed(() => {
-    const hasChat = this.has('chronicle');
-    return [
+    const chat = this.has('chronicle');
+    const layout = this.chatLayout() === 'floating' ? 'floating' : 'docked';
+    return lgCx(
       'lg-shell',
-      this.has('folio') ? 'has-folio' : '',
-      hasChat ? 'has-chat' : '',
-      hasChat ? `is-chat-${this.chatLayout()}` : '',
-      hasChat && this.chatCollapsed() ? 'is-chat-collapsed' : '',
-      this.railOpen() ? 'is-rail-open' : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
+      this.has('folio') && 'has-folio',
+      chat && 'has-chat',
+      chat && 'is-chat-' + layout,
+      chat && this.chatCollapsed() && 'is-chat-collapsed',
+      this.railOpen() && 'is-rail-open',
+    );
   });
-
   protected readonly chronicleClass = computed(() =>
     this.chatLayout() === 'floating'
-      ? `lg-shell__chronicle lg-shell__chronicle--floating${this.floatingPlaced() ? ' is-placed' : ''}`
+      ? lgCx('lg-shell__chronicle', 'lg-shell__chronicle--floating', this.placed() && 'is-placed')
       : 'lg-shell__chronicle lg-shell__chronicle--docked',
   );
 
+  constructor() {
+    // The rail drawer takes focus when it opens, closes on Escape and returns focus to its opener.
+    effect((onCleanup) => {
+      if (!this.railOpen()) return;
+      const rail = this.railRef()?.nativeElement;
+      setTimeout(() => rail?.querySelector<HTMLElement>('button:not([disabled]), a[href], [tabindex="0"]')?.focus());
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          this.railOpen.set(false);
+        }
+      };
+      document.addEventListener('keydown', onKey);
+      onCleanup(() => {
+        document.removeEventListener('keydown', onKey);
+        // After the drawer has closed and the rest is no longer inert.
+        const o = this.opener;
+        setTimeout(() => {
+          if (o && o.isConnected) o.focus();
+        });
+      });
+    });
+  }
+
   openRail(): void {
+    this.opener = document.activeElement as HTMLElement | null;
     this.railOpen.set(true);
   }
 
@@ -136,15 +158,11 @@ export class LgGameShellComponent implements LgShellApi {
     const bounds = this.bounds();
     if (!bounds) return;
     event.preventDefault();
-    const offsetX = event.clientX - bounds.drawer.left;
-    const offsetY = bounds.drawer.bottom - event.clientY;
-    const move = (moveEvent: PointerEvent) => {
-      const current = this.bounds() ?? bounds;
-      this.place(
-        moveEvent.clientX - current.shell.left - offsetX,
-        current.shell.bottom - moveEvent.clientY - offsetY,
-        current,
-      );
+    const dx = event.clientX - bounds.drawer.left;
+    const dy = bounds.drawer.bottom - event.clientY;
+    const move = (e: PointerEvent) => {
+      const b = this.bounds() ?? bounds;
+      this.place(e.clientX - b.shell.left - dx, b.shell.bottom - e.clientY - dy, b);
     };
     const up = () => {
       window.removeEventListener('pointermove', move);
@@ -161,15 +179,11 @@ export class LgGameShellComponent implements LgShellApi {
       ArrowUp: [0, 16],
       ArrowDown: [0, -16],
     };
-    const step = steps[event.key];
-    const bounds = this.bounds();
-    if (!step || !bounds) return;
+    const d = steps[event.key];
+    const b = this.bounds();
+    if (!d || !b) return;
     event.preventDefault();
-    this.place(
-      bounds.drawer.left - bounds.shell.left + step[0],
-      bounds.shell.bottom - bounds.drawer.bottom + step[1],
-      bounds,
-    );
+    this.place(b.drawer.left - b.shell.left + d[0], b.shell.bottom - b.drawer.bottom + d[1], b);
   }
 
   protected has(name: string): boolean {
@@ -179,19 +193,15 @@ export class LgGameShellComponent implements LgShellApi {
   private bounds(): { shell: DOMRect; drawer: DOMRect } | null {
     const drawer = this.chronicleRef()?.nativeElement;
     if (!drawer) return null;
-    return {
-      shell: this.shellRef().nativeElement.getBoundingClientRect(),
-      drawer: drawer.getBoundingClientRect(),
-    };
+    return { shell: this.shellRef().nativeElement.getBoundingClientRect(), drawer: drawer.getBoundingClientRect() };
   }
 
-  private place(left: number, bottom: number, bounds: { shell: DOMRect; drawer: DOMRect }): void {
-    const margin = 8;
-    const clamp = (value: number, min: number, max: number) =>
-      Math.max(min, Math.min(max, value));
+  private place(left: number, bottom: number, b: { shell: DOMRect; drawer: DOMRect }): void {
+    const m = 8;
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
     this.chroniclePosition.set({
-      left: Math.round(clamp(left, margin, bounds.shell.width - bounds.drawer.width - margin)),
-      bottom: Math.round(clamp(bottom, margin, bounds.shell.height - bounds.drawer.height - margin)),
+      left: Math.round(clamp(left, m, b.shell.width - b.drawer.width - m)),
+      bottom: Math.round(clamp(bottom, m, b.shell.height - b.drawer.height - m)),
     });
   }
 }

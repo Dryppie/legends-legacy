@@ -1,0 +1,34 @@
+<!-- @dsCard group="Components · Lists & labels" height=480 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>EntryList — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.pv-col { display: grid; gap: 16px; }
+.pv-cap { margin: 0 0 var(--stack-sm); font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+var NAMES = ['Alpha Wolf', 'Bloodfang Wolf', 'Dire Wolf', 'Ember Wolf', 'Horned Wolf', 'Blackjaw Spider', 'Giant Spider', 'Cave Bat', 'Ember Knight'];
+function App() {
+  var s = React.useState('Ember Wolf');
+  var items = NAMES.map(function (n) { return { id: n, name: n, tag: n === 'Blackjaw Spider' ? '+ New' : undefined, locked: n === 'Ember Knight', reason: n === 'Ember Knight' ? 'Clear Floor 10 to unlock' : undefined }; });
+  return h('div', { style: { display: 'flex', gap: 40, padding: '16px 24px 0' } },
+    h('div', { style: { width: 340 } }, h('p', { className: 'pv-cap' }, 'Standard — 24px names on 40px rows'),
+      h('div', { style: { height: 420 } }, h(L.EntryList, { label: 'Creatures', activeId: s[0], onSelect: s[1], items: items }))),
+    h('div', { style: { width: 300 } }, h('p', { className: 'pv-cap' }, 'Compact — 17px names on 32px rows'),
+      h('div', { style: { height: 420 } }, h(L.EntryList, { label: 'Creatures, compact', density: 'compact', activeId: s[0], onSelect: s[1], items: items }))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

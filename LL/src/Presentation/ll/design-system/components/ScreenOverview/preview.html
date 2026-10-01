@@ -1,0 +1,257 @@
+<!-- @dsCard group="Page Archetypes" height=1540 width=1600 subtitle="Character Overview at 1600px: the current page's content (journey, combat profile, level, Combat Rating, Combat Style, attributes, Essence loadout, player search) set in Grimoire. Search Maren to see another player." page -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ScreenOverview — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.pv-col { display: grid; gap: 16px; }
+.pv-brand { font-family: var(--font-display); font-size: var(--text-name-row); line-height: var(--leading-name-row); letter-spacing: var(--tracking-display); color: var(--gilt); }
+.pv-logo { display: grid; place-items: center; width: 44px; height: 44px; }
+.pv-logo img { display: block; }
+.pv-eyebrow { display: block; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--gilt); }
+.pv-note { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact-row); color: var(--ink-muted); }
+.pv-gilt { color: var(--gilt); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pv-link { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.pv-link:hover { text-decoration-color: var(--gilt); }
+.pv-namerow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 4px 0 10px; }
+.pv-noble { display: inline-flex; align-self: center; color: var(--gilt); }
+.pv-noble .lg-icon { width: var(--icon-sm); height: var(--icon-sm); }
+.pv-meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body); }
+.pv-meta > div { display: flex; align-items: center; gap: 8px; }
+.pv-meta dt { color: var(--ink-muted); }
+.pv-meta dd { margin: 0; display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
+.pv-overview { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--space-6); align-items: start; }
+@container (max-width: 860px) { .pv-overview { grid-template-columns: minmax(0, 1fr); } }
+.pv-main { display: grid; gap: var(--space-6); min-width: 0; }
+.pv-side { display: grid; gap: var(--space-6); position: sticky; top: 0; }
+.pv-slots { display: grid; gap: var(--space-2); }
+.pv-count { margin-left: auto; font-size: var(--text-caption); font-weight: 600; letter-spacing: 0; color: var(--ink); text-transform: none; }
+.pv-sidefoot { margin-top: var(--space-4); }
+.pv-style { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-10); }
+.pv-stylemeta { display: grid; gap: var(--space-2); width: min(280px, 100%); }
+.pv-attrs { display: grid; gap: var(--space-5); padding: var(--space-6); background: var(--surface); }
+.pv-attrshead { display: grid; gap: 4px; }
+.pv-perks { padding-top: var(--space-5); border-top: var(--border-hairline) solid var(--line); }
+.pv-perkshead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: var(--space-3); }
+.pv-perkgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4) var(--space-8); }
+.pv-perklabel { margin: 0 0 6px; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.pv-perklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); color: var(--ink); }
+.pv-perklist li { display: flex; gap: 8px; }
+.pv-perklist li span { color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+var LOGO = '../../assets/Logos/Logo.svg';
+var CORNER = '../../assets/Ornaments/CornerOrnament.svg';
+var COINS = '../../assets/Currency/Coins.svg';
+var DIAMONDS = '../../assets/Currency/Diamonds.svg';
+var BG_STUDY = '../../assets/Backgrounds/background.webp';
+var NAV = [
+  { label: 'Character', items: [
+    { id: 'overview', title: 'Overview', icon: 'overview' },
+    { id: 'inventory', title: 'Inventory', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
+    { id: 'essences', title: 'Essences', icon: 'essences' },
+    { id: 'combat-styles', title: 'Combat Styles', icon: 'combat-styles' },
+    { id: 'achievements', title: 'Achievements', icon: 'achievements' },
+    { id: 'soulstones', title: 'Soulstones', icon: 'soulstones' } ] },
+  { label: 'World', items: [
+    { id: 'world-map', title: 'World Map', icon: 'world-map' },
+    { id: 'world-tower', title: 'World Tower', icon: 'legacy-ascension' },
+    { id: 'quests', title: 'Quests', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
+    { id: 'prophecies', title: 'Prophecies', icon: 'prophecies' } ] },
+  { label: 'City', items: [
+    { id: 'guild', title: 'Guild', icon: 'guild' },
+    { id: 'colosseum', title: 'Colosseum', icon: 'colosseum' },
+    { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' },
+    { id: 'leaderboard', title: 'Leaderboard', icon: 'leaderboard' } ] },
+  { label: 'System', items: [
+    { id: 'settings', title: 'Settings', icon: 'settings' } ] }
+];
+var CHANNELS = [
+  { id: 'all', label: 'All' }, { id: 'general', label: 'General' }, { id: 'trade', label: 'Trade' }, { id: 'help', label: 'Help' },
+  { id: 'guild', label: 'Guild', unread: 3 }, { id: 'whisper', label: 'Whispers', unread: 1 }, { id: 'raid', label: 'Raid' }, { id: 'loot', label: 'Loot' }
+];
+function chatMessages() {
+  return [
+    { id: 1, channel: 'general', channelLabel: 'General', time: '21:02', author: 'Maren', text: 'Anyone seen the Ember Knight near Shenic tonight?' },
+    { id: 2, channel: 'system', channelLabel: 'System', kind: 'system', time: '21:03', text: 'The World Tower resets in 2 hours.' },
+    { id: 3, channel: 'trade', channelLabel: 'Trade', time: '21:04', author: 'Oswin', text: h(F, null, 'WTS ', h(L.ItemLink, { rarity: 'Rare', onClick: function () {} }, 'Ember Wolf Essence'), ' ×3 — 400 Cinders each') },
+    { id: 4, channel: 'guild', channelLabel: 'Guild', time: '21:05', author: 'Kaelen', text: 'Raid at 22:00. Bring resist gear, the boss burns.' },
+    { id: 5, channel: 'loot', channelLabel: 'Loot', kind: 'loot', time: '21:06', text: h(F, null, 'You found ', h(L.ItemLink, { rarity: 'Epic', onClick: function () {} }, 'Soul Prism'), ' and 120 Cinders.') },
+    { id: 6, channel: 'general', channelLabel: 'General', time: '21:07', author: 'Tamsin', mention: true, text: h(F, null, h('span', { className: 'lg-mention' }, '@Aldric'), ' that crown is ridiculous. Where from?') },
+    { id: 7, channel: 'whisper', channelLabel: 'Whisper', time: '21:08', author: 'Kaelen', direction: 'from', text: 'Can you tank tonight?' },
+    { id: 8, channel: 'help', channelLabel: 'Help', time: '21:09', author: 'Pip', text: 'How do Essences drop? Is it per kill?' }
+  ];
+}
+function useChat(initialOpen) {
+  var o = React.useState(initialOpen), c = React.useState('all'), v = React.useState(''), m = React.useState(null);
+  var msgs = m[0] || chatMessages();
+  return {
+    open: o[0], onToggle: function () { o[1](!o[0]); },
+    channels: CHANNELS, activeChannel: c[0], onChannelChange: c[1], messages: msgs,
+    composer: { channel: 'general', channelLabel: 'General', value: v[0], onChange: v[1], onSend: function (t) {
+      m[1](msgs.concat([{ id: Date.now(), channel: 'general', channelLabel: 'General', time: '21:10', author: 'Aldric', text: t }])); v[1]('');
+    } }
+  };
+}
+
+var JOURNEY_STAGES = ['First Hunt', 'Claim Your Power', 'Prepare Your Gear', 'Enter Shenic', 'Shenic Journey', 'Journey Complete'];
+var PLAYERS = ['Maren', 'Marek', 'Mareth', 'Kaelen', 'Oswin', 'Tamsin', 'Pip'];
+function pct(v) { return v + '%'; }
+function attrs(k) {
+  var n = function (base) { return Math.round(base * k * 10) / 10; };
+  return [
+    { title: 'Offense', rows: [
+      { label: 'Power', value: L.format.number(Math.round(142 * k)), description: 'Raw force behind every blow and spell. Scales all outgoing damage.' },
+      { label: 'Attack Speed', value: (1.12 * Math.sqrt(k)).toFixed(2), description: 'Attacks per second before cooldowns and abilities.' },
+      { label: 'Crit Chance', value: pct(n(9.5)), description: 'Chance for a hit to land as a critical strike.' },
+      { label: 'Crit Damage', value: pct(150 + Math.round(10 * (k - 1))), description: 'Damage dealt by a critical strike, compared to a normal hit.' },
+      { label: 'Armor Penetration', value: L.format.number(Math.round(12 * k)), description: "Ignores part of the target's Armor." },
+      { label: 'Magic Penetration', value: L.format.number(Math.round(4 * k)), description: "Ignores part of the target's Resistance." }
+    ] },
+    { title: 'Defense', rows: [
+      { label: 'Max Health', value: L.format.number(Math.round(4150 * k)), description: 'Health you enter every fight with.' },
+      { label: 'Armor', value: pct(n(38)), sub: L.format.number(Math.round(240 * k)) + ' Armor Rating', description: 'Armor is combined and converted with diminishing returns.', tipMeta: 'From equipment: ' + Math.round(240 * k) + ' Armor Rating' },
+      { label: 'Resistance', value: pct(n(22)), sub: L.format.number(Math.round(130 * k)) + ' Resistance Rating', description: 'Reduces magical, shadow and elemental damage. Converted with diminishing returns.', tipMeta: 'From equipment: ' + Math.round(130 * k) + ' Resistance Rating' },
+      { label: 'Dodge', value: pct(n(6)), description: 'Chance to avoid an attack entirely.' },
+      { label: 'Block', value: pct(n(4)), description: 'Chance to block part of an incoming hit.' },
+      { label: 'Damage Reduction', value: pct(n(3)), description: 'Reduction applied to all damage taken.' }
+    ] },
+    { title: 'Recovery', rows: [
+      { label: 'Restoration', value: L.format.number(Math.round(18 * k)), description: 'Improves healing received from every source.' },
+      { label: 'Healing Power', value: pct(n(12)), description: 'Increases healing you deal.' },
+      { label: 'Health Regen', value: L.format.unit(Math.round(24 * k), 'HP/5s'), description: 'Health restored every five seconds.' },
+      { label: 'Life Steal', value: pct(n(2.5)), description: 'Part of the damage you deal returns to you as health.' }
+    ] },
+    { title: 'Utility', rows: [
+      { label: 'Ability Haste', value: L.format.number(Math.round(15 * k)), description: 'Shortens the cooldown of your Essence abilities.' },
+      { label: 'Tenacity', value: pct(n(10)), description: 'Shortens stuns, roots and other control effects on you.' },
+      { label: 'Cooldown', value: pct(n(8)), description: 'Reduces cooldowns directly.' },
+      { label: 'Status Resistance', value: pct(n(12)), description: 'Chance to shrug off bleed, burn and poison.' },
+      { label: 'CC Resistance', value: pct(n(5)), description: 'Chance to resist crowd control outright.' },
+      { label: 'Threat', value: L.format.unit(3.4 * k, 'threat/s', 1), description: 'Estimated threat per second from your Essence loadout: how strongly enemies focus you.' }
+    ] }
+  ];
+}
+var ME = {
+  own: true, name: 'Aldric Vane', noble: true, level: 17, xp: 8420, xpMax: 12000, rating: 1284, achievements: 1240,
+  guild: { name: 'Emberwatch', tag: 'EMB' }, nobleUntil: '12 Oct 2026', k: 1,
+  slots: [
+    { state: 'attuned', name: 'Ember Wolf Essence', rarity: 'Rare', active: { name: 'Cinder Bite', cooldown: '12s' }, passive: { name: 'Pack Instinct' } },
+    { state: 'attuned', name: 'Blue Slime Essence', rarity: 'Uncommon', active: { name: 'Gel Ward', cooldown: '20s' }, passive: { name: 'Soft Body' } },
+    { state: 'locked', unlockLabel: 'Unlocks at level 20' },
+    { state: 'locked', unlockLabel: 'Unlocks at level 30' }
+  ]
+};
+function otherPlayer(name) {
+  return {
+    own: false, name: name, noble: false, online: name === 'Maren', lastSeen: '3 h ago', level: 24, xp: 15200, xpMax: 21000, rating: 1712, achievements: 2860,
+    guild: { name: 'Ashen Oath', tag: 'ASH' }, k: 1.34,
+    slots: [
+      { state: 'attuned', name: 'Dire Wolf Essence', rarity: 'Epic', active: { name: 'Rending Howl', cooldown: '18s' }, passive: { name: 'Alpha Blood' } },
+      { state: 'attuned', name: 'Giant Spider Essence', rarity: 'Rare', active: { name: 'Web Snare', cooldown: '15s' }, passive: { name: 'Venom Glands' } },
+      { state: 'attuned', name: 'Cave Bat Essence', rarity: 'Uncommon', active: { name: 'Echo Shriek', cooldown: '10s' }, passive: { name: 'Night Wings' } },
+      { state: 'locked', unlockLabel: 'Unlocks at level 30' }
+    ]
+  };
+}
+function cap(v) { return v ? v.charAt(0).toUpperCase() + v.slice(1) : v; }
+function App() {
+  var viewSt = React.useState(null), who = viewSt[0] ? otherPlayer(viewSt[0]) : ME;
+  var q = React.useState(''), perks = React.useState(false);
+  var chat = useChat(true);
+  var nav = React.useState('overview');
+  var filled = who.slots.filter(function (s) { return s.state === 'attuned'; }).length;
+  var usable = who.slots.filter(function (s) { return s.state !== 'locked'; }).length;
+  var suggestions = q[0].length >= 2 ? PLAYERS.filter(function (n) { return n.toLowerCase().indexOf(q[0].toLowerCase()) === 0; }) : [];
+  function view(name) { viewSt[1](name); q[1](name); perks[1](false); }
+  var groups = attrs(who.k);
+
+  var identity = h(F, null,
+    h('span', { className: 'pv-eyebrow' }, who.own ? 'Combat Profile' : 'Viewing player'),
+    h('div', { className: 'pv-namerow' },
+      who.noble ? h('span', { className: 'pv-noble', role: 'img', 'aria-label': 'Noble', title: 'Active Nobility' }, h(L.Icon, { name: 'nobility', size: 16 })) : null,
+      h(L.Heading, { level: 'screen', as: 'h2' }, who.name),
+      !who.own ? h(L.Presence, { online: who.online, lastSeen: who.lastSeen }) : null),
+    h('dl', { className: 'pv-meta' },
+      h('div', null, h('dt', null, 'Guild'), h('dd', null, h('a', { href: '#', className: 'pv-link', onClick: function (e) { e.preventDefault(); } }, who.guild.name), ' ', h(L.Tag, null, '[' + who.guild.tag + ']'))),
+      h('div', null, h('dt', null, 'Essences'), h('dd', null, filled + ' / ' + usable + ' attuned')),
+      h('div', null, h('dt', null, 'Achievement Points'), h('dd', { className: 'pv-gilt' }, L.format.number(who.achievements))),
+      who.noble ? h('div', null, h('dt', null, 'Nobility'), h('dd', null, 'Expires ', h('time', null, who.nobleUntil), ' ',
+        h(L.Button, { variant: 'link', 'aria-expanded': perks[0], 'aria-controls': 'pv-perks', onClick: function () { perks[1](!perks[0]); } }, perks[0] ? 'Hide perks' : 'Show perks'))) : null));
+
+  var perksPanel = who.noble && perks[0] ? h('div', { id: 'pv-perks', className: 'pv-perks' },
+    h('div', { className: 'pv-perkshead' }, h('span', { className: 'pv-eyebrow' }, 'Active Nobility perks'), h('span', { className: 'pv-note' }, 'Applied automatically while Nobility is active.')),
+    h('div', { className: 'pv-perkgrid' },
+      [{ label: 'Capacity', perks: ['+3 Equipment and Essence loadouts', '+3 Arena ticket capacity', '30 sell listings and 30 buy orders instead of 10 each'] },
+       { label: 'Time & cost', perks: ['7 days of offline combat retention', '2-hour Creature Focus cooldown instead of 8', '+1 free Prophecy reroll (costs: 0, 0, 40, 80 Fate Echo)', 'Noble badge'] }].map(function (g) {
+        return h('div', { key: g.label }, h('h4', { className: 'pv-perklabel' }, g.label),
+          h('ul', { className: 'pv-perklist' }, g.perks.map(function (x) { return h('li', { key: x }, h('span', { 'aria-hidden': 'true' }, '\u2013'), x); })));
+      }))) : null;
+
+  return h(L.GameShell, {
+    height: 1540,
+    chatLayout: 'docked',
+    chronicle: h(L.Chronicle, chat),
+    rail: h(L.NavRail, { sections: NAV, activeId: nav[0], onNavigate: nav[1],
+      header: h(F, null, h('span', { className: 'pv-logo' }, h('img', { src: LOGO, width: 36, height: 36, alt: '' })), h('span', { className: 'pv-brand' }, "Legend's", h('br'), 'Legacy')) }),
+    top: function (api) {
+      return h(L.TopBar, { title: 'Aldric Vane', eyebrow: 'Lv. 17', onMenu: api.openRail },
+        h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: COINS, short: true }),
+        h(L.CurrencyPill, { name: 'Soulstones', amount: 36, iconSrc: DIAMONDS }));
+    }
+  },
+    h(L.Page, { label: 'Character overview' },
+      h(L.PageHeader, { icon: 'overview', eyebrow: 'Character', title: 'Overview', summary: 'Stats, combat rating, and Essence loadout' },
+        h(L.SearchField, { value: q[0], onChange: q[1], suggestions: suggestions, searched: q[0].length >= 2, placeholder: 'Search character by name…', label: 'Search character by name', onSelect: view, onSubmit: function (v) { if (v) view(cap(v)); } }),
+        h(L.Button, { size: 'sm', onClick: function () { if (q[0]) view(cap(q[0])); } }, 'Search'),
+        who.own ? h(L.Button, { size: 'sm', variant: 'quiet' }, 'Refresh') : h(L.Button, { size: 'sm', variant: 'quiet', onClick: function () { viewSt[1](null); q[1](''); } }, 'Back to my profile')),
+
+      who.own ? h(L.JourneyCard, {
+        id: 'pv-journey', stages: JOURNEY_STAGES, phase: 'Shenic Journey', title: 'Develop your Shenic build',
+        summary: 'Fight in the newest available area, strengthen your loadout, and prepare for the next Shenic challenge.',
+        objective: 'Choose a current quest or return to the World Map.',
+        actions: h(F, null, h(L.Button, { variant: 'solid', size: 'sm', icon: 'world-map' }, 'Open World Map'), h(L.Button, { size: 'sm' }, 'Optional: Review Loadout')),
+        nextUnlockLabel: 'Next unlock', nextUnlock: 'A third Essence slot at level 20'
+      }) : null,
+
+      h('div', { className: 'pv-overview' },
+        h('div', { className: 'pv-main' },
+          h(L.Banner, { image: BG_STUDY, focus: 'center 30%', cornerSrc: CORNER, label: 'Combat profile',
+            aside: h(F, null,
+              h('div', { style: { width: 230 } }, h(L.LevelPlate, { kicker: 'Level', level: who.level, xp: who.xp, xpMax: who.xpMax, xpUnit: 'Combat XP' })),
+              h(L.StatFigure, { label: 'Combat Rating', value: L.format.number(who.rating), caption: 'Permanent attributes and the equipped build', title: 'Combat Rating summarizes permanent combat attributes and the equipped build.' })),
+            footer: perksPanel }, identity),
+
+          who.own ? h(L.Panel, { title: 'Combat Style', aside: h(L.Button, { variant: 'link' }, 'Manage Combat Styles') },
+            h('div', { className: 'pv-style' },
+              h(L.Sigil, { size: 'lg', value: 4, label: 'Reaper', title: 'Mastery 4' }),
+              h('div', { className: 'pv-stylemeta' },
+                h('div', { className: 'pv-note' }, 'Mastery 4 · Base form'),
+                h(L.Meter, { tone: 'xp', label: 'Mastery XP', value: 1240, max: 2000 })))) : null),
+
+        h('aside', { className: 'pv-side' },
+          h(L.Panel, { title: 'Essence Loadout', aside: h('span', { className: 'pv-count' }, filled + ' / ' + usable + ' attuned') },
+            h('div', { className: 'pv-slots' }, who.slots.map(function (sl, i) {
+              return h(L.LoadoutSlot, Object.assign({ key: i, index: i, onClick: function () {} }, sl));
+            })),
+            who.own ? h('div', { className: 'pv-sidefoot' }, h(L.Button, { variant: 'link' }, 'Open Essences')) : null))),
+
+      h('section', { className: 'pv-attrs', 'aria-labelledby': 'pv-attrs-t' },
+        h('header', { className: 'pv-attrshead' },
+          h(L.Heading, { level: 'section', id: 'pv-attrs-t' }, 'Combat Attributes'),
+          h('p', { className: 'pv-note' }, 'Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.')),
+        h('div', { className: 'lg-ledgergrid' }, groups.map(function (g) { return h(L.Ledger, { key: g.title, title: g.title, rows: g.rows }); })))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

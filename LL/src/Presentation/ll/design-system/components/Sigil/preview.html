@@ -1,0 +1,32 @@
+<!-- @dsCard group="Game Components · Character" height=250 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sigil — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.pv-col { display: grid; gap: 16px; }
+
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+function App() {
+  var s = React.useState('b');
+  return h('div', { className: 'pv', style: { gap: 40 } },
+    h(L.Sigil, { size: 'sm', value: 4, label: 'Tenacity' }),
+    h(L.Sigil, { value: 11, label: 'Power', state: s[0] === 'a' ? 'selected' : 'default', onClick: function () { s[1]('a'); } }),
+    h(L.Sigil, { size: 'lg', value: 9, label: 'Armor', state: s[0] === 'b' ? 'selected' : 'default', onClick: function () { s[1]('b'); } }),
+    h(L.Sigil, { value: 3, label: 'Resistance', labelPosition: 'left', state: 'ready' }),
+    h(L.Sigil, { value: 1, label: 'Life Steal', labelPosition: 'bottom', state: 'locked', reason: 'Unlocks at level 20', onClick: function () { s[1]('c'); } }));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

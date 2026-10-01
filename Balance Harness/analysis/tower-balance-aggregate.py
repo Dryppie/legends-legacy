@@ -22,24 +22,38 @@ MIASMA_RESOURCE_VERSION = 'tower-balance-miasma-resource-aggregate-v1'
 SHARED_PENETRATION_VERSION = 'tower-balance-shared-penetration-aggregate-v1'
 KODOKU_FIXED_VERSION = 'tower-balance-kodoku-fixed-aggregate-v1'
 KODOKU_MIDPOINT_VERSION = 'tower-balance-kodoku-midpoint-aggregate-v1'
+NI_COPY_HEALTH_VERSION = 'tower-balance-ni-copy-health-aggregate-v1'
+NI_PENETRATION_VERSION = 'tower-balance-ni-penetration-aggregate-v1'
 KODOKU_ACCEPTANCE_VERSIONS = (KODOKU_FIXED_VERSION, KODOKU_MIDPOINT_VERSION)
+
+
+def ni_penetration_module():
+    spec = importlib.util.spec_from_file_location('aggregate_ni_penetration', HERE/'tower-ni-penetration.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
 
 
 def batch_count(version):
     if version in KODOKU_ACCEPTANCE_VERSIONS:
         return 32
-    io.check(version in (VERSION, RECOVERY_VERSION, LIMITED_ARMOR_VERSION, LIMITED_RESISTANCE_VERSION, MIASMA_VERSION, MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION), 'Unknown aggregate version')
+    io.check(version in (VERSION, RECOVERY_VERSION, LIMITED_ARMOR_VERSION, LIMITED_RESISTANCE_VERSION, NI_COPY_HEALTH_VERSION, NI_PENETRATION_VERSION, MIASMA_VERSION, MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION), 'Unknown aggregate version')
     return 8 if version in (RECOVERY_VERSION, MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION) else 4
 
 
 def validate_layout(d):
     count = batch_count(d['version'])
-    samples = 16 if d['version'] in (MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS) else 32 if d['version'] in (LIMITED_ARMOR_VERSION, LIMITED_RESISTANCE_VERSION, MIASMA_VERSION) else 128
+    samples = 16 if d['version'] in (MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS) else 32 if d['version'] in (LIMITED_ARMOR_VERSION, LIMITED_RESISTANCE_VERSION, NI_COPY_HEALTH_VERSION, NI_PENETRATION_VERSION, MIASMA_VERSION) else 128
     io.check(d['batchCount'] == count and d['samplesPerBatch'] == samples, 'Unsupported prospective panel')
     if d['version'] in KODOKU_ACCEPTANCE_VERSIONS:
         io.check(d['floor'] == 8 and d['familySize'] == 186, 'Wrong fixed Kodoku family/floor')
         helper = io.ability_module().kodoku_midpoint_module() if d['version'] == KODOKU_MIDPOINT_VERSION else io.ability_module().kodoku_refinement_module()
         helper.legacy_plan(d['candidatePlan'], d['floor'])
+    elif d['version'] == NI_PENETRATION_VERSION:
+        io.check(d['floor'] == 9 and d['familySize'] == 148, 'Wrong Ni penetration family/floor')
+        ni_penetration_module().validate_plan(d['candidatePlan'], d['floor'])
+    elif d['version'] == NI_COPY_HEALTH_VERSION:
+        io.check(d['floor'] == 9 and d['familySize'] == 148, 'Wrong copy-Health family/floor')
+        io.ability_module().ni_copy_health_module().validate_plan(d['candidatePlan'], d['floor'])
     elif d['version'] == SHARED_PENETRATION_VERSION:
         io.check(d['floor'] == 8 and d['familySize'] == 177, 'Wrong shared-penetration family/floor')
         io.ability_module().shared_penetration_module().validate_plan(d['candidatePlan'], d['floor'])
@@ -55,7 +69,7 @@ def validate_layout(d):
     elif d['version'] == RECOVERY_VERSION:
         io.check(d['floor'] == 7 and d['familySize'] == 120 and
                  d['candidatePlan']['version'] == 'tower-recovery-pressure-refinement-v1', 'Wrong recovery aggregate family/candidate')
-    elif d['candidatePlan']['version'] in ('tower-recovery-pressure-refinement-v1', 'tower-unchanged-catalog-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
+    elif d['candidatePlan']['version'] in ('tower-ni-penetration-v1', 'tower-ni-copy-health-v1', 'tower-recovery-pressure-refinement-v1', 'tower-unchanged-catalog-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
         raise ValueError('Candidate requires its separate aggregate contract')
 LIMITED_EQUIPMENT = dict(version='tower-limited-equipment-v1', maximumSpecializedItems=8,
                          maximumSpecializedCharacters=2)
@@ -63,6 +77,12 @@ LIMITED_EQUIPMENT = dict(version='tower-limited-equipment-v1', maximumSpecialize
 
 def candidate_kind(d):
     version = d['candidatePlan'].get('version')
+    if version == 'tower-ni-penetration-v1':
+        io.check(d.get('version') == NI_PENETRATION_VERSION, 'Ni penetration requires its separate contract')
+        return 'penetration'
+    if version == 'tower-ni-copy-health-v1':
+        io.check(d.get('version') == NI_COPY_HEALTH_VERSION, 'Copy Health requires its separate contract')
+        return 'ability'
     if version == 'tower-kodoku-eight-item-pressure-midpoint-v1':
         io.check(d.get('version') == KODOKU_MIDPOINT_VERSION, 'Midpoint Kodoku requires its separate contract')
         return 'ability'
@@ -89,7 +109,7 @@ def candidate_kind(d):
 
 def validate_candidate(d, content):
     equipment = d.get('equipmentEligibility')
-    if d['candidatePlan'].get('version') in ('tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
+    if d['candidatePlan'].get('version') in ('tower-ni-penetration-v1', 'tower-ni-copy-health-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
         validate_layout(d)
         io.check(equipment == LIMITED_EQUIPMENT, 'Miasma requires actual limited-equipment eligibility')
     if equipment is not None:
@@ -99,6 +119,8 @@ def validate_candidate(d, content):
         io.check(equipment == LIMITED_EQUIPMENT, 'Limited armor requires actual limited-equipment eligibility')
         hashes = {p.relative_to(content/'Data').as_posix(): io.sha(p) for p in (content/'Data').rglob('*.json')}
         io.check(hashes == d['candidateContentHashes'], 'Unchanged catalog differs from the qualified source')
+    elif candidate_kind(d) == 'penetration':
+        ni_penetration_module().expected(content, d['candidatePlan'], d['floor'])
     elif candidate_kind(d) == 'recovery-pressure':
         io.check(equipment == LIMITED_EQUIPMENT, 'Recovery aggregate requires actual limited-equipment eligibility')
         io.recovery_pressure_module(d['candidatePlan']['version']).expected(content, d['candidatePlan'], d['floor'])
@@ -286,6 +308,11 @@ def verify_batch(d, cells, study, phase, excluded, *, check_current_inputs=True)
         'ability-candidate-provenance.json', 'health-pressure-candidate-provenance.json', 'penetration-candidate-provenance.json', 'recovery-pressure-candidate-provenance.json')]
     if kind == 'unchanged':
         io.check(not provenance, 'Unchanged catalog cannot carry a candidate modification')
+    elif kind == 'penetration':
+        helper = ni_penetration_module()
+        io.check(len(provenance) == 1 and Path(provenance[0]).name == expected_provenance and
+                 io.read(provenance[0]) == helper.owner_plan(d), 'Mixed Ni penetration provenance')
+        helper.verify(Path(d['source'])/'content', study/'content', d['candidatePlan'], d['floor'])
     else:
         io.check(len(provenance) == 1 and Path(provenance[0]).name == expected_provenance and
                  io.read(provenance[0])['plan'] == d['candidatePlan'], 'Mixed coefficient plan or candidate kind')
@@ -365,7 +392,8 @@ def applied_catalog(plan):
                 'applied-tower-miasma-resource-aggregate-v1': MIASMA_RESOURCE_VERSION,
                 'applied-tower-shared-penetration-aggregate-v1': SHARED_PENETRATION_VERSION,
                 'applied-tower-kodoku-fixed-aggregate-v1': KODOKU_FIXED_VERSION,
-                'applied-tower-kodoku-midpoint-aggregate-v1': KODOKU_MIDPOINT_VERSION}
+                'applied-tower-kodoku-midpoint-aggregate-v1': KODOKU_MIDPOINT_VERSION,
+                'applied-tower-ni-penetration-aggregate-v1': NI_PENETRATION_VERSION}
     io.check(accepted['version'] in versions, 'Unknown applied aggregate version')
     version = versions[accepted['version']]; count = batch_count(version)
     declaration_path = Path(accepted['declaration'])
@@ -419,7 +447,7 @@ def applied_catalog(plan):
     summary = validate_applied_parity(receipts, phases['confirm']['batches'], io.sha(phase_paths['confirm']), d['runtime'], d['version'])
     completion = io.read(completion_path)
     validate_applied_completion(completion, summary, d['candidateContentHashes'], len(excluded),
-                                tower_changed=candidate_kind(d) in ('health-pressure', 'recovery-pressure') or version in (SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS),
+                                tower_changed=candidate_kind(d) in ('penetration', 'health-pressure', 'recovery-pressure') or version in (SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS),
                                 summons_changed=version in (SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS))
     return Path(phases['confirm']['batches'][0]['source']), summary
 

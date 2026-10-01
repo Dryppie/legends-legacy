@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "outDir": "../../out-tsc/grimoire-parity", "types": [], "resolveJsonModule": true, "esModuleInterop": true },
+  "files": ["main.ts"]
+}

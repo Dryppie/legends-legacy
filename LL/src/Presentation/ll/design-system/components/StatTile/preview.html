@@ -1,0 +1,29 @@
+<!-- @dsCard group="Components · Data" height=220 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>StatTile — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { padding: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.pv-col { display: grid; gap: 16px; }
+
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { padding: 24, width: 380 } }, h('div', { className: 'lg-statgrid' },
+  h(L.StatTile, { label: 'Armor', value: 45 }),
+  h(L.StatTile, { label: 'Resist', value: 30, delta: 4, deltaPolarity: 'better' }),
+  h(L.StatTile, { label: 'Crit', value: 12, suffix: '%' }),
+  h(L.StatTile, { label: 'Dodge', value: 8, suffix: '%', delta: -2, deltaPolarity: 'worse' }),
+  h(L.StatTile, { label: 'Cooldown', value: 6.8, suffix: 's', delta: -1.2, deltaPolarity: 'better' }),
+  h(L.StatTile, { label: 'Block', value: 5, suffix: '%', delta: 0 }))));
+</script>
+</body>
+</html>

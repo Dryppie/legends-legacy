@@ -10,7 +10,7 @@ function gcd(a: number, b: number): number {
   return b ? gcd(b, a % b) : a;
 }
 
-/** Engraved star-polygon line art for Folio headers. Give each attribute its own point count. */
+/** The attribute sign: engraved star-polygon line art for Folio headers. Give each attribute its own point count. */
 @Component({
   selector: 'lg-emblem',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +27,7 @@ function gcd(a: number, b: number): number {
       <circle cx="50" cy="50" r="48" class="lg-emblem__ring" />
       <circle cx="50" cy="50" r="44" class="lg-emblem__ring lg-emblem__ring--thin" />
       @for (point of outer(); track $index) {
-        <line x1="50" y1="50" [attr.x2]="point[0]" [attr.y2]="point[1]" class="lg-emblem__spoke" />
+        <line x1="50" y1="50" [attr.x2]="point[0].toFixed(2)" [attr.y2]="point[1].toFixed(2)" class="lg-emblem__spoke" />
       }
       <polygon [attr.points]="frame()" class="lg-emblem__frame" />
       @for (star of stars(); track $index) {
@@ -37,7 +37,7 @@ function gcd(a: number, b: number): number {
       <circle cx="50" cy="50" r="9" class="lg-emblem__core" />
       <circle cx="50" cy="50" r="3" class="lg-emblem__heart" />
       @for (point of outer(); track $index) {
-        <circle [attr.cx]="point[0]" [attr.cy]="point[1]" r="1.6" class="lg-emblem__dot" />
+        <circle [attr.cx]="point[0].toFixed(2)" [attr.cy]="point[1].toFixed(2)" r="1.6" class="lg-emblem__dot" />
       }
     </svg>
   `,
