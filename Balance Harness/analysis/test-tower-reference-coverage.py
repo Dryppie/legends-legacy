@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('tower_pass', Path(__file__).with_name('run-tower-balance-pass.py'))
 owner = importlib.util.module_from_spec(spec)
@@ -180,6 +181,185 @@ class SearchChallengeTests(unittest.TestCase):
         finalists[0]['scenario']['seeds'] = [1]
         with self.assertRaisesRegex(ValueError, 'seed-free'):
             owner.append_search_finalists(self.family(), finalists, 'bad')
+
+
+class GearReferenceTests(unittest.TestCase):
+    def family(self):
+        return [SearchChallengeTests.recipe('parent', 'parent-essence'),
+                SearchChallengeTests.recipe('template', 'different-essence', 'partial-gear')]
+
+    def test_only_equipment_changes_and_originals_are_retained(self):
+        cells = self.family()
+        cells[0]['scenario']['party'][0]['build']['essenceIds'] = ['z', 'a']
+        before = copy.deepcopy(cells)
+        receipt = owner.append_gear_reference(cells, 'parent', 'template')
+        self.assertEqual(cells[:2], before)
+        expected = copy.deepcopy(before[0]['scenario'])
+        expected['party'][0]['build']['equipment'] = before[1]['scenario']['party'][0]['build']['equipment']
+        self.assertEqual(cells[2]['scenario'], expected)
+        self.assertEqual(cells[2]['composition'], 'parent')
+        self.assertEqual(cells[2]['gear'], 'partial-gear')
+        self.assertTrue(receipt['added'])
+
+    def test_exact_duplicates_are_not_added(self):
+        cells = self.family()
+        first = owner.append_gear_reference(cells, 'parent', 'template')
+        second = owner.append_gear_reference(cells, 'parent', 'template')
+        self.assertEqual(len(cells), 3)
+        self.assertEqual(first['cellId'], second['cellId'])
+        self.assertFalse(second['added'])
+
+    def test_rank_quality_level_tier_rolls_and_positions_are_guarded(self):
+        for field,value in [('rank',4),('quality','Exceptional'),('characterLevel',50),('tier',2),
+                            ('attributeRollMultiplier',1.1),('partySlot',2)]:
+            cells = self.family()
+            member = cells[1]['scenario']['party'][0]
+            (member if field=='partySlot' else member['build'])[field] = value
+            before = copy.deepcopy(cells)
+            with self.assertRaisesRegex(ValueError,'positions or budgets'):
+                owner.append_gear_reference(cells, 'parent', 'template')
+            self.assertEqual(cells,before)
+
+    def test_wrong_floor_seeded_or_different_party_size_is_rejected(self):
+        for field,value in [('floorNumber',2),('seeds',[12]),('party',[])]:
+            cells = self.family(); cells[1]['scenario'][field] = value
+            with self.assertRaisesRegex(ValueError,'seed-free|party size'):
+                owner.append_gear_reference(cells, 'parent', 'template')
+
+    def test_unknown_or_ambiguous_saved_identity_is_rejected(self):
+        cells = self.family()
+        with self.assertRaisesRegex(ValueError,'Unique saved'):
+            owner.append_gear_reference(cells, 'missing', 'template')
+        cells.append(copy.deepcopy(cells[0]))
+        with self.assertRaisesRegex(ValueError,'Unique saved'):
+            owner.append_gear_reference(cells, 'parent', 'template')
+
+
+class FixedSupportReferenceTests(unittest.TestCase):
+    def family(self):
+        source = SearchChallengeTests.recipe('source', 'damage')
+        donor = SearchChallengeTests.recipe('donor', 'heal', 'different-gear')
+        for c, essences in [(source, ['damage.z', 'damage.a']), (donor, ['heal.z', 'heal.a'])]:
+            first = c['scenario']['party'][0]
+            first['build']['essenceIds'] = essences
+            second = copy.deepcopy(first)
+            second['partySlot'] = 2
+            second['build']['id'] += '-second'
+            second['build']['essenceIds'] = ['unchanged.z', 'unchanged.a']
+            c['scenario']['party'].append(second)
+        return [source, donor]
+
+    def test_only_declared_slot_essences_change_with_donor_order_preserved(self):
+        cells = self.family(); before = copy.deepcopy(cells)
+        receipt = owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        self.assertEqual(cells[:2], before)
+        expected = copy.deepcopy(before[0]['scenario'])
+        expected['party'][0]['build']['essenceIds'] = ['heal.z', 'heal.a']
+        self.assertEqual(cells[2]['scenario'], expected)
+        self.assertEqual(cells[2]['gear'], 'baseline')
+        self.assertEqual(receipt['newEssenceIds'], ['heal.z', 'heal.a'])
+        self.assertTrue(receipt['added'])
+        self.assertNotEqual(owner.composition_key(cells[0]), owner.composition_key(cells[2]))
+
+    def test_exact_duplicate_merges_but_identity_variant_remains(self):
+        cells = self.family()
+        first = owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        again = owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        self.assertEqual(first['cellId'], again['cellId'])
+        self.assertFalse(again['added'])
+        cells[0]['scenario']['party'][0]['build']['identityEssenceIds'] = ['new-identity']
+        other = owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        self.assertTrue(other['added'])
+        self.assertEqual(len(cells), 4)
+        self.assertEqual(owner.composition_key(cells[2]), owner.composition_key(cells[3]))
+
+    def test_budget_changes_rejected_without_mutation(self):
+        for field, value in [('rank', 4), ('quality', 'Exceptional'), ('characterLevel', 50),
+                             ('tier', 2), ('attributeRollMultiplier', 1.1)]:
+            cells = self.family(); cells[1]['scenario']['party'][0]['build'][field] = value
+            before = copy.deepcopy(cells)
+            with self.assertRaisesRegex(ValueError, 'slot budgets'):
+                owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+            self.assertEqual(cells, before)
+
+    def test_wrong_floor_or_seeded_source_or_donor_rejected(self):
+        for index in (0, 1):
+            for key, value in [('floorNumber', 2), ('seeds', [123])]:
+                cells = self.family(); cells[index]['scenario'][key] = value
+                before = copy.deepcopy(cells)
+                with self.assertRaisesRegex(ValueError, 'seed-free'):
+                    owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+                self.assertEqual(cells, before)
+
+    def test_unique_matching_party_positions_and_saved_slot_required(self):
+        for value in (True, 0, 3, '1'):
+            with self.assertRaisesRegex(ValueError, 'party positions'):
+                owner.append_fixed_support_reference(self.family(), 'source', 'donor', value)
+        for index in (0, 1):
+            for change in ('reorder', 'duplicate', 'missing', 'boolean'):
+                cells = self.family(); party = cells[index]['scenario']['party']
+                if change == 'reorder': party.reverse()
+                elif change == 'duplicate': party[1]['partySlot'] = 1
+                elif change == 'missing': party.pop()
+                else: party[0]['partySlot'] = True
+                with self.assertRaisesRegex(ValueError, 'party positions'):
+                    owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+
+    def test_equal_unique_nonempty_essence_counts_required(self):
+        for index in (0, 1):
+            for value in ([], ['a'], ['a', 'b', 'c'], ['a', 'a'], ['', 'b'], [1, 2], None):
+                cells = self.family(); cells[index]['scenario']['party'][0]['build']['essenceIds'] = value
+                before = copy.deepcopy(cells)
+                with self.assertRaisesRegex(ValueError, 'unique Essence counts'):
+                    owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+                self.assertEqual(cells, before)
+
+    def test_essence_permutations_are_not_role_changes(self):
+        cells = self.family()
+        cells[1]['scenario']['party'][0]['build']['essenceIds'] = ['damage.a', 'damage.z']
+        with self.assertRaisesRegex(ValueError, 'not their order'):
+            owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+
+    def test_missing_ambiguous_ids_and_hash_collision_rejected(self):
+        cells = self.family()
+        with self.assertRaisesRegex(ValueError, 'Unique saved'):
+            owner.append_fixed_support_reference(cells, 'missing', 'donor', 1)
+        cells.append(copy.deepcopy(cells[0]))
+        with self.assertRaisesRegex(ValueError, 'Unique saved'):
+            owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        cells = self.family()
+        receipt = owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        cells[-1]['scenario']['id'] = 'different-scenario'
+        before = copy.deepcopy(cells)
+        with self.assertRaisesRegex(ValueError, 'identifier collision'):
+            owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        self.assertEqual(cells, before)
+
+    def test_existing_exact_recipe_must_keep_gear_label(self):
+        cells = self.family()
+        owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+        cells[-1]['gear'] = 'wrong'
+        with self.assertRaisesRegex(ValueError, 'different gear label'):
+            owner.append_fixed_support_reference(cells, 'source', 'donor', 1)
+
+    def test_cli_rejects_fights_or_combined_changes_before_history_or_allocation(self):
+        base = ['runner', '--mode', 'prepare', '--name', 'test-support', '--source', 'source',
+                '--artifacts', 'unused', '--fixed-support-reference', 'a', 'b', '1']
+        cases = [['--mode', mode] for mode in ('screen', 'confirm', 'search')]
+        cases += [['--current-content'], ['--gear-reference', 'a', 'b'], ['--qualified-family', 'plan'],
+                  ['--add-search', 'search'], ['--add-references', 'search'], ['--ability-candidate', 'plan'],
+                  ['--health-factor', '1.1'], ['--offense-factor', '.9']]
+        for extra in cases:
+            with patch.object(owner.sys, 'argv', base + extra), patch.object(owner, 'history') as history:
+                with self.assertRaisesRegex(ValueError, 'Fixed support requires'):
+                    owner.main()
+                history.assert_not_called()
+        no_source = base[:]
+        position = no_source.index('--source'); del no_source[position:position+2]
+        with patch.object(owner.sys, 'argv', no_source), patch.object(owner, 'history') as history:
+            with self.assertRaisesRegex(ValueError, 'Fixed support requires'):
+                owner.main()
+            history.assert_not_called()
 
 
 if __name__ == '__main__':

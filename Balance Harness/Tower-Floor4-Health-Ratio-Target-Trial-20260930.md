@@ -1,0 +1,83 @@
+# Floor 4: Mirror Lance health-percentage targeting — 30 September 2026
+
+**Subsequent result — penetration/offense trial closed:** The [penetration/offense trial](Tower-Floor4-Penetration-Offense-Trial-20260930.md) closed **`NoEligiblePenetrationConfirmation`** after **16,896 fresh fights / 128 reservations**, retaining **132 exact recipes / nine actual compositions**. At **36% physical/magical penetration and offense ×0.68**, two healer variants with **six Restoration items on one character** passed the eligible screen minimum at **34/128 and 33/128** (adjusted lower bounds **15.26% and 14.67%**). Full-armor C/D scored **23/128 and 25/128**, within the ceiling. However, health/regeneration C/D/B scored **77/128, 72/128 and 67/128**, above the **43/128** ceiling. This is an unconfirmed limited-equipment lead, not accepted balance; no confirmation or application ran. The maintained runner now admits guarded isolated penetration/offense trials. **78 fresh Python checks, ten native mechanic tests and one study fixture passed**; **108 backend passes / four opt-in skips** were authenticated and reused. Exclusions **917,862**. The penetration feasibility assessment proposed below has now run. Follow the linked report and current handoff for the regeneration diagnostic priority and latest ledger; this targeting trial remains closed.
+
+Target: primary LL World Tower and offline Balance Harness. Follow the [fixed healer diagnostic](Tower-Floor4-Fixed-Support-Diagnostic-20260930.md), retaining its complete 132-recipe family. Test one isolated targeting change, with no search or scalar/coefficient sweep.
+
+## Mechanical assessment and frozen protocol
+
+`FastCombatEngine.SelectExtremumTarget` uses absolute current health for `LowestCurrentHealthEnemy`, but current/max health for `LowestHealthEnemy`. Effects resolve in sequence, so the magical Mirror Lance target is selected after its physical hit. The candidate changes **only the magical hit from `LowestCurrentHealthEnemy` to `LowestHealthEnemy`**, with an explicit health-percentage description. This tests whether targeting inherently smaller health pools contributes to the armor dependency. It can also concentrate both hits on the same injured character; improvement is not assumed.
+
+The current runtime already implements both selectors. `RuntimeAbility.StartInitialCooldown` uses the authored cooldown, as does the repeating cooldown. Changing it would alter both opening timing and frequency. `InitialDelayTicks` belongs to triggers, not direct active damage effects. Converting Hall to periodic damage would also change damage delivery and charge interactions. Those broader scheduling changes are excluded from this single-variable test. The candidate affects every Mirror Lance cast, not only the opening.
+
+1. Authenticate the preceding 661 publication bindings and archive pre-edit candidate-helper/test sources. Authenticate the complete unchanged-catalog source `TestResults/tower-balance-pass-floor4-fixed-support-diagnostic-study-20260929`, manifest `60950e8d1e7e6e31feb03e926e12dac57be9244fec763b23b6ceba3972b5d52f`, live catalogs, six current runtime/test assemblies and the existing 108-pass/four-skip backend receipt. Initial exclusions: **917,606**.
+2. Implement the separate `tower-ability-health-target-v1` candidate contract. Admit exactly one direct Power damage effect and only the explicit absolute-to-percentage lowest-health selector transition. Preserve coefficients, Mirrorbound ratios and consumption, physical targeting, taunt/tie/summon flags, timings, all other abilities and catalogs. Old coefficient formats must continue rejecting targeting edits. Verify reversibility and source-byte preservation before combat.
+3. Run **37 candidate safeguards** and the existing **six native Vaelor/health-percentage mechanic tests** through `build/run-tests.ps1 -NoBuild`. Reuse the unchanged production/test assemblies and authenticated 108-pass backend receipt; no C# or engine change is planned.
+4. Freeze all **132 exact recipes / nine actual compositions**. Derive eligibility from actual equipment before allocating seeds: **at most eight specialized items on at most two party members**. This admits **54 existing recipes**, including baseline, six-item Restoration and existing one-/two-character armor variants. It does not add gear or recipes. The preceding search used one selected armor profile; this new encounter trial uses the stated eight-item ceiling across all retained profiles. Count actual compositions by party-slot Essence sets, not labels, ordering or gear.
+5. Evaluate the complete family on **128 fresh shared seeds: 16,896 fights**. Approximate simultaneous 95% Bonferroni-Wilson intervals use **all 132 recipes**. Require at least two actual compositions with an eligible recipe's lower bound **≥10%**, and **every** retained recipe's upper bound **≤50%**. Integer screen gates are **minimum 25 / maximum 43 wins of 128**. No earlier outcomes contribute to acceptance.
+6. Only a passing screen permits one independent **150-seed** confirmation of the identical candidate and family: **19,800 fights**, integer gates **minimum 29 / maximum 53**. A failed gate closes this scope without replacement seeds, retuning, retry, extension or dropping controls. Only a passing confirmation permits native candidate/current-catalog input/replay parity and local application with appropriate catalog/mechanic regressions; confirmation alone is not application.
+7. Maximum fresh study scope: **36,696 fights / 278 reservations**. Every native phase is capped at **20,000 fights, 840 seconds and 2 GiB**, with a **900-second owner**. Admit doubled preceding measured time/storage only below 80% of the envelope. Use fresh exclusive paths and preserve unsuccessful outputs. Any parity replays reuse existing seeds and require their own bounded owner.
+
+Budget stays five level-30 characters with four level-1 unevolved/unascended Essences each, T1 Epic/Fine/Rank-3 gear, roll 1 and no styles. Vaelor health/offense **2.3231953125 / 5.023125**, Mirror Lance physical/magical **2.00/1.00**, Hall magical/physical **0.50/0.50**, all cooldowns and remaining mechanics stay unchanged. Preserve prior applied floor changes and the repeating expected progression curve. No dungeon, supply, acquisition, migration, configuration, database or deployment work.
+
+## Verified result
+
+**Rejected: `NoEligibleHealthRatioConfirmation`.** One candidate ran across the complete **132-recipe / nine-composition** family, completing **16,896 fights on 128 fresh shared seeds**. It failed both predeclared acceptance conditions. This closes the trial without confirmation, application or a live gameplay edit. Floor 4 still lacks accepted balance at the declared limited-specialization budget.
+
+For each actual composition, the table gives its best eligible retained recipe. Eligibility was frozen from actual equipment: **at most eight specialized items on at most two characters**, admitting 54 recipes. The intervals are approximate simultaneous 95% Bonferroni-Wilson bounds across **all 132 recipes**, including ineligible controls. A composition needed an eligible lower bound of at least 10%: **25 wins out of 128**. None qualified.
+
+| Best eligible recipe | Wins | Adjusted interval |
+| --- | ---: | ---: |
+| D: armor on slots 2 and 4 | 15/128 | 4.92%–25.39% |
+| C healer: six-item Restoration | 13/128 | 4.00%–23.47% |
+| B: armor on slots 2 and 4 | 8/128 | 1.93%–18.43% |
+| C: armor on slots 2 and 4 | 8/128 | 1.93%–18.43% |
+| A: armor on slots 3 and 4 | 5/128 | 0.91%–15.18% |
+| D healer: six-item Restoration | 5/128 | 0.91%–15.18% |
+| Original reference 2: baseline | 0/128 | 0.00%–8.98% |
+| Original reference 3: baseline | 0/128 | 0.00%–8.98% |
+| Original reference 1: Restoration | 0/128 | 0.00%–8.98% |
+
+The ceiling applies to **every retained recipe**, regardless of gear eligibility: upper bound at most 50%, equivalent to at most **43/128 wins**. Four full-armor controls failed:
+
+| Control | Wins | Adjusted interval |
+| --- | ---: | ---: |
+| C: full armor | 82/128 | 48.36%–77.24% |
+| D: full armor | 78/128 | 45.30%–74.61% |
+| B: full armor | 52/128 | 26.72%–56.21% |
+| A: full armor | 51/128 | 26.05%–55.46% |
+
+The strongest eligible observed rate was 11.72%, but its adjusted lower bound was only 4.92%; the observed rate alone does not pass the declared confidence requirement. The strongest full-armor rate was 64.06%, with adjusted upper bound 77.24%. The candidate did not meet the intended floor-4 balance target. Earlier trial panels used different seeds: differences from their counts are unpaired and descriptive, not a measured causal effect of this targeting change. No previous outcomes were pooled into acceptance.
+
+## Implementation and verification
+
+Changed maintained files: `analysis/tower-ability-candidate.py` and `analysis/test-tower-ability-candidate.py`. The separate **`tower-ability-health-target-v1`** format accepts exactly one direct Power-scaled damage effect changing `LowestCurrentHealthEnemy` to `LowestHealthEnemy`, with a matching description. It authenticates source catalogs and the exclusive guardian/floor, rejects mixed coefficient/status/timing fields and unsupported selectors, and verifies that reversing the target and description reproduces all original ability data and other catalog bytes. Existing coefficient candidate versions continue rejecting targeting fields. No combat-engine, C# or search-algorithm changes were made.
+
+Seven new safeguard methods bring the candidate suite to **37 fresh passes**. They cover exact round-trip preservation, stale/no-op/unsupported selectors, unexpected or mixed fields, multiple changes, periodic/non-Power/non-damage effects, verifier rejection of unrelated damage/status/timing/flag drift, old-format rejection, descriptions and exclusive-guardian checks. **Six fresh native Vaelor and health-percentage mechanic tests** and **one complete-family study fixture** passed through `build/run-tests.ps1 -NoBuild`. The unchanged runtime's **108 backend passes / four intentional opt-in skips** were hash-checked and reused, not rerun. No C# rebuild was needed.
+
+The screen completed all **16,896 attempts / 16,896 fights** in **173.62 native seconds**, using **206,283,136 archive bytes**, within its predeclared 840-second / 2-GiB native envelope. The owner exited successfully with **zero retries, no timeout and zero active child processes**. The independent collector reconstructed all 132 outcomes, equipment eligibility, actual-composition identities, simultaneous bounds, verdict, candidate-only catalog differences, runtime/settings equality and seed accounting. Exclusions increased **917,606 → 917,734**, with no repeats, replacements or extensions.
+
+All **661 preceding publication bindings** were authenticated before edits. The two original helper/test sources were archived in `TestResults/tower-floor4-health-ratio-entry-20260930`; preceding publications and native archives remain immutable. The driver saved the prospective protocol as `frozen-protocol.md` before allocating seeds. This completed report records the outcome without replacing that frozen protocol. Markdown links and `git diff --check` pass at publication. No required command was blocked. Conditional 150-seed confirmation, application parity and live application were intentionally not run because the screen failed.
+
+All **102 live JSON files and six runtime/test assemblies** remain unchanged. Vaelor health/offense stays **2.3231953125 / 5.023125**; Mirror Lance physical/magical stays **2.00/1.00**, Hall magical/physical **0.50/0.50**. The live magical Lance retains `LowestCurrentHealthEnemy`. The expected repeating gear curve, approved Essence progression and previous applied floor changes are preserved. No configuration, migration, database or deployment changes.
+
+Added this report and fresh protocol/driver/collector/evidence; updated the continuation handoff, balance status, gear coverage, preceding fixed-healer report and both harness guides. The useful implementation is a constrained targeting-study capability; **this trial produced no accepted gameplay improvement**.
+
+## Next Tower work
+
+Next priority: assess **penetration paired with lower offense** as one possible way to narrow Vaelor's armor gap, using actual prepared attributes and the current mitigation formula before choosing any values. Penetration subtracts mitigation percentage points, capped at 40; the existing guardian multiplier changes both physical and magical penetration. The maintained study runner currently exposes only health/offense scaling, so a selected penetration trial would need a narrow validated candidate path. This is a feasibility assessment, not an accepted candidate or evidence of better balance. Keep all **132 recipes**, require two actual compositions within **eight specialized items on at most two characters**, retain every full-armor control, and freeze any candidate, resource limits, fresh complete-family screen, independent confirmation and native parity before combat. Do not repeat the rejected target change, fixed healer substitution, supported search or fractional Hall sweeps. No next candidate or seeds are selected and no study remains active. Dungeons, supplies and acquisition remain outside this work.
+
+Read-only code assessment found that `WorldTowerGuardianScaling.Apply` already multiplies both `ArmorPenetration` and `MagicPenetration`. Under attribute rules v18, `AttributeRules.Mitigation` first computes **0.8 × rating / (rating + 165)**, applies corrosion to rating, then subtracts capped penetration percentage points and floors mitigation at zero. Penetration does not bypass block or general damage reduction. `FastCombatEngine.ApplyTypedDefense` routes each damage type through that formula. This supports assessing penetration/offense together; it does not establish that they can satisfy the full encounter, whose gear also changes health, block and other attributes. Compare actual prepared baseline/partial/full-armor characters and all retained damage types before selecting a single candidate. The current runner's 0.25–16 factor bounds apply to health/offense only, not an existing penetration study option. Do not assume an unsupported option or silently extend those bounds.
+
+The **unchanged-live-catalog source for the next trial remains** `TestResults/tower-balance-pass-floor4-fixed-support-diagnostic-study-20260929`: manifest **`60950e8d1e7e6e31feb03e926e12dac57be9244fec763b23b6ceba3972b5d52f`**, audit **`9f393b8dd8cce16c06811964b811b18c9c5ead743f265947a03fa17b15c82e3f`**. It contains all 132 recipes. The rejected health-ratio archive below is outcome evidence, not a replacement source for live abilities. Independently use the latest exclusion ledger including this rejected screen. Do not restart from the smaller 116/98-recipe families or resume any closed driver.
+
+## Evidence and commands
+
+- Independent evidence: `TestResults/tower-floor4-health-ratio-evidence-20260930.json`, SHA **`2ee796351e59444a03a761afd18685fea9030d21bd30346e424ced28aeb66a2c`**.
+- Frozen declaration, candidate, eligible recipes, prospective protocol, exact commands, resource admission, native test receipts and completion: `TestResults/tower-floor4-health-ratio-driver-20260930/`.
+- Rejected measured screen: `TestResults/tower-balance-pass-floor4-health-ratio-screen-study-20260929`, manifest **`da88d53359c7e3375c6c74400bf9a2794e8da829dfe44dff0b0de9a09734a3aa`**, audit **`67d1cf83a00933cfbee4de1bb362069756b44182e72f7503a2f4245636b49590`**.
+- Latest ledger: `TestResults/tower-balance-pass-floor4-health-ratio-screen-owner-20260929/seed-ledger.json`, SHA **`df243c80fa7bf344bfa6ba7cb61568a73f109b4602bf7052e695b90c200fd322`**, plus all ancestors; exclusions **917,734**.
+- Current Tower SHA **`0d416f3cbbf24f7b856fad129e13efcf8ed4a9d5c7677d4bc4b6c51a5061c5e6`**, abilities SHA **`169b61f23c2e1e301e64e176962bbe3dc8386ea941a87a7f5a8205c872963d6a`**. Runtime: `TestResults/tower-floor2-precision-runtime-20260930`.
+- Current publication: `TestResults/tower-floor4-health-ratio-publication-check-20260930.json`. Authenticate its five current pin groups; older document/helper hashes remain historical.
+
+Executed once with the bundled Python using `-B -X utf8`: `Balance Harness/analysis/test-tower-ability-candidate.py`, `TestResults/tower-floor4-health-ratio-driver-20260930.py`, and `TestResults/tower-floor4-health-ratio-collect-20260930.py`. Exact backend commands and owned-process receipts are in the mechanic-test directory and frozen control directory. Publication runs relative Markdown-link checks and `git diff --check`. No active combat work remains.

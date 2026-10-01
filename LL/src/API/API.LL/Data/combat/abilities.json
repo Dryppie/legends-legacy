@@ -565,8 +565,8 @@
   {
     "id": "ability.creature.goblin_archer.snipers_strike",
     "kind": "Active",
-    "name": "Sniper\u0027s Strike",
-    "description": "Deal 135% Physical Damage with \u002B50% Critical Chance.",
+    "name": "Sniper's Strike",
+    "description": "Deal 135% Physical Damage with +50% Critical Chance.",
     "cooldownTicks": 120,
     "tags": [
       "Physical",
@@ -1474,7 +1474,7 @@
   {
     "id": "ability.creature.wood_nymph.natures_protection",
     "kind": "Passive",
-    "name": "Nature\u0027s Protection",
+    "name": "Nature's Protection",
     "description": "Innate: gain Renewal(15) and Ward(2).",
     "cooldownTicks": 0,
     "tags": [
@@ -1559,7 +1559,7 @@
   {
     "id": "ability.creature.enchanted_fairy.faes_corrosion",
     "kind": "Active",
-    "name": "Fae\u0027s Corrosion",
+    "name": "Fae's Corrosion",
     "description": "Deal 140% Magical Damage to a random enemy and apply Corrosion(6).",
     "cooldownTicks": 120,
     "tags": [
@@ -1592,7 +1592,7 @@
   {
     "id": "ability.creature.enchanted_fairy.faes_charm",
     "kind": "Passive",
-    "name": "Fae\u0027s Charm",
+    "name": "Fae's Charm",
     "description": "Every {triggerCooldown}, each enemy has an 80% chance to receive Stun(3).",
     "cooldownTicks": 0,
     "tags": [
@@ -1933,7 +1933,7 @@
     "id": "ability.creature.glade_panther.ambush_strike",
     "kind": "Active",
     "name": "Ambush Strike",
-    "description": "Deal 125% Physical Damage with \u002B20% Critical Chance.",
+    "description": "Deal 125% Physical Damage with +20% Critical Chance.",
     "cooldownTicks": 130,
     "tags": [
       "Physical",
@@ -3655,7 +3655,7 @@
     "id": "ability.creature.velka.crimson_gale",
     "kind": "Active",
     "name": "Crimson Gale",
-    "description": "Beat her wings violently, dealing 65% Physical Damage to all enemies and applying Bleed(10).",
+    "description": "Beat her wings violently, dealing 35% Physical Damage to all enemies and applying Bleed(10).",
     "cooldownTicks": 130,
     "tags": [
       "Physical",
@@ -3668,7 +3668,7 @@
         "operation": "Damage",
         "target": "AllEnemies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.65,
+        "scalingCoefficient": 0.35,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -3687,7 +3687,7 @@
     "id": "ability.creature.velka.feast_on_wounds",
     "kind": "Active",
     "name": "Feast on Wounds",
-    "description": "Consume up to three Bleed stacks from all enemies. Each consumed stack deals 20% Physical Damage to its target and heals Velka for 0.5% Max Health, capped at 4%.",
+    "description": "Consume up to three Bleed stacks from all enemies. Each consumed stack deals 65% Physical Damage to its target and heals Velka for 0.5% Max Health, capped at 4%.",
     "cooldownTicks": 210,
     "tags": [
       "Physical",
@@ -3703,7 +3703,7 @@
         "condition": "Bleed",
         "baseValue": 3,
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.2,
+        "scalingCoefficient": 0.65,
         "healingScalingAttribute": "MaxHealth",
         "healingScalingCoefficient": 0.005,
         "maximumHealingScalingCoefficient": 0.04,
@@ -3862,7 +3862,7 @@
     "id": "ability.creature.vaelor.hall_of_shards",
     "kind": "Active",
     "name": "Hall of Shards",
-    "description": "Deal 50% Magical Damage to all enemies, followed by 50% Physical Damage to all enemies.",
+    "description": "Deal Magical Damage equal to 19% of each enemy's maximum Health, followed by 50% Power as Physical Damage to all enemies. Mirrorbound adds its existing Power-based bonus to each hit.",
     "cooldownTicks": 160,
     "tags": [
       "Physical",
@@ -3874,13 +3874,14 @@
         "id": "effect.creature.vaelor.hall_of_shards.magical",
         "operation": "Damage",
         "target": "AllEnemies",
-        "scalingAttribute": "Power",
-        "scalingCoefficient": 0.5,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.19,
         "scalingStatusId": "status.vaelor.next_magical_damage",
         "statusScalingCoefficient": 0.005,
         "attackType": "Ranged",
         "damageType": "Magical",
-        "procCoefficient": 1
+        "procCoefficient": 1,
+        "scalingAttributeSubject": "Target"
       },
       {
         "id": "effect.creature.vaelor.hall_of_shards.physical",
@@ -3937,7 +3938,7 @@
     "id": "ability.creature.vaelor.mirrorbound",
     "kind": "Passive",
     "name": "Mirrorbound",
-    "description": "Physical Damage received increases the Magical Damage of Vaelor\u0027s next damaging ability by 1%; Magical Damage received instead increases its Physical Damage by 1%. Each bonus stacks to 30% and resets when consumed.",
+    "description": "Physical Damage received increases the Magical Damage of Vaelor's next damaging ability by 1%; Magical Damage received instead increases its Physical Damage by 1%. Each bonus stacks to 30% and resets when consumed.",
     "cooldownTicks": 0,
     "tags": [
       "Buff",
@@ -4133,7 +4134,7 @@
     "id": "ability.creature.kharad.crushing_verdict",
     "kind": "Active",
     "name": "Crushing Verdict",
-    "description": "Strike the enemy with the highest Max Health for 260% Physical Damage and apply Vulnerability(2).",
+    "description": "Strike the enemy with the highest Max Health for 490% Physical Damage and apply Vulnerability(2).",
     "cooldownTicks": 140,
     "tags": [
       "Physical",
@@ -4146,7 +4147,7 @@
         "operation": "Damage",
         "target": "HighestMaxHealthEnemy",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.6,
+        "scalingCoefficient": 4.9,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -4197,7 +4198,7 @@
     "id": "ability.creature.kharad.seal_of_ascension",
     "kind": "Active",
     "name": "Seal of Ascension",
-    "description": "Gain Barrier equal to 5% Max Health for 10 seconds and deal 50% Magical Damage to all enemies every 2 seconds while it holds.",
+    "description": "Gain Barrier equal to 5% Max Health for 10 seconds and deal 40% Magical Damage to all enemies every 2 seconds while it holds.",
     "cooldownTicks": 160,
     "tags": [
       "Magical",
@@ -4230,7 +4231,7 @@
         "operation": "Damage",
         "target": "AllEnemies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.5,
+        "scalingCoefficient": 0.4,
         "durationTicks": 100,
         "intervalTicks": 20,
         "attackType": "None",
@@ -4638,7 +4639,7 @@
     "id": "ability.creature.ni.ninefold",
     "kind": "Passive",
     "name": "Ninefold",
-    "description": "Innate: summon 9 inert copies with 10% of Ni\u0027s Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
+    "description": "Innate: summon 9 inert copies with 10% of Ni's Max Health and inherited Armor and Resistance. Whenever a copy dies, Ni permanently gains 5% of initial Power.",
     "cooldownTicks": 0,
     "tags": [
       "Passive",
@@ -4740,7 +4741,7 @@
     "id": "ability.creature.kodoku.withering_miasma",
     "kind": "Active",
     "name": "Withering Miasma",
-    "description": "Reduce all enemies\u0027 healing received and Health Regeneration by 80% for 15 seconds.",
+    "description": "Reduce all enemies' healing received and Health Regeneration by 80% for 15 seconds.",
     "cooldownTicks": 150,
     "tags": [
       "Area",
@@ -4770,7 +4771,7 @@
   {
     "id": "ability.creature.kodoku.survivors_struggle",
     "kind": "Passive",
-    "name": "Survivor\u0027s Struggle",
+    "name": "Survivor's Struggle",
     "description": "Innate: summon five Venomspawn. Whenever one dies, every surviving Venomspawn permanently gains 25% Attack Speed and 25% of its initial Power.",
     "cooldownTicks": 0,
     "tags": [
@@ -4840,7 +4841,7 @@
     "id": "ability.creature.eydis.springtide",
     "kind": "Active",
     "name": "Springtide",
-    "description": "Deal 100% Magical Damage plus {statusScaling} per stack of Abundance to all enemies.",
+    "description": "Deal 21.25% of each target's Max Health as Magical Damage plus 20% Power per stack of Abundance to all enemies.",
     "cooldownTicks": 120,
     "tags": [
       "Magical",
@@ -4852,14 +4853,15 @@
         "id": "effect.creature.eydis.springtide.damage",
         "operation": "Damage",
         "target": "AllEnemies",
-        "scalingAttribute": "Power",
-        "scalingCoefficient": 1.0,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.2125,
         "scalingStatusId": "status.eydis.abundance",
         "statusScalingAttribute": "Power",
         "statusScalingCoefficient": 0.2,
         "attackType": "None",
         "damageType": "Magical",
-        "procCoefficient": 1
+        "procCoefficient": 1,
+        "scalingAttributeSubject": "Target"
       }
     ]
   },
@@ -4966,7 +4968,7 @@
         "target": "Self",
         "scalingStatusId": "status.eydis.abundance",
         "statusScalingAttribute": "MaxHealth",
-        "statusScalingCoefficient": 0.01,
+        "statusScalingCoefficient": 0.009,
         "critEligibility": "Disallowed",
         "procCoefficient": 1
       }
@@ -5836,7 +5838,7 @@
   {
     "id": "ability.creature.web_weaver_spider.weavers_grasp",
     "kind": "Active",
-    "name": "Weaver\u0027s Grasp",
+    "name": "Weaver's Grasp",
     "description": "Deal 80% Physical Damage. If the target is Slowed, deal another 80% Physical Damage.",
     "cooldownTicks": 90,
     "tags": [
@@ -6469,7 +6471,7 @@
     "id": "ability.set.arcane.arcane_surge",
     "kind": "Passive",
     "name": "Arcane Surge",
-    "description": "Every third active ability grants \u002B15% Power for 6 seconds. Does not stack.",
+    "description": "Every third active ability grants +15% Power for 6 seconds. Does not stack.",
     "cooldownTicks": 0,
     "tags": [
       "Set",
@@ -6618,7 +6620,7 @@
   {
     "id": "ability.set.warden.wardens_refuge",
     "kind": "Passive",
-    "name": "Warden\u0027s Refuge",
+    "name": "Warden's Refuge",
     "description": "Falling to 40% Health grants Renewal and 15% damage reduction for 8 seconds.",
     "cooldownTicks": 0,
     "tags": [
@@ -6817,7 +6819,7 @@
     "id": "ability.set.primal.strength_of_the_pack",
     "kind": "Passive",
     "name": "Strength of the Pack",
-    "description": "Gain \u002B5% Power for every living summon, up to three.",
+    "description": "Gain +5% Power for every living summon, up to three.",
     "cooldownTicks": 0,
     "tags": [
       "Set",
@@ -6892,7 +6894,7 @@
     "id": "ability.set.hive.brood_cycle",
     "kind": "Passive",
     "name": "Brood Cycle",
-    "description": "Every fifth Basic Attack grants \u002B15% Attack Speed for 6 seconds. Does not stack.",
+    "description": "Every fifth Basic Attack grants +15% Attack Speed for 6 seconds. Does not stack.",
     "cooldownTicks": 0,
     "tags": [
       "Set",
@@ -8516,7 +8518,7 @@
     "id": "ability.creature.horned_wolf.piercing_horn",
     "kind": "Active",
     "name": "Piercing Horn",
-    "description": "Deal 165% Physical Damage and reduce the target\u0027s Physical Defense by {scaling2} for {duration}.",
+    "description": "Deal 165% Physical Damage and reduce the target's Physical Defense by {scaling2} for {duration}.",
     "cooldownTicks": 130,
     "tags": [
       "Physical",

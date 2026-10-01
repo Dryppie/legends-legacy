@@ -1,6 +1,6 @@
 # LegendsLegacy Design System Implementation Plan
 
-Prepared 29 September 2026 for the **Grimoire** design system (the "Legend's Legacy" Design System artifact in Claude Design, mirrored as `lg-*` Angular components on `feature/grimoire-design-system`).
+Prepared 29 September 2026 for the **Grimoire** design system (the "Legend's Legacy" Design System artifact in Claude Design, mirrored as `lg-*` Angular components on `main`).
 
 This is a backlog, a roadmap and a prompt library. It does not design the system. Every backlog item ends with an instruction written to be pasted into the Claude Design chat that owns the Grimoire design system.
 

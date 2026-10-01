@@ -12,10 +12,33 @@ public sealed class BalanceHarnessTowerBalancePassTests
     internal sealed record Cell(string Id, string Composition, string Gear, string Origin, TowerScenario Scenario);
     private sealed record Request(string Mode, string ApiRoot, string Fixtures, string Output, int Floor,
         int[] Seeds, int[] SearchSeeds, string? Cells, string? Earned, string? History,
-        int Benchmark, int MaximumFights, IReadOnlyDictionary<string, string> InputHashes, int NativeSeconds = 840);
+        int Benchmark, int MaximumFights, IReadOnlyDictionary<string, string> InputHashes, int NativeSeconds = 840,
+        string? DiagnosticVersion = null);
     private sealed record Score(string Id, string Composition, string Gear, string Origin, int Wins,
         int Samples, decimal MeanGuardianHealth, double MeanSeconds);
     private sealed record LaterBudgets(string Version, string Assumptions, TowerSearchBudget[] Budgets);
+
+    internal const string EightItemDiagnostic = "floor8-two-healer-eight-item-diagnostic-v1";
+    internal const string KodokuOffenseDiagnostic = "floor8-kodoku-offense-diagnostic-v1";
+    internal const string KodokuRefinementDiagnostic = "floor8-kodoku-offense-refinement-diagnostic-v1";
+    internal const string KodokuMidpointDiagnostic = "floor8-kodoku-midpoint-diagnostic-v1";
+
+    internal static int DiagnosticBatchCount(string version) => version switch {
+        KodokuMidpointDiagnostic => 4,
+        EightItemDiagnostic or KodokuOffenseDiagnostic or KodokuRefinementDiagnostic => 2,
+        _ => throw new InvalidDataException("Unknown diagnostic version.")
+    };
+
+    internal static void ValidatePanel(string mode, int floor, int samples, string? diagnosticVersion, int familySize)
+    {
+        if (diagnosticVersion is null)
+        {
+            if (samples is < 16 or > 512) throw new InvalidDataException("Ordinary panels require 16–512 seeds.");
+        }
+        else if (diagnosticVersion is not (EightItemDiagnostic or KodokuOffenseDiagnostic or KodokuRefinementDiagnostic or KodokuMidpointDiagnostic)
+                 || mode != "screen" || floor != 8 || samples != (diagnosticVersion is KodokuRefinementDiagnostic or KodokuMidpointDiagnostic ? 16 : 8) || familySize != 186)
+            throw new InvalidDataException("Diagnostic panels require their exact version, sample count and 186-recipe floor-eight family.");
+    }
 
     internal static int DeadlineSeconds(string mode, int floor, int requested)
     {
@@ -196,6 +219,7 @@ public sealed class BalanceHarnessTowerBalancePassTests
     {
         var q = HarnessJson.Read<Request>(Environment.GetEnvironmentVariable("LL_TOWER_BALANCE_PASS")!);
         Assert.Contains(q.Mode, new[] { "prepare", "screen", "search", "confirm" });
+        if (q.Mode == "prepare") Assert.Null(q.DiagnosticVersion);
         Assert.InRange(q.MaximumFights, 0, 20000); Assert.False(Path.Exists(q.Output));
         Assert.Equal(q.Seeds.Length, q.Seeds.Distinct().Count());
         Assert.Empty(q.Seeds.Intersect(q.SearchSeeds));
@@ -230,7 +254,38 @@ public sealed class BalanceHarnessTowerBalancePassTests
             }
             else
             {
-                Assert.InRange(q.Seeds.Length, 16, 512);
+                ValidatePanel(q.Mode, q.Floor, q.Seeds.Length, q.DiagnosticVersion, cells.Length);
+                if (q.DiagnosticVersion is not null)
+                {
+                    Assert.Equal(840, q.NativeSeconds);
+                    Assert.Equal(cells.Length * q.Seeds.Length, q.MaximumFights);
+                    var provenanceName = q.DiagnosticVersion switch {
+                        KodokuMidpointDiagnostic => "kodoku-midpoint-diagnostic-provenance.json",
+                        KodokuRefinementDiagnostic => "kodoku-offense-refinement-diagnostic-provenance.json",
+                        KodokuOffenseDiagnostic => "kodoku-offense-diagnostic-provenance.json",
+                        _ => "eight-item-diagnostic-provenance.json"
+                    };
+                    var provenance = Assert.Single(q.InputHashes.Keys.Where(p => Path.GetFileName(p) == provenanceName));
+                    var declaration = HarnessJson.Read<JsonElement>(provenance);
+                    var path = declaration.GetProperty("declaration").GetString()!;
+                    Assert.Equal(declaration.GetProperty("declarationSha256").GetString(), HarnessJson.FileHash(path));
+                    var contract = HarnessJson.Read<JsonElement>(path);
+                    Assert.Equal(q.DiagnosticVersion, contract.GetProperty("version").GetString());
+                    var limits = contract.GetProperty("limits");
+                    Assert.True(limits.GetProperty("diagnosticOnly").GetBoolean());
+                    Assert.False(limits.GetProperty("usedForAcceptance").GetBoolean());
+                    Assert.False(limits.GetProperty("confirmation").GetBoolean());
+                    Assert.False(limits.GetProperty("application").GetBoolean());
+                    var batches = DiagnosticBatchCount(q.DiagnosticVersion);
+                    Assert.Equal(batches, limits.GetProperty("batches").GetInt32());
+                    Assert.Equal(q.Seeds.Length, limits.GetProperty("seedsPerBatch").GetInt32());
+                    Assert.Equal(batches * q.MaximumFights, limits.GetProperty("maximumFights").GetInt32());
+                    Assert.Equal(batches * q.Seeds.Length, limits.GetProperty("maximumNewSeeds").GetInt32());
+                    var batchIndex = declaration.GetProperty("batchIndex").GetInt32();
+                    Assert.InRange(batchIndex, 0, batches - 1);
+                    Assert.Equal(batches, contract.GetProperty("studies").GetArrayLength());
+                    Assert.Equal(q.Output, contract.GetProperty("studies")[batchIndex].GetString());
+                }
                 if (q.Mode == "search")
                 {
                     Assert.Equal(3, cells.Length); Assert.Equal(109, q.SearchSeeds.Length);
@@ -280,6 +335,7 @@ public sealed class BalanceHarnessTowerBalancePassTests
                     Assert.Equal(trial.InputHash, HarnessJson.Hash(runner.CreateInput(scenario, trial.Seed, settings.Threat, settings.CheckpointIntervalTicks)));
                 }
                 Save("result.json", new { status = "Complete", mode = q.Mode, floor = q.Floor, fights = completed, rows = scores,
+                    diagnosticOnly = q.DiagnosticVersion is not null, usedForAcceptance = q.DiagnosticVersion is null ? (bool?)null : false,
                     interpretation = "Fixed declared power, hypothetical ownership; earned compositions are projected, not earned inventory replays. Separate phases are never pooled. No universal composition coverage or acquisition-time claim." });
             }
             Pins(); Check(); success = true;

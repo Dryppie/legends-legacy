@@ -1,5 +1,7 @@
 # Floor 5: gear-coverage recovery — 29 September 2026
 
+**Closed: `NoStableCandidate`.** Both settings passed their 64-seed screens but exceeded the strongest-recipe ceiling on fresh 128-seed stability panels: **+3%: 57/128**, **+4%: 47/128**, versus the required maximum **44/128**. Their best health-and-regeneration recipes won **33/128 and 32/128**. No confirmation or content change followed. All 103 recipes remain retained. Total **39,552 fights / 384 reservations**; exclusions **910,519**. A separately declared [single-point +4.5% refinement](Tower-Floor5-Gear-Refinement-20260929.md) will use fresh selection and confirmation panels, without pooling this scope.
+
 **Recovery basis:** the [initial calibration](Tower-Floor5-Gear-Calibration-20260929.md) is closed after a pinned test-source file changed from LF to CRLF during the +3% screen. The normalized-LF SHA exactly matches its original; executable/runtime hashes are unchanged. Preserve that failed panel and all 128 reservations. No failed outcomes are used here. The completed +2% panel already failed its ceiling and is not repeated. This new scope independently tests the remaining predeclared +3% and +4% settings with fresh seeds and fresh outputs; no original phase is resumed or promoted.
 
 ## Prospective scope
@@ -28,4 +30,15 @@ Driver: `TestResults/tower-floor5-gear-recovery-driver-20260929.py`. Evidence in
 
 ## Execution record
 
-Results and continuation will be recorded after the frozen scope closes.
+All five native phases passed, including their raw source/input checks and archive audits. The entry allowance was restricted to the previously proven LF-to-CRLF conversion; all new raw pins stayed unchanged throughout this scope. Each recipe and all fourteen actual compositions were retained.
+
+| Setting | Screen: strongest / best health-and-regeneration | Stability: strongest / best health-and-regeneration | Outcome |
+| --- | --- | --- | --- |
+| +3% health, 3.4095887868 | 25/64 / 18/64 | 57/128 / 33/128 | Above stability ceiling |
+| +4% health, 3.4426915905 | 21/64 / 15/64 | 47/128 / 32/128 | Above stability ceiling |
+
+Both screens met the two-composition and two-gear minimums. Stability found three compositions at least 26/128 at +3%, and two at +4%; every setting still failed the all-recipes ceiling. These are separate selection observations, not accepted win-rate intervals. The +4% second composition's best recipe won 27/128, leaving limited room for further strengthening the guardian.
+
+The collector authenticated **755 unchanged input/runtime pins**, reconciled all five process receipts and complete families, and excluded all **384** new seeds. Native phases used **1,030.00 seconds** in total. **19 fresh selection safeguards** passed; entry coverage reused the verified **91 backend passes / four opt-in skips** and **14 Python tests**, rather than rerunning unchanged code. No confirmation, application or final post-application regression was needed.
+
+Evidence: `TestResults/tower-floor5-gear-recovery-evidence-20260929.json`, SHA **`5962c1f76797a66c4def298c237ee21345f3989004dc1a4a83777aa933725ef3`**. Initial exclusions **910,135**; final **910,519**. Tower SHA remains **`aebb3e9e342b777883e7a7f2642f0078f5685108a91747d85f32beb6bacf87c2`**; floor-5 health/offense remains **3.3102803755 / 4.4702934848**. The initial failed calibration remains closed and separately charged. No production code, configuration, migrations, databases or deployments changed.

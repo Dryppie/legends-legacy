@@ -155,7 +155,11 @@ def review_floor(entry, reference, current):
             path = ROOT/'LL/src/API/API.LL'/name.removeprefix('content/')
             if not path.exists() or sha(path) != pin:
                 changed_content.append(name)
-    captured_bounds = ({r['id']: r['adjusted'] for r in rows} if floor in (10, 11)
+    # Early confirmations use a different archive layout, independently of floor.
+    legacy = 'confirmation-seeds.json' in a.files
+    trial_directory = 'study' if legacy else 'evaluation'
+    require(trial_directory+'/trials.jsonl' in a.files, 'Missing confirmation trial journal')
+    captured_bounds = ({r['id']: r['adjusted'] for r in rows} if legacy
                        else {r['id']: r for r in audit['assessment']['bounds']})
     require((audit['assessment'] if isinstance(audit['assessment'], str) else audit['assessment']['verdict']) == 'Pass', 'Source not accepted')
     for row in rows:
@@ -164,8 +168,8 @@ def review_floor(entry, reference, current):
         require(abs(lo-bound['lower']) < 1e-7 and abs(hi-bound['upper']) < 1e-7, 'Adjusted bounds disagree')
         row.update(lower=bound['lower'], upper=bound['upper'], actualComposition=composition_id(cells[row['id']]),
                    gear=cells[row['id']].get('gear', cells[row['id']].get('profile')))
-    stats, authenticated = a.recount('study' if floor in (10, 11) else 'evaluation', cells, rows)
-    declared = a.member('confirmation-seeds.json') if floor in (10, 11) else a.member('request.json')['seeds']
+    stats, authenticated = a.recount(trial_directory, cells, rows)
+    declared = a.member('confirmation-seeds.json') if legacy else a.member('request.json')['seeds']
     require(set(declared) == next(iter(stats.values()))['seeds'] and len(declared) == len(set(declared)), 'Declared panel mismatch')
     require(sum(r['samples'] for r in rows) == result.get('confirmationFights', result['fights']), 'Fight accounting mismatch')
     intended = [r for r in rows if floor != 11 or r['essenceSlots'] == 7]

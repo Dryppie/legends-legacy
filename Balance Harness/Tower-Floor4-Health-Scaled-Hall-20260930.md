@@ -1,0 +1,73 @@
+# Floor 4: target-health Hall trial — 30 September 2026
+
+**Subsequent result — lower target-health Hall calibration closed:** The [20% target-health Hall calibration](Tower-Floor4-Health-Scaled-Hall-Lower-20260930.md) completed **16,896 fresh fights / 128 new seeds** across all **132 recipes / nine actual compositions**. **Every ceiling passed; only one of two required eligible compositions qualified.** The six-item Restoration healers C/D won **17/128 and 30/128**, against a **25-win minimum**. The maximum adjusted upper bound is **38.74%**, below 50%. This candidate is **closed and not applied**; confirmation and application parity were not run. **89 fresh Python guards and 117 fresh backend cases passed**, with four intentional opt-in skips, plus the full-family native fixture. Live gameplay/search remain unchanged; exclusions are **918,118**. Follow the linked result and current handoff for the unallocated 18% proposal and latest ledger. This 25% study remains closed.
+
+Target: primary LL World Tower and offline Balance Harness. Implement the single frozen proposal following the [recovery diagnostic](Tower-Floor4-Recovery-Diagnostic-20260930.md). This is a candidate experiment; acceptance requires the entire family and independent confirmation.
+
+## Frozen prospective protocol
+
+- Proposal: `TestResults/tower-floor4-health-scaled-hall-proposal-20260930.json`, SHA `3dcbb11490d6f47b0a55633d6bb35896d9d3ec28fc27af1e78e85e0dcfd2d80b`. Authenticate all 742 previous publication bindings and archive changed maintained files before editing.
+- Start from unchanged-catalog `tower-balance-pass-floor4-fixed-support-diagnostic-study-20260929`, manifest `60950e8d1e7e6e31feb03e926e12dac57be9244fec763b23b6ceba3972b5d52f`. Retain all **132 recipes / nine actual compositions**, including ceiling controls. No candidate chaining, imports, search, loadout rearrangement or replacement.
+- Isolated Vaelor offense **5.023125 → 3.415725** and penetration multiplier **1 → 100**; health remains **2.3231953125**. Hall's magical base changes from **0.50 source Power to 0.25 target MaxHealth**. Preserve the **0.005 source-Power bonus per Mirrorbound stack**, both charge removals, physical Hall, Lance, timing and targets. Update Hall's description accurately. All other fields and catalogs remain unchanged.
+- Use the existing damage engine, including typed mitigation and barrier absorption. Native target-health damage does not receive the Power-only ±20% magnitude variance; physical Hall retains that variance. No engine change, shield bypass, direct health subtraction or regeneration/healing change.
+- Before combat: pass candidate guards and native current-rule tests for distinct/wounded target health pools, source Power, status stacks and removal, Resistance Rating, penetration and barriers. Build through `build/run-tests.ps1`; authenticate the runtime's five production assemblies against the saved source, and bind the newly compiled test assembly.
+- Initial seed exclusions: **917,862** including all ancestors. Screen **128 new shared seeds / 16,896 fights**, name `floor4-health-scaled-hall-screen`. Eligible recipes have at most **eight specialized items on two characters**, counted from actual equipment IDs (54 recipes). At least **two actual compositions** must have eligible adjusted lower bounds ≥10%; **every recipe** must have adjusted upper bound ≤50%. Use approximate simultaneous 95% Bonferroni-Wilson intervals over all 132 recipes: **minimum 25 / maximum 43 wins** at 128 samples.
+- Only if the complete screen passes, run `floor4-health-scaled-hall-confirm`: **150 independent new shared seeds / 19,800 fights**, same family and candidate. Confirmation gates: **minimum 29 / maximum 53 wins**, with the same composition and equipment requirements. Maximum total **36,696 fights / 278 reservations**.
+- Each phase is limited to **20,000 fights / 840 native seconds / 900 owner seconds / 2 GiB**. Before allocation, doubled measured time and storage projections must remain below 80% of those envelopes. Keep owned-process receipts, raw native reports, input hashes and an independent recount of every result.
+- A failed screen or confirmation closes this candidate. No retuning, retries, extensions, replacement seeds, dropped controls or pooled historical outcomes. Apply locally only after independent confirmation and native input/replay parity plus regressions. Preserve all unsuccessful outputs.
+
+Preserve expected repeating gear progression, approved Essence counts, and `affinity-creation-with-benchmark-validation-v1`. No dungeons, supplies, acquisition, migration, configuration, database or deployment work.
+
+## Result
+
+**Rejected: the candidate passed every ceiling but failed the limited-equipment minimum.** All **16,896 fights** completed exactly once across 132 frozen recipes and 128 fresh shared seeds. No eligible recipe reached **25 wins**, so **zero of the required two actual compositions** qualified. Conditional confirmation, application parity and live application were not run.
+
+| Recipe | C | D |
+| --- | ---: | ---: |
+| healer; restorer-specialization | 7/128 | 10/128 |
+| damage; health-and-regeneration | 10/128 | 9/128 |
+| damage; armor-and-health | 4/128 | 0/128 |
+| healer; health-and-regeneration | 0/128 | 0/128 |
+
+The six-item Restoration healer D was the strongest eligible recipe at **10/128 (7.81%)**, adjusted interval **2.71–20.49%**. Healer C had **7/128 (5.47%)**, adjusted interval **1.57–17.37%**. Both retain the previously fixed ordered Essence lists and their original equipment. Their eight-item/two-character eligibility is based on actual equipment IDs; no recipe was relabeled to qualify.
+
+The strongest health/regeneration damage control had **10/128**, tied for the largest win count anywhere in the family. All 132 upper bounds remained below 50%, with maximum **20.49%**. This meets the ceiling alone; it does not make floor 4 accepted. Earlier penetration-only results used a different seed panel: do not pool them with this screen or describe their count differences as paired causal effects.
+
+The target-health direction removes the observed ceiling failure at this tested setting, while making the encounter too difficult for the required eligible builds. A lower target-health fraction is the next calibration direction, not an accepted change. Outcome counts alone do not establish whether a particular lower value will satisfy both constraints.
+
+## Implementation and verification
+
+Added `analysis/tower-health-pressure-candidate.py` and `analysis/test-tower-health-pressure-candidate.py`; extended `analysis/run-tower-balance-pass.py` with `--health-pressure-candidate`. The new versioned format permits one exclusive guardian's direct magical all-enemy source-Power base to become target-MaxHealth damage, together with declared lower offense and higher penetration. It preserves the separate source-Power status bonus. Existing ability-only and penetration-only restrictions remain intact.
+
+The runner rejects mixed modes, additional scalar arguments, imports, projections, content refreshes and chained candidate archives before seed allocation. It saves hashed candidate provenance. Auditing reconstructs both allowed catalog deltas, checks the entire unchanged family/settings and rejects unrelated changes, added/removed catalogs, changed status bonuses, consumption or timing. Materialization affects only isolated catalogs.
+
+Added five native theory cases in `LL/tests/EssenceSystem.Tests/AbilitySystemTests.cs`. They compile the proposed Hall through the normal engine using **current attribute rules**, distinct target max-health pools, an already wounded target, varied source Power and charge counts, resistance rating, 36% magical penetration and opening barriers. They verify the target-health base, separate source-Power bonus, both charge removals, typed mitigation and shield absorption. Physical Hall retains its Power-only ±20% variance; target-MaxHealth damage uses the existing non-Power path without that variance. No combat-engine code changed.
+
+**89 fresh Python tests passed**: 11 health-pressure guards, 12 existing penetration guards, 29 fixed-family/reference tests and 37 existing ability guards. A corrected fresh build passed **117 backend cases / four opt-in skips**. Its production assembly hashes differed from the saved runtime, so a fresh complete artifact directory combines the new test assembly with exact archived production binaries and dependencies. All **117 cases / four skips passed again against those pinned production binaries**; the independent screen collector verifies native execution hashes match the original source. The screen fixture then passed separately. No historical native report was treated as a fresh test.
+
+Build/setup history is retained. The first sandboxed build failed to read the user's NuGet configuration; an authorized build resolved access. The first new fixture assertions failed because the test used legacy-rule defaults and assumed fixed physical damage; those assertions were corrected to current rating rules and existing physical variance. Both early build owners later reached their 600-second limits while reusable build children remained; their receipts confirm zero active children after cleanup. The corrected build disables reusable build servers and completed cleanly in 65.06 seconds. A bin-only staging check produced no test output and is excluded from verification; the complete staging check includes build metadata and verified 117 actual passes in 27.78 seconds. No balance screen was retried and no fresh study seed was allocated during these setup corrections.
+
+The independent collector recounted every outcome, verified every recipe/seed and all prepared participants in **16,896 fights**, reconstructed composition/equipment eligibility and simultaneous bounds, and checked native content, settings/runtime, resources and ledger accounting. Only intended guardian Power/penetration prepared attributes changed; the ability catalog differs only by the declared Hall base/subject/description. Native candidate Power is **901.269**, physical/magical penetration **36/36**, and health **4270.9517**.
+
+The screen took **169.67 native seconds**, **172.91 owner seconds** and **205,408,159 archived bytes**. Resource admission was frozen before combat at doubled projected **371.99 seconds / 453,051,168 bytes**, below the required 80% margins. Screen owner exit code was zero, with no timeout, retries or active children. Exclusions increased **917,862 → 917,990**; exactly **128** new seeds were reserved. No confirmation reservations were made.
+
+All **102 live catalogs remain unchanged**. Live Vaelor health/offense/penetration remains **2.3231953125 / 5.023125 / 1**; Hall remains **0.50 Power magical / 0.50 Power physical**, with unchanged Lance and targeting. Earlier applied floor-2, floor-5 and floor-6 changes remain. Search stays `affinity-creation-with-benchmark-validation-v1`. No configuration, migration, database or deployment changes.
+
+Updated this report, the continuation handoff, balance status, gear coverage, preceding recovery report and both harness guides. Prior publications/proposal/native archives remain immutable. The proposal's original `ProposedNotAllocated` status is historical; this report and the new publication record its completed rejection. All 742 predecessor bindings authenticated before maintained edits, whose originals were archived. Markdown links and `git diff --check` pass at publication.
+
+## Next Tower work
+
+Next Tower priority: define **one lower target-health Hall fraction** as a separate prospective calibration, preserving the same offense/penetration pressure mix and the full 132-recipe family. The 0.25 fraction failed the minimum with substantial ceiling headroom; this supports examining a weaker fraction, but supplies no accepted value or win-rate forecast. Before allocating anything, freeze the single coefficient, resource admission, fresh full-family screen and conditional independent confirmation. Use the unchanged-catalog fixed-support source and the newest ledger, never chain the rejected candidate. Keep the two-composition/eight-specialized-items-on-two-characters minimum and every-recipe ceiling. No next numeric coefficient, seeds or fights are selected; this driver must not be resumed, retuned or extended. Do not reset search, broaden into global healing/regeneration changes or work on dungeons, supplies or acquisition.
+
+## Evidence
+
+- Independent evidence: `TestResults/tower-floor4-health-scaled-hall-evidence-20260930.json`, SHA **`0f720fc945a70b967cddcf1a416818e164bd08328da3f084efa7cb2ed4354dae`**.
+- Screen: `TestResults/tower-balance-pass-floor4-health-scaled-hall-screen-study-20260929`, manifest **`10f30f2785b4ec1f0e94f6b84a01d59e354aa31bfa5a83a4813452376b6d1b9e`**, audit **`2570f33ae3b146a1e98fd3ae195dc20ac1b1164f06cbe6795bc5bd09d055f949`**.
+- Latest ledger: `TestResults/tower-balance-pass-floor4-health-scaled-hall-screen-owner-20260929/seed-ledger.json`, SHA **`bdf3f704d5e4f1782e086dea6f681c78e527ad63d635d579af8ab58666715425`**, plus every ancestor; exclusions **917,990**.
+- Frozen candidate, family, prospective protocol, declaration, commands, resource admission, native receipts and completion: `TestResults/tower-floor4-health-scaled-hall-driver-20260930/`.
+- Runtime for continuation: `TestResults/tower-floor4-health-scaled-hall-runtime-verified-complete-20260930`; verified native regression receipts: `TestResults/tower-floor4-health-scaled-hall-runtime-verification-complete-20260930/`.
+- Unchanged source for later candidates: `TestResults/tower-balance-pass-floor4-fixed-support-diagnostic-study-20260929`, manifest **`60950e8d1e7e6e31feb03e926e12dac57be9244fec763b23b6ceba3972b5d52f`**, original audit **`9f393b8dd8cce16c06811964b811b18c9c5ead743f265947a03fa17b15c82e3f`**.
+- Current Tower SHA **`0d416f3cbbf24f7b856fad129e13efcf8ed4a9d5c7677d4bc4b6c51a5061c5e6`**, abilities SHA **`169b61f23c2e1e301e64e176962bbe3dc8386ea941a87a7f5a8205c872963d6a`**.
+- Publication: `TestResults/tower-floor4-health-scaled-hall-publication-check-20260930.json`. Authenticate its five current pin groups; older document/code hashes are historical.
+
+Commands used bundled Python with `-B -X utf8` for the four test suites, fresh script preparation, bounded build/runtime verification, driver and independent collector. All backend execution used `build/run-tests.ps1`; exact commands and logs are archived. The initial NuGet access failure was resolved. Required verification completed; confirmation and application were intentionally omitted after the failed screen. No active combat or build work remains.

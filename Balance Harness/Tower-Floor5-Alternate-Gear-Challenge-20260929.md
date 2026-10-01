@@ -1,5 +1,7 @@
 # Floor 5: alternate-gear challenge — 29 September 2026
 
+**Subsequent calibration:** the [health/gear refinement](Tower-Floor5-Gear-Refinement-20260929.md) preserves this complete source and closes the initial failure, recovery and +4.5% point without a guardian edit. +3%/+4% exceeded the stability ceiling; +4.5% missed the alternate-gear minimum. Next diagnose the profiles' damage/healing difference. Current exclusions are **910,647**; the calibration recommendation below is historical.
+
 **Completed: `NoEligibleGearConfirmation`.** The unchanged supported search found two new compositions. In the complete **103-recipe / fourteen-composition** screen they won **35/96 and 25/96** on health-and-regeneration, but **54/96 and 41/96** on resistance-and-health. Both desired gear profiles met the minimum screening threshold; the strongest recipe exceeded the **33/96 ceiling**. No confirmation or content change followed. Preserve this expanded family for a separately declared calibration. **13,904 fights**, **365 fresh reservations**, **910,007 total exclusions**; no active study remains.
 
 ## Prospective scope

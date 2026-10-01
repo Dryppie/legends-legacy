@@ -1,5 +1,9 @@
 # Floor 8: midpoint health refinement — 29 September 2026
 
+**Subsequent floor-8 trial:** **Latest floor-8 limited-armor result (30 September):** The [complete trial](Tower-Floor8-Limited-Armor-20260930.md) closed **`LimitedArmorScreenNotAccepted`** after **22,656 fresh fights / 128 reservations**, retaining **177 recipes / nine actual compositions**. The final phase has **0 qualifying limited-equipment compositions** and **0 ceiling failures** (largest adjusted upper **44.87%**). **157 Python cases and 214 backend cases / four intentional skips pass**, plus 4 native study fixtures. No gameplay edit. Exclusions: **923,900**. Floor 8 remains unresolved; next is the proposed, unallocated 96-historical-replay diagnostic. No coefficient selected or new diagnostic seed. The older protocols and results below remain historical.
+
+**Subsequent floor-8 work:** The [equipment assessment](Tower-Floor8-Gear-Assessment-20260930.md) and current-catalog qualification are complete. Floor 8 remains dependent on the tested full-party armor profile. All 177 limited-armor comparison recipes are validated and natively prepared; the separately proposed batched trial has no allocated seeds. The historical results and protocols below remain preserved.
+
 **Applied locally and verified:** Kodoku health is **9.9064526367 (+5%)**; offense remains **8.8260253906** and regeneration **1.0**. Fresh confirmation across **67 exact recipes / nine compositions** establishes **2 viable lineups** at **47/160 (29.38%)** and **33/160 (20.62%)**. Every adjusted upper bound is below 50%. All **10,720 native inputs and 67 full replays** match the applied content. **82 backend regressions passed**, with three intentional opt-in skips. The accepted teams remain poison-focused and share armor-and-health gear; broader archetypes, ordinary-player acquisition and pacing targets remain unestablished.
 
 ## Prospective scope

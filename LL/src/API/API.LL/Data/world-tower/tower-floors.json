@@ -124,10 +124,10 @@
       "progressionPosition": 4,
       "guardianScaling": {
         "health": 2.3231953125,
-        "offense": 5.023125,
+        "offense": 3.415725,
         "defense": 2.33,
         "resistance": 2.33,
-        "penetration": 1.0,
+        "penetration": 100.0,
         "regeneration": 1.0
       },
       "stagger": {
@@ -199,10 +199,10 @@
       "recommendedPowerRating": 175,
       "progressionPosition": 6,
       "guardianScaling": {
-        "health": 6.153125,
+        "health": 6.70690625,
         "offense": 4.365625,
-        "defense": 2.50,
-        "resistance": 2.50,
+        "defense": 2.5,
+        "resistance": 2.5,
         "penetration": 1.0,
         "regeneration": 1.0
       },
@@ -233,11 +233,11 @@
       "progressionPosition": 7,
       "guardianScaling": {
         "health": 4.4454238281,
-        "offense": 6.5953125,
+        "offense": 3.9571875,
         "defense": 2.04,
         "resistance": 2.04,
-        "penetration": 1.0,
-        "regeneration": 0.10
+        "penetration": 50.0,
+        "regeneration": 0.1
       },
       "stagger": {
         "enabled": true,
@@ -271,10 +271,10 @@
       "progressionPosition": 8,
       "guardianScaling": {
         "health": 9.9064526367,
-        "offense": 8.8260253906,
+        "offense": 5.185289917,
         "defense": 2.61,
         "resistance": 2.61,
-        "penetration": 1.0,
+        "penetration": 40.0,
         "regeneration": 1.0
       },
       "stagger": {
@@ -367,7 +367,7 @@
         },
         {
           "key": "tower_band_2_unlock",
-          "description": "Tower Floors 11–20"
+          "description": "Tower Floors 11\u201320"
         }
       ]
     },
@@ -418,8 +418,8 @@
       "guardianScaling": {
         "health": 9.414125,
         "offense": 11.9,
-        "defense": 2.80,
-        "resistance": 2.80,
+        "defense": 2.8,
+        "resistance": 2.8,
         "penetration": 1.0,
         "regeneration": 1.0
       },
@@ -451,8 +451,8 @@
       "guardianScaling": {
         "health": 13.180078125,
         "offense": 12.83625,
-        "defense": 3.00,
-        "resistance": 3.00,
+        "defense": 3.0,
+        "resistance": 3.0,
         "penetration": 1.0,
         "regeneration": 1.0
       },
@@ -484,8 +484,8 @@
       "guardianScaling": {
         "health": 12.68625,
         "offense": 10.933125,
-        "defense": 2.90,
-        "resistance": 2.90,
+        "defense": 2.9,
+        "resistance": 2.9,
         "penetration": 1.0,
         "regeneration": 1.0
       },
@@ -516,8 +516,8 @@
       "guardianScaling": {
         "health": 15.275,
         "offense": 10.28125,
-        "defense": 3.30,
-        "resistance": 3.30,
+        "defense": 3.3,
+        "resistance": 3.3,
         "penetration": 1.0,
         "regeneration": 1.0
       },

@@ -264,6 +264,13 @@
         "attribute": "AttackSpeed",
         "baseValue": 0,
         "minimumValue": 0
+      },
+      {
+        "attribute": "ArmorPenetration",
+        "baseValue": 0,
+        "minimumValue": 0,
+        "scalingAttribute": "ArmorPenetration",
+        "scalingCoefficient": 1
       }
     ]
   },

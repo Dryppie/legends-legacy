@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "towerSha256": "0d416f3cbbf24f7b856fad129e13efcf8ed4a9d5c7677d4bc4b6c51a5061c5e6",
+  "runtimeReferenceFloor": 6,
+  "floors": [
+    {
+      "floor": 1,
+      "source": "TestResults/tower-balance-pass-floor1-reference-coverage-confirmation-study-20260929",
+      "manifestSha256": "4404f9418132a1b1d7f449ce87be771e8a92bb404fbd53a2fdc0227793827773",
+      "audit": "TestResults/tower-balance-pass-floor1-reference-coverage-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "c1760ec35be0562827eab26b67a7a34b9a7a417c88d5471a8611f274c4118ee7",
+      "report": "Balance Harness/Tower-Reference-Coverage-20260929.md"
+    },
+    {
+      "floor": 2,
+      "source": "TestResults/tower-balance-pass-floor2-reference-coverage-confirmation-study-20260929",
+      "manifestSha256": "e451d3fd718de05b741857c810ed9512930094f9d0064a13967cd1aaa8198a8d",
+      "audit": "TestResults/tower-balance-pass-floor2-reference-coverage-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "8dae4d5cf9b665a1eb964363bc309479b8c4f64a3dafb81774db86a3f62c1c80",
+      "report": "Balance Harness/Tower-Reference-Coverage-20260929.md"
+    },
+    {
+      "floor": 3,
+      "source": "TestResults/tower-balance-pass-floor3-diversity-refinement-confirmation-study-20260929",
+      "manifestSha256": "8fe7e0cd82b13d34b4cfebc296117621281dee98393f5fa22b0a7f95cba1b561",
+      "audit": "TestResults/tower-balance-pass-floor3-diversity-refinement-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "f1b10d7ec346d68dadb95644797140b9189d0d948ab5ad05ffc4a867032f207c",
+      "report": "Balance Harness/Tower-Floor3-Diversity-20260929.md"
+    },
+    {
+      "floor": 4,
+      "source": "TestResults/tower-balance-pass-floor4-reference-coverage-confirmation-study-20260929",
+      "manifestSha256": "3f4f7cbccc46beb78d93da36b615373e04af0548f8144aee94be4688265f508f",
+      "audit": "TestResults/tower-balance-pass-floor4-reference-coverage-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "150f185153a7e0eb469c53114aba5f8a1bfa3ba6f92f351f5beb85472a657907",
+      "report": "Balance Harness/Tower-Reference-Coverage-20260929.md"
+    },
+    {
+      "floor": 5,
+      "source": "TestResults/tower-balance-pass-floor5-ability-intermediate-confirmation-study-20260929",
+      "manifestSha256": "ea8cd1f6ce3a7900449b650ce25f6fea496a5df005510af1dbfaf9655f9510ec",
+      "audit": "TestResults/tower-balance-pass-floor5-ability-intermediate-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "6d1d373f90b6c64b5da1d1651f367ea83701e1d775ff283d726ec8384b53a180",
+      "report": "Balance Harness/Tower-Floor5-Ability-Intermediate-20260929.md"
+    },
+    {
+      "floor": 6,
+      "source": "TestResults/tower-balance-pass-floor6-health-midpoint-confirmation-study-20260929",
+      "manifestSha256": "780c2a16362b8e6107fee8d7e639186d5ca157720e35ce53c9922dda73c1d71e",
+      "audit": "TestResults/tower-balance-pass-floor6-health-midpoint-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "28eaaf6fa03335e99503cb188d013ae08ec6582d96e07ced0485907c19de9b56",
+      "report": "Balance Harness/Tower-Floor6-Health-Midpoint-20260930.md"
+    },
+    {
+      "floor": 7,
+      "source": "TestResults/tower-balance-pass-floor7-diversity-refinement-confirmation-study-20260929",
+      "manifestSha256": "497df7007dc1a715006ff9ffcf128cc572cbfef4657d408ea607e546e7117f20",
+      "audit": "TestResults/tower-balance-pass-floor7-diversity-refinement-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "cd26cbacad9adac470970da54b2ffadd83d60a7f9c90730d5222c379172db7a7",
+      "report": "Balance Harness/Tower-Floor7-Diversity-Refinement-20260929.md"
+    },
+    {
+      "floor": 8,
+      "source": "TestResults/tower-balance-pass-floor8-health-refinement-confirmation-study-20260929",
+      "manifestSha256": "0218835433af0414f788d5624b8c67f05b05a6995c7aa7ce8c20cdfc4a2f9947",
+      "audit": "TestResults/tower-balance-pass-floor8-health-refinement-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "9ba64bfc28eb80925527f6b2cb947ac6d3a5c6283b5b06617e3a83b77211ad4d",
+      "report": "Balance Harness/Tower-Floor8-Health-Refinement-20260929.md"
+    },
+    {
+      "floor": 9,
+      "source": "TestResults/tower-balance-pass-floor9-reference-coverage-confirmation-study-20260929",
+      "manifestSha256": "2d5d67eb2fad561358f6e19e1c6573d7bd0ffc4abfe9fbdcddd53f4abe73ffb4",
+      "audit": "TestResults/tower-balance-pass-floor9-reference-coverage-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "de16b69fb62fe8df1aaa33b494cb33f65e1d4745cd4193f8a9ecc28428770375",
+      "report": "Balance Harness/Tower-Reference-Coverage-20260929.md"
+    },
+    {
+      "floor": 10,
+      "source": "TestResults/tower-balance-pass-floor10-expanded-calibration-confirmation-study-20260929",
+      "manifestSha256": "d8992d0e6c06caa589c92a9d74066a5b28aa83a56ba091ff8b4bbb1889bbef69",
+      "audit": "TestResults/tower-balance-pass-floor10-expanded-calibration-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "0d6273bed2f7a9aa4a4347ef0bc18beac4c0f14f2aa6ef88db3593da24fc195e",
+      "report": "Balance Harness/Tower-Floor10-Expanded-Calibration-20260929.md"
+    },
+    {
+      "floor": 11,
+      "source": "TestResults/balance/tower-carried-confirmation-20260928",
+      "manifestSha256": "6a0d98f41362a3428816679efc9d0e8a90a88a37789030fbc38afa0e4652427d",
+      "audit": "TestResults/tower-carried-confirmation-owner-20260928/independent-audit.json",
+      "auditSha256": "99e88217698ced9b6f3a5d7034d670839cb581163ea73d51f218046df741daab",
+      "report": "Balance Harness/Tower-Carried-Equipment-Confirmation-20260928.md"
+    },
+    {
+      "floor": 12,
+      "source": "TestResults/tower-balance-pass-floor12-expanded-calibration-confirmation-study-20260929",
+      "manifestSha256": "7facc8455060b9c1c97bb0eb3ab36066bf665a9d288d4146b7ecc2156626e0c5",
+      "audit": "TestResults/tower-balance-pass-floor12-expanded-calibration-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "24e7a755a3340592c49e690a7174e0cdf7de51ecd5c41510ce1d552982cffbdc",
+      "report": "Balance Harness/Tower-Floor12-Expanded-Calibration-20260929.md"
+    },
+    {
+      "floor": 13,
+      "source": "TestResults/tower-balance-pass-floor13-search-challenge-confirmation-study-20260929",
+      "manifestSha256": "af56729b3f475edad39f99766bc8f64fdd4d1a789900c686fa361ec97f2685ac",
+      "audit": "TestResults/tower-balance-pass-floor13-search-challenge-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "c067b7cca17c7c0bb86fd31d990824fa00fad4336f2013d7cbbadfa616b65b8b",
+      "report": "Balance Harness/Tower-Floor13-Search-Challenge-20260929.md"
+    },
+    {
+      "floor": 14,
+      "source": "TestResults/tower-balance-pass-floor14-later-complete-confirmation-study-20260929",
+      "manifestSha256": "5a172c2f4a5bdd2ac27aac762a3c0bb82c17514e26ea46dd0ab8542cbb4d43a7",
+      "audit": "TestResults/tower-balance-pass-floor14-later-complete-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "915e09039876f9100608363c2fb8b0a515ea6fa1181519d6f6b1ac6a1f0b7cae",
+      "report": "Balance Harness/Tower-Floors12-15-Balance-Pass-20260929.md"
+    },
+    {
+      "floor": 15,
+      "source": "TestResults/tower-balance-pass-floor15-later-complete-large-confirmation-study-20260929",
+      "manifestSha256": "40564a8540bea2ffbb313055a2f3a70ed0ffe269c96a799a977807c8057204ec",
+      "audit": "TestResults/tower-balance-pass-floor15-later-complete-large-confirmation-owner-20260929/independent-audit.json",
+      "auditSha256": "695bcd5e4adf64645cf34758af1a9c0b7b072333ae0411111204b6820280cb5b",
+      "report": "Balance Harness/Tower-Floors12-15-Balance-Pass-20260929.md"
+    }
+  ],
+  "lowerEssenceDiagnostic": {
+    "source": "TestResults/tower-floor10-controls-20260928",
+    "manifestSha256": "e64ca74eb3f6b785514ec834e861c665facc33b68660c60bfce2875b46c72763",
+    "report": "Balance Harness/Tower-Floor10-Lower-Essence-Controls-20260928.md"
+  },
+  "latestLedger": {
+    "path": "TestResults/tower-balance-pass-floor6-health-midpoint-confirmation-owner-20260929/seed-ledger.json",
+    "sha256": "42b7439b355de511dfe86c889e3b7b8a7b790a24a832be03b948c3a2d7a6cb40",
+    "exclusions": 913644
+  }
+}

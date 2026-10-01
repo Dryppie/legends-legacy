@@ -2777,7 +2777,7 @@ public sealed class AbilitySystemTests
 
         var crushingDamage = catalog.AbilitiesById["ability.creature.kharad.crushing_verdict"].Effects[0];
         Assert.Equal(AbilityTargetSelector.HighestMaxHealthEnemy, crushingDamage.Target);
-        Assert.Equal(2.6f, crushingDamage.ScalingCoefficient);
+        Assert.Equal(4.9f, crushingDamage.ScalingCoefficient);
 
         Assert.False(catalog.SummonsById["kharadIronPillar"].CanBasicAttack);
         Assert.False(catalog.SummonsById["kharadAetherPillar"].CanBasicAttack);
@@ -3273,6 +3273,81 @@ public sealed class AbilitySystemTests
         });
     }
 
+    [Theory]
+    [InlineData(false, 100, 0)]
+    [InlineData(true, 100, 0)]
+    [InlineData(true, 100, 30)]
+    [InlineData(true, 100, -30)]
+    [InlineData(true, 150, 0)]
+    public void Miasma_candidate_preserves_healing_reduction_and_normal_regeneration_cadence(
+        bool removeRate, int regeneration, int otherHealingModifier)
+    {
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), FindApiContentRoot(), CreateJsonOptions()).GetCatalog();
+        var spec = catalog.AbilitiesById["ability.creature.kodoku.withering_miasma"];
+        Assert.Equal(150, spec.CooldownTicks);
+        if (removeRate) spec.Effects.RemoveAll(e => e.Id == "effect.creature.kodoku.withering_miasma.regeneration");
+        var heal = AbilityCompiler.CompileAbility(new AbilitySpec
+        {
+            Id = "ability.test.miasma-heal", Kind = AbilitySpecKind.Active, Name = "Test Heal", CooldownTicks = 10000,
+            Effects = [new() { Id = "effect.test.miasma-heal", Operation = AbilityEffectOperation.Heal,
+                Target = AbilityTargetSelector.Self, BaseValue = 100, CritEligibility = CritEligibility.Disallowed }]
+        });
+        var kodoku = new RuntimeCombatant("kodoku", "Kodoku", CombatTeam.Friendly,
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 100000 },
+            [AbilityCompiler.CompileAbility(spec)], canBasicAttack: false);
+        var targets = Enumerable.Range(1, 2).Select(i => new RuntimeCombatant("target-" + i, "Target", CombatTeam.Hostile,
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 100000, [AttributeType.HealthRegeneration] = regeneration },
+            [heal], canBasicAttack: false)).ToArray();
+        foreach (var target in targets) { target.SetHealth(100); target.AdjustHealingReceived(otherHealingModifier); }
+        var result = new FastCombatEngine(AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 100, RandomSeed: 17)).Run([kodoku], targets);
+        foreach (var target in targets)
+        {
+            Assert.Equal(-80 + otherHealingModifier, target.HealingReceivedPercent);
+            Assert.Equal(removeRate ? 0 : -80, target.RegenerationRatePercent);
+            var pulses = result.EventLog.Where(e => e.TargetId == target.Id && e.EventType == EventType.HealthRegeneration).ToArray();
+            var amount = Math.Max(0, (int)Math.Round(regeneration * (1 + (-80 + otherHealingModifier) / 100f)));
+            if (removeRate && amount > 0)
+            {
+                Assert.Equal(new[] { 49, 99 }, pulses.Select(e => e.Timestamp));
+                Assert.All(pulses, e => Assert.Equal(amount, e.Magnitude));
+            }
+            else Assert.Empty(pulses);
+            var healing = result.EventLog.Where(e => e.TargetId == target.Id && e.Source == "effect.test.miasma-heal").Sum(e => e.Magnitude);
+            Assert.Equal(Math.Max(0, 20 + otherHealingModifier), healing);
+            Assert.Equal(100 + healing + pulses.Sum(e => e.Magnitude), target.Health);
+        }
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(30)]
+    public void Miasma_candidate_expiry_restores_amount_without_delaying_pulses(int otherHealingModifier)
+    {
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), FindApiContentRoot(), CreateJsonOptions()).GetCatalog();
+        var spec = catalog.AbilitiesById["ability.creature.kodoku.withering_miasma"];
+        spec.Effects.RemoveAll(e => e.Id == "effect.creature.kodoku.withering_miasma.regeneration");
+        Assert.Equal(150, Assert.Single(spec.Effects).DurationTicks);
+        // Prevent a second cast solely to observe the original 150-tick expiration.
+        spec.CooldownTicks = 10000;
+        var kodoku = new RuntimeCombatant("kodoku", "Kodoku", CombatTeam.Friendly,
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 100000 },
+            [AbilityCompiler.CompileAbility(spec)], canBasicAttack: false);
+        var target = new RuntimeCombatant("target", "Target", CombatTeam.Hostile,
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 100000, [AttributeType.HealthRegeneration] = 100 },
+            [], canBasicAttack: false);
+        target.SetHealth(100); target.AdjustHealingReceived(otherHealingModifier);
+        var result = new FastCombatEngine(AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 200, RandomSeed: 17)).Run([kodoku], [target]);
+        var expired = Assert.Single(result.EventLog.Where(e => e.TargetId == target.Id && e.EventType == EventType.BuffExpired));
+        Assert.Equal(149, expired.Timestamp);
+        var pulses = result.EventLog.Where(e => e.TargetId == target.Id && e.EventType == EventType.HealthRegeneration).ToArray();
+        Assert.Equal(new[] { 49, 99, 149, 199 }, pulses.Select(e => e.Timestamp));
+        Assert.All(pulses, e => Assert.Equal(e.Timestamp < expired.Timestamp ? 20 + otherHealingModifier : 100 + otherHealingModifier, e.Magnitude));
+        Assert.Equal(otherHealingModifier, target.HealingReceivedPercent);
+        Assert.Equal(0, target.RegenerationRatePercent);
+    }
+
     [Fact]
     public void Venomspawn_deaths_permanently_stack_power_and_attack_speed_on_survivors()
     {
@@ -3343,7 +3418,9 @@ public sealed class AbilitySystemTests
 
         var springtide = Assert.Single(catalog.AbilitiesById["ability.creature.eydis.springtide"].Effects);
         Assert.Equal(120, catalog.AbilitiesById["ability.creature.eydis.springtide"].CooldownTicks);
-        Assert.Equal(1f, springtide.ScalingCoefficient);
+        Assert.Equal(.2125f, springtide.ScalingCoefficient);
+        Assert.Equal(AttributeType.MaxHealth, springtide.ScalingAttribute);
+        Assert.Equal(AbilityConditionSubject.Target, springtide.ScalingAttributeSubject);
         Assert.Equal("status.eydis.abundance", springtide.ScalingStatusId);
         Assert.Equal(AttributeType.Power, springtide.StatusScalingAttribute);
         Assert.Equal(0.2f, springtide.StatusScalingCoefficient);
@@ -3378,7 +3455,7 @@ public sealed class AbilitySystemTests
         var heal = endless.Effects[1];
         Assert.Equal("status.eydis.abundance", heal.ScalingStatusId);
         Assert.Equal(AttributeType.MaxHealth, heal.StatusScalingAttribute);
-        Assert.Equal(0.01f, heal.StatusScalingCoefficient);
+        Assert.Equal(.009f, heal.StatusScalingCoefficient);
 
         var abundance = catalog.StatusesById["status.eydis.abundance"];
         Assert.Equal(AbilityStatusStackingPolicy.Stack, abundance.StackingPolicy);
@@ -3387,7 +3464,7 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Springtide_gains_twenty_percent_power_scaling_per_abundance()
+    public void Springtide_combines_target_health_with_twenty_percent_power_per_abundance()
     {
         var catalog = new JsonAbilityCatalogProvider(
             CreateConfig(),
@@ -3399,7 +3476,7 @@ public sealed class AbilitySystemTests
         int DamageWithStacks(int stacks)
         {
             var eydis = CreateCombatant($"eydis-{stacks}", CombatTeam.Friendly, [springtide]);
-            var enemy = CreateCombatant($"enemy-{stacks}", CombatTeam.Hostile, [], maxHealth: 1_000);
+            var enemy = CreateCombatant($"enemy-{stacks}", CombatTeam.Hostile, [], maxHealth: 800);
             if (stacks > 0)
                 eydis.Statuses.Add(new RuntimeStatus(statuses["status.eydis.abundance"], eydis, eydis, stacks));
             var engine = new FastCombatEngine(
@@ -3413,11 +3490,12 @@ public sealed class AbilitySystemTests
         var baseDamage = DamageWithStacks(0);
         var stackedDamage = DamageWithStacks(3);
         Assert.True(stackedDamage > baseDamage);
-        Assert.InRange((double)stackedDamage / baseDamage, 1.55, 1.65);
+        Assert.Equal(170, baseDamage);
+        Assert.Equal(200, stackedDamage);
     }
 
     [Fact]
-    public void Endless_spring_gains_abundance_before_healing_one_percent_max_health_per_stack()
+    public void Endless_spring_gains_abundance_before_healing_point_nine_percent_max_health_per_stack()
     {
         var catalog = new JsonAbilityCatalogProvider(
             CreateConfig(),
@@ -3435,12 +3513,74 @@ public sealed class AbilitySystemTests
         var result = engine.Run([eydis], [enemy]);
 
         Assert.Equal(2, eydis.GetStatusStacks("status.eydis.abundance"));
-        Assert.Equal(530, eydis.Health);
+        Assert.Equal(527, eydis.Health);
         Assert.Equal(
-            [10, 20],
+            [9, 18],
             result.EventLog
                 .Where(log => log.Source == "effect.creature.eydis.endless_spring.heal" && log.EventType == EventType.Heal)
                 .Select(log => log.Magnitude));
+    }
+
+    [Theory]
+    [InlineData(4000, 1000, 0, 201, 1090, 90, 0)]
+    [InlineData(8000, 1000, 0, 201, 1180, 180, 0)]
+    [InlineData(4000, 1000, 5, 101, 1180, 180, 0)]
+    [InlineData(9740, 1000, 5, 101, 1438, 438, 0)]
+    [InlineData(4000, 3995, 0, 101, 4000, 30, 25)]
+    [InlineData(4000, 4000, 0, 101, 4000, 30, 30)]
+    [InlineData(4000, 1000, 0, 100, 1000, 0, 0)]
+    [InlineData(4000, 1000, 60, 101, 2800, 1800, 0)]
+    public void Endless_spring_recovery_candidate_preserves_interval_stacks_and_actual_healing(
+        int maxHealth, int startingHealth, int stacks, int ticks, int finalHealth, int potential, int overhealing)
+        => AssertEndlessSpringRecoveryCandidate(.0075f, maxHealth, startingHealth, stacks, ticks, finalHealth, potential, overhealing);
+
+    [Theory]
+    [InlineData(4000, 1000, 0, 201, 1108, 108, 0)]
+    [InlineData(8000, 1000, 0, 201, 1216, 216, 0)]
+    [InlineData(4000, 1000, 5, 101, 1216, 216, 0)]
+    [InlineData(9740, 1000, 5, 101, 1526, 526, 0)]
+    [InlineData(4000, 3995, 0, 101, 4000, 36, 31)]
+    [InlineData(4000, 4000, 0, 101, 4000, 36, 36)]
+    [InlineData(4000, 1000, 0, 100, 1000, 0, 0)]
+    [InlineData(4000, 1000, 60, 101, 3160, 2160, 0)]
+    public void Endless_spring_refinement_candidate_preserves_interval_stacks_and_actual_healing(
+        int maxHealth, int startingHealth, int stacks, int ticks, int finalHealth, int potential, int overhealing)
+        => AssertEndlessSpringRecoveryCandidate(.009f, maxHealth, startingHealth, stacks, ticks, finalHealth, potential, overhealing);
+
+    private void AssertEndlessSpringRecoveryCandidate(float coefficient,
+        int maxHealth, int startingHealth, int stacks, int ticks, int finalHealth, int potential, int overhealing)
+    {
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), FindApiContentRoot(), CreateJsonOptions()).GetCatalog();
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        // This isolated candidate does not edit the live catalog before independent acceptance.
+        var spec = catalog.AbilitiesById["ability.creature.eydis.endless_spring"];
+        var heal = spec.Effects.Single(e => e.Id == "effect.creature.eydis.endless_spring.heal");
+        heal.StatusScalingCoefficient = coefficient;
+        Assert.Equal(AttributeType.MaxHealth, heal.StatusScalingAttribute);
+        Assert.Equal(CritEligibility.Disallowed, heal.CritEligibility);
+        var eydis = new RuntimeCombatant("eydis", "Eydis", CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = maxHealth,
+                [AttributeType.Power] = 10000,
+                [AttributeType.CritChance] = 100
+            }, [AbilityCompiler.CompileAbility(spec)], canBasicAttack: false);
+        eydis.SetHealth(startingHealth);
+        if (stacks > 0)
+            eydis.Statuses.Add(new RuntimeStatus(statuses["status.eydis.abundance"], eydis, eydis, stacks));
+        var enemy = new RuntimeCombatant("enemy", "Enemy", CombatTeam.Hostile,
+            new Dictionary<AttributeType, float> { [AttributeType.MaxHealth] = 100000 }, [], canBasicAttack: false);
+        var result = new FastCombatEngine(statuses,
+            new FastCombatEngineOptions(MaxTicks: ticks, RandomSeed: 17)).Run([eydis], [enemy]);
+        Assert.Equal(Math.Min(60, stacks + (ticks - 1) / 100), eydis.GetStatusStacks("status.eydis.abundance"));
+        Assert.Equal(finalHealth, eydis.Health);
+        var logs = result.EventLog.Where(e => e.Source == heal.Id).ToArray();
+        Assert.All(logs, e => Assert.Equal(EventType.Heal, e.EventType));
+        Assert.Equal(finalHealth - startingHealth, logs.Sum(e => e.Magnitude));
+        var stats = result.EntityStats.Single(e => e.EntityId == eydis.Id);
+        Assert.Equal(potential, stats.HealingPotential);
+        Assert.Equal(overhealing, stats.Overhealing);
+        Assert.Equal(finalHealth - startingHealth, stats.HealingReceived);
     }
 
     [Fact]
@@ -3943,6 +4083,211 @@ public sealed class AbilitySystemTests
             && log.EventType is EventType.Damage or EventType.DamageCrit);
         Assert.Equal(0, vaelor.GetStatusStacks("status.vaelor.next_physical_damage"));
         Assert.Equal(0, vaelor.GetStatusStacks("status.vaelor.next_magical_damage"));
+    }
+
+    [Theory]
+    [InlineData(100, 0, 0, 0, 0, 200, 300, 50)]
+    [InlineData(100, 20, 0, 0, 0, 210, 310, 60)]
+    [InlineData(200, 20, 0, 0, 0, 220, 320, 120)]
+    [InlineData(100, 20, 165, 0, 100, 126, 186, 60)]
+    [InlineData(100, 20, 165, 36, 100, 202, 298, 60)]
+    public void Target_health_hall_preserves_source_power_charges_mitigation_and_barriers(
+        int power, int stacks, int resistance, int penetration, int barrier,
+        int firstMagical, int secondMagical, int physical)
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(), FindApiContentRoot(), CreateJsonOptions()).GetCatalog();
+        // Exercise the proposed data through the compiler and normal damage path;
+        // the authored live Hall remains unchanged until independent confirmation.
+        var spec = catalog.AbilitiesById["ability.creature.vaelor.hall_of_shards"];
+        var magical = spec.Effects.Single(e => e.Id == "effect.creature.vaelor.hall_of_shards.magical");
+        magical.ScalingAttribute = AttributeType.MaxHealth;
+        magical.ScalingAttributeSubject = AbilityConditionSubject.Target;
+        magical.ScalingCoefficient = .25f;
+        Assert.Equal(.005f, magical.StatusScalingCoefficient);
+        Assert.Equal(AttributeType.Power, magical.StatusScalingAttribute);
+        Assert.Equal(AbilityConditionSubject.Source, magical.ScalingStatusSubject);
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var vaelor = new RuntimeCombatant("vaelor", "Vaelor", CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 2_000,
+                [AttributeType.Power] = power,
+                [AttributeType.MagicPenetration] = penetration
+            }, [AbilityCompiler.CompileAbility(spec)], canBasicAttack: false,
+            attributeRulesVersion: AttributeRules.CurrentVersion);
+        if (stacks > 0)
+        {
+            foreach (var id in new[] { "status.vaelor.next_magical_damage", "status.vaelor.next_physical_damage" })
+                vaelor.Statuses.Add(new RuntimeStatus(statuses[id], vaelor, vaelor, stacks: stacks));
+        }
+        var shield = AbilityCompiler.CompileAbility(CreatePassiveBarrier(
+            "ability.test.hall.shield", "effect.test.hall.shield", AbilityTriggerEvent.OnCombatStart, barrier));
+        var targets = new[] { 800, 1_200 }.Select((health, i) => new RuntimeCombatant(
+            $"target-{i}", "Target", CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = health,
+                [AttributeType.Power] = 999,
+                [AttributeType.ResistanceRating] = resistance
+            }, [shield], canBasicAttack: false, attributeRulesVersion: AttributeRules.CurrentVersion)).ToArray();
+        targets[1].AdjustHealth(-100);
+        var engine = new FastCombatEngine(statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([vaelor], targets);
+
+        for (var i = 0; i < targets.Length; i++)
+        {
+            var magicHit = Assert.Single(result.EventLog.Where(e => e.Source == magical.Id
+                && e.TargetId == targets[i].Id && e.EventType is EventType.Damage or EventType.DamageCrit));
+            var physicalHit = Assert.Single(result.EventLog.Where(e => e.Source == "effect.creature.vaelor.hall_of_shards.physical"
+                && e.TargetId == targets[i].Id && e.EventType is EventType.Damage or EventType.DamageCrit));
+            Assert.Equal((i == 0 ? firstMagical : secondMagical) - barrier, magicHit.Magnitude);
+            // Existing Power damage retains its native +/-20% magnitude variation.
+            Assert.InRange(physicalHit.Magnitude, (int)Math.Round(physical * .8), (int)Math.Round(physical * 1.2));
+            Assert.Equal((i == 0 ? 800 : 1_100) - magicHit.Magnitude - physicalHit.Magnitude, targets[i].Health);
+        }
+        Assert.All(targets, target => Assert.Equal(0, target.Barrier));
+        Assert.Equal(0, vaelor.GetStatusStacks("status.vaelor.next_magical_damage"));
+        Assert.Equal(0, vaelor.GetStatusStacks("status.vaelor.next_physical_damage"));
+        Assert.Equal(2, result.EventLog.Count(e => e.Source == magical.Id
+            && e.EventType is EventType.Damage or EventType.DamageCrit));
+    }
+
+    [Theory]
+    [InlineData(.175f, 100, 0, 0, 0, 0, 140, 210)]
+    [InlineData(.20f, 100, 0, 0, 0, 0, 160, 240)]
+    [InlineData(.225f, 100, 0, 0, 0, 0, 180, 270)]
+    [InlineData(.175f, 100, 4, 0, 0, 0, 220, 290)]
+    [InlineData(.20f, 100, 4, 0, 0, 0, 240, 320)]
+    [InlineData(.225f, 100, 4, 0, 0, 0, 260, 350)]
+    [InlineData(.25f, 100, 0, 0, 0, 0, 200, 300)]
+    [InlineData(.275f, 100, 0, 0, 0, 0, 220, 330)]
+    [InlineData(.30f, 100, 0, 0, 0, 0, 240, 360)]
+    [InlineData(.25f, 100, 4, 0, 0, 0, 280, 380)]
+    [InlineData(.275f, 100, 4, 0, 0, 0, 300, 410)]
+    [InlineData(.30f, 100, 4, 0, 0, 0, 320, 440)]
+    [InlineData(.25f, 200, 4, 0, 0, 0, 360, 460)]
+    [InlineData(.275f, 200, 5, 0, 0, 0, 420, 530)]
+    [InlineData(.25f, 100, 4, 165, 0, 100, 168, 228)]
+    [InlineData(.25f, 100, 4, 165, 50, 100, 280, 380)]
+    public void Target_health_springtide_preserves_source_power_abundance_mitigation_and_barriers(
+        float healthFraction, int power, int stacks, int resistance, int penetration, int barrier,
+        int firstDamage, int secondDamage)
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(), FindApiContentRoot(), CreateJsonOptions()).GetCatalog();
+        // Compile isolated proposed data; the live catalog changes only after confirmation.
+        var spec = catalog.AbilitiesById["ability.creature.eydis.springtide"];
+        var damage = Assert.Single(spec.Effects);
+        damage.ScalingAttribute = AttributeType.MaxHealth;
+        damage.ScalingAttributeSubject = AbilityConditionSubject.Target;
+        damage.ScalingCoefficient = healthFraction;
+        Assert.Equal(.20f, damage.StatusScalingCoefficient);
+        Assert.Equal(AttributeType.Power, damage.StatusScalingAttribute);
+        Assert.Equal(AbilityConditionSubject.Source, damage.ScalingStatusSubject);
+        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var eydis = new RuntimeCombatant("eydis", "Eydis", CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 2_000,
+                [AttributeType.Power] = power,
+                [AttributeType.MagicPenetration] = penetration
+            }, [AbilityCompiler.CompileAbility(spec)], canBasicAttack: false,
+            attributeRulesVersion: AttributeRules.CurrentVersion);
+        if (stacks > 0)
+            eydis.Statuses.Add(new RuntimeStatus(statuses["status.eydis.abundance"], eydis, eydis, stacks: stacks));
+        var shield = AbilityCompiler.CompileAbility(CreatePassiveBarrier(
+            "ability.test.springtide.shield", "effect.test.springtide.shield", AbilityTriggerEvent.OnCombatStart, barrier));
+        var targets = new[] { 800, 1_200 }.Select((health, i) => new RuntimeCombatant(
+            $"target-{i}", "Target", CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = health,
+                [AttributeType.Power] = 999,
+                [AttributeType.ResistanceRating] = resistance
+            }, [shield], canBasicAttack: false, attributeRulesVersion: AttributeRules.CurrentVersion)).ToArray();
+        targets[1].AdjustHealth(-100);
+        var engine = new FastCombatEngine(statuses,
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: 17));
+
+        var result = engine.Run([eydis], targets);
+
+        for (var i = 0; i < targets.Length; i++)
+        {
+            var hit = Assert.Single(result.EventLog.Where(e => e.Source == damage.Id
+                && e.TargetId == targets[i].Id && e.EventType is EventType.Damage or EventType.DamageCrit));
+            Assert.Equal((i == 0 ? firstDamage : secondDamage) - barrier, hit.Magnitude);
+            Assert.Equal((i == 0 ? 800 : 1_100) - hit.Magnitude, targets[i].Health);
+        }
+        Assert.All(targets, target => Assert.Equal(0, target.Barrier));
+        Assert.Equal(stacks, eydis.GetStatusStacks("status.eydis.abundance"));
+        Assert.Equal(2, result.EventLog.Count(e => e.Source == damage.Id
+            && e.EventType is EventType.Damage or EventType.DamageCrit));
+    }
+
+    [Theory]
+    [InlineData(.175f, 204)]
+    [InlineData(.20f, 224)]
+    [InlineData(.225f, 244)]
+    public void Target_health_springtide_weaken_affects_only_abundance_and_power_base_alone_varies(
+        float healthFraction, int expectedHealthDamage)
+    {
+        var powerHits = new HashSet<int>();
+        foreach (var targetHealth in new[] { false, true })
+        {
+            foreach (var seed in Enumerable.Range(1, 16))
+            {
+                var catalog = new JsonAbilityCatalogProvider(
+                    CreateConfig(), FindApiContentRoot(), CreateJsonOptions()).GetCatalog();
+                var spec = catalog.AbilitiesById["ability.creature.eydis.springtide"];
+                var damage = Assert.Single(spec.Effects);
+                damage.ScalingAttribute = targetHealth ? AttributeType.MaxHealth : AttributeType.Power;
+                damage.ScalingAttributeSubject = targetHealth
+                    ? AbilityConditionSubject.Target : AbilityConditionSubject.Source;
+                damage.ScalingCoefficient = targetHealth ? healthFraction : 1f;
+                var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+                var eydis = new RuntimeCombatant("eydis", "Eydis", CombatTeam.Friendly,
+                    new Dictionary<AttributeType, float>
+                    {
+                        [AttributeType.MaxHealth] = 2_000,
+                        [AttributeType.Power] = 100
+                    }, [AbilityCompiler.CompileAbility(spec)], canBasicAttack: false,
+                    attributeRulesVersion: AttributeRules.CurrentVersion);
+                eydis.Statuses.Add(new RuntimeStatus(statuses["status.eydis.abundance"], eydis, eydis, stacks: 4));
+                eydis.Conditions.Add(new RuntimeCondition(StandardConditionType.Weaken,
+                    eydis, eydis, 1, 30, 100, 1, "condition.weaken"));
+                var target = new RuntimeCombatant("target", "Target", CombatTeam.Hostile,
+                    new Dictionary<AttributeType, float>
+                    {
+                        [AttributeType.MaxHealth] = 800,
+                        [AttributeType.Power] = 999
+                    }, [], canBasicAttack: false, attributeRulesVersion: AttributeRules.CurrentVersion);
+                var engine = new FastCombatEngine(statuses,
+                    new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000, RandomSeed: seed));
+
+                var result = engine.Run([eydis], [target]);
+
+                var hit = Assert.Single(result.EventLog.Where(e => e.Source == damage.Id
+                    && e.TargetId == target.Id && e.EventType is EventType.Damage or EventType.DamageCrit));
+                Assert.Equal(EventType.Damage, hit.EventType);
+                if (targetHealth)
+                {
+                    // Weaken reduces the four-stack Power bonus from 80 to 64, not the Health base.
+                    // The native Power-only variance gate leaves this whole hit constant across seeds.
+                    Assert.Equal(expectedHealthDamage, hit.Magnitude);
+                }
+                else
+                {
+                    // Weaken applies to both Power terms: (100 + 4 * 20) * .8 = 144.
+                    Assert.InRange(hit.Magnitude, (int)Math.Round(144 * .8), (int)Math.Round(144 * 1.2));
+                    powerHits.Add(hit.Magnitude);
+                }
+                Assert.True(eydis.HasCondition(StandardConditionType.Weaken));
+            }
+        }
+        Assert.True(powerHits.Count > 1, "Power-scaled Springtide must retain native magnitude variance.");
     }
 
     [Fact]
