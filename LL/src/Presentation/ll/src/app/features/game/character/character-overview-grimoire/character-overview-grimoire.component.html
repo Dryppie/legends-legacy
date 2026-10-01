@@ -177,6 +177,21 @@
             }
           </lg-panel>
         }
+
+        <!-- The attributes stay in the main column, beside the loadout (D-103). -->
+        <section class="ovw-attrs" aria-labelledby="ovw-attrs-title">
+          <header class="ovw-attrs__head">
+            <h2 lgHeading="section" id="ovw-attrs-title">Combat Attributes</h2>
+            <p class="ovw-note">
+              Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.
+            </p>
+          </header>
+          <div class="lg-ledgergrid">
+            @for (group of attributeGroups(); track group.title) {
+              <lg-ledger [title]="group.title" [rows]="group.rows" />
+            }
+          </div>
+        </section>
       </div>
 
       <aside class="lg-aside__side">
@@ -187,6 +202,7 @@
               @for (s of loadout(); track s.index) {
                 <app-essence-preview [definition]="s.slot.definition" originClass="relative block">
                   <lg-loadout-slot
+                    compact
                     [index]="s.index"
                     [state]="s.state"
                     [name]="s.name"
@@ -208,19 +224,5 @@
         </lg-panel>
       </aside>
     </div>
-
-    <section class="ovw-attrs" aria-labelledby="ovw-attrs-title">
-      <header class="ovw-attrs__head">
-        <h2 lgHeading="section" id="ovw-attrs-title">Combat Attributes</h2>
-        <p class="ovw-note">
-          Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.
-        </p>
-      </header>
-      <div class="lg-ledgergrid">
-        @for (group of attributeGroups(); track group.title) {
-          <lg-ledger [title]="group.title" [rows]="group.rows" />
-        }
-      </div>
-    </section>
   }
 </lg-page>

@@ -65,7 +65,7 @@ A region is not a bounded object. A Panel, the JourneyCard, the Combat Attribute
 - **No container border around rows.** A Panel has no border of its own, so a `flush` Panel's List keeps its separators and its rows run to the edge. Don't wrap a list in a bordered box to hold it.
 - **The table's header rule stays.** One `line` hairline closes the header row and travels with it when it sticks. It divides the header from the body, so it is not a row separator, and it stays in zebra.
 - **Hover and selection lie over the rhythm.** A hovered or selected row takes the `surface-raised` wash over its stripe; the selected row adds its 2px start bar.
-- **Zebra needs a surface.** `row-stripe` is darker than `surface` and the Folio (1.06:1 and 1.05:1), so use it on Level 1 or in the Folio. On `ground` it all but disappears (1.02:1): use separators there.
+- **Zebra needs a surface.** `row-stripe` is a faint light veil over the row's fill (1.09:1 on `surface` and the Folio), so use it on Level 1 or in the Folio, where the container holds the rhythm. On `ground` there is no container: use separators there.
 - Rows never get boxes, and the table has no border around it.
 
 ## SectionRule

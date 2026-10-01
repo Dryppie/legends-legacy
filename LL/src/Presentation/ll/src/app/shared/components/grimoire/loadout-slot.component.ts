@@ -24,7 +24,8 @@ export interface LgLoadoutAbility {
 /**
  * An Essence loadout slot, in three states: attuned (a neutral Attuned Tag), open (an empty frame and "Empty") and
  * locked (a dashed frame, a Locked Tag and the unlock condition printed as the name). A locked slot that would be a
- * button stays one, aria-disabled, its printed condition part of its name.
+ * button stays one, aria-disabled, its printed condition part of its name. `compact` is one short row for a full
+ * loadout (D-103).
  */
 @Component({
   selector: 'lg-loadout-slot',
@@ -42,8 +43,12 @@ export interface LgLoadoutAbility {
       />
       <div class="lg-loadout__body">
         <div class="lg-loadout__head">
-          <span class="lg-loadout__slot">Slot {{ index() != null ? index()! + 1 : '' }}</span>
-          @if (currentState() === 'attuned') {
+          <span [class]="compact() ? 'lg-sr' : 'lg-loadout__slot'">Slot {{ index() != null ? index()! + 1 : '' }}</span>
+          <!-- Compact (D-103): the name takes the slot label's place, and only a locked slot keeps its Tag. -->
+          @if (compact()) {
+            <div [class]="nameClass()">{{ nameText() }}</div>
+          }
+          @if (currentState() === 'attuned' && !compact()) {
             <lg-tag state="attuned" />
           } @else if (currentState() === 'locked') {
             <lg-tag state="locked" />
@@ -54,7 +59,9 @@ export interface LgLoadoutAbility {
             <span class="lg-sr">{{ readyWord() }}</span>
           }
         </div>
-        <div [class]="nameClass()">{{ nameText() }}</div>
+        @if (!compact()) {
+          <div [class]="nameClass()">{{ nameText() }}</div>
+        }
         @if (currentState() === 'attuned' && (active() || passive())) {
           <div class="lg-loadout__abilities">
             @if (active(); as ability) {
@@ -104,6 +111,8 @@ export class LgLoadoutSlotComponent {
   readonly hint = input<string>();
   /** The attention diamond at the end of the head, after the Tag: true, or the words ("Essence ready to attune"). */
   readonly ready = input<boolean | string>();
+  /** One short row for a full loadout (D-103): the name leads, the slot number is for screen readers, an attuned slot has no Tag. */
+  readonly compact = input(false, { transform: booleanAttribute });
   /** Renders a button that emits `activate` (React's onClick). */
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly activate = output<void>();
@@ -125,7 +134,9 @@ export class LgLoadoutSlotComponent {
       ? { reason: this.unlock(), word: 'Locked', printed: true, describe: false }
       : null,
   );
-  protected readonly classes = computed(() => lgCx('lg-loadout', 'is-' + this.currentState()));
+  protected readonly classes = computed(() =>
+    lgCx('lg-loadout', 'is-' + this.currentState(), this.compact() && 'lg-loadout--compact'),
+  );
   protected readonly nameClass = computed(() => {
     const r = this.rarity();
     return lgCx('lg-loadout__name', r && this.currentState() === 'attuned' && 'lg-itemlink--' + r.toLowerCase());

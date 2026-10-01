@@ -1,17 +1,20 @@
 /* Generated from design-system/tokens.css by design-system/scripts/sync-styles.mjs. Do not edit: change the design system and run the script. */
 /* Legend's Legacy — generated from tokens.json */
 :root, [data-theme="grimoire"] {
-  --umber-950: #0b0806; /* Tier 1 · palette. umber-950 — the brown-black ramp for grounds, surfaces and lines. Aliased by ground-deep. Never referenced by a component. */
-  --umber-950-a80: #0b0806cc; /* Tier 1 · palette. umber-950 at 80% opacity, for scrims. Aliased by scrim. Never referenced by a component. */
-  --umber-900: #15100c; /* Tier 1 · palette. umber-900 — the brown-black ramp for grounds, surfaces and lines. Aliased by ground. Never referenced by a component. */
-  --umber-875: #1a1109; /* Tier 1 · palette. umber-875 — the brown-black ramp for grounds, surfaces and lines. Aliased by on-gilt and row-stripe. Never referenced by a component. */
-  --umber-850: #22160f; /* Tier 1 · palette. umber-850 — the brown-black ramp for grounds, surfaces and lines. Aliased by folio. Never referenced by a component. */
-  --umber-825: #1f1812; /* Tier 1 · palette. umber-825 — the brown-black ramp for grounds, surfaces and lines. Aliased by surface. Never referenced by a component. */
-  --umber-800: #261d16; /* Tier 1 · palette. umber-800 — the brown-black ramp for grounds, surfaces and lines. Aliased by tile. Never referenced by a component. */
-  --umber-775: #2a2019; /* Tier 1 · palette. umber-775 — the brown-black ramp for grounds, surfaces and lines. Aliased by surface-raised. Never referenced by a component. */
-  --umber-750: #2e241c; /* Tier 1 · palette. umber-750 — the brown-black ramp for grounds, surfaces and lines. Aliased by meter-track. Never referenced by a component. */
-  --umber-650: #46372a; /* Tier 1 · palette. umber-650 — the brown-black ramp for grounds, surfaces and lines. Aliased by line and changed. Never referenced by a component. */
-  --umber-450: #8c7358; /* Tier 1 · palette. umber-450 — the brown-black ramp for grounds, surfaces and lines. Aliased by line-strong. Never referenced by a component. */
+  --slate-950: #0b0b0f; /* Tier 1 · palette. slate-950 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by ground-deep. Never referenced by a component. */
+  --slate-950-a80: #0b0b0fcc; /* Tier 1 · palette. slate-950 at 80% opacity, for scrims (D-102). Aliased by scrim. Never referenced by a component. */
+  --slate-900: #101014; /* Tier 1 · palette. slate-900 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by ground. Never referenced by a component. */
+  --slate-900-a72: #101014b8; /* Tier 1 · palette. slate-900 at 72% opacity: the game's panel material, translucent over the frame's backdrop (D-102). Aliased by surface. Never referenced by a component. */
+  --slate-875: #16161b; /* Tier 1 · palette. slate-875 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by surface-solid. Never referenced by a component. */
+  --slate-850: #131318; /* Tier 1 · palette. slate-850 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by folio. Never referenced by a component. */
+  --slate-800: #1b1b22; /* Tier 1 · palette. slate-800 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by tile. Never referenced by a component. */
+  --slate-775: #22222a; /* Tier 1 · palette. slate-775 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by surface-raised. Never referenced by a component. */
+  --slate-750: #2a2a33; /* Tier 1 · palette. slate-750 — the slate ramp, the game's own cool near-black, for grounds and surfaces (D-102). Aliased by meter-track. Never referenced by a component. */
+  --slate-100-a12: #f4f4f81f; /* Tier 1 · palette. A near-white at 12% opacity, a light veil that reads on any slate ground or surface (D-102); the opaque step is not a token. Aliased by line. Never referenced by a component. */
+  --slate-100-a04: #f4f4f80a; /* Tier 1 · palette. A near-white at 4% opacity, a light veil that reads on any slate ground or surface (D-102); the opaque step is not a token. Aliased by row-stripe. Never referenced by a component. */
+  --umber-875: #1a1109; /* Tier 1 · palette. umber-875 — the brown-black ramp, now for the marks that stay warm (D-102). Aliased by on-gilt. Never referenced by a component. */
+  --umber-650: #46372a; /* Tier 1 · palette. umber-650 — the brown-black ramp, now for the marks that stay warm (D-102). Aliased by changed. Never referenced by a component. */
+  --umber-450: #8c7358; /* Tier 1 · palette. umber-450 — the brown-black ramp, now for the marks that stay warm (D-102). Aliased by line-strong. Never referenced by a component. */
   --bone-100: #f0e6d2; /* Tier 1 · palette. bone-100 — the parchment ramp for ink. Aliased by ink, success, channel-general, channel-help. Never referenced by a component. */
   --bone-300: #bba98c; /* Tier 1 · palette. bone-300 — the parchment ramp for ink. Aliased by ink-muted, channel-system, channel-loot, delta-neutral. Never referenced by a component. */
   --bone-500: #7a6a56; /* Tier 1 · palette. bone-500 — the parchment ramp for ink. Aliased by ink-disabled. Never referenced by a component. */
@@ -46,15 +49,16 @@
   --hue-damage-poison: #82b94b; /* Tier 1 · palette. The game's Poison damage hue — learned by players; never changes. Aliased by damage-poison. Never referenced by a component. */
   --hue-damage-shadow: #69b6dd; /* Tier 1 · palette. The game's Shadow damage hue — learned by players; never changes. Aliased by damage-shadow. Never referenced by a component. */
   --hue-damage-none: #8d8991; /* Tier 1 · palette. The game's None damage hue — learned by players; never changes. Aliased by damage-none. Never referenced by a component. */
-  --ground: var(--umber-900); /* Tier 2 · role. Level 0: the page ground behind everything, the shell's base colour, the Page and the docked Chronicle. The stage paints a vignette of ground-deep over it. */
-  --ground-deep: var(--umber-950); /* Tier 2 · role. Below Level 0: wells (inputs, item slots, the inventory grid's gutters), the stage's vignette edges and the letterbox behind stage art. */
-  --surface: var(--umber-825); /* Tier 2 · role. Level 1: the NavRail, Panels, lists and the JourneyCard on ground, and the floating Chronicle drawer. */
-  --surface-raised: var(--umber-775); /* Tier 2 · role. Level 2, one step above surface: hover, selected and pinned washes; popovers, tooltips, hover cards, menus and toasts. */
-  --folio: var(--umber-850); /* Tier 2 · role. Level 3: the Folio, dialog sheets, confirmations and the tour's coach mark. Not lighter than surface-raised: its height reads from shadow-panel. */
-  --scrim: var(--umber-950-a80); /* Tier 2 · role. Above the levels: the flat dimmer behind a dialog, a confirmation, the rail drawer and the tour's spotlight. Never blurred. */
-  --line: var(--umber-650); /* Tier 2 · role. Separation and decoration, never an edge that must be seen: row and group separators, the Panel head rule, orbit rings, bounded objects that are not controls. Never the only edge of a control (Foundations · Lines). */
+  --ground: var(--slate-900); /* Tier 2 · role. Level 0: the page ground behind everything, the shell's base colour, the Page and the docked Chronicle. The stage paints a vignette of ground-deep over it. */
+  --ground-deep: var(--slate-950); /* Tier 2 · role. Below Level 0: wells (inputs, item slots, the inventory grid's gutters), the stage's vignette edges and the letterbox behind stage art. */
+  --surface: var(--slate-900-a72); /* Tier 2 · role. Level 1: the NavRail, Panels, lists and the JourneyCard. Translucent over the frame's backdrop, never blurred (D-102); where content passes beneath, use surface-solid. */
+  --surface-solid: var(--slate-875); /* Tier 2 · role. Level 1 where something passes beneath it: sticky table headers and columns, the floating Chronicle drawer and lg-level-1--float. The opaque form of surface, about what surface shows over the frame's backdrop (D-102). */
+  --surface-raised: var(--slate-775); /* Tier 2 · role. Level 2, one step above surface: hover, selected and pinned washes; popovers, tooltips, hover cards, menus and toasts. */
+  --folio: var(--slate-850); /* Tier 2 · role. Level 3: the Folio, dialog sheets, confirmations and the tour's coach mark. Not lighter than surface-raised: its height reads from shadow-panel. */
+  --scrim: var(--slate-950-a80); /* Tier 2 · role. Above the levels: the flat dimmer behind a dialog, a confirmation, the rail drawer and the tour's spotlight. Never blurred. */
+  --line: var(--slate-100-a12); /* Tier 2 · role. Separation and decoration, never an edge that must be seen: row and group separators, the Panel head rule, orbit rings, bounded objects that are not controls. Never the only edge of a control (Foundations · Lines). */
   --line-strong: var(--umber-450); /* Tier 2 · role. Interactive edges: inputs, outline buttons, clickable pills and slots, tab separators; floating surfaces; dotted Ledger leaders. Holds 3:1 on ground, surface, surface-raised and folio (Foundations · Lines). */
-  --row-stripe: var(--umber-875); /* Tier 2 · role. The zebra rhythm: every second row of a dense List or table set to zebra, on Level 1 or the Folio (Foundations · Lines). Never with row separators or a container edge; hover and selection wash over it. */
+  --row-stripe: var(--slate-100-a04); /* Tier 2 · role. The zebra rhythm: every second row of a dense List or table set to zebra, on Level 1 or the Folio (Foundations · Lines). Never with row separators or a container edge; hover and selection wash over it. */
   --ink: var(--bone-100); /* Tier 2 · role. Primary text and numerals on ground, surface, surface-raised and folio. */
   --ink-muted: var(--bone-300); /* Tier 2 · role. Secondary text, inactive nav and list items, captions; on ground, surface, surface-raised and folio. */
   --ink-disabled: var(--bone-500); /* Tier 2 · role. Plain disabled controls and the names of locked things only (inactive, so exempt from contrast minimums); a locked name always has a lock or the word 'Locked' beside it in ink-muted (Standards · States). */
@@ -71,7 +75,7 @@
   --info: var(--azure-200); /* Tier 2 · role. Neutral notices, as text with their word or icon, in shell and data contexts only. */
   --focus: var(--brass-200); /* Tier 2 · role. Keyboard focus ring colour (see shadow focus-ring). */
   --changed: var(--umber-650); /* Tier 2 · role. The live-update mark only: a flat wash behind a value that changed by itself — a Bazaar price, a roster status, a payout — on at once, held for duration-reveal, then faded over duration-slow (Foundations · Motion). It says the value changed, never whether that helps the player; never a hover, selected, row or rarity wash. ink holds 9.21:1 on it, ink-muted 4.98:1. The same umber as line, doing a second job as a fill. */
-  --meter-track: var(--umber-750); /* Tier 3 · domain. Empty part of every Meter and Track. */
+  --meter-track: var(--slate-750); /* Tier 3 · domain. Empty part of every Meter and Track. */
   --meter-hp: var(--ember-500); /* Tier 3 · domain. Health fill. Pair with the 'HP' label; never colour alone. */
   --meter-sp: var(--azure-500); /* Tier 3 · domain. Stamina/mana fill (SP). */
   --meter-xp: var(--brass-300); /* Tier 3 · domain. Experience fill (EXP) and level progress — brass's one job among meters. */
@@ -93,7 +97,7 @@
   --rarity-legacy: var(--hue-rarity-legacy); /* Tier 3 · domain. Legacy. */
   --damage-physical: var(--hue-damage-physical); /* Tier 3 · domain. Physical damage numbers and tags. */
   --damage-magical: var(--hue-damage-magical); /* Tier 3 · domain. Magical damage. */
-  --damage-bleed: var(--hue-damage-bleed); /* Tier 3 · domain. Bleed. Kept from the game's current palette: 4.3:1 on surface and folio, 3.9:1 on surface-raised — set bleed numbers on ground, or at 19px bold and up. */
+  --damage-bleed: var(--hue-damage-bleed); /* Tier 3 · domain. Bleed. Kept from the game's current palette: 4.4:1 on surface, 3.9:1 on surface-raised — set bleed numbers on ground or folio, or at 19px bold and up. */
   --damage-burn: var(--hue-damage-burn); /* Tier 3 · domain. Burn. */
   --damage-poison: var(--hue-damage-poison); /* Tier 3 · domain. Poison. */
   --damage-shadow: var(--hue-damage-shadow); /* Tier 3 · domain. Shadow. */
@@ -108,13 +112,13 @@
   --sigil-fill: var(--verdigris-800); /* Component token (Sigil). Hexagon stat badge fill. PageHeader's hex icon also reads it — a known exception (Foundations · Colour). */
   --sigil-edge: var(--verdigris-250); /* Component token (Sigil). Sigil outline; 3:1 against sigil-fill and the grounds. PageHeader's hex icon also reads it — a known exception. */
   --on-sigil: var(--ink); /* Component token (Sigil). Numerals inside a sigil, on sigil-fill; follows ink. PageHeader's hex icon also reads it — a known exception. */
-  --tile: var(--umber-800); /* Component token (StatTile). Stat tile fill. TabStrip's active primary tab also reads it — a known exception (Foundations · Colour). */
+  --tile: var(--slate-800); /* Component token (StatTile). Stat tile fill. TabStrip's active primary tab also reads it — a known exception (Foundations · Colour). */
   --on-tile: var(--ink); /* Component token (StatTile). Values on tile; follows ink. TabStrip's active primary tab also reads it — a known exception. */
   --on-tile-muted: var(--ink-muted); /* Component token (StatTile). Tile labels (STR, Armor) and units on tile; follows ink-muted. */
   --shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080; /* Level 3: the Folio, dialog sheets, confirmations, the tour's coach mark and the rail drawer. */
   --shadow-float: 0 12px 28px -8px #000000cc; /* Floating Levels 1 and 2: the Chronicle drawer, popovers, tooltips, hover cards, menus and toasts. */
-  --shadow-text-art: 0 1px 14px #0b0806, 0 0 3px #0b0806; /* text-shadow for any label set over Stage art (Sigil labels, stage captions). */
-  --focus-ring: 0 0 0 2px #15100c, 0 0 0 4px #f5d48f; /* Keyboard focus on every interactive element (box-shadow, so it follows the radius). */
+  --shadow-text-art: 0 1px 14px #0b0b0f, 0 0 3px #0b0b0f; /* text-shadow for any label set over Stage art (Sigil labels, stage captions). */
+  --focus-ring: 0 0 0 2px #101014, 0 0 0 4px #f5d48f; /* Keyboard focus on every interactive element (box-shadow, so it follows the radius). */
 }
 :root {
   --space-1: 0.25rem; /* Icon-to-label gap, keycap padding. (4px at the default text size.) */

@@ -464,6 +464,8 @@ export interface LoadoutSlotProps {
   hint?: React.ReactNode;
   /** The attention diamond at the end of the head, after the Tag: true, or the words ("Essence ready to attune"). Not on a locked slot. */
   ready?: boolean | string;
+  /** One short row for a full loadout (D-103): the name leads, the slot number is for screen readers, an attuned slot has no Tag. */
+  compact?: boolean;
   onClick?: () => void; className?: string;
 }
 export declare function LoadoutSlot(props: LoadoutSlotProps): React.ReactElement;

@@ -12,7 +12,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 **Must**
 - Draw every surface at one of the four levels, with that level's fill, shadow and edge (Elevation, below).
 - In flow, step up at most one level from the surface beneath. Keep to at most two enclosed levels inside the stage (Nesting, below).
-- Make every surface opaque. Use no backdrop blur and no translucent panel over content. Only the scrim lets content show through, and it is flat.
+- Make every floating surface opaque. Level 1 in flow lets the frame's backdrop through, the game's panel material (D-102), but never content. Use no backdrop blur. Only the scrim lets content show through, and it is flat.
 - Keep film grain to art: the Stage and the Banner, when they have an image (Foundations · Ornament).
 - Give every z-index a `z-*` token (The layer stack, below). Only two exceptions exist:
   - art inside an isolated Stage or Banner sits at −1 and −2;
@@ -44,13 +44,13 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 
 | Level | Fill | Shadow | Edge | Corners | Texture | Holds |
 | --- | --- | --- | --- | --- | --- | --- |
-| **0 · Ground** | `ground` | None | None | — | Only the Stage's art and its grain, beneath the content | The shell's base, the Page, the stage and the docked Chronicle |
-| **1 · Surface** | `surface` | None in flow; `shadow-float` when it floats | None in flow: the fill and the space around it carry the region (Foundations · Lines); `line-strong` when it floats | `radius-container` in flow; `radius-float` when it floats | None | The NavRail, Panels, lists and the JourneyCard; floating, the Chronicle drawer |
+| **0 · Ground** | `ground` | None | None | — | Only the Stage's art and its grain, beneath the content | The shell's base, the stage and the docked Chronicle. The Page has no surface of its own: it shows its frame's backdrop (D-101) |
+| **1 · Surface** | `surface` in flow, translucent over the frame's backdrop (D-102); `surface-solid` when it floats or something scrolls beneath it | None in flow; `shadow-float` when it floats | None in flow: the fill and the space around it carry the region (Foundations · Lines); `line-strong` when it floats | `radius-container` in flow; `radius-float` when it floats | None | The NavRail, Panels, lists and the JourneyCard; floating, the Chronicle drawer |
 | **2 · Raised** | `surface-raised` | None for a wash; `shadow-float` when it floats | None for a wash; `line-strong` when it floats | `radius-float` when it floats | None | Washes: hover, selected, a pinned Ledger row, a mention. Floating: tooltips, hover cards, menus, suggestion lists and toasts |
 | **3 · Folio** | `folio` | `shadow-panel` | The 1px dark ring built into `shadow-panel`. The Folio adds its gilt double frame; a sheet adds `line-strong`. | Square on the Folio; `radius-container` on a sheet | The Folio only: frame and corners. No grain (D-072) | The Folio, dialog sheets, confirmations and the tour's coach mark |
-| **Scrim** | `scrim` (`umber-950` at 80%) | None | None | — | None; never blurred | Beneath a dialog, a confirmation, the rail drawer and the tour's spotlight |
+| **Scrim** | `scrim` (`slate-950` at 80%) | None | None | — | None; never blurred | Beneath a dialog, a confirmation, the rail drawer and the tour's spotlight |
 
-- **Levels are not a lightness ramp.** The fills are ground `#15100c`, surface `#1f1812`, surface-raised `#2a2019` and folio `#22160f`: the Folio is darker than a hover wash. Level 3 reads as the highest through `shadow-panel`, and the Folio through its frame as well. Every level holds `ink` at 12.85:1 or more and `line-strong` edges at 3:1 or more (Foundations · Colour · Contrast).
+- **Levels are not a lightness ramp.** The fills are ground `#101014`, surface `#101014` at 72% over the backdrop (about `surface-solid`, `#16161b`), surface-raised `#22222a` and folio `#131318`: the Folio is darker than a hover wash. Level 3 reads as the highest through `shadow-panel`, and the Folio through its frame as well. Every level holds `ink` at 12.74:1 or more and `line-strong` edges at 3:1 or more (Foundations · Colour · Contrast).
 - **Inner surfaces of Level 2.** StatTiles and the active primary tab take `tile`, a step up from `surface` inside a Level 1 container.
 - **Wells sink below Level 0.** Inputs, item slots and the inventory grid's gutters are `ground-deep`; a LoadoutSlot is `ground`. A well counts as an enclosed level, like a tile.
 - **Modal surfaces take `shadow-panel`.** A dialog or confirmation over a scrim has Level 3's shadow. So does the rail drawer on small screens: the NavRail keeps its Level 1 fill, but it is modal.
@@ -83,7 +83,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 
 ## Opacity, blur and texture
 
-- **Every surface is opaque:** its fill hides what lies behind it.
+- **Every surface hides what lies behind it, but one:** Level 1 in flow — a Panel, a list, the JourneyCard, the NavRail — is `surface`, the game's panel material, a cool near-black at 72% that lets the frame's backdrop show through (D-102). It sits over the backdrop only, never over content: where content scrolls beneath it (a sticky table header or column) or it floats, it takes `surface-solid`. Text on it is measured over the real backdrop, at 4.5:1 over the brightest point behind it.
 - **No backdrop blur (`backdrop-filter`) anywhere.** The scrim dims what lies behind it but does not blur it.
 - **Softened art is not blurred content.** The Stage and the Banner soften their own picture, which is part of the art treatment. No surface ever blurs what lies behind it.
 - **Some things are not surfaces**, and may let the picture show through:

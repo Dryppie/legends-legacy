@@ -1487,6 +1487,8 @@
   // Three states (Standards · States): attuned (Ownership · Attuned, a neutral Tag), open (Data · Empty: an empty frame
   // and "Empty") and locked (Availability · Locked: a dashed frame, a Locked Tag and the unlock condition printed as the
   // name). A locked slot that would be a button stays one, aria-disabled, its printed condition as the description.
+  // `compact` (D-103) is one short row for a full loadout: the name leads, the slot number is for screen readers only,
+  // and an attuned slot drops its Tag — being in the loadout says it. Open says "Empty"; locked keeps its Tag.
   function LoadoutSlot(p) {
     var id = useId('lgo');
     var state = p.state || (p.name ? 'attuned' : 'open');
@@ -1496,9 +1498,11 @@
     if (locked && !unlock) stateWarn('loadout:' + p.index, 'LoadoutSlot ' + (p.index != null ? p.index + 1 : '') + ' is locked with no reason; say how it unlocks');
     var w = locked && interactive ? why(id + '-why', unlock, { word: 'Locked', printed: true }) : null;
     var tag = state === 'attuned' ? h(Tag, { state: 'attuned' }) : locked ? h(Tag, { state: 'locked' }) : null;
+    var name = h('div', { className: cx('lg-loadout__name', p.rarity && state === 'attuned' && 'lg-itemlink--' + String(p.rarity).toLowerCase()) },
+      state === 'attuned' ? p.name : state === 'open' ? 'Empty' : (unlock || STATES.locked.word));
     var props = {
       type: interactive ? 'button' : undefined, onClick: interactive && !locked ? p.onClick : undefined,
-      className: cx('lg-loadout', 'is-' + state, p.className)
+      className: cx('lg-loadout', 'is-' + state, p.compact && 'lg-loadout--compact', p.className)
     };
     // The condition is printed inside the button, so it is already in the name ("Slot 3 Locked Unlocks at level 20").
     if (w) { props = chain(props, w.props); delete props['aria-describedby']; }
@@ -1506,11 +1510,14 @@
       h(ItemSlot, { icon: state === 'attuned' ? (p.icon || 'essences') : undefined, image: state === 'attuned' ? p.image : undefined, rarity: state === 'attuned' ? p.rarity : undefined, caption: false, size: 'sm' }),
       h('div', { className: 'lg-loadout__body' },
         // The head: "Slot 3" at the start; the Tag, then the attention diamond, at the end (Standards · State combinations).
-        h('div', { className: 'lg-loadout__head' }, h('span', { className: 'lg-loadout__slot' }, 'Slot ' + (p.index != null ? p.index + 1 : '')), tag,
+        // Compact: the name takes the slot label's place, and only a locked slot keeps its Tag.
+        h('div', { className: 'lg-loadout__head' },
+          h('span', { className: p.compact ? 'lg-sr' : 'lg-loadout__slot' }, 'Slot ' + (p.index != null ? p.index + 1 : '')),
+          p.compact ? name : null,
+          p.compact && !locked ? null : tag,
           p.ready && !locked ? attention('lg-loadout__attention') : null,
           p.ready && !locked ? h('span', { className: 'lg-sr' }, readyWords(p.ready)) : null),
-        h('div', { className: cx('lg-loadout__name', p.rarity && state === 'attuned' && 'lg-itemlink--' + String(p.rarity).toLowerCase()) },
-          state === 'attuned' ? p.name : state === 'open' ? 'Empty' : (unlock || STATES.locked.word)),
+        p.compact ? null : name,
         state === 'attuned' && (p.active || p.passive) ? h('div', { className: 'lg-loadout__abilities' },
           p.active ? h('span', null, h('b', null, 'Active'), ' ', p.active.name, p.active.cooldown ? ' \u00B7 ' + p.active.cooldown : '') : null,
           p.passive ? h('span', null, h('b', null, 'Passive'), ' ', p.passive.name) : null) : null,

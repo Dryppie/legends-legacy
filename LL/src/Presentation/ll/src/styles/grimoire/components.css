@@ -186,7 +186,7 @@
 .lg-level-0 { background: var(--ground); }
 /* Level 1 in flow has no edge: its fill and the space around it carry the region (Foundations · Lines). */
 .lg-level-1 { background: var(--surface); border-radius: var(--radius-container); }
-.lg-level-1--float { background: var(--surface); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float); }
+.lg-level-1--float { background: var(--surface-solid); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float); }
 .lg-level-2 { background: var(--surface-raised); }
 .lg-level-2--float { background: var(--surface-raised); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float); }
 .lg-level-3 { background: var(--folio); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-container); box-shadow: var(--shadow-panel); }
@@ -1088,7 +1088,7 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
 .lg-chronicle.is-collapsed { height: var(--chronicle-collapsed); }
 .lg-chronicle--floating {
   height: var(--chronicle-float-height); max-height: calc(100cqh - 2 * var(--space-6));
-  border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float); overflow: hidden; background: var(--surface);
+  border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float); overflow: hidden; background: var(--surface-solid);
 }
 .lg-chronicle--floating.is-tall { height: var(--chronicle-float-tall); }
 .lg-chronicle--floating.is-collapsed { height: var(--chronicle-collapsed); }
@@ -1213,7 +1213,9 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
   padding: calc(var(--topbar-height) + var(--space-3)) var(--lg-page-pad) var(--section-lg);
   /* A focused element scrolled into view stays clear of the TopBar that overlays the Page (WCAG 2.4.11). */
   scroll-padding-top: calc(var(--topbar-height) + var(--space-3));
-  background: var(--ground);
+  /* No background of its own (D-101): the Page shows the backdrop of the frame it sits in — GameShell's ground, or the
+     game's own backdrop while screens migrate. Panels on it are opaque, so their text never depends on the backdrop. */
+  background: none;
 }
 .lg-page__inner { position: relative; display: grid; gap: var(--section-sm); max-width: var(--page-max); margin: 0 auto; }
 /* Flow (D-097): in a host frame that is not GameShell — the game's frame while screens migrate — the Page sits in the
@@ -1280,9 +1282,9 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
    Columns carry data-priority 1–4; 4 hides below wide, 3 below medium, 2 below narrow, 1 never. */
 .lg-tablewrap { container: lg-table / inline-size; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
 .lg-tablewrap > table { width: 100%; min-width: var(--lg-table-min, 0px); border-collapse: collapse; }
-.lg-tablewrap :is(th, td):first-child { position: sticky; left: 0; z-index: var(--z-sticky); background: var(--lg-table-bg, var(--surface)); }
+.lg-tablewrap :is(th, td):first-child { position: sticky; left: 0; z-index: var(--z-sticky); background: var(--lg-table-bg, var(--surface-solid)); }
 /* The header row sticks when the wrapper has a height of its own (max-height); its first cell, held both ways, sits one above. */
-.lg-tablewrap thead th { position: sticky; top: 0; z-index: var(--z-sticky); background: var(--lg-table-bg, var(--surface)); }
+.lg-tablewrap thead th { position: sticky; top: 0; z-index: var(--z-sticky); background: var(--lg-table-bg, var(--surface-solid)); }
 .lg-tablewrap thead th:first-child { z-index: calc(var(--z-sticky) + 1); }
 /* Row rhythm (Foundations · Lines): a hairline between body rows by default, or zebra with lg-tablewrap--zebra, never both. The table has no edge of its own.
    The header's rule is an inset shadow, so it travels with the sticky header. */
@@ -1467,6 +1469,20 @@ button.lg-loadout:focus-visible { outline: 2px solid transparent; box-shadow: va
 .lg-loadout.is-locked { border-style: dashed; background: transparent; }
 .lg-loadout.is-locked .lg-loadout__name { font-family: var(--font-ui); font-size: var(--text-body-compact); color: var(--ink-muted); }
 .lg-loadout.is-locked .lg-slot__frame { box-shadow: inset 0 0 0 var(--border-hairline) var(--line); }
+/* Compact (D-103): one short row per slot for a full loadout. A 32px frame and the name leading the head; the abilities
+   share one line, active then passive split by a hairline, their Active and Passive labels kept for screen readers
+   (the cooldown marks the active). The Essence preview on hover or focus carries the rest. */
+.lg-loadout--compact { gap: var(--space-3); padding: var(--space-2) var(--lg-inset-inner); }
+.lg-loadout--compact .lg-slot--sm { width: 2rem; }
+/* At 32px the Essence glyph and the rarity code would overlap: the frame keeps the rarity edge and the code, centred (rarity is never colour alone). */
+.lg-loadout--compact .lg-slot__frame .lg-icon { display: none; }
+.lg-loadout--compact .lg-slot__code { top: 50%; left: 50%; transform: translate(-50%, -50%); background: transparent; }
+.lg-loadout--compact .lg-loadout__head > .lg-loadout__name { margin-right: auto; min-width: 0; }
+.lg-loadout--compact .lg-loadout__abilities { display: flex; gap: var(--space-2); white-space: nowrap; overflow: hidden; }
+.lg-loadout--compact .lg-loadout__abilities > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lg-loadout--compact .lg-loadout__abilities > span:first-child { flex: none; }
+.lg-loadout--compact .lg-loadout__abilities > span + span { padding-left: var(--space-2); border-left: var(--border-hairline) solid var(--line); }
+.lg-loadout--compact .lg-loadout__abilities b { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ---------- ProfileIdentity (D-099) ----------
    The eyebrow and the fact labels are ink-muted and the values ink, by the allocation (Foundations · Colour, D-015):

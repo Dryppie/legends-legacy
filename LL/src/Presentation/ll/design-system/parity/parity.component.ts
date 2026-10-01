@@ -179,6 +179,11 @@ interface ParityWindow {
     </div>
     <div class="case" data-case="loadout-open"><lg-loadout-slot [index]="1" hint="Choose an Essence" /></div>
     <div class="case" data-case="loadout-locked"><lg-loadout-slot [index]="2" state="locked" reason="Unlocks at level 20" interactive /></div>
+    <div class="case" data-case="loadout-compact-attuned">
+      <lg-loadout-slot compact [index]="0" name="Ember Wolf Essence" rarity="Rare" [active]="{ name: 'Cinder Bite', cooldown: '12s' }" [passive]="{ name: 'Pack Instinct' }" interactive />
+    </div>
+    <div class="case" data-case="loadout-compact-open"><lg-loadout-slot compact [index]="1" ready="Essence ready to attune" /></div>
+    <div class="case" data-case="loadout-compact-locked"><lg-loadout-slot compact [index]="2" state="locked" reason="Unlocks at level 20" interactive /></div>
     <div class="case" data-case="presence-online"><lg-presence [online]="true" /></div>
     <div class="case" data-case="presence-offline"><lg-presence [online]="false" lastSeen="3 h ago" /></div>
     <div class="case" data-case="presence-compact"><lg-presence [online]="false" compact /></div>

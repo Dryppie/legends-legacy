@@ -128,7 +128,7 @@ function useFocusOnOpen(open, ref, userRef) {
 /* ---------- Levels and the stack ---------- */
 var LEVELS = [
   { cls: 'lg-level-0', name: 'Level 0 · Ground', fill: 'ground', shadow: 'None', edge: 'None', use: 'The shell’s base, the Page, the stage, the docked Chronicle.' },
-  { cls: 'lg-level-1', name: 'Level 1 · Surface', fill: 'surface', shadow: 'None; shadow-float when it floats', edge: 'None in flow; line-strong when it floats', use: 'The NavRail, Panels, lists, the JourneyCard; the chat drawer.' },
+  { cls: 'lg-level-1', name: 'Level 1 · Surface', fill: 'surface, translucent over the backdrop; surface-solid when it floats', shadow: 'None; shadow-float when it floats', edge: 'None in flow; line-strong when it floats', use: 'The NavRail, Panels, lists, the JourneyCard; the chat drawer.' },
   { cls: 'lg-level-2--float', name: 'Level 2 · Raised', fill: 'surface-raised', shadow: 'None for a wash; shadow-float when it floats', edge: 'line-strong when it floats', use: 'Hover and selected washes; tooltips, hover cards, menus, toasts.' },
   { cls: 'lg-level-3', name: 'Level 3 · Folio', fill: 'folio', shadow: 'shadow-panel', edge: 'line-strong on a sheet; the gilt frame on the Folio', use: 'The Folio, dialogs, confirmations, the tour’s coach mark.' }
 ];
@@ -154,7 +154,7 @@ function Levels() {
           h('div', { className: 'pv-under', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i')),
           h('div', { className: 'lg-scrim' },
             h('h3', { className: 'pv-lv__name' }, 'Scrim'),
-            h('p', { style: { color: 'var(--ink)' } }, 'Flat umber-950 at 80%. It dims; it never blurs. Beneath a dialog, a confirmation, the rail drawer and the tour.')))),
+            h('p', { style: { color: 'var(--ink)' } }, 'Flat slate-950 at 80%. It dims; it never blurs. Beneath a dialog, a confirmation, the rail drawer and the tour.')))),
       h('p', { className: 'pv-note' }, h('b', null, 'Not a lightness ramp:'), ' folio is darker than surface-raised. Level 3 reads highest through its shadow and edge.')),
     h('section', { 'aria-labelledby': 'pv-st-h', style: { display: 'grid', gap: 'var(--stack-lg)' } },
       h('h2', { className: 'pv-h', id: 'pv-st-h' }, 'Layer stack'),

@@ -43,7 +43,7 @@ Colour comes in three tiers — palette primitives hold the raw values, semantic
 
 | Tier | Holds | Named for | Example | Read by |
 | --- | --- | --- | --- | --- |
-| 1 · Palette primitives | The raw values: eight ramps and the fourteen game hues | The colour | `umber-900`, `hue-rarity-epic` | Tier 2, Tier 3 and component tokens only |
+| 1 · Palette primitives | The raw values: nine ramps and the fourteen game hues | The colour | `umber-900`, `hue-rarity-epic` | Tier 2, Tier 3 and component tokens only |
 | 2 · Semantic roles | What a colour does anywhere in the interface | The role | `ground`, `ink-muted`, `gilt` | Every component |
 | 3 · Domain roles | The game's own lists, and polarity | The registry and its entry | `rarity-epic`, `channel-loot`, `meter-hp` | Every component, through Registries |
 | Component tokens | One component's own colours | The component or its part | `sigil-fill`, `on-tile` | That component only |
@@ -72,7 +72,7 @@ An earlier audit of the game found one accent colour carrying too many meanings,
 | **Rarity hues** — `rarity-*` | — | — | — | — | — | The item's rarity: name, edge, tag and code | — | Item links, in [brackets] |
 | **Damage hues** — `damage-*` | — | — | — | — | — | — | The damage type, always named | — |
 
-Umber is structure — grounds, surfaces and lines — in every context. Three marks sit outside the table because they may appear anywhere: `focus` (`brass-200`), the keyboard focus ring, always a ring outside a `ground` gap and never a fill; `changed` (`umber-650`), the live-update mark, a flat wash behind a value that changed by itself, in any context — it says that the value changed, never whether that helps, so it takes no hue (Foundations · Motion); and the component tokens of Sigil and StatTile, which belong to their component.
+Slate is structure — grounds, surfaces and lines — in every context: the game's own cool near-black, which Martin chose over a warm brown (D-102). Umber keeps the marks that stay warm: `line-strong`, `on-gilt` and `changed`. Three marks sit outside the table because they may appear anywhere: `focus` (`brass-200`), the keyboard focus ring, always a ring outside a `ground` gap and never a fill; `changed` (`umber-650`), the live-update mark, a flat wash behind a value that changed by itself, in any context — it says that the value changed, never whether that helps, so it takes no hue (Foundations · Motion); and the component tokens of Sigil and StatTile, which belong to their component.
 
 ### Gilt's four jobs
 
@@ -356,20 +356,23 @@ Every colour token, tier by tier.
 
 ### Tier 1 · Palette primitives
 
-Eight ramps, each named for its colour in the grimoire's own terms — umber, bone, brass, verdigris, ember, amber, azure, orchid. Step numbers order a ramp by lightness — the lower the number, the lighter the colour — and are not evenly spaced: the values were inherited, so steps such as 825 and 875 sit where the existing colours fell. `-a80` marks a translucent version, at 80% opacity.
+Nine ramps, each named for its colour in the grimoire's own terms — slate, umber, bone, brass, verdigris, ember, amber, azure, orchid. Step numbers order a ramp by lightness — the lower the number, the lighter the colour — and are not evenly spaced: the values were inherited, so steps such as 825 and 875 sit where the existing colours fell. `-a<opacity>` marks a translucent version: `slate-950-a80` at 80%, `slate-900-a72` at 72%. `slate-100-a12` and `slate-100-a04` are light veils with no opaque step of their own.
 
 | Primitive | Value | Aliased by |
 | --- | --- | --- |
-| `umber-950` | `#0b0806` | `ground-deep` |
-| `umber-950-a80` | `#0b0806cc` | `scrim` |
-| `umber-900` | `#15100c` | `ground` |
-| `umber-875` | `#1a1109` | `on-gilt`, `row-stripe` |
-| `umber-850` | `#22160f` | `folio` |
-| `umber-825` | `#1f1812` | `surface` |
-| `umber-800` | `#261d16` | `tile` |
-| `umber-775` | `#2a2019` | `surface-raised` |
-| `umber-750` | `#2e241c` | `meter-track` |
-| `umber-650` | `#46372a` | `line`, `changed` |
+| `slate-950` | `#0b0b0f` | `ground-deep` |
+| `slate-950-a80` | `#0b0b0fcc` | `scrim` |
+| `slate-900` | `#101014` | `ground` |
+| `slate-900-a72` | `#101014b8` | `surface` |
+| `slate-875` | `#16161b` | `surface-solid` |
+| `slate-850` | `#131318` | `folio` |
+| `slate-800` | `#1b1b22` | `tile` |
+| `slate-775` | `#22222a` | `surface-raised` |
+| `slate-750` | `#2a2a33` | `meter-track` |
+| `slate-100-a12` | `#f4f4f81f` | `line` |
+| `slate-100-a04` | `#f4f4f80a` | `row-stripe` |
+| `umber-875` | `#1a1109` | `on-gilt` |
+| `umber-650` | `#46372a` | `changed` |
 | `umber-450` | `#8c7358` | `line-strong` |
 | `bone-100` | `#f0e6d2` | `ink`, `success`, `channel-general`, `channel-help` |
 | `bone-300` | `#bba98c` | `ink-muted`, `channel-system`, `channel-loot`, `delta-neutral` |
@@ -408,15 +411,16 @@ The fourteen game hues are the game's existing rarity and damage colours. Player
 
 | Family | Role | Aliases | Value | For |
 | --- | --- | --- | --- | --- |
-| **Grounds** | `ground` | `umber-900` | `#15100c` | Level 0: the page, behind everything; the Page and the docked Chronicle. |
-|  | `ground-deep` | `umber-950` | `#0b0806` | Below Level 0: wells (inputs, item slots), the vignette, the letterbox behind stage art. |
-|  | `surface` | `umber-825` | `#1f1812` | Level 1: the rail, Panels, lists, the JourneyCard and the floating chat drawer. |
-|  | `surface-raised` | `umber-775` | `#2a2019` | Level 2: the hover, selected and mention washes; popovers, hover cards, menus and toasts. |
-|  | `folio` | `umber-850` | `#22160f` | Level 3: the Folio, dialog sheets, confirmations and the tour's coach mark. Darker than `surface-raised`: its height reads from `shadow-panel`. |
-|  | `scrim` | `umber-950-a80` | `#0b0806cc` | Above the levels: the flat dimmer behind the rail drawer, dialogs, confirmations and the tour. Never blurred. |
-| **Lines** | `line` | `umber-650` | `#46372a` | Separation and decoration: row and group separators, bounded objects that are not controls. Never the only edge of a control (Foundations · Lines). |
+| **Grounds** | `ground` | `slate-900` | `#101014` | Level 0: the page, behind everything; GameShell's stage behind a Page, and the docked Chronicle. |
+|  | `ground-deep` | `slate-950` | `#0b0b0f` | Below Level 0: wells (inputs, item slots), the vignette, the letterbox behind stage art. |
+|  | `surface` | `slate-900-a72` | `#101014b8` | Level 1: the rail, Panels, lists and the JourneyCard. The game's panel material: translucent over the frame's backdrop, never blurred (D-102). |
+|  | `surface-solid` | `slate-875` | `#16161b` | Level 1 where something passes beneath it: sticky table headers and columns, the floating chat drawer, `lg-level-1--float`. About what `surface` shows over the backdrop. |
+|  | `surface-raised` | `slate-775` | `#22222a` | Level 2: the hover, selected and mention washes; popovers, hover cards, menus and toasts. |
+|  | `folio` | `slate-850` | `#131318` | Level 3: the Folio, dialog sheets, confirmations and the tour's coach mark. Darker than `surface-raised`: its height reads from `shadow-panel`. |
+|  | `scrim` | `slate-950-a80` | `#0b0b0fcc` | Above the levels: the flat dimmer behind the rail drawer, dialogs, confirmations and the tour. Never blurred. |
+| **Lines** | `line` | `slate-100-a12` | `#f4f4f81f` | Separation and decoration: row and group separators, bounded objects that are not controls. Never the only edge of a control (Foundations · Lines). |
 |  | `line-strong` | `umber-450` | `#8c7358` | Interactive edges — inputs, outline buttons, clickable pills and slots, tab separators — floating surfaces and dotted Ledger leaders. |
-|  | `row-stripe` | `umber-875` | `#1a1109` | The zebra rhythm: every second row of a wide List or table set to zebra, on Level 1 or in the Folio. Never with separators. |
+|  | `row-stripe` | `slate-100-a04` | `#f4f4f80a` | The zebra rhythm: every second row of a wide List or table set to zebra, on Level 1 or in the Folio. Never with separators. |
 | **Ink** | `ink` | `bone-100` | `#f0e6d2` | Text and every ordinary data value. |
 |  | `ink-muted` | `bone-300` | `#bba98c` | Secondary text, labels, eyebrows, inactive items, captions. |
 |  | `ink-disabled` | `bone-500` | `#7a6a56` | Plain disabled controls and the names of locked things only, a locked name always with a lock or "Locked". |
@@ -442,7 +446,7 @@ The game's own lists — set out, with names and codes, in Registries — and th
 
 | Family | Token | Aliases | Value | For | Same value as |
 | --- | --- | --- | --- | --- | --- |
-| **Meters** | `meter-track` | `umber-750` | `#2e241c` | The empty part of every Meter and Track. | — |
+| **Meters** | `meter-track` | `slate-750` | `#2a2a33` | The empty part of every Meter and Track. | — |
 |  | `meter-hp` | `ember-500` | `#d0443f` | Health (HP). | — |
 |  | `meter-sp` | `azure-500` | `#4f9fd6` | Stamina or mana (SP). | — |
 |  | `meter-xp` | `brass-300` | `#dcb872` | Experience (EXP) and level progress. | `gilt` |
@@ -476,7 +480,7 @@ A component token belongs to one component and is read only there. It aliases a 
 | `sigil-fill` | Sigil | `verdigris-800` | `#1d4b45` | The hexagon badge's fill. | — |
 | `sigil-edge` | Sigil | `verdigris-250` | `#7fc9b8` | The hexagon's outline. | — |
 | `on-sigil` | Sigil | `ink` | `#f0e6d2` | Numerals inside the badge. | — |
-| `tile` | StatTile | `umber-800` | `#261d16` | The tile's fill. | TabStrip's active primary tab |
+| `tile` | StatTile | `slate-800` | `#1b1b22` | The tile's fill. | TabStrip's active primary tab |
 | `on-tile` | StatTile | `ink` | `#f0e6d2` | Values on the tile. | TabStrip's active primary tab |
 | `on-tile-muted` | StatTile | `ink-muted` | `#bba98c` | Labels (STR, Armor) and units on the tile. | — |
 
@@ -486,7 +490,7 @@ One reader breaks the one-component rule and is flagged rather than hidden: TabS
 
 | Tier | Pattern | Examples |
 | --- | --- | --- |
-| 1 · ramps | `<ramp>-<step>`, and `-a<opacity>` for a translucent version | `umber-900`, `bone-300`, `umber-950-a80` |
+| 1 · ramps | `<ramp>-<step>`, and `-a<opacity>` for a translucent version | `slate-900`, `bone-300`, `slate-950-a80` |
 | 1 · game hues | `hue-<registry>-<entry>` | `hue-rarity-epic`, `hue-damage-bleed` |
 | 2 | `<role>`, `<role>-<modifier>`, or `on-<role>` for text and icons on that role's fill | `surface-raised`, `ink-muted`, `on-gilt` |
 | 3 | `<registry>-<entry>`, with the entry spelled as Registries spells it | `rarity-legendary`, `channel-whisper`, `meter-hp` |
@@ -502,9 +506,9 @@ One reader breaks the one-component rule and is flagged rather than hidden: TabS
 
 - A Tier 1 token holds a raw colour. Every other colour token holds an alias, `{brass-300}`, which the page compiles to `var(--brass-300)`: `--gilt` resolves in the browser to brass-300's value, so a component's `var(--gilt)` never changes when the palette is reorganised.
 - Chains are short: Tier 2 and Tier 3 alias a primitive directly (one step); a component token may alias a role (two steps). The page would follow up to 16; we keep it to two.
-- An alias must name an existing token and cannot mix, tint or fade it. A translucent colour is a primitive of its own (`umber-950-a80`, for `scrim`).
+- An alias must name an existing token and cannot mix, tint or fade it. A translucent colour is a primitive of its own (`slate-950-a80`, for `scrim`).
 - Changing a primitive moves every token that aliases it — its usage line lists them. To change one role, repoint that role.
-- **Raw values outside Tier 1.** Shadow tokens cannot alias, so three repeat palette values by hand: `focus-ring` repeats `umber-900` (#15100c) and `brass-200` (#f5d48f), and `shadow-text-art` repeats `umber-950` (#0b0806); `shadow-panel` and `shadow-float` use black, which has no primitive. Changing those primitives means editing those shadows too. The two list-end masks in `bundle.css` use `#000` as an alpha value; a mask is not a colour and takes no token.
+- **Raw values outside Tier 1.** Shadow tokens cannot alias, so three repeat palette values by hand: `focus-ring` repeats `slate-900` (#101014) and `brass-200` (#f5d48f), and `shadow-text-art` repeats `slate-950` (#0b0b0f); `shadow-panel` and `shadow-float` use black, which has no primitive. Changing those primitives means editing those shadows too. The two list-end masks in `bundle.css` use `#000` as an alpha value; a mask is not a colour and takes no token.
 - **Check:** no component names a primitive. Search `bundle.css`, `bundle.js` and every `preview.html` for `var(--umber-`, `--bone-`, `--brass-`, `--verdigris-`, `--ember-`, `--amber-`, `--azure-`, `--orchid-` and `--hue-`; today there are none.
 
 ## Adding a token
@@ -534,7 +538,7 @@ One reader breaks the one-component rule and is flagged rather than hidden: TabS
 
 ## Contrast
 
-WCAG 2.2 contrast ratios, measured from the token values in sRGB and truncated to two decimals, so a ratio shown as 4.50 always passes. Text needs 4.5:1 (WCAG 1.4.3); an edge or other non-text mark a player must see needs 3:1 (WCAG 1.4.11). Large text — 24px regular or 19px bold and up — needs 3:1. `scrim` is translucent and not measured; deprecated tokens share their replacements' values. `success`, `channel-general` and `channel-help` share `ink`'s value and its ratios; `effect-beneficial` and `effect-harmful` share the deltas'; `delta-neutral` shares `ink-muted`'s.
+WCAG 2.2 contrast ratios, measured from the token values in sRGB and truncated to two decimals, so a ratio shown as 4.50 always passes. Text needs 4.5:1 (WCAG 1.4.3); an edge or other non-text mark a player must see needs 3:1 (WCAG 1.4.11). Large text — 24px regular or 19px bold and up — needs 3:1. The `surface` column is measured on `surface-solid`, about what the translucent `surface` shows over the frame's backdrop; text on a Panel in the game's frame was also measured over the real backdrop, at 5.9:1 or better (D-102). `line` and `row-stripe` are measured over each fill. `scrim` is translucent and not measured; deprecated tokens share their replacements' values. `success`, `channel-general` and `channel-help` share `ink`'s value and its ratios; `effect-beneficial` and `effect-harmful` share the deltas'; `delta-neutral` shares `ink-muted`'s.
 
 ### Failures
 
@@ -542,43 +546,43 @@ Every ratio below the threshold, flagged here and marked **fail** in the tables.
 
 | Token | Fails | Measured | Why it ships, and the rule |
 | --- | --- | --- | --- |
-| `ink-disabled` | Text 4.5:1 on all four grounds | 3.05–3.62 | Plain disabled controls and the names of locked things only, a locked name always with a lock or the word "Locked" in `ink-muted`; WCAG exempts the text of inactive controls. It passes 3:1. |
-| `damage-bleed` | Text 4.5:1 on `surface`, `surface-raised`, `folio` | surface 4.31, surface-raised 3.91, folio 4.34 | Kept from the game's palette. Set bleed numbers on `ground` (4.64), or as large text: bold at 19px and up. It passes 3:1 everywhere. |
-| `line` | Edge 3:1 on all four grounds | 1.39–1.65 | Separation and decoration only — never the only edge of a control (Foundations · Lines). |
-| `row-stripe` | Edge 3:1 on all four grounds | 1.02–1.17; `surface` 1.06, `folio` 1.05 | A rhythm, not a state and not an edge: it helps the eye along a wide row. Rows are also told apart by their text; use it on Level 1 or in the Folio, not on `ground` (Foundations · Lines). |
-| `meter-track` | Edge 3:1 on all four grounds | 1.05–1.24 | The empty part is a fill. The `bar` Meter draws its full length with a `line-strong` edge (passes); the thin Meter and the Track rely on the numbers printed beside them. |
-| `surface-raised`, `gilt-soft`, `arcana-soft`, `danger-soft`, `changed` | Edge 3:1 on the grounds | 1.00–1.65; `surface-raised` 1.10–1.18, `changed` 1.39–1.65 | Washes, never the only sign of a state: selection also takes a bar, ring or edge and a weight or face change (Standards · States); a mention also takes its `ink` edge and bold `@you`; hover is an extra cue, not a state a player must see; the live mark is an extra cue too, since the value itself shows the change. |
-| `gilt-soft` in SearchField | Edge 3:1 on `surface-raised` | 1.16 | **Breach, not an exception:** the highlighted suggestion in SearchField's list is marked by the wash alone. Queued in Governance · Audit & consolidation map (revision item 3). |
-| `tile`, `sigil-fill` | Edge 3:1 on all four grounds | 1.03–1.92 | Fills. The Sigil's shape is drawn by `sigil-edge` (passes); a StatTile's content is its text; TabStrip's active tab also takes the `arcana-glow` bar. |
+| `ink-disabled` | Text 4.5:1 on all four grounds | 3.02–3.63 | Plain disabled controls and the names of locked things only, a locked name always with a lock or the word "Locked" in `ink-muted`; WCAG exempts the text of inactive controls. It passes 3:1. |
+| `damage-bleed` | Text 4.5:1 on `surface`, `surface-raised` | surface 4.43, surface-raised 3.88 | Kept from the game's palette. Set bleed numbers on `ground` (4.67) or `folio` (4.55), or as large text: bold at 19px and up. It passes 3:1 everywhere. |
+| `line` | Edge 3:1 on all four grounds | 1.36–1.44 | Separation and decoration only — never the only edge of a control (Foundations · Lines). |
+| `row-stripe` | Edge 3:1 on all four grounds | 1.08–1.10 over each fill | A rhythm, not a state and not an edge: it helps the eye along a wide row. Rows are also told apart by their text; use it on Level 1 or in the Folio, not on `ground` (Foundations · Lines). |
+| `meter-track` | Edge 3:1 on all four grounds | 1.11–1.33 | The empty part is a fill. The `bar` Meter draws its full length with a `line-strong` edge (passes); the thin Meter and the Track rely on the numbers printed beside them. |
+| `surface-raised`, `gilt-soft`, `arcana-soft`, `danger-soft`, `changed` | Edge 3:1 on the grounds | 1.00–1.66; `surface-raised` 1.14–1.20, `changed` 1.38–1.66 | Washes, never the only sign of a state: selection also takes a bar, ring or edge and a weight or face change (Standards · States); a mention also takes its `ink` edge and bold `@you`; hover is an extra cue, not a state a player must see; the live mark is an extra cue too, since the value itself shows the change. |
+| `gilt-soft` in SearchField | Edge 3:1 on `surface-raised` | 1.15 | **Breach, not an exception:** the highlighted suggestion in SearchField's list is marked by the wash alone. Queued in Governance · Audit & consolidation map (revision item 3). |
+| `tile`, `sigil-fill` | Edge 3:1 on all four grounds | 1.05–1.93 | Fills. The Sigil's shape is drawn by `sigil-edge` (passes); a StatTile's content is its text; TabStrip's active tab also takes the `arcana-glow` bar. |
 
 ### Text tokens on the four grounds
 
 | Token | Primitive | `ground` | `surface` | `surface-raised` | `folio` | Text 4.5:1 | Edge 3:1 |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| `ink` | `bone-100` | 15.25 | 14.15 | 12.85 | 14.25 | Pass | Pass |
-| `ink-muted` | `bone-300` | 8.24 | 7.65 | 6.94 | 7.70 | Pass | Pass |
-| `ink-disabled` | `bone-500` | 3.62 **fail** | 3.35 **fail** | 3.05 **fail** | 3.38 **fail** | **Fail** on all four | Pass |
-| `gilt` | `brass-300` | 10.02 | 9.30 | 8.44 | 9.36 | Pass | Pass |
-| `arcana` | `verdigris-300` | 9.74 | 9.03 | 8.20 | 9.09 | Pass | Pass |
-| `danger` | `ember-300` | 7.47 | 6.93 | 6.29 | 6.97 | Pass | Pass |
-| `warning` | `amber-300` | 10.16 | 9.43 | 8.56 | 9.49 | Pass | Pass |
-| `info` | `azure-200` | 10.90 | 10.11 | 9.18 | 10.18 | Pass | Pass |
-| `delta-better` | `lichen-200` | 13.67 | 12.68 | 11.51 | 12.77 | Pass | Pass |
-| `delta-worse` | `madder-400` | 6.10 | 5.66 | 5.13 | 5.69 | Pass | Pass |
-| `rarity-common` | `hue-rarity-common` | 12.78 | 11.86 | 10.77 | 11.94 | Pass | Pass |
-| `rarity-uncommon` | `hue-rarity-uncommon` | 13.03 | 12.09 | 10.97 | 12.17 | Pass | Pass |
-| `rarity-rare` | `hue-rarity-rare` | 9.06 | 8.41 | 7.63 | 8.46 | Pass | Pass |
-| `rarity-epic` | `hue-rarity-epic` | 7.67 | 7.12 | 6.46 | 7.17 | Pass | Pass |
-| `rarity-unique` | `hue-rarity-unique` | 12.33 | 11.44 | 10.39 | 11.52 | Pass | Pass |
-| `rarity-legendary` | `hue-rarity-legendary` | 8.34 | 7.74 | 7.03 | 7.79 | Pass | Pass |
-| `rarity-legacy` | `hue-rarity-legacy` | 7.02 | 6.51 | 5.91 | 6.55 | Pass | Pass |
-| `damage-physical` | `hue-damage-physical` | 14.61 | 13.56 | 12.31 | 13.65 | Pass | Pass |
-| `damage-magical` | `hue-damage-magical` | 6.37 | 5.91 | 5.37 | 5.95 | Pass | Pass |
-| `damage-bleed` | `hue-damage-bleed` | 4.64 | 4.31 **fail** | 3.91 **fail** | 4.34 **fail** | **Fail** on `surface`, `surface-raised`, `folio` | Pass |
-| `damage-burn` | `hue-damage-burn` | 7.53 | 6.98 | 6.34 | 7.03 | Pass | Pass |
-| `damage-poison` | `hue-damage-poison` | 8.08 | 7.50 | 6.81 | 7.55 | Pass | Pass |
-| `damage-shadow` | `hue-damage-shadow` | 8.40 | 7.79 | 7.07 | 7.84 | Pass | Pass |
-| `damage-none` | `hue-damage-none` | 5.50 | 5.10 | 4.63 | 5.14 | Pass | Pass |
+| `ink` | `bone-100` | 15.32 | 14.55 | 12.74 | 14.95 | Pass | Pass |
+| `ink-muted` | `bone-300` | 8.28 | 7.87 | 6.89 | 8.08 | Pass | Pass |
+| `ink-disabled` | `bone-500` | 3.63 **fail** | 3.45 **fail** | 3.02 **fail** | 3.54 **fail** | **Fail** on all four | Pass |
+| `gilt` | `brass-300` | 10.07 | 9.56 | 8.37 | 9.82 | Pass | Pass |
+| `arcana` | `verdigris-300` | 9.78 | 9.29 | 8.13 | 9.54 | Pass | Pass |
+| `danger` | `ember-300` | 7.50 | 7.12 | 6.24 | 7.32 | Pass | Pass |
+| `warning` | `amber-300` | 10.21 | 9.70 | 8.49 | 9.96 | Pass | Pass |
+| `info` | `azure-200` | 10.95 | 10.40 | 9.11 | 10.68 | Pass | Pass |
+| `delta-better` | `lichen-200` | 13.73 | 13.04 | 11.42 | 13.39 | Pass | Pass |
+| `delta-worse` | `madder-400` | 6.12 | 5.82 | 5.09 | 5.97 | Pass | Pass |
+| `rarity-common` | `hue-rarity-common` | 12.84 | 12.19 | 10.68 | 12.52 | Pass | Pass |
+| `rarity-uncommon` | `hue-rarity-uncommon` | 13.09 | 12.43 | 10.88 | 12.77 | Pass | Pass |
+| `rarity-rare` | `hue-rarity-rare` | 9.10 | 8.64 | 7.57 | 8.88 | Pass | Pass |
+| `rarity-epic` | `hue-rarity-epic` | 7.71 | 7.32 | 6.41 | 7.52 | Pass | Pass |
+| `rarity-unique` | `hue-rarity-unique` | 12.39 | 11.77 | 10.30 | 12.09 | Pass | Pass |
+| `rarity-legendary` | `hue-rarity-legendary` | 8.38 | 7.96 | 6.97 | 8.18 | Pass | Pass |
+| `rarity-legacy` | `hue-rarity-legacy` | 7.05 | 6.69 | 5.86 | 6.88 | Pass | Pass |
+| `damage-physical` | `hue-damage-physical` | 14.68 | 13.94 | 12.21 | 14.32 | Pass | Pass |
+| `damage-magical` | `hue-damage-magical` | 6.40 | 6.08 | 5.32 | 6.25 | Pass | Pass |
+| `damage-bleed` | `hue-damage-bleed` | 4.67 | 4.43 **fail** | 3.88 **fail** | 4.55 | **Fail** on `surface`, `surface-raised` | Pass |
+| `damage-burn` | `hue-damage-burn` | 7.56 | 7.18 | 6.29 | 7.38 | Pass | Pass |
+| `damage-poison` | `hue-damage-poison` | 8.12 | 7.71 | 6.75 | 7.92 | Pass | Pass |
+| `damage-shadow` | `hue-damage-shadow` | 8.43 | 8.01 | 7.01 | 8.23 | Pass | Pass |
+| `damage-none` | `hue-damage-none` | 5.53 | 5.25 | 4.60 | 5.39 | Pass | Pass |
 
 ### Other text-capable tokens
 
@@ -586,25 +590,25 @@ Channel colours set speaker names and tags; the component tokens carry text on t
 
 | Token | Primitive | `ground` | `surface` | `surface-raised` | `folio` | Text 4.5:1 |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| `channel-general` | `bone-100` | 15.25 | 14.15 | 12.85 | 14.25 | Pass |
-| `channel-trade` | `amber-300` | 10.16 | 9.43 | 8.56 | 9.49 | Pass |
-| `channel-help` | `bone-100` | 15.25 | 14.15 | 12.85 | 14.25 | Pass |
-| `channel-guild` | `verdigris-300` | 9.74 | 9.03 | 8.20 | 9.09 | Pass |
-| `channel-whisper` | `orchid-100` | 13.25 | 12.30 | 11.16 | 12.38 | Pass |
-| `channel-raid` | `ember-300` | 7.47 | 6.93 | 6.29 | 6.97 | Pass |
-| `channel-invites` | `azure-200` | 10.90 | 10.11 | 9.18 | 10.18 | Pass |
-| `channel-system` | `bone-300` | 8.24 | 7.65 | 6.94 | 7.70 | Pass |
-| `channel-loot` | `bone-300` | 8.24 | 7.65 | 6.94 | 7.70 | Pass |
+| `channel-general` | `bone-100` | 15.32 | 14.55 | 12.74 | 14.95 | Pass |
+| `channel-trade` | `amber-300` | 10.21 | 9.70 | 8.49 | 9.96 | Pass |
+| `channel-help` | `bone-100` | 15.32 | 14.55 | 12.74 | 14.95 | Pass |
+| `channel-guild` | `verdigris-300` | 9.78 | 9.29 | 8.13 | 9.54 | Pass |
+| `channel-whisper` | `orchid-100` | 13.31 | 12.64 | 11.07 | 12.99 | Pass |
+| `channel-raid` | `ember-300` | 7.50 | 7.12 | 6.24 | 7.32 | Pass |
+| `channel-invites` | `azure-200` | 10.95 | 10.40 | 9.11 | 10.68 | Pass |
+| `channel-system` | `bone-300` | 8.28 | 7.87 | 6.89 | 8.08 | Pass |
+| `channel-loot` | `bone-300` | 8.28 | 7.87 | 6.89 | 8.08 | Pass |
 
 | Text | On | Ratio | Text 4.5:1 |
 | --- | --- | ---: | --- |
-| `delta-better` | `tile` | 11.96 | Pass |
-| `delta-worse` | `tile` | 5.33 | Pass |
+| `delta-better` | `tile` | 12.38 | Pass |
+| `delta-worse` | `tile` | 5.52 | Pass |
 | `on-gilt` | `gilt` | 9.87 | Pass |
 | `on-sigil` | `sigil-fill` | 7.90 | Pass |
-| `on-tile` | `tile` | 13.35 | Pass |
-| `on-tile-muted` | `tile` | 7.21 | Pass |
-| `ink` | `surface-raised` | 12.85 | Pass |
+| `on-tile` | `tile` | 13.82 | Pass |
+| `on-tile-muted` | `tile` | 7.47 | Pass |
+| `ink` | `surface-raised` | 12.74 | Pass |
 | `ink` | `gilt-soft` | 11.02 | Pass |
 | `ink-muted` | `gilt-soft` | 5.96 | Pass |
 | `gilt` | `gilt-soft` | 7.24 | Pass |
@@ -619,32 +623,32 @@ Channel colours set speaker names and tags; the component tokens carry text on t
 
 | Token | Used as | `ground` | `surface` | `surface-raised` | `folio` | Edge 3:1 |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| `line` | Separators and decoration | 1.65 **fail** | 1.53 **fail** | 1.39 **fail** | 1.54 **fail** | **Fail** on all four |
-| `line-strong` | Interactive edges, floating edges, dotted leaders | 4.23 | 3.93 | 3.56 | 3.95 | Pass |
-| `focus` | The focus ring | 13.22 | 12.27 | 11.14 | 12.35 | Pass |
-| `arcana-glow` | The selected ring, edge or bar; the ready diamond | 12.83 | 11.90 | 10.81 | 11.98 | Pass |
-| `gilt` | Brand frames; the current-location diamond | 10.02 | 9.30 | 8.44 | 9.36 | Pass |
-| `ink` | The Chronicle's active-tab bar and mention edge | 15.25 | 14.15 | 12.85 | 14.25 | Pass |
-| `sigil-edge` | The Sigil outline | 9.85 | 9.14 | 8.30 | 9.20 | Pass |
-| `meter-hp` | Health fill | 4.12 | 3.82 | 3.47 | 3.85 | Pass |
-| `meter-sp` | Stamina or mana fill | 6.53 | 6.06 | 5.50 | 6.10 | Pass |
-| `meter-xp` | Experience fill | 10.02 | 9.30 | 8.44 | 9.36 | Pass |
-| `meter-track` | The empty part of a meter | 1.24 **fail** | 1.15 **fail** | 1.05 **fail** | 1.16 **fail** | **Fail** on all four |
-| `surface-raised` | Hover and mention wash | 1.18 **fail** | 1.10 **fail** | — | 1.10 **fail** | **Fail** on the other three |
-| `gilt-soft` | Former hover wash | 1.38 **fail** | 1.28 **fail** | 1.16 **fail** | 1.29 **fail** | **Fail** on all four |
-| `arcana-soft` | Wash behind arcana | 1.48 **fail** | 1.37 **fail** | 1.24 **fail** | 1.38 **fail** | **Fail** on all four |
-| `danger-soft` | Wash behind danger | 1.19 **fail** | 1.11 **fail** | 1.00 **fail** | 1.11 **fail** | **Fail** on all four |
-| `changed` | The live-update mark | 1.65 **fail** | 1.53 **fail** | 1.39 **fail** | 1.54 **fail** | **Fail** on all four |
-| `tile` | StatTile fill | 1.14 **fail** | 1.06 **fail** | 1.03 **fail** | 1.06 **fail** | **Fail** on all four |
-| `sigil-fill` | Sigil fill | 1.92 **fail** | 1.79 **fail** | 1.62 **fail** | 1.80 **fail** | **Fail** on all four |
+| `line` | Separators and decoration | 1.36 **fail** | 1.39 **fail** | 1.44 **fail** | 1.37 **fail** | **Fail** on all four |
+| `line-strong` | Interactive edges, floating edges, dotted leaders | 4.25 | 4.04 | 3.53 | 4.15 | Pass |
+| `focus` | The focus ring | 13.28 | 12.61 | 11.04 | 12.95 | Pass |
+| `arcana-glow` | The selected ring, edge or bar; the ready diamond | 12.89 | 12.24 | 10.72 | 12.57 | Pass |
+| `gilt` | Brand frames; the current-location diamond | 10.07 | 9.56 | 8.37 | 9.82 | Pass |
+| `ink` | The Chronicle's active-tab bar and mention edge | 15.32 | 14.55 | 12.74 | 14.95 | Pass |
+| `sigil-edge` | The Sigil outline | 9.89 | 9.40 | 8.23 | 9.65 | Pass |
+| `meter-hp` | Health fill | 4.14 | 3.93 | 3.44 | 4.03 | Pass |
+| `meter-sp` | Stamina or mana fill | 6.56 | 6.23 | 5.45 | 6.40 | Pass |
+| `meter-xp` | Experience fill | 10.07 | 9.56 | 8.37 | 9.82 | Pass |
+| `meter-track` | The empty part of a meter | 1.33 **fail** | 1.26 **fail** | 1.11 **fail** | 1.30 **fail** | **Fail** on all four |
+| `surface-raised` | Hover and mention wash | 1.20 **fail** | 1.14 **fail** | — | 1.17 **fail** | **Fail** on the other three |
+| `gilt-soft` | Former hover wash | 1.39 **fail** | 1.32 **fail** | 1.15 **fail** | 1.35 **fail** | **Fail** on all four |
+| `arcana-soft` | Wash behind arcana | 1.48 **fail** | 1.41 **fail** | 1.23 **fail** | 1.45 **fail** | **Fail** on all four |
+| `danger-soft` | Wash behind danger | 1.20 **fail** | 1.14 **fail** | 1.00 **fail** | 1.17 **fail** | **Fail** on all four |
+| `changed` | The live-update mark | 1.66 **fail** | 1.58 **fail** | 1.38 **fail** | 1.62 **fail** | **Fail** on all four |
+| `tile` | StatTile fill | 1.10 **fail** | 1.05 **fail** | 1.08 **fail** | 1.08 **fail** | **Fail** on all four |
+| `sigil-fill` | Sigil fill | 1.93 **fail** | 1.84 **fail** | 1.61 **fail** | 1.89 **fail** | **Fail** on all four |
 
 | Mark | Against | Ratio | Edge 3:1 |
 | --- | --- | ---: | --- |
-| `meter-hp` | `meter-track` | 3.30 | Pass |
-| `meter-sp` | `meter-track` | 5.24 | Pass |
-| `meter-xp` | `meter-track` | 8.04 | Pass |
+| `meter-hp` | `meter-track` | 3.10 | Pass |
+| `meter-sp` | `meter-track` | 4.91 | Pass |
+| `meter-xp` | `meter-track` | 7.54 | Pass |
 | `sigil-edge` | `sigil-fill` | 5.10 | Pass |
-| `arcana-glow` | `tile` | 11.23 | Pass |
+| `arcana-glow` | `tile` | 11.62 | Pass |
 
 Every text token that passes 4.5:1 also passes 3:1 as an edge, so rarity-coloured slot edges pass; on `ground-deep`, the darkest ground, every ratio is higher than on `ground`.
 
@@ -692,7 +696,7 @@ Components use the `lg-` class prefix so they can live beside today's `ll-` clas
 | Point `warning` at another primitive to recolour warnings. | Edit `amber-300` to recolour warnings — Trade moves with it. |
 | Give the one committing action on a screen the `solid` gilt button ("Enter dungeon"). | Put two `solid` buttons on one screen. |
 | Print "240 / 300" beside a health bar. | Let the `meter-hp` fill carry the value alone. |
-| Set a bleed number on `ground`, or bold at 19px. | Set a 13px regular bleed number on `surface` (4.31:1). |
+| Set a bleed number on `ground` or `folio`, or bold at 19px. | Set a 13px regular bleed number on `surface` (4.43:1). |
 | Show a cooldown cut from 8s to 6.8s as ▼ −1.2s in `delta-better`. | Colour it `delta-worse` because the number fell. |
 | Say "12 Soulstones short" as a `warning`. | Show a shortfall as `danger`. |
 | Tag a reward that can be claimed in `arcana`; say "✓ Claimed" once it is. | Mark "Ready to claim" as `success`. |

@@ -222,20 +222,21 @@ function App() {
               h(L.Sigil, { size: 'lg', value: 4, label: 'Reaper', title: 'Mastery 4' }),
               h('div', { className: 'pv-stylemeta' },
                 h('div', { className: 'pv-note' }, 'Mastery 4 · Base form'),
-                h(L.Meter, { tone: 'xp', label: 'Mastery XP', value: 1240, max: 2000 })))) : null),
+                h(L.Meter, { tone: 'xp', label: 'Mastery XP', value: 1240, max: 2000 })))) : null,
+
+          // The attributes stay in the main column, beside the loadout (D-103).
+          h('section', { className: 'pv-attrs', 'aria-labelledby': 'pv-attrs-t' },
+            h('header', { className: 'pv-attrshead' },
+              h(L.Heading, { level: 'section', id: 'pv-attrs-t' }, 'Combat Attributes'),
+              h('p', { className: 'pv-note' }, 'Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.')),
+            h('div', { className: 'lg-ledgergrid' }, groups.map(function (g) { return h(L.Ledger, { key: g.title, title: g.title, rows: g.rows }); })))),
 
         h('aside', { className: 'lg-aside__side' },
           h(L.Panel, { title: 'Essence Loadout', aside: h('span', { className: 'pv-count' }, filled + ' / ' + usable + ' attuned') },
             h('div', { className: 'pv-slots' }, who.slots.map(function (sl, i) {
-              return h(L.LoadoutSlot, Object.assign({ key: i, index: i, onClick: function () {} }, sl));
+              return h(L.LoadoutSlot, Object.assign({ key: i, index: i, compact: true, onClick: function () {} }, sl));
             })),
-            who.own ? h('div', { className: 'pv-sidefoot' }, h(L.Button, { variant: 'link' }, 'Open Essences')) : null))),
-
-      h('section', { className: 'pv-attrs', 'aria-labelledby': 'pv-attrs-t' },
-        h('header', { className: 'pv-attrshead' },
-          h(L.Heading, { level: 'section', id: 'pv-attrs-t' }, 'Combat Attributes'),
-          h('p', { className: 'pv-note' }, 'Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.')),
-        h('div', { className: 'lg-ledgergrid' }, groups.map(function (g) { return h(L.Ledger, { key: g.title, title: g.title, rows: g.rows }); })))));
+            who.own ? h('div', { className: 'pv-sidefoot' }, h(L.Button, { variant: 'link' }, 'Open Essences')) : null)))));
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
 </script>

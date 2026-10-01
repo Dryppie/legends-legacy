@@ -31,6 +31,7 @@ An Essence loadout slot.
 | `unlockLabel` | `React.ReactNode` | The older name for `reason`. |
 | `hint` | `React.ReactNode` | An open slot: what fills it. |
 | `ready` | `boolean \| string` | The attention diamond at the end of the head, after the Tag: true, or the words ("Essence ready to attune"). Not on a locked slot. |
+| `compact` | `boolean` | One short row for a full loadout (D-103): the name leads, the slot number is for screen readers, an attuned slot has no Tag. |
 | `onClick` | `() => void` |  |
 
 ## More

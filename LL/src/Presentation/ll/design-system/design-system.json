@@ -289,9 +289,9 @@
     "Cards"
   ],
   "lastChange": {
-    "at": "2026-10-01T13:50:00Z",
+    "at": "2026-10-01T17:00:00Z",
     "by": "Martin",
-    "note": "The Character Overview moves to Grimoire inside the game's frame: Page `flow` (D-097), the main and side column `lg-aside` with `aside-width` (D-098), ProfileIdentity (D-099), and Grimoire roots in the legacy frame (D-100); ScreenOverview uses them.",
+    "note": "LoadoutSlot gains `compact` for a full loadout, and an information screen keeps its attributes in the main column beside the side column (D-103); ScreenOverview uses both.",
     "via": "Claude (Cowork)"
   },
   "layout": "files",

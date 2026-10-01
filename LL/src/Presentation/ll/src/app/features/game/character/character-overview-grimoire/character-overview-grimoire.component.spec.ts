@@ -113,6 +113,8 @@ describe('CharacterOverviewGrimoireComponent', () => {
     expect(text(el)).toContain('Combat Style');
     expect(text(el)).toContain('Mastery 4');
     expect(el.querySelector('.lg-identity__noble')).toBeNull();
+    // The attributes sit in the main column, beside the loadout (D-103).
+    expect(el.querySelector('.lg-aside__main .ovw-attrs')).not.toBeNull();
     fixture.destroy();
     tick(60_000);
   }));

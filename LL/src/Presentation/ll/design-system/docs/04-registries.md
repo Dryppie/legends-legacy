@@ -39,7 +39,7 @@ The rarity hues are the game's existing ones, kept as the palette primitives `hu
 | --- | --- | --- | --- | --- |
 | Physical | `damage-physical` | `damage-physical` (none yet) | The word after the number: "124 physical" | |
 | Magical | `damage-magical` | `damage-magical` (none yet) | "124 magical" | Keep its icon apart from Shadow's: the hues are confusable |
-| Bleed | `damage-bleed` | `damage-bleed` (none yet) | "124 bleed" | Below 4.5:1 on `surface`, `surface-raised` and `folio` (3.91–4.34:1): set bleed numbers on `ground`, or bold at 19px and up (Foundations · Colour · Contrast) |
+| Bleed | `damage-bleed` | `damage-bleed` (none yet) | "124 bleed" | Below 4.5:1 on `surface` and `surface-raised` (3.88–4.43:1): set bleed numbers on `ground` or `folio`, or bold at 19px and up (Foundations · Colour · Contrast) |
 | Burn | `damage-burn` | `damage-burn` (none yet) | "124 burn" | Keep its icon apart from Poison's |
 | Poison | `damage-poison` | `damage-poison` (none yet) | "124 poison" | |
 | Shadow | `damage-shadow` | `damage-shadow` (none yet) | "124 shadow" | |
