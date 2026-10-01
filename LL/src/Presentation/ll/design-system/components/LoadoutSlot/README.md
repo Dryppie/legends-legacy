@@ -37,7 +37,7 @@ One Essence loadout slot: the Essence, its rarity and its two abilities — or a
 | Focus | `focus-ring` |
 | Announced | The slot, its state and its Essence; a locked slot's condition |
 | Hover and tap | The `surface-raised` wash on an attuned or open slot with `onClick`; nothing on a locked one |
-| Target size | The whole slot, at least 64px tall; compact, at least 44px |
+| Target size | The whole slot, at least 64px tall; compact, at least 44px — an attuned compact slot is 48px, so a full loadout of ten fits a side column (D-123) |
 | Text scaling | The name truncates; the body grows |
 | Colour | Rarity also by its code; locked also by its dashes and words |
 | Motion | Nothing |

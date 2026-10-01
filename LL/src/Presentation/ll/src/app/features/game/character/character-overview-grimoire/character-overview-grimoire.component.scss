@@ -59,11 +59,6 @@
   font-weight: 700;
 }
 
-.ovw-level {
-  width: 14.375rem;
-  max-width: 100%;
-}
-
 // Nobility perks, in the Banner's footer.
 .ovw-perks {
   padding-top: var(--space-5);
@@ -109,17 +104,24 @@
   }
 }
 
-// Combat Style: the Sigil beside its Mastery note and XP Meter.
+// Combat Style, in the side column (D-121), on one row (D-123): the Sigil, then its name, the Mastery note and the XP Meter.
 .ovw-style {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-4) var(--space-10);
+  gap: var(--space-4);
 }
 .ovw-style__meta {
+  flex: 1;
+  min-width: 0;
   display: grid;
-  gap: var(--space-2);
-  width: min(17.5rem, 100%);
+  gap: var(--space-1);
+}
+.ovw-style__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title-md);
+  line-height: var(--leading-title-md);
+  color: var(--ink);
 }
 
 .ovw-count {
@@ -132,10 +134,10 @@
 }
 .ovw-slots {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 .ovw-sidefoot {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
 }
 
 .ovw-attrs {

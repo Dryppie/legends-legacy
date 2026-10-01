@@ -17,7 +17,7 @@ The main navigation.
 
 ## Notes
 
-Hover fades the surface-raised wash in over duration-fast; the active item and its diamond move at once — the current location never animates. As GameShell's drawer under 60rem it slides in over duration-base and out over duration-fast.
+Hover fades the surface-raised wash in over duration-fast; the active item, its bar and its wash move at once — the current location never animates. As GameShell's drawer under 60rem it slides in over duration-base and out over duration-fast.
 
 ## Props (NavRailProps)
 

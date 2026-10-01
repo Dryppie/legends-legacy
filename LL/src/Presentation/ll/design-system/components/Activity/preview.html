@@ -31,7 +31,7 @@ function App() {
       h(L.Activity, { label: 'Idle' })),
     h('div', { className: 'pv-compact' },
       h('p', { className: 'pv-label' }, 'Compact'),
-      h(L.Activity, { label: 'Engaged in Combat', remaining: time, progress: t[0], onOpen: noop, openLabel: '', compact: true })));
+      h(L.Activity, { label: 'Engaged in Combat', short: 'Battling', remaining: time, progress: t[0], onOpen: noop, openLabel: '', compact: true })));
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
 </script>

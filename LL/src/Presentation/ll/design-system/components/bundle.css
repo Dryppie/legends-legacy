@@ -24,7 +24,8 @@
   --lg-btn-weight: 600;
   --lg-btn-transform: none;
   --lg-btn-track: var(--tracking-button);
-  --lg-rail-active-bg: transparent;
+  /* The current location on the rail (D-118): the game's own wash — gilt fading toward the item's end over a faint lift. */
+  --lg-rail-active-bg: linear-gradient(90deg, color-mix(in srgb, var(--gilt) 18%, transparent), color-mix(in srgb, var(--gilt) 4.5%, transparent) 68%, transparent), color-mix(in srgb, var(--ink) 3.5%, transparent);
   --lg-rail-active-ink: var(--ink);
   --lg-rail-active-family: var(--font-ui);
   --lg-emblem-ink: var(--gilt);
@@ -855,7 +856,7 @@ button.lg-currency:hover { background: var(--surface-raised); }
 .lg-rail__item.is-locked { --lg-rail-icon: var(--ink-disabled); }
 .lg-rail__item.is-locked .lg-rail__desc { color: var(--ink-disabled); }
 /* Feedback: the hover wash is a layer that fades over duration-fast; the title turns ink at once. The current location
-   (the active item and its diamond) moves at once, like any change of place. */
+   (the active item, its wash and its bar) moves at once, like any change of place. */
 .lg-rail__item::after {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
   background: var(--surface-raised); opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard);
@@ -870,9 +871,10 @@ button.lg-currency:hover { background: var(--surface-raised); }
   font-weight: 600;
 }
 .lg-rail__item.is-active .lg-icon { opacity: 1; }
+/* …and a 2px gilt bar at its start, as the game's sidebar always marked where you are (D-118). */
 .lg-rail__item.is-active::before {
-  content: ""; position: absolute; left: -0.625rem; top: 50%; width: 0.4375rem; height: 0.4375rem; margin-top: -0.2188rem;
-  transform: rotate(45deg); background: var(--gilt);
+  content: ""; position: absolute; left: 0; top: var(--space-2); bottom: var(--space-2); width: 2px;
+  border-radius: var(--radius-control); background: var(--gilt);
 }
 .lg-rail__item.is-locked { color: var(--ink-disabled); cursor: not-allowed; }
 /* Locked stays in the Tab order (Standards · States): no hover wash, "Locked" where the badge goes, and the unlock
@@ -889,10 +891,11 @@ button.lg-currency:hover { background: var(--surface-raised); }
   font-family: var(--font-ui); font-size: var(--text-caption); line-height: var(--leading-mark); font-weight: 600; letter-spacing: 0; text-shadow: none;
 }
 .lg-rail__footer { margin-top: auto; }
-.lg-rail--compact { padding-left: var(--space-3); padding-right: var(--space-3); align-items: center; }
+/* Compact items fill the rail's width but for a space-1 margin, as the game's compact sidebar drew them (D-119). */
+.lg-rail--compact { padding-left: var(--space-1); padding-right: var(--space-1); align-items: stretch; }
 .lg-rail__title { overflow: hidden; text-overflow: ellipsis; }
 .lg-rail--compact .lg-rail__title, .lg-rail--compact .lg-rail__desc, .lg-rail--compact .lg-rail__group { display: none; }
-.lg-rail--compact .lg-rail__item { justify-content: center; padding: 0; width: 2.5rem; }
+.lg-rail--compact .lg-rail__item { justify-content: center; padding: 0; width: 100%; min-height: 2.75rem; }
 /* Compact (D-115): the description wrapper leaves the layout too, so the icon is centred; a count is a small mark pinned
    to the icon's corner, ringed off from it, rather than a tile at the rail's edge. */
 .lg-rail--compact .lg-rail__text { display: none; }
@@ -1044,7 +1047,7 @@ button.lg-currency:hover { background: var(--surface-raised); }
   .lg-shell .lg-rail--compact:has(> .lg-rail__header) { padding-top: 0; }
   .lg-shell .lg-rail--compact > .lg-rail__header {
     align-self: stretch; justify-content: center; min-height: var(--topbar-height); padding-left: 0;
-    margin-inline: calc(-1 * var(--space-3));
+    margin-inline: calc(-1 * var(--space-1));
   }
   .lg-shell.has-backdrop .lg-rail--compact > .lg-rail__header { border-bottom: var(--border-hairline) solid var(--line); }
 }
@@ -1430,6 +1433,18 @@ button.lg-chronicle__author:focus-visible { outline: 2px solid transparent; box-
 .lg-pagehead__summary { margin: 2px 0 0; max-width: var(--lg-measure); color: var(--ink-muted); }
 .lg-pagehead__actions { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--space-2); margin-left: auto; min-width: 0; }
 @container lg-region (width < 44rem) { .lg-pagehead__actions { flex-wrap: wrap; width: 100%; margin-left: 0; } }
+/* A Page in the game's frame is dense (D-120). The rail already names the section and says what the screen is for, so the
+   PageHeader is one row: no eyebrow or summary, a 2.25rem mark, the title at section size, the actions beside it and a
+   tighter rule. Panels sit stack-lg apart both ways, and the content fills the stage to the Page's gutter, lining up
+   with the TopBar's title and currencies, instead of centring at page-max. */
+.lg-shell .lg-pagehead { gap: var(--space-3) var(--space-4); padding-bottom: var(--space-3); }
+.lg-shell .lg-pagehead__icon { width: 2.25rem; height: 2.25rem; }
+.lg-shell .lg-pagehead__icon .lg-icon { width: 1.125rem; height: 1.125rem; }
+.lg-shell .lg-pagehead__eyebrow, .lg-shell .lg-pagehead__summary { display: none; }
+.lg-shell .lg-pagehead .lg-heading--screen { font-size: var(--text-title-md); line-height: var(--leading-title-md); }
+.lg-shell .lg-page__inner { gap: var(--stack-lg); max-width: none; margin: 0; }
+.lg-shell .lg-page :is(.lg-aside, .lg-split, .lg-compare) { gap: var(--stack-lg); }
+.lg-shell .lg-page .lg-aside > * { gap: var(--stack-lg); }
 
 /* ---------- Inputs + SearchField ---------- */
 .lg-input {
@@ -1471,13 +1486,11 @@ button.lg-chronicle__author:focus-visible { outline: 2px solid transparent; box-
 .lg-banner__frame { position: absolute; inset: 0.5rem; pointer-events: none; border: var(--border-hairline) solid var(--gilt); opacity: 0.28; }
 .lg-banner__frame::after { content: ""; position: absolute; inset: 0.25rem; border: var(--border-hairline) solid var(--gilt); opacity: 0.6; }
 .lg-banner .lg-folio__corner { width: 2.25rem; height: 2.25rem; }
-.lg-banner__body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--space-6) var(--space-8); padding: var(--space-8) var(--space-8) var(--space-6); }
-.lg-banner__main { min-width: 0; text-shadow: var(--shadow-text-art); }
-.lg-banner__aside { display: flex; align-items: flex-end; gap: var(--space-8); }
+/* The figures sit beside the identity whenever both fit, and drop under it only when they don't (D-122). */
+.lg-banner__body { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-6) var(--space-8); padding: var(--space-8) var(--space-8) var(--space-6); }
+.lg-banner__main { flex: 1 1 24rem; min-width: 0; text-shadow: var(--shadow-text-art); }
+.lg-banner__aside { flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-6) var(--space-8); }
 .lg-banner__footer { position: relative; padding: 0 var(--space-8) var(--space-6); }
-@container lg-region (width < 68rem) {
-  .lg-banner__body { grid-template-columns: minmax(0, 1fr); }
-}
 
 /* ---------- StatFigure ---------- */
 .lg-figure { display: grid; gap: 2px; justify-items: start; }
@@ -1594,7 +1607,8 @@ button.lg-loadout:focus-visible { outline: 2px solid transparent; box-shadow: va
 /* Compact (D-103): one short row per slot for a full loadout. A 32px frame and the name leading the head; the abilities
    share one line, active then passive split by a hairline, their Active and Passive labels kept for screen readers
    (the cooldown marks the active). The Essence preview on hover or focus carries the rest. */
-.lg-loadout--compact { gap: var(--space-3); padding: var(--space-2) var(--lg-inset-inner); }
+.lg-loadout--compact { gap: var(--space-3); min-height: 2.75rem; padding: var(--space-1) var(--lg-inset-inner); } /* 48px a filled slot, so a full loadout of ten fits a side column (D-123) */
+.lg-loadout--compact .lg-loadout__name { line-height: 1.25rem; }
 .lg-loadout--compact .lg-slot--sm { width: 2rem; }
 /* At 32px the Essence glyph and the rarity code would overlap: the frame keeps the rarity edge and the code, centred (rarity is never colour alone). */
 .lg-loadout--compact .lg-slot__frame .lg-icon { display: none; }

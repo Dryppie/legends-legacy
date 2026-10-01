@@ -25,7 +25,7 @@ Square and engraved, with a little rounding only where the hand touches. Grimoir
 | Shape | Means | Where it lives | Never |
 | --- | --- | --- | --- |
 | **Hexagon** | A sigil: a stat, mastery or constellation value | The Sigil; the Constellation's values; a Combat Style's mastery | A section icon, or a frame for anything but a value |
-| **Diamond** | A milestone, a ready or claimable marker, or the current location | Track and dungeon-route milestones; the Sigil's ready mark (`arcana-glow`); the NavRail's current item and the PageHeader's section mark (`gilt`) | A bullet, a badge, a delta, the Nobility mark, or decoration beside content |
+| **Diamond** | A milestone, a ready or claimable marker, or the current location | Track and dungeon-route milestones; the Sigil's ready mark (`arcana-glow`); the PageHeader's section mark (`gilt`; the NavRail's current item takes a bar instead, D-118) | A bullet, a badge, a delta, the Nobility mark, or decoration beside content |
 | **Square** | An item or equipment slot | ItemSlot, ListRow thumbnails, the slot inside a LoadoutSlot; dashed inside when empty | A data tile, a portrait, a decoration |
 | **Circle** | Presence: online, or when last seen | The Presence dot, and nothing else | A count badge, an icon button, a bullet, a portrait |
 | **Rectangle** | A container; at control size, a control or a label | Square-cornered: Panels, dialogs, the Page, tiles. At `radius-control`: Buttons, inputs, tabs, key caps, Tags, count badges, CurrencyPills | A pill |
@@ -44,7 +44,9 @@ Three signs sit beside the shapes. They are glyphs and pictures, not shapes, and
 
 ## The ✦ list marker
 
-**It conflicts, so it is retired.** At list size, 10–12px in `gilt`, the four-point ✦ loses its thin arms and reads as a diamond. That puts it beside the Track's milestones and the rail's marker. It is also a four-point star beside the Emblem's star polygons. It was registered as the list marker but no component drew it; the Nobility panel's perk lists used ◆ instead, which was worse.
+**It conflicts, so it is retired.** At list size, 10–12px in `gilt`, the four-point ✦ loses its thin arms and reads as a diamond. That puts it beside the Track's milestones and the PageHeader's section mark. It is also a four-point star beside the Emblem's star polygons. It was registered as the list marker but no component drew it; the Nobility panel's perk lists used ◆ instead, which was worse.
+
+**One ✦ remains, and it is not a list marker:** the compact Activity's mark sets it at the centre of its ring, at body size, where its arms hold and the ring keeps it from reading as a diamond (D-117).
 
 **The list marker is the en dash**, `–` in `ink-muted`, hung before each item. It is a stroke, not a shape, so it marks nothing. A range dash always sits between two numbers with no spaces (12–18), so the two never meet. Registries · Glyphs lists both.
 
@@ -86,7 +88,7 @@ The Button was a full pill, and so were the inputs, the key caps, the CurrencyPi
 | `radius-control` | Controls, tags and slots |
 | `radius-float` | Popovers and drawers |
 | `radius-circle` | The Presence dot, the compact Activity's ring and live dot |
-| `gilt` | The current-location diamond (NavRail, PageHeader), the Nobility crown |
+| `gilt` | The current-location diamond (PageHeader), the Nobility crown |
 | `arcana-glow` | The ready diamond on a Sigil |
 | `sigil-fill`, `sigil-edge` | The Sigil's hexagon, and nothing else |
 
@@ -95,7 +97,7 @@ The Button was a full pill, and so were the inputs, the key caps, the CurrencyPi
 | Do | Don't |
 | --- | --- |
 | A Challenge button as a 4px engraved rectangle in an opponent row. | A pill Challenge button beside square rows. |
-| A diamond for a Track milestone and for the rail's current item. | A diamond as a bullet in a perk list. |
+| A diamond for a Track milestone and for the PageHeader's section mark. | A diamond as a bullet in a perk list. |
 | The crown before a noble player's name. | A gilt ◆ before the name, the same mark as the rail's "you are here". |
 | ±0 for an unchanged stat. | ◇ 0, which reads as a milestone still to come. |
 | A rectangular count badge on the rail. | A round badge: the circle means presence. |

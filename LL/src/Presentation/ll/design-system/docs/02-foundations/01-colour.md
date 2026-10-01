@@ -76,7 +76,7 @@ Slate is structure — grounds, surfaces and lines — in every context: the gam
 
 ### Gilt's four jobs
 
-1. **Brand and current location** — the logo; the grimoire's brass furniture within the ornament budget (the Folio's and Banner's frames, corner ornaments, the ornament rule's lattice, Emblems); the game's one heraldic mark, the Nobility crown (D-007, D-066); and where you are: the active NavRail diamond, the current screen's icon in the PageHeader. The NavRail's icons are gilt at rest too (D-105): brand furniture of the frame, not a location mark; the diamond and the weight say where you are.
+1. **Brand and current location** — the logo; the grimoire's brass furniture within the ornament budget (the Folio's and Banner's frames, corner ornaments, the ornament rule's lattice, Emblems); the game's one heraldic mark, the Nobility crown (D-007, D-066); and where you are: the active NavRail item's bar and wash (D-118), the current screen's icon in the PageHeader. The NavRail's icons are gilt at rest too (D-105): brand furniture of the frame, not a location mark; the bar, the wash and the weight say where you are.
 2. **The one committing action** — the `solid` button's fill, with `on-gilt` text, once per screen. It keeps its fill in every context: a filled button is a shape, not a hue label.
 3. **The screen's one headline figure** — the StatFigure, or the level numeral when the level is what the screen is about. One per screen, like every display-size element (Principles · Anti-generic guardrails).
 4. **Effect magnitudes inside descriptions** — the "+12%" in "+12% damage from equipment". Inside an item context magnitudes are `ink`, because rarity owns the hue there.
@@ -627,7 +627,7 @@ Channel colours set speaker names and tags; the component tokens carry text on t
 | `line-strong` | Interactive edges, floating edges, dotted leaders | 4.25 | 4.04 | 3.53 | 4.15 | Pass |
 | `focus` | The focus ring | 13.28 | 12.61 | 11.04 | 12.95 | Pass |
 | `arcana-glow` | The selected ring, edge or bar; the ready diamond | 12.89 | 12.24 | 10.72 | 12.57 | Pass |
-| `gilt` | Brand frames; the current-location diamond | 10.07 | 9.56 | 8.37 | 9.82 | Pass |
+| `gilt` | Brand frames; the current-location diamond and the rail's current bar | 10.07 | 9.56 | 8.37 | 9.82 | Pass |
 | `ink` | The Chronicle's active-tab bar and mention edge | 15.32 | 14.55 | 12.74 | 14.95 | Pass |
 | `sigil-edge` | The Sigil outline | 9.89 | 9.40 | 8.23 | 9.65 | Pass |
 | `meter-hp` | Health fill | 4.14 | 3.93 | 3.44 | 4.03 | Pass |
@@ -686,7 +686,7 @@ Components use the `lg-` class prefix so they can live beside today's `ll-` clas
 | Do | Don't |
 | --- | --- |
 | Set Ledger values in `ink`, and the one headline figure in a gilt StatFigure. | Set every value on the screen in `gilt`. |
-| Show the current screen with the gilt diamond in the NavRail. | Mark a selected list entry in `gilt` — selection is `arcana-glow`. |
+| Show the current screen with the gilt bar and wash in the NavRail (D-118). | Mark a selected list entry in `gilt` — selection is `arcana-glow`. |
 | Put "+ New" in `arcana` on `arcana-soft`. | Colour "Online", a positive delta or a link in `arcana`. |
 | Write "Completed ✓" in `ink`. | Colour a completed quest teal next to a ready one. |
 | In an Epic item's Folio, set the title in `rarity-epic` and "+14 Power" in bold `ink`. | Set the item's effect magnitudes in `gilt` beside its rarity-coloured name. |

@@ -13,7 +13,7 @@ import { CombatStyleStateService } from '../../../../core/services/api/combat-st
         <a
           class="text-xs text-primary underline"
           routerLink="/game/character/combat-styles"
-          >Manage Combat Styles</a
+          >Manage</a
         >
       </div>
       @if (selected(); as entry) {
@@ -34,7 +34,8 @@ import { CombatStyleStateService } from '../../../../core/services/api/combat-st
       } @else if (state.data()) {
         <p class="mt-2 text-sm text-zinc-300">No Combat Style selected.</p>
         <p class="mt-1 text-xs text-zinc-400">
-          Bastion, Conduit, Reaper and Duelist are available immediately at Mastery 0.
+          Bastion, Conduit, Reaper and Duelist are available immediately at
+          Mastery 0.
         </p>
       } @else {
         <p class="mt-2 text-xs text-zinc-400">

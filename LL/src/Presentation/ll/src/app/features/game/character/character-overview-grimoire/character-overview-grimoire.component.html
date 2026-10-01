@@ -28,7 +28,9 @@
       Search
     </button>
     @if (viewing()) {
-      <button lgButton="quiet" lgSlot="actions" size="sm" (click)="backToOwn()">Back to my profile</button>
+      <button lgButton="quiet" lgSlot="actions" size="sm" (click)="backToOwn()">
+        Back to my profile
+      </button>
     } @else {
       <button
         lgButton="quiet"
@@ -70,10 +72,20 @@
         [nextUnlockLabel]="j.nextUnlockLabel"
         [nextUnlock]="j.nextUnlock"
       >
-        <button lgButton="solid" lgSlot="actions" size="sm" (click)="go(j.primaryAction.route)">
+        <button
+          lgButton="solid"
+          lgSlot="actions"
+          size="sm"
+          (click)="go(j.primaryAction.route)"
+        >
           {{ j.primaryAction.label }}
         </button>
-        <button lgButton lgSlot="actions" size="sm" (click)="go(j.optionalAction.route)">
+        <button
+          lgButton
+          lgSlot="actions"
+          size="sm"
+          (click)="go(j.optionalAction.route)"
+        >
           Optional: {{ j.optionalAction.label }}
         </button>
       </lg-journey-card>
@@ -81,7 +93,12 @@
 
     <div class="lg-aside">
       <div class="lg-aside__main">
-        <lg-banner label="Combat profile" [image]="bannerArt" focus="center 30%" [cornerSrc]="cornerSrc">
+        <lg-banner
+          label="Combat profile"
+          [image]="bannerArt"
+          focus="center 30%"
+          [cornerSrc]="cornerSrc"
+        >
           <lg-profile-identity
             [eyebrow]="isOwnProfile() ? 'Combat Profile' : 'Viewing player'"
             [name]="profileName()"
@@ -90,7 +107,9 @@
           >
             <div lgProfileFact label="Guild">
               @if (c.guild; as guild) {
-                <a [routerLink]="['/game/city/guild', guild.id]">{{ guild.name }}</a>
+                <a [routerLink]="['/game/city/guild', guild.id]">{{
+                  guild.name
+                }}</a>
                 @if (guild.tag) {
                   <lg-tag>[{{ guild.tag }}]</lg-tag>
                 }
@@ -98,37 +117,51 @@
                 None
               }
             </div>
-            <div lgProfileFact label="Essences">{{ attuned() }} / {{ loadout().length }} attuned</div>
-            <div lgProfileFact label="Achievement Points">{{ fmt(c.totalAchievementPoints) }}</div>
+            <div lgProfileFact label="Essences">
+              {{ attuned() }} / {{ loadout().length }} attuned
+            </div>
+            <div lgProfileFact label="Achievement Points">
+              {{ fmt(c.totalAchievementPoints) }}
+            </div>
             @if (membership(); as m) {
               <div lgProfileFact label="Nobility">
-                Expires <time [attr.datetime]="m.expiresAt">{{ m.expiresAt | date: 'd MMM y' }}</time>
+                Expires
+                <time [attr.datetime]="m.expiresAt">{{
+                  m.expiresAt | date: "d MMM y"
+                }}</time>
                 <button
                   lgButton="link"
                   aria-controls="ovw-perks"
                   [attr.aria-expanded]="showPerks()"
                   (click)="showPerks.set(!showPerks())"
                 >
-                  {{ showPerks() ? 'Hide perks' : 'Show perks' }}
+                  {{ showPerks() ? "Hide perks" : "Show perks" }}
                 </button>
               </div>
             }
           </lg-profile-identity>
 
-          <div lgSlot="aside" class="ovw-level">
-            <lg-level-plate
-              kicker="Level"
-              [level]="c.level"
-              [xp]="c.experience"
-              [xpMax]="c.experienceUntilNextLevel"
-              xpUnit="Combat XP"
-            />
-          </div>
+          <!-- Level is a figure like Combat Rating, beside the identity (D-122). -->
+          <lg-stat-figure
+            lgSlot="aside"
+            label="Level"
+            [value]="c.level"
+            [caption]="
+              fmt(c.experience) +
+              ' / ' +
+              fmt(c.experienceUntilNextLevel) +
+              ' Combat XP'
+            "
+          />
           <lg-stat-figure
             lgSlot="aside"
             label="Combat Rating"
             [value]="combatRating()"
-            [caption]="combatRating() ? 'Permanent attributes and the equipped build' : 'Unavailable'"
+            [caption]="
+              combatRating()
+                ? 'Permanent attributes and the equipped build'
+                : 'Unavailable'
+            "
             title="Combat Rating summarizes permanent combat attributes and the equipped build."
           />
 
@@ -136,7 +169,9 @@
             <div lgSlot="footer" id="ovw-perks" class="ovw-perks">
               <div class="ovw-perks__head">
                 <h3 class="ovw-eyebrow">Active Nobility perks</h3>
-                <p class="ovw-note">Applied automatically while Nobility is active.</p>
+                <p class="ovw-note">
+                  Applied automatically while Nobility is active.
+                </p>
               </div>
               <div class="ovw-perks__grid">
                 @for (group of perkGroups; track group.label) {
@@ -154,37 +189,10 @@
           }
         </lg-banner>
 
-        @if (!viewing()) {
-          <lg-panel title="Combat Style">
-            <a lgButton="link" lgSlot="aside" routerLink="/game/character/combat-styles">Manage Combat Styles</a>
-            @if (combatStyle(); as style) {
-              <div class="ovw-style">
-                <lg-sigil size="lg" [value]="style.level" [label]="style.name" [title]="'Mastery ' + style.level" />
-                <div class="ovw-style__meta">
-                  <p class="ovw-note">Mastery {{ style.level }} · {{ style.refinement }}</p>
-                  @if (style.mastered) {
-                    <p class="ovw-note">Mastered</p>
-                  } @else {
-                    <lg-meter tone="xp" label="Mastery XP" [value]="style.xp" [max]="style.xpRequired" />
-                  }
-                </div>
-              </div>
-            } @else if (combatStyles.data()) {
-              <p class="ovw-note">No Combat Style selected.</p>
-              <p class="ovw-note">Bastion, Conduit, Reaper and Duelist are available immediately at Mastery 0.</p>
-            } @else {
-              <p class="ovw-note">{{ combatStyles.error() ?? 'Loading Combat Style…' }}</p>
-            }
-          </lg-panel>
-        }
-
-        <!-- The attributes stay in the main column, beside the loadout (D-103). -->
+        <!-- The attributes stay in the main column, beside the side column (D-103). -->
         <section class="ovw-attrs" aria-labelledby="ovw-attrs-title">
           <header class="ovw-attrs__head">
             <h2 lgHeading="section" id="ovw-attrs-title">Combat Attributes</h2>
-            <p class="ovw-note">
-              Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.
-            </p>
           </header>
           <div class="lg-ledgergrid">
             @for (group of attributeGroups(); track group.title) {
@@ -195,12 +203,67 @@
       </div>
 
       <aside class="lg-aside__side">
+        <!-- Combat Style heads the side column, above the loadout it works with (D-121). -->
+        @if (!viewing()) {
+          <lg-panel title="Combat Style">
+            <a
+              lgButton="link"
+              lgSlot="aside"
+              routerLink="/game/character/combat-styles"
+              >Manage</a
+            >
+            @if (combatStyle(); as style) {
+              <!-- One row: the Sigil, then the name, the Mastery note and the XP Meter beside it (D-123). -->
+              <div class="ovw-style">
+                <lg-sigil
+                  labelPosition="none"
+                  [value]="style.level"
+                  [label]="style.name"
+                  [title]="'Mastery ' + style.level"
+                />
+                <div class="ovw-style__meta">
+                  <p class="ovw-style__name" aria-hidden="true">
+                    {{ style.name }}
+                  </p>
+                  <p class="ovw-note">
+                    Mastery {{ style.level }} · {{ style.refinement }}
+                  </p>
+                  @if (style.mastered) {
+                    <p class="ovw-note">Mastered</p>
+                  } @else {
+                    <lg-meter
+                      tone="xp"
+                      ariaLabel="Mastery XP"
+                      [value]="style.xp"
+                      [max]="style.xpRequired"
+                    />
+                  }
+                </div>
+              </div>
+            } @else if (combatStyles.data()) {
+              <p class="ovw-note">No Combat Style selected.</p>
+              <p class="ovw-note">
+                Bastion, Conduit, Reaper and Duelist are available immediately
+                at Mastery 0.
+              </p>
+            } @else {
+              <p class="ovw-note">
+                {{ combatStyles.error() ?? "Loading Combat Style…" }}
+              </p>
+            }
+          </lg-panel>
+        }
         <lg-panel title="Essence Loadout">
-          <span lgSlot="aside" class="ovw-count">{{ attuned() }} / {{ loadout().length }} attuned</span>
+          <span lgSlot="aside" class="ovw-count"
+            >{{ attuned() }} / {{ loadout().length }} attuned</span
+          >
           @if (loadout().length) {
             <div class="ovw-slots">
               @for (s of loadout(); track s.index) {
-                <app-essence-preview [definition]="s.slot.definition" originClass="relative block">
+                <app-essence-preview
+                  [definition]="s.slot.definition"
+                  originClass="relative block"
+                >
                   <lg-loadout-slot
                     compact
                     [index]="s.index"
@@ -218,7 +281,9 @@
           }
           @if (!viewing()) {
             <div class="ovw-sidefoot">
-              <a lgButton="link" routerLink="/game/character/essences">Open Essences</a>
+              <a lgButton="link" routerLink="/game/character/essences"
+                >Open Essences</a
+              >
             </div>
           }
         </lg-panel>

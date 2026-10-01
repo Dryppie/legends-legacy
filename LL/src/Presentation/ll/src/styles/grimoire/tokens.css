@@ -62,7 +62,7 @@
   --ink: var(--bone-100); /* Tier 2 · role. Primary text and numerals on ground, surface, surface-raised and folio. */
   --ink-muted: var(--bone-300); /* Tier 2 · role. Secondary text, inactive nav and list items, captions; on ground, surface, surface-raised and folio. */
   --ink-disabled: var(--bone-500); /* Tier 2 · role. Plain disabled controls and the names of locked things only (inactive, so exempt from contrast minimums); a locked name always has a lock or the word 'Locked' beside it in ink-muted (Standards · States). */
-  --gilt: var(--brass-300); /* Tier 2 · role. Brand brass, with four jobs only: brand and current location (logo, frames, ornament, the active rail diamond, the Nobility mark); the one committing action (solid button fill); the screen's one headline figure; effect magnitudes inside descriptions. */
+  --gilt: var(--brass-300); /* Tier 2 · role. Brand brass, with four jobs only: brand and current location (logo, frames, ornament, the current rail item's bar and wash, the Nobility mark); the one committing action (solid button fill); the screen's one headline figure; effect magnitudes inside descriptions. */
   --gilt-soft: var(--brass-900); /* Tier 2 · role. Former hover and selected-row wash. No new uses (D-015): hover is surface-raised. Still read by SearchField and JourneyCard, queued in the audit; EntryList left it in D-087. */
   --on-gilt: var(--umber-875); /* Tier 2 · role. Text and icons on a gilt fill (the solid button). */
   --arcana: var(--verdigris-300); /* Tier 2 · role. Means ready, new, actionable or selected — nothing else: '+ New' tags, 'Ready', 'Claimable', rail badges. Not in item, combat or chat contexts. */
@@ -144,7 +144,7 @@
   --inline-sm: 0.5rem; /* Inline · tags in a row, a Button’s icon and label; the gap between a row’s parts in a Compact region. Aliases space-2. (8px at the default text size.) */
   --inline-md: 0.75rem; /* Inline · controls in a toolbar; the gap between a row’s parts in a Standard region. Aliases space-3. (12px at the default text size.) */
   --inline-lg: 1rem; /* Inline · control groups; the gap between a row’s parts in a Comfortable region. Aliases space-4. (16px at the default text size.) */
-  --section-sm: 1.5rem; /* Section · between Panels on a Page, between blocks in the Folio. Aliases space-6. (24px at the default text size.) */
+  --section-sm: 1.5rem; /* Section · between Panels on a Page (stack-lg in the game's frame, D-120), between blocks in the Folio. Aliases space-6. (24px at the default text size.) */
   --section-md: 2rem; /* Section · the Page’s side padding; between major regions of a screen. Aliases space-8. (32px at the default text size.) */
   --section-lg: 3rem; /* Section · above a screen title; the rail’s top padding. Aliases space-12. (48px at the default text size.) */
   --radius-container: 2px; /* Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions). Regions — the Folio, Banner, Stage, rail and Page — are square. */
@@ -243,7 +243,7 @@
   --chronicle-float-height: 28rem; /* Floating drawer, open (28rem). (448px at the default text size.) */
   --chronicle-float-tall: 56rem; /* Floating drawer, tall (56rem); never taller than the screen. (896px at the default text size.) */
   --shell-max: 120rem; /* Widest the shell grows; beyond it the ground-deep letterbox shows. (1920px at the default text size.) */
-  --page-max: 80rem; /* The widest a Page's content grows; beyond it the Page centres its content. Full-bleed art may pass it. (1280px at the default text size.) */
+  --page-max: 80rem; /* The widest a Page's content grows; beyond it the Page centres its content — outside the game's frame; inside GameShell it fills the stage (D-120). Full-bleed art may pass it. (1280px at the default text size.) */
   --content-wide: 68rem; /* Content tier Wide starts here: a region this wide holds four Ledgers side by side, or a list and its inspector at 3 : 2. Container breakpoint; the stylesheet repeats the value. (1088px at the default text size.) */
   --content-medium: 44rem; /* Content tier Medium starts here: the narrowest region that holds a list beside its inspector. Below it the inspector replaces the list. Container breakpoint. (704px at the default text size.) */
   --content-narrow: 32rem; /* Content tier Narrow starts here: two Ledgers side by side. Below it, Stacked: one column. Container breakpoint. (512px at the default text size.) */
@@ -282,7 +282,7 @@
   --text-body-strong: 600 0.9375rem/1.375rem var(--font-ui); /* Emphasis in running text; Button labels. */
   --text-body-compact-strong: 600 0.875rem/1.25rem var(--font-ui); /* Emphasis in dense text; small Button labels, names under an item slot, meter labels. */
   --text-caption-strong: 600 0.75rem/1rem var(--font-ui); /* Emphasised small text: counts in badges, footnotes, Presence. */
-  --text-nav-active: 600 0.8125rem/1.125rem var(--font-ui); /* The current NavRail item: nav at weight 600 beside the gilt diamond (Barlow since D-030). */
+  --text-nav-active: 600 0.8125rem/1.125rem var(--font-ui); /* The current NavRail item: nav at weight 600 on its gilt bar and wash (Barlow since D-030; D-118). */
   --text-sigil-numeral: 700 1.375rem/1.5rem var(--font-numeral); /* The number inside a Sigil, in Barlow Condensed 700 with tabular figures (D-034). It scales with the Sigil (0.42 of its size), 22px at the default size. */
 }
 .level-numeral {

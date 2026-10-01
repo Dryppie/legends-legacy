@@ -289,9 +289,9 @@
     "Cards"
   ],
   "lastChange": {
-    "at": "2026-10-01T22:30:00Z",
+    "at": "2026-10-02T01:30:00Z",
     "by": "Martin",
-    "note": "A screen that hasn't migrated fills the stage between the frame's lines, with no sheet edge or gutter of its own (D-116); the compact Activity is the game's own ring-and-star mark over one short word (D-117).",
+    "note": "Compact LoadoutSlots are 48px and the Overview's Combat Style is one row, so the side column fits without scrolling (D-123).",
     "via": "Claude (Cowork)"
   },
   "layout": "files",

@@ -64,7 +64,7 @@ Every row is **Ported · parity-checked**. Lifecycle status (Draft, Stable) is t
 | ItemSlot | `<lg-item-slot>` | `interactive` and `(activate)`. |
 | Tag | `<lg-tag>` | `label` replaces the state word; `ariaHidden` for `hidden`. |
 | Presence | `<lg-presence>` | — |
-| Activity | `<lg-activity>` | `interactive` and `(activate)` for `onOpen`. |
+| Activity | `<lg-activity>` | `interactive` and `(activate)` for `onOpen`; `short` as in the reference (D-117). |
 | Objective | `<lg-objective>` | The tracker (`children`) is a projected `lgSlot="panel"` child; `[(open)]` for `open` and `onToggle`. |
 | Notice | `<lg-notice>` | The detail is the default content (`text` says whether there is one); `action` is a slot. |
 | ProfileIdentity | `<lg-profile-identity>` with `<div lgProfileFact label="…">` facts | `facts` are projected `div[lgProfileFact]` children, the value as content; `as` is the heading tag; `presence` takes `{ online, lastSeen }`. |

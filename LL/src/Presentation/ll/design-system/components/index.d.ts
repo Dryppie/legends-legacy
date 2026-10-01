@@ -85,7 +85,7 @@ export interface NavRailProps {
   label?: string;
   className?: string;
 }
-/** Hover fades the surface-raised wash in over duration-fast; the active item and its diamond move at once — the current
+/** Hover fades the surface-raised wash in over duration-fast; the active item, its bar and its wash move at once — the current
  *  location never animates. As GameShell's drawer under 60rem it slides in over duration-base and out over duration-fast. */
 export declare function NavRail(props: NavRailProps): React.ReactElement;
 

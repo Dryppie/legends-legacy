@@ -102,7 +102,7 @@ color: var(--slate-950);
 | `line` | #f4f4f81f | Tier 2 · role. Separation and decoration, never an edge that must be seen: row and group separators, the Panel head rule, orbit rings, bounded objects that are not controls. Never the only edge of a control (Foundations · Lines). |
 | `line-strong` | #8c7358 | Tier 2 · role. Interactive edges: inputs, outline buttons, clickable pills and slots, tab separators; floating surfaces; dotted Ledger leaders. Holds 3:1 on ground, surface, surface-raised and folio (Foundations · Lines). |
 | `row-stripe` | #f4f4f80a | Tier 2 · role. The zebra rhythm: every second row of a dense List or table set to zebra, on Level 1 or the Folio (Foundations · Lines). Never with row separators or a container edge; hover and selection wash over it. |
-| `gilt` | #dcb872 | Tier 2 · role. Brand brass, with four jobs only: brand and current location (logo, frames, ornament, the active rail diamond, the Nobility mark); the one committing action (solid button fill); the screen's one headline figure; effect magnitudes inside descriptions. |
+| `gilt` | #dcb872 | Tier 2 · role. Brand brass, with four jobs only: brand and current location (logo, frames, ornament, the current rail item's bar and wash, the Nobility mark); the one committing action (solid button fill); the screen's one headline figure; effect magnitudes inside descriptions. |
 | `gilt-soft` | #3a2b17 | Tier 2 · role. Former hover and selected-row wash. No new uses (D-015): hover is surface-raised. Still read by SearchField and JourneyCard, queued in the audit; EntryList left it in D-087. |
 | `arcana` | #6fcab9 | Tier 2 · role. Means ready, new, actionable or selected — nothing else: '+ New' tags, 'Ready', 'Claimable', rail badges. Not in item, combat or chat contexts. |
 | `arcana-soft` | #163833 | Tier 2 · role. Wash behind arcana text on small marks only: the new Tag and rail badges — never a row, list item or card. |
@@ -200,7 +200,7 @@ font-family: var(--font-display);   /* the family alone */
 | `code` | `.code`, `--text-code` | 0.6875rem / 0.75rem | 700 | `ui` | Rarity codes and key caps only — bold capitals, the one place 11px is allowed. |
 | `tab` | `.tab`, `--text-tab` | 1.0625rem / 1.5rem | 400 | `display` | Primary TabStrip labels: tracked capitals, three words at most. |
 | `nav` | `.nav`, `--text-nav` | 0.8125rem / 1.125rem | 500 | `ui` | NavRail items: tracked capitals, three words at most. |
-| `nav-active` | `.nav-active`, `--text-nav-active` | 0.8125rem / 1.125rem | 600 | `ui` | The current NavRail item: nav at weight 600 beside the gilt diamond (Barlow since D-030). |
+| `nav-active` | `.nav-active`, `--text-nav-active` | 0.8125rem / 1.125rem | 600 | `ui` | The current NavRail item: nav at weight 600 on its gilt bar and wash (Barlow since D-030; D-118). |
 | `numeral-headline` | `.numeral-headline`, `--text-numeral-headline` | 4rem / 4rem | 400 | `display` | The screen’s one headline figure (StatFigure), in gilt Marcellus with proportional figures. Never in a table. |
 | `numeral-stat` | `.numeral-stat`, `--text-numeral-stat` | 1.375rem / 1.5rem | 700 | `numeral` | StatTile values. |
 | `numeral-row` | `.numeral-row`, `--text-numeral-row` | 1.125rem / 1.25rem | 600 | `numeral` | Values in Ledger rows, meter values, side stats and currency amounts. |
@@ -267,7 +267,7 @@ padding: var(--space-1);
 | `inline-sm` | 0.5rem | Inline · tags in a row, a Button’s icon and label; the gap between a row’s parts in a Compact region. Aliases space-2. (8px at the default text size.) |
 | `inline-md` | 0.75rem | Inline · controls in a toolbar; the gap between a row’s parts in a Standard region. Aliases space-3. (12px at the default text size.) |
 | `inline-lg` | 1rem | Inline · control groups; the gap between a row’s parts in a Comfortable region. Aliases space-4. (16px at the default text size.) |
-| `section-sm` | 1.5rem | Section · between Panels on a Page, between blocks in the Folio. Aliases space-6. (24px at the default text size.) |
+| `section-sm` | 1.5rem | Section · between Panels on a Page (stack-lg in the game's frame, D-120), between blocks in the Folio. Aliases space-6. (24px at the default text size.) |
 | `section-md` | 2rem | Section · the Page’s side padding; between major regions of a screen. Aliases space-8. (32px at the default text size.) |
 | `section-lg` | 3rem | Section · above a screen title; the rail’s top padding. Aliases space-12. (48px at the default text size.) |
 
@@ -520,7 +520,7 @@ Shell dimensions and content breakpoints in rem, so columns widen with the readi
 | `chronicle-float-height` | 28rem | Floating drawer, open (28rem). (448px at the default text size.) |
 | `chronicle-float-tall` | 56rem | Floating drawer, tall (56rem); never taller than the screen. (896px at the default text size.) |
 | `shell-max` | 120rem | Widest the shell grows; beyond it the ground-deep letterbox shows. (1920px at the default text size.) |
-| `page-max` | 80rem | The widest a Page's content grows; beyond it the Page centres its content. Full-bleed art may pass it. (1280px at the default text size.) |
+| `page-max` | 80rem | The widest a Page's content grows; beyond it the Page centres its content — outside the game's frame; inside GameShell it fills the stage (D-120). Full-bleed art may pass it. (1280px at the default text size.) |
 | `content-wide` | 68rem | Content tier Wide starts here: a region this wide holds four Ledgers side by side, or a list and its inspector at 3 : 2. Container breakpoint; the stylesheet repeats the value. (1088px at the default text size.) |
 | `content-medium` | 44rem | Content tier Medium starts here: the narrowest region that holds a list beside its inspector. Below it the inspector replaces the list. Container breakpoint. (704px at the default text size.) |
 | `content-narrow` | 32rem | Content tier Narrow starts here: two Ledgers side by side. Below it, Stacked: one column. Container breakpoint. (512px at the default text size.) |

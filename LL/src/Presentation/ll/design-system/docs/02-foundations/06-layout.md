@@ -212,7 +212,7 @@ Under 32rem, prefer a List of ListRows (a name, one value, one action) over a ta
   - In a narrower region, prose fills the region.
   - In the readable font the same 68ch is wider in px, as it should be.
   - The measure lives in the stylesheet, because the token format has no `ch` unit.
-- **A Page's content stops at `page-max`** (80rem, 1,280px) and centres.
+- **A Page's content stops at `page-max`** (80rem, 1,280px) and centres — except in the game's frame, where it fills the stage to the gutter and its panels sit `stack-lg` apart (D-120).
 - **Full bleed** (`.lg-bleed`) runs edge to edge of the stage, through the Page's cap and side padding. It is for art only: a Banner's art, a scene, a map. Text over bled art keeps to the content edges.
 - **Tables, Ledger grids and forms never bleed.** A table wider than `page-max` scrolls inside its own region.
 
@@ -245,7 +245,7 @@ At every step, in both specimens, no label truncates and nothing scrolls sideway
 | `rail-width` | 16rem (256px) | NavRail column, wide enough for a destination's description (D-104) |
 | `rail-width-compact` | 4rem (64px) | NavRail column for the compact rail, icons only (D-113) |
 | `folio-width` | 22.5rem (360px) | Folio column |
-| `topbar-height` | 3.5rem (56px) | TopBar height; the Page pads its top by it, and scrolls focus clear of it |
+| `topbar-height` | 3.5rem (56px) | TopBar height; the Page pads its top by it, and scrolls focus clear of it. Over a backdrop the stage starts below the TopBar and sets it to 0 inside (D-115); the docked Chronicle's head and a compact rail's header band take it too |
 | `hintbar-height` | 2.5rem (40px) | KeyHints strip at the stage's foot |
 | `shell-max` | 120rem (1,920px) | Widest the shell grows |
 | `page-max` | 80rem (1,280px) | Widest a Page's content grows |

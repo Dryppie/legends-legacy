@@ -96,7 +96,7 @@ The ramp has ten groups, organised by role. The tokens are in rem; sizes and lin
 | --- | --- | --- | --- |
 | `tab` | Marcellus, capitals | 17 / 24 | Primary TabStrip labels. Secondary tabs use `label`. |
 | `nav` | Barlow 500, capitals, `tracking-nav` | 13 / 18 | NavRail items |
-| `nav-active` | Barlow 600, capitals, `tracking-nav` | 13 / 18 | The current NavRail item, beside the gilt diamond |
+| `nav-active` | Barlow 600, capitals, `tracking-nav` | 13 / 18 | The current NavRail item, on its gilt bar and wash (D-118) |
 
 **Numerals**
 

@@ -69,7 +69,7 @@ Motion is quiet. In a realtime game it has three jobs: confirm what the player d
 - **The new state lands in the frame of the press:** the selection ring, bar or edge, `aria-pressed`, the toggled label. The old state clears in the same frame, so two things never look selected at once. A selection that lags reads as a missed click.
 - **One transform may settle over `duration-fast`:** a selected Sigil grows to 1.08. No indicator travels between items, and no tab bar slides.
 - **Content a toggle opens** ("Show perks") is placed at once and rises in over `duration-base` (`lg-enter`: `space-2` and opacity). Nothing slides open, and no height animates. It closes at once.
-- **The current location moves at once:** the NavRail's active item and its gilt diamond, the Track's current diamond. A change of place is never animated.
+- **The current location moves at once:** the NavRail's active item with its gilt bar and wash, the Track's current diamond. A change of place is never animated.
 - **Reduced motion:** the mark and the size at once.
 
 ### Value change: a Meter's fill, and numbers after combat or a purchase

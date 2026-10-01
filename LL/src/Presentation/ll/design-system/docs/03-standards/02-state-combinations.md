@@ -93,7 +93,7 @@ Each mark has one place on each part. Corner marks sit `space-1` in from the fra
 
 **EntryList.** The selection bar at the row's start; the name; the one Tag straight after it; the attention diamond at the row's end. A locked entry's Locked Tag takes the Tag's place, and it shows no diamond.
 
-**NavRail.** The current diamond outside the item's start (gilt: where the player is); the icon; the title; at the item's end, one of: "Locked" (availability), a count badge, or the attention diamond (`ready`, when there is nothing to count). Locked comes first, then the count. In `compact`, the badge or diamond sits on the square's top end corner, and a locked item says so in its tip.
+**NavRail.** The current item's gilt bar at its start and its gilt wash (where the player is, D-118); the icon; the title; at the item's end, one of: "Locked" (availability), a count badge, or the attention diamond (`ready`, when there is nothing to count). Locked comes first, then the count. In `compact`, the badge sits on the icon's top end corner and the diamond on the item's (D-115, D-119), and a locked item says so in its tip.
 
 **List and ListRow** follow EntryList: the selection bar at the start, the thumbnail's rarity edge, the name and code, the one Tag after them, and markers beside the Tag. ListRow takes its markers through `tags` until DS-040 gives it a `ready` prop.
 

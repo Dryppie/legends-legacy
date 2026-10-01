@@ -83,11 +83,11 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 
 ## Opacity, blur and texture
 
-- **Every surface hides what lies behind it, but one:** Level 1 in flow — a Panel, a list, the JourneyCard, the NavRail — is `surface`, the game's panel material, a cool near-black at 72% that lets the frame's backdrop show through (D-102). It sits over the backdrop only, never over content: where content scrolls beneath it (a sticky table header or column) or it floats, it takes `surface-solid`. Text on it is measured over the real backdrop, at 4.5:1 over the brightest point behind it.
+- **Every surface hides what lies behind it, but one:** Level 1 in flow — a Panel, a list, the JourneyCard, the NavRail, the TopBar over a backdrop — is `surface`, the game's panel material, a cool near-black at 72% that lets the frame's backdrop show through (D-102). It sits over the backdrop only, never over content: where content scrolls beneath it (a sticky table header or column) or it floats, it takes `surface-solid`. Text on it is measured over the real backdrop, at 4.5:1 over the brightest point behind it.
 - **No backdrop blur (`backdrop-filter`) anywhere.** The scrim dims what lies behind it but does not blur it.
 - **Softened art is not blurred content.** The Stage and the Banner soften their own picture, which is part of the art treatment. No surface ever blurs what lies behind it.
 - **Some things are not surfaces**, and may let the picture show through:
-  - the TopBar's fade to `ground` over the stage;
+  - the TopBar's fade to `ground` over the stage — except over a frame's backdrop, where it is a Level 1 band of `surface` with a hairline under it and the stage starts below it (D-115);
   - the veils over Stage and Banner art;
   - the dark fades at a list's ends.
 

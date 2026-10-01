@@ -6,7 +6,7 @@ The headline block.
 
 A framed band with painted art behind it, for the one headline block on an information screen (the Combat Profile).
 
-**Provide:** `children` (the identity: eyebrow, name, meta), `aside` (headline figures: LevelPlate, StatFigure), optional `footer`, `image` (a Backgrounds asset), `focus` and `cornerSrc` (the CornerOrnament asset).
+**Provide:** `children` (the identity: eyebrow, name, meta), `aside` (headline figures: StatFigures, or a LevelPlate where the level is the subject — they sit beside the identity whenever both fit and drop under it only when they don't, D-122), optional `footer`, `image` (a Backgrounds asset), `focus` and `cornerSrc` (the CornerOrnament asset).
 
 - The art is darkened, warmed and blurred, then covered by the veil: a left-to-right `ground-deep` vignette and a film grain like the Stage's. Without an `image` there is no veil and no grain: both belong to the art. The veil is the text's contrast surface — at least 66% `ground-deep` across the left 60%, where the text sits, so `ink` holds 9.9:1 over the brightest art — and text also takes `shadow-text-art`. The Banner is a Level 1 enclosure filled with art instead of `surface` (Foundations · Surfaces & Layering).
 - The double `gilt` hairline frame at 28% and the four corner ornaments set it apart from plain panels. The frame is its one edge: no border outside it. The double gilt frame belongs to the Banner and the Folio only (Foundations · Lines).

@@ -1,4 +1,50 @@
-# Tower archive storage and cleanup review — 12 September 2026
+# Tower archive storage and cleanup review
+
+## Second follow-up — 1 October 2026
+
+The user authorized the next four recommendations: compact output in the current balance-pass runner, an overall storage budget and retention preview, another lossless archive-compression pass, and investigation/fixing of duplicated build output with review of old Angular previews.
+
+The filesystem work is complete and verified, reclaiming **58.24 GiB** by per-file accounting: **50.27 GiB** from lossless NTFS compression and **7.98 GiB** from eight obsolete generated Angular previews. Drive free space was **433.4 GiB** at the final check, up from **379.6 GiB** before this pass. That drive-wide change also includes concurrent study activity, isolated builds and other applications; it is distinct from the per-file savings.
+
+| Compressed archive under `TestResults/balance` | Before on disk | After on disk | Files with identical before/after SHA-256 |
+| --- | ---: | ---: | ---: |
+| `tower-competitive-kharad-resolution-20260912` | 41.53 GiB | 13.44 GiB | 52,046 |
+| `tower-competitive-kharad-precision-20260912` | 16.48 GiB | 5.33 GiB | 20,755 |
+| `tower-dashboard-20260909` | 16.33 GiB | 5.31 GiB | 46,965 |
+
+All **119,766 files** retain identical bytes, paths and inventory. No raw battle evidence was deleted in this pass. The eight removed August Angular builds were `blueprint-attributes-angular`, `chat-bottom-anchor-angular`, `chat-nearest-anchor-angular`, `collapsed-chat-pin-angular`, `draggable-chat-angular`, `draggable-chat-angular-final`, `guild-overview-angular` and `mobile-popover-angular`, directly under `artifacts`. They contained 10,264 generated files, had no tracked files or tracked references, and were inventoried with hashes before deletion. The active frontend still returned HTTP 200.
+
+The [compression receipt](../TestResults/balance/tower-storage-followup-20261001/completed.json), [preview-removal receipt](../TestResults/balance/tower-storage-followup-20261001/preview-cleanup-completed.json), and [final integrity checks](../TestResults/balance/tower-storage-followup-20261001/final-filesystem-checks.json) record the exact totals. Final verification also matched all **156 previously protected metadata/catalog hashes** and the active study's **866 source pins plus 102 live-catalog pins**.
+
+Preventative code is implemented and tested in the attached **`balance-storage` checkout**, with its `Tower-Storage-Controls-Review.md` and harness README documenting operation. The user explicitly chose to keep these changes isolated until the active floor-ten acceptance study finishes, because it hashes the affected source files. They have not been substituted into that study or its producing runtime.
+
+The implementation is preserved in local branch `codex/balance-storage`, commit `b1834014c33f0bb59927c1e0944486238add83f2`. The [handoff receipt](../TestResults/balance/tower-storage-followup-20261001/implementation-handoff.json) records the checkout, patch digest, exact test receipts, measured comparison and deferred activation decision.
+
+The new runner writes compact fixed-family evaluation archives with compressed materialized inputs, preserving all non-event reports and exact schedules. The measured diagnostic was **22.15% smaller than gzip-per-battle output**, with 32 full report hashes and result rows matching. An overall 1,280-GiB logical TestResults budget, 64-GiB drive headroom, three-GiB phase admission reservation and explicit protected/retired preview prevent unbounded accumulation by participating runs. Unknown historical archives and seed ledgers remain protected. The actual gzip and compact runner paths also passed separate independent end-to-end audits with identical result hashes.
+
+Build duplication was reproduced: redirecting output paths caused the Web SDK to include old generated trees as content. Permanent SDK exclusions reduced the primary API's redirected evaluation from **21,733 items (21,628 generated)** to **105 intended items (zero generated)**. Historical backend outputs remain because archived studies may depend on their binaries. Code verification passed **69 backend tests plus two explicit end-to-end runner invocations, 51 Python tests, and normal/redirected build-item probes**; the generic suite intentionally skipped its live-experiment entry point. No gameplay content, dependency, database migration or deployment changed. Offline storage policy and SDK build-item configuration changes remain in the isolated checkout pending the user's chosen activation boundary.
+
+## Completed follow-up — 1 October 2026
+
+Following the user's authorization to proceed with all three reviewed actions, cleanup completed and passed verification at **21:35 Copenhagen time**. Drive free space increased from **129.6 GiB to 384.3 GiB**, a measured net gain of **254.7 GiB**. Drive-wide figures include concurrent activity and filesystem allocation; they are distinct from the per-file estimates below.
+
+| Completed action | Space removed or saved |
+| --- | ---: |
+| Pruned the exact 11,371 reviewed tuning/inconclusive run directories, containing 475,649 files | 112.8 GiB |
+| Removed stale Angular Webpack/Babel caches and the dashboard's old cache, containing 1,761 files | 14.4 GiB |
+| Applied lossless NTFS compression to the remaining three campaign archives | 127.5 GiB |
+
+Pruning ran before compression, so these action estimates do not overlap. The retained campaign files occupy **63.7 GiB on disk**, with **191.1 GiB of unchanged logical contents**. The active main frontend cache (approximately 13 MiB) was preserved, its development server remained running, and an HTTP check returned **200 OK**.
+
+The three affected directories under `TestResults/balance` are `tower-progression-calibration-20260911`, `tower-retained-build-calibration-20260911-v2`, and `tower-kharad-followup-calibration-20260911`. Removed raw data consists of completed coarse/fine tuning and the original, never-applied, inconclusive floor-2 confirmation. The later passing floor-2 follow-up, other accepted confirmations, recipes, observations, portfolios, seed/exclusion ledgers, content, original executables and historical reports remain.
+
+**These are now partially pruned historical packages.** Their original checksum manifests and seals remain unchanged as historical records. Complete original-package audits cannot pass with the explicitly removed runs absent. Every remaining indexed file was freshly checked against its original SHA-256: **375,601 matches**, with exact remaining file counts and logical lengths verified. All **156 protected metadata/catalog checks** also passed after cleanup. All 375,607 remaining campaign files have NTFS compression enabled; application-visible bytes and filenames are unchanged.
+
+The [completion receipt](../TestResults/balance/tower-storage-cleanup-20261001/completed.json), [approved exact target inventory](../TestResults/balance/tower-storage-cleanup-20261001/approved-candidates.json), [preflight](../TestResults/balance/tower-storage-cleanup-20261001/prepared.json), [per-run deletion log](../TestResults/balance/tower-storage-cleanup-20261001/deleted-runs.jsonl), and [pruning receipt](../TestResults/balance/tower-storage-cleanup-20261001/pruning-completed.json) record authorization, scope, counts, hashes and consequences. Native compression logs and per-campaign verification receipts are retained alongside them. The executor checks resolved workspace paths, rejects links and tracked targets, and requires exact inventory agreement before deletion. Existing execution receipts prevent blindly repeating the cleanup.
+
+Changed files are this review, ignored cleanup scripts/receipts, the explicitly removed generated archives/caches, and NTFS compression attributes on retained archives. No game code/content, application configuration, dependency, database migration or deployment changed. No backend tests or combat simulations were run for this filesystem-only operation. Validation used metadata preflight, full retained-file hashing, protected catalog/metadata checks, target-absence checks and the frontend HTTP check. No required command remains blocked.
+
+## Original review — 12 September 2026
 
 **Status: the recommended first cleanup completed on 12 September 2026 at 14:05 UTC.** Following the user's authorization, 615,826 obsolete files were deleted from this checkout's `TestResults` directory. Measured drive free space increased by **119.6 GiB**, from **71.0 GiB to 190.5 GiB**. Raw evidence for the final Kharad setting and both precision stages, saved teams and historical seed exclusions were retained. The broader cleanup option and older campaigns were not pruned.
 

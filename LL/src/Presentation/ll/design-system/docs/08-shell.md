@@ -12,7 +12,8 @@ The frame every in-game screen sits in — the rail, the top bar, the stage, the
 - Put loot in the Chronicle's Loot channel, not a separate box (Decision D-005).
 - Give the shell a real height; the stage, Folio and Chronicle scroll inside it.
 - Give the game's shell its textured backdrop (`backdrop`, D-107): the frame shows it, and an information screen shows it through its Page (D-101).
-- While screens migrate, hold a screen not built with Grimoire in an `lg-legacy` region in the stage (D-108).
+- While screens migrate, hold a screen not built with Grimoire in an `lg-legacy` region in the stage (D-108). Its sheet fills the stage between the frame's lines, with no edge or gutter of its own, and its content keeps the Page's side gutter (D-116).
+- Let the frame's lines meet: over a backdrop the TopBar is a `surface` band whose rule continues the docked Chronicle's head and a compact rail's header band; its insets are the Page's gutter (D-115).
 
 **Should**
 - Give detail and collection screens one subject: the stage shows it, the Folio explains the selected thing. Dense workbench screens — the Cinder Bazaar, the guild's member list — may set several side by side (Principles · One screen, one subject; D-010).
