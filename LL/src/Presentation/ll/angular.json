@@ -27,8 +27,16 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/styles/grimoire/tokens.css",
-              "src/styles/grimoire/components.css"
+              {
+                "input": "src/styles/grimoire/tokens.css",
+                "bundleName": "grimoire",
+                "inject": false
+              },
+              {
+                "input": "src/styles/grimoire/components.css",
+                "bundleName": "grimoire",
+                "inject": false
+              }
             ],
             "scripts": []
           },
@@ -48,7 +56,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1.2MB"
+                  "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",

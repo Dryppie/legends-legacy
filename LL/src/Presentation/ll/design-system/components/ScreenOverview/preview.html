@@ -15,20 +15,6 @@ body { background: var(--ground); }
 .pv-logo img { display: block; }
 .pv-eyebrow { display: block; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--gilt); }
 .pv-note { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact-row); color: var(--ink-muted); }
-.pv-gilt { color: var(--gilt); font-weight: 600; font-variant-numeric: tabular-nums; }
-.pv-link { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
-.pv-link:hover { text-decoration-color: var(--gilt); }
-.pv-namerow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 4px 0 10px; }
-.pv-noble { display: inline-flex; align-self: center; color: var(--gilt); }
-.pv-noble .lg-icon { width: var(--icon-sm); height: var(--icon-sm); }
-.pv-meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body); }
-.pv-meta > div { display: flex; align-items: center; gap: 8px; }
-.pv-meta dt { color: var(--ink-muted); }
-.pv-meta dd { margin: 0; display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
-.pv-overview { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--space-6); align-items: start; }
-@container (max-width: 860px) { .pv-overview { grid-template-columns: minmax(0, 1fr); } }
-.pv-main { display: grid; gap: var(--space-6); min-width: 0; }
-.pv-side { display: grid; gap: var(--space-6); position: sticky; top: 0; }
 .pv-slots { display: grid; gap: var(--space-2); }
 .pv-count { margin-left: auto; font-size: var(--text-caption); font-weight: 600; letter-spacing: 0; color: var(--ink); text-transform: none; }
 .pv-sidefoot { margin-top: var(--space-4); }
@@ -175,18 +161,17 @@ function App() {
   function view(name) { viewSt[1](name); q[1](name); perks[1](false); }
   var groups = attrs(who.k);
 
-  var identity = h(F, null,
-    h('span', { className: 'pv-eyebrow' }, who.own ? 'Combat Profile' : 'Viewing player'),
-    h('div', { className: 'pv-namerow' },
-      who.noble ? h('span', { className: 'pv-noble', role: 'img', 'aria-label': 'Noble', title: 'Active Nobility' }, h(L.Icon, { name: 'nobility', size: 16 })) : null,
-      h(L.Heading, { level: 'screen', as: 'h2' }, who.name),
-      !who.own ? h(L.Presence, { online: who.online, lastSeen: who.lastSeen }) : null),
-    h('dl', { className: 'pv-meta' },
-      h('div', null, h('dt', null, 'Guild'), h('dd', null, h('a', { href: '#', className: 'pv-link', onClick: function (e) { e.preventDefault(); } }, who.guild.name), ' ', h(L.Tag, null, '[' + who.guild.tag + ']'))),
-      h('div', null, h('dt', null, 'Essences'), h('dd', null, filled + ' / ' + usable + ' attuned')),
-      h('div', null, h('dt', null, 'Achievement Points'), h('dd', { className: 'pv-gilt' }, L.format.number(who.achievements))),
-      who.noble ? h('div', null, h('dt', null, 'Nobility'), h('dd', null, 'Expires ', h('time', null, who.nobleUntil), ' ',
-        h(L.Button, { variant: 'link', 'aria-expanded': perks[0], 'aria-controls': 'pv-perks', onClick: function () { perks[1](!perks[0]); } }, perks[0] ? 'Hide perks' : 'Show perks'))) : null));
+  // The Combat Profile's identity (ProfileIdentity, D-099).
+  var identity = h(L.ProfileIdentity, {
+    eyebrow: who.own ? 'Combat Profile' : 'Viewing player', name: who.name, noble: who.noble,
+    presence: !who.own ? { online: who.online, lastSeen: who.lastSeen } : null,
+    facts: [
+      { label: 'Guild', value: h(F, null, h('a', { href: '#', onClick: function (e) { e.preventDefault(); } }, who.guild.name), h(L.Tag, null, '[' + who.guild.tag + ']')) },
+      { label: 'Essences', value: filled + ' / ' + usable + ' attuned' },
+      { label: 'Achievement Points', value: L.format.number(who.achievements) },
+      who.noble ? { label: 'Nobility', value: h(F, null, 'Expires ', h('time', null, who.nobleUntil),
+        h(L.Button, { variant: 'link', 'aria-expanded': perks[0], 'aria-controls': 'pv-perks', onClick: function () { perks[1](!perks[0]); } }, perks[0] ? 'Hide perks' : 'Show perks')) } : null
+    ] });
 
   var perksPanel = who.noble && perks[0] ? h('div', { id: 'pv-perks', className: 'pv-perks' },
     h('div', { className: 'pv-perkshead' }, h('span', { className: 'pv-eyebrow' }, 'Active Nobility perks'), h('span', { className: 'pv-note' }, 'Applied automatically while Nobility is active.')),
@@ -223,8 +208,9 @@ function App() {
         nextUnlockLabel: 'Next unlock', nextUnlock: 'A third Essence slot at level 20'
       }) : null,
 
-      h('div', { className: 'pv-overview' },
-        h('div', { className: 'pv-main' },
+      // Main and side column (lg-aside, D-098).
+      h('div', { className: 'lg-aside' },
+        h('div', { className: 'lg-aside__main' },
           h(L.Banner, { image: BG_STUDY, focus: 'center 30%', cornerSrc: CORNER, label: 'Combat profile',
             aside: h(F, null,
               h('div', { style: { width: 230 } }, h(L.LevelPlate, { kicker: 'Level', level: who.level, xp: who.xp, xpMax: who.xpMax, xpUnit: 'Combat XP' })),
@@ -238,7 +224,7 @@ function App() {
                 h('div', { className: 'pv-note' }, 'Mastery 4 · Base form'),
                 h(L.Meter, { tone: 'xp', label: 'Mastery XP', value: 1240, max: 2000 })))) : null),
 
-        h('aside', { className: 'pv-side' },
+        h('aside', { className: 'lg-aside__side' },
           h(L.Panel, { title: 'Essence Loadout', aside: h('span', { className: 'pv-count' }, filled + ' / ' + usable + ' attuned') },
             h('div', { className: 'pv-slots' }, who.slots.map(function (sl, i) {
               return h(L.LoadoutSlot, Object.assign({ key: i, index: i, onClick: function () {} }, sl));

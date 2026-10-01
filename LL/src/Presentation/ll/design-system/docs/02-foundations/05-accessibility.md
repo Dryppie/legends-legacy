@@ -94,9 +94,9 @@ Pixel figures in these docs are at Default. The only lengths left in px are hair
 
 The page itself never scrolls sideways, and nothing is clipped.
 
-**Settings labels.** The reading-size options read "14px", "16px" and "18px" today. Rename them Default, Large (115%) and Extra large (130%). The pixel labels stop being true once the base is 16px.
+**Settings labels.** The reading-size options read Default, Large (115%) and Extra large (130%). They used to read "14px", "16px" and "18px", which stopped being true when the base became 16px (D-096).
 
-**Migrating the game.** Today the game sets its root to 14px, and its `--ll-*` rem tokens assume that base. Grimoire sets the root to 100% (16px, or the browser's own size) and the two larger steps to 115% and 130%. Legacy screens would grow by a seventh at Default, so rebase the legacy rem tokens by ×0.875 when the Grimoire stylesheet goes in. Large and Extra large then come out slightly larger than today's 16 and 18px, never smaller.
+**Migrating the game: done (D-096).** The game set its root to 14px, and its legacy styles assume that base. Its root now follows Grimoire — 100% (16px, or the browser's own size), 115% and 130% — and the build multiplies every legacy rem by 0.875, so legacy screens keep their size at Default and come out slightly larger than the old 16 and 18px at Large and Extra large, never smaller. Media queries keep their rem: there it is the browser's 16px, not the root's.
 
 ## The keyboard model
 

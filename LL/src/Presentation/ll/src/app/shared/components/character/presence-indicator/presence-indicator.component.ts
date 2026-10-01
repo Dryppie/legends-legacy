@@ -1,5 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { NgIf } from '@angular/common';
+import { lastSeenLabel as elapsedLabel } from './last-seen';
 
 /**
  * Shows whether a character is currently active.
@@ -31,27 +32,4 @@ export class PresenceIndicatorComponent {
     const elapsed = elapsedLabel(this.lastSeenAt());
     return elapsed ? `Last seen ${elapsed}` : 'Last seen unknown';
   });
-}
-
-function elapsedLabel(lastSeenAt: string | null | undefined): string | null {
-  if (!lastSeenAt) return null;
-
-  const timestamp = new Date(lastSeenAt).getTime();
-  if (Number.isNaN(timestamp)) return null;
-
-  const elapsedMinutes = Math.floor(
-    Math.max(0, Date.now() - timestamp) / 60_000,
-  );
-  if (elapsedMinutes < 1) return 'just now';
-  if (elapsedMinutes < 60) {
-    return `${elapsedMinutes} ${elapsedMinutes === 1 ? 'minute' : 'minutes'} ago`;
-  }
-
-  const elapsedHours = Math.floor(elapsedMinutes / 60);
-  if (elapsedHours < 24) {
-    return `${elapsedHours} ${elapsedHours === 1 ? 'hour' : 'hours'} ago`;
-  }
-
-  const elapsedDays = Math.floor(elapsedHours / 24);
-  return `${elapsedDays} ${elapsedDays === 1 ? 'day' : 'days'} ago`;
 }

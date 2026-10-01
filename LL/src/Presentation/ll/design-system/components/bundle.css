@@ -1229,6 +1229,10 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
   background: var(--ground);
 }
 .lg-page__inner { position: relative; display: grid; gap: var(--section-sm); max-width: var(--page-max); margin: 0 auto; }
+/* Flow (D-097): in a host frame that is not GameShell — the game's frame while screens migrate — the Page sits in the
+   normal flow, fills its parent's height and scrolls itself. No TopBar floats over it, so no room is kept for one, and
+   the host frame gives the gutters. */
+.lg-page.lg-page--flow { position: relative; inset: auto; flex: 1 1 auto; height: 100%; min-height: 0; --lg-page-pad: 0px; padding: 0; scroll-padding-top: 0; }
 /* At 400% zoom (a 320px-wide Page) the side padding steps down so content keeps its width (WCAG 1.4.10). */
 @container (max-width: 30rem) {
   .lg-page { --lg-page-pad: var(--inset-lg); }
@@ -1269,6 +1273,15 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
   .lg-split > .lg-split__list { flex: 3 1 0; }
   .lg-split > .lg-split__inspector { flex: 2 1 0; min-width: var(--inspector-min); }
   .lg-split__back { display: none; }
+}
+
+/* Main and side column (D-098): a main column and an aside-width side column from Medium up; below, the main column
+   then the side. Each column is a region of its own, so what sits in it follows its width. */
+.lg-aside { container: lg-aside / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--section-sm) var(--lg-gutter); }
+.lg-aside > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; display: grid; gap: var(--section-sm); }
+@container lg-aside (width >= 44rem) {
+  .lg-aside > .lg-aside__main { flex: 1 1 0; }
+  .lg-aside > .lg-aside__side { flex: 0 0 var(--aside-width); }
 }
 
 /* Split comparison: two panes 1 : 1 from 32rem up (narrow, medium, wide); stacked, one above the other. */
@@ -1467,6 +1480,22 @@ button.lg-loadout:focus-visible { outline: 2px solid transparent; box-shadow: va
 .lg-loadout.is-locked { border-style: dashed; background: transparent; }
 .lg-loadout.is-locked .lg-loadout__name { font-family: var(--font-ui); font-size: var(--text-body-compact); color: var(--ink-muted); }
 .lg-loadout.is-locked .lg-slot__frame { box-shadow: inset 0 0 0 var(--border-hairline) var(--line); }
+
+/* ---------- ProfileIdentity (D-099) ----------
+   The eyebrow and the fact labels are ink-muted and the values ink, by the allocation (Foundations · Colour, D-015):
+   on a profile, the one gilt figure is the headline number beside it. */
+.lg-identity { display: grid; gap: var(--space-1); min-width: 0; }
+.lg-identity__eyebrow { font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.lg-identity__name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); min-width: 0; margin-bottom: var(--space-2); }
+.lg-identity__name .lg-heading { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.lg-identity__noble { display: inline-flex; align-self: center; color: var(--gilt); }
+.lg-identity__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body); }
+.lg-identity__facts > div { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
+.lg-identity__facts dt { color: var(--ink-muted); }
+.lg-identity__facts dd { margin: 0; display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); color: var(--ink); font-variant-numeric: tabular-nums; }
+/* A link among the facts (the Guild) is a text link: ink, underlined. */
+.lg-identity__facts a { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 0.1875rem; }
+.lg-identity__facts a:hover { text-decoration-color: var(--ink); }
 
 /* ---------- Presence ---------- */
 .lg-presence { display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--text-caption); line-height: var(--leading-caption); font-weight: 600; color: var(--ink-muted); }

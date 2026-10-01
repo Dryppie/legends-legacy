@@ -521,6 +521,7 @@ Shell dimensions and content breakpoints in rem, so columns widen with the readi
 | `ledger-min` | 15rem | The narrowest a Ledger gets in a grid before the grid drops a column, so labels such as Magic Penetration never truncate. (240px at the default text size.) |
 | `stat-min` | 8.5rem | The narrowest a StatTile gets in a stat grid before the grid drops a column. A tile with a Delta needs more room: give it a one-word label. (136px at the default text size.) |
 | `inspector-min` | 20rem | The narrowest an inspector gets beside its list; the list gives way first. (320px at the default text size.) |
+| `aside-width` | 20rem | The side column of a main-and-side layout (lg-aside): the Essence Loadout beside the Character Overview's profile. (320px at the default text size.) |
 
 ## Z index
 

@@ -45,6 +45,7 @@
     "components/Panel/README.md",
     "components/PatternFeedback/README.md",
     "components/Presence/README.md",
+    "components/ProfileIdentity/README.md",
     "components/ScreenArchive/README.md",
     "components/ScreenOverview/README.md",
     "components/SearchField/README.md",
@@ -172,6 +173,11 @@
       "name": "LevelPlate",
       "group": "Game Components · Character",
       "summary": "The level display."
+    },
+    {
+      "name": "ProfileIdentity",
+      "group": "Game Components · Character",
+      "summary": "Who a player is."
     },
     {
       "name": "Ledger",

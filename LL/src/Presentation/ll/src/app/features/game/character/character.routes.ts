@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { CharacterComponent } from './character.component';
 import { InventoryComponent } from './inventory/inventory.component';
-import { CharacterOverviewComponent } from './character-overview/character-overview.component';
+import { CharacterOverviewSwitchComponent } from './character-overview-switch.component';
 import { SoulstoneArchiveComponent } from './soulstone-archive/soulstone-archive.component';
 import { EssencesComponent } from './essences/essences.component';
 import { AchievementsComponent } from './achievements/achievements.component';
@@ -19,7 +19,7 @@ export const CHARACTER_ROUTES: Routes = [
       },
       {
         path: 'character-overview',
-        component: CharacterOverviewComponent,
+        component: CharacterOverviewSwitchComponent,
         data: { guidePageId: GUIDE_PAGE_IDS.characterOverview },
       },
       {

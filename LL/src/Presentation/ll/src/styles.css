@@ -6,8 +6,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Legacy element styles stop at Grimoire roots (.lg-root, .lg-shell; D-100): a screen that has moved to Grimoire takes
+   its type and focus ring from Grimoire, not from these. The :where() adds no specificity, so legacy screens are
+   unchanged. Remove the guard with the rule once no legacy screen needs the rule. */
+
 @layer base {
-  :focus-visible {
+  :focus-visible:where(:not(:is(.lg-root, .lg-shell) *)) {
     outline: 2px solid var(--ll-color-focus-ring) !important;
     outline-offset: 2px !important;
     box-shadow: var(--ll-shadow-focus) !important;
@@ -1393,16 +1397,19 @@ input:not(:placeholder-shown) + .input-placeholder {
   display: none;
 }
 
+/* The root follows Grimoire (D-096; Foundations · Accessibility · Text scaling): 100% at Default (16px, or the
+   browser's own size), 115% at Large and 130% at Extra large. Legacy styles were written for a 14px root, so the
+   build multiplies their rem values by 0.875 (scripts/postcss-legacy-rem) and they keep their size at Default. */
 html {
-  font-size: 14px;
+  font-size: 100%;
 }
 
 html[data-reading-font-size="large"] {
-  font-size: 16px;
+  font-size: 115%;
 }
 
 html[data-reading-font-size="extra-large"] {
-  font-size: 18px;
+  font-size: 130%;
 }
 
 html,
@@ -1421,41 +1428,37 @@ body.mat-typography {
   overflow-x: hidden;
 }
 
-h1 {
+h1:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-tight);
   font-size: var(--ll-text-4xl);
 }
 
-h2 {
+h2:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-tight);
   font-size: var(--ll-text-xl);
 }
 
-h3 {
+h3:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-tight);
   font-size: var(--ll-text-lg);
   font-style: normal;
 }
 
-.mat-typography h1,
-.mat-typography h2,
-.mat-typography h3 {
+.mat-typography :is(h1, h2, h3):where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-display);
 }
 
-input {
+input:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-normal);
   font-weight: var(--ll-weight-regular);
   font-size: var(--ll-text-sm);
 }
 
-button,
-select,
-textarea {
+:is(button, select, textarea):where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-body);
 }
 
@@ -1476,37 +1479,38 @@ textarea {
     sans-serif;
 }
 
+/* The preview shows legacy text at each size: the root's 16px, 18.4px and 20.8px, times the legacy 0.875. */
 [data-reading-font-size-preview="default"] {
   font-size: 14px;
 }
 
 [data-reading-font-size-preview="large"] {
-  font-size: 16px;
+  font-size: 16.1px;
 }
 
 [data-reading-font-size-preview="extra-large"] {
-  font-size: 18px;
+  font-size: 18.2px;
 }
 
-label {
+label:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-normal);
   font-size: var(--ll-text-sm);
 }
 
-span {
+span:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-tight);
   font-weight: var(--ll-weight-light);
   font-size: var(--ll-text-sm);
 }
 
-span img {
+span img:where(:not(:is(.lg-root, .lg-shell) *)) {
   display: block;
   width: 100%;
 }
 
-small {
+small:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-normal);
   font-weight: var(--ll-weight-regular);

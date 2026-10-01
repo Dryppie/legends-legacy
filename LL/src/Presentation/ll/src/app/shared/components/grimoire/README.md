@@ -19,8 +19,14 @@ Every design-system change ports here in the same step (`design-system/AGENTS.md
 - `src/styles/grimoire/components.css` — all `lg-*` component styles: a copy of
   `design-system/components/bundle.css`, made by the same script (D-092).
   Never edit these copies; change `design-system/` and run the script.
-- Both are listed in `angular.json` → `styles`, after `src/styles.css`, so they
-  win over Tailwind's preflight.
+- Both are built as one stylesheet of their own, `grimoire.css` (`angular.json` →
+  `styles`, `bundleName: "grimoire"`, `inject: false`), outside the app's first
+  load. `main.ts` calls `lgLoadStyles(APP_VERSION)` from `grimoire-styles.ts`,
+  which adds it after `src/styles.css` without blocking the first render, so it
+  wins over Tailwind's preflight (D-096).
+- The root text size follows Grimoire: 16px at Default, 115% and 130% for the
+  larger reading sizes. Legacy styles keep their size because the build rebases
+  their rem values by 0.875 (`scripts/postcss-legacy-rem`, D-096).
 - `src/index.html` loads Barlow, Barlow Condensed, EB Garamond and Atkinson
   Hyperlegible from Google Fonts (Marcellus was already loaded).
 
@@ -115,7 +121,7 @@ component):
 Components: Banner, Button, Chronicle, Constellation, CurrencyPill, Delta,
 Emblem, EntryList, Folio, GameShell, Heading, Icon, ItemLink, ItemSlot,
 JourneyCard, Key, KeyHints, Ledger, LevelPlate, List and ListRow, LoadoutSlot,
-Meter, NavRail, Num, Page, PageHeader, Panel, Presence, SearchField,
+Meter, NavRail, Num, Page, PageHeader, Panel, Presence, ProfileIdentity, SearchField,
 SectionRule, Sigil, Stage, StatFigure, StatTile, TabStrip, Tag, TopBar, Track.
 
 Helpers:

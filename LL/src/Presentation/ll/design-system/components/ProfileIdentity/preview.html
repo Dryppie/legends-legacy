@@ -1,0 +1,43 @@
+<!-- @dsCard group="Game Components · Character" height=520 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ProfileIdentity — preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Marcellus&display=swap">
+<style>
+html, body { margin: 0; }
+body { background: var(--ground); }
+.pv { display: grid; gap: var(--section-sm); padding: var(--section-md); max-width: 60rem; }
+</style>
+</head>
+<body>
+<div id="root" class="lg-root"></div>
+<script>
+var L = window.LL, h = React.createElement, F = React.Fragment;
+var noop = function (e) { if (e && e.preventDefault) e.preventDefault(); };
+function App() {
+  var perks = React.useState(false);
+  return h('div', { className: 'pv' },
+    // Your own profile, as a Noble, in a Banner with its headline figures beside it.
+    h(L.Banner, { label: 'Combat profile', aside: h(F, null,
+        h('div', { style: { width: '14rem' } }, h(L.LevelPlate, { kicker: 'Level', level: 17, xp: 8420, xpMax: 12000, xpUnit: 'Combat XP' })),
+        h(L.StatFigure, { label: 'Combat Rating', value: '1,284', caption: 'Permanent attributes and the equipped build' })) },
+      h(L.ProfileIdentity, { eyebrow: 'Combat Profile', name: 'Aldric Vane', noble: true, facts: [
+        { label: 'Guild', value: h(F, null, h('a', { href: '#', onClick: noop }, 'Emberwatch'), h(L.Tag, null, '[EMB]')) },
+        { label: 'Essences', value: '2 / 2 attuned' },
+        { label: 'Achievement Points', value: '1,240' },
+        { label: 'Nobility', value: h(F, null, 'Expires ', h('time', { dateTime: '2026-10-12' }, '12 Oct 2026'), h(L.Button, { variant: 'link', 'aria-expanded': perks[0], onClick: function () { perks[1](!perks[0]); } }, perks[0] ? 'Hide perks' : 'Show perks')) }
+      ] })),
+    // Another player's: Presence after the name, no crown, a player without a guild.
+    h(L.Banner, { label: 'Viewing player' },
+      h(L.ProfileIdentity, { eyebrow: 'Viewing player', name: 'Maren', presence: { online: false, lastSeen: '3 h ago' }, facts: [
+        { label: 'Guild', value: 'None' },
+        { label: 'Essences', value: '3 / 4 attuned' },
+        { label: 'Achievement Points', value: '2,860' }
+      ] })));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

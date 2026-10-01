@@ -12,6 +12,7 @@ export * from './grimoire-a11y';
 export * from './grimoire-motion';
 export * from './grimoire-ornament';
 export * from './grimoire-icons';
+export * from './grimoire-styles';
 export * from './banner.component';
 export * from './button.component';
 export * from './chronicle.component';
@@ -40,6 +41,7 @@ export * from './page-header.component';
 export * from './page.component';
 export * from './panel.component';
 export * from './presence.component';
+export * from './profile-identity.component';
 export * from './search-field.component';
 export * from './section-rule.component';
 export * from './sigil.component';
@@ -82,6 +84,7 @@ import { LgPageHeaderComponent } from './page-header.component';
 import { LgPageComponent } from './page.component';
 import { LgPanelComponent } from './panel.component';
 import { LgPresenceComponent } from './presence.component';
+import { LgProfileFactComponent, LgProfileIdentityComponent } from './profile-identity.component';
 import { LgSearchFieldComponent } from './search-field.component';
 import { LgSectionRuleComponent } from './section-rule.component';
 import { LgSigilComponent } from './sigil.component';
@@ -128,6 +131,8 @@ export const LG_GRIMOIRE = [
   LgPageComponent,
   LgPanelComponent,
   LgPresenceComponent,
+  LgProfileIdentityComponent,
+  LgProfileFactComponent,
   LgSearchFieldComponent,
   LgSectionRuleComponent,
   LgSigilComponent,

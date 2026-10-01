@@ -12,7 +12,8 @@
 // stylesheet owns them and the legacy screens depend on them:
 //   - the Google Fonts @import (src/index.html loads the same families);
 //   - the body rule (the game's body keeps its legacy font and colours until the shell moves to Grimoire);
-//   - the :root font-size rules (the game sets the root size from the reading-size setting: 14, 16 or 18px).
+//   - the :root font-size rules. src/styles.css sets the same sizes (100%, 115%, 130%; D-096), and has to: the app
+//     builds these copies as grimoire.css, which loads after the first render, and the root must be right before it.
 //
 // Run from the repository root (any working directory works; the paths are resolved from this file):
 //   node LL/src/Presentation/ll/design-system/scripts/sync-styles.mjs           write the app copies

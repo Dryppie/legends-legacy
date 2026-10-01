@@ -289,9 +289,9 @@
     "Cards"
   ],
   "lastChange": {
-    "at": "2026-10-01T12:18:10Z",
+    "at": "2026-10-01T13:50:00Z",
     "by": "Martin",
-    "note": "DS-020 State combinations: one state per channel, at most four marks on one thing, the drop order beside the Tag order, one colour per object, fixed marker positions and seven worked examples on Standards · State combinations; ItemSlot, EntryList, NavRail and LoadoutSlot take the attention diamond, ItemSlot the in-use square, and StateCombinationSpecimen draws the examples (D-094, D-095).",
+    "note": "The Character Overview moves to Grimoire inside the game's frame: Page `flow` (D-097), the main and side column `lg-aside` with `aside-width` (D-098), ProfileIdentity (D-099), and Grimoire roots in the legacy frame (D-100); ScreenOverview uses them.",
     "via": "Claude (Cowork)"
   },
   "layout": "files",

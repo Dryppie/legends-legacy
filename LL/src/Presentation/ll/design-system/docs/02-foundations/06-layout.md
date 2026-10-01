@@ -108,6 +108,7 @@ Each track layout has one behaviour per tier:
 | Stat grid (`lg-statgrid`) | Up to 6 tiles | 4 | 3 | 2 |
 | Data table (`lg-tablewrap`) | Every column | Priority 4 hidden | Priorities 3 and 4 hidden | Priority 1 only; scrolls inside its wrapper if still too wide |
 | Split comparison (`lg-compare`) | Two panes, 1 : 1 | 1 : 1 | 1 : 1 | One above the other, current first |
+| Main and side column (`lg-aside`) | The main column, and a 20rem side column beside it | As Wide | One column: the main column, then the side | As Narrow |
 
 Every grid has a floor. A Ledger never gets narrower than `ledger-min` (15rem), and a tile never narrower than `stat-min` (8.5rem). When a row can't hold the tier's count at that width, it holds one fewer. That keeps the three-group grid at two a row between 44 and 49rem, and keeps every label whole at 130%. Grids keep their empty tracks, so a short row keeps the columns of the grid above it.
 
@@ -180,6 +181,22 @@ Under 32rem, prefer a List of ListRows (a name, one value, one action) over a ta
 
 **Rows take one rhythm** (Foundations · Lines): a hairline between body rows by default, or every second row on `row-stripe` with `lg-tablewrap--zebra`, never both. One hairline closes the header and travels with it when it sticks; the table has no border around it.
 
+### Main and side column
+
+`lg-aside` sets a main column beside a narrow side column of supporting detail: the Character Overview's profile and Combat Style, with the Essence Loadout beside them (D-098).
+
+```html
+<div class="lg-aside">
+  <div class="lg-aside__main"> … a Banner, Panels … </div>
+  <aside class="lg-aside__side"> … a Panel … </aside>
+</div>
+```
+
+- **From Medium (44rem)** the side column is `aside-width` (20rem) and the main column takes the rest. Below, they stack: the main column first.
+- **Each column is a region**, so what sits in it follows its own width: in a 60rem Page the main column is about 38rem, so a Banner in it lays its figures under its identity.
+- **Stack in order of use.** The main column holds what the screen is about; the side holds what supports it. Don't put the screen's primary action in the side column: on a narrow screen it ends up last.
+- The layout reads its own width (`lg-aside`).
+
 ### Split comparison
 
 `lg-compare` puts two things side by side: the equipped item and a candidate, two builds, or two players. The panes are 1 : 1 from 32rem. Below that they stack, current first: reading order is DOM order.
@@ -235,6 +252,7 @@ At every step, in both specimens, no label truncates and nothing scrolls sideway
 | `ledger-min` | 15rem (240px) | The narrowest Ledger in a grid |
 | `stat-min` | 8.5rem (136px) | The narrowest StatTile in a grid |
 | `inspector-min` | 20rem (320px) | The narrowest inspector beside its list |
+| `aside-width` | 20rem (320px) | The side column beside a main column (`lg-aside`) |
 | `section-md` | 2rem (32px) | The gutter between columns (`--lg-gutter`) and the Page's side padding |
 | `section-sm`, `section-lg` | 24 and 48px | Section spacing |
 | `space-1` | 4px | The rhythm unit |

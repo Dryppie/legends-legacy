@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"LL","components":[{"name":"GameShell"},{"name":"TopBar"},{"name":"NavRail"},{"name":"TabStrip"},{"name":"Stage"},{"name":"Page"},{"name":"PageHeader"},{"name":"Banner"},{"name":"Folio"},{"name":"Panel"},{"name":"StatFigure"},{"name":"LevelPlate"},{"name":"Ledger"},{"name":"Meter"},{"name":"Track"},{"name":"StatTile"},{"name":"Delta"},{"name":"Sigil"},{"name":"Constellation"},{"name":"JourneyCard"},{"name":"LoadoutSlot"},{"name":"Chronicle"},{"name":"ItemLink"},{"name":"EntryList"},{"name":"ListRow"},{"name":"ItemSlot"},{"name":"Tag"},{"name":"Presence"},{"name":"CurrencyPill"},{"name":"Button"},{"name":"KeyHints"},{"name":"SearchField"},{"name":"Heading"},{"name":"SectionRule"},{"name":"Emblem"},{"name":"Icon"}]} */
+/* @ds-bundle: {"format":4,"namespace":"LL","components":[{"name":"GameShell"},{"name":"TopBar"},{"name":"NavRail"},{"name":"TabStrip"},{"name":"Stage"},{"name":"Page"},{"name":"PageHeader"},{"name":"Banner"},{"name":"Folio"},{"name":"Panel"},{"name":"StatFigure"},{"name":"LevelPlate"},{"name":"ProfileIdentity"},{"name":"Ledger"},{"name":"Meter"},{"name":"Track"},{"name":"StatTile"},{"name":"Delta"},{"name":"Sigil"},{"name":"Constellation"},{"name":"JourneyCard"},{"name":"LoadoutSlot"},{"name":"Chronicle"},{"name":"ItemLink"},{"name":"EntryList"},{"name":"ListRow"},{"name":"ItemSlot"},{"name":"Tag"},{"name":"Presence"},{"name":"CurrencyPill"},{"name":"Button"},{"name":"KeyHints"},{"name":"SearchField"},{"name":"Heading"},{"name":"SectionRule"},{"name":"Emblem"},{"name":"Icon"}]} */
 (function () {
   'use strict';
   var R = window.React;
@@ -1311,8 +1311,10 @@
   }
 
   /* ---------- Page (scrolling screen without stage art) ---------- */
+  // `flow`: a Page in a host frame that is not GameShell (the game's frame while screens migrate): in the normal flow,
+  // filling its parent's height, with no room kept for a TopBar; the host gives the gutters.
   function Page(p) {
-    return h('div', { className: cx('lg-page', p.className), role: p.role, 'aria-label': p.label },
+    return h('div', { className: cx('lg-page', p.flow && 'lg-page--flow', p.className), role: p.role, 'aria-label': p.label },
       h('div', { className: 'lg-page__inner', style: p.maxWidth ? { maxWidth: p.maxWidth } : undefined }, p.children));
   }
 
@@ -1520,6 +1522,22 @@
     return h('span', { className: cx('lg-presence', p.online ? 'is-online' : 'is-offline', p.className), title: p.online ? 'Online' : (p.lastSeen ? 'Last seen ' + p.lastSeen : 'Last seen unknown') },
       h('span', { className: 'lg-presence__dot', 'aria-hidden': 'true' }),
       p.online ? 'Online' : (p.compact ? (p.lastSeen || 'Unknown') : 'Last seen ' + (p.lastSeen || 'unknown')));
+  }
+
+  /* ---------- ProfileIdentity ---------- */
+  // Who a player is, at the head of a profile (D-099): an eyebrow, the name with the Nobility crown and, for another
+  // player, Presence; then a short list of facts — Guild, Essences, Achievement Points, Nobility. It sits in a Banner's body.
+  function ProfileIdentity(p) {
+    var facts = (p.facts || []).filter(Boolean);
+    return h('div', { className: cx('lg-identity', p.className) },
+      p.eyebrow ? h('span', { className: 'lg-identity__eyebrow' }, p.eyebrow) : null,
+      h('div', { className: 'lg-identity__name' },
+        p.noble ? h('span', { className: 'lg-identity__noble', role: 'img', 'aria-label': 'Noble', title: 'Active Nobility' }, h(Icon, { name: 'nobility', size: 16 })) : null,
+        h(Heading, { level: 'screen', as: p.as || 'h2', id: p.headingId }, p.name),
+        p.presence ? h(Presence, p.presence) : null),
+      facts.length ? h('dl', { className: 'lg-identity__facts' }, facts.map(function (f, i) {
+        return h('div', { key: f.key || i }, h('dt', null, f.label), h('dd', null, f.value));
+      })) : null);
   }
 
   /* ---------- ItemLink ---------- */
@@ -1785,7 +1803,7 @@
     Button: Button, KeyHints: KeyHints, Heading: Heading, SectionRule: SectionRule, Emblem: Emblem, Icon: Icon,
     Chronicle: Chronicle, ItemLink: ItemLink, Key: Key,
     Page: Page, PageHeader: PageHeader, SearchField: SearchField, Banner: Banner, StatFigure: StatFigure,
-    JourneyCard: JourneyCard, Ledger: Ledger, List: List, ListRow: ListRow, LoadoutSlot: LoadoutSlot, Presence: Presence, format: { number: fmt, short: short, range: range, times: times, fraction: fraction, percent: percent, unit: unit, parts: numParts, none: NONE, duration: duration, spokenDuration: spokenDuration }, announce: announce,
+    JourneyCard: JourneyCard, Ledger: Ledger, List: List, ListRow: ListRow, LoadoutSlot: LoadoutSlot, Presence: Presence, ProfileIdentity: ProfileIdentity, format: { number: fmt, short: short, range: range, times: times, fraction: fraction, percent: percent, unit: unit, parts: numParts, none: NONE, duration: duration, spokenDuration: spokenDuration }, announce: announce,
     states: STATES, topState: firstState, why: why, ornament: { audit: auditOrnament, budget: ORNAMENT_BUDGET },
     motion: { duration: MOTION.duration, easing: MOTION.easing, ms: motionMs, reduced: reducedMotion, useLive: useLive, useLiveList: useLiveList, audit: auditMotion, loopsAllowed: LOOPS_ALLOWED }, layers: { open: openLayer, use: useLayer, top: function () { var t = layerTop(); return t ? t.kind : null; } }, RARITY_CODES: RARITY_CODES
   };

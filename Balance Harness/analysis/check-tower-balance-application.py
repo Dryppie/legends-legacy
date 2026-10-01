@@ -112,7 +112,7 @@ def main():
     expected = 'AggregateInputsAndReplaysVerified' if aggregate else 'IsolatedInputsAndReplaysVerified' if a.candidate_root else 'QualifiedInputsAndReplaysVerified' if qualification else 'AppliedInputsAndReplaysVerified'
     family_size = aggregate['assessment']['familySize'] if aggregate else evidence['assessment']['familySize']
     io.check(result['status'] == expected and result['matchedInputs'] == evidence['evaluationFights']
-             and result['fullReplays'] == family_size and io.sha(floor) == floor_pin, 'Incomplete application parity')
+             and result['fullReplays'] == family_size * (4 if aggregate and aggregate['version'] == 'tower-balance-ni-restoration-aggregate-v1' else 1) and io.sha(floor) == floor_pin, 'Incomplete application parity')
     io.write(owner/'completion.json', dict(status='Qualified' if qualification else 'Verified', floorFileSha256=floor_pin, resultSha256=io.sha(owner/'result.json'),
                                           matchedInputs=result['matchedInputs'], fullReplays=result['fullReplays'], newSeeds=0,
                                           aggregateSha256=a.aggregate_sha256, isolated=bool(a.candidate_root)))

@@ -8,8 +8,8 @@ window.lgParityNormalize = function (root) {
   var ID_ATTRS = ['id', 'aria-describedby', 'aria-controls', 'aria-labelledby', 'aria-activedescendant', 'for'];
   // Static attributes Angular leaves on attribute-selector components (button[lgButton], li[lgListRow], h1[lgHeading]).
   var INPUTS = ['sub', 'size', 'density', 'hotkey', 'icon', 'state', 'reason', 'shortfall', 'remaining', 'pendinglabel',
-    'rarity', 'image', 'meta', 'quantity', 'value', 'live', 'selected', 'muted', 'interactive'];
-  var SKIP = /^(_ng|ng-reflect|ng-version|lgslot$|lglistrow$|lgbutton$|lgheading$|lgwhy$|lgwhyid$|lgkey$)/;
+    'rarity', 'image', 'meta', 'quantity', 'value', 'live', 'selected', 'muted', 'interactive', 'label'];
+  var SKIP = /^(_ng|ng-reflect|ng-version|lgslot$|lglistrow$|lgbutton$|lgheading$|lgwhy$|lgwhyid$|lgkey$|lgprofilefact$)/;
   function styleNorm(s) {
     return s.split(';').map(function (x) { return x.trim(); }).filter(Boolean).map(function (x) {
       var i = x.indexOf(':'); return x.slice(0, i).trim() + ': ' + x.slice(i + 1).trim().replace(/"/g, '');
@@ -25,7 +25,7 @@ window.lgParityNormalize = function (root) {
       if (node.nodeType !== 1) return;
       var tag = node.tagName.toLowerCase();
       if (tag.indexOf('lg-') === 0) { Array.prototype.forEach.call(node.childNodes, function (k) { walk(k, depth); }); return; }
-      var attrComponent = node.hasAttribute('lgbutton') || node.hasAttribute('lglistrow') || node.hasAttribute('lgheading');
+      var attrComponent = node.hasAttribute('lgbutton') || node.hasAttribute('lglistrow') || node.hasAttribute('lgheading') || node.hasAttribute('lgprofilefact');
       var attrs = [];
       Array.prototype.forEach.call(node.attributes, function (a) {
         var name = a.name, v = a.value;

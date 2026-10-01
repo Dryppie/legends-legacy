@@ -20,6 +20,7 @@ import {
   SidebarLayoutPreferenceService,
 } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 import { GoogleSignInButtonComponent } from '../../../shared/components/google-sign-in-button/google-sign-in-button.component';
+import { GrimoirePreviewPreferenceService } from '../../../core/services/client-side/grimoire-preview/grimoire-preview-preference.service';
 import {
   ReadingFont,
   ReadingFontSize,
@@ -55,6 +56,7 @@ export class SettingsComponent {
   public readonly guild;
   readonly chatLayout;
   readonly sidebarLayout;
+  readonly characterOverviewPreview;
   readonly readingFont;
   readonly readingFontSize;
   readonly readingFontOptions: ReadonlyArray<{
@@ -80,15 +82,15 @@ export class SettingsComponent {
   }> = [
     {
       value: 'default',
-      label: '14px',
+      label: 'Default',
     },
     {
       value: 'large',
-      label: '16px',
+      label: 'Large (115%)',
     },
     {
       value: 'extra-large',
-      label: '18px',
+      label: 'Extra large (130%)',
     },
   ];
 
@@ -99,11 +101,13 @@ export class SettingsComponent {
     private readonly chatLayoutPreference: ChatLayoutPreferenceService,
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly typographyPreference: TypographyPreferenceService,
+    private readonly grimoirePreview: GrimoirePreviewPreferenceService,
   ) {
     this.guild = guildState.guild;
     this.currentCharacter = this.authService.currentCharacter;
     this.chatLayout = this.chatLayoutPreference.layout;
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
+    this.characterOverviewPreview = this.grimoirePreview.characterOverview;
     this.readingFont = this.typographyPreference.readingFont;
     this.readingFontSize = this.typographyPreference.readingFontSize;
 
@@ -126,6 +130,10 @@ export class SettingsComponent {
 
   setChatLayout(layout: ChatLayout): void {
     this.chatLayoutPreference.setLayout(layout);
+  }
+
+  setCharacterOverviewPreview(enabled: boolean): void {
+    this.grimoirePreview.setCharacterOverview(enabled);
   }
 
   setSidebarLayout(layout: SidebarLayout): void {

@@ -190,7 +190,7 @@ class KodokuMidpointTests(unittest.TestCase):
         provenance=source/d.PROVENANCE
         write(source/'result.json',dict(diagnosticOnly=True,usedForAcceptance=False))
         write(source/'scope.json',dict(execution={},settings={},contentHashes={}))
-        for index in (3,4):
+        for index in (3,4,5,6):
             write(provenance,dict(declaration=str(source/'unused.json'),declarationSha256='pinned',batchIndex=index))
             q=dict(diagnosticVersion=d.DIAGNOSTIC,inputHashes={str(provenance):b.sha(provenance)},mode='screen',floor=8,seeds=list(range(16)),searchSeeds=[],maximumFights=2976)
             with patch.object(d,'read_contract',return_value=(contract,cells)):
@@ -198,13 +198,13 @@ class KodokuMidpointTests(unittest.TestCase):
                 else:
                     with self.assertRaises(ValueError):d.audit_request(None,source,q)
 
-    def test_cli_accepts_four_panel_indices_but_still_requires_bound_contract(self):
+    def test_cli_accepts_six_panel_indices_but_still_requires_bound_contract(self):
         import subprocess
         import sys
-        for index in (2,3,4):
+        for index in (2,3,4,5,6):
             result=subprocess.run([sys.executable,'-B',str(io.__file__),'--mode','screen','--name','midpoint-cli-boundary',
                                    '--floor','8','--artifacts',str(self.api.parent),'--diagnostic-batch',str(index)],capture_output=True,text=True)
             self.assertNotEqual(0,result.returncode)
-            self.assertIn('invalid choice' if index==4 else 'Complete diagnostic binding required',result.stderr)
+            self.assertIn('invalid choice' if index==6 else 'Complete diagnostic binding required',result.stderr)
 
 if __name__=='__main__':unittest.main()

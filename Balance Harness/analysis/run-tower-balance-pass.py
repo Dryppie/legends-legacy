@@ -311,7 +311,7 @@ def audit(output):
     files = authenticate(output)
     q, result = read(output / 'request.json'), read(output / 'result.json')
     diagnostic_paths = [p for p in q['inputHashes'] if Path(p).name in
-        ('eight-item-diagnostic-provenance.json', 'kodoku-offense-diagnostic-provenance.json', 'kodoku-offense-refinement-diagnostic-provenance.json', 'kodoku-midpoint-diagnostic-provenance.json', 'ni-restoration-diagnostic-provenance.json')]
+        ('eight-item-diagnostic-provenance.json', 'kodoku-offense-diagnostic-provenance.json', 'kodoku-offense-refinement-diagnostic-provenance.json', 'kodoku-midpoint-diagnostic-provenance.json', 'ni-restoration-diagnostic-provenance.json', 'ni-restoration-offense-diagnostic-provenance.json')]
     check(bool(diagnostic_paths) == bool(q.get('diagnosticVersion')) and len(diagnostic_paths) <= 1, 'Diagnostic marker/provenance mismatch')
     diagnostic_module(q.get('diagnosticVersion')).audit_request(SimpleNamespace(authenticate=authenticate, ability_module=ability_module), output, q)
     ni_family = [Path(p) for p in q['inputHashes'] if Path(p).name == 'ni-restoration-family-provenance.json']
@@ -373,6 +373,8 @@ def audit(output):
         check(read(output / 'cells.json') == read(source / 'cells.json'), 'Ability trial changed its recipe family')
         check(read(output / 'scope.json')['settings'] == read(source / 'scope.json')['settings'],
               'Ability trial changed combat settings')
+        if provenance['plan'].get('version') == 'tower-ni-restoration-offense-v1':
+            check(q.get('diagnosticVersion') == 'floor9-restoration-offense-diagnostic-v1', 'Ni offense calibration is diagnostic only')
         ability_verification = ability_module().verify(source / 'content', output / 'content', provenance['plan'], q['floor'])
     penetration_provenance = [Path(path) for path in q['inputHashes']
                               if Path(path).name == 'penetration-candidate-provenance.json']
@@ -520,7 +522,8 @@ def diagnostic_module(version=None):
         return eight_item_module()
     if version == 'floor9-limited-restoration-diagnostic-v1':
         return ni_restoration_module()
-    modules = {'floor8-kodoku-offense-diagnostic-v1': 'tower-kodoku-offense-diagnostic.py',
+    modules = {'floor9-restoration-offense-diagnostic-v1': 'tower-ni-restoration-offense-diagnostic.py',
+               'floor8-kodoku-offense-diagnostic-v1': 'tower-kodoku-offense-diagnostic.py',
                'floor8-kodoku-offense-refinement-diagnostic-v1': 'tower-kodoku-offense-refinement-diagnostic.py',
                'floor8-kodoku-midpoint-diagnostic-v1': 'tower-kodoku-midpoint-diagnostic.py'}
     check(version in modules, 'Unknown diagnostic version')
@@ -575,7 +578,7 @@ def main():
     p.add_argument('--ni-restoration-family', type=Path, help='Seed-free exact fifteen-variant floor-nine Restoration extension')
     p.add_argument('--diagnostic-contract', type=Path, help='Pinned versioned diagnostic; never acceptance')
     p.add_argument('--diagnostic-sha256')
-    p.add_argument('--diagnostic-batch', type=int, choices=[0, 1, 2, 3])
+    p.add_argument('--diagnostic-batch', type=int, choices=[0, 1, 2, 3, 4, 5])
     p.add_argument('--gear-reference', nargs=2, metavar=('SOURCE_ID', 'TEMPLATE_ID'),
                    help='Seed-free preparation: retain the family and copy saved template equipment onto one saved composition')
     p.add_argument('--fixed-support-reference', nargs=3, action='append', default=[],
@@ -701,6 +704,8 @@ def main():
     ability_plan = None
     if a.ability_candidate:
         ability_plan = read(a.ability_candidate)
+        if ability_plan.get('version') == 'tower-ni-restoration-offense-v1':
+            check(diagnostic is not None and diagnostic['version'] == 'floor9-restoration-offense-diagnostic-v1', 'Ni offense calibration is diagnostic only')
         ability_module().validate(api, ability_plan, a.floor)
     health_plan = read(a.health_pressure_candidate) if a.health_pressure_candidate else None
     if health_plan is not None:
@@ -741,7 +746,7 @@ def main():
         for name in ('tower-eight-item-diagnostic.py','tower-one-healer-family.py'):
             helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
             for path in (helper,owner/name): pins[str(path)] = sha(path)
-        if diagnostic and diagnostic['version'] in ('floor8-kodoku-offense-diagnostic-v1', 'floor8-kodoku-offense-refinement-diagnostic-v1', 'floor8-kodoku-midpoint-diagnostic-v1'):
+        if diagnostic and diagnostic['version'] in ('floor9-restoration-offense-diagnostic-v1', 'floor8-kodoku-offense-diagnostic-v1', 'floor8-kodoku-offense-refinement-diagnostic-v1', 'floor8-kodoku-midpoint-diagnostic-v1'):
             helper = Path(diagnostic_module(diagnostic['version']).__file__); shutil.copy2(helper, owner/helper.name)
             for path in (helper,owner/helper.name): pins[str(path)] = sha(path)
     if a.one_healer_family:
@@ -807,6 +812,14 @@ def main():
             for name in (candidate_helper, 'tower-kodoku-shared-penetration.py'):
                 helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
                 for path in (helper,owner/name): pins[str(path)] = sha(path)
+        if ability_plan['version'] == 'tower-ni-restoration-acceptance-v1':
+            for name in ('tower-ni-restoration-acceptance.py', 'tower-kodoku-shared-penetration.py'):
+                helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
+                for path in (helper, owner/name): pins[str(path)] = sha(path)
+        if ability_plan['version'] == 'tower-ni-restoration-offense-v1':
+            for name in ('tower-ni-restoration-offense.py', 'tower-kodoku-shared-penetration.py'):
+                helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)
+                for path in (helper, owner/name): pins[str(path)] = sha(path)
         if ability_plan['version'] == 'tower-ni-copy-health-v1':
             for name in ('tower-ni-copy-health.py', 'tower-kodoku-shared-penetration.py'):
                 helper = Path(__file__).with_name(name); shutil.copy2(helper, owner/name)

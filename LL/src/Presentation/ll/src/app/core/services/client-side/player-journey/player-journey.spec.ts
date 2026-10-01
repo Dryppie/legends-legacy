@@ -4,6 +4,7 @@ import {
   getPlayerJourneyDestinationRoute,
   isPlayerJourneyOnboardingComplete,
   PlayerJourneyStage,
+  playerJourneyStageLabels,
   resolvePlayerJourneyStage,
 } from './player-journey';
 import {
@@ -19,6 +20,23 @@ import {
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 
 describe('player journey', () => {
+  it('names the journey stages in order, using the current phase label for the current stage', () => {
+    expect(playerJourneyStageLabels()).toEqual([
+      'First Hunt',
+      'Claim Your Power',
+      'Prepare Your Gear',
+      'Enter Shenic',
+      'Shenic Journey',
+      'Journey Complete',
+    ]);
+    expect(
+      playerJourneyStageLabels({
+        stage: PlayerJourneyStage.FirstWeapon,
+        phaseLabel: 'The Smith\'s Chain',
+      })[PlayerJourneyStage.FirstWeapon],
+    ).toBe("The Smith's Chain");
+  });
+
   it('guides the character to choose and equip a starter weapon without unlocking tutorial crafting', () => {
     const current = journal(
       TRAINING_DAY_QUEST_ID,

@@ -22,6 +22,7 @@ Grimoire is the game's design system. Its source of truth is `design-system/`, i
 - Read `design-system/AGENTS.md` before changing a Grimoire token, an `lg-*` component or `src/styles/grimoire/`. Those changes go through the design system: docs, tokens, port and decision log together.
 - To see what a component looks like and how it behaves, open the catalog: from this directory, run `python -m http.server 4600 -d design-system` and go to `http://localhost:4600/catalog/`.
 - Migrate a screen on purpose, as its own task. Don't half-convert a screen while fixing something else in it.
+- A migrated screen lives beside the legacy one in a folder whose name ends in `-grimoire` (`character-overview-grimoire/`) until it replaces it, behind a Settings → Interface preview (`GrimoirePreviewPreferenceService`). Its host carries the `lg-root` class, its Page takes `flow` (D-097), and its own styles use Grimoire tokens only. The legacy element styles in `src/styles.css` stop at `lg-root` (D-100), and the build leaves rem in a `-grimoire` folder alone. `CHARACTER_OVERVIEW_GRIMOIRE_PLAN.md` at the repository root is the worked example.
 
 **Legacy styling.** The `--ll-*` tokens (`src/styles/tokens.css`), the `ll-*` shared classes in `src/styles.css`, and Tailwind colour and typography classes (`text-primary`, `border-primary`, `bg-texture`, `border-light_gray`, the `zinc` text colours) are legacy. They stay only for screens not yet migrated. Use them only for a small fix to such a screen, following "Legacy Screens" below. Don't use them in new screens, and don't add new ones.
 
@@ -38,6 +39,7 @@ These rules apply only when you change a screen that has not moved to Grimoire.
 - Use `bg-black/30` or similar low-opacity dark fills inside textured panels when content needs grouping.
 - Use danger/success colors intentionally for outcomes, warnings, validation, healing, damage, and destructive actions.
 - Avoid bright modern gradients, glassy SaaS cards, oversized hero layouts, decorative blobs, and one-off palettes.
+- Legacy sizes are written for the old 14px root. The root now follows Grimoire (16px at Default, D-096), and the build multiplies every rem outside `src/styles/grimoire/` and `-grimoire` screen folders by 0.875 (`scripts/postcss-legacy-rem`). Keep writing legacy rem values and Tailwind sizes as before; don't convert them by hand. A rem set outside a stylesheet — an inline `style`, or code that turns rem into pixels from the root's font size — is not rebased, so multiply it by 0.875 yourself.
 - Keep rounded corners modest. Existing panels commonly use `rounded`, `rounded-md`, or `rounded-lg`.
 - Respect the global font setup: headings use the Marcellus feel through `h1`, `h2`, and `h3`; body text uses Poppins. Use the Tailwind text sizes already in the app.
 

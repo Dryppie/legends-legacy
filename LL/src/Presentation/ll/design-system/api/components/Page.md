@@ -17,7 +17,7 @@ The information screen frame.
 
 ## Notes
 
-Scrolling frame for information screens (no stage art). Place it as GameShell's children. It is a layout region (lg-region): content inside follows the tiers of its width — Stacked, Narrow from 32rem, Medium from 44rem, Wide from 68rem (Foundations · Layout).
+Scrolling frame for information screens (no stage art). Place it as GameShell's children, or with `flow` in another frame. It is a layout region (lg-region): content inside follows the tiers of its width — Stacked, Narrow from 32rem, Medium from 44rem, Wide from 68rem (Foundations · Layout).
 
 ## Props (PageProps)
 
@@ -26,6 +26,7 @@ Scrolling frame for information screens (no stage art). Place it as GameShell's 
 | `label` | `string` |  |
 | `maxWidth` | `number \| string` | Defaults to page-max (80rem). |
 | `role` | `string` |  |
+| `flow` | `boolean` | In a host frame that is not GameShell (the game's frame while screens migrate): in the normal flow, filling its parent's height, with no room kept for a TopBar; the host gives the gutters. |
 | `children` | `React.ReactNode` |  |
 
 ## More

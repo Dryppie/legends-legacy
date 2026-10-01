@@ -57,6 +57,7 @@ In the catalogue these are grouped as "Game Components · <family>".
 | Component | Plain subtitle | Family | Status |
 | --- | --- | --- | --- |
 | LevelPlate | the level display | Character | Draft |
+| ProfileIdentity | who a player is | Character | Draft |
 | Sigil | the hex stat badge | Character | Draft |
 | Constellation | the stat star chart | Character | Draft |
 | Emblem | the attribute sign | Character | Draft |

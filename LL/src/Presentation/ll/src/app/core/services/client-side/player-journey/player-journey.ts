@@ -295,6 +295,26 @@ function normalizeRoute(route: string): string {
   return withSlash.startsWith('/game/') ? withSlash : `/game${withSlash}`;
 }
 
+/**
+ * The journey's stages in order, each by its phase name: the steps of the JourneyCard's track. The current stage's
+ * name is the guidance's own `phaseLabel` when a quest chain names it, so pass that in to keep the track's current
+ * step matching the card's phase.
+ */
+export function playerJourneyStageLabels(
+  current?: Pick<PlayerJourneyGuidance, 'stage' | 'phaseLabel'> | null,
+): string[] {
+  return [
+    PlayerJourneyStage.FirstHunt,
+    PlayerJourneyStage.SoulArchive,
+    PlayerJourneyStage.FirstWeapon,
+    PlayerJourneyStage.EnterLumo,
+    PlayerJourneyStage.Shenic,
+    PlayerJourneyStage.BetaComplete,
+  ].map((stage) =>
+    current && current.stage === stage ? current.phaseLabel : phaseLabel(stage),
+  );
+}
+
 function phaseLabel(stage: PlayerJourneyStage): string {
   switch (stage) {
     case PlayerJourneyStage.FirstHunt:

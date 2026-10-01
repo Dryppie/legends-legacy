@@ -23,7 +23,7 @@ Whole-screen templates. An archetype fixes a screen's shell configuration, what 
 **Stage content:** a Page instead of a Stage: a PageHeader, then content on `ground`. Art appears only inside a Banner.
 **Order:** lead with what the player needs to decide next (the JourneyCard), then who they are (one Banner with the headline figures), then the detail (Panels and Ledgers). Show every value the game knows, label it plainly, and explain it on hover or focus — atmosphere never replaces information.
 **Density:** Standard; the Folio, when there is one, is Comfortable.
-**Layout:** the four-group Ledger grid for the attributes; the Banner's figures beside its identity at Wide.
+**Layout:** a main and side column (`lg-aside`) for the profile and its supporting Panels; the four-group Ledger grid for the attributes; the Banner's figures beside its identity at Wide. In the game's own frame, while screens migrate, the Page takes `flow` (D-097).
 **Showcase:** ScreenOverview — the Character Overview.
 **Status:** Draft
 

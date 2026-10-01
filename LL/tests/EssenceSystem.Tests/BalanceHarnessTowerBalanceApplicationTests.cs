@@ -25,6 +25,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var recovery = version == "tower-balance-recovery-aggregate-v1";
         var limitedArmor = version == "tower-balance-limited-armor-aggregate-v1";
         var niCopyHealth = version == "tower-balance-ni-copy-health-aggregate-v1";
+        var niRestoration = version == "tower-balance-ni-restoration-aggregate-v1";
         var niPenetration = version == "tower-balance-ni-penetration-aggregate-v1";
         var limitedResistance = version == "tower-balance-limited-resistance-aggregate-v1";
         var miasma = version == "tower-balance-miasma-aggregate-v1";
@@ -33,7 +34,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var fixedKodoku = version == "tower-balance-kodoku-fixed-aggregate-v1";
         var midpointKodoku = version == "tower-balance-kodoku-midpoint-aggregate-v1";
         var fixedAcceptance = fixedKodoku || midpointKodoku;
-        if ((version != "tower-balance-aggregate-v1" && !recovery && !limitedArmor && !limitedResistance && !niCopyHealth && !niPenetration && !miasma && !miasmaResource && !sharedPenetration && !fixedAcceptance) ||
+        if ((version != "tower-balance-aggregate-v1" && !recovery && !limitedArmor && !limitedResistance && !niCopyHealth && !niPenetration && !niRestoration && !miasma && !miasmaResource && !sharedPenetration && !fixedAcceptance) ||
             declaration.GetProperty("version").GetString() != version ||
             evidence.GetProperty("status").GetString() != "Verified" || evidence.GetProperty("phase").GetString() != "confirm" ||
             evidence.GetProperty("assessment").GetProperty("verdict").GetString() != "Pass")
@@ -51,6 +52,16 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
             declaration.GetProperty("candidatePlan").GetProperty("version").GetString() != "tower-unchanged-catalog-v1" ||
             declaration.GetProperty("candidatePlan").EnumerateObject().Count() != 1))
             throw new InvalidDataException("The limited-equipment aggregate requires unchanged content and its exact floor and family.");
+        if (niRestoration)
+        {
+            if (family != 163 || declaration.GetProperty("floor").GetInt32() != 9)
+                throw new InvalidDataException("Nominated Ni requires the complete 163-recipe family.");
+            NiRestorationAcceptanceTests.ValidatePlan(declaration.GetProperty("candidatePlan"));
+        }
+        else if (declaration.TryGetProperty("candidatePlan", out var restorationPlan) &&
+                 restorationPlan.TryGetProperty("version", out var restorationVersion) &&
+                 restorationVersion.GetString() is "tower-ni-restoration-acceptance-v1" or "tower-ni-restoration-offense-v1")
+            throw new InvalidDataException("Nominated Ni requires its separate acceptance contract; diagnostics cannot qualify.");
         if (niPenetration)
         {
             if (family != 148 || declaration.GetProperty("floor").GetInt32() != 9)
@@ -78,7 +89,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
                 throw new InvalidDataException("Shared penetration requires the complete floor-eight family.");
             ValidateSharedPenetrationPlan(declaration.GetProperty("candidatePlan"), fixedKodoku, midpointKodoku);
         }
-        if (count != (fixedAcceptance ? 32 : recovery || miasmaResource || sharedPenetration ? 8 : 4) || samples != (miasmaResource || sharedPenetration || fixedAcceptance ? 16 : limitedArmor || limitedResistance || niCopyHealth || niPenetration || miasma ? 32 : 128) || batches.Length != count || paths.Length != count || paths.Distinct().Count() != count ||
+        if (count != (niRestoration ? 8 : fixedAcceptance ? 32 : recovery || miasmaResource || sharedPenetration ? 8 : 4) || samples != (niRestoration ? 64 : miasmaResource || sharedPenetration || fixedAcceptance ? 16 : limitedArmor || limitedResistance || niCopyHealth || niPenetration || miasma ? 32 : 128) || batches.Length != count || paths.Length != count || paths.Distinct().Count() != count ||
             !paths.SequenceEqual(batches.Select(b => b.GetProperty("source").GetString())) ||
             assessment.GetProperty("familySize").GetInt32() != family || assessment.GetProperty("samples").GetInt32() != count*samples ||
             evidence.GetProperty("evaluationFights").GetInt32() != count*samples*family ||
@@ -632,7 +643,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     internal static void ValidateAggregateEquipment(JsonElement evidence, JsonElement declaration, JsonElement cells)
     {
         var healthPressure = declaration.GetProperty("candidatePlan").GetProperty("version").GetString()
-            is "tower-ni-penetration-v1" or "tower-ni-copy-health-v1" or "tower-health-pressure-candidate-v1" or "tower-recovery-pressure-refinement-v1" or "tower-unchanged-catalog-v1" or "tower-kodoku-miasma-v1" or "tower-kodoku-shared-penetration-v1" or "tower-kodoku-eight-item-pressure-refinement-v1" or "tower-kodoku-eight-item-pressure-midpoint-v1";
+            is "tower-ni-restoration-acceptance-v1" or "tower-ni-penetration-v1" or "tower-ni-copy-health-v1" or "tower-health-pressure-candidate-v1" or "tower-recovery-pressure-refinement-v1" or "tower-unchanged-catalog-v1" or "tower-kodoku-miasma-v1" or "tower-kodoku-shared-penetration-v1" or "tower-kodoku-eight-item-pressure-refinement-v1" or "tower-kodoku-eight-item-pressure-midpoint-v1";
         var hasContract = declaration.TryGetProperty("equipmentEligibility", out var contract) && contract.ValueKind != JsonValueKind.Null;
         if (!healthPressure && !hasContract) return;
         if (!hasContract || contract.GetProperty("version").GetString() != "tower-limited-equipment-v1" ||
@@ -861,6 +872,10 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var archive = Path.Combine(q.Source, "evaluation");
         var trials = TowerLoadoutArchive.Verify(archive, token);
         var runner = new TowerBattleRunner(root, OfflineContent.ForTower(root, settings));
+        var replayCount = q.Aggregate is not null && HarnessJson.Read<JsonElement>(q.Aggregate).GetProperty("version").GetString() == "tower-balance-ni-restoration-aggregate-v1" ? 4 : 1;
+        var replaySeeds = HarnessJson.Read<JsonElement>(Path.Combine(q.Source, "request.json")).GetProperty("seeds")
+            .EnumerateArray().Take(replayCount).Select(s => s.GetInt32()).ToHashSet();
+        Assert.Equal(replayCount, replaySeeds.Count);
         var replayed = new HashSet<string>(); var matched = 0;
         foreach (var trial in trials)
         {
@@ -868,14 +883,14 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
             var scenario = HarnessJson.Read<TowerScenario>(Path.Combine(archive, "recipes", trial.Recipe + ".json"));
             var input = runner.CreateInput(scenario, trial.Seed, settings.Threat, settings.CheckpointIntervalTicks);
             Assert.Equal(trial.InputHash, HarnessJson.Hash(input)); matched++;
-            if (replayed.Add(trial.Stage))
+            if (replaySeeds.Contains(trial.Seed) && replayed.Add(trial.Stage + "/" + trial.Seed))
             {
                 var actual = await runner.RunAsync(input, token: token);
                 Assert.Equal(HarnessJson.Hash(TowerLoadoutArchive.ReadBattle(archive, trial.Id, scope.ReportStorage)), HarnessJson.Hash(actual));
             }
         }
         var cells = HarnessJson.Read<BalanceHarnessTowerBalancePassTests.Cell[]>(Path.Combine(q.Source, "cells.json"));
-        Assert.Equal(cells.Length, replayed.Count);
+        Assert.Equal(cells.Length * replayCount, replayed.Count);
         if (qualification is not null) Assert.All(cells, c => Assert.Equal(qualification.Floor, c.Scenario.FloorNumber));
         HarnessJson.WriteNew(q.Output, new { status = q.Aggregate is not null ? "AggregateInputsAndReplaysVerified" : q.CandidateRoot is not null ? "IsolatedInputsAndReplaysVerified" : qualification is null ? "AppliedInputsAndReplaysVerified" : "QualifiedInputsAndReplaysVerified", matchedInputs = matched,
             fullReplays = replayed.Count, newSeeds = 0, manifestPin = q.ManifestPin,

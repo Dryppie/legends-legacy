@@ -245,6 +245,7 @@
   --ledger-min: 15rem; /* The narrowest a Ledger gets in a grid before the grid drops a column, so labels such as Magic Penetration never truncate. (240px at the default text size.) */
   --stat-min: 8.5rem; /* The narrowest a StatTile gets in a stat grid before the grid drops a column. A tile with a Delta needs more room: give it a one-word label. (136px at the default text size.) */
   --inspector-min: 20rem; /* The narrowest an inspector gets beside its list; the list gives way first. (320px at the default text size.) */
+  --aside-width: 20rem; /* The side column of a main-and-side layout (lg-aside): the Essence Loadout beside the Character Overview's profile. (320px at the default text size.) */
   --z-content: 0; /* Layer 0 · content: the stage, the Page and everything in flow. The default; written only to reset a layer. */
   --z-raised: 1; /* A focused row, or the region the pointer or focus is in, rises above its neighbours inside its own stacking context. Never used across regions. */
   --z-sticky: 10; /* Sticky table headers, a table's held first column and sticky section heads, over the content that scrolls beneath them. */

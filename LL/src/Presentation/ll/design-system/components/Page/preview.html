@@ -1,4 +1,4 @@
-<!-- @dsCard group="Shell" height=360 -->
+<!-- @dsCard group="Shell" height=680 -->
 <!doctype html>
 <html>
 <head>
@@ -18,9 +18,14 @@ body { background: var(--ground); }
 <script>
 var L = window.LL, h = React.createElement, F = React.Fragment;
 var LOGO = '../../assets/Logos/Logo.svg';
-ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { position: 'relative', height: 360 } }, h(L.Page, { label: 'Example' },
-  h(L.PageHeader, { icon: 'leaderboard', eyebrow: 'City', title: 'Leaderboard', summary: 'Top Legends by Combat Rating this season' }),
-  h(L.Panel, { title: 'Season standings' }, h('p', null, 'Page scrolls on its own; the TopBar floats above it.')))));
+ReactDOM.createRoot(document.getElementById('root')).render(h(F, null,
+  h('div', { style: { position: 'relative', height: 360 } }, h(L.Page, { label: 'Example' },
+    h(L.PageHeader, { icon: 'leaderboard', eyebrow: 'City', title: 'Leaderboard', summary: 'Top Legends by Combat Rating this season' }),
+    h(L.Panel, { title: 'Season standings' }, h('p', null, 'Page scrolls on its own; the TopBar floats above it.')))),
+  // flow: in a frame that is not GameShell, which gives the gutters (here 24px), the Page sits in the flow and keeps no room for a TopBar.
+  h('div', { style: { display: 'flex', flexDirection: 'column', height: 300, padding: '24px 0 24px 24px', boxSizing: 'border-box', borderTop: '1px solid var(--line)' } }, h(L.Page, { label: 'Example in another frame', flow: true },
+    h(L.PageHeader, { icon: 'guild', eyebrow: 'City', title: 'Guild', summary: 'A Page with flow, inside the game\u2019s own frame' }),
+    h(L.Panel, { title: 'Members' }, h('p', null, 'No room is kept for a TopBar; the frame gives the gutters.'))))));
 </script>
 </body>
 </html>

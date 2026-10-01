@@ -1,5 +1,7 @@
 # Floor 9: isolated Ni penetration trial — 2026-10-01
 
+**Follow-up completed:** The [limited-Restoration diagnostic](Tower-Floor9-Limited-Restoration-20261001.md) found promising eight-item routes after 5,216 fights. The original candidate remains rejected; next is a separate offense calibration. The trial and original proposal below remain historical evidence.
+
 ## Completed result
 
 **Not accepted after the complete 18,944-fight screen. No confirmation or local application.** Every raw outcome and prepared participant was independently recounted. The 115 eligible recipes won **0–4 / 128**, far below the 25-win qualifying minimum. Four Health/Regeneration controls exceeded the 43-win ceiling; the largest adjusted upper bound was **72.71%**. Floor 9 remains unresolved.

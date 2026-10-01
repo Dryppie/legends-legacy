@@ -1,0 +1,226 @@
+<lg-page label="Character overview" flow>
+  <lg-page-header
+    icon="overview"
+    eyebrow="Character"
+    title="Overview"
+    summary="Stats, combat rating, and Essence loadout"
+  >
+    <lg-search-field
+      lgSlot="actions"
+      label="Search character by name"
+      placeholder="Search character by name…"
+      [maxLength]="80"
+      [(value)]="query"
+      [suggestions]="suggestions()"
+      [loading]="suggesting()"
+      [searched]="suggestionsSearched()"
+      (pick)="pick($event)"
+      (submitted)="search($event)"
+    />
+    <button
+      lgButton
+      lgSlot="actions"
+      size="sm"
+      [state]="searchLoading() ? 'pending' : 'available'"
+      pendingLabel="Searching…"
+      (click)="search()"
+    >
+      Search
+    </button>
+    @if (viewing()) {
+      <button lgButton="quiet" lgSlot="actions" size="sm" (click)="backToOwn()">Back to my profile</button>
+    } @else {
+      <button
+        lgButton="quiet"
+        lgSlot="actions"
+        size="sm"
+        [state]="loading() ? 'pending' : 'available'"
+        pendingLabel="Refreshing…"
+        (click)="refresh()"
+      >
+        Refresh
+      </button>
+    }
+  </lg-page-header>
+
+  @if (error()) {
+    <p class="ovw-state ovw-state--error" role="alert">
+      <span class="ovw-state__glyph" aria-hidden="true">✕</span>
+      {{ error() }}
+      <button lgButton="link" size="sm" (click)="refresh()">Try again</button>
+    </p>
+  }
+  @if (!character()) {
+    @if (loading()) {
+      <p class="ovw-state" aria-busy="true">Loading character overview…</p>
+    } @else if (!error()) {
+      <p class="ovw-state">No character overview loaded.</p>
+    }
+  }
+
+  @if (character(); as c) {
+    @if (journey(); as j) {
+      <lg-journey-card
+        id="ovw-journey"
+        [stages]="journeyStages()"
+        [phase]="j.phaseLabel"
+        [title]="j.title"
+        [summary]="j.summary"
+        [objective]="j.objective"
+        [nextUnlockLabel]="j.nextUnlockLabel"
+        [nextUnlock]="j.nextUnlock"
+      >
+        <button lgButton="solid" lgSlot="actions" size="sm" (click)="go(j.primaryAction.route)">
+          {{ j.primaryAction.label }}
+        </button>
+        <button lgButton lgSlot="actions" size="sm" (click)="go(j.optionalAction.route)">
+          Optional: {{ j.optionalAction.label }}
+        </button>
+      </lg-journey-card>
+    }
+
+    <div class="lg-aside">
+      <div class="lg-aside__main">
+        <lg-banner label="Combat profile" [image]="bannerArt" focus="center 30%" [cornerSrc]="cornerSrc">
+          <lg-profile-identity
+            [eyebrow]="isOwnProfile() ? 'Combat Profile' : 'Viewing player'"
+            [name]="profileName()"
+            [noble]="!!membership()"
+            [presence]="presence()"
+          >
+            <div lgProfileFact label="Guild">
+              @if (c.guild; as guild) {
+                <a [routerLink]="['/game/city/guild', guild.id]">{{ guild.name }}</a>
+                @if (guild.tag) {
+                  <lg-tag>[{{ guild.tag }}]</lg-tag>
+                }
+              } @else {
+                None
+              }
+            </div>
+            <div lgProfileFact label="Essences">{{ attuned() }} / {{ loadout().length }} attuned</div>
+            <div lgProfileFact label="Achievement Points">{{ fmt(c.totalAchievementPoints) }}</div>
+            @if (membership(); as m) {
+              <div lgProfileFact label="Nobility">
+                Expires <time [attr.datetime]="m.expiresAt">{{ m.expiresAt | date: 'd MMM y' }}</time>
+                <button
+                  lgButton="link"
+                  aria-controls="ovw-perks"
+                  [attr.aria-expanded]="showPerks()"
+                  (click)="showPerks.set(!showPerks())"
+                >
+                  {{ showPerks() ? 'Hide perks' : 'Show perks' }}
+                </button>
+              </div>
+            }
+          </lg-profile-identity>
+
+          <div lgSlot="aside" class="ovw-level">
+            <lg-level-plate
+              kicker="Level"
+              [level]="c.level"
+              [xp]="c.experience"
+              [xpMax]="c.experienceUntilNextLevel"
+              xpUnit="Combat XP"
+            />
+          </div>
+          <lg-stat-figure
+            lgSlot="aside"
+            label="Combat Rating"
+            [value]="combatRating()"
+            [caption]="combatRating() ? 'Permanent attributes and the equipped build' : 'Unavailable'"
+            title="Combat Rating summarizes permanent combat attributes and the equipped build."
+          />
+
+          @if (membership() && showPerks()) {
+            <div lgSlot="footer" id="ovw-perks" class="ovw-perks">
+              <div class="ovw-perks__head">
+                <h3 class="ovw-eyebrow">Active Nobility perks</h3>
+                <p class="ovw-note">Applied automatically while Nobility is active.</p>
+              </div>
+              <div class="ovw-perks__grid">
+                @for (group of perkGroups; track group.label) {
+                  <div>
+                    <h4 class="ovw-perks__label">{{ group.label }}</h4>
+                    <ul class="ovw-perks__list">
+                      @for (perk of group.perks; track perk) {
+                        <li><span aria-hidden="true">–</span>{{ perk }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </lg-banner>
+
+        @if (!viewing()) {
+          <lg-panel title="Combat Style">
+            <a lgButton="link" lgSlot="aside" routerLink="/game/character/combat-styles">Manage Combat Styles</a>
+            @if (combatStyle(); as style) {
+              <div class="ovw-style">
+                <lg-sigil size="lg" [value]="style.level" [label]="style.name" [title]="'Mastery ' + style.level" />
+                <div class="ovw-style__meta">
+                  <p class="ovw-note">Mastery {{ style.level }} · {{ style.refinement }}</p>
+                  @if (style.mastered) {
+                    <p class="ovw-note">Mastered</p>
+                  } @else {
+                    <lg-meter tone="xp" label="Mastery XP" [value]="style.xp" [max]="style.xpRequired" />
+                  }
+                </div>
+              </div>
+            } @else if (combatStyles.data()) {
+              <p class="ovw-note">No Combat Style selected.</p>
+              <p class="ovw-note">Bastion, Conduit, Reaper and Duelist are available immediately at Mastery 0.</p>
+            } @else {
+              <p class="ovw-note">{{ combatStyles.error() ?? 'Loading Combat Style…' }}</p>
+            }
+          </lg-panel>
+        }
+      </div>
+
+      <aside class="lg-aside__side">
+        <lg-panel title="Essence Loadout">
+          <span lgSlot="aside" class="ovw-count">{{ attuned() }} / {{ loadout().length }} attuned</span>
+          @if (loadout().length) {
+            <div class="ovw-slots">
+              @for (s of loadout(); track s.index) {
+                <app-essence-preview [definition]="s.slot.definition" originClass="relative block">
+                  <lg-loadout-slot
+                    [index]="s.index"
+                    [state]="s.state"
+                    [name]="s.name"
+                    [rarity]="s.rarity"
+                    [active]="s.active"
+                    [passive]="s.passive"
+                  />
+                </app-essence-preview>
+              }
+            </div>
+          } @else {
+            <p class="ovw-note">No Essence loadout.</p>
+          }
+          @if (!viewing()) {
+            <div class="ovw-sidefoot">
+              <a lgButton="link" routerLink="/game/character/essences">Open Essences</a>
+            </div>
+          }
+        </lg-panel>
+      </aside>
+    </div>
+
+    <section class="ovw-attrs" aria-labelledby="ovw-attrs-title">
+      <header class="ovw-attrs__head">
+        <h2 lgHeading="section" id="ovw-attrs-title">Combat Attributes</h2>
+        <p class="ovw-note">
+          Combat values after equipment and permanent bonuses. Hover or focus a row for what it does.
+        </p>
+      </header>
+      <div class="lg-ledgergrid">
+        @for (group of attributeGroups(); track group.title) {
+          <lg-ledger [title]="group.title" [rows]="group.rows" />
+        }
+      </div>
+    </section>
+  }
+</lg-page>

@@ -406,8 +406,11 @@ export declare function Chronicle(props: ChronicleProps): React.ReactElement;
 export interface ItemLinkProps { rarity?: Rarity; meta?: string; onClick?: () => void; className?: string; children?: React.ReactNode }
 export declare function ItemLink(props: ItemLinkProps): React.ReactElement;
 
-export interface PageProps { label?: string; /** Defaults to page-max (80rem). */ maxWidth?: number | string; role?: string; className?: string; children?: React.ReactNode }
-/** Scrolling frame for information screens (no stage art). Place it as GameShell's children. It is a layout region (lg-region):
+export interface PageProps { label?: string; /** Defaults to page-max (80rem). */ maxWidth?: number | string; role?: string;
+  /** In a host frame that is not GameShell (the game's frame while screens migrate): in the normal flow, filling its parent's
+   *  height, with no room kept for a TopBar; the host gives the gutters. */
+  flow?: boolean; className?: string; children?: React.ReactNode }
+/** Scrolling frame for information screens (no stage art). Place it as GameShell's children, or with `flow` in another frame. It is a layout region (lg-region):
  *  content inside follows the tiers of its width — Stacked, Narrow from 32rem, Medium from 44rem, Wide from 68rem (Foundations · Layout). */
 export declare function Page(props: PageProps): React.ReactElement;
 
@@ -467,6 +470,25 @@ export declare function LoadoutSlot(props: LoadoutSlotProps): React.ReactElement
 
 export interface PresenceProps { online: boolean; lastSeen?: string; compact?: boolean; className?: string }
 export declare function Presence(props: PresenceProps): React.ReactElement;
+
+export interface ProfileFact { label: React.ReactNode; value: React.ReactNode; key?: string }
+export interface ProfileIdentityProps {
+  /** "Combat Profile"; "Viewing player" on someone else's. */
+  eyebrow?: React.ReactNode;
+  name: React.ReactNode;
+  /** Active Nobility: the crown before the name (D-066). */
+  noble?: boolean;
+  /** Another player's: Presence after the name. */
+  presence?: PresenceProps;
+  /** Guild, Essences, Achievement Points, Nobility… A value may hold a link, a Tag or a link Button. Falsy entries are skipped. */
+  facts?: (ProfileFact | null | false | undefined)[];
+  /** The name's heading element. Default h2. */
+  as?: 'h1' | 'h2' | 'h3';
+  headingId?: string;
+  className?: string;
+}
+/** Who a player is, at the head of a profile: put it in a Banner's body (D-099). */
+export declare function ProfileIdentity(props: ProfileIdentityProps): React.ReactElement;
 
 /** Every state in Standards · States, by family. */
 export type StateName =

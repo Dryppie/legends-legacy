@@ -239,7 +239,8 @@ export class RegionComponent implements OnInit, OnDestroy {
     const isStacked =
       getComputedStyle(content).gridTemplateColumns.trim().split(/\s+/)
         .length === 1;
-    const reservedRailWidth = isStacked ? 0 : 17 * rootFontSize + layoutGap;
+    // The rail column is minmax(17rem, …) in the stylesheet, which the legacy rem rebase builds as 17 × 0.875 rem (D-096).
+    const reservedRailWidth = isStacked ? 0 : 17 * 0.875 * rootFontSize + layoutGap;
     const availableAreaWidth = Math.max(
       cardWidth,
       contentWidth - reservedRailWidth,

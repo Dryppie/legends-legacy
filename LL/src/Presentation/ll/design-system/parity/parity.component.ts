@@ -145,6 +145,21 @@ interface ParityWindow {
       <lg-top-bar title="Aldric" eyebrow="Lv. 17" showMenu><span lgSlot="center">Track</span><span>Pills</span></lg-top-bar>
     </div>
     <div class="case" data-case="page"><lg-page label="Overview" maxWidth="60rem" role="region"><p>Content</p></lg-page></div>
+    <div class="case" data-case="identity-own">
+      <lg-profile-identity eyebrow="Combat Profile" name="Aldric Vane" noble headingId="pid">
+        <div lgProfileFact label="Guild"><a href="/guild/1">Emberwatch</a><lg-tag>[EMB]</lg-tag></div>
+        <div lgProfileFact label="Essences">2 / 2 attuned</div>
+        <div lgProfileFact label="Achievement Points">1,240</div>
+      </lg-profile-identity>
+    </div>
+    <div class="case" data-case="identity-other">
+      <lg-profile-identity eyebrow="Viewing player" name="Maren" as="h3" [presence]="{ online: false, lastSeen: '3 h ago' }">
+        <div lgProfileFact label="Guild">None</div>
+      </lg-profile-identity>
+    </div>
+    <div class="case" data-case="identity-bare"><lg-profile-identity name="Pip" /></div>
+    <div class="case" data-case="aside"><div class="lg-aside"><div class="lg-aside__main">Main</div><aside class="lg-aside__side">Side</aside></div></div>
+    <div class="case" data-case="page-flow"><lg-page label="Overview" flow><p>Content</p></lg-page></div>
     <div class="case" data-case="pageheader">
       <lg-page-header icon="leaderboard" eyebrow="City" title="Leaderboard" summary="Top Legends"><button lgButton lgSlot="actions">Refresh</button></lg-page-header>
     </div>
