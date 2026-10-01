@@ -82,6 +82,18 @@ window.CASES = function (h, L, D) {
     ['currency-click', function () { return h(L.CurrencyPill, { name: 'Soulstones', amount: 36, onClick: noop }); }],
     ['navrail', function () { return h(L.NavRail, { sections: D.nav, activeId: 'overview', header: h('span', null, 'LL'), footer: h('span', null, 'v1') }); }],
     ['navrail-compact', function () { return h(L.NavRail, { sections: D.nav, activeId: 'inventory', compact: true }); }],
+    ['navrail-desc', function () { return h(L.NavRail, { sections: D.navDesc, activeId: 'overview' }); }],
+    ['navrail-desc-compact', function () { return h(L.NavRail, { sections: D.navDesc, activeId: 'overview', compact: true }); }],
+    ['activity', function () { return h(L.Activity, { label: 'Idle' }); }],
+    ['activity-open', function () { return h(L.Activity, { label: 'Engaged in Combat', remaining: '00:12', value: 3, max: 10, onOpen: noop }); }],
+    ['activity-compact', function () { return h(L.Activity, { label: 'Engaged in Combat', remaining: '00:12', progress: 0.5, onOpen: noop, openLabel: '', compact: true }); }],
+    ['activity-compact-short', function () { return h(L.Activity, { label: 'Engaged in Combat', short: 'Battling', progress: 0.25, compact: true }); }],
+    ['objective', function () { return h(L.Objective, { title: 'The First Hunt', objective: 'Defeat wolves', current: 3, required: 5 }); }],
+    ['objective-kicker', function () { return h(L.Objective, { kicker: 'Quest', title: 'The First Hunt' }); }],
+    ['objective-panel', function () { return h(L.Objective, { kicker: 'Quest', title: 'The First Hunt', objective: 'Defeat wolves', current: 3, required: 5 }, h('p', null, 'Tracker')); }],
+    ['notice', function () { return h(L.Notice, { title: 'Multiplayer access restricted' }, 'Solo content stays open.'); }],
+    ['notice-danger', function () { return h(L.Notice, { tone: 'danger', title: 'Offline progress paused', action: h(L.Button, { size: 'sm' }, 'Retry') }, 'The server did not answer.'); }],
+    ['notice-busy', function () { return h(L.Notice, { tone: 'warning', title: 'Catching up offline progress', busy: true }, 'Resolving stored actions and rewards.'); }],
     ['tabstrip', function () { return h(L.TabStrip, { tabs: D.tabs, activeId: 'all', label: 'Filters', level: 'secondary', density: 'compact' }); }],
     ['stage', function () { return h(L.Stage, { image: 'bg.webp', focus: 'top', label: 'Tavern' }, h('h2', null, 'The Tavern')); }],
     ['stage-noart', function () { return h(L.Stage, { label: 'Empty' }); }],
@@ -115,6 +127,9 @@ window.CASES = function (h, L, D) {
     ['itemlink-button', function () { return h(L.ItemLink, { onClick: noop }, 'Plain'); }],
     ['chronicle', function () { return h(L.Chronicle, { channels: D.channels, activeChannel: 'all', messages: D.messages, onToggle: noop, composer: { value: '', onChange: noop, onSend: noop, channel: 'general' } }); }],
     ['chronicle-collapsed', function () { return h(L.Chronicle, { channels: D.channels, messages: D.messages, open: false, onToggle: noop }); }],
+    ['chronicle-authors', function () { return h(L.Chronicle, { channels: D.channels, messages: D.messagesNoble, onAuthor: noop }); }],
+    ['chronicle-day', function () { return h(L.Chronicle, { channels: D.channels, activeChannel: 'all', messages: D.messagesDay }); }],
+    ['chronicle-custom-composer', function () { return h(L.Chronicle, { channels: D.channels, messages: D.messages, composer: h('div', { className: 'lg-chronicle__row' }, h('input', { className: 'lg-chronicle__input', 'aria-label': 'Chat message' })) }); }],
     ['chronicle-trade', function () { return h(L.Chronicle, { channels: D.channels, activeChannel: 'trade', messages: D.messages, announce: 'mentions' }); }],
     ['gameshell', function () {
       return h(L.GameShell, {
@@ -128,6 +143,9 @@ window.CASES = function (h, L, D) {
     }],
     ['gameshell-floating', function () {
       return h(L.GameShell, { chatLayout: 'floating', chronicle: h(L.Chronicle, { channels: D.channels, messages: D.messages, onToggle: noop }) }, h('p', null, 'Stage'));
+    }],
+    ['gameshell-backdrop', function () {
+      return h(L.GameShell, { height: 400, backdrop: 'backdrop.webp', rail: h(L.NavRail, { sections: D.nav, activeId: 'overview' }), chronicle: h(L.Chronicle, { channels: D.channels, messages: D.messages, onToggle: noop }) }, h('p', null, 'Stage'));
     }]
   ];
 };
@@ -162,6 +180,9 @@ window.ICASES = function (h, L, D) {
     }],
     ['i-currency', function () { return h(L.CurrencyPill, { name: 'Cinders', amount: 12480, short: true }); }],
     ['i-navrail', function () { return h(L.NavRail, { sections: D.nav, activeId: 'overview', onNavigate: count('nav') }); }],
+    ['i-objective', function () { return h('div', null, h(L.Objective, { kicker: 'Quest', title: 'The First Hunt', objective: 'Defeat wolves', current: 3, required: 5 }, h('p', null, 'Tracker')), h('button', { type: 'button', className: 'away' }, 'Away')); }],
+    ['i-chronicle-author', function () { return h(L.Chronicle, { channels: D.channels, messages: D.messagesNoble, onAuthor: count('author') }); }],
+    ['i-activity', function () { return h(L.Activity, { label: 'Engaged in Combat', remaining: '00:12', progress: 0.25, onOpen: count('activity') }); }],
     ['i-chronicle', function () {
       return h(Stateful(function (st, set) {
         return h(L.Chronicle, { channels: D.channels, messages: D.messages, activeChannel: st.ch, open: st.open,

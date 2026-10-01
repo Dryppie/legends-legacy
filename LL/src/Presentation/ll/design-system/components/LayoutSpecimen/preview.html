@@ -1,4 +1,4 @@
-<!-- @dsCard group="Foundations" height=1710 width=1480 subtitle="An inventory and its inspector in regions 1,248, 864 and 507px wide: side by side at 3 : 2, side by side with the inspector at its minimum, and one column where the inspector takes the list's place." -->
+<!-- @dsCard group="Foundations" height=1710 width=1480 subtitle="An inventory and its inspector in regions 1,216, 832 and 470px wide: side by side at 3 : 2, side by side with the inspector at its minimum, and one column where the inspector takes the list's place." -->
 <!doctype html>
 <html>
 <head>
@@ -151,10 +151,10 @@ function Inventory(p) {
 
 function App() {
   return h('div', { className: 'pv' },
-    h(Frame, { width: '1248px', where: 'The stage content at 1920px with no Folio and the Chronicle docked. List and inspector at 3 : 2.' }, h(Inventory, { selected: 'fang' })),
+    h(Frame, { width: '1216px', where: 'The stage content at 1920px with no Folio and the Chronicle docked. List and inspector at 3 : 2.' }, h(Inventory, { selected: 'fang' })),
     h('div', { className: 'pv-row' },
-      h(Frame, { width: '864px', where: 'At 1536px, no Folio, docked. The inspector holds its 20rem minimum.' }, h(Inventory, { selected: 'crown' })),
-      h(Frame, { width: '507px', where: 'At 1280px with Large text. One column: the inspector takes the list’s place.' }, h(Inventory, { selected: 'fang', view: 'inspector' }))),
+      h(Frame, { width: '832px', where: 'At 1536px, no Folio, docked. The inspector holds its 20rem minimum.' }, h(Inventory, { selected: 'crown' })),
+      h(Frame, { width: '470px', where: 'At 1280px with Large text. One column: the inspector takes the list’s place.' }, h(Inventory, { selected: 'fang', view: 'inspector' }))),
     h('p', { className: 'pv-note' }, h('b', null, 'Try it:'), ' in the one-column region, Back or Esc returns to the list and to the row you came from. Each inspector is a region of its own: the widest is about 30rem, so its stat grid is Stacked and holds two tiles a row, whatever the page’s tier. At Large and Extra large text each region reaches a smaller tier sooner; the captions read the tier live.'));
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));

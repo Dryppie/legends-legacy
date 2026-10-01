@@ -71,10 +71,10 @@ Pixel figures in these docs are at Default. The only lengths left in px are hair
 
 | Screen | 100% (body 15px) | 115% (body 17.25px) | 130% (body 19.5px) |
 | --- | --- | --- | --- |
-| 1920 × 1080 | Rail 224, stage 952, Folio 360, the Chronicle in its own 384px column | Rail 258, stage 807, Folio 414, the Chronicle in its own column | Rail 291, stage 1161, Folio 468; the Chronicle moves under the Folio |
-| 1440 × 900 | The Chronicle under the Folio; stage 856 | The Chronicle under the Folio; stage 768 | Stage 681; the Folio scrolls |
-| 1280 × 720 | Stage 696; the Folio scrolls | Stage 608; the Folio scrolls | Stage 521; the Folio scrolls |
-| 1024 × 768 | Stage 440, every column kept | The rail becomes a drawer, the Folio stacks under the stage, and chat docks at the bottom | As at 115% |
+| 1920 × 1080 | Rail 256, stage 920, Folio 360, the Chronicle in its own 384px column | Rail 294, stage 770, Folio 414, the Chronicle in its own column | Rail 333, stage 1119, Folio 468; the Chronicle moves under the Folio |
+| 1440 × 900 | The Chronicle under the Folio; stage 824 | The Chronicle under the Folio; stage 731 | Stage 639; the Folio scrolls |
+| 1280 × 720 | Stage 664; the Folio scrolls | Stage 571; the Folio scrolls | Stage 479; the Folio scrolls |
+| 1024 × 768 | Stage 408, every column kept | The rail becomes a drawer, the Folio stacks under the stage, and chat docks at the bottom | As at 115% |
 
 **What reflows at larger text:**
 

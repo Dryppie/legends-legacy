@@ -56,7 +56,7 @@ Three signs sit beside the shapes. They are glyphs and pictures, not shapes, and
 | `radius-container` | 2px | Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, the JourneyCard's objective, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions) |
 | `radius-control` | 4px | Controls, tags and slots: Buttons, inputs, tabs, key caps, clickable CurrencyPills; Tags, count badges, rarity codes; ItemSlots, thumbnails, LoadoutSlots and StatTiles. Focus rings on links and icon buttons follow it |
 | `radius-float` | 8px | Popovers and drawers: tooltips, hover cards, menus, suggestion lists, toasts and the floating chat drawer |
-| `radius-circle` | 50% | The Presence dot |
+| `radius-circle` | 50% | The Presence dot; the compact Activity's ring and live dot — the character, present and at work (D-117) |
 
 - **Meters are square-ended.** A Meter is a gauge, like the Track's rail, so neither the thin line nor the `bar` rounds its ends.
 - **A focus ring follows its element's corner:** 4px on a Button, 2px on a Ledger row.
@@ -85,7 +85,7 @@ The Button was a full pill, and so were the inputs, the key caps, the CurrencyPi
 | `radius-container` | Containers, dialog sheets and row washes |
 | `radius-control` | Controls, tags and slots |
 | `radius-float` | Popovers and drawers |
-| `radius-circle` | The Presence dot |
+| `radius-circle` | The Presence dot, the compact Activity's ring and live dot |
 | `gilt` | The current-location diamond (NavRail, PageHeader), the Nobility crown |
 | `arcana-glow` | The ready diamond on a Sigil |
 | `sigil-fill`, `sigil-edge` | The Sigil's hexagon, and nothing else |

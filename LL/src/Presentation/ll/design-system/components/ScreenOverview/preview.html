@@ -42,24 +42,24 @@ var DIAMONDS = '../../assets/Currency/Diamonds.svg';
 var BG_STUDY = '../../assets/Backgrounds/background.webp';
 var NAV = [
   { label: 'Character', items: [
-    { id: 'overview', title: 'Overview', icon: 'overview' },
-    { id: 'inventory', title: 'Inventory', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
-    { id: 'essences', title: 'Essences', icon: 'essences' },
-    { id: 'combat-styles', title: 'Combat Styles', icon: 'combat-styles' },
-    { id: 'achievements', title: 'Achievements', icon: 'achievements' },
-    { id: 'soulstones', title: 'Soulstones', icon: 'soulstones' } ] },
+    { id: 'overview', title: 'Overview', description: 'Stats, vitals, loadout', icon: 'overview' },
+    { id: 'inventory', title: 'Inventory', description: 'Items, gear, misc', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
+    { id: 'essences', title: 'Essences', description: 'Archive, attune, ascend', icon: 'essences' },
+    { id: 'combat-styles', title: 'Combat Styles', description: 'Train, refine, combine', icon: 'combat-styles' },
+    { id: 'achievements', title: 'Achievements', description: 'Records and titles', icon: 'achievements' },
+    { id: 'soulstones', title: 'Soulstones', description: 'Permanent upgrades', icon: 'soulstones' } ] },
   { label: 'World', items: [
-    { id: 'world-map', title: 'World Map', icon: 'world-map' },
-    { id: 'world-tower', title: 'World Tower', icon: 'legacy-ascension' },
-    { id: 'quests', title: 'Quests', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
-    { id: 'prophecies', title: 'Prophecies', icon: 'prophecies' } ] },
+    { id: 'world-map', title: 'World Map', description: 'Travel and explore', icon: 'world-map' },
+    { id: 'world-tower', title: 'World Tower', description: 'Conquer the World Tower', icon: 'legacy-ascension' },
+    { id: 'quests', title: 'Quests', description: 'Objectives and rewards', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
+    { id: 'prophecies', title: 'Prophecies', description: 'Daily and weekly omens', icon: 'prophecies' } ] },
   { label: 'City', items: [
-    { id: 'guild', title: 'Guild', icon: 'guild' },
-    { id: 'colosseum', title: 'Colosseum', icon: 'colosseum' },
-    { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' },
-    { id: 'leaderboard', title: 'Leaderboard', icon: 'leaderboard' } ] },
+    { id: 'guild', title: 'Guild', description: 'Guild headquarters', icon: 'guild' },
+    { id: 'colosseum', title: 'Colosseum', description: 'Tournaments and battles', icon: 'colosseum' },
+    { id: 'cinder-bazaar', title: 'Cinder Bazaar', description: 'List and buy items', icon: 'cinder-bazaar' },
+    { id: 'leaderboard', title: 'Leaderboard', description: 'Rankings and records', icon: 'leaderboard' } ] },
   { label: 'System', items: [
-    { id: 'settings', title: 'Settings', icon: 'settings' } ] }
+    { id: 'settings', title: 'Settings', description: 'Account and preferences', icon: 'settings' } ] }
 ];
 var CHANNELS = [
   { id: 'all', label: 'All' }, { id: 'general', label: 'General' }, { id: 'trade', label: 'Trade' }, { id: 'help', label: 'Help' },
@@ -184,6 +184,7 @@ function App() {
 
   return h(L.GameShell, {
     height: 1540,
+    backdrop: BG_STUDY,
     chatLayout: 'docked',
     chronicle: h(L.Chronicle, chat),
     rail: h(L.NavRail, { sections: NAV, activeId: nav[0], onNavigate: nav[1],

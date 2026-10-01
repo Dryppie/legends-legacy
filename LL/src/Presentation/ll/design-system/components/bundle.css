@@ -801,7 +801,7 @@ button.lg-slot:hover:not(.is-blocked)::after { opacity: 1; }
 
 /* ---------- CurrencyPill ---------- */
 .lg-currency {
-  display: inline-flex; align-items: center; gap: var(--space-2);
+  display: inline-flex; flex: none; align-items: center; gap: var(--space-2); /* never squeezed: its words stay inside the edge */
   height: 1.875rem; padding: 0 var(--space-3) 0 var(--space-2);
   border: var(--border-hairline) solid var(--line); border-radius: var(--radius-control);
   background: var(--surface); color: var(--ink);
@@ -841,7 +841,19 @@ button.lg-currency:hover { background: var(--surface-raised); }
   font-family: var(--font-ui); font-size: var(--text-nav); line-height: var(--leading-nav); font-weight: 500; letter-spacing: var(--tracking-nav); text-transform: uppercase;
   isolation: isolate;
 }
-.lg-rail__item .lg-icon { opacity: 0.85; }
+.lg-rail__item { --lg-rail-icon: var(--gilt); }
+/* The rail's icons are gilt at rest as well as when active (D-105): the game's sidebar has always drawn them in gold. The current
+   location is still told by the diamond, the weight and ink; a locked item's icon steps back with its title. */
+.lg-rail__item .lg-icon { color: var(--lg-rail-icon); opacity: 0.85; }
+.lg-rail__text { display: grid; min-width: 0; }
+.lg-rail__desc {
+  overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--font-ui); font-size: var(--text-caption); line-height: var(--leading-caption); font-weight: 400; letter-spacing: 0; text-transform: none;
+  color: var(--ink-muted);
+}
+.lg-rail__item:has(.lg-rail__desc) { min-height: 2.75rem; padding-top: var(--space-1); padding-bottom: var(--space-1); }
+.lg-rail__item.is-locked { --lg-rail-icon: var(--ink-disabled); }
+.lg-rail__item.is-locked .lg-rail__desc { color: var(--ink-disabled); }
 /* Feedback: the hover wash is a layer that fades over duration-fast; the title turns ink at once. The current location
    (the active item and its diamond) moves at once, like any change of place. */
 .lg-rail__item::after {
@@ -857,7 +869,7 @@ button.lg-currency:hover { background: var(--surface-raised); }
 .lg-rail__item.is-active {
   font-weight: 600;
 }
-.lg-rail__item.is-active .lg-icon { color: var(--gilt); opacity: 1; }
+.lg-rail__item.is-active .lg-icon { opacity: 1; }
 .lg-rail__item.is-active::before {
   content: ""; position: absolute; left: -0.625rem; top: 50%; width: 0.4375rem; height: 0.4375rem; margin-top: -0.2188rem;
   transform: rotate(45deg); background: var(--gilt);
@@ -879,9 +891,15 @@ button.lg-currency:hover { background: var(--surface-raised); }
 .lg-rail__footer { margin-top: auto; }
 .lg-rail--compact { padding-left: var(--space-3); padding-right: var(--space-3); align-items: center; }
 .lg-rail__title { overflow: hidden; text-overflow: ellipsis; }
-.lg-rail--compact .lg-rail__title, .lg-rail--compact .lg-rail__group { display: none; }
+.lg-rail--compact .lg-rail__title, .lg-rail--compact .lg-rail__desc, .lg-rail--compact .lg-rail__group { display: none; }
 .lg-rail--compact .lg-rail__item { justify-content: center; padding: 0; width: 2.5rem; }
-.lg-rail--compact .lg-rail__badge { position: absolute; top: 0; right: -0.25rem; }
+/* Compact (D-115): the description wrapper leaves the layout too, so the icon is centred; a count is a small mark pinned
+   to the icon's corner, ringed off from it, rather than a tile at the rail's edge. */
+.lg-rail--compact .lg-rail__text { display: none; }
+.lg-rail--compact .lg-rail__badge {
+  position: absolute; top: 0.125rem; left: calc(50% + 0.25rem); right: auto; margin: 0;
+  min-width: 1rem; height: 1rem; padding: 0 0.25rem; box-shadow: 0 0 0 2px var(--surface-solid);
+}
 .lg-rail--compact .lg-rail__lock { display: none; }
 
 /* ---------- TabStrip ---------- */
@@ -987,11 +1005,49 @@ button.lg-currency:hover { background: var(--surface-raised); }
   background: var(--ground); overflow: hidden;
 }
 .lg-shell.has-folio { grid-template-columns: var(--rail-width) minmax(0, 1fr) var(--folio-width); grid-template-areas: "rail main folio" "rail main folio"; }
+/* The frame's backdrop (D-107): a picture at Level 0 behind the rail, the stage and the docked Chronicle — the game's
+   textured backdrop. The regions over it take Level 1's translucent surface (D-102); a Page shows it (D-101). */
+.lg-shell.has-backdrop { background: var(--ground) var(--lg-shell-backdrop) center / cover no-repeat; }
+.lg-shell.has-backdrop .lg-shell__chronicle--docked .lg-chronicle { background: var(--surface); }
+/* A legacy region (D-108): content inside the shell that isn't built with Grimoire — a screen that hasn't migrated yet.
+   Grimoire's inherited type and colour stop here; the host sets --lg-legacy-* to its own body values, and its own
+   element styles restart inside (they stop again at any .lg-root within). It fills the stage below the TopBar. */
+.lg-legacy {
+  position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  padding-top: var(--topbar-height);
+  color: var(--lg-legacy-ink, inherit); font-family: var(--lg-legacy-font, inherit); font-size: var(--lg-legacy-size, inherit);
+  line-height: var(--lg-legacy-leading, inherit); font-weight: var(--lg-legacy-weight, inherit); font-variant-numeric: normal;
+}
 .lg-shell__rail { grid-area: rail; min-height: 0; position: relative; z-index: var(--z-chrome); }
+/* The compact rail the player chose (D-113): the column narrows to the icons. */
+.lg-shell:has(> .lg-shell__rail .lg-rail--compact) { --rail-width: var(--rail-width-compact); }
 .lg-shell__main { grid-area: main; position: relative; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
 .lg-shell__top { position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-chrome); }
 .lg-shell__stage { position: relative; min-height: 0; }
 .lg-shell__hints { position: absolute; right: var(--space-6); bottom: var(--space-4); z-index: var(--z-chrome); }
+/* The frame lines up (D-115). Over a backdrop the TopBar is a band of the frame, like the rail: Level 1's surface with a
+   hairline under it, and the stage starts below it, so nothing scrolls beneath a translucent band (D-102). */
+.lg-shell.has-backdrop .lg-shell__main { grid-template-rows: auto minmax(0, 1fr); }
+.lg-shell.has-backdrop .lg-shell__top { position: relative; grid-row: 1; }
+.lg-shell.has-backdrop .lg-shell__stage { grid-row: 2; --topbar-height: 0px; }
+.lg-shell.has-backdrop .lg-shell__main:not(:has(> .lg-shell__top)) .lg-shell__stage { grid-row: 1 / -1; }
+.lg-shell.has-backdrop .lg-topbar { background: var(--surface); border-bottom: var(--border-hairline) solid var(--line); }
+@container lg-shell (min-width: 60rem) {
+  /* The TopBar's insets are the Page's gutter: the title starts and the currencies end where the screen's edges are. */
+  .lg-shell .lg-topbar { padding-inline: var(--section-md); }
+  /* The docked Chronicle's head is as tall as the TopBar, so their rules are one line across the frame. */
+  .lg-shell.is-chat-docked:not(.has-folio) .lg-shell__chronicle--docked .lg-chronicle { border-top: 0; }
+  .lg-shell.is-chat-docked:not(.has-folio) .lg-shell__chronicle--docked .lg-chronicle__head { min-height: var(--topbar-height); }
+  /* A rail's header starts level with the TopBar's controls (a control is 1.875rem tall, centred in the band)… */
+  .lg-shell .lg-rail:has(> .lg-rail__header) { padding-top: calc((var(--topbar-height) - 1.875rem) / 2); }
+  /* …and a compact rail's header is a band of the same height, its Activity centred in it, the same rule under it. */
+  .lg-shell .lg-rail--compact:has(> .lg-rail__header) { padding-top: 0; }
+  .lg-shell .lg-rail--compact > .lg-rail__header {
+    align-self: stretch; justify-content: center; min-height: var(--topbar-height); padding-left: 0;
+    margin-inline: calc(-1 * var(--space-3));
+  }
+  .lg-shell.has-backdrop .lg-rail--compact > .lg-rail__header { border-bottom: var(--border-hairline) solid var(--line); }
+}
 .lg-shell__folio { grid-area: folio; min-height: 0; position: relative; z-index: var(--z-folio); }
 .lg-shell__scrim { display: none; }
 
@@ -1060,6 +1116,16 @@ button.lg-currency:hover { background: var(--surface-raised); }
   .lg-shell__chronicle .lg-chronicle__grip, .lg-shell__chronicle .lg-chronicle__tall { display: none; }
   .lg-shell__chronicle--docked .lg-chronicle { border-left: 0; }
   .lg-shell.is-chat-docked, .lg-shell.is-chat-docked:not(.has-folio) { --lg-chat-h: var(--chronicle-height); --lg-chat-rot: 0deg; }
+  /* The dock sits over content here, so it is opaque even over the frame's backdrop (D-102). */
+  .lg-shell.has-backdrop .lg-shell__chronicle .lg-chronicle, .lg-shell__chronicle .lg-chronicle { background: var(--surface-solid); }
+}
+/* Under 40rem the TopBar's "now" thing takes a second row (D-114): the stage below makes room for it. */
+@container lg-shell (max-width: 40rem) {
+  .lg-shell__main:has(.lg-topbar__center) { --topbar-height: 6rem; }
+  .lg-shell .lg-topbar:has(.lg-topbar__center) { position: relative; align-items: flex-start; padding-top: calc((3.5rem - var(--lg-topbar-row, 2.25rem)) / 2); }
+  .lg-shell .lg-topbar:has(.lg-topbar__center) > :not(.lg-topbar__center) { min-height: var(--lg-topbar-row, 2.25rem); display: flex; align-items: center; }
+  .lg-shell .lg-topbar__center { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-1); justify-content: stretch; }
+  .lg-shell .lg-topbar__center > * { max-width: none; }
 }
 
 /* ---------- ItemLink ---------- */
@@ -1183,6 +1249,10 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
 .lg-chronicle__tag { margin-right: 0.375rem; font-size: var(--text-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--lg-ch); }
 .lg-chronicle__author { margin-right: 0.375rem; font-weight: 600; color: var(--lg-ch); }
 .lg-chronicle__author::after { content: ":"; }
+button.lg-chronicle__author { margin: 0 0.375rem 0 0; padding: 0; border: 0; background: none; font: inherit; font-weight: 600; cursor: pointer; border-radius: var(--radius-control); }
+button.lg-chronicle__author:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+button.lg-chronicle__author:focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); }
+.lg-chronicle__noble { display: inline-flex; margin-right: 0.25rem; vertical-align: -0.0625rem; color: var(--gilt); }
 .lg-chronicle__text { color: var(--ink); }
 .lg-chronicle__line--system .lg-chronicle__text, .lg-chronicle__line--loot .lg-chronicle__text, .lg-chronicle__ticker.lg-chronicle__line--system .lg-chronicle__text, .lg-chronicle__ticker.lg-chronicle__line--loot .lg-chronicle__text { font-family: var(--font-lore); font-style: italic; font-size: var(--text-lore-sm); line-height: var(--leading-lore-sm-row); color: var(--ink-muted); }
 .lg-chronicle__line.is-mention { background: var(--surface-raised); box-shadow: inset var(--border-emphasis) 0 0 var(--ink); }
@@ -1205,6 +1275,45 @@ button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: v
 .lg-chronicle__input:focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); }
 .lg-chronicle__send { display: grid; place-items: center; flex: none; margin: 0; padding: 0.25rem; border: 0; background: none; cursor: pointer; }
 .lg-chronicle__send:focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); border-radius: var(--radius-control); }
+
+/* Day breaks (D-112): the date between two days' lines, a label between two line rules. */
+.lg-chronicle__line--day { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0.375rem; }
+.lg-chronicle__line--day::before, .lg-chronicle__line--day::after { content: ""; flex: 1; height: var(--border-hairline); background: var(--line); }
+.lg-chronicle__line--day .lg-chronicle__text { flex: none; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+/* A composer of the host's own (D-112): it takes the composer's place and may use its parts — the prefix, the input
+   (an <input> or a contenteditable editor) and the send key — with these: a note and an error line under it, a
+   character count, and the @mention suggestions, a Level 2 floating listbox above the input. */
+.lg-chronicle__composer--custom { display: block; }
+.lg-chronicle__composer--custom > * { min-width: 0; }
+.lg-chronicle__row { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.lg-chronicle__input[contenteditable] { display: block; height: auto; min-height: 2.125rem; max-height: 6rem; overflow-y: auto; padding-top: var(--space-2); padding-bottom: var(--space-2); white-space: pre-wrap; overflow-wrap: anywhere; line-height: var(--leading-body-compact); }
+.lg-chronicle__input[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--ink-muted); pointer-events: none; }
+.lg-chronicle__input[aria-disabled="true"], .lg-chronicle__input:disabled { color: var(--ink-disabled); cursor: not-allowed; }
+.lg-chronicle__note, .lg-chronicle__error { margin: var(--space-1) 0 0; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.lg-chronicle__error { color: var(--danger); }
+.lg-chronicle__note a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.15em; }
+.lg-chronicle__count { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); font-variant-numeric: tabular-nums lining-nums; }
+.lg-chronicle__count.is-over { color: var(--danger); }
+.lg-chronicle__suggest {
+  min-width: 12rem; max-height: 14rem; overflow: auto; margin: 0; padding: var(--space-1); list-style: none;
+  background: var(--surface-raised); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float);
+  font-size: var(--text-body-compact); line-height: var(--leading-body-compact-row);
+}
+.lg-chronicle__option { padding: 0.375rem var(--space-3); border-radius: var(--radius-container); color: var(--ink); cursor: pointer; }
+.lg-chronicle__option:hover, .lg-chronicle__option.is-active { background: var(--surface-solid); box-shadow: inset var(--border-emphasis) 0 0 var(--ink); }
+.lg-chronicle__status { padding: 0.375rem var(--space-3); color: var(--ink-muted); }
+/* Channel settings (the aside): a quiet icon button opening a Level 2 menu of channel checkboxes. */
+.lg-chronicle__menu {
+  display: grid; gap: 2px; min-width: 12rem; padding: var(--space-2);
+  background: var(--surface-raised); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float); box-shadow: var(--shadow-float);
+}
+.lg-chronicle__menu-title { margin: 0 0 var(--space-1); padding: 0 var(--space-2); font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); }
+.lg-chronicle__choice { display: flex; align-items: center; gap: var(--space-2); min-height: 2rem; padding: 0 var(--space-2); border-radius: var(--radius-container); color: var(--ink); cursor: pointer; font-size: var(--text-body-compact); }
+.lg-chronicle__choice:hover { background: var(--surface-solid); }
+.lg-chronicle__online { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); white-space: nowrap; }
+/* A native checkbox in Grimoire's selection colour: checked is selected, arcana's job (Foundations · Colour). */
+.lg-check { flex: none; width: 1rem; height: 1rem; margin: 0; accent-color: var(--arcana-glow); }
+.lg-check:focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); }
 
 /* ---------- Button: link ---------- */
 .lg-btn--link {
@@ -1512,6 +1621,90 @@ button.lg-loadout:focus-visible { outline: 2px solid transparent; box-shadow: va
 /* A link among the facts (the Guild) is a text link: ink, underlined. */
 .lg-identity__facts a { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 0.1875rem; }
 .lg-identity__facts a:hover { text-decoration-color: var(--ink); }
+
+/* ---------- Activity (the current action, D-109) ----------
+   At the head of the NavRail: a Level 1 block in the rail — the action in ink, the time left in tabular figures, a thin
+   bar in the neutral progress fill (Bone: printed progress, not EXP, HP or SP) and the way to it. A button when it opens
+   the action: line-strong edge and the raised wash on hover, as for any control. */
+.lg-activity {
+  display: grid; gap: var(--space-1); width: 100%; margin: 0; padding: var(--space-2) var(--space-3);
+  border: var(--border-hairline) solid var(--line); border-radius: var(--radius-container);
+  background: var(--surface-solid); color: var(--ink); font: inherit; text-align: left;
+}
+button.lg-activity { cursor: pointer; border-color: var(--line-strong); }
+button.lg-activity:hover { background: var(--surface-raised); }
+button.lg-activity:focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); }
+.lg-activity__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); min-width: 0; }
+.lg-activity__label { min-width: 0; overflow-wrap: anywhere; font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+.lg-activity__time { flex: none; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); font-variant-numeric: tabular-nums lining-nums; }
+.lg-activity__bar { display: block; height: 0.25rem; border-radius: var(--radius-control); background: var(--meter-track); overflow: hidden; }
+.lg-activity__fill { display: block; height: 100%; background: var(--ink-muted); transform-origin: left; transform: scaleX(var(--lg-activity-p, 0)); }
+.lg-activity__open { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink); text-decoration: underline; text-underline-offset: 0.15em; }
+/* Compact, the Activity is a mark like the rail's items beside it — the time over the bar, no box — its hover the items' wash (D-115). */
+.lg-activity--compact, button.lg-activity--compact {
+  width: auto; min-width: 2.5rem; max-width: 100%; padding: 0; justify-items: center; gap: 2px;
+  border-color: transparent; background: transparent; color: var(--gilt);
+}
+/* The compact mark (D-117), the game's own: a 2rem ring (the circle is presence's shape — here the character, present and
+   at work) in which the progress rises in a gilt wash, the ✦ at its centre and the live dot on its shoulder; one word under it. */
+.lg-activity__orb { position: relative; display: grid; place-items: center; width: 2rem; height: 2rem; }
+.lg-activity__well { position: absolute; inset: 0; overflow: hidden; border: var(--border-hairline) solid var(--line); border-radius: var(--radius-circle); background: var(--surface-raised); }
+.lg-activity__rise {
+  position: absolute; inset: 0; transform-origin: bottom; transform: scaleY(var(--lg-activity-p, 0));
+  background: linear-gradient(to top, color-mix(in srgb, var(--gilt) 60%, transparent), color-mix(in srgb, var(--gilt) 25%, transparent));
+}
+.lg-activity__glyph { position: relative; font-size: var(--text-body-compact); line-height: 1; color: var(--gilt); }
+.lg-activity__live { position: absolute; top: 0; right: 0; width: 0.5rem; height: 0.5rem; border-radius: var(--radius-circle); background: var(--arcana-glow); }
+.lg-activity__word {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.625rem; line-height: 0.875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.lg-activity--compact .lg-activity__label, .lg-activity--compact .lg-activity__time, .lg-activity--compact .lg-activity__open { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- Objective (the pinned quest in the TopBar's centre, D-110) ----------
+   One line of now: the kicker and quest title, then the current objective and its count. A disclosure when it holds the
+   full tracker: the panel is a Level 2 floating surface beneath it, at z-popover. */
+.lg-objective { position: relative; min-width: 0; }
+.lg-objective__summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; column-gap: var(--space-2); width: 100%;
+  margin: 0; padding: var(--space-1) var(--space-3); border: var(--border-hairline) solid transparent; border-radius: var(--radius-control);
+  background: none; color: var(--ink); font: inherit; text-align: left;
+}
+button.lg-objective__summary { cursor: pointer; border-color: var(--line); }
+button.lg-objective__summary:hover, .lg-objective.is-open button.lg-objective__summary { background: var(--surface-raised); border-color: var(--line-strong); }
+button.lg-objective__summary:focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); }
+.lg-objective__kicker { font-size: var(--text-label); line-height: var(--leading-label); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--ink-muted); white-space: nowrap; }
+.lg-objective__title { grid-column: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); font-weight: 600; }
+.lg-objective__summary > .lg-objective__title:first-child { grid-column: 1 / -1; }
+.lg-objective__line { grid-column: 1 / -1; display: flex; gap: var(--space-2); min-width: 0; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.lg-objective__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-objective__count { flex: none; margin-left: auto; color: var(--ink); font-variant-numeric: tabular-nums lining-nums; }
+.lg-objective__panel {
+  position: absolute; top: calc(100% + var(--space-1)); left: 50%; z-index: var(--z-popover);
+  width: min(26.25rem, 90vw); max-height: 70vh; overflow: auto; transform: translateX(-50%);
+  padding: var(--inset-md); border: var(--border-hairline) solid var(--line-strong); border-radius: var(--radius-float);
+  background: var(--surface-raised); box-shadow: var(--shadow-float);
+}
+.lg-objective__panel { animation: lg-enter var(--duration-base) var(--ease-enter) both; }
+
+/* ---------- Notice (D-111) ----------
+   A persistent notice: Level 1 surface-solid with a 2px start bar in its tone, the title in ink and the text in
+   ink-muted, an action at the end. The title carries the meaning; the bar backs it. Busy adds a small pulse — an
+   indeterminate progressbar, the one kind of loop Foundations · Motion allows outside playback. */
+.lg-notice {
+  --lg-notice-tone: var(--info);
+  display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--inset-lg);
+  border-radius: var(--radius-container); background: var(--surface-solid);
+  box-shadow: inset var(--border-emphasis) 0 0 var(--lg-notice-tone);
+}
+.lg-notice--warning { --lg-notice-tone: var(--warning); }
+.lg-notice--danger { --lg-notice-tone: var(--danger); }
+.lg-notice__body { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.lg-notice__title { margin: 0; font-size: var(--text-body-compact); line-height: var(--leading-body-compact); font-weight: 600; color: var(--ink); }
+.lg-notice__text { font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--ink-muted); }
+.lg-notice__action { flex: none; display: flex; gap: var(--space-2); }
+@keyframes lg-pulse { 50% { opacity: 0.35; } }
+.lg-notice__busy { flex: none; width: 0.625rem; height: 0.625rem; border-radius: 50%; background: var(--lg-notice-tone); animation: lg-pulse 1.4s var(--ease-standard) infinite; }
 
 /* ---------- Presence ---------- */
 .lg-presence { display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--text-caption); line-height: var(--leading-caption); font-weight: 600; color: var(--ink-muted); }

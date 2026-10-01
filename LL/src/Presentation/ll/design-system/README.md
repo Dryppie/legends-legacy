@@ -112,11 +112,11 @@ Follow Governance. Change the highest layer in the table that solves the problem
 - `api/assets/Backgrounds.md` — 5 files, as files in `assets/`. (1.4k)
 - `api/assets/Cards.md` — 3 files, as files in `assets/`. (1.2k)
 
-**Components** (`api/components/<Comp>.md`, 51; 2 of them showcase pages)
+**Components** (`api/components/<Comp>.md`, 54; 2 of them showcase pages)
 
-- **Shell**: `GameShell` — The screen frame · `TopBar` — The top bar · `NavRail` — The main navigation · `Stage` — The scene backdrop · `Page` — The information screen frame · `Folio` — The detail panel · `Chronicle` — Chat and the game log · `KeyHints` — The keyboard shortcut hints
+- **Shell**: `GameShell` — The screen frame · `TopBar` — The top bar · `NavRail` — The main navigation · `Stage` — The scene backdrop · `Page` — The information screen frame · `Folio` — The detail panel · `Chronicle` — Chat and the game log · `KeyHints` — The keyboard shortcut hints · `Activity` — The current action · `Objective` — The pinned quest
 - **Components · Actions & input**: `TabStrip` — The tabs · `Button` — The command button · `SearchField` — Search with suggestions
-- **Components · Containers**: `PageHeader` — The information screen heading · `Banner` — The headline block · `Panel` — The content box
+- **Components · Containers**: `PageHeader` — The information screen heading · `Banner` — The headline block · `Panel` — The content box · `Notice` — The persistent notice
 - **Components · Data**: `StatFigure` — The headline number · `Ledger` — The labelled value list · `Meter` — The progress bar · `Track` — The milestone track · `StatTile` — The compact stat · `Delta` — The stat change
 - **Game Components · Character**: `LevelPlate` — The level display · `ProfileIdentity` — Who a player is · `Sigil` — The hex stat badge · `Constellation` — The stat star chart · `JourneyCard` — The next-step guide · `Emblem` — The attribute sign
 - **Game Components · Items & economy**: `LoadoutSlot` — An Essence loadout slot · `ItemLink` — An item named in text · `ItemSlot` — The item frame · `CurrencyPill` — The currency amount

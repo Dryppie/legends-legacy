@@ -1,0 +1,76 @@
+// The new look's frame (GAME_SHELL_GRIMOIRE_PLAN.md). Page-local layout from tokens only.
+:host {
+  display: block;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+// The stage below the TopBar (which GameShell now keeps out of the stage, D-115): shell notices first, then the screen.
+.dg-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-sm);
+  padding-top: var(--topbar-height);
+}
+.dg-stage ::ng-deep .lg-notice {
+  flex: none;
+  margin: 0 var(--dg-gutter);
+}
+.dg-stage ::ng-deep .lg-notice:first-child {
+  margin-top: var(--space-3);
+}
+
+// The screen's box. Inside it the TopBar is already accounted for, so a Page or the legacy region needs no room for it.
+.dg-view {
+  --topbar-height: 0px;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.dg-region {
+  position: absolute;
+  inset: 0;
+}
+.dg-page,
+.dg-fill,
+.dg-outlet {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+.dg-outlet {
+  overflow: hidden;
+}
+
+// An old screen's sheet fills the stage between the frame's lines — the rail, the TopBar's rule and the Chronicle's edge
+// — with no edge of its own, so it never draws a second frame inside the first (D-116). Its content keeps the Page's
+// side gutter, so a screen's edges stay put between the two looks and line up with the TopBar's title and currencies.
+.dg-stage {
+  --dg-gutter: var(--section-md);
+}
+@media (max-width: 40rem) {
+  .dg-stage {
+    --dg-gutter: var(--space-2);
+  }
+}
+.dg-sheet {
+  position: absolute;
+  inset: 0;
+}
+// The old sheet rose from the old frame's foot with a border and its top corners rounded; here the frame bounds it.
+.dg-stage.ll-game-surface {
+  position: absolute;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.dg-sheet__body {
+  padding: var(--space-6) var(--dg-gutter);
+}
+@media (max-width: 40rem) {
+  .dg-sheet__body {
+    padding: var(--space-2);
+  }
+}

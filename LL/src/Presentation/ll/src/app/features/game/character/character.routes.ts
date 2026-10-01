@@ -20,7 +20,8 @@ export const CHARACTER_ROUTES: Routes = [
       {
         path: 'character-overview',
         component: CharacterOverviewSwitchComponent,
-        data: { guidePageId: GUIDE_PAGE_IDS.characterOverview },
+        // grimoireView: in the new look this screen is a Grimoire Page, so the shell gives it no legacy region (D-108).
+        data: { guidePageId: GUIDE_PAGE_IDS.characterOverview, grimoireView: true },
       },
       {
         path: 'inventory',

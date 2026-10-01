@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './dashboard.component';
+import { DashboardSwitchComponent } from '../dashboard-grimoire/dashboard-switch.component';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
 import { GUIDE_PAGE_IDS } from '../../shared/help/guide-catalog';
 import { focusedBetaUnavailableMatchGuard } from '../../core/guards/focused-beta-journey.guard';
@@ -7,7 +7,8 @@ import { focusedBetaUnavailableMatchGuard } from '../../core/guards/focused-beta
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
-    component: DashboardComponent,
+    // The old frame or the new look's shell, by Settings → Interface → New look.
+    component: DashboardSwitchComponent,
     children: [
       {
         path: '',

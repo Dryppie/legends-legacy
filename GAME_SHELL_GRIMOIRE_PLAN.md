@@ -4,6 +4,12 @@
 
 **Agreed so far:** the new shell sits behind the same single switch as every migrated screen: Settings → Interface → New look (`GrimoirePreviewPreferenceService.newLook()`, which replaced the per-screen Character Overview preview). With it on, the game shows the Grimoire shell and every screen that has a new look; screens that haven't moved render unchanged inside the new shell.
 
+**Status (1 October 2026, evening): steps 1–3 built.** Design system D-104 to D-114 (NavRail descriptions, gold icons and journey locks with the `lock` marker; GameShell backdrop, `lg-legacy` host, compact rail column and narrow TopBar; Activity, Objective, Notice; the Chronicle's own composer, day breaks, player actions and Nobility). App: `src/app/layout/dashboard-grimoire/` — the whole frame and the chat as a Chronicle with a Loot channel, chosen by `DashboardSwitchComponent` from `newLook()`. Checks: design-system check 0 errors; parity 441/441 static, 25/25 behaviour; 895 unit tests pass; `ng build ll` succeeds. Screenshots were taken from a mocked harness only, so step 4 (review in the running game) is next. Known: mention highlighting and the welcome modal haven't been seen against live data.
+
+**Review fix (D-115):** after Martin's first look the frame's lines were made to meet — the TopBar is a surface band with a rule that continues the chat's head, its insets match the stage gutter, an old screen's sheet is inset by that gutter on every side, the compact rail's icons are centred with small corner counts and an unboxed Activity, and screens inside the world mark the World Map.
+
+**Second review (D-116, D-117):** the inset sheet read as a frame inside a frame, so an old screen's sheet now fills the stage between the frame's lines with no edge of its own, notices included, its content at the Page's side gutter. The compact rail's current action is the old sidebar's mark again: the ring the progress rises in, the ✦, the live dot and "Battling".
+
 ## 1. What the frame is today
 
 `dashboard.component` (561 + 217 lines), `game-header` (93 + 98), `sidebar` (233 + 130, with `sidebar-item`), `chat` (1,300 + 912, plus the composer, mentions and item links), `quest-tracker` (176 + 296), `loot-tracker` (99 + 57).
@@ -63,16 +69,16 @@ At 1600px, docked chat, Default text: Grimoire gives rail 14rem (224px) + stage 
 ## 6. Order of work
 
 1. **Design system:** S1 backdrop, S2 legacy host, S3 Current activity, S4 TopBar "now" slot, S5 Notice, S6 the nav rule. Docs, `bundle.*`, the `lg-*` port and parity cases.
-2. **App:** `dashboard-grimoire` behind `newLook()`: GameShell, NavRail via the adapter, TopBar with currencies and the "now" slot, notices, legacy host for unmigrated screens, today's chat in the shell's chat area. The Overview drops `flow` inside it. Specs.
-3. **Chronicle:** the chat port (channels, composer with suggestions, mentions, item links, Loot channel), replacing today's chat inside the new shell.
+2. **App:** `dashboard-grimoire` behind `newLook()`: GameShell, NavRail via the adapter, TopBar with currencies and the "now" slot, notices, legacy host for unmigrated screens. The Overview drops `flow` inside it. Specs.
+3. **Chronicle, in the same pass (decision 5):** the chat port (channels, composer with suggestions, mentions, item links, Loot channel), so the new shell ships with it.
 4. **Review** at the sizes above, keyboard and screen reader; fix; then make the new look the default and delete the old frame.
 
-## 7. Decisions for Martin
+## 7. Decisions (Martin, 1 October 2026)
 
-1. Rail descriptions ("Stats, vitals, loadout"): drop them, as Grimoire's narrower rail does (recommended), or add a description line to NavRail?
-2. Destinations the journey hasn't introduced: keep them hidden (recommended, with the nav rule in S6), or show them Locked with how they unlock?
-3. Loot History: move it into the chat as the Loot channel, as Grimoire decided in D-005 (recommended), or keep a separate box?
-4. Pinned quest and current action: the quest's current objective in the TopBar centre (the run's Track replaces it during a dungeon or raid) and the current action at the head of the rail (recommended)?
-5. Chat: the shell first with today's chat inside it, then the Chronicle port as its own step (recommended), or both at once?
-6. Rail icons: the drawings are the same; the choice is how they're coloured. Grimoire's way, muted at rest and gold only on the current destination (recommended), or every icon gold as today?
-7. Backdrop: keep the game's textured backdrop across the whole frame, as D-101 promised (recommended)?
+1. **Rail descriptions stay.** Each destination keeps its description line, so a player never has to recall a destination from its icon. NavRail gains `description` (S8).
+2. **Destinations the journey hasn't introduced show as Locked**, with how they unlock — D-087's rule as written. The adapter turns the journey filter into `locked` + `reason` instead of hiding (S6).
+3. **Loot History moves into the chat as the Loot channel** (D-005).
+4. **The pinned quest's current objective sits in the TopBar centre**, replaced by the run's Track during a dungeon or raid and opening the full tracker; the current action sits at the head of the rail (S3, S4).
+5. **The chat is ported in the same pass**, not after: the new shell ships with the Chronicle, not today's chat inside it.
+6. **Rail icons stay gold at rest**, as today. This narrows Foundations · Iconography's colour rule (gilt for the current location only) for the NavRail's icons; the current destination is still marked by the diamond, the weight and `ink`.
+7. **The game's textured backdrop stays across the whole frame** (S1, as D-101 promised).

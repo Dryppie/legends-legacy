@@ -89,7 +89,7 @@ Everything else keeps its word, even in a dense row: equip, unequip, sell, buy, 
 
 ## Colour
 
-- **`currentColor` only.** An icon takes the colour of the text it labels: `ink-muted` beside a muted label, `ink` beside an active one, `gilt` for the current location only (the active rail item, the PageHeader's mark), `arcana` beside a ready or new word, a status colour beside its status word, a damage type's colour beside its damage number, `effect-beneficial` or `effect-harmful` inside a condition's Tag.
+- **`currentColor` only.** An icon takes the colour of the text it labels: `ink-muted` beside a muted label, `ink` beside an active one, `gilt` for the current location (the PageHeader's mark) and for the NavRail's icons, which are gold at rest as the game's sidebar has always drawn them (D-105), `arcana` beside a ready or new word, a status colour beside its status word, a damage type's colour beside its damage number, `effect-beneficial` or `effect-harmful` inside a condition's Tag.
 - **No rarity-coloured icons.** Rarity is carried by the slot's edge, the name's colour and the rarity code (Registries · Rarity). An icon beside a rarity-coloured name is set in `ink-muted`, never inherited from the name.
 - **No multicolour line icons.** A line icon is one colour, with no gradient and no second tone. The only multicolour images are art — the currency art, the Logo, the ornaments and the combat banners — and art is never an icon: it is shown at display size and never inline at 16px.
 - **No glow** on any icon (Foundations · Ornament · Glow).
@@ -224,7 +224,7 @@ What exists today, and what is needed, by category. Names are the icons' planned
 | `sell` | Sell | Needed | P1 | A coin leaving |
 | `buy` | Buy | Needed | P1 | A coin arriving |
 | `claim` | Claim a reward | Needed | P1 | A reward coming to hand |
-| `lock` | Lock an item, or Locked (marker) | Needed | P1 | A closed padlock; a solid 12px marker on slots |
+| `lock` | Lock an item, or Locked (marker) | Set (D-113) | P1 | A closed padlock: a solid 12px marker, drawn first for the NavRail's locked destinations |
 | `unlock` | Unlock an item | Needed | P1 | An open padlock |
 | `favourite` | Favourite, or Favourite (marker) | Glyph ★ | P1 | A bookmark ribbon (D-082); a solid 12px marker on slots |
 | `filter` | Filter | Game | P1 | A funnel. The game's `settings/filters.svg` has a baked gradient |

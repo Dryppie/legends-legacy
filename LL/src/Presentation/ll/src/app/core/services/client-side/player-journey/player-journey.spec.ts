@@ -4,6 +4,7 @@ import {
   getPlayerJourneyDestinationRoute,
   isPlayerJourneyOnboardingComplete,
   PlayerJourneyStage,
+  playerJourneySidebarLockReason,
   playerJourneyStageLabels,
   resolvePlayerJourneyStage,
 } from './player-journey';
@@ -351,6 +352,23 @@ describe('player journey', () => {
     expect(filterSidebarForPlayerJourney(sections, journal(), 1, false)).toBe(
       sections,
     );
+  });
+
+  it('says how a destination the journey keeps back unlocks, and nothing for an open one', () => {
+    const item = (id: string, route: string[] = [id]) => ({ id, route });
+
+    expect(playerJourneySidebarLockReason(item('character-overview', ['character', 'character-overview']), journal(), 1, true)).toBeNull();
+    expect(playerJourneySidebarLockReason(item('essences', ['character', 'essences']), journal(), 1, true)).toBe(
+      'Unlocks at Claim Your Power on your journey, or at level 30',
+    );
+    expect(playerJourneySidebarLockReason(item('guild', ['city', 'guild']), journal(), 1, true)).toBe(
+      'Unlocks at Shenic Journey and level 10, or at level 30',
+    );
+    expect(playerJourneySidebarLockReason(item('legacy-ascension', ['world', 'legacy-ascension']), journal(), 1, true)).toBe(
+      'Unlocks at level 30',
+    );
+    expect(playerJourneySidebarLockReason(item('essences', ['character', 'essences']), journal(), 1, false)).toBeNull();
+    expect(playerJourneySidebarLockReason(item('guild', ['city', 'guild']), journal(), 30, true)).toBeNull();
   });
 });
 

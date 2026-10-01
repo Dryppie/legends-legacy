@@ -1,0 +1,19 @@
+# Floor 10: fixed Power and penetration acceptance — 1 October 2026
+
+## Frozen protocol
+
+Target: primary LL World Tower and the offline Balance Harness. Implement and execute the proposal `TestResults/tower-floor10-fixed-penetration-acceptance-proposal-20261001.json`, SHA-256 `0c588e56db75fb38416b66f5e021ad89d18096d2711d0889957abd99c7cc2bd1`. The candidate is floor-10 offense **7.13 → 3.565** and penetration **1 → 40**. Health **12.8371**, defenses, regeneration, the full shared Mad King/Ant King kit, all other floors, expected progression and every raw Essence/actor/item ordering stay fixed.
+
+Retain all **278 recipes / five actual compositions**, including 38 original controls and 240 armor variants. **245 recipes** satisfy the limit of at most eight specialized items on at most two characters. Each candidate batch starts from the original unchanged qualified source; no candidate-on-candidate edits.
+
+Complete **32 batches of 16 fresh seeds per phase**, giving **512 observations per recipe**. Screening: **142,336 fights / 512 reservations**. Independent confirmation runs only after the entire screen passes, with the same scope and separate seeds. Maximum **284,672 fresh fights / 1,024 reservations**. Initial exclusions: **927,676**. No interim assessment, omitted controls, reordered loadouts, extension, retries, replacement seeds, tuning or pooling of earlier outcomes. A failed process or admission is preserved and stops the run.
+
+Both phases independently require the simultaneous 95% approximate Bonferroni-Wilson gates across all 278 recipes: at least two distinct eligible compositions with lower bound at least 10%, and every recipe with upper bound at most 50%. At 512 observations these are **77 minimum wins on two eligible compositions and 213 maximum wins on every recipe**. Recount all raw outcomes, native participant sets, intervals and decisions independently after closure.
+
+Each batch uses the existing native **840-second**, owned-process **900-second**, and **2-GiB** bounds. Before allocation, recheck all declared inputs, catalog/runtime bindings and the entire completed batch prefix. Admit only if doubled measured time is below 672 seconds and doubled bytes below 80% of 2 GiB, with remaining-output capacity plus 2 GiB free disk. The preceding 16-seed diagnostic gives a doubled native estimate of **380.87 seconds**. Observe supervisor stdout only during native runs and leave pinned sources unchanged.
+
+Native preparation must match every nominated recipe and change only guardian Power and raw typed penetration; combat applies the existing 40% cap. Fresh guards are checked both on a fresh build and with the preserved qualified combat assemblies. Backend verification uses `build/run-tests.ps1`.
+
+If both phases pass, freeze application verification before any gameplay edit: match every **142,336 confirmation input hashes** and replay **one historical seed per recipe in each confirmation batch, 8,896 complete replays maximum**, using the exact isolated candidate bytes and qualified runtime. No new seeds, additional replay panels or automatic retries. Local application requires the independently recounted passing phases and the complete parity proof; then verify byte-identical live catalogs, every native preparation and fresh backend regressions. Roll back only this owned catalog change if post-application verification fails. This protocol authorizes no database operation or deployment.
+
+Prior proof: [pressure diagnosis](Tower-Floor10-Pressure-Diagnostic-20261001.md) and [candidate diagnostic](Tower-Floor10-Penetration-Diagnostic-20261001.md). Their observations selected the setting but contribute no acceptance samples. Keep the known unrelated Kharad behavior-manifest failure visible; scoped verification does not claim to fix it.

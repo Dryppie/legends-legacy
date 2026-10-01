@@ -7,11 +7,21 @@
 @tailwind utilities;
 
 /* Legacy element styles stop at Grimoire roots (.lg-root, .lg-shell; D-100): a screen that has moved to Grimoire takes
-   its type and focus ring from Grimoire, not from these. The :where() adds no specificity, so legacy screens are
-   unchanged. Remove the guard with the rule once no legacy screen needs the rule. */
+   its type and focus ring from Grimoire, not from these. Inside the Grimoire shell they restart in an .lg-legacy region,
+   which holds a screen that hasn't moved yet, and stop again at any .lg-root within it (D-108). The :where() adds no
+   specificity, so legacy screens are unchanged. Remove the guard with the rule once no legacy screen needs the rule. */
+
+/* The legacy region's body type, which Grimoire's shell would otherwise pass down (D-108). */
+.lg-legacy {
+  --lg-legacy-font: var(--ll-font-body);
+  --lg-legacy-size: var(--ll-text-md);
+  --lg-legacy-leading: var(--ll-leading-normal);
+  --lg-legacy-weight: var(--ll-weight-regular);
+  --lg-legacy-ink: var(--ll-color-text);
+}
 
 @layer base {
-  :focus-visible:where(:not(:is(.lg-root, .lg-shell) *)) {
+  :focus-visible:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
     outline: 2px solid var(--ll-color-focus-ring) !important;
     outline-offset: 2px !important;
     box-shadow: var(--ll-shadow-focus) !important;
@@ -1428,37 +1438,37 @@ body.mat-typography {
   overflow-x: hidden;
 }
 
-h1:where(:not(:is(.lg-root, .lg-shell) *)) {
+h1:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-tight);
   font-size: var(--ll-text-4xl);
 }
 
-h2:where(:not(:is(.lg-root, .lg-shell) *)) {
+h2:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-tight);
   font-size: var(--ll-text-xl);
 }
 
-h3:where(:not(:is(.lg-root, .lg-shell) *)) {
+h3:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-tight);
   font-size: var(--ll-text-lg);
   font-style: normal;
 }
 
-.mat-typography :is(h1, h2, h3):where(:not(:is(.lg-root, .lg-shell) *)) {
+.mat-typography :is(h1, h2, h3):where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-display);
 }
 
-input:where(:not(:is(.lg-root, .lg-shell) *)) {
+input:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-normal);
   font-weight: var(--ll-weight-regular);
   font-size: var(--ll-text-sm);
 }
 
-:is(button, select, textarea):where(:not(:is(.lg-root, .lg-shell) *)) {
+:is(button, select, textarea):where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-body);
 }
 
@@ -1492,25 +1502,25 @@ input:where(:not(:is(.lg-root, .lg-shell) *)) {
   font-size: 18.2px;
 }
 
-label:where(:not(:is(.lg-root, .lg-shell) *)) {
+label:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-display);
   line-height: var(--ll-leading-normal);
   font-size: var(--ll-text-sm);
 }
 
-span:where(:not(:is(.lg-root, .lg-shell) *)) {
+span:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-tight);
   font-weight: var(--ll-weight-light);
   font-size: var(--ll-text-sm);
 }
 
-span img:where(:not(:is(.lg-root, .lg-shell) *)) {
+span img:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   display: block;
   width: 100%;
 }
 
-small:where(:not(:is(.lg-root, .lg-shell) *)) {
+small:where(:not(:is(.lg-root, .lg-shell) *), .lg-legacy :not(.lg-legacy .lg-root *)) {
   font-family: var(--ll-font-body);
   line-height: var(--ll-leading-normal);
   font-weight: var(--ll-weight-regular);

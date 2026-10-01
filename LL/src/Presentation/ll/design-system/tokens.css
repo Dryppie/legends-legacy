@@ -149,7 +149,7 @@
   --radius-container: 2px; /* Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions). Regions — the Folio, Banner, Stage, rail and Page — are square. */
   --radius-control: 4px; /* Controls, tags and slots: Buttons, inputs, tabs, key caps and clickable CurrencyPills; Tags, count badges and rarity codes; ItemSlots, thumbnails, LoadoutSlots and StatTiles. Focus rings on links and icon buttons follow it. */
   --radius-float: 8px; /* Popovers and drawers: tooltips, hover cards, menus, suggestion lists, toasts and the floating chat drawer. Only what floats. */
-  --radius-circle: 50%; /* The Presence dot, and nothing else: the circle means presence (Foundations · Shape). Never a count badge, an icon button, a bullet or a portrait. */
+  --radius-circle: 50%; /* The Presence dot and the compact Activity's ring and live dot (D-117), and nothing else: the circle means presence — someone there, or the character at work (Foundations · Shape). Never a count badge, an icon button, a bullet or a portrait. */
   --text-level-numeral: 5.25rem; /* Size of level-numeral. (84px at the default text size.) */
   --text-title-xl: 3.5rem; /* Size of title-xl. (56px at the default text size.) */
   --text-title-lg: 2.25rem; /* Size of title-lg; StatFigure sm; a large Sigil label. (36px at the default text size.) */
@@ -227,7 +227,8 @@
   --border-emphasis: 2px; /* Selection edges only: the selected row’s start bar, the selected slot ring, the active tab and channel bars, the current entry; and Track diamonds, drawn at a size they need. Never a resting edge, and not the focus ring (shadow focus-ring). */
   --opacity-unowned: 0.4; /* Not owned (Standards · States · Ownership and use): the art of a thing the player doesn't have, in a collection, codex or shop. Its name drops to ink-muted and says "Not owned"; the art alone never carries it. */
   --opacity-drag-origin: 0.4; /* Dragging (Standards · States · Interaction): the place a dragged thing left. It keeps its room, so nothing reflows, while the copy under the pointer lifts with shadow-float on z-drag. */
-  --rail-width: 14rem; /* NavRail column. (224px at the default text size.) */
+  --rail-width: 16rem; /* NavRail column, wide enough for a destination's description (D-104). (256px at the default text size.) */
+  --rail-width-compact: 4rem; /* NavRail column when the player chose the compact rail: icons only (D-113). (64px at the default text size.) */
   --folio-width: 22.5rem; /* Folio column. (360px at the default text size.) */
   --topbar-height: 3.5rem; /* TopBar height. (56px at the default text size.) */
   --hintbar-height: 2.5rem; /* KeyHints strip at the stage's foot. (40px at the default text size.) */

@@ -25,6 +25,18 @@ The Chronicle is the game's chat and log in one place: what people say (General,
 - **New lines never move what the player is reading** (Foundations · Motion · Live updates). The log follows the newest line only while the player is at its foot. Scrolled up, it keeps its place — the line being read stays put even as old lines leave the top — and a small "3 new lines" control waits over the log's foot, a Compact Button with `shadow-float`. Pressing it jumps to the latest and focuses the log. Sending a message returns to the foot. Key messages by a stable `id`.
 - **Motion:** opened by the player, the Chronicle's body rises `space-2` and fades in over `duration-base` on `ease-enter`; closing is at once, since the frame becomes its bar and height never animates. New lines appear at once, without sliding in. The jump control fades in over `duration-fast`. Dragging the floating drawer follows the pointer with no transition. Under reduced motion all of it happens at once.
 
+**Day breaks** (D-112). A message with `kind: 'day'` is the date between two days' lines — "1 Oct 2026" — set in `label` capitals between two `line` rules, with no time, tag or author.
+
+**Player actions and Nobility** (D-112). With `onAuthor` (Angular: `authorActions` and `(authorSelect)`, which emits `{ message, element }`) each author's name is a button; the host opens its own menu — View profile, Whisper — anchored to that element as a Level 2 popover. The collapsed ticker keeps plain names. A message with `noble` shows the 12px Nobility crown before the name, labelled "Noble", as Identity does (D-066).
+
+**A composer of your own** (D-112). Pass a React element as `composer` (Angular: a `lgSlot="composer"` child) when the host needs more than the built-in input — the game's editor holds item links and offers @mention suggestions. It takes the composer's place and may use its parts:
+
+- `lg-chronicle__row` lays out the prefix, the input and the send key; `lg-chronicle__input` styles an `<input>` or a contenteditable editor (its `data-placeholder` shows while empty);
+- `lg-chronicle__note` and `lg-chronicle__error` (with `role="alert"`) sit under the row; `lg-chronicle__count` shows the length as the limit nears, `is-over` past it;
+- `lg-chronicle__suggest` is the @mention list — a Level 2 floating `listbox` above the input with `lg-chronicle__option` options (`is-active` for the highlighted one: the raised wash and a 2px `ink` bar) and `lg-chronicle__status` for "Searching…" or "No players found". The input is its `combobox`: Up and Down move, Enter or Tab picks, Escape closes.
+
+**Channel settings** go in the `aside`: a quiet icon button opening `lg-chronicle__menu`, a Level 2 menu titled with `lg-chronicle__menu-title` and holding one `lg-chronicle__choice` per channel — a label around an `lg-check`, the native checkbox in `arcana-glow` (checked is selected). `lg-chronicle__online` beside it says how many players are online.
+
 ## Accessibility notes
 
 | Field | Notes |

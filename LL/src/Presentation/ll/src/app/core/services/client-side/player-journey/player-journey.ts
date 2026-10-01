@@ -8,7 +8,7 @@ import {
   SOUL_ARCHIVE_QUEST_ID,
   TRAINING_DAY_QUEST_ID,
 } from '../../../../shared/models/quest';
-import { SidebarSection } from '../../../../shared/models/sidebar-item';
+import { SidebarSection, Tab } from '../../../../shared/models/sidebar-item';
 
 export enum PlayerJourneyStage {
   FirstHunt = 0,
@@ -224,6 +224,53 @@ export function filterSidebarForPlayerJourney(
       ),
     }))
     .filter((section) => section.items.length > 0);
+}
+
+/**
+ * Why a sidebar destination is not open yet on the focused journey — "Unlocks at Claim Your Power" — or null when
+ * `filterSidebarForPlayerJourney` keeps it. The Grimoire rail shows such a destination as Locked with this reason
+ * instead of hiding it (D-106).
+ */
+export function playerJourneySidebarLockReason(
+  item: Pick<Tab, 'id' | 'route'>,
+  journal: QuestJournal,
+  characterLevel: number,
+  focusedBetaJourney: boolean,
+): string | null {
+  const visible = filterSidebarForPlayerJourney(
+    [{ id: 'probe', label: '', items: [{ ...item, icon: '', title: '' }] }],
+    journal,
+    characterLevel,
+    focusedBetaJourney,
+  );
+  if (visible.length) return null;
+
+  const fullGame = `level ${PLAYER_JOURNEY_FULL_GAME_UNLOCK_LEVEL}`;
+  const at = (stage: PlayerJourneyStage) => `Unlocks at ${phaseLabel(stage)} on your journey, or at ${fullGame}`;
+  const stage = resolvePlayerJourneyStage(journal);
+  switch (item.id) {
+    case 'inventory':
+    case 'essences':
+      return at(PlayerJourneyStage.SoulArchive);
+    case 'world':
+      return at(PlayerJourneyStage.EnterLumo);
+    case 'prophecies':
+    case 'colosseum':
+      return at(PlayerJourneyStage.Shenic);
+    case 'achievements':
+    case 'soulstone-archive':
+    case 'guild':
+      return stage >= PlayerJourneyStage.Shenic
+        ? `Unlocks at level ${PLAYER_JOURNEY_SOCIAL_UNLOCK_LEVEL}`
+        : `Unlocks at ${phaseLabel(PlayerJourneyStage.Shenic)} and level ${PLAYER_JOURNEY_SOCIAL_UNLOCK_LEVEL}, or at ${fullGame}`;
+    case 'market-place':
+    case 'tavern':
+      return stage >= PlayerJourneyStage.Shenic
+        ? `Unlocks at level ${PLAYER_JOURNEY_ECONOMY_UNLOCK_LEVEL}`
+        : `Unlocks at ${phaseLabel(PlayerJourneyStage.Shenic)} and level ${PLAYER_JOURNEY_ECONOMY_UNLOCK_LEVEL}, or at ${fullGame}`;
+    default:
+      return `Unlocks at ${fullGame}`;
+  }
 }
 
 export function isPlayerJourneyOnboardingComplete(

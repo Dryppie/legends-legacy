@@ -1,4 +1,4 @@
-<!-- @dsCard group="Shell" height=640 -->
+<!-- @dsCard group="Shell" height=880 -->
 <!doctype html>
 <html>
 <head>
@@ -23,34 +23,34 @@ var L = window.LL, h = React.createElement, F = React.Fragment;
 var LOGO = '../../assets/Logos/Logo.svg';
 var NAV = [
   { label: 'Character', items: [
-    { id: 'overview', title: 'Overview', icon: 'overview' },
-    { id: 'inventory', title: 'Inventory', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
-    { id: 'essences', title: 'Essences', icon: 'essences' },
-    { id: 'combat-styles', title: 'Combat Styles', icon: 'combat-styles' },
-    { id: 'achievements', title: 'Achievements', icon: 'achievements' },
-    { id: 'soulstones', title: 'Soulstones', icon: 'soulstones' } ] },
+    { id: 'overview', title: 'Overview', description: 'Stats, vitals, loadout', icon: 'overview' },
+    { id: 'inventory', title: 'Inventory', description: 'Items, gear, misc', icon: 'inventory', badge: 3, badgeLabel: '3 new items' },
+    { id: 'essences', title: 'Essences', description: 'Archive, attune, ascend', icon: 'essences' },
+    { id: 'combat-styles', title: 'Combat Styles', description: 'Train, refine, combine', icon: 'combat-styles' },
+    { id: 'achievements', title: 'Achievements', description: 'Records and titles', icon: 'achievements' },
+    { id: 'soulstones', title: 'Soulstones', description: 'Permanent upgrades', icon: 'soulstones' } ] },
   { label: 'World', items: [
-    { id: 'world-map', title: 'World Map', icon: 'world-map' },
-    { id: 'world-tower', title: 'World Tower', icon: 'legacy-ascension' },
-    { id: 'quests', title: 'Quests', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
+    { id: 'world-map', title: 'World Map', description: 'Travel and explore', icon: 'world-map' },
+    { id: 'world-tower', title: 'World Tower', description: 'Conquer the World Tower', icon: 'legacy-ascension' },
+    { id: 'quests', title: 'Quests', description: 'Objectives and rewards', icon: 'quest-journal', badge: 1, badgeLabel: '1 quest ready to turn in' },
     // Something waiting with nothing to count: the attention diamond in the badge's place.
-    { id: 'prophecies', title: 'Prophecies', icon: 'prophecies', ready: 'Daily cache ready' } ] },
+    { id: 'prophecies', title: 'Prophecies', description: 'Daily and weekly omens', icon: 'prophecies', ready: 'Daily cache ready' } ] },
   { label: 'City', items: [
-    { id: 'guild', title: 'Guild', icon: 'guild' },
+    { id: 'guild', title: 'Guild', description: 'Guild headquarters', icon: 'guild' },
     // Locked comes before the attention mark: no diamond on a locked item.
-    { id: 'colosseum', title: 'Colosseum', icon: 'colosseum', locked: true, reason: 'Unlocks at level 20', ready: true },
-    { id: 'cinder-bazaar', title: 'Cinder Bazaar', icon: 'cinder-bazaar' },
-    { id: 'leaderboard', title: 'Leaderboard', icon: 'leaderboard' } ] },
+    { id: 'colosseum', title: 'Colosseum', description: 'Tournaments and battles', icon: 'colosseum', locked: true, reason: 'Unlocks at level 20', ready: true },
+    { id: 'cinder-bazaar', title: 'Cinder Bazaar', description: 'List and buy items', icon: 'cinder-bazaar' },
+    { id: 'leaderboard', title: 'Leaderboard', description: 'Rankings and records', icon: 'leaderboard' } ] },
   { label: 'System', items: [
-    { id: 'settings', title: 'Settings', icon: 'settings' } ] }
+    { id: 'settings', title: 'Settings', description: 'Account and preferences', icon: 'settings' } ] }
 ];
 
 function App() {
   var s = React.useState('overview');
   return h('div', { className: 'pv-rails' },
-    h('div', { style: { width: 224, height: 640 } }, h(L.NavRail, { sections: NAV, activeId: s[0], onNavigate: s[1],
+    h('div', { style: { width: 256, height: 820 } }, h(L.NavRail, { sections: NAV, activeId: s[0], onNavigate: s[1],
       header: h(F, null, h('span', { className: 'pv-logo' }, h('img', { src: LOGO, width: 36, height: 36, alt: '' })), h('span', { className: 'pv-brand' }, "Legend's", h('br'), 'Legacy')) })),
-    h('div', { style: { width: 64, height: 640 } }, h(L.NavRail, { compact: true, sections: NAV, activeId: s[0], onNavigate: s[1] })));
+    h('div', { style: { width: 64, height: 820 } }, h(L.NavRail, { compact: true, sections: NAV, activeId: s[0], onNavigate: s[1] })));
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
 </script>

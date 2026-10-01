@@ -33,8 +33,8 @@ To look at the page, run `npx ng serve` and open `http://localhost:4610/`: the r
 A pass prints:
 
 ```text
-Static: 423 of 423 cases match.
-Behaviour: 22 of 22 scenarios match.
+Static: 442 of 442 cases match.
+Behaviour: 25 of 25 scenarios match.
 Announcements: the same 9 lines on both sides.
 ```
 

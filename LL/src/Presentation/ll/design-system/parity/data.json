@@ -1,62 +1,394 @@
 {
   "nav": [
-    { "label": "Character", "items": [
-      { "id": "overview", "title": "Overview", "icon": "overview" },
-      { "id": "inventory", "title": "Inventory", "icon": "inventory", "badge": 3, "badgeLabel": "3 new items" },
-      { "id": "essences", "title": "Essences", "icon": "essences", "locked": true, "reason": "Unlocks at level 20" }
-    ]},
-    { "label": "City", "items": [
-      { "id": "guild", "title": "Guild", "icon": "guild", "href": "/guild" }
-    ]}
+    {
+      "label": "Character",
+      "items": [
+        {
+          "id": "overview",
+          "title": "Overview",
+          "icon": "overview"
+        },
+        {
+          "id": "inventory",
+          "title": "Inventory",
+          "icon": "inventory",
+          "badge": 3,
+          "badgeLabel": "3 new items"
+        },
+        {
+          "id": "essences",
+          "title": "Essences",
+          "icon": "essences",
+          "locked": true,
+          "reason": "Unlocks at level 20"
+        }
+      ]
+    },
+    {
+      "label": "City",
+      "items": [
+        {
+          "id": "guild",
+          "title": "Guild",
+          "icon": "guild",
+          "href": "/guild"
+        }
+      ]
+    }
   ],
   "navReady": [
-    { "label": "World", "items": [
-      { "id": "quests", "title": "Quests", "icon": "quest-journal", "badge": 2, "badgeLabel": "2 quests ready", "ready": true },
-      { "id": "prophecies", "title": "Prophecies", "icon": "prophecies", "ready": "Daily cache ready" },
-      { "id": "tower", "title": "World Tower", "icon": "legacy-ascension", "ready": true, "badgeLabel": "Floor reward waiting" },
-      { "id": "arena", "title": "Colosseum", "icon": "colosseum", "locked": true, "reason": "Unlocks at level 20", "ready": true }
-    ]}
+    {
+      "label": "World",
+      "items": [
+        {
+          "id": "quests",
+          "title": "Quests",
+          "icon": "quest-journal",
+          "badge": 2,
+          "badgeLabel": "2 quests ready",
+          "ready": true
+        },
+        {
+          "id": "prophecies",
+          "title": "Prophecies",
+          "icon": "prophecies",
+          "ready": "Daily cache ready"
+        },
+        {
+          "id": "tower",
+          "title": "World Tower",
+          "icon": "legacy-ascension",
+          "ready": true,
+          "badgeLabel": "Floor reward waiting"
+        },
+        {
+          "id": "arena",
+          "title": "Colosseum",
+          "icon": "colosseum",
+          "locked": true,
+          "reason": "Unlocks at level 20",
+          "ready": true
+        }
+      ]
+    }
   ],
   "entriesReady": [
-    { "id": "wolf", "name": "Ember Wolf", "tag": "New", "ready": "1 point to spend" },
-    { "id": "slime", "name": "Blue Slime", "ready": true },
-    { "id": "drake", "name": "Ash Drake", "locked": true, "reason": "Defeat the Ash Drake in Shenic", "ready": true },
-    { "id": "bat", "name": "Undiscovered", "tag": "Creature Focus", "tagTone": "neutral" }
+    {
+      "id": "wolf",
+      "name": "Ember Wolf",
+      "tag": "New",
+      "ready": "1 point to spend"
+    },
+    {
+      "id": "slime",
+      "name": "Blue Slime",
+      "ready": true
+    },
+    {
+      "id": "drake",
+      "name": "Ash Drake",
+      "locked": true,
+      "reason": "Defeat the Ash Drake in Shenic",
+      "ready": true
+    },
+    {
+      "id": "bat",
+      "name": "Undiscovered",
+      "tag": "Creature Focus",
+      "tagTone": "neutral"
+    }
   ],
-  "tabs": [ { "id": "all", "label": "All", "count": 12 }, { "id": "weapons", "label": "Weapons" }, { "id": "armor", "label": "Armor", "count": 0 } ],
+  "tabs": [
+    {
+      "id": "all",
+      "label": "All",
+      "count": 12
+    },
+    {
+      "id": "weapons",
+      "label": "Weapons"
+    },
+    {
+      "id": "armor",
+      "label": "Armor",
+      "count": 0
+    }
+  ],
   "entries": [
-    { "id": "wolf", "name": "Ember Wolf", "tag": "New" },
-    { "id": "slime", "name": "Blue Slime" },
-    { "id": "drake", "name": "Ash Drake", "locked": true, "reason": "Defeat the Ash Drake in Shenic" },
-    { "id": "imp", "name": "Cinder Imp", "tag": "Rare", "tagTone": "rare" }
+    {
+      "id": "wolf",
+      "name": "Ember Wolf",
+      "tag": "New"
+    },
+    {
+      "id": "slime",
+      "name": "Blue Slime"
+    },
+    {
+      "id": "drake",
+      "name": "Ash Drake",
+      "locked": true,
+      "reason": "Defeat the Ash Drake in Shenic"
+    },
+    {
+      "id": "imp",
+      "name": "Cinder Imp",
+      "tag": "Rare",
+      "tagTone": "rare"
+    }
   ],
   "constellation": {
     "items": [
-      { "id": "str", "label": "Strength", "value": 24, "x": 300, "y": 200 },
-      { "id": "dex", "label": "Dexterity", "value": 18, "x": 600, "y": 300, "labelPosition": "left", "size": "sm", "state": "ready" },
-      { "id": "int", "label": "Intellect", "value": 9, "x": 500, "y": 500, "state": "locked", "reason": "Unlocks at level 30" }
+      {
+        "id": "str",
+        "label": "Strength",
+        "value": 24,
+        "x": 300,
+        "y": 200
+      },
+      {
+        "id": "dex",
+        "label": "Dexterity",
+        "value": 18,
+        "x": 600,
+        "y": 300,
+        "labelPosition": "left",
+        "size": "sm",
+        "state": "ready"
+      },
+      {
+        "id": "int",
+        "label": "Intellect",
+        "value": 9,
+        "x": 500,
+        "y": 500,
+        "state": "locked",
+        "reason": "Unlocks at level 30"
+      }
     ],
-    "rings": [ { "cx": 500, "cy": 350, "r": 200 }, { "cx": 500, "cy": 350, "r": 300, "strong": true } ],
-    "nodes": [ { "x": 700, "y": 350 }, { "x": 500, "y": 50 } ]
+    "rings": [
+      {
+        "cx": 500,
+        "cy": 350,
+        "r": 200
+      },
+      {
+        "cx": 500,
+        "cy": 350,
+        "r": 300,
+        "strong": true
+      }
+    ],
+    "nodes": [
+      {
+        "x": 700,
+        "y": 350
+      },
+      {
+        "x": 500,
+        "y": 50
+      }
+    ]
   },
   "ledger": [
-    { "label": "Power", "value": 1284, "description": "How hard you hit.", "tipMeta": "From equipment" },
-    { "label": "Crit Chance", "value": "24.8%", "sub": "+3% from Essences" },
-    { "label": "Health Regen", "value": "84 HP/5s", "description": "Health restored every five seconds." },
-    { "label": "Range", "value": "12–18" },
-    { "label": "Magic Penetration", "value": null, "muted": true },
-    { "label": "Style", "value": "Reaper" }
+    {
+      "label": "Power",
+      "value": 1284,
+      "description": "How hard you hit.",
+      "tipMeta": "From equipment"
+    },
+    {
+      "label": "Crit Chance",
+      "value": "24.8%",
+      "sub": "+3% from Essences"
+    },
+    {
+      "label": "Health Regen",
+      "value": "84 HP/5s",
+      "description": "Health restored every five seconds."
+    },
+    {
+      "label": "Range",
+      "value": "12–18"
+    },
+    {
+      "label": "Magic Penetration",
+      "value": null,
+      "muted": true
+    },
+    {
+      "label": "Style",
+      "value": "Reaper"
+    }
   ],
-  "channels": [ { "id": "all", "label": "All" }, { "id": "general", "label": "General", "unread": 2 }, { "id": "trade", "label": "Trade" } ],
+  "channels": [
+    {
+      "id": "all",
+      "label": "All"
+    },
+    {
+      "id": "general",
+      "label": "General",
+      "unread": 2
+    },
+    {
+      "id": "trade",
+      "label": "Trade"
+    }
+  ],
   "messages": [
-    { "id": 1, "channel": "general", "time": "12:01", "author": "Maren", "text": "Anyone for the tower?" },
-    { "id": 2, "channel": "system", "kind": "system", "time": "12:02", "text": "The Colosseum opens in 5 minutes." },
-    { "id": 3, "channel": "whisper", "channelLabel": "Whisper", "time": "12:03", "author": "Kaelen", "direction": "from", "text": "Trade?", "mention": true },
-    { "id": 4, "channel": "trade", "time": "12:04", "author": "You", "text": "WTS Ember Fang" }
+    {
+      "id": 1,
+      "channel": "general",
+      "time": "12:01",
+      "author": "Maren",
+      "text": "Anyone for the tower?"
+    },
+    {
+      "id": 2,
+      "channel": "system",
+      "kind": "system",
+      "time": "12:02",
+      "text": "The Colosseum opens in 5 minutes."
+    },
+    {
+      "id": 3,
+      "channel": "whisper",
+      "channelLabel": "Whisper",
+      "time": "12:03",
+      "author": "Kaelen",
+      "direction": "from",
+      "text": "Trade?",
+      "mention": true
+    },
+    {
+      "id": 4,
+      "channel": "trade",
+      "time": "12:04",
+      "author": "You",
+      "text": "WTS Ember Fang"
+    }
   ],
-  "keyhints": [ { "label": "Back", "key": "Esc" }, { "label": "Select", "key": "↵" } ],
-  "stages": [ "First Hunt", "Shenic Journey", "Tower", "Legacy" ],
-  "effects": [ "Your attacks burn.", { "value": "+12%", "text": "damage from equipment" } ],
-  "aside": [ { "label": "Combat Rating", "value": 1284, "icon": "leaderboard" }, { "label": "Crit", "value": 24.8, "unit": "%" } ],
-  "shortfall": [ { "amount": 120, "name": "Cinders" }, { "amount": 2, "name": "Soulstones" } ]
+  "keyhints": [
+    {
+      "label": "Back",
+      "key": "Esc"
+    },
+    {
+      "label": "Select",
+      "key": "↵"
+    }
+  ],
+  "stages": [
+    "First Hunt",
+    "Shenic Journey",
+    "Tower",
+    "Legacy"
+  ],
+  "effects": [
+    "Your attacks burn.",
+    {
+      "value": "+12%",
+      "text": "damage from equipment"
+    }
+  ],
+  "aside": [
+    {
+      "label": "Combat Rating",
+      "value": 1284,
+      "icon": "leaderboard"
+    },
+    {
+      "label": "Crit",
+      "value": 24.8,
+      "unit": "%"
+    }
+  ],
+  "shortfall": [
+    {
+      "amount": 120,
+      "name": "Cinders"
+    },
+    {
+      "amount": 2,
+      "name": "Soulstones"
+    }
+  ],
+  "navDesc": [
+    {
+      "label": "Character",
+      "items": [
+        {
+          "id": "overview",
+          "title": "Overview",
+          "description": "Stats, vitals, loadout",
+          "icon": "overview"
+        },
+        {
+          "id": "inventory",
+          "title": "Inventory",
+          "description": "Items, gear, misc",
+          "icon": "inventory",
+          "badge": 3,
+          "badgeLabel": "3 new items"
+        },
+        {
+          "id": "essences",
+          "title": "Essences",
+          "description": "Archive, attune, ascend",
+          "icon": "essences",
+          "locked": true,
+          "reason": "Unlocks after your first hunt"
+        }
+      ]
+    }
+  ],
+  "messagesDay": [
+    {
+      "id": "d1",
+      "channel": "system",
+      "kind": "day",
+      "text": "30 Sep 2026"
+    },
+    {
+      "id": 1,
+      "channel": "general",
+      "time": "23:58",
+      "author": "Maren",
+      "text": "Night all"
+    },
+    {
+      "id": "d2",
+      "channel": "system",
+      "kind": "day",
+      "text": "1 Oct 2026"
+    },
+    {
+      "id": 2,
+      "channel": "loot",
+      "channelLabel": "Loot",
+      "kind": "loot",
+      "time": "00:04",
+      "text": "You found 2 Wolf Pelt."
+    }
+  ],
+  "messagesNoble": [
+    {
+      "id": 1,
+      "channel": "general",
+      "time": "12:01",
+      "author": "Maren",
+      "noble": true,
+      "text": "Anyone for the tower?"
+    },
+    {
+      "id": 2,
+      "channel": "whisper",
+      "channelLabel": "Whisper",
+      "time": "12:03",
+      "author": "Kaelen",
+      "direction": "from",
+      "text": "Trade?"
+    }
+  ]
 }

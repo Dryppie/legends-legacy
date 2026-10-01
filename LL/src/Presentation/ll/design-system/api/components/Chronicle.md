@@ -26,7 +26,8 @@ Chat and the game log.
 | `open` | `boolean` | false shows the one-line ticker. Default true. Opened again, the body rises in over duration-base; closing is at once. New lines follow the log's foot only w… |
 | `announce` | `'all' \| 'mentions' \| 'off'` | What screen readers hear as lines arrive. all (default): the log is a polite live region. mentions: only lines that mention you and whispers to you, through … |
 | `onToggle` | `() => void` |  |
-| `composer` | `{ channel?; channelLabel?: string; value: string; onChange: (v: string) => void; onSend: (v: string) => voi…` |  |
+| `onAuthor` | `(message: ChronicleMessage, element: HTMLElement) => void` | Makes the author a button that opens the host's player actions — a profile, a whisper (D-112). Not in the collapsed ticker. |
+| `composer` | `{ channel?; channelLabel?: string; value: string; onChange: (v: string) => void; onSend: (v: string) => void; placeholder?; maxLength? } \| React.ReactElement` | The built-in composer's settings, or a composer of the host's own (D-112). |
 | `aside` | `React.ReactNode` | Extra header controls (channel settings, pop-out). |
 | `floating` | `boolean` | Drawer styling for the floating chat layout (GameShell sets it). |
 | `tall` | `boolean` | Floating drawer: tall size (chronicle-float-tall). GameShell manages it unless you pass it. |
@@ -44,8 +45,9 @@ Chat and the game log.
 | `time` | `string` |  |
 | `author` | `string` |  |
 | `direction` | `'from' \| 'to'` | Whispers: "From Kaelen" / "To Kaelen". |
-| `kind` | `'chat' \| 'system' \| 'loot'` | system and loot lines are set in lore italic without an author. |
+| `kind` | `'chat' \| 'system' \| 'loot' \| 'day'` | system and loot lines are set in lore italic without an author; a day break is the date between two days' lines (D-112). |
 | `mention` | `boolean` | The line mentions the player: a neutral surface-raised wash and a 2px ink edge (D-022). |
+| `noble` | `boolean` | The author holds active Nobility: the crown before the name (D-066, D-112). |
 | `text` * | `React.ReactNode` | May contain ItemLinks and <span class="lg-mention">@Name</span>. |
 
 ## More

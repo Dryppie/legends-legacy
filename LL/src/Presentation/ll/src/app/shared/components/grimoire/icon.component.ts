@@ -6,7 +6,7 @@ import { LG_ICONS, LgIconName } from './grimoire-icons';
 export type LgIconSize = 12 | 16 | 20 | 24;
 
 const ICON_SIZES = [12, 16, 20, 24];
-const ICON_MARKERS = ['nobility'];
+const ICON_MARKERS = ['nobility', 'lock'];
 const warned = new Set<string>();
 function iconWarn(key: string, message: string): void {
   if (warned.has(key)) return;

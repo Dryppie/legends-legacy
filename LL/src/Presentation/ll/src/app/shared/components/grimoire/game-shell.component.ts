@@ -40,7 +40,7 @@ import {
   host: { style: 'display: contents' },
   template: `
     <div class="lg-shellhost" [style.height]="cssHeight()">
-      <div #shell [class]="shellClass()">
+      <div #shell [class]="shellClass()" [style.--lg-shell-backdrop]="backdropUrl()">
         <a class="lg-skip" [attr.href]="'#' + mainId">Skip to content</a>
         @if (has('rail')) {
           <div #rail class="lg-shell__rail"><ng-content select="[lgSlot=rail]" /></div>
@@ -81,6 +81,8 @@ export class LgGameShellComponent implements LgShellApi {
   readonly chroniclePosition = model<LgChroniclePosition | null>(null);
   /** CSS height (a number is px); defaults to 100vh. */
   readonly height = input<string | number>();
+  /** The frame's backdrop (D-107): an image URL painted at Level 0 behind the rail, the stage and the docked Chronicle. */
+  readonly backdrop = input<string>();
 
   private readonly slots = contentChildren(LgSlotDirective);
   private readonly shellRef = viewChild.required<ElementRef<HTMLElement>>('shell');
@@ -109,7 +111,12 @@ export class LgGameShellComponent implements LgShellApi {
       chat && 'is-chat-' + layout,
       chat && this.chatCollapsed() && 'is-chat-collapsed',
       this.railOpen() && 'is-rail-open',
+      !!this.backdrop() && 'has-backdrop',
     );
+  });
+  protected readonly backdropUrl = computed(() => {
+    const b = this.backdrop();
+    return b ? `url("${b}")` : null;
   });
   protected readonly chronicleClass = computed(() =>
     this.chatLayout() === 'floating'

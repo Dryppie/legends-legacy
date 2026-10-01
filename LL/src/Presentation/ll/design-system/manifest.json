@@ -10,6 +10,7 @@
     "assets/Logos/README.md",
     "assets/Ornaments/README.md",
     "components/AccessibilitySpecimen/README.md",
+    "components/Activity/README.md",
     "components/Banner/README.md",
     "components/Button/README.md",
     "components/Chronicle/README.md",
@@ -38,7 +39,9 @@
     "components/Meter/README.md",
     "components/MotionSpecimen/README.md",
     "components/NavRail/README.md",
+    "components/Notice/README.md",
     "components/NumeralSpecimen/README.md",
+    "components/Objective/README.md",
     "components/OrnamentSpecimen/README.md",
     "components/Page/README.md",
     "components/PageHeader/README.md",
@@ -180,6 +183,11 @@
       "summary": "Who a player is."
     },
     {
+      "name": "Notice",
+      "group": "Components · Containers",
+      "summary": "The persistent notice."
+    },
+    {
       "name": "Ledger",
       "group": "Components · Data",
       "summary": "The labelled value list."
@@ -273,6 +281,16 @@
       "name": "KeyHints",
       "group": "Shell",
       "summary": "The keyboard shortcut hints."
+    },
+    {
+      "name": "Activity",
+      "group": "Shell",
+      "summary": "The current action."
+    },
+    {
+      "name": "Objective",
+      "group": "Shell",
+      "summary": "The pinned quest."
     },
     {
       "name": "SearchField",

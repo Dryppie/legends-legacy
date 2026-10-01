@@ -1,0 +1,195 @@
+<lg-chronicle
+  [channels]="channelTabs"
+  [messages]="lines"
+  [(activeChannel)]="activeId"
+  [open]="chronicleOpen()"
+  (openChange)="setOpen($event)"
+  authorActions
+  (authorSelect)="openPlayerMenu($event)"
+  label="Chat"
+>
+  <!-- The text of a line, from its source: item links, @mentions, a linked item, an invite's signup link. -->
+  <ng-template lgChronicleText let-line>
+    @if (lootSource(line); as entry) {
+      {{ entry.item.quantity }} × <app-item class="cg-item" [item]="entry.item.itemInstance" /> · {{ lootPlace(entry) }}
+    } @else if (chatSource(line); as m) {
+      @if (m.targetUrl && m.channelType !== 'Invites') {
+        <a class="cg-target" [routerLink]="m.targetUrl"><ng-container *ngTemplateOutlet="body; context: { $implicit: m.body }" /></a>
+      } @else {
+        @if (isInlineSystemNotice(m) || m.linkedItem) {
+          @if (!(m.channelType === 'Raid' && m.isSystemGenerated)) {<span class="cg-actor">{{ m.senderTitleDisplayName || m.senderName }}</span> }
+        }
+        <ng-container *ngTemplateOutlet="body; context: { $implicit: m.body }" />
+      }
+      @if (m.linkedItem; as item) {
+        <app-item class="cg-item" [item]="item" />.
+      }
+      @if (m.channelType === 'Invites' && m.targetUrl) {
+        <a class="cg-link" [routerLink]="m.targetUrl">View signup →</a>
+      }
+    } @else {
+      {{ line.text }}
+    }
+  </ng-template>
+
+  <div lgSlot="aside" class="cg-aside">
+    <span class="lg-chronicle__online">{{ onlinePlayerLabel }}</span>
+    <button
+      type="button"
+      class="lg-chronicle__toggle"
+      cdkOverlayOrigin
+      #settingsOrigin="cdkOverlayOrigin"
+      aria-label="Choose visible chat channels"
+      aria-haspopup="dialog"
+      [attr.aria-expanded]="channelSettingsOpen"
+      title="Choose visible channels"
+      (click)="toggleChannelSettings()"
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" />
+      </svg>
+    </button>
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="settingsOrigin"
+      [cdkConnectedOverlayOpen]="channelSettingsOpen"
+      [cdkConnectedOverlayPositions]="channelSettingsPositions"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="8"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+      (backdropClick)="channelSettingsOpen = false"
+      (detach)="channelSettingsOpen = false"
+    >
+      <div class="lg-root">
+        <fieldset class="lg-chronicle__menu cg-menu" role="dialog" aria-label="Visible chat channels">
+          <legend class="lg-sr">Visible chat channels</legend>
+          <p class="lg-chronicle__menu-title" aria-hidden="true">Visible channels</p>
+          @for (room of configurableRooms; track trackRoom($index, room)) {
+            <label class="lg-chronicle__choice">
+              <input type="checkbox" class="lg-check" [checked]="isChannelVisible(room)" (change)="setChannelVisible(room, $any($event.target).checked)" />
+              {{ room.label }}
+            </label>
+          }
+          <label class="lg-chronicle__choice">
+            <input type="checkbox" class="lg-check" [checked]="lootVisible()" (change)="setLootVisible($any($event.target).checked)" />
+            Loot
+          </label>
+          <button lgButton="quiet" size="sm" class="cg-clear" [state]="clearing() ? 'pending' : 'available'" pendingLabel="Clearing…" (click)="clearLoot()">
+            Clear loot history
+          </button>
+        </fieldset>
+      </div>
+    </ng-template>
+  </div>
+
+  <div lgSlot="composer" class="cg-composer">
+    @if (draftMessageLength > 160) {
+      <span class="lg-chronicle__count cg-count" [class.is-over]="draftMessageLength > 200">{{ draftMessageLength }}/200</span>
+    }
+    <div class="lg-chronicle__row">
+      <span [class]="'lg-chronicle__prefix lg-ch--' + prefixId">{{ prefixLabel }}</span>
+      <div
+        appChatComposer
+        #chatInput="chatComposer"
+        cdkOverlayOrigin
+        #mentionOrigin="cdkOverlayOrigin"
+        role="combobox"
+        aria-label="Chat message"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        [attr.aria-expanded]="!!mentions.active()"
+        [attr.aria-controls]="mentions.active() ? mentionListId : null"
+        [attr.aria-activedescendant]="mentions.active() && mentions.selectedIndex() >= 0 ? mentionListId + '-' + mentions.selectedIndex() : null"
+        aria-multiline="false"
+        [attr.data-placeholder]="chatPlaceholder"
+        class="lg-chronicle__input"
+        [(ngModel)]="draft"
+        (ngModelChange)="onDraftChange(chatInput)"
+        (keydown)="onComposerKeydown($event)"
+        (keyup)="onComposerKeyup($event, chatInput)"
+        (click)="updateMentionSearch(chatInput)"
+        (focus)="updateMentionSearch(chatInput)"
+        (blur)="mentions.close()"
+        [disabled]="!canWriteActiveChannel || isSending"
+      ></div>
+      <button
+        type="button"
+        class="lg-chronicle__send"
+        [attr.aria-label]="isSending ? 'Sending' : 'Send'"
+        [attr.aria-disabled]="!canWriteActiveChannel || !draft.trim() || isSending ? 'true' : null"
+        (click)="send()"
+      >
+        <lg-key>↵</lg-key>
+      </button>
+    </div>
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="mentionOrigin"
+      [cdkConnectedOverlayOpen]="!!mentions.active()"
+      [cdkConnectedOverlayPositions]="mentionPositions"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="8"
+      (overlayOutsideClick)="mentions.close()"
+    >
+      <div class="lg-root" [style.width.px]="chatInput.nativeElement.offsetWidth" (pointerdown)="$event.preventDefault()">
+        <ul class="lg-chronicle__suggest" [id]="mentionListId" role="listbox" aria-label="Player suggestions" [attr.aria-busy]="mentions.loading()">
+          @for (name of mentions.names(); track name; let i = $index) {
+            <li
+              role="option"
+              [id]="mentionListId + '-' + i"
+              [class]="mentions.selectedIndex() === i ? 'lg-chronicle__option is-active' : 'lg-chronicle__option'"
+              [attr.aria-selected]="mentions.selectedIndex() === i"
+              (mouseenter)="mentions.selectedIndex.set(i)"
+              (click)="selectMention(name)"
+            >
+              {{ '@' + name }}
+            </li>
+          }
+          <li class="lg-chronicle__status" role="status" aria-live="polite">
+            @if ((mentions.active()?.query?.trim()?.length ?? 0) < 2) {
+              Type at least 2 characters to find a player.
+            } @else if (mentions.loading()) {
+              Searching players…
+            } @else if (mentions.error()) {
+              Unable to search players. Try typing again.
+            } @else if (mentions.names().length) {
+              ↑↓ to browse · Enter or Tab to pick · Esc to close
+            } @else {
+              No players found.
+            }
+          </li>
+        </ul>
+      </div>
+    </ng-template>
+    @if (isGuestAccount) {
+      <p class="lg-chronicle__note"><a routerLink="/game/settings">Bind email or Gmail in Settings</a> for access.</p>
+    }
+    @if (sendError) {
+      <p class="lg-chronicle__error" role="alert">{{ sendError }}</p>
+    }
+  </div>
+</lg-chronicle>
+
+<ng-template #body let-body>
+  @for (segment of body | chatMentionSegments: characterName(); track trackMentionSegment($index, segment)) {
+    @if (segment.equipmentId; as id) {
+      <app-chat-equipment-link [equipmentId]="id" [rarity]="segment.equipmentRarity" [name]="segment.text" />
+    } @else if (segment.mentionName; as name) {
+      <app-chat-mention [name]="name" [rawText]="segment.rawText ?? segment.text" />
+    } @else {
+      {{ segment.text }}
+    }
+  }
+</ng-template>
+
+<ng-template #playerMenu let-name>
+  <div class="lg-root">
+    <div class="lg-chronicle__menu cg-player" role="menu" [attr.aria-label]="name">
+      <p class="lg-chronicle__menu-title">{{ name }}</p>
+      <button lgButton="quiet" size="sm" role="menuitem" (click)="viewProfile(name)">View Profile</button>
+      <button lgButton="quiet" size="sm" role="menuitem" (click)="whisper(name)">Whisper</button>
+    </div>
+  </div>
+</ng-template>

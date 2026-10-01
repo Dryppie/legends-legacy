@@ -18,6 +18,8 @@ import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from './grimoire-a11y';
 export interface LgNavItem {
   id: string;
   title: string;
+  /** A short line under the title ("Stats, vitals, loadout"), so a destination is never known by its icon alone (D-104). Hidden in compact. */
+  description?: string;
   icon?: LgIconName;
   /** Router path. */
   route?: string;
@@ -61,10 +63,11 @@ export interface LgNavSection {
               @for (row of section.items; track row.item.id) {
                 <li>
                   <ng-template #inner
-                    >@if (row.item.icon) {<lg-icon [name]="row.item.icon" [size]="20" />}<span class="lg-rail__title">{{
-                      row.item.title
-                    }}</span
-                    >@if (row.item.locked) {<span class="lg-rail__lock" aria-hidden="true"
+                    >@if (row.item.icon) {<lg-icon [name]="row.item.icon" [size]="20" />}@if (row.item.description) {<span
+                        class="lg-rail__text"
+                        ><span class="lg-rail__title">{{ row.item.title }}</span
+                        ><span class="lg-rail__desc">{{ row.item.description }}</span></span
+                      >} @else {<span class="lg-rail__title">{{ row.item.title }}</span>}@if (row.item.locked) {<span class="lg-rail__lock" aria-hidden="true"
                         >@if (lockIcon) {<lg-icon [name]="lockIcon" [size]="12" />} @else {{{ lockedWord }}}</span
                       >} @else if (row.item.badge != null && row.item.badge !== '') {<span
                         class="lg-rail__badge"

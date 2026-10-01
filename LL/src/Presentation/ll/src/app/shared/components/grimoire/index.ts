@@ -42,6 +42,9 @@ export * from './page.component';
 export * from './panel.component';
 export * from './presence.component';
 export * from './profile-identity.component';
+export * from './activity.component';
+export * from './objective.component';
+export * from './notice.component';
 export * from './search-field.component';
 export * from './section-rule.component';
 export * from './sigil.component';
@@ -85,6 +88,9 @@ import { LgPageComponent } from './page.component';
 import { LgPanelComponent } from './panel.component';
 import { LgPresenceComponent } from './presence.component';
 import { LgProfileFactComponent, LgProfileIdentityComponent } from './profile-identity.component';
+import { LgActivityComponent } from './activity.component';
+import { LgObjectiveComponent } from './objective.component';
+import { LgNoticeComponent } from './notice.component';
 import { LgSearchFieldComponent } from './search-field.component';
 import { LgSectionRuleComponent } from './section-rule.component';
 import { LgSigilComponent } from './sigil.component';
@@ -133,6 +139,9 @@ export const LG_GRIMOIRE = [
   LgPresenceComponent,
   LgProfileIdentityComponent,
   LgProfileFactComponent,
+  LgActivityComponent,
+  LgObjectiveComponent,
+  LgNoticeComponent,
   LgSearchFieldComponent,
   LgSectionRuleComponent,
   LgSigilComponent,

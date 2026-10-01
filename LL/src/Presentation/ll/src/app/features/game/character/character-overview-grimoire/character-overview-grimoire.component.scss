@@ -17,6 +17,10 @@
     padding-inline-end: var(--space-6);
   }
 }
+// In the new look's GameShell the Page gives every gutter itself.
+:host(.in-shell) {
+  padding-inline-end: 0;
+}
 
 .ovw-note {
   margin: 0;

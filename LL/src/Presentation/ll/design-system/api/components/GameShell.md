@@ -33,6 +33,7 @@ Renders a "Skip to content" link as the first tab stop. Under 60rem the rail bec
 | `chroniclePosition` | `{ left: number; bottom: number } \| null` | Floating drawer position in px from the shell's bottom-left. Leave undefined to let the shell keep it. |
 | `onChroniclePositionChange` | `(pos: { left: number; bottom: number }) => void` | Called while the drawer is dragged or nudged — persist it like the game's floatingDrawerPosition. |
 | `height` | `number \| string` | CSS height of the shell; defaults to 100vh. |
+| `backdrop` | `string` | The frame's backdrop (D-107): an image URL painted at Level 0 behind the rail, the stage and the docked Chronicle. |
 | `children` | `React.ReactNode` | The stage — usually a Stage. |
 
 ## More

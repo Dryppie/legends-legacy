@@ -10,6 +10,8 @@ export const CHAT_CHANNEL_VISIBILITY_KEYS = [
   'trade',
   'help',
   'system',
+  // The Loot channel of the new look's chat (D-005); the old chat has no Loot tab and ignores it.
+  'loot',
 ] as const;
 
 export type ChatChannelVisibilityKey =

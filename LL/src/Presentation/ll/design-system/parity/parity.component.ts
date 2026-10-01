@@ -138,6 +138,22 @@ interface ParityWindow {
       <lg-nav-rail [sections]="nav" activeId="overview"><span lgSlot="header">LL</span><span lgSlot="footer">v1</span></lg-nav-rail>
     </div>
     <div class="case" data-case="navrail-compact"><lg-nav-rail [sections]="nav" activeId="inventory" compact /></div>
+    <div class="case" data-case="navrail-desc"><lg-nav-rail [sections]="navDesc" activeId="overview" /></div>
+    <div class="case" data-case="navrail-desc-compact"><lg-nav-rail [sections]="navDesc" activeId="overview" compact /></div>
+    <div class="case" data-case="activity"><lg-activity label="Idle" /></div>
+    <div class="case" data-case="activity-open"><lg-activity label="Engaged in Combat" remaining="00:12" [value]="3" [max]="10" interactive /></div>
+    <div class="case" data-case="activity-compact"><lg-activity label="Engaged in Combat" remaining="00:12" [progress]="0.5" openLabel="" interactive compact /></div>
+    <div class="case" data-case="activity-compact-short"><lg-activity label="Engaged in Combat" short="Battling" [progress]="0.25" compact /></div>
+    <div class="case" data-case="objective"><lg-objective title="The First Hunt" objective="Defeat wolves" [current]="3" [required]="5" /></div>
+    <div class="case" data-case="objective-kicker"><lg-objective kicker="Quest" title="The First Hunt" /></div>
+    <div class="case" data-case="objective-panel">
+      <lg-objective kicker="Quest" title="The First Hunt" objective="Defeat wolves" [current]="3" [required]="5"><p lgSlot="panel">Tracker</p></lg-objective>
+    </div>
+    <div class="case" data-case="notice"><lg-notice title="Multiplayer access restricted">Solo content stays open.</lg-notice></div>
+    <div class="case" data-case="notice-danger">
+      <lg-notice tone="danger" title="Offline progress paused">The server did not answer.<button lgButton lgSlot="action" size="sm">Retry</button></lg-notice>
+    </div>
+    <div class="case" data-case="notice-busy"><lg-notice tone="warning" title="Catching up offline progress" busy>Resolving stored actions and rewards.</lg-notice></div>
     <div class="case" data-case="tabstrip"><lg-tab-strip [tabs]="d.tabs" activeId="all" label="Filters" level="secondary" density="compact" /></div>
     <div class="case" data-case="stage"><lg-stage image="bg.webp" focus="top" label="Tavern"><h2>The Tavern</h2></lg-stage></div>
     <div class="case" data-case="stage-noart"><lg-stage label="Empty" /></div>
@@ -195,6 +211,17 @@ interface ParityWindow {
     <div class="case" data-case="chronicle-collapsed">
       <lg-chronicle [channels]="d.channels" [messages]="messages" [open]="false" [composer]="false" />
     </div>
+    <div class="case" data-case="chronicle-authors">
+      <lg-chronicle [channels]="d.channels" [messages]="messagesNoble" authorActions [toggleable]="false" [composer]="false" />
+    </div>
+    <div class="case" data-case="chronicle-day">
+      <lg-chronicle [channels]="d.channels" activeChannel="all" [messages]="messagesDay" [toggleable]="false" [composer]="false" />
+    </div>
+    <div class="case" data-case="chronicle-custom-composer">
+      <lg-chronicle [channels]="d.channels" [messages]="messages" [toggleable]="false"
+        ><div lgSlot="composer" class="lg-chronicle__row"><input class="lg-chronicle__input" aria-label="Chat message" /></div
+      ></lg-chronicle>
+    </div>
     <div class="case" data-case="chronicle-trade">
       <lg-chronicle [channels]="d.channels" activeChannel="trade" [messages]="messages" announce="mentions" [toggleable]="false" [composer]="false" />
     </div>
@@ -210,6 +237,13 @@ interface ParityWindow {
     </div>
     <div class="case" data-case="gameshell-floating">
       <lg-game-shell chatLayout="floating">
+        <lg-chronicle lgSlot="chronicle" [channels]="d.channels" [messages]="messages" [composer]="false" />
+        <p>Stage</p>
+      </lg-game-shell>
+    </div>
+    <div class="case" data-case="gameshell-backdrop">
+      <lg-game-shell [height]="400" backdrop="backdrop.webp">
+        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="overview" />
         <lg-chronicle lgSlot="chronicle" [channels]="d.channels" [messages]="messages" [composer]="false" />
         <p>Stage</p>
       </lg-game-shell>
@@ -235,6 +269,16 @@ interface ParityWindow {
     </div>
     <div class="case" data-case="i-currency"><lg-currency-pill name="Cinders" [amount]="12480" short /></div>
     <div class="case" data-case="i-navrail"><lg-nav-rail [sections]="nav" activeId="overview" (navigate)="count('nav')" /></div>
+    <div class="case" data-case="i-objective">
+      <div>
+        <lg-objective kicker="Quest" title="The First Hunt" objective="Defeat wolves" [current]="3" [required]="5"><p lgSlot="panel">Tracker</p></lg-objective>
+        <button type="button" class="away">Away</button>
+      </div>
+    </div>
+    <div class="case" data-case="i-chronicle-author">
+      <lg-chronicle [channels]="d.channels" [messages]="messagesNoble" authorActions [toggleable]="false" [composer]="false" (authorSelect)="count('author')" />
+    </div>
+    <div class="case" data-case="i-activity"><lg-activity label="Engaged in Combat" remaining="00:12" [progress]="0.25" interactive (activate)="count('activity')" /></div>
     <div class="case" data-case="i-chronicle"><lg-chronicle [channels]="d.channels" [messages]="messages" [(activeChannel)]="channel" [(open)]="open" [composer]="false" /></div>
     <div class="case" data-case="i-itemslot-locked"><lg-item-slot name="Tower Key" state="locked" reason="Clear floor 10" interactive (activate)="count('slot')" /></div>
     <div class="case" data-case="i-itemslot-nocaption">
@@ -447,8 +491,11 @@ export class ParityComponent {
   protected readonly ledger = data.ledger as LgLedgerRow[];
   protected readonly nav = data.nav as unknown as LgNavSection[];
   protected readonly navReady = data.navReady as unknown as LgNavSection[];
+  protected readonly navDesc = data.navDesc as unknown as LgNavSection[];
   protected readonly entriesReady = data.entriesReady as LgEntry[];
   protected readonly messages = data.messages as LgChronicleMessage[];
+  protected readonly messagesDay = data.messagesDay as LgChronicleMessage[];
+  protected readonly messagesNoble = data.messagesNoble as LgChronicleMessage[];
   protected readonly effects = data.effects as (string | LgFolioEffect)[];
   protected readonly aside = data.aside as LgLevelPlateStat[];
 }

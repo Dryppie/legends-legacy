@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"LL","components":[{"name":"GameShell"},{"name":"TopBar"},{"name":"NavRail"},{"name":"TabStrip"},{"name":"Stage"},{"name":"Page"},{"name":"PageHeader"},{"name":"Banner"},{"name":"Folio"},{"name":"Panel"},{"name":"StatFigure"},{"name":"LevelPlate"},{"name":"ProfileIdentity"},{"name":"Ledger"},{"name":"Meter"},{"name":"Track"},{"name":"StatTile"},{"name":"Delta"},{"name":"Sigil"},{"name":"Constellation"},{"name":"JourneyCard"},{"name":"LoadoutSlot"},{"name":"Chronicle"},{"name":"ItemLink"},{"name":"EntryList"},{"name":"ListRow"},{"name":"ItemSlot"},{"name":"Tag"},{"name":"Presence"},{"name":"CurrencyPill"},{"name":"Button"},{"name":"KeyHints"},{"name":"SearchField"},{"name":"Heading"},{"name":"SectionRule"},{"name":"Emblem"},{"name":"Icon"}]} */
+/* @ds-bundle: {"format":4,"namespace":"LL","components":[{"name":"GameShell"},{"name":"TopBar"},{"name":"NavRail"},{"name":"TabStrip"},{"name":"Stage"},{"name":"Page"},{"name":"PageHeader"},{"name":"Banner"},{"name":"Folio"},{"name":"Panel"},{"name":"StatFigure"},{"name":"LevelPlate"},{"name":"ProfileIdentity"},{"name":"Activity"},{"name":"Objective"},{"name":"Notice"},{"name":"Ledger"},{"name":"Meter"},{"name":"Track"},{"name":"StatTile"},{"name":"Delta"},{"name":"Sigil"},{"name":"Constellation"},{"name":"JourneyCard"},{"name":"LoadoutSlot"},{"name":"Chronicle"},{"name":"ItemLink"},{"name":"EntryList"},{"name":"ListRow"},{"name":"ItemSlot"},{"name":"Tag"},{"name":"Presence"},{"name":"CurrencyPill"},{"name":"Button"},{"name":"KeyHints"},{"name":"SearchField"},{"name":"Heading"},{"name":"SectionRule"},{"name":"Emblem"},{"name":"Icon"}]} */
 (function () {
   'use strict';
   var R = window.React;
@@ -377,10 +377,10 @@
   }
 
   /* ---------- Icon: the game's own sidebar icons, redrawn in currentColor ---------- */
-  var ICONS = {"achievements":{"vb":"0 0 24 24","sw":"1.6","body":"<circle cx=\"12\" cy=\"9\" r=\"4.5\"/><path d=\"M12 6.6l.9 1.7 1.9.3-1.4 1.3.3 1.9-1.7-.9-1.7.9.3-1.9-1.4-1.3 1.9-.3z\" stroke-width=\"1.2\"/><path d=\"M9 13l-2 7 5-2.6L17 20l-2-7\"/>"},"combat-styles":{"vb":"0 0 24 24","sw":"1.75","body":"<path d=\"M9.4 3.6a8.6 8.6 0 0 0 0 16.8\"/><path d=\"M14.6 3.6a8.6 8.6 0 0 1 0 16.8\"/><path d=\"M12 10.4v3.2\"/>"},"essences":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 3l5.5 4-2 9.5h-7L6.5 7z\"/><path d=\"M6.5 7L12 10.5 17.5 7\"/><path d=\"M12 10.5v6\"/><path d=\"M12 19.5v1.5\"/>"},"inventory":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M4 9h16v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z\"/><path d=\"M8 9V6.5A2.5 2.5 0 0 1 10.5 4h3A2.5 2.5 0 0 1 16 6.5V9\"/><path d=\"M4 13h16\"/><path d=\"M10.5 13v2h3v-2\"/>"},"overview":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 3l7 3v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/><path d=\"M8.5 16c.8-1.6 2-2.4 3.5-2.4s2.7.8 3.5 2.4\"/>"},"soulstones":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 3L5 9l7 12 7-12z\"/><path d=\"M5 9h14\"/><path d=\"M12 3L9.5 9 12 21l2.5-12z\"/>"},"cinder-bazaar":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 4v3\"/><path d=\"M4 8l2.5 5h-5L4 8zM20 8l2.5 5h-5L20 8z\"/><path d=\"M4 8h16\"/><path d=\"M1.5 13a2.5 2.5 0 0 0 5 0M17.5 13a2.5 2.5 0 0 0 5 0\"/><path d=\"M12 7v12\"/><path d=\"M8 19h8\"/>"},"colosseum":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M5 4l11 11\"/><path d=\"M19 4L8 15\"/><path d=\"M4.5 15.5l4 4M19.5 15.5l-4 4\"/><path d=\"M6 17l-2.5 2.5M18 17l2.5 2.5M7.5 20L5 22M16.5 20l2.5 2\"/>"},"guild":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M6 21V8l-2-2V4h4v2h2V4h4v2h2V4h4v2l-2 2v13\"/><path d=\"M10 21v-5a2 2 0 0 1 4 0v5\"/><path d=\"M4 21h16\"/>"},"leaderboard":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M4 8l4 3 4-6 4 6 4-3-1.5 9h-13z\"/><path d=\"M6 20h12\"/>"},"settings":{"vb":"0 0 24 24","sw":"1.6","body":"<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1\"/>"},"legacy-ascension":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M6 21h12\"/><path d=\"M8 21V9h8v12\"/><path d=\"M7 9V5h2v2h2V5h2v2h2V5h2v4\"/><path d=\"M10.5 21v-4a1.5 1.5 0 0 1 3 0v4\"/><path d=\"M12 2v3\"/>"},"prophecies":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M19 14.5A7.5 7.5 0 0 1 9.5 5 7.5 7.5 0 1 0 19 14.5z\"/><path d=\"M16.5 4.5l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5L14.5 6l1.5-.5z\" stroke-width=\"1.2\"/>"},"quest-journal":{"vb":"1 1 22 22","sw":"1.6","body":"<path d=\"M12 7.2v12\"/><path d=\"M12 7.2C10.2 5.6 7.6 4.9 4.5 5.2a1 1 0 0 0-.9 1v10.5a1 1 0 0 0 1.1 1c2.7-.2 5 .4 7.3 1.5\"/><path d=\"M12 7.2c1.8-1.6 4.4-2.3 7.5-2a1 1 0 0 1 .9 1v10.5a1 1 0 0 1-1.1 1c-2.7-.2-5 .4-7.3 1.5\"/><path d=\"M12 4.2 12.9 6l1.8.5-1.8.5-.9 1.8-.9-1.8-1.8-.5L11.1 6z\" fill=\"currentColor\" stroke=\"none\" opacity=\".85\"/>"},"world-map":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M9 4L4 6v14l5-2 6 2 5-2V4l-5 2z\"/><path d=\"M9 4v14M15 6v14\"/><circle cx=\"12\" cy=\"10\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>"},"nobility":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M3.2 17.6 2.6 7.4l5.3 4.4L12 4l4.1 7.8 5.3-4.4-.6 10.2z\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M3.6 20.2h16.8\" stroke-width=\"2.2\" stroke-linecap=\"butt\"/>"}};
+  var ICONS = {"achievements":{"vb":"0 0 24 24","sw":"1.6","body":"<circle cx=\"12\" cy=\"9\" r=\"4.5\"/><path d=\"M12 6.6l.9 1.7 1.9.3-1.4 1.3.3 1.9-1.7-.9-1.7.9.3-1.9-1.4-1.3 1.9-.3z\" stroke-width=\"1.2\"/><path d=\"M9 13l-2 7 5-2.6L17 20l-2-7\"/>"},"combat-styles":{"vb":"0 0 24 24","sw":"1.75","body":"<path d=\"M9.4 3.6a8.6 8.6 0 0 0 0 16.8\"/><path d=\"M14.6 3.6a8.6 8.6 0 0 1 0 16.8\"/><path d=\"M12 10.4v3.2\"/>"},"essences":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 3l5.5 4-2 9.5h-7L6.5 7z\"/><path d=\"M6.5 7L12 10.5 17.5 7\"/><path d=\"M12 10.5v6\"/><path d=\"M12 19.5v1.5\"/>"},"inventory":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M4 9h16v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z\"/><path d=\"M8 9V6.5A2.5 2.5 0 0 1 10.5 4h3A2.5 2.5 0 0 1 16 6.5V9\"/><path d=\"M4 13h16\"/><path d=\"M10.5 13v2h3v-2\"/>"},"overview":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 3l7 3v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/><path d=\"M8.5 16c.8-1.6 2-2.4 3.5-2.4s2.7.8 3.5 2.4\"/>"},"soulstones":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 3L5 9l7 12 7-12z\"/><path d=\"M5 9h14\"/><path d=\"M12 3L9.5 9 12 21l2.5-12z\"/>"},"cinder-bazaar":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M12 4v3\"/><path d=\"M4 8l2.5 5h-5L4 8zM20 8l2.5 5h-5L20 8z\"/><path d=\"M4 8h16\"/><path d=\"M1.5 13a2.5 2.5 0 0 0 5 0M17.5 13a2.5 2.5 0 0 0 5 0\"/><path d=\"M12 7v12\"/><path d=\"M8 19h8\"/>"},"colosseum":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M5 4l11 11\"/><path d=\"M19 4L8 15\"/><path d=\"M4.5 15.5l4 4M19.5 15.5l-4 4\"/><path d=\"M6 17l-2.5 2.5M18 17l2.5 2.5M7.5 20L5 22M16.5 20l2.5 2\"/>"},"guild":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M6 21V8l-2-2V4h4v2h2V4h4v2h2V4h4v2l-2 2v13\"/><path d=\"M10 21v-5a2 2 0 0 1 4 0v5\"/><path d=\"M4 21h16\"/>"},"leaderboard":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M4 8l4 3 4-6 4 6 4-3-1.5 9h-13z\"/><path d=\"M6 20h12\"/>"},"settings":{"vb":"0 0 24 24","sw":"1.6","body":"<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1\"/>"},"legacy-ascension":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M6 21h12\"/><path d=\"M8 21V9h8v12\"/><path d=\"M7 9V5h2v2h2V5h2v2h2V5h2v4\"/><path d=\"M10.5 21v-4a1.5 1.5 0 0 1 3 0v4\"/><path d=\"M12 2v3\"/>"},"prophecies":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M19 14.5A7.5 7.5 0 0 1 9.5 5 7.5 7.5 0 1 0 19 14.5z\"/><path d=\"M16.5 4.5l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5L14.5 6l1.5-.5z\" stroke-width=\"1.2\"/>"},"quest-journal":{"vb":"1 1 22 22","sw":"1.6","body":"<path d=\"M12 7.2v12\"/><path d=\"M12 7.2C10.2 5.6 7.6 4.9 4.5 5.2a1 1 0 0 0-.9 1v10.5a1 1 0 0 0 1.1 1c2.7-.2 5 .4 7.3 1.5\"/><path d=\"M12 7.2c1.8-1.6 4.4-2.3 7.5-2a1 1 0 0 1 .9 1v10.5a1 1 0 0 1-1.1 1c-2.7-.2-5 .4-7.3 1.5\"/><path d=\"M12 4.2 12.9 6l1.8.5-1.8.5-.9 1.8-.9-1.8-1.8-.5L11.1 6z\" fill=\"currentColor\" stroke=\"none\" opacity=\".85\"/>"},"world-map":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M9 4L4 6v14l5-2 6 2 5-2V4l-5 2z\"/><path d=\"M9 4v14M15 6v14\"/><circle cx=\"12\" cy=\"10\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>"},"nobility":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M3.2 17.6 2.6 7.4l5.3 4.4L12 4l4.1 7.8 5.3-4.4-.6 10.2z\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M3.6 20.2h16.8\" stroke-width=\"2.2\" stroke-linecap=\"butt\"/>"},"lock":{"vb":"0 0 24 24","sw":"1.6","body":"<path d=\"M7.5 11V8.2a4.5 4.5 0 0 1 9 0V11\" fill=\"none\" stroke-width=\"2.4\" stroke-linecap=\"butt\"/><rect x=\"4.5\" y=\"11\" width=\"15\" height=\"10\" rx=\"1.6\" fill=\"currentColor\" stroke=\"none\"/>"}};
   // The size scale (Foundations · Iconography): line icons at 16, 20 or 24px; 12px only for the solid inline markers.
   var ICON_SIZES = [12, 16, 20, 24];
-  var ICON_MARKERS = ['nobility'];
+  var ICON_MARKERS = ['nobility', 'lock'];
   var iconWarned = {};
   function iconWarn(key, msg) { if (iconWarned[key] || typeof console === 'undefined') return; iconWarned[key] = true; console.warn('LL.Icon: ' + msg + ' (Foundations · Iconography).'); }
   function Icon(p) {
@@ -1249,7 +1249,9 @@
               return h('li', { key: it.id },
                 h('a', props,
                   it.icon ? h(Icon, { name: it.icon, size: 20 }) : null,
-                  h('span', { className: 'lg-rail__title' }, it.title),
+                  // With a description (D-104) the title and its line stack; compact shows neither.
+                  it.description ? h('span', { className: 'lg-rail__text' }, h('span', { className: 'lg-rail__title' }, it.title), h('span', { className: 'lg-rail__desc' }, it.description))
+                    : h('span', { className: 'lg-rail__title' }, it.title),
                   // The 12px lock marker once it is drawn (Foundations · Iconography); until then the word.
                   // One mark at the item's end (Standards · State combinations): Locked, else a count badge, else the
                   // attention diamond for something waiting with nothing to count.
@@ -1563,6 +1565,8 @@
   function chClass(id) { return 'lg-ch--' + String(id || 'general').toLowerCase(); }
   function ChronicleLine(p) {
     var m = p.m, kind = m.kind || 'chat';
+    // A day break (D-112): the date between two days' lines, set as a rule; no time, tag or author.
+    if (kind === 'day') return h('span', { className: 'lg-chronicle__text' }, m.text);
     var channelLabel = m.channelLabel || m.channel;
     var tag = p.showTag && channelLabel ? h('span', { className: 'lg-chronicle__tag' }, channelLabel) : null;
     if (kind === 'system' || kind === 'loot') {
@@ -1571,10 +1575,15 @@
         tag, h('span', { className: 'lg-chronicle__text' }, m.text));
     }
     var author = m.direction === 'to' ? 'To ' + m.author : m.direction === 'from' ? 'From ' + m.author : m.author;
+    // With onAuthor the author is a button that opens the host's player actions (D-112) — not in the collapsed ticker,
+    // which is a button itself. A Noble's crown sits before the name (D-066), at the 12px marker size.
     return h(F, null,
       m.time && !p.compact ? h('time', { className: 'lg-chronicle__time' }, m.time) : null,
       tag,
-      author ? h('span', { className: 'lg-chronicle__author' }, author) : null,
+      author && m.noble ? h('span', { className: 'lg-chronicle__noble', role: 'img', 'aria-label': 'Noble', title: 'Active Nobility' }, h(Icon, { name: 'nobility', size: 12 })) : null,
+      author ? (p.onAuthor && !p.compact
+        ? h('button', { type: 'button', className: 'lg-chronicle__author', onClick: function (e) { p.onAuthor(m, e.currentTarget); } }, author)
+        : h('span', { className: 'lg-chronicle__author' }, author)) : null,
       h('span', { className: 'lg-chronicle__text' }, m.text));
   }
   // The Chronicle is always Compact: its controls' icons are icon-sm (16px).
@@ -1688,12 +1697,14 @@
         h('ol', { className: 'lg-chronicle__log', ref: logRef, onScroll: onLogScroll, 'aria-live': mode === 'all' ? 'polite' : 'off', 'aria-relevant': 'additions', tabIndex: 0, 'aria-label': 'Messages' },
           msgs.map(function (m) {
             return h('li', { key: m.id, 'data-id': m.id, className: cx('lg-chronicle__line', 'lg-chronicle__line--' + (m.kind || 'chat'), chClass(m.channel), m.mention && 'is-mention') },
-              h(ChronicleLine, { m: m, showTag: active === 'all' || m.channel !== active }));
+              h(ChronicleLine, { m: m, showTag: active === 'all' || m.channel !== active, onAuthor: p.onAuthor }));
           })),
         newSt[0] ? h(Button, {
           size: 'sm', className: 'lg-chronicle__jump', onClick: jump,
           'aria-label': newSt[0] + ' new ' + (newSt[0] === 1 ? 'line' : 'lines') + ', jump to latest'
         }, newSt[0] + ' new ' + (newSt[0] === 1 ? 'line' : 'lines')) : null) : null,
+      // A composer of the host's own (D-112) — a rich editor with @mention suggestions — in the composer's place.
+      open && comp && R.isValidElement(comp) ? h('div', { className: 'lg-chronicle__composer lg-chronicle__composer--custom' }, comp) :
       open && comp ? h('form', {
         className: 'lg-chronicle__composer',
         onSubmit: function (e) { e.preventDefault(); stick.current = true; if (comp.onSend && comp.value && String(comp.value).trim()) comp.onSend(comp.value); }
@@ -1789,7 +1800,9 @@
       h('div', {
         ref: shellRef,
         className: cx('lg-shell', p.folio && 'has-folio', chat && 'has-chat', chat && 'is-chat-' + layout,
-          chat && !chatOpen && 'is-chat-collapsed', railOpen && 'is-rail-open')
+          chat && !chatOpen && 'is-chat-collapsed', railOpen && 'is-rail-open', p.backdrop && 'has-backdrop'),
+        // The frame's backdrop (D-107): one picture behind the rail, the stage and the docked Chronicle, at Level 0.
+        style: p.backdrop ? { '--lg-shell-backdrop': 'url("' + p.backdrop + '")' } : undefined
       },
         h('a', { className: 'lg-skip', href: '#' + mainId }, 'Skip to content'),
         p.rail ? h('div', { ref: railRef, className: 'lg-shell__rail' }, p.rail) : null,
@@ -1803,6 +1816,88 @@
         chatEl ? R.cloneElement(chatEl, { inert: railOpen ? '' : undefined }) : null));
   }
 
+  /* ---------- Activity (the current action, D-109) ---------- */
+  // What the character is doing now, at the head of the NavRail: the action, the time left and its progress, and a way
+  // to it. A button when it opens the action (onOpen). Compact (the compact rail): the bar and the time; the action stays
+  // its accessible name and tooltip.
+  function Activity(p) {
+    var pct = p.max ? (p.value || 0) / p.max : (p.progress || 0);
+    pct = Math.max(0, Math.min(1, pct));
+    var interactive = typeof p.onOpen === 'function';
+    var props = {
+      type: interactive ? 'button' : undefined, onClick: interactive ? p.onOpen : undefined,
+      className: cx('lg-activity', p.compact && 'lg-activity--compact', p.className),
+      title: p.compact ? p.label : undefined
+    };
+    // Compact (D-117): the game's own mark — a ring the progress rises in, the ✦ and the live dot — over one short word;
+    // the action and the time left stay its accessible name.
+    if (p.compact) return h(interactive ? 'button' : 'div', props,
+      h('span', { className: 'lg-activity__orb', 'aria-hidden': 'true' },
+        h('span', { className: 'lg-activity__well' },
+          h('span', { className: 'lg-activity__rise', style: { '--lg-activity-p': String(pct) } })),
+        h('span', { className: 'lg-activity__glyph' }, '\u2726'),
+        h('span', { className: 'lg-activity__live' })),
+      h('span', { className: 'lg-activity__word', 'aria-hidden': 'true' }, p.short || p.label || 'Idle'),
+      h('span', { className: 'lg-activity__label' }, p.label || 'Idle'),
+      p.remaining ? h('span', { className: 'lg-activity__time' }, p.remaining) : null);
+    return h(interactive ? 'button' : 'div', props,
+      h('span', { className: 'lg-activity__head' },
+        h('span', { className: 'lg-activity__label' }, p.label || 'Idle'),
+        p.remaining ? h('span', { className: 'lg-activity__time' }, p.remaining) : null),
+      h('span', { className: 'lg-activity__bar', 'aria-hidden': 'true' },
+        h('span', { className: 'lg-activity__fill', style: { '--lg-activity-p': String(pct) } })),
+      interactive && p.openLabel !== '' ? h('span', { className: 'lg-activity__open' }, p.openLabel || 'Go to action') : null);
+  }
+
+  /* ---------- Objective (the pinned quest in the TopBar's centre, D-110) ---------- */
+  // The one "now" thing in the TopBar when no run is in progress: the pinned quest's title and current objective with its
+  // count. With children it is a disclosure: the button opens them — the full tracker — in a Level 2 popover beneath it,
+  // which Escape, a click outside or the button close.
+  function Objective(p) {
+    var id = useId('lgobj');
+    var st = R.useState(false), open = p.open != null ? p.open : st[0];
+    var btnRef = R.useRef(null), panelRef = R.useRef(null), byPointer = R.useRef(false);
+    var hasPanel = p.children != null && p.children !== false;
+    function set(v) { if (p.open == null) st[1](v); if (p.onToggle) p.onToggle(v); }
+    useLayer(open && hasPanel, { kind: 'popover', opener: btnRef, restoreFocus: !byPointer.current, onClose: function () { set(false); } });
+    R.useEffect(function () {
+      if (!open) return;
+      byPointer.current = false;
+      function down(e) {
+        var b = btnRef.current, pn = panelRef.current;
+        if ((b && b.contains(e.target)) || (pn && pn.contains(e.target))) return;
+        byPointer.current = true; set(false);
+      }
+      document.addEventListener('pointerdown', down);
+      return function () { document.removeEventListener('pointerdown', down); };
+    }, [open]);
+    var count = p.required ? h('span', { className: 'lg-objective__count' }, fmt(p.current || 0) + NBSP + '/' + NBSP + fmt(p.required)) : null;
+    var summary = [
+      p.kicker ? h('span', { key: 'k', className: 'lg-objective__kicker' }, p.kicker) : null,
+      h('span', { key: 't', className: 'lg-objective__title' }, p.title),
+      p.objective ? h('span', { key: 'o', className: 'lg-objective__line' }, h('span', { className: 'lg-objective__text' }, p.objective), count) : null
+    ];
+    return h('div', { className: cx('lg-objective', open && hasPanel && 'is-open', p.className) },
+      hasPanel ? h('button', { ref: btnRef, type: 'button', className: 'lg-objective__summary', 'aria-expanded': open, 'aria-controls': id,
+        onClick: function () { set(!open); } }, summary)
+        : h('div', { className: 'lg-objective__summary' }, summary),
+      open && hasPanel ? h('div', { ref: panelRef, id: id, className: 'lg-objective__panel', role: 'region', 'aria-label': p.title }, p.children) : null);
+  }
+
+  /* ---------- Notice (D-111) ---------- */
+  // A persistent notice at the head of the stage or a region: restricted access, progress being caught up, an error
+  // with a way out. The title says what happened in words; the tone's bar backs it, never alone (Foundations · Colour).
+  function Notice(p) {
+    var tone = p.tone || 'info';
+    return h('div', { className: cx('lg-notice', 'lg-notice--' + tone, p.className), role: tone === 'danger' ? 'alert' : 'status',
+      'aria-busy': p.busy ? 'true' : undefined },
+      p.busy ? h('span', { className: 'lg-notice__busy', role: 'progressbar', 'aria-label': p.busyLabel || 'In progress' }) : null,
+      h('div', { className: 'lg-notice__body' },
+        p.title ? h('p', { className: 'lg-notice__title' }, p.title) : null,
+        p.children ? h('div', { className: 'lg-notice__text' }, p.children) : null),
+      p.action ? h('div', { className: 'lg-notice__action' }, p.action) : null);
+  }
+
   var api = {
     GameShell: GameShell, TopBar: TopBar, NavRail: NavRail, TabStrip: TabStrip, Stage: Stage, Folio: Folio, Panel: Panel,
     Sigil: Sigil, Constellation: Constellation, Meter: Meter, Track: Track, LevelPlate: LevelPlate, StatTile: StatTile, Delta: Delta,
@@ -1810,7 +1905,7 @@
     Button: Button, KeyHints: KeyHints, Heading: Heading, SectionRule: SectionRule, Emblem: Emblem, Icon: Icon,
     Chronicle: Chronicle, ItemLink: ItemLink, Key: Key,
     Page: Page, PageHeader: PageHeader, SearchField: SearchField, Banner: Banner, StatFigure: StatFigure,
-    JourneyCard: JourneyCard, Ledger: Ledger, List: List, ListRow: ListRow, LoadoutSlot: LoadoutSlot, Presence: Presence, ProfileIdentity: ProfileIdentity, format: { number: fmt, short: short, range: range, times: times, fraction: fraction, percent: percent, unit: unit, parts: numParts, none: NONE, duration: duration, spokenDuration: spokenDuration }, announce: announce,
+    JourneyCard: JourneyCard, Ledger: Ledger, List: List, ListRow: ListRow, LoadoutSlot: LoadoutSlot, Presence: Presence, ProfileIdentity: ProfileIdentity, Activity: Activity, Objective: Objective, Notice: Notice, format: { number: fmt, short: short, range: range, times: times, fraction: fraction, percent: percent, unit: unit, parts: numParts, none: NONE, duration: duration, spokenDuration: spokenDuration }, announce: announce,
     states: STATES, topState: firstState, why: why, ornament: { audit: auditOrnament, budget: ORNAMENT_BUDGET },
     motion: { duration: MOTION.duration, easing: MOTION.easing, ms: motionMs, reduced: reducedMotion, useLive: useLive, useLiveList: useLiveList, audit: auditMotion, loopsAllowed: LOOPS_ALLOWED }, layers: { open: openLayer, use: useLayer, top: function () { var t = layerTop(); return t ? t.kind : null; } }, RARITY_CODES: RARITY_CODES
   };

@@ -40,6 +40,7 @@ import {
   lgFormatDuration,
   lgFormatNumber,
   lgFormatUnit,
+  LG_SHELL,
 } from '../../../../shared/components/grimoire';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
 import { AttributeDto } from '../../../../shared/models/Dtos/attributesDto';
@@ -150,9 +151,11 @@ export interface OverviewLoadoutSlot {
   imports: [...LG_GRIMOIRE, RouterLink, DatePipe, EssencePreviewComponent],
   templateUrl: './character-overview-grimoire.component.html',
   styleUrl: './character-overview-grimoire.component.scss',
-  host: { class: 'lg-root' },
+  host: { class: 'lg-root', '[class.in-shell]': 'inShell' },
 })
 export class CharacterOverviewGrimoireComponent {
+  /** In the new look's GameShell the Page is the stage's own; in the old frame it flows inside it (D-097). */
+  protected readonly inShell = !!inject(LG_SHELL, { optional: true });
   private readonly characterService = inject(CharacterService);
   private readonly characterState = inject(CharacterStateService);
   private readonly questState = inject(QuestStateService);

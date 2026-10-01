@@ -1,6 +1,6 @@
 # Foundations · Layout
 
-The grid every screen is built on, and how content arranges itself inside it. The key fact: the stage is much narrower than the screen. At 1920px, the NavRail (`rail-width`, 224px), the Folio (`folio-width`, 360px) and the docked Chronicle (`chronicle-width`, 384px) leave a 952px stage. After the Page's padding, 888px is left for content. So content arranges itself by the width of the region it sits in, never by the window. Shell covers where each shell region goes. LayoutSpecimen shows the rules on an inventory and LayoutGridSpecimen on the Character Overview.
+The grid every screen is built on, and how content arranges itself inside it. The key fact: the stage is much narrower than the screen. At 1920px, the NavRail (`rail-width`, 256px), the Folio (`folio-width`, 360px) and the docked Chronicle (`chronicle-width`, 384px) leave a 920px stage. After the Page's padding, 856px is left for content. So content arranges itself by the width of the region it sits in, never by the window. Shell covers where each shell region goes. LayoutSpecimen shows the rules on an inventory and LayoutGridSpecimen on the Character Overview.
 
 ## Rules
 
@@ -15,7 +15,7 @@ The grid every screen is built on, and how content arranges itself inside it. Th
 - Check each layout at all four tiers, and at 115% and 130% text.
 
 **Should**
-- Design each screen at Medium first. 1920px with a Folio and the docked Chronicle, the most common setup, gives 888px of content, which is Medium. Then check Wide, Narrow and Stacked.
+- Design each screen at Medium first. 1920px with a Folio and the docked Chronicle, the most common setup, gives 856px of content, which is Medium. Then check Wide, Narrow and Stacked.
 - Use the standard track layouts (below) before inventing one.
 - Give a screen one inspector. Page screens (the inventory, the Cinder Bazaar, guild members) inspect in the content, with a list and inspector. Stage screens (an archive, the world map) use the Folio.
 - Keep a Constellation's coordinates in pixels that match the stage size you design for. It keeps its aspect ratio and scales to its container's width.
@@ -32,32 +32,32 @@ The stage is what the shell leaves: the screen, less the rail, the Folio and the
 
 | Screen | Folio, docked open | Folio, docked collapsed | Folio, floating | No Folio, docked open | No Folio, docked collapsed | No Folio, floating |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1,280 | 696 · Narrow | 696 · Narrow | 696 · Narrow | 672 · Narrow | 1,008 · Medium | 1,056 · Medium |
-| 1,440 | 856 · Medium | 856 · Medium | 856 · Medium | 832 · Medium | 1,168 · Wide | 1,216 · Wide |
-| 1,536 | 568 · Stacked | 904 · Medium | 952 · Medium | 928 · Medium | 1,264 · Wide | 1,312 · Wide |
-| 1,920 | 952 · Medium | 1,288 · Wide | 1,336 · Wide | 1,312 · Wide | 1,648 · Wide | 1,696 · Wide |
-| 2,560 | 952 · Medium | 1,288 · Wide | 1,336 · Wide | 1,312 · Wide | 1,648 · Wide | 1,696 · Wide |
+| 1,280 | 664 · Narrow | 664 · Narrow | 664 · Narrow | 640 · Narrow | 976 · Medium | 1,024 · Medium |
+| 1,440 | 824 · Medium | 824 · Medium | 824 · Medium | 800 · Medium | 1,136 · Medium | 1,184 · Wide |
+| 1,536 | 536 · Stacked | 872 · Medium | 920 · Medium | 896 · Medium | 1,232 · Wide | 1,280 · Wide |
+| 1,920 | 920 · Medium | 1,256 · Wide | 1,304 · Wide | 1,280 · Wide | 1,616 · Wide | 1,664 · Wide |
+| 2,560 | 920 · Medium | 1,256 · Wide | 1,304 · Wide | 1,280 · Wide | 1,616 · Wide | 1,664 · Wide |
 
 - **Docked, 1,536px and wider:** the Chronicle takes its own 384px column. Collapsed, it becomes a 48px strip.
 - **Docked, under 1,536px:** with a Folio, the Chronicle shares the Folio's column, so opening or collapsing it doesn't change the stage. Without a Folio, it takes a 384px right-hand column, or a 48px strip when collapsed.
 - **Floating:** the stage keeps its full width, but the drawer covers its bottom-right corner, 352px wide (384px from 1,536px) by 448px when open. Content under the drawer must stay reachable by scrolling. KeyHints move to the bottom left.
 - **2,560px** is letterboxed. The shell stops at `shell-max`, 1,920px at the default text size, so the stage is as at 1,920px, with 320px of `ground-deep` on each side.
-- **The 1,536px step.** At 1,536px the docked Chronicle takes its own column. With a Folio, the stage drops from 856px at 1,440px to 568px: narrower than at 1,280px, and Stacked. D-054 proposes that, with a Folio, the Chronicle take its own column only from 120rem. Until that is decided, a screen with a Folio must work Stacked at 1,536px.
+- **The 1,536px step.** At 1,536px the docked Chronicle takes its own column. With a Folio, the stage drops from 824px at 1,440px to 536px: narrower than at 1,280px, and Stacked. D-054 proposes that, with a Folio, the Chronicle take its own column only from 120rem. Until that is decided, a screen with a Folio must work Stacked at 1,536px.
 
 **At larger text** the rail, Folio and Chronicle widen too, so the stage shrinks in px and the tiers (in rem) come sooner.
 
 | Screen, text | Folio, docked open | Folio, docked collapsed | Folio, floating | No Folio, docked open | No Folio, docked collapsed | No Folio, floating |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1,280, Large | 608 · Stacked | 608 · Stacked | 608 · Stacked | 581 · Stacked | 967 · Medium | 1,022 · Medium |
-| 1,440, Large | 768 · Narrow | 768 · Narrow | 768 · Narrow | 741 · Narrow | 1,127 · Medium | 1,182 · Medium |
-| 1,536, Large | 864 · Narrow | 864 · Narrow | 864 · Narrow | 837 · Narrow | 1,223 · Medium | 1,278 · Medium |
-| 1,920, Large | 807 · Narrow | 1,193 · Medium | 1,248 · Medium | 1,221 · Medium | 1,607 · Wide | 1,662 · Wide |
-| 2,560, Large | 1,095 · Medium | 1,481 · Wide | 1,536 · Wide | 1,509 · Wide | 1,895 · Wide | 1,950 · Wide |
-| 1,280, Extra large | 521 · Stacked | 521 · Stacked | 521 · Stacked | 490 · Stacked | 926 · Narrow | 989 · Narrow |
-| 1,440, Extra large | 681 · Stacked | 681 · Stacked | 681 · Stacked | 650 · Stacked | 1,086 · Medium | 1,149 · Medium |
-| 1,536, Extra large | 777 · Narrow | 777 · Narrow | 777 · Narrow | 746 · Stacked | 1,182 · Medium | 1,245 · Medium |
-| 1,920, Extra large | 1,161 · Medium | 1,161 · Medium | 1,161 · Medium | 1,130 · Medium | 1,566 · Wide | 1,629 · Wide |
-| 2,560, Extra large | 1,238 · Medium | 1,674 · Wide | 1,737 · Wide | 1,706 · Wide | 2,142 · Wide | 2,205 · Wide |
+| 1,280, Large | 571 · Stacked | 571 · Stacked | 571 · Stacked | 544 · Stacked | 930 · Medium | 985 · Medium |
+| 1,440, Large | 731 · Narrow | 731 · Narrow | 731 · Narrow | 704 · Narrow | 1,090 · Medium | 1,145 · Medium |
+| 1,536, Large | 827 · Narrow | 827 · Narrow | 827 · Narrow | 800 · Narrow | 1,186 · Medium | 1,241 · Medium |
+| 1,920, Large | 770 · Narrow | 1,156 · Medium | 1,211 · Medium | 1,184 · Medium | 1,570 · Wide | 1,625 · Wide |
+| 2,560, Large | 1,058 · Medium | 1,444 · Wide | 1,499 · Wide | 1,472 · Wide | 1,858 · Wide | 1,913 · Wide |
+| 1,280, Extra large | 479 · Stacked | 479 · Stacked | 479 · Stacked | 448 · Stacked | 884 · Narrow | 947 · Narrow |
+| 1,440, Extra large | 639 · Stacked | 639 · Stacked | 639 · Stacked | 608 · Stacked | 1,044 · Medium | 1,107 · Medium |
+| 1,536, Extra large | 735 · Stacked | 735 · Stacked | 735 · Stacked | 704 · Stacked | 1,140 · Medium | 1,203 · Medium |
+| 1,920, Extra large | 1,119 · Medium | 1,119 · Medium | 1,119 · Medium | 1,088 · Medium | 1,524 · Wide | 1,587 · Wide |
+| 2,560, Extra large | 1,196 · Medium | 1,632 · Wide | 1,695 · Wide | 1,664 · Wide | 2,100 · Wide | 2,163 · Wide |
 
 At Extra large, 1,920px is below the Chronicle's own-column breakpoint (96rem, 1,997px), so the Chronicle stays under the Folio. The stage is wider than at Large as a result.
 
@@ -79,8 +79,8 @@ Content inside the stage answers to four tiers, read from the width of its regio
 
 | Tier | Region width | Holds | Typical regions |
 | --- | --- | --- | --- |
-| Wide | 68rem (1,088px) and up (`content-wide`) | Four Ledgers a row. A list and inspector at 3 : 2. A table with every column. | 1,920px without a Folio (1,248px of content). 1,920px with a Folio and the Chronicle collapsed or floating. 1,440px and 1,536px without a Folio, the Chronicle collapsed or floating. |
-| Medium | 44–68rem (704–1,087px) (`content-medium`) | Two Ledgers a row, or three for three groups. A list and inspector side by side, the inspector at 20rem or more. | 1,920px with a Folio and the docked Chronicle (888px). 1,440px, docked. 1,536px without a Folio, or with one and the Chronicle collapsed or floating. |
+| Wide | 68rem (1,088px) and up (`content-wide`) | Four Ledgers a row. A list and inspector at 3 : 2. A table with every column. | 1,920px without a Folio (1,216px of content). 1,920px with a Folio and the Chronicle collapsed or floating. 1,536px without a Folio, the Chronicle collapsed or floating; 1,440px without a Folio, floating. |
+| Medium | 44–68rem (704–1,087px) (`content-medium`) | Two Ledgers a row, or three for three groups. A list and inspector side by side, the inspector at 20rem or more. | 1,920px with a Folio and the docked Chronicle (856px). 1,440px, docked, or without a Folio and the Chronicle collapsed. 1,536px without a Folio, or with one and the Chronicle collapsed or floating. |
 | Narrow | 32–44rem (512–703px) (`content-narrow`) | Two Ledgers a row. A list and inspector in one column. Tables without priorities 3 and 4. | 1,280px, docked. 1,440px and 1,536px at Large text. |
 | Stacked | Under 32rem (512px) | One column | The Folio (18.5rem inside). An inspector. 1,536px with a Folio and the docked Chronicle. 1,280px at Large and Extra large text. |
 
@@ -232,9 +232,9 @@ Every tier, minimum and gutter is in rem. At Large and Extra large text a region
 
 | Region | Default | Large (115%) | Extra large (130%) |
 | --- | --- | --- | --- |
-| 1,248px | 78rem · Wide: 4 Ledgers a row; list and inspector at 3 : 2 | 67.8rem · Medium: 2 a row; side by side | 60rem · Medium: 2 a row; side by side |
-| 864px | 54rem · Medium: 2 a row; the inspector at its minimum | 47rem · Medium: 2 a row; side by side | 41.5rem · Narrow: 2 a row; one column |
-| 507px | 31.7rem · Stacked: 1 a row; one column | 27.6rem · Stacked | 24.4rem · Stacked |
+| 1,216px | 76rem · Wide: 4 Ledgers a row; list and inspector at 3 : 2 | 66.1rem · Medium: 2 a row; side by side | 58.5rem · Medium: 2 a row; side by side |
+| 832px | 52rem · Medium: 2 a row; the inspector at its minimum | 45.2rem · Medium: 2 a row; side by side | 40rem · Narrow: 2 a row; one column |
+| 470px | 29.4rem · Stacked: 1 a row; one column | 25.5rem · Stacked | 22.6rem · Stacked |
 
 At every step, in both specimens, no label truncates and nothing scrolls sideways.
 
@@ -242,7 +242,8 @@ At every step, in both specimens, no label truncates and nothing scrolls sideway
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `rail-width` | 14rem (224px) | NavRail column |
+| `rail-width` | 16rem (256px) | NavRail column, wide enough for a destination's description (D-104) |
+| `rail-width-compact` | 4rem (64px) | NavRail column for the compact rail, icons only (D-113) |
 | `folio-width` | 22.5rem (360px) | Folio column |
 | `topbar-height` | 3.5rem (56px) | TopBar height; the Page pads its top by it, and scrolls focus clear of it |
 | `hintbar-height` | 2.5rem (40px) | KeyHints strip at the stage's foot |
@@ -264,7 +265,7 @@ The Chronicle's own sizes (`chronicle-*`) are listed in Shell.
 
 | Do | Don't |
 | --- | --- |
-| Switch the Overview's attribute grid on its region: four a row at Wide, two at Medium and Narrow. | Switch it on the window, and squeeze four Ledgers into 888px on a 1,920px screen with a Folio. |
+| Switch the Overview's attribute grid on its region: four a row at Wide, two at Medium and Narrow. | Switch it on the window, and squeeze four Ledgers into 856px on a 1,920px screen with a Folio. |
 | Hide an order book's Total column first (priority 4). | Hide Price each, or the seller's name. |
 | Let a 24rem order book scroll inside its wrapper at 130%, the seller's name held. | Let the page scroll sideways. |
 | Keep a quest description at 68ch in a Wide region. | Run it 1,200px across. |

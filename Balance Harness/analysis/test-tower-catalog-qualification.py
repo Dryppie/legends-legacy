@@ -377,5 +377,43 @@ class Floor9LimitedResistanceFamilyTests(MixedArmorFamilyTests):
         with self.assertRaisesRegex(ValueError, 'seed-free mixed'): q.validate_family(self.proposal, self.original)
 
 
+class Floor10LimitedArmorFamilyTests(Floor8LimitedArmorFamilyTests):
+    floor = 10
+    retained = 38
+    party_size = 15
+
+    def setUp(self):
+        super().setUp()
+        self.proposal['version'] = 'floor10-limited-armor-proposal-v1'
+
+    def test_complete_177_family_and_late_party_slots(self):
+        self.assertEqual(278, len(q.validate_family(self.proposal, self.original)))
+        self.assertEqual(2, sum(v['armorPartySlots'] == [14,15] for v in self.proposal['variants']))
+
+    def test_floor_nine_contract_cannot_admit_floor_ten(self):
+        self.proposal['version'] = 'floor9-limited-resistance-proposal-v1'
+        with self.assertRaisesRegex(ValueError, 'seed-free mixed'): q.validate_family(self.proposal, self.original)
+
+
+class SummonAcceptanceChainTests(unittest.TestCase):
+    def setUp(self):
+        self.parent = dict(acceptedAggregate=dict(version='applied-tower-kodoku-midpoint-aggregate-v1'), receiptPins={})
+        self.plan = dict(acceptedAggregate=dict(version='applied-tower-ni-restoration-aggregate-v1'), acceptedSummonsAggregate=self.parent)
+
+    def test_explicit_parent_selected_and_old_direct_proof_unchanged(self):
+        self.assertIs(self.parent, q.summons_acceptance(self.plan))
+        self.assertIs(self.parent, q.summons_acceptance(self.parent))
+
+    def test_wrong_parent_outer_and_unbound_parent_rejected(self):
+        for mutation in ('outer', 'parent', 'pins', 'extra'):
+            with self.subTest(mutation=mutation):
+                plan = copy.deepcopy(self.plan)
+                if mutation == 'outer': plan['acceptedAggregate']['version'] = 'unaccepted'
+                if mutation == 'parent': plan['acceptedSummonsAggregate']['acceptedAggregate']['version'] = 'unaccepted'
+                if mutation == 'pins': del plan['acceptedSummonsAggregate']['receiptPins']
+                if mutation == 'extra': plan['acceptedSummonsAggregate']['extra'] = True
+                with self.assertRaisesRegex(ValueError, 'acceptance chain'): q.summons_acceptance(plan)
+
+
 if __name__ == '__main__':
     unittest.main()

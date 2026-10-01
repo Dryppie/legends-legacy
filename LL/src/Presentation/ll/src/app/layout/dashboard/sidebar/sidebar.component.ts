@@ -58,7 +58,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
-  private readonly sections = signal<SidebarSection[]>([]);
+  protected readonly sections = signal<SidebarSection[]>([]);
   readonly visibleSections = computed(() =>
     filterSidebarForPlayerJourney(
       this.sections(),
@@ -83,16 +83,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
   readonly hasActiveDungeon: DungeonStateService['hasActiveDungeon'];
   readonly hasActiveRaid: RaidService['hasActiveRaid'];
   constructor(
-    private readonly sidebarService: SidebarService,
-    private readonly state: CharacterActionsStateService,
-    private readonly characterState: CharacterStateService,
+    protected readonly sidebarService: SidebarService,
+    protected readonly state: CharacterActionsStateService,
+    protected readonly characterState: CharacterStateService,
     private readonly notificationService: NotificationService,
     private readonly sidebarNotificationRefreshService: SidebarNotificationRefreshService,
     public readonly essenceState: EssenceStateService,
     public readonly guildState: GuildStateService,
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
-    private readonly router: Router,
-    private readonly questState: QuestStateService,
+    protected readonly router: Router,
+    protected readonly questState: QuestStateService,
     private readonly questPresenter: QuestPresenterService,
     private readonly regionService: RegionService,
     dungeonState: DungeonStateService,

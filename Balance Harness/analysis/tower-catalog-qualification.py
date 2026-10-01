@@ -102,6 +102,15 @@ def validate_plan(plan, source, api, tests):
 def validate_summons_transition(plan, source, confirmed, api):
     """Only the fully accepted exclusive floor-eight inheritance may cross catalogs."""
     io = owner_module()
+    parent = summons_acceptance(plan)
+    if parent is not plan:
+        spec = importlib.util.spec_from_file_location('summons_parent_aggregate', Path(__file__).with_name('tower-balance-aggregate.py'))
+        aggregate = importlib.util.module_from_spec(spec); spec.loader.exec_module(aggregate)
+        parent_confirmed, _ = aggregate.applied_catalog(parent)
+        # The later Ni application retains exactly the accepted Kodoku summons.
+        io.check(io.sha(confirmed/'content/Data/combat/summons.json') ==
+                 io.sha(parent_confirmed/'content/Data/combat/summons.json'), 'Summon acceptance chain differs')
+        plan, confirmed = parent, parent_confirmed
     accepted = plan.get('acceptedAggregate', {})
     io.check(accepted.get('version') in ('applied-tower-shared-penetration-aggregate-v1', 'applied-tower-kodoku-fixed-aggregate-v1', 'applied-tower-kodoku-midpoint-aggregate-v1'), 'Unrelated historical summons catalog changed')
     d = io.read(accepted['declaration'])
@@ -113,6 +122,18 @@ def validate_summons_transition(plan, source, confirmed, api):
     summons = helper.base.SUMMONS if fixed or midpoint else helper.SUMMONS
     io.check(io.sha(source/'content'/summons) == io.sha(original/summons) and
              io.sha(api/summons) == io.sha(confirmed/'content'/summons), 'Unconfirmed summons transition')
+
+
+def summons_acceptance(plan):
+    """A later Ni Tower edit can retain the independently applied Kodoku summons."""
+    parent = plan.get('acceptedSummonsAggregate')
+    if parent is None:
+        return plan
+    owner_module().check(plan.get('acceptedAggregate', {}).get('version') == 'applied-tower-ni-restoration-aggregate-v1' and
+                         set(parent) == {'acceptedAggregate', 'receiptPins'} and
+                         parent['acceptedAggregate'].get('version') == 'applied-tower-kodoku-midpoint-aggregate-v1',
+                         'Only the applied Ni-to-Kodoku summon acceptance chain is supported')
+    return parent
 
 
 def signature(value):
@@ -206,6 +227,21 @@ def validate_limited_resistance_family(proposal, original):
     return cells
 
 
+def validate_floor10_limited_armor_family(proposal, original):
+    """Keep 38 controls and all one/two-character armor subsets of both leaders."""
+    io = owner_module()
+    io.check(proposal.get('maximumSpecializedItems') == 8 and
+             proposal.get('maximumSpecializedCharacters') == 2, 'Floor-ten equipment budget changed')
+    cells = validate_mixed_defense_family(proposal, original, 'armor', 'armor-and-health', 38, (10,),
+        party_size=15, subset_counts=(1, 2), version='floor10-limited-armor-proposal-v1')
+    for variant in proposal['variants']:
+        slots = [m['partySlot'] for m in variant['cell']['scenario']['party']
+                 for item in m['build']['equipment'] if '.spec.' in item['definitionId']]
+        io.check(len(slots) == 4*len(variant['armorPartySlots']) and
+                 set(slots) == set(variant['armorPartySlots']), 'Floor-ten actual specialized items differ')
+    return cells
+
+
 def validate_mixed_defense_family(proposal, original, defense, gear, retained, floors, *,
                                  party_size=5, subset_counts=(1, 2, 3, 4), version=None):
     """Admit only the complete, explicitly declared equipment comparison."""
@@ -274,7 +310,8 @@ def validate_family(proposal, original):
                   'floor4-mixed-armor-proposal-v1': validate_mixed_armor_family,
                   'floor7-mixed-resistance-proposal-v1': validate_mixed_resistance_family,
                   'floor8-limited-armor-proposal-v1': validate_limited_armor_family,
-                  'floor9-limited-resistance-proposal-v1': validate_limited_resistance_family}
+                  'floor9-limited-resistance-proposal-v1': validate_limited_resistance_family,
+                  'floor10-limited-armor-proposal-v1': validate_floor10_limited_armor_family}
     owner_module().check(proposal['version'] in validators, 'Unknown family proposal version')
     return validators[proposal['version']](proposal, original)
 

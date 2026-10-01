@@ -76,7 +76,7 @@ Slate is structure — grounds, surfaces and lines — in every context: the gam
 
 ### Gilt's four jobs
 
-1. **Brand and current location** — the logo; the grimoire's brass furniture within the ornament budget (the Folio's and Banner's frames, corner ornaments, the ornament rule's lattice, Emblems); the game's one heraldic mark, the Nobility crown (D-007, D-066); and where you are: the active NavRail diamond and icon, the current screen's icon in the PageHeader.
+1. **Brand and current location** — the logo; the grimoire's brass furniture within the ornament budget (the Folio's and Banner's frames, corner ornaments, the ornament rule's lattice, Emblems); the game's one heraldic mark, the Nobility crown (D-007, D-066); and where you are: the active NavRail diamond, the current screen's icon in the PageHeader. The NavRail's icons are gilt at rest too (D-105): brand furniture of the frame, not a location mark; the diamond and the weight say where you are.
 2. **The one committing action** — the `solid` button's fill, with `on-gilt` text, once per screen. It keeps its fill in every context: a filled button is a shape, not a hue label.
 3. **The screen's one headline figure** — the StatFigure, or the level numeral when the level is what the screen is about. One per screen, like every display-size element (Principles · Anti-generic guardrails).
 4. **Effect magnitudes inside descriptions** — the "+12%" in "+12% damage from equipment". Inside an item context magnitudes are `ink`, because rarity owns the hue there.

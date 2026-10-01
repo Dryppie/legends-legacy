@@ -22,6 +22,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { LG_SHELL, LgSlotDirective, lgCx, lgHasSlot } from './grimoire-core';
 import { LgButtonComponent } from './button.component';
 import { lgAnnounce } from './grimoire-a11y';
+import { LgIconComponent } from './icon.component';
 
 export interface LgChronicleChannel {
   /** 'all' shows the merged feed of visible channels. */
@@ -39,10 +40,13 @@ export interface LgChronicleMessage {
   author?: string;
   /** Whispers: "From Kaelen" / "To Kaelen". */
   direction?: 'from' | 'to';
-  /** system and loot lines are set in lore italic, without an author. */
-  kind?: 'chat' | 'system' | 'loot';
+  /** system and loot lines are set in lore italic, without an author; a day break (D-112) is the date between two
+   *  days' lines, its text only. */
+  kind?: 'chat' | 'system' | 'loot' | 'day';
   /** The line mentions the player. */
   mention?: boolean;
+  /** The author holds active Nobility: the crown before the name (D-066, D-112). */
+  noble?: boolean;
   text: string;
 }
 
@@ -74,21 +78,27 @@ function channelClass(id: string | undefined): string {
  */
 @Component({
   selector: 'lg-chronicle',
-  imports: [NgTemplateOutlet, LgButtonComponent],
+  imports: [NgTemplateOutlet, LgButtonComponent, LgIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
     <ng-template #line let-m let-compact="compact" let-showTag="showTag"
-      >@if (m.time && !compact) {<time class="lg-chronicle__time">{{ m.time }}</time>}@if (
+      >@if (m.kind === 'day') {<span class="lg-chronicle__text">{{ m.text }}</span>} @else {@if (m.time && !compact) {<time class="lg-chronicle__time">{{ m.time }}</time>}@if (
         showTag && (m.channelLabel || m.channel)
       ) {<span class="lg-chronicle__tag">{{ m.channelLabel || m.channel }}</span>}@if (
         m.kind !== 'system' && m.kind !== 'loot' && author(m)
-      ) {<span class="lg-chronicle__author">{{ author(m) }}</span>}<span class="lg-chronicle__text"
+      ) {@if (m.noble) {<span class="lg-chronicle__noble" role="img" aria-label="Noble" title="Active Nobility"
+            ><lg-icon name="nobility" [size]="12" /></span
+          >}@if (authorActions() && !compact) {<button
+            type="button"
+            class="lg-chronicle__author"
+            (click)="authorSelect.emit({ message: m, element: $any($event.currentTarget) })"
+          >{{ author(m) }}</button>} @else {<span class="lg-chronicle__author">{{ author(m) }}</span>}}<span class="lg-chronicle__text"
         >@if (textTemplate(); as custom) {<ng-container
             [ngTemplateOutlet]="custom.template"
             [ngTemplateOutletContext]="{ $implicit: m }"
           />} @else {{{ m.text }}}</span
-      ></ng-template
+      >}</ng-template
     >
 
     <section [class]="classes()" [attr.aria-label]="label() || 'Chronicle'" (animationend)="onAnimationEnd($event)">
@@ -201,7 +211,9 @@ function channelClass(id: string | undefined): string {
           }
         </div>
       }
-      @if (open() && composer()) {
+      @if (open() && has('composer')) {
+        <div class="lg-chronicle__composer lg-chronicle__composer--custom"><ng-content select="[lgSlot=composer]" /></div>
+      } @else if (open() && composer()) {
         <form class="lg-chronicle__composer" (submit)="submit($event)">
           <span [class]="'lg-chronicle__prefix ' + prefixClass()">{{ composerChannelLabel() || composerChannel() || current() }}</span>
           <input
@@ -246,6 +258,9 @@ export class LgChronicleComponent {
   readonly label = input('Chronicle');
   /** Emits the draft when it is not empty; clear `draft` when the message is accepted. */
   readonly send = output<string>();
+  /** Makes the author a button that emits `authorSelect` to open the host's player actions (D-112). Not in the ticker. */
+  readonly authorActions = input(false, { transform: booleanAttribute });
+  readonly authorSelect = output<{ message: LgChronicleMessage; element: HTMLElement }>();
 
   protected readonly shell = inject(LG_SHELL, { optional: true });
   private readonly slots = contentChildren(LgSlotDirective);

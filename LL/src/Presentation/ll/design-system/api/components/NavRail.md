@@ -46,6 +46,7 @@ locked (Standards · States): stays in the Tab order (aria-disabled), says "Lock
 | --- | --- | --- |
 | `id` * | `string` |  |
 | `title` * | `string` |  |
+| `description` | `string` | A short line under the title ("Stats, vitals, loadout"), so a destination is never known by its icon alone (D-104). Hidden in compact. |
 | `icon` | `IconName` |  |
 | `href` | `string` |  |
 | `badge` | `React.ReactNode` | A count: unread, ready. |

@@ -45,6 +45,7 @@ The catalogue's Foundations group holds specimens, not components: TypeRamp (eve
 | Panel | the content box | Containers | Draft |
 | Banner | the headline block | Containers | Draft |
 | PageHeader | the information screen heading | Containers | Draft |
+| Notice | the persistent notice | Containers | Draft |
 | EntryList | the browsable name list | Lists & labels | Draft |
 | ListRow | the list row | Lists & labels | Draft |
 | Tag | the status label | Lists & labels | Draft |

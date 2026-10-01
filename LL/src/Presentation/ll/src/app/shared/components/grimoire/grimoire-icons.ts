@@ -19,6 +19,8 @@ export const LG_ICONS = {
   'quest-journal': { viewBox: '1 1 22 22', strokeWidth: 1.6, body: '<path d="M12 7.2v12"/><path d="M12 7.2C10.2 5.6 7.6 4.9 4.5 5.2a1 1 0 0 0-.9 1v10.5a1 1 0 0 0 1.1 1c2.7-.2 5 .4 7.3 1.5"/><path d="M12 7.2c1.8-1.6 4.4-2.3 7.5-2a1 1 0 0 1 .9 1v10.5a1 1 0 0 1-1.1 1c-2.7-.2-5 .4-7.3 1.5"/><path d="M12 4.2 12.9 6l1.8.5-1.8.5-.9 1.8-.9-1.8-1.8-.5L11.1 6z" fill="currentColor" stroke="none" opacity=".85"/>' },
   'world-map': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2z"/><path d="M9 4v14M15 6v14"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/>' },
   'nobility': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M3.2 17.6 2.6 7.4l5.3 4.4L12 4l4.1 7.8 5.3-4.4-.6 10.2z" fill="currentColor" stroke="none"/><path d="M3.6 20.2h16.8" stroke-width="2.2" stroke-linecap="butt"/>' },
+  // The solid 12px Locked marker (Foundations · Iconography · Inventory): a closed padlock.
+  'lock': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M7.5 11V8.2a4.5 4.5 0 0 1 9 0V11" fill="none" stroke-width="2.4" stroke-linecap="butt"/><rect x="4.5" y="11" width="15" height="10" rx="1.6" fill="currentColor" stroke="none"/>' },
 } as const;
 
 export type LgIconName = keyof typeof LG_ICONS;

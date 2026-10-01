@@ -17,7 +17,9 @@ export type Density = 'comfortable' | 'standard' | 'compact';
 
 /** locked (Standards · States): stays in the Tab order (aria-disabled), says "Locked" where the badge goes, shows `reason` —
  *  how it unlocks — in the reason tip beside it, and a click or Enter shows the reason instead of navigating. */
-export interface NavItem { id: string; title: string; icon?: IconName; href?: string; badge?: React.ReactNode; badgeLabel?: string; locked?: boolean; reason?: string;
+export interface NavItem { id: string; title: string;
+  /** A short line under the title ("Stats, vitals, loadout"), so a destination is never known by its icon alone (D-104). Hidden in compact. */
+  description?: string; icon?: IconName; href?: string; badge?: React.ReactNode; badgeLabel?: string; locked?: boolean; reason?: string;
   /** Something waiting with nothing to count: the attention diamond at the item's end. true, or the words ("Quest ready").
    *  A count `badge` comes first, and Locked before both (Standards · State combinations). */
   ready?: boolean | string }
@@ -48,6 +50,8 @@ export interface GameShellProps {
   onChroniclePositionChange?: (pos: { left: number; bottom: number }) => void;
   /** CSS height of the shell; defaults to 100vh. */
   height?: number | string;
+  /** The frame's backdrop (D-107): an image URL painted at Level 0 behind the rail, the stage and the docked Chronicle. */
+  backdrop?: string;
   className?: string;
   /** The stage — usually a Stage. */
   children?: React.ReactNode;
@@ -368,10 +372,12 @@ export interface ChronicleMessage {
   author?: string;
   /** Whispers: "From Kaelen" / "To Kaelen". */
   direction?: 'from' | 'to';
-  /** system and loot lines are set in lore italic without an author. */
-  kind?: 'chat' | 'system' | 'loot';
+  /** system and loot lines are set in lore italic without an author; a day break is the date between two days' lines (D-112). */
+  kind?: 'chat' | 'system' | 'loot' | 'day';
   /** The line mentions the player: a neutral surface-raised wash and a 2px ink edge (D-022). */
   mention?: boolean;
+  /** The author holds active Nobility: the crown before the name (D-066, D-112). */
+  noble?: boolean;
   /** May contain ItemLinks and <span class="lg-mention">@Name</span>. */
   text: React.ReactNode;
 }
@@ -388,7 +394,11 @@ export interface ChronicleProps {
    *  mention you and whispers to you, through LL.announce (throttled). off: nothing. Combat events never go in the Chronicle. */
   announce?: 'all' | 'mentions' | 'off';
   onToggle?: () => void;
-  composer?: { channel?: ChronicleChannelId; channelLabel?: string; value: string; onChange: (v: string) => void; onSend: (v: string) => void; placeholder?: string; maxLength?: number };
+  /** Makes the author a button that opens the host's player actions — a profile, a whisper (D-112). Not in the collapsed ticker. */
+  onAuthor?: (message: ChronicleMessage, element: HTMLElement) => void;
+  /** The built-in composer's settings, or a composer of the host's own (D-112) — a rich editor with @mention suggestions —
+   *  which takes the composer's place and may use its parts (Chronicle README · A composer of your own). */
+  composer?: { channel?: ChronicleChannelId; channelLabel?: string; value: string; onChange: (v: string) => void; onSend: (v: string) => void; placeholder?: string; maxLength?: number } | React.ReactElement;
   /** Extra header controls (channel settings, pop-out). */
   aside?: React.ReactNode;
   /** Drawer styling for the floating chat layout (GameShell sets it). */
@@ -491,6 +501,60 @@ export interface ProfileIdentityProps {
 }
 /** Who a player is, at the head of a profile: put it in a Banner's body (D-099). */
 export declare function ProfileIdentity(props: ProfileIdentityProps): React.ReactElement;
+
+/** The current action at the head of the NavRail (D-109): the action, the time left, a thin progress bar and the way
+ *  to it. A button with onOpen. Compact (in the compact rail): the bar and the time, the action as its name. */
+export interface ActivityProps {
+  /** "Engaged in Combat", "Idle". */
+  label: string;
+  /** Time left, as printed ("00:12"). */
+  remaining?: string;
+  /** Progress as value of max, or `progress` 0–1. */
+  value?: number; max?: number; progress?: number;
+  onOpen?: () => void;
+  /** The way to it; "Go to action" by default, '' for none. */
+  openLabel?: string;
+  /** The compact rail's mark (D-117): a ring the progress rises in, the ✦ and the live dot, over the `short` word. */
+  compact?: boolean;
+  /** Compact: the one word under the mark ("Battling", "Stopping"); the label by default. */
+  short?: string;
+  className?: string;
+}
+export declare function Activity(props: ActivityProps): React.ReactElement;
+
+/** The pinned quest in the TopBar's centre (D-110): its title and current objective with the count. With children it is
+ *  a disclosure that opens them — the full tracker — in a Level 2 popover; Escape, a click outside or the button close it
+ *  and focus returns to the button. A run's Track takes its place while a dungeon run or tower climb is in progress. */
+export interface ObjectiveProps {
+  /** "Pinned quest". */
+  kicker?: React.ReactNode;
+  title: React.ReactNode;
+  /** The current objective's text. */
+  objective?: React.ReactNode;
+  current?: number; required?: number;
+  /** Controlled open state; leave undefined to let the Objective keep it. */
+  open?: boolean;
+  onToggle?: (open: boolean) => void;
+  /** The full tracker, shown in the popover. */
+  children?: React.ReactNode;
+  className?: string;
+}
+export declare function Objective(props: ObjectiveProps): React.ReactElement;
+
+/** A persistent notice (D-111) at the head of the stage or a region. The title says it in words; the tone's start bar
+ *  backs it. `danger` is an alert, the others a status. `busy` adds a pulse, an indeterminate progressbar. */
+export interface NoticeProps {
+  tone?: 'info' | 'warning' | 'danger';
+  title: React.ReactNode;
+  children?: React.ReactNode;
+  /** Usually one Button. */
+  action?: React.ReactNode;
+  busy?: boolean;
+  /** What the pulse is named; "In progress" by default. */
+  busyLabel?: string;
+  className?: string;
+}
+export declare function Notice(props: NoticeProps): React.ReactElement;
 
 /** Every state in Standards · States, by family. */
 export type StateName =
