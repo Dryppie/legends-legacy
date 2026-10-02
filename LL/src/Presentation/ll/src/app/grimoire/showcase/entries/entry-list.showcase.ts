@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  LgEntry,
-  LgEntryListComponent,
-} from '../../../shared/components/grimoire';
+import { LgEntry, LgEntryListComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -22,7 +19,7 @@ const NAMES = [
 ];
 
 /**
- * The catalog's creature list: Horned Wolf has a point to spend (the attention diamond), Blackjaw Spider is new,
+ * The creature list: Horned Wolf has a point to spend (the attention diamond), Blackjaw Spider is new,
  * Cave Bat is undiscovered and the current Creature Focus (its one Tag), Ember Knight is locked.
  */
 const CREATURES: readonly LgEntry[] = NAMES.map((n): LgEntry => {
@@ -168,6 +165,6 @@ export const ENTRY_LIST_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The browsable name list.',
   covers: ['LgEntryListComponent'],
-  readme: 'design-system/components/EntryList/README.md',
+  readme: 'src/app/grimoire/components/entry-list/README.md',
   component: EntryListShowcaseComponent,
 };

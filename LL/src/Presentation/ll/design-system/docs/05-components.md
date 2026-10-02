@@ -1,6 +1,6 @@
 # Components
 
-The interface parts, in two catalogues. **Components** are generic: they have no game vocabulary of their own and take the game's words and numbers as content, so the same Ledger shows attributes, a combat summary or a price list. **Game Components** carry the game's own vocabulary — levels, sigils, attributes, items, Essences, currencies, the player's journey — and are built from Components, Foundations and Registries. The frame is in Shell.
+The interface parts, in two lists. **Components** are generic: they have no game vocabulary of their own and take the game's words and numbers as content, so the same Ledger shows attributes, a combat summary or a price list. **Game Components** carry the game's own vocabulary — levels, sigils, attributes, items, Essences, currencies, the player's journey — and are built from Components, Foundations and Registries. The frame is in Shell.
 
 ## Rules
 
@@ -9,24 +9,22 @@ The interface parts, in two catalogues. **Components** are generic: they have no
 - Read type from the ramp — the `text-*`, `leading-*` and `tracking-*` tokens — never a pixel size, line height or letter-spacing (Foundations · Typography).
 - Take row heights, paddings, gaps, icon and control sizes from the density variables (`--lg-row`, `--lg-cell-*`, `--lg-gap`, `--lg-inset*`, `--lg-icon`, `--lg-control`), so a region's `data-density` reaches every part inside it (Foundations · Space & Density).
 - Use the `lg-` class prefix (Angular selectors `lg-*`), so components live beside today's `ll-` classes while screens migrate.
-- Have a page in the catalogue with a live preview and a README that opens with a plain subtitle and a status (Governance · Templates).
+- Have a README beside its code that opens with a plain subtitle and a status (Governance · Templates), a showcase entry with a story for each state and variant it supports (D-129), and a spec that pins its behaviour through its harness (D-130).
 - Meet every Standard: states, hierarchy, disclosure, art-optional, content. Show every state by the channel and words in Standards · States, list the states it has in its README's Supported states, and keep a blocked control focusable with its reason (D-087).
 - Meet Foundations · Accessibility: rem sizes, the keyboard model, 24px targets, hover content that opens on focus and pins on tap, named controls, and Accessibility notes in the README.
 
 **Should**
 - Keep evocative names with their plain subtitle; give new components plain descriptive names.
-- Format numbers with the shared helpers (`LL.format`) or take them already formatted; never with a formatter of their own (Foundations · Numerals).
+- Format numbers with the shared helpers (`LG_FORMAT`, `lgFormatNumber`, …) or take them already formatted; never with a formatter of their own (Foundations · Numerals).
 - Reflow on their container's width, not the window's.
 
 **Never**
 - Hard-code a game list — take it from Registries.
 - Copy a component under a new name to change one detail; add a documented variant instead.
 
-## Catalogue: Components
+## Components
 
-Every component starts at Draft (Governance defines the statuses). In the catalogue these are grouped as "Components · <family>".
-
-The catalogue's Foundations group holds specimens, not components: TypeRamp (every type style) and TypeSpecimen (the ramp in use) illustrate Foundations · Typography, NumeralSpecimen illustrates Foundations · Numerals, DensitySpecimen illustrates Foundations · Space & Density, AccessibilitySpecimen illustrates Foundations · Accessibility, LayoutSpecimen (the list and inspector) and LayoutGridSpecimen (the attribute grid) illustrate Foundations · Layout, LayeringSpecimen illustrates Foundations · Surfaces & Layering, LinesSpecimen illustrates Foundations · Lines, ShapeSpecimen illustrates Foundations · Shape, OrnamentSpecimen illustrates Foundations · Ornament, and MotionSpecimen illustrates Foundations · Motion. The Standards group holds StateCombinationSpecimen, which illustrates Standards · State combinations. They have no API.
+Every component starts at Draft (Governance defines the statuses). They are grouped as "Components · <family>"; the README's index gives each one's folder in `src/app/grimoire/`.
 
 | Component | Plain subtitle | Family | Status |
 | --- | --- | --- | --- |
@@ -36,12 +34,14 @@ The catalogue's Foundations group holds specimens, not components: TypeRamp (eve
 | Heading | the titles | Type & ornament | Draft |
 | Icon | the game's icon set | Type & ornament | Draft |
 | SectionRule | the dividers | Type & ornament | Draft |
+| Key | the key cap | Type & ornament | Draft |
 | Ledger | the labelled value list | Data | Draft |
 | Meter | the progress bar | Data | Draft |
 | StatTile | the compact stat | Data | Draft |
 | Delta | the stat change | Data | Draft |
 | StatFigure | the headline number | Data | Draft |
 | Track | the milestone track | Data | Draft |
+| Num | a number with its unit | Data | Draft |
 | Panel | the content box | Containers | Draft |
 | Banner | the headline block | Containers | Draft |
 | PageHeader | the information screen heading | Containers | Draft |
@@ -51,9 +51,9 @@ The catalogue's Foundations group holds specimens, not components: TypeRamp (eve
 | Tag | the status label | Lists & labels | Draft |
 | Presence | the online status | Lists & labels | Draft |
 
-## Catalogue: Game Components
+## Game Components
 
-In the catalogue these are grouped as "Game Components · <family>".
+They are grouped as "Game Components · <family>".
 
 | Component | Plain subtitle | Family | Status |
 | --- | --- | --- | --- |

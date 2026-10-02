@@ -7,7 +7,7 @@ import {
   LgSlotDirective,
   LgTopBarComponent,
   LgTrackComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -200,6 +200,6 @@ export const TOP_BAR_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'The top bar.',
   covers: ['LgTopBarComponent'],
-  readme: 'design-system/components/TopBar/README.md',
+  readme: 'src/app/grimoire/shell/top-bar/README.md',
   component: TopBarShowcaseComponent,
 };

@@ -39,7 +39,7 @@ import {
   LgChronicleTextDirective,
   LgKeyComponent,
   LgSlotDirective,
-} from '../../shared/components/grimoire';
+} from '@grimoire';
 import { chronicleChannelId, chronicleChannels, lootLine, toChronicleLine, withDayBreaks } from './chat-chronicle';
 
 /**

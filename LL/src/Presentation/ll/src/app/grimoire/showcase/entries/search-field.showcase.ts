@@ -4,10 +4,7 @@ import {
   computed,
   signal,
 } from '@angular/core';
-import {
-  LgButtonComponent,
-  LgSearchFieldComponent,
-} from '../../../shared/components/grimoire';
+import { LgButtonComponent, LgSearchFieldComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -138,6 +135,6 @@ export const SEARCH_FIELD_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'Search with suggestions.',
   covers: ['LgSearchFieldComponent'],
-  readme: 'design-system/components/SearchField/README.md',
+  readme: 'src/app/grimoire/components/search-field/README.md',
   component: SearchFieldShowcaseComponent,
 };

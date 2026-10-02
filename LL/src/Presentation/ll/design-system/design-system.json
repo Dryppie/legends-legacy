@@ -277,7 +277,7 @@
       "docs/10-governance/01-governance.md",
       "docs/10-governance/02-decision-log.md",
       "docs/10-governance/03-audit-and-consolidation-map.md",
-      "docs/10-governance/04-code-parity.md"
+      "docs/10-governance/04-code.md"
     ]
   },
   "groups": [
@@ -289,27 +289,12 @@
     "Cards"
   ],
   "lastChange": {
-    "at": "2026-10-02T09:30:00Z",
+    "at": "2026-10-02T18:00:00Z",
     "by": "Martin",
-    "note": "The currency art is the game's own Cinders and Soulstones emblems, in place of Coins.svg and Diamonds.svg (D-126).",
+    "note": "The reference edition, the catalog and the parity check are removed; the Angular lg-* components in src/app/grimoire/ are Grimoire's only implementation (D-130 to D-133).",
     "via": "Claude (Cowork)"
   },
   "layout": "files",
-  "libraries": [
-    {
-      "file": "components/lib/react.production.min.js",
-      "global": "React",
-      "name": "react",
-      "version": "18"
-    },
-    {
-      "file": "components/lib/react-dom.production.min.js",
-      "global": "ReactDOM",
-      "name": "react-dom",
-      "version": "18"
-    }
-  ],
-  "namespace": "LL",
   "sections": {},
   "title": "Legend's Legacy"
 }

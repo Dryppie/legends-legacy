@@ -1,6 +1,6 @@
 import { ChatChannelType, ChatMessageDto } from '../../core/services/ll-chat/chat-service/chat.service';
 import { formatLocalDate } from '../../shared/pipes/local-date/local-date.pipe';
-import { LgChronicleChannel, LgChronicleMessage } from '../../shared/components/grimoire';
+import { LgChronicleChannel, LgChronicleMessage } from '@grimoire';
 import { LootHistoryEntry } from '../../shared/models/loot-history';
 import { isInlineChannelSystemMessage, isWorldSystemMessage, startsNewChatDay } from '../dashboard/chat/chat.component';
 

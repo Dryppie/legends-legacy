@@ -1,6 +1,6 @@
 # Foundations · Accessibility
 
-Every player can read, reach and understand everything in Legend's Legacy, at the text size, font and motion they chose. The target is **WCAG 2.2 level AA**. The game already has a reading-font setting, a reading-size setting, reduced-motion handling, visible focus rings and focus-trapped dialogs. The system honours every one of them, and none may regress. This section sets what AA means here: text scaling, the keyboard model, target sizes, hover content, live regions, and names and numbers. AccessibilitySpecimen shows these rules in use.
+Every player can read, reach and understand everything in Legend's Legacy, at the text size, font and motion they chose. The target is **WCAG 2.2 level AA**. The game already has a reading-font setting, a reading-size setting, reduced-motion handling, visible focus rings and focus-trapped dialogs. The system honours every one of them, and none may regress. This section sets what AA means here: text scaling, the keyboard model, target sizes, hover content, live regions, and names and numbers.
 
 ## Rules
 
@@ -132,7 +132,7 @@ Never use a positive `tabindex`. Hidden and off-screen things are out of the ord
 6. a hover card, tooltip, suggestion list or menu on the page (a Ledger explanation, SearchField);
 7. the rail drawer, with focus back to the menu button.
 
-`LL.layers` keeps this order for anything registered with it.
+The layer stack (`lgOpenLayer`) keeps this order for anything registered with it.
 
 Only when no layer is open may a screen use Escape for Back, and its KeyHints then say so.
 
@@ -189,7 +189,7 @@ The game changes every second, and a screen reader can speak only one thing at a
 
 Summarise a fight when it ends ("Victory. 3 enemies defeated, 120 Cinders"). The combat log stays readable on demand: it is focusable, not live.
 
-**One announcer, throttled.** `LL.announce(text, { key, assertive })` writes to one pair of hidden live regions for the whole app:
+**One announcer, throttled.** `lgAnnounce(text, { key, assertive })` writes to one pair of hidden live regions for the whole app:
 
 - polite messages go out one at a time, at most one every 1.5 seconds;
 - a message with the same `key` replaces the one still waiting, so ten loot drops become one line;
@@ -202,7 +202,7 @@ Components add no live regions of their own. The one exception is the Chronicle 
 ## Names and numbers
 
 - **Icon-only controls name their action:** "Open navigation", "Collapse chat", "Send", "Drag chat". Decorative icons are `aria-hidden`; a standalone meaningful Icon takes a `title`.
-- **Abbreviated numbers are read in full.** CurrencyPill shows "12.5k" and screen readers hear "12,480 Cinders". Anything that uses `LL.format.short` pairs it with the full figure in visually hidden text (`.lg-sr`), and shows the full figure on focus, click or tap as well as hover: a short CurrencyPill is a button that toggles between 12.5k and 12,480.
+- **Abbreviated numbers are read in full.** CurrencyPill shows "12.5k" and screen readers hear "12,480 Cinders". Anything that uses `lgFormatShort` pairs it with the full figure in visually hidden text (`.lg-sr`), and shows the full figure on focus, click or tap as well as hover: a short CurrencyPill is a button that toggles between 12.5k and 12,480.
 - **Changes and counts are read as words.** Delta says "+12, better"; a ListRow says "Quantity 3"; a Meter says "3,120 of 4,150".
 - **Rarity is announced by name.** ItemLink, ItemSlot and ListRow say "Epic" wherever they show the code E, and rarity Tags spell the rarity out.
 
@@ -259,7 +259,6 @@ Before a screen ships:
 
 ## Related components
 
-- AccessibilitySpecimen — the accessibility rules on real parts
 - GameShell — the screen frame
 - Ledger — the labelled value list
 - ListRow — the list row

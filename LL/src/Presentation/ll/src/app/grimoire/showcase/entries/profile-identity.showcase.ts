@@ -8,7 +8,7 @@ import {
   LgSlotDirective,
   LgStatFigureComponent,
   LgTagComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -148,6 +148,6 @@ export const PROFILE_IDENTITY_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'Who a player is.',
   covers: ['LgProfileIdentityComponent', 'LgProfileFactComponent'],
-  readme: 'design-system/components/ProfileIdentity/README.md',
+  readme: 'src/app/grimoire/game/profile-identity/README.md',
   component: ProfileIdentityShowcaseComponent,
 };

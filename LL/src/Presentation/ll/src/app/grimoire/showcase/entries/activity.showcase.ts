@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgActivityComponent } from '../../../shared/components/grimoire';
+import { LgActivityComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -109,6 +109,6 @@ export const ACTIVITY_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'The current action.',
   covers: ['LgActivityComponent'],
-  readme: 'design-system/components/Activity/README.md',
+  readme: 'src/app/grimoire/shell/activity/README.md',
   component: ActivityShowcaseComponent,
 };

@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  LgItemSlotComponent,
-  LgShortfall,
-} from '../../../shared/components/grimoire';
+import { LgItemSlotComponent, LgShortfall } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -563,6 +560,6 @@ export const ITEM_SLOT_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The item frame.',
   covers: ['LgItemSlotComponent'],
-  readme: 'design-system/components/ItemSlot/README.md',
+  readme: 'src/app/grimoire/game/item-slot/README.md',
   component: ItemSlotShowcaseComponent,
 };

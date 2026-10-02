@@ -1,6 +1,6 @@
 # Foundations · Numerals
 
-Legend's Legacy is mostly numbers: attributes, prices, quantities, ratings, damage, cooldowns and progress. This section sets how every number is written, aligned and updated, so a player can compare two values at a glance and a live value never moves the interface. The type styles numbers use are in Foundations · Typography. NumeralSpecimen shows these rules in use.
+Legend's Legacy is mostly numbers: attributes, prices, quantities, ratings, damage, cooldowns and progress. This section sets how every number is written, aligned and updated, so a player can compare two values at a glance and a live value never moves the interface. The type styles numbers use are in Foundations · Typography.
 
 ## Rules
 
@@ -12,7 +12,7 @@ Legend's Legacy is mostly numbers: attributes, prices, quantities, ratings, dama
 - Write a negative number with a true minus, U+2212 (−12); a range with an en dash (12–18); a multiplier with × (×1.5); a fraction with a spaced slash (3,120 / 4,150).
 - Show "—" (an em dash) for a value that is unknown or does not apply, and "0" for zero. Never leave a value cell empty.
 - Give numbers thousands separators: 12,480.
-- Format values before passing them to a component (`LL.format`). Components style a unit but never add one.
+- Format values before passing them to a component (the `lgFormat*` helpers). Components style a unit but never add one.
 - Print a meter's value beside its bar.
 - Reserve the width of a number that updates live, so it never moves anything beside it (Live values, below).
 
@@ -47,31 +47,31 @@ With tabular figures every digit is the same width, so 1ch in a numeral style is
 
 | Write | For | Never | Helper |
 | --- | --- | --- | --- |
-| 12,480 | Thousands | 12480, 12 480 | `LL.format.number(12480)` |
-| −12 | A negative number: the true minus, U+2212 | -12 | `LL.format.number(-12)` |
+| 12,480 | Thousands | 12480, 12 480 | `lgFormatNumber(12480)` |
+| −12 | A negative number: the true minus, U+2212 | -12 | `lgFormatNumber(-12)` |
 | +12, −1.2s, ±0 | A change, always inside a Delta: ▲ or ▼ with its sign, or ±0 | 12 with no sign | Delta |
-| 12–18 | A range: an en dash, no spaces | 12-18, 12 - 18 | `LL.format.range(12, 18)` |
-| ×1.5 | A multiplier: × before the number, no space. A stack of three in an ItemSlot corner is ×3. | x1.5, 1.5x | `LL.format.times(1.5)` |
-| 3,120 / 4,150 | A value out of a maximum: non-breaking spaces round the slash | 3,120/4,150 | `LL.format.fraction(3120, 4150)` |
-| — | Unknown, or does not apply | An empty cell, N/A, -, ? | `LL.format.none`; every helper returns it for a missing value |
-| 0 | Zero | —, "none", an empty cell | `LL.format.number(0)` |
-| 12.5k | Abbreviated, on request only | 12,5k, 12.5K | `LL.format.short(12480)` |
+| 12–18 | A range: an en dash, no spaces | 12-18, 12 - 18 | `lgFormatRange(12, 18)` |
+| ×1.5 | A multiplier: × before the number, no space. A stack of three in an ItemSlot corner is ×3. | x1.5, 1.5x | `lgFormatTimes(1.5)` |
+| 3,120 / 4,150 | A value out of a maximum: non-breaking spaces round the slash | 3,120/4,150 | `lgFormatFraction(3120, 4150)` |
+| — | Unknown, or does not apply | An empty cell, N/A, -, ? | `LG_NONE`; every helper returns it for a missing value |
+| 0 | Zero | —, "none", an empty cell | `lgFormatNumber(0)` |
+| 12.5k | Abbreviated, on request only | 12,5k, 12.5K | `lgFormatShort(12480)` |
 
 ## Alignment
 
 - **Right-align** every numeric column and its header, so units line up under units, tens under tens and hundreds under hundreds.
-- **Align mixed precision on the decimal point.** The integer sits right-aligned in one column, and the fraction and unit sit left-aligned in the next, so 1,284, 24.8%, 84 HP/5s and 184.6 threat/s line up. Ledger does this for you: its rows share the columns through CSS subgrid (D-035). In a table, split each numeric column into two cells with `LL.format.parts`, and give the header `colspan="2"`.
+- **Align mixed precision on the decimal point.** The integer sits right-aligned in one column, and the fraction and unit sit left-aligned in the next, so 1,284, 24.8%, 84 HP/5s and 184.6 threat/s line up. Ledger does this for you: its rows share the columns through CSS subgrid (D-035). In a table, split each numeric column into two cells with `lgNumberParts`, and give the header `colspan="2"`.
 - **One precision needs only right alignment.** Tabular figures already line up whole numbers, or numbers that all have one decimal place.
 - **Text in a numeric column** — a Delta, "Locked" or "—" — sits at the right, in the integer column.
 
 ## Units
 
 - **A unit follows its number immediately and is smaller and muted.** It is set at the `caption` size in Barlow 500, `ink-muted` (the `.lg-unit` class).
-- **Symbol units attach with no space:** 24.8%, 12s, 2h 14m. **Word units take a non-breaking space:** 84 HP/5s, 184.6 threat/s, 40 Soulstones, 240 Armor Rating. `LL.format.unit(84, 'HP/5s')` chooses the spacing for you.
+- **Symbol units attach with no space:** 24.8%, 12s, 2h 14m. **Word units take a non-breaking space:** 84 HP/5s, 184.6 threat/s, 40 Soulstones, 240 Armor Rating. `lgFormatUnit(84, 'HP/5s')` chooses the spacing for you.
 - **Signs and operators before a number are part of it** and keep its style: +, − and ×.
 - **Inside a Delta the unit keeps the delta's colour,** so the change reads as one mark: ▼ −1.2s.
 - **In a table, name the unit once,** in the column header or the caption ("Price each", "in Cinders"), not in every cell. A column holds one unit.
-- **Durations use at most two units:** 12s, 2m 14s, 2h 14m, 3d 4h. `LL.format.duration(134)` writes "2m 14s", and `LL.format.spokenDuration(134)` gives screen readers "2 minutes 14 seconds" — a cooldown's "Ready in" and an "Expires in" read both ways (Standards · States).
+- **Durations use at most two units:** 12s, 2m 14s, 2h 14m, 3d 4h. `lgFormatDuration(134)` writes "2m 14s", and `lgSpokenDuration(134)` gives screen readers "2 minutes 14 seconds" — a cooldown's "Ready in" and an "Expires in" read both ways (Standards · States).
 
 ## Live values
 
@@ -81,7 +81,7 @@ Combat, auctions and currency update while the player watches. A number that cha
 2. **Reserve the widest value** the number will show, in `ch`. Meter reserves the width of "max / max". CurrencyPill grows to fit and never shrinks while it is on screen, and its `reserve` holds room for the next digit from the start. A counter or a timer gets `min-width` in `ch`.
 3. **Right-align inside the reserved width.** New digits grow to the left, and whatever follows the number stays put.
 4. **Keep the format fixed while the value is live.** Don't switch from 999 to 1k, or from 9.5 to 10, mid-count; show 10.0.
-5. **Don't animate width.** Count only a change the player caused — after combat, after a purchase — over `duration-slow` (400ms), inside the reserved width, and not at all under reduced motion. A change that came by itself shows at once, with the live-update mark. `LL.motion.useLive` does both (Foundations · Motion · Value change).
+5. **Don't animate width.** Count only a change the player caused — after combat, after a purchase — over `duration-slow` (400ms), inside the reserved width, and not at all under reduced motion. A change that came by itself shows at once, with the live-update mark. `lgLive()` does both (Foundations · Motion · Value change).
 6. **Don't make live numbers live regions.** Announce only the outcomes a player must act on — being outbid, or loot that has landed — through the Chronicle or an alert, once. Combat ticks are never announced.
 
 ## Number and label, by context
@@ -115,7 +115,7 @@ Combat, auctions and currency update while the player watches. A number that cha
 | `gilt` | The screen's one headline figure, and effect magnitudes inside descriptions |
 | `delta-better`, `delta-worse`, `delta-neutral` | Changes, through Delta |
 
-The reference components format numbers with `LL.format`: `number`, `short`, `range`, `times`, `fraction`, `percent`, `unit`, `parts` and `none`. The Angular edition exports `lgFormatNumber` and `lgFormatShort`; the other helpers are not ported yet.
+Components and screens format numbers with the `@grimoire` helpers in `core/grimoire-format.ts`: `lgFormatNumber`, `lgFormatShort`, `lgFormatRange`, `lgFormatTimes`, `lgFormatFraction`, `lgFormatPercent`, `lgFormatUnit`, `lgNumberParts`, `LG_NONE`, `lgFormatDuration` and `lgSpokenDuration`, all also in `LG_FORMAT`.
 
 ## Do and don't
 
@@ -139,7 +139,6 @@ The reference components format numbers with `LL.format`: `number`, `short`, `ra
 
 ## Related components
 
-- NumeralSpecimen — the numeral rules in use
 - Ledger — the labelled value list
 - StatTile — the compact stat
 - StatFigure — the headline number

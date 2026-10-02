@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgTrackComponent } from '../../../shared/components/grimoire';
+import { LgTrackComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -119,6 +119,6 @@ export const TRACK_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The milestone track.',
   covers: ['LgTrackComponent'],
-  readme: 'design-system/components/Track/README.md',
+  readme: 'src/app/grimoire/components/track/README.md',
   component: TrackShowcaseComponent,
 };

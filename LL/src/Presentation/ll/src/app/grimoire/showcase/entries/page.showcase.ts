@@ -8,7 +8,7 @@ import {
   LgPageHeaderComponent,
   LgPanelComponent,
   LgSlotDirective,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -192,6 +192,6 @@ export const PAGE_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The information screen frame.',
   covers: ['LgPageComponent'],
-  readme: 'design-system/components/Page/README.md',
+  readme: 'src/app/grimoire/components/page/README.md',
   component: PageShowcaseComponent,
 };

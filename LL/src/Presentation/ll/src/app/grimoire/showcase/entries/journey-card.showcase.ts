@@ -3,7 +3,7 @@ import {
   LgButtonComponent,
   LgJourneyCardComponent,
   LgSlotDirective,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -154,6 +154,6 @@ export const JOURNEY_CARD_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The next-step guide.',
   covers: ['LgJourneyCardComponent'],
-  readme: 'design-system/components/JourneyCard/README.md',
+  readme: 'src/app/grimoire/game/journey-card/README.md',
   component: JourneyCardShowcaseComponent,
 };

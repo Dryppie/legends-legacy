@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgLevelPlateComponent,
-  LgLevelPlateStat,
-} from '../../../shared/components/grimoire';
+import { LgLevelPlateComponent, LgLevelPlateStat } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -74,6 +71,6 @@ export const LEVEL_PLATE_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The level display.',
   covers: ['LgLevelPlateComponent'],
-  readme: 'design-system/components/LevelPlate/README.md',
+  readme: 'src/app/grimoire/game/level-plate/README.md',
   component: LevelPlateShowcaseComponent,
 };

@@ -20,9 +20,9 @@ Start here. This page says how the documentation is organised, which way to read
 | Governance | How does the system change? Naming, statuses, templates. |
 | Governance · Decision Log | What was decided, when, and why? |
 | Governance · Audit & consolidation map | Which parts to keep, revise, merge or retire, and in what order? |
-| Governance · Code parity | How does the game's Angular edition map onto the reference components, and how is that checked? |
+| Governance · Code | How is the code organised, which conventions does it follow, and how is a change checked? |
 
-Every component also has its own page in the component catalogue: a live preview, its props, and its guidelines.
+Every part also has its own page, its guidelines, beside its code (`src/app/grimoire/<tier>/<name>/README.md`), and its stories in the `/grimoire` showcase.
 
 ## The layer model
 
@@ -46,7 +46,7 @@ Governance sits beside every layer: how the system changes, its templates, and t
 
 - **New here:** this page, then Principles.
 - **Designing a screen.** Pick the closest Page Archetype. Read Shell for the frame and the two chat layouts. Then read the Patterns and components the archetype names, and Standards · States for every state the screen can be in.
-- **Building a part.** Read its component page, then each Foundation and Standard it cites. Take every game list (rarities, channels, resources) from Registries rather than typing it again.
+- **Building a part.** Read its page (`README.md` beside its code) and look at its stories in the showcase, then each Foundation and Standard it cites. Take every game list (rarities, channels, resources) from Registries rather than typing it again.
 - **Writing copy.** Standards (Content) for voice and labels, Standards · States for the exact words of every state, Foundations · Numerals for numbers, Registries for the game's nouns, codes and marks.
 - **Changing the system.** Governance first. Then log what you decided in the Decision Log.
 
@@ -76,10 +76,10 @@ New parts get plain descriptive names, like LoadoutSlot or SearchField. Composit
 
 ## Where the code lives
 
-- `tokens.json` — every token. `scripts/build-tokens.mjs` compiles it to `tokens.css`.
-- `icons.json` — the icon set, the one source of icon drawings. `scripts/build-icons.mjs` writes it into both editions (D-125).
-- `components/bundle.js`, `components/bundle.css`, `components/index.d.ts` — the reference components (React, on `window.LL`), their `lg-` styles and their types. Frozen since D-127: `bundle.css` stays the source of the app's component styles until step 9 of `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root), and step 10 removes the rest.
-- In the game repository — an Angular edition of the same components (standalone `lg-*` components) under `src/app/shared/components/grimoire`. It renders the same markup and shares `bundle.css`: `scripts/sync-styles.mjs` copies the tokens, styles and fonts into `src/styles/grimoire` (D-092), and the parity check in `parity/` compared the two editions (D-093, Governance · Code parity). Since D-127 the Angular edition is the only implementation and the parity check is retired.
+- `tokens.json` — every token. `scripts/build-tokens.mjs` compiles it into `src/app/grimoire/tokens/`: `tokens.css` (every token as a `--lg-*` property) and `tokens.ts` (the values script needs) (D-131).
+- `icons.json` — the icon set, the one source of icon drawings. `scripts/build-icons.mjs` writes it into `src/app/grimoire/core/grimoire-icons.ts` (D-125).
+- `src/app/grimoire/` in the game repository — the `lg-*` Angular components, Grimoire's only implementation (D-127, D-133), imported as `@grimoire`. One folder per part, in four tiers (primitives, components, game, shell), each with its component, its styles, its spec and its page. Governance · Code describes it.
+- The `/grimoire` showcase (development builds only) shows every part in each of its states, and `npm run grimoire:snapshots` checks every story against its baseline (D-129).
 
 ## How to extend it
 
@@ -87,43 +87,28 @@ Follow Governance. Change the highest layer in the table that solves the problem
 
 ---
 
-## Consuming this system
+## Using it in the game
 
-`components/bundle.js` defines `window.LL` (49 components); `components/bundle.css` is its stylesheet; `tokens.css` is every token as a CSS variable plus `@font-face` for the fonts, compiled from `tokens.json`. `components/bundle.css` reads its variables from `tokens.css`. The bundle needs `components/lib/react.production.min.js` (`window.React`) and `components/lib/react-dom.production.min.js` (`window.ReactDOM`), loaded before it. A preview (`components/<Name>/preview.html`) expects all of these to be loaded first.
+- **Import** single components from `@grimoire`, or spread `LG_GRIMOIRE` into a standalone component's `imports`. Test harnesses come from `@grimoire/testing`.
+- **Styles** load by themselves: the tokens, the base and every part's styles are one stylesheet, `grimoire.css`, which the app adds at startup (D-096, D-132). A screen's own styles use tokens only (`var(--lg-ink-muted)`).
+- **Assets.** Source images are in `assets/<Group>/`, each group with its page (`assets/<Group>/README.md`); the game serves its own copies from `src/assets/`.
+- **Fonts.** Atkinson Hyperlegible is in `fonts/`, copied beside the compiled tokens; the other families load from Google Fonts.
 
-- **The catalog.** `catalog/index.html` loads them for every preview and shows the documentation. Serve this folder (`python -m http.server 4600 -d LL/src/Presentation/ll/design-system`) and open `http://localhost:4600/catalog/`. Frozen since D-127; the dev-only `/grimoire` showcase in the app replaces it (D-129).
-- **The game.** The game uses the Angular `lg-*` components in `src/app/shared/components/grimoire/` and the generated copies of these styles in `src/styles/grimoire/`, not this bundle.
-- **Assets.** Image files in `assets/<Group>/`, listed in `api/assets/<Group>.md`. From a preview, refer to one as `../../assets/<Group>/<file>`.
-- **Fonts.** Atkinson Hyperlegible is in `fonts/`; the other families load from Google Fonts.
-
-**Read, per thing:** a component’s props, parts and examples: `api/components/<Comp>.md`; token values: `api/tokens.md`; assets and their paths: `api/assets/<Group>.md`. `components/<Comp>/README.md` and `assets/<Group>/README.md` are the long-form pages a card links to. `tokens.json`, `manifest.json`, `components/index.d.ts` and `design-system.json` are sources for tools. To change the system, read `AGENTS.md` first.
+**Read, per thing:** a part's inputs, slots, states and rules: its `README.md` beside its code, and its `.component.ts`; token values and their use: `tokens.json`; assets: `assets/<Group>/README.md`. To change the system, read `AGENTS.md` first.
 
 ## Index
 
-**Tokens**
+**Tokens and icons:** `tokens.json` (every token, with its value and use), `icons.json` (every icon).
 
-- `api/tokens.md` — Every token: surface, text, fill, palette, type, spacing, radius, shadow, font-size, line-height, letter-spacing, density, icon-size, border-width, opacity, layout, z-index, motion. (46.4k)
+**Assets:** `assets/Logos/`, `assets/Icons/`, `assets/Currency/`, `assets/Ornaments/`, `assets/Backgrounds/`, `assets/Cards/`, each with its `README.md`.
 
-**Icons and assets**
+**Parts** (42; each page is `src/app/grimoire/<tier>/<name>/README.md`)
 
-- `api/assets/Logos.md` — 1 file, as files in `assets/`. (1.0k)
-- `api/assets/Icons.md` — 15 files, as files in `assets/`. (3.0k)
-- `api/assets/Currency.md` — 2 files, as files in `assets/`. (1.4k)
-- `api/assets/Ornaments.md` — 2 files, as files in `assets/`. (1.4k)
-- `api/assets/Backgrounds.md` — 5 files, as files in `assets/`. (1.4k)
-- `api/assets/Cards.md` — 3 files, as files in `assets/`. (1.2k)
-
-**Components** (`api/components/<Comp>.md`, 54; 2 of them showcase pages)
-
-- **Shell**: `GameShell` — The screen frame · `TopBar` — The top bar · `NavRail` — The main navigation · `Stage` — The scene backdrop · `Page` — The information screen frame · `Folio` — The detail panel · `Chronicle` — Chat and the game log · `KeyHints` — The keyboard shortcut hints · `Activity` — The current action · `Objective` — The pinned quest
-- **Components · Actions & input**: `TabStrip` — The tabs · `Button` — The command button · `SearchField` — Search with suggestions
-- **Components · Containers**: `PageHeader` — The information screen heading · `Banner` — The headline block · `Panel` — The content box · `Notice` — The persistent notice
-- **Components · Data**: `StatFigure` — The headline number · `Ledger` — The labelled value list · `Meter` — The progress bar · `Track` — The milestone track · `StatTile` — The compact stat · `Delta` — The stat change
-- **Game Components · Character**: `LevelPlate` — The level display · `ProfileIdentity` — Who a player is · `Sigil` — The hex stat badge · `Constellation` — The stat star chart · `JourneyCard` — The next-step guide · `Emblem` — The attribute sign
-- **Game Components · Items & economy**: `LoadoutSlot` — An Essence loadout slot · `ItemLink` — An item named in text · `ItemSlot` — The item frame · `CurrencyPill` — The currency amount
-- **Components · Lists & labels**: `EntryList` — The browsable name list · `ListRow` — The list row · `Tag` — The status label · `Presence` — The online status
-- **Components · Type & ornament**: `Heading` — The titles · `SectionRule` — The dividers · `Icon` — The game's icon set
-- **Foundations**: `AccessibilitySpecimen` — The accessibility rules on real parts · `DensitySpecimen` — The three densities side by side · `LayeringSpecimen` — The levels, the stack and four layered scenes · `LayoutGridSpecimen` — The attribute grid at three region widths · `LayoutSpecimen` — The list and inspector at three region widths · `LinesSpecimen` — The line types, the ladder and the rhythms, drawn both ways · `MotionSpecimen` — The motion tokens, and every motion category beside its reduced twin · `NumeralSpecimen` — The numeral rules in use · `OrnamentSpecimen` — The decorative devices and the budget, counted on the Creature Archive · `ShapeSpecimen` — The shape vocabulary, the Button's two shapes and the radius roles · `TypeRamp` — Every type style, by role · `TypeSpecimen` — The type ramp in use
-- **Standards**: `StateCombinationSpecimen` — Several states on one thing, resolved
-- **Patterns**: `PatternFeedback` — Whether a change, an effect or a cost works for the player or against them
-- **Page Archetypes**: `ScreenArchive` (showcase page) — The showcase for ArchetypeArchive: the Creature Archive · `ScreenOverview` (showcase page) — The showcase for ArchetypeInformation: the Character Overview
+- **Shell**: `GameShell` — The screen frame (`shell/game-shell/`) · `TopBar` — The top bar (`shell/top-bar/`) · `NavRail` — The main navigation (`shell/nav-rail/`) · `Stage` — The scene backdrop (`shell/stage/`) · `Page` — The information screen frame (`components/page/`) · `Folio` — The detail panel (`components/folio/`) · `Chronicle` — Chat and the game log (`shell/chronicle/`) · `KeyHints` — The keyboard shortcut hints (`components/key-hints/`) · `Activity` — The current action (`shell/activity/`) · `Objective` — The pinned quest (`shell/objective/`)
+- **Components · Actions & input**: `TabStrip` — The tabs (`primitives/tab-strip/`) · `Button` — The command button (`primitives/button/`) · `SearchField` — Search with suggestions (`components/search-field/`)
+- **Components · Containers**: `PageHeader` — The information screen heading (`components/page-header/`) · `Banner` — The headline block (`components/banner/`) · `Panel` — The content box (`components/panel/`) · `Notice` — The persistent notice (`components/notice/`)
+- **Components · Data**: `StatFigure` — The headline number (`components/stat-figure/`) · `Ledger` — The labelled value list (`components/ledger/`) · `Meter` — The progress bar (`primitives/meter/`) · `Track` — The milestone track (`components/track/`) · `StatTile` — The compact stat (`components/stat-tile/`) · `Delta` — The stat change (`components/delta/`) · `Num` — A number with its unit (`primitives/num/`)
+- **Game Components · Character**: `LevelPlate` — The level display (`game/level-plate/`) · `ProfileIdentity` — Who a player is (`game/profile-identity/`) · `Sigil` — The hex stat badge (`game/sigil/`) · `Constellation` — The stat star chart (`game/constellation/`) · `JourneyCard` — The next-step guide (`game/journey-card/`) · `Emblem` — The attribute sign (`game/emblem/`)
+- **Game Components · Items & economy**: `LoadoutSlot` — An Essence loadout slot (`game/loadout-slot/`) · `ItemLink` — An item named in text (`game/item-link/`) · `ItemSlot` — The item frame (`game/item-slot/`) · `CurrencyPill` — The currency amount (`game/currency-pill/`)
+- **Components · Lists & labels**: `EntryList` — The browsable name list (`components/entry-list/`) · `ListRow` — The list row (`components/list/`) · `Tag` — The status label (`primitives/tag/`) · `Presence` — The online status (`game/presence/`)
+- **Components · Type & ornament**: `Heading` — The titles (`primitives/heading/`) · `SectionRule` — The dividers (`primitives/section-rule/`) · `Icon` — The game's icon set (`primitives/icon/`) · `Key` — The key cap (`primitives/key/`)

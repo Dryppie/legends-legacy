@@ -1,0 +1,51 @@
+/* ---------- List and ListRow ---------- */
+.lg-list { list-style: none; margin: 0; padding: 0; display: grid; column-gap: var(--lg-gap); align-content: start; }
+.lg-listrow {
+  position: relative; display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center;
+  min-height: var(--lg-row); padding: var(--lg-cell-y) var(--lg-list-pad, var(--lg-cell-x));
+  color: var(--lg-ink);
+  font-size: var(--lg-row-text); line-height: var(--lg-row-leading);
+  --lg-rarity: var(--lg-line-strong);
+}
+/* The hairline between rows sits inside the row, so a row is exactly its density's height. */
+.lg-listrow + .lg-listrow::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--lg-border-hairline); background: var(--lg-line); pointer-events: none; }
+/* Row rhythm (Foundations · Lines): separators (the default), zebra or spacing alone, never two at once. Zebra sits under hover and selection. */
+.lg-list--zebra > .lg-listrow::before, .lg-list--spacing > .lg-listrow::before { content: none; }
+.lg-list--zebra > :where(.lg-listrow:nth-child(even)) { background: var(--lg-row-stripe); }
+/* A row with a thumbnail lets the thumbnail fill it: 4px above and below, so the row keeps its height (40 + 8 = 48, 32 + 8 = 40, 24 + 8 = 32). */
+.lg-listrow:has(> .lg-listrow__thumb) { padding-block: var(--lg-stack-xs); }
+.lg-listrow__thumb {
+  display: grid; place-items: center; width: var(--lg-thumb); height: var(--lg-thumb); overflow: hidden;
+  border-radius: var(--lg-radius-control); background: var(--lg-ground-deep); box-shadow: inset 0 0 0 var(--lg-border-hairline) var(--lg-rarity); color: var(--lg-ink-muted);
+}
+.lg-listrow__thumb .lg-icon { width: var(--lg-icon); height: var(--lg-icon); }
+.lg-listrow__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.lg-listrow__main { display: flex; flex-wrap: var(--lg-meta-wrap); align-items: baseline; column-gap: var(--lg-inline-sm); min-width: 0; overflow: hidden; }
+.lg-listrow__name { flex: 0 0 auto; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--lg-font-display); font-size: var(--lg-text-name-row); line-height: var(--lg-leading-name-row); color: var(--lg-rarity-ink, var(--lg-ink)); }
+.lg-listrow__code { flex: none; font-size: var(--lg-text-code); line-height: var(--lg-leading-code); font-weight: 700; letter-spacing: var(--lg-tracking-code); color: var(--lg-rarity-ink, var(--lg-ink-muted)); }
+.lg-listrow__tags { position: relative; z-index: var(--lg-z-raised); flex: none; display: inline-flex; gap: var(--lg-inline-xs); align-self: center; }
+.lg-listrow__meta { flex: 0 100 var(--lg-meta-basis); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+.lg-listrow__qty, .lg-listrow__value { justify-self: end; text-align: right; white-space: nowrap;
+  font-family: var(--lg-font-numeral); font-size: var(--lg-row-num); line-height: var(--lg-row-num-leading); font-weight: 600; }
+.lg-listrow__qty { color: var(--lg-ink-muted); }
+.lg-listrow__trail { position: relative; z-index: var(--lg-z-raised); justify-self: end; display: inline-flex; align-items: center; gap: var(--lg-inline-sm); }
+/* The name is the row's button; its hit area covers the row, and the ring is drawn on the whole row. */
+.lg-listrow__hit { flex: 0 0 auto; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; display: inline-flex; }
+.lg-listrow__hit::after { content: ""; position: absolute; inset: 0; }
+.lg-listrow__hit:focus-visible { outline: 2px solid transparent; }
+.lg-listrow:has(.lg-listrow__hit:focus-visible) { outline: 2px solid transparent; }
+.lg-listrow:has(.lg-listrow__hit):hover { background: var(--lg-surface-raised); }
+.lg-listrow:has(.lg-listrow__hit:focus-visible) { box-shadow: var(--lg-focus-ring); }
+/* Selection is a shape — an ink bar and the raised wash — so it is right in item contexts, where rarity owns hue. */
+.lg-listrow.is-selected { background: var(--lg-surface-raised); box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink); }
+.lg-listrow.is-selected:has(.lg-listrow__hit:focus-visible) { box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink), var(--lg-focus-ring); }
+.lg-listrow.is-muted .lg-listrow__name, .lg-listrow.is-muted .lg-listrow__value { color: var(--lg-ink-muted); }
+.lg-listrow--common { --lg-rarity: var(--lg-rarity-common); --lg-rarity-ink: var(--lg-rarity-common); }
+.lg-listrow--uncommon { --lg-rarity: var(--lg-rarity-uncommon); --lg-rarity-ink: var(--lg-rarity-uncommon); }
+.lg-listrow--rare { --lg-rarity: var(--lg-rarity-rare); --lg-rarity-ink: var(--lg-rarity-rare); }
+.lg-listrow--epic { --lg-rarity: var(--lg-rarity-epic); --lg-rarity-ink: var(--lg-rarity-epic); }
+.lg-listrow--unique { --lg-rarity: var(--lg-rarity-unique); --lg-rarity-ink: var(--lg-rarity-unique); }
+.lg-listrow--legendary { --lg-rarity: var(--lg-rarity-legendary); --lg-rarity-ink: var(--lg-rarity-legendary); }
+.lg-listrow--legacy { --lg-rarity: var(--lg-rarity-legacy); --lg-rarity-ink: var(--lg-rarity-legacy); }

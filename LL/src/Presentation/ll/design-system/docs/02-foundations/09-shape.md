@@ -1,6 +1,6 @@
 # Foundations · Shape
 
-Square and engraved, with a little rounding only where the hand touches. Grimoire uses a few shapes, and each one means one thing: a hexagon is a sigil, a diamond is a milestone or where you are, a square is a slot for an item, and a circle is presence. Everything else is a rectangle. ShapeSpecimen shows the vocabulary, the retired ✦ marker, the Button as a pill beside the engraved rectangle, and the radius roles.
+Square and engraved, with a little rounding only where the hand touches. Grimoire uses a few shapes, and each one means one thing: a hexagon is a sigil, a diamond is a milestone or where you are, a square is a slot for an item, and a circle is presence. Everything else is a rectangle.
 
 ## Rules
 
@@ -66,7 +66,7 @@ Three signs sit beside the shapes. They are glyphs and pictures, not shapes, and
 
 ## The Button: pill or engraved rectangle
 
-The Button was a full pill, and so were the inputs, the key caps, the CurrencyPills and the Meters. A pill is the default control of any rounded app, and beside Grimoire's square Panels, square Folio and gilt frames it read as borrowed. The Button was drawn both ways in three dense moments from the game: a row of Arena opponents with a Challenge button each, a Folio with its one solid action, and a dialog footer (ShapeSpecimen).
+The Button was a full pill, and so were the inputs, the key caps, the CurrencyPills and the Meters. A pill is the default control of any rounded app, and beside Grimoire's square Panels, square Folio and gilt frames it read as borrowed. The Button was drawn both ways in three dense moments from the game: a row of Arena opponents with a Challenge button each, a Folio with its one solid action, and a dialog footer.
 
 | | A · The pill | B · The engraved rectangle |
 | --- | --- | --- |
@@ -78,7 +78,7 @@ The Button was a full pill, and so were the inputs, the key caps, the CurrencyPi
 
 **Chosen: B, the engraved rectangle (D-064).** Inputs, key caps, tabs, clickable CurrencyPills and count badges take the same corner, so a SearchField's input and its Search button match. The side padding drops from `cell-x` + 8px to `cell-x` + 4px.
 
-**The chamfer was considered and deferred.** It is the most engraved look of the three: a bevelled corner, like a cut brass plate. But `clip-path` cuts off the edge and the focus ring. The CSS `corner-shape: bevel` draws the chamfer properly, but only in Chromium browsers; Firefox and Safari do not support it yet, so players on those browsers would see a rounded corner instead. Revisit when they ship it. ShapeSpecimen draws the chamfer beside the other two.
+**The chamfer was considered and deferred.** It is the most engraved look of the three: a bevelled corner, like a cut brass plate. But `clip-path` cuts off the edge and the focus ring. The CSS `corner-shape: bevel` draws the chamfer properly, but only in Chromium browsers; Firefox and Safari do not support it yet, so players on those browsers would see a rounded corner instead. Revisit when they ship it.
 
 ## Tokens used
 

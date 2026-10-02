@@ -1,0 +1,16 @@
+/* ---------- ItemLink ---------- */
+.lg-itemlink {
+  display: inline; margin: 0; padding: 0; border: 0; background: none;
+  font: inherit; font-style: normal; font-weight: 600;
+  color: var(--lg-rarity-ink, var(--lg-ink));
+}
+button.lg-itemlink { cursor: pointer; }
+button.lg-itemlink:hover { text-decoration: underline; text-underline-offset: 2px; }
+button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
+.lg-itemlink--common { --lg-rarity-ink: var(--lg-rarity-common); }
+.lg-itemlink--uncommon { --lg-rarity-ink: var(--lg-rarity-uncommon); }
+.lg-itemlink--rare { --lg-rarity-ink: var(--lg-rarity-rare); }
+.lg-itemlink--epic { --lg-rarity-ink: var(--lg-rarity-epic); }
+.lg-itemlink--unique { --lg-rarity-ink: var(--lg-rarity-unique); }
+.lg-itemlink--legendary { --lg-rarity-ink: var(--lg-rarity-legendary); }
+.lg-itemlink--legacy { --lg-rarity-ink: var(--lg-rarity-legacy); }

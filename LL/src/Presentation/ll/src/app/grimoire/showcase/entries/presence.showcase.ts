@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgPresenceComponent } from '../../../shared/components/grimoire';
+import { LgPresenceComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -48,6 +48,6 @@ export const PRESENCE_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The online status.',
   covers: ['LgPresenceComponent'],
-  readme: 'design-system/components/Presence/README.md',
+  readme: 'src/app/grimoire/game/presence/README.md',
   component: PresenceShowcaseComponent,
 };

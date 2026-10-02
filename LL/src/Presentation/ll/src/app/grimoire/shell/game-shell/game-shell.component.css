@@ -1,0 +1,136 @@
+/* ---------- GameShell ---------- */
+/* The host is the size container; the shell grid inside it answers the container queries. */
+.lg-shellhost { container: lg-shell / inline-size; width: 100%; height: 100vh; max-width: var(--lg-shell-max); margin: 0 auto; }
+.lg-shell {
+  --lg-chat-col: var(--lg-chronicle-width);
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--lg-rail-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: "rail main" "rail main";
+  width: 100%; height: 100%;
+  background: var(--lg-ground); overflow: hidden;
+}
+.lg-shell.has-folio { grid-template-columns: var(--lg-rail-width) minmax(0, 1fr) var(--lg-folio-width); grid-template-areas: "rail main folio" "rail main folio"; }
+/* The frame's backdrop (D-107): a picture at Level 0 behind the rail, the stage and the docked Chronicle — the game's
+   textured backdrop. The regions over it take Level 1's translucent surface (D-102); a Page shows it (D-101). */
+.lg-shell.has-backdrop { background: var(--lg-ground) var(--lg-shell-backdrop) center / cover no-repeat; }
+.lg-shell.has-backdrop .lg-shell__chronicle--docked .lg-chronicle { background: var(--lg-surface); }
+/* A legacy region (D-108): content inside the shell that isn't built with Grimoire — a screen that hasn't migrated yet.
+   Grimoire's inherited type and colour stop here; the host sets --lg-legacy-* to its own body values, and its own
+   element styles restart inside (they stop again at any .lg-root within). It fills the stage below the TopBar. */
+.lg-legacy {
+  position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  padding-top: var(--lg-topbar-height);
+  color: var(--lg-legacy-ink, inherit); font-family: var(--lg-legacy-font, inherit); font-size: var(--lg-legacy-size, inherit);
+  line-height: var(--lg-legacy-leading, inherit); font-weight: var(--lg-legacy-weight, inherit); font-variant-numeric: normal;
+}
+.lg-shell__rail { grid-area: rail; min-height: 0; position: relative; z-index: var(--lg-z-chrome); }
+/* The compact rail the player chose (D-113): the column narrows to the icons. */
+.lg-shell:has(> .lg-shell__rail .lg-rail--compact) { --lg-rail-width: var(--lg-rail-width-compact); }
+.lg-shell__main { grid-area: main; position: relative; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+.lg-shell__top { position: absolute; top: 0; left: 0; right: 0; z-index: var(--lg-z-chrome); }
+.lg-shell__stage { position: relative; min-height: 0; }
+.lg-shell__hints { position: absolute; right: var(--lg-space-6); bottom: var(--lg-space-4); z-index: var(--lg-z-chrome); }
+/* The frame lines up (D-115). Over a backdrop the TopBar is a band of the frame, like the rail: Level 1's surface with a
+   hairline under it, and the stage starts below it, so nothing scrolls beneath a translucent band (D-102). */
+.lg-shell.has-backdrop .lg-shell__main { grid-template-rows: auto minmax(0, 1fr); }
+.lg-shell.has-backdrop .lg-shell__top { position: relative; grid-row: 1; }
+.lg-shell.has-backdrop .lg-shell__stage { grid-row: 2; --lg-topbar-height: 0px; }
+.lg-shell.has-backdrop .lg-shell__main:not(:has(> .lg-shell__top)) .lg-shell__stage { grid-row: 1 / -1; }
+.lg-shell.has-backdrop .lg-topbar { background: var(--lg-surface); border-bottom: var(--lg-border-hairline) solid var(--lg-line); }
+@container lg-shell (min-width: 60rem) {
+  /* The TopBar's insets are the Page's gutter: the title starts and the currencies end where the screen's edges are. */
+  .lg-shell .lg-topbar { padding-inline: var(--lg-section-md); }
+  /* The docked Chronicle's head is as tall as the TopBar, so their rules are one line across the frame. */
+  .lg-shell.is-chat-docked:not(.has-folio) .lg-shell__chronicle--docked .lg-chronicle { border-top: 0; }
+  .lg-shell.is-chat-docked:not(.has-folio) .lg-shell__chronicle--docked .lg-chronicle__head { min-height: var(--lg-topbar-height); }
+  /* A rail's header starts level with the TopBar's controls (a control is 1.875rem tall, centred in the band)… */
+  .lg-shell .lg-rail:has(> .lg-rail__header) { padding-top: calc((var(--lg-topbar-height) - 1.875rem) / 2); }
+  /* …and a compact rail's header is a band of the same height, its Activity centred in it, the same rule under it. */
+  .lg-shell .lg-rail--compact:has(> .lg-rail__header) { padding-top: 0; }
+  .lg-shell .lg-rail--compact > .lg-rail__header {
+    align-self: stretch; justify-content: center; min-height: var(--lg-topbar-height); padding-left: 0;
+    margin-inline: calc(-1 * var(--lg-space-1));
+  }
+  .lg-shell.has-backdrop .lg-rail--compact > .lg-rail__header { border-bottom: var(--lg-border-hairline) solid var(--lg-line); }
+}
+.lg-shell__folio { grid-area: folio; min-height: 0; position: relative; z-index: var(--lg-z-folio); }
+.lg-shell__scrim { display: none; }
+
+/* Chat layout "docked" — the Chronicle lives in the right-hand side.
+   960–1535px: it shares the Folio's column, under the Folio. */
+.lg-shell__chronicle--docked { grid-area: chat; position: relative; z-index: var(--lg-z-folio); min-width: 0; min-height: 0; container-type: inline-size; }
+.lg-shell__chronicle--docked .lg-chronicle { border-left: var(--lg-border-hairline) solid var(--lg-line); }
+.lg-shell.is-chat-docked { grid-template-columns: var(--lg-rail-width) minmax(0, 1fr) var(--lg-chat-col); grid-template-areas: "rail main chat" "rail main chat"; }
+.lg-shell.is-chat-docked.has-folio { grid-template-columns: var(--lg-rail-width) minmax(0, 1fr) var(--lg-folio-width); grid-template-areas: "rail main folio" "rail main chat"; }
+/* When the Chronicle owns a full column, it fills it and its collapse chevron points right.
+   (Custom properties carry the shell's container query into the Chronicle, which is its own container.) */
+.lg-shell__chronicle--docked .lg-chronicle { height: var(--lg-chat-h, min(var(--lg-chronicle-height), 45vh)); }
+.lg-shell__chronicle--docked .lg-chronicle__toggle:not(.lg-chronicle__tall):not(.lg-chronicle__grip) svg { transform: rotate(var(--lg-chat-rot, 0deg)); }
+.lg-shell.is-chat-docked:not(.has-folio) { --lg-chat-h: 100%; --lg-chat-rot: -90deg; }
+.lg-shell.is-chat-docked.is-chat-collapsed:not(.has-folio) { --lg-chat-col: var(--lg-chronicle-strip); }
+/* ≥1536px: its own column at the far right, collapsing to a vertical strip. */
+@container lg-shell (min-width: 96rem) {
+  .lg-shell.is-chat-docked.has-folio { grid-template-columns: var(--lg-rail-width) minmax(0, 1fr) var(--lg-folio-width) var(--lg-chat-col); grid-template-areas: "rail main folio chat" "rail main folio chat"; --lg-chat-h: 100%; --lg-chat-rot: -90deg; }
+  .lg-shell.is-chat-docked.is-chat-collapsed { --lg-chat-col: var(--lg-chronicle-strip); }
+}
+
+/* Chat layout "floating" — a drawer over the stage, draggable by its grip. */
+.lg-shell__chronicle--floating {
+  position: absolute; z-index: var(--lg-z-chat-float);
+  right: var(--lg-space-6); bottom: var(--lg-space-6);
+  width: min(var(--lg-chronicle-float-width), calc(100% - 2 * var(--lg-space-6)));
+}
+.lg-shell.has-folio .lg-shell__chronicle--floating { right: calc(var(--lg-folio-width) + var(--lg-space-6)); }
+.lg-shell__chronicle--floating.is-placed { left: var(--lg-float-left); bottom: var(--lg-float-bottom); right: auto; }
+.lg-shell.is-chat-floating .lg-shell__hints { right: auto; left: var(--lg-space-6); }
+@container lg-shell (min-width: 96rem) {
+  .lg-shell__chronicle--floating { width: var(--lg-chronicle-float-width-wide); }
+}
+
+@container lg-shell (max-width: 59.9375rem) {
+  .lg-shell, .lg-shell.has-folio, .lg-shell.is-chat-docked, .lg-shell.is-chat-docked.has-folio {
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto;
+    grid-template-areas: "main" "folio" "chat"; height: auto; min-height: 100vh; overflow: visible;
+  }
+  .lg-shell__rail {
+    position: fixed; top: 0; bottom: 0; left: 0; width: min(84vw, 18.75rem); z-index: var(--lg-z-overlay);
+    /* Spatial: the drawer slides in from its edge over duration-base on ease-enter and leaves over duration-fast on
+       ease-exit. Once it has left it is hidden, so nothing off-screen can take focus. */
+    transform: translateX(-102%); visibility: hidden; box-shadow: var(--lg-shadow-panel);
+    transition: transform var(--lg-duration-fast) var(--lg-ease-exit), visibility 0s linear var(--lg-duration-fast);
+  }
+  .lg-shell.is-rail-open .lg-shell__rail {
+    transform: none; visibility: visible;
+    transition: transform var(--lg-duration-base) var(--lg-ease-enter), visibility 0s;
+  }
+  .lg-shell__scrim {
+    display: block; position: fixed; inset: 0; z-index: calc(var(--lg-z-overlay) - 1); background: var(--lg-scrim);
+    opacity: 0; pointer-events: none; transition: opacity var(--lg-duration-fast) var(--lg-ease-exit);
+  }
+  .lg-shell.is-rail-open .lg-shell__scrim { opacity: 1; pointer-events: auto; transition: opacity var(--lg-duration-base) var(--lg-ease-enter); }
+  .lg-shell__main { min-height: 72vh; }
+  .lg-shell .lg-topbar__menu { display: grid; }
+  .lg-shell__hints { display: none; }
+  .lg-shell__folio .lg-folio { height: auto; }
+  /* Both layouts become the bottom dock on small screens. */
+  .lg-shell__chronicle--docked, .lg-shell__chronicle--floating, .lg-shell__chronicle--floating.is-placed {
+    grid-area: chat; position: sticky; bottom: 0; left: auto; right: auto; width: auto; z-index: var(--lg-z-chat-float);
+  }
+  .lg-shell__chronicle--floating .lg-chronicle { border-radius: 0; border-width: var(--lg-border-hairline) 0 0; height: var(--lg-chronicle-height); }
+  .lg-shell__chronicle--floating .lg-chronicle.is-collapsed { height: var(--lg-chronicle-collapsed); }
+  .lg-shell__chronicle .lg-chronicle__grip, .lg-shell__chronicle .lg-chronicle__tall { display: none; }
+  .lg-shell__chronicle--docked .lg-chronicle { border-left: 0; }
+  .lg-shell.is-chat-docked, .lg-shell.is-chat-docked:not(.has-folio) { --lg-chat-h: var(--lg-chronicle-height); --lg-chat-rot: 0deg; }
+  /* The dock sits over content here, so it is opaque even over the frame's backdrop (D-102). */
+  .lg-shell.has-backdrop .lg-shell__chronicle .lg-chronicle, .lg-shell__chronicle .lg-chronicle { background: var(--lg-surface-solid); }
+}
+/* Under 40rem the TopBar's "now" thing takes a second row (D-114): the stage below makes room for it. */
+@container lg-shell (max-width: 40rem) {
+  .lg-shell__main:has(.lg-topbar__center) { --lg-topbar-height: 6rem; }
+  .lg-shell .lg-topbar:has(.lg-topbar__center) { position: relative; align-items: flex-start; padding-top: calc((3.5rem - var(--lg-topbar-row, 2.25rem)) / 2); }
+  .lg-shell .lg-topbar:has(.lg-topbar__center) > :not(.lg-topbar__center) { min-height: var(--lg-topbar-row, 2.25rem); display: flex; align-items: center; }
+  .lg-shell .lg-topbar__center { position: absolute; left: var(--lg-space-3); right: var(--lg-space-3); bottom: var(--lg-space-1); justify-content: stretch; }
+  .lg-shell .lg-topbar__center > * { max-width: none; }
+}

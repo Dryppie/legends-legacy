@@ -1,0 +1,37 @@
+/* ---------- EntryList ---------- */
+.lg-entrylist { list-style: none; margin: 0; padding: var(--lg-space-2) var(--lg-space-1); display: grid; align-content: start; gap: 2px; max-height: 100%; overflow-y: auto; scrollbar-width: none; }
+.lg-entrylist--fade {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 3.5rem, #000 calc(100% - 3.5rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 3.5rem, #000 calc(100% - 3.5rem), transparent 100%);
+  padding: 2.5rem var(--lg-space-1);
+}
+.lg-entrylist__item {
+  position: relative;
+  display: flex; align-items: center; gap: var(--lg-space-3);
+  min-width: 0; min-height: var(--lg-row); padding: 0 var(--lg-cell-x);
+  font-family: var(--lg-list-family); font-weight: var(--lg-list-weight);
+  font-size: var(--lg-list-name); line-height: var(--lg-list-name-leading); letter-spacing: var(--lg-tracking-display);
+  color: var(--lg-ink-muted); cursor: pointer;
+  border-radius: var(--lg-radius-container);
+  isolation: isolate;
+}
+/* Feedback: the hover wash is the neutral surface-raised layer, fading over duration-fast; the name turns ink at once. */
+.lg-entrylist__item::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  background: var(--lg-surface-raised); opacity: 0; transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
+}
+.lg-entrylist__item:hover { color: var(--lg-ink); }
+.lg-entrylist__item:hover::after { opacity: 1; }
+.lg-entrylist__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-entrylist__item .lg-tag { flex: none; }
+.lg-entrylist__item.is-active { color: var(--lg-list-active); }
+/* Selection is the selection edge — a 2px bar inside the entry's start — and the raised wash (Foundations · Lines, Shape). */
+.lg-entrylist__item.is-active { background: var(--lg-surface-raised); }
+.lg-entrylist__item.is-active::before {
+  content: ""; position: absolute; left: 0; top: 0.375rem; bottom: 0.375rem; width: var(--lg-border-emphasis); background: var(--lg-arcana-glow);
+}
+/* Locked (Standards · States): the name in ink-disabled with a Locked Tag; in the focus order, no hover, never selected. */
+.lg-entrylist__item.is-locked { color: var(--lg-ink-disabled); cursor: not-allowed; }
+.lg-entrylist__item.is-locked:hover { color: var(--lg-ink-disabled); }
+.lg-entrylist__item.is-locked::after { display: none; }
+.lg-entrylist__item:focus-visible { box-shadow: var(--lg-focus-ring); outline: 2px solid transparent; }

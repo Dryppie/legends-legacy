@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgDeltaComponent,
-  LgDeltaDirection,
-  LgDeltaPolarity,
-} from '../../../shared/components/grimoire';
+import { LgDeltaComponent, LgDeltaDirection, LgDeltaPolarity } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -182,6 +178,6 @@ export const DELTA_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The stat change.',
   covers: ['LgDeltaComponent'],
-  readme: 'design-system/components/Delta/README.md',
+  readme: 'src/app/grimoire/components/delta/README.md',
   component: DeltaShowcaseComponent,
 };

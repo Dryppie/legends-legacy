@@ -1,0 +1,71 @@
+/* ---------- Button ---------- */
+.lg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lg-space-2);
+  height: var(--lg-control);
+  padding: 0 max(0.375rem, calc(var(--lg-cell-x) - var(--lg-space-1))) 0 calc(var(--lg-cell-x) + var(--lg-space-1));
+  border: var(--lg-border-hairline) solid var(--lg-line-strong);
+  border-radius: var(--lg-radius-control);
+  background: var(--lg-surface);
+  color: var(--lg-ink);
+  font-family: var(--lg-btn-family);
+  font-weight: var(--lg-btn-weight);
+  font-size: var(--lg-control-text);
+  line-height: var(--lg-control-leading);
+  letter-spacing: var(--lg-btn-track);
+  text-transform: var(--lg-btn-transform);
+  cursor: pointer;
+  position: relative; isolation: isolate;
+  /* Feedback (Foundations · Motion): the press goes down at once and comes back over duration-fast. */
+  transition: transform var(--lg-duration-fast) var(--lg-ease-standard);
+}
+/* Hover is a layer that fades over duration-fast: the gilt edge on framed buttons, the 6% brighter fill on solid.
+   The layer sits behind the label, so only its opacity changes. */
+.lg-btn::after {
+  content: ""; position: absolute; inset: calc(-1 * var(--lg-border-hairline)); z-index: -1; pointer-events: none;
+  border-radius: inherit; opacity: 0;
+  transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
+}
+.lg-btn--primary::after, .lg-btn--danger::after { border: var(--lg-border-hairline) solid var(--lg-gilt); }
+.lg-btn--solid::after { background: var(--lg-gilt); filter: brightness(1.06); }
+.lg-btn--primary:hover:not(:disabled, .is-blocked, .is-pending)::after, .lg-btn--danger:hover:not(:disabled, .is-blocked, .is-pending)::after, .lg-btn--solid:hover:not(:disabled, .is-blocked, .is-pending)::after { opacity: 1; }
+.lg-btn:active:not(:disabled, .is-blocked, .is-pending) { transform: translateY(var(--lg-border-hairline)); transition-duration: var(--lg-duration-instant); }
+/* An engraved rectangle (D-064): corners of radius-control, and less side room than the pill it replaced. */
+.lg-btn:not(:has(.lg-key)) { padding: 0 calc(var(--lg-cell-x) + var(--lg-space-1)); }
+.lg-btn .lg-icon { width: var(--lg-icon); height: var(--lg-icon); }
+/* An explicit size pins the Button to one density: md reads Standard, sm reads Compact. Without one it follows its region. */
+.lg-btn--md { --lg-control: var(--lg-control-standard); --lg-cell-x: var(--lg-inset-md); --lg-icon: var(--lg-icon-standard); --lg-control-text: var(--lg-text-body); --lg-control-leading: var(--lg-leading-body-row); }
+.lg-btn--solid { background: var(--lg-gilt); border-color: var(--lg-gilt); color: var(--lg-on-gilt); }
+.lg-btn--solid .lg-key { background: transparent; border-color: currentColor; color: inherit; }
+.lg-btn--quiet { background: transparent; border-color: transparent; color: var(--lg-ink-muted); }
+.lg-btn--quiet:hover:not(:disabled, .is-blocked, .is-pending) { color: var(--lg-ink); }
+.lg-btn--danger { background: transparent; border-color: var(--lg-danger); color: var(--lg-danger); }
+.lg-btn--sm { --lg-control: var(--lg-control-compact); --lg-cell-x: var(--lg-inset-sm); --lg-icon: var(--lg-icon-compact); --lg-control-text: var(--lg-text-body-compact); --lg-control-leading: var(--lg-leading-body-compact-row); }
+.lg-btn:disabled { color: var(--lg-ink-disabled); border-color: var(--lg-line); cursor: not-allowed; background: transparent; }
+/* Blocked (Standards · States · Availability): unavailable, locked, restricted, insufficient or cooling down. It stays
+   focusable and readable — the label in ink-muted on a line edge — takes no hover layer and no press, and gives its
+   reason in the reason tip. Locked has a dashed edge: a gate the player will pass. */
+.lg-btn.is-blocked { color: var(--lg-ink-muted); border-color: var(--lg-line); background: transparent; cursor: not-allowed; }
+.lg-btn--quiet.is-blocked, .lg-btn--link.is-blocked { border-color: transparent; }
+.lg-btn.is-locked:not(.lg-btn--quiet, .lg-btn--link) { border-style: dashed; }
+.lg-btn.is-blocked .lg-key { color: inherit; border-color: var(--lg-line); }
+/* Pending (Standards · States · Data): the progressive label, and no second press. Both labels share one cell, so the
+   Button keeps the width of the longer. */
+.lg-btn.is-pending { cursor: progress; }
+.lg-btn__labels { display: inline-grid; }
+.lg-btn__labels > .lg-btn__label { grid-area: 1 / 1; text-align: center; }
+.lg-btn__label.is-off { visibility: hidden; }
+.lg-btn:focus-visible { box-shadow: var(--lg-focus-ring); }
+
+/* ---------- Button: link ---------- */
+.lg-btn--link {
+  height: auto; padding: 0; border: 0; border-radius: var(--lg-radius-control); background: none;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row); font-weight: 600; letter-spacing: var(--lg-tracking-button); text-transform: none;
+  color: var(--lg-gilt);
+}
+.lg-btn--link:not(:has(.lg-key)) { padding: 0; }
+/* A link Button standing on its own keeps the 24px minimum target (WCAG 2.5.8). */
+.lg-btn--link { min-height: var(--lg-target-min); }
+.lg-btn--link:hover:not(:disabled, .is-blocked, .is-pending) { box-shadow: none; text-decoration: underline; text-underline-offset: 3px; }

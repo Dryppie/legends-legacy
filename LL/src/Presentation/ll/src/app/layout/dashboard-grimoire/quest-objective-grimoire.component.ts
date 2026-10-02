@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { QuestTrackerComponent } from '../dashboard/quest-tracker/quest-tracker.component';
 import { DialogFocusDirective } from '../../shared/directives/dialog-focus/dialog-focus.directive';
-import { LgButtonComponent, LgObjectiveComponent, LgSlotDirective } from '../../shared/components/grimoire';
+import { LgButtonComponent, LgObjectiveComponent, LgSlotDirective } from '@grimoire';
 
 /**
  * The pinned quest in the TopBar's centre (D-110): the old header tracker's data and behaviour as an Objective, its

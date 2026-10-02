@@ -12,15 +12,15 @@ These instructions apply to the LegendsLegacy Angular frontend in this directory
 
 ## Design System: Grimoire
 
-Grimoire is the game's design system. Its source of truth is `design-system/`, its rules are in `design-system/AGENTS.md`, and the game uses it through the `lg-*` Angular components. Those components are its only implementation (D-127): the React reference in `design-system/components/` (`bundle.js`, the previews, the catalog) and the parity check are frozen until step 10 of `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root) removes them, so never edit them. That plan sets the order of work for the Angular design system.
+Grimoire is the game's design system. Its rules, token values, icon drawings and docs are in `design-system/`, its working rules in `design-system/AGENTS.md`, and the game uses it through the `lg-*` Angular components in `src/app/grimoire/`, imported as `@grimoire`. Those components are its only implementation (D-127, D-133). `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root) sets the order of work for the Angular design system.
 
 - New screens, and screens being migrated, use Grimoire:
-  - the `lg-*` components in `src/app/shared/components/grimoire/` (import `LG_GRIMOIRE`, or single components);
-  - the Grimoire tokens and styles in `src/styles/grimoire/`.
+  - the `lg-*` components from `@grimoire` (import `LG_GRIMOIRE`, or single components; never a path inside `src/app/grimoire/`);
+  - the Grimoire tokens (`var(--lg-…)` in CSS, `tokens.ts` in script) and styles, which load by themselves.
 - Take every colour, type style, space, radius, shadow and state from Grimoire. Feature code adds no hex colours, pixel font sizes or shadows of its own.
 - Gold (`gilt`) is not a general accent. It has four jobs (Foundations · Colour, D-015). Selection, ready and new are `arcana`, and ordinary values are `ink`. Draw states with the channels and words in Standards · States.
-- Read `design-system/AGENTS.md` before changing a Grimoire token, an `lg-*` component or `src/styles/grimoire/`. Those changes go through the design system: docs, tokens, port and decision log together.
-- To see what a component looks like and how it behaves, open the dev-only showcase: `npm start`, then `http://localhost:4200/grimoire` (`src/app/grimoire/showcase/README.md`, D-129). The catalog in `design-system/catalog/` shows the frozen React reference; don't use it.
+- Read `design-system/AGENTS.md` before changing a Grimoire token, an `lg-*` component or anything else in `src/app/grimoire/`. Those changes go through the design system: docs, tokens, the part's README, styles, stories and spec, and the decision log together.
+- To see what a component looks like and how it behaves, open the dev-only showcase: `npm start`, then `http://localhost:4200/grimoire` (`src/app/grimoire/showcase/README.md`, D-129). Its guidelines are the `README.md` beside its code.
 - Migrate a screen on purpose, as its own task. Don't half-convert a screen while fixing something else in it.
 - A migrated screen lives beside the legacy one in a folder whose name ends in `-grimoire` (`character-overview-grimoire/`) until it replaces it, behind the one Settings → Interface → New look switch (`GrimoirePreviewPreferenceService.newLook()`), which every migrated screen and the Grimoire shell read: one switch for the whole new look, never one per screen. Its host carries the `lg-root` class, its Page takes `flow` (D-097), and its own styles use Grimoire tokens only. The legacy element styles in `src/styles.css` stop at `lg-root` (D-100), and the build leaves rem in a `-grimoire` folder alone. `CHARACTER_OVERVIEW_GRIMOIRE_PLAN.md` at the repository root is the worked example.
 
@@ -39,7 +39,7 @@ These rules apply only when you change a screen that has not moved to Grimoire.
 - Use `bg-black/30` or similar low-opacity dark fills inside textured panels when content needs grouping.
 - Use danger/success colors intentionally for outcomes, warnings, validation, healing, damage, and destructive actions.
 - Avoid bright modern gradients, glassy SaaS cards, oversized hero layouts, decorative blobs, and one-off palettes.
-- Legacy sizes are written for the old 14px root. The root now follows Grimoire (16px at Default, D-096), and the build multiplies every rem outside `src/styles/grimoire/` and `-grimoire` screen folders by 0.875 (`scripts/postcss-legacy-rem`). Keep writing legacy rem values and Tailwind sizes as before; don't convert them by hand. A rem set outside a stylesheet — an inline `style`, or code that turns rem into pixels from the root's font size — is not rebased, so multiply it by 0.875 yourself.
+- Legacy sizes are written for the old 14px root. The root now follows Grimoire (16px at Default, D-096), and the build multiplies every rem outside `src/app/grimoire/` and `-grimoire` screen folders by 0.875 (`scripts/postcss-legacy-rem`). Keep writing legacy rem values and Tailwind sizes as before; don't convert them by hand. A rem set outside a stylesheet — an inline `style`, or code that turns rem into pixels from the root's font size — is not rebased, so multiply it by 0.875 yourself.
 - Keep rounded corners modest. Existing panels commonly use `rounded`, `rounded-md`, or `rounded-lg`.
 - Respect the global font setup: headings use the Marcellus feel through `h1`, `h2`, and `h3`; body text uses Poppins. Use the Tailwind text sizes already in the app.
 
@@ -118,6 +118,6 @@ These rules apply only when you change a screen that has not moved to Grimoire.
 
 - Check the result against the right system: Grimoire screens against the design system's rules and states; legacy screens against the legacy styling above.
 - Verify responsive behavior in the markup: desktop can use fixed panes, mobile should stack and scroll.
-- If you changed anything in `design-system/`, `src/styles/grimoire/` or `src/app/shared/components/grimoire/`, run `node design-system/scripts/check.mjs` from this directory, `npm run build:development` (it compiles every `lg-*` component through the showcase) and `npm run grimoire:snapshots` (every showcase story against its baseline, and axe; D-129). The parity check is retired (D-127).
+- If you changed anything in `design-system/` or `src/app/grimoire/`, run `node design-system/scripts/check.mjs` from this directory, `npm run build:development` (it compiles every `lg-*` component through the showcase), `npm run test:ci` and `npm run grimoire:snapshots` (every showcase story against its baseline, and axe; D-129).
 - Run a lightweight static check such as `git diff --check` unless the user asked for no commands.
 - Report any commands not run.

@@ -9,7 +9,7 @@ import {
   lgFormatRange,
   lgFormatTimes,
   lgFormatUnit,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -120,6 +120,6 @@ export const NUM_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'A number set by the numeral rules.',
   covers: ['LgNumComponent'],
-  readme: 'design-system/docs/02-foundations/03-numerals.md',
+  readme: 'src/app/grimoire/primitives/num/README.md',
   component: NumShowcaseComponent,
 };

@@ -1,0 +1,7 @@
+/* ---------- Delta (D-026) ---------- */
+/* Glyph + sign + value, coloured by polarity: better or worse for the player, never by the sign. */
+.lg-delta { display: inline-flex; align-items: baseline; gap: 0.3em; font-weight: 700; font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.lg-delta__glyph { font-size: 0.72em; line-height: var(--lg-leading-mark); }
+.lg-delta--better { color: var(--lg-delta-better); }
+.lg-delta--worse { color: var(--lg-delta-worse); }
+.lg-delta--neutral { color: var(--lg-delta-neutral); }

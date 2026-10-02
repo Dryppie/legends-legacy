@@ -6,14 +6,14 @@
 }
 .qo-panel {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--lg-space-3);
   text-align: left;
 }
 .qo-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--lg-space-4);
 }
 .qo-titles {
   display: grid;
@@ -23,26 +23,26 @@
 .qo-kicker,
 .qo-chain {
   margin: 0;
-  font-size: var(--text-label);
-  line-height: var(--leading-label);
+  font-size: var(--lg-text-label);
+  line-height: var(--lg-leading-label);
   font-weight: 600;
-  letter-spacing: var(--tracking-caps);
+  letter-spacing: var(--lg-tracking-caps);
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: var(--lg-ink-muted);
 }
 .qo-title {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-name-row);
-  line-height: var(--leading-name-row);
-  color: var(--ink);
+  font-family: var(--lg-font-display);
+  font-size: var(--lg-text-name-row);
+  line-height: var(--lg-leading-name-row);
+  color: var(--lg-ink);
 }
 .qo-count,
 .qo-note {
   margin: 0;
-  font-size: var(--text-caption);
-  line-height: var(--leading-caption);
-  color: var(--ink-muted);
+  font-size: var(--lg-text-caption);
+  line-height: var(--lg-leading-caption);
+  color: var(--lg-ink-muted);
 }
 .qo-count {
   flex: none;
@@ -50,7 +50,7 @@
 }
 .qo-list {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--lg-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -59,27 +59,27 @@
   display: grid;
   grid-template-columns: 1.25rem minmax(0, 1fr) auto;
   align-items: baseline;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-container);
-  background: var(--surface-solid);
-  font-size: var(--text-body-compact);
-  line-height: var(--leading-body-compact);
-  color: var(--ink);
+  gap: var(--lg-space-2);
+  padding: var(--lg-space-2) var(--lg-space-3);
+  border-radius: var(--lg-radius-container);
+  background: var(--lg-surface-solid);
+  font-size: var(--lg-text-body-compact);
+  line-height: var(--lg-leading-body-compact);
+  color: var(--lg-ink);
 }
 .qo-mark {
-  color: var(--ink-muted);
+  color: var(--lg-ink-muted);
   font-variant-numeric: tabular-nums lining-nums;
 }
 .qo-amount {
-  color: var(--ink);
+  color: var(--lg-ink);
   font-variant-numeric: tabular-nums lining-nums;
 }
 .qo-item.is-done {
-  color: var(--ink-muted);
+  color: var(--lg-ink-muted);
 }
 .qo-item.is-done .qo-mark {
-  color: var(--ink);
+  color: var(--lg-ink);
 }
 .qo-actions {
   display: flex;
@@ -87,7 +87,7 @@
 }
 .qo-error {
   margin: 0;
-  font-size: var(--text-caption);
-  line-height: var(--leading-caption);
-  color: var(--danger);
+  font-size: var(--lg-text-caption);
+  line-height: var(--lg-leading-caption);
+  color: var(--lg-danger);
 }

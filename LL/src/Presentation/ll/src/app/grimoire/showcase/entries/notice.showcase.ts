@@ -3,7 +3,7 @@ import {
   LgButtonComponent,
   LgNoticeComponent,
   LgSlotDirective,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -116,6 +116,6 @@ export const NOTICE_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The persistent notice.',
   covers: ['LgNoticeComponent'],
-  readme: 'design-system/components/Notice/README.md',
+  readme: 'src/app/grimoire/components/notice/README.md',
   component: NoticeShowcaseComponent,
 };

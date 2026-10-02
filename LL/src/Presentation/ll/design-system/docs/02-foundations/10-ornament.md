@@ -1,6 +1,6 @@
 # Foundations · Ornament
 
-Ornament marks the one special surface on a screen and the break between lore and effects, and nothing else. It never carries data, never takes the place of a value, and never reaches a table, a list or a control. The fantasy comes from type, lore and art; decoration is kept on a budget, counted per screen. OrnamentSpecimen shows every device, and the Creature Archive twice — within the budget, and over it — each counted by `LL.ornament.audit`.
+Ornament marks the one special surface on a screen and the break between lore and effects, and nothing else. It never carries data, never takes the place of a value, and never reaches a table, a list or a control. The fantasy comes from type, lore and art; decoration is kept on a budget, counted per screen.
 
 ## Rules
 
@@ -14,7 +14,7 @@ Ornament marks the one special surface on a screen and the break between lore an
 **Should**
 - Count the devices on every new screen and compare them with the budget before it ships (Audit, below).
 - Spend the budget where the player's attention should go: the Folio on a stage screen, the Banner on an information screen.
-- Tag any decorative element a screen adds outside the components with `data-ornament` (`frame`, `rule`, `corner`, `texture`), so the audit counts it.
+- Tag any decorative element a screen adds outside the components with `data-ornament` (`frame`, `rule`, `corner`, `texture`), so the audit finds it (Audit, below).
 
 **Never**
 - Use parchment, leather, wood, metal, stone or any other material texture.
@@ -99,12 +99,13 @@ In Grimoire, light is drawn flat. Four states are lit, each with its own mark, a
 A quick check for any screen, before it ships and whenever it changes:
 
 1. **Take the screen at its widest,** with its busiest content and any dialog it can open.
-2. **Count the devices:** ornamented framed surfaces, ornament rules, corner sets, surfaces with grain (and whether each bears art), vignettes, and anything that is lit or moves by itself.
+2. **Count the devices:** ornamented framed surfaces, ornament rules, corner sets, surfaces with grain (and whether each bears art), vignettes, anything tagged `data-ornament`, and anything that is lit or moves by itself.
 3. **Check the zones:** is any device inside a table, list, input, toast, menu, dense Panel or everyday dialog?
 4. **Compare with the budget.** Any count over, any device in a forbidden zone, any glow outside the four lit states, any texture: cut it.
-5. **Or run the audit in the console:** `LL.ornament.audit(document.querySelector('.lg-shell'))`. It returns the counts, the budget and a list of what is over.
 
-`LL.ornament.audit` counts what it can see: the components' own devices, anything tagged `data-ornament`, blurred coloured shadows (halos) and looping animations other than the two Motion allows. It cannot see ornament painted into an image, so the eye check still stands. The components also warn in the console, on a screen inside a GameShell, when a Folio and a Banner meet, when a third ornament rule appears, or when an ornament rule lands in a forbidden zone.
+The components check part of this themselves. On a screen inside a GameShell they warn in the console when a Folio and a Banner meet, when a third ornament rule appears, or when an ornament rule lands in a forbidden zone (`lgCheckFramed` and `lgCheckOrnamentRule`, against `LG_ORNAMENT_BUDGET` and `lgForbiddenZone`). Nothing checks grain, halos, loops or ornament painted into an image, so the eye check still stands.
+
+The Creature Archive, counted within the budget and over it:
 
 | Creature Archive | Within the budget | Over-decorated |
 | --- | --- | --- |

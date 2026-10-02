@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgPageComponent,
-  LgPanelComponent,
-  LgStageComponent,
-} from '../../../shared/components/grimoire';
+import { LgPageComponent, LgPanelComponent, LgStageComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -102,6 +98,6 @@ export const STAGE_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'The scene backdrop.',
   covers: ['LgStageComponent'],
-  readme: 'design-system/components/Stage/README.md',
+  readme: 'src/app/grimoire/shell/stage/README.md',
   component: StageShowcaseComponent,
 };

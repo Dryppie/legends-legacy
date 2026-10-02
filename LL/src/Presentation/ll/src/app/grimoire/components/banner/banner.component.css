@@ -1,0 +1,22 @@
+/* ---------- Banner (art-backed band) ---------- */
+/* One edge: the double gilt frame, as on the Folio. No outer border (Foundations · Lines). */
+.lg-banner { position: relative; isolation: isolate; overflow: hidden; background: var(--lg-ground-deep); }
+.lg-banner__art { position: absolute; inset: -0.75rem; z-index: -2; background-size: cover; filter: sepia(0.3) saturate(0.85) brightness(0.55) blur(1.5px); }
+.lg-banner__veil {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, var(--lg-ground-deep) 0%, color-mix(in srgb, var(--lg-ground-deep) 78%, transparent) 42%, color-mix(in srgb, var(--lg-ground-deep) 40%, transparent) 100%),
+    linear-gradient(to top, color-mix(in srgb, var(--lg-ground-deep) 70%, transparent), transparent 60%);
+}
+.lg-banner__veil::after {
+  content: ""; position: absolute; inset: 0; opacity: var(--lg-grain-opacity); mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.lg-banner__frame { position: absolute; inset: 0.5rem; pointer-events: none; border: var(--lg-border-hairline) solid var(--lg-gilt); opacity: 0.28; }
+.lg-banner__frame::after { content: ""; position: absolute; inset: 0.25rem; border: var(--lg-border-hairline) solid var(--lg-gilt); opacity: 0.6; }
+.lg-banner .lg-folio__corner { width: 2.25rem; height: 2.25rem; }
+/* The figures sit beside the identity whenever both fit, and drop under it only when they don't (D-122). */
+.lg-banner__body { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--lg-space-6) var(--lg-space-8); padding: var(--lg-space-8) var(--lg-space-8) var(--lg-space-6); }
+.lg-banner__main { flex: 1 1 24rem; min-width: 0; text-shadow: var(--lg-shadow-text-art); }
+.lg-banner__aside { flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-space-6) var(--lg-space-8); }
+.lg-banner__footer { position: relative; padding: 0 var(--lg-space-8) var(--lg-space-6); }

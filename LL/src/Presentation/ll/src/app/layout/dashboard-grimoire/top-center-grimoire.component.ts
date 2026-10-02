@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CurrentDungeonComponent } from '../../shared/components/current-dungeon/current-dungeon.component';
 import { CurrentRaidComponent } from '../../shared/components/current-raid/current-raid.component';
-import { LgObjectiveComponent, LgTrackComponent } from '../../shared/components/grimoire';
+import { LgObjectiveComponent, LgTrackComponent } from '@grimoire';
 import { QuestObjectiveGrimoireComponent } from './quest-objective-grimoire.component';
 
 /**
@@ -42,16 +42,16 @@ import { QuestObjectiveGrimoireComponent } from './quest-objective-grimoire.comp
       display: block;
       width: 100%;
       min-width: 0;
-      border-radius: var(--radius-control);
+      border-radius: var(--lg-radius-control);
       color: inherit;
       text-decoration: none;
     }
     .tc-run:hover {
-      background: var(--surface-raised);
+      background: var(--lg-surface-raised);
     }
     .tc-run:focus-visible {
       outline: 2px solid transparent;
-      box-shadow: var(--focus-ring);
+      box-shadow: var(--lg-focus-ring);
     }
   `,
 })

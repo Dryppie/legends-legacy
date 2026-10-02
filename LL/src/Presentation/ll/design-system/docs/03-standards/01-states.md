@@ -25,7 +25,7 @@ Families combine. An entry can be selected (Interaction), locked (Availability) 
 - Give every blocking state its reason. Unavailable says why. Locked says how it unlocks. Restricted says who may. Insufficient says what is missing and how much. On cooldown says when.
 - Keep blocked controls focusable. Use `aria-disabled="true"`, not `disabled`, and make the reason the control's description (`aria-describedby`). A press shows and announces the reason instead of acting (The reason tip).
 - Draw the focus ring over every other state, unchanged.
-- Announce a state change the player caused, or one that blocks what they are doing, with `LL.announce` (Announcements).
+- Announce a state change the player caused, or one that blocks what they are doing, with `lgAnnounce` (Announcements).
 - List each component's states on its page, by the names on this page.
 
 **Should**
@@ -69,7 +69,7 @@ The reason tip is how a blocked control explains itself.
 - **One at a time.** Opening one closes any other.
 - **When it isn't needed.** A reason already printed beside the control (a LoadoutSlot's "Unlocks at level 20") is the description itself, and no tip repeats it.
 
-Button, EntryList, NavRail, Sigil and ItemSlot build it in. `LL.why` gives it to anything else.
+Button, EntryList, NavRail, Sigil and ItemSlot build it in. The `[lgWhy]` directive, or `LgWhyController`, gives it to anything else.
 
 ## Interaction
 
@@ -239,7 +239,7 @@ Standards · State combinations holds these rules (D-094): which channel each ki
 
 ## Announcements
 
-`LL.announce` speaks a state change once, politely unless marked, and never repeats the same words within five seconds.
+`lgAnnounce` speaks a state change once, politely unless marked, and never repeats the same words within five seconds.
 
 | Change | Announce | How | Words |
 | --- | --- | --- | --- |
@@ -334,11 +334,11 @@ Labels show their states only as words, and Values show theirs only as figures, 
 | --- | --- |
 | `opacity-unowned` | 0.4. The art of a thing the player doesn't own. Art only, never text |
 | `opacity-drag-origin` | 0.4. The place a dragged thing left, which keeps its room while the copy moves |
-| `LL.states` | Every state on this page with its family, word, Tag tone and what screen readers hear. Tag's `state` reads it, so a state's words are the same everywhere |
-| `LL.topState(states)` | The one Tag a row shows when several states apply, by the Tag order in Standards · State combinations |
-| `LL.why(id, reason, options)` | The reason tip for any focusable element. It returns the props to spread on the element and the description node to render beside it. `options.word` is the state word ("Locked"); `options.tone: 'warning'` is for a shortfall |
-| `LL.format.duration(seconds)` | "4m 12s", in two units at most (Foundations · Numerals) |
-| `LL.format.spokenDuration(seconds)` | "4 minutes 12 seconds", for screen readers |
+| `LG_STATES` | Every state on this page with its family, word, Tag tone and what screen readers hear. Tag's `state` reads it, so a state's words are the same everywhere |
+| `lgTopState(states)` | The one Tag a row shows when several states apply, by the Tag order in Standards · State combinations (`LG_TAG_ORDER`) |
+| `[lgWhy]="{ reason, word, tone }"`, `[lgWhyId]` | The reason tip for any focusable element. It sets `aria-disabled` and `aria-describedby` on the element; render the description beside it, with the `lgWhyId` id. `word` is the state word ("Locked"); `tone: 'warning'` is for a shortfall. `LgWhyController` does the same inside a component |
+| `lgFormatDuration(seconds)` | "4m 12s", in two units at most (Foundations · Numerals) |
+| `lgSpokenDuration(seconds)` | "4 minutes 12 seconds", for screen readers |
 | Button `state`, `reason`, `shortfall`, `remaining`, `pendingLabel` | `unavailable`, `locked`, `restricted`, `insufficient`, `cooldown` or `pending`. `shortfall` writes "Short by 250 Cinders"; `remaining` writes "Ready in 4m 12s" |
 | Tag `state` | Any state with a word, such as `locked`, `claimable`, `equipped` or `expiring` |
 | ItemSlot `state`, `reason`, `favourite`, `ready` | A blocked state with its reason printed under the name, Not owned, Undiscovered, or a word state that leads the meta line; Equipped and Attuned also take the in-use square; `favourite` is the ribbon marker, or its word until it is drawn; `ready` is the attention diamond (Standards · State combinations) |

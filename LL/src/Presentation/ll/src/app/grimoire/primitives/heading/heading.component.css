@@ -1,0 +1,14 @@
+/* ---------- Heading ---------- */
+.lg-heading {
+  margin: 0;
+  font-family: var(--lg-title-family);
+  font-weight: var(--lg-title-weight);
+  font-style: var(--lg-title-style);
+  letter-spacing: var(--lg-title-track);
+  color: var(--lg-ink);
+}
+.lg-heading--folio { font-size: var(--lg-text-title-xl); line-height: var(--lg-leading-title-xl); }
+.lg-heading--screen { font-size: var(--lg-text-title-lg); line-height: var(--lg-leading-title-lg); }
+.lg-heading--section { font-size: var(--lg-text-title-md); line-height: var(--lg-leading-title-md); }
+.lg-heading--subsection { font-size: var(--lg-text-title-sm); line-height: var(--lg-leading-title-sm); }
+.lg-heading__sub { color: var(--lg-ink-muted); font-weight: 400; }

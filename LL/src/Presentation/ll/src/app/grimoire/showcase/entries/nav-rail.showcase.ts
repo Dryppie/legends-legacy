@@ -6,7 +6,7 @@ import {
   LgNavRailComponent,
   LgNavSection,
   LgSlotDirective,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -421,6 +421,6 @@ export const NAV_RAIL_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'The main navigation.',
   covers: ['LgNavRailComponent'],
-  readme: 'design-system/components/NavRail/README.md',
+  readme: 'src/app/grimoire/shell/nav-rail/README.md',
   component: NavRailShowcaseComponent,
 };

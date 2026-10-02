@@ -5,7 +5,7 @@ import {
   LgPanelComponent,
   LgSlotDirective,
   LgTagComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -130,6 +130,6 @@ export const PANEL_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The content box.',
   covers: ['LgPanelComponent'],
-  readme: 'design-system/components/Panel/README.md',
+  readme: 'src/app/grimoire/components/panel/README.md',
   component: PanelShowcaseComponent,
 };

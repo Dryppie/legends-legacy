@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgKeyHint,
-  LgKeyHintsComponent,
-} from '../../../shared/components/grimoire';
+import { LgKeyHint, LgKeyHintsComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -54,6 +51,6 @@ export const KEY_HINTS_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The keyboard shortcut hints.',
   covers: ['LgKeyHintsComponent'],
-  readme: 'design-system/components/KeyHints/README.md',
+  readme: 'src/app/grimoire/components/key-hints/README.md',
   component: KeyHintsShowcaseComponent,
 };

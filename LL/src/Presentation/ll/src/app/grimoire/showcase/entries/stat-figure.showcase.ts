@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgStatFigureComponent } from '../../../shared/components/grimoire';
+import { LgStatFigureComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -77,6 +77,6 @@ export const STAT_FIGURE_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The headline number.',
   covers: ['LgStatFigureComponent'],
-  readme: 'design-system/components/StatFigure/README.md',
+  readme: 'src/app/grimoire/components/stat-figure/README.md',
   component: StatFigureShowcaseComponent,
 };

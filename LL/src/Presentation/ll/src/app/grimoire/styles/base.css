@@ -1,0 +1,193 @@
+/* Grimoire's base: what every part relies on and no part owns — the type roles, density, the reading-font setting,
+   reduced motion, the root text and box model, focus and the elevation levels. Tokens come from tokens/tokens.css.
+   The role variables below name which face each role uses, so the reading-font setting can swap them all at once. */
+
+:root {
+  --lg-title-family: var(--lg-font-display);
+  --lg-title-weight: 400;
+  --lg-title-style: normal;
+  --lg-title-track: var(--lg-tracking-display);
+  --lg-num-family: var(--lg-font-display);
+  --lg-num-weight: 400;
+  --lg-list-family: var(--lg-font-display);
+  --lg-list-weight: 400;
+  --lg-list-active: var(--lg-ink);
+  --lg-tab-family: var(--lg-font-display);
+  --lg-tab-weight: 400;
+  --lg-tab-track: var(--lg-tracking-caps);
+  --lg-btn-family: var(--lg-font-ui);
+  --lg-btn-weight: 600;
+  --lg-btn-transform: none;
+  --lg-btn-track: var(--lg-tracking-button);
+  /* The current location on the rail (D-118): the game's own wash — gilt fading toward the item's end over a faint lift. */
+  --lg-rail-active-bg: linear-gradient(90deg, color-mix(in srgb, var(--lg-gilt) 18%, transparent), color-mix(in srgb, var(--lg-gilt) 4.5%, transparent) 68%, transparent), color-mix(in srgb, var(--lg-ink) 3.5%, transparent);
+  --lg-rail-active-ink: var(--lg-ink);
+  --lg-rail-active-family: var(--lg-font-ui);
+  --lg-emblem-ink: var(--lg-gilt);
+  --lg-ring-ink: var(--lg-ink);
+  --lg-ring-opacity: 0.3;
+  --lg-grain-opacity: 0.14;
+  --lg-frame-ink: var(--lg-gilt);
+  --lg-frame-opacity: 0.32;
+}
+
+/* ---------- Space & Density ----------
+   Semantic spacing aliases the 4px scale: change a step, not an alias. tokens.json lists the same values for the viewer. */
+:root {
+  --lg-inset-xs: var(--lg-space-1); --lg-inset-sm: var(--lg-space-2); --lg-inset-md: var(--lg-space-3); --lg-inset-lg: var(--lg-space-4); --lg-inset-xl: var(--lg-space-6);
+  --lg-stack-xs: var(--lg-space-1); --lg-stack-sm: var(--lg-space-2); --lg-stack-md: var(--lg-space-3); --lg-stack-lg: var(--lg-space-4);
+  --lg-inline-xs: var(--lg-space-1); --lg-inline-sm: var(--lg-space-2); --lg-inline-md: var(--lg-space-3); --lg-inline-lg: var(--lg-space-4);
+  --lg-section-sm: var(--lg-space-6); --lg-section-md: var(--lg-space-8); --lg-section-lg: var(--lg-space-12);
+}
+/* Density modes. data-density on any container sets the mode for everything inside it; the Folio and a list's inspector are Comfortable.
+   Components read only these --lg-* variables, so a mode is one attribute. */
+.lg-folio, .lg-split__inspector, [data-density="comfortable"] {
+  --lg-row: var(--lg-row-comfortable); --lg-control: var(--lg-control-comfortable); --lg-icon: var(--lg-icon-comfortable); --lg-thumb: var(--lg-thumb-comfortable);
+  --lg-cell-y: var(--lg-stack-md); --lg-cell-x: var(--lg-inset-lg); --lg-gap: var(--lg-inline-lg);
+  --lg-inset: var(--lg-inset-xl); --lg-inset-inner: var(--lg-inset-lg);
+  --lg-row-text: var(--lg-text-body); --lg-row-leading: var(--lg-leading-body-row);
+  --lg-row-num: var(--lg-text-numeral-row); --lg-row-num-leading: var(--lg-leading-numeral-row);
+  --lg-control-text: var(--lg-text-body); --lg-control-leading: var(--lg-leading-body-row);
+  --lg-list-name: var(--lg-text-name-header); --lg-list-name-leading: var(--lg-leading-name-header);
+  --lg-meta-basis: 100%; --lg-meta-wrap: wrap;
+}
+:root, [data-density="standard"] {
+  --lg-row: var(--lg-row-standard); --lg-control: var(--lg-control-standard); --lg-icon: var(--lg-icon-standard); --lg-thumb: var(--lg-thumb-standard);
+  --lg-cell-y: var(--lg-stack-sm); --lg-cell-x: var(--lg-inset-md); --lg-gap: var(--lg-inline-md);
+  --lg-inset: var(--lg-inset-lg); --lg-inset-inner: var(--lg-inset-md);
+  --lg-row-text: var(--lg-text-body-compact); --lg-row-leading: var(--lg-leading-body-compact-row);
+  --lg-row-num: var(--lg-text-numeral-row); --lg-row-num-leading: var(--lg-leading-numeral-row);
+  --lg-control-text: var(--lg-text-body); --lg-control-leading: var(--lg-leading-body-row);
+  --lg-list-name: var(--lg-text-name-header); --lg-list-name-leading: var(--lg-leading-name-header);
+  --lg-meta-basis: auto; --lg-meta-wrap: nowrap;
+}
+[data-density="compact"] {
+  --lg-row: var(--lg-row-compact); --lg-control: var(--lg-control-compact); --lg-icon: var(--lg-icon-compact); --lg-thumb: var(--lg-thumb-compact);
+  --lg-cell-y: var(--lg-stack-xs); --lg-cell-x: var(--lg-inset-sm); --lg-gap: var(--lg-inline-sm);
+  --lg-inset: var(--lg-inset-md); --lg-inset-inner: var(--lg-inset-sm);
+  --lg-row-text: var(--lg-text-body-compact); --lg-row-leading: var(--lg-leading-body-compact-row);
+  --lg-row-num: var(--lg-text-numeral-compact); --lg-row-num-leading: var(--lg-leading-numeral-compact);
+  --lg-control-text: var(--lg-text-body-compact); --lg-control-leading: var(--lg-leading-body-compact-row);
+  --lg-list-name: var(--lg-text-name-row); --lg-list-name-leading: var(--lg-leading-name-row);
+  --lg-meta-basis: auto; --lg-meta-wrap: nowrap;
+}
+/* The "Compact lists" setting, switched off: every Compact region reads Standard. Text, focus rings and the Chronicle are untouched. */
+:root[data-compact-lists="off"] [data-density="compact"] {
+  --lg-row: var(--lg-row-standard); --lg-control: var(--lg-control-standard); --lg-icon: var(--lg-icon-standard); --lg-thumb: var(--lg-thumb-standard);
+  --lg-cell-y: var(--lg-stack-sm); --lg-cell-x: var(--lg-inset-md); --lg-gap: var(--lg-inline-md);
+  --lg-inset: var(--lg-inset-lg); --lg-inset-inner: var(--lg-inset-md);
+  --lg-row-num: var(--lg-text-numeral-row); --lg-row-num-leading: var(--lg-leading-numeral-row);
+  --lg-control-text: var(--lg-text-body); --lg-control-leading: var(--lg-leading-body-row);
+  --lg-list-name: var(--lg-text-name-header); --lg-list-name-leading: var(--lg-leading-name-header);
+  --lg-meta-basis: auto; --lg-meta-wrap: nowrap;
+}
+
+/* ---------- Accessibility (Foundations · Accessibility) ----------
+   Text scaling. Every size in the system is rem, so the root's font size scales the whole interface: 100% (the default,
+   and whatever text size the player's browser asks for), 115% and 130%. The game's reading-size setting sets
+   data-reading-font-size on the root, with the same two values it uses today. Those root rules are in src/styles.css,
+   not here: this stylesheet loads after the first render (D-096), and the root must be right before it. */
+
+/* The game's reading-font setting: readable (Atkinson Hyperlegible) or system maps every role to that face. */
+:root[data-reading-font="readable"] {
+  --lg-font-display: var(--lg-font-readable);
+  --lg-font-lore: var(--lg-font-readable);
+  --lg-font-ui: var(--lg-font-readable);
+  --lg-font-numeral: var(--lg-font-readable);
+  --lg-title-style: normal;
+}
+:root[data-reading-font="system"] {
+  --lg-font-display: var(--lg-font-system);
+  --lg-font-lore: var(--lg-font-system);
+  --lg-font-ui: var(--lg-font-system);
+  --lg-font-numeral: var(--lg-font-system);
+  --lg-title-style: normal;
+}
+
+/* Reduced motion: every transition and animation in the system collapses to its end state, as the game does today
+   (Foundations · Motion). The tokens keep their values; the durations are overridden here. data-motion="reduced" on any
+   ancestor does the same for its subtree — an in-game setting, or the reduced twin in a specimen. */
+@media (prefers-reduced-motion: reduce) {
+  :where(.lg-root, .lg-shell, .lg-why), :where(.lg-root, .lg-shell, .lg-why) *, :where(.lg-root, .lg-shell) *::before, :where(.lg-root, .lg-shell) *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; transition-delay: 0s !important; scroll-behavior: auto !important;
+  }
+}
+:where([data-motion="reduced"]), :where([data-motion="reduced"]) *, :where([data-motion="reduced"]) *::before, :where([data-motion="reduced"]) *::after {
+  animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important; transition-delay: 0s !important; scroll-behavior: auto !important;
+}
+
+/* ---------- Motion (Foundations · Motion) ----------
+   Only transform and opacity animate; visibility may step at the start or end of a fade so what has gone cannot be
+   focused or clicked. Colours, edges and fills change at once — a wash that should fade is a layer whose opacity fades.
+   Arriving: lg-enter rises space-2 and fades in. A reveal (a reward or result) takes duration-reveal; a drawer's body
+   duration-base. */
+@keyframes lg-enter { from { opacity: 0; transform: translateY(var(--lg-enter-y, var(--lg-space-2))); } }
+.lg-reveal { animation: lg-enter var(--lg-duration-reveal) var(--lg-ease-enter) both; }
+/* Content a toggle opens, and anything else that arrives in place: rises in over duration-base. */
+.lg-enter { animation: lg-enter var(--lg-duration-base) var(--lg-ease-enter) both; }
+/* The live-update mark: a value that changed by itself is marked by a flat changed wash, on at once, held for
+   duration-reveal (lgLive() sets is-changed), then faded over duration-slow. Under reduced motion it goes at once.
+   The wash is absolutely placed, so the value and its neighbours never move. */
+.lg-live { position: relative; isolation: isolate; }
+.lg-live::before {
+  content: ""; position: absolute; inset: -0.0625rem -0.25rem; z-index: -1; pointer-events: none;
+  border-radius: var(--lg-radius-control); background: var(--lg-changed); opacity: 0;
+  transition: opacity var(--lg-duration-slow) var(--lg-ease-standard);
+}
+.lg-live.is-changed::before { opacity: 1; transition: none; }
+
+/* Forced colours (Windows contrast themes) drop box-shadows, so focus and selection fall back to system outlines. */
+@media (forced-colors: active) {
+  :where(.lg-root, .lg-shell) :focus-visible,
+  .lg-listrow:has(.lg-listrow__hit:focus-visible) { outline: 2px solid CanvasText !important; outline-offset: 2px; }
+  .lg-listrow.is-selected, .lg-entrylist__item.is-active { outline: 1px solid Highlight; outline-offset: -1px; }
+  .lg-meter__fill, .lg-tabs__tab.is-active::after, .lg-tabs--primary .lg-tabs__tab.is-active::after { forced-color-adjust: none; }
+  /* The attention diamond and the in-use square are solid shapes: keep them, in the text colour. */
+  .lg-attention::before, .lg-slot__mark--inuse::before { forced-color-adjust: none; background: CanvasText; }
+}
+
+/* ---------- base ---------- */
+.lg-root, .lg-shell {
+  color: var(--lg-ink);
+  font-family: var(--lg-font-ui);
+  font-size: var(--lg-text-body);
+  line-height: var(--lg-leading-body);
+  /* Tabular lining figures everywhere: numbers align in columns, stack in lists and update without shifting.
+     Only the isolated headline figure and the level opt into proportional figures (Foundations · Numerals). */
+  font-variant-numeric: tabular-nums lining-nums;
+}
+/* A unit after its number: smaller and muted (84 HP/5s, 12s, 24.8%). */
+.lg-unit { font-family: var(--lg-font-ui); font-size: var(--lg-text-caption); font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--lg-ink-muted); }
+.lg-root *, .lg-shell * { box-sizing: border-box; }
+/* Form controls reset fonts in the browser's own styles; keep the root's tabular figures in them. */
+.lg-root :where(button, input, select, textarea), .lg-shell :where(button, input, select, textarea) { font-variant-numeric: inherit; }
+.lg-icon { display: inline-block; flex: none; vertical-align: middle; width: var(--lg-icon-size, var(--lg-icon-md)); height: var(--lg-icon-size, var(--lg-icon-md)); }
+/* The skip link: the first tab stop in the shell, shown when focused (WCAG 2.4.1). */
+.lg-skip { position: absolute; left: var(--lg-space-3); top: var(--lg-space-3); z-index: var(--lg-z-overlay); padding: var(--lg-space-2) var(--lg-space-4); border-radius: var(--lg-radius-control); background: var(--lg-surface-raised); color: var(--lg-ink); font-weight: 600; text-decoration: none; transform: translateY(-200%); }
+.lg-skip:focus-visible { transform: none; outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+/* Visually hidden, still read by screen readers. */
+.lg-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+:where(.lg-btn, .lg-tabs__tab, .lg-rail__item, .lg-entrylist__item, .lg-slot, .lg-currency, .lg-topbar__menu, button.lg-sigil):focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--lg-focus-ring);
+}
+/* In every density the full ring shows: a focused row rises above its neighbours, which would otherwise paint over it. */
+:where(.lg-ledger__row, .lg-entrylist__item, .lg-listrow, .lg-tabs__tab):focus-visible, .lg-listrow:has(.lg-listrow__hit:focus-visible) { z-index: var(--lg-z-raised); }
+
+/* ---------- Surfaces: elevation levels (Foundations · Surfaces & Layering) ----------
+   Level 0 ground · Level 1 surface · Level 2 surface-raised · Level 3 folio · then the scrim. Levels are not a lightness ramp:
+   folio is darker than surface-raised, and height reads from shadow and edge. Every surface is opaque; nothing blurs what lies behind it.
+   In flow, a surface steps up at most one level from what it sits on; floating layers take their own level over anything. */
+.lg-level-0 { background: var(--lg-ground); }
+/* Level 1 in flow has no edge: its fill and the space around it carry the region (Foundations · Lines). */
+.lg-level-1 { background: var(--lg-surface); border-radius: var(--lg-radius-container); }
+.lg-level-1--float { background: var(--lg-surface-solid); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float); box-shadow: var(--lg-shadow-float); }
+.lg-level-2 { background: var(--lg-surface-raised); }
+.lg-level-2--float { background: var(--lg-surface-raised); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float); box-shadow: var(--lg-shadow-float); }
+.lg-level-3 { background: var(--lg-folio); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-container); box-shadow: var(--lg-shadow-panel); }
+/* The scrim dims what lies under a dialog, a confirmation, the rail drawer or the tour. It is flat: no blur, no gradient.
+   It sits one below the layer it serves: z-index: calc(var(--lg-z-modal) - 1). */
+.lg-scrim { position: absolute; inset: 0; background: var(--lg-scrim); }

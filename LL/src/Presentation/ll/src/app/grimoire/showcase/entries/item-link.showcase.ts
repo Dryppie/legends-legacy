@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgItemLinkComponent } from '../../../shared/components/grimoire';
+import { LgItemLinkComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -79,6 +79,6 @@ export const ITEM_LINK_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'An item named in text.',
   covers: ['LgItemLinkComponent'],
-  readme: 'design-system/components/ItemLink/README.md',
+  readme: 'src/app/grimoire/game/item-link/README.md',
   component: ItemLinkShowcaseComponent,
 };

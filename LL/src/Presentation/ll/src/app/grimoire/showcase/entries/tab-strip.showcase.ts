@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  LgTab,
-  LgTabStripComponent,
-} from '../../../shared/components/grimoire';
+import { LgTab, LgTabStripComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -165,6 +162,6 @@ export const TAB_STRIP_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'The tabs.',
   covers: ['LgTabStripComponent'],
-  readme: 'design-system/components/TabStrip/README.md',
+  readme: 'src/app/grimoire/primitives/tab-strip/README.md',
   component: TabStripShowcaseComponent,
 };

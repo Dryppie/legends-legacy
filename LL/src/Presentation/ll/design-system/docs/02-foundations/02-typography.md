@@ -1,6 +1,6 @@
 # Foundations · Typography
 
-Four families, each with one job, and a ramp of 27 styles organised by role. The ramp is sized for a data-dense RPG: it covers order books, attribute tables and loadouts as well as titles and lore. Every size, line height and letter-spacing in the component styles reads a token from this ramp. How numbers are formatted is in Foundations · Numerals. TypeRamp shows every style, and TypeSpecimen shows the styles in use on a Cinder Bazaar screen and a Combat Attributes table.
+Four families, each with one job, and a ramp of 27 styles organised by role. The ramp is sized for a data-dense RPG: it covers order books, attribute tables and loadouts as well as titles and lore. Every size, line height and letter-spacing in the component styles reads a token from this ramp. How numbers are formatted is in Foundations · Numerals.
 
 ## Rules
 
@@ -192,8 +192,6 @@ Letter-spacing has also moved onto tokens:
 - Titles and header names use `tracking-display`.
 - Every `line-height: 1` now reads `leading-mark`.
 
-The previews read the same tokens.
-
 ## Tokens used
 
 Each style's size and line height are `text-<style>` and `leading-<style>`. There are some exceptions:
@@ -230,8 +228,6 @@ Each style's size and line height are `text-<style>` and `leading-<style>`. Ther
 
 ## Related components
 
-- TypeRamp — every type style
-- TypeSpecimen — the ramp in use
 - Heading — the titles
 - PageHeader — the screen title
 - Button — the command button

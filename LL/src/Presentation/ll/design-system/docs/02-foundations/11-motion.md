@@ -1,6 +1,6 @@
 # Foundations · Motion
 
-Motion is quiet. In a realtime game it has three jobs: confirm what the player did, show what changed, and keep everything else where it was. It never performs. Five durations and three easings, all motion tokens, cover six categories, each with its rules and its reduced-motion alternative. Only `transform` and `opacity` animate, nothing bounces, and only two things may loop. MotionSpecimen plays every category beside its reduced twin.
+Motion is quiet. In a realtime game it has three jobs: confirm what the player did, show what changed, and keep everything else where it was. It never performs. Five durations and three easings, all motion tokens, cover six categories, each with its rules and its reduced-motion alternative. Only `transform` and `opacity` animate, nothing bounces, and only two things may loop.
 
 ## Rules
 
@@ -12,8 +12,8 @@ Motion is quiet. In a realtime game it has three jobs: confirm what the player d
 - Let only an indeterminate progress indicator and live combat playback loop (Loops, below).
 
 **Should**
-- Show a value that changes on screen with `LL.motion.useLive`, and a list that refreshes with `LL.motion.useLiveList`.
-- Run `LL.motion.audit` on every new screen.
+- Show a value that changes on screen with `lgLive()`, and a list that refreshes with the `[lgLiveList]` directive.
+- Check every new screen by the Audit below.
 
 **Never**
 - Bounce, overshoot, spring, wobble or shake.
@@ -44,7 +44,7 @@ Motion is quiet. In a realtime game it has three jobs: confirm what the player d
 
 **Distances.** What arrives in place rises `space-2` (8px) as it fades in; a popover moves `space-1` (4px) into place. A drawer travels its own width from its edge. A press sinks `border-hairline` (1px). A selected Sigil grows to 1.08, and 1.06 on hover. Nothing turns as it moves.
 
-`LL.motion.duration`, `LL.motion.easing` and `LL.motion.ms('reveal')` give the same values to script, read from `tokens.css` when it is loaded.
+Script reads the same values from `LG_DURATION` and `LG_EASING` in `src/app/grimoire/tokens/tokens.ts`, which the token compiler writes from `tokens.json`; `lgMotionMs('reveal')` reads the live `--lg-duration-reveal` when `tokens.css` is loaded.
 
 ## Categories
 
@@ -76,7 +76,7 @@ Motion is quiet. In a realtime game it has three jobs: confirm what the player d
 
 - **A Meter's fill is scaled, never resized.** A step — experience after a fight, a potion — moves over `duration-slow`. A Meter fed by combat playback (`live`) follows each tick over `duration-fast`, so it is never more than a tick behind its number.
 - **The printed value is the truth** and changes at once. The fill catches up.
-- **A number the player caused to change counts** to its new value over `duration-slow` on `ease-standard`: experience and loot totals after combat, the currency after a purchase. `LL.motion.useLive(value, { cause: 'player' })`. A new change mid-count carries on from where the count is.
+- **A number the player caused to change counts** to its new value over `duration-slow` on `ease-standard`: experience and loot totals after combat, the currency after a purchase. `lgLive(() => value, () => ({ cause: 'player' }))`. A new change mid-count carries on from where the count is.
 - **A number that changes by itself never counts.** It changes at once and takes the live mark (below).
 - **A count is a text change, not an animated property.** It runs in tabular figures, inside a width reserved for the widest value, in a fixed format (Foundations · Numerals · Live values), so it never moves a neighbour.
 - **Reduced motion:** the fill and the number change at once. The live mark may note the change.
@@ -99,10 +99,10 @@ Motion is quiet. In a realtime game it has three jobs: confirm what the player d
 
 ### Live-update highlight
 
-- **A value that changed by itself** — a Bazaar price, a roster's status, a guild payout, a bid — takes the `changed` wash behind it: on at once, held for `duration-reveal`, then faded over `duration-slow` on `ease-standard`. `LL.motion.useLive(value)`, or ListRow's `live`.
+- **A value that changed by itself** — a Bazaar price, a roster's status, a guild payout, a bid — takes the `changed` wash behind it: on at once, held for `duration-reveal`, then faded over `duration-slow` on `ease-standard`. `lgLive(() => value)`, or ListRow's `live`.
 - **The mark says that it changed, not whether it helps.** It is not a hover, a selection or a rarity signal. It never loops, and it never repeats while the value is still.
 - **Mark what the player may need to notice.** A value that ticks every second, like combat HP or a timer, is not marked.
-- **Count what the player caused; mark what changed by itself; never both.** `useLive` chooses from `cause`.
+- **Count what the player caused; mark what changed by itself; never both.** `lgLive` chooses from `cause`.
 - **The wash sits outside the value's box,** absolutely placed, so the value and its neighbours never move. `ink` holds 9.21:1 on it and `ink-muted` 4.98:1.
 - **Reduced motion:** the mark shows at once and goes at once after the hold. The brief colour change is the whole of it.
 
@@ -111,7 +111,7 @@ Motion is quiet. In a realtime game it has three jobs: confirm what the player d
 Prices, rosters, bids, chat and combat change while the player watches. **A live update never causes a layout shift, and never moves the control the player is about to click.**
 
 1. **Nothing shifts.** Numbers reserve their width (Foundations · Numerals). New rows go below what the player sees, or wait. A notice arrives as a toast or in a place kept for it, never pushed into the flow above content.
-2. **A list in use is held.** While the pointer is over a list, or focus is inside it, its rows keep their order and values update in place. A row whose item has gone stays where it was, muted, its action disabled ("Sold"). New rows wait behind a count ("2 new listings") in the Panel head, which the player can press. When the player leaves the list, the new order applies. `LL.motion.useLiveList`.
+2. **A list in use is held.** While the pointer is over a list, or focus is inside it, its rows keep their order and values update in place. A row whose item has gone stays where it was, muted, its action disabled ("Sold"). New rows wait behind a count ("2 new listings") in the Panel head, which the player can press. When the player leaves the list, the new order applies. The `[lgLiveList]` directive.
 3. **Selection and scroll stay.** The selection is kept by id. If the selected item leaves, its row stays in place, gone, until the player picks another (`keep`). Rows are keyed by id, never by index, so the scroll position holds.
 4. **The Chronicle keeps its place.** It follows the newest line only while the player is at its foot. Scrolled up, the line they are reading stays put, even as old lines leave the top, and "3 new lines" jumps to the latest.
 5. **Arrivals don't move.** A new row appears at once, without sliding in. A value that changed takes the live mark.
@@ -134,7 +134,7 @@ Two things may loop, and only while what they show is happening. Neither is deco
 | **Indeterminate progress** | A real wait with no measurable progress: searching the Bazaar, joining a raid | `role="progressbar"` with no `aria-valuenow`, named by what is happening ("Searching the Bazaar"). A segment sweeps its track by `transform`, linear, once every 1.2s (twice `duration-reveal`). A wait that can be measured shows a Meter instead | The sweep stops and the track stays empty; the label says what is happening |
 | **Live combat playback** | While a fight runs | Its container carries `data-motion="playback"`. Swings, hits, the swing timer and floating damage move by `transform` and `opacity`; its Meters are `live` | Travel becomes cuts: a hit lands in place, a damage number appears without drifting, the swing timer stops, nothing shakes |
 
-A wait that runs past five seconds says in words what is happening. Combat playback is the activity itself, and an indeterminate indicator is essential while its wait lasts, which is how both meet WCAG 2.2.2 (Foundations · Accessibility). `LL.ornament.audit` and `LL.motion.audit` count every other loop as a fault.
+A wait that runs past five seconds says in words what is happening. Combat playback is the activity itself, and an indeterminate indicator is essential while its wait lasts, which is how both meet WCAG 2.2.2 (Foundations · Accessibility). Every other loop is a fault (Audit, below).
 
 ## Properties
 
@@ -147,7 +147,7 @@ A wait that runs past five seconds says in words what is happening. Combat playb
 
 ## Reduced motion
 
-The game's rule (D-043): under `prefers-reduced-motion: reduce`, every transition and animation in the system ends at once and scrolling is instant. `data-motion="reduced"` on any ancestor does the same for its subtree — for an in-game setting, or a specimen's reduced twin. `LL.motion.reduced(el)` answers for script, and `useLive` stops counting under it.
+The game's rule (D-043): under `prefers-reduced-motion: reduce`, every transition and animation in the system ends at once and scrolling is instant. `data-motion="reduced"` on any ancestor does the same for its subtree — for an in-game setting, or the showcase's reduced-motion option. `lgReducedMotion(el)` answers for script, and `lgLive` stops counting under it.
 
 Reduced motion changes how things move, never what the player learns. States, values, focus and the live mark's colour still arrive, at once. Each category's alternative is in its section above, and in the Categories table.
 
@@ -155,7 +155,7 @@ Reduced motion changes how things move, never what the player learns. States, va
 
 A quick check for any screen, before it ships:
 
-1. **Run `LL.motion.audit(document.querySelector('.lg-shell'))`.** It lists every transition or animation on anything but `transform` and `opacity`, every duration past `duration-reveal`, and every loop but the two allowed.
+1. **Check every transition and animation** on the screen: each is on `transform` or `opacity`, none runs past `duration-reveal`, and nothing loops but the two allowed (Loops, above).
 2. **Watch the screen update** with the pointer resting on a list row: nothing under the pointer may move.
 3. **Turn on reduced motion** and do it again: everything arrives, at once.
 
@@ -194,4 +194,3 @@ A quick check for any screen, before it ships:
 - EntryList — the browsable name list
 - Sigil — the hex stat badge
 - Ledger — the labelled value list
-- MotionSpecimen — every category, beside its reduced twin

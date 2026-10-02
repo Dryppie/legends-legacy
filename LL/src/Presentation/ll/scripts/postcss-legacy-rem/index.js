@@ -6,16 +6,16 @@
  * were written for a 14px root, so this plugin multiplies every rem they declare by 0.875 (14 / 16). Legacy screens keep
  * their size at Default, and come out a little larger than before at Large and Extra large, never smaller.
  *
- * Grimoire's styles are left alone: they are written for the 16px root. That is src/styles/grimoire/, and the own
- * styles of a screen that has moved to Grimoire, which lives in a folder whose name ends in "-grimoire"
- * (character-overview-grimoire/) until it replaces the legacy screen.
+ * Grimoire's styles are left alone: they are written for the 16px root. That is everything under src/app/grimoire/
+ * (tokens, base, every part and the showcase), and the own styles of a screen that has moved to Grimoire, which lives
+ * in a folder whose name ends in "-grimoire" (character-overview-grimoire/) until it replaces the legacy screen.
  * Media and container queries are left alone too: a rem there is the browser's 16px, not the root's, so it never
  * changed. Only declaration values are rewritten.
  *
  * Delete this plugin (and its line in postcss.config.json) when the last legacy screen has moved to Grimoire.
  */
 const FACTOR = 0.875;
-const SKIP = /[\\/]src[\\/]styles[\\/]grimoire[\\/]|-grimoire[\\/][^\\/]+$/;
+const SKIP = /[\\/]src[\\/]app[\\/]grimoire[\\/]|-grimoire[\\/][^\\/]+$/;
 const REM = /(^|[^\w.-])(-?(?:\d+\.?\d*|\.\d+))rem\b/g;
 
 function scale(n) {

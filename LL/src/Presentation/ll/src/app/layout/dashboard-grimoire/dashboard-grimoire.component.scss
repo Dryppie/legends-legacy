@@ -11,20 +11,20 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--stack-sm);
-  padding-top: var(--topbar-height);
+  gap: var(--lg-stack-sm);
+  padding-top: var(--lg-topbar-height);
 }
 .dg-stage ::ng-deep .lg-notice {
   flex: none;
   margin: 0 var(--dg-gutter);
 }
 .dg-stage ::ng-deep .lg-notice:first-child {
-  margin-top: var(--space-3);
+  margin-top: var(--lg-space-3);
 }
 
 // The screen's box. Inside it the TopBar is already accounted for, so a Page or the legacy region needs no room for it.
 .dg-view {
-  --topbar-height: 0px;
+  --lg-topbar-height: 0px;
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
@@ -48,11 +48,11 @@
 // — with no edge of its own, so it never draws a second frame inside the first (D-116). Its content keeps the Page's
 // side gutter, so a screen's edges stay put between the two looks and line up with the TopBar's title and currencies.
 .dg-stage {
-  --dg-gutter: var(--section-md);
+  --dg-gutter: var(--lg-section-md);
 }
 @media (max-width: 40rem) {
   .dg-stage {
-    --dg-gutter: var(--space-2);
+    --dg-gutter: var(--lg-space-2);
   }
 }
 .dg-sheet {
@@ -67,10 +67,10 @@
   box-shadow: none;
 }
 .dg-sheet__body {
-  padding: var(--space-6) var(--dg-gutter);
+  padding: var(--lg-space-6) var(--dg-gutter);
 }
 @media (max-width: 40rem) {
   .dg-sheet__body {
-    padding: var(--space-2);
+    padding: var(--lg-space-2);
   }
 }

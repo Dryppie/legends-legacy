@@ -1,0 +1,27 @@
+/* ---------- The reason tip (Standards · States · The reason tip) ----------
+   One float on the body, placed beside the blocked control it explains, so no scrolling region clips it. It arrives
+   over duration-fast on ease-enter and leaves on ease-exit; it can be hovered, and Escape closes it. */
+.lg-why {
+  position: fixed; left: 0; top: 0; z-index: var(--lg-z-popover);
+  display: grid; gap: 2px; width: max-content; max-width: min(18rem, calc(100vw - 1rem));
+  padding: var(--lg-space-2) var(--lg-space-3);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
+  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 400;
+  color: var(--lg-ink); text-align: left; white-space: normal;
+  opacity: 0; visibility: hidden; transform: translateY(-0.25rem); pointer-events: none;
+  transition: opacity var(--lg-duration-fast) var(--lg-ease-exit), transform var(--lg-duration-fast) var(--lg-ease-exit), visibility 0s linear var(--lg-duration-fast);
+}
+.lg-why--end { transform: translateX(-0.25rem); }
+.lg-why.is-shown {
+  opacity: 1; visibility: visible; transform: none; pointer-events: auto;
+  transition: opacity var(--lg-duration-fast) var(--lg-ease-enter), transform var(--lg-duration-fast) var(--lg-ease-enter), visibility 0s;
+}
+/* From inside a dialog or confirmation it sits on the detached popover layer, above them. */
+.lg-why.is-detached { z-index: var(--lg-z-popover-detached); }
+/* The reason as a description, in plain case wherever it sits (a rail item sets its text in capitals). */
+.lg-why__desc { text-transform: none; letter-spacing: normal; }
+.lg-why__title { font-weight: 600; color: var(--lg-ink); }
+.lg-why__word { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-why--warning .lg-why__reason { color: var(--lg-warning); }
+@media (forced-colors: active) { .lg-why { border-color: CanvasText; } }

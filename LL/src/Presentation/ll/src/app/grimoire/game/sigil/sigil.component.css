@@ -1,0 +1,51 @@
+/* ---------- Sigil ---------- */
+.lg-sigil {
+  --lg-sigil: var(--lg-sigil-size);
+  display: inline-flex; align-items: center; gap: var(--lg-space-3);
+  margin: 0; padding: 0; border: 0; background: none;
+  color: var(--lg-ink); font: inherit; text-align: left;
+}
+button.lg-sigil { cursor: pointer; }
+button.lg-sigil:disabled, button.lg-sigil[aria-disabled="true"] { cursor: not-allowed; }
+.lg-sigil--sm { --lg-sigil: 2.5rem; }
+.lg-sigil--lg { --lg-sigil: 4.25rem; }
+.lg-sigil--label-top, .lg-sigil--label-bottom { flex-direction: column; gap: var(--lg-space-1); }
+.lg-sigil__badge {
+  position: relative; flex: none;
+  display: inline-grid; place-items: center;
+  width: var(--lg-sigil); height: var(--lg-sigil);
+  /* State change: hover and selection scale the badge over duration-fast; the ring changes colour at once. */
+  transition: transform var(--lg-duration-fast) var(--lg-ease-standard);
+}
+.lg-sigil__hex { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lg-sigil__outer { fill: var(--lg-sigil-fill); stroke: var(--lg-sigil-edge); stroke-width: 3; }
+.lg-sigil__inner { fill: none; stroke: var(--lg-sigil-edge); stroke-width: 1.25; opacity: 0.5; }
+.lg-sigil__value {
+  position: relative;
+  font-family: var(--lg-font-numeral); font-weight: 700;
+  font-size: calc(var(--lg-sigil) * 0.42); line-height: var(--lg-leading-mark);
+  color: var(--lg-on-sigil);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.lg-sigil__label {
+  font-family: var(--lg-title-family); font-style: var(--lg-title-style); font-weight: var(--lg-title-weight);
+  font-size: var(--lg-text-sigil-label); line-height: var(--lg-leading-sigil-label); letter-spacing: var(--lg-title-track);
+  color: var(--lg-ink); white-space: nowrap;
+  text-shadow: var(--lg-shadow-text-art);
+}
+.lg-sigil--sm .lg-sigil__label { font-size: var(--lg-text-title-sm); line-height: var(--lg-leading-title-sm); }
+.lg-sigil--lg .lg-sigil__label { font-size: var(--lg-text-title-lg); line-height: var(--lg-leading-title-lg); }
+button.lg-sigil:hover:not(:disabled, [aria-disabled="true"]) .lg-sigil__badge { transform: scale(1.06); }
+.lg-sigil.is-selected .lg-sigil__outer { stroke: var(--lg-arcana-glow); }
+.lg-sigil.is-selected .lg-sigil__badge { transform: scale(1.08); }
+.lg-sigil.is-ready .lg-sigil__badge::after {
+  content: ""; position: absolute; top: 2px; right: 0;
+  width: 0.6875rem; height: 0.6875rem; transform: rotate(45deg);
+  background: var(--lg-arcana-glow); box-shadow: 0 0 0 2px var(--lg-ground);
+}
+.lg-sigil.is-locked .lg-sigil__outer { fill: var(--lg-surface); stroke: var(--lg-line-strong); }
+.lg-sigil.is-locked .lg-sigil__inner { stroke: var(--lg-line); }
+.lg-sigil.is-locked .lg-sigil__value { color: var(--lg-ink-disabled); }
+.lg-sigil.is-locked .lg-sigil__label { color: var(--lg-ink-muted); }
+button.lg-sigil:focus-visible { box-shadow: none; }
+button.lg-sigil:focus-visible .lg-sigil__badge { border-radius: var(--lg-radius-control); box-shadow: var(--lg-focus-ring); }

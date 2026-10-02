@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { LG_GRIMOIRE } from '../../shared/components/grimoire';
+import { LG_GRIMOIRE } from '@grimoire';
 import { SHOWCASE_ENTRIES } from './showcase.registry';
 import { showcaseSlug } from './showcase.types';
 

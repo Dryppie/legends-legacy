@@ -1,0 +1,6 @@
+/* ---------- StatFigure ---------- */
+.lg-figure { display: grid; gap: 2px; justify-items: start; }
+.lg-figure__label { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-figure__value { font-family: var(--lg-font-display); font-size: var(--lg-text-numeral-headline); line-height: var(--lg-leading-numeral-headline); letter-spacing: var(--lg-tracking-headline); color: var(--lg-gilt); font-variant-numeric: proportional-nums lining-nums; }
+.lg-figure--sm .lg-figure__value { font-size: var(--lg-text-title-lg); line-height: var(--lg-leading-title-lg); }
+.lg-figure__caption { max-width: 22ch; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }

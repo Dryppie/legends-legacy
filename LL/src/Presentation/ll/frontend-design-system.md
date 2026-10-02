@@ -2,8 +2,8 @@
 
 > **Status: legacy.** This page describes the `--ll-*` tokens and the `ll-*` shared classes. They stay only for screens not yet migrated. New and migrated screens use **Grimoire**:
 >
-> - the `lg-*` components in `src/app/shared/components/grimoire/`;
-> - the tokens and styles in `src/styles/grimoire/`;
+> - the `lg-*` components in `src/app/grimoire/`, imported as `@grimoire`;
+> - its tokens and styles, beside its code (`src/app/grimoire/tokens/`, `styles/` and each part's `.component.css`);
 > - the design system itself in `design-system/` (start with its `README.md`, and read its `AGENTS.md` before changing it).
 >
 > Don't add new `--ll-*` tokens or `ll-*` classes. When a screen moves to Grimoire, its `ll-*` and Tailwind colour classes go with it. The frontend `AGENTS.md` says which rules apply where.

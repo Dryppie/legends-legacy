@@ -1,8 +1,8 @@
 # Grimoire showcase
 
 Every Grimoire component on its own, outside the game, in each state it supports, at **`/grimoire`** on the dev
-server. It replaces the React catalog in `design-system/catalog/` (D-127) and is the safety net for the Angular rework
-(`ANGULAR_DESIGN_SYSTEM_PLAN.md`, steps 3 to 5, D-129).
+server. It replaced the old catalog (D-127, D-133), and with the snapshot run below it is the safety net for the
+Angular rework (`ANGULAR_DESIGN_SYSTEM_PLAN.md`, D-129).
 
 - **Development builds only.** `app.routes.ts` matches the path only in dev mode, and production builds swap
   `showcase.routes.ts` for `showcase.routes.production.ts` (`angular.json` → `fileReplacements`), so none of it ships.
@@ -28,15 +28,16 @@ Each story has its own address, `/grimoire/<tier>/<entry>/<story>`, and the stor
 
 ## Adding or changing an entry
 
-1. Copy `entries/button.showcase.ts`. Import single `lg-*` components from `shared/components/grimoire`.
+1. Copy `entries/button.showcase.ts`. Import single `lg-*` components from `@grimoire`.
 2. One story per state or variant worth seeing on its own: the states in Standards · States the component supports, its
    variants and densities, long text. Names in sentence case; one short sentence of `notes` when it helps.
 3. Keep it deterministic: fixed data, no timers, no `Date.now()`, no random values. A story that moves by itself gets
    `noSnapshot`.
 4. Give a part that fills its parent a `width` (and `height` and `flush` for the frame, the shell, a Page or a Stage),
    the size it has in the game. No styles of its own: layout helpers only, sizes in rem.
-5. Images come from the app's `assets/` (the design system's `../../assets/` paths don't exist here).
-6. Register it in `showcase.registry.ts` and list the components it shows in `covers`.
+5. Images come from the app's `assets/`.
+6. Register it in `showcase.registry.ts`, list the components it shows in `covers` (`check.mjs` and the registry spec
+   fail on a part no entry covers), and point `readme` at the part's page beside its code.
 
 ## The snapshot run
 

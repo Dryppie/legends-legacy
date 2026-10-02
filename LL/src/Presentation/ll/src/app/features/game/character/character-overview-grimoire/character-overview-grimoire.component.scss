@@ -1,6 +1,6 @@
 // The Grimoire Character Overview. Everything here is page-local layout from Grimoire tokens (plan gaps G4–G6):
 // the perks disclosure, the Combat Style block, the region states and a few text styles. The shared parts come from
-// the lg-* components and src/styles/grimoire.
+// the lg-* components and their styles (@grimoire).
 
 // The host fills the game's frame; the frame gives the top, left and bottom gutters, and the right one is set here,
 // as the legacy pages set theirs (8px, 24px from the frame's 40rem breakpoint).
@@ -10,11 +10,11 @@
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
-  padding-inline-end: var(--space-2);
+  padding-inline-end: var(--lg-space-2);
 }
 @media (min-width: 40rem) {
   :host {
-    padding-inline-end: var(--space-6);
+    padding-inline-end: var(--lg-space-6);
   }
 }
 // In the new look's GameShell the Page gives every gutter itself.
@@ -24,19 +24,19 @@
 
 .ovw-note {
   margin: 0;
-  font-size: var(--text-body-compact);
-  line-height: var(--leading-body-compact-row);
-  color: var(--ink-muted);
+  font-size: var(--lg-text-body-compact);
+  line-height: var(--lg-leading-body-compact-row);
+  color: var(--lg-ink-muted);
 }
 
 .ovw-eyebrow {
   margin: 0;
-  font-size: var(--text-label);
-  line-height: var(--leading-label);
+  font-size: var(--lg-text-label);
+  line-height: var(--lg-leading-label);
   font-weight: 600;
-  letter-spacing: var(--tracking-caps);
+  letter-spacing: var(--lg-tracking-caps);
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: var(--lg-ink-muted);
 }
 
 // Region states (Standards · States · Data).
@@ -45,15 +45,15 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--inset-lg);
-  background: var(--surface);
-  font-size: var(--text-body-compact);
-  line-height: var(--leading-body-compact);
-  color: var(--ink-muted);
+  gap: var(--lg-space-2);
+  padding: var(--lg-inset-lg);
+  background: var(--lg-surface);
+  font-size: var(--lg-text-body-compact);
+  line-height: var(--lg-leading-body-compact);
+  color: var(--lg-ink-muted);
 }
 .ovw-state--error {
-  color: var(--danger);
+  color: var(--lg-danger);
 }
 .ovw-state__glyph {
   font-weight: 700;
@@ -61,46 +61,46 @@
 
 // Nobility perks, in the Banner's footer.
 .ovw-perks {
-  padding-top: var(--space-5);
-  border-top: var(--border-hairline) solid var(--line);
+  padding-top: var(--lg-space-5);
+  border-top: var(--lg-border-hairline) solid var(--lg-line);
 }
 .ovw-perks__head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-1) var(--space-4);
-  margin-bottom: var(--space-3);
+  gap: var(--lg-space-1) var(--lg-space-4);
+  margin-bottom: var(--lg-space-3);
 }
 .ovw-perks__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(13.75rem, 1fr));
-  gap: var(--space-4) var(--space-8);
+  gap: var(--lg-space-4) var(--lg-space-8);
 }
 .ovw-perks__label {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-label);
-  line-height: var(--leading-label);
+  margin: 0 0 var(--lg-space-2);
+  font-size: var(--lg-text-label);
+  line-height: var(--lg-leading-label);
   font-weight: 600;
-  letter-spacing: var(--tracking-caps);
+  letter-spacing: var(--lg-tracking-caps);
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: var(--lg-ink-muted);
 }
 .ovw-perks__list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-1);
-  font-size: var(--text-body-compact);
-  line-height: var(--leading-body-compact);
-  color: var(--ink);
+  gap: var(--lg-space-1);
+  font-size: var(--lg-text-body-compact);
+  line-height: var(--lg-leading-body-compact);
+  color: var(--lg-ink);
 
   li {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--lg-space-2);
   }
   span {
-    color: var(--ink-muted);
+    color: var(--lg-ink-muted);
   }
 }
 
@@ -108,45 +108,45 @@
 .ovw-style {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--lg-space-4);
 }
 .ovw-style__meta {
   flex: 1;
   min-width: 0;
   display: grid;
-  gap: var(--space-1);
+  gap: var(--lg-space-1);
 }
 .ovw-style__name {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-title-md);
-  line-height: var(--leading-title-md);
-  color: var(--ink);
+  font-family: var(--lg-font-display);
+  font-size: var(--lg-text-title-md);
+  line-height: var(--lg-leading-title-md);
+  color: var(--lg-ink);
 }
 
 .ovw-count {
   margin-left: auto;
-  font-size: var(--text-caption);
+  font-size: var(--lg-text-caption);
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--ink);
+  color: var(--lg-ink);
 }
 .ovw-slots {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--lg-space-1);
 }
 .ovw-sidefoot {
-  margin-top: var(--space-3);
+  margin-top: var(--lg-space-3);
 }
 
 .ovw-attrs {
   display: grid;
-  gap: var(--space-5);
-  padding: var(--space-6);
-  background: var(--surface);
+  gap: var(--lg-space-5);
+  padding: var(--lg-space-6);
+  background: var(--lg-surface);
 }
 .ovw-attrs__head {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--lg-space-1);
 }

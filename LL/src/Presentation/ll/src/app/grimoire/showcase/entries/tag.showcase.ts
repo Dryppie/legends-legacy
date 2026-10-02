@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgTagComponent } from '../../../shared/components/grimoire';
+import { LgTagComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -131,6 +131,6 @@ export const TAG_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'The status label.',
   covers: ['LgTagComponent'],
-  readme: 'design-system/components/Tag/README.md',
+  readme: 'src/app/grimoire/primitives/tag/README.md',
   component: TagShowcaseComponent,
 };

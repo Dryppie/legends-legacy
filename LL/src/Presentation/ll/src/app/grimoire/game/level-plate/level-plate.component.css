@@ -1,0 +1,20 @@
+/* ---------- LevelPlate ---------- */
+.lg-levelplate { display: grid; gap: var(--lg-space-2); }
+.lg-levelplate__row { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--lg-space-5); }
+.lg-levelplate__level { display: flex; align-items: flex-end; gap: var(--lg-space-2); }
+.lg-levelplate__kicker {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase;
+  color: var(--lg-ink-muted); padding-bottom: 0.375rem;
+}
+.lg-levelplate__num {
+  font-family: var(--lg-num-family); font-weight: var(--lg-num-weight);
+  font-size: var(--lg-text-level-numeral); line-height: var(--lg-leading-level-numeral); letter-spacing: var(--lg-tracking-hero); color: var(--lg-gilt);
+  font-variant-numeric: proportional-nums lining-nums;
+}
+.lg-levelplate__aside { list-style: none; margin: 0 0 0.375rem; padding: 0; display: grid; gap: var(--lg-space-1); }
+.lg-levelplate__aside li { display: flex; align-items: center; gap: var(--lg-space-2); color: var(--lg-ink-muted); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row); }
+.lg-levelplate__aside b { margin-left: auto; padding-left: var(--lg-space-2); color: var(--lg-ink); font-family: var(--lg-font-numeral); font-size: var(--lg-text-numeral-row); line-height: var(--lg-leading-numeral-row); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+.lg-levelplate__xp { display: grid; gap: 0.25rem; }
+.lg-levelplate__xp .lg-meter__track { height: 0.375rem; }
+.lg-levelplate__xptext { justify-self: end; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); font-variant-numeric: tabular-nums lining-nums; }

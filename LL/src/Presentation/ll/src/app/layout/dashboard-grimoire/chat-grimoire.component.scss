@@ -2,20 +2,20 @@
 .cg-aside {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--lg-space-2);
 }
 .cg-composer {
   position: relative;
 }
 .cg-count {
   position: absolute;
-  top: calc(var(--space-5) * -1);
-  right: var(--space-3);
+  top: calc(var(--lg-space-5) * -1);
+  right: var(--lg-space-3);
 }
 .cg-actor {
   font-style: normal;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--lg-ink);
 }
 .cg-target {
   color: inherit;
@@ -23,19 +23,19 @@
   text-underline-offset: 0.15em;
 }
 .cg-link {
-  margin-left: var(--space-1);
+  margin-left: var(--lg-space-1);
   font-weight: 600;
-  color: var(--ink);
+  color: var(--lg-ink);
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
 .cg-menu {
   margin: 0;
-  border-width: var(--border-hairline);
+  border-width: var(--lg-border-hairline);
 }
 .cg-clear {
   justify-self: start;
-  margin-top: var(--space-2);
+  margin-top: var(--lg-space-2);
 }
 .cg-player {
   min-width: 10rem;

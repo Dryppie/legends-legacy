@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgKeyComponent } from '../../../shared/components/grimoire';
+import { LgKeyComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -63,5 +63,6 @@ export const KEY_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'A keyboard key, drawn as a cap.',
   covers: ['LgKeyComponent'],
+  readme: 'src/app/grimoire/primitives/key/README.md',
   component: KeyShowcaseComponent,
 };

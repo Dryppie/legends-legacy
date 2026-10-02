@@ -1,0 +1,23 @@
+/* ---------- JourneyCard ---------- */
+.lg-journey {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(13.75rem, 0.34fr);
+  gap: var(--lg-space-5) var(--lg-space-8); padding: var(--lg-space-6) var(--lg-space-8);
+  /* Level 1 on the Page: surface with no edge, shadow, frame or grain (Foundations · Surfaces & Layering, Lines). */
+  background: var(--lg-surface);
+}
+.lg-journey__main { position: relative; display: grid; gap: var(--lg-space-2); align-content: start; }
+.lg-journey__phase { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-gilt); }
+.lg-journey__summary { margin: 0; max-width: var(--lg-measure); color: var(--lg-ink-muted); }
+.lg-journey__objective { display: grid; gap: 2px; margin-top: var(--lg-space-2); padding: var(--lg-space-3) var(--lg-space-4); background: var(--lg-gilt-soft); border-radius: var(--lg-radius-container); }
+.lg-journey__objective strong { font-weight: 600; color: var(--lg-ink); }
+.lg-journey__label { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-journey__actions { display: flex; flex-wrap: wrap; gap: var(--lg-space-3); margin-top: var(--lg-space-3); }
+.lg-journey__unlock { position: relative; display: grid; gap: var(--lg-space-1); align-content: start; padding-top: var(--lg-space-6); padding-left: var(--lg-space-8); border-left: var(--lg-border-hairline) solid var(--lg-line); }
+/* The next unlock usually carries a number ("at level 20"), so it is Barlow, not Marcellus (D-034). */
+.lg-journey__unlock strong { font-family: var(--lg-font-ui); font-weight: 600; font-size: var(--lg-text-body); line-height: var(--lg-leading-body); color: var(--lg-ink); }
+.lg-journey__key { width: var(--lg-icon-lg); height: var(--lg-icon-lg); color: var(--lg-gilt); margin-bottom: var(--lg-space-2); }
+.lg-journey__track { position: relative; grid-column: 1 / -1; padding-top: var(--lg-space-4); border-top: var(--lg-border-hairline) solid var(--lg-line); }
+@container lg-region (width < 44rem) {
+  .lg-journey { grid-template-columns: minmax(0, 1fr); }
+  .lg-journey__unlock { padding-left: 0; border-left: 0; padding-top: var(--lg-space-4); border-top: var(--lg-border-hairline) solid var(--lg-line); }
+}

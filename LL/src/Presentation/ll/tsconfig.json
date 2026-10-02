@@ -18,7 +18,11 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2022", "dom"]
+    "lib": ["ES2022", "dom"],
+    "paths": {
+      "@grimoire": ["./src/app/grimoire/index.ts"],
+      "@grimoire/testing": ["./src/app/grimoire/testing/index.ts"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

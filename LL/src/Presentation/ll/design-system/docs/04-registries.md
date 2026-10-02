@@ -31,7 +31,7 @@ The game's canonical lists — one place for every name, code, colour and mark t
 | Legendary | L | `rarity-legendary` |
 | Legacy | LG | `rarity-legacy` |
 
-The rarity hues are the game's existing ones, kept as the palette primitives `hue-rarity-*`; each `rarity-*` token aliases the hue of the same name (Foundations · Colour). Rarity also always shows its code: ItemSlot sets it in the corner, ItemLink names the rarity in its tooltip, and rarity Tags are outlined in their colour. Screen readers hear the rarity by name — "Epic", never "E" — in ItemLink, ItemSlot and ListRow (Foundations · Accessibility). The codes are exported as `LL.RARITY_CODES` (Angular: `LG_RARITY_CODES`).
+The rarity hues are the game's existing ones, kept as the palette primitives `hue-rarity-*`; each `rarity-*` token aliases the hue of the same name (Foundations · Colour). Rarity also always shows its code: ItemSlot sets it in the corner, ItemLink names the rarity in its tooltip, and rarity Tags are outlined in their colour. Screen readers hear the rarity by name — "Epic", never "E" — in ItemLink, ItemSlot and ListRow (Foundations · Accessibility). The codes are exported as `LG_RARITY_CODES`.
 
 ## Damage types
 
@@ -218,7 +218,7 @@ The crown beside a name says that player's Nobility is active. It follows these 
 
 ## Icon names
 
-`overview`, `inventory`, `essences`, `combat-styles`, `achievements`, `soulstones`, `world-map`, `legacy-ascension`, `quest-journal`, `prophecies`, `guild`, `colosseum`, `cinder-bazaar`, `leaderboard`, `settings` — the game's sidebar set. Two more are solid markers, not sidebar icons: `nobility`, the filled crown of the Nobility mark, and `lock`, the Locked marker (D-113). All seventeen are in `icons.json`, the one source of the set (D-125); `Icon` lists them in `LL.Icon.names` (`LG_ICON_NAMES` in the game).
+`overview`, `inventory`, `essences`, `combat-styles`, `achievements`, `soulstones`, `world-map`, `legacy-ascension`, `quest-journal`, `prophecies`, `guild`, `colosseum`, `cinder-bazaar`, `leaderboard`, `settings` — the game's sidebar set. Two more are solid markers, not sidebar icons: `nobility`, the filled crown of the Nobility mark, and `lock`, the Locked marker (D-113). All seventeen are in `icons.json`, the one source of the set (D-125); `LG_ICON_NAMES` lists them.
 
 Every other name in the registries above is planned and not drawn yet ("none yet"); Foundations · Iconography · Inventory lists them all with their priority. A name is the icon's meaning, in lowercase with hyphens; slot icons take `slot-` and damage icons `damage-`, matching their tokens. Until a name is drawn, `Icon` draws nothing for it and the entry's fallback shows.
 

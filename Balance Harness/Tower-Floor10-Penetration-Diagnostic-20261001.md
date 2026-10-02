@@ -1,5 +1,7 @@
 # Floor 10: isolated Power and penetration diagnostic — 1 October 2026
 
+**Current status, 2 October:** the subsequent [fixed-candidate acceptance](Tower-Floor10-Fixed-Acceptance-20261001.md) passed and the change is applied and verified locally. Statements below about pending acceptance, unimplemented contracts and unchanged live values describe the earlier diagnostic checkpoint.
+
 ## Completed result
 
 **Hold offense factor 0.50 and penetration factor 40 fixed for formal acceptance testing.** The diagnostic completed **4,448 fresh fights / 16 fresh seeds** across all **278 recipes / five actual compositions**. The two strongest limited-equipment compositions each reached **5/16**, both full-armor controls reached **4/16**, and the highest count anywhere was **6/16** on A/Precision. This is a promising candidate, not accepted balance; the diagnostic's selected leaders have selection bias and the sample is small.

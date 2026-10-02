@@ -4,7 +4,7 @@ Oct 2, 2026 · @Martin
 
 Living copy (Claude Doc, with diagrams and comments): https://claude.ai/code/artifact/bf6ccd8d-3fb0-4546-8151-1ff12a09864e. This file is a snapshot of it.
 
-Status: steps 1 to 5 done on 2 October 2026. The New look work is committed; D-127 (one implementation, the React reference frozen), D-128 (the `lg-` prefix stays) and D-129 (the dev-only `/grimoire` showcase with 42 entries and 279 stories, and `npm run grimoire:snapshots`) are in the decision log. Next: step 6.
+Status: steps 1 to 10 done on 2 October 2026 (phases 0 to 2). D-127 (one implementation), D-128 (the `lg-` prefix) and D-129 (the dev-only `/grimoire` showcase, 42 entries and 279 stories, and `npm run grimoire:snapshots`) settled phase 0 and the safety net; D-130 (`src/app/grimoire/` by tier, `@grimoire`, behaviour specs through harnesses), D-131 (the `--lg-` token prefix, breakpoint tokens, `tokens.ts`), D-132 (styles beside their parts, assembled in cascade order) and D-133 (the React reference removed) record steps 6 to 10. Next: phase 3, step 11.
 
 ## Summary
 
@@ -414,7 +414,7 @@ Rules:
 - **Raw values are errors.** `check.mjs` extends its raw-value check (hex colour, pixel font size, coloured shadow) to every component CSS file and to `-grimoire` screen folders.
 - **The legacy guards stay where they are.** The `.lg-root` and `.lg-legacy` guards in `src/styles.css` (D-100, D-108) protect Grimoire from legacy element rules and stay until those rules go.
 
-What goes: `src/styles/grimoire/components.css` and `sync-styles.mjs` (component CSS lives with components), and once tokens and base load globally, the `grimoire` bundle entries in `angular.json` and `lgLoadStyles()`. The largest component sections, Chronicle and GameShell, are 12.5 KB and 7.9 KB minified, inside the 20 KB `anyComponentStyle` warning budget.
+What goes: `src/styles/grimoire/components.css` and `sync-styles.mjs` (component CSS lives with components), and once tokens and base load globally, the `grimoire` bundle entries in `angular.json` and `lgLoadStyles()`. The largest component sections, Chronicle and GameShell, are 12.5 KB and 7.9 KB minified, inside the 20 KB `anyComponentStyle` warning budget. (Step 9, D-132: the first two went; the bundle and `lgLoadStyles` stay until the budget allows.)
 
 ## 10. Accessibility strategy
 
@@ -530,45 +530,45 @@ All paths are under `LL/src/Presentation/ll/`. Nothing here is an npm package: t
 
 ### Before removing anything
 
-- [ ] The New look work is committed and the tree is clean
-- [ ] Every component has showcase stories covering the states its preview showed, and the snapshot baselines are committed
-- [ ] The 25 parity behaviour scenarios pass as Angular specs
-- [ ] `rg -ilw "react" src scripts angular.json package.json tsconfig*.json` finds only comments in `lg-*` files (confirmed on 2 October 2026)
-- [ ] `package-lock.json` has no `node_modules/react` entry and `npm ls react react-dom` is empty (confirmed: 0 entries)
-- [ ] No workflow in `.github/workflows/` runs the catalog, `check-parity.mjs` or `design-system/parity` (confirmed)
-- [ ] `tsconfig.json` has no `jsx` option and there is no Babel or Webpack config (confirmed)
+- [x] The New look work is committed and the tree is clean
+- [x] Every component has showcase stories covering the states its preview showed, and the snapshot baselines are committed
+- [x] The 25 parity behaviour scenarios pass as Angular specs
+- [x] `rg -ilw "react" src scripts angular.json package.json tsconfig*.json` finds only comments in `lg-*` files (confirmed on 2 October 2026)
+- [x] `package-lock.json` has no `node_modules/react` entry and `npm ls react react-dom` is empty (confirmed: 0 entries)
+- [x] No workflow in `.github/workflows/` runs the catalog, `check-parity.mjs` or `design-system/parity` (confirmed)
+- [x] `tsconfig.json` has no `jsx` option and there is no Babel or Webpack config (confirmed)
 
 ### Remove
 
-- [ ] `design-system/components/lib/react.production.min.js` and `react-dom.production.min.js` (React 18.3.1)
-- [ ] `design-system/components/bundle.js`
-- [ ] `design-system/components/index.d.ts` (imports `react` types)
-- [ ] `design-system/components/bundle.css`, once split into component files
-- [ ] The 57 `design-system/components/<Name>/preview.html` and `components/Cover/`
-- [ ] `design-system/catalog/`
-- [ ] `design-system/parity/` and its output `dist/grimoire-parity/`
-- [ ] `design-system/api/components/*.md` (56 cards); keep `api/tokens.md` and `api/assets/` only if regenerated from `tokens.json`
-- [ ] `design-system/manifest.json`, and the `libraries` entry in `design-system.json`
-- [ ] `src/styles/grimoire/components.css` and `scripts/sync-styles.mjs`
-- [ ] `out-tsc/grimoire-design-system-2026-10-02.zip` and `out-tsc/ll-check-2026-10-02.tgz`
+- [x] `design-system/components/lib/react.production.min.js` and `react-dom.production.min.js` (React 18.3.1)
+- [x] `design-system/components/bundle.js`
+- [x] `design-system/components/index.d.ts` (imports `react` types)
+- [x] `design-system/components/bundle.css`, once split into component files
+- [x] The 57 `design-system/components/<Name>/preview.html` and `components/Cover/`
+- [x] `design-system/catalog/`
+- [x] `design-system/parity/` and its output `dist/grimoire-parity/`
+- [x] `design-system/api/components/*.md` (56 cards); keep `api/tokens.md` and `api/assets/` only if regenerated from `tokens.json`
+- [x] `design-system/manifest.json`, and the `libraries` entry in `design-system.json`
+- [x] `src/styles/grimoire/components.css` and `scripts/sync-styles.mjs`
+- [x] `out-tsc/grimoire-design-system-2026-10-02.zip` and `out-tsc/ll-check-2026-10-02.tgz`
 
 ### Rewrite
 
-- [ ] `scripts/build-icons.mjs`: write only `grimoire-icons.ts`
-- [ ] `scripts/check.mjs`: drop the bundle and manifest steps and the `lib` exception; add the boundary, raw-value and "every component has a spec, a showcase entry and a README" checks
-- [ ] `design-system/AGENTS.md` and the frontend `AGENTS.md`: the new change rule and checks
-- [ ] `design-system/README.md`: "Where the code lives" and "Consuming this system"
-- [ ] Governance · Code parity (`docs/10-governance/04-code-parity.md`) becomes Governance · Code: conventions, showcase, snapshots
-- [ ] Surfaces & Layering: `LL.layers` becomes the CDK overlay
-- [ ] Decision log: a new entry superseding D-093 and narrowing D-092, D-096 and D-125
-- [ ] The "React's onClick" comments in 14 `lg-*` files and the grimoire README
-- [ ] The project note `claude/grimoire-migration-status.md`
+- [x] `scripts/build-icons.mjs`: write only `grimoire-icons.ts`
+- [x] `scripts/check.mjs`: drop the bundle and manifest steps and the `lib` exception; add the boundary, raw-value and "every component has a spec, a showcase entry and a README" checks
+- [x] `design-system/AGENTS.md` and the frontend `AGENTS.md`: the new change rule and checks
+- [x] `design-system/README.md`: "Where the code lives" and "Consuming this system"
+- [x] Governance · Code parity (`docs/10-governance/04-code-parity.md`) becomes Governance · Code: conventions, showcase, snapshots
+- [x] Surfaces & Layering: `LL.layers` becomes the CDK overlay
+- [x] Decision log: a new entry superseding D-093 and narrowing D-092, D-096 and D-125
+- [x] The "React's onClick" comments in 14 `lg-*` files and the grimoire README
+- [x] The project note `claude/grimoire-migration-status.md`
 
 ### After
 
-- [ ] `rg -il "\breact\b|window\.LL|bundle\.js" LL/src/Presentation/ll --glob '!node_modules'` finds only the decision log's history
-- [ ] `node design-system/scripts/check.mjs`: 0 errors
-- [ ] `npm run build` and `npm run test:ci` pass; `npm run grimoire:snapshots` shows no difference
+- [x] `rg -il "\breact\b|window\.LL|bundle\.js" LL/src/Presentation/ll --glob '!node_modules'` finds only the decision log's history
+- [x] `node design-system/scripts/check.mjs`: 0 errors
+- [x] `npm run build` and `npm run test:ci` pass; `npm run grimoire:snapshots` shows no difference
 - [ ] Decide what happens to the Claude Design artifact: leave it as a frozen archive, or re-sync it from the showcase's static HTML
 
 Not on this list, on purpose: Tailwind, the `--ll-*` system, `postcss-legacy-rem`, `@angular/animations` and `@angular/material`. None is React; each retires in phase 8 when its last user is gone.
@@ -587,14 +587,14 @@ Not on this list, on purpose: Tailwind, the `--ll-*` system, `postcss-legacy-rem
 3. Showcase shell: the dev-only `/grimoire` route, its tree and toolbar, the entry type, and the `fileReplacements` that keep it out of production.
 4. Showcase entries for the 44 current components, taken from the 57 previews' scenarios, on today's APIs.
 5. `npm run grimoire:snapshots`: Playwright and `@axe-core/playwright` as dev dependencies; baselines committed. Done when two runs match. Steps 3 to 5 done on 2 October: 42 entries, 279 stories, D-129.
-6. The 25 parity behaviour scenarios ported to specs, with the harness scaffolding in `testing/`.
-7. Move `shared/components/grimoire/` to `src/app/grimoire/<tier>/<name>/`, add the `@grimoire` alias, update the 8 importers.
-8. Token compiler: the `--lg-` prefix, breakpoints, `tokens.ts`, type classes; scripted rename of every `var(--…)`.
-9. Split `components.css` into component files, `base.css` and `layout.css`, with `ViewEncapsulation.None` so nothing moves; tokens and base load globally; remove `lgLoadStyles`, the `grimoire` bundle and `sync-styles.mjs`. Done when the snapshots are unchanged.
+6. The 25 parity behaviour scenarios ported to specs, with the harness scaffolding in `testing/`. Done on 2 October: every scenario is a spec beside its part, through 18 harnesses and the announcer helpers; two known bugs are skipped specs (D-130).
+7. Move `shared/components/grimoire/` to `src/app/grimoire/<tier>/<name>/`, add the `@grimoire` alias, update the 8 importers. Done on 2 October (D-130).
+8. Token compiler: the `--lg-` prefix, breakpoints, `tokens.ts`, type classes; scripted rename of every `var(--…)`. Done on 2 October: six `breakpoint-*` tokens; `tokens.ts` is `LG_DURATION`, `LG_EASING`, `LG_BREAKPOINT`, `LG_CONTENT_TIER` and `LG_LAYER`; the type classes stay in the generated `tokens.css` (D-131).
+9. Split `components.css` into component files, `base.css` and `layout.css`, with `ViewEncapsulation.None` so nothing moves; tokens and base load globally; remove `lgLoadStyles`, the `grimoire` bundle and `sync-styles.mjs`. Done when the snapshots are unchanged. Done on 2 October, with two changes (D-132): the files are assembled in the old order by `styles/grimoire.css` rather than attached with `ViewEncapsulation.None`, because about a hundred cross-part selectors depend on that order; and `lgLoadStyles` and the separate `grimoire.css` stay, because the first load is 986 kB of its 1 MB budget and the tokens alone are 13 kB. `sync-styles.mjs` is gone. Phase 3 moves each file to its component.
 
 **Phase 2 · Retire React**
 
-10. Work through the "Remove" and "Rewrite" parts of the checklist in section 15. Done when its "After" checks pass.
+10. Work through the "Remove" and "Rewrite" parts of the checklist in section 15. Done when its "After" checks pass. Done on 2 October (D-133); the Claude Design artifact question is still open.
 
 **Phase 3 · Re-shape what exists.** Each step covers the component, its CSS moved to emulated encapsulation, its spec and harness, its stories, its README, and its consumers.
 

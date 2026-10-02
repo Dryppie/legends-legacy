@@ -9,7 +9,7 @@ import {
   LgLedgerRow,
   LgSlotDirective,
   LgTrackComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -169,6 +169,6 @@ export const FOLIO_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The detail panel.',
   covers: ['LgFolioComponent'],
-  readme: 'design-system/components/Folio/README.md',
+  readme: 'src/app/grimoire/components/folio/README.md',
   component: FolioShowcaseComponent,
 };

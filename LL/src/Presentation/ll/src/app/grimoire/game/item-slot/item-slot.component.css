@@ -1,0 +1,73 @@
+/* ---------- ItemSlot ---------- */
+.lg-slot {
+  --lg-rarity: var(--lg-line-strong);
+  position: relative; isolation: isolate;
+  display: inline-flex; flex-direction: column; gap: var(--lg-space-2);
+  width: 7rem; margin: 0; padding: 0; border: 0; background: none;
+  color: var(--lg-ink); font: inherit; text-align: left;
+}
+button.lg-slot { cursor: pointer; }
+/* Hover (Standards · States · Interaction): the neutral wash, a layer around the frame and caption that fades over duration-fast. */
+button.lg-slot::after {
+  content: ""; position: absolute; inset: calc(-1 * var(--lg-space-1)); z-index: -1; pointer-events: none;
+  border-radius: var(--lg-radius-container); background: var(--lg-surface-raised);
+  opacity: 0; transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
+}
+button.lg-slot:hover:not(.is-blocked)::after { opacity: 1; }
+.lg-slot--sm { width: 4rem; }
+.lg-slot--wide { width: 11rem; }
+.lg-slot__frame {
+  position: relative; display: grid; place-items: center;
+  aspect-ratio: 1 / 1; width: 100%;
+  border-radius: var(--lg-radius-control);
+  background: var(--lg-ground-deep);
+  box-shadow: inset 0 0 0 var(--lg-border-hairline) var(--lg-rarity);
+  color: var(--lg-ink-muted); overflow: hidden;
+}
+.lg-slot--wide .lg-slot__frame { aspect-ratio: 16 / 9; }
+.lg-slot__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lg-slot.is-empty .lg-slot__frame { background: transparent; box-shadow: inset 0 0 0 var(--lg-border-hairline) var(--lg-line-strong); }
+.lg-slot.is-empty .lg-slot__frame::after { content: ""; position: absolute; inset: 0.375rem; border: var(--lg-border-hairline) dashed var(--lg-line); border-radius: var(--lg-radius-container); }
+.lg-slot.is-selected .lg-slot__frame { box-shadow: inset 0 0 0 var(--lg-border-emphasis) var(--lg-arcana-glow); }
+/* Blocked (Standards · States · Availability): the name drops to ink-muted and the reason is printed under it; a locked
+   slot's frame is dashed and its name ink-disabled. No hover, no press, still focusable. */
+.lg-slot.is-blocked { cursor: not-allowed; }
+.lg-slot.is-blocked .lg-slot__name { color: var(--lg-ink-muted); }
+.lg-slot.is-locked .lg-slot__name { color: var(--lg-ink-disabled); }
+.lg-slot.is-locked .lg-slot__frame { background: transparent; box-shadow: none; }
+.lg-slot.is-locked .lg-slot__frame::before { content: ""; position: absolute; inset: 0; border: var(--lg-border-hairline) dashed var(--lg-line-strong); border-radius: inherit; pointer-events: none; }
+.lg-slot.is-locked.is-empty .lg-slot__frame::after { display: none; }
+.lg-slot__reason { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+.lg-slot__reason.is-warning { color: var(--lg-warning); }
+.lg-slot__word { display: block; font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; }
+/* Not owned: the art at opacity-unowned, never the words. Undiscovered keeps the empty frame and says so. */
+.lg-slot.is-not-owned .lg-slot__img, .lg-slot.is-not-owned .lg-slot__frame > .lg-icon { opacity: var(--lg-opacity-unowned); }
+.lg-slot.is-not-owned .lg-slot__name, .lg-slot.is-undiscovered .lg-slot__name { color: var(--lg-ink-muted); }
+/* Marks keep fixed corners (Standards · State combinations): the code top start, the attention diamond top end, the
+   ownership mark bottom start, the quantity bottom end. Each is icon-marker across, space-1 in. */
+.lg-slot__attention { position: absolute; top: var(--lg-space-1); right: var(--lg-space-1); }
+.lg-slot__attention::before { box-shadow: 0 0 0 2px var(--lg-ground); }
+/* The ownership mark: the in-use square (Equipped, Attuned), or the favourite ribbon once drawn, in ink. */
+.lg-slot__mark { position: absolute; bottom: var(--lg-space-1); left: var(--lg-space-1); width: var(--lg-icon-marker); height: var(--lg-icon-marker); display: grid; place-items: center; color: var(--lg-ink); }
+.lg-slot__mark--inuse::before { content: ""; width: calc(var(--lg-icon-marker) - var(--lg-space-1)); height: calc(var(--lg-icon-marker) - var(--lg-space-1)); background: var(--lg-ink); box-shadow: 0 0 0 2px var(--lg-ground); }
+.lg-slot__code {
+  position: absolute; top: 0.25rem; left: 0.25rem; min-width: 1.125rem; height: 1rem; padding: 0 0.25rem;
+  display: grid; place-items: center;
+  border-radius: var(--lg-radius-control); background: var(--lg-ground-deep); color: var(--lg-rarity-ink, var(--lg-ink));
+  font-size: var(--lg-text-code); line-height: var(--lg-leading-mark); font-weight: 700; letter-spacing: var(--lg-tracking-code);
+}
+.lg-slot__qty {
+  position: absolute; right: 0.25rem; bottom: 0.25rem; padding: 0 0.25rem; border-radius: var(--lg-radius-control);
+  background: var(--lg-ground-deep); color: var(--lg-ink);
+  font-family: var(--lg-font-numeral); font-size: var(--lg-text-numeral-compact); line-height: var(--lg-leading-numeral-compact); font-weight: 600;
+}
+.lg-slot__caption { display: grid; gap: 0; min-width: 0; }
+.lg-slot__name { font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row); font-weight: 600; color: var(--lg-rarity-ink, var(--lg-ink)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-slot__meta { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+.lg-slot--common { --lg-rarity: var(--lg-rarity-common); --lg-rarity-ink: var(--lg-rarity-common); }
+.lg-slot--uncommon { --lg-rarity: var(--lg-rarity-uncommon); --lg-rarity-ink: var(--lg-rarity-uncommon); }
+.lg-slot--rare { --lg-rarity: var(--lg-rarity-rare); --lg-rarity-ink: var(--lg-rarity-rare); }
+.lg-slot--epic { --lg-rarity: var(--lg-rarity-epic); --lg-rarity-ink: var(--lg-rarity-epic); }
+.lg-slot--unique { --lg-rarity: var(--lg-rarity-unique); --lg-rarity-ink: var(--lg-rarity-unique); }
+.lg-slot--legendary { --lg-rarity: var(--lg-rarity-legendary); --lg-rarity-ink: var(--lg-rarity-legendary); }
+.lg-slot--legacy { --lg-rarity: var(--lg-rarity-legacy); --lg-rarity-ink: var(--lg-rarity-legacy); }

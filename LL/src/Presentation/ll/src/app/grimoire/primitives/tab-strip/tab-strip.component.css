@@ -1,0 +1,34 @@
+/* ---------- TabStrip ---------- */
+.lg-tabs { display: flex; align-items: center; flex-wrap: wrap; }
+.lg-tabs__tab {
+  position: relative;
+  display: inline-flex; align-items: center; gap: var(--lg-space-2);
+  margin: 0; border: 0; background: none; cursor: pointer;
+  color: var(--lg-ink-muted);
+}
+.lg-tabs--primary { gap: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.lg-tabs--primary .lg-tabs__tab {
+  flex: none; height: var(--lg-control); padding: 0 calc(var(--lg-cell-x) + var(--lg-space-1));
+  font-family: var(--lg-tab-family); font-weight: var(--lg-tab-weight);
+  font-size: var(--lg-text-tab); line-height: var(--lg-leading-tab); letter-spacing: var(--lg-tab-track); text-transform: uppercase;
+  border-radius: var(--lg-radius-control);
+}
+.lg-tabs--primary .lg-tabs__tab + .lg-tabs__tab::before {
+  content: ""; position: absolute; left: 0; top: 25%; bottom: 25%; width: var(--lg-border-hairline); background: var(--lg-line-strong);
+}
+.lg-tabs--primary .lg-tabs__tab.is-active + .lg-tabs__tab::before, .lg-tabs--primary .lg-tabs__tab.is-active::before { display: none; }
+.lg-tabs--primary .lg-tabs__tab:hover { color: var(--lg-ink); }
+.lg-tabs--primary .lg-tabs__tab.is-active { background: var(--lg-tile); color: var(--lg-on-tile); }
+.lg-tabs--primary .lg-tabs__tab.is-active::after {
+  content: ""; position: absolute; left: calc(var(--lg-cell-x) + var(--lg-space-1)); right: calc(var(--lg-cell-x) + var(--lg-space-1)); bottom: 0.3125rem; height: var(--lg-border-emphasis); background: var(--lg-arcana-glow);
+}
+.lg-tabs--secondary { gap: var(--lg-space-5); }
+.lg-tabs--secondary .lg-tabs__tab {
+  height: max(1.5rem, calc(var(--lg-control) - 0.75rem)); padding: 0;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase;
+}
+.lg-tabs--secondary .lg-tabs__tab:hover { color: var(--lg-ink); }
+.lg-tabs--secondary .lg-tabs__tab.is-active { color: var(--lg-ink); }
+.lg-tabs--secondary .lg-tabs__tab.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: var(--lg-border-emphasis); background: var(--lg-arcana-glow); }
+.lg-tabs__count { font-family: var(--lg-font-ui); font-size: var(--lg-text-caption); font-weight: 600; letter-spacing: 0; color: var(--lg-arcana); }
+.lg-tabs__tab.is-active .lg-tabs__count { color: inherit; opacity: 0.8; }

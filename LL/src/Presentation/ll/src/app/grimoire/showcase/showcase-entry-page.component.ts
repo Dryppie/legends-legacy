@@ -9,7 +9,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { LgPageComponent } from '../../shared/components/grimoire';
+import { LgPageComponent } from '@grimoire';
 import { ShowcaseStore } from './showcase.store';
 
 function cssSize(value: string | number | undefined): string | null {

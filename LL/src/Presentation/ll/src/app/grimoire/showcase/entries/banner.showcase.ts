@@ -6,7 +6,7 @@ import {
   LgProfileIdentityComponent,
   LgSlotDirective,
   LgStatFigureComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -173,6 +173,6 @@ export const BANNER_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The headline block.',
   covers: ['LgBannerComponent'],
-  readme: 'design-system/components/Banner/README.md',
+  readme: 'src/app/grimoire/components/banner/README.md',
   component: BannerShowcaseComponent,
 };

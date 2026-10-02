@@ -1,0 +1,15 @@
+/* ---------- ProfileIdentity (D-099) ----------
+   The eyebrow and the fact labels are ink-muted and the values ink, by the allocation (Foundations · Colour, D-015):
+   on a profile, the one gilt figure is the headline number beside it. */
+.lg-identity { display: grid; gap: var(--lg-space-1); min-width: 0; }
+.lg-identity__eyebrow { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-identity__name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-1) var(--lg-space-3); min-width: 0; margin-bottom: var(--lg-space-2); }
+.lg-identity__name .lg-heading { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.lg-identity__noble { display: inline-flex; align-self: center; color: var(--lg-gilt); }
+.lg-identity__facts { display: flex; flex-wrap: wrap; gap: var(--lg-space-2) var(--lg-space-6); margin: 0; font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body); }
+.lg-identity__facts > div { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-2); min-width: 0; }
+.lg-identity__facts dt { color: var(--lg-ink-muted); }
+.lg-identity__facts dd { margin: 0; display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-2); color: var(--lg-ink); font-variant-numeric: tabular-nums; }
+/* A link among the facts (the Guild) is a text link: ink, underlined. */
+.lg-identity__facts a { color: var(--lg-ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--lg-line-strong); text-underline-offset: 0.1875rem; }
+.lg-identity__facts a:hover { text-decoration-color: var(--lg-ink); }

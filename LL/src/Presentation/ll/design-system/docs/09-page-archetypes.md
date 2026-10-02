@@ -1,6 +1,6 @@
 # Page Archetypes
 
-Whole-screen templates. An archetype fixes a screen's shell configuration, what fills the stage, and the order its content comes in. Archetypes are named `Archetype<Name>`. Each has a showcase in the catalogue; the two showcases were built before this naming rule and are still called ScreenOverview and ScreenArchive.
+Whole-screen templates. An archetype fixes a screen's shell configuration, what fills the stage, and the order its content comes in. Archetypes are named `Archetype<Name>`. The game's Character Overview is the worked example of ArchetypeInformation.
 
 ## Rules
 
@@ -12,7 +12,7 @@ Whole-screen templates. An archetype fixes a screen's shell configuration, what 
 
 **Should**
 - Start every new screen from the closest archetype.
-- Add a new archetype, with a showcase, when a screen fits none of them.
+- Add a new archetype when a screen fits none of them, with that screen as its worked example.
 
 **Never**
 - Let a screen drop information to fit an archetype's look — information density is preferred over decorative layouts (Decision D-008).
@@ -24,7 +24,7 @@ Whole-screen templates. An archetype fixes a screen's shell configuration, what 
 **Order:** lead with what the player needs to decide next (the JourneyCard), then who they are (one Banner with the headline figures), then the detail (Panels and Ledgers). Show every value the game knows, label it plainly, and explain it on hover or focus — atmosphere never replaces information.
 **Density:** Standard; the Folio, when there is one, is Comfortable.
 **Layout:** a main and side column (`lg-aside`). The main column holds the profile and then the Ledger grid of attributes; the side column runs beside all of it — the Combat Style Panel first, on one row, then the Essence Loadout (D-121, D-123) — so nothing waits below the loadout (D-103). A long list in the side column takes its compact form — the loadout's slots are compact LoadoutSlots; the Banner's figures beside its identity at Wide. In the game's own frame, while screens migrate, the Page takes `flow` (D-097).
-**Showcase:** ScreenOverview — the Character Overview.
+**Worked example:** the game's Character Overview (`src/app/features/game/character/character-overview-grimoire/`).
 **Status:** Draft
 
 ## ArchetypeArchive
@@ -34,7 +34,6 @@ Whole-screen templates. An archetype fixes a screen's shell configuration, what 
 **Order:** what you are browsing, how it is filtered, the list, then the selected thing's stats in the Folio (`align="start"`).
 **Density:** Standard for the tabs and the EntryList; the Folio is Comfortable.
 **Layout:** a Stage, with the Folio as the inspector.
-**Showcase:** ScreenArchive — the Creature Archive.
 **Status:** Draft
 
 ## Workbench screens
@@ -81,8 +80,6 @@ None of their own: each archetype uses the Shell and the parts it names.
 
 ## Related components
 
-- ScreenOverview — showcase of ArchetypeInformation
-- ScreenArchive — showcase of ArchetypeArchive
 - Page — the information screen frame
 - Stage — the scene backdrop
 - PageHeader — the information screen heading

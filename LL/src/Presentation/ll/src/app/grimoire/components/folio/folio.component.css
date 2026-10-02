@@ -1,0 +1,54 @@
+/* ---------- Folio ---------- */
+.lg-folio {
+  position: relative;
+  display: flex; flex-direction: column;
+  height: 100%; min-height: 0;
+  background: var(--lg-folio);
+  color: var(--lg-ink);
+  box-shadow: var(--lg-shadow-panel);
+  /* No film grain: the Folio bears no art, and its lore and effects would sit straight on the texture (Foundations · Ornament, D-072). */
+}
+.lg-folio__frame {
+  position: absolute; inset: 0.625rem; pointer-events: none;
+  border: var(--lg-border-hairline) solid var(--lg-frame-ink); opacity: var(--lg-frame-opacity);
+}
+.lg-folio__frame::after { content: ""; position: absolute; inset: 0.25rem; border: var(--lg-border-hairline) solid var(--lg-frame-ink); opacity: 0.6; }
+.lg-folio__corner {
+  position: absolute; width: 2.75rem; height: 2.75rem; pointer-events: none;
+  background: var(--lg-gilt); opacity: 0.8;
+  -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.lg-folio__corner--tl { top: 0.375rem; left: 0.375rem; }
+.lg-folio__corner--tr { top: 0.375rem; right: 0.375rem; transform: scaleX(-1); }
+.lg-folio__corner--bl { bottom: 0.375rem; left: 0.375rem; transform: scaleY(-1); }
+.lg-folio__corner--br { bottom: 0.375rem; right: 0.375rem; transform: scale(-1, -1); }
+.lg-folio__scroll {
+  position: relative; flex: 1; min-height: 0; overflow: auto;
+  display: flex; flex-direction: column; gap: var(--lg-space-6);
+  padding: var(--lg-space-10) var(--lg-space-8) var(--lg-space-8);
+  text-align: center;
+}
+.lg-folio--start .lg-folio__scroll { text-align: left; }
+.lg-folio__top { display: flex; flex-direction: column; align-items: center; gap: var(--lg-space-3); }
+.lg-folio--start .lg-folio__top { align-items: flex-start; }
+.lg-folio__emblem { display: grid; place-items: center; margin-bottom: var(--lg-space-2); }
+.lg-folio__eyebrow { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-folio__lore {
+  margin: 0; font-family: var(--lg-font-lore); font-style: italic; font-size: var(--lg-text-lore); line-height: var(--lg-leading-lore); color: var(--lg-ink-muted);
+}
+.lg-folio__lore b, .lg-folio__lore strong { font-weight: 500; color: var(--lg-ink); }
+.lg-folio__effects { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--lg-space-2); font-size: var(--lg-text-body); line-height: var(--lg-leading-body); color: var(--lg-ink); }
+.lg-folio__fx { color: var(--lg-gilt); font-weight: 600; }
+/* An item's Folio is an item context: rarity owns hue, so magnitudes are ink (D-017, D-019). */
+.lg-folio--item .lg-folio__fx { color: var(--lg-ink); }
+.lg-folio--item .lg-folio__top .lg-heading__main { color: var(--lg-rarity-ink, var(--lg-ink)); }
+.lg-folio--common { --lg-rarity-ink: var(--lg-rarity-common); }
+.lg-folio--uncommon { --lg-rarity-ink: var(--lg-rarity-uncommon); }
+.lg-folio--rare { --lg-rarity-ink: var(--lg-rarity-rare); }
+.lg-folio--epic { --lg-rarity-ink: var(--lg-rarity-epic); }
+.lg-folio--unique { --lg-rarity-ink: var(--lg-rarity-unique); }
+.lg-folio--legendary { --lg-rarity-ink: var(--lg-rarity-legendary); }
+.lg-folio--legacy { --lg-rarity-ink: var(--lg-rarity-legacy); }
+.lg-folio__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--lg-space-3); }
+.lg-folio--start .lg-folio__actions { justify-content: flex-start; }
+.lg-folio__footer { position: relative; padding: var(--lg-space-4) var(--lg-space-8) var(--lg-space-6); border-top: var(--lg-border-hairline) solid var(--lg-line); }

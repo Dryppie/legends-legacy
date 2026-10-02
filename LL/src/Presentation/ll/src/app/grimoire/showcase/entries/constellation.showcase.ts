@@ -4,7 +4,7 @@ import {
   LgConstellationItem,
   LgConstellationRing,
   LgStageComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -152,6 +152,6 @@ export const CONSTELLATION_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The stat star chart.',
   covers: ['LgConstellationComponent'],
-  readme: 'design-system/components/Constellation/README.md',
+  readme: 'src/app/grimoire/game/constellation/README.md',
   component: ConstellationShowcaseComponent,
 };

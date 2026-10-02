@@ -4,7 +4,7 @@ import {
   LG_ICON_NAMES,
   LgIconComponent,
   LgIconName,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -124,6 +124,6 @@ export const ICON_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: "The game's icon set.",
   covers: ['LgIconComponent'],
-  readme: 'design-system/components/Icon/README.md',
+  readme: 'src/app/grimoire/primitives/icon/README.md',
   component: IconShowcaseComponent,
 };

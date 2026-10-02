@@ -1,0 +1,22 @@
+/* ---------- Inputs + SearchField ---------- */
+.lg-input {
+  height: var(--lg-control); padding: 0 var(--lg-space-4);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control);
+  background: var(--lg-ground-deep); color: var(--lg-ink);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact);
+}
+.lg-input::placeholder { color: var(--lg-ink-muted); }
+.lg-input:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+.lg-search { position: relative; min-width: 11.25rem; flex: 0 1 20rem; }
+.lg-search__field { position: relative; }
+.lg-search__glass { position: absolute; left: 0.8125rem; top: 50%; margin-top: -0.5rem; color: var(--lg-ink-muted); pointer-events: none; }
+.lg-search__input { width: 100%; padding-left: 2.25rem; }
+.lg-search__panel {
+  position: absolute; left: 0; right: 0; top: calc(100% + 0.375rem); z-index: var(--lg-z-popover);
+  max-height: 12rem; overflow-y: auto; padding: var(--lg-space-1);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
+  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
+}
+.lg-search__option { padding: 0.375rem var(--lg-space-3); border-radius: var(--lg-radius-container); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row); color: var(--lg-ink); cursor: pointer; }
+.lg-search__option.is-active { background: var(--lg-gilt-soft); }
+.lg-search__note { padding: 0.375rem var(--lg-space-3); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }

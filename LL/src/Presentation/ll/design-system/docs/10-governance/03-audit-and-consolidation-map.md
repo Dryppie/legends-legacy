@@ -1,6 +1,6 @@
 # Governance · Audit & consolidation map
 
-An audit of all 34 components and the two showcase compositions, made on 30 September 2026 against their code (`bundle.js`), their styles (`bundle.css`, which the Angular edition shares), their pages, the Principles, the Anti-generic guardrails and D-012. Nothing was changed in this step; the revision queue at the end is the plan.
+An audit of all 34 components and the two showcase compositions, made on 30 September 2026 against their code and styles at the time, their pages, the Principles, the Anti-generic guardrails and D-012. Nothing was changed in this step; the revision queue at the end is the plan.
 
 The verdicts — **keep**, **revise**, **merge**, **retire** — are audit calls, not lifecycle statuses: every part stays Draft until it ships (Governance · Statuses).
 
@@ -178,7 +178,7 @@ CurrencyPill takes any name, amount and icon, but it is documented, registered a
 
 ## Hard-coded values
 
-Values in the component styles that are not tokens, grouped by kind. The Angular edition's `components.css` carries the same values.
+Values in the component styles that are not tokens, grouped by kind. The Angular edition's styles carry the same values.
 
 ### Type sizes
 
@@ -294,7 +294,7 @@ In order. Each item that changes a rule needs a Decision Log entry first (marked
 
 **Priority 3 — workbench readiness and the showcases**
 
-12. **Workbench parts:** Table and ListRow first (ListRow done, D-040; the Table reads the density values when it is built, and builds on `lg-tablewrap`'s column priorities, held first column and minimum width, D-051) (they unlock the Bazaar, guild members and inventory), then Select, NumberField, Checkbox and Toggle, Dialog and confirm (on `LL.layers`, D-057), a Toast and the guided tour, an inline alert (the only place soft status washes may go, D-025), empty and error blocks, a loading skeleton and pagination.
+12. **Workbench parts:** Table and ListRow first (ListRow done, D-040; the Table reads the density values when it is built, and builds on `lg-tablewrap`'s column priorities, held first column and minimum width, D-051) (they unlock the Bazaar, guild members and inventory), then Select, NumberField, Checkbox and Toggle, Dialog and confirm (on the layer stack, D-057), a Toast and the guided tour, an inline alert (the only place soft status washes may go, D-025), empty and error blocks, a loading skeleton and pagination.
 13. **Missing states:** Button loading (done: `pending`, D-087); Chronicle history loading, failed send, lost connection and cooldown; SearchField error; Folio empty and loading; TabStrip blocked states (ItemSlot done, D-087); ItemSlot hover (done, D-087) and TopBar menu hover. Each one takes its words and channel from Standards · States (D-086).
 14. **Container boundaries:** JourneyCard onto `surface` with no frame or shadow (done, D-055), and no edge (D-059); Banner to one edge (done, D-061); the Folio title steps down beside a LevelPlate; StatFigure `sm` beside a LevelPlate.
 15. **Remaining raw values as tokens:** two control heights (32 and 40px), a few opacity steps, the shell's z-layers. Control heights done: `control-*` 44, 40 and 32px (D-038); z-layers done (D-056).

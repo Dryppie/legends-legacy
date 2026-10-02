@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgSectionRuleComponent,
-  LgSlotDirective,
-} from '../../../shared/components/grimoire';
+import { LgSectionRuleComponent, LgSlotDirective } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -75,6 +72,6 @@ export const SECTION_RULE_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'The dividers.',
   covers: ['LgSectionRuleComponent'],
-  readme: 'design-system/components/SectionRule/README.md',
+  readme: 'src/app/grimoire/primitives/section-rule/README.md',
   component: SectionRuleShowcaseComponent,
 };

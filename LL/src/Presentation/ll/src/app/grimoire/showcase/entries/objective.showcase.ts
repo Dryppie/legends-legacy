@@ -3,7 +3,7 @@ import {
   LgButtonComponent,
   LgObjectiveComponent,
   LgSlotDirective,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -137,6 +137,6 @@ export const OBJECTIVE_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'The pinned quest.',
   covers: ['LgObjectiveComponent'],
-  readme: 'design-system/components/Objective/README.md',
+  readme: 'src/app/grimoire/shell/objective/README.md',
   component: ObjectiveShowcaseComponent,
 };

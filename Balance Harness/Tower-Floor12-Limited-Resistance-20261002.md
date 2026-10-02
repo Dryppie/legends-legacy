@@ -1,6 +1,21 @@
 # Floor 12: limited Resistance + Health diagnostic — 2 October 2026
 
-## Queued scope, awaiting qualified preparation
+## Completed diagnostic result
+
+The complete **7,712-fight / 32-fresh-seed** panel finished and passed independent raw-outcome, recipe/order and native-participant checks. All **241 recipes / nine actual compositions**, including all 131 original controls, remain in the result. Of the **128 equipment-eligible recipes**, **122 won 0/32 and six won 1/32**. Floor 12 remains unresolved for expected limited equipment; this diagnostic is not acceptance.
+
+| Original parent | Baseline | Best limited equipment | Full specialization | Median first death: baseline / limited / full |
+| --- | ---: | --- | ---: | --- |
+| e8fa67a114cf… | 0/32 | 1/32, eight items on slots 4 + 10 | 13/32, forty items | 18 / 18 / 36 s |
+| 046ef3e3ae8a… | 0/32 | 1/32, eight items on slots 2 + 9 | 10/32, forty items | 18 / 18 / 36 s |
+
+The separate [saved-report review](../TestResults/tower-floor12-diagnostic-mechanics-review-20261002/completion.json) completed **192 reports / four paired contrasts**, with zero combat or replays. Same-seed first-death delays have median zero for both limited variants and 9.5/9 seconds for full specialization. All 192 reports contain an unreconciled mitigation/prevention flag; recorded guardian ability/type totals reconcile. These descriptive comparisons do not isolate one gear attribute or prove a specific win probability.
+
+Native study time was **199.59 seconds**. Current qualification had already matched **19,912 historical inputs / 131 full replays**, and all **241 recipes** prepared natively. Verification passed **133 Python preparation checks**, the **26 fresh backend qualification guards**, and the preparation/diagnostic fixtures without skips. Final exclusions: **928,732**. No live guardian, kit, progression, engine, migration, configuration or deployment change occurred.
+
+Next is a separately frozen [Power/penetration diagnostic](Tower-Floor12-Penetration-Diagnostic-20261002.md): one isolated offense factor **0.50** and penetration factor **40**, retaining the complete family. It tests whether reducing ordinary-gear pressure while narrowing the Resistance advantage produces viable limited-equipment routes. The original equipment panel is closed; its outcomes are not reused as acceptance samples.
+
+## Original frozen scope
 
 Target: the primary LL World Tower and its offline Balance Harness. This experiment compares equipment against unchanged Volgrin. It does not select or apply a guardian change, change search, or reopen dungeon/acquisition work.
 
@@ -32,7 +47,7 @@ A separate read-only [report review](../TestResults/tower-floor12-diagnostic-mec
 
 ## Execution and evidence
 
-Floor 10 is now applied and fully verified locally. The first floor-12 build could not read the existing NuGet configuration inside the sandbox; it stopped before compilation, qualification, preparation or diagnostic allocation, and restored its source edits. The [recovery record](../TestResults/tower-floor12-build-access-recovery-20261002.json) preserves that failure and binds replacement scripts with fresh output/prerequisite paths. The replacement current build has passed 99 Python and 26 native guards; historical qualification is running. The diagnostic remains conditional and has allocated no seeds.
+Floor 10 is applied and fully verified locally. The first floor-12 build could not read the existing NuGet configuration inside the sandbox; it stopped before compilation, qualification, preparation or diagnostic allocation, and restored its source edits. The [recovery record](../TestResults/tower-floor12-build-access-recovery-20261002.json) preserves that failure and binds replacement scripts with fresh output/prerequisite paths. The replacement current build passed 99 Python and 26 native guards. Its [historical qualification](../TestResults/tower-floor12-current-qualification-buildrepair1-20261002/completion.json) passed: **19,912 input matches / 131 full replays / zero new seeds**. All 27 closed source/owner pins were checked, and the native process exited successfully with no timeout or surviving children. The preparation integration passed **133 Python checks** and completed all 241 seed-free native preparations. The later complete diagnostic is reported above.
 
 Driver: `TestResults/tower-floor12-limited-resistance-screen-buildrepair1-20261002.py`.
 
@@ -48,4 +63,4 @@ Backend execution uses `build/run-tests.ps1`. No migration, application configur
 
 ## Pre-execution verification
 
-The original driver passed syntax validation and six checks covering complete prerequisites, incomplete qualification, changed/incomplete family preparation, historical/incomplete runtimes, the exact real saved family, and missing/duplicated controls. The [verification receipt](../TestResults/tower-floor12-limited-resistance-screen-checks-20261002.json) binds those original bytes; the recovery record verifies that the replacement changes only routing paths, preserving the exact diagnostic guards and budgets. The measured historical archive contains **451,768,182 bytes**; doubled projections are **324.47 seconds and 333.73 MiB** for 7,712 fights. These checks ran no combat and allocated no seeds. The driver is waiting for the prerequisite receipt; diagnostic backend execution remains pending.
+The original driver passed syntax validation and six checks covering complete prerequisites, incomplete qualification, changed/incomplete family preparation, historical/incomplete runtimes, the exact real saved family, and missing/duplicated controls. The [verification receipt](../TestResults/tower-floor12-limited-resistance-screen-checks-20261002.json) binds those original bytes; the recovery record verifies that the replacement changes only routing paths, preserving the exact diagnostic guards and budgets. The measured historical archive contains **451,768,182 bytes**; doubled projections were **324.47 seconds and 333.73 MiB** for 7,712 fights. These pre-execution checks ran no combat and allocated no seeds. The subsequent diagnostic backend execution and independent review both completed successfully.

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgHeadingComponent } from '../../../shared/components/grimoire';
+import { LgHeadingComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -69,6 +69,6 @@ export const HEADING_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'The titles.',
   covers: ['LgHeadingComponent'],
-  readme: 'design-system/components/Heading/README.md',
+  readme: 'src/app/grimoire/primitives/heading/README.md',
   component: HeadingShowcaseComponent,
 };

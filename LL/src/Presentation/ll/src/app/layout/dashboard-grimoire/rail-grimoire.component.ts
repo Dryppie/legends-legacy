@@ -6,7 +6,7 @@ import { SidebarComponent } from '../dashboard/sidebar/sidebar.component';
 import { SidebarSection, Tab } from '../../shared/models/sidebar-item';
 import { playerJourneySidebarLockReason } from '../../core/services/client-side/player-journey/player-journey';
 import { environment } from '../../../environments/environment';
-import { LgActivityComponent, LgIconName, LgNavRailComponent, LgNavSection, LgSlotDirective } from '../../shared/components/grimoire';
+import { LgActivityComponent, LgIconName, LgNavRailComponent, LgNavSection, LgSlotDirective } from '@grimoire';
 import { actionLabel, injectActionProgress } from './action-progress';
 
 /** Grimoire icon names for the sidebar's destinations: the same drawings as the sidebar's own SVGs. */

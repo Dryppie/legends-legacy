@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { GrimoirePreviewPreferenceService } from '../../core/services/client-side/grimoire-preview/grimoire-preview-preference.service';
-import { lgAnnounce } from '../../shared/components/grimoire/grimoire-a11y';
+import { lgAnnounce } from '@grimoire';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { DashboardGrimoireComponent } from './dashboard-grimoire.component';
 

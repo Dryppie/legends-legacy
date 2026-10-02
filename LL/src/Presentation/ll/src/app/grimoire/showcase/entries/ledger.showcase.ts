@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgLedgerComponent,
-  LgLedgerRow,
-} from '../../../shared/components/grimoire';
+import { LgLedgerComponent, LgLedgerRow } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -178,6 +175,6 @@ export const LEDGER_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The labelled value list.',
   covers: ['LgLedgerComponent'],
-  readme: 'design-system/components/Ledger/README.md',
+  readme: 'src/app/grimoire/components/ledger/README.md',
   component: LedgerShowcaseComponent,
 };

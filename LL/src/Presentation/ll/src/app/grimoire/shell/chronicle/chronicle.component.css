@@ -1,0 +1,169 @@
+/* ---------- Chronicle (chat + game log) ---------- */
+.lg-ch--all, .lg-ch--general { --lg-ch: var(--lg-channel-general); }
+.lg-ch--trade { --lg-ch: var(--lg-channel-trade); }
+.lg-ch--help { --lg-ch: var(--lg-channel-help); }
+.lg-ch--guild { --lg-ch: var(--lg-channel-guild); }
+.lg-ch--whisper { --lg-ch: var(--lg-channel-whisper); }
+.lg-ch--raid { --lg-ch: var(--lg-channel-raid); }
+.lg-ch--invites { --lg-ch: var(--lg-channel-invites); }
+.lg-ch--system { --lg-ch: var(--lg-channel-system); }
+.lg-ch--loot { --lg-ch: var(--lg-channel-loot); }
+
+.lg-chronicle {
+  display: flex; flex-direction: column;
+  height: var(--lg-chronicle-height); min-height: 0;
+  /* Docked, the Chronicle is a shell region on Level 0: ground with a line rule. Floating, it is a Level 1 surface. */
+  background: var(--lg-ground); color: var(--lg-ink);
+  border-top: var(--lg-border-hairline) solid var(--lg-line);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact);
+}
+.lg-chronicle.is-collapsed { height: var(--lg-chronicle-collapsed); }
+.lg-chronicle--floating {
+  height: var(--lg-chronicle-float-height); max-height: calc(100cqh - 2 * var(--lg-space-6));
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float); box-shadow: var(--lg-shadow-float); overflow: hidden; background: var(--lg-surface-solid);
+}
+.lg-chronicle--floating.is-tall { height: var(--lg-chronicle-float-tall); }
+.lg-chronicle--floating.is-collapsed { height: var(--lg-chronicle-collapsed); }
+.lg-chronicle__grip { cursor: grab; touch-action: none; }
+.lg-chronicle__grip:active { cursor: grabbing; }
+.lg-chronicle__strip-label { display: none; }
+
+/* Collapsed in a narrow container (the docked strip at the far right): a vertical tab. */
+@container (max-width: 7.5rem) {
+  .lg-chronicle.is-collapsed { height: 100%; border-top: 0; }
+  .lg-chronicle.is-collapsed .lg-chronicle__head { flex-direction: column-reverse; justify-content: flex-end; gap: var(--lg-space-3); height: 100%; padding: var(--lg-space-3) 0; }
+  .lg-chronicle.is-collapsed .lg-chronicle__ticker { flex: 1; flex-direction: column; justify-content: flex-start; gap: var(--lg-space-3); width: 100%; }
+  .lg-chronicle.is-collapsed .lg-chronicle__ticker > :not(.lg-chronicle__strip-label):not(.lg-chronicle__unread) { display: none; }
+  .lg-chronicle.is-collapsed .lg-chronicle__strip-label {
+    display: block; writing-mode: vertical-rl;
+    font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted);
+  }
+  .lg-chronicle.is-collapsed .lg-chronicle__aside { display: none; }
+}
+
+.lg-chronicle__head { display: flex; align-items: center; gap: var(--lg-space-3); flex: none; min-height: 2.5rem; padding: 0 var(--lg-space-3) 0 var(--lg-space-5); border-bottom: var(--lg-border-hairline) solid var(--lg-line); }
+.is-collapsed .lg-chronicle__head { height: 100%; border-bottom: 0; }
+.lg-chronicle__channels { display: flex; align-items: stretch; gap: var(--lg-space-5); flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; contain: inline-size; }
+.lg-chronicle__channel {
+  position: relative; flex: none; display: inline-flex; align-items: center; gap: 0.375rem;
+  height: 2.5rem; margin: 0; padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase;
+  color: var(--lg-ink-muted);
+}
+.lg-chronicle__channel:hover { color: var(--lg-ink); }
+.lg-chronicle__channel.is-active { color: var(--lg-ink); }
+.lg-chronicle__channel.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--lg-border-emphasis); background: var(--lg-ink); }
+.lg-chronicle__channel:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
+.lg-chronicle__unread {
+  display: inline-grid; place-items: center; min-width: 1.125rem; height: 1.125rem; padding: 0 0.3125rem;
+  border-radius: var(--lg-radius-control); background: var(--lg-surface-raised); color: var(--lg-ink);
+  font-size: var(--lg-text-caption); line-height: var(--lg-leading-mark); font-weight: 600; letter-spacing: 0;
+}
+.lg-chronicle__aside { display: flex; align-items: center; gap: var(--lg-space-2); flex: none; }
+.lg-chronicle__toggle {
+  display: grid; place-items: center; flex: none; width: 2rem; height: 2rem;
+  border: 0; border-radius: var(--lg-radius-control); background: none; color: var(--lg-ink-muted); cursor: pointer;
+}
+.lg-chronicle__toggle:hover { color: var(--lg-ink); background: var(--lg-surface-raised); }
+.lg-chronicle__toggle:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+
+.lg-chronicle__ticker {
+  display: flex; align-items: center; gap: var(--lg-space-2); flex: 1; min-width: 0; height: 100%;
+  margin: 0; padding: 0; border: 0; background: none; cursor: pointer; text-align: left;
+  font: inherit; color: var(--lg-ink);
+}
+.lg-chronicle__ticker > .lg-chronicle__tag, .lg-chronicle__ticker > .lg-chronicle__author { flex: none; }
+.lg-chronicle__ticker > .lg-chronicle__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-chronicle__ticker:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
+
+.lg-chronicle__log {
+  display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0;
+  list-style: none; margin: 0; padding: var(--lg-space-2) var(--lg-space-5);
+  overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--lg-line-strong) transparent;
+}
+.lg-chronicle__log:focus-visible { outline: 2px solid transparent; box-shadow: inset 0 0 0 2px var(--lg-focus); }
+/* The log and the jump control share a body, so the control floats over the log without moving a line. */
+.lg-chronicle__body { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+/* Spatial: opened by the player, the body rises in over duration-base on ease-enter; closing is at once — the frame
+   becomes its bar in one frame, since height never animates. */
+.lg-chronicle.is-entering .lg-chronicle__body, .lg-chronicle.is-entering .lg-chronicle__composer { animation: lg-enter var(--lg-duration-base) var(--lg-ease-enter) both; }
+/* Reading back: new lines never scroll the log. The count waits over the log's foot, at a floating surface's level. */
+.lg-chronicle__jump {
+  position: absolute; left: 50%; bottom: var(--lg-space-2); z-index: var(--lg-z-raised);
+  translate: -50% 0; box-shadow: var(--lg-shadow-float); white-space: nowrap;
+  animation: lg-enter var(--lg-duration-fast) var(--lg-ease-enter) both;
+}
+.lg-chronicle__line { position: relative; padding: 1px 0.375rem 1px 3.125rem; border-radius: var(--lg-radius-container); overflow-wrap: anywhere; }
+.lg-chronicle__line:first-child { margin-top: auto; }
+.lg-chronicle__time {
+  display: inline-block; width: 2.75rem; margin-left: -2.75rem;
+  font-size: var(--lg-text-caption); color: var(--lg-ink-muted); font-variant-numeric: tabular-nums lining-nums;
+}
+.lg-chronicle__tag { margin-right: 0.375rem; font-size: var(--lg-text-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ch); }
+.lg-chronicle__author { margin-right: 0.375rem; font-weight: 600; color: var(--lg-ch); }
+.lg-chronicle__author::after { content: ":"; }
+button.lg-chronicle__author { margin: 0 0.375rem 0 0; padding: 0; border: 0; background: none; font: inherit; font-weight: 600; cursor: pointer; border-radius: var(--lg-radius-control); }
+button.lg-chronicle__author:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+button.lg-chronicle__author:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+.lg-chronicle__noble { display: inline-flex; margin-right: 0.25rem; vertical-align: -0.0625rem; color: var(--lg-gilt); }
+.lg-chronicle__text { color: var(--lg-ink); }
+.lg-chronicle__line--system .lg-chronicle__text, .lg-chronicle__line--loot .lg-chronicle__text, .lg-chronicle__ticker.lg-chronicle__line--system .lg-chronicle__text, .lg-chronicle__ticker.lg-chronicle__line--loot .lg-chronicle__text { font-family: var(--lg-font-lore); font-style: italic; font-size: var(--lg-text-lore-sm); line-height: var(--lg-leading-lore-sm-row); color: var(--lg-ink-muted); }
+.lg-chronicle__line.is-mention { background: var(--lg-surface-raised); box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink); }
+.lg-chronicle__line .lg-mention { font-weight: 700; color: var(--lg-ink); }
+
+.lg-chronicle__composer { display: flex; align-items: center; gap: var(--lg-space-2); flex: none; padding: var(--lg-space-1) var(--lg-space-3) var(--lg-space-3) var(--lg-space-5); }
+.lg-chronicle__prefix {
+  flex: none; display: inline-flex; align-items: center; height: 1.375rem; padding: 0 0.375rem;
+  border: var(--lg-border-hairline) solid currentColor; border-radius: var(--lg-radius-control);
+  font-size: var(--lg-text-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ch);
+}
+.lg-chronicle__input {
+  flex: 1; min-width: 0; height: 2.125rem; padding: 0 var(--lg-space-4);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control);
+  background: var(--lg-surface-raised); color: var(--lg-ink);
+  font: inherit; font-size: var(--lg-text-body-compact);
+}
+.lg-chronicle__input { background: var(--lg-ground-deep); }
+.lg-chronicle__input::placeholder { color: var(--lg-ink-muted); }
+.lg-chronicle__input:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+.lg-chronicle__send { display: grid; place-items: center; flex: none; margin: 0; padding: 0.25rem; border: 0; background: none; cursor: pointer; }
+.lg-chronicle__send:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
+
+/* Day breaks (D-112): the date between two days' lines, a label between two line rules. */
+.lg-chronicle__line--day { display: flex; align-items: center; gap: var(--lg-space-2); padding: var(--lg-space-2) 0.375rem; }
+.lg-chronicle__line--day::before, .lg-chronicle__line--day::after { content: ""; flex: 1; height: var(--lg-border-hairline); background: var(--lg-line); }
+.lg-chronicle__line--day .lg-chronicle__text { flex: none; font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+/* A composer of the host's own (D-112): it takes the composer's place and may use its parts — the prefix, the input
+   (an <input> or a contenteditable editor) and the send key — with these: a note and an error line under it, a
+   character count, and the @mention suggestions, a Level 2 floating listbox above the input. */
+.lg-chronicle__composer--custom { display: block; }
+.lg-chronicle__composer--custom > * { min-width: 0; }
+.lg-chronicle__row { display: flex; align-items: center; gap: var(--lg-space-2); min-width: 0; }
+.lg-chronicle__input[contenteditable] { display: block; height: auto; min-height: 2.125rem; max-height: 6rem; overflow-y: auto; padding-top: var(--lg-space-2); padding-bottom: var(--lg-space-2); white-space: pre-wrap; overflow-wrap: anywhere; line-height: var(--lg-leading-body-compact); }
+.lg-chronicle__input[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--lg-ink-muted); pointer-events: none; }
+.lg-chronicle__input[aria-disabled="true"], .lg-chronicle__input:disabled { color: var(--lg-ink-disabled); cursor: not-allowed; }
+.lg-chronicle__note, .lg-chronicle__error { margin: var(--lg-space-1) 0 0; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+.lg-chronicle__error { color: var(--lg-danger); }
+.lg-chronicle__note a { color: var(--lg-ink); text-decoration: underline; text-underline-offset: 0.15em; }
+.lg-chronicle__count { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); font-variant-numeric: tabular-nums lining-nums; }
+.lg-chronicle__count.is-over { color: var(--lg-danger); }
+.lg-chronicle__suggest {
+  min-width: 12rem; max-height: 14rem; overflow: auto; margin: 0; padding: var(--lg-space-1); list-style: none;
+  background: var(--lg-surface-raised); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float); box-shadow: var(--lg-shadow-float);
+  font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row);
+}
+.lg-chronicle__option { padding: 0.375rem var(--lg-space-3); border-radius: var(--lg-radius-container); color: var(--lg-ink); cursor: pointer; }
+.lg-chronicle__option:hover, .lg-chronicle__option.is-active { background: var(--lg-surface-solid); box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink); }
+.lg-chronicle__status { padding: 0.375rem var(--lg-space-3); color: var(--lg-ink-muted); }
+/* Channel settings (the aside): a quiet icon button opening a Level 2 menu of channel checkboxes. */
+.lg-chronicle__menu {
+  display: grid; gap: 2px; min-width: 12rem; padding: var(--lg-space-2);
+  background: var(--lg-surface-raised); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float); box-shadow: var(--lg-shadow-float);
+}
+.lg-chronicle__menu-title { margin: 0 0 var(--lg-space-1); padding: 0 var(--lg-space-2); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-chronicle__choice { display: flex; align-items: center; gap: var(--lg-space-2); min-height: 2rem; padding: 0 var(--lg-space-2); border-radius: var(--lg-radius-container); color: var(--lg-ink); cursor: pointer; font-size: var(--lg-text-body-compact); }
+.lg-chronicle__choice:hover { background: var(--lg-surface-solid); }
+.lg-chronicle__online { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); white-space: nowrap; }
+/* A native checkbox in Grimoire's selection colour: checked is selected, arcana's job (Foundations · Colour). */
+.lg-check { flex: none; width: 1rem; height: 1rem; margin: 0; accent-color: var(--lg-arcana-glow); }
+.lg-check:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }

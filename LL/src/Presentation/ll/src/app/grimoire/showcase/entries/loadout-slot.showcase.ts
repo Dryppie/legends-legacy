@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LgLoadoutAbility,
-  LgLoadoutSlotComponent,
-} from '../../../shared/components/grimoire';
+import { LgLoadoutAbility, LgLoadoutSlotComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -201,6 +198,6 @@ export const LOADOUT_SLOT_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'An Essence loadout slot.',
   covers: ['LgLoadoutSlotComponent'],
-  readme: 'design-system/components/LoadoutSlot/README.md',
+  readme: 'src/app/grimoire/game/loadout-slot/README.md',
   component: LoadoutSlotShowcaseComponent,
 };

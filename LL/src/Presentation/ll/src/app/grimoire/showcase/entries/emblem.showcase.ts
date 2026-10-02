@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgEmblemComponent } from '../../../shared/components/grimoire';
+import { LgEmblemComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -68,6 +68,6 @@ export const EMBLEM_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The attribute sign.',
   covers: ['LgEmblemComponent'],
-  readme: 'design-system/components/Emblem/README.md',
+  readme: 'src/app/grimoire/game/emblem/README.md',
   component: EmblemShowcaseComponent,
 };

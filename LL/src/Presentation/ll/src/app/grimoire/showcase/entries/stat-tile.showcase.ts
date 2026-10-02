@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgStatTileComponent } from '../../../shared/components/grimoire';
+import { LgStatTileComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -177,6 +177,6 @@ export const STAT_TILE_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The compact stat.',
   covers: ['LgStatTileComponent'],
-  readme: 'design-system/components/StatTile/README.md',
+  readme: 'src/app/grimoire/components/stat-tile/README.md',
   component: StatTileShowcaseComponent,
 };

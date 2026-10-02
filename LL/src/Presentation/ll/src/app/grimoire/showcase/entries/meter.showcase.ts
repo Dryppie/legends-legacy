@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgMeterComponent } from '../../../shared/components/grimoire';
+import { LgMeterComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -125,6 +125,6 @@ export const METER_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'The progress bar.',
   covers: ['LgMeterComponent'],
-  readme: 'design-system/components/Meter/README.md',
+  readme: 'src/app/grimoire/primitives/meter/README.md',
   component: MeterShowcaseComponent,
 };

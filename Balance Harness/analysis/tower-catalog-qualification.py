@@ -305,6 +305,28 @@ def validate_mixed_defense_family(proposal, original, defense, gear, retained, f
     return cells
 
 
+def floor12_family_module():
+    spec = importlib.util.spec_from_file_location('floor12_family_binding', Path(__file__).with_name('tower-floor12-family-binding.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_floor12_bound_family(proposal, original):
+    return floor12_family_module().validate(proposal, original)
+
+
+def floor12_restoration_module():
+    spec = importlib.util.spec_from_file_location('floor12_restoration_binding', Path(__file__).with_name('tower-floor12-restoration-binding.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_floor12_restoration_family(proposal, original):
+    return floor12_restoration_module().validate(proposal, original)
+
+
 def validate_family(proposal, original):
     validators = {'floor6-partial-restoration-proposal-v1': validate_partial_family,
                   'floor2-mixed-armor-proposal-v1': validate_mixed_armor_family,
@@ -312,12 +334,14 @@ def validate_family(proposal, original):
                   'floor7-mixed-resistance-proposal-v1': validate_mixed_resistance_family,
                   'floor8-limited-armor-proposal-v1': validate_limited_armor_family,
                   'floor9-limited-resistance-proposal-v1': validate_limited_resistance_family,
-                  'floor10-limited-armor-proposal-v1': validate_floor10_limited_armor_family}
+                  'floor10-limited-armor-proposal-v1': validate_floor10_limited_armor_family,
+                  'floor12-limited-resistance-bound-family-v1': validate_floor12_bound_family,
+                  'floor12-limited-restoration-bound-family-v1': validate_floor12_restoration_family}
     owner_module().check(proposal['version'] in validators, 'Unknown family proposal version')
     return validators[proposal['version']](proposal, original)
 
 
-def admit_family(path, source, api, tests):
+def admit_family(path, source, api, tests, input_pins=None):
     io = owner_module()
     admission = io.read(path)
     qualified = Path(admission['qualificationOwner'])
@@ -353,4 +377,15 @@ def admit_family(path, source, api, tests):
              proposal['currentTowerSha256'] == plan['currentContentHashes']['world-tower/tower-floors.json'] and
              proposal['currentAbilitiesSha256'] == plan['currentContentHashes']['combat/abilities.json'],
              'Proposal source or current catalog differs')
-    return validate_family(proposal, io.read(source/'cells.json'))
+    cells = validate_family(proposal, io.read(source/'cells.json'))
+    if input_pins is not None and proposal['version'] in ('floor12-limited-resistance-bound-family-v1',
+                                                        'floor12-limited-restoration-bound-family-v1'):
+        # Keep the immutable historical proposal and qualification evidence bound
+        # throughout seed-free native preparation, including derivation helpers.
+        helper = floor12_restoration_module() if proposal['version'] == 'floor12-limited-restoration-bound-family-v1' else floor12_family_module()
+        pins = helper.input_pins(proposal)
+        pins.update({str(qualified/name): pin for name, pin in admission['qualificationPins'].items()})
+        pins.update({str(proposal_path): admission['proposalSha256'], str(plan_path): request['qualificationPlanPin'],
+                     str(Path(request['audit'])): request['auditPin'], str(Path(path).resolve()): io.sha(path)})
+        input_pins.update(pins)
+    return cells

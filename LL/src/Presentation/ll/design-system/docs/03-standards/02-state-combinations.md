@@ -62,7 +62,7 @@ Two orders, for two different questions. Neither replaces the other.
 
 Identity and focus are never dropped. A dropped state is still in the accessible name and the Folio.
 
-**Which state is the row's one Tag.** The first that applies, in this order: Failed, Claimable, Expiring soon, Locked, Listed, In escrow, Borrowed, Equipped, Attuned, Assigned, Captured, In progress, New, Completed, Claimed, Expired, Opened. The order puts what the player must act on first, then what blocks them, then what describes the thing, then history (D-086). `LL.topState` picks it. Markers sit beside the Tag: the favourite ribbon, an unread count, the current diamond, the attention diamond. Markers don't compete with the Tag, and each has its own place.
+**Which state is the row's one Tag.** The first that applies, in this order: Failed, Claimable, Expiring soon, Locked, Listed, In escrow, Borrowed, Equipped, Attuned, Assigned, Captured, In progress, New, Completed, Claimed, Expired, Opened. The order puts what the player must act on first, then what blocks them, then what describes the thing, then history (D-086). `lgTopState` picks it. Markers sit beside the Tag: the favourite ribbon, an unread count, the current diamond, the attention diamond. Markers don't compete with the Tag, and each has its own place.
 
 The two orders agree where they meet: a blocked thing loses its attention mark, and New is always last to show.
 
@@ -95,7 +95,7 @@ Each mark has one place on each part. Corner marks sit `space-1` in from the fra
 
 **NavRail.** The current item's gilt bar at its start and its gilt wash (where the player is, D-118); the icon; the title; at the item's end, one of: "Locked" (availability), a count badge, or the attention diamond (`ready`, when there is nothing to count). Locked comes first, then the count. In `compact`, the badge sits on the icon's top end corner and the diamond on the item's (D-115, D-119), and a locked item says so in its tip.
 
-**List and ListRow** follow EntryList: the selection bar at the start, the thumbnail's rarity edge, the name and code, the one Tag after them, and markers beside the Tag. ListRow takes its markers through `tags` until DS-040 gives it a `ready` prop.
+**List and ListRow** follow EntryList: the selection bar at the start, the thumbnail's rarity edge, the name and code, the one Tag after them, and markers beside the Tag. ListRow takes its markers through its `tags` slot (`lgSlot="tags"`) until DS-040 gives it a `ready` input.
 
 ## Worked examples
 
@@ -110,8 +110,6 @@ Each example shows what the player sees, and what is said only in words.
 | An undiscovered creature that is the current Creature Focus | An EntryList of creatures | "Undiscovered" in place of the name, in `ink-muted`; the "Creature Focus" Tag (Assigned: the Focus activity holds it) | The hint, "Found on Floors 10–20", and the Focus cooldown, in the Folio |
 | A Bazaar-listed item that is a favourite | An inventory ItemSlot | The rarity identity; the ribbon bottom start; meta "Listed · 1,200 Cinders" | Nothing: Listed is the meta's word, Favourite the mark |
 | A captured Arena defence build that differs from the live build | The Arena defence row | The "In defence snapshot" Tag; "Changed since 14:02" in `ink-muted` | The snapshot rule, in the Folio: "Snapshot from 14:02. Changes apply at the next snapshot." |
-
-StateCombinationSpecimen, in the catalogue's Standards group, draws each one.
 
 ## Tokens used
 
@@ -131,7 +129,7 @@ StateCombinationSpecimen, in the catalogue's Standards group, draws each one.
 
 | Name | What it is |
 | --- | --- |
-| `LL.topState(states)` | The row's one Tag, by the Tag order |
+| `lgTopState(states)` | The row's one Tag, by the Tag order |
 | ItemSlot `ready` | The attention diamond. `true`, or the words: "Upgrade available". The Claimable state draws it too |
 | ItemSlot `state: 'equipped'` or `'attuned'` | The in-use square, bottom start, and the word in the meta line |
 | ItemSlot `favourite` | The ribbon, bottom start, when there is no in-use square; until the ribbon is drawn, the word in the meta line |

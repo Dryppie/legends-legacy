@@ -1,23 +1,21 @@
 #!/usr/bin/env node
-// Writes the icon set into both editions from icons.json, the one source of icon drawings (D-125):
+// Writes the icon set from icons.json, the one source of icon drawings (D-125, D-133):
 //
-//   design-system/icons.json → components/bundle.js     the ICONS block, between // @icons-start and // @icons-end
-//                            → components/index.d.ts    the IconName type, between the same two lines
-//                            → src/app/shared/components/grimoire/grimoire-icons.ts   the whole file
+//   design-system/icons.json → src/app/grimoire/core/grimoire-icons.ts   (LG_ICONS, LgIconName, LG_ICON_NAMES, LG_ICON_MARKERS)
 //
-// Never edit those by hand: change icons.json and run this script. An entry in icons.json is
+// Never edit that file by hand: change icons.json and run this script. An entry in icons.json is
 //
 //   "name": { "viewBox": "0 0 24 24", "strokeWidth": 1.6, "body": "<path d=\"…\"/>", "marker": true, "note": "…" }
 //
 // where `body` is the shapes inside the svg, drawn in currentColor; `marker` (true or left out) marks a solid inline
 // marker, the only icons drawn at 12px; and `note` (optional) becomes a comment in the generated code. The order of
-// the entries is the order of `LL.Icon.names` and `LG_ICON_NAMES`. Foundations · Iconography sets how an icon is drawn.
+// the entries is the order of `LG_ICON_NAMES`. Foundations · Iconography sets how an icon is drawn.
 //
 // The SVG files in assets/Icons/ are the game's own sidebar files, shown as assets; this script does not touch them.
 //
 // Run from the repository root (any working directory works; the paths are resolved from this file):
-//   node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs           write the generated code
-//   node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs --check   exit 1 if any of it is out of date
+//   node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs           write grimoire-icons.ts
+//   node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs --check   exit 1 if it is out of date
 //
 // No dependencies; Node 18 or later.
 
@@ -57,29 +55,6 @@ if (problems.length) fail(`icons.json:\n  ${problems.join('\n  ')}`);
 // ---- the generated code ----------------------------------------------------------------------------------------------
 const tsString = (s) => `'${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
-function bundleBlock() {
-  const lines = [`  // @icons-start. ${generated}`, '  var ICONS = {'];
-  names.forEach((name, i) => {
-    const d = icons[name];
-    const entry = { viewBox: d.viewBox, strokeWidth: d.strokeWidth, body: d.body };
-    if (d.marker) entry.marker = true;
-    if (d.note) lines.push(`    // ${d.note}`);
-    lines.push(`    ${JSON.stringify(name)}: ${JSON.stringify(entry)}${i < names.length - 1 ? ',' : ''}`);
-  });
-  lines.push('  };', '  // @icons-end');
-  return lines.join('\n');
-}
-
-function typesBlock() {
-  const lines = [`// @icons-start. ${generated}`, "/** Names of the icons in the set (icons.json), drawn in currentColor by Icon. */", 'export type IconName ='];
-  names.forEach((name, i) => {
-    if (icons[name].note) lines.push(`  /** ${icons[name].note} */`);
-    lines.push(`  | '${name}'${i < names.length - 1 ? '' : ';'}`);
-  });
-  lines.push('// @icons-end');
-  return lines.join('\n');
-}
-
 function angularFile() {
   const lines = [
     `/* ${generated} */`,
@@ -110,36 +85,18 @@ function angularFile() {
   return lines.join('\n');
 }
 
-// A block between `// @icons-start` and `// @icons-end` inside a hand-written file.
-function withBlock(path, block) {
-  const text = nl(readFileSync(path, 'utf8'));
-  const re = /^[ \t]*\/\/ @icons-start\b[^\n]*\n[\s\S]*?^[ \t]*\/\/ @icons-end[^\n]*$/m;
-  if (!re.test(text)) fail(`build-icons: ${path.slice(ds.length + 1)} has no // @icons-start … // @icons-end block to write into.`);
-  return text.replace(re, () => block);
-}
-
-const angularPath = join(ds, '..', 'src', 'app', 'shared', 'components', 'grimoire', 'grimoire-icons.ts');
-const targets = [
-  ['design-system/components/bundle.js', join(ds, 'components', 'bundle.js'), (p) => withBlock(p, bundleBlock())],
-  ['design-system/components/index.d.ts', join(ds, 'components', 'index.d.ts'), (p) => withBlock(p, typesBlock())],
-  ['src/app/shared/components/grimoire/grimoire-icons.ts', angularPath, () => angularFile()],
-];
-
-const stale = [];
-for (const [label, path, make] of targets) {
-  const raw = existsSync(path) ? readFileSync(path, 'utf8') : null;
-  const next = make(path);
-  if (raw !== null && nl(raw) === next) continue;
-  if (check) { stale.push(label); continue; }
-  // Keep the file's line endings: the app's sources use CRLF, the design system LF.
-  writeFileSync(path, raw !== null && raw.includes('\r\n') ? next.replace(/\n/g, '\r\n') : next);
-}
+const angularPath = join(ds, '..', 'src', 'app', 'grimoire', 'core', 'grimoire-icons.ts');
+const raw = existsSync(angularPath) ? readFileSync(angularPath, 'utf8') : null;
+const next = angularFile();
+const current = raw !== null && nl(raw) === next;
 
 if (check) {
-  if (stale.length) fail(`Out of date with design-system/icons.json: ${stale.join(', ')}. Run: node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs`);
-  console.log(`The icon code matches icons.json (${names.length} icons).`);
+  if (!current) fail('src/app/grimoire/core/grimoire-icons.ts is out of date with design-system/icons.json. Run: node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs');
+  console.log(`grimoire-icons.ts matches icons.json (${names.length} icons).`);
 } else {
-  console.log(`Wrote the icon set (${names.length} icons) into components/bundle.js, components/index.d.ts and src/app/shared/components/grimoire/grimoire-icons.ts.`);
+  // Keep the file's line endings.
+  if (!current) writeFileSync(angularPath, raw !== null && raw.includes('\r\n') ? next.replace(/\n/g, '\r\n') : next);
+  console.log(`Wrote the icon set (${names.length} icons) into src/app/grimoire/core/grimoire-icons.ts.`);
 }
 
 function fail(message) {

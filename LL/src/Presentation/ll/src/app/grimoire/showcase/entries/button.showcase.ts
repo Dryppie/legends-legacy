@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgButtonComponent } from '../../../shared/components/grimoire';
+import { LgButtonComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -154,6 +154,6 @@ export const BUTTON_SHOWCASE: ShowcaseEntry = {
   tier: 'primitives',
   summary: 'The command button.',
   covers: ['LgButtonComponent'],
-  readme: 'design-system/components/Button/README.md',
+  readme: 'src/app/grimoire/primitives/button/README.md',
   component: ButtonShowcaseComponent,
 };

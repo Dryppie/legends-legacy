@@ -105,7 +105,6 @@ These components still break the allocation. They are listed rather than hidden 
 | ItemSlot | Selection is an `arcana-glow` ring — the same form as an Uncommon edge, ΔE00 13.4 away | A shape: an offset ring or a corner mark |
 | Presence | "Online" is `arcana` with an `arcana-glow` dot | A filled `ink` dot and the word |
 | TabStrip | Tab counts are `arcana` | `ink-muted`, unless the count means new |
-| Showcases | The Overview sets some values in gilt in its own preview styles | Follow their components |
 
 ## Context ownership
 
@@ -500,16 +499,16 @@ One reader breaks the one-component rule and is flagged rather than hidden: TabS
 - **Roles are named for their job, never their hue:** `ink-muted`, not `beige`; `danger`, not `red`. A primitive never names a role: `umber-900`, not `ground-900`.
 - **Modifiers mean the same everywhere:** `-deep` and `-raised` step a ground down or up, `-strong` is the edge that must be seen, `-muted` and `-disabled` step ink back, `-soft` is the wash behind that colour's text, `on-` is what sits on that fill.
 - **Names are lowercase with hyphens, unique across every token family** (the page shares one namespace for colour, shadow, spacing, radius, layout and z-index).
-- **A step's number places it by lightness** (OKLab L) between its neighbours; take a free number between them rather than renumbering the ramp. `orchid-100` is the only orchid step left once `orchid-300` was removed. `orchid-100` is the only orchid step left once `orchid-300` was removed. `orchid-100` is the only orchid step left once `orchid-300` was removed. `orchid-100` is the only orchid step left once `orchid-300` was removed.
+- **A step's number places it by lightness** (OKLab L) between its neighbours; take a free number between them rather than renumbering the ramp. `orchid-100` is the only orchid step left once `orchid-300` was removed.
 
 ## How aliases work
 
-- A Tier 1 token holds a raw colour. Every other colour token holds an alias, `{brass-300}`, which the page compiles to `var(--brass-300)`: `--gilt` resolves in the browser to brass-300's value, so a component's `var(--gilt)` never changes when the palette is reorganised.
+- A Tier 1 token holds a raw colour. Every other colour token holds an alias, `{brass-300}`, which the page compiles to `var(--lg-brass-300)`: `--lg-gilt` resolves in the browser to brass-300's value, so a component's `var(--lg-gilt)` never changes when the palette is reorganised.
 - Chains are short: Tier 2 and Tier 3 alias a primitive directly (one step); a component token may alias a role (two steps). The page would follow up to 16; we keep it to two.
 - An alias must name an existing token and cannot mix, tint or fade it. A translucent colour is a primitive of its own (`slate-950-a80`, for `scrim`).
 - Changing a primitive moves every token that aliases it — its usage line lists them. To change one role, repoint that role.
-- **Raw values outside Tier 1.** Shadow tokens cannot alias, so three repeat palette values by hand: `focus-ring` repeats `slate-900` (#101014) and `brass-200` (#f5d48f), and `shadow-text-art` repeats `slate-950` (#0b0b0f); `shadow-panel` and `shadow-float` use black, which has no primitive. Changing those primitives means editing those shadows too. The two list-end masks in `bundle.css` use `#000` as an alpha value; a mask is not a colour and takes no token.
-- **Check:** no component names a primitive. Search `bundle.css`, `bundle.js` and every `preview.html` for `var(--umber-`, `--bone-`, `--brass-`, `--verdigris-`, `--ember-`, `--amber-`, `--azure-`, `--orchid-` and `--hue-`; today there are none.
+- **Raw values outside Tier 1.** Shadow tokens cannot alias, so three repeat palette values by hand: `focus-ring` repeats `slate-900` (#101014) and `brass-200` (#f5d48f), and `shadow-text-art` repeats `slate-950` (#0b0b0f); `shadow-panel` and `shadow-float` use black, which has no primitive. Changing those primitives means editing those shadows too. EntryList's list-end mask uses `#000` as an alpha value; a mask is not a colour and takes no token.
+- **Check:** no component names a primitive. Search the components' CSS (`src/app/grimoire/**/*.css`, all but the compiled `tokens/tokens.css`) for `var(--lg-umber-`, `--lg-bone-`, `--lg-brass-`, `--lg-verdigris-`, `--lg-ember-`, `--lg-amber-`, `--lg-azure-`, `--lg-orchid-` and `--lg-hue-`; today there are none. Raw values — a hex colour, a pixel font size, a shadow with its own colour — are checked automatically: `node design-system/scripts/check.mjs`.
 
 ## Adding a token
 
@@ -527,7 +526,7 @@ One reader breaks the one-component rule and is flagged rather than hidden: TabS
 1. Log a Decision Log entry naming the replacement.
 2. Keep the token and alias it to its replacement — the one case where a token aliases a role — and start its usage line with "Deprecated (D-xxx) — use `<replacement>`."
 3. Add it to the table below and move every reader to the replacement; the audit lists the readers.
-4. Remove it, with a Decision Log entry, once no component, pattern, preview or the Angular edition reads it. A primitive is removed as soon as nothing aliases it.
+4. Remove it, with a Decision Log entry, once no component, pattern or game screen reads it. A primitive is removed as soon as nothing aliases it.
 
 | Deprecated token | Replacement | Decision | Remove when |
 | --- | --- | --- | --- |
@@ -692,7 +691,7 @@ Components use the `lg-` class prefix so they can live beside today's `ll-` clas
 | In an Epic item's Folio, set the title in `rarity-epic` and "+14 Power" in bold `ink`. | Set the item's effect magnitudes in `gilt` beside its rarity-coloured name. |
 | In chat, colour only the tag and the speaker's name; mark a mention with the neutral wash and an `ink` edge. | Colour the message text, the tab bar or the mention by channel or in gilt. |
 | Name the damage type with every damage number: "124 bleed". | Rely on red for bleed and green for poison. |
-| `color: var(--gilt)` in a component. | `color: var(--brass-300)` or `#dcb872` in a component. |
+| `color: var(--lg-gilt)` in a component. | `color: var(--lg-brass-300)` or `#dcb872` in a component. |
 | Point `warning` at another primitive to recolour warnings. | Edit `amber-300` to recolour warnings — Trade moves with it. |
 | Give the one committing action on a screen the `solid` gilt button ("Enter dungeon"). | Put two `solid` buttons on one screen. |
 | Print "240 / 300" beside a health bar. | Let the `meter-hp` fill carry the value alone. |

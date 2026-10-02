@@ -22,7 +22,7 @@ import {
   LgSlotDirective,
   LgStageComponent,
   LgTopBarComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -658,6 +658,6 @@ export const GAME_SHELL_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'The screen frame.',
   covers: ['LgGameShellComponent'],
-  readme: 'design-system/components/GameShell/README.md',
+  readme: 'src/app/grimoire/shell/game-shell/README.md',
   component: GameShellShowcaseComponent,
 };

@@ -1,6 +1,6 @@
 # Foundations · Lines
 
-The game draws a thin frame around nearly everything, so a line can mean a group, a control or a selection, and the player has to guess which. In Grimoire each line has one meaning, carried by its colour, width and style. Most groups need no line at all: space and a heading set them apart. LinesSpecimen shows the rules on a guild member list, an inventory list, a Folio and a form.
+The game draws a thin frame around nearly everything, so a line can mean a group, a control or a selection, and the player has to guess which. In Grimoire each line has one meaning, carried by its colour, width and style. Most groups need no line at all: space and a heading set them apart.
 
 ## Rules
 
@@ -57,9 +57,9 @@ A region is not a bounded object. A Panel, the JourneyCard, the Combat Attribute
 
 | Rhythm | Draws | Use for | Set with |
 | --- | --- | --- | --- |
-| **Separators** (the default) | A `line` hairline between rows, never above the first or below the last | Lists read row by row: inventory, guild members, an order book | `List`; a table in `lg-tablewrap` |
-| **Zebra** | Every second row on `row-stripe`, and no separators | Wide rows read across many columns: rankings, a combat log, a table of six columns or more | `List rhythm="zebra"`; `lg-tablewrap lg-tablewrap--zebra` |
-| **Spacing** | Nothing: the row height does it | Short lists of about five rows or fewer, with room to breathe: a Folio's rewards, recent trades | `List rhythm="spacing"` |
+| **Separators** (the default) | A `line` hairline between rows, never above the first or below the last | Lists read row by row: inventory, guild members, an order book | `<lg-list>`; a table in `lg-tablewrap` |
+| **Zebra** | Every second row on `row-stripe`, and no separators | Wide rows read across many columns: rankings, a combat log, a table of six columns or more | `<lg-list rhythm="zebra">`; `lg-tablewrap lg-tablewrap--zebra` |
+| **Spacing** | Nothing: the row height does it | Short lists of about five rows or fewer, with room to breathe: a Folio's rewards, recent trades | `<lg-list rhythm="spacing">` |
 
 - **One rhythm, never two.** Separators and zebra together draw two rhythms, and the eye reads neither.
 - **No container border around rows.** A Panel has no border of its own, so a `flush` Panel's List keeps its separators and its rows run to the edge. Don't wrap a list in a bordered box to hold it.

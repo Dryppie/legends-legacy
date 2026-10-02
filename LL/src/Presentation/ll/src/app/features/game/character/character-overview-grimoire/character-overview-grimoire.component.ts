@@ -41,7 +41,7 @@ import {
   lgFormatNumber,
   lgFormatUnit,
   LG_SHELL,
-} from '../../../../shared/components/grimoire';
+} from '@grimoire';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
 import { AttributeDto } from '../../../../shared/models/Dtos/attributesDto';
 import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating-display';

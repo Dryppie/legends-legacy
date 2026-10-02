@@ -1,0 +1,24 @@
+/* ---------- SectionRule ---------- */
+.lg-rule { display: flex; align-items: center; gap: var(--lg-space-3); width: 100%; }
+.lg-rule--hairline { min-height: var(--lg-border-hairline); }
+.lg-rule--hairline::after { content: ""; order: 1; flex: 1; height: var(--lg-border-hairline); background: var(--lg-line); }
+.lg-rule--hairline.lg-rule--end::after { order: -1; }
+.lg-rule--hairline .lg-rule__aside { order: 2; margin-left: 0; }
+.lg-rule--hairline .lg-rule__label { color: var(--lg-ink-muted); }
+.lg-rule--band {
+  min-height: 1.625rem; padding: 0 var(--lg-space-3);
+  background: var(--lg-line);
+  border-radius: var(--lg-radius-container);
+}
+.lg-rule--end { justify-content: flex-end; }
+.lg-rule__label { font-family: var(--lg-font-ui); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink); white-space: nowrap; }
+.lg-rule__aside { margin-left: auto; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+.lg-rule--end .lg-rule__aside { margin-left: 0; }
+.lg-rule--ornament { gap: var(--lg-space-3); }
+.lg-rule__lattice {
+  flex: 1; height: 0.75rem; min-width: 1.5rem;
+  background: var(--lg-gilt); opacity: 0.6;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M8 1.5 12 6 8 10.5 4 6Z' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Cpath d='M0 6h4M12 6h4' stroke='%23000' stroke-width='1.1'/%3E%3Cpath d='M0 .5h16M0 11.5h16' stroke='%23000' stroke-width='.8'/%3E%3C/svg%3E") repeat-x left center / 16px 12px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M8 1.5 12 6 8 10.5 4 6Z' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Cpath d='M0 6h4M12 6h4' stroke='%23000' stroke-width='1.1'/%3E%3Cpath d='M0 .5h16M0 11.5h16' stroke='%23000' stroke-width='.8'/%3E%3C/svg%3E") repeat-x left center / 16px 12px;
+}
+.lg-rule--ornament .lg-rule__label { color: var(--lg-gilt); }

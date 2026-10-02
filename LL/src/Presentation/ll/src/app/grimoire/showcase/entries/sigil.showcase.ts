@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  LgSigilComponent,
-  LgSigilLabelPosition,
-} from '../../../shared/components/grimoire';
+import { LgSigilComponent, LgSigilLabelPosition } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -131,6 +128,6 @@ export const SIGIL_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The hex stat badge.',
   covers: ['LgSigilComponent'],
-  readme: 'design-system/components/Sigil/README.md',
+  readme: 'src/app/grimoire/game/sigil/README.md',
   component: SigilShowcaseComponent,
 };

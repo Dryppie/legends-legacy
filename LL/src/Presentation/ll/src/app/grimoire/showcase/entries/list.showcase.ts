@@ -9,7 +9,7 @@ import {
   LgRarity,
   LgSlotDirective,
   LgTagComponent,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -392,6 +392,6 @@ export const LIST_SHOWCASE: ShowcaseEntry = {
   tier: 'components',
   summary: 'The list and its rows.',
   covers: ['LgListComponent', 'LgListRowComponent'],
-  readme: 'design-system/components/ListRow/README.md',
+  readme: 'src/app/grimoire/components/list/README.md',
   component: ListShowcaseComponent,
 };

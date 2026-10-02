@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgCurrencyPillComponent } from '../../../shared/components/grimoire';
+import { LgCurrencyPillComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -85,6 +85,6 @@ export const CURRENCY_PILL_SHOWCASE: ShowcaseEntry = {
   tier: 'game',
   summary: 'The currency amount.',
   covers: ['LgCurrencyPillComponent'],
-  readme: 'design-system/components/CurrencyPill/README.md',
+  readme: 'src/app/grimoire/game/currency-pill/README.md',
   component: CurrencyPillShowcaseComponent,
 };

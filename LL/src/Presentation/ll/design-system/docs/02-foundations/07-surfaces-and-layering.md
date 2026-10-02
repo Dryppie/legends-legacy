@@ -5,7 +5,7 @@ Candlelight, not paper. This section covers two things: how a surface looks agai
 - **Elevation** is the look: four levels and the scrim, each with its own fill, shadow and edge.
 - **The layer** is the paint order: the `z-*` stack, from the content up to a drag preview.
 
-The two are separate. An item hover card looks like Level 2, but it sits on the detached-popover layer, above a Level 3 dialog. Stage art stays at the bottom as atmosphere, and nothing glows (D-012). LayeringSpecimen shows the levels, the stack and four scenes from the game.
+The two are separate. An item hover card looks like Level 2, but it sits on the detached-popover layer, above a Level 3 dialog. Stage art stays at the bottom as atmosphere, and nothing glows (D-012).
 
 ## Rules
 
@@ -16,7 +16,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 - Keep film grain to art: the Stage and the Banner, when they have an image (Foundations · Ornament).
 - Give every z-index a `z-*` token (The layer stack, below). Only two exceptions exist:
   - art inside an isolated Stage or Banner sits at −1 and −2;
-  - a scrim sits one below the layer it serves (`calc(var(--z-modal) - 1)`).
+  - a scrim sits one below the layer it serves (`calc(var(--lg-z-modal) - 1)`).
 - Open one modal at a time. A confirmation overlays the dialog that opened it; anything else a dialog leads to replaces its content.
 - Close the topmost layer first on Escape, and return focus to the element that opened the layer.
 - Give any text set over art `shadow-text-art`.
@@ -24,7 +24,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 **Should**
 - Build surfaces from the level classes (`lg-level-1`, `lg-level-2`, `lg-level-3`, their `--float` variants and `lg-scrim`), or from the same tokens.
 - Detach a popover (portal it to the body) when it must cross the edge of the region or dialog it opens from.
-- Register anything that Escape closes with `LL.layers`. The one stack then keeps the order and returns focus.
+- Register anything that Escape closes with `lgOpenLayer`. The one stack then keeps the order and returns focus.
 - Show selection with a solid `border-emphasis` (2px) `arcana-glow` ring or edge — an `ink` bar in item rows and chat — and hover with the neutral `surface-raised` wash (D-015, Foundations · Lines).
 - Treat stage art the same way everywhere:
   - darkened, warmed and slightly blurred;
@@ -125,7 +125,7 @@ From the bottom up. A layer paints over every layer below it, whatever the level
   - At most three show at once, newest on top.
   - Each stays at least 6 seconds, and pauses while hovered or focused.
   - Each can be dismissed, and is never the only way to act.
-  - A toast never takes focus. It is announced through `LL.announce`, not a live region of its own (Foundations · Accessibility · Live regions).
+  - A toast never takes focus. It is announced through `lgAnnounce`, not a live region of its own (Foundations · Accessibility · Live regions).
 - **Drag previews** are the dragged thing's own surface at Level 2 floating: opaque, never faded.
   - Escape cancels the drag and puts the item back.
   - Every drag also has a single-pointer alternative, such as a Move button or a menu (WCAG 2.5.7).
@@ -153,14 +153,14 @@ From the bottom up. A layer paints over every layer below it, whatever the level
    | 6 | A page popover or menu | Closes it |
    | 7 | The rail drawer | Closes it |
 
-   Each layer stops the key there. `LL.layers` keeps this order: the highest z first, then the latest opened. A toast takes Escape only while focus is in it. A screen may use Escape for Back only when no layer is open.
+   Each layer stops the key there. The layer stack (`lgOpenLayer`) keeps this order: the highest z first, then the latest opened. A toast takes Escape only while focus is in it. A screen may use Escape for Back only when no layer is open.
 4. **Focus goes into a layer, and back to where it came from.**
    - Opening a layer moves focus into it: a dialog to its first control, a confirmation to its safe button, the tour to its coach mark.
    - Popovers that open on hover or focus don't take focus.
    - A dialog, a confirmation and the tour trap Tab (`trap`), and everything beneath them is `inert`.
    - Closing a layer returns focus to the element that opened it. If that element is gone (the item was withdrawn), focus goes to the nearest thing that remains: the next row, or the dialog's heading.
 
-`LL.layers.open({ kind, onClose, opener, trap })` and, in React, `LL.layers.use(open, options)` implement these rules. The future Dialog, Tooltip, Toast and tour are built on them.
+`lgOpenLayer({ kind, onClose, opener, trap })` implements these rules. It returns a handle; close it when the layer goes. `lgTopLayer()` names the topmost layer, and step 11 of the Angular design-system plan moves this stack onto the Angular CDK overlay. The future Dialog, Tooltip, Toast and tour are built on it.
 
 ## In the game
 
@@ -228,12 +228,11 @@ From the bottom up. A layer paints over every layer below it, whatever the level
 | The vault's hover card portaled at `z-popover-detached`. | The hover card clipped by the dialog's scrolling grid. |
 | A confirmation over the Nobility dialog, with Back focused. | A second dialog opened on top of the first. |
 | Escape closes the hover card, then the dialog. | One Escape that closes the card and the dialog together. |
-| `z-index: var(--z-toast)`. | `z-index: 9999`. |
+| `z-index: var(--lg-z-toast)`. | `z-index: 9999`. |
 | Set a Sigil label over art with `shadow-text-art`. | Put a dark box behind it. |
 
 ## Related components
 
-- LayeringSpecimen — the levels, the stack and four scenes
 - Folio — the detail panel
 - Panel — the content box
 - Chronicle — chat and the game log

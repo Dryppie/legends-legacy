@@ -14,7 +14,7 @@ import {
   LgNoticeComponent,
   LgSlotDirective,
   LgTopBarComponent,
-} from '../../shared/components/grimoire';
+} from '@grimoire';
 import { RailGrimoireComponent } from './rail-grimoire.component';
 import { TopCenterGrimoireComponent } from './top-center-grimoire.component';
 import { ChatGrimoireComponent } from './chat-grimoire.component';

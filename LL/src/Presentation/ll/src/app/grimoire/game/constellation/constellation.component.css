@@ -1,0 +1,14 @@
+/* ---------- Constellation ---------- */
+.lg-constellation { position: relative; width: 100%; }
+.lg-constellation__rings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.lg-constellation__rings circle { fill: none; stroke: var(--lg-ring-ink); stroke-opacity: var(--lg-ring-opacity); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.lg-constellation__rings circle.is-strong { stroke: var(--lg-gilt); stroke-opacity: 0.55; }
+.lg-constellation__tick { stroke: var(--lg-gilt); stroke-opacity: 0.8; stroke-width: var(--lg-border-emphasis); stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.lg-constellation__node { position: absolute; --lg-sigil: var(--lg-sigil-size); }
+.lg-constellation__node--sm { --lg-sigil: 2.5rem; }
+.lg-constellation__node--lg { --lg-sigil: 4.25rem; }
+.lg-constellation__node--right { transform: translate(calc(var(--lg-sigil) / -2), -50%); }
+.lg-constellation__node--left { transform: translate(calc(-100% + var(--lg-sigil) / 2), -50%); }
+.lg-constellation__node--top { transform: translate(-50%, calc(-100% + var(--lg-sigil) / 2)); }
+.lg-constellation__node--bottom { transform: translate(-50%, calc(var(--lg-sigil) / -2)); }
+.lg-constellation__node--none { transform: translate(-50%, -50%); }

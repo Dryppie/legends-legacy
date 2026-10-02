@@ -28,12 +28,7 @@
             "styles": [
               "src/styles.css",
               {
-                "input": "src/styles/grimoire/tokens.css",
-                "bundleName": "grimoire",
-                "inject": false
-              },
-              {
-                "input": "src/styles/grimoire/components.css",
+                "input": "src/app/grimoire/styles/grimoire.css",
                 "bundleName": "grimoire",
                 "inject": false
               }
@@ -109,8 +104,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/styles/grimoire/tokens.css",
-              "src/styles/grimoire/components.css"
+              "src/app/grimoire/styles/grimoire.css"
             ],
             "scripts": []
           }

@@ -23,11 +23,11 @@ export interface ShowcaseEntry {
   /** The design system's name for it: `Button`. */
   name: string;
   tier: ShowcaseTier;
-  /** One line: what it is (the plain subtitle from the catalog). */
+  /** One line: what it is (the plain subtitle of its README). */
   summary: string;
   /** The Angular components and directives the entry shows: `LgButtonComponent`. */
   covers: readonly string[];
-  /** The guidelines page, from the frontend folder: `design-system/components/Button/README.md`. */
+  /** The guidelines page, from the frontend folder: `src/app/grimoire/primitives/button/README.md`. */
   readme?: string;
   component: Type<ShowcaseEntryComponent>;
 }

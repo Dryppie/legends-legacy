@@ -8,7 +8,7 @@ import {
   LgKeyComponent,
   LgRarity,
   LgSlotDirective,
-} from '../../../shared/components/grimoire';
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -504,6 +504,6 @@ export const CHRONICLE_SHOWCASE: ShowcaseEntry = {
   tier: 'shell',
   summary: 'Chat and the game log.',
   covers: ['LgChronicleComponent', 'LgChronicleTextDirective'],
-  readme: 'design-system/components/Chronicle/README.md',
+  readme: 'src/app/grimoire/shell/chronicle/README.md',
   component: ChronicleShowcaseComponent,
 };

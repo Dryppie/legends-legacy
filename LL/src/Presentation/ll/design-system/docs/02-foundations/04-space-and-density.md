@@ -1,12 +1,12 @@
 # Foundations · Space & Density
 
-Spacing is the game's 4px scale, used through semantic tokens that name the job. Every spacing and density token is in rem, so spacing grows with the reading-size setting; the pixel figures here are at the default text size (Foundations · Accessibility). Density is how tightly a region packs its rows, in three modes. Legend's Legacy players spend hours on inventory, rankings and trading screens, and information density is preferred over decorative layouts (D-008). So Compact is a deliberate, legible mode, never just a smaller one. DensitySpecimen shows the same inventory list and attribute Ledger in all three modes.
+Spacing is the game's 4px scale, used through semantic tokens that name the job. Every spacing and density token is in rem, so spacing grows with the reading-size setting; the pixel figures here are at the default text size (Foundations · Accessibility). Density is how tightly a region packs its rows, in three modes. Legend's Legacy players spend hours on inventory, rankings and trading screens, and information density is preferred over decorative layouts (D-008). So Compact is a deliberate, legible mode, never just a smaller one.
 
 ## Rules
 
 **Must**
 - Space with the semantic tokens: `inset-*`, `stack-*`, `inline-*` and `section-*`. Use a raw `space-*` step only where no role fits, such as an optical offset. Never invent a gap.
-- Give every region one density, Comfortable, Standard or Compact, with `data-density` on its container or a component's `density` prop. Standard is the default.
+- Give every region one density, Comfortable, Standard or Compact, with `data-density` on its container or a component's `density` input. Standard is the default.
 - Keep 12px as the smallest text in every density; only rarity codes and key caps use 11px. Keep the full focus ring:
   - a focused row rises above its neighbours;
   - a scrolling list keeps `space-1` of inline padding, so the ring is never clipped.
@@ -44,7 +44,7 @@ Spacing is the game's 4px scale, used through semantic tokens that name the job.
 
 ## Semantic spacing
 
-Each semantic token equals one step of the scale. The stylesheet aliases it to that step (`--inset-lg: var(--space-4)`), so a change to the scale carries through. `tokens.json` lists the same values for the viewer; its format has no aliases for lengths. Change a scale step, never an alias.
+Each semantic token equals one step of the scale. The stylesheet aliases it to that step (`--lg-inset-lg: var(--lg-space-4)`), so a change to the scale carries through. `tokens.json` lists the same values for the viewer; its format has no aliases for lengths. Change a scale step, never an alias.
 
 | Kind | Tokens | Aliases | Job |
 | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ Each semantic token equals one step of the scale. The stylesheet aliases it to t
 
 **How a mode is set:**
 
-- `data-density="compact"` on any container sets the mode for everything inside it, and a component's `density` prop does the same on the component itself.
+- `data-density="compact"` on any container sets the mode for everything inside it, and a component's `density` input does the same on the component itself.
 - The nearest setting wins, so a Compact table can sit inside a Standard Panel.
 - The Folio and a list's inspector (`lg-split__inspector`, Foundations · Layout) are always Comfortable; mark a region inside either `data-density` to change it.
 - Components read only the `--lg-row`, `--lg-cell-*`, `--lg-gap`, `--lg-inset*`, `--lg-control`, `--lg-icon` and `--lg-thumb` variables that the mode sets. A mode is one attribute, with no per-component overrides.
@@ -174,7 +174,6 @@ The future Table reads the same row, cell and control values.
 
 ## Related components
 
-- DensitySpecimen — the three modes side by side
 - ListRow — the list row
 - Ledger — the labelled value list
 - EntryList — the browsable name list

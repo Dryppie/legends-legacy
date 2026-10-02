@@ -1,6 +1,6 @@
 # Foundations · Layout
 
-The grid every screen is built on, and how content arranges itself inside it. The key fact: the stage is much narrower than the screen. At 1920px, the NavRail (`rail-width`, 256px), the Folio (`folio-width`, 360px) and the docked Chronicle (`chronicle-width`, 384px) leave a 920px stage. After the Page's padding, 856px is left for content. So content arranges itself by the width of the region it sits in, never by the window. Shell covers where each shell region goes. LayoutSpecimen shows the rules on an inventory and LayoutGridSpecimen on the Character Overview.
+The grid every screen is built on, and how content arranges itself inside it. The key fact: the stage is much narrower than the screen. At 1920px, the NavRail (`rail-width`, 256px), the Folio (`folio-width`, 360px) and the docked Chronicle (`chronicle-width`, 384px) leave a 920px stage. After the Page's padding, 856px is left for content. So content arranges itself by the width of the region it sits in, never by the window. Shell covers where each shell region goes.
 
 ## Rules
 
@@ -73,6 +73,8 @@ These widths are the shell's container width, in rem; the px figures are at the 
 
 Under 30rem (480px, or 400% zoom on a 1,280px screen) the Page's side padding steps down to `inset-lg`.
 
+Each width is a `breakpoint-*` token: `breakpoint-wide` 96rem, `breakpoint-shell` 60rem, `breakpoint-narrow` 40rem (the TopBar's second row, D-114, and a screen's narrower gutters), `breakpoint-reflow` 30rem, and two for parts of the frame, `breakpoint-topcenter` 16rem and `breakpoint-strip` 7.5rem. A query can't read a custom property, so they are not properties: the stylesheet writes the value, `check.mjs` fails on any width in a query that is not a breakpoint token or a content tier (a `max-width` query may sit 0.0625rem below one, as `59.9375rem` does), and script reads them from `LG_BREAKPOINT` in `tokens.ts`. Compare them with a container's width in rem, never with `window.innerWidth` in px: the px value is right only at the default text size.
+
 ## Content tiers
 
 Content inside the stage answers to four tiers, read from the width of its region.
@@ -93,7 +95,7 @@ Content inside the stage answers to four tiers, read from the width of its regio
 
 A Panel is not a region. A layout inside a Panel follows the region around the Panel, which is two insets wider; the grids' minimum widths absorb the difference. Mark a box `.lg-region` when a layout inside it must follow the box, such as a column of your own grid or a dialog. The region the pointer or focus is in paints above its neighbours, so a tooltip or suggestion list that overflows a cell is never covered.
 
-**In code:** `@container lg-region (width >= 44rem) { … }`. The rules are written mobile-first, so a layout with no region around it takes its Stacked form. Container conditions cannot read custom properties, so the stylesheet repeats the `content-*` token values. The Angular edition sets `container: lg-region / inline-size` on the same regions.
+**In code:** `@container lg-region (width >= 44rem) { … }`. The rules are written mobile-first, so a layout with no region around it takes its Stacked form. Container conditions cannot read custom properties, so the stylesheet repeats the `content-*` token values (script reads them from `LG_CONTENT_TIER` in `tokens.ts`). The same stylesheet sets `container: lg-region / inline-size` on the regions above.
 
 ## Track layouts
 
@@ -228,7 +230,7 @@ Under 32rem, prefer a List of ListRows (a name, one value, one action) over a ta
 
 ## At larger reading sizes
 
-Every tier, minimum and gutter is in rem. At Large and Extra large text a region reaches a smaller tier sooner, and every minimum grows with the text, which keeps labels whole. The specimens' three regions:
+Every tier, minimum and gutter is in rem. At Large and Extra large text a region reaches a smaller tier sooner, and every minimum grows with the text, which keeps labels whole. Three regions, each holding the four-group Ledger grid and a list and inspector:
 
 | Region | Default | Large (115%) | Extra large (130%) |
 | --- | --- | --- | --- |
@@ -236,7 +238,7 @@ Every tier, minimum and gutter is in rem. At Large and Extra large text a region
 | 832px | 52rem · Medium: 2 a row; the inspector at its minimum | 45.2rem · Medium: 2 a row; side by side | 40rem · Narrow: 2 a row; one column |
 | 470px | 29.4rem · Stacked: 1 a row; one column | 25.5rem · Stacked | 22.6rem · Stacked |
 
-At every step, in both specimens, no label truncates and nothing scrolls sideways.
+At every step no label truncates and nothing scrolls sideways.
 
 ## Tokens used
 
@@ -250,6 +252,8 @@ At every step, in both specimens, no label truncates and nothing scrolls sideway
 | `shell-max` | 120rem (1,920px) | Widest the shell grows |
 | `page-max` | 80rem (1,280px) | Widest a Page's content grows |
 | `content-wide`, `content-medium`, `content-narrow` | 68, 44 and 32rem | Where the Wide, Medium and Narrow tiers start |
+| `breakpoint-wide`, `breakpoint-shell`, `breakpoint-narrow`, `breakpoint-reflow` | 96, 60, 40 and 30rem | The shell's breakpoints (above) |
+| `breakpoint-topcenter`, `breakpoint-strip` | 16 and 7.5rem | The TopBar centre drops its Track's end labels; a collapsed Chronicle is the docked strip |
 | `ledger-min` | 15rem (240px) | The narrowest Ledger in a grid |
 | `stat-min` | 8.5rem (136px) | The narrowest StatTile in a grid |
 | `inspector-min` | 20rem (320px) | The narrowest inspector beside its list |
@@ -277,8 +281,6 @@ The Chronicle's own sizes (`chronicle-*`) are listed in Shell.
 
 ## Related components
 
-- LayoutSpecimen — the list and inspector at three region widths
-- LayoutGridSpecimen — the attribute grid at three region widths
 - GameShell — the screen frame
 - Page — the information screen frame
 - Folio — the detail panel

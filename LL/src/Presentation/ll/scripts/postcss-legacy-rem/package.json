@@ -2,7 +2,7 @@
   "name": "postcss-legacy-rem",
   "version": "1.0.0",
   "private": true,
-  "description": "Keeps the legacy (pre-Grimoire) styles at their old size now that the root follows Grimoire: every rem outside src/styles/grimoire/ is multiplied by 0.875.",
+  "description": "Keeps the legacy (pre-Grimoire) styles at their old size now that the root follows Grimoire: every rem outside src/app/grimoire/ and -grimoire screen folders is multiplied by 0.875.",
   "main": "index.js",
   "peerDependencies": {
     "postcss": "^8"

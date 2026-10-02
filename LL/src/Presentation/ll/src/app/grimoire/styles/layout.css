@@ -1,0 +1,67 @@
+/* ---------- Layout: regions, content tiers and track layouts (Foundations · Layout) ----------
+   The stage is much narrower than the screen, so layouts answer to the region they sit in, never the window.
+   A region is the Page, the Folio, each cell of a split or a comparison, or anything marked .lg-region.
+   Content tiers, by the region's width: stacked < 32rem ≤ narrow < 44rem ≤ medium < 68rem ≤ wide
+   (the content-* tokens; container conditions cannot read custom properties, so the values repeat here).
+   Every value is rem, so at Large and Extra large text a region reaches a smaller tier sooner. */
+:root { --lg-measure: 68ch; --lg-gutter: var(--lg-section-md); }
+.lg-region, .lg-folio__scroll { container: lg-region / inline-size; }
+/* The region the pointer or focus is in paints above its neighbours, so its tooltips and suggestion lists are never covered. */
+.lg-region { position: relative; }
+:is(.lg-region, .lg-split > *, .lg-compare > *):is(:hover, :focus-within) { z-index: var(--lg-z-raised); }
+
+/* Prose keeps a reading width of about 68 characters, however wide the region. */
+.lg-prose { max-width: var(--lg-measure); }
+.lg-prose > * { margin: 0; }
+.lg-prose > * + * { margin-top: var(--lg-stack-md); }
+
+/* Full bleed: art that runs edge to edge of the stage, past the Page's cap and side padding. Only for art — never text, Ledgers or tables. */
+.lg-bleed { margin-inline: calc(50% - 50cqi - var(--lg-page-pad, 0px)); }
+
+/* List + inspector. The split is its own container, so its mode follows its own width and its cells can ask it.
+   Medium and wide (44rem and up): side by side, 3 : 2, the inspector never under inspector-min; the list gives way first.
+   Narrow and stacked: one column; the inspector replaces the list while it is open (data-view="inspector"), with a Back button. */
+.lg-split { container: lg-split / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-section-sm) var(--lg-gutter); }
+.lg-split > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; }
+.lg-split__back { width: fit-content; }
+@container lg-split (width < 44rem) {
+  .lg-split[data-view="inspector"] > .lg-split__list, .lg-split:not([data-view="inspector"]) > .lg-split__inspector { display: none; }
+}
+@container lg-split (width >= 44rem) {
+  .lg-split > .lg-split__list { flex: 3 1 0; }
+  .lg-split > .lg-split__inspector { flex: 2 1 0; min-width: var(--lg-inspector-min); }
+  .lg-split__back { display: none; }
+}
+
+/* Main and side column (D-098): a main column and an aside-width side column from Medium up; below, the main column
+   then the side. Each column is a region of its own, so what sits in it follows its width. */
+.lg-aside { container: lg-aside / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-section-sm) var(--lg-gutter); }
+.lg-aside > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; display: grid; gap: var(--lg-section-sm); }
+@container lg-aside (width >= 44rem) {
+  .lg-aside > .lg-aside__main { flex: 1 1 0; }
+  .lg-aside > .lg-aside__side { flex: 0 0 var(--lg-aside-width); }
+}
+
+/* Split comparison: two panes 1 : 1 from 32rem up (narrow, medium, wide); stacked, one above the other. */
+.lg-compare { container: lg-compare / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-section-sm) var(--lg-gutter); }
+.lg-compare > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; }
+@container lg-compare (width >= 32rem) { .lg-compare > * { flex: 1 1 0; } }
+
+/* Data tables: the table fills its region down to its minimum (--lg-table-min), then scrolls inside the wrapper with the first column held.
+   Columns carry data-priority 1–4; 4 hides below wide, 3 below medium, 2 below narrow, 1 never. */
+.lg-tablewrap { container: lg-table / inline-size; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--lg-line-strong) transparent; }
+.lg-tablewrap > table { width: 100%; min-width: var(--lg-table-min, 0px); border-collapse: collapse; }
+.lg-tablewrap :is(th, td):first-child { position: sticky; left: 0; z-index: var(--lg-z-sticky); background: var(--lg-table-bg, var(--lg-surface-solid)); }
+/* The header row sticks when the wrapper has a height of its own (max-height); its first cell, held both ways, sits one above. */
+.lg-tablewrap thead th { position: sticky; top: 0; z-index: var(--lg-z-sticky); background: var(--lg-table-bg, var(--lg-surface-solid)); }
+.lg-tablewrap thead th:first-child { z-index: calc(var(--lg-z-sticky) + 1); }
+/* Row rhythm (Foundations · Lines): a hairline between body rows by default, or zebra with lg-tablewrap--zebra, never both. The table has no edge of its own.
+   The header's rule is an inset shadow, so it travels with the sticky header. */
+.lg-tablewrap thead th { box-shadow: inset 0 calc(-1 * var(--lg-border-hairline)) 0 var(--lg-line); }
+.lg-tablewrap tbody tr + tr > * { border-top: var(--lg-border-hairline) solid var(--lg-line); }
+.lg-tablewrap--zebra tbody tr + tr > * { border-top: 0; }
+.lg-tablewrap--zebra tbody tr:nth-child(even) > * { background: var(--lg-row-stripe); }
+.lg-tablewrap:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+@container lg-table (width < 68rem) { .lg-tablewrap [data-priority="4"] { display: none; } }
+@container lg-table (width < 44rem) { .lg-tablewrap [data-priority="3"] { display: none; } }
+@container lg-table (width < 32rem) { .lg-tablewrap [data-priority="2"] { display: none; } }
