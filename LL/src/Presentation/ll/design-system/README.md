@@ -91,7 +91,7 @@ Follow Governance. Change the highest layer in the table that solves the problem
 
 `components/bundle.js` defines `window.LL` (49 components); `components/bundle.css` is its stylesheet; `tokens.css` is every token as a CSS variable plus `@font-face` for the fonts, compiled from `tokens.json`. `components/bundle.css` reads its variables from `tokens.css`. The bundle needs `components/lib/react.production.min.js` (`window.React`) and `components/lib/react-dom.production.min.js` (`window.ReactDOM`), loaded before it. A preview (`components/<Name>/preview.html`) expects all of these to be loaded first.
 
-- **The catalog.** `catalog/index.html` loads them for every preview and shows the documentation. Serve this folder (`python -m http.server 4600 -d LL/src/Presentation/ll/design-system`) and open `http://localhost:4600/catalog/`.
+- **The catalog.** `catalog/index.html` loads them for every preview and shows the documentation. Serve this folder (`python -m http.server 4600 -d LL/src/Presentation/ll/design-system`) and open `http://localhost:4600/catalog/`. Frozen since D-127; the dev-only `/grimoire` showcase in the app replaces it (D-129).
 - **The game.** The game uses the Angular `lg-*` components in `src/app/shared/components/grimoire/` and the generated copies of these styles in `src/styles/grimoire/`, not this bundle.
 - **Assets.** Image files in `assets/<Group>/`, listed in `api/assets/<Group>.md`. From a preview, refer to one as `../../assets/<Group>/<file>`.
 - **Fonts.** Atkinson Hyperlegible is in `fonts/`; the other families load from Google Fonts.

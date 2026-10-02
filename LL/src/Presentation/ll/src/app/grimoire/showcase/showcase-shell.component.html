@@ -1,0 +1,114 @@
+<div class="sc lg-root" [attr.data-showcase-ready]="store.ready() ? '' : null">
+  <nav class="sc-nav" aria-label="Showcase">
+    <a class="sc-brand" routerLink="/grimoire" queryParamsHandling="preserve"
+      >Grimoire showcase</a
+    >
+    <p class="sc-muted">
+      {{ store.entries().length }} entries, {{ store.storyCount() }} stories
+    </p>
+    @for (tier of tiers; track tier.id) {
+      <h2 class="sc-nav__tier">{{ tier.label }}</h2>
+      <ul class="sc-nav__list">
+        @for (e of store.inTier(tier.id); track e.entry.slug) {
+          <li>
+            <a
+              class="sc-nav__entry"
+              [routerLink]="['/grimoire', e.entry.tier, e.entry.slug]"
+              queryParamsHandling="preserve"
+              routerLinkActive="is-active"
+              ariaCurrentWhenActive="page"
+              [routerLinkActiveOptions]="{ exact: true }"
+              >{{ e.entry.name }}</a
+            >
+            @if (current() === e.entry.tier + "/" + e.entry.slug) {
+              <ul class="sc-nav__stories">
+                @for (s of e.stories; track s.slug()) {
+                  <li>
+                    <a
+                      [routerLink]="[
+                        '/grimoire',
+                        e.entry.tier,
+                        e.entry.slug,
+                        s.slug(),
+                      ]"
+                      queryParamsHandling="preserve"
+                      routerLinkActive="is-active"
+                      ariaCurrentWhenActive="page"
+                      >{{ s.name() }}</a
+                    >
+                  </li>
+                }
+              </ul>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </nav>
+
+  <div class="sc-main">
+    <form
+      class="sc-toolbar"
+      aria-label="Display options"
+      (submit)="$event.preventDefault()"
+    >
+      <label
+        >Density
+        <select
+          [value]="options().density"
+          (change)="setOption('density', $any($event.target).value)"
+        >
+          <option value="">Component default</option>
+          <option value="comfortable">Comfortable</option>
+          <option value="standard">Standard</option>
+          <option value="compact">Compact</option>
+        </select>
+      </label>
+      <label
+        >Text size
+        <select
+          [value]="options().text"
+          (change)="setOption('text', $any($event.target).value)"
+        >
+          <option value="default">Default (100%)</option>
+          <option value="large">Large (115%)</option>
+          <option value="extra-large">Extra large (130%)</option>
+        </select>
+      </label>
+      <label
+        >Motion
+        <select
+          [value]="options().motion"
+          (change)="setOption('motion', $any($event.target).value)"
+        >
+          <option value="full">Full</option>
+          <option value="reduced">Reduced</option>
+        </select>
+      </label>
+      <label
+        >Frame
+        <select
+          [value]="options().frame"
+          (change)="setOption('frame', $any($event.target).value)"
+        >
+          <option value="bare">Bare</option>
+          <option value="page">In a Page</option>
+        </select>
+      </label>
+      <label
+        >Ground
+        <select
+          [value]="options().ground"
+          (change)="setOption('ground', $any($event.target).value)"
+        >
+          <option value="ground">Ground</option>
+          <option value="surface">Surface</option>
+          <option value="backdrop">Game backdrop</option>
+        </select>
+      </label>
+    </form>
+    <div class="sc-content">
+      <router-outlet />
+    </div>
+  </div>
+</div>

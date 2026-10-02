@@ -4,7 +4,7 @@ Oct 2, 2026 · @Martin
 
 Living copy (Claude Doc, with diagrams and comments): https://claude.ai/code/artifact/bf6ccd8d-3fb0-4546-8151-1ff12a09864e. This file is a snapshot of it.
 
-Status: steps 1 and 2 done on 2 October 2026. The New look work is committed; D-127 (one implementation, the React reference frozen) and D-128 (the `lg-` prefix stays) are in the decision log.
+Status: steps 1 to 5 done on 2 October 2026. The New look work is committed; D-127 (one implementation, the React reference frozen), D-128 (the `lg-` prefix stays) and D-129 (the dev-only `/grimoire` showcase with 42 entries and 279 stories, and `npm run grimoire:snapshots`) are in the decision log. Next: step 6.
 
 ## Summary
 
@@ -586,7 +586,7 @@ Not on this list, on purpose: Tailwind, the `--ll-*` system, `postcss-legacy-rem
 
 3. Showcase shell: the dev-only `/grimoire` route, its tree and toolbar, the entry type, and the `fileReplacements` that keep it out of production.
 4. Showcase entries for the 44 current components, taken from the 57 previews' scenarios, on today's APIs.
-5. `npm run grimoire:snapshots`: Playwright and `@axe-core/playwright` as dev dependencies; baselines committed. Done when two runs match.
+5. `npm run grimoire:snapshots`: Playwright and `@axe-core/playwright` as dev dependencies; baselines committed. Done when two runs match. Steps 3 to 5 done on 2 October: 42 entries, 279 stories, D-129.
 6. The 25 parity behaviour scenarios ported to specs, with the harness scaffolding in `testing/`.
 7. Move `shared/components/grimoire/` to `src/app/grimoire/<tier>/<name>/`, add the `@grimoire` alias, update the 8 importers.
 8. Token compiler: the `--lg-` prefix, breakpoints, `tokens.ts`, type classes; scripted rename of every `var(--…)`.

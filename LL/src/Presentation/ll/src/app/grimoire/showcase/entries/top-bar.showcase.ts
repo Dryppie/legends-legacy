@@ -1,0 +1,205 @@
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  LgButtonComponent,
+  LgCurrencyPillComponent,
+  LgGameShellComponent,
+  LgObjectiveComponent,
+  LgSlotDirective,
+  LgTopBarComponent,
+  LgTrackComponent,
+} from '../../../shared/components/grimoire';
+import {
+  ShowcaseEntryComponent,
+  ShowcaseStoryDirective,
+} from '../showcase-story.directive';
+import { ShowcaseEntry } from '../showcase.types';
+
+@Component({
+  selector: 'sc-top-bar-showcase',
+  imports: [
+    ShowcaseStoryDirective,
+    LgTopBarComponent,
+    LgCurrencyPillComponent,
+    LgObjectiveComponent,
+    LgTrackComponent,
+    LgButtonComponent,
+    LgGameShellComponent,
+    LgSlotDirective,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <ng-template
+      scStory="Default"
+      notes="Who you are and what you carry: the name, the level in gilt, and the currencies at the end."
+      width="60rem"
+      flush
+    >
+      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
+        <lg-currency-pill
+          name="Cinders"
+          [amount]="12480"
+          iconSrc="assets/game-emblems/cinders-v1-64.webp"
+          short
+        />
+        <lg-currency-pill
+          name="Soulstones"
+          [amount]="36"
+          iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+        />
+      </lg-top-bar>
+    </ng-template>
+
+    <ng-template
+      scStory="Pinned quest"
+      notes="The centre holds one now thing: with no run in progress, the pinned quest's Objective, shown here with its tracker open."
+      width="60rem"
+      height="15.5rem"
+      flush
+    >
+      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
+        <lg-objective
+          lgSlot="center"
+          kicker="Quest"
+          title="The First Hunt"
+          objective="Defeat wolves in the Whispering Woods"
+          [current]="3"
+          [required]="5"
+          [(open)]="questOpen"
+        >
+          <div lgSlot="panel" class="sc-col">
+            <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
+            <ul class="sc-col">
+              <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
+              <li><b>0 / 1</b> Attune an Essence</li>
+            </ul>
+            <button lgButton="link" size="sm">Open Quests</button>
+          </div>
+        </lg-objective>
+        <lg-currency-pill
+          name="Cinders"
+          [amount]="12480"
+          iconSrc="assets/game-emblems/cinders-v1-64.webp"
+          short
+        />
+        <lg-currency-pill
+          name="Soulstones"
+          [amount]="36"
+          iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+        />
+      </lg-top-bar>
+    </ng-template>
+
+    <ng-template
+      scStory="Run in progress"
+      notes="During a dungeon run or tower climb the run's Track takes the centre."
+      width="60rem"
+      flush
+    >
+      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
+        <lg-track
+          lgSlot="center"
+          [steps]="5"
+          [current]="2"
+          tone="hp"
+          startLabel="Floor 3"
+          endLabel="Boss"
+          label="World Tower"
+        />
+        <lg-currency-pill
+          name="Cinders"
+          [amount]="12480"
+          iconSrc="assets/game-emblems/cinders-v1-64.webp"
+          short
+        />
+        <lg-currency-pill
+          name="Soulstones"
+          [amount]="36"
+          iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+        />
+      </lg-top-bar>
+    </ng-template>
+
+    <ng-template
+      scStory="Menu button"
+      notes="showMenu adds the menu button, which shows in a GameShell under 60rem and opens its rail drawer."
+      width="40rem"
+      height="3.5rem"
+      flush
+    >
+      <lg-game-shell height="3.5rem">
+        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
+          <lg-currency-pill
+            name="Cinders"
+            [amount]="12480"
+            iconSrc="assets/game-emblems/cinders-v1-64.webp"
+            short
+          />
+        </lg-top-bar>
+      </lg-game-shell>
+    </ng-template>
+
+    <ng-template
+      scStory="Narrow"
+      notes="Under 40rem the currency names give way to their art; the centre Track drops its end labels when it gets narrow."
+      width="36rem"
+      flush
+    >
+      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
+        <lg-track
+          lgSlot="center"
+          [steps]="5"
+          [current]="2"
+          tone="hp"
+          startLabel="Floor 3"
+          endLabel="Boss"
+          label="World Tower"
+        />
+        <lg-currency-pill
+          name="Cinders"
+          [amount]="12480"
+          iconSrc="assets/game-emblems/cinders-v1-64.webp"
+          short
+        />
+        <lg-currency-pill
+          name="Soulstones"
+          [amount]="36"
+          iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+        />
+      </lg-top-bar>
+    </ng-template>
+
+    <ng-template
+      scStory="Long title"
+      notes="At the narrowest the name truncates and the currencies scroll sideways inside the bar."
+      width="24rem"
+      flush
+    >
+      <lg-top-bar title="Aldric Vane the Unbroken" eyebrow="Lv. 42">
+        <lg-currency-pill
+          name="Cinders"
+          [amount]="12480"
+          iconSrc="assets/game-emblems/cinders-v1-64.webp"
+          short
+        />
+        <lg-currency-pill
+          name="Soulstones"
+          [amount]="36"
+          iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+        />
+      </lg-top-bar>
+    </ng-template>
+  `,
+})
+export class TopBarShowcaseComponent extends ShowcaseEntryComponent {
+  protected readonly questOpen = signal(true);
+}
+
+export const TOP_BAR_SHOWCASE: ShowcaseEntry = {
+  slug: 'top-bar',
+  name: 'TopBar',
+  tier: 'shell',
+  summary: 'The top bar.',
+  covers: ['LgTopBarComponent'],
+  readme: 'design-system/components/TopBar/README.md',
+  component: TopBarShowcaseComponent,
+};

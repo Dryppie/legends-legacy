@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Grimoire snapshot run (e2e/playwright.config.ts)
+/test-results

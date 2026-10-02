@@ -107,7 +107,7 @@ def validate_summons_transition(plan, source, confirmed, api):
         spec = importlib.util.spec_from_file_location('summons_parent_aggregate', Path(__file__).with_name('tower-balance-aggregate.py'))
         aggregate = importlib.util.module_from_spec(spec); spec.loader.exec_module(aggregate)
         parent_confirmed, _ = aggregate.applied_catalog(parent)
-        # The later Ni application retains exactly the accepted Kodoku summons.
+        # Later accepted Tower applications retain exactly the accepted Kodoku summons.
         io.check(io.sha(confirmed/'content/Data/combat/summons.json') ==
                  io.sha(parent_confirmed/'content/Data/combat/summons.json'), 'Summon acceptance chain differs')
         plan, confirmed = parent, parent_confirmed
@@ -125,14 +125,15 @@ def validate_summons_transition(plan, source, confirmed, api):
 
 
 def summons_acceptance(plan):
-    """A later Ni Tower edit can retain the independently applied Kodoku summons."""
+    """Accepted Ni or Mad King edits can retain the independently applied Kodoku summons."""
     parent = plan.get('acceptedSummonsAggregate')
     if parent is None:
         return plan
-    owner_module().check(plan.get('acceptedAggregate', {}).get('version') == 'applied-tower-ni-restoration-aggregate-v1' and
+    owner_module().check(plan.get('acceptedAggregate', {}).get('version') in
+                         ('applied-tower-ni-restoration-aggregate-v1', 'applied-tower-mad-king-acceptance-aggregate-v1') and
                          set(parent) == {'acceptedAggregate', 'receiptPins'} and
                          parent['acceptedAggregate'].get('version') == 'applied-tower-kodoku-midpoint-aggregate-v1',
-                         'Only the applied Ni-to-Kodoku summon acceptance chain is supported')
+                         'Only the applied Ni/Mad King-to-Kodoku summon acceptance chain is supported')
     return parent
 
 

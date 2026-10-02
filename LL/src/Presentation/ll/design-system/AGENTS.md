@@ -51,7 +51,7 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 | `catalog/index.html` | The local viewer for every preview and docs page; frozen with the previews (D-127) |
 | `components/Cover/` | The catalog's cover card: a preview only, with no README, card or port |
 | `scripts/build-tokens.mjs`, `scripts/build-icons.mjs`, `scripts/sync-styles.mjs`, `scripts/check.mjs` | Token compiler, the icon set's code in both editions (D-125), the copy of the styles into the app (D-092), and static checks |
-| `parity/` | The retired parity check (D-093, superseded by D-127); frozen. Its `npx ng build` stays the strict compile check for every `lg-*` component until the showcase takes that over (plan step 4). |
+| `parity/` | The retired parity check (D-093, superseded by D-127); frozen and no longer run. The development build compiles every `lg-*` component through the showcase (D-129). |
 
 **The `lg-*` components (the implementation, D-127):**
 
@@ -60,6 +60,8 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 | `../src/styles/grimoire/tokens.css`, `fonts/` | Generated copies of `tokens.css` and `fonts/`. Never edit them. |
 | `../src/styles/grimoire/components.css` | Generated copy of `components/bundle.css`: the one `lg-*` stylesheet. Never edit it. |
 | `../src/app/shared/components/grimoire/grimoire-icons.ts` | Generated from `icons.json` by `scripts/build-icons.mjs`: the icon set `lg-icon` draws. Never edit it. |
+| `../src/app/grimoire/showcase/` | The dev-only `/grimoire` showcase: one entry per component, one story per state or variant (D-129). Its `README.md` says how to add an entry. |
+| `../e2e/grimoire/` | The snapshot and accessibility run over every story (`npm run grimoire:snapshots`): its fixtures, fonts, per-platform baselines and the known axe debt (`axe-known.json`). |
 | `../src/app/shared/components/grimoire/` | Standalone, OnPush, signal-based `lg-*` components, exported as `LG_GRIMOIRE` from `index.ts`. They are the implementation (D-127); their markup still matches the frozen reference until plan phase 3 re-shapes them. Governance · Code parity maps each one's props to Angular inputs, outputs and slots as they stood on 2 October 2026. |
 
 ## Rules
@@ -70,7 +72,7 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 - Make each backlog item **one change** that updates, together, everything it affects:
   1. the `docs/` sections (new sections added to `design-system.json` → `docs.sections`);
   2. `tokens.json`, then the compiled `tokens.css`;
-  3. the affected component READMEs (new components added to `manifest.json`); the previews are frozen (D-127);
+  3. the affected component READMEs (new components added to `manifest.json`) and showcase entries (`src/app/grimoire/showcase/entries/`), with a story for every new variant or state (D-129); the previews are frozen (D-127);
   4. the component's styles in `components/bundle.css` (until plan step 9), then the app's copies (`sync-styles.mjs`);
   5. a decision log entry for every rule added, reversed or narrowed;
   6. the `lg-*` component itself. No React port and no parity case (D-127).
@@ -91,7 +93,7 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 
 **Never**
 - Edit `tokens.css` or the generated icon code by hand, or type a raw value into a component, preview or Angular style.
-- Change anything outside `design-system/`, `src/styles/grimoire/` and `src/app/shared/components/grimoire/`, unless the item says to migrate a screen. The `--ll-*` tokens, `src/styles.css`, Tailwind and existing screens are out of bounds.
+- Change anything outside `design-system/`, `src/styles/grimoire/`, `src/app/shared/components/grimoire/`, the showcase (`src/app/grimoire/showcase/`) and the snapshot run (`e2e/grimoire/`), unless the item says to migrate a screen. The `--ll-*` tokens, `src/styles.css`, Tailwind and existing screens are out of bounds.
 - Build a second component beside an existing one. Extend Grimoire's component instead.
 - Publish, edit or read back from the Claude Design artifact.
 - Edit `components/bundle.js`, `components/index.d.ts`, `components/lib/`, a preview, `catalog/`, `parity/` or an `api/components/` card, except through `build-icons.mjs` (frozen, D-127).
@@ -123,10 +125,11 @@ If an item depends on one of these, say which assumption you used.
 - The docs, tokens and component READMEs say the same thing.
 - The decision log has an entry for each decision, in the existing format.
 - No hex value, pixel font size or coloured shadow appears outside `tokens.json` and `tokens.css`.
-- The change looks right in the game with Settings → Interface → New look on, with no console errors (until the `/grimoire` showcase exists, plan steps 3 to 5).
+- The change looks right in the `/grimoire` showcase, with no console errors, and the component's stories cover what changed.
+- `npm run grimoire:snapshots` passes: no difference but the intended ones, whose baselines are updated in the same change, and no new serious or critical axe violation (D-129).
 - The change passes the review checklists in Principles and Principles · Anti-generic guardrails (DS-003), and DS-132's acceptance checklist once it exists.
-- The app's copies of the styles are up to date, and `npx ng build` in `parity/` compiles every `lg-*` component.
-- Nothing outside `design-system/`, `src/styles/grimoire/` and `src/app/shared/components/grimoire/` changed, unless the item says to migrate a screen.
+- The app's copies of the styles are up to date, and `npm run build:development` passes (it compiles every `lg-*` component through the showcase).
+- Nothing outside `design-system/`, `src/styles/grimoire/`, `src/app/shared/components/grimoire/`, `src/app/grimoire/showcase/` and `e2e/grimoire/` changed, unless the item says to migrate a screen.
 
 ## Checks
 
@@ -138,15 +141,15 @@ node LL/src/Presentation/ll/design-system/scripts/check.mjs
 
 Zero errors required. It checks that `tokens.css` matches `tokens.json`; that the icon code in both editions matches `icons.json`; that no asset id remains; that every asset path, manifest entry, preview `@dsCard` and docs entry resolves; that decision ids run in order; and that no raw value has been added. It also checks that the app's copies of the styles match, and that the `lg-*` port has no raw value. Warnings are existing debt: don't add to them.
 
-The catalog shows the frozen React reference (D-127), so don't use it to check a change. Until the `/grimoire` showcase exists (plan steps 3 to 5), look at the change in the game with Settings → Interface → New look on, and check the browser console.
-
-The strict compile check, from `LL/src/Presentation/ll/design-system/parity` (npm only; it does not run from the root). It compiles every `lg-*` component with strict templates, including those no screen imports yet. `check-parity.mjs` is retired (D-127): don't run it or add cases.
+The catalog shows the frozen React reference (D-127), so don't use it to check a change. Look at the change in the `/grimoire` showcase instead (`npm start` from `LL/src/Presentation/ll`, then `http://localhost:4200/grimoire`; `src/app/grimoire/showcase/README.md` says how) and check the browser console. Then run the snapshot and accessibility run, from `LL/src/Presentation/ll`:
 
 ```text
-npx ng build
+npm run grimoire:snapshots
 ```
 
-Then, from `LL/src/Presentation/ll`, check the app still builds with the styles:
+Zero differences and no new serious or critical axe violations required (D-129). After an intended change, `npm run grimoire:snapshots:update` rewrites the baselines; commit them with the change. Before the first run on a computer, `npx playwright install chromium`.
+
+Then, from `LL/src/Presentation/ll`, check the app still builds (the development build compiles every `lg-*` component, through the showcase):
 
 ```text
 npm run build:development

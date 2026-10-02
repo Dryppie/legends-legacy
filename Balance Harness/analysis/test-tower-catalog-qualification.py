@@ -415,5 +415,11 @@ class SummonAcceptanceChainTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'acceptance chain'): q.summons_acceptance(plan)
 
 
+class MadKingSummonAcceptanceChainTests(SummonAcceptanceChainTests):
+    def setUp(self):
+        super().setUp()
+        self.plan['acceptedAggregate']['version'] = 'applied-tower-mad-king-acceptance-aggregate-v1'
+
+
 if __name__ == '__main__':
     unittest.main()

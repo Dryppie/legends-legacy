@@ -111,7 +111,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
                     $"hostile-{index}",
                     CombatTeam.Hostile,
                     hostileAbilities,
-                    scenario.HostileStats,
+                    scenario.GetHostileStats($"hostile-{index}"),
                     scenario.HostileHealth))
                 .ToList();
             var combatants = hostiles.Concat([friendly]).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
@@ -177,7 +177,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
                 var combatant = CreateCombatEntity(
                     $"hostile-{index}",
                     character,
-                    scenario.HostileStats,
+                    scenario.GetHostileStats($"hostile-{index}"),
                     scenario.HostileHealth,
                     scenario.HostileEssenceIds,
                     scenario.EvolvedHostileEssenceIds);
@@ -498,6 +498,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         public float? HostileHealth { get; set; }
         public Dictionary<AttributeType, float> FriendlyStats { get; set; } = [];
         public Dictionary<AttributeType, float> HostileStats { get; set; } = [];
+        public Dictionary<string, Dictionary<AttributeType, float>> HostileStatsById { get; set; } = [];
         public List<InitialStatusSpec> InitialStatuses { get; set; } = [];
         public List<InitialConditionSpec> InitialConditions { get; set; } = [];
         public List<ExpectedLogObservation> ExpectedLogs { get; set; } = [];
@@ -508,6 +509,17 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
             || HostileEssenceIds.Count > 0
             || EvolvedFriendlyEssenceIds.Count > 0
             || EvolvedHostileEssenceIds.Count > 0;
+
+        public IReadOnlyDictionary<AttributeType, float> GetHostileStats(string combatantId)
+        {
+            if (!HostileStatsById.TryGetValue(combatantId, out var overrides))
+                return HostileStats;
+
+            var stats = new Dictionary<AttributeType, float>(HostileStats);
+            foreach (var stat in overrides)
+                stats[stat.Key] = stat.Value;
+            return stats;
+        }
     }
 
     private sealed class InitialStatusSpec

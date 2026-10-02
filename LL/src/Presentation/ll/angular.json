@@ -42,6 +42,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/grimoire/showcase/showcase.routes.ts",
+                  "with": "src/app/grimoire/showcase/showcase.routes.production.ts"
+                }
+              ],
               "optimization": {
                 "scripts": true,
                 "styles": {

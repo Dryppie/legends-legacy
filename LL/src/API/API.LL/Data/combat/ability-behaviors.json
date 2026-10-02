@@ -1307,10 +1307,18 @@
       "ability.creature.kharad.crushing_verdict"
     ],
     "hostileCount": 2,
+    "hostileStats": {
+      "MaxHealth": 500
+    },
+    "hostileStatsById": {
+      "hostile-2": {
+        "MaxHealth": 1000
+      }
+    },
     "maxTicks": 1,
     "expectedConditions": [
       {
-        "combatantId": "hostile-1",
+        "combatantId": "hostile-2",
         "condition": "Vulnerable",
         "minStacks": 2
       }
@@ -1319,6 +1327,7 @@
       {
         "source": "effect.creature.kharad.crushing_verdict.damage",
         "eventType": "Damage",
+        "targetId": "hostile-2",
         "minCount": 1
       }
     ]

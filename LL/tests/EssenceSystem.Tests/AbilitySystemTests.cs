@@ -6807,6 +6807,56 @@ public sealed class AbilitySystemTests
         Assert.Empty(report.MissingAbilityIds);
     }
 
+    [Theory]
+    [InlineData("hostile-1", 17)]
+    [InlineData("hostile-1", 29)]
+    [InlineData("hostile-2", 17)]
+    [InlineData("hostile-2", 29)]
+    public void Behavior_manifest_targets_the_unique_highest_max_health_hostile(string targetId, int randomSeed)
+    {
+        var config = CreateConfig();
+        var options = CreateJsonOptions();
+        var provider = new JsonAbilityCatalogProvider(config, FindApiContentRoot(), options);
+        var root = Directory.CreateTempSubdirectory("ll-ability-behavior-");
+        try
+        {
+            var directory = Directory.CreateDirectory(Path.Combine(root.FullName, "Data", "combat"));
+            File.WriteAllText(Path.Combine(directory.FullName, "ability-behaviors.json"), $$"""
+                [
+                  {
+                    "id": "behavior.test.highest_max_health",
+                    "abilityId": "ability.creature.kharad.crushing_verdict",
+                    "hostileCount": 2,
+                    "hostileStats": { "MaxHealth": 500 },
+                    "hostileStatsById": { "{{targetId}}": { "MaxHealth": 1000 } },
+                    "randomSeed": {{randomSeed}},
+                    "maxTicks": 1,
+                    "expectedConditions": [
+                      { "combatantId": "{{targetId}}", "condition": "Vulnerable", "minStacks": 2 }
+                    ],
+                    "expectedLogs": [
+                      {
+                        "source": "effect.creature.kharad.crushing_verdict.damage",
+                        "eventType": "Damage",
+                        "targetId": "{{targetId}}",
+                        "minCount": 1
+                      }
+                    ]
+                  }
+                ]
+                """);
+
+            var diagnostics = new AbilityCatalogBehaviorDiagnostics(provider, config, root.FullName, options);
+            var scenario = Assert.Single(diagnostics.Analyze().Scenarios);
+
+            Assert.True(scenario.Passed, string.Join(Environment.NewLine, scenario.Failures));
+        }
+        finally
+        {
+            root.Delete(recursive: true);
+        }
+    }
+
     [Fact]
     public void Json_catalog_covers_authored_essence_slots()
     {

@@ -396,26 +396,34 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     internal static JsonElement SummonsAcceptance(JsonElement qualification)
     {
         if (!qualification.TryGetProperty("acceptedSummonsAggregate", out var parent)) return qualification;
-        if (qualification.GetProperty("acceptedAggregate").GetProperty("version").GetString() != "applied-tower-ni-restoration-aggregate-v1" ||
+        if (qualification.GetProperty("acceptedAggregate").GetProperty("version").GetString() is not
+            ("applied-tower-ni-restoration-aggregate-v1" or "applied-tower-mad-king-acceptance-aggregate-v1") ||
             parent.EnumerateObject().Select(p => p.Name).Order().SequenceEqual(new[] { "acceptedAggregate", "receiptPins" }) is false ||
             parent.GetProperty("acceptedAggregate").GetProperty("version").GetString() != "applied-tower-kodoku-midpoint-aggregate-v1")
-            throw new InvalidDataException("Only the applied Ni-to-Kodoku summon acceptance chain is supported.");
+            throw new InvalidDataException("Only the applied Ni/Mad King-to-Kodoku summon acceptance chain is supported.");
         return parent;
     }
 
     [Theory]
-    [InlineData("valid")]
-    [InlineData("missing")]
-    [InlineData("outer-version")]
-    [InlineData("parent-version")]
-    [InlineData("missing-pins")]
-    [InlineData("extra-parent")]
-    public void Summon_acceptance_chain_requires_exact_independently_applied_parent(string change)
+    [InlineData("ni", "valid")]
+    [InlineData("ni", "missing")]
+    [InlineData("ni", "outer-version")]
+    [InlineData("ni", "parent-version")]
+    [InlineData("ni", "missing-pins")]
+    [InlineData("ni", "extra-parent")]
+    [InlineData("mad-king", "valid")]
+    [InlineData("mad-king", "missing")]
+    [InlineData("mad-king", "outer-version")]
+    [InlineData("mad-king", "parent-version")]
+    [InlineData("mad-king", "missing-pins")]
+    [InlineData("mad-king", "extra-parent")]
+    public void Summon_acceptance_chain_requires_exact_independently_applied_parent(string catalog, string change)
     {
         var plan = JsonNode.Parse("""
             {"acceptedAggregate":{"version":"applied-tower-ni-restoration-aggregate-v1"},
              "acceptedSummonsAggregate":{"acceptedAggregate":{"version":"applied-tower-kodoku-midpoint-aggregate-v1"},"receiptPins":{}}}
             """)!;
+        if (catalog == "mad-king") plan["acceptedAggregate"]!["version"] = "applied-tower-mad-king-acceptance-aggregate-v1";
         if (change == "missing") plan.AsObject().Remove("acceptedSummonsAggregate");
         if (change == "outer-version") plan["acceptedAggregate"]!["version"] = "unaccepted";
         if (change == "parent-version") plan["acceptedSummonsAggregate"]!["acceptedAggregate"]!["version"] = "unaccepted";
