@@ -48,8 +48,8 @@ A part's regions are child components, each styling itself (D-136); a part with 
 </lg-panel>
 ```
 
-Parts not yet re-shaped (plan phase 3, steps 14 to 18) still take named slots through the `lgSlot` directive
-(`<lg-tag lgSlot="tags">`); it is part of `LG_GRIMOIRE` and goes in step 19.
+Parts not yet re-shaped (plan phase 3, steps 16 to 18) still take named slots through the `lgSlot` directive
+(`<lg-nav-rail lgSlot="rail">`); it is part of `LG_GRIMOIRE` and goes in step 19.
 
 A screen that has moved to Grimoire lives in a `-grimoire` folder, carries the `lg-root` class on its host, and styles
 itself with tokens only (`var(--lg-ink-muted)`); `src/app/features/game/character/character-overview-grimoire/` is the

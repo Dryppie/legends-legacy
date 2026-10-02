@@ -16,7 +16,7 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Nothing under way: the word and an empty bar."
       width="17rem"
     >
-      <lg-activity label="Idle" />
+      <div lgActivity label="Idle"></div>
     </ng-template>
 
     <ng-template
@@ -24,11 +24,12 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="The action, the time left in tabular figures and a thin bar with no hue."
       width="17rem"
     >
-      <lg-activity
+      <div
+        lgActivity
         label="Engaged in Combat"
         remaining="00:12"
         [progress]="0.42"
-      />
+      ></div>
     </ng-template>
 
     <ng-template
@@ -36,13 +37,13 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="With a way to the action it is a button; progress here is value of max."
       width="17rem"
     >
-      <lg-activity
+      <button
+        lgActivity
         label="Engaged in Combat"
         remaining="00:12"
         [value]="3"
         [max]="10"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -50,13 +51,13 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="openLabel set to empty: still a button, without the line under the bar."
       width="17rem"
     >
-      <lg-activity
+      <button
+        lgActivity
         label="Woodcutting"
         remaining="01:45"
         [progress]="0.7"
         openLabel=""
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -64,12 +65,12 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="The action wraps; the time keeps its width."
       width="17rem"
     >
-      <lg-activity
+      <button
+        lgActivity
         label="Gathering Ember Wolf Essence in the Whispering Woods"
         remaining="1:04:12"
         [progress]="0.18"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -77,19 +78,19 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="The compact rail's mark: a ring the progress rises in, the ✦ and the live dot, over one short word."
       width="7rem"
     >
-      <lg-activity
+      <button
+        lgActivity
         label="Engaged in Combat"
         short="Battling"
         remaining="00:12"
         [progress]="0.42"
         openLabel=""
-        interactive
         compact
-      />
+      ></button>
     </ng-template>
 
     <ng-template scStory="Compact idle" width="7rem">
-      <lg-activity label="Idle" compact />
+      <div lgActivity label="Idle" compact></div>
     </ng-template>
 
     <ng-template
@@ -97,7 +98,13 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Without short, the label is the word under the mark."
       width="7rem"
     >
-      <lg-activity label="Mining" remaining="00:40" [progress]="0.25" compact />
+      <div
+        lgActivity
+        label="Mining"
+        remaining="00:40"
+        [progress]="0.25"
+        compact
+      ></div>
     </ng-template>
   `,
 })

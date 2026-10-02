@@ -1,12 +1,12 @@
 import { ComponentHarness } from '@angular/cdk/testing';
 import { lgDescriptionOf } from './tip.harness';
 
-/** A Grimoire LoadoutSlot (`lg-loadout-slot`), one Essence loadout slot; with `interactive` it is a button. */
+/** A Grimoire LoadoutSlot (`[lgLoadoutSlot]`), one Essence loadout slot: a button, a link or a box. */
 export class LgLoadoutSlotHarness extends ComponentHarness {
-  static hostSelector = 'lg-loadout-slot';
+  static hostSelector = '[lgLoadoutSlot]';
 
-  // The slot: a button when interactive, else a plain box.
-  private readonly control = this.locatorFor('.lg-loadout');
+  // The slot is its host.
+  private readonly control = () => this.host();
   private readonly name = this.locatorFor('.lg-loadout__name');
   private readonly tag = this.locatorForOptional('.lg-loadout__head lg-tag');
 

@@ -16,45 +16,53 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Art, amount, name. A pill that only shows an amount has a line edge and is not focusable."
     >
       <div class="sc-row">
-        <lg-currency-pill name="Cinders" [amount]="12480" [iconSrc]="cinders" />
-        <lg-currency-pill
+        <span
+          lgCurrencyPill
+          name="Cinders"
+          [amount]="12480"
+          [iconSrc]="cinders"
+        ></span>
+        <span
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           [iconSrc]="soulstones"
-        />
+        ></span>
       </div>
     </ng-template>
 
     <ng-template
       scStory="Short"
-      notes="Abbreviated, it is always a button: a press toggles between 12.5k and 12,480. Screen readers hear the full amount."
+      notes="Abbreviated, it is a button: with toggle a press switches between 12.5k and 12,480. Screen readers hear the full amount, and the tip shows it."
     >
-      <lg-currency-pill
+      <button
+        lgCurrencyPill
         name="Cinders"
         [amount]="12480"
         [iconSrc]="cinders"
         short
-      />
+        toggle
+      ></button>
     </ng-template>
 
     <ng-template
       scStory="With a press"
-      notes="With a press of its own (interactive) it keeps its format and emits activate; the edge is line-strong."
+      notes="A button whose press is your own (click) keeps its format: the TopBar switches every pill at once. The edge is line-strong."
     >
       <div class="sc-row">
-        <lg-currency-pill
+        <button
+          lgCurrencyPill
           name="Cinders"
           [amount]="12480"
           [iconSrc]="cinders"
           short
-          interactive
-        />
-        <lg-currency-pill
+        ></button>
+        <button
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           [iconSrc]="soulstones"
-          interactive
-        />
+        ></button>
       </div>
     </ng-template>
 
@@ -63,13 +71,19 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Below, room held for six characters from the start, so a live amount never reflows the TopBar."
     >
       <div class="sc-col">
-        <lg-currency-pill name="Cinders" [amount]="980" [iconSrc]="cinders" />
-        <lg-currency-pill
+        <span
+          lgCurrencyPill
+          name="Cinders"
+          [amount]="980"
+          [iconSrc]="cinders"
+        ></span>
+        <span
+          lgCurrencyPill
           name="Cinders"
           [amount]="980"
           [iconSrc]="cinders"
           [reserve]="6"
-        />
+        ></span>
       </div>
     </ng-template>
   `,

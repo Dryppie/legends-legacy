@@ -86,7 +86,8 @@ export function toRailSections(sections: readonly SidebarSection[], state: (item
   template: `
     <lg-nav-rail [sections]="railSections()" [activeId]="activeId()" [compact]="compact()" (navigate)="onRailNavigate($event)">
       @if (hasAction()) {
-        <lg-activity
+        <button
+          lgActivity
           lgSlot="header"
           [label]="activityLabel()"
           [remaining]="progress.remaining()"
@@ -94,9 +95,8 @@ export function toRailSections(sections: readonly SidebarSection[], state: (item
           [compact]="compact()"
           [short]="currentActionLabel()"
           [openLabel]="compact() ? '' : 'Go to action'"
-          interactive
-          (activate)="navigateToAction(); toggleSidebar()"
-        />
+          (click)="navigateToAction(); toggleSidebar()"
+        ></button>
       }
     </lg-nav-rail>
   `,

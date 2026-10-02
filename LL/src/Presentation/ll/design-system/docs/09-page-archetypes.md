@@ -30,9 +30,9 @@ Whole-screen templates. An archetype fixes a screen's shell configuration, what 
 ## ArchetypeArchive
 
 **For:** screens that browse a collection over a scene — the Creature Archive.
-**Stage content:** a Stage with art; tabs and filters across the top (primary and secondary TabStrips), an EntryList over the scene, and a lore Panel.
+**Stage content:** a Stage with art; tabs and filters across the top (primary and secondary Tabs), a scene List over the art, and a lore Panel.
 **Order:** what you are browsing, how it is filtered, the list, then the selected thing's stats in the Folio (`align="start"`).
-**Density:** Standard for the tabs and the EntryList; the Folio is Comfortable.
+**Density:** Standard for the tabs and the scene List; the Folio is Comfortable.
 **Layout:** a Stage, with the Folio as the inspector.
 **Status:** Draft
 
@@ -87,6 +87,6 @@ None of their own: each archetype uses the Shell and the parts it names.
 - Banner — the headline block
 - Panel — the content box
 - Ledger — the labelled value list
-- TabStrip — the tabs
-- EntryList — the browsable name list
+- Tabs — the tabs
+- List — the list and its rows, and the scene name list
 - Folio — the detail panel

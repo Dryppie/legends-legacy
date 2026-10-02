@@ -30,7 +30,8 @@ Every component starts at Draft (Governance defines the statuses). They are grou
 | --- | --- | --- | --- |
 | Button | the command button | Actions & input | Draft |
 | SearchField | search with suggestions | Actions & input | Draft |
-| TabStrip | the tabs | Actions & input | Draft |
+| Option | an option in a list that keeps focus in its field | Actions & input | Draft |
+| Tabs | the tabs | Actions & input | Draft |
 | Heading | the titles | Type & ornament | Draft |
 | Icon | the game's icon set | Type & ornament | Draft |
 | SectionRule | the dividers | Type & ornament | Draft |
@@ -45,8 +46,7 @@ Every component starts at Draft (Governance defines the statuses). They are grou
 | Banner | the headline block | Containers | Draft |
 | PageHeader | the information screen heading | Containers | Draft |
 | Notice | the persistent notice | Containers | Draft |
-| EntryList | the browsable name list | Lists & labels | Draft |
-| ListRow | the list row | Lists & labels | Draft |
+| List | the list and its rows, and the scene name list | Lists & labels | Draft |
 | Tag | the status label | Lists & labels | Draft |
 | Presence | the online status | Lists & labels | Draft |
 
@@ -66,6 +66,7 @@ They are grouped as "Game Components · <family>".
 | ItemLink | an item named in text | Items & economy | Draft |
 | LoadoutSlot | an Essence loadout slot | Items & economy | Draft |
 | CurrencyPill | the currency amount | Items & economy | Draft |
+| Rarity | the rarity mark | Items & economy | Draft |
 
 ### Rules for Game Components
 
@@ -75,7 +76,8 @@ They are grouped as "Game Components · <family>".
 - Map onto one game concept, using the game's own nouns and labels.
 
 **Should**
-- Compose generic Components rather than redrawing them — LoadoutSlot uses ItemSlot and Tag; LevelPlate uses a Meter.
+- Compose generic Components rather than redrawing them — LoadoutSlot uses ItemSlot and Tag; ItemSlot and the List row use the Rarity mark; LevelPlate uses a Meter.
+- Take a native host when the part is a control: `<button lgItemSlot>`, `<a lgItemLink>`, `<div lgSigil>` to show it (D-139). Its press is the native `(click)`, which never runs while it is blocked.
 - Keep to the counts the game shows: one LevelPlate per detail view, Sigil values of up to three characters, five to seven Constellation items.
 
 **Never**

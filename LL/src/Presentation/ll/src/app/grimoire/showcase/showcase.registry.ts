@@ -6,7 +6,7 @@ import { KEY_SHOWCASE } from './entries/key.showcase';
 import { NUMERALS_SHOWCASE } from './entries/numerals.showcase';
 import { TAG_SHOWCASE } from './entries/tag.showcase';
 import { TOOLTIP_SHOWCASE } from './entries/tooltip.showcase';
-import { TAB_STRIP_SHOWCASE } from './entries/tab-strip.showcase';
+import { TABS_SHOWCASE } from './entries/tabs.showcase';
 import { METER_SHOWCASE } from './entries/meter.showcase';
 import { SECTION_RULE_SHOWCASE } from './entries/section-rule.showcase';
 import { PANEL_SHOWCASE } from './entries/panel.showcase';
@@ -20,11 +20,11 @@ import { STAT_FIGURE_SHOWCASE } from './entries/stat-figure.showcase';
 import { DELTA_SHOWCASE } from './entries/delta.showcase';
 import { TRACK_SHOWCASE } from './entries/track.showcase';
 import { LIST_SHOWCASE } from './entries/list.showcase';
-import { ENTRY_LIST_SHOWCASE } from './entries/entry-list.showcase';
 import { SEARCH_FIELD_SHOWCASE } from './entries/search-field.showcase';
 import { KEY_HINTS_SHOWCASE } from './entries/key-hints.showcase';
 import { ITEM_SLOT_SHOWCASE } from './entries/item-slot.showcase';
 import { ITEM_LINK_SHOWCASE } from './entries/item-link.showcase';
+import { RARITY_SHOWCASE } from './entries/rarity.showcase';
 import { LOADOUT_SLOT_SHOWCASE } from './entries/loadout-slot.showcase';
 import { SIGIL_SHOWCASE } from './entries/sigil.showcase';
 import { CONSTELLATION_SHOWCASE } from './entries/constellation.showcase';
@@ -53,8 +53,9 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   KEY_SHOWCASE,
   NUMERALS_SHOWCASE,
   TAG_SHOWCASE,
+  RARITY_SHOWCASE,
   TOOLTIP_SHOWCASE,
-  TAB_STRIP_SHOWCASE,
+  TABS_SHOWCASE,
   METER_SHOWCASE,
   SECTION_RULE_SHOWCASE,
   // Components
@@ -69,7 +70,6 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   DELTA_SHOWCASE,
   TRACK_SHOWCASE,
   LIST_SHOWCASE,
-  ENTRY_LIST_SHOWCASE,
   SEARCH_FIELD_SHOWCASE,
   KEY_HINTS_SHOWCASE,
   // Game

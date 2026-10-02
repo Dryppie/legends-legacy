@@ -125,15 +125,16 @@ def validate_summons_transition(plan, source, confirmed, api):
 
 
 def summons_acceptance(plan):
-    """Accepted Ni or Mad King edits can retain the independently applied Kodoku summons."""
+    """Accepted later-floor edits retain the independently applied Kodoku summons."""
     parent = plan.get('acceptedSummonsAggregate')
     if parent is None:
         return plan
     owner_module().check(plan.get('acceptedAggregate', {}).get('version') in
-                         ('applied-tower-ni-restoration-aggregate-v1', 'applied-tower-mad-king-acceptance-aggregate-v1') and
+                         ('applied-tower-ni-restoration-aggregate-v1', 'applied-tower-mad-king-acceptance-aggregate-v1',
+                          'applied-tower-floor12-restoration-aggregate-v1') and
                          set(parent) == {'acceptedAggregate', 'receiptPins'} and
                          parent['acceptedAggregate'].get('version') == 'applied-tower-kodoku-midpoint-aggregate-v1',
-                         'Only the applied Ni/Mad King-to-Kodoku summon acceptance chain is supported')
+                         'Only the applied Ni/Mad King/floor-twelve-to-Kodoku summon acceptance chain is supported')
     return parent
 
 
@@ -327,6 +328,17 @@ def validate_floor12_restoration_family(proposal, original):
     return floor12_restoration_module().validate(proposal, original)
 
 
+def floor13_family_module():
+    spec = importlib.util.spec_from_file_location('floor13_bound_family', Path(__file__).with_name('tower-floor13-family-binding.py'))
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+
+def validate_floor13_bound_family(proposal, original):
+    return floor13_family_module().validate(proposal, original)
+
+
 def validate_family(proposal, original):
     validators = {'floor6-partial-restoration-proposal-v1': validate_partial_family,
                   'floor2-mixed-armor-proposal-v1': validate_mixed_armor_family,
@@ -336,7 +348,8 @@ def validate_family(proposal, original):
                   'floor9-limited-resistance-proposal-v1': validate_limited_resistance_family,
                   'floor10-limited-armor-proposal-v1': validate_floor10_limited_armor_family,
                   'floor12-limited-resistance-bound-family-v1': validate_floor12_bound_family,
-                  'floor12-limited-restoration-bound-family-v1': validate_floor12_restoration_family}
+                  'floor12-limited-restoration-bound-family-v1': validate_floor12_restoration_family,
+                  'floor13-limited-defense-bound-family-v1': validate_floor13_bound_family}
     owner_module().check(proposal['version'] in validators, 'Unknown family proposal version')
     return validators[proposal['version']](proposal, original)
 
@@ -379,10 +392,14 @@ def admit_family(path, source, api, tests, input_pins=None):
              'Proposal source or current catalog differs')
     cells = validate_family(proposal, io.read(source/'cells.json'))
     if input_pins is not None and proposal['version'] in ('floor12-limited-resistance-bound-family-v1',
-                                                        'floor12-limited-restoration-bound-family-v1'):
+                                                        'floor12-limited-restoration-bound-family-v1',
+                                                        'floor13-limited-defense-bound-family-v1'):
         # Keep the immutable historical proposal and qualification evidence bound
         # throughout seed-free native preparation, including derivation helpers.
-        helper = floor12_restoration_module() if proposal['version'] == 'floor12-limited-restoration-bound-family-v1' else floor12_family_module()
+        helpers = {'floor12-limited-restoration-bound-family-v1': floor12_restoration_module,
+                   'floor12-limited-resistance-bound-family-v1': floor12_family_module,
+                   'floor13-limited-defense-bound-family-v1': floor13_family_module}
+        helper = helpers[proposal['version']]()
         pins = helper.input_pins(proposal)
         pins.update({str(qualified/name): pin for name, pin in admission['qualificationPins'].items()})
         pins.update({str(proposal_path): admission['proposalSha256'], str(plan_path): request['qualificationPlanPin'],

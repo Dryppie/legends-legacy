@@ -1,4 +1,7 @@
-/* ---------- Inputs + SearchField ---------- */
+/* ---------- SearchField ----------
+   The host is the field's box. The suggestions list is on the CDK overlay, beneath the field and as wide; its rows are
+   lg-options. */
+:host { display: block; position: relative; min-width: 11.25rem; flex: 0 1 20rem; }
 .lg-input {
   height: var(--lg-control); padding: 0 var(--lg-space-4);
   border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control);
@@ -7,16 +10,15 @@
 }
 .lg-input::placeholder { color: var(--lg-ink-muted); }
 .lg-input:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
-.lg-search { position: relative; min-width: 11.25rem; flex: 0 1 20rem; }
 .lg-search__field { position: relative; }
 .lg-search__glass { position: absolute; left: 0.8125rem; top: 50%; margin-top: -0.5rem; color: var(--lg-ink-muted); pointer-events: none; }
 .lg-search__input { width: 100%; padding-left: 2.25rem; }
+/* The overlay's pane is a flex box as wide as the field: the list fills it. */
 .lg-search__panel {
-  position: absolute; left: 0; right: 0; top: calc(100% + 0.375rem); z-index: var(--lg-z-popover);
+  flex: 1 1 auto; min-width: 0; box-sizing: border-box;
   max-height: 12rem; overflow-y: auto; padding: var(--lg-space-1);
   border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
   background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
+  color: var(--lg-ink); font-family: var(--lg-font-ui);
 }
-.lg-search__option { padding: 0.375rem var(--lg-space-3); border-radius: var(--lg-radius-container); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row); color: var(--lg-ink); cursor: pointer; }
-.lg-search__option.is-active { background: var(--lg-gilt-soft); }
 .lg-search__note { padding: 0.375rem var(--lg-space-3); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }

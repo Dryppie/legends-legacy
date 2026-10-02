@@ -12,8 +12,7 @@ import {
   LgGameShellComponent,
   LgKeyHint,
   LgKeyHintsComponent,
-  LgListComponent,
-  LgListRowComponent,
+  LG_LIST,
   LgNavRailComponent,
   LgNavSection,
   LgObjectiveComponent,
@@ -203,8 +202,7 @@ const HINTS: readonly LgKeyHint[] = [
     LgPageComponent,
     LgPageHeaderComponent,
     ...LG_PANEL,
-    LgListComponent,
-    LgListRowComponent,
+    ...LG_LIST,
     LgStageComponent,
     LgSlotDirective,
   ],
@@ -219,13 +217,13 @@ const HINTS: readonly LgKeyHint[] = [
     >
       <lg-game-shell height="42rem">
         <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map">
-          <lg-activity
+          <button
+            lgActivity
             lgSlot="header"
             label="Engaged in Combat"
             remaining="00:12"
             [progress]="0.42"
-            interactive
-          />
+          ></button>
         </lg-nav-rail>
         <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
           <lg-objective
@@ -236,17 +234,20 @@ const HINTS: readonly LgKeyHint[] = [
             [current]="3"
             [required]="5"
           />
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
-          <lg-currency-pill
+            toggle
+          ></button>
+          <span
+            lgCurrencyPill
             name="Soulstones"
             [amount]="36"
             iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          />
+          ></span>
         </lg-top-bar>
         <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
           <lg-folio-lore
@@ -274,28 +275,16 @@ const HINTS: readonly LgKeyHint[] = [
             <lg-panel-header>
               <lg-panel-title>Regions</lg-panel-title>
             </lg-panel-header>
-            <lg-list label="Regions">
-              <li
-                lgListRow
-                title="Whispering Woods"
-                meta="Levels 1–10"
-                interactive
-                [selected]="false"
-              ></li>
-              <li
-                lgListRow
-                title="Shenic"
-                meta="Levels 10–20"
-                interactive
-                [selected]="true"
-              ></li>
-              <li
-                lgListRow
-                title="Ashen Wastes"
-                meta="Levels 20–30"
-                interactive
-                [selected]="false"
-              ></li>
+            <lg-list label="Regions" selected="Shenic">
+              <li lgListRow name="Whispering Woods" meta="Levels 1–10">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Shenic" meta="Levels 10–20">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Ashen Wastes" meta="Levels 20–30">
+                <button lgListRowAction></button>
+              </li>
             </lg-list>
           </lg-panel>
         </lg-page>
@@ -316,12 +305,14 @@ const HINTS: readonly LgKeyHint[] = [
       >
         <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map" />
         <lg-top-bar lgSlot="top" title="World Map" eyebrow="Shenic" showMenu>
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
+            toggle
+          ></button>
         </lg-top-bar>
         <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
           <lg-folio-lore
@@ -355,17 +346,20 @@ const HINTS: readonly LgKeyHint[] = [
       <lg-game-shell height="42rem">
         <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map" />
         <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42">
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
-          <lg-currency-pill
+            toggle
+          ></button>
+          <span
+            lgCurrencyPill
             name="Soulstones"
             [amount]="36"
             iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          />
+          ></span>
         </lg-top-bar>
         <lg-chronicle
           lgSlot="chronicle"
@@ -385,28 +379,16 @@ const HINTS: readonly LgKeyHint[] = [
             <lg-panel-header>
               <lg-panel-title>Regions</lg-panel-title>
             </lg-panel-header>
-            <lg-list label="Regions">
-              <li
-                lgListRow
-                title="Whispering Woods"
-                meta="Levels 1–10"
-                interactive
-                [selected]="false"
-              ></li>
-              <li
-                lgListRow
-                title="Shenic"
-                meta="Levels 10–20"
-                interactive
-                [selected]="true"
-              ></li>
-              <li
-                lgListRow
-                title="Ashen Wastes"
-                meta="Levels 20–30"
-                interactive
-                [selected]="false"
-              ></li>
+            <lg-list label="Regions" selected="Shenic">
+              <li lgListRow name="Whispering Woods" meta="Levels 1–10">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Shenic" meta="Levels 10–20">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Ashen Wastes" meta="Levels 20–30">
+                <button lgListRowAction></button>
+              </li>
             </lg-list>
           </lg-panel>
         </lg-page>
@@ -425,13 +407,13 @@ const HINTS: readonly LgKeyHint[] = [
         backdrop="assets/backgrounds/optimized/background.webp"
       >
         <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map">
-          <lg-activity
+          <button
+            lgActivity
             lgSlot="header"
             label="Engaged in Combat"
             remaining="00:12"
             [progress]="0.42"
-            interactive
-          />
+          ></button>
         </lg-nav-rail>
         <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
           <lg-objective
@@ -442,17 +424,20 @@ const HINTS: readonly LgKeyHint[] = [
             [current]="3"
             [required]="5"
           />
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
-          <lg-currency-pill
+            toggle
+          ></button>
+          <span
+            lgCurrencyPill
             name="Soulstones"
             [amount]="36"
             iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          />
+          ></span>
         </lg-top-bar>
         <lg-chronicle
           lgSlot="chronicle"
@@ -471,28 +456,16 @@ const HINTS: readonly LgKeyHint[] = [
             <lg-panel-header>
               <lg-panel-title>Regions</lg-panel-title>
             </lg-panel-header>
-            <lg-list label="Regions">
-              <li
-                lgListRow
-                title="Whispering Woods"
-                meta="Levels 1–10"
-                interactive
-                [selected]="false"
-              ></li>
-              <li
-                lgListRow
-                title="Shenic"
-                meta="Levels 10–20"
-                interactive
-                [selected]="true"
-              ></li>
-              <li
-                lgListRow
-                title="Ashen Wastes"
-                meta="Levels 20–30"
-                interactive
-                [selected]="false"
-              ></li>
+            <lg-list label="Regions" selected="Shenic">
+              <li lgListRow name="Whispering Woods" meta="Levels 1–10">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Shenic" meta="Levels 10–20">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Ashen Wastes" meta="Levels 20–30">
+                <button lgListRowAction></button>
+              </li>
             </lg-list>
           </lg-panel>
         </lg-page>
@@ -516,29 +489,32 @@ const HINTS: readonly LgKeyHint[] = [
           activeId="world-map"
           compact
         >
-          <lg-activity
+          <button
+            lgActivity
             lgSlot="header"
             label="Engaged in Combat"
             short="Battling"
             remaining="00:12"
             [progress]="0.42"
             openLabel=""
-            interactive
             compact
-          />
+          ></button>
         </lg-nav-rail>
         <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
-          <lg-currency-pill
+            toggle
+          ></button>
+          <span
+            lgCurrencyPill
             name="Soulstones"
             [amount]="36"
             iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          />
+          ></span>
         </lg-top-bar>
         <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
           <lg-folio-lore
@@ -565,28 +541,16 @@ const HINTS: readonly LgKeyHint[] = [
             <lg-panel-header>
               <lg-panel-title>Regions</lg-panel-title>
             </lg-panel-header>
-            <lg-list label="Regions">
-              <li
-                lgListRow
-                title="Whispering Woods"
-                meta="Levels 1–10"
-                interactive
-                [selected]="false"
-              ></li>
-              <li
-                lgListRow
-                title="Shenic"
-                meta="Levels 10–20"
-                interactive
-                [selected]="true"
-              ></li>
-              <li
-                lgListRow
-                title="Ashen Wastes"
-                meta="Levels 20–30"
-                interactive
-                [selected]="false"
-              ></li>
+            <lg-list label="Regions" selected="Shenic">
+              <li lgListRow name="Whispering Woods" meta="Levels 1–10">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Shenic" meta="Levels 10–20">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Ashen Wastes" meta="Levels 20–30">
+                <button lgListRowAction></button>
+              </li>
             </lg-list>
           </lg-panel>
         </lg-page>
@@ -611,12 +575,14 @@ const HINTS: readonly LgKeyHint[] = [
             [current]="3"
             [required]="5"
           />
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
+            toggle
+          ></button>
         </lg-top-bar>
         <lg-page label="World Map">
           <lg-page-header
@@ -629,28 +595,16 @@ const HINTS: readonly LgKeyHint[] = [
             <lg-panel-header>
               <lg-panel-title>Regions</lg-panel-title>
             </lg-panel-header>
-            <lg-list label="Regions">
-              <li
-                lgListRow
-                title="Whispering Woods"
-                meta="Levels 1–10"
-                interactive
-                [selected]="false"
-              ></li>
-              <li
-                lgListRow
-                title="Shenic"
-                meta="Levels 10–20"
-                interactive
-                [selected]="true"
-              ></li>
-              <li
-                lgListRow
-                title="Ashen Wastes"
-                meta="Levels 20–30"
-                interactive
-                [selected]="false"
-              ></li>
+            <lg-list label="Regions" selected="Shenic">
+              <li lgListRow name="Whispering Woods" meta="Levels 1–10">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Shenic" meta="Levels 10–20">
+                <button lgListRowAction></button>
+              </li>
+              <li lgListRow name="Ashen Wastes" meta="Levels 20–30">
+                <button lgListRowAction></button>
+              </li>
             </lg-list>
           </lg-panel>
         </lg-page>

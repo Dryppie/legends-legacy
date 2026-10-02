@@ -3,15 +3,16 @@ import {
   ComponentHarness,
   HarnessPredicate,
 } from '@angular/cdk/testing';
+import { LgTipHarness } from './tip.harness';
 
 export interface LgCurrencyPillHarnessFilters extends BaseHarnessFilters {
   /** The currency ("Cinders"), as text or a pattern. */
   name?: string | RegExp;
 }
 
-/** A Grimoire CurrencyPill (`lg-currency-pill`); a short pill is a button that toggles 12.5k and 12,480. */
+/** A Grimoire CurrencyPill (`[lgCurrencyPill]`): a button or a span; a short pill with `toggle` switches 12.5k and 12,480. */
 export class LgCurrencyPillHarness extends ComponentHarness {
-  static hostSelector = 'lg-currency-pill';
+  static hostSelector = '[lgCurrencyPill]';
 
   static with(
     options: LgCurrencyPillHarnessFilters = {},
@@ -23,8 +24,11 @@ export class LgCurrencyPillHarness extends ComponentHarness {
     );
   }
 
-  // The pill: a button when short or interactive, else a plain box.
-  private readonly control = this.locatorFor('.lg-currency');
+  // The pill is its host.
+  private readonly control = () => this.host();
+  private readonly tip = this.documentRootLocatorFactory().locatorForOptional(
+    LgTipHarness.with({ shown: true }),
+  );
   private readonly amount = this.locatorFor('.lg-currency__amount');
   private readonly name = this.locatorFor('.lg-currency__name');
 
@@ -42,9 +46,14 @@ export class LgCurrencyPillHarness extends ComponentHarness {
     return (await this.control()).text({ exclude: '[aria-hidden="true"]' });
   }
 
-  /** The tooltip: the full amount and name, or the `title` given. */
+  /** The tip on hover: the full amount and name, or the `tooltip` given; null when none shows. */
   async getTooltip(): Promise<string | null> {
-    return (await this.control()).getAttribute('title');
+    const control = await this.control();
+    await control.hover();
+    const tip = await this.tip();
+    const text = tip ? await tip.getReason() : null;
+    await control.mouseAway();
+    return text;
   }
 
   /** The width, in characters, kept for the amount, so the TopBar does not reflow as it changes. */
@@ -55,7 +64,7 @@ export class LgCurrencyPillHarness extends ComponentHarness {
     return parseFloat(width) || 0;
   }
 
-  /** A click, tap or key press: toggles a short pill's format, or emits `activate`. */
+  /** A click, tap or key press: switches a toggling pill's format, or runs your (click). */
   async press(): Promise<void> {
     return (await this.control()).click();
   }

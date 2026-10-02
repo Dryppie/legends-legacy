@@ -10,7 +10,7 @@ const ZONES: readonly (readonly [string, string])[] = [
   ['[role="menu"], [role="menubar"]', 'a menu'],
   ['[role="status"], .lg-toast', 'a toast'],
   ['input, select, textarea', 'an input'],
-  ['ul, ol, [role="list"], [role="listbox"], [role="log"], .lg-list, .lg-entrylist', 'a list'],
+  ['ul, ol, [role="list"], [role="listbox"], [role="log"], .lg-list', 'a list'],
   [
     '[role="dialog"]:not([data-commitment="major"]), [role="alertdialog"]:not([data-commitment="major"])',
     'a dialog that is not a major commitment',

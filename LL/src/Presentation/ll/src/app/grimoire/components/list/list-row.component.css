@@ -1,0 +1,99 @@
+/* ---------- A List row ---------- */
+/* It takes the List's columns through subgrid: thumbnail, name, quantity, amount, trailing region. */
+:host {
+  position: relative; display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center;
+  min-height: var(--lg-row); padding: var(--lg-cell-y) var(--lg-list-pad, var(--lg-cell-x));
+  color: var(--lg-ink);
+  font-size: var(--lg-row-text); line-height: var(--lg-row-leading);
+  --lg-rarity: var(--lg-line-strong);
+}
+/* The hairline between rows sits inside the row, so a row is exactly its density's height. The List's rhythm sets its
+   colour (transparent for zebra and spacing) and the even rows' stripe, which sits under hover and selection. */
+:host(:not(.lg-listrow--scene):not(:first-child))::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--lg-border-hairline);
+  background: var(--lg-list-rule, var(--lg-line)); pointer-events: none;
+}
+:host(:where(:nth-child(even))) { background: var(--lg-list-stripe); }
+/* A row with a thumbnail lets the thumbnail fill it: 4px above and below, so the row keeps its height (40 + 8 = 48, 32 + 8 = 40, 24 + 8 = 32). */
+:host(:has(> .lg-listrow__thumb)) { padding-block: var(--lg-stack-xs); }
+.lg-listrow__thumb {
+  display: grid; place-items: center; width: var(--lg-thumb); height: var(--lg-thumb); overflow: hidden;
+  border-radius: var(--lg-radius-control); background: var(--lg-ground-deep); box-shadow: inset 0 0 0 var(--lg-border-hairline) var(--lg-rarity); color: var(--lg-ink-muted);
+  --lg-icon-fit: var(--lg-icon);
+}
+.lg-listrow__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.lg-listrow__main { display: flex; flex-wrap: var(--lg-meta-wrap); align-items: baseline; column-gap: var(--lg-inline-sm); min-width: 0; overflow: hidden; }
+.lg-listrow__name { flex: 0 0 auto; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--lg-font-display); font-size: var(--lg-text-name-row); line-height: var(--lg-leading-name-row); color: var(--lg-rarity-ink, var(--lg-ink)); }
+/* The rarity mark (lg-rarity) after the name, on the code's own line height. */
+.lg-listrow__code { flex: none; line-height: var(--lg-leading-code); }
+/* Tags sit above the action, so a Tag that is a control can be pressed. */
+.lg-listrow__tags { position: relative; z-index: var(--lg-z-raised); flex: none; display: inline-flex; gap: var(--lg-inline-xs); align-self: center; }
+.lg-listrow__tags[hidden] { display: none; }
+.lg-listrow__meta { flex: 0 100 var(--lg-meta-basis); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+/* The attention diamond (Standards · State combinations) at the row's end. */
+.lg-listrow__attention { margin-left: auto; align-self: center; }
+.lg-listrow__qty, .lg-listrow__value { justify-self: end; text-align: right; white-space: nowrap;
+  font-family: var(--lg-font-numeral); font-size: var(--lg-row-num); line-height: var(--lg-row-num-leading); font-weight: 600; }
+.lg-listrow__qty { color: var(--lg-ink-muted); }
+/* The empty cell a row keeps when another row has a trailing region. */
+.lg-listrow__trail { justify-self: end; }
+
+/* A row with an action (the action covers it) or a row that is an option: hover washes the row, and the focus ring is
+   drawn round the whole row, which rises above its neighbours. */
+:host(.has-action:not(.lg-listrow--scene):hover), :host(.is-option:not(.lg-listrow--scene):not(.is-blocked):hover) { background: var(--lg-surface-raised); }
+:host(.is-option:focus-visible), :host(:has(> .lg-listrow__action:focus-visible)) {
+  outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); z-index: var(--lg-z-raised);
+}
+/* Selection is a shape — an ink bar and the raised wash — so it is right in item contexts, where rarity owns hue. */
+:host(.is-selected:not(.lg-listrow--scene)) { background: var(--lg-surface-raised); box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink); }
+:host(.is-selected.is-option:not(.lg-listrow--scene):focus-visible), :host(.is-selected:not(.lg-listrow--scene):has(> .lg-listrow__action:focus-visible)) {
+  box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink), var(--lg-focus-ring);
+}
+:host(.is-muted) .lg-listrow__name, :host(.is-muted) .lg-listrow__value { color: var(--lg-ink-muted); }
+/* Blocked (Standards · States): the name in ink-disabled with the state's Tag; in reach, never selected. */
+:host(.is-blocked) .lg-listrow__name, :host(.is-blocked) .lg-listrow__code { color: var(--lg-ink-disabled); --lg-rarity-ink: var(--lg-ink-disabled); }
+:host(.is-blocked.is-option) { cursor: not-allowed; }
+
+/* ---------- The scene variant ----------
+   Names in the display face at name-header (24px; name-row in Compact) on rows that stand apart, in ink-muted, ink
+   when hovered or selected. Selection is the selection edge — a 2px arcana-glow bar inside the row's start — and the
+   raised wash (Foundations · Lines, Shape). */
+:host(.lg-listrow--scene) {
+  padding: 0 var(--lg-cell-x);
+  font-family: var(--lg-list-family); font-weight: var(--lg-list-weight);
+  font-size: var(--lg-list-name); line-height: var(--lg-list-name-leading); letter-spacing: var(--lg-tracking-display);
+  color: var(--lg-ink-muted); border-radius: var(--lg-radius-container); isolation: isolate;
+}
+:host(.lg-listrow--scene.is-option) { cursor: pointer; }
+:host(.lg-listrow--scene) .lg-listrow__main { flex-wrap: nowrap; align-items: center; column-gap: var(--lg-space-3); }
+:host(.lg-listrow--scene) .lg-listrow__name { flex: 0 1 auto; max-width: none; font: inherit; letter-spacing: inherit; color: inherit; }
+/* Feedback: the hover wash is the neutral surface-raised layer, fading over duration-fast; the name turns ink at once. */
+:host(.lg-listrow--scene)::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  background: var(--lg-surface-raised); opacity: 0; transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
+}
+:host(.lg-listrow--scene:hover) { color: var(--lg-ink); }
+:host(.lg-listrow--scene:hover)::after { opacity: 1; }
+:host(.lg-listrow--scene.is-selected) { color: var(--lg-list-active); background: var(--lg-surface-raised); }
+:host(.lg-listrow--scene.is-selected)::before {
+  content: ""; position: absolute; left: 0; top: 0.375rem; bottom: 0.375rem; width: var(--lg-border-emphasis); background: var(--lg-arcana-glow);
+}
+:host(.lg-listrow--scene.is-blocked), :host(.lg-listrow--scene.is-blocked:hover) { color: var(--lg-ink-disabled); }
+:host(.lg-listrow--scene.is-blocked)::after { display: none; }
+
+/* Rarity: the thumbnail's frame and the name take the rarity's hue. */
+:host(.lg-listrow--common) { --lg-rarity: var(--lg-rarity-common); --lg-rarity-ink: var(--lg-rarity-common); }
+:host(.lg-listrow--uncommon) { --lg-rarity: var(--lg-rarity-uncommon); --lg-rarity-ink: var(--lg-rarity-uncommon); }
+:host(.lg-listrow--rare) { --lg-rarity: var(--lg-rarity-rare); --lg-rarity-ink: var(--lg-rarity-rare); }
+:host(.lg-listrow--epic) { --lg-rarity: var(--lg-rarity-epic); --lg-rarity-ink: var(--lg-rarity-epic); }
+:host(.lg-listrow--unique) { --lg-rarity: var(--lg-rarity-unique); --lg-rarity-ink: var(--lg-rarity-unique); }
+:host(.lg-listrow--legendary) { --lg-rarity: var(--lg-rarity-legendary); --lg-rarity-ink: var(--lg-rarity-legendary); }
+:host(.lg-listrow--legacy) { --lg-rarity: var(--lg-rarity-legacy); --lg-rarity-ink: var(--lg-rarity-legacy); }
+
+/* Forced colours drop box-shadows: selection and the row's focus fall back to system outlines. */
+@media (forced-colors: active) {
+  :host(.is-selected) { outline: 1px solid Highlight; outline-offset: -1px; }
+  :host(:has(> .lg-listrow__action:focus-visible)) { outline: 2px solid CanvasText !important; outline-offset: 2px; }
+}

@@ -1,0 +1,12 @@
+/* ---------- An option ----------
+   A row of a suggestions list: body-compact words on a container-radius row, the highlighted one on the old hover
+   wash (gilt-soft, queued in the audit with the rest of SearchField's colours). */
+:host {
+  display: block; padding: 0.375rem var(--lg-space-3); border-radius: var(--lg-radius-container);
+  font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row); color: var(--lg-ink); cursor: pointer;
+}
+:host(.is-active) { background: var(--lg-gilt-soft); }
+:host([aria-disabled='true']) { color: var(--lg-ink-disabled); cursor: not-allowed; }
+@media (forced-colors: active) {
+  :host(.is-active) { outline: 2px solid Highlight; outline-offset: -2px; }
+}

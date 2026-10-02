@@ -144,12 +144,10 @@
 
 /* Forced colours (Windows contrast themes) drop box-shadows, so focus and selection fall back to system outlines. */
 @media (forced-colors: active) {
-  :where(.lg-root, .lg-shell) :focus-visible,
-  .lg-listrow:has(.lg-listrow__hit:focus-visible) { outline: 2px solid CanvasText !important; outline-offset: 2px; }
-  .lg-listrow.is-selected, .lg-entrylist__item.is-active { outline: 1px solid Highlight; outline-offset: -1px; }
-  .lg-meter__fill, .lg-tabs__tab.is-active::after, .lg-tabs--primary .lg-tabs__tab.is-active::after { forced-color-adjust: none; }
-  /* The attention diamond and the in-use square are solid shapes: keep them, in the text colour. */
-  .lg-attention::before, .lg-slot__mark--inuse::before { forced-color-adjust: none; background: CanvasText; }
+  :where(.lg-root, .lg-shell) :focus-visible { outline: 2px solid CanvasText !important; outline-offset: 2px; }
+  .lg-meter__fill { forced-color-adjust: none; }
+  /* The attention diamond is a solid shape: keep it, in the text colour (ItemSlot keeps its in-use square itself). */
+  .lg-attention::before { forced-color-adjust: none; background: CanvasText; }
 }
 
 /* ---------- base ---------- */
@@ -170,8 +168,9 @@
 /* Form controls reset fonts in the browser's own styles; keep the root's tabular figures in them. */
 .lg-root :where(button, input, select, textarea), .lg-shell :where(button, input, select, textarea) { font-variant-numeric: inherit; }
 /* An icon is its size (lg-icon's size, set as --lg-icon-size), unless a box it sits in fits it to another through
-   --lg-icon-fit (the dense PageHeader's 18px glyph, D-120). */
-.lg-icon { display: inline-block; flex: none; vertical-align: middle; width: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); height: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); }
+   --lg-icon-fit (the dense PageHeader's 18px glyph, D-120), and opaque unless the box fades it through --lg-icon-opacity
+   (a not-owned ItemSlot's art, D-139). */
+.lg-icon { display: inline-block; flex: none; vertical-align: middle; width: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); height: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); opacity: var(--lg-icon-opacity, 1); }
 /* The skip link: the first tab stop in the shell, shown when focused (WCAG 2.4.1). */
 .lg-skip { position: absolute; left: var(--lg-space-3); top: var(--lg-space-3); z-index: var(--lg-z-overlay); padding: var(--lg-space-2) var(--lg-space-4); border-radius: var(--lg-radius-control); background: var(--lg-surface-raised); color: var(--lg-ink); font-weight: 600; text-decoration: none; transform: translateY(-200%); }
 .lg-skip:focus-visible { transform: none; outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
@@ -180,12 +179,10 @@
 /* The CDK's own visually hidden elements: the announcer's live region and the tooltips' descriptions (D-134). */
 .cdk-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; outline: 0; -webkit-appearance: none; -moz-appearance: none; left: 0; }
 
-:where(.lg-btn, .lg-tabs__tab, .lg-rail__item, .lg-entrylist__item, .lg-slot, .lg-currency, .lg-topbar__menu, button.lg-sigil):focus-visible {
+:where(.lg-btn, .lg-rail__item, .lg-topbar__menu):focus-visible {
   outline: 2px solid transparent;
   box-shadow: var(--lg-focus-ring);
 }
-/* In every density the full ring shows: a focused row rises above its neighbours, which would otherwise paint over it. */
-:where(.lg-ledger__row, .lg-entrylist__item, .lg-listrow, .lg-tabs__tab):focus-visible, .lg-listrow:has(.lg-listrow__hit:focus-visible) { z-index: var(--lg-z-raised); }
 
 /* ---------- Surfaces: elevation levels (Foundations · Surfaces & Layering) ----------
    Level 0 ground · Level 1 surface · Level 2 surface-raised · Level 3 folio · then the scrim. Levels are not a lightness ramp:

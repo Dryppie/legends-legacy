@@ -149,14 +149,14 @@ import { ShowcaseEntry } from '../showcase.types';
               <lg-list label="Essence loadout">
                 <li
                   lgListRow
-                  title="Dire Wolf Essence"
+                  name="Dire Wolf Essence"
                   rarity="Rare"
                   icon="essences"
                   meta="Essence · Lv 12"
                 ></li>
                 <li
                   lgListRow
-                  title="Soul Prism"
+                  name="Soul Prism"
                   rarity="Epic"
                   icon="soulstones"
                   meta="Essence · Lv 18"
@@ -201,14 +201,14 @@ import { ShowcaseEntry } from '../showcase.types';
               <lg-list label="Essence loadout">
                 <li
                   lgListRow
-                  title="Dire Wolf Essence"
+                  name="Dire Wolf Essence"
                   rarity="Rare"
                   icon="essences"
                   meta="Essence · Lv 12"
                 ></li>
                 <li
                   lgListRow
-                  title="Soul Prism"
+                  name="Soul Prism"
                   rarity="Epic"
                   icon="soulstones"
                   meta="Essence · Lv 18"

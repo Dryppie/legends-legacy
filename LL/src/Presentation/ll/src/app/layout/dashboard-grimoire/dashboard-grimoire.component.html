@@ -9,24 +9,24 @@
   @if (character(); as c) {
     <lg-top-bar lgSlot="top" [title]="c.name" [eyebrow]="'Lv. ' + level()" showMenu>
       <app-top-center-grimoire lgSlot="center" />
-      <lg-currency-pill
+      <button
+        lgCurrencyPill
         name="Cinders"
         [amount]="c.cinders"
         iconSrc="assets/game-emblems/cinders-v1-64.webp"
         [short]="shortCurrency()"
-        title="Toggle abbreviated currency values"
-        interactive
-        (activate)="toggleCurrencyFormat()"
-      />
-      <lg-currency-pill
+        tooltip="Toggle abbreviated currency values"
+        (click)="toggleCurrencyFormat()"
+      ></button>
+      <button
+        lgCurrencyPill
         name="Soulstones"
         [amount]="c.soulstones"
         iconSrc="assets/game-emblems/soulstones-v1-64.webp"
         [short]="shortCurrency()"
-        title="Toggle abbreviated currency values"
-        interactive
-        (activate)="toggleCurrencyFormat()"
-      />
+        tooltip="Toggle abbreviated currency values"
+        (click)="toggleCurrencyFormat()"
+      ></button>
     </lg-top-bar>
   }
 

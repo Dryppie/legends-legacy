@@ -227,12 +227,13 @@
             @if (combatStyle(); as style) {
               <!-- One row: the Sigil, then the name, the Mastery note and the XP Meter beside it (D-123). -->
               <div class="ovw-style">
-                <lg-sigil
+                <div
+                  lgSigil
                   labelPosition="none"
                   [value]="style.level"
                   [label]="style.name"
-                  [title]="'Mastery ' + style.level"
-                />
+                  [lgTooltip]="'Mastery ' + style.level"
+                ></div>
                 <div class="ovw-style__meta">
                   <p class="ovw-style__name" aria-hidden="true">
                     {{ style.name }}
@@ -279,7 +280,8 @@
                   [definition]="s.slot.definition"
                   originClass="relative block"
                 >
-                  <lg-loadout-slot
+                  <div
+                    lgLoadoutSlot
                     compact
                     [index]="s.index"
                     [state]="s.state"
@@ -287,7 +289,7 @@
                     [rarity]="s.rarity"
                     [active]="s.active"
                     [passive]="s.passive"
-                  />
+                  ></div>
                 </app-essence-preview>
               }
             </div>

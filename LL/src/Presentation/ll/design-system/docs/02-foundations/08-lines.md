@@ -29,7 +29,7 @@ The game draws a thin frame around nearly everything, so a line can mean a group
 | --- | --- | --- | --- | --- | --- |
 | **Separation** | These are distinct but belong together | `line` | `border-hairline` | Solid | Between rows of a List or table; the Panel head's rule; the PageHeader's closing rule; the Folio footer's rule; the trailing rule after a Ledger title or rail group; SectionRule `hairline`; the docked Chronicle's rules |
 | **Interactive edge** | You can press, type into or open this | `line-strong` (3:1) | `border-hairline` | Solid | Inputs and the chat composer; outline Buttons; a CurrencyPill that opens or toggles; a LoadoutSlot that opens; the separators between primary tabs |
-| **Selection edge** | This is the one chosen | `arcana-glow`; `ink` in item rows and in chat, where verdigris stays out (Foundations · Colour · Allocation) | `border-emphasis` | Solid bar or ring | The active tab's bar; the current EntryList entry; the selected ItemSlot's ring (queued to become a shape, Foundations · Colour); the selected ListRow's start bar in `ink`; the active Chronicle channel; a Chronicle line that mentions you (chat has no selected line, so the bar cannot be misread) |
+| **Selection edge** | This is the one chosen | `arcana-glow`; `ink` in item rows and in chat, where verdigris stays out (Foundations · Colour · Allocation) | `border-emphasis` | Solid bar or ring | The active tab's bar; the selected row of a scene List; the selected ItemSlot's ring (queued to become a shape, Foundations · Colour); the selected ListRow's start bar in `ink`; the active Chronicle channel; a Chronicle line that mentions you (chat has no selected line, so the bar cannot be misread) |
 | **Decorative ornament** | Brand: this surface is the special one | `gilt` | `border-hairline` | Solid double frame, or the diamond-chain lattice | The double frame of the Folio and the Banner, with their corners; SectionRule `ornament` |
 | **Dotted leader** | This label's value is at the end of the row | `line-strong` | `border-hairline` | Dotted | Ledger rows, and rows built like them: a label on the left, one value on the right |
 
@@ -144,7 +144,7 @@ A surface is one surface at one level: a Folio, a Panel, a Banner, a dialog or t
 - SectionRule — the dividers
 - Panel — the content box
 - Ledger — the labelled value list
-- List and ListRow — the list and its row
+- List — the list and its rows, and the scene name list
 - Folio — the detail panel
 - Banner — the headline block
 - ItemSlot — the item frame
@@ -152,4 +152,4 @@ A surface is one surface at one level: a Folio, a Panel, a Banner, a dialog or t
 - CurrencyPill — the currency amount
 - Button — the command button
 - SearchField — search with suggestions
-- TabStrip — the tabs
+- Tabs — the tabs

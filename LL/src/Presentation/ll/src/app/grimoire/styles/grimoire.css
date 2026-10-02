@@ -6,7 +6,8 @@
  * plain global CSS, not yet attached to their components: the order below is the cascade order, and selectors still
  * reach from one part into another (.lg-shell .lg-topbar), so a later rule may rely on coming after an earlier one. Keep
  * the order. Plan phase 3 moves each file to its component's styleUrl, encapsulated, as it re-shapes the component, and
- * takes it off this list: Panel, Page, PageHeader, Banner, Folio, Notice (D-136) and Ledger (D-137) have moved.
+ * takes it off this list: Panel, Page, PageHeader, Banner, Folio, Notice (D-136), Ledger (D-137), List and Tabs (D-138),
+ * ItemSlot, ItemLink, LoadoutSlot, Sigil, CurrencyPill and Activity (D-139), and SearchField (D-140) have moved.
  *
  * Every size here is written for the 16px root: the legacy rem rebase leaves src/app/grimoire/ alone.
  */
@@ -18,7 +19,6 @@
 @import '../primitives/button/button.component.css';
 @import '../components/key-hints/key-hints.component.css';
 @import '../primitives/tag/tag.component.css';
-@import '../game/sigil/sigil.component.css';
 @import '../game/constellation/constellation.component.css';
 @import '../primitives/meter/meter.component.css';
 @import '../components/track/track.component.css';
@@ -26,25 +26,16 @@
 @import '../components/delta/delta.component.css';
 @import '../primitives/section-rule/section-rule.component.css';
 @import '../game/emblem/emblem.component.css';
-@import '../components/entry-list/entry-list.component.css';
 @import './attention.css';
-@import '../game/item-slot/item-slot.component.css';
-@import '../components/list/list.component.css';
-@import '../game/currency-pill/currency-pill.component.css';
 @import '../shell/nav-rail/nav-rail.component.css';
-@import '../primitives/tab-strip/tab-strip.component.css';
 @import '../shell/stage/stage.component.css';
 @import '../shell/top-bar/top-bar.component.css';
 @import '../shell/game-shell/game-shell.component.css';
-@import '../game/item-link/item-link.component.css';
 @import '../shell/chronicle/chronicle.component.css';
 @import './layout.css';
-@import '../components/search-field/search-field.component.css';
 @import '../components/stat-figure/stat-figure.component.css';
 @import '../game/journey-card/journey-card.component.css';
-@import '../game/loadout-slot/loadout-slot.component.css';
 @import '../game/profile-identity/profile-identity.component.css';
-@import '../shell/activity/activity.component.css';
 @import '../shell/objective/objective.component.css';
 @import '../game/presence/presence.component.css';
 @import './tip.css';

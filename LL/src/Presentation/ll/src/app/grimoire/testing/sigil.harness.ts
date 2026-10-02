@@ -10,9 +10,9 @@ export interface LgSigilHarnessFilters extends BaseHarnessFilters {
   label?: string | RegExp;
 }
 
-/** A Grimoire Sigil (`lg-sigil`), the hex stat badge; with `interactive` it is a toggle button. */
+/** A Grimoire Sigil (`[lgSigil]`), the hex stat badge: a toggle button or a box. */
 export class LgSigilHarness extends ComponentHarness {
-  static hostSelector = 'lg-sigil';
+  static hostSelector = '[lgSigil]';
 
   static with(
     options: LgSigilHarnessFilters = {},
@@ -24,8 +24,8 @@ export class LgSigilHarness extends ComponentHarness {
     );
   }
 
-  // The badge: a button when interactive, else a plain box.
-  private readonly control = this.locatorFor('.lg-sigil');
+  // The Sigil is its host.
+  private readonly control = () => this.host();
   private readonly value = this.locatorFor('.lg-sigil__value');
   private readonly label = this.locatorForOptional('.lg-sigil__label');
 
@@ -71,7 +71,7 @@ export class LgSigilHarness extends ComponentHarness {
     );
   }
 
-  /** Whether the toggle is pressed (selected); null when it is not a toggle (not interactive, or locked). */
+  /** Whether the toggle is pressed (selected); null when it is not a toggle (not a button, or locked). */
   async isPressed(): Promise<boolean | null> {
     const pressed = await (await this.control()).getAttribute('aria-pressed');
     return pressed == null ? null : pressed === 'true';

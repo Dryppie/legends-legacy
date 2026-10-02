@@ -62,7 +62,7 @@ The ramp has ten groups, organised by role. The tokens are in rem; sizes and lin
 
 | Style | Face | Size / line | Used for |
 | --- | --- | --- | --- |
-| `name-header` | Marcellus | 24 / 30 | A name that leads: the TopBar, the item on sale in the Bazaar, a creature's header, EntryList entries |
+| `name-header` | Marcellus | 24 / 30 | A name that leads: the TopBar, the item on sale in the Bazaar, a creature's header, the scene List's rows |
 | `name-row` | Marcellus | 17 / 22 | A name in a row: a Bazaar seller, a recent trade, a LoadoutSlot's Essence, a party member. An item takes its rarity colour and its code. |
 
 **Body**
@@ -94,7 +94,7 @@ The ramp has ten groups, organised by role. The tokens are in rem; sizes and lin
 
 | Style | Face | Size / line | Used for |
 | --- | --- | --- | --- |
-| `tab` | Marcellus, capitals | 17 / 24 | Primary TabStrip labels. Secondary tabs use `label`. |
+| `tab` | Marcellus, capitals | 17 / 24 | Primary tab labels (Tabs). Secondary tabs use `label`. |
 | `nav` | Barlow 500, capitals, `tracking-nav` | 13 / 18 | NavRail items |
 | `nav-active` | Barlow 600, capitals, `tracking-nav` | 13 / 18 | The current NavRail item, on its gilt bar and wash (D-118) |
 
@@ -142,7 +142,7 @@ Marcellus runs below 17px in three places. They were evaluated against the 15px 
 | Part | Was | Now | Why |
 | --- | --- | --- | --- |
 | Button labels | Marcellus 16px (md), 14px (sm) | Barlow 600: `body` on the 20px row leading (md) and `body-compact` on 18px (sm), `tracking-button` | The sm label broke the 15px floor, and one face should serve both sizes. Buttons sit in dense rows beside Barlow Condensed numbers (the order book's Buy). At the same size, Barlow 600 is heavier and has a larger x-height. This follows Clarity over expressiveness (Principles). |
-| EntryList items | Marcellus 24px | Stays Marcellus, at `name-header` 24 / 30 | It is a list of names — creatures, guild members, prophecies — over stage art, read one name at a time rather than scanned as data. At 24px Marcellus is legible and carries the scene's voice. The dense row it will merge into (ListRow in the Audit) uses `name-row` and Barlow. |
+| Scene List rows (EntryList until D-138) | Marcellus 24px | Stays Marcellus, at `name-header` 24 / 30 | It is a list of names — creatures, guild members, prophecies — over stage art, read one name at a time rather than scanned as data. At 24px Marcellus is legible and carries the scene's voice. It merged into List as the scene variant (D-138); a standard List row sets its name in `name-row`. |
 | The current NavRail item | Marcellus 13px | Barlow 600 at the `nav` size (`nav-active`) | 13px is below the Marcellus floor. The current item now changes weight instead of face, and the gilt diamond still marks it. |
 
 ## Size map
@@ -154,8 +154,8 @@ Every font size that was typed by hand in the component styles, and the style it
 | 10px | `code` (11) | ItemSlot rarity code |
 | 10px | `label` (12) | LoadoutSlot ability labels |
 | 11px | `code` | Key cap |
-| 11px | `label` (12) | Tag, CurrencyPill name, EntryList lock, NavRail group label, Chronicle tag and prefix, JourneyCard label, LoadoutSlot slot number |
-| 11px | `caption` (12) | StatTile delta, NavRail badge, TabStrip count, Chronicle unread count |
+| 11px | `label` (12) | Tag, CurrencyPill name, NavRail group label, Chronicle tag and prefix, JourneyCard label, LoadoutSlot slot number |
+| 11px | `caption` (12) | StatTile delta, NavRail badge, tab count, Chronicle unread count |
 | 12px | `label` | Eyebrows (TopBar, PageHeader, Folio), Panel head, SectionRule label, Ledger title, StatFigure label, JourneyCard phase, LevelPlate kicker, Track end, secondary tabs, Chronicle channel and collapsed strip |
 | 12px | `caption` | KeyHints, LevelPlate EXP text, SectionRule aside, ItemSlot meta, Chronicle time, SearchField note, StatFigure caption, Ledger sub-line and tip meta, LoadoutSlot abilities, Presence |
 | 12px | `nav` (13) | NavRail items |
@@ -179,7 +179,7 @@ Every font size that was typed by hand in the component styles, and the style it
 | 22px | `title-md` (24) | `section` Heading |
 | 22px | `name-header` (24) | TopBar name |
 | 22px | `numeral-stat` | StatTile value |
-| 24px | `name-header` | EntryList items |
+| 24px | `name-header` | The scene List's rows |
 | 30px | `sigil-label` | Sigil label |
 | 36px | `title-lg` | `screen` Heading, small StatFigure value, large Sigil label |
 | 56px | `title-xl` | `folio` Heading |
@@ -231,12 +231,12 @@ Each style's size and line height are `text-<style>` and `leading-<style>`. Ther
 - Heading — the titles
 - PageHeader — the screen title
 - Button — the command button
-- EntryList — the browsable name list
+- List — the list and its rows, and the scene name list
 - NavRail — the main navigation
 - Ledger — the labelled value list
 - StatFigure — the headline number
 - LevelPlate — the level display
 - Folio — the detail panel
 - Chronicle — chat and the game log
-- TabStrip — the tabs
+- Tabs — the tabs
 - Sigil — the hex stat badge

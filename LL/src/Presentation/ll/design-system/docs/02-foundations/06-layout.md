@@ -283,7 +283,7 @@ The Chronicle's own sizes (`chronicle-*`) are listed in Shell.
 - GameShell — the screen frame
 - Page — the information screen frame
 - Folio — the detail panel
-- ListRow — the list row
+- List — the list and its rows, and the scene name list
 - Ledger — the labelled value list
 - PageHeader — the information screen heading
 - Banner — the headline block

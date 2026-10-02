@@ -1,13 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   booleanAttribute,
   computed,
+  effect,
+  inject,
   input,
-  output,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
-import { LG_RARITY_CODES, LgRarity, lgCx, lgUniqueId } from '../../core/grimoire-core';
+import { LgRarity, lgCx, lgUniqueId } from '../../core/grimoire-core';
 import { lgFormatNumber } from '../../core/grimoire-format';
 import { LgIconComponent } from '../../primitives/icon/icon.component';
 import { LG_ICONS, LgIconName } from '../../core/grimoire-icons';
@@ -20,72 +21,70 @@ import {
   lgReadyWords,
   lgStateWarn,
 } from '../../core/grimoire-states';
-import { LgBlockedDirective, LgBlockedTip, lgBlockedSpoken } from '../../core/grimoire-blocked';
+import { LgBlockedController, LgBlockedTip, lgBlockedSpoken } from '../../core/grimoire-blocked';
+import { LgRarityComponent } from '../../primitives/rarity/rarity.component';
+
+/** `xs` is 32px and shows the rarity code alone, centred: at that size the art and the code would overlap. */
+export type LgItemSlotSize = 'xs' | 'sm' | 'md' | 'wide';
 
 /**
  * The item frame: a square for an item, Essence or equipment slot, edged in its rarity, with the rarity code in its
- * corner. States (Standards · States): a blocked slot (locked, unavailable, restricted, insufficient, cooldown) gives
- * its reason; `not-owned` fades the art; `undiscovered` withholds the name and art; any other state with a word
- * (equipped, listed, borrowed…) leads the meta line. Marks keep fixed corners (Standards · State combinations): the
- * rarity code top start; the attention diamond top end (`ready`, or Claimable); the ownership mark bottom start — the
- * in-use square for Equipped and Attuned, else the favourite ribbon (or its word until it is drawn); the quantity
- * bottom end. A blocked or undiscovered slot takes no attention mark.
+ * corner. Its host is the element: `<button lgItemSlot>` to pick or toggle it (a press is the native `(click)`;
+ * `selected` sets `aria-pressed`), `<a lgItemSlot>` to open it, `<div lgItemSlot>` to show it.
+ *
+ * States (Standards · States): a blocked slot (locked, unavailable, restricted, insufficient, cooldown) gives its
+ * reason, and as a button stays focusable and does not act — your (click) handler never runs; `not-owned` fades the
+ * art; `undiscovered` withholds the name and art; any other state with a word (equipped, listed, borrowed…) leads the
+ * meta line. Marks keep fixed corners (Standards · State combinations): the rarity code top start; the attention
+ * diamond top end (`ready`, or Claimable); the ownership mark bottom start — the in-use square for Equipped and
+ * Attuned, else the favourite ribbon (or its word until it is drawn); the quantity bottom end. A blocked or undiscovered
+ * slot takes no attention mark. A button or link needs a `name` or `slotLabel`: it is the control's name.
  */
 @Component({
-  selector: 'lg-item-slot',
-  imports: [LgIconComponent, NgTemplateOutlet, LgBlockedDirective],
+  selector: 'button[lgItemSlot], a[lgItemSlot], div[lgItemSlot]',
+  imports: [LgIconComponent, LgRarityComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: {
+    '[class]': 'classes()',
+    '[attr.type]': "isButton ? 'button' : null",
+    '[attr.aria-pressed]': 'isButton && !blocked() ? selected() : null',
+    '[attr.aria-label]': 'isControl ? accessibleLabel() : null',
+    '[attr.aria-disabled]': "isControl && blocked() ? 'true' : null",
+    '[attr.aria-describedby]': 'blockedTip.describedBy()',
+    '(mouseenter)': 'blockedTip.enter()',
+    '(mouseleave)': 'blockedTip.leave()',
+    '(focus)': 'blockedTip.focus()',
+    '(blur)': 'blockedTip.blur()',
+  },
   template: `
-    <ng-template #body>
-      <span class="lg-slot__frame"
-        >@if (!undiscovered()) {
-          @if (image(); as src) {<img [src]="src" alt="" class="lg-slot__img" />} @else if (icon(); as iconName) {<lg-icon
-              [name]="iconName"
-              [size]="24"
-            />}
-        }@if (shownRarity(); as r) {<span class="lg-slot__code" [attr.title]="r" aria-hidden="true">{{ codes[r] || r }}</span
-          >@if (!interactive()) {<span class="lg-sr">{{ r }}</span>}}@if (attention()) {<span
-            class="lg-attention lg-slot__attention"
-            aria-hidden="true"
-          ></span
-          >}@if (inUse()) {<span class="lg-slot__mark lg-slot__mark--inuse" aria-hidden="true"></span
-          >}@if (ribbon()) {<span class="lg-slot__mark" aria-hidden="true"
-            ><lg-icon [name]="favouriteIcon" [size]="12" /></span
-          >@if (!interactive()) {<span class="lg-sr">{{ favouriteWord }}</span>}}@if (readyWord() && !interactive()) {<span
-            class="lg-sr"
-            >{{ readyWord() }}</span
-          >}@if ((quantity() ?? 0) > 1) {<span class="lg-slot__qty"
-            >×{{ format(quantity()) }}</span
-          >}</span
-      >@if (captioned()) {<span class="lg-slot__caption"
-          ><span class="lg-slot__name">{{ label() }}</span
-          >@if (blocked()) {<span [id]="whyId" [class]="reasonClass()"
-              >@if (reasonInfo()?.word) {<span class="lg-slot__word" aria-hidden="true">{{ reasonInfo()?.word }}</span
-                ><span class="lg-sr lg-blocked__desc">{{ reasonInfo()?.word }}. </span>}{{ reasonInfo()?.reason }}</span
-            >}@if (metaParts().length) {<span class="lg-slot__meta">{{ metaParts().join(' · ') }}</span>}</span
-        >}@if (blocked() && !captioned() && !interactive()) {<span class="lg-sr">{{ srReason() }}</span
-        >}@if (why() && !captioned()) {<span class="lg-sr lg-blocked__desc" [id]="whyId" aria-hidden="true">{{
-          spoken(why()!)
-        }}</span>}
-    </ng-template>
-
-    @if (interactive()) {
-      <button
-        type="button"
-        [class]="classes()"
-        [attr.aria-pressed]="blocked() ? null : !!selected()"
-        [attr.aria-label]="accessibleLabel()"
-        [lgBlocked]="why()"
-        [lgBlockedId]="whyId"
-        (click)="blocked() ? null : activate.emit()"
-      >
-        <ng-container [ngTemplateOutlet]="body" />
-      </button>
-    } @else {
-      <div [class]="classes()"><ng-container [ngTemplateOutlet]="body" /></div>
-    }
+    <span class="lg-slot__frame"
+      >@if (!undiscovered() && size() !== 'xs') {
+        @if (image(); as src) {<img [src]="src" alt="" class="lg-slot__img" />} @else if (icon(); as iconName) {<lg-icon
+            [name]="iconName"
+            [size]="24"
+          />}
+      }@if (shownRarity(); as r) {<span class="lg-slot__code"
+          ><lg-rarity [rarity]="r" [tip]="!blocked()" [attr.aria-hidden]="isControl ? 'true' : null" /></span
+        >}@if (attention()) {<span class="lg-attention lg-slot__attention" aria-hidden="true"></span
+        >}@if (inUse()) {<span class="lg-slot__mark lg-slot__mark--inuse" aria-hidden="true"></span
+        >}@if (ribbon()) {<span class="lg-slot__mark" aria-hidden="true"
+          ><lg-icon [name]="favouriteIcon" [size]="12" /></span
+        >@if (!isControl) {<span class="lg-sr">{{ favouriteWord }}</span>}}@if (readyWord() && !isControl) {<span
+          class="lg-sr"
+          >{{ readyWord() }}</span
+        >}@if ((quantity() ?? 0) > 1) {<span class="lg-slot__qty">×{{ format(quantity()) }}</span>}</span
+    >@if (captioned()) {<span class="lg-slot__caption"
+        ><span class="lg-slot__name">{{ label() }}</span
+        >@if (blocked()) {<span [id]="whyId" [class]="reasonClass()"
+            >@if (reasonInfo()?.word) {<span class="lg-slot__word" aria-hidden="true">{{ reasonInfo()?.word }}</span
+              ><span class="lg-sr lg-blocked__desc">{{ reasonInfo()?.word }}. </span>}{{ reasonInfo()?.reason }}</span
+          >}@if (metaParts().length) {<span class="lg-slot__meta">{{ metaParts().join(' · ') }}</span>}</span
+      >}@if (blocked() && !captioned() && !isControl) {<span class="lg-sr">{{ srReason() }}</span
+      >}@if (why() && !captioned()) {<span class="lg-sr lg-blocked__desc" [id]="whyId" aria-hidden="true">{{
+        spoken(why()!)
+      }}</span>}
   `,
+  styleUrl: './item-slot.component.css',
 })
 export class LgItemSlotComponent {
   readonly name = input<string>();
@@ -96,8 +95,9 @@ export class LgItemSlotComponent {
   readonly image = input<string>();
   readonly icon = input<LgIconName>();
   readonly quantity = input<number>();
+  /** On a button: pressed (`aria-pressed`) and edged in arcana-glow. */
   readonly selected = input(false, { transform: booleanAttribute });
-  readonly size = input<'sm' | 'md' | 'wide'>();
+  readonly size = input<LgItemSlotSize>();
   /** false hides the caption under the frame. */
   readonly caption = input(true, { transform: booleanAttribute });
   readonly state = input<LgStateName>();
@@ -111,11 +111,11 @@ export class LgItemSlotComponent {
   /** Something waiting for the player: the attention diamond in the top end corner. true, or the words ("Upgrade
    *  available"), which join the accessible name. The claimable state draws it too. */
   readonly ready = input<boolean | string>();
-  /** Renders a toggle button and emits `activate` on a press. */
-  readonly interactive = input(false, { transform: booleanAttribute });
-  readonly activate = output<void>();
 
-  protected readonly codes: Record<string, string> = LG_RARITY_CODES;
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  protected readonly isButton = this.el.tagName === 'BUTTON';
+  /** A button or a link: it takes focus, so its name is its aria-label and a blocked one gives its reason. */
+  protected readonly isControl = this.isButton || this.el.tagName === 'A';
   protected readonly format = lgFormatNumber;
   protected readonly spoken = lgBlockedSpoken;
   protected readonly favouriteWord = LG_STATES.favourite.word;
@@ -156,9 +156,10 @@ export class LgItemSlotComponent {
   /** With a caption the reason is printed under the name and is the description; without one it is the reason tip. */
   protected readonly why = computed<LgBlockedTip | null>(() => {
     const br = this.reasonInfo();
-    if (!br || !this.interactive()) return null;
+    if (!br || !this.isControl) return null;
     return { reason: br.reason, word: br.word, tone: br.tone, spoken: br.spoken, printed: this.captioned() };
   });
+  protected readonly blockedTip = new LgBlockedController(this.el, this.why, () => this.whyId);
   private readonly stateWord = computed(() => {
     const info = this.info();
     return info && !this.blocked() && !this.undiscovered() ? info.word : null;
@@ -200,4 +201,23 @@ export class LgItemSlotComponent {
       .filter(Boolean)
       .join(', '),
   );
+
+  constructor() {
+    // A blocked slot does not act: stop the press before (click) handlers on the element hear it, and give the reason.
+    this.el.addEventListener(
+      'click',
+      (event) => {
+        if (!this.blocked() || !this.isControl) return;
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        this.blockedTip.press(event);
+      },
+      true,
+    );
+    // A control needs a name: without `name` or `slotLabel` it would be an unnamed button (WCAG 4.1.2).
+    effect(() => {
+      if (this.isControl && !this.label())
+        lgStateWarn('slot-name', 'An ItemSlot that is a button or link needs a name or slotLabel: it is its accessible name');
+    });
+  }
 }

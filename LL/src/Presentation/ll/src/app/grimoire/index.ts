@@ -25,7 +25,6 @@ export * from './game/constellation/constellation.component';
 export * from './game/currency-pill/currency-pill.component';
 export * from './components/delta/delta.component';
 export * from './game/emblem/emblem.component';
-export * from './components/entry-list/entry-list.component';
 export * from './components/folio/folio.component';
 export * from './shell/game-shell/game-shell.component';
 export * from './primitives/heading/heading.component';
@@ -40,12 +39,14 @@ export * from './game/level-plate/level-plate.component';
 export * from './components/list/list.component';
 export * from './game/loadout-slot/loadout-slot.component';
 export * from './primitives/meter/meter.component';
+export * from './primitives/option/option.component';
 export * from './shell/nav-rail/nav-rail.component';
 export * from './components/page-header/page-header.component';
 export * from './components/page/page.component';
 export * from './components/panel/panel.component';
 export * from './game/presence/presence.component';
 export * from './game/profile-identity/profile-identity.component';
+export * from './primitives/rarity/rarity.component';
 export * from './shell/activity/activity.component';
 export * from './shell/objective/objective.component';
 export * from './components/notice/notice.component';
@@ -54,7 +55,7 @@ export * from './primitives/section-rule/section-rule.component';
 export * from './game/sigil/sigil.component';
 export * from './shell/stage/stage.component';
 export * from './components/stat-figure/stat-figure.component';
-export * from './primitives/tab-strip/tab-strip.component';
+export * from './primitives/tabs/tabs.component';
 export * from './primitives/tag/tag.component';
 export * from './primitives/tooltip/tooltip.directive';
 export * from './shell/top-bar/top-bar.component';
@@ -72,7 +73,6 @@ import { LgConstellationComponent } from './game/constellation/constellation.com
 import { LgCurrencyPillComponent } from './game/currency-pill/currency-pill.component';
 import { LgDeltaComponent } from './components/delta/delta.component';
 import { LgEmblemComponent } from './game/emblem/emblem.component';
-import { LgEntryListComponent } from './components/entry-list/entry-list.component';
 import {
   LgFolioActionsComponent,
   LgFolioComponent,
@@ -90,15 +90,22 @@ import { LgKeyComponent } from './primitives/key/key.component';
 import { LgKeyHintsComponent } from './components/key-hints/key-hints.component';
 import { LgLedgerComponent, LgLedgerRowComponent } from './components/ledger/ledger.component';
 import { LgLevelPlateComponent } from './game/level-plate/level-plate.component';
-import { LgListComponent, LgListRowComponent } from './components/list/list.component';
+import {
+  LgListComponent,
+  LgListRowActionComponent,
+  LgListRowComponent,
+  LgListRowTrailingComponent,
+} from './components/list/list.component';
 import { LgLoadoutSlotComponent } from './game/loadout-slot/loadout-slot.component';
 import { LgMeterComponent } from './primitives/meter/meter.component';
+import { LgOptionComponent } from './primitives/option/option.component';
 import { LgNavRailComponent } from './shell/nav-rail/nav-rail.component';
 import { LgPageHeaderActionsComponent, LgPageHeaderComponent } from './components/page-header/page-header.component';
 import { LgPageComponent } from './components/page/page.component';
 import { LgPanelComponent, LgPanelHeaderComponent, LgPanelTitleComponent } from './components/panel/panel.component';
 import { LgPresenceComponent } from './game/presence/presence.component';
 import { LgProfileFactComponent, LgProfileIdentityComponent } from './game/profile-identity/profile-identity.component';
+import { LgRarityComponent } from './primitives/rarity/rarity.component';
 import { LgActivityComponent } from './shell/activity/activity.component';
 import { LgObjectiveComponent } from './shell/objective/objective.component';
 import { LgNoticeActionsComponent, LgNoticeComponent } from './components/notice/notice.component';
@@ -107,7 +114,13 @@ import { LgSectionRuleComponent } from './primitives/section-rule/section-rule.c
 import { LgSigilComponent } from './game/sigil/sigil.component';
 import { LgStageComponent } from './shell/stage/stage.component';
 import { LgStatFigureComponent } from './components/stat-figure/stat-figure.component';
-import { LgTabStripComponent } from './primitives/tab-strip/tab-strip.component';
+import {
+  LgTabComponent,
+  LgTabLinkComponent,
+  LgTabNavComponent,
+  LgTabPanelComponent,
+  LgTabsComponent,
+} from './primitives/tabs/tabs.component';
 import { LgTagComponent } from './primitives/tag/tag.component';
 import { LgTopBarComponent } from './shell/top-bar/top-bar.component';
 import { LgTrackComponent } from './components/track/track.component';
@@ -128,7 +141,6 @@ export const LG_GRIMOIRE = [
   LgCurrencyPillComponent,
   LgDeltaComponent,
   LgEmblemComponent,
-  LgEntryListComponent,
   LgFolioComponent,
   LgFolioEmblemComponent,
   LgFolioLoreComponent,
@@ -147,8 +159,11 @@ export const LG_GRIMOIRE = [
   LgLevelPlateComponent,
   LgListComponent,
   LgListRowComponent,
+  LgListRowActionComponent,
+  LgListRowTrailingComponent,
   LgLoadoutSlotComponent,
   LgMeterComponent,
+  LgOptionComponent,
   LgNavRailComponent,
   LgPageHeaderComponent,
   LgPageHeaderActionsComponent,
@@ -159,6 +174,7 @@ export const LG_GRIMOIRE = [
   LgPresenceComponent,
   LgProfileIdentityComponent,
   LgProfileFactComponent,
+  LgRarityComponent,
   LgActivityComponent,
   LgObjectiveComponent,
   LgNoticeComponent,
@@ -168,7 +184,11 @@ export const LG_GRIMOIRE = [
   LgSigilComponent,
   LgStageComponent,
   LgStatFigureComponent,
-  LgTabStripComponent,
+  LgTabsComponent,
+  LgTabComponent,
+  LgTabPanelComponent,
+  LgTabNavComponent,
+  LgTabLinkComponent,
   LgTagComponent,
   LgTopBarComponent,
   LgTrackComponent,

@@ -1,0 +1,8 @@
+/* ---------- Tabs ---------- */
+/* The host holds the strip and, after it, the panels. Primary tabs scroll sideways inside the strip when they no
+   longer fit; secondary tabs wrap. The same strip rules are nav[lgTabNav]'s own. */
+/* It never grows past its container (min-width 0 lets a grid or flex track shrink to it), so primary tabs scroll inside it. */
+:host { display: block; min-width: 0; max-width: 100%; }
+.lg-tabs__list { display: flex; align-items: center; flex-wrap: wrap; }
+.lg-tabs__list--primary { gap: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.lg-tabs__list--secondary { gap: var(--lg-space-5); }

@@ -36,7 +36,7 @@ Ornament marks the one special surface on a screen and the break between lore an
 | **`shadow-text-art`** | A dark text shadow (`#0b0806`, 14px and 3px) | Legibility, not decoration: lifts a label off art | Labels set over Stage or Banner art: Sigil labels, stage captions, the Banner's text. Never in a light colour | In use |
 | **Emblem** | A star polygon in `gilt` strokes | A sign — an attribute, school or region — not an ornament (Foundations · Shape) | Crowning a Folio, one per Folio; it goes with the Folio's budget | In use |
 
-The fades that are not the veil — the TopBar's fade over the stage and the EntryList's fading ends — are part of the art's frame too, and follow the gradient guardrail: dark fades over pictures only (D-012).
+The fades that are not the veil — the TopBar's fade over the stage and a scene List's fading ends — are part of the art's frame too, and follow the gradient guardrail: dark fades over pictures only (D-012).
 
 ## The budget
 
@@ -62,7 +62,7 @@ No frame, corner, ornament rule, grain, vignette or texture goes inside these, o
 | Zone | Why |
 | --- | --- |
 | **Tables** | Rows are read across; ornament breaks the columns |
-| **Lists** — List, ListRow, EntryList, the Chronicle's log | Ornament between rows reads as a group break that is not there |
+| **Lists** — List and ListRow (the scene variant too), the Chronicle's log | Ornament between rows reads as a group break that is not there |
 | **Inputs** — fields, selects, the chat composer | An input is a control; its edge is `line-strong`, nothing more |
 | **Toasts** | They arrive unasked; decoration makes them shout |
 | **Menus** — suggestion lists, context menus, pickers | Options are scanned, not admired |

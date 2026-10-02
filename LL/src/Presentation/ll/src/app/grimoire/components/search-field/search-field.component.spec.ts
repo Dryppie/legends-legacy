@@ -2,6 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgSearchFieldComponent } from './search-field.component';
+import { LgOptionComponent } from '../../primitives/option/option.component';
 import { LgSearchFieldHarness } from '../../testing/search-field.harness';
 import { lgCloseTip } from '../../testing/tip.harness';
 import {
@@ -37,6 +38,33 @@ class SearchFieldHost {
   readonly submits: string[] = [];
   /** Escape presses that reached the page around the field. */
   escapesAround = 0;
+}
+
+/** Options of its own: projected lg-options with more than a name. */
+@Component({
+  imports: [LgSearchFieldComponent, LgOptionComponent],
+  template: `
+    <lg-search-field
+      label="Find a guild member"
+      [(value)]="query"
+      (pick)="picks.push($event)"
+    >
+      @for (m of members; track m.name) {
+        <lg-option [value]="m.name" [disabled]="m.away"
+          >{{ m.name }} <span>Lv {{ m.level }}</span></lg-option
+        >
+      }
+    </lg-search-field>
+  `,
+})
+class OptionsHost {
+  readonly query = signal('');
+  readonly members = [
+    { name: 'Maren', level: 42, away: false },
+    { name: 'Kaelen', level: 38, away: true },
+    { name: 'Tamsin', level: 21, away: false },
+  ];
+  readonly picks: string[] = [];
 }
 
 describe('LgSearchFieldComponent', () => {
@@ -164,5 +192,86 @@ describe('LgSearchFieldComponent', () => {
     expect(host.picks).toEqual(['Marek']);
     expect(await field.isOpen()).toBeFalse();
     expect(await field.getValue()).toBe('Marekx');
+  }));
+
+  it('a click on a suggestion picks it, and focus stays in the field', fakeAsync(async () => {
+    const { host, field } = await typeMa();
+
+    await field.clickSuggestion('Mara');
+
+    expect(host.picks).toEqual(['Mara']);
+    expect(host.query()).toBe('Mara');
+    expect(await field.isOpen()).toBeFalse();
+    expect(await field.isFocused()).toBeTrue();
+  }));
+
+  it('opens its list on the overlay, outside the field, as wide as the field', fakeAsync(async () => {
+    TestBed.configureTestingModule({ imports: [SearchFieldHost] });
+    const fixture = TestBed.createComponent(SearchFieldHost);
+    const field =
+      await TestbedHarnessEnvironment.loader(fixture).getHarness(
+        LgSearchFieldHarness,
+      );
+    await field.click();
+    await field.type('Ma');
+
+    const host = fixture.nativeElement as HTMLElement;
+    const list = document.querySelector(
+      '.cdk-overlay-container [role=listbox]',
+    );
+    expect(list).not.toBeNull();
+    expect(host.contains(list)).toBeFalse();
+    const fieldWidth = (
+      host.querySelector('.lg-search__field') as HTMLElement
+    ).getBoundingClientRect().width;
+    expect(list!.getBoundingClientRect().width).toBeCloseTo(fieldWidth, 0);
+  }));
+});
+
+describe('LgSearchFieldComponent with options of its own', () => {
+  async function setup() {
+    TestBed.configureTestingModule({ imports: [OptionsHost] });
+    const fixture = TestBed.createComponent(OptionsHost);
+    const field =
+      await TestbedHarnessEnvironment.loader(fixture).getHarness(
+        LgSearchFieldHarness,
+      );
+    return { host: fixture.componentInstance, field };
+  }
+
+  beforeEach(lgAnnouncerIdle);
+  beforeEach(lgCloseTip);
+
+  it('opens on focus with its projected options, and picks an option’s value', fakeAsync(async () => {
+    const { host, field } = await setup();
+
+    await field.click();
+
+    expect(await field.isOpen()).toBeTrue();
+    expect(await field.getSuggestions()).toEqual([
+      'Maren Lv 42',
+      'Kaelen Lv 38',
+      'Tamsin Lv 21',
+    ]);
+    await field.pressKey('ArrowDown');
+    expect(await field.highlightedSuggestion()).toBe('Maren Lv 42');
+    // Kaelen is away (disabled): the keys pass over him.
+    await field.pressKey('ArrowDown');
+    expect(await field.highlightedSuggestion()).toBe('Tamsin Lv 21');
+
+    await field.pressKey('Enter');
+
+    expect(host.picks).toEqual(['Tamsin']);
+    expect(await field.getValue()).toBe('Tamsin');
+  }));
+
+  it('a click on a disabled option does nothing', fakeAsync(async () => {
+    const { host, field } = await setup();
+    await field.click();
+
+    await field.clickSuggestion('Kaelen Lv 38');
+
+    expect(host.picks).toEqual([]);
+    expect(await field.isOpen()).toBeTrue();
   }));
 });

@@ -417,10 +417,10 @@
       "progressionPosition": 12,
       "guardianScaling": {
         "health": 9.414125,
-        "offense": 11.9,
+        "offense": 6.99125,
         "defense": 2.8,
         "resistance": 2.8,
-        "penetration": 1.0,
+        "penetration": 40.0,
         "regeneration": 1.0
       },
       "stagger": {

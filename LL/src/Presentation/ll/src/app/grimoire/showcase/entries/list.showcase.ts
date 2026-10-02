@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
+  LG_LIST,
   LG_PANEL,
   LgButtonComponent,
   LgIconName,
-  LgListComponent,
-  LgListRowComponent,
+  LgListRowState,
   LgPresenceComponent,
   LgRarity,
-  LgSlotDirective,
   LgTagComponent,
+  LgTagTone,
 } from '@grimoire';
 import {
   ShowcaseEntryComponent,
@@ -35,13 +35,60 @@ interface Member {
   seen?: string;
 }
 
+/** A row of the scene list. */
+interface Creature {
+  id: string;
+  name: string;
+  tag?: string;
+  tagTone?: LgTagTone;
+  state?: LgListRowState;
+  /** Locked: how it unlocks. */
+  reason?: string;
+  ready?: boolean | string;
+}
+
+const NAMES = [
+  'Alpha Wolf',
+  'Bloodfang Wolf',
+  'Dire Wolf',
+  'Ember Wolf',
+  'Horned Wolf',
+  'Blackjaw Spider',
+  'Giant Spider',
+  'Cave Bat',
+  'Ember Knight',
+];
+
+/**
+ * The creature list: Horned Wolf has a point to spend (the attention diamond), Blackjaw Spider is new,
+ * Cave Bat is undiscovered and the current Creature Focus (its one Tag), Ember Knight is locked.
+ */
+const CREATURES: readonly Creature[] = NAMES.map((n): Creature => {
+  if (n === 'Cave Bat')
+    return {
+      id: n,
+      name: 'Undiscovered',
+      tag: 'Creature Focus',
+      tagTone: 'neutral',
+    };
+  return {
+    id: n,
+    name: n,
+    tag: n === 'Blackjaw Spider' ? '+ New' : undefined,
+    state: n === 'Ember Knight' ? 'locked' : undefined,
+    reason: n === 'Ember Knight' ? 'Clear Floor 10 to unlock' : undefined,
+    ready:
+      n === 'Horned Wolf'
+        ? '1 point to spend'
+        : n === 'Ember Knight' || undefined,
+  };
+});
+
 @Component({
   selector: 'sc-list-showcase',
   imports: [
     ShowcaseStoryDirective,
-    LgListComponent,
-    LgListRowComponent,
-    LgSlotDirective,
+    ...LG_LIST,
     ...LG_PANEL,
     LgTagComponent,
     LgPresenceComponent,
@@ -51,7 +98,7 @@ interface Member {
   template: `
     <ng-template
       scStory="Inventory"
-      notes="Standard rows in a flush Panel: thumbnail, name and rarity code, Tags and meta, quantity, value. Click a row to select it. Values are sell prices in Cinders."
+      notes="Standard rows in a flush Panel: thumbnail, name and rarity code, Tags and meta, quantity, amount. Each row's action covers it; press one to select it ([(selected)]). Amounts are sell prices in Cinders."
       width="32rem"
     >
       <lg-panel flush>
@@ -59,22 +106,21 @@ interface Member {
           <lg-panel-title>Inventory</lg-panel-title>
           <span>5 of 60</span>
         </lg-panel-header>
-        <lg-list label="Inventory">
+        <lg-list label="Inventory" [(selected)]="selected">
           @for (it of items; track it.id) {
             <li
               lgListRow
-              [title]="it.title"
+              [key]="it.id"
+              [name]="it.title"
               [rarity]="it.rarity"
               [icon]="it.icon"
               [meta]="it.meta"
               [quantity]="it.quantity"
-              [value]="it.value"
-              interactive
-              [selected]="selected() === it.id"
-              (activate)="selected.set(it.id)"
+              [amount]="it.value"
             >
+              <button lgListRowAction></button>
               @if (it.equipped) {
-                <lg-tag lgSlot="tags">Equipped</lg-tag>
+                <lg-tag>Equipped</lg-tag>
               }
             </li>
           }
@@ -84,7 +130,7 @@ interface Member {
 
     <ng-template
       scStory="Compact"
-      notes="Guild members on 32px rows, one line, with Presence trailing. Values are contribution this season."
+      notes="Guild members on 32px rows, one line, with Presence in the trailing region. Amounts are contribution this season."
       width="32rem"
     >
       <lg-panel flush density="compact">
@@ -94,19 +140,11 @@ interface Member {
         </lg-panel-header>
         <lg-list label="Guild members">
           @for (m of members; track m.name) {
-            <li
-              lgListRow
-              [title]="m.name"
-              [meta]="m.rank"
-              [value]="m.score"
-              interactive
-            >
-              <lg-presence
-                lgSlot="trailing"
-                [online]="m.online"
-                [lastSeen]="m.seen"
-                compact
-              />
+            <li lgListRow [name]="m.name" [meta]="m.rank" [amount]="m.score">
+              <button lgListRowAction></button>
+              <lg-list-row-trailing>
+                <lg-presence [online]="m.online" [lastSeen]="m.seen" compact />
+              </lg-list-row-trailing>
             </li>
           }
         </lg-list>
@@ -126,12 +164,12 @@ interface Member {
           @for (it of items.slice(0, 3); track it.id) {
             <li
               lgListRow
-              [title]="it.title"
+              [name]="it.title"
               [rarity]="it.rarity"
               [icon]="it.icon"
               [meta]="it.meta"
               [quantity]="it.quantity"
-              [value]="it.value"
+              [amount]="it.value"
             ></li>
           }
         </lg-list>
@@ -140,7 +178,7 @@ interface Member {
 
     <ng-template
       scStory="Trailing action"
-      notes="One small Button at the row's end. Trailing actions leave the tab order: Right moves into them, Left back."
+      notes="One small Button in the trailing region. In a row with an action, it leaves the tab order: Right moves into it, Left back."
       width="32rem"
     >
       <lg-panel flush>
@@ -151,14 +189,16 @@ interface Member {
           @for (it of items.slice(2); track it.id) {
             <li
               lgListRow
-              [title]="it.title"
+              [name]="it.title"
               [rarity]="it.rarity"
               [icon]="it.icon"
               [quantity]="it.quantity"
-              [value]="it.value"
-              interactive
+              [amount]="it.value"
             >
-              <button lgButton lgSlot="trailing" size="sm">Sell</button>
+              <button lgListRowAction></button>
+              <lg-list-row-trailing>
+                <button lgButton size="sm">Sell</button>
+              </lg-list-row-trailing>
             </li>
           }
         </lg-list>
@@ -177,38 +217,44 @@ interface Member {
         <lg-list label="Inventory">
           <li
             lgListRow
-            title="Dire Wolf Essence"
+            name="Dire Wolf Essence"
             rarity="Rare"
             icon="essences"
             [quantity]="3"
-            value="1,250"
-            interactive
+            amount="1,250"
           >
-            <button lgButton lgSlot="trailing" size="sm">Sell</button>
+            <button lgListRowAction></button>
+            <lg-list-row-trailing>
+              <button lgButton size="sm">Sell</button>
+            </lg-list-row-trailing>
           </li>
           <li
             lgListRow
-            title="Soul Prism"
+            name="Soul Prism"
             rarity="Epic"
             icon="soulstones"
             meta="Sold"
             [quantity]="7"
-            value="2,100"
+            amount="2,100"
             muted
-            interactive
           >
-            <button lgButton lgSlot="trailing" size="sm" disabled>Sell</button>
+            <button lgListRowAction></button>
+            <lg-list-row-trailing>
+              <button lgButton size="sm" disabled>Sell</button>
+            </lg-list-row-trailing>
           </li>
           <li
             lgListRow
-            title="Iron Sabre"
+            name="Iron Sabre"
             rarity="Common"
             icon="colosseum"
             [quantity]="2"
-            value="85"
-            interactive
+            amount="85"
           >
-            <button lgButton lgSlot="trailing" size="sm">Sell</button>
+            <button lgListRowAction></button>
+            <lg-list-row-trailing>
+              <button lgButton size="sm">Sell</button>
+            </lg-list-row-trailing>
           </li>
         </lg-list>
       </lg-panel>
@@ -227,9 +273,9 @@ interface Member {
           @for (m of members; track m.name) {
             <li
               lgListRow
-              [title]="m.name"
+              [name]="m.name"
               [meta]="m.rank"
-              [value]="m.score"
+              [amount]="m.score"
             ></li>
           }
         </lg-list>
@@ -249,9 +295,9 @@ interface Member {
           @for (m of members; track m.name) {
             <li
               lgListRow
-              [title]="m.name"
+              [name]="m.name"
               [meta]="m.rank"
-              [value]="m.score"
+              [amount]="m.score"
             ></li>
           }
         </lg-list>
@@ -270,26 +316,26 @@ interface Member {
         <lg-list label="Inventory">
           <li
             lgListRow
-            title="Ember Fang"
+            name="Ember Fang"
             rarity="Epic"
             icon="colosseum"
             [quantity]="1"
-            value="9,400"
+            amount="9,400"
           ></li>
           <li
             lgListRow
-            title="Crown of Cinders"
+            name="Crown of Cinders"
             rarity="Legendary"
             icon="overview"
-            value="48,000"
+            amount="48,000"
           ></li>
           <li
             lgListRow
-            title="Soul Prism"
+            name="Soul Prism"
             rarity="Epic"
             icon="soulstones"
             [quantity]="7"
-            [value]="null"
+            [amount]="null"
           ></li>
         </lg-list>
       </lg-panel>
@@ -297,7 +343,7 @@ interface Member {
 
     <ng-template
       scStory="Live value"
-      notes="A value that changes by itself takes the live-update mark. Press Refresh price to see it."
+      notes="An amount that changes by itself takes the live-update mark. Press Refresh price to see it."
       width="32rem"
     >
       <lg-panel flush>
@@ -310,30 +356,255 @@ interface Member {
         <lg-list label="Bazaar">
           <li
             lgListRow
-            title="Soul Prism"
+            name="Soul Prism"
             rarity="Epic"
             icon="soulstones"
             meta="Material"
-            [value]="price()"
+            [amount]="price()"
             live
           ></li>
           <li
             lgListRow
-            title="Dire Wolf Essence"
+            name="Dire Wolf Essence"
             rarity="Rare"
             icon="essences"
             meta="Essence · Lv 12"
-            value="1,250"
+            amount="1,250"
             live
           ></li>
         </lg-list>
       </lg-panel>
     </ng-template>
+
+    <ng-template
+      scStory="Selectable"
+      notes="selectable: the rows are options of a listbox, for a choice with nothing to do on each row. Up and Down move the selection, wrapping."
+      width="32rem"
+    >
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Loadout presets</lg-panel-title>
+        </lg-panel-header>
+        <lg-list label="Loadout presets" selectable [(selected)]="preset">
+          <li lgListRow name="Hunter" key="hunter" meta="3 Essences"></li>
+          <li lgListRow name="Warden" key="warden" meta="2 Essences"></li>
+          <li
+            lgListRow
+            name="Reaper"
+            key="reaper"
+            state="locked"
+            reason="Unlocks at level 30"
+          ></li>
+        </lg-list>
+      </lg-panel>
+    </ng-template>
+
+    <ng-template
+      scStory="Scene"
+      notes="variant=scene, the browsable name list over stage art: 24px names on 40px rows; the selected one takes the bar and the wash. The list scrolls, and its ends fade. Up and Down move the selection."
+      width="22rem"
+      height="28rem"
+    >
+      <lg-list
+        label="Creatures"
+        variant="scene"
+        selectable
+        [(selected)]="active"
+      >
+        @for (c of creatures; track c.id) {
+          <li
+            lgListRow
+            [key]="c.id"
+            [name]="c.name"
+            [state]="c.state"
+            [reason]="c.reason"
+            [ready]="c.ready"
+          >
+            @if (c.tag) {
+              <lg-tag [tone]="c.tagTone || 'new'">{{ c.tag }}</lg-tag>
+            }
+          </li>
+        }
+      </lg-list>
+    </ng-template>
+
+    <ng-template
+      scStory="Scene compact"
+      notes="17px names on 32px rows, for a long roster."
+      width="20rem"
+      height="24rem"
+    >
+      <lg-list
+        label="Creatures, compact"
+        variant="scene"
+        selectable
+        density="compact"
+        [(selected)]="active"
+      >
+        @for (c of creatures; track c.id) {
+          <li
+            lgListRow
+            [key]="c.id"
+            [name]="c.name"
+            [state]="c.state"
+            [reason]="c.reason"
+            [ready]="c.ready"
+          >
+            @if (c.tag) {
+              <lg-tag [tone]="c.tagTone || 'new'">{{ c.tag }}</lg-tag>
+            }
+          </li>
+        }
+      </lg-list>
+    </ng-template>
+
+    <ng-template
+      scStory="Locked"
+      notes="A locked row is never selected; hover or focus it, or move onto it with the arrows, to see how it unlocks."
+      width="22rem"
+      height="14rem"
+    >
+      <lg-list
+        label="Creatures"
+        variant="scene"
+        selectable
+        [(selected)]="lockedActive"
+      >
+        @for (c of locked; track c.id) {
+          <li
+            lgListRow
+            [key]="c.id"
+            [name]="c.name"
+            [state]="c.state"
+            [reason]="c.reason"
+          >
+            @if (c.tag) {
+              <lg-tag [tone]="c.tagTone || 'new'">{{ c.tag }}</lg-tag>
+            }
+          </li>
+        }
+      </lg-list>
+    </ng-template>
+
+    <ng-template
+      scStory="Ready"
+      notes="ready draws the attention diamond at the row's end; a locked row takes none."
+      width="22rem"
+      height="14rem"
+    >
+      <lg-list label="Creatures" variant="scene" selectable selected="slime">
+        @for (c of ready; track c.id) {
+          <li
+            lgListRow
+            [key]="c.id"
+            [name]="c.name"
+            [state]="c.state"
+            [reason]="c.reason"
+            [ready]="c.ready"
+          >
+            @if (c.tag) {
+              <lg-tag [tone]="c.tagTone || 'new'">{{ c.tag }}</lg-tag>
+            }
+          </li>
+        }
+      </lg-list>
+    </ng-template>
+
+    <ng-template
+      scStory="No fade"
+      notes="fade=false: the ends do not fade out."
+      width="22rem"
+      height="28rem"
+    >
+      <lg-list
+        label="Creatures"
+        variant="scene"
+        selectable
+        selected="Ember Wolf"
+        [fade]="false"
+      >
+        @for (c of creatures; track c.id) {
+          <li
+            lgListRow
+            [key]="c.id"
+            [name]="c.name"
+            [state]="c.state"
+            [reason]="c.reason"
+            [ready]="c.ready"
+          >
+            @if (c.tag) {
+              <lg-tag [tone]="c.tagTone || 'new'">{{ c.tag }}</lg-tag>
+            }
+          </li>
+        }
+      </lg-list>
+    </ng-template>
+
+    <ng-template
+      scStory="Narrow"
+      notes="Names truncate; a Tag keeps its words."
+      width="16rem"
+      height="28rem"
+    >
+      <lg-list
+        label="Creatures"
+        variant="scene"
+        selectable
+        selected="Ember Wolf"
+      >
+        @for (c of creatures; track c.id) {
+          <li
+            lgListRow
+            [key]="c.id"
+            [name]="c.name"
+            [state]="c.state"
+            [reason]="c.reason"
+            [ready]="c.ready"
+          >
+            @if (c.tag) {
+              <lg-tag [tone]="c.tagTone || 'new'">{{ c.tag }}</lg-tag>
+            }
+          </li>
+        }
+      </lg-list>
+    </ng-template>
   `,
 })
 export class ListShowcaseComponent extends ShowcaseEntryComponent {
-  protected readonly selected = signal('wolf');
+  protected readonly selected = signal<string | null>('wolf');
   protected readonly price = signal(2100);
+  protected readonly preset = signal<string | null>('warden');
+  protected readonly creatures = CREATURES;
+  protected readonly active = signal<string | null>('Ember Wolf');
+  protected readonly lockedActive = signal<string | null>('wolf');
+  protected readonly locked: readonly Creature[] = [
+    { id: 'wolf', name: 'Ember Wolf', tag: 'New' },
+    { id: 'slime', name: 'Blue Slime' },
+    {
+      id: 'drake',
+      name: 'Ash Drake',
+      state: 'locked',
+      reason: 'Defeat the Ash Drake in Shenic',
+    },
+    { id: 'imp', name: 'Cinder Imp', tag: 'Rare', tagTone: 'rare' },
+  ];
+  protected readonly ready: readonly Creature[] = [
+    { id: 'wolf', name: 'Ember Wolf', tag: 'New', ready: '1 point to spend' },
+    { id: 'slime', name: 'Blue Slime', ready: true },
+    {
+      id: 'drake',
+      name: 'Ash Drake',
+      state: 'locked',
+      reason: 'Defeat the Ash Drake in Shenic',
+      ready: true,
+    },
+    {
+      id: 'bat',
+      name: 'Undiscovered',
+      tag: 'Creature Focus',
+      tagTone: 'neutral',
+    },
+  ];
   protected readonly items: readonly InventoryItem[] = [
     {
       id: 'fang',
@@ -412,8 +683,13 @@ export const LIST_SHOWCASE: ShowcaseEntry = {
   slug: 'list',
   name: 'List',
   tier: 'components',
-  summary: 'The list and its rows.',
-  covers: ['LgListComponent', 'LgListRowComponent'],
+  summary: 'The list and its rows, and the scene name list.',
+  covers: [
+    'LgListComponent',
+    'LgListRowComponent',
+    'LgListRowActionComponent',
+    'LgListRowTrailingComponent',
+  ],
   readme: 'src/app/grimoire/components/list/README.md',
   component: ListShowcaseComponent,
 };

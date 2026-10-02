@@ -89,8 +89,8 @@ Pixel figures in these docs are at Default. The only lengths left in px are hair
 
 **What scrolls, and only inside its own region:**
 
-- vertically: the Page, the Folio, the Chronicle log and the EntryList;
-- sideways: the primary TabStrip, the Chronicle's channel tabs and, at 320px, the TopBar's currency strip.
+- vertically: the Page, the Folio, the Chronicle log and a scene List;
+- sideways: primary Tabs, the Chronicle's channel tabs and, at 320px, the TopBar's currency strip.
 
 The page itself never scrolls sideways, and nothing is clipped.
 
@@ -115,9 +115,9 @@ Never use a positive `tabindex`. Hidden and off-screen things are out of the ord
 
 | Widget | Keys | What moves |
 | --- | --- | --- |
-| TabStrip, the Chronicle's channels | Left, Right | Focus and selection together: the tab opens as it takes focus |
-| EntryList | Up, Down (wrapping), Home, End | Focus and selection together; a locked entry takes focus but not selection |
-| List and ListRow | Up, Down, Home, End; Right into a row's trailing action and Left back to its name | Focus only; Enter or Space opens the row |
+| Tabs, the Chronicle's channels | Left, Right (wrapping); Home and End in Tabs | Focus and selection together: the tab opens as it takes focus |
+| A selectable List (the scene list) | Up, Down (wrapping), Home, End, a name's first letters | Focus and selection together; a blocked row takes focus but not selection |
+| A List of things to act on | Up, Down, Home, End, a name's first letters; Right into a row's trailing region and Left back to the row | Focus only; Enter or Space presses the row's action |
 | Ledger (rows that explain themselves) | Up, Down, Home, End | Focus, with the explanation opening on each row |
 | Constellation | Arrow keys, Home, End | Focus between Sigils, locked ones included; Enter or Space selects, or shows a locked Sigil's condition |
 | Grids (the future inventory grid, the Table) | Arrow keys in two dimensions; Home and End within a row; Ctrl + Home and Ctrl + End to the first and last cell; Page Up and Page Down by a screenful | Focus only |
@@ -151,7 +151,7 @@ Only when no layer is open may a screen use Escape for Back, and its KeyHints th
 | Inputs, primary tabs | The control height: 44, 40 or 32px |
 | Secondary tabs | 24–32px |
 | A link Button standing alone | At least 24px (`target-min`) |
-| A ListRow | Its name is its button, and the hit area covers the whole row (32–48px) |
+| A ListRow | Its action covers the whole row (32–48px) |
 | Sigils | 40, 52 or 68px |
 | Chronicle toggles and the send button | At least 24px |
 | An ItemLink inside a sentence | Exempt as inline text; give it a separate target where it is the only way in |
@@ -261,9 +261,8 @@ Before a screen ships:
 
 - GameShell — the screen frame
 - Ledger — the labelled value list
-- ListRow — the list row
-- TabStrip — the tabs
-- EntryList — the browsable name list
+- List — the list and its rows, and the scene name list
+- Tabs — the tabs
 - SearchField — search with suggestions
 - Button — the command button
 - CurrencyPill — the currency amount

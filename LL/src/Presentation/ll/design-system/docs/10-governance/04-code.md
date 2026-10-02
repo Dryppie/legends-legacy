@@ -64,7 +64,7 @@ Every token is a custom property with the `--lg-` prefix (`--lg-ink-muted`, `--l
 | The tip | `LgTip`: one float for the page on the CDK overlay, under `lgTooltip` and `lgBlocked`; `isShownFor` and `isPinned` are reactive | `core/grimoire-tip.ts` |
 | Blocked controls and their reason tip | `[lgBlocked]`, `[lgBlockedId]`, `LgBlockedController`, `lgBlockedSpoken` | `core/grimoire-blocked.ts` |
 | Tooltips | `[lgTooltip]` (text, `{ title, text, meta }` or a template), `lgTooltipPlace`, `lgTooltipPin`, `lgTooltipDescription`; `LgTooltipController` for a part that is its own tooltip's element (a Ledger row) | `primitives/tooltip/tooltip.directive.ts` |
-| Roving focus | `lgMoveKey`, until each composite moves to the CDK's `FocusKeyManager` (the Ledger has, D-137) | `core/grimoire-a11y.ts` |
+| Roving focus | `lgMoveKey`, until each composite moves to the CDK's key managers (the Ledger, List and Tabs have `FocusKeyManager`, D-137, D-138; SearchField `ActiveDescendantKeyManager`, D-140) | `core/grimoire-a11y.ts` |
 | Motion, live values, live lists | `LG_MOTION`, `lgMotionMs`, `lgReducedMotion`, `lgLive()`, `[lgLiveList]` (`exportAs: 'lgLiveList'`: `rows()`, `pending()`, `release()`) | `core/grimoire-motion.ts` |
 | The ornament budget's warnings | `LG_ORNAMENT_BUDGET`, `lgForbiddenZone`, `lgCheckFramed`, `lgCheckOrnamentRule` | `core/grimoire-ornament.ts` |
 | The icon set | `LG_ICONS`, `LgIconName`, `LG_ICON_NAMES`, `LG_ICON_MARKERS` (generated from `icons.json`, D-125) | `core/grimoire-icons.ts` |
@@ -81,7 +81,7 @@ Each part as it stands: a re-shaped part with its regions, the rest as they were
 | GameShell | `<lg-game-shell>` | Slots `rail`, `top`, `folio`, `hints`, `chronicle`; the stage is the default content. `[(chroniclePosition)]`; `backdrop` (D-107). A TopBar inside the shell opens the rail drawer itself (`LgShellApi.openRail()`). |
 | TopBar | `<lg-top-bar>` | `(menu)`; slot `center`. |
 | NavRail | `<lg-nav-rail>` | `(navigate)`; slots `header`, `footer`. |
-| TabStrip | `<lg-tab-strip>` | `[(activeId)]`. |
+| Tabs | `<lg-tabs>` with `<button lgTab key="…">` tabs and `<lg-tab-panel key="…">` panels; route tabs as `<nav lgTabNav>` with `<a lgTabLink>` | `[(selected)]`, the selected tab's key; a tab's `count`; `LG_TABS`. Keys through the CDK's `FocusKeyManager`; route tabs read `aria-current="page"` from the consumer's `routerLinkActive` (D-138). |
 | Stage | `<lg-stage>` | — |
 | Page | `<lg-page>` | `flow` (D-097); dense inside a GameShell (D-120), from `LG_SHELL`. |
 | PageHeader | `<lg-page-header heading="…">` | Region `<lg-page-header-actions>`; `LG_PAGE_HEADER`. Dense inside a GameShell. |
@@ -91,30 +91,31 @@ Each part as it stands: a re-shaped part with its regions, the rest as they were
 | Ledger | `<lg-ledger heading="…">` with `<div lgLedgerRow label="…" [value]="…">` rows | `columns="2"` sets the rows two-up; a row's `delta`, `deltaPolarity`, `deltaText`; `LG_LEDGER`. Keys through the CDK's `FocusKeyManager`, explanations through the tip (D-137). |
 | StatFigure, LevelPlate, Meter, Track | `<lg-stat-figure>`, `<lg-level-plate>`, `<lg-meter>`, `<lg-track>` | — |
 | Delta | `<lg-delta>` | `extraClass` adds a class to its root. |
-| Sigil | `<lg-sigil>` | `interactive` and `(activate)`. |
+| Sigil | `<button lgSigil>`, `<div lgSigil>` | A button is a toggle (`state="selected"` is its `aria-pressed`); a press is the native `(click)`, which never runs while it is locked. A tooltip is `lgTooltip` on the host (D-139). |
 | Constellation | `<lg-constellation>` | `(select)`. |
 | JourneyCard | `<lg-journey-card>` | `title`; `id` is optional. Slot `actions`. |
-| LoadoutSlot | `<lg-loadout-slot>` | `interactive` and `(activate)`; `compact` (D-103). |
+| LoadoutSlot | `<button lgLoadoutSlot>`, `<a lgLoadoutSlot>`, `<div lgLoadoutSlot>` | A press is the native `(click)`, which never runs while it is locked; `compact` (D-103), whose frame is an `xs` ItemSlot (D-139). |
 | Chronicle | `<lg-chronicle>` | `[(activeChannel)]`, `[(open)]`, `[(draft)]`, `(send)`; `toggleable`, `composer`, `composerChannel`, `composerChannelLabel`, `placeholder`; `authorActions` with `(authorSelect)` (`{ message, element }`); slots `aside` and `composer` (a composer of your own); `<ng-template lgChronicleText let-message>` for message text. |
-| ItemLink | `<lg-item-link>` | `interactive` and `(activate)`. |
-| EntryList | `<lg-entry-list>` | `[(activeId)]`. |
-| ListRow | `<lg-list>` with `<li lgListRow>` rows | `interactive` and `(activate)`; slots `thumb`, `tags`, `meta`, `trailing`. |
-| ItemSlot | `<lg-item-slot>` | `interactive` and `(activate)`. |
+| ItemLink | `<button lgItemLink>`, `<a lgItemLink>`, `<span lgItemLink>` | The name is its content; `rarity` and `meta` show in the tip (D-139). |
+| List | `<lg-list>` with `<li lgListRow name="…">` rows | `[(selected)]`, the selected row's `key`; `selectable` (a listbox), `variant="scene"` (EntryList's look), `rhythm`; a row's `amount`, `state` with `reason`, `ready`; its action `<button lgListRowAction>` or `<a lgListRowAction>`, Tags as projected `<lg-tag>`s, region `<lg-list-row-trailing>`; `LG_LIST`. Keys through the CDK's `FocusKeyManager` (D-138). |
+| ItemSlot | `<button lgItemSlot>`, `<a lgItemSlot>`, `<div lgItemSlot>` | `selected` is a button's `aria-pressed`; a press is the native `(click)`, which never runs while it is blocked; a button or link needs `name` or `slotLabel`. Its container sets `--lg-slot-width` and `--lg-slot-edge` (D-139). |
 | Tag | `<lg-tag>` | `label` replaces the state word; `ariaHidden` hides it from screen readers. |
+| Rarity | `<lg-rarity rarity="Epic">` | `nameId` names its spoken words for an `aria-labelledby`; `tip` (D-139). |
 | Presence | `<lg-presence>` | — |
-| Activity | `<lg-activity>` | `interactive` and `(activate)`; `short` (D-117). |
+| Activity | `<button lgActivity>`, `<a lgActivity>`, `<div lgActivity>` | A press is the native `(click)`; `short` (D-117); compact, the action is its tooltip (D-139). |
 | Objective | `<lg-objective>` | The tracker is a projected `lgSlot="panel"` child; `[(open)]`. |
 | Notice | `<lg-notice heading="…">` | The detail is the default content; region `<lg-notice-actions>`; `LG_NOTICE`. |
 | ProfileIdentity | `<lg-profile-identity>` with `<div lgProfileFact label="…">` facts | The facts are projected children, the value as content; `as` is the heading tag; `presence` takes `{ online, lastSeen }`. |
-| CurrencyPill | `<lg-currency-pill>` | `interactive` and `(activate)`. |
+| CurrencyPill | `<button lgCurrencyPill>`, `<span lgCurrencyPill>` | `toggle` switches a `short` pill's figure on a press; otherwise the press is your `(click)`; `tooltip` for the tip's words (D-139). |
 | Button | `<button lgButton>`, `<a lgButton>` | The variant is the attribute's value: `lgButton="quiet"`. A press is the native `(click)`, which never runs while the Button is blocked or pending. |
 | KeyHints | `<lg-key-hints>` | — |
-| SearchField | `<lg-search-field>` | `[(value)]`; `(pick)` and `(submitted)` (`select` and `submit` are DOM event names). |
+| SearchField | `<lg-search-field>` with `suggestions` or projected `<lg-option value="…">`s | `[(value)]`; `(pick)` and `(submitted)` (`select` and `submit` are DOM event names). The list is on the CDK overlay, and the highlight moves by the CDK's `ActiveDescendantKeyManager` (D-140). |
+| Option | `<lg-option value="…">` | `disabled`; reports to its list through `LgOptionParent` (D-140). |
 | Heading | `<h2 lgHeading>` (h1–h6) | The level is the attribute's value: `lgHeading="screen"`. |
 | SectionRule | `<lg-section-rule>` | Slot `aside`. |
 | Emblem, Icon, Key | `<lg-emblem>`, `<lg-icon>`, `<lg-key>` | — |
 
-**General rules today.** Projected content is the default content, a region component in a re-shaped part, or a named slot (`lgSlot="name"`) in the rest. A part that becomes a control on request takes an `interactive` input and emits `(activate)`. A value the screen owns is a `model()`, bound with `[( )]`. Other events are outputs named for what happened, without `on`, except where that name is a DOM event the host would also fire (SearchField). Plan phase 3 replaces `lgSlot` and `interactive` with child components and native hosts.
+**General rules today.** Projected content is the default content, a region component in a re-shaped part, or a named slot (`lgSlot="name"`) in the rest. A part that can be a control takes a native host — `<button lgItemSlot>`, `<a lgActivity>` — and its press is the native `(click)`; no part takes `interactive` or emits `(activate)` any more (D-138, D-139). A value the screen owns is a `model()`, bound with `[( )]`. Other events are outputs named for what happened, without `on`, except where that name is a DOM event the host would also fire (SearchField). Plan phase 3 replaces the remaining `lgSlot`s with child components (step 18).
 
 ## Tests
 
@@ -140,7 +141,7 @@ A change is done when all four pass: no `check.mjs` error, no snapshot differenc
   - **Live list, `keep` after release.** A kept key that has left the data stays while the list is held, but drops out on `release()` (the player pressing "2 new listings"). Foundations · Motion (Live updates, rule 3) says it stays until the player picks another (`core/grimoire-motion.spec.ts`).
 - **Window width in the new look's frame.** `dashboard-grimoire` (the edge swipe) and `chat-grimoire` (whether the docked Chronicle opens) compare `window.innerWidth` with 960px, while the shell's breakpoint is `breakpoint-shell`, 60rem of its container. At Large and Extra large text they disagree between 960px and 1,104 or 1,248px. Read `LG_BREAKPOINT.shell` against the shell's width when the frame is next touched.
 - **Styles not encapsulated yet** in the parts plan phase 3 hasn't re-shaped, and the selectors in them that reach across parts (Styles, above).
-- **The first load is at its limit.** It is 998 kB of the 1,000 kB error budget. The legacy screens' Angular Material loads `@angular/cdk/a11y` at startup, and the build keeps any part of that package a lazy screen uses beside it in the first load: the key managers (D-137) added 6 kB that way. The next CDK piece a part takes can fail the production build: raise the budget, or take Material's form field, input and icon out of the first load, before plan step 17 (`ActiveDescendantKeyManager`).
+- **The first load is at its limit.** It is 998 kB of the 1,000 kB error budget. The legacy screens' Angular Material loads `@angular/cdk/a11y` at startup, and the build keeps any part of that package a lazy screen uses beside it in the first load: the key managers added 6 kB that way (D-137), and `ActiveDescendantKeyManager` 0.2 kB more (D-140). The next CDK piece a part takes (phase 4's Dialog, Select, Menu) can fail the production build: raise the budget, or take Material's form field, input and icon out of the first load, first.
 - **Parts without a spec**: `check.mjs` lists them as warnings.
 - **Root size (D-096).** The game's root follows Grimoire: 100%, 115% and 130%. The legacy styles were written for the old 14px root, and the build multiplies their rem values by 0.875, so legacy screens keep their size at Default.
 - **Fonts and body.** `src/index.html` loads the Google Fonts families and `src/styles.css` sets the root sizes; Grimoire's stylesheet sets neither, because it loads after the first render.

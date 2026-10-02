@@ -1,16 +1,21 @@
-/* ---------- ItemLink ---------- */
-.lg-itemlink {
+/* ---------- ItemLink ----------
+   The host is the item's name in the text: a button, a link or a span. */
+:host {
   display: inline; margin: 0; padding: 0; border: 0; background: none;
-  font: inherit; font-style: normal; font-weight: 600;
+  font: inherit; font-style: normal; font-weight: 600; text-decoration: none;
   color: var(--lg-rarity-ink, var(--lg-ink));
 }
-button.lg-itemlink { cursor: pointer; }
-button.lg-itemlink:hover { text-decoration: underline; text-underline-offset: 2px; }
-button.lg-itemlink:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
-.lg-itemlink--common { --lg-rarity-ink: var(--lg-rarity-common); }
-.lg-itemlink--uncommon { --lg-rarity-ink: var(--lg-rarity-uncommon); }
-.lg-itemlink--rare { --lg-rarity-ink: var(--lg-rarity-rare); }
-.lg-itemlink--epic { --lg-rarity-ink: var(--lg-rarity-epic); }
-.lg-itemlink--unique { --lg-rarity-ink: var(--lg-rarity-unique); }
-.lg-itemlink--legendary { --lg-rarity-ink: var(--lg-rarity-legendary); }
-.lg-itemlink--legacy { --lg-rarity-ink: var(--lg-rarity-legacy); }
+:host(button), :host(a) { cursor: pointer; }
+/* A button lays out its words on their own line (it never wraps with its sentence), so formatters set its name on a
+   line of its own: as an inline block the name drops the spaces at its ends and hugs its brackets. A link or a span
+   wraps with its sentence and keeps its name tight in the markup. */
+:host(button) .lg-itemlink__name { display: inline-block; }
+:host(button:hover), :host(a:hover) { text-decoration: underline; text-underline-offset: 2px; }
+:host(:focus-visible) { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
+:host(.lg-itemlink--common) { --lg-rarity-ink: var(--lg-rarity-common); }
+:host(.lg-itemlink--uncommon) { --lg-rarity-ink: var(--lg-rarity-uncommon); }
+:host(.lg-itemlink--rare) { --lg-rarity-ink: var(--lg-rarity-rare); }
+:host(.lg-itemlink--epic) { --lg-rarity-ink: var(--lg-rarity-epic); }
+:host(.lg-itemlink--unique) { --lg-rarity-ink: var(--lg-rarity-unique); }
+:host(.lg-itemlink--legendary) { --lg-rarity-ink: var(--lg-rarity-legendary); }
+:host(.lg-itemlink--legacy) { --lg-rarity-ink: var(--lg-rarity-legacy); }

@@ -421,5 +421,11 @@ class MadKingSummonAcceptanceChainTests(SummonAcceptanceChainTests):
         self.plan['acceptedAggregate']['version'] = 'applied-tower-mad-king-acceptance-aggregate-v1'
 
 
+class Floor12SummonAcceptanceChainTests(SummonAcceptanceChainTests):
+    def setUp(self):
+        super().setUp()
+        self.plan['acceptedAggregate']['version'] = 'applied-tower-floor12-restoration-aggregate-v1'
+
+
 if __name__ == '__main__':
     unittest.main()

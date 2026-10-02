@@ -6,13 +6,14 @@ import {
   TestKey,
   parallel,
 } from '@angular/cdk/testing';
+import { lgDescriptionOf } from './tip.harness';
 
 export interface LgListHarnessFilters extends BaseHarnessFilters {
   /** The list's accessible name. */
   label?: string | RegExp;
 }
 
-/** The keys a player uses on a List. */
+/** The keys a player uses on a List. Letters move to the next row whose name starts with them (`type`). */
 export type LgListKey =
   | 'ArrowUp'
   | 'ArrowDown'
@@ -20,9 +21,10 @@ export type LgListKey =
   | 'ArrowRight'
   | 'Home'
   | 'End'
-  | 'Enter';
+  | 'Enter'
+  | ' ';
 
-const KEYS: Record<LgListKey, TestKey> = {
+const KEYS: Record<LgListKey, TestKey | string> = {
   ArrowUp: TestKey.UP_ARROW,
   ArrowDown: TestKey.DOWN_ARROW,
   ArrowLeft: TestKey.LEFT_ARROW,
@@ -30,22 +32,155 @@ const KEYS: Record<LgListKey, TestKey> = {
   Home: TestKey.HOME,
   End: TestKey.END,
   Enter: TestKey.ENTER,
+  ' ': ' ',
 };
 
-/** A place in the list that takes focus: a row's name (its button, when interactive) or its trailing action. */
+/** A place in the list that takes focus: a row (the option, or its action) or the control in its trailing region. */
 export interface LgListSpot {
   row: string;
-  on: 'name' | 'action';
+  on: 'row' | 'trailing';
 }
 
-interface Row {
-  title: string;
-  name: TestElement | null;
-  hit: TestElement | null;
-  action: TestElement | null;
+/**
+ * One `li[lgListRow]`. Its focus target is the row itself in a selectable List (an option), else its action
+ * (`button[lgListRowAction]`), if it has one.
+ */
+export class LgListRowHarness extends ComponentHarness {
+  static hostSelector = '.lg-listrow';
+
+  private readonly nameEl = this.locatorFor('.lg-listrow__name');
+  private readonly metaEl = this.locatorForOptional('.lg-listrow__meta');
+  private readonly action = this.locatorForOptional('.lg-listrow__action');
+  private readonly trailingControl = this.locatorForOptional(
+    'lg-list-row-trailing button, lg-list-row-trailing a',
+  );
+
+  async getName(): Promise<string> {
+    return (await this.nameEl()).text();
+  }
+
+  async getMeta(): Promise<string | null> {
+    return (await this.metaEl())?.text() ?? null;
+  }
+
+  /** Whether the row is an option (in a selectable List). */
+  async isOption(): Promise<boolean> {
+    return (await (await this.host()).getAttribute('role')) === 'option';
+  }
+
+  async hasAction(): Promise<boolean> {
+    return !!(await this.action());
+  }
+
+  /** Selected: `aria-selected` on an option, `aria-pressed` on an action, else the selected look. */
+  async isSelected(): Promise<boolean> {
+    const host = await this.host();
+    if (await this.isOption()) {
+      return (await host.getAttribute('aria-selected')) === 'true';
+    }
+    const pressed = (await this.action())
+      ? await (await this.action())!.getAttribute('aria-pressed')
+      : null;
+    return pressed != null ? pressed === 'true' : host.hasClass('is-selected');
+  }
+
+  /** Blocked (locked, unavailable, restricted): unavailable, but still focusable. */
+  async isBlocked(): Promise<boolean> {
+    const target = await this.target();
+    return !!target && (await target.getAttribute('aria-disabled')) === 'true';
+  }
+
+  /** Whether Tab lands on the row. */
+  async isTabStop(): Promise<boolean> {
+    const target = await this.target();
+    return !!target && (await target.getAttribute('tabindex')) === '0';
+  }
+
+  /** Whether Tab lands on the trailing region's control. */
+  async isTrailingTabStop(): Promise<boolean> {
+    const control = await this.trailingControl();
+    return !!control && (await control.getProperty<number>('tabIndex')) >= 0;
+  }
+
+  /** Where focus is in the row, or null. */
+  async getFocus(): Promise<'row' | 'trailing' | null> {
+    const [target, control] = await parallel(() => [
+      this.target(),
+      this.trailingControl(),
+    ]);
+    if (target && (await target.isFocused())) return 'row';
+    if (control && (await control.isFocused())) return 'trailing';
+    return null;
+  }
+
+  /** What screen readers hear as the row's description: a blocked row's reason, or null. */
+  async getDescription(): Promise<string | null> {
+    const target = await this.target();
+    return target
+      ? lgDescriptionOf(target, this.documentRootLocatorFactory())
+      : null;
+  }
+
+  /** A click on the row: the press focuses it first, as a pointer press does in the browser. */
+  async click(): Promise<void> {
+    const target = await this.requireTarget();
+    if (!(await target.isFocused())) await target.focus();
+    await target.click();
+  }
+
+  async hover(): Promise<void> {
+    await (await this.requireTarget()).hover();
+  }
+
+  async mouseAway(): Promise<void> {
+    await (await this.requireTarget()).mouseAway();
+  }
+
+  /** A key pressed where focus is in the row. Enter and Space also press a focused button or link, as the browser does. */
+  async press(key: LgListKey): Promise<void> {
+    const el = await this.focusedElement();
+    if (!el) throw Error(`Nothing in row "${await this.getName()}" has focus.`);
+    await el.sendKeys(KEYS[key]);
+    if (
+      (key === 'Enter' || key === ' ') &&
+      (await el.matchesSelector('button, a[href]'))
+    ) {
+      await el.click();
+    }
+  }
+
+  async type(letters: string): Promise<void> {
+    const el = await this.focusedElement();
+    if (!el) throw Error(`Nothing in row "${await this.getName()}" has focus.`);
+    await el.sendKeys(letters);
+  }
+
+  private async target(): Promise<TestElement | null> {
+    return (await this.isOption()) ? this.host() : this.action();
+  }
+
+  private async requireTarget(): Promise<TestElement> {
+    const target = await this.target();
+    if (!target) {
+      throw Error(
+        `Row "${await this.getName()}" takes no focus: it has no action and the List is not selectable.`,
+      );
+    }
+    return target;
+  }
+
+  private async focusedElement(): Promise<TestElement | null> {
+    const [target, control] = await parallel(() => [
+      this.target(),
+      this.trailingControl(),
+    ]);
+    if (target && (await target.isFocused())) return target;
+    if (control && (await control.isFocused())) return control;
+    return null;
+  }
 }
 
-/** `lg-list` and its `li[lgListRow]` rows. Rows are found by their title. */
+/** `lg-list` and its `li[lgListRow]` rows. Rows are found by their name. */
 export class LgListHarness extends ComponentHarness {
   static hostSelector = 'lg-list';
 
@@ -60,122 +195,122 @@ export class LgListHarness extends ComponentHarness {
     );
   }
 
-  private readonly list = this.locatorFor('[role=list]');
-  // In DOM order, so each row's parts follow the row itself.
-  private readonly parts = this.locatorForAll(
-    '.lg-listrow',
-    '.lg-listrow__hit',
-    '.lg-listrow__name',
-    '.lg-listrow__trail button',
-    '.lg-listrow__trail a',
-  );
+  private readonly list = this.locatorFor('ul');
+  private readonly rowHarnesses = this.locatorForAll(LgListRowHarness);
 
   async getLabel(): Promise<string | null> {
     return (await this.list()).getAttribute('aria-label');
   }
 
-  /** Every row's title, in order. */
-  async getRowTitles(): Promise<string[]> {
-    return (await this.rows()).map((row) => row.title);
+  /** `list`, or `listbox` when the List is selectable. */
+  async getRole(): Promise<string | null> {
+    return (await this.list()).getAttribute('role');
   }
 
-  /** A click on the row's name: the press focuses it first, as a pointer press does in the browser. */
-  async click(title: string): Promise<void> {
-    const hit = (await this.row(title)).hit;
-    if (!hit) throw Error(`Row "${title}" is not interactive.`);
-    if (!(await hit.isFocused())) await hit.focus();
-    await hit.click();
+  /** Every row, in order. */
+  async getRows(): Promise<LgListRowHarness[]> {
+    return this.rowHarnesses();
   }
 
-  /** A key pressed where focus is. Enter also presses the focused button, as the browser does. */
-  async pressKey(key: LgListKey): Promise<void> {
-    const focused = await this.focusedElement();
-    if (!focused) throw Error('Nothing in the list has focus.');
-    await focused.sendKeys(KEYS[key]);
-    if (key === 'Enter' && (await focused.matchesSelector('button'))) {
-      await focused.click();
+  /** Every row's name, in order. */
+  async getRowNames(): Promise<string[]> {
+    const rows = await this.rowHarnesses();
+    return parallel(() => rows.map((row) => row.getName()));
+  }
+
+  /** The row named `name`. */
+  async getRow(name: string): Promise<LgListRowHarness> {
+    const [rows, names] = await Promise.all([
+      this.rowHarnesses(),
+      this.getRowNames(),
+    ]);
+    const i = names.indexOf(name);
+    if (i < 0) {
+      throw Error(`No row named "${name}"; the list has ${names.join(', ')}.`);
     }
+    return rows[i];
+  }
+
+  async click(name: string): Promise<void> {
+    await (await this.getRow(name)).click();
+  }
+
+  async hover(name: string): Promise<void> {
+    await (await this.getRow(name)).hover();
+  }
+
+  async mouseAway(name: string): Promise<void> {
+    await (await this.getRow(name)).mouseAway();
+  }
+
+  /** A key pressed where focus is in the list. */
+  async pressKey(key: LgListKey): Promise<void> {
+    await (await this.focusedRow()).press(key);
+  }
+
+  /** Letters typed where focus is in the list: typeahead by name. */
+  async type(letters: string): Promise<void> {
+    await (await this.focusedRow()).type(letters);
   }
 
   /** Where focus is in the list, or null. */
   async getFocus(): Promise<LgListSpot | null> {
-    return (await this.spotsWhere((el) => el.isFocused()))[0] ?? null;
+    const rows = await this.rowHarnesses();
+    const [names, spots] = await Promise.all([
+      parallel(() => rows.map((row) => row.getName())),
+      parallel(() => rows.map((row) => row.getFocus())),
+    ]);
+    const i = spots.findIndex((spot) => spot != null);
+    return i < 0 ? null : { row: names[i], on: spots[i]! };
   }
 
-  /** Where Tab enters the list: one row's name, and never a trailing action. */
+  /** The focused row's name, or null. */
+  async focusedName(): Promise<string | null> {
+    return (await this.getFocus())?.row ?? null;
+  }
+
+  /** Where Tab enters the list: one row, and never the trailing control of a row with an action. */
   async getTabStops(): Promise<LgListSpot[]> {
-    return this.spotsWhere(
-      async (el) => (await el.getProperty<number>('tabIndex')) >= 0,
-    );
-  }
-
-  /** The rows marked selected (`aria-pressed` on an interactive row's name). */
-  async selectedTitles(): Promise<string[]> {
-    const rows = await this.rows();
-    const pressed = await parallel(() =>
-      rows.map((row) => row.hit?.getAttribute('aria-pressed') ?? null),
-    );
-    return rows.filter((_, i) => pressed[i] === 'true').map((row) => row.title);
-  }
-
-  private async rows(): Promise<Row[]> {
-    const parts = await this.parts();
-    const kinds = await parallel(() =>
-      parts.map(async (part) => {
-        const [row, hit, name] = await parallel(() => [
-          part.hasClass('lg-listrow'),
-          part.hasClass('lg-listrow__hit'),
-          part.hasClass('lg-listrow__name'),
-        ]);
-        return row ? 'row' : hit ? 'hit' : name ? 'name' : 'action';
-      }),
-    );
-    const rows: Row[] = [];
-    kinds.forEach((kind, i) => {
-      if (kind === 'row') {
-        rows.push({ title: '', name: null, hit: null, action: null });
-      } else if (rows.length) {
-        rows[rows.length - 1][kind] = parts[i];
-      }
+    const rows = await this.rowHarnesses();
+    const [names, rowStops, trailStops] = await Promise.all([
+      parallel(() => rows.map((row) => row.getName())),
+      parallel(() => rows.map((row) => row.isTabStop())),
+      parallel(() => rows.map((row) => row.isTrailingTabStop())),
+    ]);
+    const spots: LgListSpot[] = [];
+    names.forEach((row, i) => {
+      if (rowStops[i]) spots.push({ row, on: 'row' });
+      if (trailStops[i]) spots.push({ row, on: 'trailing' });
     });
-    const titles = await parallel(() =>
-      rows.map((row) => row.name?.text() ?? ''),
-    );
-    rows.forEach((row, i) => (row.title = titles[i]));
-    return rows;
+    return spots;
   }
 
-  private async row(title: string): Promise<Row> {
-    const rows = await this.rows();
-    const row = rows.find((r) => r.title === title);
-    if (!row) {
-      const titles = rows.map((r) => r.title).join(', ');
-      throw Error(`No row titled "${title}"; the list has ${titles}.`);
-    }
+  /** The selected rows' names. */
+  async selectedNames(): Promise<string[]> {
+    return this.namesWhere((row) => row.isSelected());
+  }
+
+  /** The blocked rows' names. */
+  async blockedNames(): Promise<string[]> {
+    return this.namesWhere((row) => row.isBlocked());
+  }
+
+  private async focusedRow(): Promise<LgListRowHarness> {
+    const rows = await this.rowHarnesses();
+    const spots = await parallel(() => rows.map((row) => row.getFocus()));
+    const row = rows[spots.findIndex((spot) => spot != null)];
+    if (!row) throw Error('Nothing in the list has focus.');
     return row;
   }
 
-  private async focusedElement(): Promise<TestElement | null> {
-    const els = (await this.rows())
-      .flatMap((row) => [row.hit, row.action])
-      .filter((el): el is TestElement => !!el);
-    const focused = await parallel(() => els.map((el) => el.isFocused()));
-    return els[focused.indexOf(true)] ?? null;
-  }
-
-  private async spotsWhere(
-    test: (el: TestElement) => Promise<boolean>,
-  ): Promise<LgListSpot[]> {
-    const spots: { spot: LgListSpot; el: TestElement }[] = [];
-    for (const row of await this.rows()) {
-      if (row.hit) {
-        spots.push({ spot: { row: row.title, on: 'name' }, el: row.hit });
-      }
-      if (row.action) {
-        spots.push({ spot: { row: row.title, on: 'action' }, el: row.action });
-      }
-    }
-    const hits = await parallel(() => spots.map(({ el }) => test(el)));
-    return spots.filter((_, i) => hits[i]).map(({ spot }) => spot);
+  private async namesWhere(
+    test: (row: LgListRowHarness) => Promise<boolean>,
+  ): Promise<string[]> {
+    const rows = await this.rowHarnesses();
+    const [names, hits] = await Promise.all([
+      parallel(() => rows.map((row) => row.getName())),
+      parallel(() => rows.map(test)),
+    ]);
+    return names.filter((_, i) => hits[i]);
   }
 }

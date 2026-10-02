@@ -31,7 +31,7 @@ The game's canonical lists — one place for every name, code, colour and mark t
 | Legendary | L | `rarity-legendary` |
 | Legacy | LG | `rarity-legacy` |
 
-The rarity hues are the game's existing ones, kept as the palette primitives `hue-rarity-*`; each `rarity-*` token aliases the hue of the same name (Foundations · Colour). Rarity also always shows its code: ItemSlot sets it in the corner, ItemLink names the rarity in its tooltip, and rarity Tags are outlined in their colour. Screen readers hear the rarity by name — "Epic", never "E" — in ItemLink, ItemSlot and ListRow (Foundations · Accessibility). The codes are exported as `LG_RARITY_CODES`.
+The rarity hues are the game's existing ones, kept as the palette primitives `hue-rarity-*`; each `rarity-*` token aliases the hue of the same name (Foundations · Colour). Rarity also always shows its code: the Rarity mark (`lg-rarity`, D-139) sets it in the rarity's hue, in an ItemSlot's corner and after a List row's name, and names the rarity in its tip; ItemLink names the rarity in its tip, and rarity Tags are outlined in their colour. Screen readers hear the rarity by name — "Epic", never "E" — in ItemLink, ItemSlot and ListRow (Foundations · Accessibility). The codes are exported as `LG_RARITY_CODES`.
 
 ## Damage types
 

@@ -1,15 +1,17 @@
-/* ---------- Sigil ---------- */
-.lg-sigil {
+/* ---------- Sigil ----------
+   The host is the Sigil: a toggle button or a box. Its size sets --lg-sigil, which the badge reads (a Constellation
+   places its nodes by the same sizes). */
+:host {
   --lg-sigil: var(--lg-sigil-size);
   display: inline-flex; align-items: center; gap: var(--lg-space-3);
   margin: 0; padding: 0; border: 0; background: none;
   color: var(--lg-ink); font: inherit; text-align: left;
 }
-button.lg-sigil { cursor: pointer; }
-button.lg-sigil:disabled, button.lg-sigil[aria-disabled="true"] { cursor: not-allowed; }
-.lg-sigil--sm { --lg-sigil: 2.5rem; }
-.lg-sigil--lg { --lg-sigil: 4.25rem; }
-.lg-sigil--label-top, .lg-sigil--label-bottom { flex-direction: column; gap: var(--lg-space-1); }
+:host(button) { cursor: pointer; }
+:host(button[aria-disabled='true']) { cursor: not-allowed; }
+:host(.lg-sigil--sm) { --lg-sigil: 2.5rem; }
+:host(.lg-sigil--lg) { --lg-sigil: 4.25rem; }
+:host(.lg-sigil--label-top), :host(.lg-sigil--label-bottom) { flex-direction: column; gap: var(--lg-space-1); }
 .lg-sigil__badge {
   position: relative; flex: none;
   display: inline-grid; place-items: center;
@@ -33,19 +35,20 @@ button.lg-sigil:disabled, button.lg-sigil[aria-disabled="true"] { cursor: not-al
   color: var(--lg-ink); white-space: nowrap;
   text-shadow: var(--lg-shadow-text-art);
 }
-.lg-sigil--sm .lg-sigil__label { font-size: var(--lg-text-title-sm); line-height: var(--lg-leading-title-sm); }
-.lg-sigil--lg .lg-sigil__label { font-size: var(--lg-text-title-lg); line-height: var(--lg-leading-title-lg); }
-button.lg-sigil:hover:not(:disabled, [aria-disabled="true"]) .lg-sigil__badge { transform: scale(1.06); }
-.lg-sigil.is-selected .lg-sigil__outer { stroke: var(--lg-arcana-glow); }
-.lg-sigil.is-selected .lg-sigil__badge { transform: scale(1.08); }
-.lg-sigil.is-ready .lg-sigil__badge::after {
+:host(.lg-sigil--sm) .lg-sigil__label { font-size: var(--lg-text-title-sm); line-height: var(--lg-leading-title-sm); }
+:host(.lg-sigil--lg) .lg-sigil__label { font-size: var(--lg-text-title-lg); line-height: var(--lg-leading-title-lg); }
+:host(button:hover:not([aria-disabled='true'])) .lg-sigil__badge { transform: scale(1.06); }
+:host(.is-selected) .lg-sigil__outer { stroke: var(--lg-arcana-glow); }
+:host(.is-selected) .lg-sigil__badge { transform: scale(1.08); }
+:host(.is-ready) .lg-sigil__badge::after {
   content: ""; position: absolute; top: 2px; right: 0;
   width: 0.6875rem; height: 0.6875rem; transform: rotate(45deg);
   background: var(--lg-arcana-glow); box-shadow: 0 0 0 2px var(--lg-ground);
 }
-.lg-sigil.is-locked .lg-sigil__outer { fill: var(--lg-surface); stroke: var(--lg-line-strong); }
-.lg-sigil.is-locked .lg-sigil__inner { stroke: var(--lg-line); }
-.lg-sigil.is-locked .lg-sigil__value { color: var(--lg-ink-disabled); }
-.lg-sigil.is-locked .lg-sigil__label { color: var(--lg-ink-muted); }
-button.lg-sigil:focus-visible { box-shadow: none; }
-button.lg-sigil:focus-visible .lg-sigil__badge { border-radius: var(--lg-radius-control); box-shadow: var(--lg-focus-ring); }
+:host(.is-locked) .lg-sigil__outer { fill: var(--lg-surface); stroke: var(--lg-line-strong); }
+:host(.is-locked) .lg-sigil__inner { stroke: var(--lg-line); }
+:host(.is-locked) .lg-sigil__value { color: var(--lg-ink-disabled); }
+:host(.is-locked) .lg-sigil__label { color: var(--lg-ink-muted); }
+/* The focus ring is drawn round the hexagon's square, not the label. */
+:host(:focus-visible) { outline: 2px solid transparent; }
+:host(:focus-visible) .lg-sigil__badge { border-radius: var(--lg-radius-control); box-shadow: var(--lg-focus-ring); }

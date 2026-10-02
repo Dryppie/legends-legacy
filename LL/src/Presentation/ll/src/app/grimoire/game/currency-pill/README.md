@@ -6,7 +6,7 @@ The currency amount.
 
 Cinders or Soulstones with their art and amount, for the TopBar and shop headers.
 
-**Provide:** `name`, `amount`, `iconSrc` (Currency/Cinders.webp for Cinders, Currency/Soulstones.webp for Soulstones), `short` to abbreviate (12.5k), `reserve` (characters of width to hold for a live amount) and, optionally, `interactive` with `(activate)`. A short pill is always a button that toggles between 12.5k and 12,480, as the game does today; set `interactive` only when the game keeps the format as a setting.
+**Provide:** `name`, `amount`, `iconSrc` (Currency/Cinders.webp for Cinders, Currency/Soulstones.webp for Soulstones), `short` to abbreviate (12.5k), `reserve` (characters of width to hold for a live amount) and `tooltip` when the tip should say what a press does. The host is the element: `<button lgCurrencyPill>` when a press does something, `<span lgCurrencyPill>` to show the amount. A short pill is a button, so the full figure is one press away: with `toggle` it switches between 12.5k and 12,480 itself; without, your `(click)` decides — the TopBar switches every pill and keeps the format as a setting.
 
 - **Art here, line icons inline.** The pill is the display size, so it takes the full-colour art. A cost list, a Ledger row, a reward line or running text uses the resource's line icon at 16px in `currentColor` instead, before the resource's name, and never the art (Foundations · Iconography · Resource, Registries · Resources).
 - The art is 22px (1.375rem), contained: the currency emblems are tall shards and need the height (D-126).
@@ -17,11 +17,11 @@ Cinders or Soulstones with their art and amount, for the TopBar and shop headers
 
 | Field | Notes |
 | --- | --- |
-| Role and name | A `button` when it is short or `interactive`, else text. Screen readers hear the full amount and name ("12,480 Cinders"), whatever is shown |
-| Keyboard | A short pill is a Tab stop: Enter or Space toggles the format. A full-figure pill that is not `interactive` is not focusable |
+| Role and name | A `button`, or text in a `span`. Screen readers hear the full amount and name ("12,480 Cinders"), whatever is shown |
+| Keyboard | A button pill is a Tab stop: Enter or Space switches the format (`toggle`) or does what your `(click)` does. A `span` pill is not focusable |
 | Focus | `focus-ring` |
 | Announced | The full figure, never "12.5k". It is not a live region: announce gains through the Chronicle's loot line or `LgAnnouncer` |
-| Hover and tap | The full figure is in the `title` and is read out, and a click, tap or key shows it, so nothing is hover-only |
+| Hover and tap | The full figure (or the `tooltip` words) is in the tip on hover and focus and is read out, and a press shows it, so nothing is hover-only |
 | Target size | 30px high |
 | Text scaling | In the TopBar, the name gives way to the art under 40rem and the strip scrolls sideways at 320px; the amount keeps its reserved width |
 | Colour | The art and the name say which currency, never colour |

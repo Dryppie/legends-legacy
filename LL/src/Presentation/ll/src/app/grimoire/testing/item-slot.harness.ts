@@ -10,9 +10,9 @@ export interface LgItemSlotHarnessFilters extends BaseHarnessFilters {
   name?: string | RegExp;
 }
 
-/** A Grimoire ItemSlot (`lg-item-slot`); with `interactive` it is a toggle button. */
+/** A Grimoire ItemSlot (`[lgItemSlot]`): a toggle button, a link or a box. */
 export class LgItemSlotHarness extends ComponentHarness {
-  static hostSelector = 'lg-item-slot';
+  static hostSelector = '[lgItemSlot]';
 
   static with(
     options: LgItemSlotHarnessFilters = {},
@@ -24,8 +24,8 @@ export class LgItemSlotHarness extends ComponentHarness {
     );
   }
 
-  // The frame: a button when interactive, else a plain box.
-  private readonly control = this.locatorFor('.lg-slot');
+  // The slot is its host: a button, a link or a box.
+  private readonly control = () => this.host();
   private readonly name = this.locatorForOptional('.lg-slot__name');
   private readonly printedReason = this.locatorForOptional('.lg-slot__reason');
   private readonly printedWord = this.locatorForOptional(
@@ -76,7 +76,7 @@ export class LgItemSlotHarness extends ComponentHarness {
     );
   }
 
-  /** Whether the toggle is pressed (selected); null when it is not a toggle (not interactive, or blocked). */
+  /** Whether the toggle is pressed (selected); null when it is not a toggle (not a button, or blocked). */
   async isPressed(): Promise<boolean | null> {
     const pressed = await (await this.control()).getAttribute('aria-pressed');
     return pressed == null ? null : pressed === 'true';

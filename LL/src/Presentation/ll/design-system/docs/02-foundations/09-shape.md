@@ -55,7 +55,7 @@ Three signs sit beside the shapes. They are glyphs and pictures, not shapes, and
 | Token | Value | Rounds |
 | --- | --- | --- |
 | — | 0 | Regions: the Folio, the Banner, the Stage, the rail, the Page, and the TopBar |
-| `radius-container` | 2px | Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, the JourneyCard's objective, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions) |
+| `radius-container` | 2px | Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, the JourneyCard's objective, and row washes (Ledger rows, rail items, scene List rows, chat lines, suggestions) |
 | `radius-control` | 4px | Controls, tags and slots: Buttons, inputs, tabs, key caps, clickable CurrencyPills; Tags, count badges, rarity codes; ItemSlots, thumbnails and LoadoutSlots. Focus rings on links and icon buttons follow it |
 | `radius-float` | 8px | Popovers and drawers: tooltips, hover cards, menus, suggestion lists, toasts and the floating chat drawer |
 | `radius-circle` | 50% | The Presence dot; the compact Activity's ring and live dot — the character, present and at work (D-117) |

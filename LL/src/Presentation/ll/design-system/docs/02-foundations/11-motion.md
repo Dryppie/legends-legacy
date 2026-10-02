@@ -59,7 +59,7 @@ Script reads the same values from `LG_DURATION` and `LG_EASING` in `src/app/grim
 
 ### Feedback: hover and press
 
-- **Hover shows over `duration-fast`** as a layer whose opacity fades: the `surface-raised` wash on NavRail items, the `gilt` edge on a primary or danger Button, the solid Button's fill 6% brighter, EntryList's wash. Text turns `ink` at once.
+- **Hover shows over `duration-fast`** as a layer whose opacity fades: the `surface-raised` wash on NavRail items, the `gilt` edge on a primary or danger Button, the solid Button's fill 6% brighter, the scene List's wash. Text turns `ink` at once.
 - **A press goes down at once** (`duration-instant`) and comes back over `duration-fast`. The Button sinks `border-hairline`. Nothing scales, ripples or lights up.
 - **Focus is never animated.** The focus ring is there in the frame focus arrives (Foundations · Accessibility).
 - **Reduced motion:** the wash, the edge and the sink happen at once.
@@ -143,7 +143,7 @@ A wait that runs past five seconds says in words what is happening. Combat playb
 | `transform` (translate, scale) and `opacity` | Width, height, position (`top`, `left`, `inset`), margin, padding |
 | `visibility`, as a step at the start or end of a fade, so what has gone cannot be focused or clicked | Colour, background, border, box-shadow, filter, font and anything else that repaints or reflows |
 
-**A wash that fades is a layer.** The Button, NavRail and EntryList draw their hover washes and edges on a pseudo-element behind their content, and fade its opacity. **A fill that grows is scaled:** the Meter sets `scaleX` from its left edge. **A count is text:** it changes digits in script, in a box already sized for it.
+**A wash that fades is a layer.** The Button, NavRail and the scene List draw their hover washes and edges on a pseudo-element behind their content, and fade its opacity. **A fill that grows is scaled:** the Meter sets `scaleX` from its left edge. **A count is text:** it changes digits in script, in a box already sized for it.
 
 ## Reduced motion
 
@@ -190,7 +190,6 @@ A quick check for any screen, before it ships:
 - Chronicle — chat and the game log
 - Button — the command button
 - GameShell — the screen frame
-- ListRow — the list row
-- EntryList — the browsable name list
+- List — the list and its rows, and the scene name list
 - Sigil — the hex stat badge
 - Ledger — the labelled value list

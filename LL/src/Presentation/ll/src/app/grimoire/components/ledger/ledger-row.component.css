@@ -9,7 +9,8 @@
 }
 /* A row that explains itself takes the neutral wash on hover and keyboard focus, and keeps it while pinned. */
 :host([tabindex]:hover), :host(:focus-visible), :host(.is-pinned) { background: var(--lg-surface-raised); }
-:host(:focus-visible) { box-shadow: var(--lg-focus-ring); }
+/* In every density the full ring shows: a focused row rises above its neighbours, which would otherwise paint over it. */
+:host(:focus-visible) { box-shadow: var(--lg-focus-ring); z-index: var(--lg-z-raised); }
 .lg-ledger__label { display: flex; align-items: baseline; gap: var(--lg-space-2); min-width: 0; margin: 0; padding-right: var(--lg-space-2); font-size: var(--lg-row-text); line-height: var(--lg-row-leading); color: var(--lg-ink-muted); }
 .lg-ledger__labeltext { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lg-ledger__leader { flex: 1 1 0.5rem; min-width: 0.5rem; /* The dotted leader belongs to Ledger rows only (Foundations · Lines). */ border-bottom: var(--lg-border-hairline) dotted var(--lg-line-strong); transform: translateY(-4px); }

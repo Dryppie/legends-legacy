@@ -69,7 +69,7 @@ The reason tip is how a blocked control explains itself.
 - **One at a time.** Opening one closes any other.
 - **When it isn't needed.** A reason already printed beside the control (a LoadoutSlot's "Unlocks at level 20") is the description itself, and no tip repeats it.
 
-Button, EntryList, NavRail, Sigil and ItemSlot build it in. The `[lgBlocked]` directive, or `LgBlockedController`, gives it to anything else; the tip itself is the one float on the CDK overlay that tooltips use too (D-134).
+Button, List rows, NavRail, Sigil and ItemSlot build it in. The `[lgBlocked]` directive, or `LgBlockedController`, gives it to anything else; the tip itself is the one float on the CDK overlay that tooltips use too (D-134).
 
 ## Interaction
 
@@ -261,9 +261,9 @@ The matrix says which states each kind of part can show. ● The part shows the 
 | Category | Components |
 | --- | --- |
 | Commands | Button |
-| Toggles and tabs | TabStrip, toggle Buttons |
+| Toggles and tabs | Tabs, toggle Buttons |
 | Navigation | NavRail, ItemLink, the TopBar menu |
-| Lists and rows | EntryList, List and ListRow, Ledger rows, Chronicle lines |
+| Lists and rows | List and ListRow (the scene variant too), Ledger rows, Chronicle lines |
 | Slots | ItemSlot, LoadoutSlot |
 | Stat marks | Sigil, Constellation, Meter, Track, LevelPlate |
 | Labels | Tag, Presence |
@@ -342,7 +342,7 @@ Labels show their states only as words, and Values show theirs only as figures, 
 | Button `state`, `reason`, `shortfall`, `remaining`, `pendingLabel` | `unavailable`, `locked`, `restricted`, `insufficient`, `cooldown` or `pending`. `shortfall` writes "Short by 250 Cinders"; `remaining` writes "Ready in 4m 12s" |
 | Tag `state` | Any state with a word, such as `locked`, `claimable`, `equipped` or `expiring` |
 | ItemSlot `state`, `reason`, `favourite`, `ready` | A blocked state with its reason printed under the name, Not owned, Undiscovered, or a word state that leads the meta line; Equipped and Attuned also take the in-use square; `favourite` is the ribbon marker, or its word until it is drawn; `ready` is the attention diamond (Standards · State combinations) |
-| EntryList and NavRail items `locked`, `reason`, `ready` | A locked entry or rail item, with how it unlocks; `ready`, the attention diamond |
+| ListRow `state`, `reason`, `ready`; NavRail items `locked`, `reason`, `ready` | A blocked row or a locked rail item, with its reason (how it unlocks); `ready`, the attention diamond |
 | LoadoutSlot `reason` | A locked slot's condition, printed as its name |
 | Sigil `reason` | The unlock condition of a locked stat |
 
@@ -361,4 +361,4 @@ Labels show their states only as words, and Values show theirs only as figures, 
 
 ## Related components
 
-Button, Tag, ItemSlot, LoadoutSlot, EntryList, NavRail, Sigil, TabStrip, List and ListRow, Ledger, Meter, Track, Chronicle, SearchField, Presence, Folio.
+Button, Tag, ItemSlot, LoadoutSlot, NavRail, Sigil, Tabs, List and ListRow, Ledger, Meter, Track, Chronicle, SearchField, Presence, Folio.

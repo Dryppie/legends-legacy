@@ -75,30 +75,30 @@ import { ShowcaseEntry } from '../showcase.types';
         <lg-list label="Inventory">
           <li
             lgListRow
-            title="Ember Fang"
+            name="Ember Fang"
             rarity="Epic"
             icon="colosseum"
             meta="Weapon · Sword · Lv 18"
             [quantity]="1"
-            value="9,400"
+            amount="9,400"
           ></li>
           <li
             lgListRow
-            title="Dire Wolf Essence"
+            name="Dire Wolf Essence"
             rarity="Rare"
             icon="essences"
             meta="Essence · Lv 12"
             [quantity]="3"
-            value="1,250"
+            amount="1,250"
           ></li>
           <li
             lgListRow
-            title="Iron Sabre"
+            name="Iron Sabre"
             rarity="Common"
             icon="colosseum"
             meta="Weapon · Sword · Lv 4"
             [quantity]="2"
-            value="85"
+            amount="85"
           ></li>
         </lg-list>
       </lg-panel>

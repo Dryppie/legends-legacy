@@ -64,7 +64,7 @@ Each semantic token equals one step of the scale. The stylesheet aliases it to t
 | **Container inset, and inner surface** | 24px, inner 16px | 16px, inner 12px | 12px, inner 8px |
 | **Row text** | `body`, 15 / 20 | `body-compact`, 14 / 18 | `body-compact`, 14 / 18 |
 | **Numbers in rows** | `numeral-row`, 18 | `numeral-row`, 18 | `numeral-compact`, 14 |
-| **Names in rows** | `name-row`, 17 (EntryList: `name-header`, 24) | `name-row`, 17 (EntryList: `name-header`, 24) | `name-row`, 17 |
+| **Names in rows** | `name-row`, 17 (scene List: `name-header`, 24) | `name-row`, 17 (scene List: `name-header`, 24) | `name-row`, 17 |
 | **Meta line** (type, level, rank) | Its own line under the name | Beside the name, truncating | Beside the name, truncating |
 | **Icon** | `icon-comfortable` 20px | `icon-standard` 20px | `icon-compact` 16px |
 | **Row thumbnail** | `thumb-comfortable` 40px | `thumb-standard` 32px | `thumb-compact` 24px |
@@ -109,8 +109,8 @@ A container inside another surface takes the inner inset of the density it sits 
 | --- | --- | --- | --- | --- |
 | Ledger | Yes | Yes | Yes | Row height and padding, label text, values (`numeral-compact` in Compact) |
 | ListRow and List | Yes | Yes | Yes | Row, thumbnail, gap, meta on its own line in Comfortable, values |
-| EntryList | Yes | Yes | Yes | Row height; names `name-header` 24px, or `name-row` 17px in Compact |
-| TabStrip | Yes | Yes | Yes | Primary tab height (the control height) and padding; secondary tab height |
+| List, scene variant | Yes | Yes | Yes | Row height; names `name-header` 24px, or `name-row` 17px in Compact |
+| Tabs | Yes | Yes | Yes | Primary tab height (the control height) and padding; secondary tab height |
 | Button | Yes | Yes | Yes | Height, padding, label size and icon. Without a `size` it follows its region; `size="md"` pins Standard, `size="sm"` pins Compact |
 | SearchField and inputs | Yes | Yes | Yes | Control height |
 | Panel | Yes | Yes | Yes | Body and head inset; one step less when nested; `flush` for a list or table |
@@ -127,7 +127,7 @@ The future Table reads the same row, cell and control values.
 | Archetype | Default | Regions that differ |
 | --- | --- | --- |
 | ArchetypeInformation: Overview, Settings, the guild's front page | Standard | The Folio is Comfortable |
-| ArchetypeArchive: the Creature Archive | Standard: tabs and the EntryList | The Folio is Comfortable |
+| ArchetypeArchive: the Creature Archive | Standard: tabs and the scene List | The Folio is Comfortable |
 | ArchetypeWorkbench (future): the Cinder Bazaar, inventory, crafting | Compact: tables, lists and order books | The order form and filters are Standard; the inspector and dialogs are Comfortable |
 | ArchetypeRanking (future): the Leaderboard, the Colosseum ladder | Compact | The player's own standing, above the table, is Standard |
 | ArchetypeRoster (future): guild members, a party | Compact | The selected member's detail is Comfortable, in the inspector |
@@ -174,10 +174,9 @@ The future Table reads the same row, cell and control values.
 
 ## Related components
 
-- ListRow — the list row
+- List — the list and its rows, and the scene name list
 - Ledger — the labelled value list
-- EntryList — the browsable name list
-- TabStrip — the tabs
+- Tabs — the tabs
 - Button — the command button
 - Panel — the content box
 - Folio — the detail panel

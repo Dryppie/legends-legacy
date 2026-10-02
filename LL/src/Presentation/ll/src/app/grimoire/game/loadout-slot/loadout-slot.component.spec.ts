@@ -22,13 +22,13 @@ import {
   // Kept in view, like the other reason-tip cases, so "no tip" means none was asked for.
   host: { style: 'position: fixed; top: 0; left: 0' },
   template: `
-    <lg-loadout-slot
+    <button
+      lgLoadoutSlot
       [index]="2"
       state="locked"
       reason="Unlocks at level 20"
-      interactive
-      (activate)="activated = activated + 1"
-    />
+      (click)="activated = activated + 1"
+    ></button>
   `,
 })
 class LockedLoadoutCase {
@@ -54,7 +54,7 @@ describe('LgLoadoutSlotComponent', () => {
   afterEach(() => lgCloseTip());
 
   describe('locked (i-loadout-locked)', () => {
-    it('announces its condition on a press, opens no tip, and does not emit activate', fakeAsync(async () => {
+    it('announces its condition on a press, opens no tip, and your (click) does not run', fakeAsync(async () => {
       lgQuietAnnouncer();
       const announcements = lgWatchAnnouncements();
 

@@ -8,13 +8,13 @@ import { LgActivityHarness } from '../../testing/activity.harness';
 @Component({
   imports: [LgActivityComponent],
   template: `
-    <lg-activity
+    <button
+      lgActivity
       label="Engaged in Combat"
       remaining="00:12"
       [progress]="0.25"
-      interactive
-      (activate)="activated = activated + 1"
-    />
+      (click)="activated = activated + 1"
+    ></button>
   `,
 })
 class ActivityCase {
@@ -28,7 +28,7 @@ describe('LgActivityComponent', () => {
     fixture = TestBed.createComponent(ActivityCase);
   });
 
-  it('emits activate once on a press when interactive (i-activity)', async () => {
+  it('is a button whose press is its own (click), once (i-activity)', async () => {
     const activity =
       await TestbedHarnessEnvironment.loader(fixture).getHarness(
         LgActivityHarness,

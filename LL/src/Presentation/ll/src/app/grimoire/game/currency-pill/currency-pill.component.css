@@ -1,5 +1,6 @@
-/* ---------- CurrencyPill ---------- */
-.lg-currency {
+/* ---------- CurrencyPill ----------
+   The host is the pill: a button or a span. */
+:host {
   display: inline-flex; flex: none; align-items: center; gap: var(--lg-space-2); /* never squeezed: its words stay inside the edge */
   height: 1.875rem; padding: 0 var(--lg-space-3) 0 var(--lg-space-2);
   border: var(--lg-border-hairline) solid var(--lg-line); border-radius: var(--lg-radius-control);
@@ -8,8 +9,9 @@
   text-transform: none; letter-spacing: normal; /* a pill in a capitalised header keeps 12.5k, never 12.5K */
 }
 /* A pill that opens or toggles is a control: its edge is line-strong at rest, and hover is the raised wash (Foundations · Lines). */
-button.lg-currency { cursor: pointer; border-color: var(--lg-line-strong); }
-button.lg-currency:hover { background: var(--lg-surface-raised); }
+:host(button) { cursor: pointer; border-color: var(--lg-line-strong); }
+:host(button:hover) { background: var(--lg-surface-raised); }
+:host(:focus-visible) { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
 .lg-currency__icon { display: block; width: 1.375rem; height: 1.375rem; object-fit: contain; } /* the emblems are tall shards: 22px keeps them legible in a 30px pill (D-126) */
 .lg-currency__amount { display: inline-block; font-family: var(--lg-font-numeral); font-size: var(--lg-text-numeral-row); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; text-align: right; }
 .lg-currency__name { font-size: var(--lg-text-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }

@@ -32,7 +32,7 @@ Recurring compositions: several parts arranged the same way every time they solv
 ## PatternBrowseAndInspect
 
 **Problem:** browsing many things of one kind and inspecting one.
-**Composition:** TabStrips for what is browsed and how it is filtered, an EntryList (or a Constellation of Sigils) on the stage, and the Folio for the selection — choosing an entry fills the Folio.
+**Composition:** Tabs for what is browsed and how it is filtered, a scene List (or a Constellation of Sigils) on the stage, and the Folio for the selection — choosing an entry fills the Folio.
 **Seen in:** no game screen yet.
 **Status:** Draft
 
@@ -46,7 +46,7 @@ Recurring compositions: several parts arranged the same way every time they solv
 ## PatternLockedPreview
 
 **Problem:** showing what is coming before the player can use it.
-**Composition:** the locked state of the part itself (Standards · States · Availability) — a LoadoutSlot with a dashed frame and its unlock level ("Unlocks at level 20"), a locked EntryList entry or NavRail item that says "Locked" and opens its condition in the reason tip — shown in place, never hidden, and still in the Tab order.
+**Composition:** the locked state of the part itself (Standards · States · Availability) — a LoadoutSlot with a dashed frame and its unlock level ("Unlocks at level 20"), a locked row of a scene List or a NavRail item that says "Locked" and opens its condition in the reason tip — shown in place, never hidden, and still in the Tab order.
 **Seen in:** the NavRail — its locked destinations. The Character Overview's Essence Loadout shows its future slots this way once the server sends them.
 **Status:** Draft
 
@@ -77,8 +77,8 @@ None of their own: each pattern uses the tokens of the parts it is built from.
 - StatFigure — the headline number
 - SearchField — search with suggestions
 - Presence — the online status
-- EntryList — the browsable name list
-- TabStrip — the tabs
+- List — the list and its rows, and the scene name list
+- Tabs — the tabs
 - Folio — the detail panel
 - Chronicle — chat and the game log
 - ItemLink — an item named in text

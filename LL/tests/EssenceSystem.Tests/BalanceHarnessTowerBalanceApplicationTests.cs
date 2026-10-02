@@ -407,10 +407,10 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     {
         if (!qualification.TryGetProperty("acceptedSummonsAggregate", out var parent)) return qualification;
         if (qualification.GetProperty("acceptedAggregate").GetProperty("version").GetString() is not
-            ("applied-tower-ni-restoration-aggregate-v1" or "applied-tower-mad-king-acceptance-aggregate-v1") ||
+            ("applied-tower-ni-restoration-aggregate-v1" or "applied-tower-mad-king-acceptance-aggregate-v1" or "applied-tower-floor12-restoration-aggregate-v1") ||
             parent.EnumerateObject().Select(p => p.Name).Order().SequenceEqual(new[] { "acceptedAggregate", "receiptPins" }) is false ||
             parent.GetProperty("acceptedAggregate").GetProperty("version").GetString() != "applied-tower-kodoku-midpoint-aggregate-v1")
-            throw new InvalidDataException("Only the applied Ni/Mad King-to-Kodoku summon acceptance chain is supported.");
+            throw new InvalidDataException("Only the applied Ni/Mad King/floor-twelve-to-Kodoku summon acceptance chain is supported.");
         return parent;
     }
 
@@ -427,6 +427,12 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     [InlineData("mad-king", "parent-version")]
     [InlineData("mad-king", "missing-pins")]
     [InlineData("mad-king", "extra-parent")]
+    [InlineData("floor12", "valid")]
+    [InlineData("floor12", "missing")]
+    [InlineData("floor12", "outer-version")]
+    [InlineData("floor12", "parent-version")]
+    [InlineData("floor12", "missing-pins")]
+    [InlineData("floor12", "extra-parent")]
     public void Summon_acceptance_chain_requires_exact_independently_applied_parent(string catalog, string change)
     {
         var plan = JsonNode.Parse("""
@@ -434,6 +440,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
              "acceptedSummonsAggregate":{"acceptedAggregate":{"version":"applied-tower-kodoku-midpoint-aggregate-v1"},"receiptPins":{}}}
             """)!;
         if (catalog == "mad-king") plan["acceptedAggregate"]!["version"] = "applied-tower-mad-king-acceptance-aggregate-v1";
+        if (catalog == "floor12") plan["acceptedAggregate"]!["version"] = "applied-tower-floor12-restoration-aggregate-v1";
         if (change == "missing") plan.AsObject().Remove("acceptedSummonsAggregate");
         if (change == "outer-version") plan["acceptedAggregate"]!["version"] = "unaccepted";
         if (change == "parent-version") plan["acceptedSummonsAggregate"]!["acceptedAggregate"]!["version"] = "unaccepted";

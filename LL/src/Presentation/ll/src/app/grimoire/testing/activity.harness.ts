@@ -1,11 +1,11 @@
 import { ComponentHarness } from '@angular/cdk/testing';
 
-/** A Grimoire Activity (`lg-activity`), the current action at the head of the rail; with `interactive` it is a button. */
+/** A Grimoire Activity (`[lgActivity]`), the current action at the head of the rail: a button, a link or a box. */
 export class LgActivityHarness extends ComponentHarness {
-  static hostSelector = 'lg-activity';
+  static hostSelector = '[lgActivity]';
 
-  // The block: a button when interactive, else a plain box.
-  private readonly control = this.locatorFor('.lg-activity');
+  // The block is its host.
+  private readonly control = () => this.host();
   private readonly label = this.locatorFor('.lg-activity__label');
   private readonly remaining = this.locatorForOptional('.lg-activity__time');
 

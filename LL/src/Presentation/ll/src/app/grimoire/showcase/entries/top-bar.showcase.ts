@@ -35,17 +35,20 @@ import { ShowcaseEntry } from '../showcase.types';
       flush
     >
       <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
-        <lg-currency-pill
+        <button
+          lgCurrencyPill
           name="Cinders"
           [amount]="12480"
           iconSrc="assets/game-emblems/cinders-v1-64.webp"
           short
-        />
-        <lg-currency-pill
+          toggle
+        ></button>
+        <span
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-        />
+        ></span>
       </lg-top-bar>
     </ng-template>
 
@@ -75,17 +78,20 @@ import { ShowcaseEntry } from '../showcase.types';
             <button lgButton="link" size="sm">Open Quests</button>
           </div>
         </lg-objective>
-        <lg-currency-pill
+        <button
+          lgCurrencyPill
           name="Cinders"
           [amount]="12480"
           iconSrc="assets/game-emblems/cinders-v1-64.webp"
           short
-        />
-        <lg-currency-pill
+          toggle
+        ></button>
+        <span
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-        />
+        ></span>
       </lg-top-bar>
     </ng-template>
 
@@ -105,17 +111,20 @@ import { ShowcaseEntry } from '../showcase.types';
           endLabel="Boss"
           label="World Tower"
         />
-        <lg-currency-pill
+        <button
+          lgCurrencyPill
           name="Cinders"
           [amount]="12480"
           iconSrc="assets/game-emblems/cinders-v1-64.webp"
           short
-        />
-        <lg-currency-pill
+          toggle
+        ></button>
+        <span
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-        />
+        ></span>
       </lg-top-bar>
     </ng-template>
 
@@ -128,12 +137,14 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <lg-game-shell height="3.5rem">
         <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <lg-currency-pill
+          <button
+            lgCurrencyPill
             name="Cinders"
             [amount]="12480"
             iconSrc="assets/game-emblems/cinders-v1-64.webp"
             short
-          />
+            toggle
+          ></button>
         </lg-top-bar>
       </lg-game-shell>
     </ng-template>
@@ -154,17 +165,20 @@ import { ShowcaseEntry } from '../showcase.types';
           endLabel="Boss"
           label="World Tower"
         />
-        <lg-currency-pill
+        <button
+          lgCurrencyPill
           name="Cinders"
           [amount]="12480"
           iconSrc="assets/game-emblems/cinders-v1-64.webp"
           short
-        />
-        <lg-currency-pill
+          toggle
+        ></button>
+        <span
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-        />
+        ></span>
       </lg-top-bar>
     </ng-template>
 
@@ -175,17 +189,20 @@ import { ShowcaseEntry } from '../showcase.types';
       flush
     >
       <lg-top-bar title="Aldric Vane the Unbroken" eyebrow="Lv. 42">
-        <lg-currency-pill
+        <button
+          lgCurrencyPill
           name="Cinders"
           [amount]="12480"
           iconSrc="assets/game-emblems/cinders-v1-64.webp"
           short
-        />
-        <lg-currency-pill
+          toggle
+        ></button>
+        <span
+          lgCurrencyPill
           name="Soulstones"
           [amount]="36"
           iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-        />
+        ></span>
       </lg-top-bar>
     </ng-template>
   `,

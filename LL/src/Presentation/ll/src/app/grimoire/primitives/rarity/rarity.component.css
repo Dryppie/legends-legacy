@@ -1,0 +1,14 @@
+/* ---------- Rarity: the code in the rarity's hue ----------
+   The type is the code style (code, 700, tracking-code); the line height is the container's, so the mark sits in a
+   list row's line or an ItemSlot's corner chip alike. */
+:host {
+  font-size: var(--lg-text-code); font-weight: 700; letter-spacing: var(--lg-tracking-code);
+  color: var(--lg-rarity-ink, var(--lg-ink-muted)); white-space: nowrap;
+}
+:host(.lg-rarity--common) { --lg-rarity-ink: var(--lg-rarity-common); }
+:host(.lg-rarity--uncommon) { --lg-rarity-ink: var(--lg-rarity-uncommon); }
+:host(.lg-rarity--rare) { --lg-rarity-ink: var(--lg-rarity-rare); }
+:host(.lg-rarity--epic) { --lg-rarity-ink: var(--lg-rarity-epic); }
+:host(.lg-rarity--unique) { --lg-rarity-ink: var(--lg-rarity-unique); }
+:host(.lg-rarity--legendary) { --lg-rarity-ink: var(--lg-rarity-legendary); }
+:host(.lg-rarity--legacy) { --lg-rarity-ink: var(--lg-rarity-legacy); }

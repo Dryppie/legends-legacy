@@ -22,14 +22,14 @@ import {
   // Kept in view: the reason tip closes when its control is off screen.
   host: { style: 'position: fixed; top: 0; left: 0' },
   template: `
-    <lg-sigil
+    <button
+      lgSigil
       [value]="9"
       label="Int"
       state="locked"
       reason="Unlocks at level 30"
-      interactive
-      (activate)="activated = activated + 1"
-    />
+      (click)="activated = activated + 1"
+    ></button>
   `,
 })
 class LockedSigilCase {
@@ -55,7 +55,7 @@ describe('LgSigilComponent', () => {
   afterEach(() => lgCloseTip());
 
   describe('locked (i-sigil-locked)', () => {
-    it('pins its reason tip and announces its condition on a press, and does not emit activate', fakeAsync(async () => {
+    it('pins its reason tip and announces its condition on a press, and your (click) does not run', fakeAsync(async () => {
       lgQuietAnnouncer();
       const announcements = lgWatchAnnouncements();
       const s = await sigil();

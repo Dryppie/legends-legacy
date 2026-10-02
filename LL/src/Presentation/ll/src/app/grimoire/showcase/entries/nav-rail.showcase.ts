@@ -350,13 +350,13 @@ const NAV_LONG: readonly LgNavSection[] = [
       flush
     >
       <lg-nav-rail [sections]="nav" activeId="world-map">
-        <lg-activity
+        <button
+          lgActivity
           lgSlot="header"
           label="Engaged in Combat"
           remaining="00:12"
           [progress]="0.42"
-          interactive
-        />
+        ></button>
       </lg-nav-rail>
     </ng-template>
 
@@ -368,16 +368,16 @@ const NAV_LONG: readonly LgNavSection[] = [
       flush
     >
       <lg-nav-rail [sections]="nav" activeId="world-map" compact>
-        <lg-activity
+        <button
+          lgActivity
           lgSlot="header"
           label="Engaged in Combat"
           short="Battling"
           remaining="00:12"
           [progress]="0.42"
           openLabel=""
-          interactive
           compact
-        />
+        ></button>
       </lg-nav-rail>
     </ng-template>
 

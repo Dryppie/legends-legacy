@@ -91,11 +91,9 @@ Each mark has one place on each part. Corner marks sit `space-1` in from the fra
 
 **LoadoutSlot.** The head row holds "Slot 3" at its start, then at its end the Tag (Attuned, Locked) and after it the attention diamond (`ready`: an Essence can be attuned). Its small ItemSlot shows identity only.
 
-**EntryList.** The selection bar at the row's start; the name; the one Tag straight after it; the attention diamond at the row's end. A locked entry's Locked Tag takes the Tag's place, and it shows no diamond.
+**List and ListRow.** The selection bar at the row's start; in a standard List, the thumbnail's rarity edge; the name and code; the one Tag straight after them; the attention diamond at the row's end (`ready`). A blocked row's state Tag (Locked) takes the Tag's place, and it shows no diamond. The scene variant (it was EntryList, D-138) has no thumbnail or code.
 
 **NavRail.** The current item's gilt bar at its start and its gilt wash (where the player is, D-118); the icon; the title; at the item's end, one of: "Locked" (availability), a count badge, or the attention diamond (`ready`, when there is nothing to count). Locked comes first, then the count. In `compact`, the badge sits on the icon's top end corner and the diamond on the item's (D-115, D-119), and a locked item says so in its tip.
-
-**List and ListRow** follow EntryList: the selection bar at the start, the thumbnail's rarity edge, the name and code, the one Tag after them, and markers beside the Tag. ListRow takes its markers through its `tags` slot (`lgSlot="tags"`) until DS-040 gives it a `ready` input.
 
 ## Worked examples
 
@@ -107,7 +105,7 @@ Each example shows what the player sees, and what is said only in words.
 | A locked reward that is new | A reward row | The name in `ink-disabled`; the Locked Tag (dashed); the unlock condition in the reason tip | New: the Locked Tag comes first, and a blocked thing takes no attention mark. The Folio says "+ New" |
 | A claimable Prophecy cache that expires soon | A Prophecy row | The arcana "Claimable" Tag and a Claim Button; "Expires in 2h" in `ink-muted` in the meta line | Nothing is hidden; only the expiry's `warning` tone is dropped. No diamond: the Tag already says it |
 | A selected item the player can't afford | A Cinder Bazaar listing | The `arcana-glow` bar or ring: the item stays selectable | The shortfall sits on the committing action, not the item: the Folio's Buy Button is Insufficient, "Short by 250 Cinders", and the cost line reads "1,000 / 1,250" |
-| An undiscovered creature that is the current Creature Focus | An EntryList of creatures | "Undiscovered" in place of the name, in `ink-muted`; the "Creature Focus" Tag (Assigned: the Focus activity holds it) | The hint, "Found on Floors 10–20", and the Focus cooldown, in the Folio |
+| An undiscovered creature that is the current Creature Focus | A scene List of creatures | "Undiscovered" in place of the name, in `ink-muted`; the "Creature Focus" Tag (Assigned: the Focus activity holds it) | The hint, "Found on Floors 10–20", and the Focus cooldown, in the Folio |
 | A Bazaar-listed item that is a favourite | An inventory ItemSlot | The rarity identity; the ribbon bottom start; meta "Listed · 1,200 Cinders" | Nothing: Listed is the meta's word, Favourite the mark |
 | A captured Arena defence build that differs from the live build | The Arena defence row | The "In defence snapshot" Tag; "Changed since 14:02" in `ink-muted` | The snapshot rule, in the Folio: "Snapshot from 14:02. Changes apply at the next snapshot." |
 
@@ -133,7 +131,7 @@ Each example shows what the player sees, and what is said only in words.
 | ItemSlot `ready` | The attention diamond. `true`, or the words: "Upgrade available". The Claimable state draws it too |
 | ItemSlot `state: 'equipped'` or `'attuned'` | The in-use square, bottom start, and the word in the meta line |
 | ItemSlot `favourite` | The ribbon, bottom start, when there is no in-use square; until the ribbon is drawn, the word in the meta line |
-| EntryList and NavRail items `ready`, LoadoutSlot `ready` | The attention diamond at the end. On a rail item a count `badge` comes first |
+| ListRow and NavRail items `ready`, LoadoutSlot `ready` | The attention diamond at the end. On a rail item a count `badge` comes first |
 
 ## Do and don't
 
@@ -148,4 +146,4 @@ Each example shows what the player sees, and what is said only in words.
 
 ## Related components
 
-ItemSlot, LoadoutSlot, EntryList, NavRail, List and ListRow, Tag, Folio, Button.
+ItemSlot, LoadoutSlot, NavRail, List and ListRow, Tag, Folio, Button.

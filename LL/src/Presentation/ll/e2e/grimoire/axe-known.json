@@ -2,11 +2,6 @@
   "about": "Serious or critical axe violations that existed when the snapshot run was introduced (ANGULAR_DESIGN_SYSTEM_PLAN.md, step 5, 2 October 2026). They are existing debt in the lg-* components, not in the showcase: the run fails only on violations not listed here. Remove an entry when it is fixed.",
   "violations": [
     {
-      "entry": "game/item-slot",
-      "rule": "button-name",
-      "reason": "An interactive ItemSlot with no name and caption=false (icon only: the Insufficient and Cooldown stories) renders a button with no accessible name. Fix when ItemSlot becomes an attribute component on button (plan step 16): require a label."
-    },
-    {
       "entry": "shell/nav-rail",
       "rule": "link-name",
       "reason": "A locked item in the compact rail has no accessible name: its title is hidden in compact and only unlocked items get a title attribute. Fix with the NavRail rework (plan step 18)."

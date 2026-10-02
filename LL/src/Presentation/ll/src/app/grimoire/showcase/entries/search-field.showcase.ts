@@ -4,7 +4,11 @@ import {
   computed,
   signal,
 } from '@angular/core';
-import { LgButtonComponent, LgSearchFieldComponent } from '@grimoire';
+import {
+  LgButtonComponent,
+  LgOptionComponent,
+  LgSearchFieldComponent,
+} from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -27,7 +31,12 @@ const PLAYERS = [
  */
 @Component({
   selector: 'sc-search-field-showcase',
-  imports: [ShowcaseStoryDirective, LgSearchFieldComponent, LgButtonComponent],
+  imports: [
+    ShowcaseStoryDirective,
+    LgSearchFieldComponent,
+    LgOptionComponent,
+    LgButtonComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-template
@@ -72,6 +81,26 @@ const PLAYERS = [
           }}
         </p>
       </div>
+    </ng-template>
+
+    <ng-template
+      scStory="Options of its own"
+      notes="Interactive: focus the field. Projected lg-options carry more than a name; a disabled one is shown but passed over. Suggestions from a service are the suggestions input instead."
+      width="22.5rem"
+      height="14rem"
+    >
+      <lg-search-field
+        label="Find a guild member"
+        placeholder="Find a guild member…"
+        [(value)]="member"
+      >
+        @for (m of members; track m.name) {
+          <lg-option [value]="m.name" [disabled]="m.away"
+            >{{ m.name }} · Lv {{ m.level
+            }}{{ m.away ? ' · away' : '' }}</lg-option
+          >
+        }
+      </lg-search-field>
     </ng-template>
 
     <ng-template
@@ -121,6 +150,12 @@ const PLAYERS = [
 export class SearchFieldShowcaseComponent extends ShowcaseEntryComponent {
   protected readonly query = signal('Ma');
   protected readonly picked = signal('');
+  protected readonly member = signal('');
+  protected readonly members = [
+    { name: 'Maren', level: 42, away: false },
+    { name: 'Kaelen', level: 38, away: true },
+    { name: 'Tamsin', level: 21, away: false },
+  ];
   protected readonly matches = computed(() => {
     const q = this.query().toLowerCase();
     return q.length >= 2
@@ -133,8 +168,8 @@ export const SEARCH_FIELD_SHOWCASE: ShowcaseEntry = {
   slug: 'search-field',
   name: 'SearchField',
   tier: 'components',
-  summary: 'Search with suggestions.',
-  covers: ['LgSearchFieldComponent'],
+  summary: 'Search with suggestions, and its options.',
+  covers: ['LgSearchFieldComponent', 'LgOptionComponent', 'LgOptionParent'],
   readme: 'src/app/grimoire/components/search-field/README.md',
   component: SearchFieldShowcaseComponent,
 };

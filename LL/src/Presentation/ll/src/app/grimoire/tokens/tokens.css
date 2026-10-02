@@ -62,7 +62,7 @@
   --lg-ink-muted: var(--lg-bone-300); /* Tier 2 · role. Secondary text, inactive nav and list items, captions; on ground, surface, surface-raised and folio. */
   --lg-ink-disabled: var(--lg-bone-500); /* Tier 2 · role. Plain disabled controls and the names of locked things only (inactive, so exempt from contrast minimums); a locked name always has a lock or the word 'Locked' beside it in ink-muted (Standards · States). */
   --lg-gilt: var(--lg-brass-300); /* Tier 2 · role. Brand brass, with four jobs only: brand and current location (logo, frames, ornament, the current rail item's bar and wash, the Nobility mark); the one committing action (solid button fill); the screen's one headline figure; effect magnitudes inside descriptions. */
-  --lg-gilt-soft: var(--lg-brass-900); /* Tier 2 · role. Former hover and selected-row wash. No new uses (D-015): hover is surface-raised. Still read by SearchField and JourneyCard, queued in the audit; EntryList left it in D-087. */
+  --lg-gilt-soft: var(--lg-brass-900); /* Tier 2 · role. Former hover and selected-row wash. No new uses (D-015): hover is surface-raised. Still read by SearchField and JourneyCard, queued in the audit; EntryList (now the scene List) left it in D-087. */
   --lg-on-gilt: var(--lg-umber-875); /* Tier 2 · role. Text and icons on a gilt fill (the solid button). */
   --lg-arcana: var(--lg-verdigris-300); /* Tier 2 · role. Means ready, new, actionable or selected — nothing else: '+ New' tags, 'Ready', 'Claimable', rail badges. Not in item, combat or chat contexts. */
   --lg-arcana-soft: var(--lg-verdigris-900); /* Tier 2 · role. Wash behind arcana text on small marks only: the new Tag and rail badges — never a row, list item or card. */
@@ -111,8 +111,8 @@
   --lg-sigil-fill: var(--lg-verdigris-800); /* Component token (Sigil). Hexagon stat badge fill. PageHeader's hex icon also reads it — a known exception (Foundations · Colour). */
   --lg-sigil-edge: var(--lg-verdigris-250); /* Component token (Sigil). Sigil outline; 3:1 against sigil-fill and the grounds. PageHeader's hex icon also reads it — a known exception. */
   --lg-on-sigil: var(--lg-ink); /* Component token (Sigil). Numerals inside a sigil, on sigil-fill; follows ink. PageHeader's hex icon also reads it — a known exception. */
-  --lg-tile: var(--lg-slate-800); /* Component token. The active primary tab's fill (TabStrip); StatTile's until it merged into Ledger (D-137). */
-  --lg-on-tile: var(--lg-ink); /* Component token. Text on the active primary tab (TabStrip); follows ink. StatTile's until D-137. */
+  --lg-tile: var(--lg-slate-800); /* Component token. The selected primary tab's fill (Tabs); StatTile's until it merged into Ledger (D-137). */
+  --lg-on-tile: var(--lg-ink); /* Component token. Text on the selected primary tab (Tabs); follows ink. StatTile's until D-137. */
   --lg-on-tile-muted: var(--lg-ink-muted); /* Component token. No reader since StatTile merged into Ledger (D-137); follows ink-muted. Retire it in the next token pass. */
   --lg-shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080; /* Level 3: the Folio, dialog sheets, confirmations, the tour's coach mark and the rail drawer. */
   --lg-shadow-float: 0 12px 28px -8px #000000cc; /* Floating Levels 1 and 2: the Chronicle drawer, popovers, tooltips, hover cards, menus and toasts. */
@@ -146,7 +146,7 @@
   --lg-section-sm: 1.5rem; /* Section · between Panels on a Page (stack-lg in the game's frame, D-120), between blocks in the Folio. Aliases space-6. (24px at the default text size.) */
   --lg-section-md: 2rem; /* Section · the Page’s side padding; between major regions of a screen. Aliases space-8. (32px at the default text size.) */
   --lg-section-lg: 3rem; /* Section · above a screen title; the rail’s top padding. Aliases space-12. (48px at the default text size.) */
-  --lg-radius-container: 2px; /* Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions). Regions — the Folio, Banner, Stage, rail and Page — are square. */
+  --lg-radius-container: 2px; /* Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, and row washes (Ledger rows, rail items, scene List rows, chat lines, suggestions). Regions — the Folio, Banner, Stage, rail and Page — are square. */
   --lg-radius-control: 4px; /* Controls, tags and slots: Buttons, inputs, tabs, key caps and clickable CurrencyPills; Tags, count badges and rarity codes; ItemSlots, thumbnails and LoadoutSlots. Focus rings on links and icon buttons follow it. */
   --lg-radius-float: 8px; /* Popovers and drawers: tooltips, hover cards, menus, suggestion lists, toasts and the floating chat drawer. Only what floats. */
   --lg-radius-circle: 50%; /* The Presence dot and the compact Activity's ring and live dot (D-117), and nothing else: the circle means presence — someone there, or the character at work (Foundations · Shape). Never a count badge, an icon button, a bullet or a portrait. */

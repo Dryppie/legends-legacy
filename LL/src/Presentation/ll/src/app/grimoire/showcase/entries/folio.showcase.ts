@@ -78,7 +78,7 @@ import { ShowcaseEntry } from '../showcase.types';
         [effects]="prismEffects"
       >
         <lg-folio-emblem>
-          <lg-item-slot rarity="Epic" icon="essences" [caption]="false" />
+          <div lgItemSlot rarity="Epic" icon="essences" [caption]="false"></div>
         </lg-folio-emblem>
         <lg-folio-lore
           >A shard of a warden’s heart, still humming with the <b>Prism</b> it
@@ -99,7 +99,12 @@ import { ShowcaseEntry } from '../showcase.types';
         [effects]="crownEffects"
       >
         <lg-folio-emblem>
-          <lg-item-slot rarity="Legendary" icon="overview" [caption]="false" />
+          <div
+            lgItemSlot
+            rarity="Legendary"
+            icon="overview"
+            [caption]="false"
+          ></div>
         </lg-folio-emblem>
         <lg-folio-actions>
           <button lgButton="solid" hotkey="E">Equip</button>

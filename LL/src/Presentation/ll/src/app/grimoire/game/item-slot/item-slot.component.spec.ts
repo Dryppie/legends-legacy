@@ -22,13 +22,13 @@ import {
   // Kept in view: the reason tip closes when its control is off screen.
   host: { style: 'position: fixed; top: 0; left: 0' },
   template: `
-    <lg-item-slot
+    <button
+      lgItemSlot
       name="Tower Key"
       state="locked"
       reason="Clear floor 10"
-      interactive
-      (activate)="activated = activated + 1"
-    />
+      (click)="activated = activated + 1"
+    ></button>
   `,
 })
 class LockedSlotCase {
@@ -40,21 +40,79 @@ class LockedSlotCase {
   imports: [LgItemSlotComponent],
   host: { style: 'position: fixed; top: 0; left: 0' },
   template: `
-    <lg-item-slot
+    <button
+      lgItemSlot
       icon="essences"
+      name="Ember Wolf Essence"
       [caption]="false"
       state="cooldown"
       [remaining]="3725"
-      interactive
-      (activate)="activated = activated + 1"
-    />
+      (click)="activated = activated + 1"
+    ></button>
   `,
 })
 class UncaptionedSlotCase {
   activated = 0;
 }
 
+/** A slot that toggles: a button whose press is its own (click). */
+@Component({
+  imports: [LgItemSlotComponent],
+  template: `
+    <button
+      lgItemSlot
+      icon="soulstones"
+      rarity="Epic"
+      name="Soul Prism"
+      [quantity]="2"
+      [selected]="selected"
+      (click)="selected = !selected"
+    ></button>
+    <div
+      lgItemSlot
+      icon="essences"
+      rarity="Rare"
+      name="Ember Wolf Essence"
+    ></div>
+  `,
+})
+class ToggleSlotCase {
+  selected = false;
+}
+
 describe('LgItemSlotComponent', () => {
+  describe('a button', () => {
+    it('is a toggle named by its name, rarity and quantity; a press is its (click)', async () => {
+      const fixture = TestBed.createComponent(ToggleSlotCase);
+      const s = await TestbedHarnessEnvironment.loader(fixture).getHarness(
+        LgItemSlotHarness.with({ name: 'Soul Prism' }),
+      );
+      const host = fixture.nativeElement.querySelector(
+        'button[lgItemSlot]',
+      ) as HTMLButtonElement;
+
+      expect(host.getAttribute('aria-label')).toBe(
+        'Soul Prism, Epic, quantity 2',
+      );
+      expect(host.type).toBe('button');
+      expect(await s.isPressed()).toBeFalse();
+      await s.press();
+      expect(await s.isPressed()).toBeTrue();
+    });
+
+    it('a box is no control: no role of its own, its rarity spoken in its words', async () => {
+      const fixture = TestBed.createComponent(ToggleSlotCase);
+      fixture.detectChanges();
+      const box = fixture.nativeElement.querySelector(
+        'div[lgItemSlot]',
+      ) as HTMLElement;
+
+      expect(box.hasAttribute('aria-label')).toBeFalse();
+      expect(box.hasAttribute('aria-pressed')).toBeFalse();
+      expect(box.textContent).toContain(', Rare');
+    });
+  });
+
   beforeEach(lgAnnouncerIdle);
 
   afterEach(() => lgCloseTip());
@@ -76,7 +134,7 @@ describe('LgItemSlotComponent', () => {
     const shownTip = () =>
       page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
 
-    it('announces its printed reason on a press, opens no tip, and does not emit activate', fakeAsync(async () => {
+    it('announces its printed reason on a press, opens no tip, and your (click) does not run', fakeAsync(async () => {
       lgQuietAnnouncer();
       const announcements = lgWatchAnnouncements();
 
@@ -144,7 +202,7 @@ describe('LgItemSlotComponent', () => {
       announcements.stop();
     }));
 
-    it('pins the tip and announces the spoken reason on a press, and does not emit activate', fakeAsync(async () => {
+    it('pins the tip and announces the spoken reason on a press, and your (click) does not run', fakeAsync(async () => {
       lgQuietAnnouncer();
       const announcements = lgWatchAnnouncements();
       const s = await slot();

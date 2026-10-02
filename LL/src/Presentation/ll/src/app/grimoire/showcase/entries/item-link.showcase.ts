@@ -17,39 +17,33 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <p>
         You found
-        <lg-item-link rarity="Common" interactive>Frayed Satchel</lg-item-link>,
-        <lg-item-link rarity="Rare" interactive>Ember Wolf Essence</lg-item-link
-        >, <lg-item-link rarity="Epic" interactive>Soul Prism</lg-item-link> and
-        <lg-item-link rarity="Legendary" interactive
-          >Crown of Cinders</lg-item-link
-        >.
+        <button lgItemLink rarity="Common">Frayed Satchel</button>,
+        <button lgItemLink rarity="Rare">Ember Wolf Essence</button>,
+        <button lgItemLink rarity="Epic">Soul Prism</button> and
+        <button lgItemLink rarity="Legendary">Crown of Cinders</button>.
       </p>
     </ng-template>
 
     <ng-template
       scStory="Rarities"
-      notes="The rarity and meta are also in the title, and the rarity is read after the name."
+      notes="The rarity and meta are also in the tip, on hover and focus, and the rarity is read after the name."
     >
       <div class="sc-col">
-        <lg-item-link rarity="Common" meta="Relic" interactive
-          >Frayed Satchel</lg-item-link
-        >
-        <lg-item-link rarity="Uncommon" meta="Bow · Lv 9" interactive
-          >Ashwood Bow</lg-item-link
-        >
-        <lg-item-link rarity="Rare" meta="Essence · Lv 12" interactive
-          >Ember Wolf Essence</lg-item-link
-        >
-        <lg-item-link rarity="Epic" meta="Sword" interactive
-          >Ember Fang</lg-item-link
-        >
-        <lg-item-link rarity="Unique" interactive>Prophecy Cache</lg-item-link>
-        <lg-item-link rarity="Legendary" meta="Head" interactive
-          >Crown of Cinders</lg-item-link
-        >
-        <lg-item-link rarity="Legacy" meta="Trinket" interactive
-          >Ashenreach Heirloom</lg-item-link
-        >
+        <button lgItemLink rarity="Common" meta="Relic">Frayed Satchel</button>
+        <button lgItemLink rarity="Uncommon" meta="Bow · Lv 9">
+          Ashwood Bow
+        </button>
+        <button lgItemLink rarity="Rare" meta="Essence · Lv 12">
+          Ember Wolf Essence
+        </button>
+        <button lgItemLink rarity="Epic" meta="Sword">Ember Fang</button>
+        <button lgItemLink rarity="Unique">Prophecy Cache</button>
+        <button lgItemLink rarity="Legendary" meta="Head">
+          Crown of Cinders
+        </button>
+        <button lgItemLink rarity="Legacy" meta="Trinket">
+          Ashenreach Heirloom
+        </button>
       </div>
     </ng-template>
 
@@ -57,7 +51,7 @@ import { ShowcaseEntry } from '../showcase.types';
       scStory="No rarity"
       notes="Without a rarity the name takes the text colour."
     >
-      <p>You found <lg-item-link interactive>Iron Sabre</lg-item-link>.</p>
+      <p>You found <button lgItemLink>Iron Sabre</button>.</p>
     </ng-template>
 
     <ng-template
@@ -66,7 +60,7 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <p>
         Reward:
-        <lg-item-link rarity="Epic" meta="Sword">Ember Fang</lg-item-link>.
+        <span lgItemLink rarity="Epic" meta="Sword">Ember Fang</span>.
       </p>
     </ng-template>
   `,

@@ -89,7 +89,7 @@ Gilt no longer marks group labels and eyebrows (`ink-muted`), Ledger and other d
 
 ### Not yet on the allocation
 
-These components still break the allocation. They are listed rather than hidden and are queued in Governance · Audit & consolidation map (revision item 9). Ledger, Folio, Tag, NavRail and Chronicle follow it (D-018 to D-022), StatTile did from D-026 until it merged into Ledger (D-137), and EntryList and LoadoutSlot since D-087.
+These components still break the allocation. They are listed rather than hidden and are queued in Governance · Audit & consolidation map (revision item 9). Ledger, Folio, Tag, NavRail and Chronicle follow it (D-018 to D-022), StatTile did from D-026 until it merged into Ledger (D-137), and EntryList (now the scene List, D-138) and LoadoutSlot since D-087.
 
 | Component | Off the allocation | Moves to |
 | --- | --- | --- |
@@ -104,7 +104,7 @@ These components still break the allocation. They are listed rather than hidden 
 | SearchField | The highlighted suggestion is marked by the `gilt-soft` wash alone | `surface-raised` and a bar (also a contrast breach, below) |
 | ItemSlot | Selection is an `arcana-glow` ring — the same form as an Uncommon edge, ΔE00 13.4 away | A shape: an offset ring or a corner mark |
 | Presence | "Online" is `arcana` with an `arcana-glow` dot | A filled `ink` dot and the word |
-| TabStrip | Tab counts are `arcana` | `ink-muted`, unless the count means new |
+| Tabs | Tab counts are `arcana` | `ink-muted`, unless the count means new |
 
 ## Context ownership
 
@@ -479,11 +479,11 @@ A component token belongs to one component and is read only there. It aliases a 
 | `sigil-fill` | Sigil | `verdigris-800` | `#1d4b45` | The hexagon badge's fill. | — |
 | `sigil-edge` | Sigil | `verdigris-250` | `#7fc9b8` | The hexagon's outline. | — |
 | `on-sigil` | Sigil | `ink` | `#f0e6d2` | Numerals inside the badge. | — |
-| `tile` | TabStrip (StatTile's until D-137) | `slate-800` | `#1b1b22` | The active primary tab's fill. | — |
-| `on-tile` | TabStrip (StatTile's until D-137) | `ink` | `#f0e6d2` | Text on the active primary tab. | — |
+| `tile` | Tabs (StatTile's until D-137) | `slate-800` | `#1b1b22` | The active primary tab's fill. | — |
+| `on-tile` | Tabs (StatTile's until D-137) | `ink` | `#f0e6d2` | Text on the active primary tab. | — |
 | `on-tile-muted` | None since D-137 (StatTile) | `ink-muted` | `#bba98c` | Labels and units on a tile. | — |
 
-One reader broke the one-component rule and was flagged rather than hidden: TabStrip's active primary tab takes the tile fill. Since StatTile merged into Ledger (D-137) TabStrip is the tile tokens' only reader, so the next token pass can make them TabStrip's own and retire `on-tile-muted`. (PageHeader used to draw its own hex with the Sigil tokens; its section mark is now a `gilt` diamond, D-065.) It is queued in Governance · Audit & consolidation map (revision item 3), to be resolved by promoting the token to a role or giving the reader its own component token.
+One reader broke the one-component rule and was flagged rather than hidden: the selected primary tab (Tabs) takes the tile fill. Since StatTile merged into Ledger (D-137) Tabs is the tile tokens' only reader, so the next token pass can make them Tabs' own and retire `on-tile-muted`. (PageHeader used to draw its own hex with the Sigil tokens; its section mark is now a `gilt` diamond, D-065.) It is queued in Governance · Audit & consolidation map (revision item 3), to be resolved by promoting the token to a role or giving the reader its own component token.
 
 ## Naming convention
 
@@ -507,7 +507,7 @@ One reader broke the one-component rule and was flagged rather than hidden: TabS
 - Chains are short: Tier 2 and Tier 3 alias a primitive directly (one step); a component token may alias a role (two steps). The page would follow up to 16; we keep it to two.
 - An alias must name an existing token and cannot mix, tint or fade it. A translucent colour is a primitive of its own (`slate-950-a80`, for `scrim`).
 - Changing a primitive moves every token that aliases it — its usage line lists them. To change one role, repoint that role.
-- **Raw values outside Tier 1.** Shadow tokens cannot alias, so three repeat palette values by hand: `focus-ring` repeats `slate-900` (#101014) and `brass-200` (#f5d48f), and `shadow-text-art` repeats `slate-950` (#0b0b0f); `shadow-panel` and `shadow-float` use black, which has no primitive. Changing those primitives means editing those shadows too. EntryList's list-end mask uses `#000` as an alpha value; a mask is not a colour and takes no token.
+- **Raw values outside Tier 1.** Shadow tokens cannot alias, so three repeat palette values by hand: `focus-ring` repeats `slate-900` (#101014) and `brass-200` (#f5d48f), and `shadow-text-art` repeats `slate-950` (#0b0b0f); `shadow-panel` and `shadow-float` use black, which has no primitive. Changing those primitives means editing those shadows too. The scene List's list-end mask uses `#000` as an alpha value; a mask is not a colour and takes no token.
 - **Check:** no component names a primitive. Search the components' CSS (`src/app/grimoire/**/*.css`, all but the compiled `tokens/tokens.css`) for `var(--lg-umber-`, `--lg-bone-`, `--lg-brass-`, `--lg-verdigris-`, `--lg-ember-`, `--lg-amber-`, `--lg-azure-`, `--lg-orchid-` and `--lg-hue-`; today there are none. Raw values — a hex colour, a pixel font size, a shadow with its own colour — are checked automatically: `node design-system/scripts/check.mjs`.
 
 ## Adding a token
@@ -552,7 +552,7 @@ Every ratio below the threshold, flagged here and marked **fail** in the tables.
 | `meter-track` | Edge 3:1 on all four grounds | 1.11–1.33 | The empty part is a fill. The `bar` Meter draws its full length with a `line-strong` edge (passes); the thin Meter and the Track rely on the numbers printed beside them. |
 | `surface-raised`, `gilt-soft`, `arcana-soft`, `danger-soft`, `changed` | Edge 3:1 on the grounds | 1.00–1.66; `surface-raised` 1.14–1.20, `changed` 1.38–1.66 | Washes, never the only sign of a state: selection also takes a bar, ring or edge and a weight or face change (Standards · States); a mention also takes its `ink` edge and bold `@you`; hover is an extra cue, not a state a player must see; the live mark is an extra cue too, since the value itself shows the change. |
 | `gilt-soft` in SearchField | Edge 3:1 on `surface-raised` | 1.15 | **Breach, not an exception:** the highlighted suggestion in SearchField's list is marked by the wash alone. Queued in Governance · Audit & consolidation map (revision item 3). |
-| `tile`, `sigil-fill` | Edge 3:1 on all four grounds | 1.05–1.93 | Fills. The Sigil's shape is drawn by `sigil-edge` (passes); TabStrip's active tab also takes the `arcana-glow` bar. |
+| `tile`, `sigil-fill` | Edge 3:1 on all four grounds | 1.05–1.93 | Fills. The Sigil's shape is drawn by `sigil-edge` (passes); the selected primary tab also takes the `arcana-glow` bar. |
 
 ### Text tokens on the four grounds
 
@@ -713,6 +713,6 @@ Components use the `lg-` class prefix so they can live beside today's `ll-` clas
 - Button — the command button
 - Meter — the progress bar
 - Sigil — the hex stat badge
-- TabStrip — the tabs
+- Tabs — the tabs
 - PageHeader — the information screen heading
 - ItemSlot — the item frame

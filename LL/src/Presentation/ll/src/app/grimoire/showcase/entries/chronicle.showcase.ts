@@ -354,9 +354,9 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
         <!-- Whitespace between these parts is rendered, so Prettier must leave them on one line. -->
         <!-- prettier-ignore -->
         <ng-template lgChronicleText let-message
-          >@for (part of parts(message); track $index) {@if (part.item) {<lg-item-link [rarity]="part.rarity" interactive>{{
+          >@for (part of parts(message); track $index) {@if (part.item) {<button lgItemLink [rarity]="part.rarity">{{
               part.item
-            }}</lg-item-link>} @else if (part.mention) {<span class="lg-mention">{{ part.mention }}</span>} @else {{{ part.text }}}}</ng-template
+            }}</button>} @else if (part.mention) {<span class="lg-mention">{{ part.mention }}</span>} @else {{{ part.text }}}}</ng-template
         >
       </lg-chronicle>
     </ng-template>

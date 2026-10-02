@@ -621,8 +621,8 @@ def main():
           'Gear reference requires seed-free preparation from a saved family with no other modifications')
     check(not a.qualified_family or a.mode == 'prepare' and a.source is not None and not a.current_content and
           not a.add_search and not a.add_references and a.ability_candidate is None and
-          a.health_factor == a.offense_factor == 1 and a.floor in (2, 4, 6, 7, 8, 9, 10, 12),
-          'Qualified family requires floor-2, floor-4, floor-6, floor-7, floor-8, floor-9, floor-10 or floor-12 seed-free preparation with no other modifications')
+          a.health_factor == a.offense_factor == 1 and a.floor in (2, 4, 6, 7, 8, 9, 10, 12, 13),
+          'Qualified family requires floor-2, floor-4, floor-6, floor-7, floor-8, floor-9, floor-10, floor-12 or floor-13 seed-free preparation with no other modifications')
     check(not a.add_references or a.mode in ('prepare', 'screen', 'confirm') and a.source is not None,
           'Reference-only import requires a saved family and a fixed-family mode')
     check(a.native_seconds == 840 or a.mode == 'confirm' and a.floor == 15,

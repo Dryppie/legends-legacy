@@ -68,18 +68,30 @@ export interface LgConstellationRing {
           [style.left.%]="(item.x / width()) * 100"
           [style.top.%]="(item.y / height()) * 100"
         >
-          <lg-sigil
-            [label]="item.label"
-            [value]="item.value"
-            [labelPosition]="item.labelPosition || 'right'"
-            [size]="item.size || 'md'"
-            [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
-            [reason]="item.reason"
-            [interactive]="selectable()"
-            [tabIndex]="i === active() ? 0 : -1"
-            [dataIndex]="i"
-            (activate)="select.emit(item.id)"
-          />
+          @if (selectable()) {
+            <button
+              lgSigil
+              [label]="item.label"
+              [value]="item.value"
+              [labelPosition]="item.labelPosition || 'right'"
+              [size]="item.size || 'md'"
+              [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
+              [reason]="item.reason"
+              [attr.tabindex]="i === active() ? 0 : -1"
+              [attr.data-index]="i"
+              (click)="select.emit(item.id)"
+            ></button>
+          } @else {
+            <div
+              lgSigil
+              [label]="item.label"
+              [value]="item.value"
+              [labelPosition]="item.labelPosition || 'right'"
+              [size]="item.size || 'md'"
+              [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
+              [attr.data-index]="i"
+            ></div>
+          }
         </div>
       }
     </div>

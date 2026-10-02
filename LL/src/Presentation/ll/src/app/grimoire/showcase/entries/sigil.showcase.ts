@@ -16,8 +16,8 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="A number in a verdigris hex, its name beside it. With a press it is a toggle button."
     >
       <div class="sc-row">
-        <lg-sigil [value]="24" label="Strength" />
-        <lg-sigil [value]="11" label="Power" interactive />
+        <div lgSigil [value]="24" label="Strength"></div>
+        <button lgSigil [value]="11" label="Power"></button>
       </div>
     </ng-template>
 
@@ -26,39 +26,41 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="The edge turns arcana-glow and the badge scales to 1.08. Press the other one to move it."
     >
       <div class="sc-row">
-        <lg-sigil
+        <button
+          lgSigil
           [value]="11"
           label="Power"
           [state]="selected() === 'power' ? 'selected' : 'default'"
-          interactive
-          (activate)="selected.set('power')"
-        />
-        <lg-sigil
+          (click)="selected.set('power')"
+        ></button>
+        <button
+          lgSigil
           size="lg"
           [value]="9"
           label="Armor"
           [state]="selected() === 'armor' ? 'selected' : 'default'"
-          interactive
-          (activate)="selected.set('armor')"
-        />
+          (click)="selected.set('armor')"
+        ></button>
       </div>
     </ng-template>
 
     <ng-template scStory="Ready" notes="An arcana-glow diamond: can be raised.">
       <div class="sc-row">
-        <lg-sigil
+        <div
+          lgSigil
           [value]="3"
           label="Resistance"
           labelPosition="left"
           state="ready"
-        />
-        <lg-sigil
+        ></div>
+        <div
+          lgSigil
           [value]="18"
           label="Dex"
           labelPosition="left"
           size="sm"
           state="ready"
-        />
+        ></div>
       </div>
     </ng-template>
 
@@ -67,23 +69,23 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="The hex empties and the value greys. With a press it stays a focusable button, and the condition opens in the reason tip."
     >
       <div class="sc-row">
-        <lg-sigil
+        <button
+          lgSigil
           [value]="1"
           label="Life Steal"
           labelPosition="bottom"
           state="locked"
           reason="Unlocks at level 20"
-          interactive
-        />
-        <lg-sigil [value]="9" label="Int" state="locked" />
+        ></button>
+        <div lgSigil [value]="9" label="Int" state="locked"></div>
       </div>
     </ng-template>
 
     <ng-template scStory="Sizes" notes="sm 40px, md 52px, lg 68px.">
       <div class="sc-row">
-        <lg-sigil size="sm" [value]="4" label="Tenacity" />
-        <lg-sigil size="md" [value]="11" label="Power" />
-        <lg-sigil size="lg" [value]="9" label="Armor" />
+        <div lgSigil size="sm" [value]="4" label="Tenacity"></div>
+        <div lgSigil size="md" [value]="11" label="Power"></div>
+        <div lgSigil size="lg" [value]="9" label="Armor"></div>
       </div>
     </ng-template>
 
@@ -96,11 +98,12 @@ import { ShowcaseEntry } from '../showcase.types';
         @for (p of positions; track p.position) {
           <div class="sc-cell">
             <p class="sc-cap">{{ p.position }}</p>
-            <lg-sigil
+            <div
+              lgSigil
               [value]="p.value"
               [label]="p.label"
               [labelPosition]="p.position"
-            />
+            ></div>
           </div>
         }
       </div>

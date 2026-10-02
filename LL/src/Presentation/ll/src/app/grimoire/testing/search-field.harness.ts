@@ -21,7 +21,10 @@ const KEYS: Record<LgSearchFieldKey, TestKey> = {
   Escape: TestKey.ESCAPE,
 };
 
-/** `lg-search-field`: search with suggestions, an ARIA combobox. */
+/**
+ * `lg-search-field`: search with suggestions, an ARIA combobox. The list is on the CDK overlay, outside the field: it is
+ * found through the input's `aria-controls`.
+ */
 export class LgSearchFieldHarness extends ComponentHarness {
   static hostSelector = 'lg-search-field';
 
@@ -37,10 +40,7 @@ export class LgSearchFieldHarness extends ComponentHarness {
   }
 
   private readonly input = this.locatorFor('input[role=combobox]');
-  private readonly options = this.locatorForAll('[role=listbox] [role=option]');
-  private readonly note = this.locatorForOptional(
-    '[role=listbox] .lg-search__note',
-  );
+  private readonly page = this.documentRootLocatorFactory();
 
   async getLabel(): Promise<string | null> {
     return (await this.input()).getAttribute('aria-label');
@@ -84,6 +84,20 @@ export class LgSearchFieldHarness extends ComponentHarness {
     return parallel(() => options.map((option) => option.text()));
   }
 
+  /** A click on the suggestion, as a pointer picks it: focus stays in the field. */
+  async clickSuggestion(text: string): Promise<void> {
+    const options = await this.options();
+    const texts = await parallel(() => options.map((option) => option.text()));
+    const i = texts.indexOf(text);
+    if (i < 0) {
+      throw Error(
+        `No suggestion "${text}"; the list has ${texts.join(', ') || 'none'}.`,
+      );
+    }
+    await options[i].hover();
+    await options[i].click();
+  }
+
   /** The suggestion the arrow keys highlighted (the combobox's active descendant), or null. */
   async highlightedSuggestion(): Promise<string | null> {
     const [input, options] = await parallel(() => [
@@ -101,7 +115,24 @@ export class LgSearchFieldHarness extends ComponentHarness {
 
   /** The list's note in place of suggestions ("No matching players", "Finding players…"), or null. */
   async getNote(): Promise<string | null> {
-    const note = await this.note();
+    const list = await this.listSelector();
+    if (!list) return null;
+    const note = await this.page.locatorForOptional(
+      `${list} .lg-search__note`,
+    )();
     return note ? note.text() : null;
+  }
+
+  /** The open list's selector, from the input's aria-controls; null while it is closed. */
+  private async listSelector(): Promise<string | null> {
+    const id = await (await this.input()).getAttribute('aria-controls');
+    return id ? `[id="${id}"]` : null;
+  }
+
+  private async options() {
+    const list = await this.listSelector();
+    return list
+      ? this.page.locatorForAll(`${list} [role=option]`)()
+      : Promise.resolve([]);
   }
 }

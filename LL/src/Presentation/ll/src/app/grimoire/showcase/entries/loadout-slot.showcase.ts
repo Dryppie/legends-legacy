@@ -16,15 +16,15 @@ import { ShowcaseEntry } from '../showcase.types';
       width="23rem"
       notes="A rarity-edged slot, the name in its rarity colour, its two abilities and a neutral Attuned Tag."
     >
-      <lg-loadout-slot
+      <button
+        lgLoadoutSlot
         [index]="0"
         state="attuned"
         name="Ember Wolf Essence"
         rarity="Rare"
         [active]="active"
         [passive]="passive"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -32,12 +32,12 @@ import { ShowcaseEntry } from '../showcase.types';
       width="23rem"
       notes="The empty frame and Empty, with the hint saying what fills it. No Tag."
     >
-      <lg-loadout-slot
+      <button
+        lgLoadoutSlot
         [index]="1"
         state="open"
         hint="Choose an Essence to attune"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -45,12 +45,12 @@ import { ShowcaseEntry } from '../showcase.types';
       width="23rem"
       notes="A dashed frame, a Locked Tag and the unlock condition printed as the name. It stays a focusable button, aria-disabled."
     >
-      <lg-loadout-slot
+      <button
+        lgLoadoutSlot
         [index]="2"
         state="locked"
         reason="Unlocks at level 20"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -59,27 +59,27 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="The attention diamond at the end of the head, after the Tag. A locked slot takes none."
     >
       <div class="sc-col">
-        <lg-loadout-slot
+        <button
+          lgLoadoutSlot
           [index]="1"
           state="open"
           hint="Choose an Essence to attune"
           ready="Essence ready to attune"
-          interactive
-        />
-        <lg-loadout-slot
+        ></button>
+        <button
+          lgLoadoutSlot
           [index]="0"
           name="Ember Wolf Essence"
           rarity="Rare"
           [ready]="true"
-          interactive
-        />
-        <lg-loadout-slot
+        ></button>
+        <button
+          lgLoadoutSlot
           [index]="2"
           state="locked"
           reason="Unlocks at level 20"
           [ready]="true"
-          interactive
-        />
+        ></button>
       </div>
     </ng-template>
 
@@ -89,19 +89,21 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Without a press the edge is line, not line-strong, and there is no hover."
     >
       <div class="sc-col">
-        <lg-loadout-slot
+        <div
+          lgLoadoutSlot
           [index]="0"
           name="Ember Wolf Essence"
           rarity="Rare"
           [active]="active"
           [passive]="passive"
-        />
-        <lg-loadout-slot [index]="1" hint="Choose an Essence" />
-        <lg-loadout-slot
+        ></div>
+        <div lgLoadoutSlot [index]="1" hint="Choose an Essence"></div>
+        <div
+          lgLoadoutSlot
           [index]="2"
           state="locked"
           reason="Unlocks at level 20"
-        />
+        ></div>
       </div>
     </ng-template>
 
@@ -110,7 +112,8 @@ import { ShowcaseEntry } from '../showcase.types';
       width="23rem"
       notes="One short row for a full loadout: the name leads, the slot number is for screen readers, and there is no Attuned Tag."
     >
-      <lg-loadout-slot
+      <button
+        lgLoadoutSlot
         compact
         [index]="0"
         state="attuned"
@@ -118,8 +121,7 @@ import { ShowcaseEntry } from '../showcase.types';
         rarity="Rare"
         [active]="active"
         [passive]="passive"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -127,13 +129,13 @@ import { ShowcaseEntry } from '../showcase.types';
       width="23rem"
       notes="An open compact slot says Empty; here with an Essence ready to attune."
     >
-      <lg-loadout-slot
+      <button
+        lgLoadoutSlot
         compact
         [index]="1"
         state="open"
         ready="Essence ready to attune"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -141,13 +143,13 @@ import { ShowcaseEntry } from '../showcase.types';
       width="23rem"
       notes="A locked compact slot keeps its Locked Tag and condition."
     >
-      <lg-loadout-slot
+      <button
+        lgLoadoutSlot
         compact
         [index]="2"
         state="locked"
         reason="Unlocks at level 20"
-        interactive
-      />
+      ></button>
     </ng-template>
 
     <ng-template
@@ -156,7 +158,8 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="A full loadout, stacked as in the Character Overview."
     >
       <div class="sc-col">
-        <lg-loadout-slot
+        <button
+          lgLoadoutSlot
           compact
           [index]="0"
           state="attuned"
@@ -164,22 +167,21 @@ import { ShowcaseEntry } from '../showcase.types';
           rarity="Rare"
           [active]="active"
           [passive]="passive"
-          interactive
-        />
-        <lg-loadout-slot
+        ></button>
+        <button
+          lgLoadoutSlot
           compact
           [index]="1"
           state="open"
           ready="Essence ready to attune"
-          interactive
-        />
-        <lg-loadout-slot
+        ></button>
+        <button
+          lgLoadoutSlot
           compact
           [index]="2"
           state="locked"
           reason="Unlocks at level 20"
-          interactive
-        />
+        ></button>
       </div>
     </ng-template>
   `,

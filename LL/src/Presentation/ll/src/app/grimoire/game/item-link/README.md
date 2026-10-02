@@ -6,9 +6,13 @@ An item named in text.
 
 An item named inline in text — chat, loot lines, quest rewards — as a bracketed name in its rarity colour.
 
-**Provide:** the item name as content, `rarity`, optional `meta` for the tooltip and `interactive` with `(activate)` (open the item's detail or tooltip).
+**Provide:** the host — `<button lgItemLink>` to open the item's detail (a press is the native `(click)`), `<a lgItemLink>` to go to it, `<span lgItemLink>` to name it — the item name as content, `rarity`, and optional `meta` for the tip.
 
-- Colour is the `rarity-*` token; weight 600. Rarity also shows in the tooltip, so the colour never carries it alone.
+```html
+You found <button lgItemLink rarity="Epic" meta="Sword" (click)="inspect(item)">Ember Fang</button>.
+```
+
+- Colour is the `rarity-*` token; weight 600. The rarity and meta show in the tip on hover and focus, and the rarity is read after the name, so the colour never carries it alone.
 - Keep links to item names; never link a whole sentence.
 
 ## Accessibility notes
@@ -19,7 +23,7 @@ An item named inline in text — chat, loot lines, quest rewards — as a bracke
 | Keyboard | A button: Enter or Space |
 | Focus | `focus-ring` |
 | Announced | The name and its rarity by name |
-| Hover and tap | The rarity and meta are also in its `title`, and the rarity is read out, so nothing is hover-only |
+| Hover and tap | The rarity and meta are also in the tip, on hover and on keyboard focus; the meta is the description, and the rarity is read out, so nothing is hover-only |
 | Target size | Inline text, exempt; where it is the only way to the item, give it a separate target |
 | Text scaling | Wraps with its sentence |
 | Colour | The brackets and the spoken rarity carry what the colour says |

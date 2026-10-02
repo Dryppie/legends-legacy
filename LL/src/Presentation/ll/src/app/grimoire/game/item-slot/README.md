@@ -6,7 +6,11 @@ The item frame.
 
 A framed square for an item, essence or equipment slot, edged in its rarity colour. The square is the slot's shape and nothing else's (Foundations · Shape); its corners are `radius-control`.
 
-**Provide:** `name`, `meta`, `rarity` (Common … Legacy), `image` or `icon`, optional `quantity`, `selected`, `size` (`sm`, `md`, `wide` for 16:9 profession cards) and `interactive` with `(activate)`. For a state, `state` (and `reason`, `shortfall` or `remaining` when it blocks), `favourite` and `ready`.
+**Provide:** the host — `<button lgItemSlot>` to pick or toggle it (a press is the native `(click)`), `<a lgItemSlot>` to open it, `<div lgItemSlot>` to show it — and `name`, `meta`, `rarity` (Common … Legacy), `image` or `icon`, optional `quantity`, `selected` (a button's `aria-pressed`), `size` (`xs` 32px, the code alone; `sm`; `md`; `wide` for 16:9 profession cards). For a state, `state` (and `reason`, `shortfall` or `remaining` when it blocks), `favourite` and `ready`. A button or link needs a `name` or `slotLabel`: it is its accessible name, even without a caption.
+
+```html
+<button lgItemSlot icon="essences" rarity="Rare" name="Ember Wolf Essence" [selected]="picked() === id" (click)="pick(id)"></button>
+```
 
 - The frame is `ground-deep` with a 1px inset edge in the `rarity-*` token; the name is set in the same rarity colour; the game's rarity code (C, UC, R, E, U, L, LG) sits in the corner in `code` (11px bold capitals) so rarity never depends on colour alone. The name is `body-compact-strong`, the quantity `numeral-compact`.
 - Empty slots show a dashed inner frame and the `slotLabel`. An empty equipment slot also takes its slot's icon (`slot-head` … `slot-off-hand`) at 24px in `ink-muted`; until the icon is drawn, the label alone is its fallback — never a placeholder (Registries · Equipment slots, Foundations · Iconography).
@@ -16,8 +20,10 @@ A framed square for an item, essence or equipment slot, edged in its rarity colo
   - **Ownership:** Equipped and Attuned draw the in-use square, in `ink` — the square is the slot's shape (Foundations · Shape), so a small one says "in a slot". Otherwise a favourite item takes the 12px solid ribbon once it is drawn; until then, or when the square holds the corner, the word "Favourite" goes in the meta line. Don't pass Equipped in the equipment grid: every slot there is equipped.
   - The `lock` marker will join the Locked state in the caption, not a corner.
 - **States** (Standards · States). A word state — `equipped`, `attuned`, `assigned`, `captured`, `listed`, `escrow`, `borrowed`, `new`, `claimable`… — leads the meta line ("Equipped · Main hand") and the accessible name. `not-owned` fades the art to `opacity-unowned` and the name to `ink-muted`, and says "Not owned". `undiscovered` withholds the art and the name and says "Undiscovered", with any hint in `meta`.
-- **Blocked slots** — `locked`, `unavailable`, `restricted`, `insufficient`, `cooldown` — print their reason under the name ("Locked" / "Unlocks at level 20", "Ready in 12s"), which is also the description. A locked slot's frame is dashed and its name `ink-disabled`. With `interactive` it stays a focusable button (`aria-disabled`): no hover, no press, and a press announces the reason. With no caption, the reason opens in the reason tip.
-- Hover (with `interactive`) is the neutral `surface-raised` wash around the frame and caption.
+- **Blocked slots** — `locked`, `unavailable`, `restricted`, `insufficient`, `cooldown` — print their reason under the name ("Locked" / "Unlocks at level 20", "Ready in 12s"), which is also the description. A locked slot's frame is dashed and its name `ink-disabled`. As a button it stays focusable (`aria-disabled`): no hover, and a press announces the reason; your `(click)` never runs. With no caption, the reason opens in the reason tip.
+- Hover (a button or link) is the neutral `surface-raised` wash around the frame and caption.
+- The rarity code is the Rarity mark (`lg-rarity`, D-139): the code in the hue, its name for screen readers and in the tip on hover.
+- A container sets its width through `--lg-slot-width`, and the edge of an empty frame through `--lg-slot-edge` (a LoadoutSlot's frame).
 - `selected` adds a solid 2px `arcana-glow` ring — the slot's one lit state, drawn flat.
 - **Rarity never glows** (Foundations · Ornament · Glow). It is carried by the rarity edge, the name's colour and the rarity code, and nothing else: no halo, bloom, shimmer or pulse, not even for a Legendary or Legacy item.
 - **No ornament:** no corners, gilt frame, parchment or texture on the slot or behind it. A slot is a bounded object with its rarity edge (Foundations · Lines).
@@ -27,7 +33,7 @@ A framed square for an item, essence or equipment slot, edged in its rarity colo
 | State | Channel | Words | Screen readers hear |
 | --- | --- | --- | --- |
 | Default | Edge: the rarity edge; the rarity code | The name and meta | "Soul Prism, Epic" |
-| Hover (with `interactive`) | Fill: the `surface-raised` wash | — | Nothing |
+| Hover (a button or link) | Fill: the `surface-raised` wash | — | Nothing |
 | Focus-visible | Edge: `focus-ring` | — | The name and state |
 | Selected | Edge: a 2px `arcana-glow` ring | — | "pressed" |
 | Empty | Edge: a dashed inner frame | The `slotLabel`: "Off-hand" | "Off-hand" |
@@ -50,7 +56,7 @@ Selection is still the `arcana-glow` ring, which shares its form with an Uncommo
 | Keyboard | A button: Enter or Space |
 | Focus | `focus-ring` |
 | Announced | The rarity by name ("Epic"), never just the code |
-| Hover and tap | The wash, with `interactive`. The code's rarity is also in its `title`; nothing else is hover-only, and a blocked slot's reason is printed (or, without a caption, opens in the reason tip) |
+| Hover and tap | The wash, on a button or link. The code's rarity is also in the tip over the code (not on a blocked slot, whose reason takes the tip); nothing else is hover-only, and a blocked slot's reason is printed (or, without a caption, opens in the reason tip) |
 | Target size | 64, 112 or 176px |
 | Text scaling | The frame grows with the text; names truncate (Audit item 8) |
 | Colour | The rarity edge always comes with the code; the marks differ by shape and place, and keep their shape in forced colours |

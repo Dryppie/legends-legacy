@@ -50,7 +50,7 @@ Headings are `ink` and eyebrows are `ink-muted`. The one headline figure and eff
 | Journey, then Combat Profile, then Combat Attributes on the Overview. | Attributes first because they are the longest block. |
 | One `solid` "Enter dungeon" button. | "Enter dungeon" and "Buy potions" both `solid`. |
 
-Related components: Folio, Heading, StatFigure, LevelPlate, Banner, JourneyCard, TabStrip, TopBar, Button, Panel.
+Related components: Folio, Heading, StatFigure, LevelPlate, Banner, JourneyCard, Tabs, TopBar, Button, Panel.
 
 ## Progressive Disclosure
 
