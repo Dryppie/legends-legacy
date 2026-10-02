@@ -501,17 +501,17 @@
       "name": "Currency",
       "tile": "s",
       "order": [
-        "Coins.svg",
-        "Diamonds.svg"
+        "Cinders.webp",
+        "Soulstones.webp"
       ],
       "files": [
         {
-          "path": "assets/Currency/Coins.svg",
-          "id": "assets/Currency/Coins.svg"
+          "path": "assets/Currency/Cinders.webp",
+          "id": "assets/Currency/Cinders.webp"
         },
         {
-          "path": "assets/Currency/Diamonds.svg",
-          "id": "assets/Currency/Diamonds.svg"
+          "path": "assets/Currency/Soulstones.webp",
+          "id": "assets/Currency/Soulstones.webp"
         }
       ]
     },
@@ -638,17 +638,17 @@
         "bytes": 30050,
         "type": "image/webp"
       },
-      "assets/Currency/Coins.svg": {
+      "assets/Currency/Cinders.webp": {
         "store": "file",
-        "id": "assets/Currency/Coins.svg",
-        "bytes": 8349,
-        "type": "image/svg+xml"
+        "id": "assets/Currency/Cinders.webp",
+        "bytes": 5658,
+        "type": "image/webp"
       },
-      "assets/Currency/Diamonds.svg": {
+      "assets/Currency/Soulstones.webp": {
         "store": "file",
-        "id": "assets/Currency/Diamonds.svg",
-        "bytes": 42241,
-        "type": "image/svg+xml"
+        "id": "assets/Currency/Soulstones.webp",
+        "bytes": 4626,
+        "type": "image/webp"
       },
       "assets/Icons/achievements.svg": {
         "store": "file",

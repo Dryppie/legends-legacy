@@ -6,9 +6,10 @@ The currency amount.
 
 Cinders or Soulstones with their art and amount, for the TopBar and shop headers.
 
-**Provide:** `name`, `amount`, `iconSrc` (Currency/Coins.svg for Cinders, Currency/Diamonds.svg for Soulstones), `short` to abbreviate (12.5k), `reserve` (characters of width to hold for a live amount) and, optionally, `onClick`. A short pill is always a button that toggles between 12.5k and 12,480, as the game does today; pass `onClick` only when the game keeps the format as a setting.
+**Provide:** `name`, `amount`, `iconSrc` (Currency/Cinders.webp for Cinders, Currency/Soulstones.webp for Soulstones), `short` to abbreviate (12.5k), `reserve` (characters of width to hold for a live amount) and, optionally, `onClick`. A short pill is always a button that toggles between 12.5k and 12,480, as the game does today; pass `onClick` only when the game keeps the format as a setting.
 
 - **Art here, line icons inline.** The pill is the display size, so it takes the full-colour art. A cost list, a Ledger row, a reward line or running text uses the resource's line icon at 16px in `currentColor` instead, before the resource's name, and never the art (Foundations · Iconography · Resource, Registries · Resources).
+- The art is 22px (1.375rem), contained: the currency emblems are tall shards and need the height (D-126).
 - Order: art, amount, name. Amount in `numeral-row` (Barlow Condensed 18px) with tabular figures, name in `label` capitals `ink-muted`, on `surface` at `radius-control`: the name is the game's, but the shape is a small engraved plate, like a Button (D-064). A pill that only shows an amount has a `line` edge; one that opens or toggles is a control, so its edge is `line-strong` and hover is the `surface-raised` wash (Foundations · Lines).
 - **Live amounts do not reflow the TopBar.** The amount is right-aligned in its own width, which grows to fit and never shrinks while the pill is on screen; pass `reserve` to hold room for the next digit from the start (D-035). The pill is not a live region — announce gains in the Chronicle's loot line instead.
 

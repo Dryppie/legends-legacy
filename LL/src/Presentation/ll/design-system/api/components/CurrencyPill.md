@@ -21,7 +21,7 @@ The currency amount.
 | --- | --- | --- |
 | `name` * | `'Cinders' \| 'Soulstones' \| string` |  |
 | `amount` * | `number` |  |
-| `iconSrc` | `string` | Currency art URL (Currency/Coins.svg for Cinders, Currency/Diamonds.svg for Soulstones). |
+| `iconSrc` | `string` | Currency art URL (Currency/Cinders.webp for Cinders, Currency/Soulstones.webp for Soulstones). |
 | `short` | `boolean` | Abbreviate: 12.5k, 3.2M. Screen readers always hear the full number ("12,480 Cinders"). A short CurrencyPill is always a button: without `onClick` it toggles… |
 | `reserve` | `number` | Characters of width to reserve for the amount. The amount never shrinks while mounted either, so live changes do not reflow the TopBar. |
 | `onClick` | `() => void` | Your own toggle, when the game stores the format as a setting. Without it a `short` CurrencyPill toggles itself. |

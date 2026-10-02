@@ -46,7 +46,7 @@ import { lgFormatNumber, lgFormatShort } from './grimoire-format';
 export class LgCurrencyPillComponent {
   readonly name = input.required<string>();
   readonly amount = input.required<number>();
-  /** assets/Currency/Coins.svg for Cinders, Diamonds.svg for Soulstones. */
+  /** assets/Currency/Cinders.webp for Cinders, Soulstones.webp for Soulstones. */
   readonly iconSrc = input<string>();
   /** Abbreviate (12.5k). */
   readonly short = input(false, { transform: booleanAttribute });

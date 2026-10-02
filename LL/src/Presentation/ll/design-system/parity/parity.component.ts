@@ -131,7 +131,7 @@ interface ParityWindow {
       </lg-list>
     </div>
     <div class="case" data-case="listrow-alone"><li lgListRow title="Solo" [value]="12"></li></div>
-    <div class="case" data-case="currency"><lg-currency-pill name="Cinders" [amount]="12480" iconSrc="Coins.svg" /></div>
+    <div class="case" data-case="currency"><lg-currency-pill name="Cinders" [amount]="12480" iconSrc="Cinders.webp" /></div>
     <div class="case" data-case="currency-short"><lg-currency-pill name="Cinders" [amount]="12480" short /></div>
     <div class="case" data-case="currency-click"><lg-currency-pill name="Soulstones" [amount]="36" interactive /></div>
     <div class="case" data-case="navrail">

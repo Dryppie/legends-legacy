@@ -13,7 +13,7 @@ Icons label things; they never replace a word, except for a few common actions. 
 - Name an icon for what it means, not what it shows: `sell`, not `coin-arrow`. One icon, one meaning.
 
 **Should**
-- Use the full-colour currency art (Coins for Cinders, Diamonds for Soulstones) at display size, and each resource's line icon inline (Resource, below).
+- Use the full-colour currency art (`Cinders.webp`, `Soulstones.webp`, D-126) at display size, and each resource's line icon inline (Resource, below).
 - Mark attributes in the Folio with Emblems (star polygons), each with its own point count (Registries · Emblem point counts), and with their line icon in rows.
 - Set the Logo — gold-only — on `ground`, `surface` or `folio`.
 - Use only the glyphs in Registries · Glyphs.
@@ -274,8 +274,8 @@ What exists today, and what is needed, by category. Names are the icons' planned
 
 | Icon | Shows | Today | Priority | Note |
 | --- | --- | --- | --- | --- |
-| `cinders` | Cinders | Art (Coins) | P1 | Line icon for cost lists; the art stays for display |
-| `soulstones` | Soulstones | Set; Art (Diamonds) | — | The sidebar's gem is the line icon |
+| `cinders` | Cinders | Art (Cinders.webp) | P1 | Line icon for cost lists; the art stays for display |
+| `soulstones` | Soulstones | Set; Art (Soulstones.webp) | — | The sidebar's gem is the line icon |
 | `essence-dust` | Essence Dust | Needed | P1 | Shown as a cost when levelling an Essence |
 | `glory` | Glory (Colosseum) | Game | P1 | A laurel; the game's podium wreath is filled, on a 798-unit grid |
 | `experience` | Experience (EXP) | Needed | P2 | Rewards; the Meter keeps its EXP label |
@@ -396,7 +396,7 @@ The icon names are listed in Registries · Icon names.
 | --- | --- |
 | "Guild" with the guild icon beside it. | The guild icon alone in the rail. |
 | A close button with the `close` icon, named "Close", with a tooltip. | A × character in a corner. |
-| "40 [line icon] Soulstones" in a cost list. | The Diamonds art shrunk to 16px in a cost line. |
+| "40 [line icon] Soulstones" in a cost list. | The Soulstones art shrunk to 16px in a cost line. |
 | An Epic item's name in `rarity-epic` with its icon in `ink-muted`. | The icon turned pink with the name. |
 | "WEAKEN 6s" in a cut-corner Tag with its icon. | The Weaken icon alone, red. |
 | The Head slot's icon and "Head" in an empty slot. | A question mark in a slot whose icon isn't drawn yet. |

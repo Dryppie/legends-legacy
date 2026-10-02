@@ -1,12 +1,27 @@
 # LegendsLegacy equipment progression: game-design and architecture review
 
-Date: 10 September 2026. Scope: the primary LL game, its API, persistence, combat workers, Angular client, administrative acquisition paths, and balance tooling. Reviewed checkout: `7dcbe382c`, including the working tree as found. This is a design report; no gameplay implementation, configuration edit, migration, database operation, or deployment accompanies it.
+Originally written: 10 September 2026. Revalidated: **2 October 2026**, against gameplay code at `3e5b6d2e1`; checkout advanced to `02c07b0db` during review with only unrelated currency artwork added. Scope: the primary LL game, its API, persistence, combat workers, Angular client, administrative acquisition paths, and balance tooling. This is a design report; no gameplay implementation, configuration edit, migration, database operation, or deployment accompanies it.
 
-**Recommendation:** build a monster-targeted loot system with readable base items, a small number of bounded affixes, recognizable named drops, and personal guarantees for usable equipment. Remove Quality, rank reinforcement, consumable equipment blueprints, and four-piece combat-rule sets from the next design. Potential and Tempering are already absent from live equipment; keep them absent. Preserve ownership, transactional acquisition, snapshots, loadouts, stat budgets, and combat comparison foundations where they serve the new loop.
+**Recommendation:** retain the direction of monster-targeted loot, readable bases, bounded specialization, recognizable named drops and personal guarantees. Build on the now-implemented core/specialization allocation, activity-aware comparison, versioned equipment catalogs and audited conversion tooling. Removing Quality, reinforcement, blueprints and combat-rule sets remains a **proposed design choice**, not an approved cleanup or a description of the current game. Potential and Tempering are already absent; keep them absent.
 
-The important shift is from finding a better scalar version of a manufactured stat package to finding equipment suited to a specific combat job. Essences supply the abilities; Doctrines supply the combat rules; equipment supplies the physical foundation, specialization, and encounter preparation.
+The remaining shift is toward choosing a monster source for equipment suited to a specific combat job. Current specialization already gives gear more identity than the original report credited. Essences supply abilities; Doctrines supply combat rules; equipment supplies the foundation, specialization and encounter preparation.
 
 Numbers below are **illustrative design inputs**, not validated live balance. Current behavior, historical intent, inferred problems, and proposed behavior are identified separately. Evidence IDs refer to the linked source index at the end. Repository content establishes what this checkout supports; it does not establish which migrations or settings are running on a deployed server.
+
+### What changed since the original review
+
+| Change now implemented | Consequence for this review |
+| --- | --- |
+| Equipment release 4, with 70% core / 30% specialization and legal slot-specific profiles | Retire the claim that gear is only a fixed scalar package. Proposed independently rolled affixes remain additional work. |
+| Attribute rules 18: item-tier defense normalization, Restoration, Ability Haste and Tenacity | The old character-level defense cliff is resolved. Use current units and legality in examples. |
+| Set-bearing styles reserve 10% budget for identity; fixed authored set bonuses were restored | Acknowledge the reservation; effectiveness still needs combat valuation. Removing sets is a design proposal. |
+| Activity-aware comparisons, richer metrics and comparison observation | Reuse these APIs; encounter/trigger simulation and market comparisons remain separate gaps. |
+| Versioned migration preview/apply/rollback, one-time specialization choice and startup conversion | Extend existing conversion contracts; do not propose rebuilding them or deleting required historical catalogs. |
+| Nobility: up to 168 hours retained offline combat, six presets and 30 market orders/listings | Model a weekly return as well as a daily session; limits remain three presets and ten orders/listings without Nobility. |
+| New Meran area and five additional creatures | Current world has 106 creatures and five Meran combat areas; later regions remain unauthored. |
+| Optional Grimoire character overview and frontend migration rules | Inventory and Auction House remain legacy screens; a future redesign must follow the deliberate screen migration policy. |
+
+Repository defaults select **attribute rules 18 and equipment release 4**. Startup equipment conversion is enabled in the API configuration. Historical `.v1` catalogs are not automatically the active catalog; use the release registry. These observations establish checkout behavior, not deployed state. [E36–E42]
 
 ## 1. Current system summary
 
@@ -14,9 +29,9 @@ Numbers below are **illustrative design inputs**, not validated live balance. Cu
 
 The live system is not the old crafting system described in several historical plans. Crafting, gathering, queued tempering, Potential, equipment XP, and the Forge have been removed through code cleanup and migrations. The current model retains **Quality, seven rarities, frozen item-wide rolls, reinforcement ranks, styles/variants, sets, and consumable blueprints**. Later work reintroduced blueprint consumption for variant conversion; an older engineering document saying that blueprint IDs do not imply inventory items is now incomplete. [E01–E07]
 
-There are **eight equipment slots**: Head, Chest, Legs, Ring, Necklace, Relic, MainHand, and OffHand. A two-handed weapon occupies both hands but counts as one item. Thus a full loadout contains seven or eight distinct items. Current definitions offer **28 archetypes**, **30 named definitions**, **11 styles**, and **11 sets**. The archetypes comprise nine armor pieces, three jewelry types, five one-handed weapons, eight two-handed weapons, and three offhands. There is no second ring slot, boots slot, belt slot, or gloves slot. [E01–E04]
+There are **eight equipment slots**: Head, Chest, Legs, Ring, Necklace, Relic, MainHand, and OffHand. A two-handed weapon is one inventory instance but occupies two slots and now contributes **two occupied slots to set thresholds**. A full loadout contains seven or eight distinct items. Release 4 offers **28 archetypes**, **30 named definitions**, **11 styles** and **11 current sets**; the resolver also retains 11 historical set definitions. Thirteen specialization profiles expand into 115 additional archetype/profile combinations across seven rarities: **1,031 selectable catalog definitions** comprise 196 base, 805 specialized and 30 named definitions. These are not 1,031 separately designed item identities. The archetypes comprise nine armor pieces, three jewelry types, five one-handed weapons, eight two-handed weapons and three offhands. [E01–E04, E36–E37]
 
-Actual released equipment catalogs support tiers 1–2. World JSON contains Shenic, with ten ordinary combat areas plus the tutorial, and Meran, with four combat areas; there are 101 creature definitions. Four dungeon families each have three difficulties. The canonical progression policy describes ten regions and the equipment curve can extend further, but that is not equivalent to authored Region 3–10 loot. [E08–E12]
+Actual released equipment catalogs support tiers 1–2. World JSON contains Shenic, with ten ordinary combat areas plus the tutorial, and Meran, with **five** combat areas; there are **106 creature definitions**. Meran's added Sunken Scalehold is level 70, difficulty 15, with Tower floor 10 access. Four dungeon families each have three difficulties. The canonical progression policy describes ten regions and the equipment curve can extend further, but that is not equivalent to authored Region 3–10 loot. [E08–E12]
 
 ### Item identity and stat construction
 
@@ -26,7 +41,7 @@ For a current newly evaluated item, the approximate pre-allocation budget is:
 
 `B = 100 × 15.2^((tier−1)/9) × slotWeight × rarity × quality × (1 + 0.04×rank) × frozenRoll`
 
-`slotWeight = 2` for two-handed weapons and `1` for other items. Caps and allocation rules affect the final attribute vector. An additive variant then contributes another **15%** of this budget using its style profile; set bonuses sit outside that item budget. The regional budget multiplier is approximately **1.35306**, or **35.3% per equipment tier**. Tier 1 has budget 100; tier 10 has 1,520. [E02–E05]
+`slotWeight = 2` for two-handed weapons and `1` for other items. The evaluator splits the base budget into **70% core and 30% specialization**. An additive style has a nominal extra 15%; a set-bearing style allocates **5% to style stats and reserves 10% for set identity**. The current fixed set effects are not dynamically scaled by that reservation, so it is an accounting allowance rather than proof of equal combat value. The regional budget multiplier remains approximately **1.35306**, or **35.3% per equipment tier**. Tier 1 has budget 100; tier 10 has 1,520. [E02–E05, E37]
 
 | Dimension | Current behavior |
 | --- | --- |
@@ -34,20 +49,23 @@ For a current newly evaluated item, the approximate pre-allocation budget is:
 | Quality | Crude 0.90; Standard 1.00; Fine 1.12; Exceptional 1.26; Masterpiece 1.42. |
 | Quality probabilities | Current ordinary JSON: **12.5%, 50%, 25%, 10%, 2.5%**, respectively, for both area and dungeon equipment. The current specification's 0/35/45/16/4 distribution is stale. |
 | Frozen roll | One uniform multiplier from 0.95 to 1.05 on the whole budget. Individual stats are not independently rolled affixes. |
+| Specialization | Authored legal profiles allocate the 30% share; ordinary generation selects an archetype first, then one of its eligible profiles. This adds build choices without an unrestricted affix generator. |
 | Rank | 0–5; four percent additional budget per rank, reaching 20%. Area drops start at 0; ordinary dungeon rewards at 1. |
 | Variant | Compatible active style adds a fixed authored stat profile and potentially set membership. A replacement can change that profile; it preserves tier, quality, rarity, roll, and rank. |
 | Requirements | Equipment tier determines character level: T1 requires level 1; T2 level 50; T3 would require 100. Equipping does not require personally clearing the source region. |
 
 For fixed tier, rarity and rank, Quality and the whole-item roll mostly answer the same question: how large is this otherwise identical package? The raw scalar envelope from Crude/low-roll to Masterpiece/high-roll is `1.42×1.05 / (0.90×0.95) = 1.744`. This is a much larger difference than the apparent ±5% roll suggests. The catalog's average Quality multiplier is 1.054, but its tails matter much more to item replacement. [E03–E05]
 
-The base profiles are highly deterministic. Heavy armor allocates 40% Health, 30% Armor, 30% Resistance; Medium allocates 35% Power, 25% Health, 20% Armor, 20% Resistance; Light allocates 70% Power and 10% each to Health, Armor, Resistance. Head, Chest and Legs share these weights and equal budgets. Base ring is Power, necklace Health, relic regeneration. Weapons generally allocate 70% Power and 30% to a designated secondary. The authored base weapon interval and damage multipliers currently equal 1; the existence of a behavior field does not establish distinct live attack rhythms. [E02–E04]
+Within the **70% core share**, Heavy armor allocates 40% Health, 30% Armor, 30% Resistance; Medium allocates 35% Power, 25% Health, 20% Armor, 20% Resistance; Light allocates 70% Power and 10% each to Health, Armor, Resistance. Head, Chest and Legs share core weights and budgets but have different legal specialization pools. A default ring combines a Power core with crit specialization; necklace combines Health with Tenacity; relic combines regeneration with Ability Haste. Weapons have a Power core and a legal specialization. Shields normalize their Health/defense core separately from Block specialization. The authored base weapon interval and damage multipliers currently equal 1. [E02–E04, E37]
+
+Current ordinary gear uses 14 attributes: Power, Max Health, Armor, Resistance, Crit Chance, Crit Damage, Armor Penetration, Magic Penetration, Attack Speed, Block Chance, Health Regeneration, **Restoration, Ability Haste and Tenacity**. Older Healing Power/Cooldown/Status Resistance/Crowd-Control Resistance wording is not the current equipment contract; Dodge, general Damage Reduction and Life Steal are also excluded from ordinary gear. Crit Damage requires Crit Chance on the same item, and Attack Speed cannot coexist with Ability Haste. Slot legality is enforced. Release 4's authored stat costs, not the global default price table, determine current evaluation. [E37–E38]
 
 ### Actual sources and progression gates
 
 | Source | What this checkout actually awards |
 | --- | --- |
 | Ordinary area combat | One equipment roll **per victorious encounter**, at 1/864. Conditional rarity: 85% Common, 12% Uncommon, 3% Rare. Equipment comes from the area/region pool, not the killed creature's own equipment table. |
-| Base selection | 40% weapons, 35% armor, 25% jewelry; within weapons 60% one-handed/offhand and 40% two-handed. Then select among eligible bases. A 15% compatible regional variant roll follows. |
+| Base selection | 40% weapons, 35% armor, 25% jewelry; within weapons 60% one-handed/offhand and 40% two-handed. Select archetype first, then specialization, so profile count does not inflate an ordinary base's chance. A 15% compatible regional variant roll follows. |
 | Dungeon completion | Equipment chance 50% + 5 percentage points per mastery level, capped at 100%; mastery at run start determines the roll. Variant chance 50%, with family-specific eligibility. |
 | Dungeon rarity | Novice: Uncommon/Rare/Epic 84/14/2; Veteran: Rare/Epic/Unique 84/14/2; Champion: Epic/Unique/Legendary 84/14/2. |
 | Dungeon rooms | Miniboss rewards have a 25% equipment path. Treasury reward selection can produce a blueprint or styled equipment, with a 50/50 branch. These are separate from completion rewards. |
@@ -57,10 +75,12 @@ The base profiles are highly deterministic. Heavy armor allocates 40% Health, 30
 | Administrative grants | Canonical equipment grant/preview paths exist. They are operational tools, not ordinary progression. |
 | Raids | Two authored bosses and five difficulty rows in total; current rewards are trophies, Soul Dust and monster cores. No currently authored equipment reward; trophy-vendor item list is empty. |
 | Region boss | Mad King reward configuration is disabled with empty reward brackets. The reward schema supports currencies, not current signature equipment. |
-| World Tower | Fifteen authored/released floors and Tower Token rewards, including first-clear and limited Echo rewards; no authored equipment drops. |
+| World Tower | Fifteen authored/released floors, Tower Tokens and successful-participation title rewards. Tower supply equipment code/catalogs exist but are disabled and not wired into active completion rewards; they are not a current equipment guarantee. |
 | Guild shop / Champion Market / other reward catalogs | Active offers focus on currencies, cores, sigil fragments and titles. Generic item factories are not evidence that these sources currently distribute equipment. |
 
 The generic reward table file is empty and creatures have no active authored equipment reward tables. The infrastructure can resolve generic item rewards, including old-style equipment construction paths, but the audit found no current equipment-base references in those generic content reward lists. This is a future ingress risk rather than a current competing equipment economy. [E08–E17]
+
+Random equipment boxes differ from ordinary generation: they sample eligible **definitions**, so expanded specialization counts weight bases. A jewelry box currently selects Ring/Necklace/Relic with shares **5/12, 4/12 and 3/12**. Do not assume every acquisition path shares the archetype-first weighting. [E09, E15, E42]
 
 The 30 named definitions are not a current direct unique-drop table: natural area/dungeon selection chooses base definitions and then attaches styles. The evaluator's current display naming can also derive “Style + base name” instead of preserving the authored named definition's title. Goblin Mines targets Fury/Phoenix blueprints, Forgotten Catacombs Arcane/Endurance, Tangled Cave Execution, and Great Tree Spirit. Only these six styles have current direct blueprint-item sources; the broader eleven-style catalog can appear as native variants. Dungeon style rolls are subject to base compatibility: the nominal 50% produces about 45.5% styled equipment in Goblin Mines/Tangled Cave and 50% in the other two families. [E04, E07, E09, E13]
 
@@ -70,21 +90,27 @@ The 30 named definitions are not a current direct unique-drop table: natural are
 
 Equipping validates ownership, level and hand compatibility, binds eligible personal items, exchanges displaced items with inventory, and publishes the resulting state. Unequipping returns equipment to inventory. Saved equipment loadouts and activity-specific automatic selection already exist. The actual combat loadout can therefore differ from the gear displayed in the basic equipment slots. [E19–E22]
 
-There are three saved equipment loadouts. Equipment uses one inventory row per unique instance with quantity one; the inventory repository currently loads the full inventory and related metadata rather than a paged equipment result. Favorites/unseen status belongs to the inventory ownership row, with favorite state preserved while equipping and returning items. [E01, E19–E20, E24]
+There are **three saved equipment loadouts, or six with Nobility**. Equipment uses one inventory row per unique instance with quantity one; the inventory repository loads the full inventory and related metadata rather than a paged equipment result. Favorites/unseen status belongs to the inventory ownership row, with favorite state preserved while equipping and returning items. [E01, E19–E20, E24, E39]
 
-The comparison query projects a prospective full attribute loadout, handles two-handed replacement, combines ratings correctly, includes default Essence attributes and attribute-based set bonuses, and returns differences. It does **not** simulate Doctrine triggers, active Essence rotations, set-granted abilities, or encounter outcomes. The displayed Combat Rating similarly values attributes; its single-target and multi-target offense are identical and its control utility is zero. It is useful evidence, not an authoritative “upgrade” classification. [E21–E23]
+The comparison query now accepts an **activity**, resolves that activity's equipment and Essence loadouts, applies current rules and exposes Doctrine identity and per-Essence cooldown changes. It handles both displaced hands, set changes, core/specialization budget, raw/effective/over-cap attributes, critical output, effective health, barrier, regeneration, Restoration and attack interval. Comparison observations can be recorded. It explicitly excludes temporary effects and Doctrine triggers; it does not simulate rotations or encounter outcomes. It accepts inventory candidates, not arbitrary Auction House stock. The older Combat Rating projection remains limited, including identical single/multi-target offense and zero control utility; neither it nor Gear Power proves an upgrade. [E21–E23, E38]
 
-Reinforcement and dismantling use current prices for T1–2. T1 rank costs in parts are 5/10/20/40/80, with Cinder costs 11,150/22,300/44,600/89,200/178,400; T2 doubles these. The full T1 rank ladder therefore costs **155 parts and 345,650 Cinders**. Dismantling returns base parts equal to tier plus half the cumulative rank part cost, rounded down. Recovery is based on rank, including awarded rank, rather than the item's payment history. A T1 rank-1 dungeon drop returns three parts; T2 returns seven. Rarity and Quality do not change that return. A T3 price lookup would throw; no T3 price data is authored. [E05–E06]
+Reinforcement and dismantling use current prices for T1–2. Single-slot T1 rank costs in parts are 5/10/20/40/80, with Cinder costs 11,150/22,300/44,600/89,200/178,400; T2 doubles these. The full T1 ladder costs **155 parts and 345,650 Cinders per occupied slot**; a two-hander costs **310 parts and 691,300 Cinders**. Dismantling returns tier plus half the cumulative rank part cost, rounded down, then multiplied by occupied slots. Recovery is based on rank, including awarded rank, not payment history. T1 rank-1 returns three parts for a single-slot item or six for a two-hander; T2 returns seven or fourteen. Rarity and Quality do not change that return. T3 price data remains unauthored. [E05–E06]
 
-Blueprint conversion consumes one compatible blueprint plus `100×tier` Cinders. It is guaranteed; replacement loses the former variant without refund. It does not itself bind unbound gear. Reinforcement does bind. Upgrade execution locks/reloads, re-quotes current state and records an idempotent operation receipt; it does not require a previously issued preview token. [E06–E07]
+Blueprint conversion consumes one compatible blueprint plus `100×tier` Cinders **per occupied slot**: a two-hander consumes two blueprints and `200×tier` Cinders. It is guaranteed; replacement loses the former variant without refund. Conversion does not itself bind unbound gear; reinforcement does. Upgrade execution locks/reloads, re-quotes, evaluates using the item's recorded equipment release and records an idempotent operation receipt. It does not require a previously issued preview token. [E06–E07, E36]
 
 The equipment Auction House operates alongside the stackable-item Bazaar. Normal random-discovery equipment can be traded while unbound. Deterministic protected/quest awards are personal. Guild donation creates persistent guild ownership and loans preserve it. The buyer's progression is not checked at purchase; equipping later checks character level. Existing trade provenance, ownership checks, listings and economic ledger are valuable foundations. There is no supported general NPC equipment-sale loop in the audited client/service path; dismantling into Reinforcement Parts is the ordinary disposal loop. [E24–E27]
 
-The Angular client has equipment cards/details, comparisons, slot filtering, type/rarity-aware search and sorting, favorite/unseen indicators, loadouts, upgrade/variant previews and bulk dismantling. Those are browsing tools, not automatic server-side loot admission filters. All retained equipment instances currently enter the reward/inventory flow. Bulk dismantling excludes favorites but can include unseen or saved-loadout items; deletion can null saved slot references. It issues preview/mutation requests item by item. Offline backend rewards preserve instances, but frontend summary grouping by item-base ID can collapse distinct variants and Quality rolls into the first representative item. [E28–E31]
+The Angular client has equipment cards/details, activity comparisons, filtering, sorting, favorites/unseen indicators, loadouts, upgrade/variant previews and bulk dismantling. These are browsing tools, not automatic loot admission filters. Bulk dismantling uses rarity **or** a Gear Power threshold and excludes favorites, but can include unseen or saved-loadout items. It previews/mutates sequentially per item. Missing saved-slot references are now pruned; partial and even empty presets can remain usable, so deletion can silently weaken a saved build rather than necessarily trigger fallback. Backend rewards preserve instances, but frontend base-ID summary grouping can collapse distinct descriptors into the first representative item. No general auto-sell or auto-dismantle policy is implemented. [E20, E28–E31]
+
+The optional Grimoire character overview uses the shared device-persisted New look setting, default off. Inventory and Auction House routes still use legacy screens. The migrated-specialization chooser is a one-time conversion repair choice, not a general affix reroll system. [E40–E41]
 
 ### Character power and the other progression systems
 
-Equipment modifiers feed `AttributeCalculator`, which combines flats, additive percentages and multiplicative modifiers. Armor and Resistance are summed as raw equipment ratings and converted using the character's expected progression tier: `80×normalizedRating/(55+normalizedRating)`. Other equipment percentage attributes are direct percentage points under the current model. This avoids scaling every percentage with tier, but means some old percentage-heavy equipment can retain disproportionate value. Tier normalization changes discretely at levels 51, 101, etc.; T2 equipping begins at 50. [E03, E22–E23]
+Under attribute rules 18, each item's Armor/Resistance contribution is normalized using **that item's tier before aggregation**, not character level. With normalized rating `R`, mitigation is `0.8×R/(R+165)` as a fraction, before typed penetration. Corrosion reduces rating first; penetration subtracts percentage points after the curve, capped at 40 and floored at zero mitigation. **The former level 51/101 defense cliff is resolved.** T2 equipment still requires level 50. Higher-tier gear does not automatically provide more normalized defense simply because its raw tier budget is larger. [E03, E38]
+
+Restoration scales healing, regeneration and barrier support; Ability Haste uses `ceil(baseTicks/(1+haste/100))`, capped at 66⅔; Tenacity governs resistance to harmful effect application. These are current shared combat semantics, not new attributes this proposal must invent. Percentage-heavy old gear and replacement incentives still deserve simulation, but character-level decay should not be reintroduced as a presumed bug fix. [E38]
+
+Offline retention is now coverage-aware: nominal benefits are **24 hours without Nobility and 168 hours with Nobility**. A continuous eligible seven-day return represents 60,480 encounter opportunities at the unchanged ten-second cadence. This is a scenario, not a universal catch-up ceiling: retained historical paid windows plus a current free window can exceed seven days in one settlement. Nobility also changes Creature Focus cooldown from eight to two hours. Loot UX must handle these windows without assuming daily logins or retroactive full-week entitlement after a late subscription. [E39]
 
 Essences already carry active abilities, passives, attributes, tags, evolution and ascension. Their attunement slots unlock every ten character levels, from one to a maximum ten. Creature Focus already changes creature spawn weighting and Essence rewards, giving an existing interface for discussing farm targets. [E32]
 
@@ -92,18 +118,18 @@ The user-facing concept called **Doctrines in this brief is implemented as Comba
 
 ## 2. Problems with the current system
 
-1. **Several independent labels largely multiply the same stat package.** Rarity, Quality, rank, the frozen roll and additive variants create more arithmetic than item identity. Randomness rarely asks a new build question.
+1. **Several labels still multiply the same underlying budget.** Rarity, Quality, rank and whole-item roll overlap. However, the new specialization profiles already create meaningful stat-direction choices; the remaining problem is excessive scalar layers and weak source targeting, not a complete absence of item variety.
 2. **The monster roster has little equipment identity.** Area pools determine gear. Choosing a creature currently matters far more to Essences than to equipment.
 3. **Dungeon difficulty mostly escalates rarity multipliers.** A higher rarity is a strong default improvement; Unique is a numeric rarity rather than a guarantee of unique behavior.
-4. **Sets carry substantial combat-rule identity outside the item budget.** For example, Fury's four-piece effect stacks Power after critical hits; Arcane rewards every third cast; Execution boosts damage below a target-health threshold. These overlap the role of Combat Styles and make comparisons incomplete. [E04]
+4. **Sets carry substantial combat-rule identity beyond static comparison.** The 10% identity reservation now acknowledges their cost, but does not scale the restored fixed effects to their actual value. Fury's crit-triggered Power, Arcane's third-cast reward and Execution's low-health damage overlap Combat Style ownership. Removing them remains a proposed simplification, not correction of missing accounting. [E04, E37]
 5. **A desired slot and a usable stat direction lack reliable equipment protection.** Blueprint pity does not solve either problem. At the current area rate, Rare equipment averages one every 80 hours of uninterrupted victories, before slot, style or Quality suitability.
 6. **Raid eligibility prescribes equipment construction.** It constrains viable builds using rarity and style rather than demonstrated competence.
-7. **The UI protects favorites, not the complete set of player intentions.** Saved builds and important unseen items are vulnerable during bulk disposal; the offline summary can hide item-level differences.
+7. **The UI protects favorites, not the complete set of player intentions.** Saved builds and important unseen items are vulnerable during bulk disposal; base-ID summary grouping hides differences. Nobility raises the required review window from a day to as much as a week.
 8. **The persistent economy relies on binding and dismantling but lacks a designed long-term supply budget.** Infinite unbound random production still creates a growing supply of never-equipped gear. An Auction House fee removes currency, not equipment.
 9. **Further regions need content work, not just a formula.** T3–10 require acquisition pools, prices or their replacement, item identities, monster sources and progression validation.
-10. **Documentation can mislead a redesign.** Both old “no blueprint inventory” wording and newer Quality probability documentation disagree with current code/content. Design decisions must use the executable paths.
+10. **Documentation and historical catalog filenames can mislead a redesign.** Older blueprint wording, Quality probabilities and character-level defense rules are stale. Select catalogs through the release registry and verify active service wiring; inactive Tower supply code is not proof of an available reward.
 
-These are design findings, not claims that the existing code is universally broken. The 498 relevant existing backend tests passed. Two additional correctness concerns deserve reproduction before implementation: activity-loadout equipment can be mutated without the same earned-combat settlement used for physically equipped gear, and the static comparison context differs from the activity-specific combat context. [E06, E20–E23]
+These are design findings, not claims that the existing code is universally broken. The revalidation suite passed **831 tests, with eight skipped**. The former activity-comparison gap is resolved. A remaining **unreproduced correctness risk** is mutation of inventory-resident activity-loadout gear: upgrade settlement is gated by physical `IsEquipped`, and dismantling does not use that settlement path. Verify earned-combat behavior before changing mutation rules. [E06, E20–E23]
 
 ## 3. Crafting-era mechanics to remove
 
@@ -124,7 +150,7 @@ These are design findings, not claims that the existing code is universally brok
 
 **KEEP** slot and handedness rules, archetype identity, complete dropped objects, source provenance, ownership, item IDs, loadouts, favorites, server authority, idempotent rewards and mutation receipts where mutations remain.
 
-**MODIFY** the budget allocator and attribute catalog into an internal balance tool. A deterministic budget is useful engineering; deterministic player item identity is a separate design decision. The allocator can fund base stats and affixes without exposing recipes, quality or production steps.
+**KEEP and extend** the existing budget allocator, core/specialization split, legality rules and versioned attribute catalog as internal balance tools. Current profiles already fund build-specific choices. Independent affix selection and narrow per-trait rolls would extend that model; they do not justify replacing working allocation/versioning infrastructure. [E36–E38]
 
 **MODIFY** equipment tier into a readable region/band requirement. Preserve finite authored content validation and explicit access rules; remove independent tier, item-level and region labels that repeat the same information.
 
@@ -144,7 +170,7 @@ The historical formula and intent are drawn from the explicitly historical craft
 
 Equipment should make a player say, “This improves my survival against these enemies,” or “This is the weapon profile my Essence loadout needs.” It should create recognizable farm goals and occasional satisfying surprises. It should usually **support** a build, occasionally adjust its preferred matchup, and rarely introduce one small conditional behavior. It should not supply a second deck of abilities or another Doctrine.
 
-Healthy targets: complete a basic early outfit through onboarding; receive roughly 25–35 ordinary random items per active day at high win rates; inspect a handful of candidates in one or two daily visits; make frequent early improvements and much slower late optimization. A strong item should normally survive the rest of its region and part of the next. Good decisions should survive bad rolls; exact perfect rolls need no guarantee.
+Healthy targets: complete a basic early outfit through onboarding; receive roughly 25–35 ordinary random items per eligible day at high win rates; inspect a handful of candidates on a daily visit or a grouped batch after a longer absence; make frequent early improvements and much slower late optimization. Nobility's weekly return must not require seven separate daily review chores. A strong item should normally survive the rest of its region and part of the next. Good decisions should survive bad rolls; exact perfect rolls need no guarantee.
 
 | Dimension | A. Broad randomized loot | B. Monster-targeted bounded loot — recommended | C. Deterministic named equipment |
 | --- | --- | --- | --- |
@@ -194,6 +220,8 @@ No Quality, Potential, rank, equipment XP, sockets, prefix/suffix naming grammar
 
 ## 8. Rarity model
 
+**Proposed replacement, not current behavior.** Today all ordinary rarities use the 70/30 core/specialization split and rarity still multiplies total budget. The table below changes both contracts and requires simulation before adoption.
+
 | Rarity | Ordinary drop share | Core/affix budget | Role |
 | --- | ---: | --- | --- |
 | Common | 55% | 100% core; no affix | Immediate foundation; focused raw-stat options can remain useful. |
@@ -203,21 +231,21 @@ No Quality, Potential, rank, equipment XP, sockets, prefix/suffix naming grammar
 
 All have the **same nominal total budget** at equal base/region/band. Affix rolls are 80–100% of the allocated amount. Thus actual total budget is 100% for Common, 96–100% for Uncommon, and 94–100% for Rare/Epic. This is intentional: rarity buys specialization and combinations. It does not promise more Power or more total points.
 
-A Rare with two desired traits can beat an Epic whose three traits split its specialization too widely. An Uncommon can provide the strongest single secondary. Common should remain a practical foundation and occasionally a deliberate stat choice, but not the best answer for every build: the base and affix pools must be tested for that failure. In particular, redesign today's one-stat jewelry cores into balanced foundations before applying this model.
+A Rare with two desired traits can beat an Epic whose three traits split its specialization too widely. An Uncommon can provide the strongest single secondary. Common should remain a practical foundation and occasionally a deliberate stat choice, but not the best answer for every build. Current jewelry already has a separate specialization; its cores remain concentrated in Power, Health or regeneration. Test balanced accessory foundations before making the proposed Common allocate 100% to those cores.
 
 Remove Unique, Legendary and Legacy as ordinary equipment power-rarity levels. **Named** is an identity/source category over Rare or Epic. Exceptionally scarce appearances and collection distinctions can have presentation labels, but they do not add another power multiplier. Do not alter the shared rarity enum for Essences merely to change equipment rarity; isolate the equipment contract.
 
 ## 9. Affix model
 
-Start with a compact library using existing useful attributes: Power, Health, Armor, Resistance, regeneration, crit, attack speed, healing, penetration, cooldown, status resistance and crowd-control resistance. Avoid a large collection of near-synonymous damage percentages. Add new elemental/basic-attack/support traits only when the combat engine has a single defined place to apply and measure them.
+Start from the **current 14 ordinary equipment attributes and slot legality** listed in section 1. Use Restoration, Ability Haste and Tenacity with their current shared semantics; do not revive removed healing/cooldown/resistance aliases as additional affixes. Retain the no-Attack-Speed-plus-Haste rule and paired Crit Chance requirement for Crit Damage. Avoid near-synonymous damage percentages. Add elemental/basic-attack/support traits only when combat has a defined place to apply and measure them. [E37–E38]
 
-Each base has a small allowed pool, initially about six to eight compatible traits. Each source family emphasizes two or three. A Rare has one family-weighted trait and one compatible general trait; it does not roll from every stat in the game. Epic adds a third compatible trait while splitting the same budget. Reject duplicates, contradictory traits and combinations that cannot benefit the base's intended role. Do not allow a trait to buy back the identical core allocation with a better exchange rate.
+Reuse the current small per-slot allowed pools; do not force six to eight traits onto slots whose legal pool is smaller. Each source family emphasizes two or three. A proposed Rare has one family-weighted trait and one compatible general trait; Epic adds a third while splitting the same budget. Reject duplicates, contradictory traits and combinations that cannot benefit the base's intended role. Preserve linked traits such as Crit Chance/Crit Damage as explicit legal packages when necessary. Do not let a trait buy back the identical core allocation at a better exchange rate.
 
 Affix values use **five bands: 80%, 85%, 90%, 95%, 100%**, equally likely initially. Value bands are deliberately coarse enough that perfect numerical rolls are not a microscopic event. A specific two-affix item has a 1/25 chance of perfect values once its desired affixes are present; its desired identity is the more important chase. Do not add a hidden overall roll on top.
 
 Keep numeric effects in shared attribute buckets. Equipment-only conditional damage/healing bonuses should share additive buckets and a combined loadout cap, initially 20%, rather than multiply each other. General cooldown and attack-speed caps still apply. Equipment does not reduce Doctrine trigger thresholds, add Essence slots, duplicate Essence casts, or create self-triggering proc loops. A conditional trait can activate at most once per originating event; reflected, triggered and summoned events require an explicit eligibility policy.
 
-Percentage-valued specializations require a separate balance pass. Retain the rating principle and use smooth level-relative normalization for vertical gear ratings; do not let a T1 percentage-only accessory remain a permanent best slot. All accessory cores must include a scaling Power/Health foundation. Normalize a contribution once, never by both item region and character level as separate penalties. Display raw rating and effective contribution at the player's current level. Smooth normalization removes today's boundary cliff but still produces gradual level-relative decay, which must be visible and simulated.
+Percentage-valued specializations require a separate balance pass. **Preserve rules 18's item-tier defense normalization**; the original recommendation to fix a character-level cliff is obsolete. Display raw and effective contributions, as the current comparison already does. Establish replacement pressure through useful core growth, affordable alternatives and encounter demands, then measure whether old percentage-heavy accessories persist too long. Do not assume rising raw defense buys rising mitigation, or silently introduce character-level decay as part of this loot redesign. Any different normalization policy would be a separate, explicitly simulated combat decision. [E38]
 
 ## 10. Regional progression
 
@@ -252,15 +280,15 @@ For ordinary combat, initially use **0.004 equipment probability per victorious 
 
 In mixed encounters, select one source creature from the actually defeated roster using a published normalized rule. Default to uniform selection among defeated creatures, with an explicit limited focus weight if used. Do not award one equipment roll per monster or silently multiply the chance for multi-monster encounters. Family attribution must survive into the reward descriptor and loot history.
 
-Give each family two or three preferred bases, two or three emphasized traits and, where worthwhile, one recognizable named object. Individual species can change one preference or carry a signature without requiring 101 bespoke generators. Early examples below use real creature names but **proposed** equipment associations:
+Give each family two or three preferred bases, two or three emphasized traits and, where worthwhile, one recognizable named object. Individual species can change one preference or carry a signature without requiring 106 bespoke generators. Early examples below use real creature names but **proposed** equipment associations:
 
 | Existing creature/family | Proposed equipment identity | Reason to farm |
 | --- | --- | --- |
 | Goblin Warrior / martial goblins | One-handed weapons, offhand shields; Power and physical defense | Prepare an attack/guard loadout. |
-| Crystal Wisp | Wands, necklaces; magic resistance and modest cooldown specialization | Support a caster facing magical damage. |
-| Giant Spider / Blackjaw Spider | Rings, light armor; status resistance and carefully bounded condition support | Prepare against conditions or support an existing condition Essence. |
+| Crystal Wisp | Wands with Ability Haste; necklaces with Tenacity or regeneration | Support a caster while respecting each slot's current legal pool. |
+| Giant Spider / Blackjaw Spider | Necklaces and light head/leg armor with Tenacity; later, carefully bounded condition support if implemented | Prepare against harmful effects or support an existing condition Essence. |
 | Cave Bat / Giant Bat | Relics and medium armor; regeneration and basic-attack support | Improve sustained ordinary combat. |
-| Forest Spirit | Staves, defensive jewelry; healing and resistance | Support group healing or a defensive Conduit setup. |
+| Forest Spirit | Staves with Restoration, necklaces with Health/Restoration | Support group healing or a defensive Conduit setup. |
 
 Elite encounters can improve **selection quality**, such as guaranteeing the family branch when the ordinary equipment roll succeeds. Initially keep the same overall item opportunity rate; avoid introducing an elite multiplier before elite frequency is measured. No elite tier classifier was found in the current ordinary gear processor, so this needs an explicit content definition.
 
@@ -271,6 +299,8 @@ Boss signatures use a separate, clearly budgeted reward opportunity: **20% for t
 The share of gear comes from player choices. A reference day with 24 hours of ordinary victories has an expectation of 34.56 area items. Adding two dungeon completions and two separate standalone eligible boss clears would raise that expectation to 38.56, excluding foundation and first-clear awards; spending those opportunities on the two dungeon completions instead gives 36.56. These are expected supplies, not hard maxima. If activities replace ordinary-combat time, subtract the displaced encounter opportunities. In this illustrative schedule roughly 90% of **item count** is ordinary loot, while bosses/dungeons supply more of the named or deliberately specialized keepers. It is not a required daily checklist.
 
 Raids should offer a small pool of group-role named gear through the existing reward eligibility cadence, initially a choice among three role pools. World Tower should emphasize demonstrated progression: a bound selection at major first-clear milestones and appearances/collection records, with no infinite top-floor equipment faucet. Current raid currencies, Tower Tokens, sigils and Essence materials need not all become equipment-purchase currencies. Do not require raids, Tower and every dungeon for a mandatory complete set.
+
+This remains a proposed acquisition policy. The repository's disabled Tower supply service does not satisfy it; evaluate that code's fit and wire a chosen policy explicitly rather than treating unused chest definitions as released rewards. [E42]
 
 ## 12. Target farming
 
@@ -335,7 +365,7 @@ Guild property needs an officer-authorized retirement action with audit records,
 
 ## 16. Idle and offline loot handling
 
-At the proposed frequency, a perfect 24-hour ordinary-combat session generates about 35 equipment objects, not hundreds. At 85% victory it generates about 29. This is an intentional inventory design decision. Thousands of enemy deaths are mostly combat progress and non-equipment rewards.
+At the proposed frequency, 24 hours of ordinary victories generates about **35 equipment objects**, or about 29 at 85% victory. A continuous eligible **168-hour Noble return generates about 242**, or 206 at 85% victory, before other sources. Current rates give 70 and 59.5 respectively for that weekly case. Historical retention windows can produce still larger catch-up batches. Daily-scale readability alone is therefore insufficient. [E39]
 
 Not every rolled object needs a durable inventory entity. Use a server pipeline:
 
@@ -349,11 +379,11 @@ The candidate evaluator is a conservative shortlist, not automatic equipping. It
 
 Show a daily summary such as: “8,640 encounters, 7,344 victories; 29 equipment drops; 5 retained candidates, 2 protected discoveries, 22 sold; foundation progress +7,344.” This is an illustrative presentation, not a guaranteed distribution. Provide individual cards for notable finds with their actual rarity, affixes and source; show sale totals separately. Never group different descriptors under the first item with the same base ID.
 
-Aim for **two to eight candidates to inspect per day once established**, in one or two visits. The first day may contain more protected first discoveries; batch comparison must make this one review session rather than constant interruptions. A first named copy is always retained. For saved loadouts, unread important finds and guild property, no retention limit silently overrides protection.
+Aim for **two to eight candidates per eligible day once established**, not an eight-item cap on a weekly return. A 15–25% shortlist of 242 weekly drops yields about **36–60 candidates before protected discoveries**. Provide grouped batch comparison by slot and intended build; safely group strictly dominated like-for-like items, but retain uncertain and incomparable alternatives. First discoveries can raise the count. A first named copy is always retained, and no quota overrides saved-loadout, unread-find or guild protections.
 
 Use paged inventory queries and batched actions. With a hypothetical 10,000 generated objects from imported/high-volume future content, the same pipeline streams rolls, maintains per-build candidates, aggregates sale ledgers and queues protected finds; it does not serialize all objects to the browser. Do not introduce a hard “best 20” cap that destroys incomparable items. Storage limits require explicit user resolution and a protected overflow inbox.
 
-For automatic sales, a small recent-sales list with exact-instance recovery for 72 hours is reasonable. Recovery requires sufficient Cinders to reverse the original credit, consumes the recovery receipt and restores the original bound/unbound descriptor once in the same transaction; it cannot reroll or double-spend the award. This is inventory error recovery, not a permanent buyback market. If that feature is deferred, auto-sale should initially require stricter conservative rules and never auto-sell unseen Rare/Epic/named gear.
+For automatic sales, exact-instance recovery for 72 hours **after the settlement is delivered for review**, rather than the historical kill time, is a reasonable starting policy. Otherwise a weekly returning player could lose recovery before seeing the sale. Recovery requires sufficient Cinders to reverse the credit, consumes the receipt and restores the original bound/unbound descriptor once transactionally; it cannot reroll or double-spend. This is error recovery, not a permanent buyback market. If deferred, auto-sale should initially use stricter rules and never auto-sell unseen Rare/Epic/named gear.
 
 ## 17. Auction House and trading rules
 
@@ -363,7 +393,7 @@ Equipping binds to the character; moving to another player's inventory does not 
 
 All equip, saved-loadout resolution and guild-borrow/use paths enforce personal region/band access. Named items also require the corresponding first clear. The market should display “usable now,” “region clear required” and “source clear required,” and default search to usable stock while allowing browsing aspirational items. There is no need to block merely buying an unusable item if ownership and future eligibility are clear.
 
-Current defaults are ten listings, ten commodity buy orders, seven-day listing expiry and a seller fee of 3% with a one-Cinder minimum. Preserve this infrastructure initially. Replace Quality/rank/style filters with slot, region/band, trait, named identity and usable-now filters. Static Gear Power must not drive automatic purchasing or disposal. Equipment buy orders are not currently stat-specific; do not promise that feature without implementing its matching and escrow model. [E24–E25]
+Current limits are ten listings and ten commodity buy orders, rising to **30 each with Nobility**; listing expiry is seven days and seller fee is 3% with a one-Cinder minimum. Preserve this infrastructure initially. Replace Quality/rank/style filters only if the corresponding proposed model is adopted. Add slot, region/band, trait, named identity and usable-now filtering. Static Gear Power must not drive automatic purchasing or disposal. Equipment buy orders are not currently stat-specific; matching and escrow would require additional work. [E24–E25, E39]
 
 Supply over time needs honest treatment:
 
@@ -391,7 +421,7 @@ Essences own active abilities, passives, important attributes, targeting pattern
 
 An Essence should still determine whether the character can poison, heal allies, summon, cleanse or control. Equipment may improve a relevant existing attribute or one bounded aspect of that behavior. It does not grant a substitute Essence, extra attunement slots, duplicate passives or free casts. Do not let a single signature make several otherwise irrelevant Essences mandatory.
 
-Start with already measurable interactions: healing power, defensive rating, attack speed, crit and modest cooldown. Elemental damage, summon support and condition amplification are potential later traits, not assumed existing universal stats. They need a shared combat effect contract and tests before being authored. Avoid per-Essence hardcoded bonuses.
+Start with already measurable interactions: Restoration, defensive rating, Attack Speed, crit and Ability Haste. Restoration affects healing, regeneration and barrier support, so value its whole contribution rather than pricing it as a heal-only bonus. Elemental damage, summon support and condition amplification are later possibilities, not existing universal gear stats. They need a shared effect contract and tests; avoid per-Essence hardcoded bonuses. [E38]
 
 Gear and Essence farming should sometimes align and sometimes compete. A player may farm Crystal Wisp for its Essence while accepting a lower chance at a physical shield; another family offers the reverse. The archive should make that tradeoff visible. Equipment focus must not accidentally reuse the existing Essence Focus 3× drop multiplier on equipment; the systems have different probability budgets. [E32]
 
@@ -399,8 +429,8 @@ Gear and Essence farming should sometimes align and sometimes compete. A player 
 
 | Actual Combat Style | Its ownership of build identity | Equipment's supporting role |
 | --- | --- | --- |
-| Bastion | Healing split into Health and Barrier, with its own refinements and mastery | Health, defensive rating and measured healing support; no extra healing-conversion engine. |
-| Conduit | Channeled first Essence and Charge consumption from other casts | Balanced Power/healing and bounded cooldown; no extra Charges, free casts or automatic first-slot replacement. |
+| Bastion | Healing split into Health and Barrier, with its own refinements and mastery | Health, defensive rating and Restoration; verify no double application through healing-to-Barrier conversion. |
+| Conduit | Channeled first Essence and Charge consumption from other casts | Power, Restoration and bounded Ability Haste; no extra Charges, free casts or automatic first-slot replacement. |
 | Reaper | Harvesting existing Bleed/Burn/Poison ticks with active damage | Sustain and modest condition support once defined; no extra harvest triggers or self-propagating condition loops. |
 | Duelist | Read generation and consumption for a stronger damaging Essence | Attack speed/crit where useful; no reduction of the Read threshold or extra Read-on-proc mechanics. |
 
@@ -410,19 +440,19 @@ Cap gear-origin conditional modifiers across the full loadout, and simulate comb
 
 ## 21. Concrete example items
 
-These are **proposed items and source associations**, not existing drops. Budgets below use current exchange rates only to illustrate a core where stated; they are not production-ready stat values. A point allocation is an internal design measure, never a currency shown on the item. Conditional trait prices require simulation and are not claimed equivalent to a specific damage percentage yet.
+These are **proposed items and source associations**, not existing drops. Budgets follow the proposed rarity model, not today's universal 70/30 split. Where a core is quantified, it uses release 4 exchange rates; the values are not production-ready. A point allocation is an internal design measure, never a player currency. Conditional trait prices require simulation and are not claimed equivalent to a damage percentage.
 
 | Example | Anatomy and intended decision |
 | --- | --- |
 | **Groveguard Helm** — Common, late R1, Heavy Head | Budget 108. Using the present Heavy profile and exchange rates: approximately 234 Health, 36 Armor Rating, 36 Resistance Rating. No affixes. A readable foundation and possible defensive alternative to an overly offensive Rare. Proposed martial/forest general pool. |
-| **Wisp-touched Wand** — Uncommon, entry R2, one-handed | Budget 118; core 94.4, one cooldown-support affix allocated 23.6 points. At the 90% band the affix realizes 21.24 points, total 115.64. It gives one concentrated specialization; a three-affix Epic may have less of that particular secondary. Proposed Crystal Wisp family/challenge source. |
-| **Blackjaw Band** — Rare, late R1, Ring | Budget 108; balanced core 75.6; two 16.2-point traits: status resistance at 100%, regeneration at 90% = 14.58. Total 106.38. It supports surviving condition-heavy enemies; it does not grant Poison. Proposed Blackjaw Spider source. |
-| **Meran Scout Mail** — Epic, entry R2, Medium Chest | Budget 118; core 82.6; three 11.8-point traits at 85/95/100%: physical defense, regeneration, crit. Total 115.64. Useful for a hybrid solo build, but a focused Rare can devote more budget to its two essential traits. Proposed regional scout/martial pool, requiring authored family assignment. |
+| **Wisp-touched Wand** — Uncommon, entry R2, one-handed | Budget 118; core 94.4, one Ability Haste trait allocated 23.6 points. At the 90% band it realizes 21.24 points, total 115.64. A concentrated specialization; a three-affix Epic may provide less of that secondary. Proposed Crystal Wisp family/challenge source. |
+| **Blackjaw Gorget** — Rare, late R1, Necklace | Budget 108; core 75.6; two 16.2-point traits: Tenacity at 100%, regeneration at 90% = 14.58. Total 106.38. Supports surviving harmful effects without granting Poison. These traits are legal on a necklace; the original ring example was incompatible with current slot rules. Proposed Blackjaw Spider source. |
+| **Meran Scout Mail** — Epic, entry R2, Medium Chest | Budget 118; core 82.6; three 11.8-point traits at 85/95/100%: Armor, Resistance and Restoration. Total 115.64. Current chest legality supports these; the original regeneration/crit example did not. A focused Rare can devote more to its two essential traits. Proposed regional martial pool, requiring authored family assignment. |
 | **Garran's Gateward** — named Rare, late R1, offhand shield | Budget 108; 70% core, 15% fixed signature, 15% resistance trait. Signature proposal: an opening Barrier worth a calibrated multiple of this shield's own Health contribution, lasting at most six seconds, once per encounter. Apply a shared equipment-origin cap; never scale the old shield's barrier from total character Health. No refresh/proc loop. Proposed Garran source; effect magnitude and its 15% cost require short/long-fight value tests. |
-| **Heartwood Mercy** — named Rare, late R2, two-handed staff | Budget 254.88; core 178.416, fixed healing trait 38.232, one defensive trait 38.232 before roll. No free heal. It supports existing healing Essences or Conduit. Proposed Great Tree signature; requires a personal source clear. |
+| **Heartwood Mercy** — named Rare, late R2, two-handed staff | Budget 254.88; core 178.416, fixed Restoration trait 38.232, Ability Haste trait 38.232 before roll. Both are legal weapon specialization attributes. No free heal. Supports existing healing Essences or Conduit. Proposed Great Tree signature; requires a personal source clear. |
 | **Morrowmaw's Memorial** — cosmetic chase appearance | Same rolled power and requirements as its attainable underlying named item. Records the source and changes appearance only. It is an optional collection goal, not a raid requirement. |
 
-The staff replaces both hand slots, so its budget and comparison use two units. Do not count it as two set pieces or allow its cosmetic appearance to bypass type restrictions. Source, binding, required access, exact trait bands and “used by loadout” status appear on every relevant item card.
+The staff replaces both hand slots, so its budget and comparison use two units. Current set thresholds also count two occupied slots; the proposed model removes those sets rather than changing that rule silently. Cosmetic appearance cannot bypass type restrictions. Source, binding, access, trait bands and “used by loadout” status appear on every relevant item card.
 
 ## 22. Example player progression
 
@@ -432,7 +462,7 @@ Region 3 onward is hypothetical future content. Time estimates assume the propos
 | --- | --- | --- |
 | Early R1 | Onboarding supplies a complete basic Common outfit with a weapon choice. Player farms accessible goblins/nearby families for one suitable offensive or defensive secondary and their first Essences. An upgrade may fill a missing role rather than increase rarity. | Quest improvements within the first play session; roughly 2–5 random useful improvements/day while many slots are weak. Sell clearly obsolete duplicates after previewing keep rules. |
 | Late R1 | Choose an actual Style/Essence plan. Farm a shield, resistance item or focused weapon, then one optional signature such as Gateward. Replace current four-piece-set expectations with individual decisions. | Around one random improvement/day in a partially established outfit; guaranteed baseline clears remaining bad slots. Strong Rare/Uncommon pieces remain relevant. |
-| Entering R2 | Earn access using R1 gear. Replace the weakest core pieces first; retain the excellent Blackjaw Band against condition-heavy fights. New family pools offer different defensive and support opportunities. | Two or three early replacements across initial sessions, then partial refresh over several days. Foundation progress avoids an unlucky missing-slot stall. |
+| Entering R2 | Earn access using R1 gear. Replace the weakest core pieces first; retain the excellent Blackjaw Gorget against harmful effects. New family pools offer different defensive and support opportunities. | Two or three early replacements across initial sessions, then partial refresh over several days. Foundation progress avoids an unlucky missing-slot stall. |
 | Late R3 | Hypothetical full role loadout; farm a precise family for a desired two-trait Rare or a second defensive set of individual items. A useful upgrade changes win reliability or resolves a specific weakness. | Focused random upgrades every few days; one or two carried R2 pieces may remain. Auto-sale handles known low-fit bases; saved-build gear stays protected. |
 | Midgame, R4–6 | Maintain two or three activity loadouts. Seek different mitigation/sustain profiles and a signature supporting a chosen role. Revisit an unlocked challenge source when its specific item is useful. | New-region foundations improve regularly; within-region optimization about every 2–7 days with deliberate targeting. Gear goals coexist with Essence progression. |
 | Late game, R7–9 | Prepare for particular raid/Tower demands using alternative individual slots. Higher difficulty gives more specialized choices, not mandatory six-piece sets. | Strong items usually last through the current region and part of the next. A lower-rarity concentrated trait can remain deliberate. |
@@ -453,8 +483,10 @@ Current idle configuration gives 360 encounters/hour and approximately 8,640 per
 | 1,000 kills in a typical current area | 0.587 | 2.029 |
 | 24 hours, all victories | 10.000 | 34.560 |
 | 24 hours, 85% victory | 8.500 | 29.376 |
+| Continuous eligible 168 hours, all victories | 70.000 | 241.920 |
+| Continuous eligible 168 hours, 85% victory | 59.500 | 205.632 |
 
-The proposal increases equipment frequency **3.456×**, deliberately remaining far below conventional high-volume action-RPG loot. At the present rate, the chance of seeing no area Rare in a perfect day is about 74%; a particular Rare armor archetype averages roughly 85.7 continuous days before Quality/style suitability. That is a poor source for a recognizable ordinary equipment goal.
+The proposal increases equipment frequency **3.456×**. At the present rate, the chance of seeing no area Rare in a perfect day is about 74%; a particular Rare armor archetype still averages roughly 85.7 continuous winning days before Quality/style suitability. Requiring one specific current profile adds another factor: five alternatives on Head/Chest yield about **428.6 days**, four on Legs about **342.9 days**. Specialization improves variety, but also makes exact targeting more important. The weekly baseline is 59.5 Common, 8.4 Uncommon and 2.1 Rare on average at perfect victory; it is not a drop guarantee.
 
 Proposed ordinary rarity counts:
 
@@ -463,6 +495,7 @@ Proposed ordinary rarity counts:
 | 1,000 kills, ~507.36 wins | 1.116 | 0.609 | 0.264 | 0.041 |
 | 1,000 wins | 2.200 | 1.200 | 0.520 | 0.080 |
 | 24 hours, all victories | 19.008 | 10.368 | 4.493 | 0.691 |
+| Continuous eligible 168 hours, all victories | 133.056 | 72.576 | 31.450 | 4.838 |
 
 For hypothetical R3 with the same encounter structure, 1,000 kills therefore produce about two objects. If 35% are relevant to currently wanted slots, 45% of those suit the build, and 15% of those improve it, the expected random upgrades are:
 
@@ -489,7 +522,7 @@ Let `r = P(wanted slot) × P(build fit | slot) × P(meaningful improvement | fit
 
 These fit/better probabilities are **explicit scenario assumptions**, not measurements and not a simulation demonstrating actual item balance. The two focused rows assume pure target-family attribution (`q=1`); mixed-roster farming uses section 12's lower slot probability. Within a real run fit/improvement chances decrease as items improve and may be correlated. At 85% victory, rates multiply by 0.85 and intervals divide by 0.85. The table shows the conditions the content/pools must achieve, and why an uncontrolled many-affix tail would be unacceptable.
 
-For a practical initial shortlist, retaining 15–25% of the day's ~35 objects produces about 5–9 candidates before protected first discoveries and named loot. Use telemetry to tune relevance, not a destructive quota that forces every session to fit that number.
+For a practical initial shortlist, retaining 15–25% of the day's ~35 objects produces about 5–9 candidates; a seven-day batch produces **36–60** before protected discoveries and named loot. Use the existing comparison-observation foundation to measure useful choices, replacement ages and review effort, then add missing acquisition/disposition telemetry. No destructive quota should force every return into the daily count. [E38–E39]
 
 ### Random tails and deterministic ceilings
 
@@ -507,7 +540,7 @@ For two desired affixes each with five equally likely value bands, a perfect-val
 
 ### Currency and item lifespan checks
 
-With a provisional R3 single-slot vendor price of about 27.85 Cinders, selling 80% of 34.56 daily ordinary drops yields about **770 Cinders/day before two-handed weighting**, in addition to current currency rewards. This is merely a faucet estimate; deleting today's 345,650-Cinder T1 reinforcement ladder changes demand much more substantially. Model both sides before choosing a sale price.
+With a provisional R3 single-slot vendor price of about 27.85 Cinders, selling 80% of 34.56 daily ordinary drops yields about **770 Cinders/day before two-handed weighting**, in addition to current currency rewards. This is merely a faucet estimate; deleting today's 345,650-Cinder single-slot T1 reinforcement ladder (**691,300 for a two-hander**) changes demand much more substantially. Model both sides before choosing a sale price.
 
 An excellent item bridging one region is supported by the 2.7% old-max/new-min budget gap. An old item persisting through several regions would indicate overpowered flat-percentage traits, an underpriced signature, inaccessible alternatives, or an incorrect source-band curve. Track actual replacement ages by slot and build. Do not respond automatically by increasing every region's budget.
 
@@ -518,16 +551,17 @@ An excellent item bridging one region is supported by the 2.7% old-max/new-min b
 | Existing system | Reuse and limits |
 | --- | --- |
 | Equipment instances and frozen descriptors | Preserve stable IDs, evaluated stats, source/ownership, snapshot restoration and row-version concurrency. Change anatomy rather than creating a second permanent item implementation. |
-| Domain budget allocator and attribute metadata | Retain stat units, caps, hand weights and constrained allocation. Replace rarity/quality/rank scalar inputs with core/affix budget allocations. Recalibrate the numerical curve. |
+| Domain budget allocator and attribute metadata | Retain the implemented 70/30 core/specialization structure, slot legality, rules 18 units/caps and occupied-slot weighting. Extend to proposed rarity-specific shares and rolls only if adopted; recalibrate the curve through simulation. |
+| Versioned catalogs and migration tooling | Retain release registry, exact-version evaluation, audited previews, receipts, rollback guards and the finite specialization transition. Extend them for any approved descriptor change. |
 | CQRS/MediatR command pipeline | Keep command transactions, service interfaces, request IDs, receipts and existing response/state-sync patterns. |
 | Combat reward settlement | Preserve encounter/run identities, frozen rewards, original earned-time handling, batching and retry semantics. |
 | Inventory, equipment slots and loadouts | Reuse exact-instance placement and two-hand deduplication. Expand protection and personal-access checks. |
 | AH, transfers, guild loans, ledger and provenance | Reuse custody and audit infrastructure. Add consistent access/protection policies and guild retirement. |
-| Comparison and snapshots | Reuse the shared full-attribute projector; extend activity context and signature disclosures. Do not duplicate balance arithmetic in Angular. |
+| Comparison and snapshots | Reuse implemented activity-aware projection, Essence cooldowns, raw/effective/over-cap metrics, budget disclosure, snapshots and comparison observation. Add candidate support for market stock and explicit new-signature limitations where needed. Do not duplicate arithmetic in Angular. |
 
 ### Refactor
 
-**Domain models.** Introduce a single equipment-specific rarity contract, base/core definition, affix definition, affix roll, named definition and source/band requirement. Keep definition IDs and versions stable. Put slot placement, personal eligibility, protections and disposal decisions in Core domain/application policies. Existing gameplay decisions in `EquipmentSlotRepository` should move out of persistence as part of this scoped change; Core must not depend on Infrastructure. [E01–E03, E19]
+**Domain models.** Evolve the existing equipment-specific rarity contract, core/specialization definitions and versioned frozen descriptor. Add independent affix rolls and source/band requirements only for the approved design. Preserve stable IDs, version resolution and legal slot pools. Put personal eligibility, protection and disposition decisions in Core domain/application policies. Move touched placement decisions out of `EquipmentSlotRepository` when this feature requires it; avoid an unrelated architecture rewrite. Core must not depend on Infrastructure. [E01–E03, E19, E36–E38]
 
 Proposed service concepts, not implemented APIs:
 
@@ -536,19 +570,21 @@ Proposed service concepts, not implemented APIs:
 - A progression policy awards personal foundation/signature entitlements from eligible encounters/clears.
 - A placement policy evaluates level, personal progression access, handedness, ownership and guild loan availability.
 
-**Database.** Version the existing equipment JSON descriptor or replace its column contract in a one-time migration. Add indexed queryable fields for region/band, equipment rarity, base, named identity and ownership; retain the full descriptor as authority. For AH affix filtering, use an indexed item-affix projection table or carefully chosen JSON indexes; do not scan/deserialise the full market. The appropriate choice depends on existing PostgreSQL query plans and expected item volume.
+**Database.** Extend the already versioned equipment JSON descriptor and conversion receipt contract. Add or reuse indexed queryable fields for region/band, rarity, base, named identity and ownership; retain the descriptor as authority. For new AH affix filtering, choose a projection table or JSON indexes from actual PostgreSQL query plans and volume. Existing versioning/migration infrastructure is not an absent prerequisite. [E27, E36, E40]
 
 Add per-character/per-region foundation progress and consumed slot entitlements; per-character/source/signature first-copy progress; banked reward-opportunity timestamps if that cadence is selected; versioned filter preferences; and idempotent sale/recovery receipts. Counters and award receipts need uniqueness constraints on their complete logical keys, plus concurrency protection. Extend existing discovery/history storage where it already fits instead of creating duplicate counters for every UI card.
 
 **Loot content and generation.** Replace area-wide anonymous selection with a validated mapping from creature → family → equipment pools, with explicit base and affix eligibility. Preserve one roll per victorious encounter. Move dungeon completion, named bosses, chests, quests, events, Tower selections and administrative grants through the same typed equipment boundary. Reject generic equipment-base rewards that would invoke `InventoryItemFactory`'s descriptor-less fallback. Reference/canonical builds can use the same evaluator with explicit simulation contexts; they never count as player acquisitions. [E08–E17]
 
-**Combat integration.** Add only a small shared signature-effect adapter where existing attributes are insufficient. Include source eligibility, trigger exclusions, cap buckets and balance versioning. Snapshots must contain everything needed to reproduce the selected equipment loadout; emitted combat still resolves live definition versions only according to an explicit policy. Revisit rating normalization and the 50/51 requirement discontinuity together. Recalibrate creature scaling, canonical builds, dungeon/raid/Tower forecasts and balance harness expectations as one change. [E03, E22–E23, E33]
+**Combat integration.** Add only a small shared signature-effect adapter where current attributes are insufficient, with source eligibility, exclusions, caps and balance versions. Preserve reproducible loadout snapshots. The character-level defense discontinuity is already resolved; retain item-tier normalization unless a separately reviewed combat change is justified. Recalibrate creature scaling, canonical builds and dungeon/raid/Tower forecasts if the proposed budget curve or rarity model changes. [E03, E22–E23, E33, E38]
 
 **Reward transactions.** A settlement must atomically record the award identity, update personal progress, create a kept item or sale receipt, apply Cinders, record discovery/quest progress and enqueue state/history notifications. Replaying the same award must not grant both the sold and retained versions. Saved filters and content versions must be stable for an already computed reward; changing a filter cannot reroll an old batch or change a committed outcome. Pending offline combat must settle with the equipment state that earned it.
 
-**API/application contracts.** Retain equip/unequip, linked-item lookup and loadout routes with revised descriptors. Add source/target queries, target selection, filter preview/update, paged equipment queries, activity-aware comparison, batch sale and optional recent-sale recovery. Use `ICommand<T>` for mutation and `IQuery<T>` for reads, focused feature DTOs, mapping in Application handlers and repository interfaces for persistence. Repositories do not become alternate gameplay engines. Retire upgrade/reinforce/dismantle/variant commands and endpoints after cutover; do not expose no-op compatibility endpoints. [E19–E21, E35]
+**API/application contracts.** Retain equip/unequip, linked-item, loadout, activity-aware comparison and comparison-observation routes. Add source/target queries, target selection, filter preview/update, paged equipment queries, batch sale and optional recovery. Use `ICommand<T>`/`IQuery<T>`, focused DTOs, Application mapping and repository interfaces; repositories do not become alternate gameplay engines. Retire upgrade/dismantle/variant endpoints only if the corresponding systems are removed after an approved cutover. [E19–E21, E35, E38]
 
 **Frontend.** Revise `equipment-progression.ts`, equipment DTOs, equipment API/state services, display cards, comparison modal, inventory sorts, marketplace filters, chat links, loadouts and session summary together. Show a concise core/traits/source/requirements layout. Remove Quality, rank, blueprint and set-progress panels. Add safe keep-rule preview, source browsing, guarantee progress, saved-loadout protection reasons and notable-find cards. AdminDashboard's base-item editor is not a full equipment/affix catalog authoring tool; either extend it with validated catalogs or continue using validated source-controlled JSON. [E28–E31, E35]
+
+The preceding removals are conditional on adopting the proposed item model. Follow the frontend's **Grimoire rules for new or intentionally migrated screens**, using the existing New look preference and shared primitives. Inventory and Auction House are still legacy screens; migrate a complete chosen screen rather than mixing design systems. Reuse the richer comparison and receipt-backed migration chooser where relevant. Weekly summaries need actual instance cards and retention-history-aware wording, not only the current nominal Nobility hour label. [E41]
 
 **Existing consumers requiring explicit updates.** Quests reading `PlainEquipmentEntitlement`, raid styled-armor checks, dungeon preview rewards, event/selection boxes, guild loan availability, marketplace listings, character overviews, power-rating fingerprints, combat snapshots, loot history, support/admin snapshots, chat links, favorites/new-item actions and activity mutation boundaries must all understand the new descriptor. A rename of the equipment screen will not complete this migration.
 
@@ -558,11 +594,11 @@ Use invariant and behavior tests rather than assertions that duplicate the gener
 
 Run deterministic scenario comparisons for all four Styles, offensive/defensive/support Essence loadouts, all available regions and planned region checkpoints. Include short burst, attrition, multi-target, status-heavy and group encounters. Validate replacement lifetimes and core-vs-affix tradeoffs. Static budget scores alone cannot price conditional effects.
 
-Test concurrent claim/retry, duplicate settlement, auto-sale versus favorite/loadout changes, sale recovery versus spending, source/band access through direct transfer/AH/guild loans, snapshot restoration, quest credit for sold awards, and no retroactive loadout mutation. Load-test 24-hour settlement and larger synthetic inventories. A database-backed concurrency suite is needed; an EF in-memory test is not evidence of PostgreSQL locking correctness.
+Test concurrent claim/retry, duplicate settlement, auto-sale versus favorite/loadout changes, sale recovery versus spending, source/band access through transfer/AH/guild loans, snapshot restoration, sold-award quest credit and no retroactive loadout mutation. Load-test **24-hour, continuously covered 168-hour and mixed historical retention windows**, plus larger inventories. Existing opt-in PostgreSQL equipment/startup rehearsals provide a starting point; extend and run them on a disposable database. In-memory tests do not establish PostgreSQL locking correctness. [E39–E40]
 
 ## 25. Systems and code to delete
 
-After migration and final reference checks, delete the superseded active feature slices together:
+**Conditional on choosing the proposed redesign**, remove superseded active feature slices after migration and reference checks. This is not a list of already-approved deletions:
 
 - Rank reinforcement and dismantling logic in `EquipmentUpgradePolicy`, `EquipmentUpgradeModels`, `EquipmentUpgradeService`, `EquipmentUpgradeRepository`, their interfaces/commands/DTOs, upgrade price JSON and player panels. Extract any still-needed generic receipt/locking code into its actual surviving feature before deleting it.
 - Consumable blueprint catalog/options/progress/repository/service paths, `ApplyEquipmentVariant`, blueprint item definitions, dungeon blueprint rewards/pity, conversion panels and associated quest rewards. Replace all source references; do not leave dangling quest/dungeon outputs.
@@ -572,26 +608,30 @@ After migration and final reference checks, delete the superseded active feature
 - Descriptor-less equipment creation through generic rewards; old runtime fallback branches only after the data inventory and conversion are complete.
 - `EquipmentAttributeRules` is a candidate for dead-code removal: no callers were found during this audit. A final reference/build check must precede deletion.
 
-Potential, Tempering, crafting and gathering are **already deleted feature work**. Do not reopen those projects or count deleting their historical descriptions as a gameplay milestone. Keep applied historical EF migrations; they explain how an existing database reached its schema. Archive/mark stale design documents instead of letting contradictory specifications remain current. Never rewrite applied migration history to make the repository appear as though the old game never existed.
+Potential, Tempering, crafting and gathering are **already deleted feature work**. Do not reopen them or count deleting historical descriptions as a gameplay milestone. Preserve applied EF migrations. Also preserve catalog releases, evaluation rules, receipts and historical snapshot support still referenced by stored data or supported rollback. Versioned history is a correctness requirement, not automatically dead code; remove a version only after an explicit reference and retention audit. Mark superseded design prose clearly. [E36, E40]
 
 ## 26. Migration strategy
 
-No migration is generated or applied in this review. There are two legitimate data situations; determine the actual one before implementation. A historical cleanup document says Alpha data could be discarded at that time. That does not authorize deleting today's player state.
+No migration is generated or applied in this review. **Substantial migration tooling already exists**: release-specific previews with source/result hashes, idempotent apply receipts and revisions, latest-only rollback with changed-item/used-choice guards, pending reward conversion and a one-time specialization allowance. LiveOps exposes audit/preview/apply/rollback. The existing `VersionEquipmentRebalances` EF migration stores this infrastructure. These are foundations to extend, not evidence that the proposed loot model has already been migrated. [E40]
+
+The configured startup converter targets equipment release 4 with attribute rules 18. It uses a lock, batches and per-item transactions, resumes remaining work, refreshes Arena defenses, and audits unsupported pending/active historical tournament payloads. It intentionally **does not pause or settle scheduled combat**. Retained historical references remain supported. Do not start the API as a read-only documentation check: startup is configured to mutate equipment. [E36, E40]
+
+For a later redesign, distinguish disposable development worlds from retained player data. A historical Alpha reset allowance does not authorize deleting today's state.
 
 **For disposable development/test worlds**, rebuild equipment test data directly in the new model through the normal development process. This is the simplest development path, but it is not permission to reset a shared environment.
 
-**For retained player data**, plan a finite cutover rather than a permanent dual-model compatibility layer:
+**For retained player data**, plan a finite active-item cutover using the existing preview/receipt/version framework, while retaining the historical versions still needed for audit, snapshots and rollback:
 
 1. Inventory all current equipment stores: player inventory, equipped slots, saved loadouts, AH custody, guild vault/loans, pending dungeon rewards, combat snapshots, administrative/support copies and any embedded reward payloads. Count descriptor-less and malformed items explicitly.
 2. Prepare a mapping preview by actual archetype, tier, useful stat profile and ownership. Preserve usable roles and stable instance identity when possible. Quality/rank cannot be translated into “the same affixes” mechanically; define a bounded normalization policy and show representative old/new character results. Do not invent boss-clear credit merely because an old item has a matching style.
 3. Evaluate legitimate regional progress already earned from durable quest/clear records. Backfill access only from that evidence. If a former owner cannot use converted gear, give an explicit bounded transition entitlement or baseline replacement, not a universal bypass that new purchases inherit.
-4. Resolve existing listings and pending claims under a declared release boundary. Cancel/refund outstanding obsolete blueprint/parts orders and return valid equipment with its original ownership before conversion. Completed trade history remains history. Pause or drain pending combat and avoid editing already-running snapshot semantics in place.
-5. Convert retained objects once, preserving IDs/ownership/favorites where possible and repairing every loadout reference. Quarantine unknown descriptors for an explicit decision instead of silently dropping them or retaining permanent old evaluation branches.
+4. Resolve listings and pending claims under a declared release boundary. If blueprints/parts are removed, cancel/refund obsolete orders and return valid equipment with its original ownership. Completed trade history remains history. A major loot/set redesign needs an explicit policy for pending combat and old effects; unlike today's release-4 conversion, it may need a drain or pause. Do not silently alter already-earned snapshot semantics.
+5. Convert retained objects once, preserving IDs/ownership/favorites and repairing loadouts. Extend current receipts and validation for the new mapping. Quarantine unknown descriptors for a decision; keep exact-version resolution wherever retained data still requires it. Preserve recorded legacy ownership rather than treating every imported object as a fresh protected reward.
 6. Retire Reinforcement Parts and blueprint inventory through one documented transition policy. Prefer a bounded one-time credit or equivalent regional baseline reward supported by actual records. Decide explicitly whether historical Cinder spending receives any credit; do not create an uncapped refund faucet from inferred rank values. Bound deterministic replacement rewards to avoid a migration-created market flood.
 7. Recompute search projections, validate custody totals, compare before/after character roles, verify that no item is simultaneously listed/equipped/owned twice, and reconcile monetary adjustments against a migration ledger.
-8. Once every retained item and pending payload is resolved, remove obsolete tables/columns/runtime branches and the old endpoints. Keep migration receipts and source history for audit, not gameplay execution.
+8. Once every affected retained item and pending payload is resolved, remove obsolete active tables/columns/branches and endpoints. Retain receipts, source history and the historical evaluators/catalogs required by the declared snapshot and rollback policy.
 
-Back up and test this sequence on a database copy, including rollback before irreversible player exposure. If persisted combat effects depend on old set definitions, resolve those pending runs before removing the definitions or explicitly retain versioned snapshot resolution for the finite drain period. That is a cutover requirement, not justification for indefinite compatibility hacks.
+Rehearse this sequence on a disposable database copy, including rollback and changes made after conversion. Current receipt guards are valuable but do not make arbitrary future affix/set conversion safe automatically. If combat payloads depend on old sets, drain them or explicitly retain versioned resolution for their supported lifetime. Historical support should have a documented lifecycle; it should not be removed merely to simplify the new schema.
 
 This will require coordinated backend content/API and frontend releases, and likely worker updates. Normal deployment/migration approval remains a later operational step. Nothing in this analysis deploys services or modifies infrastructure-as-code.
 
@@ -600,9 +640,9 @@ This will require coordinated backend content/API and frontend releases, and lik
 | Phase | Deliverable | Exit condition |
 | --- | --- | --- |
 | 1. Validate design with current combat | Small representative base/affix/named catalog and offline simulation inputs; economy/drop-volume model; settle region-access rules. | Common/U/R/E tradeoffs, two-hand fairness, four Styles and early/late encounters behave as intended. Select actual desired upgrade cadence from evidence. |
-| 2. Build the canonical model and read projections | New descriptor/evaluator, source definitions, access/protection policies, schema/migration preview; updated comparison contracts. | Every ingress can construct and explain one legal item; existing player data has a reviewed finite conversion path. |
+| 2. Extend the canonical model and read projections | Evolve versioned descriptors, current allocation/legality, source/access/protection policies and existing migration previews; extend comparison only where needed. | Every ingress constructs and explains a legal item; retained data has a reviewed conversion and historical-version policy. |
 | 3. Implement acquisition and guarantees | Region/family drops, dungeon final reward, foundation and signature progress with idempotent settlement. | Probability tests and retry/concurrency tests pass; no hidden extra room/boss equipment faucets; all eight slot-budget units have achievable sources. |
-| 4. Complete safe inventory and market UX | Source browser, trait comparison, paged inventory, saved-build protection, batch sale, notable offline finds and updated AH/guild rules. | A 24-hour session is understandable in one review; no protected find is silently disposed of; all transfer/use paths enforce eligibility. Auto-sale waits until its safety criteria pass. |
+| 4. Complete safe inventory and market UX | Source browser, current comparison extensions, pagination, saved-build protection, batch sale, grouped offline finds and AH/guild rules, following Grimoire screen migration policy. | Daily, weekly and mixed-window catch-up batches are understandable; protected finds survive; transfer/use paths enforce eligibility. Auto-sale waits for its safety criteria. |
 | 5. Migrate and remove old systems | Data reconciliation, pending-run drain, economy transition, obsolete contract removal and documentation update. | No active Quality/rank/blueprint/set dependency remains; historic migrations preserved; all retained custody and balances reconcile. |
 | 6. Author and expand progression | Regional source matrices, optional signatures and challenge versions; R3–10 content in independently playable increments. | Each region has functional baseline access, meaningful farm alternatives and measured replacement times; no missing-price/catalog failure like the current T3 gap. |
 
@@ -627,13 +667,13 @@ These questions affect final balance/content, but none prevented this analysis o
 
 ## 29. Final verdict
 
-LegendsLegacy already has much of the technical foundation needed for good loot: stable equipment instances, source-aware rewards, explicit ownership, loadouts, shared stat evaluation, transactional operations and deterministic reward restoration. Reuse that foundation.
+LegendsLegacy now has a stronger equipment foundation than the original report described: stable instances, source-aware rewards, ownership, activity loadouts/comparison, legal core/specialization allocation, rules 18 attributes, versioned evaluation and audited conversion. Reuse this work. The defense cliff and missing activity comparison should no longer appear as open implementation gaps.
 
-The current gameplay still treats most equipment as a fixed profile multiplied by rarity, Quality, investment and style. That model makes sense as the output of a production process, but it does not make the monster roster or the act of finding an item sufficiently interesting. Its raid eligibility rules reveal the strongest remaining production assumption.
+Current specialization improves individual choices, but rarity, Quality, investment and whole-item roll still overlap; monster sources remain weakly differentiated and exact desired gear is poorly protected. The styled-Epic raid armor gate remains the clearest production-era assumption. Inventory safety and longer offline returns are immediate concerns independent of whether the larger redesign is accepted.
 
-Adopt **monster-targeted bounded loot with personal baseline and signature guarantees**. Make rarity describe specialization; let named equipment provide restrained source identity; let Essences and Combat Styles retain the larger combat decisions. Keep dropped items complete, remove redundant enhancement axes, and make a day's rewards a short set of decisions.
+The recommended next direction remains **monster-targeted bounded loot with personal baseline and signature guarantees**. Test the proposed rarity/enhancement simplification against the improved current system before committing to removal. Let named gear add restrained source identity and Essences/Combat Styles retain the larger combat decisions. Design review tools for the player's whole retained reward window.
 
-The success criterion is a player who can explain both what they want and why they are farming that source, remain functional through bad luck, and return after a day of idle combat to a few understandable equipment choices.
+The success criterion is a player who can explain what they want and why they are farming that source, remain functional through bad luck, and understand the equipment choices awaiting them after either a daily or weekly return.
 
 ## Evidence index
 

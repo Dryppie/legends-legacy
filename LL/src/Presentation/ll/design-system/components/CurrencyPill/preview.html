@@ -17,8 +17,8 @@ body { background: var(--ground); }
 <div id="root" class="lg-root"></div>
 <script>
 var L = window.LL, h = React.createElement, F = React.Fragment;
-var COINS = '../../assets/Currency/Coins.svg';
-var DIAMONDS = '../../assets/Currency/Diamonds.svg';
+var COINS = '../../assets/Currency/Cinders.webp';
+var DIAMONDS = '../../assets/Currency/Soulstones.webp';
 ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'pv', style: { gap: 12 } },
   h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: COINS }),
   h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: COINS, short: true, onClick: function () {} }),

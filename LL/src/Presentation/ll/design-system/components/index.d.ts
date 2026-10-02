@@ -609,7 +609,7 @@ export declare function Tag(props: TagProps): React.ReactElement;
 export interface CurrencyPillProps {
   name: 'Cinders' | 'Soulstones' | string;
   amount: number;
-  /** Currency art URL (Currency/Coins.svg for Cinders, Currency/Diamonds.svg for Soulstones). */
+  /** Currency art URL (Currency/Cinders.webp for Cinders, Currency/Soulstones.webp for Soulstones). */
   iconSrc?: string;
   /** Abbreviate: 12.5k, 3.2M. Screen readers always hear the full number ("12,480 Cinders"). A short CurrencyPill is always a button: without `onClick` it toggles between 12.5k and 12,480 itself, so the full figure is never hover-only. */
   short?: boolean;

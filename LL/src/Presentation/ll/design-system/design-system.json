@@ -74,23 +74,23 @@
     },
     "Currency": {
       "files": {
-        "Coins.svg": {
-          "blob": "assets/Currency/Coins.svg",
-          "name": "Coins.svg",
-          "size": 8349,
-          "type": "image/svg+xml"
+        "Cinders.webp": {
+          "blob": "assets/Currency/Cinders.webp",
+          "name": "Cinders.webp",
+          "size": 5658,
+          "type": "image/webp"
         },
-        "Diamonds.svg": {
-          "blob": "assets/Currency/Diamonds.svg",
-          "name": "Diamonds.svg",
-          "size": 42241,
-          "type": "image/svg+xml"
+        "Soulstones.webp": {
+          "blob": "assets/Currency/Soulstones.webp",
+          "name": "Soulstones.webp",
+          "size": 4626,
+          "type": "image/webp"
         }
       },
       "name": "Currency",
       "order": [
-        "Coins.svg",
-        "Diamonds.svg"
+        "Cinders.webp",
+        "Soulstones.webp"
       ],
       "tile": "s"
     },
@@ -289,9 +289,9 @@
     "Cards"
   ],
   "lastChange": {
-    "at": "2026-10-02T01:30:00Z",
+    "at": "2026-10-02T09:30:00Z",
     "by": "Martin",
-    "note": "Compact LoadoutSlots are 48px and the Overview's Combat Style is one row, so the side column fits without scrolling (D-123).",
+    "note": "The currency art is the game's own Cinders and Soulstones emblems, in place of Coins.svg and Diamonds.svg (D-126).",
     "via": "Claude (Cowork)"
   },
   "layout": "files",

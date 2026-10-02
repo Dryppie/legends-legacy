@@ -77,7 +77,7 @@ window.CASES = function (h, L, D) {
         h(L.ListRow, { title: 'Gone', muted: true }));
     }],
     ['listrow-alone', function () { return h(L.ListRow, { title: 'Solo', value: 12 }); }],
-    ['currency', function () { return h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: 'Coins.svg' }); }],
+    ['currency', function () { return h(L.CurrencyPill, { name: 'Cinders', amount: 12480, iconSrc: 'Cinders.webp' }); }],
     ['currency-short', function () { return h(L.CurrencyPill, { name: 'Cinders', amount: 12480, short: true }); }],
     ['currency-click', function () { return h(L.CurrencyPill, { name: 'Soulstones', amount: 36, onClick: noop }); }],
     ['navrail', function () { return h(L.NavRail, { sections: D.nav, activeId: 'overview', header: h('span', null, 'LL'), footer: h('span', null, 'v1') }); }],

@@ -106,8 +106,8 @@ Currencies and the materials spent like them. Each has a line icon for inline us
 
 | Resource | What it is | Art | Line icon | Fallback | Shown in |
 | --- | --- | --- | --- | --- | --- |
-| Cinders | The soft currency | `Currency/Coins.svg` | `cinders` (none yet) | The word: "1,250 Cinders"; the art at display size | CurrencyPill in the TopBar and shop headers; cost lists |
-| Soulstones | The premium currency | `Currency/Diamonds.svg` | `soulstones`, the sidebar's gem | "40 Soulstones"; the art at display size | CurrencyPill in the TopBar and shop headers; cost lists |
+| Cinders | The soft currency | `Currency/Cinders.webp` | `cinders` (none yet) | The word: "1,250 Cinders"; the art at display size | CurrencyPill in the TopBar and shop headers; cost lists |
+| Soulstones | The premium currency | `Currency/Soulstones.webp` | `soulstones`, the sidebar's gem | "40 Soulstones"; the art at display size | CurrencyPill in the TopBar and shop headers; cost lists |
 | Experience | EXP, from combat and quests | — | `experience` (none yet) | "240 EXP" | Rewards; the XP Meter keeps its label |
 | Essence Dust | From shattering spare Essences | — | `essence-dust` (none yet) | "120 Essence Dust" | The cost of levelling an Essence |
 | Glory | The Colosseum's currency | — | `glory` (none yet) | "300 Glory" | Colosseum rewards and its shop |
