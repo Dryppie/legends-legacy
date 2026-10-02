@@ -12,11 +12,8 @@ import {
 } from '../chronicle/chronicle.component';
 import { LgGameShellComponent } from './game-shell.component';
 import { LgChroniclePosition, LgSlotDirective } from '../../core/grimoire-core';
-import {
-  LgLayerHandle,
-  lgOpenLayer,
-  lgTopLayer,
-} from '../../core/grimoire-a11y';
+import { Overlay } from '@angular/cdk/overlay';
+import { DomPortal } from '@angular/cdk/portal';
 import {
   LgNavRailComponent,
   LgNavSection,
@@ -152,10 +149,7 @@ describe('LgGameShellComponent', () => {
       topBar = await loader.getHarness(LgTopBarHarness);
     });
 
-    afterEach(() => {
-      fixture.destroy();
-      expect(lgTopLayer()).toBeNull();
-    });
+    afterEach(() => fixture.destroy());
 
     it('starts closed, with the menu button in the TopBar', async () => {
       expect(await topBar.hasMenu()).toBeTrue();
@@ -182,22 +176,32 @@ describe('LgGameShellComponent', () => {
       expect(await topBar.isMenuFocused()).toBeTrue();
     });
 
-    // Known bug: the drawer listens for Escape on its own, ignoring the layer stack, so one Escape closes both a
-    // popover in the drawer and the drawer (Foundations · Surfaces & Layering, Accessibility) (fix in plan phase 3)
-    xit('an Escape that closes a popover inside the drawer leaves the drawer open', async () => {
+    // Fixed in plan step 11 (D-134): an overlay marks the Escape it uses, and the drawer leaves a marked Escape alone.
+    it('an Escape that closes an overlay opened from the drawer leaves the drawer open', async () => {
       await topBar.pressMenu();
-      const popover: LgLayerHandle = lgOpenLayer({
-        kind: 'popover',
-        onClose: () => popover.close(),
+      // A popover on the CDK overlay, as an lg-popover will be: it closes on Escape and marks the key as used.
+      const content = document.createElement('div');
+      content.textContent = 'Popover';
+      document.body.appendChild(content);
+      const popover = TestBed.inject(Overlay).create();
+      popover.attach(new DomPortal(content));
+      popover.keydownEvents().subscribe((e) => {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+        popover.detach();
       });
       try {
         await shell.pressKey(TestKey.ESCAPE);
 
-        expect(lgTopLayer()).toBeNull();
+        expect(popover.hasAttached()).toBeFalse();
         expect(await shell.isRailOpen()).toBeTrue();
         expect(await shell.getFocusedRailItem()).toBe('Overview');
+
+        await shell.pressKey(TestKey.ESCAPE);
+        expect(await shell.isRailOpen()).toBeFalse();
       } finally {
-        popover.close(false);
+        popover.dispose();
+        content.remove();
       }
     });
   });

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { LG_HEX_INNER, LG_HEX_OUTER, lgCx, lgUniqueId } from '../../core/grimoire-core';
-import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a11y';
+import { LgBlockedDirective, LgBlockedTip, lgBlockedSpoken } from '../../core/grimoire-blocked';
 import { lgBlockedReason } from '../../core/grimoire-states';
 
 export type LgSigilState = 'default' | 'selected' | 'ready' | 'locked';
@@ -21,7 +21,7 @@ export type LgSigilSize = 'sm' | 'md' | 'lg';
  */
 @Component({
   selector: 'lg-sigil',
-  imports: [NgTemplateOutlet, LgWhyDirective],
+  imports: [NgTemplateOutlet, LgBlockedDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     style: 'display: contents',
@@ -53,12 +53,12 @@ export type LgSigilSize = 'sm' | 'md' | 'lg';
         [attr.aria-pressed]="why() ? null : state() === 'selected'"
         [attr.aria-label]="srText()"
         [attr.title]="title() ?? null"
-        [lgWhy]="why()"
-        [lgWhyId]="whyId"
+        [lgBlocked]="why()"
+        [lgBlockedId]="whyId"
         (click)="why() ? null : activate.emit()"
       >
         <ng-container [ngTemplateOutlet]="body" />@if (why(); as w) {<span
-            class="lg-sr lg-why__desc"
+            class="lg-sr lg-blocked__desc"
             [id]="whyId"
             aria-hidden="true"
             >{{ spoken(w) }}</span
@@ -90,7 +90,7 @@ export class LgSigilComponent {
   protected readonly hexOuter = LG_HEX_OUTER;
   protected readonly hexInner = LG_HEX_INNER;
   protected readonly whyId = lgUniqueId('lgs') + '-why';
-  protected readonly spoken = lgWhySpoken;
+  protected readonly spoken = lgBlockedSpoken;
 
   protected readonly position = computed<LgSigilLabelPosition>(
     () => this.labelPosition() || (this.label() ? 'right' : 'none'),
@@ -98,7 +98,7 @@ export class LgSigilComponent {
   protected readonly showLabel = computed(() => !!this.label() && this.position() !== 'none');
   protected readonly labelFirst = computed(() => this.position() === 'left' || this.position() === 'top');
   /** A locked Sigil that would be a button stays one: focusable, aria-disabled, with its unlock condition. */
-  protected readonly why = computed<LgWhyOptions | null>(() =>
+  protected readonly why = computed<LgBlockedTip | null>(() =>
     this.interactive() && this.state() === 'locked'
       ? {
           reason: lgBlockedReason('locked', { reason: this.reason() }, `Sigil "${this.label() || ''}"`).reason,

@@ -12,7 +12,7 @@ import { LgItemSlotComponent } from '../item-slot/item-slot.component';
 import { LgTagComponent } from '../../primitives/tag/tag.component';
 import { LgIconName } from '../../core/grimoire-icons';
 import { LG_STATES, lgReadyWords, lgStateWarn } from '../../core/grimoire-states';
-import { LgWhyDirective, LgWhyOptions } from '../../core/grimoire-a11y';
+import { LgBlockedDirective, LgBlockedTip } from '../../core/grimoire-blocked';
 
 export type LgLoadoutSlotState = 'attuned' | 'open' | 'locked';
 
@@ -29,7 +29,7 @@ export interface LgLoadoutAbility {
  */
 @Component({
   selector: 'lg-loadout-slot',
-  imports: [LgItemSlotComponent, LgTagComponent, NgTemplateOutlet, LgWhyDirective],
+  imports: [LgItemSlotComponent, LgTagComponent, NgTemplateOutlet, LgBlockedDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
@@ -82,7 +82,7 @@ export interface LgLoadoutAbility {
       <button
         type="button"
         [class]="classes()"
-        [lgWhy]="why()"
+        [lgBlocked]="why()"
         (click)="currentState() === 'locked' ? null : activate.emit()"
       >
         <ng-container [ngTemplateOutlet]="body" />
@@ -129,7 +129,7 @@ export class LgLoadoutSlotComponent {
     return u;
   });
   /** The condition is printed inside the button, so it is already in the name ("Slot 3 Locked Unlocks at level 20"). */
-  protected readonly why = computed<LgWhyOptions | null>(() =>
+  protected readonly why = computed<LgBlockedTip | null>(() =>
     this.currentState() === 'locked' && this.interactive()
       ? { reason: this.unlock(), word: 'Locked', printed: true, describe: false }
       : null,

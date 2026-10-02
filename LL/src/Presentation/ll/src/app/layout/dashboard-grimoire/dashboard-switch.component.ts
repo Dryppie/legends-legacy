@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { GrimoirePreviewPreferenceService } from '../../core/services/client-side/grimoire-preview/grimoire-preview-preference.service';
-import { lgAnnounce } from '@grimoire';
+import { LgAnnouncer } from '@grimoire';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { DashboardGrimoireComponent } from './dashboard-grimoire.component';
 
@@ -28,12 +28,13 @@ export function isNewLookShortcut(e: Pick<KeyboardEvent, 'ctrlKey' | 'altKey' | 
 })
 export class DashboardSwitchComponent {
   protected readonly preview = inject(GrimoirePreviewPreferenceService);
+  private readonly announcer = inject(LgAnnouncer);
 
   protected onKeydown(e: KeyboardEvent): void {
     if (!isNewLookShortcut(e)) return;
     e.preventDefault();
     const next = !this.preview.newLook();
     this.preview.setNewLook(next);
-    lgAnnounce(next ? 'New look on' : 'New look off', { key: 'new-look' });
+    this.announcer.announce(next ? 'New look on' : 'New look off', { key: 'new-look' });
   }
 }

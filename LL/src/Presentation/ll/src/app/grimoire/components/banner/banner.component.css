@@ -1,6 +1,12 @@
 /* ---------- Banner (art-backed band) ---------- */
-/* One edge: the double gilt frame, as on the Folio. No outer border (Foundations · Lines). */
-.lg-banner { position: relative; isolation: isolate; overflow: hidden; background: var(--lg-ground-deep); }
+/* One edge: the double gilt frame, as on the Folio. No outer border (Foundations · Lines). A Panel inside it steps its
+   padding down one level (--lg-panel-inset). */
+:host {
+  display: block;
+  position: relative; isolation: isolate; overflow: hidden; background: var(--lg-ground-deep);
+  --lg-corner-size: 2.25rem;
+  --lg-panel-inset: var(--lg-inset-inner);
+}
 .lg-banner__art { position: absolute; inset: -0.75rem; z-index: -2; background-size: cover; filter: sepia(0.3) saturate(0.85) brightness(0.55) blur(1.5px); }
 .lg-banner__veil {
   position: absolute; inset: 0; z-index: -1;
@@ -14,9 +20,10 @@
 }
 .lg-banner__frame { position: absolute; inset: 0.5rem; pointer-events: none; border: var(--lg-border-hairline) solid var(--lg-gilt); opacity: 0.28; }
 .lg-banner__frame::after { content: ""; position: absolute; inset: 0.25rem; border: var(--lg-border-hairline) solid var(--lg-gilt); opacity: 0.6; }
-.lg-banner .lg-folio__corner { width: 2.25rem; height: 2.25rem; }
 /* The figures sit beside the identity whenever both fit, and drop under it only when they don't (D-122). */
 .lg-banner__body { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--lg-space-6) var(--lg-space-8); padding: var(--lg-space-8) var(--lg-space-8) var(--lg-space-6); }
 .lg-banner__main { flex: 1 1 24rem; min-width: 0; text-shadow: var(--lg-shadow-text-art); }
-.lg-banner__aside { flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-space-6) var(--lg-space-8); }
-.lg-banner__footer { position: relative; padding: 0 var(--lg-space-8) var(--lg-space-6); }
+/* At 400% zoom (a 320px-wide region) the padding steps down so the identity keeps its width (WCAG 1.4.10). */
+@container (max-width: 30rem) {
+  .lg-banner__body { padding: var(--lg-inset-lg); }
+}

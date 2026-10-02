@@ -4,7 +4,7 @@ Oct 2, 2026 · @Martin
 
 Living copy (Claude Doc, with diagrams and comments): https://claude.ai/code/artifact/bf6ccd8d-3fb0-4546-8151-1ff12a09864e. This file is a snapshot of it.
 
-Status: steps 1 to 10 done on 2 October 2026 (phases 0 to 2). D-127 (one implementation), D-128 (the `lg-` prefix) and D-129 (the dev-only `/grimoire` showcase, 42 entries and 279 stories, and `npm run grimoire:snapshots`) settled phase 0 and the safety net; D-130 (`src/app/grimoire/` by tier, `@grimoire`, behaviour specs through harnesses), D-131 (the `--lg-` token prefix, breakpoint tokens, `tokens.ts`), D-132 (styles beside their parts, assembled in cascade order) and D-133 (the React reference removed) record steps 6 to 10. Next: phase 3, step 11.
+Status: steps 1 to 10 done on 2 October 2026 (phases 0 to 2). D-127 (one implementation), D-128 (the `lg-` prefix) and D-129 (the dev-only `/grimoire` showcase, 42 entries and 279 stories, and `npm run grimoire:snapshots`) settled phase 0 and the safety net; D-130 (`src/app/grimoire/` by tier, `@grimoire`, behaviour specs through harnesses), D-131 (the `--lg-` token prefix, breakpoint tokens, `tokens.ts`), D-132 (styles beside their parts, assembled in cascade order) and D-133 (the React reference removed) record steps 6 to 10. Steps 11 to 14 of phase 3 done the same day: D-134 (the tip, `lgTooltip`, `lgBlocked` and `LgAnnouncer` on the CDK), D-135 (numeral pipes), D-136 (containers as boxes with region components and encapsulated styles) and D-137 (the Ledger composed of its rows; StatTile merged into it). Next: step 15, after settling the first-load budget (998 of 1,000 kB, step 14's note).
 
 ## Summary
 
@@ -221,7 +221,7 @@ Of today's 44 components, 24 keep their API, 17 are re-shaped, 2 merge away, and
 | Banner, Folio | `lg-banner`, `lg-folio` | Re-shape slots | Named child regions |
 | Notice (alert) | `lg-notice` | Keep | The one alert |
 | Region state (empty, loading, error) | page-local (gap G6) | New | `lg-region-state` with the words from Standards · States and an action slot |
-| Ledger (attribute display) | `lg-ledger [rows]` | Re-shape | `lg-ledger` + `lg-ledger-row`; explanations through `lgTooltip`; keys through `FocusKeyManager` |
+| Ledger (attribute display) | `lg-ledger [rows]` | Re-shape | `lg-ledger` + `div[lgLedgerRow]`; explanations through `lgTooltip`; keys through `FocusKeyManager` |
 | StatFigure, Delta, Track | exist | Keep | Native `title` explanations move to `lgTooltip` |
 | StatTile | `lg-stat-tile` | Merge into Ledger | Audit map verdict |
 | List, ListRow | `lg-list` + `li[lgListRow]` | Keep | Already composition; selectable lists use `cdk/listbox` |
@@ -307,7 +307,7 @@ One theme stays (Grimoire), so there is no theming machinery. Reduced motion sta
 
 Every component follows the same twelve rules. They replace the React-to-Angular mapping table in the grimoire `README.md` and Governance · Code parity.
 
-1. **Selectors.** Prefix `lg-`, Grimoire's existing prefix, rather than a new `ds-`: renaming would touch every selector, class, token and doc page and change nothing a player sees. An element selector for a part that owns its box (`lg-panel`). An attribute selector when the host must be a native element with its own semantics: `button[lgButton]`, `a[lgButton]`, `input[lgInput]`, `table[lgTable]`, `kbd[lgKey]`, and the interactive game parts (`[lgItemSlot]` on `button`, `a` or `div`). Behaviour without markup is a directive (`[lgTooltip]`, `[lgBlocked]`).
+1. **Selectors.** Prefix `lg-`, Grimoire's existing prefix, rather than a new `ds-`: renaming would touch every selector, class, token and doc page and change nothing a player sees. An element selector for a part that owns its box (`lg-panel`). An attribute selector when the host must be a native element with its own semantics: `button[lgButton]`, `a[lgButton]`, `input[lgInput]`, `table[lgTable]`, `kbd[lgKey]`, a list's or a Ledger's rows (`li[lgListRow]`, `div[lgLedgerRow]`), and the interactive game parts (`[lgItemSlot]` on `button`, `a` or `div`). Behaviour without markup is a directive (`[lgTooltip]`, `[lgBlocked]`).
 2. **The host is the box.** No `display: contents`. Set `:host { display: … }` and put the root class, `role` and state attributes on the host through `host` metadata. No input shares a name with a native attribute that acts on the host: Panel's `title` becomes a projected `lg-panel-title`, Ledger's becomes `heading`.
 3. **Composition before configuration.** Structure is projected children, not arrays. A parent reads its children with `contentChildren()` only when it must coordinate them (keyboard, selection). Arrays stay only for long, uniform data nobody customises per row: Chronicle messages, suggestions from a service.
 4. **Regions are child components**, not a generic slot directive: `lg-panel-header`, `lg-dialog-actions`, `lg-page-header-actions`. The template compiler rejects an unknown element; it never checked `lgSlot="asdie"`.
@@ -345,10 +345,10 @@ Inside a component, styling hooks are the host class (`lg-panel`), ARIA state an
 <!-- Ledger: today -->
 <lg-ledger [title]="group.title" [rows]="group.rows" />
 
-<!-- Ledger: target -->
+<!-- Ledger: target (as built in step 14: a row is a div, because a dl holds its pairs in divs) -->
 <lg-ledger heading="Offense">
   @for (row of offense(); track row.id) {
-    <lg-ledger-row [label]="row.label" [value]="row.value" [description]="row.description" />
+    <div lgLedgerRow [label]="row.label" [value]="row.value" [description]="row.description"></div>
   }
 </lg-ledger>
 ```
@@ -598,10 +598,10 @@ Not on this list, on purpose: Tailwind, the `--ll-*` system, `postcss-legacy-rem
 
 **Phase 3 · Re-shape what exists.** Each step covers the component, its CSS moved to emulated encapsulation, its spec and harness, its stories, its README, and its consumers.
 
-11. The overlay foundation: `lgTooltip`, `lgBlocked` in place of `lgWhy`, `lgAnnounce` on `LiveAnnouncer`, the CDK overlay z-layers; delete the global layer stack.
-12. Numeral pipes; retire `lg-num`.
-13. Containers: Panel, Page, PageHeader, Banner, Folio, Notice. Hosts become boxes and regions become child components.
-14. Ledger with child rows and `FocusKeyManager`; merge StatTile into it.
+11. The overlay foundation: `lgTooltip`, `lgBlocked` in place of `lgWhy`, `lgAnnounce` on `LiveAnnouncer`, the CDK overlay z-layers; delete the global layer stack. Done on 2 October (D-134): `LgTip`, one float for the page on the CDK overlay, serves `lgTooltip` and `lgBlocked`; `LgAnnouncer` keeps the rate limit on `LiveAnnouncer`; Escape goes to the tip first, then to CDK overlays, then to inline layers, which skip an Escape already handled. Three changes: the CDK overlay container keeps its own z-index (1000), because the legacy overlays share it, and panes stack in open order; the Objective's tracker stays inline until the Popover (step 22); the native `title` tooltips of StatFigure, Track, ItemLink and the rest move in their own steps.
+12. Numeral pipes; retire `lg-num`. Done on 2 October (D-135): `lgNumber`, `lgShort`, `lgPercent`, `lgUnit`, `lgDuration` and `lgValue`, which splits a value for the `.lg-unit` markup; the showcase entry is Numerals.
+13. Containers: Panel, Page, PageHeader, Banner, Folio, Notice. Hosts become boxes and regions become child components. Done on 2 October (D-136): `lg-panel-header` with `lg-panel-title`, `lg-page-header-actions`, `lg-banner-aside` and `-footer`, `lg-folio-emblem`, `-lore`, `-actions` and `-footer`, `lg-notice-actions`; `title` inputs become `heading`; each part's CSS is on its `styleUrl`, emulated, and the first cross-part selectors became inherited custom properties (`--lg-panel-inset`, `--lg-layout-gap`, `--lg-icon-fit`) or `LG_SHELL` (the dense Page and PageHeader in GameShell). Two visible fixes, both intended: a Tag in a Panel's head sits at the end, and the Banner's 400% zoom padding applies.
+14. Ledger with child rows and `FocusKeyManager`; merge StatTile into it. Done on 2 October (D-137): rows are `div[lgLedgerRow]`, not `<lg-ledger-row>`, because a `dl` holds its pairs in `div`s; explanations show in the tip through `LgTooltipController`; `columns="2"` and a row's `delta` take over StatTile, which is deleted, and its tokens wait for a token pass. The key managers put 6 kB into the first load, now 998 of its 1,000 kB: raise the budget or move Material's eager form field, input and icon out of the first load before step 17.
 15. Merge EntryList into List; TabStrip becomes Tabs.
 16. Game parts on attribute selectors: ItemSlot, ItemLink, LoadoutSlot, Sigil, CurrencyPill, Activity; add `lg-rarity`.
 17. SearchField on the CDK overlay and `ActiveDescendantKeyManager`.

@@ -14,11 +14,11 @@
   gap: var(--lg-stack-sm);
   padding-top: var(--lg-topbar-height);
 }
-.dg-stage ::ng-deep .lg-notice {
+.dg-stage > lg-notice {
   flex: none;
   margin: 0 var(--dg-gutter);
 }
-.dg-stage ::ng-deep .lg-notice:first-child {
+.dg-stage > lg-notice:first-child {
   margin-top: var(--lg-space-3);
 }
 

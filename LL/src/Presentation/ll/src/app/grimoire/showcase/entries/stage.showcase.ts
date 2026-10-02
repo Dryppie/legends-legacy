@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgPageComponent, LgPanelComponent, LgStageComponent } from '@grimoire';
+import { LG_PANEL, LgPageComponent, LgStageComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -12,7 +12,7 @@ import { ShowcaseEntry } from '../showcase.types';
     ShowcaseStoryDirective,
     LgStageComponent,
     LgPageComponent,
-    LgPanelComponent,
+    ...LG_PANEL,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -39,7 +39,10 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-stage image="assets/backgrounds/optimized/tavern.webp" label="Tavern">
         <lg-page label="Tavern">
           <div class="sc-col">
-            <lg-panel title="The Tavern">
+            <lg-panel>
+              <lg-panel-header>
+                <lg-panel-title>The Tavern</lg-panel-title>
+              </lg-panel-header>
               <p>Warm ale, cold rumours. Someone here is looking for you.</p>
             </lg-panel>
           </div>
@@ -81,7 +84,10 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-stage label="Tavern">
         <lg-page label="Tavern">
           <div class="sc-col">
-            <lg-panel title="The Tavern">
+            <lg-panel>
+              <lg-panel-header>
+                <lg-panel-title>The Tavern</lg-panel-title>
+              </lg-panel-header>
               <p>Warm ale, cold rumours. Someone here is looking for you.</p>
             </lg-panel>
           </div>

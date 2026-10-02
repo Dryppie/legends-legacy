@@ -188,8 +188,8 @@ for (const p of walk(join(app, 'src')).filter((f) => f.endsWith('.ts') && !f.sta
 
 // ---- Parts ------------------------------------------------------------------------------------------------------
 
-// 9. Every part (a <tier>/<name>/<name>.component.ts) has its guidelines page beside it and is covered by a showcase
-//    entry; a part without a spec is debt (a warning).
+// 9. Every part (a <tier>/<name>/<name>.component.ts, or <name>.directive.ts for one without markup of its own) has its
+//    guidelines page beside it and is covered by a showcase entry; a part without a spec is debt (a warning).
 const covered = new Set(
   walk(join(grimoire, 'showcase', 'entries'))
     .filter((f) => f.endsWith('.showcase.ts'))
@@ -199,15 +199,16 @@ for (const tier of PART_TIERS) {
   for (const name of readdirSync(join(grimoire, tier))) {
     const dir = join(grimoire, tier, name);
     if (!statSync(dir).isDirectory()) continue;
-    const ts = join(dir, `${name}.component.ts`);
+    const kind = existsSync(join(dir, `${name}.component.ts`)) ? 'component' : 'directive';
+    const ts = join(dir, `${name}.${kind}.ts`);
     if (!existsSync(ts)) {
-      errors.push(`${rel(dir)}/: a part's folder holds ${name}.component.ts.`);
+      errors.push(`${rel(dir)}/: a part's folder holds ${name}.component.ts (or ${name}.directive.ts).`);
       continue;
     }
     const readme = join(dir, 'README.md');
     if (!existsSync(readme)) errors.push(`${rel(dir)}/README.md is missing: every part has its guidelines page beside it.`);
     else if (!/^# \S/.test(read(readme))) errors.push(`${rel(readme)}: starts with "# <Name>" (Governance · Templates).`);
-    if (!existsSync(join(dir, `${name}.component.spec.ts`))) warnings.push(`${rel(dir)}/${name}.component.spec.ts is missing.`);
+    if (!existsSync(join(dir, `${name}.${kind}.spec.ts`))) warnings.push(`${rel(dir)}/${name}.${kind}.spec.ts is missing.`);
     for (const cls of read(ts).matchAll(/^export class (Lg\w+)/gm)) {
       if (!covered.has(cls[1])) errors.push(`${rel(ts)}: ${cls[1]} is in no showcase entry's covers (src/app/grimoire/showcase/entries/).`);
     }

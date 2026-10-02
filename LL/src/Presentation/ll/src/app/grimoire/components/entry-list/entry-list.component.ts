@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { LgDensity, lgCx, lgUniqueId } from '../../core/grimoire-core';
 import { LgTagComponent, LgTagTone } from '../../primitives/tag/tag.component';
-import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a11y';
+import { LgBlockedDirective, LgBlockedTip, lgBlockedSpoken } from '../../core/grimoire-blocked';
 import { lgBlockedReason, lgReadyWords } from '../../core/grimoire-states';
 
 export interface LgEntry {
@@ -32,7 +32,7 @@ export interface LgEntry {
  */
 @Component({
   selector: 'lg-entry-list',
-  imports: [LgTagComponent, LgWhyDirective],
+  imports: [LgTagComponent, LgBlockedDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
@@ -50,8 +50,8 @@ export interface LgEntry {
           [attr.data-index]="i"
           [attr.tabindex]="i === tabAt() ? 0 : -1"
           [class]="entry.classes"
-          [lgWhy]="entry.why"
-          [lgWhyId]="entry.whyId"
+          [lgBlocked]="entry.why"
+          [lgBlockedId]="entry.whyId"
           (focus)="focused.set(i)"
           (click)="entry.item.locked ? null : choose(entry.item.id)"
         >
@@ -67,7 +67,7 @@ export interface LgEntry {
             <span class="lg-sr">, {{ readyWords(entry.item.ready) }}</span>
           }
           @if (entry.why; as w) {
-            <span class="lg-sr lg-why__desc" [id]="entry.whyId" aria-hidden="true">{{ spoken(w) }}</span>
+            <span class="lg-sr lg-blocked__desc" [id]="entry.whyId" aria-hidden="true">{{ spoken(w) }}</span>
           }
         </li>
       }
@@ -83,7 +83,7 @@ export class LgEntryListComponent {
   readonly label = input('Entries');
 
   protected readonly focused = signal<number | null>(null);
-  protected readonly spoken = lgWhySpoken;
+  protected readonly spoken = lgBlockedSpoken;
   protected readonly readyWords = lgReadyWords;
   private readonly base = lgUniqueId('lge');
 
@@ -96,7 +96,7 @@ export class LgEntryListComponent {
   protected readonly rows = computed(() =>
     this.items().map((item, i) => {
       const active = item.id === this.activeId() && !item.locked;
-      const why: LgWhyOptions | null = item.locked
+      const why: LgBlockedTip | null = item.locked
         ? {
             reason: lgBlockedReason('locked', item, `EntryList entry "${item.name}"`).reason,
             word: 'Locked',

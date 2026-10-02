@@ -3,7 +3,7 @@ import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgSearchFieldComponent } from './search-field.component';
 import { LgSearchFieldHarness } from '../../testing/search-field.harness';
-import { lgCloseReasonTip } from '../../testing/reason-tip.harness';
+import { lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -60,7 +60,7 @@ describe('LgSearchFieldComponent', () => {
 
   beforeEach(lgAnnouncerIdle);
   // The reason tip hears Escape before anything else on the page: one another test left open would take this Escape.
-  beforeEach(lgCloseReasonTip);
+  beforeEach(lgCloseTip);
 
   it('starts empty and closed', fakeAsync(async () => {
     const { field } = await setup();

@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
-  LgBannerComponent,
+  LG_BANNER,
   LgButtonComponent,
   LgLevelPlateComponent,
   LgProfileFactComponent,
   LgProfileIdentityComponent,
-  LgSlotDirective,
   LgStatFigureComponent,
   LgTagComponent,
 } from '@grimoire';
@@ -21,10 +20,9 @@ import { ShowcaseEntry } from '../showcase.types';
     ShowcaseStoryDirective,
     LgProfileIdentityComponent,
     LgProfileFactComponent,
-    LgBannerComponent,
+    ...LG_BANNER,
     LgButtonComponent,
     LgLevelPlateComponent,
-    LgSlotDirective,
     LgStatFigureComponent,
     LgTagComponent,
   ],
@@ -111,21 +109,22 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Its place: a Banner's body, with the headline figures (LevelPlate, StatFigure) in the aside."
     >
       <lg-banner label="Combat profile">
-        <div lgSlot="aside" style="width: 14rem">
-          <lg-level-plate
-            kicker="Level"
-            [level]="17"
-            [xp]="8420"
-            [xpMax]="12000"
-            xpUnit="Combat XP"
+        <lg-banner-aside>
+          <div style="width: 14rem">
+            <lg-level-plate
+              kicker="Level"
+              [level]="17"
+              [xp]="8420"
+              [xpMax]="12000"
+              xpUnit="Combat XP"
+            />
+          </div>
+          <lg-stat-figure
+            label="Combat Rating"
+            value="1,284"
+            caption="Permanent attributes and the equipped build"
           />
-        </div>
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Combat Rating"
-          value="1,284"
-          caption="Permanent attributes and the equipped build"
-        />
+        </lg-banner-aside>
         <lg-profile-identity eyebrow="Combat Profile" name="Aldric Vane" noble>
           <div lgProfileFact label="Guild">
             <a href="#" (click)="$event.preventDefault()">Emberwatch</a

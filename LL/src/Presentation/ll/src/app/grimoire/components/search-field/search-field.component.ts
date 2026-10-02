@@ -4,13 +4,14 @@ import {
   booleanAttribute,
   computed,
   effect,
+  inject,
   input,
   model,
   output,
   signal,
 } from '@angular/core';
 import { lgUniqueId } from '../../core/grimoire-core';
-import { lgAnnounce } from '../../core/grimoire-a11y';
+import { LgAnnouncer } from '../../core/grimoire-announcer';
 
 /**
  * Search with suggestions (an ARIA combobox).
@@ -107,9 +108,10 @@ export class LgSearchFieldComponent {
   });
 
   constructor() {
+    const announcer = inject(LgAnnouncer);
     effect(() => {
       const text = this.said();
-      if (text) lgAnnounce(text, { key: 'search-' + this.id });
+      if (text) announcer.announce(text, { key: 'search-' + this.id });
     });
   }
 

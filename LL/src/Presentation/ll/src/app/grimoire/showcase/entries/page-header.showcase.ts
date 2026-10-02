@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
+  LG_PAGE_HEADER,
   LgButtonComponent,
-  LgPageHeaderComponent,
   LgSearchFieldComponent,
-  LgSlotDirective,
 } from '@grimoire';
 import {
   ShowcaseEntryComponent,
@@ -15,8 +14,7 @@ import { ShowcaseEntry } from '../showcase.types';
   selector: 'sc-page-header-showcase',
   imports: [
     ShowcaseStoryDirective,
-    LgPageHeaderComponent,
-    LgSlotDirective,
+    ...LG_PAGE_HEADER,
     LgButtonComponent,
     LgSearchFieldComponent,
   ],
@@ -24,22 +22,23 @@ import { ShowcaseEntry } from '../showcase.types';
   template: `
     <ng-template
       scStory="With search"
-      notes="The section's icon in a gilt diamond, eyebrow, title, summary, and the screen's actions on one line."
+      notes="The section's icon in a gilt diamond, eyebrow, heading, summary, and the screen's actions on one line, in lg-page-header-actions."
       width="60rem"
     >
       <lg-page-header
         icon="overview"
         eyebrow="Character"
-        title="Overview"
+        heading="Overview"
         summary="Stats, combat rating, and Essence loadout"
       >
-        <lg-search-field
-          lgSlot="actions"
-          placeholder="Search character by name…"
-          label="Search character by name"
-        />
-        <button lgButton lgSlot="actions" size="sm">Search</button>
-        <button lgButton="quiet" lgSlot="actions" size="sm">Refresh</button>
+        <lg-page-header-actions>
+          <lg-search-field
+            placeholder="Search character by name…"
+            label="Search character by name"
+          />
+          <button lgButton size="sm">Search</button>
+          <button lgButton="quiet" size="sm">Refresh</button>
+        </lg-page-header-actions>
       </lg-page-header>
     </ng-template>
 
@@ -47,10 +46,12 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-page-header
         icon="leaderboard"
         eyebrow="City"
-        title="Leaderboard"
+        heading="Leaderboard"
         summary="Top Legends by Combat Rating this season"
       >
-        <button lgButton lgSlot="actions">Refresh</button>
+        <lg-page-header-actions>
+          <button lgButton>Refresh</button>
+        </lg-page-header-actions>
       </lg-page-header>
     </ng-template>
 
@@ -58,17 +59,17 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-page-header
         icon="overview"
         eyebrow="Character"
-        title="Overview"
+        heading="Overview"
         summary="Stats, combat rating, and Essence loadout"
       />
     </ng-template>
 
     <ng-template
       scStory="Title only"
-      notes="Without an icon, eyebrow or summary: the title and its rule."
+      notes="Without an icon, eyebrow or summary: the heading and its rule."
       width="60rem"
     >
-      <lg-page-header title="Settings" />
+      <lg-page-header heading="Settings" />
     </ng-template>
 
     <ng-template
@@ -79,16 +80,17 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-page-header
         icon="overview"
         eyebrow="Character"
-        title="Overview"
+        heading="Overview"
         summary="Stats, combat rating, and Essence loadout"
       >
-        <lg-search-field
-          lgSlot="actions"
-          placeholder="Search character by name…"
-          label="Search character by name"
-        />
-        <button lgButton lgSlot="actions" size="sm">Search</button>
-        <button lgButton="quiet" lgSlot="actions" size="sm">Refresh</button>
+        <lg-page-header-actions>
+          <lg-search-field
+            placeholder="Search character by name…"
+            label="Search character by name"
+          />
+          <button lgButton size="sm">Search</button>
+          <button lgButton="quiet" size="sm">Refresh</button>
+        </lg-page-header-actions>
       </lg-page-header>
     </ng-template>
   `,
@@ -100,7 +102,7 @@ export const PAGE_HEADER_SHOWCASE: ShowcaseEntry = {
   name: 'PageHeader',
   tier: 'components',
   summary: 'The information screen heading.',
-  covers: ['LgPageHeaderComponent'],
+  covers: ['LgPageHeaderComponent', 'LgPageHeaderActionsComponent'],
   readme: 'src/app/grimoire/components/page-header/README.md',
   component: PageHeaderShowcaseComponent,
 };

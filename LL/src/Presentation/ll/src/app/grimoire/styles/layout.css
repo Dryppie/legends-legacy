@@ -3,9 +3,11 @@
    A region is the Page, the Folio, each cell of a split or a comparison, or anything marked .lg-region.
    Content tiers, by the region's width: stacked < 32rem ≤ narrow < 44rem ≤ medium < 68rem ≤ wide
    (the content-* tokens; container conditions cannot read custom properties, so the values repeat here).
-   Every value is rem, so at Large and Extra large text a region reaches a smaller tier sooner. */
+   Every value is rem, so at Large and Extra large text a region reaches a smaller tier sooner.
+   A track layout's gaps are section-sm and the gutter, or --lg-layout-gap both ways where its region sets one: a Page
+   in the game's frame sets stack-lg (D-120). */
 :root { --lg-measure: 68ch; --lg-gutter: var(--lg-section-md); }
-.lg-region, .lg-folio__scroll { container: lg-region / inline-size; }
+.lg-region { container: lg-region / inline-size; }
 /* The region the pointer or focus is in paints above its neighbours, so its tooltips and suggestion lists are never covered. */
 .lg-region { position: relative; }
 :is(.lg-region, .lg-split > *, .lg-compare > *):is(:hover, :focus-within) { z-index: var(--lg-z-raised); }
@@ -21,7 +23,7 @@
 /* List + inspector. The split is its own container, so its mode follows its own width and its cells can ask it.
    Medium and wide (44rem and up): side by side, 3 : 2, the inspector never under inspector-min; the list gives way first.
    Narrow and stacked: one column; the inspector replaces the list while it is open (data-view="inspector"), with a Back button. */
-.lg-split { container: lg-split / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-section-sm) var(--lg-gutter); }
+.lg-split { container: lg-split / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-layout-gap, var(--lg-section-sm)) var(--lg-layout-gap, var(--lg-gutter)); }
 .lg-split > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; }
 .lg-split__back { width: fit-content; }
 @container lg-split (width < 44rem) {
@@ -35,17 +37,29 @@
 
 /* Main and side column (D-098): a main column and an aside-width side column from Medium up; below, the main column
    then the side. Each column is a region of its own, so what sits in it follows its width. */
-.lg-aside { container: lg-aside / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-section-sm) var(--lg-gutter); }
-.lg-aside > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; display: grid; gap: var(--lg-section-sm); }
+.lg-aside { container: lg-aside / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-layout-gap, var(--lg-section-sm)) var(--lg-layout-gap, var(--lg-gutter)); }
+.lg-aside > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; display: grid; gap: var(--lg-layout-gap, var(--lg-section-sm)); }
 @container lg-aside (width >= 44rem) {
   .lg-aside > .lg-aside__main { flex: 1 1 0; }
   .lg-aside > .lg-aside__side { flex: 0 0 var(--lg-aside-width); }
 }
 
 /* Split comparison: two panes 1 : 1 from 32rem up (narrow, medium, wide); stacked, one above the other. */
-.lg-compare { container: lg-compare / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-section-sm) var(--lg-gutter); }
+.lg-compare { container: lg-compare / inline-size; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--lg-layout-gap, var(--lg-section-sm)) var(--lg-layout-gap, var(--lg-gutter)); }
 .lg-compare > * { flex: 1 1 100%; min-width: 0; container: lg-region / inline-size; }
 @container lg-compare (width >= 32rem) { .lg-compare > * { flex: 1 1 0; } }
+
+/* Ledger grids: several Ledgers side by side (D-051). */
+.lg-ledgergrid {
+  /* The tier sets the most Ledgers a row may hold (--lg-cols); ledger-min sets the fewest pixels each may have, so a Ledger never truncates:
+     below that the grid drops a column. Four groups (the default): 1 · 2 · 2 · 4 from stacked to wide; --3: 1 · 2 · 3 · 3; --2: 1 · 2 · 2 · 2. */
+  --lg-cols: 1;
+  display: grid; gap: var(--lg-space-6) var(--lg-gutter);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--lg-ledger-min), calc((100% - (var(--lg-cols) - 1) * var(--lg-gutter)) / var(--lg-cols) - 0.1px))), 1fr));
+}
+@container lg-region (width >= 32rem) { .lg-ledgergrid { --lg-cols: 2; } }
+@container lg-region (width >= 44rem) { .lg-ledgergrid--3 { --lg-cols: 3; } }
+@container lg-region (width >= 68rem) { .lg-ledgergrid { --lg-cols: 4; } .lg-ledgergrid--3 { --lg-cols: 3; } .lg-ledgergrid--2 { --lg-cols: 2; } }
 
 /* Data tables: the table fills its region down to its minimum (--lg-table-min), then scrolls inside the wrapper with the first column held.
    Columns carry data-priority 1–4; 4 hides below wide, 3 below medium, 2 below narrow, 1 never. */

@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
-  LgBannerComponent,
+  LG_BANNER,
   LgLevelPlateComponent,
   LgProfileFactComponent,
   LgProfileIdentityComponent,
-  LgSlotDirective,
   LgStatFigureComponent,
 } from '@grimoire';
 import {
@@ -17,8 +16,7 @@ import { ShowcaseEntry } from '../showcase.types';
   selector: 'sc-banner-showcase',
   imports: [
     ShowcaseStoryDirective,
-    LgBannerComponent,
-    LgSlotDirective,
+    ...LG_BANNER,
     LgLevelPlateComponent,
     LgStatFigureComponent,
     LgProfileIdentityComponent,
@@ -28,7 +26,7 @@ import { ShowcaseEntry } from '../showcase.types';
   template: `
     <ng-template
       scStory="Level plate"
-      notes="Painted art under a veil, the double gilt frame and four corner ornaments; the headline figures beside the identity."
+      notes="Painted art under a veil, the double gilt frame and four corner ornaments; the headline figures, in lg-banner-aside, beside the identity."
       width="64rem"
     >
       <lg-banner [image]="art" [cornerSrc]="corner" label="Combat profile">
@@ -36,20 +34,21 @@ import { ShowcaseEntry } from '../showcase.types';
           <div lgProfileFact label="Guild">Emberwatch</div>
           <div lgProfileFact label="Essences">2 / 2 attuned</div>
         </lg-profile-identity>
-        <div lgSlot="aside" style="width: 13.75rem">
-          <lg-level-plate
-            [level]="17"
-            [xp]="8420"
-            [xpMax]="12000"
-            xpUnit="Combat XP"
+        <lg-banner-aside>
+          <div style="width: 13.75rem">
+            <lg-level-plate
+              [level]="17"
+              [xp]="8420"
+              [xpMax]="12000"
+              xpUnit="Combat XP"
+            />
+          </div>
+          <lg-stat-figure
+            label="Combat Rating"
+            value="1,284"
+            caption="Permanent attributes and the equipped build"
           />
-        </div>
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Combat Rating"
-          value="1,284"
-          caption="Permanent attributes and the equipped build"
-        />
+        </lg-banner-aside>
       </lg-banner>
     </ng-template>
 
@@ -69,24 +68,24 @@ import { ShowcaseEntry } from '../showcase.types';
           <div lgProfileFact label="Essences">2 / 2 attuned</div>
           <div lgProfileFact label="Achievement Points">1,240</div>
         </lg-profile-identity>
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Level"
-          [value]="17"
-          caption="8,420 / 12,000 Combat XP"
-        />
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Combat Rating"
-          value="1,284"
-          caption="Permanent attributes and the equipped build"
-        />
+        <lg-banner-aside>
+          <lg-stat-figure
+            label="Level"
+            [value]="17"
+            caption="8,420 / 12,000 Combat XP"
+          />
+          <lg-stat-figure
+            label="Combat Rating"
+            value="1,284"
+            caption="Permanent attributes and the equipped build"
+          />
+        </lg-banner-aside>
       </lg-banner>
     </ng-template>
 
     <ng-template
       scStory="With footer"
-      notes="An optional footer runs under the body, across the whole Banner."
+      notes="An optional lg-banner-footer runs under the body, across the whole Banner."
       width="64rem"
     >
       <lg-banner
@@ -99,16 +98,19 @@ import { ShowcaseEntry } from '../showcase.types';
           <div lgProfileFact label="Guild">Emberwatch</div>
           <div lgProfileFact label="Essences">2 / 2 attuned</div>
         </lg-profile-identity>
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Combat Rating"
-          value="1,284"
-          caption="Permanent attributes and the equipped build"
-        />
-        <p lgSlot="footer">
-          Active Nobility perks are applied automatically while Nobility is
-          active.
-        </p>
+        <lg-banner-aside>
+          <lg-stat-figure
+            label="Combat Rating"
+            value="1,284"
+            caption="Permanent attributes and the equipped build"
+          />
+        </lg-banner-aside>
+        <lg-banner-footer>
+          <p>
+            Active Nobility perks are applied automatically while Nobility is
+            active.
+          </p>
+        </lg-banner-footer>
       </lg-banner>
     </ng-template>
 
@@ -122,12 +124,13 @@ import { ShowcaseEntry } from '../showcase.types';
           <div lgProfileFact label="Guild">Emberwatch</div>
           <div lgProfileFact label="Essences">2 / 2 attuned</div>
         </lg-profile-identity>
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Combat Rating"
-          value="1,284"
-          caption="Permanent attributes and the equipped build"
-        />
+        <lg-banner-aside>
+          <lg-stat-figure
+            label="Combat Rating"
+            value="1,284"
+            caption="Permanent attributes and the equipped build"
+          />
+        </lg-banner-aside>
       </lg-banner>
     </ng-template>
 
@@ -146,18 +149,18 @@ import { ShowcaseEntry } from '../showcase.types';
           <div lgProfileFact label="Guild">Emberwatch</div>
           <div lgProfileFact label="Essences">2 / 2 attuned</div>
         </lg-profile-identity>
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Level"
-          [value]="17"
-          caption="8,420 / 12,000 Combat XP"
-        />
-        <lg-stat-figure
-          lgSlot="aside"
-          label="Combat Rating"
-          value="1,284"
-          caption="Permanent attributes and the equipped build"
-        />
+        <lg-banner-aside>
+          <lg-stat-figure
+            label="Level"
+            [value]="17"
+            caption="8,420 / 12,000 Combat XP"
+          />
+          <lg-stat-figure
+            label="Combat Rating"
+            value="1,284"
+            caption="Permanent attributes and the equipped build"
+          />
+        </lg-banner-aside>
       </lg-banner>
     </ng-template>
   `,
@@ -172,7 +175,11 @@ export const BANNER_SHOWCASE: ShowcaseEntry = {
   name: 'Banner',
   tier: 'components',
   summary: 'The headline block.',
-  covers: ['LgBannerComponent'],
+  covers: [
+    'LgBannerComponent',
+    'LgBannerAsideComponent',
+    'LgBannerFooterComponent',
+  ],
   readme: 'src/app/grimoire/components/banner/README.md',
   component: BannerShowcaseComponent,
 };

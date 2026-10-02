@@ -6,10 +6,19 @@ The persistent notice.
 
 A notice that stays until its cause goes: restricted access, progress being caught up, an error with a way out. It sits at the head of the stage or a region (D-111).
 
-**Provide:** `tone` (`info`, `warning`, `danger`), `title` (what happened, in words), the detail as content (`[text]="false"` when there is none), an `action` slot (usually one small Button: "Retry"), and `busy` while something is under way (`busyLabel` names it).
+**Use:**
 
-- Level 1 `surface-solid` with a 2px start bar in its tone — `info` azure, `warning` amber, `danger` ember — the title in `body-compact` 600 `ink`, the detail in `caption` `ink-muted`, the action at its end.
-- The title carries the meaning; the bar backs it and is never alone (Foundations · Colour).
+```html
+<lg-notice tone="danger" heading="Offline progress paused">
+  The server did not answer. Your progress is safe.
+  <lg-notice-actions><button lgButton size="sm" (click)="retry()">Retry</button></lg-notice-actions>
+</lg-notice>
+```
+
+**Provide:** `tone` (`info`, `warning`, `danger`), `heading` (what happened, in words), the detail as content (leave it out when there is none), its way out in `<lg-notice-actions>` (usually one small Button: "Retry"), and `busy` while something is under way (`busyLabel` names it). Import `LG_NOTICE` for both.
+
+- Level 1 `surface-solid` with a 2px start bar in its tone — `info` azure, `warning` amber, `danger` ember — the heading in `body-compact` 600 `ink`, the detail in `caption` `ink-muted`, the action at its end.
+- The heading carries the meaning; the bar backs it and is never alone (Foundations · Colour).
 - `danger` is an alert (`role="alert"`, announced at once); the others are a status, announced politely.
 - `busy` adds a small pulsing dot in the tone: an indeterminate progressbar, the one kind of loop Foundations · Motion allows outside playback.
 - One notice per cause; stack several with `stack-sm`. A passing confirmation is a toast, not a Notice.
@@ -18,10 +27,10 @@ A notice that stays until its cause goes: restricted access, progress being caug
 
 | State | Channel | Words | Screen readers hear |
 | --- | --- | --- | --- |
-| Info | Edge: the azure bar | The title | "Multiplayer access restricted …" (polite) |
-| Warning | Edge: the amber bar | The title | The title and detail (polite) |
-| Danger | Edge: the ember bar | The title | The title and detail (assertive) |
-| Busy | Marker: the pulsing dot | The title | "In progress, progress bar, busy" |
+| Info | Edge: the azure bar | The heading | "Multiplayer access restricted …" (polite) |
+| Warning | Edge: the amber bar | The heading | The heading and detail (polite) |
+| Danger | Edge: the ember bar | The heading | The heading and detail (assertive) |
+| Busy | Marker: the pulsing dot | The heading | "In progress, progress bar, busy" |
 
 ## Accessibility notes
 

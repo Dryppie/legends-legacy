@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
+  LG_PANEL,
   LgButtonComponent,
   LgIconName,
   LgListComponent,
   LgListRowComponent,
-  LgPanelComponent,
   LgPresenceComponent,
   LgRarity,
   LgSlotDirective,
@@ -42,7 +42,7 @@ interface Member {
     LgListComponent,
     LgListRowComponent,
     LgSlotDirective,
-    LgPanelComponent,
+    ...LG_PANEL,
     LgTagComponent,
     LgPresenceComponent,
     LgButtonComponent,
@@ -54,8 +54,11 @@ interface Member {
       notes="Standard rows in a flush Panel: thumbnail, name and rarity code, Tags and meta, quantity, value. Click a row to select it. Values are sell prices in Cinders."
       width="32rem"
     >
-      <lg-panel title="Inventory" flush>
-        <span lgSlot="aside">5 of 60</span>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Inventory</lg-panel-title>
+          <span>5 of 60</span>
+        </lg-panel-header>
         <lg-list label="Inventory">
           @for (it of items; track it.id) {
             <li
@@ -84,8 +87,11 @@ interface Member {
       notes="Guild members on 32px rows, one line, with Presence trailing. Values are contribution this season."
       width="32rem"
     >
-      <lg-panel title="Guild members" flush density="compact">
-        <span lgSlot="aside">5 of 24</span>
+      <lg-panel flush density="compact">
+        <lg-panel-header>
+          <lg-panel-title>Guild members</lg-panel-title>
+          <span>5 of 24</span>
+        </lg-panel-header>
         <lg-list label="Guild members">
           @for (m of members; track m.name) {
             <li
@@ -112,7 +118,10 @@ interface Member {
       notes="48px rows for a short list in a detail view: meta on its own line."
       width="32rem"
     >
-      <lg-panel title="Inventory" flush density="comfortable">
+      <lg-panel flush density="comfortable">
+        <lg-panel-header>
+          <lg-panel-title>Inventory</lg-panel-title>
+        </lg-panel-header>
         <lg-list label="Inventory">
           @for (it of items.slice(0, 3); track it.id) {
             <li
@@ -134,7 +143,10 @@ interface Member {
       notes="One small Button at the row's end. Trailing actions leave the tab order: Right moves into them, Left back."
       width="32rem"
     >
-      <lg-panel title="Inventory" flush>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Inventory</lg-panel-title>
+        </lg-panel-header>
         <lg-list label="Inventory">
           @for (it of items.slice(2); track it.id) {
             <li
@@ -158,7 +170,10 @@ interface Member {
       notes="A row whose item left while the list was held: muted, its action disabled, a word in meta."
       width="32rem"
     >
-      <lg-panel title="Inventory" flush>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Inventory</lg-panel-title>
+        </lg-panel-header>
         <lg-list label="Inventory">
           <li
             lgListRow
@@ -204,7 +219,10 @@ interface Member {
       notes="rhythm=zebra: every second row on row-stripe, no separators. For wide rows read across, such as rankings."
       width="32rem"
     >
-      <lg-panel title="Guild members" flush>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Guild members</lg-panel-title>
+        </lg-panel-header>
         <lg-list label="Guild members" rhythm="zebra">
           @for (m of members; track m.name) {
             <li
@@ -223,7 +241,10 @@ interface Member {
       notes="rhythm=spacing: nothing drawn; the row height sets them apart. For short lists of about five rows."
       width="32rem"
     >
-      <lg-panel title="Guild members" flush>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Guild members</lg-panel-title>
+        </lg-panel-header>
         <lg-list label="Guild members" rhythm="spacing">
           @for (m of members; track m.name) {
             <li
@@ -242,7 +263,10 @@ interface Member {
       notes="A column shows when any row uses it; a row with no quantity shows —."
       width="32rem"
     >
-      <lg-panel title="Inventory" flush>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Inventory</lg-panel-title>
+        </lg-panel-header>
         <lg-list label="Inventory">
           <li
             lgListRow
@@ -276,15 +300,13 @@ interface Member {
       notes="A value that changes by itself takes the live-update mark. Press Refresh price to see it."
       width="32rem"
     >
-      <lg-panel title="Bazaar" flush>
-        <button
-          lgButton="quiet"
-          lgSlot="aside"
-          size="sm"
-          (click)="price.set(price() + 50)"
-        >
-          Refresh price
-        </button>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Bazaar</lg-panel-title>
+          <button lgButton="quiet" size="sm" (click)="price.set(price() + 50)">
+            Refresh price
+          </button>
+        </lg-panel-header>
         <lg-list label="Bazaar">
           <li
             lgListRow

@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
+  LG_FOLIO,
+  LG_PANEL,
   LgActivityComponent,
   LgButtonComponent,
   LgChronicleChannel,
@@ -7,7 +9,6 @@ import {
   LgChronicleMessage,
   LgChroniclePosition,
   LgCurrencyPillComponent,
-  LgFolioComponent,
   LgGameShellComponent,
   LgKeyHint,
   LgKeyHintsComponent,
@@ -18,7 +19,6 @@ import {
   LgObjectiveComponent,
   LgPageComponent,
   LgPageHeaderComponent,
-  LgPanelComponent,
   LgSlotDirective,
   LgStageComponent,
   LgTopBarComponent,
@@ -196,13 +196,13 @@ const HINTS: readonly LgKeyHint[] = [
     LgTopBarComponent,
     LgObjectiveComponent,
     LgCurrencyPillComponent,
-    LgFolioComponent,
+    ...LG_FOLIO,
     LgButtonComponent,
     LgKeyHintsComponent,
     LgChronicleComponent,
     LgPageComponent,
     LgPageHeaderComponent,
-    LgPanelComponent,
+    ...LG_PANEL,
     LgListComponent,
     LgListRowComponent,
     LgStageComponent,
@@ -248,13 +248,13 @@ const HINTS: readonly LgKeyHint[] = [
             iconSrc="assets/game-emblems/soulstones-v1-64.webp"
           />
         </lg-top-bar>
-        <lg-folio
-          lgSlot="folio"
-          eyebrow="Region"
-          title="Shenic"
-          lore="Temples older than the roads that lead to them."
-        >
-          <button lgButton hotkey="↵" lgSlot="actions">Travel</button>
+        <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
+          <lg-folio-lore
+            >Temples older than the roads that lead to them.</lg-folio-lore
+          >
+          <lg-folio-actions>
+            <button lgButton hotkey="↵">Travel</button>
+          </lg-folio-actions>
         </lg-folio>
         <lg-key-hints lgSlot="hints" [hints]="hints" />
         <lg-chronicle
@@ -265,12 +265,15 @@ const HINTS: readonly LgKeyHint[] = [
         />
         <lg-page label="World Map">
           <lg-page-header
-            title="World Map"
+            heading="World Map"
             eyebrow="World"
             icon="world-map"
             summary="Travel and explore."
           />
-          <lg-panel title="Regions" flush>
+          <lg-panel flush>
+            <lg-panel-header>
+              <lg-panel-title>Regions</lg-panel-title>
+            </lg-panel-header>
             <lg-list label="Regions">
               <li
                 lgListRow
@@ -320,13 +323,13 @@ const HINTS: readonly LgKeyHint[] = [
             short
           />
         </lg-top-bar>
-        <lg-folio
-          lgSlot="folio"
-          eyebrow="Region"
-          title="Shenic"
-          lore="Temples older than the roads that lead to them."
-        >
-          <button lgButton hotkey="↵" lgSlot="actions">Travel</button>
+        <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
+          <lg-folio-lore
+            >Temples older than the roads that lead to them.</lg-folio-lore
+          >
+          <lg-folio-actions>
+            <button lgButton hotkey="↵">Travel</button>
+          </lg-folio-actions>
         </lg-folio>
         <lg-key-hints lgSlot="hints" [hints]="hints" />
         <lg-chronicle
@@ -373,12 +376,15 @@ const HINTS: readonly LgKeyHint[] = [
         />
         <lg-page label="World Map">
           <lg-page-header
-            title="World Map"
+            heading="World Map"
             eyebrow="World"
             icon="world-map"
             summary="Travel and explore."
           />
-          <lg-panel title="Regions" flush>
+          <lg-panel flush>
+            <lg-panel-header>
+              <lg-panel-title>Regions</lg-panel-title>
+            </lg-panel-header>
             <lg-list label="Regions">
               <li
                 lgListRow
@@ -456,12 +462,15 @@ const HINTS: readonly LgKeyHint[] = [
         />
         <lg-page label="World Map">
           <lg-page-header
-            title="World Map"
+            heading="World Map"
             eyebrow="World"
             icon="world-map"
             summary="Travel and explore."
           />
-          <lg-panel title="Regions" flush>
+          <lg-panel flush>
+            <lg-panel-header>
+              <lg-panel-title>Regions</lg-panel-title>
+            </lg-panel-header>
             <lg-list label="Regions">
               <li
                 lgListRow
@@ -531,13 +540,13 @@ const HINTS: readonly LgKeyHint[] = [
             iconSrc="assets/game-emblems/soulstones-v1-64.webp"
           />
         </lg-top-bar>
-        <lg-folio
-          lgSlot="folio"
-          eyebrow="Region"
-          title="Shenic"
-          lore="Temples older than the roads that lead to them."
-        >
-          <button lgButton hotkey="↵" lgSlot="actions">Travel</button>
+        <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
+          <lg-folio-lore
+            >Temples older than the roads that lead to them.</lg-folio-lore
+          >
+          <lg-folio-actions>
+            <button lgButton hotkey="↵">Travel</button>
+          </lg-folio-actions>
         </lg-folio>
         <lg-chronicle
           lgSlot="chronicle"
@@ -547,12 +556,15 @@ const HINTS: readonly LgKeyHint[] = [
         />
         <lg-page label="World Map">
           <lg-page-header
-            title="World Map"
+            heading="World Map"
             eyebrow="World"
             icon="world-map"
             summary="Travel and explore."
           />
-          <lg-panel title="Regions" flush>
+          <lg-panel flush>
+            <lg-panel-header>
+              <lg-panel-title>Regions</lg-panel-title>
+            </lg-panel-header>
             <lg-list label="Regions">
               <li
                 lgListRow
@@ -608,12 +620,15 @@ const HINTS: readonly LgKeyHint[] = [
         </lg-top-bar>
         <lg-page label="World Map">
           <lg-page-header
-            title="World Map"
+            heading="World Map"
             eyebrow="World"
             icon="world-map"
             summary="Travel and explore."
           />
-          <lg-panel title="Regions" flush>
+          <lg-panel flush>
+            <lg-panel-header>
+              <lg-panel-title>Regions</lg-panel-title>
+            </lg-panel-header>
             <lg-list label="Regions">
               <li
                 lgListRow

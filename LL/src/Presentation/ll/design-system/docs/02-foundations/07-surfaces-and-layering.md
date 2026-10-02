@@ -23,8 +23,8 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 
 **Should**
 - Build surfaces from the level classes (`lg-level-1`, `lg-level-2`, `lg-level-3`, their `--float` variants and `lg-scrim`), or from the same tokens.
-- Detach a popover (portal it to the body) when it must cross the edge of the region or dialog it opens from.
-- Register anything that Escape closes with `lgOpenLayer`. The one stack then keeps the order and returns focus.
+- Open every popover, tooltip, menu, dialog and confirmation on the Angular CDK overlay (D-134), so no region or dialog clips it and it stacks in the order it opened.
+- Give anything else that Escape closes (the rail drawer, the Objective's tracker) the same manners: leave an Escape something above it already took (`defaultPrevented`) alone, and mark the Escape it takes.
 - Show selection with a solid `border-emphasis` (2px) `arcana-glow` ring or edge — an `ink` bar in item rows and chat — and hover with the neutral `surface-raised` wash (D-015, Foundations · Lines).
 - Treat stage art the same way everywhere:
   - darkened, warmed and slightly blurred;
@@ -51,7 +51,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 | **Scrim** | `scrim` (`slate-950` at 80%) | None | None | — | None; never blurred | Beneath a dialog, a confirmation, the rail drawer and the tour's spotlight |
 
 - **Levels are not a lightness ramp.** The fills are ground `#101014`, surface `#101014` at 72% over the backdrop (about `surface-solid`, `#16161b`), surface-raised `#22222a` and folio `#131318`: the Folio is darker than a hover wash. Level 3 reads as the highest through `shadow-panel`, and the Folio through its frame as well. Every level holds `ink` at 12.74:1 or more and `line-strong` edges at 3:1 or more (Foundations · Colour · Contrast).
-- **Inner surfaces of Level 2.** StatTiles and the active primary tab take `tile`, a step up from `surface` inside a Level 1 container.
+- **Inner surfaces of Level 2.** The active primary tab takes `tile`, a step up from `surface` inside a Level 1 container.
 - **Wells sink below Level 0.** Inputs, item slots and the inventory grid's gutters are `ground-deep`; a LoadoutSlot is `ground`. A well counts as an enclosed level, like a tile.
 - **Modal surfaces take `shadow-panel`.** A dialog or confirmation over a scrim has Level 3's shadow. So does the rail drawer on small screens: the NavRail keeps its Level 1 fill, but it is modal.
 - **The level classes:**
@@ -77,7 +77,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 | --- | --- |
 | The Page, then a Panel, then a hovered ListRow's wash | A Panel inside a Panel |
 | The Page, then the JourneyCard (Level 1), then its objective wash | A Level 3 card with `shadow-panel` on the Page, as the JourneyCard was before D-055 |
-| The Folio, then a StatTile | The Folio, then a Panel, then a StatTile |
+| The Folio, then an ItemSlot | The Folio, then a Panel, then an ItemSlot |
 | A dialog, then item-slot wells | A dialog, then a Panel, then a LoadoutSlot, then an ItemSlot |
 | A tooltip over the Page, with its shadow and edge | A tooltip drawn in flow, on the surface of the row beneath, with no shadow |
 
@@ -117,15 +117,17 @@ From the bottom up. A layer paints over every layer below it, whatever the level
 
 `z-overlay`, `z-popover`, `z-modal` and `z-popover-detached` keep the game's values. The other ten fill the gaps around them.
 
+**The CDK overlay (D-134).** Popovers, tooltips, menus, dialogs and confirmations open in the Angular CDK's overlay container, which sits above every layer in the page, the legacy screens' overlays included. Inside it they stack in the order they open: a popover opened from a dialog sits above that dialog, and a tooltip above whatever it opened from. So the tokens from `z-popover` up name an order the overlay keeps, not a z-index anything sets. The toast, the tour and a drag preview will lift their overlay above the rest with their token when they are built. Script reads the values from `LG_LAYER` in `tokens.ts`.
+
 - **Layers compare at the top of the document.** The Stage, the Page (a size container), each region and each dialog start their own stacking context. Nothing drawn in place inside one can rise above the shell's layers outside it: an in-place tooltip in the Page stays under the TopBar and the Folio.
-- **A popover that must pass over the shell's layers portals to the body:** the page's at `z-popover`, a dialog's at `z-popover-detached`. The Ledger's explanation is drawn in place today; the shared Tooltip (Audit item 2) will portal.
+- **A popover never draws in place:** it opens on the CDK overlay, so it passes over the shell's layers and is never clipped by the region or dialog it came from. The tip — a tooltip, a Ledger row's explanation, a blocked control's reason — is one float for the page, on the overlay.
 - **Portaled page popovers outrank the drawer.** A floor's tooltip on the dungeon route (100) covers the floating Chronicle (40), which in turn covers the Folio (30).
 - **Opening a dialog closes the page's popovers.** They belong to a page that is now inert.
 - **Toasts** are Level 2 floating surfaces at the top centre of the stage.
   - At most three show at once, newest on top.
   - Each stays at least 6 seconds, and pauses while hovered or focused.
   - Each can be dismissed, and is never the only way to act.
-  - A toast never takes focus. It is announced through `lgAnnounce`, not a live region of its own (Foundations · Accessibility · Live regions).
+  - A toast never takes focus. It is announced through `LgAnnouncer`, not a live region of its own (Foundations · Accessibility · Live regions).
 - **Drag previews** are the dragged thing's own surface at Level 2 floating: opaque, never faded.
   - Escape cancels the drag and puts the item back.
   - Every drag also has a single-pointer alternative, such as a Move button or a menu (WCAG 2.5.7).
@@ -153,14 +155,14 @@ From the bottom up. A layer paints over every layer below it, whatever the level
    | 6 | A page popover or menu | Closes it |
    | 7 | The rail drawer | Closes it |
 
-   Each layer stops the key there. The layer stack (`lgOpenLayer`) keeps this order: the highest z first, then the latest opened. A toast takes Escape only while focus is in it. A screen may use Escape for Back only when no layer is open.
+   Each layer stops the key there. The tip hears Escape before anything else. The CDK overlays hear it next, the latest opened first, and each marks the Escape it uses; the rail drawer and the Objective's tracker, which aren't overlays, leave a marked Escape alone. A toast takes Escape only while focus is in it. A screen may use Escape for Back only when no layer is open.
 4. **Focus goes into a layer, and back to where it came from.**
    - Opening a layer moves focus into it: a dialog to its first control, a confirmation to its safe button, the tour to its coach mark.
    - Popovers that open on hover or focus don't take focus.
    - A dialog, a confirmation and the tour trap Tab (`trap`), and everything beneath them is `inert`.
    - Closing a layer returns focus to the element that opened it. If that element is gone (the item was withdrawn), focus goes to the nearest thing that remains: the next row, or the dialog's heading.
 
-`lgOpenLayer({ kind, onClose, opener, trap })` implements these rules. It returns a handle; close it when the layer goes. `lgTopLayer()` names the topmost layer, and step 11 of the Angular design-system plan moves this stack onto the Angular CDK overlay. The future Dialog, Tooltip, Toast and tour are built on it.
+The Angular CDK implements these rules (D-134): its Overlay for popovers, tooltips and menus, its keyboard dispatcher for the order Escape takes, and `cdk/dialog` for the dialog and the confirmation (focus trap, focus return, Escape, `aria-modal`), which plan step 21 builds. The tip is `LgTip`, under `lgTooltip` and `lgBlocked`.
 
 ## In the game
 
@@ -206,7 +208,7 @@ From the bottom up. A layer paints over every layer below it, whatever the level
 | --- | --- |
 | `ground`, `surface`, `surface-raised`, `folio` | The fills of Levels 0–3 |
 | `ground-deep` | Wells, below Level 0 |
-| `tile` | Level 2 inner surfaces: StatTiles, the active tab |
+| `tile` | Level 2 inner surfaces: the active tab |
 | `scrim` | The dimmer beneath a modal layer |
 | `line-strong` | Floating and modal edges |
 | `border-hairline` | Every surface edge |

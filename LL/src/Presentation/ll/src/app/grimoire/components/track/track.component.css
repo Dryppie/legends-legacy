@@ -1,6 +1,8 @@
 /* ---------- Track ---------- */
 .lg-track { display: flex; align-items: center; gap: var(--lg-space-3); min-width: 0; }
 .lg-track__end { font-family: var(--lg-font-ui); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); white-space: nowrap; }
+/* At 400% zoom (a 320px-wide region) the end label wraps instead of pushing the Track wider (WCAG 1.4.10). */
+@container (max-width: 30rem) { .lg-track__end { white-space: normal; min-width: 0; } }
 .lg-track__rail { position: relative; flex: 1; min-width: 5rem; height: 1.125rem; margin: 0 0.5625rem; }
 .lg-track__rail::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--lg-meter-track); box-shadow: 0 0 0 var(--lg-border-hairline) var(--lg-line); }
 .lg-track__fill { position: absolute; left: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--lg-track); }

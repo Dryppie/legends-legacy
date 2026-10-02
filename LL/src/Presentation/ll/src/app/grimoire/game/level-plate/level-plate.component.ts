@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { LgIconComponent } from '../../primitives/icon/icon.component';
 import { LgIconName } from '../../core/grimoire-icons';
 import { LgMeterComponent } from '../../primitives/meter/meter.component';
-import { LgNumComponent } from '../../primitives/num/num.component';
+import { LgValuePipe } from '../../core/grimoire-numerals';
 import { LG_NBSP, lgFormatFraction, lgFormatUnit } from '../../core/grimoire-format';
 
 export interface LgLevelPlateStat {
@@ -16,7 +16,7 @@ export interface LgLevelPlateStat {
 /** The level display: a large level numeral with its progress bar and up to two headline stats. */
 @Component({
   selector: 'lg-level-plate',
-  imports: [LgIconComponent, LgMeterComponent, LgNumComponent],
+  imports: [LgIconComponent, LgMeterComponent, LgValuePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
@@ -34,7 +34,8 @@ export interface LgLevelPlateStat {
                   <lg-icon [name]="stat.icon" [size]="16" />
                 }
                 <span class="lg-levelplate__aside-label">{{ stat.label }}</span>
-                <b><lg-num [value]="stat.unit ? unit(stat.value, stat.unit) : stat.value" /></b>
+                @let v = (stat.unit ? unit(stat.value, stat.unit) : stat.value) | lgValue;
+                <b>{{ v.number }}<span class="lg-unit">{{ v.unit }}</span></b>
               </li>
             }
           </ul>

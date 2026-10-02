@@ -6,7 +6,18 @@ The detail panel.
 
 The right-hand detail panel: an emblem, a title, a paragraph of lore, effect lines and one action — the answer to "what is this thing I selected?".
 
-**Provide:** `title` and any of an `emblem` slot (an Emblem, or an ItemSlot for an item), `eyebrow`, `rarity` (when it explains an item), `lore` (wrap key nouns in `<b>`, in a `lgSlot="lore"` child; the `lore` input is plain text), `effects` (`[{ value, text }]`), an `actions` slot (one Button, two at most), a `footer` slot (a Track), content for stat stacks, and `cornerSrc` (the CornerOrnament asset URL) for the engraved corners.
+**Use:**
+
+```html
+<lg-folio eyebrow="Attribute" heading="Power" [effects]="effects" [cornerSrc]="corner">
+  <lg-folio-emblem><lg-emblem [points]="6" [size]="148" /></lg-folio-emblem>
+  <lg-folio-lore>Raw force behind every blow and spell. With <b>Power</b> as your weapon, you break what others only bend.</lg-folio-lore>
+  <lg-folio-actions><button lgButton hotkey="E">View breakdown</button></lg-folio-actions>
+  <lg-folio-footer><lg-track [steps]="5" [current]="1" label="Legacy Ascension" /></lg-folio-footer>
+</lg-folio>
+```
+
+**Provide:** `heading` (with `headingSub` for lighter first words: "Ember" Wolf) and any of `<lg-folio-emblem>` (an Emblem, or an ItemSlot for an item), `eyebrow`, `rarity` (when it explains an item), `<lg-folio-lore>` (wrap key nouns in `<b>`), `effects` (`[{ value, text }]` or plain lines), `<lg-folio-actions>` (one Button, two at most), `<lg-folio-footer>` (a Track), other content for stat stacks (placed after the effects), `label` (what screen readers call it; its heading, or "Details", by default) and `cornerSrc` (the CornerOrnament asset URL) for the engraved corners. Import `LG_FOLIO` for the Folio and its regions.
 
 - **Level 3** (Foundations · Surfaces & Layering): `folio` with `shadow-panel` and a double inset frame in `gilt`. It has no film grain: it bears no art, and its lore and effects would sit straight on the texture (D-072). The frame and corners are brand ornament — gilt's first job — and carry no meaning. The double gilt frame is its one edge, and belongs to the Folio and the Banner only (Foundations · Lines). Its fill is not lighter than a hover wash: its height reads from the shadow and the frame.
 - **Its layer is `z-folio`,** above the stage and the TopBar, so its shadow falls on them. The floating Chronicle (`z-chat-float`) and every popover pass over it.
@@ -17,5 +28,5 @@ The right-hand detail panel: an emblem, a title, a paragraph of lore, effect lin
 - **One enclosed level inside it:** tiles, slots, inputs and washes, never a Panel (Principles · Anti-generic guardrails).
 - **Its ornament budget** (Foundations · Ornament): the Folio is the screen's one ornamented framed surface — its frame, its four CornerOrnaments (`cornerSrc`) and one Emblem — so a screen with a Folio has no Banner. It draws the SectionRule ornament between lore and effects itself and holds no other: that is one of the screen's two ornament rules. Group its stats with space, a `band` or a `hairline`. Its Ledgers keep their dotted leaders, with no box around them, and the footer's hairline sets off the Track (Foundations · Lines).
 - **Nothing in it is lit** but the selection and focus, drawn flat: no glowing title, numeral or item, and no halo for rarity. A Folio beside a Banner inside one GameShell logs a console warning.
-- **The Folio is a region** (`lg-region`) of 18.5rem inside, always the Stacked tier: grids in it hold one Ledger and two StatTiles a row (Foundations · Layout).
+- **The Folio is a region** (`lg-region`) of 18.5rem inside, always the Stacked tier: grids in it hold one Ledger a row, and its secondary stats are a two-up Ledger (`columns="2"`, Foundations · Layout). For screen readers it is complementary content (`role="complementary"`), named by its heading.
 - One Folio per screen, and it is the screen's only inspector: stage screens use it, Page screens put their inspector in the content (D-052). Don't put navigation in it.

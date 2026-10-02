@@ -20,7 +20,7 @@ Cinders or Soulstones with their art and amount, for the TopBar and shop headers
 | Role and name | A `button` when it is short or `interactive`, else text. Screen readers hear the full amount and name ("12,480 Cinders"), whatever is shown |
 | Keyboard | A short pill is a Tab stop: Enter or Space toggles the format. A full-figure pill that is not `interactive` is not focusable |
 | Focus | `focus-ring` |
-| Announced | The full figure, never "12.5k". It is not a live region: announce gains through the Chronicle's loot line or `lgAnnounce` |
+| Announced | The full figure, never "12.5k". It is not a live region: announce gains through the Chronicle's loot line or `LgAnnouncer` |
 | Hover and tap | The full figure is in the `title` and is read out, and a click, tap or key shows it, so nothing is hover-only |
 | Target size | 30px high |
 | Text scaling | In the TopBar, the name gives way to the art under 40rem and the strip scrolls sideways at 320px; the amount keeps its reserved width |

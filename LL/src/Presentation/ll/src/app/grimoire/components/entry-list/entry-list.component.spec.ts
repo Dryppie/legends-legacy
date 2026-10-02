@@ -3,10 +3,7 @@ import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgEntry, LgEntryListComponent } from './entry-list.component';
 import { LgEntryListHarness } from '../../testing/entry-list.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -43,7 +40,7 @@ describe('LgEntryListComponent', () => {
     const page = TestbedHarnessEnvironment.documentRootLoader(fixture);
     /** The reason tip while it shows, or null. */
     const shownTip = () =>
-      page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true }));
+      page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
     return { host: fixture.componentInstance, list, shownTip };
   }
 
@@ -55,8 +52,8 @@ describe('LgEntryListComponent', () => {
   }
 
   beforeEach(lgAnnouncerIdle);
-  beforeEach(lgCloseReasonTip);
-  afterEach(lgCloseReasonTip);
+  beforeEach(lgCloseTip);
+  afterEach(lgCloseTip);
 
   it('starts with the active entry as its one tab stop', fakeAsync(async () => {
     const { list } = await setup();

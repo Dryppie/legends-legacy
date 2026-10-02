@@ -7,10 +7,7 @@ import {
   LgConstellationRing,
 } from './constellation.component';
 import { LgConstellationHarness } from '../../testing/constellation.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -75,7 +72,7 @@ describe('LgConstellationComponent', () => {
     const page = TestbedHarnessEnvironment.documentRootLoader(fixture);
     /** The reason tip while it shows, or null. */
     const shownTip = () =>
-      page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true }));
+      page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
     return { host: fixture.componentInstance, chart, shownTip };
   }
 
@@ -87,8 +84,8 @@ describe('LgConstellationComponent', () => {
   }
 
   beforeEach(lgAnnouncerIdle);
-  beforeEach(lgCloseReasonTip);
-  afterEach(lgCloseReasonTip);
+  beforeEach(lgCloseTip);
+  afterEach(lgCloseTip);
 
   it('starts with the selected Sigil pressed and as its one tab stop', fakeAsync(async () => {
     const { chart } = await setup();

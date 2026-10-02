@@ -34,14 +34,13 @@ Every component starts at Draft (Governance defines the statuses). They are grou
 | Heading | the titles | Type & ornament | Draft |
 | Icon | the game's icon set | Type & ornament | Draft |
 | SectionRule | the dividers | Type & ornament | Draft |
+| Tooltip | a short explanation beside the thing under the pointer or focus | Type & ornament | Draft |
 | Key | the key cap | Type & ornament | Draft |
 | Ledger | the labelled value list | Data | Draft |
 | Meter | the progress bar | Data | Draft |
-| StatTile | the compact stat | Data | Draft |
 | Delta | the stat change | Data | Draft |
 | StatFigure | the headline number | Data | Draft |
 | Track | the milestone track | Data | Draft |
-| Num | a number with its unit | Data | Draft |
 | Panel | the content box | Containers | Draft |
 | Banner | the headline block | Containers | Draft |
 | PageHeader | the information screen heading | Containers | Draft |
@@ -105,7 +104,7 @@ All of them, through the Foundations; no component defines a colour, size, radiu
 | A `quiet` Button for Cancel. | A new grey button colour. |
 | An ItemSlot with the item's name, its code and its meta, and an icon until there is art. | An ItemSlot that only shows a picture. |
 | The JourneyCard on your own Overview. | The JourneyCard while viewing Maren's profile. |
-| A StatTile for "1,284". | A Sigil stretched to fit "1,284". |
+| A Ledger row or a StatFigure for "1,284". | A Sigil stretched to fit "1,284". |
 
 ## Related sections
 

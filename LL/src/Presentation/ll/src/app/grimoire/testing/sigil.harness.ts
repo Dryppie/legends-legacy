@@ -3,7 +3,7 @@ import {
   ComponentHarness,
   HarnessPredicate,
 } from '@angular/cdk/testing';
-import { lgDescriptionOf } from './reason-tip.harness';
+import { lgDescriptionOf } from './tip.harness';
 
 export interface LgSigilHarnessFilters extends BaseHarnessFilters {
   /** The stat's name beside the hex ("Int"), as text or a pattern. */

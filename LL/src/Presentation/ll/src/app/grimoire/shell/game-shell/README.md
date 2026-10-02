@@ -35,7 +35,7 @@ The full-screen frame every in-game screen sits in: NavRail on the left, the sta
 | Role and name | `main` holds the stage and TopBar; the rail, Folio and Chronicle name themselves |
 | Keyboard | "Skip to content" is the first tab stop; then the rail, TopBar, stage, Folio and Chronicle in that order. Under 60rem the rail is a drawer: Escape closes it |
 | Focus | Opening the drawer moves focus to its first item and makes the rest `inert`; closing returns focus to the menu button |
-| Announced | Nothing of its own; one announcer (`lgAnnounce`) serves the app |
+| Announced | Nothing of its own; one announcer (`LgAnnouncer`) serves the app |
 | Hover and tap | Nothing |
 | Target size | The menu button is 36px |
 | Text scaling | Columns are rem, so the shell reflows sooner at larger text: the Chronicle leaves its own column under 96rem and the rail becomes a drawer under 60rem (Foundations · Accessibility · Text scaling) |

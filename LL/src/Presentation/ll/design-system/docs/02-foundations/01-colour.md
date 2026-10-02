@@ -10,7 +10,7 @@ Colour comes in three tiers — palette primitives hold the raw values, semantic
 - Give each hue family one job per context, as the allocation table sets out. A new use takes a job the table already lists, or the table changes with a Decision Log entry (D-015).
 - Keep `gilt` to its four jobs: brand and current location, the one committing action, the screen's one headline figure, and effect magnitudes inside descriptions.
 - Use `arcana` only for ready, new, actionable or selected.
-- Set ordinary data values — Ledger values, table cells, stat tiles — in `ink`.
+- Set ordinary data values — Ledger values, table cells — in `ink`.
 - Let each context's owner hold the hue: rarity in item contexts, the damage type in combat, the channel in chat — and in chat only on tags and speaker names. Everything else there is a word, a glyph or a shape (D-017).
 - Keep the rarity and damage hues as they are: players have learned them. Resolve a collision by moving the other token or by requiring a word, glyph or form (D-016).
 - Keep each status to its meaning: `danger` for loss, destruction and failure; `warning` for attention — a reversible risk, a shortfall, something expiring soon; `success` for a confirmed outcome only; `info` for neutral notices. "Ready" and "claimable" are `arcana` (D-025).
@@ -56,7 +56,7 @@ The token viewer groups colours by name stem, so its first group, which it label
 
 An earlier audit of the game found one accent colour carrying too many meanings, and Grimoire had repeated it: `gilt` marked group labels, eyebrows, effect values, Ledger values, the level numeral, the active nav marker, selected rules and the solid button. A colour that means everything marks nothing. So each hue family — a ramp and the tokens that alias it — does one job per context (D-015).
 
-**The contexts.** **Shell** — the frame: TopBar, NavRail, Stage, the brass furniture of Folio and Banner. **Controls** — buttons, tabs, inputs. **Data** — Ledgers, stat tiles, figures, tables and notices on information screens. **Descriptions** — effect lines, perks, abilities, lore. **Meters** — every Meter and Track fill. **Items** — ItemSlot, ItemLink, LoadoutSlot, loot and market rows, an item's Folio. **Combat** — damage numbers and combat results. **Chat** — the Chronicle.
+**The contexts.** **Shell** — the frame: TopBar, NavRail, Stage, the brass furniture of Folio and Banner. **Controls** — buttons, tabs, inputs. **Data** — Ledgers, figures, tables and notices on information screens. **Descriptions** — effect lines, perks, abilities, lore. **Meters** — every Meter and Track fill. **Items** — ItemSlot, ItemLink, LoadoutSlot, loot and market rows, an item's Folio. **Combat** — damage numbers and combat results. **Chat** — the Chronicle.
 
 | Hue family | Shell | Controls | Data | Descriptions | Meters | Items | Combat | Chat |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -89,7 +89,7 @@ Gilt no longer marks group labels and eyebrows (`ink-muted`), Ledger and other d
 
 ### Not yet on the allocation
 
-These components still break the allocation. They are listed rather than hidden and are queued in Governance · Audit & consolidation map (revision item 9). Ledger, Folio, Tag, NavRail and Chronicle follow it (D-018 to D-022), StatTile since D-026, and EntryList and LoadoutSlot since D-087.
+These components still break the allocation. They are listed rather than hidden and are queued in Governance · Audit & consolidation map (revision item 9). Ledger, Folio, Tag, NavRail and Chronicle follow it (D-018 to D-022), StatTile did from D-026 until it merged into Ledger (D-137), and EntryList and LoadoutSlot since D-087.
 
 | Component | Off the allocation | Moves to |
 | --- | --- | --- |
@@ -162,7 +162,7 @@ Effects follow the same rule. `effect-beneficial` marks Empower and Haste, `effe
 - The glyph and the sign say which way the number moved, the colour says whether that helps, and screen readers hear both in words: "−1.2s, better". The meaning never depends on colour.
 - The signs are true signs: + and − (U+2212), never a hyphen.
 - Unchanged is ±0, with no glyph: a hollow diamond would read as a milestone still to come (D-067; Foundations · Shape).
-- Delta draws this for every part — StatTile's delta, comparison rows in a Ledger. Registries · Glyphs lists the glyphs; PatternFeedback shows them in use.
+- Delta draws this for every part — a Ledger row's change, comparison rows in a Ledger. Registries · Glyphs lists the glyphs; PatternFeedback shows them in use.
 
 ### Soft backgrounds
 
@@ -479,11 +479,11 @@ A component token belongs to one component and is read only there. It aliases a 
 | `sigil-fill` | Sigil | `verdigris-800` | `#1d4b45` | The hexagon badge's fill. | — |
 | `sigil-edge` | Sigil | `verdigris-250` | `#7fc9b8` | The hexagon's outline. | — |
 | `on-sigil` | Sigil | `ink` | `#f0e6d2` | Numerals inside the badge. | — |
-| `tile` | StatTile | `slate-800` | `#1b1b22` | The tile's fill. | TabStrip's active primary tab |
-| `on-tile` | StatTile | `ink` | `#f0e6d2` | Values on the tile. | TabStrip's active primary tab |
-| `on-tile-muted` | StatTile | `ink-muted` | `#bba98c` | Labels (STR, Armor) and units on the tile. | — |
+| `tile` | TabStrip (StatTile's until D-137) | `slate-800` | `#1b1b22` | The active primary tab's fill. | — |
+| `on-tile` | TabStrip (StatTile's until D-137) | `ink` | `#f0e6d2` | Text on the active primary tab. | — |
+| `on-tile-muted` | None since D-137 (StatTile) | `ink-muted` | `#bba98c` | Labels and units on a tile. | — |
 
-One reader breaks the one-component rule and is flagged rather than hidden: TabStrip's active primary tab takes the tile fill. (PageHeader used to draw its own hex with the Sigil tokens; its section mark is now a `gilt` diamond, D-065.) It is queued in Governance · Audit & consolidation map (revision item 3), to be resolved by promoting the token to a role or giving the reader its own component token.
+One reader broke the one-component rule and was flagged rather than hidden: TabStrip's active primary tab takes the tile fill. Since StatTile merged into Ledger (D-137) TabStrip is the tile tokens' only reader, so the next token pass can make them TabStrip's own and retire `on-tile-muted`. (PageHeader used to draw its own hex with the Sigil tokens; its section mark is now a `gilt` diamond, D-065.) It is queued in Governance · Audit & consolidation map (revision item 3), to be resolved by promoting the token to a role or giving the reader its own component token.
 
 ## Naming convention
 
@@ -552,7 +552,7 @@ Every ratio below the threshold, flagged here and marked **fail** in the tables.
 | `meter-track` | Edge 3:1 on all four grounds | 1.11–1.33 | The empty part is a fill. The `bar` Meter draws its full length with a `line-strong` edge (passes); the thin Meter and the Track rely on the numbers printed beside them. |
 | `surface-raised`, `gilt-soft`, `arcana-soft`, `danger-soft`, `changed` | Edge 3:1 on the grounds | 1.00–1.66; `surface-raised` 1.14–1.20, `changed` 1.38–1.66 | Washes, never the only sign of a state: selection also takes a bar, ring or edge and a weight or face change (Standards · States); a mention also takes its `ink` edge and bold `@you`; hover is an extra cue, not a state a player must see; the live mark is an extra cue too, since the value itself shows the change. |
 | `gilt-soft` in SearchField | Edge 3:1 on `surface-raised` | 1.15 | **Breach, not an exception:** the highlighted suggestion in SearchField's list is marked by the wash alone. Queued in Governance · Audit & consolidation map (revision item 3). |
-| `tile`, `sigil-fill` | Edge 3:1 on all four grounds | 1.05–1.93 | Fills. The Sigil's shape is drawn by `sigil-edge` (passes); a StatTile's content is its text; TabStrip's active tab also takes the `arcana-glow` bar. |
+| `tile`, `sigil-fill` | Edge 3:1 on all four grounds | 1.05–1.93 | Fills. The Sigil's shape is drawn by `sigil-edge` (passes); TabStrip's active tab also takes the `arcana-glow` bar. |
 
 ### Text tokens on the four grounds
 
@@ -638,7 +638,7 @@ Channel colours set speaker names and tags; the component tokens carry text on t
 | `arcana-soft` | Wash behind arcana | 1.48 **fail** | 1.41 **fail** | 1.23 **fail** | 1.45 **fail** | **Fail** on all four |
 | `danger-soft` | Wash behind danger | 1.20 **fail** | 1.14 **fail** | 1.00 **fail** | 1.17 **fail** | **Fail** on all four |
 | `changed` | The live-update mark | 1.66 **fail** | 1.58 **fail** | 1.38 **fail** | 1.62 **fail** | **Fail** on all four |
-| `tile` | StatTile fill | 1.10 **fail** | 1.05 **fail** | 1.08 **fail** | 1.08 **fail** | **Fail** on all four |
+| `tile` | The active tab's fill | 1.10 **fail** | 1.05 **fail** | 1.08 **fail** | 1.08 **fail** | **Fail** on all four |
 | `sigil-fill` | Sigil fill | 1.93 **fail** | 1.84 **fail** | 1.61 **fail** | 1.89 **fail** | **Fail** on all four |
 
 | Mark | Against | Ratio | Edge 3:1 |
@@ -713,7 +713,6 @@ Components use the `lg-` class prefix so they can live beside today's `ll-` clas
 - Button — the command button
 - Meter — the progress bar
 - Sigil — the hex stat badge
-- StatTile — the compact stat
 - TabStrip — the tabs
 - PageHeader — the information screen heading
 - ItemSlot — the item frame

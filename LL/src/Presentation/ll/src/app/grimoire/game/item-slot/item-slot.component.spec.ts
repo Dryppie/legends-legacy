@@ -9,10 +9,7 @@ import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgItemSlotComponent } from './item-slot.component';
 import { LgItemSlotHarness } from '../../testing/item-slot.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -60,7 +57,7 @@ class UncaptionedSlotCase {
 describe('LgItemSlotComponent', () => {
   beforeEach(lgAnnouncerIdle);
 
-  afterEach(() => lgCloseReasonTip());
+  afterEach(() => lgCloseTip());
 
   describe('locked, with a caption (i-itemslot-locked)', () => {
     let fixture: ComponentFixture<LockedSlotCase>;
@@ -77,7 +74,7 @@ describe('LgItemSlotComponent', () => {
     });
 
     const shownTip = () =>
-      page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true }));
+      page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
 
     it('announces its printed reason on a press, opens no tip, and does not emit activate', fakeAsync(async () => {
       lgQuietAnnouncer();
@@ -129,7 +126,7 @@ describe('LgItemSlotComponent', () => {
     });
 
     const shownTip = () =>
-      page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true }));
+      page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
 
     it('shows its reason in the tip, unpinned, on hover, and says nothing', fakeAsync(async () => {
       lgQuietAnnouncer();

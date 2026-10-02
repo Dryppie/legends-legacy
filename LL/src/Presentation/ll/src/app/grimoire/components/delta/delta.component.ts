@@ -26,7 +26,7 @@ export class LgDeltaComponent {
   /** The size of the change, formatted, without a sign: "12%", "1.2s", "0". */
   readonly value = input.required<string | number>();
   readonly polarity = input.required<LgDeltaPolarity>();
-  /** A class for the inner element (StatTile places its Delta with it). */
+  /** A class for the inner element, to place it in a layout of the caller's. */
   readonly extraClass = input<string>();
 
   protected readonly glyph = computed(() =>

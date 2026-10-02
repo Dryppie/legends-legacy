@@ -1,0 +1,32 @@
+/* ---------- The tip (Standards · States · The reason tip; Foundations · Surfaces & Layering) ----------
+   One float for the page, on the CDK overlay (D-134): a tooltip, a Ledger row's explanation or a blocked control's
+   reason, placed beside its element so no scrolling region clips it, and above whatever opened before it. It arrives
+   over duration-fast on ease-enter and leaves on ease-exit; it can be hovered, and Escape closes it. */
+.lg-tip {
+  display: grid; gap: 2px; width: max-content; max-width: min(18rem, calc(100vw - 1rem));
+  padding: var(--lg-space-2) var(--lg-space-3);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
+  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 400;
+  color: var(--lg-ink); text-align: left; white-space: normal;
+  opacity: 0; visibility: hidden; transform: translateY(-0.25rem); pointer-events: none;
+  transition: opacity var(--lg-duration-fast) var(--lg-ease-exit), transform var(--lg-duration-fast) var(--lg-ease-exit), visibility 0s linear var(--lg-duration-fast);
+}
+.lg-tip-pane--end .lg-tip { transform: translateX(-0.25rem); }
+.lg-tip.is-shown {
+  opacity: 1; visibility: visible; transform: none; pointer-events: auto;
+  transition: opacity var(--lg-duration-fast) var(--lg-ease-enter), transform var(--lg-duration-fast) var(--lg-ease-enter), visibility 0s;
+}
+/* The pane never takes the pointer itself, so a tip fading out never covers the page; a shown tip can be hovered. */
+.cdk-overlay-pane.lg-tip-pane { pointer-events: none; }
+.lg-tip__title { font-weight: 600; color: var(--lg-ink); }
+.lg-tip__word { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+.lg-tip--warning .lg-tip__line { color: var(--lg-warning); }
+.lg-tip__meta { display: block; margin-top: var(--lg-space-1); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 600; color: var(--lg-ink); }
+/* An explanation (a Ledger row's): what it explains in the display face, then the explanation, muted. */
+.lg-tip--explain { gap: var(--lg-space-1); }
+.lg-tip--explain .lg-tip__title { font-family: var(--lg-font-display); font-weight: 400; font-size: var(--lg-text-title-sm); line-height: var(--lg-leading-title-sm); letter-spacing: var(--lg-tracking-display); }
+.lg-tip--explain .lg-tip__line { color: var(--lg-ink-muted); }
+/* A blocked control's reason as its description, in plain case wherever it sits (a rail item sets its text in capitals). */
+.lg-blocked__desc { text-transform: none; letter-spacing: normal; }
+@media (forced-colors: active) { .lg-tip { border-color: CanvasText; } }

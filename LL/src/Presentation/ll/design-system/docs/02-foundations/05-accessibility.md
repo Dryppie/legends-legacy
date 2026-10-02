@@ -84,7 +84,7 @@ Pixel figures in these docs are at Default. The only lengths left in px are hair
 - Data tables hide columns by priority, then scroll inside their own region with the name held.
 - The TopBar's currency names give way to their art under 40rem. The full name is still read out and shown in the tooltip.
 - The TopBar's centre Track drops its end labels under 16rem.
-- ListRow meta truncates, and Tags, StatTiles and Buttons grow with their text.
+- ListRow meta truncates, and Tags and Buttons grow with their text.
 - The docked Chronicle under the Folio never takes more than 45% of the screen's height.
 
 **What scrolls, and only inside its own region:**
@@ -132,7 +132,7 @@ Never use a positive `tabindex`. Hidden and off-screen things are out of the ord
 6. a hover card, tooltip, suggestion list or menu on the page (a Ledger explanation, SearchField);
 7. the rail drawer, with focus back to the menu button.
 
-The layer stack (`lgOpenLayer`) keeps this order for anything registered with it.
+The CDK overlay keeps this order for everything on it, the latest opened first, and the tip hears Escape before anything (D-134). The rail drawer and the Objective's tracker, which aren't overlays, leave an Escape something above them already took alone.
 
 Only when no layer is open may a screen use Escape for Back, and its KeyHints then say so.
 
@@ -167,7 +167,7 @@ Nothing exists only on hover. Every hover card or tooltip:
 - stays open while the pointer is over it;
 - closes on Escape, or when the pointer or focus leaves (unless it is pinned).
 
-Ledger explanations and the reason tip on blocked controls (Standards · States · The reason tip) work this way; the reason tip sits on top of whatever opened it, so Escape closes it first. A short CurrencyPill is a button that toggles to the full figure. The shared Tooltip (Audit item 2) will carry the pattern to StatFigure, ItemLink, Track and the ItemSlot code, which still use a native `title`. What they hold is also on screen or read out in the meantime.
+The tip works this way: `lgTooltip`, a Ledger row's explanation and the reason tip on blocked controls (Standards · States · The reason tip) are one float for the page, on the CDK overlay, and it sits on top of whatever opened it, so Escape closes it first (D-134). Its words are also the element's description. A short CurrencyPill is a button that toggles to the full figure. StatFigure, ItemLink, Track and the ItemSlot code still use a native `title`; each moves to `lgTooltip` in its plan step. What they hold is also on screen or read out in the meantime.
 
 ## Live regions in a realtime game
 
@@ -189,7 +189,7 @@ The game changes every second, and a screen reader can speak only one thing at a
 
 Summarise a fight when it ends ("Victory. 3 enemies defeated, 120 Cinders"). The combat log stays readable on demand: it is focusable, not live.
 
-**One announcer, throttled.** `lgAnnounce(text, { key, assertive })` writes to one pair of hidden live regions for the whole app:
+**One announcer, throttled.** `LgAnnouncer.announce(text, { key, assertive })` speaks through the CDK's `LiveAnnouncer`, one hidden live region for the whole app (D-134):
 
 - polite messages go out one at a time, at most one every 1.5 seconds;
 - a message with the same `key` replaces the one still waiting, so ten loot drops become one line;

@@ -11,7 +11,7 @@ The hexagon stat badge — a number in a verdigris hex, with its name beside it.
 - Fill `sigil-fill`, edge `sigil-edge`, numeral `on-sigil` in `sigil-numeral` — Barlow Condensed 700 with tabular figures, since D-034 keeps Marcellus numerals for the headline figure and the level; label in `sigil-label` with `shadow-text-art`, so it reads over stage art.
 - `selected` swaps the edge to `arcana-glow` and scales the badge to 1.08 (1.06 on hover); `ready` adds an `arcana-glow` diamond meaning "can be raised" — the diamond's ready meaning; `locked` empties the hex to `surface` with a `line-strong` edge and greys the value to `ink-disabled`. A locked `interactive` Sigil stays a focusable button (`aria-disabled`): its unlock condition opens in the reason tip on hover and focus, and a press shows it instead of selecting (Standards · States). In a Constellation, arrow keys land on it too.
 - **Motion** (Foundations · Motion · State change): the scale settles over `duration-fast` on `ease-standard`; the edge changes colour at once. Only `transform` moves — the old `filter` transition is gone. At once under reduced motion.
-- Values stay short: up to three characters ("42", "9%"). Longer numbers belong in a StatTile.
+- Values stay short: up to three characters ("42", "9%"). Longer numbers belong in a Ledger row or a StatFigure.
 
 ## Supported states
 

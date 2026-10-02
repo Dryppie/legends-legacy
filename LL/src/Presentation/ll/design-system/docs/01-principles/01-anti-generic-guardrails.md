@@ -17,7 +17,7 @@ These guardrails turn the Principles into limits. Every rule here is a *must*.
 | --- | --- | --- |
 | Excessive cards | Every data group in its own bordered box | Group data with a heading, a SectionRule band or space first. A Panel holds secondary content that must stand apart — lore, pending loot, a biography — never a group of values a Ledger title already names. |
 | Container nesting | A box in a box in a box | At most **two enclosure levels** inside a region. The shell's regions — rail, stage, Folio, Chronicle — are the frame and don't count; any container with its own fill or border does. A Panel, Banner or JourneyCard is level one; a slot, tile, input or wash inside it is level two; nothing goes deeper. |
-| Stat tile grids | A row of equal tiles as a screen's summary | Primary stats go in a Ledger or a StatFigure. StatTiles hold secondary stats in a stat column, such as the Folio's: two-up, six to eight per group. |
+| Stat tile grids | A row of equal tiles as a screen's summary | Primary stats go in a Ledger or a StatFigure. Secondary stats in a stat column, such as the Folio's, are a two-up Ledger, six to eight rows: no boxes (D-137). |
 | Heading stacks and repeated eyebrows | Eyebrow, title and subtitle on every block; heading → subtitle → grid down the page | Eyebrows orient, so only four places carry one: the TopBar (a level or region), the PageHeader (its section), the Folio (the selected thing's kind) and the Banner (its subject). A block gets a title, and a subtitle only when it says what the title cannot. Consecutive groups take the form of their content — Ledger, list, Track, table — not one repeated rhythm. |
 | Rounded rectangles and pills | Every surface a soft rounded box; every button, input and badge a pill | Square and engraved (Foundations · Shape): regions square, containers and rows at `radius-container` (2px), controls, tags and slots at `radius-control` (4px), only floating surfaces at `radius-float` (8px). Nothing is a pill, and the one circle is the Presence dot. |
 | Gradients | Gradient fills, buttons, rails and headers | Gradients only as **dark fades over pictures**: the Stage and Banner veils, the TopBar's fade over the stage, list ends fading into the scene. Never on a surface, fill, button, border or text (D-012). One accepted exception: the NavRail's current item, a gilt wash fading toward its end (D-118). |
@@ -38,7 +38,7 @@ These guardrails turn the Principles into limits. Every rule here is a *must*.
 | Banner | One per screen, for the headline identity block of an information screen only. Its art shows the subject's place, or it has none. Never a section header, a promotion or a divider. |
 | Folio | One per screen (D-004), for the selected thing only. Its frame is the screen's engraved frame: nothing inside it is framed again, and no Panel goes in it. |
 | Stage | Scene screens only; its art is the screen's place. Information and workbench screens use a Page. |
-| StatTile | Secondary stats in a stat column, such as the Folio's — two-up, six to eight per group. Never a screen-wide row; primary stats go in a Ledger or a StatFigure. |
+| Two-up Ledger | Secondary stats in a stat column, such as the Folio's — six to eight rows. Never a screen-wide row of tiles; primary stats go in a Ledger or a StatFigure. |
 | Button | An engraved rectangle at `radius-control`, never a pill (D-064); CurrencyPills and key caps take the same corner, and Meters are square-ended (Foundations · Shape). One `solid` button per screen. |
 | `arcana-glow` | A flat fill for the selected ring, edge or bar, the active-tab bar and the ready diamond — never a halo, a shadow or text. One selection per screen carries it. |
 
@@ -90,7 +90,7 @@ Answer every question for a new component or screen. Each *no* needs a fix or a 
 
 1. Does every Panel hold secondary content that a heading or a rule could not separate?
 2. Are there at most two enclosure levels inside each region?
-3. Are primary stats in Ledgers or a StatFigure, with StatTiles only for secondary stats?
+3. Are primary stats in Ledgers or a StatFigure, with a two-up Ledger only for secondary stats?
 4. Do only the TopBar, the PageHeader, the Folio and the Banner carry eyebrows, with no heading → subtitle → grid repeated down the screen?
 5. Does every radius come from its role, is nothing a pill, does each shape keep its one meaning (Foundations · Shape), and is every full border an interactive edge or a bounded object (Foundations · Lines)?
 6. Are gradients only dark fades over pictures, with no frosted glass anywhere?

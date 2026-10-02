@@ -15,12 +15,12 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { LgSlotDirective, lgHasSlot, lgUniqueId } from '../../core/grimoire-core';
 import { LG_NBSP, lgFormatNumber } from '../../core/grimoire-format';
-import { LgLayerHandle, lgOpenLayer } from '../../core/grimoire-a11y';
 
 /**
  * The pinned quest in the TopBar's centre (D-110): its title and current objective with the count. With a
  * `lgSlot="panel"` child — the full tracker — it is a disclosure that opens it in a Level 2 popover beneath it; Escape,
- * a click outside or the button close it, and Escape returns focus to the button. `[(open)]` binds the state.
+ * a click outside or the button close it, and Escape returns focus to the button. An Escape something above the tracker
+ * took first (the tip, an overlay) leaves it open. `[(open)]` binds the state.
  */
 @Component({
   selector: 'lg-objective',
@@ -81,7 +81,7 @@ export class LgObjectiveComponent {
     return req ? lgFormatNumber(this.current() || 0) + LG_NBSP + '/' + LG_NBSP + lgFormatNumber(req) : null;
   });
 
-  private layer: LgLayerHandle | null = null;
+  private listening = false;
   private byPointer = false;
 
   constructor() {
@@ -93,23 +93,34 @@ export class LgObjectiveComponent {
       this.byPointer = true;
       this.open.set(false);
     };
+    // Escape closes the tracker unless something above it took the key first: the tip and the CDK overlays mark the
+    // keys they use (defaultPrevented), and the overlays hear them before the document does.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      e.preventDefault();
+      this.open.set(false);
+    };
+    const stop = () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+      this.listening = false;
+    };
     effect(() => {
       const open = this.isOpen();
       untracked(() => {
-        if (open && !this.layer) {
+        if (open && !this.listening) {
           this.byPointer = false;
-          this.layer = lgOpenLayer({ kind: 'popover', opener: this.buttonRef()?.nativeElement, onClose: () => this.open.set(false) });
           document.addEventListener('pointerdown', onDown);
-        } else if (!open && this.layer) {
-          document.removeEventListener('pointerdown', onDown);
-          this.layer.close(!this.byPointer);
-          this.layer = null;
+          document.addEventListener('keydown', onKey);
+          this.listening = true;
+        } else if (!open && this.listening) {
+          stop();
+          // Focus goes back to the button, unless a press elsewhere closed the tracker.
+          const b = this.buttonRef()?.nativeElement;
+          if (!this.byPointer && b?.isConnected) b.focus();
         }
       });
     });
-    inject(DestroyRef).onDestroy(() => {
-      document.removeEventListener('pointerdown', onDown);
-      this.layer?.close(false);
-    });
+    inject(DestroyRef).onDestroy(stop);
   }
 }

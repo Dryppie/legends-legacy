@@ -1,5 +1,6 @@
 /*
- * Test helpers for Grimoire: a CDK test harness for each interactive component, the reason tip, and the announcer.
+ * Test helpers for Grimoire: a CDK test harness for each interactive component and for the containers feature specs
+ * look for (Panel, Notice), the reason tip, and the announcer.
  * Feature specs import them as `@grimoire/testing`.
  */
 export * from './activity.harness';
@@ -15,8 +16,10 @@ export * from './ledger.harness';
 export * from './list.harness';
 export * from './loadout-slot.harness';
 export * from './nav-rail.harness';
+export * from './notice.harness';
 export * from './objective.harness';
-export * from './reason-tip.harness';
+export * from './panel.harness';
+export * from './tip.harness';
 export * from './search-field.harness';
 export * from './sigil.harness';
 export * from './tab-strip.harness';

@@ -51,7 +51,7 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 | Path | What it holds |
 | --- | --- |
 | `../src/app/grimoire/tokens/` | Generated from `tokens.json` and `fonts/`: `tokens.css` (every token as a `--lg-*` property, the type classes, `@font-face`), `tokens.ts` (durations, easings, breakpoints, layers) and `fonts/`. Never edit them. |
-| `../src/app/grimoire/styles/` | What no part owns: `base.css` (type roles, density, reading font, reduced motion, root, focus, elevation), `layout.css` (regions, content tiers, track layouts), `attention.css`, `reason-tip.css`, and `grimoire.css`, which assembles every stylesheet in cascade order (D-132) |
+| `../src/app/grimoire/styles/` | What no part owns: `base.css` (type roles, density, reading font, reduced motion, root, focus, elevation), `layout.css` (regions, content tiers, track layouts), `attention.css`, `tip.css`, and `grimoire.css`, which assembles every global stylesheet in cascade order (D-132); `frame-corners.css`, which the Folio and the Banner take into their own encapsulated styles. A re-shaped part's CSS is its own, through `styleUrl` (D-136) |
 | `../src/app/grimoire/core/` | Shared helpers: formatting, states, the announcer, the reason tip, the layer stack, roving focus, motion and live values, ornament warnings, the generated icon set (`grimoire-icons.ts`, from `icons.json`; never edit it) and the stylesheet loader |
 | `../src/app/grimoire/<tier>/<name>/` | One folder per part, in four tiers (`primitives`, `components`, `game`, `shell`): `<name>.component.ts`, `<name>.component.css`, `<name>.component.spec.ts` and `README.md`, the part's guidelines |
 | `../src/app/grimoire/testing/` | Component test harnesses, imported as `@grimoire/testing` (D-130) |

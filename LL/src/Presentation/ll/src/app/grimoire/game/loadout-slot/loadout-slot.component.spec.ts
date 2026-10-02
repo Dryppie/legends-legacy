@@ -9,10 +9,7 @@ import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgLoadoutSlotComponent } from './loadout-slot.component';
 import { LgLoadoutSlotHarness } from '../../testing/loadout-slot.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -54,7 +51,7 @@ describe('LgLoadoutSlotComponent', () => {
     page = TestbedHarnessEnvironment.documentRootLoader(fixture);
   });
 
-  afterEach(() => lgCloseReasonTip());
+  afterEach(() => lgCloseTip());
 
   describe('locked (i-loadout-locked)', () => {
     it('announces its condition on a press, opens no tip, and does not emit activate', fakeAsync(async () => {
@@ -65,7 +62,7 @@ describe('LgLoadoutSlotComponent', () => {
       tick(250);
 
       expect(
-        await page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true })),
+        await page.getHarnessOrNull(LgTipHarness.with({ shown: true })),
       ).toBeNull();
       expect(announcements.said).toEqual([
         'polite: Locked. Unlocks at level 20',

@@ -1,57 +1,16 @@
 /* ---------- Ledger ---------- */
-.lg-ledgergrid {
-  /* The tier sets the most Ledgers a row may hold (--lg-cols); ledger-min sets the fewest pixels each may have, so a Ledger never truncates:
-     below that the grid drops a column. Four groups (the default): 1 · 2 · 2 · 4 from stacked to wide; --3: 1 · 2 · 3 · 3; --2: 1 · 2 · 2 · 2. */
-  --lg-cols: 1;
-  display: grid; gap: var(--lg-space-6) var(--lg-gutter);
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--lg-ledger-min), calc((100% - (var(--lg-cols) - 1) * var(--lg-gutter)) / var(--lg-cols) - 0.1px))), 1fr));
-}
-@container lg-region (width >= 32rem) { .lg-ledgergrid { --lg-cols: 2; } }
-@container lg-region (width >= 44rem) { .lg-ledgergrid--3 { --lg-cols: 3; } }
-@container lg-region (width >= 68rem) { .lg-ledgergrid { --lg-cols: 4; } .lg-ledgergrid--3 { --lg-cols: 3; } .lg-ledgergrid--2 { --lg-cols: 2; } }
-.lg-ledger { min-width: 0; }
+/* No box: on the Page, in a Panel or in the Folio, space and its title set it apart (Foundations · Lines). */
+:host { display: block; min-width: 0; }
 .lg-ledger__title {
   display: flex; align-items: center; gap: var(--lg-space-3); margin: 0 0 var(--lg-space-2);
   font-family: var(--lg-font-ui); font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted);
 }
 .lg-ledger__title::after { content: ""; flex: 1; height: var(--lg-border-hairline); background: var(--lg-line); }
+/* The rows share these three columns (label, integer, fraction and unit) through subgrid, so values align on the
+   decimal point. Each row spans --lg-ledger-row-span of them. */
 .lg-ledger__rows { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; }
-/* Rows share the rows' three columns (label, integer, fraction and unit), so values align on the decimal point. */
-.lg-ledger__row {
-  position: relative; display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: baseline;
-  min-height: var(--lg-row); padding: var(--lg-cell-y) var(--lg-cell-x); margin: 0 calc(var(--lg-cell-x) * -1);
-  align-content: center; border-radius: var(--lg-radius-container); outline: 2px solid transparent;
+/* Two-up: two rows a line, each column aligning its own values, a row's wash clear of its neighbour's. */
+:host([data-columns='2']) .lg-ledger__rows {
+  grid-template-columns: repeat(2, minmax(0, 1fr) auto auto); column-gap: var(--lg-space-6);
+  --lg-ledger-row-span: span 3;
 }
-.lg-ledger__row[tabindex]:hover, .lg-ledger__row:focus-visible { background: var(--lg-surface-raised); }
-.lg-ledger__row:focus-visible { box-shadow: var(--lg-focus-ring); }
-.lg-ledger__label { display: flex; align-items: baseline; gap: var(--lg-space-2); min-width: 0; margin: 0; padding-right: var(--lg-space-2); font-size: var(--lg-row-text); line-height: var(--lg-row-leading); color: var(--lg-ink-muted); }
-.lg-ledger__labeltext { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lg-ledger__leader { flex: 1 1 0.5rem; min-width: 0.5rem; /* The dotted leader belongs to Ledger rows only (Foundations · Lines). */ border-bottom: var(--lg-border-hairline) dotted var(--lg-line-strong); transform: translateY(-4px); }
-.lg-ledger__value { grid-column: 2 / 4; margin: 0; display: grid; grid-template-columns: subgrid; align-items: baseline; }
-.lg-ledger__int { justify-self: end; text-align: right; }
-.lg-ledger__tail { justify-self: start; white-space: nowrap; }
-.lg-ledger__value.is-text { display: block; justify-self: end; text-align: right; }
-.lg-ledger__num { font-family: var(--lg-font-numeral); font-size: var(--lg-row-num); line-height: var(--lg-row-num-leading); font-weight: 600; color: var(--lg-ink); font-variant-numeric: tabular-nums lining-nums; }
-.lg-ledger__sub { grid-column: 1 / -1; margin: 0; text-align: right; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
-.lg-ledger__row.is-muted .lg-ledger__num { color: var(--lg-ink-muted); }
-.lg-ledger__tip {
-  position: absolute; left: var(--lg-space-2); top: calc(100% + 0.25rem); z-index: var(--lg-z-popover);
-  width: min(18.75rem, 100%); padding: var(--lg-space-3) var(--lg-space-4);
-  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
-  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
-  /* A popover: it arrives over duration-fast on ease-enter and leaves over duration-fast on ease-exit. */
-  opacity: 0; visibility: hidden; transform: translateY(-0.25rem);
-  transition: opacity var(--lg-duration-fast) var(--lg-ease-exit), transform var(--lg-duration-fast) var(--lg-ease-exit), visibility 0s linear var(--lg-duration-fast);
-  pointer-events: none;
-}
-.lg-ledger__row:hover .lg-ledger__tip, .lg-ledger__row:focus-visible .lg-ledger__tip, .lg-ledger__row.is-pinned .lg-ledger__tip {
-  opacity: 1; visibility: visible; transform: none; pointer-events: auto;
-  transition: opacity var(--lg-duration-fast) var(--lg-ease-enter), transform var(--lg-duration-fast) var(--lg-ease-enter), visibility 0s;
-}
-/* The explanation can be hovered without closing (WCAG 1.4.13): a bridge covers the gap above it. Escape dismisses it. */
-.lg-ledger__tip::before { content: ""; position: absolute; left: 0; right: 0; top: -0.375rem; height: 0.375rem; }
-.lg-ledger__row.is-dismissed:not(.is-pinned) .lg-ledger__tip { opacity: 0; visibility: hidden; pointer-events: none; }
-.lg-ledger__row.is-pinned { background: var(--lg-surface-raised); }
-.lg-ledger__tip strong { display: block; font-family: var(--lg-font-display); font-weight: 400; font-size: var(--lg-text-title-sm); line-height: var(--lg-leading-title-sm); letter-spacing: var(--lg-tracking-display); color: var(--lg-ink); }
-.lg-ledger__tip p { margin: var(--lg-space-1) 0 0; font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); color: var(--lg-ink-muted); }
-.lg-ledger__tipmeta { display: block; margin-top: var(--lg-space-2); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 600; color: var(--lg-ink); }

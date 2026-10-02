@@ -25,6 +25,7 @@ KODOKU_MIDPOINT_VERSION = 'tower-balance-kodoku-midpoint-aggregate-v1'
 NI_COPY_HEALTH_VERSION = 'tower-balance-ni-copy-health-aggregate-v1'
 NI_RESTORATION_VERSION = 'tower-balance-ni-restoration-aggregate-v1'
 MAD_KING_VERSION = 'tower-balance-mad-king-acceptance-aggregate-v1'
+FLOOR12_VERSION = 'tower-balance-floor12-restoration-aggregate-v1'
 NI_PENETRATION_VERSION = 'tower-balance-ni-penetration-aggregate-v1'
 KODOKU_ACCEPTANCE_VERSIONS = (KODOKU_FIXED_VERSION, KODOKU_MIDPOINT_VERSION)
 
@@ -41,11 +42,19 @@ def mad_king_module():
     return module
 
 
+def floor12_module():
+    spec = importlib.util.spec_from_file_location('aggregate_floor12', HERE/'tower-floor12-acceptance.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
+
+
 def penetration_module(d):
+    if d['version'] == FLOOR12_VERSION: return floor12_module()
     return mad_king_module() if d['version'] == MAD_KING_VERSION else ni_penetration_module()
 
 
 def batch_count(version):
+    if version == FLOOR12_VERSION: return 16
     if version == NI_RESTORATION_VERSION: return 8
     if version in (*KODOKU_ACCEPTANCE_VERSIONS, MAD_KING_VERSION):
         return 32
@@ -55,9 +64,12 @@ def batch_count(version):
 
 def validate_layout(d):
     count = batch_count(d['version'])
-    samples = 64 if d['version'] == NI_RESTORATION_VERSION else 16 if d['version'] in (MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS, MAD_KING_VERSION) else 32 if d['version'] in (LIMITED_ARMOR_VERSION, LIMITED_RESISTANCE_VERSION, NI_COPY_HEALTH_VERSION, NI_PENETRATION_VERSION, MIASMA_VERSION) else 128
+    samples = 64 if d['version'] == NI_RESTORATION_VERSION else 16 if d['version'] in (MIASMA_RESOURCE_VERSION, SHARED_PENETRATION_VERSION, *KODOKU_ACCEPTANCE_VERSIONS, MAD_KING_VERSION) else 32 if d['version'] in (LIMITED_ARMOR_VERSION, LIMITED_RESISTANCE_VERSION, NI_COPY_HEALTH_VERSION, NI_PENETRATION_VERSION, MIASMA_VERSION, FLOOR12_VERSION) else 128
     io.check(d['batchCount'] == count and d['samplesPerBatch'] == samples, 'Unsupported prospective panel')
-    if d['version'] == MAD_KING_VERSION:
+    if d['version'] == FLOOR12_VERSION:
+        io.check(d['floor'] == 12 and d['familySize'] == 268, 'Wrong nominated floor-twelve family/floor')
+        floor12_module().validate_plan(d['candidatePlan'], d['floor'])
+    elif d['version'] == MAD_KING_VERSION:
         io.check(d['floor'] == 10 and d['familySize'] == 278, 'Wrong nominated Mad King family/floor')
         mad_king_module().validate_plan(d['candidatePlan'], d['floor'])
     elif d['version'] in KODOKU_ACCEPTANCE_VERSIONS:
@@ -88,7 +100,7 @@ def validate_layout(d):
     elif d['version'] == RECOVERY_VERSION:
         io.check(d['floor'] == 7 and d['familySize'] == 120 and
                  d['candidatePlan']['version'] == 'tower-recovery-pressure-refinement-v1', 'Wrong recovery aggregate family/candidate')
-    elif d['candidatePlan']['version'] in ('tower-mad-king-penetration-acceptance-v1', 'tower-ni-restoration-acceptance-v1', 'tower-ni-restoration-offense-v1', 'tower-ni-penetration-v1', 'tower-ni-copy-health-v1', 'tower-recovery-pressure-refinement-v1', 'tower-unchanged-catalog-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
+    elif d['candidatePlan']['version'] in ('tower-floor12-restoration-acceptance-v1', 'tower-mad-king-penetration-acceptance-v1', 'tower-ni-restoration-acceptance-v1', 'tower-ni-restoration-offense-v1', 'tower-ni-penetration-v1', 'tower-ni-copy-health-v1', 'tower-recovery-pressure-refinement-v1', 'tower-unchanged-catalog-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
         raise ValueError('Candidate requires its separate aggregate contract')
 LIMITED_EQUIPMENT = dict(version='tower-limited-equipment-v1', maximumSpecializedItems=8,
                          maximumSpecializedCharacters=2)
@@ -96,6 +108,9 @@ LIMITED_EQUIPMENT = dict(version='tower-limited-equipment-v1', maximumSpecialize
 
 def candidate_kind(d):
     version = d['candidatePlan'].get('version')
+    if version == 'tower-floor12-restoration-acceptance-v1':
+        io.check(d.get('version') == FLOOR12_VERSION, 'Floor twelve requires its separate acceptance contract')
+        return 'penetration'
     if version == 'tower-mad-king-penetration-acceptance-v1':
         io.check(d.get('version') == MAD_KING_VERSION, 'Mad King requires its separate acceptance contract')
         return 'penetration'
@@ -134,7 +149,7 @@ def candidate_kind(d):
 
 def validate_candidate(d, content):
     equipment = d.get('equipmentEligibility')
-    if d['candidatePlan'].get('version') in ('tower-mad-king-penetration-acceptance-v1', 'tower-ni-restoration-acceptance-v1', 'tower-ni-restoration-offense-v1', 'tower-ni-penetration-v1', 'tower-ni-copy-health-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
+    if d['candidatePlan'].get('version') in ('tower-floor12-restoration-acceptance-v1', 'tower-mad-king-penetration-acceptance-v1', 'tower-ni-restoration-acceptance-v1', 'tower-ni-restoration-offense-v1', 'tower-ni-penetration-v1', 'tower-ni-copy-health-v1', 'tower-kodoku-miasma-v1', 'tower-kodoku-shared-penetration-v1', 'tower-kodoku-eight-item-pressure-refinement-v1', 'tower-kodoku-eight-item-pressure-midpoint-v1'):
         validate_layout(d)
         io.check(equipment == LIMITED_EQUIPMENT, 'Miasma requires actual limited-equipment eligibility')
     if equipment is not None:
@@ -238,9 +253,9 @@ def declaration(path, pin):
     io.check(len(cells) == d['familySize'] and all(c['scenario']['floorNumber'] == d['floor'] for c in cells),
              'Wrong source family')
     validate_candidate(d, source/'content')
-    if d['version'] == MAD_KING_VERSION:
+    if d['version'] in (MAD_KING_VERSION, FLOOR12_VERSION):
         from types import SimpleNamespace
-        mad_king_module().validate_proposal(SimpleNamespace(io=io, LIMITED_EQUIPMENT=LIMITED_EQUIPMENT, equipment_eligible=equipment_eligible), d, cells)
+        penetration_module(d).validate_proposal(SimpleNamespace(io=io, LIMITED_EQUIPMENT=LIMITED_EQUIPMENT, equipment_eligible=equipment_eligible), d, cells)
     elif d['version'] == NI_RESTORATION_VERSION:
         validate_ni_restoration_proposal(d, cells)
     elif d['version'] in KODOKU_ACCEPTANCE_VERSIONS:
@@ -338,7 +353,7 @@ def has_declared_owner_budget(value):
 
 def verify_batch(d, cells, study, phase, excluded, *, check_current_inputs=True):
     study = Path(study)
-    audited = fixed_batch_audit(study) if d.get('version') in (*KODOKU_ACCEPTANCE_VERSIONS, NI_RESTORATION_VERSION, MAD_KING_VERSION) else io.audit(study)
+    audited = fixed_batch_audit(study) if d.get('version') in (*KODOKU_ACCEPTANCE_VERSIONS, NI_RESTORATION_VERSION, MAD_KING_VERSION, FLOOR12_VERSION) else io.audit(study)
     saved_owner = owner(study)
     io.check(audited == io.read(saved_owner/'independent-audit.json'), 'Native audit changed')
     io.check(io.read(study/'cells.json') == cells, 'Raw family differs')
@@ -346,7 +361,7 @@ def verify_batch(d, cells, study, phase, excluded, *, check_current_inputs=True)
     io.check(scope['execution'] == d['runtime'] and scope['settings'] == d['settings'] and
              scope['contentHashes'] == d['candidateContentHashes'], 'Mixed runtime, settings or catalog')
     io.check(q['mode'] == phase and q['floor'] == d['floor'] and not q['searchSeeds'], 'Wrong batch mode')
-    if d.get('version') in (*KODOKU_ACCEPTANCE_VERSIONS, NI_RESTORATION_VERSION, MAD_KING_VERSION):
+    if d.get('version') in (*KODOKU_ACCEPTANCE_VERSIONS, NI_RESTORATION_VERSION, MAD_KING_VERSION, FLOOR12_VERSION):
         io.check(q.get('diagnosticVersion') is None and io.read(study/'result.json').get('diagnosticOnly') is False,
                  'Diagnostic panels cannot enter acceptance')
     kind = candidate_kind(d)
@@ -442,7 +457,8 @@ def applied_catalog(plan):
                 'applied-tower-kodoku-midpoint-aggregate-v1': KODOKU_MIDPOINT_VERSION,
                 'applied-tower-ni-penetration-aggregate-v1': NI_PENETRATION_VERSION,
                 'applied-tower-ni-restoration-aggregate-v1': NI_RESTORATION_VERSION,
-                'applied-tower-mad-king-acceptance-aggregate-v1': MAD_KING_VERSION}
+                'applied-tower-mad-king-acceptance-aggregate-v1': MAD_KING_VERSION,
+                'applied-tower-floor12-restoration-aggregate-v1': FLOOR12_VERSION}
     io.check(accepted['version'] in versions, 'Unknown applied aggregate version')
     version = versions[accepted['version']]; count = batch_count(version)
     declaration_path = Path(accepted['declaration'])

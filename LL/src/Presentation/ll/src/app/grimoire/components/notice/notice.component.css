@@ -1,18 +1,19 @@
 /* ---------- Notice (D-111) ----------
-   A persistent notice: Level 1 surface-solid with a 2px start bar in its tone, the title in ink and the text in
-   ink-muted, an action at the end. The title carries the meaning; the bar backs it. Busy adds a small pulse — an
+   A persistent notice: Level 1 surface-solid with a 2px start bar in its tone, the heading in ink and the detail in
+   ink-muted, its way out at the end. The heading carries the meaning; the bar backs it. Busy adds a small pulse — an
    indeterminate progressbar, the one kind of loop Foundations · Motion allows outside playback. */
-.lg-notice {
+:host {
   --lg-notice-tone: var(--lg-info);
   display: flex; align-items: center; gap: var(--lg-space-3); padding: var(--lg-space-3) var(--lg-inset-lg);
   border-radius: var(--lg-radius-container); background: var(--lg-surface-solid);
   box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-notice-tone);
 }
-.lg-notice--warning { --lg-notice-tone: var(--lg-warning); }
-.lg-notice--danger { --lg-notice-tone: var(--lg-danger); }
+:host(.lg-notice--warning) { --lg-notice-tone: var(--lg-warning); }
+:host(.lg-notice--danger) { --lg-notice-tone: var(--lg-danger); }
 .lg-notice__body { display: grid; gap: 2px; min-width: 0; flex: 1; }
 .lg-notice__title { margin: 0; font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600; color: var(--lg-ink); }
 .lg-notice__text { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
-.lg-notice__action { flex: none; display: flex; gap: var(--lg-space-2); }
+/* A notice without detail is its heading alone. */
+.lg-notice__text:empty { display: none; }
 @keyframes lg-pulse { 50% { opacity: 0.35; } }
 .lg-notice__busy { flex: none; width: 0.625rem; height: 0.625rem; border-radius: 50%; background: var(--lg-notice-tone); animation: lg-pulse 1.4s var(--lg-ease-standard) infinite; }

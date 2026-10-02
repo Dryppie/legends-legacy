@@ -1,7 +1,7 @@
 /*
- * The Grimoire stylesheet (styles/grimoire.css: the tokens, the base and every part's styles, in cascade order) is
- * built as its own bundle, grimoire.css, outside the app's first load (D-096, D-132): the first load is 986 kB of its
- * 1 MB budget, and the tokens alone are 13 kB. lgLoadStyles adds it to the page without blocking the first render;
+ * The Grimoire stylesheet (styles/grimoire.css: the tokens, the base and the global part styles, in cascade order) is
+ * built as its own bundle, grimoire.css, outside the app's first load (D-096, D-132): the first load is 998 kB of its
+ * 1 MB budget, and the tokens alone are 13 kB. A re-shaped part's own styles come with its component (D-136). lgLoadStyles adds it to the page without blocking the first render;
  * main.ts calls it at startup, so it has arrived before a Grimoire screen opens. It comes after the app's own styles,
  * so it wins over Tailwind's preflight as it did when it was injected.
  *

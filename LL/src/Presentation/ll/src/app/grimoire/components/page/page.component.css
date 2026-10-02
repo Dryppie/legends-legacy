@@ -1,5 +1,6 @@
 /* ---------- Page (scrolling screens without stage art) ---------- */
-.lg-page {
+:host {
+  display: block;
   position: absolute; inset: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--lg-line-strong) transparent;
   /* The Page is the stage's content region: track layouts inside it answer to its width (Foundations · Layout). */
   container: lg-region / inline-size;
@@ -15,10 +16,12 @@
 /* Flow (D-097): in a host frame that is not GameShell — the game's frame while screens migrate — the Page sits in the
    normal flow, fills its parent's height and scrolls itself. No TopBar floats over it, so no room is kept for one, and
    the host frame gives the gutters. */
-.lg-page.lg-page--flow { position: relative; inset: auto; flex: 1 1 auto; height: 100%; min-height: 0; --lg-page-pad: 0px; padding: 0; scroll-padding-top: 0; }
+:host(.lg-page--flow) { position: relative; inset: auto; flex: 1 1 auto; height: 100%; min-height: 0; --lg-page-pad: 0px; padding: 0; scroll-padding-top: 0; }
+/* Dense in the game's frame (D-120): panels, and the columns of lg-aside, lg-split and lg-compare (through
+   --lg-layout-gap), sit stack-lg apart both ways, and the content fills the stage to the Page's gutter, lining up with
+   the TopBar's title and currencies, instead of centring at page-max. An explicit maxWidth still caps it. */
+:host(.lg-page--dense) .lg-page__inner { gap: var(--lg-stack-lg); max-width: none; margin: 0; --lg-layout-gap: var(--lg-stack-lg); }
 /* At 400% zoom (a 320px-wide Page) the side padding steps down so content keeps its width (WCAG 1.4.10). */
 @container (max-width: 30rem) {
-  .lg-page { --lg-page-pad: var(--lg-inset-lg); }
-  .lg-track__end { white-space: normal; min-width: 0; }
-  .lg-banner__body { padding: var(--lg-inset-lg); }
+  :host { --lg-page-pad: var(--lg-inset-lg); }
 }

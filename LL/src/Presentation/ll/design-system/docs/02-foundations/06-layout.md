@@ -107,12 +107,11 @@ Each track layout has one behaviour per tier:
 | Ledger grid, four groups (`lg-ledgergrid`) | 4 a row | 2 | 2 | 1 |
 | Ledger grid, three groups (`lg-ledgergrid--3`) | 3 | 3 from 49rem, 2 below | 2 | 1 |
 | Ledger grid, two groups (`lg-ledgergrid--2`) | 2 | 2 | 2 | 1 |
-| Stat grid (`lg-statgrid`) | Up to 6 tiles | 4 | 3 | 2 |
 | Data table (`lg-tablewrap`) | Every column | Priority 4 hidden | Priorities 3 and 4 hidden | Priority 1 only; scrolls inside its wrapper if still too wide |
 | Split comparison (`lg-compare`) | Two panes, 1 : 1 | 1 : 1 | 1 : 1 | One above the other, current first |
 | Main and side column (`lg-aside`) | The main column, and a 20rem side column beside it | As Wide | One column: the main column, then the side | As Narrow |
 
-Every grid has a floor. A Ledger never gets narrower than `ledger-min` (15rem), and a tile never narrower than `stat-min` (8.5rem). When a row can't hold the tier's count at that width, it holds one fewer. That keeps the three-group grid at two a row between 44 and 49rem, and keeps every label whole at 130%. Grids keep their empty tracks, so a short row keeps the columns of the grid above it.
+Every grid has a floor. A Ledger never gets narrower than `ledger-min` (15rem). When a row can't hold the tier's count at that width, it holds one fewer. That keeps the three-group grid at two a row between 44 and 49rem, and keeps every label whole at 130%. Grids keep their empty tracks, so a short row keeps the columns of the grid above it.
 
 ### List and inspector
 
@@ -144,9 +143,9 @@ Every grid has a floor. A Ledger never gets narrower than `ledger-min` (15rem), 
 - **Two short Ledgers in a Wide region** go in the three-group grid, with its third column left empty. They then keep the width of the Ledgers around them, and their leaders stay short enough to follow.
 - **Gaps:** `space-6` between rows of Ledgers, and the gutter, `section-md`, between columns.
 
-### Stat grid
+### Two-up Ledger
 
-Tiles run 2, 3, 4 and then up to 6 a row, from Stacked to Wide. A tile never gets narrower than `stat-min`. A tile with a Delta needs more room, so in a Stacked region (the Folio) give it a one-word label. Six to eight tiles make a group; more want a Ledger.
+Secondary stats in a narrow column, such as the Folio's, are one Ledger with `columns="2"`: two rows a line, each column aligning its own values on the decimal point. Give each a one-word label; a longer one truncates. Six to eight rows make a group. It replaced the stat grid of StatTiles (D-137).
 
 ### Data table
 
@@ -255,7 +254,7 @@ At every step no label truncates and nothing scrolls sideways.
 | `breakpoint-wide`, `breakpoint-shell`, `breakpoint-narrow`, `breakpoint-reflow` | 96, 60, 40 and 30rem | The shell's breakpoints (above) |
 | `breakpoint-topcenter`, `breakpoint-strip` | 16 and 7.5rem | The TopBar centre drops its Track's end labels; a collapsed Chronicle is the docked strip |
 | `ledger-min` | 15rem (240px) | The narrowest Ledger in a grid |
-| `stat-min` | 8.5rem (136px) | The narrowest StatTile in a grid |
+| `stat-min` | 8.5rem (136px) | No user since StatTile merged into Ledger (D-137) |
 | `inspector-min` | 20rem (320px) | The narrowest inspector beside its list |
 | `aside-width` | 20rem (320px) | The side column beside a main column (`lg-aside`) |
 | `section-md` | 2rem (32px) | The gutter between columns (`--lg-gutter`) and the Page's side padding |
@@ -286,7 +285,6 @@ The Chronicle's own sizes (`chronicle-*`) are listed in Shell.
 - Folio — the detail panel
 - ListRow — the list row
 - Ledger — the labelled value list
-- StatTile — the compact stat
 - PageHeader — the information screen heading
 - Banner — the headline block
 - JourneyCard — the next-step guide

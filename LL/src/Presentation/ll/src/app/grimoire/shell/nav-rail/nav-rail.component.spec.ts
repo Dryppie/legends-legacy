@@ -3,10 +3,7 @@ import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgNavRailComponent, LgNavSection } from './nav-rail.component';
 import { LgNavRailHarness } from '../../testing/nav-rail.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -68,7 +65,7 @@ describe('LgNavRailComponent', () => {
     const page = TestbedHarnessEnvironment.documentRootLoader(fixture);
     /** The reason tip while it shows, or null. */
     const shownTip = () =>
-      page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true }));
+      page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
     return { host: fixture.componentInstance, rail, shownTip };
   }
 
@@ -80,8 +77,8 @@ describe('LgNavRailComponent', () => {
   }
 
   beforeEach(lgAnnouncerIdle);
-  beforeEach(lgCloseReasonTip);
-  afterEach(lgCloseReasonTip);
+  beforeEach(lgCloseTip);
+  afterEach(lgCloseTip);
 
   it('marks the active item as the current page and the locked one as unavailable', fakeAsync(async () => {
     const { rail } = await setup();

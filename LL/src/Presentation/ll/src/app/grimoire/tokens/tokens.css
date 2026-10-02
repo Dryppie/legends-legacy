@@ -111,9 +111,9 @@
   --lg-sigil-fill: var(--lg-verdigris-800); /* Component token (Sigil). Hexagon stat badge fill. PageHeader's hex icon also reads it — a known exception (Foundations · Colour). */
   --lg-sigil-edge: var(--lg-verdigris-250); /* Component token (Sigil). Sigil outline; 3:1 against sigil-fill and the grounds. PageHeader's hex icon also reads it — a known exception. */
   --lg-on-sigil: var(--lg-ink); /* Component token (Sigil). Numerals inside a sigil, on sigil-fill; follows ink. PageHeader's hex icon also reads it — a known exception. */
-  --lg-tile: var(--lg-slate-800); /* Component token (StatTile). Stat tile fill. TabStrip's active primary tab also reads it — a known exception (Foundations · Colour). */
-  --lg-on-tile: var(--lg-ink); /* Component token (StatTile). Values on tile; follows ink. TabStrip's active primary tab also reads it — a known exception. */
-  --lg-on-tile-muted: var(--lg-ink-muted); /* Component token (StatTile). Tile labels (STR, Armor) and units on tile; follows ink-muted. */
+  --lg-tile: var(--lg-slate-800); /* Component token. The active primary tab's fill (TabStrip); StatTile's until it merged into Ledger (D-137). */
+  --lg-on-tile: var(--lg-ink); /* Component token. Text on the active primary tab (TabStrip); follows ink. StatTile's until D-137. */
+  --lg-on-tile-muted: var(--lg-ink-muted); /* Component token. No reader since StatTile merged into Ledger (D-137); follows ink-muted. Retire it in the next token pass. */
   --lg-shadow-panel: 0 24px 48px -16px #000000d9, 0 0 0 1px #00000080; /* Level 3: the Folio, dialog sheets, confirmations, the tour's coach mark and the rail drawer. */
   --lg-shadow-float: 0 12px 28px -8px #000000cc; /* Floating Levels 1 and 2: the Chronicle drawer, popovers, tooltips, hover cards, menus and toasts. */
   --lg-shadow-text-art: 0 1px 14px #0b0b0f, 0 0 3px #0b0b0f; /* text-shadow for any label set over Stage art (Sigil labels, stage captions). */
@@ -132,7 +132,7 @@
   --lg-space-16: 4rem; /* Stage breathing room around a Constellation. (64px at the default text size.) */
   --lg-inset-xs: 0.25rem; /* Inset · padding inside the smallest parts: key caps, badges, counts. Aliases space-1. (4px at the default text size.) */
   --lg-inset-sm: 0.5rem; /* Inset · tags and small controls; a Compact cell’s horizontal padding; the inner surface in a Compact region. Aliases space-2. (8px at the default text size.) */
-  --lg-inset-md: 0.75rem; /* Inset · tiles and inner surfaces in a Standard region (StatTile, LoadoutSlot); a Standard cell’s horizontal padding; a Compact container. Aliases space-3. (12px at the default text size.) */
+  --lg-inset-md: 0.75rem; /* Inset · tiles and inner surfaces in a Standard region (LoadoutSlot); a Standard cell’s horizontal padding; a Compact container. Aliases space-3. (12px at the default text size.) */
   --lg-inset-lg: 1rem; /* Inset · a Standard container: Panel body and head; a Comfortable cell’s horizontal padding; the inner surface in a Comfortable region. Aliases space-4. (16px at the default text size.) */
   --lg-inset-xl: 1.5rem; /* Inset · a Comfortable container: dialogs and identity blocks. Aliases space-6. (24px at the default text size.) */
   --lg-stack-xs: 0.25rem; /* Stack · label to value, eyebrow to title; a Compact cell’s vertical padding. Aliases space-1. (4px at the default text size.) */
@@ -147,7 +147,7 @@
   --lg-section-md: 2rem; /* Section · the Page’s side padding; between major regions of a screen. Aliases space-8. (32px at the default text size.) */
   --lg-section-lg: 3rem; /* Section · above a screen title; the rail’s top padding. Aliases space-12. (48px at the default text size.) */
   --lg-radius-container: 2px; /* Containers and rows: Panels, dialog sheets and confirmations, the band SectionRule, and row washes (Ledger rows, rail items, EntryList entries, chat lines, suggestions). Regions — the Folio, Banner, Stage, rail and Page — are square. */
-  --lg-radius-control: 4px; /* Controls, tags and slots: Buttons, inputs, tabs, key caps and clickable CurrencyPills; Tags, count badges and rarity codes; ItemSlots, thumbnails, LoadoutSlots and StatTiles. Focus rings on links and icon buttons follow it. */
+  --lg-radius-control: 4px; /* Controls, tags and slots: Buttons, inputs, tabs, key caps and clickable CurrencyPills; Tags, count badges and rarity codes; ItemSlots, thumbnails and LoadoutSlots. Focus rings on links and icon buttons follow it. */
   --lg-radius-float: 8px; /* Popovers and drawers: tooltips, hover cards, menus, suggestion lists, toasts and the floating chat drawer. Only what floats. */
   --lg-radius-circle: 50%; /* The Presence dot and the compact Activity's ring and live dot (D-117), and nothing else: the circle means presence — someone there, or the character at work (Foundations · Shape). Never a count badge, an icon button, a bullet or a portrait. */
   --lg-text-level-numeral: 5.25rem; /* Size of level-numeral. (84px at the default text size.) */
@@ -247,7 +247,7 @@
   --lg-content-medium: 44rem; /* Content tier Medium starts here: the narrowest region that holds a list beside its inspector. Below it the inspector replaces the list. Container breakpoint. (704px at the default text size.) */
   --lg-content-narrow: 32rem; /* Content tier Narrow starts here: two Ledgers side by side. Below it, Stacked: one column. Container breakpoint. (512px at the default text size.) */
   --lg-ledger-min: 15rem; /* The narrowest a Ledger gets in a grid before the grid drops a column, so labels such as Magic Penetration never truncate. (240px at the default text size.) */
-  --lg-stat-min: 8.5rem; /* The narrowest a StatTile gets in a stat grid before the grid drops a column. A tile with a Delta needs more room: give it a one-word label. (136px at the default text size.) */
+  --lg-stat-min: 8.5rem; /* No reader since StatTile merged into Ledger (D-137): it was the narrowest StatTile in a stat grid. Retire it in the next token pass. (136px at the default text size.) */
   --lg-inspector-min: 20rem; /* The narrowest an inspector gets beside its list; the list gives way first. (320px at the default text size.) */
   --lg-aside-width: 20rem; /* The side column of a main-and-side layout (lg-aside): the Essence Loadout beside the Character Overview's profile. (320px at the default text size.) */
   --lg-z-content: 0; /* Layer 0 · content: the stage, the Page and everything in flow. The default; written only to reset a layer. */

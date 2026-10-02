@@ -25,6 +25,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var recovery = version == "tower-balance-recovery-aggregate-v1";
         var limitedArmor = version == "tower-balance-limited-armor-aggregate-v1";
         var niCopyHealth = version == "tower-balance-ni-copy-health-aggregate-v1";
+        var floor12 = version == "tower-balance-floor12-restoration-aggregate-v1";
         var madKing = version == "tower-balance-mad-king-acceptance-aggregate-v1";
         var niRestoration = version == "tower-balance-ni-restoration-aggregate-v1";
         var niPenetration = version == "tower-balance-ni-penetration-aggregate-v1";
@@ -35,7 +36,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var fixedKodoku = version == "tower-balance-kodoku-fixed-aggregate-v1";
         var midpointKodoku = version == "tower-balance-kodoku-midpoint-aggregate-v1";
         var fixedAcceptance = fixedKodoku || midpointKodoku;
-        if ((version != "tower-balance-aggregate-v1" && !recovery && !limitedArmor && !limitedResistance && !niCopyHealth && !niPenetration && !niRestoration && !madKing && !miasma && !miasmaResource && !sharedPenetration && !fixedAcceptance) ||
+        if ((version != "tower-balance-aggregate-v1" && !recovery && !limitedArmor && !limitedResistance && !niCopyHealth && !niPenetration && !niRestoration && !madKing && !floor12 && !miasma && !miasmaResource && !sharedPenetration && !fixedAcceptance) ||
             declaration.GetProperty("version").GetString() != version ||
             evidence.GetProperty("status").GetString() != "Verified" || evidence.GetProperty("phase").GetString() != "confirm" ||
             evidence.GetProperty("assessment").GetProperty("verdict").GetString() != "Pass")
@@ -53,6 +54,15 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
             declaration.GetProperty("candidatePlan").GetProperty("version").GetString() != "tower-unchanged-catalog-v1" ||
             declaration.GetProperty("candidatePlan").EnumerateObject().Count() != 1))
             throw new InvalidDataException("The limited-equipment aggregate requires unchanged content and its exact floor and family.");
+        if (floor12)
+        {
+            if (family != 268 || declaration.GetProperty("floor").GetInt32() != 12)
+                throw new InvalidDataException("Floor twelve acceptance requires all 268 recipes.");
+            Floor12RestorationAcceptanceTests.ValidatePlan(declaration.GetProperty("candidatePlan"));
+        }
+        else if (declaration.TryGetProperty("candidatePlan", out var floor12Plan) && floor12Plan.TryGetProperty("version", out var floor12Version) &&
+                 floor12Version.GetString() == "tower-floor12-restoration-acceptance-v1")
+            throw new InvalidDataException("Floor twelve requires its separate acceptance contract.");
         if (madKing)
         {
             if (family != 278 || declaration.GetProperty("floor").GetInt32() != 10)
@@ -99,7 +109,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
                 throw new InvalidDataException("Shared penetration requires the complete floor-eight family.");
             ValidateSharedPenetrationPlan(declaration.GetProperty("candidatePlan"), fixedKodoku, midpointKodoku);
         }
-        if (count != (niRestoration ? 8 : madKing || fixedAcceptance ? 32 : recovery || miasmaResource || sharedPenetration ? 8 : 4) || samples != (niRestoration ? 64 : madKing || miasmaResource || sharedPenetration || fixedAcceptance ? 16 : limitedArmor || limitedResistance || niCopyHealth || niPenetration || miasma ? 32 : 128) || batches.Length != count || paths.Length != count || paths.Distinct().Count() != count ||
+        if (count != (floor12 ? 16 : niRestoration ? 8 : madKing || fixedAcceptance ? 32 : recovery || miasmaResource || sharedPenetration ? 8 : 4) || samples != (floor12 ? 32 : niRestoration ? 64 : madKing || miasmaResource || sharedPenetration || fixedAcceptance ? 16 : limitedArmor || limitedResistance || niCopyHealth || niPenetration || miasma ? 32 : 128) || batches.Length != count || paths.Length != count || paths.Distinct().Count() != count ||
             !paths.SequenceEqual(batches.Select(b => b.GetProperty("source").GetString())) ||
             assessment.GetProperty("familySize").GetInt32() != family || assessment.GetProperty("samples").GetInt32() != count*samples ||
             evidence.GetProperty("evaluationFights").GetInt32() != count*samples*family ||
@@ -696,7 +706,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     internal static void ValidateAggregateEquipment(JsonElement evidence, JsonElement declaration, JsonElement cells)
     {
         var healthPressure = declaration.GetProperty("candidatePlan").GetProperty("version").GetString()
-            is "tower-mad-king-penetration-acceptance-v1" or "tower-ni-restoration-acceptance-v1" or "tower-ni-penetration-v1" or "tower-ni-copy-health-v1" or "tower-health-pressure-candidate-v1" or "tower-recovery-pressure-refinement-v1" or "tower-unchanged-catalog-v1" or "tower-kodoku-miasma-v1" or "tower-kodoku-shared-penetration-v1" or "tower-kodoku-eight-item-pressure-refinement-v1" or "tower-kodoku-eight-item-pressure-midpoint-v1";
+            is "tower-floor12-restoration-acceptance-v1" or "tower-mad-king-penetration-acceptance-v1" or "tower-ni-restoration-acceptance-v1" or "tower-ni-penetration-v1" or "tower-ni-copy-health-v1" or "tower-health-pressure-candidate-v1" or "tower-recovery-pressure-refinement-v1" or "tower-unchanged-catalog-v1" or "tower-kodoku-miasma-v1" or "tower-kodoku-shared-penetration-v1" or "tower-kodoku-eight-item-pressure-refinement-v1" or "tower-kodoku-eight-item-pressure-midpoint-v1";
         var hasContract = declaration.TryGetProperty("equipmentEligibility", out var contract) && contract.ValueKind != JsonValueKind.Null;
         if (!healthPressure && !hasContract) return;
         if (!hasContract || contract.GetProperty("version").GetString() != "tower-limited-equipment-v1" ||

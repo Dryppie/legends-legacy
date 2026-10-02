@@ -15,7 +15,7 @@ The subsequent read-only review of **192 saved reports / six recipes** also clos
 
 [Completion receipt](../TestResults/tower-floor12-pressure-midpoint-driver-20261002/completion.json), SHA-256 `6f028c5692c9f750b32ae4b231cc9ca1007c5a41017d22cfef65b2bf791e37f2`; [closed report review](../TestResults/tower-floor12-pressure-midpoint-mechanics-review-20261002/completion.json); [no-nomination record](../TestResults/tower-floor12-pressure-midpoint-next-20261002.json). Final exclusions: **928,892**. All owners are closed. Live floor 12 remains offense **11.9 / penetration 1**; there was no confirmation, application, migration, environment configuration change or deployment.
 
-The next work addresses a concrete family gap: the original family includes full twelve-item Restoration controls but no six/eight-item Restoration subsets. The [saved expanded-family proposal](Tower-Floor12-Limited-Restoration-20261002.md) retains all 241 controls and adds 27 exact subsets across all nine actual compositions. Those new recipes are not yet prepared or combat-tested. No further Power midpoint or formal acceptance is allocated.
+The subsequent [expanded Restoration family](Tower-Floor12-Limited-Restoration-20261002.md) filled the six/eight-item coverage gap while preserving all 241 controls. All 268 recipes have since prepared natively and completed four separate diagnostics. The [0.5875 midpoint](Tower-Floor12-Restoration-Midpoint-20261002.md) is nominated for independent formal acceptance; this older 0.525 panel remains closed and contributes no acceptance outcomes.
 
 ## Frozen scope
 

@@ -125,13 +125,16 @@ export class LgGameShellComponent implements LgShellApi {
   );
 
   constructor() {
-    // The rail drawer takes focus when it opens, closes on Escape and returns focus to its opener.
+    // The rail drawer takes focus when it opens, closes on Escape and returns focus to its opener. An Escape something
+    // above the drawer took first (the tip, an overlay opened from it) leaves the drawer open: the tip and the CDK
+    // overlays mark the keys they use, and hear them before the document does.
     effect((onCleanup) => {
       if (!this.railOpen()) return;
       const rail = this.railRef()?.nativeElement;
       setTimeout(() => rail?.querySelector<HTMLElement>('button:not([disabled]), a[href], [tabindex="0"]')?.focus());
       const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
+        if (e.key === 'Escape' && !e.defaultPrevented) {
+          e.preventDefault();
           e.stopPropagation();
           this.railOpen.set(false);
         }

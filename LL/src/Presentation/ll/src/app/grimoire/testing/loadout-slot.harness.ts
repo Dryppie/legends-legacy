@@ -1,5 +1,5 @@
 import { ComponentHarness } from '@angular/cdk/testing';
-import { lgDescriptionOf } from './reason-tip.harness';
+import { lgDescriptionOf } from './tip.harness';
 
 /** A Grimoire LoadoutSlot (`lg-loadout-slot`), one Essence loadout slot; with `interactive` it is a button. */
 export class LgLoadoutSlotHarness extends ComponentHarness {

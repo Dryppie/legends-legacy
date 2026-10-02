@@ -1,0 +1,35 @@
+# Floor 12: fixed Restoration acceptance proposal — 2 October 2026
+
+**Status: fixed acceptance execution is active; implementation and preflight verification passed.** The [closed diagnostic](Tower-Floor12-Restoration-Midpoint-20261002.md) nominates one setting; it does not establish balance acceptance. Do not repeat qualification, the completed family admission or the diagnostic panels. The original proposal remains immutable and records its pre-implementation status.
+
+The new strict candidate/aggregate/native application contracts passed **252 Python tests** and **382 backend cases with zero skips**, both on a fresh build and on the preserved qualified combat runtime. All **268 source/candidate pairs (536 native preparations per runtime)** verified unchanged player fields, exact nominated preparations and only declared guardian Power/typed-penetration differences. The two modified shared guard files have explicit source-preimage bindings. The first sandboxed build stopped at NuGet configuration access before tests or seed allocation; the preserved `buildrepair1` attempt succeeded with local build access. No combat was repeated by this recovery.
+
+Execution driver: `TestResults/tower-floor12-acceptance-driver-20261002.py`; independent collector: `TestResults/tower-floor12-acceptance-collect-20261002.py`. Verification receipts: `TestResults/tower-floor12-acceptance-tests-20261002/completion.json` and `TestResults/tower-floor12-acceptance-runtime-verification-buildrepair1-20261002/completion.json`. Each fresh phase has sixteen 32-seed batches; the driver freezes this document and all implementation/runtime/source/catalog inputs before any allocation, stops on failure without retry, and allocates confirmation only after the complete screen passes. Observe supervisor stdout only while it runs. No live floor-12 change has been made.
+
+Saved proposal: [acceptance-proposal.json](../TestResults/tower-floor12-restoration-midpoint-next-20261002/acceptance-proposal.json), SHA-256 `eca04926aa20d5f7902e2842e49f8d5ddcb1c4a3054d42de13ee69667d360782`. Nomination closure: [completion.json](../TestResults/tower-floor12-restoration-midpoint-next-20261002/completion.json). Starting exclusions: **929,020**.
+
+## Fixed scope
+
+Target the primary LL World Tower and offline Balance Harness. Hold original floor-12 guardian offense **11.9 × 0.5875 = 6.99125** and penetration **1 → 40** fixed. Preserve Health **9.414125**, all other stats, every ability, every other floor and all player progression. Live floor 12 is still **11.9 / 1**. There is no deployment or database operation.
+
+Retain all **268 exact recipes / nine actual compositions / 155 eligible recipes**: all 241 prior controls and all 27 exact Restoration subsets. Eligibility remains at most eight specialized items on two characters. Preserve every raw actor, Essence and item order, level 60, tier 2, seven Essences and stronger owned Legendary/Masterpiece/Rank-5 gear. Use the unchanged qualified preparation as the source of every batch; never scale a previously scaled candidate.
+
+Prepared source: `TestResults/tower-balance-pass-floor12-qualified-limited-restoration-preparation-study-20260929`, manifest `f43d0836aa66ffbe3627263810bf4bc313c29c9db81dba5ab541c1b370d16a07`, cells `84b7e60e5856ccfbac361de6a4743ad15f4580986147d06c985f7adca4d2f432`.
+
+## Required implementation and execution
+
+1. Implement a separate strict floor-12 aggregate/candidate/native application contract using the existing accepted floor-10/9 patterns. Bind the exact proposal, complete family, fixed candidate, source/runtime/catalog hashes and prospective batch schedule. Add mutation guards for wrong floor, factor, family, controls, ordering, eligibility, phase size, incomplete batches and reused seeds. Keep older contracts and immutable receipts unchanged; explicitly bind any necessary helper-source transition.
+2. Verify through relevant Python guards and `build/run-tests.ps1`. Preserve the qualified combat runtime or prove parity if its consumed code changes. Native preparation must preserve every friendly field and change only guardian Power and raw typed penetration; verify all 268 exact recipes, including the new equipment subsets.
+3. Recheck measured resources and disk space before allocation. Use **16 batches × 32 fresh seeds per phase**, **512 observations per recipe**, **137,216 fights per phase**. Complete screening before its assessment. Run independent confirmation only if the full screen passes. Maximum **274,432 fresh fights / 1,024 reservations**; no earlier outcome counts toward acceptance.
+4. Independently recount both complete phases and every native prepared participant set. Each phase must separately pass the simultaneous bounds below. No interim tuning, second candidate, omitted controls, retries, replacement seeds, extensions or pooling.
+5. If both phases pass, separately freeze application verification before any gameplay edit. The intended scope is all **137,216 confirmation input comparisons** plus one saved seed per recipe per confirmation batch (**4,288 complete historical replays**), without new seeds. Only passing parity permits local application, followed by byte equality, native preparation and relevant backend regressions. No application declaration or parity job is allocated yet.
+
+## Unchanged acceptance gates
+
+Use approximate simultaneous 95% Bonferroni-Wilson intervals across **268 recipes**. At least **two distinct equipment-eligible compositions** need an exact recipe with lower bound at least **10%**; **every recipe**, including all full-specialization controls, needs upper bound at most **50%**. At 512 samples, the exact integer gates are **minimum 77 wins / maximum 213 wins**, in **both** independent phases. The 32-seed diagnostic is only a nomination heuristic.
+
+## Measured resource reference
+
+The completed midpoint measured **264.95 seconds** for 8,576 fights. Its first-batch doubled admission is **529.91 seconds / 438,018,382 bytes**, below the existing 80% admission margins for **840 seconds native / 900 seconds native owner / 2 GiB output**. Reserve remaining measured output capacity plus **2 GiB free space** before starting, and recheck the completed prefix and pins before every batch. Observe supervisor stdout only while native owners are active. Preserve every failed attempt and seed reservation; stop on failure without an automatic retry.
+
+Floor 10 remains applied and verified. Floors 13–15 have saved equipment proposals but no native preparation or balance study yet. They and the final current-version floors 1–15 sweep follow floor 12. No migration, environment configuration change or deployment is included.

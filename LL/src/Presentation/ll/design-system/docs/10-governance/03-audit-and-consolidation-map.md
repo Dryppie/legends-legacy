@@ -20,7 +20,7 @@ The verdicts — **keep**, **revise**, **merge**, **retire** — are audit calls
 | Folio | The detail panel | revise | No way to step its `title-xl` down when a LevelPlate is present (one display-size element per screen). No empty state for "nothing selected". Frame inset, corner size and opacities are raw. *Its film grain sat straight behind its body text; removed (D-072).* |
 | Panel | The content box | keep | Radius is a raw 2px; the 30px header and 0.14em tracking are raw. |
 | Ledger | The labelled value list | revise | Every value was gilt, so on a Ledger-heavy screen gilt marked nothing (values are `ink` since D-018). Needs a compact two-up variant with deltas to absorb StatTile. It owns the only accessible tooltip in the system, which should become the shared Tooltip. Row height, 2px radius and the 300px tooltip width are raw. |
-| StatTile | The compact stat | merge → Ledger | A boxed label and value — the equal-tile rows the guardrails warn against — duplicating the Ledger row. Its up-delta was text in `arcana-glow` (since D-026 it is a Delta coloured by polarity), which Foundations · Colour forbids. Its `line` inset edge framed every tile (now gone: the `tile` fill carries it, D-059). |
+| StatTile | The compact stat | merged → Ledger (D-137) | A boxed label and value — the equal-tile rows the guardrails warn against — duplicating the Ledger row. Its up-delta was text in `arcana-glow` (since D-026 it is a Delta coloured by polarity), which Foundations · Colour forbids. Its `line` inset edge framed every tile (now gone: the `tile` fill carries it, D-059). |
 | StatFigure | The headline number | revise | The 64px default is off the type scale and a display-size element; beside a LevelPlate it must be `sm`. Its explanation is a native `title`, which keyboard users never see. |
 | LevelPlate | The level display | keep | Three dead declarations: a 96px `ink` numeral overridden by the 84px gilt one. The vertical kicker's tracking is raw. |
 | Meter | The progress bar | keep | Raw 1px radius on the bar (now square-ended, D-068); 4, 6 and 10px track heights are raw. |
@@ -159,7 +159,7 @@ CurrencyPill takes any name, amount and icon, but it is documented, registered a
 | Folio | — the inspector sits in the content, beside the list (D-052) | ✓ `align="start"` |
 | Panel | ✓ | ✓ lore |
 | Ledger | ✓ the core part | ✓ compact, in the Folio |
-| StatTile | ✗ (merging into Ledger) | ✗ (merging into Ledger) |
+| StatTile | ✗ (merged into Ledger, D-137) | ✗ (merged into Ledger, D-137) |
 | StatFigure | ✓ at most one | ✓ `sm` |
 | LevelPlate | ✗ | ✓ in the Folio |
 | Meter, Track | ✓ | ✓ |
@@ -286,7 +286,7 @@ In order. Each item that changes a rule needs a Decision Log entry first (marked
 **Priority 2 — consolidation**
 
 6. **ListRow,** with EntryList as its `scene` variant and LoadoutSlot rebuilt on it (removes the third enclosure level). **Decision.** ListRow and List exist, with the three densities (D-040); EntryList and LoadoutSlot are not yet rebuilt on them.
-7. **Compact two-up Ledger with deltas** — Delta (D-026) is ready for its rows; StatTile merges into it; ScreenArchive's Folio stats move over. **Decision.**
+7. **Compact two-up Ledger with deltas** — Delta (D-026) is ready for its rows; StatTile merges into it; ScreenArchive's Folio stats move over. **Done (D-137):** `columns="2"` and a row's `delta`; StatTile is deleted.
 8. **ItemSlot text-first:** the item row by default, the square slot only for positional use, names that wrap, a code of 11px or larger (the code is now `code`, 11px, D-031; names still truncate).
 9. **Gilt down to four jobs, and every hue family to one job per context** (D-015 to D-017). Done in Ledger, Folio, Tag, NavRail and Chronicle (D-018 to D-022), StatTile (D-026), and EntryList and LoadoutSlot (D-087). The rest — Button, TopBar, PageHeader, JourneyCard, SectionRule, Constellation, LevelPlate, Track, SearchField, ItemSlot, Presence, TabStrip and the showcases — are listed with their target in Foundations · Colour · Not yet on the allocation.
 10. **Resources:** Registries · Resources and ResourceAmount; CurrencyPill becomes its TopBar variant, with the other resources behind it. **Decision.**

@@ -12,7 +12,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { LgIconComponent } from '../icon/icon.component';
 import { LgIconName } from '../../core/grimoire-icons';
 import { LG_STATES, LgBlockedState, LgShortfall, lgBlockedReason, lgIsBlocked } from '../../core/grimoire-states';
-import { LgWhyController } from '../../core/grimoire-a11y';
+import { LgBlockedController } from '../../core/grimoire-blocked';
 
 export type LgButtonVariant = 'primary' | 'solid' | 'quiet' | 'danger' | 'link';
 export type LgButtonState = 'available' | LgBlockedState | 'pending';
@@ -37,11 +37,11 @@ export type LgButtonState = 'available' | LgBlockedState | 'pending';
     '[attr.aria-keyshortcuts]': 'hotkey() || null',
     '[attr.aria-busy]': "pending() ? 'true' : null",
     '[attr.aria-disabled]': "blocked() || pending() ? 'true' : null",
-    '[attr.aria-describedby]': 'why.describedBy()',
-    '(mouseenter)': 'why.enter()',
-    '(mouseleave)': 'why.leave()',
-    '(focus)': 'why.focus()',
-    '(blur)': 'why.blur()',
+    '[attr.aria-describedby]': 'blockedTip.describedBy()',
+    '(mouseenter)': 'blockedTip.enter()',
+    '(mouseleave)': 'blockedTip.leave()',
+    '(focus)': 'blockedTip.focus()',
+    '(blur)': 'blockedTip.blur()',
   },
   template: `
     @if (icon(); as iconName) {
@@ -63,7 +63,7 @@ export type LgButtonState = 'available' | LgBlockedState | 'pending';
       <kbd class="lg-key">{{ hotkey() }}</kbd>
     }
     @if (blocked()) {
-      <span class="lg-sr lg-why__desc" [id]="whyId" aria-hidden="true">{{ why.spoken() }}</span>
+      <span class="lg-sr lg-blocked__desc" [id]="blockedId" aria-hidden="true">{{ blockedTip.spoken() }}</span>
     }
   `,
 })
@@ -92,14 +92,14 @@ export class LgButtonComponent {
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   protected readonly isButton = this.el.tagName === 'BUTTON';
   protected readonly pendingWord = LG_STATES.pending.word;
-  protected readonly whyId = lgUniqueId('lgb') + '-why';
+  protected readonly blockedId = lgUniqueId('lgb') + '-why';
 
   protected readonly stateName = computed(() => (this.state() && this.state() !== 'available' ? this.state() : null));
   protected readonly blocked = computed(() => lgIsBlocked(this.stateName()));
   protected readonly pending = computed(() => this.stateName() === 'pending');
   protected readonly stacked = computed(() => this.pending() || !!this.pendingLabel());
 
-  protected readonly why = new LgWhyController(
+  protected readonly blockedTip = new LgBlockedController(
     this.el,
     () => {
       const s = this.stateName();
@@ -112,7 +112,7 @@ export class LgButtonComponent {
       );
       return { reason: br.reason, word: br.word, tone: br.tone, spoken: br.spoken };
     },
-    () => this.whyId,
+    () => this.blockedId,
   );
 
   protected readonly hostClass = computed(() =>
@@ -134,7 +134,7 @@ export class LgButtonComponent {
         if (!this.blocked() && !this.pending()) return;
         event.stopImmediatePropagation();
         event.preventDefault();
-        if (this.blocked()) this.why.press(event);
+        if (this.blocked()) this.blockedTip.press(event);
       },
       true,
     );

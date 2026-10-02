@@ -3,7 +3,7 @@ import {
   ComponentHarness,
   HarnessPredicate,
 } from '@angular/cdk/testing';
-import { lgDescriptionOf } from './reason-tip.harness';
+import { lgDescriptionOf } from './tip.harness';
 
 export interface LgButtonHarnessFilters extends BaseHarnessFilters {
   /** The label the player sees, as text or a pattern. */

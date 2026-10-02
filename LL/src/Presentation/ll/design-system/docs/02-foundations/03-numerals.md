@@ -21,7 +21,7 @@ Legend's Legacy is mostly numbers: attributes, prices, quantities, ratings, dama
 - Set the screen's one headline figure in Marcellus in `gilt`: the level when the level is what the screen is about, or Combat Rating (`level-numeral`, or `numeral-headline` in a StatFigure). Every other number is `ink` (D-015).
 - Abbreviate currencies only on request (12.5k), with the full figure in the tooltip and read out in full: screen readers hear "12,480 Cinders", never "12.5k". CurrencyPill's `short` does both, and clicking it toggles the format as the game does today (Foundations · Accessibility).
 - Show every change with Delta: ▲ or ▼ with its sign (+12%, −1.2s), or ±0 when nothing changed. Colour it by whether it helps the player, never by its sign (Foundations · Colour · Feedback and polarity).
-- Keep Sigil values to three characters ("42", "9%"). Longer numbers belong in a StatTile.
+- Keep Sigil values to three characters ("42", "9%"). Longer numbers belong in a Ledger row or a StatFigure.
 
 **Never**
 - Set a number in Marcellus other than the StatFigure value and the LevelPlate level (D-034). A number that is part of a name, such as Floor 12 or Ascension II, belongs to the name.
@@ -35,7 +35,7 @@ Legend's Legacy is mostly numbers: attributes, prices, quantities, ratings, dama
 
 | Where | Figures | Face and style |
 | --- | --- | --- |
-| Columns, lists, rows, tables, meters, currency, counters and timers | Tabular lining | Barlow Condensed: `numeral-stat`, `numeral-row`, `numeral-compact` |
+| Columns, lists, rows, tables, meters, currency, counters and timers | Tabular lining | Barlow Condensed: `numeral-row`, `numeral-compact` |
 | Numbers inside running text (Folio effects, tooltips, the Chronicle) | Tabular lining, inherited from the root | The text's own style, Barlow `body` or `body-compact` |
 | The Sigil value | Tabular lining | Barlow Condensed 700, `sigil-numeral` |
 | The StatFigure value | Proportional lining | Marcellus in `gilt`, `numeral-headline` |
@@ -93,7 +93,7 @@ Combat, auctions and currency update while the player watches. A number that cha
 | Table | The header names the column and its unit; the cell holds only the number | Price each / 1,250 | Table |
 | Tooltip | Title, explanation, then a footnote of label, colon, number and unit | Armor · … · From equipment: 240 Armor Rating | Ledger's tooltip |
 | Ledger | Label left, value right, unit after the value, sub-line below | Armor ····· 38% / 240 Armor Rating | Ledger |
-| StatTile | Label left in capitals, value right, delta under the value | ARMOR 45 ▲ +4 | StatTile |
+| A change | Label left, value right, the change under the value | Resist ····· 30 / ▲ +4 | Ledger row with `delta` |
 | StatFigure | Label above, figure, caption below | COMBAT RATING / 1,284 / Your overall strength | StatFigure |
 | Meter | Label left, value and maximum right, bar below | HP 3,120 / 4,150 | Meter |
 | Tag | Label, then value | WEAKEN 6s · SHORT BY 12 | Tag (`value`) |
@@ -104,18 +104,27 @@ Combat, auctions and currency update while the player watches. A number that cha
 | Token | Role here |
 | --- | --- |
 | `numeral` (family) | Barlow Condensed, for every number that is not a headline |
-| `numeral-stat` | StatTile values, 22px |
+| `numeral-stat` | No user since StatTile merged into Ledger (D-137); 22px |
 | `numeral-row` | Ledger values, Meter values, side stats, currency amounts, 18px |
 | `numeral-compact` | Table cells and dense rows: prices, quantities, totals, ItemSlot quantities, 14px |
 | `sigil-numeral` | The number inside a Sigil, Barlow Condensed 700 |
 | `numeral-headline` | The StatFigure value, Marcellus 64px, proportional figures; never in a table |
 | `level-numeral` | The level on a LevelPlate, Marcellus 84px, proportional figures |
 | `text-caption`, `ink-muted` | Units after a number (`.lg-unit`) |
-| `ink` | Every ordinary value: Ledger values, stat tiles, table cells, meter numbers |
+| `ink` | Every ordinary value: Ledger values, table cells, meter numbers |
 | `gilt` | The screen's one headline figure, and effect magnitudes inside descriptions |
 | `delta-better`, `delta-worse`, `delta-neutral` | Changes, through Delta |
 
 Components and screens format numbers with the `@grimoire` helpers in `core/grimoire-format.ts`: `lgFormatNumber`, `lgFormatShort`, `lgFormatRange`, `lgFormatTimes`, `lgFormatFraction`, `lgFormatPercent`, `lgFormatUnit`, `lgNumberParts`, `LG_NONE`, `lgFormatDuration` and `lgSpokenDuration`, all also in `LG_FORMAT`.
+
+In a template, the numeral pipes do the same (`core/grimoire-numerals.ts`, `LG_NUMERAL_PIPES`; D-135): `{{ 12480 | lgNumber }}`, `{{ 12480 | lgShort }}`, `{{ 24.8 | lgPercent: 1 }}`, `{{ 84 | lgUnit: 'HP/5s' }}`, `{{ 252 | lgDuration }}` and `{{ 252 | lgDuration: 'spoken' }}`. A unit set smaller and muted after its number takes markup, so `lgValue` splits a value for it:
+
+```html
+@let v = value | lgValue;
+<b>{{ v.number }}<span class="lg-unit">{{ v.unit }}</span></b>
+```
+
+It never adds a unit, only splits off the one the value has; without one the unit's span is empty and takes no room (`.lg-unit:empty`). Signs stay whole: a range (12–18), a multiplier (×1.5) and a fraction (3,120 / 4,150) are one number, and only a unit after them is split off. An unknown value is —, never an empty cell. Keep the number and the unit's span touching, with no block such as `@if` around the span: whitespace between them shows as a space. The showcase's Numerals entry shows each case.
 
 ## Do and don't
 
@@ -135,12 +144,11 @@ Components and screens format numbers with the `@grimoire` helpers in `core/grim
 | Attack Speed 1.10 | Attack Speed 1.1 beside 1.12 |
 | 12.5k, with 12,480 in the tooltip | 12.5k with no way to see the exact amount |
 | Pass "240 Armor Rating" to the Ledger row. | Pass 240 and expect the Ledger to add "Armor Rating". |
-| Put a four-digit rating in a StatTile. | Squeeze "1,284" into a Sigil. |
+| Put a four-digit rating in a Ledger row or a StatFigure. | Squeeze "1,284" into a Sigil. |
 
 ## Related components
 
 - Ledger — the labelled value list
-- StatTile — the compact stat
 - StatFigure — the headline number
 - Meter — the progress bar
 - CurrencyPill — the currency amount

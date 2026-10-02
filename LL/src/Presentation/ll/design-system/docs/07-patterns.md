@@ -53,7 +53,7 @@ Recurring compositions: several parts arranged the same way every time they solv
 ## PatternFeedback
 
 **Problem:** telling the player whether a change, an effect or a cost works for them or against them.
-**Composition:** a comparison is a Ledger whose rows show the new value and, in `sub`, a Delta and the current value ("154 — ▲ +12 · now 142"); inside an item's view it is a data block about the player, so its deltas keep their polarity colours while the item's name keeps its rarity (D-024); an upgrade or Ascension preview is StatTiles with `delta` and `deltaPolarity` (a cooldown that falls from 8s to 6.8s is ▼ −1.2s and `better`); conditions are `beneficial` and `harmful` Tags, named and timed ("Weaken 6s", the time passed as `value` so it stays out of capitals), with what they do as Delta rows, and in combat they are the only hue beside the damage types (D-024); a cost the player cannot pay is a `warning` Tag naming the shortfall beside the cost ("Short by 12 Soulstones"), never `danger`, since a shortfall can be made up (D-025), and the committing action is an `insufficient` Button with the same shortfall as its reason — focusable, never plain disabled (Foundations · Colour · Feedback and polarity, Standards · States · Availability).
+**Composition:** a comparison is a Ledger whose rows show the new value and, in `sub`, a Delta and the current value ("154 — ▲ +12 · now 142"); inside an item's view it is a data block about the player, so its deltas keep their polarity colours while the item's name keeps its rarity (D-024); an upgrade or Ascension preview is Ledger rows with `delta` and `deltaPolarity`, two-up in a narrow column (a cooldown that falls from 8s to 6.8s is ▼ −1.2s and `better`, D-137); conditions are `beneficial` and `harmful` Tags, named and timed ("Weaken 6s", the time passed as `value` so it stays out of capitals), with what they do as Delta rows, and in combat they are the only hue beside the damage types (D-024); a cost the player cannot pay is a `warning` Tag naming the shortfall beside the cost ("Short by 12 Soulstones"), never `danger`, since a shortfall can be made up (D-025), and the committing action is an `insufficient` Button with the same shortfall as its reason — focusable, never plain disabled (Foundations · Colour · Feedback and polarity, Standards · States · Availability).
 **Rules:** every delta carries ▲ or ▼ and a sign, or ±0; polarity comes from the stat's rules, never from the sign; no row, list item or card takes a status wash.
 **Seen in:** Inventory (equipment comparison), Essences (Ascension previews), Soulstones (upgrades), dungeon and Colosseum combat (conditions).
 **Status:** Draft
@@ -84,5 +84,4 @@ None of their own: each pattern uses the tokens of the parts it is built from.
 - ItemLink — an item named in text
 - LoadoutSlot — an Essence loadout slot
 - Delta — the stat change
-- StatTile — the compact stat
 - Tag — the status label

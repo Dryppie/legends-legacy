@@ -8,7 +8,7 @@ Four families, each with one job, and a ramp of 27 styles organised by role. The
 - Use the ramp. Components read the `text-*`, `leading-*` and `tracking-*` tokens, never a pixel value. The only relative sizes are marks sized to the text around them, such as a Tag's ✓ and a Delta's triangle, and the Sigil numeral, which scales with its hex.
 - Set anything a player reads at 12px or larger. Only rarity codes and key caps may use 11px (`code`), and always in bold capitals.
 - Set Marcellus at 15px or larger. Anything smaller is Barlow.
-- Set numbers in Barlow Condensed (`numeral-stat`, `numeral-row`, `numeral-compact`, `sigil-numeral`) or Barlow, in tabular lining figures. Marcellus sets only two numbers: the StatFigure value and the LevelPlate level (Foundations · Numerals, D-034).
+- Set numbers in Barlow Condensed (`numeral-row`, `numeral-compact`, `sigil-numeral`) or Barlow, in tabular lining figures. Marcellus sets only two numbers: the StatFigure value and the LevelPlate level (Foundations · Numerals, D-034).
 - Give a dense row its row line height and running text its prose line height (see Line heights below).
 - Set mechanics in `body` or `body-compact` (Barlow) and lore in `lore` or `lore-sm` (EB Garamond italic). Never mix them in one line.
 - Honour the reading-font setting: `data-reading-font="readable"` on the root maps every role to Atkinson Hyperlegible, and `"system"` to the platform's UI font (`font-system`).
@@ -103,9 +103,9 @@ The ramp has ten groups, organised by role. The tokens are in rem; sizes and lin
 | Style | Face | Size / line | Used for |
 | --- | --- | --- | --- |
 | `numeral-headline` | Marcellus in `gilt`, `tracking-headline` | 64 / 64 | The screen's one headline figure (StatFigure). Never in a table. |
-| `numeral-stat` | Barlow Condensed 700 | 22 / 24 | StatTile values |
+| `numeral-stat` | Barlow Condensed 700 | 22 / 24 | No user since StatTile merged into Ledger (D-137) |
 | `numeral-row` | Barlow Condensed 600 | 18 / 20 | Ledger values, Meter values, side stats, currency amounts |
-| `numeral-compact` | Barlow Condensed 600 | 14 / 18 | Table cells and dense rows: prices, quantities and totals in the order book, ItemSlot quantities, the StatTile suffix |
+| `numeral-compact` | Barlow Condensed 600 | 14 / 18 | Table cells and dense rows: prices, quantities and totals in the order book, ItemSlot quantities |
 
 **Component**
 
@@ -235,7 +235,6 @@ Each style's size and line height are `text-<style>` and `leading-<style>`. Ther
 - NavRail — the main navigation
 - Ledger — the labelled value list
 - StatFigure — the headline number
-- StatTile — the compact stat
 - LevelPlate — the level display
 - Folio — the detail panel
 - Chronicle — chat and the game log

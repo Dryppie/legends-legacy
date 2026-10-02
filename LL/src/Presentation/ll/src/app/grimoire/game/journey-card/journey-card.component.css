@@ -1,5 +1,7 @@
 /* ---------- JourneyCard ---------- */
 .lg-journey {
+  /* A Panel inside it steps its padding down one level. */
+  --lg-panel-inset: var(--lg-inset-inner);
   position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(13.75rem, 0.34fr);
   gap: var(--lg-space-5) var(--lg-space-8); padding: var(--lg-space-6) var(--lg-space-8);
   /* Level 1 on the Page: surface with no edge, shadow, frame or grain (Foundations · Surfaces & Layering, Lines). */

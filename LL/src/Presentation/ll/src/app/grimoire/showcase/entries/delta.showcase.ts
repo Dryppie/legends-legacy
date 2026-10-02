@@ -113,7 +113,7 @@ interface DeltaSample {
 
     <ng-template
       scStory="Sizes"
-      notes="It takes the size of the text around it: caption in a StatTile and a Ledger row's sub, body elsewhere."
+      notes="It takes the size of the text around it: caption on a Ledger row's second line, body elsewhere."
     >
       <div class="sc-col">
         <span

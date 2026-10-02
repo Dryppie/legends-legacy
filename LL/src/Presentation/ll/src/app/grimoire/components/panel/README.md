@@ -6,7 +6,22 @@ The content box.
 
 A plain box with a small-caps header, for secondary content that sits on the stage or in a column: lore, pending loot, a biography, a list.
 
-**Provide:** `title`, the content, optionally `titleAlign="end"`, an `aside` slot (a Tag or count) in the header, `flush` and `density`.
+**Use:**
+
+```html
+<lg-panel>
+  <lg-panel-header>
+    <lg-panel-title>Combat Style</lg-panel-title>
+    <a lgButton="link" routerLink="/game/character/combat-styles">Manage</a>
+  </lg-panel-header>
+  …
+</lg-panel>
+```
+
+**Provide:** the content, and a header: `<lg-panel-header>` holding `<lg-panel-title>` and any extras after it (a Tag, a count, a link Button), which sit at the end. Optional `align="end"` on the header sets the title at the end; `flush` and `density` on the Panel. Import `LG_PANEL` for all three.
+
+- **The Panel is its own box** (D-136): `lg-panel` is the element that fills and pads, so a layout places and sizes it directly. With a title it is a region named by it (`role="region"`, `aria-labelledby` the title); without a header it is the body alone and no landmark.
+- **Paragraphs:** the Panel doesn't style what you put in it. For several paragraphs, wrap them in `.lg-prose`, which spaces them `stack-md` apart.
 
 - **Level 1** (Foundations · Surfaces & Layering): `surface` with 2px corners, and no shadow or texture. `surface` is the game's panel material, a cool near-black at 72% that lets the frame's backdrop through, never blurred (D-102). It sits on Level 0 — the Page, or content on the stage — one level up. Rows inside it wash to Level 2 (`surface-raised`) on hover and selection; tiles, slots and inputs inside it are its one enclosed level, and nothing goes deeper.
 - **No border** (Foundations · Lines). A Panel is a region, not a bounded object, so its fill and the space around it set it apart. Its one line is the head's separation hairline, which divides the title from the body. Don't add a border, a gilt frame or an inset line.

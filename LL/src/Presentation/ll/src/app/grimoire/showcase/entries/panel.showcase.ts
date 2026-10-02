@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
+  LG_PANEL,
   LgListComponent,
   LgListRowComponent,
-  LgPanelComponent,
-  LgSlotDirective,
   LgTagComponent,
 } from '@grimoire';
 import {
@@ -16,8 +15,7 @@ import { ShowcaseEntry } from '../showcase.types';
   selector: 'sc-panel-showcase',
   imports: [
     ShowcaseStoryDirective,
-    LgPanelComponent,
-    LgSlotDirective,
+    ...LG_PANEL,
     LgTagComponent,
     LgListComponent,
     LgListRowComponent,
@@ -26,21 +24,27 @@ import { ShowcaseEntry } from '../showcase.types';
   template: `
     <ng-template
       scStory="With aside"
-      notes="Head extras, a Tag or a count, sit at the end of the head."
+      notes="Head extras, a Tag or a count, follow the title and sit at the end of the head."
       width="20rem"
     >
-      <lg-panel title="Pending loot">
-        <lg-tag lgSlot="aside">4 items</lg-tag>
+      <lg-panel>
+        <lg-panel-header>
+          <lg-panel-title>Pending loot</lg-panel-title>
+          <lg-tag>4 items</lg-tag>
+        </lg-panel-header>
         <p>Retreat to secure your pending loot.</p>
       </lg-panel>
     </ng-template>
 
     <ng-template
       scStory="Title at end"
-      notes="titleAlign=end sets the title at the end of the head."
+      notes="align=end on the header sets the title at the end of the head."
       width="20rem"
     >
-      <lg-panel title="Lore" titleAlign="end">
+      <lg-panel>
+        <lg-panel-header align="end">
+          <lg-panel-title>Lore</lg-panel-title>
+        </lg-panel-header>
         <p>
           The Ember Wolf is found in the ash fields east of Shenic. It hunts in
           pairs.
@@ -50,7 +54,7 @@ import { ShowcaseEntry } from '../showcase.types';
 
     <ng-template
       scStory="No title"
-      notes="Without a title there is no head: only the body."
+      notes="Without a header there is no head: only the body."
       width="20rem"
     >
       <lg-panel>
@@ -63,8 +67,11 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="No body padding: a List runs edge to edge, and its names line up with the title."
       width="26rem"
     >
-      <lg-panel title="Inventory" flush>
-        <span lgSlot="aside">3 of 60</span>
+      <lg-panel flush>
+        <lg-panel-header>
+          <lg-panel-title>Inventory</lg-panel-title>
+          <span>3 of 60</span>
+        </lg-panel-header>
         <lg-list label="Inventory">
           <li
             lgListRow
@@ -106,8 +113,11 @@ import { ShowcaseEntry } from '../showcase.types';
         @for (d of densities; track d) {
           <div>
             <p class="sc-cap">{{ d }}</p>
-            <lg-panel title="Pending loot" [density]="d">
-              <lg-tag lgSlot="aside">4 items</lg-tag>
+            <lg-panel [density]="d">
+              <lg-panel-header>
+                <lg-panel-title>Pending loot</lg-panel-title>
+                <lg-tag>4 items</lg-tag>
+              </lg-panel-header>
               <p>Retreat to secure your pending loot.</p>
             </lg-panel>
           </div>
@@ -129,7 +139,11 @@ export const PANEL_SHOWCASE: ShowcaseEntry = {
   name: 'Panel',
   tier: 'components',
   summary: 'The content box.',
-  covers: ['LgPanelComponent'],
+  covers: [
+    'LgPanelComponent',
+    'LgPanelHeaderComponent',
+    'LgPanelTitleComponent',
+  ],
   readme: 'src/app/grimoire/components/panel/README.md',
   component: PanelShowcaseComponent,
 };

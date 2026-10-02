@@ -9,10 +9,7 @@ import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgSigilComponent } from './sigil.component';
 import { LgSigilHarness } from '../../testing/sigil.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -55,7 +52,7 @@ describe('LgSigilComponent', () => {
     page = TestbedHarnessEnvironment.documentRootLoader(fixture);
   });
 
-  afterEach(() => lgCloseReasonTip());
+  afterEach(() => lgCloseTip());
 
   describe('locked (i-sigil-locked)', () => {
     it('pins its reason tip and announces its condition on a press, and does not emit activate', fakeAsync(async () => {
@@ -67,7 +64,7 @@ describe('LgSigilComponent', () => {
       tick(250);
 
       const tip = await page.getHarnessOrNull(
-        LgReasonTipHarness.with({ shown: true }),
+        LgTipHarness.with({ shown: true }),
       );
       expect(tip).not.toBeNull();
       expect(await tip!.getWord()).toBe('Locked');

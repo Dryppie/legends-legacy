@@ -20,7 +20,7 @@ import {
   lgReadyWords,
   lgStateWarn,
 } from '../../core/grimoire-states';
-import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a11y';
+import { LgBlockedDirective, LgBlockedTip, lgBlockedSpoken } from '../../core/grimoire-blocked';
 
 /**
  * The item frame: a square for an item, Essence or equipment slot, edged in its rarity, with the rarity code in its
@@ -33,7 +33,7 @@ import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a
  */
 @Component({
   selector: 'lg-item-slot',
-  imports: [LgIconComponent, NgTemplateOutlet, LgWhyDirective],
+  imports: [LgIconComponent, NgTemplateOutlet, LgBlockedDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
@@ -62,10 +62,10 @@ import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a
           ><span class="lg-slot__name">{{ label() }}</span
           >@if (blocked()) {<span [id]="whyId" [class]="reasonClass()"
               >@if (reasonInfo()?.word) {<span class="lg-slot__word" aria-hidden="true">{{ reasonInfo()?.word }}</span
-                ><span class="lg-sr lg-why__desc">{{ reasonInfo()?.word }}. </span>}{{ reasonInfo()?.reason }}</span
+                ><span class="lg-sr lg-blocked__desc">{{ reasonInfo()?.word }}. </span>}{{ reasonInfo()?.reason }}</span
             >}@if (metaParts().length) {<span class="lg-slot__meta">{{ metaParts().join(' · ') }}</span>}</span
         >}@if (blocked() && !captioned() && !interactive()) {<span class="lg-sr">{{ srReason() }}</span
-        >}@if (why() && !captioned()) {<span class="lg-sr lg-why__desc" [id]="whyId" aria-hidden="true">{{
+        >}@if (why() && !captioned()) {<span class="lg-sr lg-blocked__desc" [id]="whyId" aria-hidden="true">{{
           spoken(why()!)
         }}</span>}
     </ng-template>
@@ -76,8 +76,8 @@ import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a
         [class]="classes()"
         [attr.aria-pressed]="blocked() ? null : !!selected()"
         [attr.aria-label]="accessibleLabel()"
-        [lgWhy]="why()"
-        [lgWhyId]="whyId"
+        [lgBlocked]="why()"
+        [lgBlockedId]="whyId"
         (click)="blocked() ? null : activate.emit()"
       >
         <ng-container [ngTemplateOutlet]="body" />
@@ -117,7 +117,7 @@ export class LgItemSlotComponent {
 
   protected readonly codes: Record<string, string> = LG_RARITY_CODES;
   protected readonly format = lgFormatNumber;
-  protected readonly spoken = lgWhySpoken;
+  protected readonly spoken = lgBlockedSpoken;
   protected readonly favouriteWord = LG_STATES.favourite.word;
   protected readonly favouriteIcon = 'favourite' as LgIconName;
   protected readonly whyId = lgUniqueId('lgi') + '-why';
@@ -154,7 +154,7 @@ export class LgItemSlotComponent {
     );
   });
   /** With a caption the reason is printed under the name and is the description; without one it is the reason tip. */
-  protected readonly why = computed<LgWhyOptions | null>(() => {
+  protected readonly why = computed<LgBlockedTip | null>(() => {
     const br = this.reasonInfo();
     if (!br || !this.interactive()) return null;
     return { reason: br.reason, word: br.word, tone: br.tone, spoken: br.spoken, printed: this.captioned() };

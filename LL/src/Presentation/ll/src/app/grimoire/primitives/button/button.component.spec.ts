@@ -9,10 +9,7 @@ import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgButtonComponent } from './button.component';
 import { LgButtonHarness } from '../../testing/button.harness';
-import {
-  LgReasonTipHarness,
-  lgCloseReasonTip,
-} from '../../testing/reason-tip.harness';
+import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
   lgAnnouncerIdle,
   lgQuietAnnouncer,
@@ -63,11 +60,11 @@ describe('LgButtonComponent', () => {
     page = TestbedHarnessEnvironment.documentRootLoader(fixture);
   });
 
-  afterEach(() => lgCloseReasonTip());
+  afterEach(() => lgCloseTip());
 
   const clicks = () => fixture.componentInstance.clicks;
   const shownTip = () =>
-    page.getHarnessOrNull(LgReasonTipHarness.with({ shown: true }));
+    page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
 
   describe('locked (i-button-locked)', () => {
     const locked = () =>

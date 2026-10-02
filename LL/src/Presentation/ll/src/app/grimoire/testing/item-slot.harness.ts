@@ -3,7 +3,7 @@ import {
   ComponentHarness,
   HarnessPredicate,
 } from '@angular/cdk/testing';
-import { lgDescriptionOf } from './reason-tip.harness';
+import { lgDescriptionOf } from './tip.harness';
 
 export interface LgItemSlotHarnessFilters extends BaseHarnessFilters {
   /** The name under the frame, as text or a pattern. */

@@ -7,11 +7,11 @@ import { CharacterStateService } from '../../core/services/api/character/charact
 import { LocalStorageService } from '../../core/services/client-side/local-storage/local-storage.service';
 import { LocalDatePipe } from '../../shared/pipes/local-date/local-date.pipe';
 import {
+  LG_NOTICE,
   LgButtonComponent,
   LgChroniclePosition,
   LgCurrencyPillComponent,
   LgGameShellComponent,
-  LgNoticeComponent,
   LgSlotDirective,
   LgTopBarComponent,
 } from '@grimoire';
@@ -47,7 +47,7 @@ export function isGrimoireView(route: ActivatedRoute): boolean {
     LgGameShellComponent,
     LgTopBarComponent,
     LgCurrencyPillComponent,
-    LgNoticeComponent,
+    ...LG_NOTICE,
     LgButtonComponent,
     LgSlotDirective,
     RailGrimoireComponent,

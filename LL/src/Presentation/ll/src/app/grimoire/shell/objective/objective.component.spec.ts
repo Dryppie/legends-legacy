@@ -5,7 +5,6 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgObjectiveHarness } from '../../testing/objective.harness';
 import { LgObjectiveComponent } from './objective.component';
 import { LgSlotDirective } from '../../core/grimoire-core';
-import { lgTopLayer } from '../../core/grimoire-a11y';
 
 // The parity case i-objective: a pinned quest with a tracker, and a plain button beside it. The tracker also holds a
 // button here, so that focus can leave the summary and be seen to come back.
@@ -54,11 +53,7 @@ describe('LgObjectiveComponent', () => {
     );
   });
 
-  afterEach(() => {
-    // The layer stack is shared by every test: none may leave its popover open.
-    fixture.destroy();
-    expect(lgTopLayer()).toBeNull();
-  });
+  afterEach(() => fixture.destroy());
 
   const away = () =>
     fixture.nativeElement.querySelector('button.away') as HTMLElement;
@@ -70,17 +65,15 @@ describe('LgObjectiveComponent', () => {
     expect(await objective.isDisclosure()).toBeTrue();
     expect(await objective.isExpanded()).toBeFalse();
     expect(await objective.isOpen()).toBeFalse();
-    expect(lgTopLayer()).toBeNull();
   });
 
-  it('a press opens the tracker as a popover layer beneath it', async () => {
+  it('a press opens the tracker beneath it', async () => {
     await objective.press();
 
     expect(await objective.isOpen()).toBeTrue();
     expect(await objective.isExpanded()).toBeTrue();
     expect(await objective.getPanelLabel()).toBe('The First Hunt');
     expect(fixture.componentInstance.open()).toBeTrue();
-    expect(lgTopLayer()).toBe('popover');
     expect(await objective.isFocused()).toBeTrue();
   });
 
@@ -91,7 +84,6 @@ describe('LgObjectiveComponent', () => {
     expect(await objective.isOpen()).toBeFalse();
     expect(await objective.isExpanded()).toBeFalse();
     expect(fixture.componentInstance.open()).toBeFalse();
-    expect(lgTopLayer()).toBeNull();
     expect(await objective.isFocused()).toBeTrue();
   });
 
@@ -111,8 +103,30 @@ describe('LgObjectiveComponent', () => {
     await fixture.whenStable();
 
     expect(await objective.isOpen()).toBeFalse();
-    expect(lgTopLayer()).toBeNull();
     expect(await objective.isFocused()).toBeTrue();
+  });
+
+  it('an Escape something above the tracker took first leaves it open (the tip, an overlay)', async () => {
+    await objective.press();
+    const inPanel = fixture.nativeElement.querySelector(
+      'button.in-panel',
+    ) as HTMLElement;
+    inPanel.focus();
+    // What the tip and the CDK overlays do with a key they use: mark it taken.
+    inPanel.addEventListener('keydown', (e) => e.preventDefault(), {
+      once: true,
+    });
+    inPanel.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    await fixture.whenStable();
+
+    expect(await objective.isOpen()).toBeTrue();
+    expect(document.activeElement).toBe(inPanel);
   });
 
   it('the summary pressed again reopens it after Escape', async () => {
@@ -122,7 +136,6 @@ describe('LgObjectiveComponent', () => {
 
     expect(await objective.isOpen()).toBeTrue();
     expect(await objective.isExpanded()).toBeTrue();
-    expect(lgTopLayer()).toBe('popover');
   });
 
   it('a press on the summary while open closes it', async () => {
@@ -131,7 +144,6 @@ describe('LgObjectiveComponent', () => {
 
     expect(await objective.isOpen()).toBeFalse();
     expect(await objective.isExpanded()).toBeFalse();
-    expect(lgTopLayer()).toBeNull();
     expect(await objective.isFocused()).toBeTrue();
   });
 
@@ -141,7 +153,6 @@ describe('LgObjectiveComponent', () => {
     await fixture.whenStable();
 
     expect(await objective.isOpen()).toBeTrue();
-    expect(lgTopLayer()).toBe('popover');
   });
 
   it('a click outside closes it and leaves focus where the player clicked', async () => {
@@ -152,7 +163,6 @@ describe('LgObjectiveComponent', () => {
     expect(await objective.isOpen()).toBeFalse();
     expect(await objective.isExpanded()).toBeFalse();
     expect(fixture.componentInstance.open()).toBeFalse();
-    expect(lgTopLayer()).toBeNull();
     expect(document.activeElement).toBe(away());
   });
 });

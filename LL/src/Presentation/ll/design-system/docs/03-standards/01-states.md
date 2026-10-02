@@ -25,7 +25,7 @@ Families combine. An entry can be selected (Interaction), locked (Availability) 
 - Give every blocking state its reason. Unavailable says why. Locked says how it unlocks. Restricted says who may. Insufficient says what is missing and how much. On cooldown says when.
 - Keep blocked controls focusable. Use `aria-disabled="true"`, not `disabled`, and make the reason the control's description (`aria-describedby`). A press shows and announces the reason instead of acting (The reason tip).
 - Draw the focus ring over every other state, unchanged.
-- Announce a state change the player caused, or one that blocks what they are doing, with `lgAnnounce` (Announcements).
+- Announce a state change the player caused, or one that blocks what they are doing, with `LgAnnouncer` (Announcements).
 - List each component's states on its page, by the names on this page.
 
 **Should**
@@ -69,7 +69,7 @@ The reason tip is how a blocked control explains itself.
 - **One at a time.** Opening one closes any other.
 - **When it isn't needed.** A reason already printed beside the control (a LoadoutSlot's "Unlocks at level 20") is the description itself, and no tip repeats it.
 
-Button, EntryList, NavRail, Sigil and ItemSlot build it in. The `[lgWhy]` directive, or `LgWhyController`, gives it to anything else.
+Button, EntryList, NavRail, Sigil and ItemSlot build it in. The `[lgBlocked]` directive, or `LgBlockedController`, gives it to anything else; the tip itself is the one float on the CDK overlay that tooltips use too (D-134).
 
 ## Interaction
 
@@ -239,7 +239,7 @@ Standards · State combinations holds these rules (D-094): which channel each ki
 
 ## Announcements
 
-`lgAnnounce` speaks a state change once, politely unless marked, and never repeats the same words within five seconds.
+`LgAnnouncer` speaks a state change once, politely unless marked, and never repeats the same words within five seconds.
 
 | Change | Announce | How | Words |
 | --- | --- | --- | --- |
@@ -265,7 +265,7 @@ The matrix says which states each kind of part can show. ● The part shows the 
 | Navigation | NavRail, ItemLink, the TopBar menu |
 | Lists and rows | EntryList, List and ListRow, Ledger rows, Chronicle lines |
 | Slots | ItemSlot, LoadoutSlot |
-| Stat marks | Sigil, Constellation, StatTile, Meter, Track, LevelPlate |
+| Stat marks | Sigil, Constellation, Meter, Track, LevelPlate |
 | Labels | Tag, Presence |
 | Values | Ledger values, StatFigure, CurrencyPill, Delta, table figures |
 | Regions | Panel, Folio, Page, Stage, Chronicle, JourneyCard |
@@ -336,7 +336,7 @@ Labels show their states only as words, and Values show theirs only as figures, 
 | `opacity-drag-origin` | 0.4. The place a dragged thing left, which keeps its room while the copy moves |
 | `LG_STATES` | Every state on this page with its family, word, Tag tone and what screen readers hear. Tag's `state` reads it, so a state's words are the same everywhere |
 | `lgTopState(states)` | The one Tag a row shows when several states apply, by the Tag order in Standards · State combinations (`LG_TAG_ORDER`) |
-| `[lgWhy]="{ reason, word, tone }"`, `[lgWhyId]` | The reason tip for any focusable element. It sets `aria-disabled` and `aria-describedby` on the element; render the description beside it, with the `lgWhyId` id. `word` is the state word ("Locked"); `tone: 'warning'` is for a shortfall. `LgWhyController` does the same inside a component |
+| `[lgBlocked]="{ reason, word, tone }"`, `[lgBlockedId]` | Blocked, with the reason tip, for any focusable element. It sets `aria-disabled` and `aria-describedby` on the element; render the description beside it, with the `lgBlockedId` id. `word` is the state word ("Locked"); `tone: 'warning'` is for a shortfall. `LgBlockedController` does the same inside a component |
 | `lgFormatDuration(seconds)` | "4m 12s", in two units at most (Foundations · Numerals) |
 | `lgSpokenDuration(seconds)` | "4 minutes 12 seconds", for screen readers |
 | Button `state`, `reason`, `shortfall`, `remaining`, `pendingLabel` | `unavailable`, `locked`, `restricted`, `insufficient`, `cooldown` or `pending`. `shortfall` writes "Short by 250 Cinders"; `remaining` writes "Ready in 4m 12s" |

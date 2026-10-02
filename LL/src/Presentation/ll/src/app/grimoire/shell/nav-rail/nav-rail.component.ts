@@ -13,7 +13,7 @@ import { LgSlotDirective, lgCx, lgHasSlot, lgUniqueId } from '../../core/grimoir
 import { LgIconComponent } from '../../primitives/icon/icon.component';
 import { LG_ICONS, LgIconName } from '../../core/grimoire-icons';
 import { LG_STATES, lgBlockedReason, lgReadyWords } from '../../core/grimoire-states';
-import { LgWhyDirective, LgWhyOptions, lgWhySpoken } from '../../core/grimoire-a11y';
+import { LgBlockedDirective, LgBlockedTip, lgBlockedSpoken } from '../../core/grimoire-blocked';
 
 export interface LgNavItem {
   id: string;
@@ -47,7 +47,7 @@ export interface LgNavSection {
  */
 @Component({
   selector: 'lg-nav-rail',
-  imports: [LgIconComponent, NgTemplateOutlet, RouterLink, LgWhyDirective],
+  imports: [LgIconComponent, NgTemplateOutlet, RouterLink, LgBlockedDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
@@ -75,7 +75,7 @@ export interface LgNavSection {
                         >{{ row.item.badge }}</span
                       >} @else if (row.item.ready) {<span class="lg-attention lg-rail__attention" aria-hidden="true"></span
                         ><span class="lg-sr">, {{ row.item.badgeLabel || readyWords(row.item.ready) }}</span
-                      >}@if (row.why; as w) {<span class="lg-sr lg-why__desc" [id]="row.whyId" aria-hidden="true">{{
+                      >}@if (row.why; as w) {<span class="lg-sr lg-blocked__desc" [id]="row.whyId" aria-hidden="true">{{
                         spoken(w)
                       }}</span>}</ng-template
                   >
@@ -94,8 +94,8 @@ export interface LgNavSection {
                       [class]="row.classes"
                       [attr.aria-current]="row.active ? 'page' : null"
                       [attr.title]="compact() && !row.item.locked ? row.item.title : null"
-                      [lgWhy]="row.why"
-                      [lgWhyId]="row.whyId"
+                      [lgBlocked]="row.why"
+                      [lgBlockedId]="row.whyId"
                       (click)="row.item.locked ? null : onPlainClick($event, row.item)"
                       ><ng-container [ngTemplateOutlet]="inner"
                     /></a>
@@ -122,7 +122,7 @@ export class LgNavRailComponent {
 
   private readonly slots = contentChildren(LgSlotDirective);
   private readonly base = lgUniqueId('lgr');
-  protected readonly spoken = lgWhySpoken;
+  protected readonly spoken = lgBlockedSpoken;
   protected readonly readyWords = lgReadyWords;
   protected readonly lockedWord = LG_STATES.locked.word;
   /** The 12px lock marker once it is drawn (Foundations · Iconography); until then the word. */
@@ -133,7 +133,7 @@ export class LgNavRailComponent {
       label: section.label,
       items: section.items.map((item, ii) => {
         const active = item.id === this.activeId() && !item.locked;
-        const why: LgWhyOptions | null = item.locked
+        const why: LgBlockedTip | null = item.locked
           ? {
               reason: lgBlockedReason('locked', item, `NavRail item "${item.title}"`).reason,
               word: 'Locked',

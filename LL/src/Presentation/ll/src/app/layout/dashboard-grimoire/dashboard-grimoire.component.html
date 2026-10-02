@@ -37,7 +37,7 @@
     @if (bootstrapLoaded()) {
       @if (accountAccess(); as access) {
         @if (!access.canParticipate) {
-          <lg-notice tone="warning" title="Multiplayer access restricted">
+          <lg-notice tone="warning" heading="Multiplayer access restricted">
             You can continue playing solo content, but markets, transfers, competitive play, guild activity, rankings, and
             server events are unavailable.
             @if (access.expiresAt) {
@@ -47,14 +47,14 @@
         }
       }
       @if (isResolvingAction) {
-        <lg-notice tone="info" title="Catching up offline progress" busy busyLabel="Catching up">
+        <lg-notice tone="info" heading="Catching up offline progress" busy busyLabel="Catching up">
           Resolving stored actions and rewards.
         </lg-notice>
       }
       @if (idleCombatError(); as resolutionError) {
-        <lg-notice tone="danger" title="Offline progress paused">
+        <lg-notice tone="danger" heading="Offline progress paused">
           {{ resolutionError }}
-          <button lgButton lgSlot="action" size="sm" (click)="retryOfflineProgress()">Retry</button>
+          <lg-notice-actions><button lgButton size="sm" (click)="retryOfflineProgress()">Retry</button></lg-notice-actions>
         </lg-notice>
       }
 
@@ -70,12 +70,12 @@
       </div>
     } @else {
       @if (bootstrapError(); as message) {
-        <lg-notice tone="danger" title="Game state unavailable">
+        <lg-notice tone="danger" heading="Game state unavailable">
           {{ message }}
-          <button lgButton lgSlot="action" size="sm" (click)="retryBootstrap()">Retry</button>
+          <lg-notice-actions><button lgButton size="sm" (click)="retryBootstrap()">Retry</button></lg-notice-actions>
         </lg-notice>
       } @else {
-        <lg-notice title="Entering the game" [busy]="bootstrapLoading()" busyLabel="Loading game data">Loading game data.</lg-notice>
+        <lg-notice heading="Entering the game" [busy]="bootstrapLoading()" busyLabel="Loading game data">Loading game data.</lg-notice>
       }
     }
   </div>

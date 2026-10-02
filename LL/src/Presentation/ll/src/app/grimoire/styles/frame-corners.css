@@ -1,0 +1,13 @@
+/* ---------- Corner ornaments (Foundations · Ornament) ----------
+   The engraved CornerOrnament in each corner of the double gilt frame, which belongs to the Folio and the Banner only.
+   Each draws it as a gilt mask of the asset (cornerSrc) and sets its size with --lg-corner-size. Not part of grimoire.css:
+   the Folio and the Banner each take this file into their own encapsulated styles (styleUrls). */
+.lg-corner {
+  position: absolute; width: var(--lg-corner-size); height: var(--lg-corner-size); pointer-events: none;
+  background: var(--lg-gilt); opacity: 0.8;
+  -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.lg-corner--tl { top: 0.375rem; left: 0.375rem; }
+.lg-corner--tr { top: 0.375rem; right: 0.375rem; transform: scaleX(-1); }
+.lg-corner--bl { bottom: 0.375rem; left: 0.375rem; transform: scaleY(-1); }
+.lg-corner--br { bottom: 0.375rem; right: 0.375rem; transform: scale(-1, -1); }

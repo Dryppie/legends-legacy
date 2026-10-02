@@ -1,23 +1,18 @@
 /* ---------- PageHeader ---------- */
-.lg-pagehead { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-4) var(--lg-space-5); padding-bottom: var(--lg-space-5); border-bottom: var(--lg-border-hairline) solid var(--lg-line); }
+:host { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-4) var(--lg-space-5); padding-bottom: var(--lg-space-5); border-bottom: var(--lg-border-hairline) solid var(--lg-line); }
 .lg-pagehead__icon { position: relative; display: grid; place-items: center; flex: none; width: 3.25rem; height: 3.25rem; color: var(--lg-gilt); }
 .lg-pagehead__mark { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .lg-pagehead__mark polygon { fill: var(--lg-surface); stroke: var(--lg-gilt); stroke-width: var(--lg-border-hairline); vector-effect: non-scaling-stroke; }
-.lg-pagehead__icon .lg-icon { position: relative; color: var(--lg-gilt); }
+/* The glyph paints over the mark, which is positioned. */
+.lg-pagehead__glyph { position: relative; display: grid; }
 .lg-pagehead__text { display: grid; gap: 2px; min-width: 0; }
 .lg-pagehead__eyebrow { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-gilt); }
 .lg-pagehead__summary { margin: 2px 0 0; max-width: var(--lg-measure); color: var(--lg-ink-muted); }
-.lg-pagehead__actions { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--lg-space-2); margin-left: auto; min-width: 0; }
-@container lg-region (width < 44rem) { .lg-pagehead__actions { flex-wrap: wrap; width: 100%; margin-left: 0; } }
 /* A Page in the game's frame is dense (D-120). The rail already names the section and says what the screen is for, so the
-   PageHeader is one row: no eyebrow or summary, a 2.25rem mark, the title at section size, the actions beside it and a
-   tighter rule. Panels sit stack-lg apart both ways, and the content fills the stage to the Page's gutter, lining up
-   with the TopBar's title and currencies, instead of centring at page-max. */
-.lg-shell .lg-pagehead { gap: var(--lg-space-3) var(--lg-space-4); padding-bottom: var(--lg-space-3); }
-.lg-shell .lg-pagehead__icon { width: 2.25rem; height: 2.25rem; }
-.lg-shell .lg-pagehead__icon .lg-icon { width: 1.125rem; height: 1.125rem; }
-.lg-shell .lg-pagehead__eyebrow, .lg-shell .lg-pagehead__summary { display: none; }
-.lg-shell .lg-pagehead .lg-heading--screen { font-size: var(--lg-text-title-md); line-height: var(--lg-leading-title-md); }
-.lg-shell .lg-page__inner { gap: var(--lg-stack-lg); max-width: none; margin: 0; }
-.lg-shell .lg-page :is(.lg-aside, .lg-split, .lg-compare) { gap: var(--lg-stack-lg); }
-.lg-shell .lg-page .lg-aside > * { gap: var(--lg-stack-lg); }
+   PageHeader is one row: no eyebrow or summary, a 2.25rem mark with an 18px glyph, the title at section size, the
+   actions beside it and a tighter rule. */
+:host(.lg-pagehead--dense) { gap: var(--lg-space-3) var(--lg-space-4); padding-bottom: var(--lg-space-3); }
+:host(.lg-pagehead--dense) .lg-pagehead__icon { width: 2.25rem; height: 2.25rem; }
+:host(.lg-pagehead--dense) .lg-pagehead__glyph { --lg-icon-fit: 1.125rem; }
+:host(.lg-pagehead--dense) .lg-pagehead__eyebrow, :host(.lg-pagehead--dense) .lg-pagehead__summary { display: none; }
+:host(.lg-pagehead--dense) h1 { font-size: var(--lg-text-title-md); line-height: var(--lg-leading-title-md); }

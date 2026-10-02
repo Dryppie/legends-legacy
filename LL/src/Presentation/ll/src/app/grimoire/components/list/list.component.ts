@@ -16,7 +16,7 @@ import { LG_RARITY_CODES, LgDensity, LgRarity, LgSlotDirective, lgCx, lgHasSlot 
 import { LG_NONE, LG_TIMES, lgFormatNumber } from '../../core/grimoire-format';
 import { LgIconComponent } from '../../primitives/icon/icon.component';
 import { LgIconName } from '../../core/grimoire-icons';
-import { LgNumComponent } from '../../primitives/num/num.component';
+import { LgValuePipe } from '../../core/grimoire-numerals';
 import { lgMoveKey } from '../../core/grimoire-a11y';
 import { lgLive } from '../../core/grimoire-motion';
 
@@ -35,7 +35,7 @@ export interface LgListColumns {
  */
 @Component({
   selector: 'li[lgListRow]',
-  imports: [LgIconComponent, LgNumComponent],
+  imports: [LgIconComponent, LgValuePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
@@ -80,7 +80,8 @@ export interface LgListColumns {
       >
     }
     @if (cols().value) {
-      <span [class]="valueClass()"><lg-num [value]="value() === undefined ? null : liveValue.value()" /></span>
+      @let v = (value() === undefined ? null : liveValue.value()) | lgValue;
+      <span [class]="valueClass()">{{ v.number }}<span class="lg-unit">{{ v.unit }}</span></span>
     }
     @if (cols().trail) {
       <span class="lg-listrow__trail"><ng-content select="[lgSlot=trailing]" /></span>

@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
-  LgLedgerComponent,
+  LG_LEDGER,
+  LG_PANEL,
   LgLedgerRow,
   LgListComponent,
   LgListRowComponent,
   LgPageComponent,
   LgPageHeaderComponent,
-  LgPanelComponent,
-  LgSlotDirective,
 } from '@grimoire';
 import {
   ShowcaseEntryComponent,
@@ -21,9 +20,8 @@ import { ShowcaseEntry } from '../showcase.types';
     ShowcaseStoryDirective,
     LgPageComponent,
     LgPageHeaderComponent,
-    LgPanelComponent,
-    LgSlotDirective,
-    LgLedgerComponent,
+    ...LG_PANEL,
+    ...LG_LEDGER,
     LgListComponent,
     LgListRowComponent,
   ],
@@ -40,10 +38,13 @@ import { ShowcaseEntry } from '../showcase.types';
         <lg-page-header
           icon="leaderboard"
           eyebrow="City"
-          title="Leaderboard"
+          heading="Leaderboard"
           summary="Top Legends by Combat Rating this season"
         />
-        <lg-panel title="Season standings">
+        <lg-panel>
+          <lg-panel-header>
+            <lg-panel-title>Season standings</lg-panel-title>
+          </lg-panel-header>
           <p>Page scrolls on its own; the TopBar floats above it.</p>
         </lg-panel>
       </lg-page>
@@ -60,10 +61,13 @@ import { ShowcaseEntry } from '../showcase.types';
         <lg-page-header
           icon="leaderboard"
           eyebrow="City"
-          title="Leaderboard"
+          heading="Leaderboard"
           summary="Top Legends by Combat Rating this season"
         />
-        <lg-panel title="Season standings">
+        <lg-panel>
+          <lg-panel-header>
+            <lg-panel-title>Season standings</lg-panel-title>
+          </lg-panel-header>
           <p>Page scrolls on its own; the TopBar floats above it.</p>
         </lg-panel>
       </lg-page>
@@ -79,10 +83,13 @@ import { ShowcaseEntry } from '../showcase.types';
         <lg-page-header
           icon="guild"
           eyebrow="City"
-          title="Guild"
+          heading="Guild"
           summary="A Page with flow, inside the game’s own frame"
         />
-        <lg-panel title="Members">
+        <lg-panel>
+          <lg-panel-header>
+            <lg-panel-title>Members</lg-panel-title>
+          </lg-panel-header>
           <p>No room is kept for a TopBar; the frame gives the gutters.</p>
         </lg-panel>
       </lg-page>
@@ -99,19 +106,46 @@ import { ShowcaseEntry } from '../showcase.types';
         <lg-page-header
           icon="overview"
           eyebrow="Character"
-          title="Overview"
+          heading="Overview"
           summary="Stats, combat rating, and Essence loadout"
         />
         <div class="lg-aside">
           <div class="lg-aside__main">
             <div class="lg-ledgergrid lg-ledgergrid--2">
-              <lg-ledger title="Offense" [rows]="offense" />
-              <lg-ledger title="Defense" [rows]="defense" />
+              <lg-ledger heading="Offense">
+                @for (row of offense; track row.label) {
+                  <div
+                    lgLedgerRow
+                    [label]="row.label"
+                    [value]="row.value"
+                    [sub]="row.sub"
+                    [description]="row.description"
+                    [tipMeta]="row.tipMeta"
+                    [muted]="!!row.muted"
+                  ></div>
+                }
+              </lg-ledger>
+              <lg-ledger heading="Defense">
+                @for (row of defense; track row.label) {
+                  <div
+                    lgLedgerRow
+                    [label]="row.label"
+                    [value]="row.value"
+                    [sub]="row.sub"
+                    [description]="row.description"
+                    [tipMeta]="row.tipMeta"
+                    [muted]="!!row.muted"
+                  ></div>
+                }
+              </lg-ledger>
             </div>
           </div>
           <aside class="lg-aside__side">
-            <lg-panel title="Essence loadout" flush>
-              <span lgSlot="aside">2 / 2</span>
+            <lg-panel flush>
+              <lg-panel-header>
+                <lg-panel-title>Essence loadout</lg-panel-title>
+                <span>2 / 2</span>
+              </lg-panel-header>
               <lg-list label="Essence loadout">
                 <li
                   lgListRow
@@ -144,11 +178,26 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-page label="Overview">
         <div class="lg-aside">
           <div class="lg-aside__main">
-            <lg-ledger title="Offense" [rows]="offense" />
+            <lg-ledger heading="Offense">
+              @for (row of offense; track row.label) {
+                <div
+                  lgLedgerRow
+                  [label]="row.label"
+                  [value]="row.value"
+                  [sub]="row.sub"
+                  [description]="row.description"
+                  [tipMeta]="row.tipMeta"
+                  [muted]="!!row.muted"
+                ></div>
+              }
+            </lg-ledger>
           </div>
           <aside class="lg-aside__side">
-            <lg-panel title="Essence loadout" flush>
-              <span lgSlot="aside">2 / 2</span>
+            <lg-panel flush>
+              <lg-panel-header>
+                <lg-panel-title>Essence loadout</lg-panel-title>
+                <span>2 / 2</span>
+              </lg-panel-header>
               <lg-list label="Essence loadout">
                 <li
                   lgListRow

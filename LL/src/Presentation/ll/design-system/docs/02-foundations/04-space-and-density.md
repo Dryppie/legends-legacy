@@ -19,7 +19,7 @@ Spacing is the game's 4px scale, used through semantic tokens that name the job.
 - Keep Compact to one line per row: name, code, meta and values in aligned columns. Secondary detail goes to the inspector (or the Folio on a stage screen) or a tooltip, not a second line.
 - Reach for a denser mode before cutting content.
 - Lay Ledgers out in the ledger grid (`lg-ledgergrid`): four a row in a Wide region, two at Medium and Narrow, one Stacked (Foundations · Layout).
-- Keep six to eight StatTiles per group; more wants a table.
+- Keep a two-up Ledger to six to eight rows; more wants a full Ledger or a table.
 
 **Never**
 - Mix densities inside one list or table.
@@ -99,7 +99,7 @@ A container inside another surface takes the inner inset of the density it sits 
 | Compact | 12px | 8px |
 
 - **An inner surface in the Folio** (a LoadoutSlot, a well) pads 16px, the Comfortable inner inset, not 24px. The Folio holds no Panel.
-- **A LoadoutSlot in a Panel** pads 12px, the inner inset, and follows its region; the Panel keeps its 16px. A StatTile is already an inner surface, fixed at 12px.
+- **A LoadoutSlot in a Panel** pads 12px, the inner inset, and follows its region; the Panel keeps its 16px.
 - **A List or table in a Panel:** the Panel is `flush` (no body padding), and each row pads to the Panel's inset, 16px in Standard. The list's names line up with the Panel's title, and the row's hover wash runs to the Panel's edge.
 - **Panels never nest** (Standards · Information Hierarchy). Three levels of enclosure means the inner one should be a row, not a box.
 
@@ -117,7 +117,7 @@ A container inside another surface takes the inner inset of the density it sits 
 | LoadoutSlot | Follows its region | Follows its region | Follows its region | Inner inset only |
 | Folio | Always | — | — | Comfortable by definition; everything inside it is Comfortable unless marked |
 | Chronicle | — | — | Always | The combat and chat log is Compact, and the Compact lists setting leaves it alone |
-| StatTile, Meter, Sigil, LevelPlate, StatFigure, Banner, JourneyCard, Tag, CurrencyPill, KeyHints, TopBar, NavRail | One size | One size | One size | Fixed. NavRail's `compact` means collapsed to icons, not a density |
+| Meter, Sigil, LevelPlate, StatFigure, Banner, JourneyCard, Tag, CurrencyPill, KeyHints, TopBar, NavRail | One size | One size | One size | Fixed. NavRail's `compact` means collapsed to icons, not a density |
 | ItemSlot | Sizes | Sizes | Sizes | `sm`, `md` and `wide` are sizes for positional slots, not densities |
 
 The future Table reads the same row, cell and control values.

@@ -11,7 +11,7 @@ The pinned quest's title and its current objective with the count, in the TopBar
 - The kicker in `label` capitals, `ink-muted`; the title in `body-compact` 600, `ink`, truncating; the objective in `caption`, `ink-muted`, with the count in `ink` and tabular figures at its end.
 - With a `panel` slot it is a disclosure button (`aria-expanded`, `aria-controls`): a `line` edge at rest, `line-strong` and the `surface-raised` wash on hover and while open.
 - The panel is a Level 2 floating surface — `surface-raised`, a `line-strong` edge, `radius-float`, `shadow-float` — at `z-popover`, centred beneath it and at most 26.25rem wide. It rises in over `duration-base`.
-- It closes on Escape (returning focus to the button), on a click outside, or on the button. It registers with the layer stack (`lgOpenLayer`), so Escape closes the topmost layer first.
+- It closes on Escape (returning focus to the button), on a click outside, or on the button. An Escape something above it took first (the tip, an overlay opened from the tracker) leaves it open, so Escape closes the topmost layer first (D-134). It moves onto the CDK overlay with the Popover in plan step 22.
 - Keep the text to the objective; rewards and the chain belong in the tracker.
 
 ## Supported states

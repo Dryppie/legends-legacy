@@ -21,7 +21,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { LG_SHELL, LgSlotDirective, lgCx, lgHasSlot } from '../../core/grimoire-core';
 import { LgButtonComponent } from '../../primitives/button/button.component';
-import { lgAnnounce } from '../../core/grimoire-a11y';
+import { LgAnnouncer } from '../../core/grimoire-announcer';
 import { LgIconComponent } from '../../primitives/icon/icon.component';
 
 export interface LgChronicleChannel {
@@ -263,6 +263,7 @@ export class LgChronicleComponent {
   readonly authorSelect = output<{ message: LgChronicleMessage; element: HTMLElement }>();
 
   protected readonly shell = inject(LG_SHELL, { optional: true });
+  private readonly announcer = inject(LgAnnouncer);
   private readonly slots = contentChildren(LgSlotDirective);
   protected readonly textTemplate = contentChild(LgChronicleTextDirective);
   private readonly log = viewChild<ElementRef<HTMLElement>>('log');
@@ -369,7 +370,7 @@ export class LgChronicleComponent {
         if (!(m.mention || m.direction === 'from')) return;
         const who =
           m.direction === 'from' ? 'Whisper from ' + m.author : m.author ? m.author + ' mentioned you' : 'You were mentioned';
-        lgAnnounce(typeof m.text === 'string' ? who + ': ' + m.text : who, { key: 'chronicle-' + (m.id ?? who) });
+        this.announcer.announce(typeof m.text === 'string' ? who + ': ' + m.text : who, { key: 'chronicle-' + (m.id ?? who) });
       });
     });
   }

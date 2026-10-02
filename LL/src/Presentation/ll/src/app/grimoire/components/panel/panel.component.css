@@ -1,18 +1,13 @@
 /* ---------- Panel ---------- */
-/* Level 1 in flow: no edge. The fill and the space around it carry the region; the head's rule is its one divider (Foundations · Lines). */
-.lg-panel { background: var(--lg-surface); border-radius: var(--lg-radius-container); }
-.lg-panel__head {
-  display: flex; align-items: center; gap: var(--lg-space-3);
-  min-height: 1.875rem; padding: 0 var(--lg-panel-inset, var(--lg-inset));
-  border-bottom: var(--lg-border-hairline) solid var(--lg-line);
-  font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted);
+/* Level 1 in flow: no edge. The fill and the space around it carry the region; the head's rule is its one divider (Foundations · Lines).
+   --lg-panel-pad is the Panel's inset, on the head and the body alike: the density's, or one step in (--lg-panel-inset)
+   inside another surface, so nested containers never both pad fully. A Folio, a Banner, a JourneyCard and a Panel's
+   body set --lg-panel-inset for the Panels in them. */
+:host {
+  display: block;
+  background: var(--lg-surface); border-radius: var(--lg-radius-container);
+  --lg-panel-pad: var(--lg-panel-inset, var(--lg-inset));
 }
-.lg-panel__head.is-end { justify-content: flex-end; }
-.lg-panel__head > :last-child:not(:first-child) { margin-left: auto; }
-.lg-panel__body { padding: var(--lg-panel-inset, var(--lg-inset)); }
-/* Nested containers never both pad fully: a Panel inside another surface steps down one level. */
-:is(.lg-folio, .lg-panel__body, .lg-banner, .lg-journey) .lg-panel { --lg-panel-inset: var(--lg-inset-inner); }
+.lg-panel__body { padding: var(--lg-panel-pad); --lg-panel-inset: var(--lg-inset-inner); }
 /* A list or table inside a Panel uses the Panel's padding instead of adding its own: flush, with rows padded to the Panel's inset. */
-.lg-panel--flush > .lg-panel__body { padding: 0; --lg-list-pad: var(--lg-panel-inset, var(--lg-inset)); }
-.lg-panel__body > p { margin: 0; }
-.lg-panel__body > p + p { margin-top: var(--lg-space-3); }
+:host(.lg-panel--flush) > .lg-panel__body { padding: 0; --lg-list-pad: var(--lg-panel-pad); }

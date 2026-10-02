@@ -2,47 +2,46 @@
   <lg-page-header
     icon="overview"
     eyebrow="Character"
-    title="Overview"
+    heading="Overview"
     summary="Stats, combat rating, and Essence loadout"
   >
-    <lg-search-field
-      lgSlot="actions"
-      label="Search character by name"
-      placeholder="Search character by name…"
-      [maxLength]="80"
-      [(value)]="query"
-      [suggestions]="suggestions()"
-      [loading]="suggesting()"
-      [searched]="suggestionsSearched()"
-      (pick)="pick($event)"
-      (submitted)="search($event)"
-    />
-    <button
-      lgButton
-      lgSlot="actions"
-      size="sm"
-      [state]="searchLoading() ? 'pending' : 'available'"
-      pendingLabel="Searching…"
-      (click)="search()"
-    >
-      Search
-    </button>
-    @if (viewing()) {
-      <button lgButton="quiet" lgSlot="actions" size="sm" (click)="backToOwn()">
-        Back to my profile
-      </button>
-    } @else {
+    <lg-page-header-actions>
+      <lg-search-field
+        label="Search character by name"
+        placeholder="Search character by name…"
+        [maxLength]="80"
+        [(value)]="query"
+        [suggestions]="suggestions()"
+        [loading]="suggesting()"
+        [searched]="suggestionsSearched()"
+        (pick)="pick($event)"
+        (submitted)="search($event)"
+      />
       <button
-        lgButton="quiet"
-        lgSlot="actions"
+        lgButton
         size="sm"
-        [state]="loading() ? 'pending' : 'available'"
-        pendingLabel="Refreshing…"
-        (click)="refresh()"
+        [state]="searchLoading() ? 'pending' : 'available'"
+        pendingLabel="Searching…"
+        (click)="search()"
       >
-        Refresh
+        Search
       </button>
-    }
+      @if (viewing()) {
+        <button lgButton="quiet" size="sm" (click)="backToOwn()">
+          Back to my profile
+        </button>
+      } @else {
+        <button
+          lgButton="quiet"
+          size="sm"
+          [state]="loading() ? 'pending' : 'available'"
+          pendingLabel="Refreshing…"
+          (click)="refresh()"
+        >
+          Refresh
+        </button>
+      }
+    </lg-page-header-actions>
   </lg-page-header>
 
   @if (error()) {
@@ -142,50 +141,52 @@
           </lg-profile-identity>
 
           <!-- Level is a figure like Combat Rating, beside the identity (D-122). -->
-          <lg-stat-figure
-            lgSlot="aside"
-            label="Level"
-            [value]="c.level"
-            [caption]="
-              fmt(c.experience) +
-              ' / ' +
-              fmt(c.experienceUntilNextLevel) +
-              ' Combat XP'
-            "
-          />
-          <lg-stat-figure
-            lgSlot="aside"
-            label="Combat Rating"
-            [value]="combatRating()"
-            [caption]="
-              combatRating()
-                ? 'Permanent attributes and the equipped build'
-                : 'Unavailable'
-            "
-            title="Combat Rating summarizes permanent combat attributes and the equipped build."
-          />
+          <lg-banner-aside>
+            <lg-stat-figure
+              label="Level"
+              [value]="c.level"
+              [caption]="
+                fmt(c.experience) +
+                ' / ' +
+                fmt(c.experienceUntilNextLevel) +
+                ' Combat XP'
+              "
+            />
+            <lg-stat-figure
+              label="Combat Rating"
+              [value]="combatRating()"
+              [caption]="
+                combatRating()
+                  ? 'Permanent attributes and the equipped build'
+                  : 'Unavailable'
+              "
+              title="Combat Rating summarizes permanent combat attributes and the equipped build."
+            />
+          </lg-banner-aside>
 
           @if (membership() && showPerks()) {
-            <div lgSlot="footer" id="ovw-perks" class="ovw-perks">
-              <div class="ovw-perks__head">
-                <h3 class="ovw-eyebrow">Active Nobility perks</h3>
-                <p class="ovw-note">
-                  Applied automatically while Nobility is active.
-                </p>
+            <lg-banner-footer>
+              <div id="ovw-perks" class="ovw-perks">
+                <div class="ovw-perks__head">
+                  <h3 class="ovw-eyebrow">Active Nobility perks</h3>
+                  <p class="ovw-note">
+                    Applied automatically while Nobility is active.
+                  </p>
+                </div>
+                <div class="ovw-perks__grid">
+                  @for (group of perkGroups; track group.label) {
+                    <div>
+                      <h4 class="ovw-perks__label">{{ group.label }}</h4>
+                      <ul class="ovw-perks__list">
+                        @for (perk of group.perks; track perk) {
+                          <li><span aria-hidden="true">–</span>{{ perk }}</li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
               </div>
-              <div class="ovw-perks__grid">
-                @for (group of perkGroups; track group.label) {
-                  <div>
-                    <h4 class="ovw-perks__label">{{ group.label }}</h4>
-                    <ul class="ovw-perks__list">
-                      @for (perk of group.perks; track perk) {
-                        <li><span aria-hidden="true">–</span>{{ perk }}</li>
-                      }
-                    </ul>
-                  </div>
-                }
-              </div>
-            </div>
+            </lg-banner-footer>
           }
         </lg-banner>
 
@@ -196,7 +197,18 @@
           </header>
           <div class="lg-ledgergrid">
             @for (group of attributeGroups(); track group.title) {
-              <lg-ledger [title]="group.title" [rows]="group.rows" />
+              <lg-ledger [heading]="group.title">
+                @for (row of group.rows; track row.label) {
+                  <div
+                    lgLedgerRow
+                    [label]="row.label"
+                    [value]="row.value"
+                    [sub]="row.sub"
+                    [description]="row.description"
+                    [tipMeta]="row.tipMeta"
+                  ></div>
+                }
+              </lg-ledger>
             }
           </div>
         </section>
@@ -205,13 +217,13 @@
       <aside class="lg-aside__side">
         <!-- Combat Style heads the side column, above the loadout it works with (D-121). -->
         @if (!viewing()) {
-          <lg-panel title="Combat Style">
-            <a
-              lgButton="link"
-              lgSlot="aside"
-              routerLink="/game/character/combat-styles"
-              >Manage</a
-            >
+          <lg-panel>
+            <lg-panel-header>
+              <lg-panel-title>Combat Style</lg-panel-title>
+              <a lgButton="link" routerLink="/game/character/combat-styles"
+                >Manage</a
+              >
+            </lg-panel-header>
             @if (combatStyle(); as style) {
               <!-- One row: the Sigil, then the name, the Mastery note and the XP Meter beside it (D-123). -->
               <div class="ovw-style">
@@ -253,10 +265,13 @@
             }
           </lg-panel>
         }
-        <lg-panel title="Essence Loadout">
-          <span lgSlot="aside" class="ovw-count"
-            >{{ attuned() }} / {{ loadout().length }} attuned</span
-          >
+        <lg-panel>
+          <lg-panel-header>
+            <lg-panel-title>Essence Loadout</lg-panel-title>
+            <span class="ovw-count"
+              >{{ attuned() }} / {{ loadout().length }} attuned</span
+            >
+          </lg-panel-header>
           @if (loadout().length) {
             <div class="ovw-slots">
               @for (s of loadout(); track s.index) {

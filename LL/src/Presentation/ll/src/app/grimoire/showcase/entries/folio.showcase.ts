@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
+  LG_FOLIO,
+  LG_LEDGER,
   LgButtonComponent,
   LgEmblemComponent,
-  LgFolioComponent,
   LgFolioEffect,
   LgItemSlotComponent,
-  LgLedgerComponent,
   LgLedgerRow,
-  LgSlotDirective,
   LgTrackComponent,
 } from '@grimoire';
 import {
@@ -20,19 +19,18 @@ import { ShowcaseEntry } from '../showcase.types';
   selector: 'sc-folio-showcase',
   imports: [
     ShowcaseStoryDirective,
-    LgFolioComponent,
-    LgSlotDirective,
+    ...LG_FOLIO,
     LgButtonComponent,
     LgEmblemComponent,
     LgItemSlotComponent,
-    LgLedgerComponent,
+    ...LG_LEDGER,
     LgTrackComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-template
       scStory="Attribute"
-      notes="Emblem, eyebrow, title, lore with its key nouns in bold, the ornament rule, effects, one action and a Track in the footer."
+      notes="The emblem, eyebrow, heading, lore with its key nouns in bold, the ornament rule, effects, one action and a Track in the footer, each region its own element."
       width="22.5rem"
       height="44rem"
       flush
@@ -40,29 +38,34 @@ import { ShowcaseEntry } from '../showcase.types';
       <lg-folio
         [cornerSrc]="corner"
         eyebrow="Attribute"
-        title="Power"
+        heading="Power"
         [effects]="powerEffects"
       >
-        <lg-emblem lgSlot="emblem" [points]="6" [size]="148" />
-        <span lgSlot="lore"
+        <lg-folio-emblem>
+          <lg-emblem [points]="6" [size]="148" />
+        </lg-folio-emblem>
+        <lg-folio-lore
           >Raw force behind every blow and spell. With <b>Power</b> as your
-          weapon, you break what others only bend.</span
+          weapon, you break what others only bend.</lg-folio-lore
         >
-        <button lgButton lgSlot="actions" hotkey="E">View breakdown</button>
-        <lg-track
-          lgSlot="footer"
-          [steps]="5"
-          [current]="1"
-          startLabel="Ascension"
-          endLabel="Tier V"
-          label="Legacy Ascension"
-        />
+        <lg-folio-actions>
+          <button lgButton hotkey="E">View breakdown</button>
+        </lg-folio-actions>
+        <lg-folio-footer>
+          <lg-track
+            [steps]="5"
+            [current]="1"
+            startLabel="Ascension"
+            endLabel="Tier V"
+            label="Legacy Ascension"
+          />
+        </lg-folio-footer>
       </lg-folio>
     </ng-template>
 
     <ng-template
       scStory="Item"
-      notes="With a rarity it is an item context: the title takes the rarity colour, a Tag names it, and magnitudes turn ink."
+      notes="With a rarity it is an item context: the heading takes the rarity colour, a Tag names it, and magnitudes turn ink."
       width="22.5rem"
       height="44rem"
       flush
@@ -71,20 +74,19 @@ import { ShowcaseEntry } from '../showcase.types';
         [cornerSrc]="corner"
         rarity="Epic"
         eyebrow="Essence"
-        title="Soul Prism"
+        heading="Soul Prism"
         [effects]="prismEffects"
       >
-        <lg-item-slot
-          lgSlot="emblem"
-          rarity="Epic"
-          icon="essences"
-          [caption]="false"
-        />
-        <span lgSlot="lore"
+        <lg-folio-emblem>
+          <lg-item-slot rarity="Epic" icon="essences" [caption]="false" />
+        </lg-folio-emblem>
+        <lg-folio-lore
           >A shard of a warden’s heart, still humming with the <b>Prism</b> it
-          once guarded.</span
+          once guarded.</lg-folio-lore
         >
-        <button lgButton="solid" lgSlot="actions" hotkey="A">Attune</button>
+        <lg-folio-actions>
+          <button lgButton="solid" hotkey="A">Attune</button>
+        </lg-folio-actions>
       </lg-folio>
     </ng-template>
 
@@ -93,16 +95,15 @@ import { ShowcaseEntry } from '../showcase.types';
         [cornerSrc]="corner"
         rarity="Legendary"
         eyebrow="Helm · Lv 20"
-        title="Crown of Cinders"
+        heading="Crown of Cinders"
         [effects]="crownEffects"
       >
-        <lg-item-slot
-          lgSlot="emblem"
-          rarity="Legendary"
-          icon="overview"
-          [caption]="false"
-        />
-        <button lgButton="solid" lgSlot="actions" hotkey="E">Equip</button>
+        <lg-folio-emblem>
+          <lg-item-slot rarity="Legendary" icon="overview" [caption]="false" />
+        </lg-folio-emblem>
+        <lg-folio-actions>
+          <button lgButton="solid" hotkey="E">Equip</button>
+        </lg-folio-actions>
       </lg-folio>
     </ng-template>
 
@@ -117,23 +118,38 @@ import { ShowcaseEntry } from '../showcase.types';
         [cornerSrc]="corner"
         align="start"
         eyebrow="Creature"
-        title="Wolf"
-        titleSub="Ember"
-        lore="The Ember Wolf is found in the ash fields east of Shenic. It hunts in pairs."
+        heading="Wolf"
+        headingSub="Ember"
         [effects]="wolfEffects"
       >
-        <lg-ledger title="Combat" [rows]="wolfStats" />
+        <lg-folio-lore
+          >The Ember Wolf is found in the ash fields east of Shenic. It hunts in
+          pairs.</lg-folio-lore
+        >
+        <lg-ledger heading="Combat">
+          @for (row of wolfStats; track row.label) {
+            <div
+              lgLedgerRow
+              [label]="row.label"
+              [value]="row.value"
+              [sub]="row.sub"
+              [description]="row.description"
+              [tipMeta]="row.tipMeta"
+              [muted]="!!row.muted"
+            ></div>
+          }
+        </lg-ledger>
       </lg-folio>
     </ng-template>
 
     <ng-template
       scStory="Title only"
-      notes="The least a Folio holds: a title, start-aligned, with no lore or effects."
+      notes="The least a Folio holds: a heading, start-aligned, with no lore or effects."
       width="22.5rem"
       height="20rem"
       flush
     >
-      <lg-folio title="Details" align="start" />
+      <lg-folio heading="Details" align="start" />
     </ng-template>
   `,
 })
@@ -168,7 +184,13 @@ export const FOLIO_SHOWCASE: ShowcaseEntry = {
   name: 'Folio',
   tier: 'components',
   summary: 'The detail panel.',
-  covers: ['LgFolioComponent'],
+  covers: [
+    'LgFolioComponent',
+    'LgFolioEmblemComponent',
+    'LgFolioLoreComponent',
+    'LgFolioActionsComponent',
+    'LgFolioFooterComponent',
+  ],
   readme: 'src/app/grimoire/components/folio/README.md',
   component: FolioShowcaseComponent,
 };

@@ -3,8 +3,9 @@ import { BUTTON_SHOWCASE } from './entries/button.showcase';
 import { ICON_SHOWCASE } from './entries/icon.showcase';
 import { HEADING_SHOWCASE } from './entries/heading.showcase';
 import { KEY_SHOWCASE } from './entries/key.showcase';
-import { NUM_SHOWCASE } from './entries/num.showcase';
+import { NUMERALS_SHOWCASE } from './entries/numerals.showcase';
 import { TAG_SHOWCASE } from './entries/tag.showcase';
+import { TOOLTIP_SHOWCASE } from './entries/tooltip.showcase';
 import { TAB_STRIP_SHOWCASE } from './entries/tab-strip.showcase';
 import { METER_SHOWCASE } from './entries/meter.showcase';
 import { SECTION_RULE_SHOWCASE } from './entries/section-rule.showcase';
@@ -17,7 +18,6 @@ import { NOTICE_SHOWCASE } from './entries/notice.showcase';
 import { LEDGER_SHOWCASE } from './entries/ledger.showcase';
 import { STAT_FIGURE_SHOWCASE } from './entries/stat-figure.showcase';
 import { DELTA_SHOWCASE } from './entries/delta.showcase';
-import { STAT_TILE_SHOWCASE } from './entries/stat-tile.showcase';
 import { TRACK_SHOWCASE } from './entries/track.showcase';
 import { LIST_SHOWCASE } from './entries/list.showcase';
 import { ENTRY_LIST_SHOWCASE } from './entries/entry-list.showcase';
@@ -51,8 +51,9 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   ICON_SHOWCASE,
   HEADING_SHOWCASE,
   KEY_SHOWCASE,
-  NUM_SHOWCASE,
+  NUMERALS_SHOWCASE,
   TAG_SHOWCASE,
+  TOOLTIP_SHOWCASE,
   TAB_STRIP_SHOWCASE,
   METER_SHOWCASE,
   SECTION_RULE_SHOWCASE,
@@ -66,7 +67,6 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   LEDGER_SHOWCASE,
   STAT_FIGURE_SHOWCASE,
   DELTA_SHOWCASE,
-  STAT_TILE_SHOWCASE,
   TRACK_SHOWCASE,
   LIST_SHOWCASE,
   ENTRY_LIST_SHOWCASE,

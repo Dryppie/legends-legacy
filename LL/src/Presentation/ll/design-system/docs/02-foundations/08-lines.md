@@ -134,7 +134,7 @@ A surface is one surface at one level: a Folio, a Panel, a Banner, a dialog or t
 | Stripe a wide rankings table, with no separators. | Stripe it and separate its rows as well. |
 | Mark the selected inventory row with the wash and a 2px `ink` bar. | Outline it with a 1px gilt border. |
 | One ornament in the Folio, between lore and effects. | An ornament above every group in the Folio. |
-| Put a `band` SectionRule ("Status") above a group of stat tiles. | Put the ornament between stat groups. |
+| Put a `band` SectionRule ("Status") above a group of stats. | Put the ornament between stat groups. |
 | Join a Ledger's labels to their values with dotted leaders. | Put leaders between an item's name and its quantity in a List. |
 | Group a form's fields with space and a heading. | Put a fieldset border around each group. |
 | A Banner edged only by its double gilt frame. | A `line` border around the gilt frame. |
