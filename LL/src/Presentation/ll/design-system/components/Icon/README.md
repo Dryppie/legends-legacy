@@ -13,7 +13,8 @@ The game's own sidebar icons, redrawn to inherit `currentColor` so they take any
 - **With a label.** Icons accompany words; an icon alone is for a common action only (close, back, expand, menu, search, filter, sort, refresh, copy, link), with a tooltip and an accessible name (Foundations · Iconography · Icons and labels).
 - **Colour** comes from the text beside it: `ink-muted`, `ink`, `gilt` for the current location only, or a status, damage or effect colour beside its word. Never a rarity colour, never two colours.
 - **An unknown name draws nothing** and logs a warning; the label beside it is the fallback, so a registry entry whose icon isn't drawn yet loses nothing but the icon.
-- `nobility` is the one icon outside the sidebar set: the filled crown of the Nobility mark, drawn solid so it holds at 12px (Registries · Nobility mark). It is the model for future 12px markers, such as locked and favourite.
+- `nobility` and `lock` are the two icons outside the sidebar set: the filled crown of the Nobility mark (Registries · Nobility mark) and the Locked marker (D-113), drawn solid so they hold at 12px. They are the model for future markers, such as favourite.
+- **Where the drawings live:** `icons.json`, the one source of the set. Add or change an icon there and run `scripts/build-icons.mjs`, which writes it into `bundle.js`, `index.d.ts` and the game's `grimoire-icons.ts` (D-125).
 
 ## Accessibility notes
 

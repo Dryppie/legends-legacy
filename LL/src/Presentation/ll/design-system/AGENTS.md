@@ -38,15 +38,16 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 | `docs/10-governance/02-decision-log.md` | Every decision (D-001 onward) |
 | `tokens.json` | Every token. **The only source of values.** |
 | `tokens.css` | Compiled from `tokens.json` by `scripts/build-tokens.mjs`. Never edit it by hand. |
+| `icons.json` | The icon set: each icon's view box, stroke width and shapes. **The only source of icon drawings** (D-125). |
 | `components/<Name>/` | `README.md` (guidelines) and `preview.html` (the catalog card) |
-| `components/bundle.js`, `bundle.css`, `index.d.ts` | The React reference components on `window.LL`, their `lg-*` styles and their prop types. Hand-written; edit them directly. Keep the `@ds-bundle` component list on line 1 of `bundle.js` in step. |
+| `components/bundle.js`, `bundle.css`, `index.d.ts` | The React reference components on `window.LL`, their `lg-*` styles and their prop types. Hand-written; edit them directly, except the icon block between `// @icons-start` and `// @icons-end` in `bundle.js` and `index.d.ts`, which `scripts/build-icons.mjs` writes. Keep the `@ds-bundle` component list on line 1 of `bundle.js` in step. |
 | `api/components/<Name>.md`, `api/tokens.md`, `api/assets/<Group>.md` | Short reference cards. No generator writes them any more: update a card by hand when its props, tokens or assets change. Their `<x-import>` lines are for the old Claude Design canvas; ignore them. |
 | `manifest.json` | The component list, groups and summaries the catalog reads |
 | `design-system.json` | Asset groups, documentation order (`docs.sections`), libraries |
-| `assets/<Group>/` | Image files; previews refer to them as `../../assets/<Group>/<file>` |
+| `assets/<Group>/` | Image files; previews refer to them as `../../assets/<Group>/<file>`. `assets/Icons/` holds the game's own sidebar SVGs, shown as assets; no component draws from them. |
 | `catalog/index.html` | The local viewer for every preview and docs page |
 | `components/Cover/` | The catalog's cover card: a preview only, with no README, card or port |
-| `scripts/build-tokens.mjs`, `scripts/sync-styles.mjs`, `scripts/check.mjs` | Token compiler, the copy of the styles into the app (D-092), and static checks |
+| `scripts/build-tokens.mjs`, `scripts/build-icons.mjs`, `scripts/sync-styles.mjs`, `scripts/check.mjs` | Token compiler, the icon set's code in both editions (D-125), the copy of the styles into the app (D-092), and static checks |
 | `parity/` | The parity check: both editions of every component on one page, compared (D-093). Its `README.md` says how to run it. |
 
 **The `lg-*` port (the code the game uses):**
@@ -55,12 +56,14 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 | --- | --- |
 | `../src/styles/grimoire/tokens.css`, `fonts/` | Generated copies of `tokens.css` and `fonts/`. Never edit them. |
 | `../src/styles/grimoire/components.css` | Generated copy of `components/bundle.css`: the one `lg-*` stylesheet. Never edit it. |
+| `../src/app/shared/components/grimoire/grimoire-icons.ts` | Generated from `icons.json` by `scripts/build-icons.mjs`: the icon set `lg-icon` draws. Never edit it. |
 | `../src/app/shared/components/grimoire/` | Standalone, OnPush, signal-based `lg-*` components, exported as `LG_GRIMOIRE` from `index.ts`. They render the reference components' markup. Governance · Code parity maps each one's props to Angular inputs, outputs and slots. |
 
 ## Rules
 
 **Must**
 - Treat `tokens.json` as the only source of values. Change a value there, then run `node LL/src/Presentation/ll/design-system/scripts/build-tokens.mjs`. No hex colour, pixel font size or shadow with its own colour appears anywhere except `tokens.json` and `tokens.css`. (A mask gradient's `#000`, used as an alpha channel, is the one exception.)
+- Treat `icons.json` as the only source of icon drawings. Add or change an icon there, then run `node LL/src/Presentation/ll/design-system/scripts/build-icons.mjs`: it writes the icon block in `bundle.js`, the `IconName` type in `index.d.ts` and the app's `grimoire-icons.ts`. A new icon goes into `icons.json`, never into a component or an SVG file (Foundations · Iconography).
 - Make each backlog item **one change** that updates, together, everything it affects:
   1. the `docs/` sections (new sections added to `design-system.json` → `docs.sections`);
   2. `tokens.json`, then the compiled `tokens.css`;
@@ -84,7 +87,7 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 - Clear any raw-value warning in a file you touch.
 
 **Never**
-- Edit `tokens.css` by hand, or type a raw value into a component, preview or Angular style.
+- Edit `tokens.css` or the generated icon code by hand, or type a raw value into a component, preview or Angular style.
 - Change anything outside `design-system/`, `src/styles/grimoire/` and `src/app/shared/components/grimoire/`, unless the item says to migrate a screen. The `--ll-*` tokens, `src/styles.css`, Tailwind and existing screens are out of bounds.
 - Build a second component beside an existing one. Extend Grimoire's component instead.
 - Publish, edit or read back from the Claude Design artifact.
@@ -129,7 +132,7 @@ Every command below runs from the repository root unless it says otherwise.
 node LL/src/Presentation/ll/design-system/scripts/check.mjs
 ```
 
-Zero errors required. It checks that `tokens.css` matches `tokens.json`; that no asset id remains; that every asset path, manifest entry, preview `@dsCard` and docs entry resolves; that decision ids run in order; and that no raw value has been added. It also checks that the app's copies of the styles match, and that the `lg-*` port has no raw value. Warnings are existing debt: don't add to them.
+Zero errors required. It checks that `tokens.css` matches `tokens.json`; that the icon code in both editions matches `icons.json`; that no asset id remains; that every asset path, manifest entry, preview `@dsCard` and docs entry resolves; that decision ids run in order; and that no raw value has been added. It also checks that the app's copies of the styles match, and that the `lg-*` port has no raw value. Warnings are existing debt: don't add to them.
 
 The catalog, to look at the previews you changed:
 

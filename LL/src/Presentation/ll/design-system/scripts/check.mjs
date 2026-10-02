@@ -3,8 +3,9 @@
 //
 //   node LL/src/Presentation/ll/design-system/scripts/check.mjs
 //
-// It checks the design system and the app's generated copy of its styles. The lg-* components themselves are checked
-// against the React reference by the parity check (design-system/parity/README.md).
+// It checks the design system and the code generated from it: the app's copy of its styles, and the icon set in both
+// editions. The lg-* components themselves are checked against the React reference by the parity check
+// (design-system/parity/README.md).
 //
 // Errors exit 1. Warnings are existing debt: do not add to them, and clear the ones in files you touch.
 // No dependencies; Node 18 or later.
@@ -39,13 +40,18 @@ if (build.status !== 0) errors.push((build.stderr || build.stdout).trim());
 const sync = spawnSync(process.execPath, [join(ds, 'scripts', 'sync-styles.mjs'), '--check'], { encoding: 'utf8' });
 if (sync.status !== 0) errors.push((sync.stderr || sync.stdout).trim());
 
-// 3. No asset-store ids or /_blob/ urls: assets are files under assets/<Group>/.
+// 3. The icon set in components/bundle.js, components/index.d.ts and the app's grimoire-icons.ts is generated from
+//    icons.json and up to date (D-125).
+const icons = spawnSync(process.execPath, [join(ds, 'scripts', 'build-icons.mjs'), '--check'], { encoding: 'utf8' });
+if (icons.status !== 0) errors.push((icons.stderr || icons.stdout).trim());
+
+// 4. No asset-store ids or /_blob/ urls: assets are files under assets/<Group>/.
 for (const p of textFiles) {
   const s = read(p);
   if (/\/_blob\/|\b[0-9a-f]{32}\b/.test(s)) errors.push(`${rel(p)}: contains an asset-store id or /_blob/ url. Use the relative path to assets/<Group>/<file>.`);
 }
 
-// 4. Asset paths named in previews, design-system.json and manifest.json exist.
+// 5. Asset paths named in previews, design-system.json and manifest.json exist.
 const assetRef = /(?:\.\.\/\.\.\/)?(assets\/[\w-]+\/[\w.-]+\.(?:svg|webp|png|jpe?g))/g;
 for (const p of [...textFiles.filter((f) => f.endsWith('preview.html')), join(ds, 'design-system.json'), join(ds, 'manifest.json')]) {
   for (const m of read(p).matchAll(assetRef)) {
@@ -53,7 +59,7 @@ for (const p of [...textFiles.filter((f) => f.endsWith('preview.html')), join(ds
   }
 }
 
-// 5. manifest.json and the component folders agree; every preview has an @dsCard height.
+// 6. manifest.json and the component folders agree; every preview has an @dsCard height.
 const manifest = JSON.parse(read(join(ds, 'manifest.json')));
 const listed = new Set(manifest.components.map((c) => c.name));
 const NOT_IN_MANIFEST = new Set(['Cover', 'lib']); // the cover card, and the React library folder
@@ -73,13 +79,13 @@ for (const p of textFiles.filter((f) => f.endsWith('preview.html'))) {
   if (!card || !/\bheight=\d+/.test(card[1])) errors.push(`${rel(p)}: needs a first-line <!-- @dsCard group="…" height=… --> comment.`);
 }
 
-// 6. design-system.json lists documentation files that exist.
+// 7. design-system.json lists documentation files that exist.
 const index = JSON.parse(read(join(ds, 'design-system.json')));
 for (const doc of [index.docs.readme, ...index.docs.sections]) {
   if (!existsSync(join(ds, doc))) errors.push(`design-system.json: docs entry ${doc} does not exist.`);
 }
 
-// 7. Decision log: one row per id, in order, six columns.
+// 8. Decision log: one row per id, in order, six columns.
 const log = read(join(ds, 'docs', '10-governance', '02-decision-log.md'));
 const rows = log.split('\n').filter((l) => /^\| D-\d{3} \|/.test(l));
 rows.forEach((row, i) => {
@@ -89,7 +95,7 @@ rows.forEach((row, i) => {
   if (cells !== 6) errors.push(`Decision log: ${id} has ${cells} columns, not 6.`);
 });
 
-// 8. Values: no hex colour, pixel font size or raw shadow outside tokens.json and tokens.css.
+// 9. Values: no hex colour, pixel font size or raw shadow outside tokens.json and tokens.css.
 function values(p, s) {
   const found = [];
   s.split('\n').forEach((line, i) => {

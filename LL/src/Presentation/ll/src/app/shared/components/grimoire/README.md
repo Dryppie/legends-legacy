@@ -130,5 +130,6 @@ Helpers:
 - `grimoire-states.ts` — Standards · States (`LG_STATES`, `lgTopState`, `lgBlockedReason`, …).
 - `grimoire-a11y.ts` — the announcer, the layer stack, roving focus and the reason tip.
 - `grimoire-motion.ts` — motion tokens, reduced motion, live values and live lists.
-- `grimoire-ornament.ts`, `grimoire-icons.ts` (`LgIconName` lists the names),
+- `grimoire-ornament.ts`, `grimoire-icons.ts` (`LgIconName` lists the names; generated from
+  `design-system/icons.json` by `design-system/scripts/build-icons.mjs`, so never edit it),
   and `grimoire-core.ts` (`lgSlot`, `lgCx`, `LG_RARITY_CODES`, the `LG_SHELL` token).

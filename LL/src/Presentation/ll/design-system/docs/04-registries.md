@@ -218,7 +218,7 @@ The crown beside a name says that player's Nobility is active. It follows these 
 
 ## Icon names
 
-`overview`, `inventory`, `essences`, `combat-styles`, `achievements`, `soulstones`, `world-map`, `legacy-ascension`, `quest-journal`, `prophecies`, `guild`, `colosseum`, `cinder-bazaar`, `leaderboard`, `settings` — the game's sidebar set, drawn by `Icon` and listed in `LL.Icon.names`. One more, `nobility`, is the filled crown of the Nobility mark; it is not a sidebar icon.
+`overview`, `inventory`, `essences`, `combat-styles`, `achievements`, `soulstones`, `world-map`, `legacy-ascension`, `quest-journal`, `prophecies`, `guild`, `colosseum`, `cinder-bazaar`, `leaderboard`, `settings` — the game's sidebar set. Two more are solid markers, not sidebar icons: `nobility`, the filled crown of the Nobility mark, and `lock`, the Locked marker (D-113). All seventeen are in `icons.json`, the one source of the set (D-125); `Icon` lists them in `LL.Icon.names` (`LG_ICON_NAMES` in the game).
 
 Every other name in the registries above is planned and not drawn yet ("none yet"); Foundations · Iconography · Inventory lists them all with their priority. A name is the icon's meaning, in lowercase with hyphens; slot icons take `slot-` and damage icons `damage-`, matching their tokens. Until a name is drawn, `Icon` draws nothing for it and the entry's fallback shows.
 

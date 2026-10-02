@@ -8,6 +8,7 @@ The game uses the Angular edition of Grimoire: the `lg-*` components in `src/app
 
 - **One stylesheet.** `components/bundle.css` is the `lg-*` stylesheet for both editions. `scripts/sync-styles.mjs` copies it, `tokens.css` and the fonts into `src/styles/grimoire/` (D-092). The Angular components carry no styles of their own.
 - **The same markup.** Each Angular component renders the DOM its reference component renders: the same elements, classes, ARIA attributes and text. Component hosts use `display: contents`, so they add no box; attribute components (`button[lgButton]`, `h2[lgHeading]`, `li[lgListRow]`) render on the element they sit on.
+- **One icon set.** `icons.json` holds every icon's drawing. `scripts/build-icons.mjs` writes it into the reference's icon block in `bundle.js`, the `IconName` type and the Angular `grimoire-icons.ts`, and `check.mjs` fails while one is out of date (D-125).
 - **The same behaviour.** Keyboard models, the reason tip, the layer stack, the announcer and live values are ported as shared helpers (below), not rewritten per component.
 - **The parity check** (`design-system/parity/`, its README says how to run it) renders every case in both editions on one page and compares them:
   - **Static:** cases for every component and variant, plus the format and state helpers against `LL.format`, `LL.states` and `LL.topState` — 442 comparisons. The DOM is normalised first (attribute and class order, Angular host elements and comments, generated ids).
@@ -28,6 +29,7 @@ The game uses the Angular edition of Grimoire: the `lg-*` components in `src/app
 | `LL.motion.ms`, `.reduced`, `.useLive` | `lgMotionMs`, `lgReducedMotion`, `lgLive()` | `grimoire-motion.ts` |
 | `LL.motion.useLiveList` | `[lgLiveList]` directive, `exportAs: 'lgLiveList'` (`rows()`, `pending()`, `release()`) | `grimoire-motion.ts` |
 | ornament helpers | `grimoire-ornament.ts` | |
+| `ICONS`, `Icon.names`, the marker list | `LG_ICONS`, `LG_ICON_NAMES`, `LG_ICON_MARKERS` | `grimoire-icons.ts`, generated from `icons.json` (D-125) |
 | `LL.motion.audit`, `LL.ornament.audit` | not ported: they check catalog previews, not the game | |
 
 ## Components

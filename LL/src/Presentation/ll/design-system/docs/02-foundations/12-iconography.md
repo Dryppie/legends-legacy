@@ -41,7 +41,7 @@ The standard is the sidebar set's own geometry. Every new icon follows it, so th
 | **Alignment** | Straight strokes and circle centres on whole units, so they sit cleanly at 24px and blur least at 20 and 16 |
 | **Detail** | Gaps of at least 2 units, and no more than three or four strokes inside the outline, so the drawing survives at 16px |
 | **Colour** | `currentColor` only. No gradient, no second colour, no opacity inside the drawing |
-| **File** | A path list in the set (`icons.json`, drawn by `Icon`); the name is the meaning, in lowercase with hyphens |
+| **File** | An entry in `icons.json`, the one source of the set: both editions of `Icon` draw from it, through code `scripts/build-icons.mjs` writes (D-125). The name is the meaning, in lowercase with hyphens |
 
 Shapes inside an icon are linework and carry no meaning of their own (Foundations · Shape · Drawings keep their own lines). An icon's outline must not be a vocabulary shape around a glyph — no "i" in a circle, no check in a square — because a mark that sits beside content follows the vocabulary.
 

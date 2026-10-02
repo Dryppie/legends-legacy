@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { LG_ICONS, LgIconName } from './grimoire-icons';
+import { LG_ICON_MARKERS, LG_ICONS, LgIconName } from './grimoire-icons';
 
 /** Icon sizes (Foundations · Iconography): line icons at 16, 20 or 24px; 12px only for solid inline markers. */
 export type LgIconSize = 12 | 16 | 20 | 24;
 
 const ICON_SIZES = [12, 16, 20, 24];
-const ICON_MARKERS = ['nobility', 'lock'];
 const warned = new Set<string>();
 function iconWarn(key: string, message: string): void {
   if (warned.has(key)) return;
@@ -66,7 +65,7 @@ export class LgIconComponent {
     }
     const s = this.size();
     if (ICON_SIZES.indexOf(s) < 0) iconWarn('size:' + s, `${s}px is off the scale; use 16, 20 or 24, or 12 for a marker`);
-    else if (s < 16 && ICON_MARKERS.indexOf(name) < 0)
+    else if (s < 16 && !LG_ICON_MARKERS.includes(name))
       iconWarn('small:' + name, `"${name}" is a line icon; line icons stop at 16px, and 12px is for markers`);
     return d;
   });

@@ -1,6 +1,8 @@
+/* Generated from design-system/icons.json by design-system/scripts/build-icons.mjs. Do not edit: change icons.json and run the script. */
+
 /**
- * The game's sidebar icon set (src/assets/icons/sidebar), with the baked gold
- * gradient removed so every icon draws in currentColor.
+ * The Grimoire icon set (Foundations · Iconography), drawn in currentColor by `lg-icon`. The game's sidebar icons
+ * (src/assets/icons/sidebar) are in it without their baked gold gradient.
  */
 export const LG_ICONS = {
   'achievements': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<circle cx="12" cy="9" r="4.5"/><path d="M12 6.6l.9 1.7 1.9.3-1.4 1.3.3 1.9-1.7-.9-1.7.9.3-1.9-1.4-1.3 1.9-.3z" stroke-width="1.2"/><path d="M9 13l-2 7 5-2.6L17 20l-2-7"/>' },
@@ -18,11 +20,15 @@ export const LG_ICONS = {
   'prophecies': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5 7.5 7.5 0 1 0 19 14.5z"/><path d="M16.5 4.5l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5L14.5 6l1.5-.5z" stroke-width="1.2"/>' },
   'quest-journal': { viewBox: '1 1 22 22', strokeWidth: 1.6, body: '<path d="M12 7.2v12"/><path d="M12 7.2C10.2 5.6 7.6 4.9 4.5 5.2a1 1 0 0 0-.9 1v10.5a1 1 0 0 0 1.1 1c2.7-.2 5 .4 7.3 1.5"/><path d="M12 7.2c1.8-1.6 4.4-2.3 7.5-2a1 1 0 0 1 .9 1v10.5a1 1 0 0 1-1.1 1c-2.7-.2-5 .4-7.3 1.5"/><path d="M12 4.2 12.9 6l1.8.5-1.8.5-.9 1.8-.9-1.8-1.8-.5L11.1 6z" fill="currentColor" stroke="none" opacity=".85"/>' },
   'world-map': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2z"/><path d="M9 4v14M15 6v14"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/>' },
-  'nobility': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M3.2 17.6 2.6 7.4l5.3 4.4L12 4l4.1 7.8 5.3-4.4-.6 10.2z" fill="currentColor" stroke="none"/><path d="M3.6 20.2h16.8" stroke-width="2.2" stroke-linecap="butt"/>' },
-  // The solid 12px Locked marker (Foundations · Iconography · Inventory): a closed padlock.
-  'lock': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M7.5 11V8.2a4.5 4.5 0 0 1 9 0V11" fill="none" stroke-width="2.4" stroke-linecap="butt"/><rect x="4.5" y="11" width="15" height="10" rx="1.6" fill="currentColor" stroke="none"/>' },
+  // The Nobility mark: a filled crown, drawn at 12px (icon-marker) beside a name and 16px beside a screen title (Registries · Nobility mark). Not a sidebar icon.
+  'nobility': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M3.2 17.6 2.6 7.4l5.3 4.4L12 4l4.1 7.8 5.3-4.4-.6 10.2z" fill="currentColor" stroke="none"/><path d="M3.6 20.2h16.8" stroke-width="2.2" stroke-linecap="butt"/>', marker: true },
+  // The Locked marker: a closed padlock, drawn at 12px, which the NavRail shows on a locked destination in place of the word (D-113). Not a sidebar icon.
+  'lock': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M7.5 11V8.2a4.5 4.5 0 0 1 9 0V11" fill="none" stroke-width="2.4" stroke-linecap="butt"/><rect x="4.5" y="11" width="15" height="10" rx="1.6" fill="currentColor" stroke="none"/>', marker: true },
 } as const;
 
 export type LgIconName = keyof typeof LG_ICONS;
 
 export const LG_ICON_NAMES = Object.keys(LG_ICONS) as LgIconName[];
+
+/** The solid inline markers: the only icons drawn at 12px. Every other icon is a line icon, 16px and up. */
+export const LG_ICON_MARKERS: readonly LgIconName[] = ['nobility', 'lock'];

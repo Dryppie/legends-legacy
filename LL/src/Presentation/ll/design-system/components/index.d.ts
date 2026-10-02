@@ -1,12 +1,28 @@
 import type * as React from 'react';
 
-/** Names of the game's sidebar icons, redrawn in currentColor. */
+// @icons-start. Generated from design-system/icons.json by design-system/scripts/build-icons.mjs. Do not edit: change icons.json and run the script.
+/** Names of the icons in the set (icons.json), drawn in currentColor by Icon. */
 export type IconName =
-  | 'overview' | 'inventory' | 'essences' | 'combat-styles' | 'achievements' | 'soulstones'
-  | 'world-map' | 'legacy-ascension' | 'quest-journal' | 'prophecies'
-  | 'guild' | 'colosseum' | 'cinder-bazaar' | 'leaderboard' | 'settings'
+  | 'achievements'
+  | 'combat-styles'
+  | 'essences'
+  | 'inventory'
+  | 'overview'
+  | 'soulstones'
+  | 'cinder-bazaar'
+  | 'colosseum'
+  | 'guild'
+  | 'leaderboard'
+  | 'settings'
+  | 'legacy-ascension'
+  | 'prophecies'
+  | 'quest-journal'
+  | 'world-map'
   /** The Nobility mark: a filled crown, drawn at 12px (icon-marker) beside a name and 16px beside a screen title (Registries · Nobility mark). Not a sidebar icon. */
-  | 'nobility';
+  | 'nobility'
+  /** The Locked marker: a closed padlock, drawn at 12px, which the NavRail shows on a locked destination in place of the word (D-113). Not a sidebar icon. */
+  | 'lock';
+// @icons-end
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Unique' | 'Legendary' | 'Legacy';
 /** Foundations · Space & Density. comfortable: identity and detail views, the Folio, dialogs (48px rows, 44px controls, body text).
