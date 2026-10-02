@@ -78,8 +78,8 @@ New parts get plain descriptive names, like LoadoutSlot or SearchField. Composit
 
 - `tokens.json` — every token. `scripts/build-tokens.mjs` compiles it to `tokens.css`.
 - `icons.json` — the icon set, the one source of icon drawings. `scripts/build-icons.mjs` writes it into both editions (D-125).
-- `components/bundle.js`, `components/bundle.css`, `components/index.d.ts` — the reference components (React, on `window.LL`), their `lg-` styles and their types.
-- In the game repository — an Angular edition of the same components (standalone `lg-*` components) under `src/app/shared/components/grimoire`. It renders the same markup and shares `bundle.css`: `scripts/sync-styles.mjs` copies the tokens, styles and fonts into `src/styles/grimoire` (D-092), and the parity check in `parity/` compares the two editions (D-093, Governance · Code parity).
+- `components/bundle.js`, `components/bundle.css`, `components/index.d.ts` — the reference components (React, on `window.LL`), their `lg-` styles and their types. Frozen since D-127: `bundle.css` stays the source of the app's component styles until step 9 of `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root), and step 10 removes the rest.
+- In the game repository — an Angular edition of the same components (standalone `lg-*` components) under `src/app/shared/components/grimoire`. It renders the same markup and shares `bundle.css`: `scripts/sync-styles.mjs` copies the tokens, styles and fonts into `src/styles/grimoire` (D-092), and the parity check in `parity/` compared the two editions (D-093, Governance · Code parity). Since D-127 the Angular edition is the only implementation and the parity check is retired.
 
 ## How to extend it
 

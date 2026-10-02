@@ -6,16 +6,18 @@ These instructions apply to everything under `LL/src/Presentation/ll/design-syst
 
 Grimoire is Legend's Legacy's design system. Until 1 October 2026 it was a Claude Design artifact; it now lives here (D-090). This folder is the **source of truth**. The artifact is a read-only archive: never edit it, never publish to it, and never copy from it again.
 
+**One implementation (D-127).** The `lg-*` Angular components are Grimoire's only implementation. The React reference edition — `components/bundle.js`, `components/index.d.ts`, `components/lib/`, the previews (`components/<Name>/preview.html`), `catalog/` and the `api/components/` cards — and the parity check in `parity/` are frozen: never edit them, never add a case, and never port a change to them. Step 10 of `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root) removes them; that plan also sets the order of work and the Angular conventions that new and re-shaped components follow (its section 8). Two things in the frozen area still change until their step lands: `components/bundle.css` stays the source of the app's component styles until plan step 9, and `scripts/build-icons.mjs` still writes the icon block in `bundle.js` and `index.d.ts` until plan step 10. Grimoire keeps the `lg-` prefix (D-128).
+
 Backlog prompts in `DESIGN_SYSTEM_IMPLEMENTATION_PLAN.md` (repository root) were written for Claude Design. Read them as follows:
 
 | The prompt says | It means |
 | --- | --- |
 | "the Grimoire Design System", "Claude Design" | this folder |
 | a section, a page, "add a page to Standards" | a Markdown file under `docs/`, listed in `design-system.json` → `docs.sections` |
-| a catalogue entry, a component, a preview | `components/<Name>/README.md` and `preview.html`, listed in `manifest.json` |
-| the reference component, `LL.<Name>` | `components/bundle.js`, `components/bundle.css`, `components/index.d.ts` |
-| the Angular edition, code parity, DS-133 | the `lg-*` port (below), changed in the same step |
-| "update those components" | update each one fully: README, preview, `bundle.js` / `bundle.css` / `index.d.ts`, its `api/` card, and its `lg-*` component and styles |
+| a catalogue entry, a component, a preview | `components/<Name>/README.md`, listed in `manifest.json`; previews are frozen (D-127) |
+| the reference component, `LL.<Name>` | frozen (D-127); the `lg-*` Angular component instead, and its styles in `components/bundle.css` until plan step 9 |
+| the Angular edition, code parity, DS-133 | the `lg-*` components (below), the only implementation; parity is retired (D-127) |
+| "update those components" | update each one fully: its README, its `lg-*` component, and its styles in `components/bundle.css` (until plan step 9); never the frozen reference (D-127) |
 | "the page holds at most 24 sections" | no longer applies (D-091) |
 
 **Which copy of a prompt.** Use the item in section 4 (Design System Backlog): its "Should define" list and its paste-ready prompt. Section 5 repeats the first fifteen prompts; treat those as copies.
@@ -39,25 +41,26 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 | `tokens.json` | Every token. **The only source of values.** |
 | `tokens.css` | Compiled from `tokens.json` by `scripts/build-tokens.mjs`. Never edit it by hand. |
 | `icons.json` | The icon set: each icon's view box, stroke width and shapes. **The only source of icon drawings** (D-125). |
-| `components/<Name>/` | `README.md` (guidelines) and `preview.html` (the catalog card) |
-| `components/bundle.js`, `bundle.css`, `index.d.ts` | The React reference components on `window.LL`, their `lg-*` styles and their prop types. Hand-written; edit them directly, except the icon block between `// @icons-start` and `// @icons-end` in `bundle.js` and `index.d.ts`, which `scripts/build-icons.mjs` writes. Keep the `@ds-bundle` component list on line 1 of `bundle.js` in step. |
-| `api/components/<Name>.md`, `api/tokens.md`, `api/assets/<Group>.md` | Short reference cards. No generator writes them any more: update a card by hand when its props, tokens or assets change. Their `<x-import>` lines are for the old Claude Design canvas; ignore them. |
+| `components/<Name>/` | `README.md` (guidelines) and `preview.html` (the catalog card, frozen since D-127) |
+| `components/bundle.js`, `index.d.ts`, `lib/` | The React reference components on `window.LL`, their prop types and React itself. Frozen (D-127): never edited by hand; only `scripts/build-icons.mjs` still writes the icon block between `// @icons-start` and `// @icons-end`. Removed in plan step 10. |
+| `components/bundle.css` | The `lg-*` stylesheet, which `scripts/sync-styles.mjs` copies into the app. Edit it directly until plan step 9 splits it into one CSS file per component. |
+| `api/components/<Name>.md`, `api/tokens.md`, `api/assets/<Group>.md` | Short reference cards. The component cards describe the React props and are frozen (D-127); update `api/tokens.md` and `api/assets/` by hand when tokens or assets change. Their `<x-import>` lines are for the old Claude Design canvas; ignore them. |
 | `manifest.json` | The component list, groups and summaries the catalog reads |
 | `design-system.json` | Asset groups, documentation order (`docs.sections`), libraries |
 | `assets/<Group>/` | Image files; previews refer to them as `../../assets/<Group>/<file>`. `assets/Icons/` holds the game's own sidebar SVGs, shown as assets; no component draws from them. |
-| `catalog/index.html` | The local viewer for every preview and docs page |
+| `catalog/index.html` | The local viewer for every preview and docs page; frozen with the previews (D-127) |
 | `components/Cover/` | The catalog's cover card: a preview only, with no README, card or port |
 | `scripts/build-tokens.mjs`, `scripts/build-icons.mjs`, `scripts/sync-styles.mjs`, `scripts/check.mjs` | Token compiler, the icon set's code in both editions (D-125), the copy of the styles into the app (D-092), and static checks |
-| `parity/` | The parity check: both editions of every component on one page, compared (D-093). Its `README.md` says how to run it. |
+| `parity/` | The retired parity check (D-093, superseded by D-127); frozen. Its `npx ng build` stays the strict compile check for every `lg-*` component until the showcase takes that over (plan step 4). |
 
-**The `lg-*` port (the code the game uses):**
+**The `lg-*` components (the implementation, D-127):**
 
 | Path | What it holds |
 | --- | --- |
 | `../src/styles/grimoire/tokens.css`, `fonts/` | Generated copies of `tokens.css` and `fonts/`. Never edit them. |
 | `../src/styles/grimoire/components.css` | Generated copy of `components/bundle.css`: the one `lg-*` stylesheet. Never edit it. |
 | `../src/app/shared/components/grimoire/grimoire-icons.ts` | Generated from `icons.json` by `scripts/build-icons.mjs`: the icon set `lg-icon` draws. Never edit it. |
-| `../src/app/shared/components/grimoire/` | Standalone, OnPush, signal-based `lg-*` components, exported as `LG_GRIMOIRE` from `index.ts`. They render the reference components' markup. Governance · Code parity maps each one's props to Angular inputs, outputs and slots. |
+| `../src/app/shared/components/grimoire/` | Standalone, OnPush, signal-based `lg-*` components, exported as `LG_GRIMOIRE` from `index.ts`. They are the implementation (D-127); their markup still matches the frozen reference until plan phase 3 re-shapes them. Governance · Code parity maps each one's props to Angular inputs, outputs and slots as they stood on 2 October 2026. |
 
 ## Rules
 
@@ -67,23 +70,23 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 - Make each backlog item **one change** that updates, together, everything it affects:
   1. the `docs/` sections (new sections added to `design-system.json` → `docs.sections`);
   2. `tokens.json`, then the compiled `tokens.css`;
-  3. the affected component READMEs and previews (new components added to `manifest.json`);
-  4. the reference bundle (`bundle.js`, `bundle.css`, `index.d.ts`) and the affected `api/` cards;
+  3. the affected component READMEs (new components added to `manifest.json`); the previews are frozen (D-127);
+  4. the component's styles in `components/bundle.css` (until plan step 9), then the app's copies (`sync-styles.mjs`);
   5. a decision log entry for every rule added, reversed or narrowed;
-  6. the `lg-*` port: the Angular component, its parity case (and a scenario for new behaviour), the app's copies of the styles (`sync-styles.mjs`), and Governance · Code parity if its API mapping changed.
+  6. the `lg-*` component itself. No React port and no parity case (D-127).
 
   If one of these does not apply, say so in your report.
-- Keep the `lg-*` port equal to the reference (D-093): the same DOM, classes, ARIA and behaviour. Phase C of `DESIGN_SYSTEM_REPO_MIGRATION_PLAN.md` brought it up to D-091; from then on every change ports in the same step.
+- Treat the `lg-*` components as the implementation (D-127). Never edit the frozen React reference to match them.
 - Regenerate the app's copies of the styles whenever `tokens.css`, `components/bundle.css` or `fonts/` change: `node LL/src/Presentation/ll/design-system/scripts/sync-styles.mjs` (`build-tokens.mjs --sync` compiles the tokens and then runs it). `check.mjs` fails while a copy is out of date.
 - Write every new section from the section template and every new or revised component page from the component README template in Governance. Give every part a status. A new part starts at Draft.
 - Write copy by Standards · Content (voice, sentence case, the game's nouns, two registers), Standards · States (the exact words of each state) and Foundations · Numerals. DS-025 will extend Standards · Content; until it is done, Standards · Content is the voice rule.
 - Keep the layer model (README): a layer draws only on the layers above it.
 - Add a decision log entry in the existing format: the next id, today's date, the decision as one present-tense sentence, the reason, the consequence, and a status. Mark a replaced entry "Superseded by D-xxx"; never delete or rewrite an old entry.
-- Keep component names identical across the React reference, the `lg-*` class names and the Angular selectors (`Folio` → `.lg-folio` → `<lg-folio>`).
+- Keep component names identical across the docs, the `lg-*` class names and the Angular selectors (`Folio` → `.lg-folio` → `<lg-folio>`), with the `lg-` prefix (D-128).
 
 **Should**
 - Change the highest layer that solves the problem: a token before a component, a component before a pattern.
-- Port the change to Angular in the same step, matching the reference component's markup, class names and props (inputs, outputs and `lgSlot` slots, as the grimoire `README.md` maps them).
+- Give a new component, or one you re-shape in its plan step, the Angular API in section 8 of `ANGULAR_DESIGN_SYSTEM_PLAN.md`: the host is its box, composition instead of configuration arrays, no `lgSlot`, native `button` and `a` hosts for controls. Don't re-shape an existing component's API outside its step in plan phase 3, because its consumers change with it.
 - Clear any raw-value warning in a file you touch.
 
 **Never**
@@ -91,6 +94,7 @@ Paths in this file are relative to `design-system/`. `src/…` means `LL/src/Pre
 - Change anything outside `design-system/`, `src/styles/grimoire/` and `src/app/shared/components/grimoire/`, unless the item says to migrate a screen. The `--ll-*` tokens, `src/styles.css`, Tailwind and existing screens are out of bounds.
 - Build a second component beside an existing one. Extend Grimoire's component instead.
 - Publish, edit or read back from the Claude Design artifact.
+- Edit `components/bundle.js`, `components/index.d.ts`, `components/lib/`, a preview, `catalog/`, `parity/` or an `api/components/` card, except through `build-icons.mjs` (frozen, D-127).
 - Commit, push or run other git commands unless Martin asks. Suggest a commit message instead.
 
 ## Open questions: what to assume
@@ -116,12 +120,12 @@ If an item depends on one of these, say which assumption you used.
 
 ## Definition of done
 
-- The docs, tokens, component READMEs and previews say the same thing.
+- The docs, tokens and component READMEs say the same thing.
 - The decision log has an entry for each decision, in the existing format.
 - No hex value, pixel font size or coloured shadow appears outside `tokens.json` and `tokens.css`.
-- The affected previews render in the catalog, with no console errors.
+- The change looks right in the game with Settings → Interface → New look on, with no console errors (until the `/grimoire` showcase exists, plan steps 3 to 5).
 - The change passes the review checklists in Principles and Principles · Anti-generic guardrails (DS-003), and DS-132's acceptance checklist once it exists.
-- The `lg-*` port matches: the parity check passes, with cases for what changed, and the app's copies of the styles are up to date.
+- The app's copies of the styles are up to date, and `npx ng build` in `parity/` compiles every `lg-*` component.
 - Nothing outside `design-system/`, `src/styles/grimoire/` and `src/app/shared/components/grimoire/` changed, unless the item says to migrate a screen.
 
 ## Checks
@@ -134,22 +138,15 @@ node LL/src/Presentation/ll/design-system/scripts/check.mjs
 
 Zero errors required. It checks that `tokens.css` matches `tokens.json`; that the icon code in both editions matches `icons.json`; that no asset id remains; that every asset path, manifest entry, preview `@dsCard` and docs entry resolves; that decision ids run in order; and that no raw value has been added. It also checks that the app's copies of the styles match, and that the `lg-*` port has no raw value. Warnings are existing debt: don't add to them.
 
-The catalog, to look at the previews you changed:
+The catalog shows the frozen React reference (D-127), so don't use it to check a change. Until the `/grimoire` showcase exists (plan steps 3 to 5), look at the change in the game with Settings → Interface → New look on, and check the browser console.
 
-```text
-python -m http.server 4600 -d LL/src/Presentation/ll/design-system
-```
-
-Then open `http://localhost:4600/catalog/` (one component: `#/c/<Name>`) and check the browser console. A preview must render without console errors and with its images. Add `?eager` to the URL to load every preview at once.
-
-The Angular port, from `LL/src/Presentation/ll/design-system/parity` (npm only; these do not run from the root). The build compiles every `lg-*` component with strict templates; the check compares both editions. Its `README.md` says how to get Playwright.
+The strict compile check, from `LL/src/Presentation/ll/design-system/parity` (npm only; it does not run from the root). It compiles every `lg-*` component with strict templates, including those no screen imports yet. `check-parity.mjs` is retired (D-127): don't run it or add cases.
 
 ```text
 npx ng build
-node check-parity.mjs
 ```
 
-Zero differences required. Then, from `LL/src/Presentation/ll`, check the app still builds with the styles (it does not compile the `lg-*` components until a screen imports them):
+Then, from `LL/src/Presentation/ll`, check the app still builds with the styles:
 
 ```text
 npm run build:development

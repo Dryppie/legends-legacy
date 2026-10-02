@@ -5,12 +5,16 @@ whose source of truth is `design-system/`, two folders up from `src/`). Every co
 OnPush and signal-based, and carries the `lg-` prefix so it can live next to the
 current `ll-` UI while screens are moved over one at a time.
 
-Nothing in the app uses these yet — adding them changes no existing screen.
+The Character Overview and the Grimoire shell use them, behind Settings →
+Interface → New look.
 
 **Same as the design system.** Each component renders the markup of its React
 reference component in `design-system/components/bundle.js` and shares its
 stylesheet, and the parity check in `design-system/parity/` proves it (D-093).
-Every design-system change ports here in the same step (`design-system/AGENTS.md`).
+Since D-127 these components are Grimoire's only implementation: the React
+reference and the parity check are frozen until step 10 of
+`ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root) removes them. Change these,
+never the reference.
 
 ## Setup (already done on this branch)
 

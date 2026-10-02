@@ -12,7 +12,7 @@ These instructions apply to the LegendsLegacy Angular frontend in this directory
 
 ## Design System: Grimoire
 
-Grimoire is the game's design system. Its source of truth is `design-system/`, its rules are in `design-system/AGENTS.md`, and the game uses it through the `lg-*` Angular components.
+Grimoire is the game's design system. Its source of truth is `design-system/`, its rules are in `design-system/AGENTS.md`, and the game uses it through the `lg-*` Angular components. Those components are its only implementation (D-127): the React reference in `design-system/components/` (`bundle.js`, the previews, the catalog) and the parity check are frozen until step 10 of `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root) removes them, so never edit them. That plan sets the order of work for the Angular design system.
 
 - New screens, and screens being migrated, use Grimoire:
   - the `lg-*` components in `src/app/shared/components/grimoire/` (import `LG_GRIMOIRE`, or single components);
@@ -20,7 +20,7 @@ Grimoire is the game's design system. Its source of truth is `design-system/`, i
 - Take every colour, type style, space, radius, shadow and state from Grimoire. Feature code adds no hex colours, pixel font sizes or shadows of its own.
 - Gold (`gilt`) is not a general accent. It has four jobs (Foundations · Colour, D-015). Selection, ready and new are `arcana`, and ordinary values are `ink`. Draw states with the channels and words in Standards · States.
 - Read `design-system/AGENTS.md` before changing a Grimoire token, an `lg-*` component or `src/styles/grimoire/`. Those changes go through the design system: docs, tokens, port and decision log together.
-- To see what a component looks like and how it behaves, open the catalog: from this directory, run `python -m http.server 4600 -d design-system` and go to `http://localhost:4600/catalog/`.
+- To see what a component looks like and how it behaves, use it in the game with Settings → Interface → New look on. The catalog (`python -m http.server 4600 -d design-system`, then `http://localhost:4600/catalog/`) still shows the frozen React reference; the dev-only `/grimoire` showcase replaces it (plan steps 3 to 5).
 - Migrate a screen on purpose, as its own task. Don't half-convert a screen while fixing something else in it.
 - A migrated screen lives beside the legacy one in a folder whose name ends in `-grimoire` (`character-overview-grimoire/`) until it replaces it, behind the one Settings → Interface → New look switch (`GrimoirePreviewPreferenceService.newLook()`), which every migrated screen and the Grimoire shell read: one switch for the whole new look, never one per screen. Its host carries the `lg-root` class, its Page takes `flow` (D-097), and its own styles use Grimoire tokens only. The legacy element styles in `src/styles.css` stop at `lg-root` (D-100), and the build leaves rem in a `-grimoire` folder alone. `CHARACTER_OVERVIEW_GRIMOIRE_PLAN.md` at the repository root is the worked example.
 
@@ -118,6 +118,6 @@ These rules apply only when you change a screen that has not moved to Grimoire.
 
 - Check the result against the right system: Grimoire screens against the design system's rules and states; legacy screens against the legacy styling above.
 - Verify responsive behavior in the markup: desktop can use fixed panes, mobile should stack and scroll.
-- If you changed anything in `design-system/`, `src/styles/grimoire/` or `src/app/shared/components/grimoire/`, run `node design-system/scripts/check.mjs` from this directory, and the parity check in `design-system/parity/` (its `README.md` says how).
+- If you changed anything in `design-system/`, `src/styles/grimoire/` or `src/app/shared/components/grimoire/`, run `node design-system/scripts/check.mjs` from this directory, and `npx ng build` in `design-system/parity/`, the strict compile check for every `lg-*` component. `check-parity.mjs` is retired (D-127).
 - Run a lightweight static check such as `git diff --check` unless the user asked for no commands.
 - Report any commands not run.

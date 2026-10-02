@@ -80,7 +80,7 @@ Assume the same viable hunt, no intervening build changes, and an already config
 
 These compare eligible time, not guaranteed wins or identical random loot. Boundary encounters do not materially change the ratios. The previous universal 24-hour diagnosis now applies specifically to free characters.
 
-For free characters, this still rewards refreshing an unchanged idle plan. Better strategy may appropriately distinguish the daily visitor; the calendar should not separately multiply the same strategy's output. The planner now respects membership coverage windows as well as the ordinary cap. After membership expires, the last seven covered days remain eligible at their historical endpoint, alongside the current free window; already processed time is not paid twice. Redeeming a Signet does not retrospectively recover a week of lost free-account time. Internal processing batch limits remain a different concern. [Planner][idle-plan] [Resolution][idle-combat-service] [Coverage windows][nobility-retention]
+For free characters, this still rewards refreshing an unchanged idle plan. Better strategy may appropriately distinguish the daily visitor; the calendar should not separately multiply the same strategy's output. The planner now respects membership coverage windows as well as the ordinary cap. After membership expires, up to the last seven covered days remain eligible at their historical endpoint, alongside the current free window; already processed time is not paid twice. Redeeming a Signet does not retrospectively recover a week of lost free-account time. Internal processing batch limits remain a different concern. [Planner][idle-plan] [Resolution][idle-combat-service] [Coverage windows][nobility-retention]
 
 ### Nobility and the baseline experience
 
@@ -386,7 +386,7 @@ Prefer bounded conveniences, display slots, planning tools, and selected special
 
 ### One digest, then the game
 
-Extend the existing combat summary rather than adding a separate comeback subsystem. The current summary already combines resolved combat rewards; its primary button dismisses information rather than claiming the earnings. Preserve that automatic settlement. [Summary service][summary-service] [Summary UI][summary-ui]
+Extend the existing combat summary rather than adding a separate comeback subsystem. The current summary already combines resolved combat rewards; its primary button dismisses information rather than claiming the earnings. Its duration-limit label now follows membership benefits, but “you were gone” still derives from the processed summary interval rather than separately reporting actual absence and credited time. A label based on current membership also does not explain historical mixed coverage. Preserve automatic settlement and finish the accounting explanation. The new Grimoire shell still carries pending counts, so the visual redesign alone does not remove checklist pressure. [Summary service][summary-service] [Summary UI][summary-ui] [Duration label][summary-duration] [Grimoire counts][grimoire-notifications]
 
 A proposed return screen, with illustrative copy rather than fabricated account results:
 
@@ -411,7 +411,11 @@ Cap the initial digest at three meaningful developments. Automatically settle cu
 
 Report **actual absence, credited simulation duration, and any uncredited duration separately**. Do not call a truncated 24-hour interval “the time you were gone.” Do not disguise losses, but do not lead with a theatrical list of everything missed. A failed hunt, invalid saved build, or unavailable target deserves one actionable explanation.
 
-The following is the **proposed experience after the redesign**, not current behavior. Seven days of normal configured combat is the minimum recommended allowance; an additional buffer is preferable if performance/economy validation permits it. Long-absence assistance is distinct from infinite offline earning.
+Today, a continuously free character returning after 24 hours can retain approximately that day; after three days or a week, the ordinary allowance remains 24 hours. Continuous Noble coverage permits those three-day and seven-day intervals. After a month or six months, historical coverage windows matter: an expired covered period can retain its eligible tail alongside a later free window, subject to the processed-action cursor. Do not calculate every return from current status alone or assume a month of membership grants a month of unprocessed combat. [Retention policy][nobility-retention] [Historical orchestration][idle-orchestrator]
+
+Dungeon mastery also now rewards played progress on safe retreat and combat/attrition defeat: attempt, room and boss components recognize an unsuccessful expedition without awarding completion-only rewards. However, the 48-hour expiry branch runs before that treatment. This is a useful improvement in failed-attempt value, not a fix for a run abandoned during a week away. Preserve partial mastery while making suspension safe. [Run outcomes][dungeon-service] [Mastery calculation][mastery-service] [Expiry][dungeon-factory]
+
+The following is the **proposed experience after the redesign**, not current behavior. Seven days of normal configured combat is the minimum universal allowance; an additional buffer is preferable if performance/economy validation permits it. Preserve already earned historical membership entitlements alongside that baseline. Long-absence assistance is distinct from infinite offline earning.
 
 | Absence | First view and progress while away | Accumulated opportunity and what was missed | Re-entry and assistance |
 |---|---|---|---|
@@ -423,7 +427,7 @@ The following is the **proposed experience after the redesign**, not current beh
 
 These comprehension times are usability targets, not measured current results. Test them with returning players who have not followed development. Give them the account and ask them to act; do not explain the new UI first.
 
-Technical consequences matter: longer catch-up must preserve ordering across level changes, equipment/build snapshots, quest events, and reward settlement. A saved hunt should not gain a new loadout retroactively. The game must survive reconnects during catch-up without duplication, lost rewards, or repeated popups. Completed event actions must use the event occurrence time, not the return date. Preserve unclaimed choice rewards across content-version changes with an explicit compatible alternative.
+Technical consequences matter: longer catch-up must preserve ordering across level changes, equipment/build snapshots, quest events, and reward settlement. Existing orchestration already splits historical membership windows and evaluates preset entitlement at the relevant time; extend that work without substituting the return-date status. A saved hunt should not gain a new loadout retroactively. Explain expiry fallback for extra presets and let the player recover the stored configuration. Existing investment-preserving equipment conversion and untimed legacy correction provide a useful precedent for balance updates. The game must survive reconnects during catch-up without duplication, lost rewards, or repeated popups. Completed event actions must use occurrence time, not return date. Preserve unclaimed choice rewards across content-version changes with an explicit compatible alternative. [Historical orchestration][idle-orchestrator] [Equipment conversion][equipment-migration-service]
 
 ## 8. A deliberate chore budget
 
@@ -472,6 +476,7 @@ Do not collapse everything into one universal token. Different currencies can pr
 | Fate Echo, daily rerolls, weekly Favor | Retire daily-escape spending and weekly Favor attendance scoring. Convert outstanding Echo/earned entitlements transparently into a useful existing resource or a limited permanent chapter choice, based on a published fair conversion. Favor is progress in a period track, not interchangeable with Guild Favor. |
 | Guild Favor | Keep if it recognizes elective contribution and supports a fixed catalog. Remove daily generation rituals and expiring weekly purchase pressure; it must not become a guild attendance wage. Current catalog is fixed, not rotating. |
 | Glory and arena tickets | Keep Glory for competitive identity and spending choices. Replace ticket overflow pressure and daily bonuses together. Do not force PvE players into the calendar for cores. Current Champion stock is also fixed despite rotation capability. |
+| Nobility Signets and redeemed coverage | Keep explicit redemption, trade ownership and non-destructive historical entitlement. There is no active daily membership resource grant to remove. Make ordinary absence protection universal; evaluate remaining membership benefits without requiring renewal to recover saved work. Preserve existing redeemed coverage during any benefit change. |
 | Tower Tokens and Raid Trophies | Define a distinct permanent reward purpose before expanding them. Tower spending is unfinished and the raid vendor has no stock. Prefer fewer complete reward loops to another pair of weekly vendors. Preserve already earned balances if consolidating. |
 
 Free weekends should not create resource windfalls beyond the intended issuance budget; flexible timing and economy balance are compatible. Evaluate a banked allowance over a month, not only the daily maximum. Do not destroy banked value to enforce the cap.
@@ -509,14 +514,14 @@ These are overlapping motivations, not fixed demographic categories. Current ser
 
 | Player motivation | Natural reason to return | Current support and missing piece | Design danger |
 |---|---|---|---|
-| Progression-focused | Reach the next meaningful power/region/challenge breakpoint. | **Strong foundations:** levels, upgrades, Ascension, mastery, unlocks. **Weakness:** offline clipping and too many parallel efficient reward sources. | Confusing a longer XP curve with more interesting progression. |
-| Collectors | Discover a missing Essence, complete a chosen family, preserve a history. | **Strong catalog foundation:** 80 Essences, Archive/Codex, source Focus. **Weakness:** weak bad-luck protection and universal collection-power pressure. | Making total completion necessary to play the builds they like. |
-| Optimizers/theorycrafters | Explain a failure and test an improved interaction. | **Substantial mechanics:** Styles, abilities, loadouts, encounters and diagnostic infrastructure. **Underserved workflow:** comparison, coherent full-build profiles, accessible evidence, low-cost trials. | Solving everything with one score or making experiments too costly to attempt. |
+| Progression-focused | Reach the next meaningful power/region/challenge breakpoint. | **Strong foundations:** levels, upgrades, Ascension, partial dungeon mastery, unlocks. **Weakness:** free-account offline clipping and too many parallel efficient reward sources. | Confusing a longer XP curve with more interesting progression. |
+| Collectors | Discover a missing Essence, complete a chosen family, preserve a history. | **Strong catalog foundation:** 85 Essences, 20 collections, Archive/Codex, source Focus. **Weakness:** weak bad-luck protection and universal collection-power pressure. | Making total completion necessary to play the builds they like. |
+| Optimizers/theorycrafters | Explain a failure and test an improved interaction. | **Improved workflow:** activity-aware equipment comparisons, specialization, preserved conversion investment, Styles and loadouts. **Remaining gaps:** coherent full-build profiles, encounter experiments and low-cost trials; extra preset access depends on membership. | Solving everything with one score or making experiments too costly to attempt. |
 | Competitive players | Improve against rivals and demonstrate performance. | **Real arena/tournament systems:** snapshots, brackets, ratings. **Weakness:** ticket scheduling, daily Glory, attendance-weighted monthly score, unvalidated population health. | Mistaking a large number of farmed matches for fair competition. |
 | Social/guild players | Help friends, complete a shared project, discuss and solve encounters. | **Useful infrastructure:** chat, guild property, construction, public raids. **Underserved incentives:** daily contribution volume is more explicit than helpfulness. | Turning membership into employment and officers into attendance managers. |
-| Achievement hunters | Complete a distinctive feat and display the result. | **Strong framework:** automatic achievements/Titles and persistent milestones. **Weakness:** some count/period goals can attach completionism to chores, and future catalog targets may exceed current content. | Endless numerical escalation or permanently missable general completion. |
-| Economy/trading players | Fill an order, finance a build, recognize a valuable roll, serve a niche. | **Real marketplace and settlement:** listings, buy orders, trade channels. **Unproven:** liquidity and long-term demand; crafting removal changes where supply comes from. | Reintroducing busywork or permitting unlimited passive supply without meaningful demand. |
-| Casual idle players | Make a plan, leave, receive useful progress, choose again. | **Good automated-combat basis; weak fit to the stated cadence:** 24-hour clipping and small ticket reservoirs punish irregular visits. | Calling the game idle while expecting daily maintenance across systems. |
+| Achievement hunters | Complete a distinctive feat and display the result. | **Strong framework:** automatic achievements/Titles, new permanent Tower floor titles and persistent milestones. **Weakness:** some count/period goals attach completionism to chores, and future catalog targets may exceed current content. | Endless numerical escalation or permanently missable general completion. |
+| Economy/trading players | Fill an order, finance a build, recognize a valuable roll, serve a niche. | **Real marketplace and settlement:** listings, buy orders, trade channels and Signets; membership raises capacity from 10 to 30. **Unproven:** liquidity, membership accessibility and long-term demand. | Reintroducing busywork or permitting unlimited passive supply without meaningful demand. |
+| Casual idle players | Make a plan, leave, receive useful progress, choose again. | **Improved for Nobles:** seven-day offline coverage. **Still underserved free baseline:** 24-hour clipping; both groups face calendar objectives and short arena reservoirs. | Making ordinary absence tolerance a renewal-dependent benefit while other systems still expect daily maintenance. |
 
 The clearest underserved audiences are **irregular idle players**, **players who want affordable experimentation**, and **guild members whose value is helping rather than daily production**. Progression and collection already receive many systems. Give those systems better absence behavior and strategic clarity before adding another progression track.
 
@@ -561,18 +566,26 @@ Prophecies become a narrative presentation of selected pursuits, not a parallel 
 
 Connections should create **options, not dependency chains through every feature**. It is healthy for dungeon drops to help an Essence build. It is unhealthy if the necessary cores require PvP, PvP entry requires a guild buff, and the buff requires daily orders. Preserve more than one reasonable route to core build viability, while letting optional modes retain distinct prestige and tactical experiences.
 
-For a solo developer, implement this through existing content definitions, event progression, build profiles, encounter records, and settlement services. A new “retention platform” is unnecessary. Shared durable reward/goal semantics are valuable; a universal abstraction that rewrites every subsystem before players can benefit is not.
+For a solo developer, implement this through existing content definitions, event progression, build profiles, encounter records, and settlement services. Historical coverage settlement, equipment comparisons/conversion, partial dungeon mastery and permanent Tower titles now supply concrete parts of this architecture. Extend those paths. A new “retention platform” is unnecessary. Shared durable reward/goal semantics are valuable; a universal abstraction that rewrites every subsystem before players can benefit is not.
 
 ## 12. Metrics that protect the design
 
 Use a joint outcome: **players return over long intervals, can articulate a chosen goal, and report that stopping or taking a break feels acceptable**. DAU remains operational context, not the success criterion. Ten minutes of useful play can be a success; a player leaving because they are finished for now is different from leaving in frustration.
+
+### Measurement already implemented
+
+The repository now includes daily telemetry for DAU/WAU/MAU, new and returning accounts, D1/D7 retention, content outcomes, 7/30-day feature adoption and economy aggregates. Itemization reporting adds offers, equipment comparisons, equips/dismantles, battle outcomes, build/rules context and stat-cap waste. It includes uncertainty information; treat these as observational associations, not proof that a choice caused better results. No live report values were queried for this review. [Telemetry models][telemetry-models] [Repository][telemetry-repository] [Itemization cohorts][itemization-cohorts] [Capture][itemization-capture]
+
+Use this foundation rather than commissioning the whole metric stack again. Long-window return, clipped offline time, deadline concentration, visit motivation and re-entry comprehension still need the definitions and instrumentation below. One existing adoption calculation counts saved Essence presets only through slot three; audit slot coverage and cohort denominators before using it to compare three-slot free and six-slot Noble behavior. Segment absence tests and retention by free, continuously Noble and expired/mixed coverage, alongside account age and progression. Membership uptake is self-selected, so a higher Noble return rate alone would not establish a causal benefit. [Adoption calculation][telemetry-adoption]
+
+### Outcomes to add or refine
 
 | Metric, with a usable definition | What a pattern could mean | How to avoid misreading it |
 |---|---|---|
 | Rolling 28/90/180-day return: share of a starting cohort returning for meaningful play in later windows; show days played separately | Stable long-window return despite fewer daily visits may support the intended pattern. | Compare account age, content exposure, progression stage and acquisition channel. Report raw counts for small Beta cohorts. |
 | Return after 3/7/30/180-day inactivity: among accounts that enter each absence band, share returning within a stated later interval | Good return-after-break behavior suggests preserved investment and manageable re-entry. | Use only cohorts with enough observation time; account for players still absent. A short study cannot establish six-month outcomes. |
 | Voluntary visit motivation: an infrequent sampled “what brought you back?” question, with hunt/build/social/competition/deadline reasons | Increasing goal/social reasons and decreasing loss-avoidance reasons support the philosophy. | Visits near a reset are not automatically coerced; combine timestamps with self-report. Never require the survey for rewards. |
-| Same-plan absence parity: simulated and Beta comparisons of seven daily settlements versus three or one weekly settlement under the same hunt and elapsed time | Material reward differences identify timing taxes, event-boundary bugs, or cap losses. | Hold decisions/eligibility constant. Frequent players are allowed to benefit from better decisions made sooner. Target near-equal earned ordinary outcomes, with stochastic confidence bounds. |
+| Same-plan absence parity: simulated and Beta comparisons of seven daily settlements versus three or one weekly settlement under the same hunt and elapsed time | Material reward differences identify timing taxes, event-boundary bugs, or cap losses. | Test free, continuously Noble and membership-transition histories separately; hold decisions/eligibility constant within each case. Target near-equal earned ordinary outcomes under the proposed universal policy, with stochastic confidence bounds. |
 | Progression velocity: median and tail time from chosen goal to usable build, then separately to optimized build | Fast initial viability plus a worthwhile optional tail can support experimentation. | Do not collapse these into average level gain. Break down outcomes by target, source, and play pattern. |
 | Goal completion and abandonment: attempts started, completed, switched, paused, and why | A goal abandoned after a long zero-progress tail may need better access. Switching after a fun discovery may be healthy. | Avoid rewarding easy goals merely to increase completion rate; retain optional hard ambitions. |
 | Feature use among eligible players and repeat-choice rate after first completion | Players voluntarily returning after rewards are reduced may value the activity itself. | Low use can be appropriate for a niche feature. All eligible players are not obliged to become fans. |
@@ -602,24 +615,24 @@ For Beta, first establish the current baseline and investigate failure cases. Th
 
 ### Keep
 
-- Automated combat with meaningful target choice and automatic earnings settlement.
-- Persistent equipment/Essence ownership, deterministic reinforcement and partial replacement recovery.
+- Automated combat with meaningful target choice, automatic earnings settlement and historical membership coverage protection.
+- Persistent equipment/Essence ownership, activity-aware comparisons, investment-preserving conversion, deterministic reinforcement and partial replacement recovery.
 - Stored loadouts, activity assignments, freely accessible base Combat Styles, and mastery choices.
 - Persistent Archive/collection records, Focus ownership, Ascension accomplishments and existing cost reductions.
-- Dungeon sigils, route decisions, family mastery, and safe voluntary retreat.
-- Permanent server Tower history, scouting knowledge, asynchronous party snapshots, and personal records where present.
+- Dungeon sigils, route decisions, family mastery including played unsuccessful runs, and safe voluntary retreat.
+- Permanent server Tower history, scouting knowledge, asynchronous party snapshots, floor-victory titles and quiet backfill.
 - Guild construction priorities, property and loans; automatic achievements/Titles; marketplace escrow and settlement.
 - Tournament advance preparation, automatic resolution, and durable outstanding rewards.
 
 ### Modify
 
-- Extend ordinary offline credit to at least seven days and validate it end to end.
+- Make the implemented seven-day ordinary offline protection universal, preserving historical coverage and validating it end to end.
 - Preserve Essence training overflow at manual Ascension gates.
 - Replace nominal resonance with meaningful persistent first-discovery protection.
 - Turn collection bonuses into a bounded source of power with elective specialization.
 - Rework Prophecies into persistent chapters only if they add distinctive direction.
 - Replace guild daily output with persistent automatic contribution, and make projects viable for different guild sizes.
-- Redesign arena pacing, first-win rewards, and PvE vendor dependency together.
+- Redesign arena pacing, five/eight-ticket caps, first-win rewards, and PvE vendor dependency together.
 - Preserve suspended dungeon state; make mastery progression reveal new choices rather than merely multiply clear counts.
 - Make Tower preparation persistent and protect lower-floor helpers from reduced reward entitlement.
 - Change monthly tournament attendance accumulation into a deliberate competition scoring policy.
@@ -628,7 +641,7 @@ For Beta, first establish the current baseline and investigate failure cases. Th
 ### Remove
 
 - Daily Prophecy acceptance deadlines, “Perfect Week” rewards, and daily reroll pressure.
-- Daily Colosseum first-win incentive and any dependence on avoiding a 15-hour ticket cap.
+- Daily Colosseum first-win incentive and dependence on avoiding the 15-hour free / 24-hour Noble ticket ceiling.
 - Daily guild supply claims and upgrades whose benefit is more required orders.
 - Wall-clock failure of suspended dungeons and weekly evaporation of unresolved Tower preparation.
 - Claim expiry for already earned server-event rewards and inaccessible historical reward paths.
@@ -641,8 +654,8 @@ For Beta, first establish the current baseline and investigate failure cases. Th
 - One integrated pursuit view over existing sources, goals, and unlocks.
 - A compact return digest focused on discoveries, useful changes, and the chosen next step.
 - Complete saved builds combining equipment, Essences, activity selection, and Style choices.
-- Player-facing encounter diagnostics and a bounded way to test alternatives before investment.
-- Personal Tower first-clear/feat records on Echo content and permanent Style mastery feats.
+- Encounter experiments and a bounded way to test alternatives before investment, building on delivered equipment comparisons.
+- Richer personal/party Tower feats alongside existing floor-victory titles, and permanent Style mastery feats.
 - Persistent guild project choices and easier asynchronous coordination.
 - Only after validation: relevant re-entry assistance, legacy displays, and any larger personal estate.
 
@@ -660,17 +673,17 @@ For Beta, first establish the current baseline and investigate failure cases. Th
 
 | Rank and change | Why it matters / problem solved | Systems and player impact | Difficulty | Timing |
 |---|---|---|---|---|
-| **1. Protect the idle plan and the return visit** | The 24-hour clamp makes three weekly visits worth roughly 43% of the same configured combat time. Hidden capped XP and dungeon expiry create further return pressure. | Combat settlement, Essence XP, active dungeon storage, return summary. Makes the advertised idle pattern credible and prevents avoidable loss. | **High** end-to-end validation; the option change itself is small. | **Before Beta:** define and deliver the absence contract, safe dungeon behavior, and correct earnings reporting. Refine the digest during Beta. |
+| **1. Make absence protection universal and preserve plans** | Three weekly visits retain roughly 43% of configured time for free characters; continuous Nobility already protects the week. Capped Essence XP, expiry fallback and dungeon expiry create further pressure. | Extend existing coverage settlement to a generous free baseline; protect training, stored builds and dungeons; explain actual versus credited absence. | **Medium** rule/UI work with **high** settlement/performance/economy validation. | **Before Beta:** universal absence contract, preserved historical entitlements, safe dungeon behavior and correct reporting. Refine the digest during Beta. |
 | **2. Retire calendar Prophecies and recover earned rewards** | The highest weekly tier structurally requires five daily completions with the weekly objective. Historical claims can become inaccessible. | Prophecies, Favor/Echo, side quests, achievements, notifications and reward ledger. Players choose ambitions without attendance grades. | **Medium–high:** state/content migration and reward rebalance. | **Before Beta:** remove attendance dependence and fix historical claims. Ship persistent chapters during Beta only if they justify their existence. |
 | **3. Remove attendance-linked guild production and Tower upkeep** | Shared resources generated by daily claims give members a reason to police one another. Weekly Tower preparation deletes communal effort. | Guild missions/buildings/shop, project records, Tower preparation/reward eligibility, social UI. A week away no longer creates guild debt; helping remains worthwhile. | **Medium–high:** contribution rules and migration, less new content. | **Before Beta:** stop loss/claim traps and extra daily-order expansion. **During Beta:** refine project sizing and social recognition. |
-| **4. Make acquisition lead to affordable experimentation** | Weak Essence luck protection, training gates, and scattered build controls can turn the core loop into waiting and inventory work. | Essence hunts/Archive, equipment targets, loadouts, Combat Styles, combat evidence. Players return to try a viable idea and overcome a specific challenge. | **Medium–high:** staged UI/rule/diagnostic work. | **Before Beta:** honest source/probability information and safe progression. **During Beta:** first-discovery protection, integrated builds, focused diagnostics. |
-| **5. Untangle competition from daily PvE efficiency** | Five arena tickets fill in 15 hours, the daily first-win bonus is substantial, and weekly stock feeds core PvE progression. | Colosseum, Champion Market, tournament registration/scoring, reward budgets. PvP becomes an elective contest, with a practical path back after a skipped season. | **Medium–high**, depending on whether rated series replace tickets. | **Before Beta:** remove daily bonus/cap pressure and secure fair PvE routes. **During Beta:** test paced series and season scoring with real population data. |
+| **4. Make acquisition lead to affordable experimentation** | Comparisons and safe conversion now help equipment decisions; weak Essence luck protection, training gates and scattered build controls still delay trying a useful idea. | Extend existing comparisons into coherent profiles and bounded trials; improve Essence hunts and honest targeting. | **Medium–high:** staged UI/rule/diagnostic work. | **Before Beta:** honest source/probability information and safe progression. **During Beta:** first-discovery protection, integrated builds and focused experiments. |
+| **5. Untangle competition from daily PvE efficiency** | Free/Noble ticket banks fill in 15/24 hours. A +20 first-win bonus equals two base attack rewards, while weekly stock feeds PvE progression. Include passive defensive Glory in the budget. | Colosseum, Champion Market, tournament registration/scoring, reward budgets. PvP becomes an elective contest, with a practical path back after a skipped season. | **Medium–high**, depending on whether rated series replace tickets. | **Before Beta:** remove daily bonus/cap pressure and secure fair PvE routes. **During Beta:** test paced series and season scoring with real population data. |
 
 ### Delivery order and acceptance criteria
 
-**Before Beta — repair the contract.** Recover all earned historical entitlements first. Remove destructive deadlines and attendance-specific rewards, retain existing ownership, and settle changed currencies transparently. Update player copy and stale guides alongside rules. The minimum acceptance case is the same unchanged hunt resolved daily, three times weekly, and once weekly receiving equivalent eligible ordinary progress over seven days, within actual random variation. Offline processing failures must retain unprocessed work rather than silently discard it.
+**Before Beta — repair the contract.** Recover all earned historical entitlements first. Make generous absence tolerance universal; preserve expired Noble coverage and saved builds during the change. Remove destructive deadlines and attendance-specific rewards, retain existing ownership, and settle changed currencies transparently. Update player copy and stale guides alongside rules. The minimum acceptance case is the same unchanged hunt resolved daily, three times weekly, and once weekly receiving equivalent eligible ordinary progress over seven days, within actual random variation. Include membership start/expiry cases. Offline processing failures must retain unprocessed work rather than silently discard it.
 
-**During Beta — prove the core loop.** Implement a thin pursuit view and coherent saved builds, then observe whether players voluntarily test ideas, pursue specific discoveries, and return after breaks. Tune reward issuance, target acquisition tails, guild projects and competitive opportunities. Test a quiet return digest with actual lapsed testers. Do not use a more generous bank as a reason to double the list of banked activities.
+**During Beta — prove the core loop.** Extend existing comparison and telemetry paths with a thin pursuit view, coherent saved builds and encounter experiments, then observe whether players voluntarily test ideas, pursue specific discoveries, and return after breaks. Tune reward issuance, target acquisition tails, guild projects and competitive opportunities. Test a quiet return digest with actual lapsed testers. Do not use a more generous bank as a reason to double the list of banked activities.
 
 **After Beta — expand demonstrated strengths.** Add encounter variations, useful new Essence niches, meaningful personal Tower feats, and larger community ambitions. Expand the world when it brings new decisions. Add Stronghold only if the smaller legacy display proves desirable. Do not enable raid/region-boss reward faucets or complete new token vendors without first giving them a defined role and checking cumulative obligations.
 
@@ -678,18 +691,18 @@ For Beta, first establish the current baseline and investigate failure cases. Th
 
 These are future implementation requirements, **not changes made by this analysis**:
 
-- A longer offline allowance affects both API/worker configuration and settlement behavior. At ten-second cadence, seven days is approximately 60,480 encounter slots. The checked-in API envelope allows 1,000 encounters per internal batch and 100 batches per resolution, so a seven-day case is below that count envelope; acceptable latency, transactions, memory, reward volume, and worker behavior are unproven. Benchmark actual multi-day scenarios, not just the options class default. [Idle options][idle-options] [API settings][idle-config]
+- Seven-day Noble coverage and historical window processing already exist. A universal baseline must align API/worker configuration, benefit metadata, free-hour options, summary copy and settlement policy without discarding existing coverage. At ten-second cadence, seven days is approximately 60,480 encounter slots. The checked-in API envelope allows 1,000 encounters per internal batch and 100 batches per resolution, so that case is below the count envelope; this does not validate latency, transactions, memory, reward volume or worker behavior. Benchmark multi-day and mixed-coverage returns. [Idle options][idle-options] [API settings][idle-config] [Coverage][nobility-retention] [Orchestration][idle-orchestrator]
 - Preserving progress across interrupted resolution, content updates, and reward generation needs authoritative timestamps and idempotent settlement. Reuse existing outbox/version/snapshot patterns. Separate unprocessed work from truly ineligible elapsed time.
-- Persistent Prophecies/projects, capped-XP reserves, personal Tower records, and durable reward choices may require EF Core schema migrations. Plan and review conversions; do not generate or apply migrations merely to implement this report's recommendations.
+- Persistent Prophecies/projects, capped-XP reserves, richer Tower feat records and durable reward choices may require EF Core schema migrations. Reuse the existing title/history model where sufficient. Existing equipment version conversion is already implemented and is distinct from these proposed schema changes. Plan and review future conversions; this documentation update generates or applies none.
 - Preserve old achievements, claimed flags, balances, purchase records, and already earned choices. Historical claims should be recovered before retiring period keys; never pay a second copy of an already claimed reward.
 - Reducing daily income requires redistribution into appropriate ordinary/permanent sources, not blanket removal of progression. Validate time to build viability and economy issuance together. No precise conversion rates can be justified from code alone without balance/economy modeling.
 - Relevant future backend verification must run through `build/run-tests.ps1`. Cover midnight/week transitions, long offline windows, partial settlement/retries, active dungeon return after eight days, capped Essence XP, historical claims, lower-floor helping, and return after a content change. Frontend checks should confirm that a returning player can act without sequential claim dialogs. These are proposed validation cases, not tests executed for this document.
 
 ### Work completed and verification
 
-Changed file: this report only. Existing gameplay, configuration, infrastructure, and uncommitted work were not modified. The analysis uses actual implementation to distinguish persistent systems worth keeping from calendar rules to redesign, and it favors changes to existing systems over a larger feature inventory.
+Changed file for this task: this report only. The October refresh corrects membership-dependent rules, content counts, arena rewards and boss enrollment; credits delivered equipment, dungeon, Tower and telemetry work; and revises the remaining priorities. Other working-tree edits were left untouched. Gameplay, configuration and infrastructure were not changed.
 
-Verification for this documentation task: repository searches and targeted source/content reads; direct calculation of cap and probability examples; validation of all 68 local source references and line numbers; all 13 requested parts and 180 fields across 18 mechanisms; and `git diff --check`. The new report also passed a separate whitespace check because it is untracked. The repository's normal check passed with line-ending conversion warnings; an additional probe disabling conversion flagged CRLF in unrelated existing edits, which were left untouched. Backend tests, frontend builds, playtesting, performance benchmarks, live telemetry queries, and economy simulations were **not run** because this task changes no executable code and no live game was inspected. No required code-test command was blocked. Search-path misses and an initial section-count script issue were corrected.
+Verification for this documentation task: repository searches and targeted source/content reads; recalculated content counts and cap examples; local source-reference, target and line-bound checks; checks for all 13 requested parts and 180 fields across 18 mechanisms; and a scoped `git diff --check`. Backend tests through `build/run-tests.ps1`, frontend builds, playtesting, performance benchmarks, live telemetry queries and economy simulations were **not run**: this task changes documentation only, and no live game was inspected. No required verification command was blocked. Existing test code provides implementation context, not evidence that tests passed during this review.
 
 No migration, configuration change, service deployment, or external-environment action was performed. Future deployment would require separately implementing, verifying, and reviewing the recommendations under repository rules.
 
@@ -699,38 +712,40 @@ The linked files are the inspected working-tree sources. Line anchors identify t
 
 | Evidence group | Primary sources |
 |---|---|
-| Idle contract and settlement | [Configuration][idle-config], [planner clamp][idle-plan], [batch options][idle-options], [resolution service][idle-combat-service] |
+| Idle contract and settlement | [Configuration][idle-config], [planner clamp][idle-plan], [batch options][idle-options], [resolution service][idle-combat-service], [historical windows][nobility-retention], [coverage orchestration][idle-orchestrator] |
+| Nobility and Signets | [Benefits][nobility-benefits], [membership term][nobility-membership], [redemption][nobility-service], [disabled checkout][nobility-purchases], [retired daily job][nobility-retired-job], [trade ownership][signet-trading] |
 | Actual world content and gates | [Regions][world-data], [Tower catalog][tower-data] |
 | Essence acquisition and progression | [Service][essence-service], [XP handling][essence-progression], [Ascension costs/caps][ascension], [catalog][essence-data], [loot probabilities][essence-loot] |
 | Focus and collections | [Archive][archive-service], [Focus multipliers][focus-rules], [resonance constants][resonance-rules], [Codex][codex-service], [bonus application][codex-bonuses], [collections][collection-data], [loadout limits][essence-limits] |
-| Equipment | [Acquisition][equipment-service], [ordinary drop tables][ordinary-equipment], [blueprint guarantees][blueprint-data], [upgrade rules][equipment-upgrade-data], [loadouts][equipment-loadouts] |
+| Equipment | [Acquisition][equipment-service], [ordinary drop tables][ordinary-equipment], [blueprint guarantees][blueprint-data], [upgrade rules][equipment-upgrade-data], [loadouts][equipment-loadouts], [release catalog][equipment-releases], [specialization][equipment-specialization], [comparisons][equipment-comparison], [conversion][equipment-migration], [legacy correction][equipment-migration-service] |
 | Combat Styles and investment | [Style operations][style-service], [rules][style-rules], [catalog][style-data], [Constellations][soulstone-service] |
 | Dungeons | [Run operations][dungeon-service], [48-hour lifetime][dungeon-factory], [mastery][mastery-service], [mastery thresholds][mastery-progression] |
 | Goals and earned identity | [Quests][quest-service], [daily-Prophecy side quest][prophecy-quest], [achievements][achievement-service], [Essence achievement catalog][essence-achievements] |
 | Prophecies | [Service][prophecy-service], [weekly Favor][revelation-data], [reward profiles][prophecy-rewards], [rerolls][prophecy-economy] |
 | Guild | [Mission rules and claims][guild-missions], [orders/targets/buildings/shop catalog][guild-data], [buildings][guild-buildings], [vault][guild-vault], [shop limits][guild-shop] |
 | Arena and competitions | [Colosseum][arena-service], [reward constants][arena-rewards], [Champion stock][champion-data], [Tournament service][tournament-service], [schedule][tournament-config] |
-| Tower | [Server progression and weekly mechanics][tower-service], [configured support limits][tower-config], [unfinished shop UI][tower-shop] |
+| Tower | [Server progression and weekly mechanics][tower-service], [configured support limits][tower-config], [permanent titles/backfill][tower-title-service], [title visibility][tower-title-visibility], [unfinished shop UI][tower-shop] |
 | Raids | [Raid service][raid-service], [reward option][raid-options], [entitlement rules][raid-rewards], [empty vendor][raid-vendor], [frontend flag][frontend-environment] |
 | Events | [Boss definition][region-boss-data], [automatic enrollment][region-boss-service], [Treasure Hunt dates][event-data], [occurrence time and claim rules][event-service] |
-| Economy and returning UI | [Market settlement][market-service], [order configuration][market-config], [summary aggregation][summary-service], [summary view][summary-ui], [Prophecy attention count][prophecy-notifications], [arena attention count][arena-notifications] |
+| Economy and returning UI | [Market settlement][market-service], [order configuration][market-config], [summary aggregation][summary-service], [summary view][summary-ui], [duration label][summary-duration], [Prophecy attention count][prophecy-notifications], [arena attention count][arena-notifications], [Grimoire counts][grimoire-notifications] |
+| Measurement already available | [Telemetry models][telemetry-models], [population/adoption/economy queries][telemetry-repository], [preset adoption limit][telemetry-adoption], [itemization cohorts][itemization-cohorts], [capture][itemization-capture] |
 
-[idle-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:59>
+[idle-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:71>
 [idle-plan]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Orchestration/Idle/IdleCombatPlanner.cs:40>
 [idle-options]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Orchestration/Models/IdleCombatProgressionOptions.cs:7>
-[idle-combat-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/CharacterActions/CombatService.cs:48>
-[idle-guild-credit]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Rewards/Idle/IdleCombatRewardApplier.cs:78>
+[idle-combat-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/CharacterActions/CombatService.cs:50>
+[idle-guild-credit]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Rewards/Idle/IdleCombatRewardApplier.cs:84>
 [world-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/world/regions.json:366>
 [essence-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/essences/essences.json:1>
 [collection-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/essences/essence-codex-collections.json:1>
 [style-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/combat-styles/combat-styles.v1.json:1>
 [tower-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/world-tower/tower-floors.json:2>
-[essence-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/EssenceSystemService.cs:237>
+[essence-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/EssenceSystemService.cs:239>
 [essence-progression]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/EssenceProgressionService.cs:18>
 [ascension]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Essences/EssenceProgressionConstants.cs:5>
 [essence-loot]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/world/creature-essence-loot-tables.json:6>
-[archive-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/CreatureArchiveService.cs:299>
-[codex-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/EssenceCodexCollectionService.cs:84>
+[archive-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/CreatureArchiveService.cs:319>
+[codex-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/EssenceCodexCollectionService.cs:98>
 [codex-bonuses]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Essences/EssenceCodexBonusProvider.cs:20>
 [focus-rules]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Essences/CreatureFocusRules.cs:5>
 [resonance-rules]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Essences/CreatureResonanceConstants.cs:5>
@@ -739,17 +754,17 @@ The linked files are the inspected working-tree sources. Line anchors identify t
 [ordinary-equipment]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/equipment/equipment-ordinary.v1.json:15>
 [blueprint-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/equipment/equipment-blueprints.v1.json:3>
 [equipment-upgrade-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/equipment/equipment-upgrades.v1.json:4>
-[equipment-loadouts]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Items/EquipmentLoadoutService.cs:51>
+[equipment-loadouts]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Items/EquipmentLoadoutService.cs:18>
 [style-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/CombatStyles/CombatStyleService.cs:35>
 [style-rules]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/CombatStyles/CombatStyleRules.cs:26>
-[soulstone-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Soulstones/SoulstoneUpgradeService.cs:1>
-[dungeon-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonRunService.cs:104>
+[soulstone-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Soulstones/SoulstoneUpgradeService.cs:40>
+[dungeon-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonRunService.cs:213>
 [dungeon-factory]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonRunFactory.cs:78>
-[mastery-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonMasteryService.cs:30>
+[mastery-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonMasteryService.cs:28>
 [mastery-progression]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Dungeons/Mastery/DungeonMasteryProgression.cs:5>
 [quest-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Quests/QuestService.cs:167>
 [prophecy-quest]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/quests/side-quests/an-omen-fulfilled.v1.json:17>
-[achievement-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Achievements/AchievementService.cs:1221>
+[achievement-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Achievements/AchievementService.cs:1237>
 [essence-achievements]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/achievements/essences.json:42>
 [prophecy-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Prophecies/ProphecyService.cs:73>
 [revelation-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/prophecies/weekly-revelation.json:3>
@@ -760,26 +775,54 @@ The linked files are the inspected working-tree sources. Line anchors identify t
 [guild-buildings]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Guilds/GuildBuildingService.cs:67>
 [guild-vault]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Guilds/GuildVaultService.cs:23>
 [guild-shop]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Guilds/GuildShopService.cs:152>
-[arena-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Colosseum/ColosseumService.cs:689>
+[arena-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Colosseum/ColosseumService.cs:681>
 [arena-rewards]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Colosseum/ArenaRewards.cs:7>
 [champion-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/market/champion-market.json:31>
 [tournament-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Colosseum/Tournaments/TournamentGroundsService.cs:451>
-[tournament-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:78>
-[tower-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerService.cs:1194>
-[tower-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:2>
-[tower-shop]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/features/game/world/tower/overview/tower-overview.component.html:756>
+[tournament-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:89>
+[tower-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerService.cs:1207>
+[tower-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:12>
+[tower-shop]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/features/game/world/tower/overview/tower-overview.component.html:764>
 [raid-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Raids/RaidService.cs:460>
 [raid-options]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Raids/RaidOptions.cs:7>
 [raid-rewards]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Raids/RaidRewards.cs:13>
 [raid-vendor]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/raids/trophy-vendor.json:2>
 [frontend-environment]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/environments/environment.ts:29>
 [region-boss-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/region-bosses/region-bosses.json:44>
-[region-boss-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/RegionBosses/RegionBossService.cs:852>
+[region-boss-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/RegionBosses/RegionBossService.cs:851>
 [event-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/event-quests/the-great-treasure-hunt.2026-09-07.json:7>
 [event-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Quests/Events/EventQuestService.cs:191>
-[market-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/MarketPlaces/MarketPlaceService.cs:978>
-[market-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:66>
+[market-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/MarketPlaces/MarketPlaceService.cs:998>
+[market-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:78>
 [summary-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/core/services/client-side/session-summary/session-summary.service.ts:15>
 [summary-ui]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/shared/components/session-summary-popup/session-summary-popup.component.html:1>
 [prophecy-notifications]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/core/services/api/prophecies/prophecy-notification.service.ts:47>
 [arena-notifications]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/core/services/api/colosseum/colosseum-state.service.ts:465>
+[nobility-retention]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Nobility/NobilityRetention.cs:9>
+[nobility-benefits]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Nobility/NobilityBenefits.cs:9>
+[nobility-membership]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Nobility/NobilityMembership.cs:17>
+[nobility-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Nobility/NobilityService.cs:70>
+[nobility-purchases]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Nobility/DisabledNobilityPurchaseGateway.cs:8>
+[nobility-retired-job]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Worker/Worker.LL/BackgroundJobs/NobilityDailyRewardsJob.cs:5>
+[signet-trading]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Nobility/SignetTradingService.cs:42>
+[idle-orchestrator]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Orchestration/Idle/IdleCombatOrchestrator.cs:62>
+[essence-selection]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Essences/EssenceLoadoutSelection.cs:26>
+[equipment-config]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/appsettings.json:2>
+[equipment-releases]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/equipment/equipment-releases.json:20>
+[equipment-specialization]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Items/Equipments/Progression/EquipmentSpecializationRules.cs:11>
+[equipment-comparison]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Application/UseCases/Equipments/Queries/CompareEquipment/CompareEquipmentQuery.cs:105>
+[equipment-comparison-ui]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/shared/components/modal-container/equipment-modals/equipment-modal/inventory-equipment-modal.component.html:95>
+[equipment-migration]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Items/Equipments/Progression/EquipmentMigration.cs:93>
+[equipment-migration-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Items/EquipmentMigrationService.cs:159>
+[equipment-historical-supply]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Application/Interfaces/Services/LL/Items/IStarterEquipmentService.cs:11>
+[tower-title-service]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerTitleService.cs:30>
+[tower-title-data]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/API/API.LL/Data/titles/world-tower.json:3>
+[tower-victory]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/WorldTower/WorldTowerService.cs:1790>
+[tower-title-visibility]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Achievements/AchievementService.cs:146>
+[grimoire-notifications]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/layout/dashboard-grimoire/rail-grimoire.component.ts:62>
+[summary-duration]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Presentation/ll/src/app/shared/components/session-summary-popup/session-summary-popup.component.ts:59>
+[telemetry-models]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Analytics/TelemetryModels.cs:28>
+[telemetry-repository]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Persistence/Persistence.LL/Repositories/Analytics/TelemetryRepository.cs:74>
+[telemetry-adoption]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Persistence/Persistence.LL/Repositories/Analytics/TelemetryRepository.cs:204>
+[itemization-cohorts]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Core/Domain/Models/Analytics/ItemizationCohortReport.cs:7>
+[itemization-capture]: <C:/repos/Legends-Legacy/legends-legacy/LL/src/Infrastructure/Service/Services.LL/Analytics/ItemizationTelemetryCapture.cs:13>

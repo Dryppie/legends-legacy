@@ -1,5 +1,7 @@
 # Governance · Code parity
 
+**Frozen (D-127, 2 October 2026).** The `lg-*` Angular components are now Grimoire's only implementation. The React reference and the parity check are frozen, and step 10 of `ANGULAR_DESIGN_SYSTEM_PLAN.md` (repository root) removes them; this page then becomes Governance · Code. Until then it records the mapping as it stood on 2 October 2026. Don't add cases or port changes to the reference.
+
 The game uses the Angular edition of Grimoire: the `lg-*` components in `src/app/shared/components/grimoire/`. This page records how far that edition matches the React reference (`components/bundle.js`), how its API maps onto the reference props, and how parity is checked. It was written when Phase C of the repository migration brought the port up to D-091 (1 October 2026, D-093).
 
 **Status:** every component in the reference bundle is ported and matches it. Nothing is behind.
